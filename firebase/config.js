@@ -1,38 +1,52 @@
-// RiderX Firebase Config
+// =================================
+// RiderX Firebase Configuration
+// =================================
 
+
+// Firebase App
 import { initializeApp } from 
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
-import { 
-getAuth 
-} from 
+
+// Firebase Authentication
+import { getAuth } from 
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-import { 
-getFirestore 
-} from 
+
+// Firestore Database
+import { getFirestore } from 
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
+// Firebase Configuration
+
 const firebaseConfig = {
 
-apiKey: "YOUR_API_KEY",
+apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
 
-authDomain: "YOUR_AUTH_DOMAIN",
+authDomain: "riderx-1.firebaseapp.com",
 
-projectId: "YOUR_PROJECT_ID",
+databaseURL: "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-storageBucket: "YOUR_STORAGE_BUCKET",
+projectId: "riderx-1",
 
-messagingSenderId: "YOUR_MESSAGING_ID",
+storageBucket: "riderx-1.firebasestorage.app",
 
-appId: "YOUR_APP_ID"
+messagingSenderId: "261640190671",
+
+appId: "1:261640190671:web:701b3ce5dcb6135fd955ba",
+
+measurementId: "G-SM8KLBVPWN"
 
 };
 
 
+// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
 
+
+// Export Services
 
 export const auth = getAuth(app);
 
