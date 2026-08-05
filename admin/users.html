@@ -1,164 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin - Customers</title>
+<title>RiderX Admin Users</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
+
+.card{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin:15px 0;
+
 }
 
-.header{
-    background:#ffcc00;
-    color:#000;
-    padding:20px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
+
+button{
+
+width:100%;
+padding:12px;
+margin-top:10px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
 }
 
-.container{
-    padding:20px;
-}
-
-.user-card{
-    background:#1d1d1d;
-    padding:15px;
-    margin:15px 0;
-    border-radius:12px;
-    border:1px solid #333;
-}
-
-.user-card h3{
-    color:#ffcc00;
-}
-
-.back{
-    display:inline-block;
-    margin-top:20px;
-    background:#ffcc00;
-    color:#000;
-    padding:12px 20px;
-    border-radius:10px;
-    text-decoration:none;
-    font-weight:bold;
-}
 </style>
 
 </head>
 
+
 <body>
 
+
 <div class="header">
-👤 RiderX Customers
+
+👥 User Management
+
 </div>
+
 
 
 <div class="container">
 
-<h2>All Customers</h2>
 
-<div id="userList">
-Loading customers...
+<div id="users">
+
+Loading...
+
+</div>
+
+
 </div>
 
 
-<a class="back" href="dashboard.html">
-⬅ Back Dashboard
-</a>
-
-
-</div>
 
 
 
 <script type="module">
 
-import { db } from "../firebase/config.js";
+
+import {db} from "../firebase/config.js";
+
 
 import {
+
 collection,
-getDocs
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+getDocs,
+doc,
+updateDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
 
 
 async function loadUsers(){
 
-let box = document.getElementById("userList");
 
-try{
 
-const snapshot = await getDocs(collection(db,"users"));
+let snap=await getDocs(
+
+collection(db,"users")
+
+);
+
+
+
+let box=document.getElementById("users");
+
 
 box.innerHTML="";
 
 
-if(snapshot.empty){
-
-box.innerHTML="<p>No customers found</p>";
-
-return;
-
-}
 
 
-snapshot.forEach((doc)=>{
 
-let data = doc.data();
+snap.forEach((user)=>{
+
+
+let data=user.data();
+
 
 
 box.innerHTML += `
 
-<div class="user-card">
+
+<div class="card">
+
 
 <h3>
-${data.name || "Customer"}
+
+👤 ${data.name || "User"}
+
 </h3>
 
-<p>
-📧 Email: ${data.email || "N/A"}
-</p>
+
 
 <p>
-📱 Phone: ${data.phone || "N/A"}
+
+📧 ${data.email || ""}
+
 </p>
 
+
+
 <p>
-ID: ${doc.id}
+
+Role: ${data.role || "customer"}
+
 </p>
+
+
+
+<p>
+
+Status:
+
+${data.blocked ? "Blocked 🚫" : "Active ✅"}
+
+</p>
+
+
+
+
+<button onclick="blockUser('${user.id}')">
+
+🚫 Block
+
+</button>
+
+
+
+<button onclick="unblockUser('${user.id}')">
+
+✅ Unblock
+
+</button>
+
+
 
 </div>
 
+
 `;
+
+
 
 });
 
 
-}
-catch(error){
-
-box.innerHTML="Error loading customers";
-
-console.log(error);
 
 }
 
 
+
+
+
+
+
+
+window.blockUser=async function(id){
+
+
+
+await updateDoc(
+
+doc(db,"users",id),
+
+{
+
+
+blocked:true
+
 }
+
+);
+
+
+
+alert("User Blocked 🚫");
 
 
 loadUsers();
+
+
+}
+
+
+
+
+
+
+
+window.unblockUser=async function(id){
+
+
+
+await updateDoc(
+
+doc(db,"users",id),
+
+{
+
+
+blocked:false
+
+}
+
+);
+
+
+
+alert("User Unblocked ✅");
+
+
+loadUsers();
+
+
+
+}
+
+
+
+
+
+loadUsers();
+
+
 
 </script>
 
 
 </body>
+
 </html>
