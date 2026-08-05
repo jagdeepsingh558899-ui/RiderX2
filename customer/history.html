@@ -10,63 +10,6 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-
-<style>
-
-body{
-
-margin:0;
-background:#111;
-color:white;
-font-family:Arial,sans-serif;
-
-}
-
-
-.header{
-
-background:#ffcc00;
-color:#000;
-padding:20px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-
-}
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-.ride-card{
-
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin-bottom:15px;
-
-}
-
-
-.back{
-
-display:block;
-background:#ffcc00;
-color:#000;
-padding:14px;
-border-radius:10px;
-text-align:center;
-text-decoration:none;
-font-weight:bold;
-
-}
-
-</style>
-
 </head>
 
 
@@ -78,7 +21,6 @@ font-weight:bold;
 📜 Ride History
 
 </div>
-
 
 
 <div class="container">
@@ -108,16 +50,122 @@ Loading rides...
 <script type="module">
 
 
+import { db } from "../firebase/config.js";
+
+
 import {
 
-loadRideHistory
+collection,
+getDocs,
+query,
+orderBy
 
-} from "../js/history.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-loadRideHistory();
 
+
+async function loadHistory(){
+
+
+let box =
+document.getElementById("rideList");
+
+
+
+const q=query(
+
+collection(db,"rides"),
+
+orderBy("createdAt","desc")
+
+);
+
+
+
+const snapshot =
+await getDocs(q);
+
+
+
+box.innerHTML="";
+
+
+
+snapshot.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+box.innerHTML += `
+
+
+<div class="ride-card">
+
+
+<h3>
+${data.service || "Ride"}
+</h3>
+
+
+<p>
+📍 ${data.pickup}
+</p>
+
+
+<p>
+➡️ ${data.drop}
+</p>
+
+
+<p>
+💰 ${data.fare}
+</p>
+
+
+<p>
+Status: ${data.status}
+</p>
+
+
+
+${
+data.status=="Completed"
+
+?
+
+`<a href="rating.html">
+
+⭐ Rate Rider
+
+</a>`
+
+:
+
+""
+
+}
+
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+}
+
+
+
+loadHistory();
 
 
 </script>
