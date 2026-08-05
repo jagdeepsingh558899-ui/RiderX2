@@ -1,136 +1,115 @@
+// =================================
+// RiderX Admin System
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
 collection,
-onSnapshot
+getDocs
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-// USERS
-
-const usersBox =
-document.getElementById("users");
 
 
-if(usersBox){
+// Load Users Count
 
 
-onSnapshot(
-
-collection(db,"users"),
-
-(snapshot)=>{
+export async function loadUsersCount(){
 
 
-usersBox.innerHTML="";
+let box =
+document.getElementById("usersCount");
 
 
-snapshot.forEach((user)=>{
+
+if(!box) return;
 
 
-let data=user.data();
+
+try{
 
 
-usersBox.innerHTML += `
+const snapshot = await getDocs(
 
-<div class="card">
-
-<h3>${data.name || "User"}</h3>
-
-<p>
-${data.email || data.phone}
-</p>
-
-<p>
-Role: ${data.role}
-</p>
-
-
-</div>
-
-`;
-
-});
-
-
-}
+collection(db,"users")
 
 );
 
 
+
+box.innerHTML = snapshot.size;
+
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+box.innerHTML="0";
+
+
+}
+
+
 }
 
 
 
 
-// RIDES
 
 
-const ridesBox =
-document.getElementById("rides");
+// Load Rides Count
+
+
+export async function loadRidesCount(){
+
+
+let box =
+document.getElementById("ridesCount");
 
 
 
-if(ridesBox){
+if(!box) return;
 
 
-onSnapshot(
 
-collection(db,"rides"),
-
-(snapshot)=>{
+try{
 
 
-ridesBox.innerHTML="";
+const snapshot = await getDocs(
 
-
-snapshot.forEach((ride)=>{
-
-
-let data=ride.data();
-
-
-ridesBox.innerHTML += `
-
-<div class="card">
-
-
-<h3>${data.type}</h3>
-
-
-<p>
-From: ${data.pickup}
-</p>
-
-
-<p>
-To: ${data.drop}
-</p>
-
-
-<p>
-Status: ${data.status}
-</p>
-
-
-</div>
-
-`;
-
-});
-
-
-}
+collection(db,"rides")
 
 );
+
+
+
+box.innerHTML = snapshot.size;
+
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+box.innerHTML="0";
+
+
+}
 
 
 }
