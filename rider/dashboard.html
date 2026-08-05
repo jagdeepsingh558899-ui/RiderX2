@@ -1,15 +1,111 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<title>RiderX Dashboard</title>
+<title>RiderX Rider Dashboard</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#111;
+    color:white;
+}
+
+.header{
+    background:#ffcc00;
+    color:#000;
+    padding:20px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.container{
+    padding:20px;
+}
+
+
+.status-box{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+text-align:center;
+margin-bottom:20px;
+
+}
+
+
+#status{
+
+font-size:22px;
+color:#ffcc00;
+
+}
+
+
+button{
+
+width:100%;
+padding:15px;
+border:none;
+border-radius:10px;
+background:#ffcc00;
+font-weight:bold;
+font-size:16px;
+cursor:pointer;
+
+}
+
+
+.cards{
+
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+gap:15px;
+
+}
+
+
+.card{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+text-align:center;
+
+}
+
+
+.card h2{
+
+color:#ffcc00;
+
+}
+
+
+.menu a{
+
+display:block;
+background:#ffcc00;
+color:#000;
+padding:15px;
+margin:12px 0;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+
+}
+
+</style>
 
 </head>
 
@@ -17,60 +113,98 @@
 <body>
 
 
-<div class="splash">
+<div class="header">
+
+🏍 RiderX Rider Dashboard
+
+</div>
 
 
-<img src="../assets/logo.png" class="logo">
+
+<div class="container">
 
 
-<h1>
-Rider<span>X</span>
-</h1>
 
+<div class="status-box">
 
-<h2>
-Rider Dashboard
+<h2 id="status">
+Offline
 </h2>
 
-
-
-<h3 id="approval">
-
-Checking Status...
-
-</h3>
-
-
-
-<button onclick="goOnline()">
-
-🟢 Go Online
-
+<button onclick="toggleStatus()">
+Go Online
 </button>
-
-
-
-<button onclick="goOffline()">
-
-🔴 Go Offline
-
-</button>
-
-
-
-<div id="request">
-
-No Ride Request
 
 </div>
 
 
 
-<h3 id="earnings">
+<div class="cards">
 
-Earnings: ₹0
 
-</h3>
+<div class="card">
+
+<h2 id="rides">
+0
+</h2>
+
+<p>Total Rides</p>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+₹0
+</h2>
+
+<p>Today's Earnings</p>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+⭐ 5.0
+</h2>
+
+<p>Rating</p>
+
+</div>
+
+
+</div>
+
+
+
+<div class="menu">
+
+
+<a href="requests.html">
+🚦 Ride Requests
+</a>
+
+
+<a href="earnings.html">
+💰 Earnings
+</a>
+
+
+<a href="profile.html">
+👤 My Profile
+</a>
+
+
+<a href="../index.html">
+⬅ Logout
+</a>
+
+
+</div>
 
 
 
@@ -78,7 +212,40 @@ Earnings: ₹0
 
 
 
-<script type="module" src="../js/rider-dashboard.js"></script>
+<script>
+
+let online=false;
+
+
+function toggleStatus(){
+
+online=!online;
+
+
+let status=document.getElementById("status");
+
+
+if(online){
+
+status.innerHTML="🟢 Online";
+
+event.target.innerHTML="Go Offline";
+
+}
+
+else{
+
+status.innerHTML="Offline";
+
+event.target.innerHTML="Go Online";
+
+}
+
+
+}
+
+
+</script>
 
 
 </body>
