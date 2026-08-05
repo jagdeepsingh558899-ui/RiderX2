@@ -26,20 +26,11 @@
 
 <select id="service">
 
-<option value="Bike Taxi">🏍 Bike Taxi</option>
-
-<option value="Cab">🚕 Cab</option>
-
-<option value="Parcel">📦 Parcel</option>
-
-<option value="Food">🍔 Food</option>
-
 </select>
 
 
 
 <input id="pickup" placeholder="Pickup Location" readonly>
-
 
 
 <button onclick="getPickup()">
@@ -51,9 +42,7 @@
 <input id="drop" placeholder="Drop Location">
 
 
-
 <input id="coupon" placeholder="Coupon Code">
-
 
 
 <button onclick="applyCoupon()">
@@ -73,7 +62,6 @@ Distance: -
 </p>
 
 
-
 <p id="fare">
 Fare: -
 </p>
@@ -91,12 +79,15 @@ Confirm Booking
 
 
 
+
 <script type="module">
 
 
 import {db} from "../firebase/config.js";
 
+
 import {getFareSettings} from "../js/fare.js";
+
 
 import {getCoordinates} from "../js/geocode.js";
 
@@ -117,32 +108,85 @@ from
 
 
 
-let pickupLat=null;
+let settings={};
 
-let pickupLng=null;
 
-let dropLat=null;
+let pickupLat;
 
-let dropLng=null;
+let pickupLng;
+
+
+let dropLat;
+
+let dropLng;
 
 
 let distance=0;
 
 let finalFare=0;
 
-
-let settings={};
-
 let couponDiscount=0;
+
+
 
 
 
 
 async function loadSettings(){
 
-settings = await getFareSettings();
+
+settings=await getFareSettings();
+
+
+
+let service=document.getElementById("service");
+
+service.innerHTML="";
+
+
+
+if(settings.bike){
+
+service.innerHTML+=
+
+`<option value="Bike Taxi">🏍 Bike Taxi</option>`;
 
 }
+
+
+
+if(settings.cab){
+
+service.innerHTML+=
+
+`<option value="Cab">🚕 Cab</option>`;
+
+}
+
+
+
+if(settings.parcel){
+
+service.innerHTML+=
+
+`<option value="Parcel">📦 Parcel</option>`;
+
+}
+
+
+
+if(settings.food){
+
+service.innerHTML+=
+
+`<option value="Food">🍔 Food</option>`;
+
+}
+
+
+
+}
+
 
 
 loadSettings();
@@ -157,12 +201,12 @@ window.getPickup=function(){
 
 navigator.geolocation.getCurrentPosition(
 
-(position)=>{
+(pos)=>{
 
 
-pickupLat=position.coords.latitude;
+pickupLat=pos.coords.latitude;
 
-pickupLng=position.coords.longitude;
+pickupLng=pos.coords.longitude;
 
 
 document.getElementById("pickup").value=
@@ -182,7 +226,6 @@ pickupLat+","+pickupLng;
 
 
 
-
 window.applyCoupon=function(){
 
 
@@ -192,11 +235,7 @@ document.getElementById("coupon").value;
 
 
 
-if(
-
-code==settings.coupon
-
-){
+if(code==settings.coupon){
 
 
 couponDiscount=
@@ -205,12 +244,7 @@ Number(settings.discount || 0);
 
 
 
-alert(
-
-"Coupon Applied 🎁 "+couponDiscount+"% OFF"
-
-);
-
+alert("Coupon Applied ✅");
 
 
 }
@@ -219,7 +253,6 @@ else{
 
 
 couponDiscount=0;
-
 
 alert("Invalid Coupon ❌");
 
@@ -268,14 +301,10 @@ dropLng=result.lng;
 let R=6371;
 
 
-let dLat=
-
-(dropLat-pickupLat)*Math.PI/180;
+let dLat=(dropLat-pickupLat)*Math.PI/180;
 
 
-let dLng=
-
-(dropLng-pickupLng)*Math.PI/180;
+let dLng=(dropLng-pickupLng)*Math.PI/180;
 
 
 
@@ -312,6 +341,7 @@ Math.sqrt(1-a)
 )
 
 ).toFixed(2);
+
 
 
 
@@ -452,10 +482,7 @@ createdAt:serverTimestamp()
 alert("Ride Booked ✅");
 
 
-
 }
-
-
 
 
 
