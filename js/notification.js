@@ -1,47 +1,110 @@
-import { db } from "../firebase/config.js";
-
-
-import {
-
-collection,
-addDoc,
-query,
-orderBy,
-onSnapshot
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+// =================================
+// RiderX Notification System
+// =================================
 
 
 
+// Show Notification
 
-// Create Notification
 
+export function showNotification(
 
-export async function sendNotification(
-userId,
+title,
 message
+
 ){
 
 
-await addDoc(
 
-collection(db,"notifications"),
+if(!("Notification" in window)){
+
+
+alert(message);
+
+return;
+
+
+}
+
+
+
+
+
+if(Notification.permission === "granted"){
+
+
+new Notification(
+
+title,
 
 {
 
-userId:userId,
+body:message,
 
-message:message,
-
-read:false,
-
-createdAt:new Date()
+icon:"../assets/logo.svg"
 
 }
+
+);
+
+
+
+}
+
+else{
+
+
+Notification.requestPermission()
+.then((permission)=>{
+
+
+if(permission==="granted"){
+
+
+new Notification(
+
+title,
+
+{
+
+body:message,
+
+icon:"../assets/logo.svg"
+
+}
+
+);
+
+
+}
+
+
+});
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+// Ride Accepted Notification
+
+
+export function rideAccepted(){
+
+
+showNotification(
+
+"RiderX",
+
+"Your ride has been accepted 🏍"
 
 );
 
@@ -52,69 +115,21 @@ createdAt:new Date()
 
 
 
-// Show Notifications
 
 
-const box =
-
-document.getElementById("notifications");
+// Ride Completed Notification
 
 
+export function rideCompleted(){
 
-if(box){
 
+showNotification(
 
-const q = query(
+"RiderX",
 
-collection(db,"notifications"),
-
-orderBy(
-"createdAt",
-"desc"
-)
+"Ride completed successfully ✅"
 
 );
-
-
-
-onSnapshot(q,(snapshot)=>{
-
-
-box.innerHTML="";
-
-
-
-snapshot.forEach((item)=>{
-
-
-let data=item.data();
-
-
-
-box.innerHTML +=
-
-`
-
-<div class="card">
-
-<h3>
-🔔 RiderX Alert
-</h3>
-
-<p>
-${data.message}
-</p>
-
-
-</div>
-
-`;
-
-
-});
-
-
-});
 
 
 }
