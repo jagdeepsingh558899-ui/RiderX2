@@ -4,33 +4,33 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
-<title>RiderX Rider Map</title>
-
-
-<link rel="stylesheet" href="../css/style.css">
-
+<title>RiderX Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<link rel="stylesheet" href="../css/style.css">
 
 
 <style>
 
 #map{
 
-height:400px;
-
+height:80vh;
 width:100%;
 
-border-radius:15px;
+}
+
+.info{
+
+background:#1d1d1d;
+padding:15px;
+border-radius:10px;
 
 }
 
 </style>
-
 
 </head>
 
@@ -38,40 +38,225 @@ border-radius:15px;
 <body>
 
 
-<div class="splash">
+<div class="header">
+
+🗺️ Ride Map
+
+</div>
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+<div class="container">
 
 
-<h2>
-Rider Location
-</h2>
+<div class="info" id="info">
+
+Loading Ride...
+
+</div>
 
 
 <div id="map"></div>
-
-
-<br>
-
-
-<button onclick="startRiderLocation()">
-
-Start Live Location
-
-</button>
 
 
 </div>
 
 
 
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
-<script type="module" src="../js/leaflet-map.js"></script>
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+getDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+let rideId=
+
+localStorage.getItem("rideId");
+
+
+
+
+
+async function loadRide(){
+
+
+
+let snap=
+
+await getDoc(
+
+doc(db,"rides",rideId)
+
+);
+
+
+
+if(!snap.exists()){
+
+return;
+
+}
+
+
+
+let data=snap.data();
+
+
+
+
+
+document.getElementById("info").innerHTML=
+
+`
+
+🚕 ${data.service}
+
+<br>
+
+💰 ${data.fare}
+
+<br>
+
+📏 ${data.distance} KM
+
+`;
+
+
+
+
+
+let map=L.map('map').setView(
+
+[
+
+data.pickupLat,
+
+data.pickupLng
+
+],
+
+13
+
+);
+
+
+
+L.tileLayer(
+
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+
+).addTo(map);
+
+
+
+
+
+let pickup=L.marker(
+
+[
+
+data.pickupLat,
+
+data.pickupLng
+
+]
+
+).addTo(map);
+
+
+
+pickup.bindPopup("📍 Pickup").openPopup();
+
+
+
+
+
+let drop=L.marker(
+
+[
+
+data.dropLat,
+
+data.dropLng
+
+]
+
+).addTo(map);
+
+
+
+drop.bindPopup("🏁 Drop");
+
+
+
+
+
+let line=L.polyline(
+
+[
+
+[
+
+data.pickupLat,
+
+data.pickupLng
+
+],
+
+
+[
+
+data.dropLat,
+
+data.dropLng
+
+]
+
+
+]
+
+]
+
+).addTo(map);
+
+
+
+
+
+map.fitBounds(line.getBounds());
+
+
+
+
+
+}
+
+
+
+loadRide();
+
+
+
+</script>
 
 
 </body>
