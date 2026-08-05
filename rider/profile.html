@@ -6,57 +6,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Rider Profile</title>
+<title>RiderX Profile</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
-
 <style>
 
-.profile{
+.card{
 
 background:#1d1d1d;
-padding:25px;
+padding:20px;
 border-radius:15px;
-text-align:center;
+margin:15px 0;
 
 }
 
 
-.avatar{
+.rating{
 
-width:90px;
-height:90px;
-border-radius:50%;
-background:#ffcc00;
-color:#000;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:40px;
-margin:auto;
-
-}
-
-
-.info{
-
-margin-top:20px;
-text-align:left;
-
-}
-
-
-.info p{
-
-background:#222;
-padding:12px;
-border-radius:10px;
+font-size:30px;
+color:#ffcc00;
 
 }
 
 </style>
-
 
 </head>
 
@@ -72,30 +45,15 @@ border-radius:10px;
 
 
 
-
 <div class="container">
 
 
-<div class="profile">
-
-
-<div class="avatar">
-
-🏍
-
-</div>
-
+<div class="card">
 
 
 <h2 id="name">
-
 Rider
-
 </h2>
-
-
-
-<div class="info">
 
 
 <p id="email">
@@ -105,12 +63,6 @@ Rider
 </p>
 
 
-<p>
-
-🟢 Status: Active
-
-</p>
-
 
 <p id="rides">
 
@@ -119,13 +71,28 @@ Rider
 </p>
 
 
+
+<div class="rating" id="rating">
+
+⭐ 0
+
+</div>
+
+
+<p id="reviews">
+
+Reviews: 0
+
+</p>
+
+
+
 </div>
 
 
 </div>
 
 
-</div>
 
 
 
@@ -159,6 +126,7 @@ from
 async function loadProfile(){
 
 
+
 let user=auth.currentUser;
 
 
@@ -179,41 +147,38 @@ doc(db,"users",user.uid)
 
 
 
-if(profile.exists()){
-
-
 let data=profile.data();
 
 
 
 document.getElementById("name").innerHTML=
 
-data.name;
+data.name || "Rider";
 
 
 
 document.getElementById("email").innerHTML=
 
-"📧 "+data.email;
-
-
-}
+"📧 "+(data.email || "");
 
 
 
 
 
-let q=query(
+
+let rides=await getDocs(
+
+query(
 
 collection(db,"rides"),
 
+where("riderId","==",user.uid),
+
 where("status","==","Completed")
 
+)
+
 );
-
-
-
-let rides=await getDocs(q);
 
 
 
@@ -223,7 +188,64 @@ document.getElementById("rides").innerHTML=
 
 
 
+
+
+
+
+let reviews=await getDocs(
+
+query(
+
+collection(db,"reviews"),
+
+where("riderId","==",user.uid)
+
+)
+
+);
+
+
+
+let total=0;
+
+
+reviews.forEach((r)=>{
+
+
+total += Number(r.data().rating || 0);
+
+
+});
+
+
+
+let avg=
+
+reviews.size ?
+
+(total/reviews.size).toFixed(1)
+
+:
+
+0;
+
+
+
+document.getElementById("rating").innerHTML=
+
+"⭐ "+avg;
+
+
+
+document.getElementById("reviews").innerHTML=
+
+"Reviews: "+reviews.size;
+
+
+
 }
+
+
 
 
 
