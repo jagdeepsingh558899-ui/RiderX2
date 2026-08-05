@@ -4,12 +4,26 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Track Rider - RiderX</title>
+<title>RiderX Live Tracking</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
+<style>
+
+#map{
+
+height:400px;
+width:100%;
+border-radius:15px;
+
+}
+
+</style>
 
 </head>
 
@@ -17,42 +31,186 @@
 <body>
 
 
-<div class="splash">
+<div class="header">
 
-
-<img src="../assets/logo.png" class="logo">
-
-
-<h1>
-Rider<span>X</span>
-</h1>
-
-
-<h2>
-Track Your Rider
-</h2>
-
-
-<div id="location">
-
-Waiting for Rider Location...
+🗺️ Live Ride Tracking
 
 </div>
 
 
-<br>
+
+<div class="container">
 
 
-<button onclick="history.back()">
-Back
-</button>
+<div id="map"></div>
+
+
+
+<a class="back" href="dashboard.html">
+
+⬅ Back Dashboard
+
+</a>
 
 
 </div>
 
 
 
-<script type="module" src="../js/tracking.js"></script>
+
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
+<script type="module">
+
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+doc,
+getDoc
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+let map = L.map("map").setView(
+
+[26.9124,75.7873],
+
+13
+
+);
+
+
+
+L.tileLayer(
+
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+attribution:"OpenStreetMap"
+
+}
+
+).addTo(map);
+
+
+
+
+
+let marker;
+
+
+
+
+async function trackRider(){
+
+
+
+let riderId = localStorage.getItem("riderId");
+
+
+
+if(!riderId){
+
+return;
+
+}
+
+
+
+let location = await getDoc(
+
+doc(db,"locations",riderId)
+
+);
+
+
+
+
+if(location.exists()){
+
+
+let data = location.data();
+
+
+
+if(marker){
+
+map.removeLayer(marker);
+
+}
+
+
+
+
+marker = L.marker(
+
+[
+
+data.latitude,
+
+data.longitude
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup("🏍 Rider Location")
+
+.openPopup();
+
+
+
+map.setView(
+
+[
+
+data.latitude,
+
+data.longitude
+
+],
+
+15
+
+);
+
+
+
+}
+
+
+
+}
+
+
+
+trackRider();
+
+
+
+setInterval(
+
+trackRider,
+
+5000
+
+);
+
+
+
+</script>
 
 
 </body>
