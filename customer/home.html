@@ -17,18 +17,18 @@
 
 width:100px;
 height:100px;
-object-fit:cover;
 border-radius:50%;
+object-fit:cover;
 
 }
 
 
-.banner{
+.box{
 
 background:#1d1d1d;
-padding:20px;
+padding:15px;
 border-radius:15px;
-margin-top:20px;
+margin-top:15px;
 
 }
 
@@ -36,8 +36,8 @@ margin-top:20px;
 button{
 
 width:100%;
-padding:15px;
-margin-top:20px;
+padding:14px;
+margin-top:15px;
 background:#ffcc00;
 border:none;
 border-radius:10px;
@@ -46,6 +46,7 @@ font-weight:bold;
 }
 
 </style>
+
 
 </head>
 
@@ -70,12 +71,29 @@ src="../assets/logo.png">
 
 
 
-<div class="banner" id="banner">
+<div class="box" id="banner">
 
 Welcome to RiderX 🚕
 
 </div>
 
+
+
+<div class="box">
+
+<h3>
+📢 Notifications
+</h3>
+
+
+<div id="notifications">
+
+Loading...
+
+</div>
+
+
+</div>
 
 
 
@@ -93,6 +111,8 @@ Welcome to RiderX 🚕
 
 
 
+
+
 <script type="module">
 
 
@@ -102,13 +122,17 @@ import {db} from "../firebase/config.js";
 import {
 
 doc,
-getDoc
+getDoc,
+collection,
+getDocs
 
 }
 
 from
 
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
 
 
 
@@ -133,43 +157,21 @@ let data=snap.data();
 
 
 
-if(data.appName){
+if(data.appName)
 
-
-document.getElementById("appName").innerHTML=
-
-data.appName;
-
-
-document.title=data.appName;
-
-
-}
+appName.innerHTML=data.appName;
 
 
 
+if(data.logo)
 
-if(data.logo){
-
-
-document.getElementById("logo").src=
-
-data.logo;
-
-
-}
+logo.src=data.logo;
 
 
 
-if(data.banner){
+if(data.banner)
 
-
-document.getElementById("banner").innerHTML=
-
-data.banner;
-
-
-}
+banner.innerHTML=data.banner;
 
 
 
@@ -177,7 +179,46 @@ data.banner;
 
 
 
+
+
+let notes=await getDocs(
+
+collection(db,"notifications")
+
+);
+
+
+
+let box=
+
+document.getElementById("notifications");
+
+
+
+box.innerHTML="";
+
+
+
+notes.forEach((n)=>{
+
+
+box.innerHTML +=`
+
+<p>
+
+📢 ${n.data().message}
+
+</p>
+
+`;
+
+
+});
+
+
+
 }
+
 
 
 
@@ -185,9 +226,7 @@ data.banner;
 
 window.goBooking=function(){
 
-
-window.location.href="booking.html";
-
+location.href="booking.html";
 
 }
 
