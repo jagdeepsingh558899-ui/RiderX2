@@ -1,17 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-
-<title>Ride Status</title>
-
+<title>RiderX Ride Status</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+.status-box{
+
+background:#1d1d1d;
+padding:25px;
+border-radius:15px;
+text-align:center;
+
+}
+
+
+.status{
+
+font-size:25px;
+color:#ffcc00;
+font-weight:bold;
+
+}
+
+
+</style>
 
 </head>
 
@@ -19,15 +39,18 @@
 <body>
 
 
-<div class="splash">
+<div class="header">
+
+🚕 Ride Status
+
+</div>
 
 
-<img src="../assets/logo.png" class="logo">
+
+<div class="container">
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+<div class="status-box">
 
 
 <h2>
@@ -35,18 +58,144 @@ Your Ride
 </h2>
 
 
-<div id="ride">
+<p id="rideStatus" class="status">
 
-Waiting...
+Checking...
+
+</p>
+
+
+<p id="details">
+
+</p>
+
 
 </div>
 
 
+
+<a class="back" href="dashboard.html">
+
+⬅ Back Dashboard
+
+</a>
+
+
 </div>
 
 
 
-<script type="module" src="../js/ride-flow.js"></script>
+
+
+<script type="module">
+
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+collection,
+getDocs,
+query,
+orderBy,
+limit
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+async function checkRide(){
+
+
+let status =
+document.getElementById("rideStatus");
+
+
+let details =
+document.getElementById("details");
+
+
+
+const q=query(
+
+collection(db,"rides"),
+
+orderBy("createdAt","desc"),
+
+limit(1)
+
+);
+
+
+
+const snapshot =
+await getDocs(q);
+
+
+
+if(snapshot.empty){
+
+
+status.innerHTML=
+"No Ride Found";
+
+
+return;
+
+}
+
+
+
+snapshot.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+status.innerHTML =
+data.status;
+
+
+
+details.innerHTML =
+
+`
+📍 ${data.pickup}
+<br>
+➡️ ${data.drop}
+<br>
+💰 ${data.fare}
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+checkRide();
+
+
+
+setInterval(
+
+checkRide,
+
+5000
+
+);
+
+
+
+</script>
 
 
 </body>
