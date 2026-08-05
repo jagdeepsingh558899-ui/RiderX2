@@ -10,6 +10,7 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
 
 .status-box{
@@ -30,6 +31,18 @@ font-weight:bold;
 
 }
 
+
+button{
+
+width:100%;
+padding:14px;
+margin-top:15px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
 
 </style>
 
@@ -58,27 +71,26 @@ Your Ride
 </h2>
 
 
-<p id="rideStatus" class="status">
+<div id="status" class="status">
 
 Checking...
-
-</p>
-
-
-<p id="details">
-
-</p>
-
 
 </div>
 
 
 
-<a class="back" href="dashboard.html">
+<p id="details"></p>
 
-⬅ Back Dashboard
 
-</a>
+
+<button onclick="openTracking()">
+
+🗺️ Track Rider
+
+</button>
+
+
+</div>
 
 
 </div>
@@ -90,7 +102,7 @@ Checking...
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
@@ -101,7 +113,12 @@ query,
 orderBy,
 limit
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
 
 
 
@@ -110,16 +127,8 @@ limit
 async function checkRide(){
 
 
-let status =
-document.getElementById("rideStatus");
 
-
-let details =
-document.getElementById("details");
-
-
-
-const q=query(
+let q=query(
 
 collection(db,"rides"),
 
@@ -131,44 +140,47 @@ limit(1)
 
 
 
-const snapshot =
-await getDocs(q);
+let snap=await getDocs(q);
 
 
 
-if(snapshot.empty){
-
-
-status.innerHTML=
-"No Ride Found";
-
-
-return;
-
-}
-
-
-
-snapshot.forEach((ride)=>{
+snap.forEach((ride)=>{
 
 
 let data=ride.data();
 
 
 
-status.innerHTML =
+document.getElementById("status").innerHTML=
+
+
+data.status=="Accepted"
+
+?
+
+"🏍 Rider Found"
+
+:
+
 data.status;
 
 
 
-details.innerHTML =
+document.getElementById("details").innerHTML=
+
 
 `
-📍 ${data.pickup}
+
+📍 Pickup: ${data.pickup || ""}
+
 <br>
-➡️ ${data.drop}
+
+🏁 Drop: ${data.drop || ""}
+
 <br>
-💰 ${data.fare}
+
+💰 ${data.fare || ""}
+
 `;
 
 
@@ -181,8 +193,20 @@ details.innerHTML =
 
 
 
-checkRide();
 
+
+window.openTracking=function(){
+
+
+window.location.href="tracking.html";
+
+
+}
+
+
+
+
+checkRide();
 
 
 setInterval(
