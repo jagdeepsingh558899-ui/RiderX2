@@ -4,11 +4,20 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RiderX - Ride Booking</title>
 
+
 <link rel="stylesheet" href="css/style.css">
+
+
+<link rel="manifest" href="manifest.json">
+
+
+<meta name="theme-color" content="#ffc400">
+
 
 </head>
 
@@ -19,7 +28,9 @@
 <div class="splash">
 
 
-<img src="assets/logo.png" class="logo" alt="RiderX Logo">
+<img src="assets/logo.png" 
+class="logo" 
+alt="RiderX Logo">
 
 
 <h1>
@@ -37,31 +48,60 @@ Start Ride
 </button>
 
 
+<br>
+
+
 <button onclick="openLogin()" class="loginBtn">
 Login
 </button>
+
 
 
 </div>
 
 
 
+
+
 <script>
+
 
 function openRegister(){
 
-window.location.href="auth/register.html";
+window.location.href =
+"auth/register.html";
 
 }
+
 
 
 function openLogin(){
 
-window.location.href="auth/login.html";
+window.location.href =
+"auth/login.html";
 
 }
 
+
+
+
+// PWA Service Worker
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register("sw.js")
+.then(()=>{
+
+console.log("RiderX App Ready");
+
+});
+
+
+}
+
+
 </script>
+
 
 
 </body>
