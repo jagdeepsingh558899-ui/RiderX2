@@ -1,17 +1,60 @@
-function go(page){
+// =================================
+// RiderX Menu System
+// =================================
 
-window.location.href = page;
+
+
+// Mobile Menu Toggle
+
+
+export function toggleMenu(){
+
+
+let menu = document.getElementById("menu");
+
+
+if(!menu){
+
+return;
 
 }
 
 
 
-function logout(){
+if(menu.style.display==="block"){
+
+
+menu.style.display="none";
+
+
+}
+
+else{
+
+
+menu.style.display="block";
+
+
+}
+
+
+}
+
+
+
+
+
+
+// Logout Menu
+
+
+export function logoutMenu(){
+
 
 localStorage.clear();
 
-alert("Logged Out");
 
 window.location.href="../index.html";
+
 
 }
