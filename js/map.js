@@ -1,44 +1,146 @@
-import { db } from "../firebase/config.js";
+// =================================
+// RiderX Map Location System
+// =================================
 
 
-import {
+let map;
 
-collection,
-addDoc
+let pickupMarker;
+
+let dropMarker;
+
+
+
+
+// Initialize Map
+
+export function createMap(){
+
+
+if(!document.getElementById("map")){
+
+return;
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
+map = L.map("map").setView(
 
-let latitude;
+[26.9124,75.7873],
 
-let longitude;
+13
 
-
-let rideType =
-localStorage.getItem("rideType") || "Bike";
+);
 
 
 
-document.getElementById("rideType").innerHTML =
-rideType + " Booking";
+L.tileLayer(
+
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+attribution:"© OpenStreetMap"
+
+}
+
+).addTo(map);
 
 
 
-let fare = 0;
+return map;
+
+
+}
 
 
 
 
 
-// Current Location
+// Add Pickup Location
 
 
-window.getLocation=function(){
+export function setPickup(
+
+lat,
+lng
+
+){
+
+
+if(pickupMarker){
+
+map.removeLayer(pickupMarker);
+
+}
+
+
+
+pickupMarker = L.marker(
+
+[lat,lng]
+
+)
+
+.addTo(map)
+
+.bindPopup("Pickup Location")
+
+.openPopup();
+
+
+}
+
+
+
+
+
+// Add Drop Location
+
+
+export function setDrop(
+
+lat,
+lng
+
+){
+
+
+if(dropMarker){
+
+map.removeLayer(dropMarker);
+
+}
+
+
+
+dropMarker = L.marker(
+
+[lat,lng]
+
+)
+
+.addTo(map)
+
+.bindPopup("Drop Location")
+
+.openPopup();
+
+
+}
+
+
+
+
+
+// Get Current Location
+
+
+export function getCurrentLocation(){
+
+
+return new Promise((resolve)=>{
 
 
 if(navigator.geolocation){
@@ -49,23 +151,17 @@ navigator.geolocation.getCurrentPosition(
 (position)=>{
 
 
-latitude =
-position.coords.latitude;
+resolve({
 
+lat:position.coords.latitude,
 
-longitude =
-position.coords.longitude;
+lng:position.coords.longitude
 
-
-
-document.getElementById("pickup").value =
-
-"Lat: "+latitude+
-" Lng: "+longitude;
-
+});
 
 
 }
+
 
 );
 
@@ -75,145 +171,13 @@ document.getElementById("pickup").value =
 else{
 
 
-alert("Location not supported");
+resolve(null);
 
 
 }
 
 
-};
-
-
-
-
-
-
-
-// Fare Calculate
-
-
-window.calculateFare=function(){
-
-
-let km =
-
-Number(
-document.getElementById("distance").value
-);
-
-
-
-if(rideType=="Bike"){
-
-fare = km * 12;
-
-}
-
-
-else if(rideType=="Cab"){
-
-fare = km * 20;
-
-}
-
-
-else{
-
-fare = km * 15;
-
-}
-
-
-
-document.getElementById("fare").innerHTML =
-
-"Fare: ₹"+fare;
-
-
-};
-
-
-
-
-
-
-
-// Book Ride
-
-
-window.bookRide = async function(){
-
-
-
-let pickup =
-
-document.getElementById("pickup").value;
-
-
-
-let drop =
-
-document.getElementById("drop").value;
-
-
-
-
-
-try{
-
-
-await addDoc(
-
-collection(db,"rides"),
-
-{
-
-type:rideType,
-
-pickup:pickup,
-
-drop:drop,
-
-distance:
-
-document.getElementById("distance").value,
-
-
-fare:fare,
-
-
-latitude:latitude,
-
-longitude:longitude,
-
-
-status:"requested",
-
-
-createdAt:new Date()
-
-}
-
-
-);
-
-
-
-document.getElementById("message").innerHTML =
-
-"Ride Request Sent 🚀";
+});
 
 
 }
-
-
-catch(error){
-
-
-alert(error.message);
-
-
-}
-
-
-};
