@@ -10,42 +10,6 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-
-<style>
-
-.status-box{
-
-background:#1d1d1d;
-padding:25px;
-border-radius:15px;
-text-align:center;
-
-}
-
-
-.status{
-
-font-size:25px;
-color:#ffcc00;
-font-weight:bold;
-
-}
-
-
-button{
-
-width:100%;
-padding:14px;
-margin-top:15px;
-background:#ffcc00;
-border:none;
-border-radius:10px;
-font-weight:bold;
-
-}
-
-</style>
-
 </head>
 
 
@@ -63,23 +27,28 @@ font-weight:bold;
 <div class="container">
 
 
-<div class="status-box">
+<div class="card">
 
 
-<h2>
-Your Ride
+<h2 id="status">
+
+Loading...
+
 </h2>
 
 
-<div id="status" class="status">
+<p id="fare">
 
-Checking...
+Fare:-
 
-</div>
+</p>
 
 
+<p id="rider">
 
-<p id="details"></p>
+Rider:-
+
+</p>
 
 
 
@@ -88,6 +57,7 @@ Checking...
 🗺️ Track Rider
 
 </button>
+
 
 
 </div>
@@ -107,11 +77,9 @@ import {db} from "../firebase/config.js";
 
 import {
 
-collection,
-getDocs,
-query,
-orderBy,
-limit
+doc,
+getDoc,
+onSnapshot
 
 }
 
@@ -123,73 +91,93 @@ from
 
 
 
-
-async function checkRide(){
-
-
-
-let q=query(
-
-collection(db,"rides"),
-
-orderBy("createdAt","desc"),
-
-limit(1)
-
-);
+let rideId = localStorage.getItem("rideId");
 
 
 
-let snap=await getDocs(q);
+
+
+function loadStatus(){
 
 
 
-snap.forEach((ride)=>{
+if(!rideId){
+
+document.getElementById("status").innerHTML=
+
+"No Ride Found";
+
+return;
+
+}
 
 
-let data=ride.data();
+
+onSnapshot(
+
+doc(db,"rides",rideId),
+
+async(snapshot)=>{
+
+
+
+let data=snapshot.data();
+
+
+
+if(!data)return;
 
 
 
 document.getElementById("status").innerHTML=
 
-
-data.status=="Accepted"
-
-?
-
-"🏍 Rider Found"
-
-:
-
-data.status;
+"Status: "+data.status;
 
 
 
-document.getElementById("details").innerHTML=
+document.getElementById("fare").innerHTML=
 
-
-`
-
-📍 Pickup: ${data.pickup || ""}
-
-<br>
-
-🏁 Drop: ${data.drop || ""}
-
-<br>
-
-💰 ${data.fare || ""}
-
-`;
+"Fare: "+data.fare;
 
 
 
-});
+if(data.riderId){
+
+
+let rider=await getDoc(
+
+doc(db,"users",data.riderId)
+
+);
+
+
+
+if(rider.exists()){
+
+
+document.getElementById("rider").innerHTML=
+
+"Rider: "+
+
+(rider.data().name || "Rider");
+
+
+}
+
+
+}
 
 
 
 }
+
+
+);
+
+
+
+}
+
 
 
 
@@ -198,24 +186,16 @@ document.getElementById("details").innerHTML=
 window.openTracking=function(){
 
 
-window.location.href="tracking.html";
+window.location.href=
+
+"live-tracking.html";
 
 
 }
 
 
 
-
-checkRide();
-
-
-setInterval(
-
-checkRide,
-
-5000
-
-);
+loadStatus();
 
 
 
