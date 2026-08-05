@@ -1,77 +1,55 @@
-import { db, auth } from "../firebase/config.js";
+// =================================
+// RiderX Rider Registration
+// =================================
+
+
+import { auth, db } from "../firebase/config.js";
+
+
+import {
+
+createUserWithEmailAndPassword
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 import {
 
 doc,
-setDoc,
-getDoc
+setDoc
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-// Rider Register
 
 
-window.registerRider = async function(){
+// Register Rider
 
 
-let user = auth.currentUser;
+export async function registerRider(
+
+name,
+email,
+password,
+vehicle
+
+){
 
 
-if(!user){
-
-alert("Please login first");
-
-return;
-
-}
+try{
 
 
+const user = await createUserWithEmailAndPassword(
 
-let data = {
+auth,
 
+email,
 
-uid:user.uid,
+password
 
-
-name:
-
-document.getElementById("name").value,
-
-
-bike:
-
-document.getElementById("bike").value,
-
-
-vehicleNumber:
-
-document.getElementById("number").value,
-
-
-license:
-
-document.getElementById("license").value,
-
-
-role:"rider",
-
-
-status:"pending",
-
-
-createdAt:new Date()
-
-
-};
-
+);
 
 
 
@@ -81,94 +59,46 @@ doc(
 
 db,
 
-"riders",
+"users",
 
-user.uid
+user.user.uid
 
 ),
 
-data
+{
+
+
+name:name,
+
+email:email,
+
+role:"rider",
+
+vehicle:vehicle,
+
+status:"Pending",
+
+createdAt:new Date()
+
+
+}
 
 );
 
 
 
-document.getElementById("message").innerHTML =
-
-"Registration Submitted ✅ Waiting For Approval";
-
-
-
-};
-
-
-
-
-
-
-// Show Profile
-
-
-let profile =
-
-document.getElementById("profile");
-
-
-
-if(profile){
-
-
-let user = auth.currentUser;
-
-
-
-if(user){
-
-
-getDoc(
-
-doc(
-
-db,
-
-"riders",
-
-user.uid
-
-)
-
-)
-
-.then((snap)=>{
-
-
-if(snap.exists()){
-
-
-let d=snap.data();
-
-
-
-profile.innerHTML=
-
-`
-
-<h3>${d.name}</h3>
-
-<p>Bike: ${d.bike}</p>
-
-<p>Number: ${d.vehicleNumber}</p>
-
-<p>Status: ${d.status}</p>
-
-
-`;
+return true;
 
 
 }
 
+catch(error){
 
-});
+
+console.log(error);
+
+
+return false;
 
 
 }
