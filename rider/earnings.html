@@ -6,49 +6,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Rider Earnings</title>
+<title>RiderX Earnings</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
 
 <style>
 
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
+
+margin:0;
+background:#111;
+color:white;
+font-family:Arial,sans-serif;
+
 }
+
 
 .header{
-    background:#ffcc00;
-    color:#000;
-    padding:20px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
+
+background:#ffcc00;
+color:#000;
+padding:20px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+
 }
+
 
 .container{
-    padding:20px;
-}
 
-
-.box{
-
-background:#1d1d1d;
-padding:25px;
-border-radius:15px;
-text-align:center;
-margin-bottom:20px;
-
-}
-
-
-.amount{
-
-font-size:35px;
-color:#ffcc00;
-font-weight:bold;
+padding:20px;
 
 }
 
@@ -56,10 +45,18 @@ font-weight:bold;
 .card{
 
 background:#1d1d1d;
-padding:15px;
-margin:15px 0;
-border-radius:12px;
-border:1px solid #333;
+padding:25px;
+border-radius:15px;
+text-align:center;
+
+}
+
+
+.money{
+
+font-size:40px;
+color:#ffcc00;
+font-weight:bold;
 
 }
 
@@ -67,11 +64,12 @@ border:1px solid #333;
 .back{
 
 display:block;
+margin-top:20px;
 background:#ffcc00;
 color:#000;
-padding:12px;
-border-radius:10px;
+padding:14px;
 text-align:center;
+border-radius:10px;
 text-decoration:none;
 font-weight:bold;
 
@@ -82,11 +80,14 @@ font-weight:bold;
 </head>
 
 
+
 <body>
 
 
 <div class="header">
-💰 RiderX Earnings
+
+💰 Rider Earnings
+
 </div>
 
 
@@ -94,29 +95,29 @@ font-weight:bold;
 <div class="container">
 
 
-<div class="box">
+<div class="card">
 
-<p>Total Earnings</p>
 
-<div class="amount" id="total">
+<h2>
+Total Earnings
+</h2>
+
+
+<div class="money" id="earning">
+
 ₹0
-</div>
 
 </div>
 
 
-
-<h2>Ride Payments</h2>
-
-
-<div id="earningList">
-Loading earnings...
 </div>
 
 
 
 <a class="back" href="dashboard.html">
+
 ⬅ Back Dashboard
+
 </a>
 
 
@@ -124,109 +125,39 @@ Loading earnings...
 
 
 
+
 <script type="module">
-
-
-import { db } from "../firebase/config.js";
 
 
 import {
 
-collection,
-getDocs
+getWalletBalance
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-async function loadEarnings(){
-
-
-let list=document.getElementById("earningList");
-
-let total=0;
-
-
-try{
-
-
-const snapshot=await getDocs(collection(db,"rides"));
-
-
-list.innerHTML="";
-
-
-if(snapshot.empty){
-
-list.innerHTML="<p>No earnings found</p>";
-
-return;
-
-}
+} from "../js/wallet.js";
 
 
 
-snapshot.forEach((ride)=>{
+async function load(){
 
 
-let data=ride.data();
+let amount = await getWalletBalance();
 
 
-if(data.status=="Completed"){
 
-
-let fare=Number(data.fare || 0);
-
-total += fare;
-
-
-list.innerHTML += `
-
-<div class="card">
-
-<h3>
-🚕 Ride Completed
-</h3>
-
-<p>
-📍 ${data.pickup || "N/A"} ➡ ${data.drop || "N/A"}
-</p>
-
-<p>
-💰 Earned: ₹${fare}
-</p>
-
-</div>
-
-`;
-
-}
-
-
-});
-
-
-document.getElementById("total").innerHTML="₹"+total;
-
-
-}
-
-catch(error){
-
-list.innerHTML="Error loading earnings";
-console.log(error);
-
-}
+document.getElementById("earning").innerHTML =
+"₹"+amount;
 
 
 }
 
 
 
-loadEarnings();
+load();
+
 
 
 </script>
+
 
 
 </body>
