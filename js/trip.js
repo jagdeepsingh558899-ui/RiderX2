@@ -1,173 +1,20 @@
-import { db } from "../firebase/config.js";
-
-
-import {
-
-doc,
-updateDoc,
-onSnapshot
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+// =================================
+// RiderX Trip Details System
+// =================================
 
 
 
-let rideId =
-
-localStorage.getItem("rideId");
+// Save Current Trip Data
 
 
-
-
-// Rider Location
-
-
-window.startTripLocation=function(){
-
-
-navigator.geolocation.watchPosition(
-
-(position)=>{
+export function saveTrip(trip){
 
 
 localStorage.setItem(
 
-"riderLat",
+"riderx_trip",
 
-position.coords.latitude
-
-);
-
-
-localStorage.setItem(
-
-"riderLng",
-
-position.coords.longitude
-
-);
-
-
-
-document.getElementById("status").innerHTML=
-
-"Location Sharing 🟢";
-
-
-}
-
-);
-
-
-};
-
-
-
-
-
-
-
-// Start Ride
-
-
-window.startRide = async function(){
-
-
-if(!rideId)return;
-
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-status:"started"
-
-}
-
-);
-
-
-alert("Ride Started");
-
-
-};
-
-
-
-
-
-
-
-// Complete Ride
-
-
-window.completeRide = async function(){
-
-
-if(!rideId)return;
-
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-status:"completed"
-
-}
-
-);
-
-
-alert("Trip Completed");
-
-
-};
-
-
-
-
-
-
-
-
-// Customer Status
-
-
-let box =
-
-document.getElementById("tripStatus");
-
-
-
-if(box && rideId){
-
-
-onSnapshot(
-
-doc(db,"rides",rideId),
-
-(snapshot)=>{
-
-
-let data=snapshot.data();
-
-
-box.innerHTML=
-
-"Ride Status: "+data.status;
-
-
-
-}
+JSON.stringify(trip)
 
 );
 
@@ -178,30 +25,50 @@ box.innerHTML=
 
 
 
+// Get Current Trip Data
 
 
-window.giveRating=function(){
+export function getTrip(){
 
 
-let r = prompt(
+let trip = localStorage.getItem(
 
-"Give Rating 1-5"
-
-);
-
-
-
-if(r){
-
-
-alert(
-
-"Thanks For Rating ⭐"
+"riderx_trip"
 
 );
+
+
+
+if(trip){
+
+
+return JSON.parse(trip);
 
 
 }
 
 
-};
+
+return null;
+
+
+}
+
+
+
+
+
+// Clear Trip
+
+
+export function clearTrip(){
+
+
+localStorage.removeItem(
+
+"riderx_trip"
+
+);
+
+
+}
