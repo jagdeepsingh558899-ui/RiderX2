@@ -9,48 +9,167 @@
 <title>RiderX Rating</title>
 
 <link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
+
+<style>
+
+body{
+margin:0;
+background:#111;
+color:white;
+font-family:Arial,sans-serif;
+}
+
+.box{
+
+width:90%;
+max-width:400px;
+margin:50px auto;
+background:#1d1d1d;
+padding:25px;
+border-radius:15px;
+text-align:center;
+
+}
+
+
+.star{
+
+font-size:40px;
+cursor:pointer;
+color:#777;
+
+}
+
+
+textarea,input{
+
+width:100%;
+padding:12px;
+margin:10px 0;
+border-radius:10px;
+border:none;
+
+}
+
+
+button{
+
+width:100%;
+padding:14px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
 
 </head>
 
+
 <body>
 
-<header class="topbar">
-<h1>Rider<span>X</span></h1>
-</header>
 
-<div class="container">
+<div class="box">
 
-<div class="service-card">
 
-<h2>⭐ Rate Your Ride</h2>
+<h1>⭐ Rate Rider</h1>
 
-<p>How was your ride?</p>
 
-<select id="rating">
+<div>
 
-<option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-<option value="4">⭐⭐⭐⭐ Good</option>
-<option value="3">⭐⭐⭐ Average</option>
-<option value="2">⭐⭐ Poor</option>
-<option value="1">⭐ Very Poor</option>
+<span class="star" onclick="setRating(1)">★</span>
+<span class="star" onclick="setRating(2)">★</span>
+<span class="star" onclick="setRating(3)">★</span>
+<span class="star" onclick="setRating(4)">★</span>
+<span class="star" onclick="setRating(5)">★</span>
 
-</select>
+</div>
 
-<textarea
-id="review"
-placeholder="Write your review..."
-style="width:100%;height:120px;margin-top:15px;padding:10px;border-radius:10px;"></textarea>
 
-<button id="submitRatingBtn">
-Submit Review
+<textarea id="comment" placeholder="Write feedback"></textarea>
+
+
+<button onclick="submitRating()">
+
+Submit Rating
+
 </button>
 
-</div>
+
+<p id="msg"></p>
+
 
 </div>
 
-<script type="module" src="../js/rating.js"></script>
+
+
+
+
+<script type="module">
+
+
+import { addRating } from "../js/rating.js";
+
+
+let selectedRating = 0;
+
+
+
+window.setRating=function(num){
+
+selectedRating=num;
+
+document.getElementById("msg").innerHTML =
+num+" Star Selected ⭐";
+
+}
+
+
+
+
+window.submitRating=async function(){
+
+
+if(selectedRating==0){
+
+alert("Select rating");
+
+return;
+
+}
+
+
+
+let result = await addRating(
+
+"ride",
+
+"user",
+
+selectedRating,
+
+document.getElementById("comment").value
+
+);
+
+
+
+if(result){
+
+document.getElementById("msg").innerHTML=
+"Thanks for rating ✅";
+
+}
+
+
+}
+
+
+
+</script>
+
 
 </body>
 
