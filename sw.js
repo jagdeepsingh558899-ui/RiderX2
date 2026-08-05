@@ -1,45 +1,92 @@
+// =================================
 // RiderX Service Worker
+// =================================
 
 
 const CACHE_NAME = "riderx-v1";
 
 
-const files = [
+const FILES_TO_CACHE = [
 
-"/",
+"index.html",
 
-"/index.html",
+"manifest.json",
 
-"/css/style.css",
+"assets/logo.svg",
 
-"/assets/logo.png",
+"css/style.css",
 
-"/manifest.json"
+"auth/login.html",
+
+"auth/register.html",
+
+"customer/dashboard.html",
+
+"customer/booking.html",
+
+"customer/history.html",
+
+"customer/profile.html",
+
+"rider/dashboard.html",
+
+"rider/requests.html",
+
+"rider/earnings.html",
+
+"rider/profile.html"
 
 ];
 
 
 
+// Install
 
-
-self.addEventListener(
-"install",
-event => {
+self.addEventListener("install", (event)=>{
 
 
 event.waitUntil(
 
 caches.open(CACHE_NAME)
 
-.then(
+.then(cache=>{
 
-cache => {
+return cache.addAll(FILES_TO_CACHE);
 
-return cache.addAll(files);
+})
+
+);
+
+
+});
+
+
+
+
+// Activate
+
+self.addEventListener("activate",(event)=>{
+
+
+event.waitUntil(
+
+caches.keys().then(keys=>{
+
+return Promise.all(
+
+keys.map(key=>{
+
+if(key!==CACHE_NAME){
+
+return caches.delete(key);
 
 }
 
-)
+})
+
+);
+
+})
 
 );
 
@@ -50,25 +97,20 @@ return cache.addAll(files);
 
 
 
-self.addEventListener(
-"fetch",
+// Fetch
 
-event => {
+self.addEventListener("fetch",(event)=>{
 
 
 event.respondWith(
 
 caches.match(event.request)
 
-.then(
-
-response => {
+.then(response=>{
 
 return response || fetch(event.request);
 
-}
-
-)
+})
 
 );
 
