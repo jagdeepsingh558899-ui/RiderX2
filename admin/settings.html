@@ -22,7 +22,6 @@ margin:15px 0;
 
 }
 
-
 input{
 
 width:100%;
@@ -33,13 +32,12 @@ border:none;
 
 }
 
-
 button{
 
 width:100%;
 padding:14px;
 background:#ffcc00;
-border:none;
+border:0;
 border-radius:10px;
 font-weight:bold;
 
@@ -60,8 +58,8 @@ font-weight:bold;
 </div>
 
 
-<div class="container">
 
+<div class="container">
 
 
 <div class="box">
@@ -69,31 +67,26 @@ font-weight:bold;
 
 <h3>🏍 Bike Fare</h3>
 
+<input id="bikeBase" placeholder="Bike Base Fare">
 
-<input id="bikeBase" placeholder="Base Fare">
-
-
-<input id="bikeKm" placeholder="Per KM Fare">
+<input id="bikeKm" placeholder="Bike Per KM">
 
 
 
 <h3>🚕 Cab Fare</h3>
 
+<input id="cabBase" placeholder="Cab Base Fare">
 
-<input id="cabBase" placeholder="Base Fare">
-
-
-<input id="cabKm" placeholder="Per KM Fare">
+<input id="cabKm" placeholder="Cab Per KM">
 
 
 
-<h3>🎁 Offer</h3>
-
-
-<input id="offer" placeholder="Discount %">
-
+<h3>🎁 Coupon Offer</h3>
 
 <input id="coupon" placeholder="Coupon Code">
+
+
+<input id="discount" placeholder="Discount %">
 
 
 
@@ -135,8 +128,7 @@ from
 
 
 
-
-async function loadSettings(){
+async function load(){
 
 
 let snap=await getDoc(
@@ -153,7 +145,6 @@ if(snap.exists()){
 let d=snap.data();
 
 
-
 bikeBase.value=d.bikeBase || "";
 
 bikeKm.value=d.bikeKm || "";
@@ -162,9 +153,9 @@ cabBase.value=d.cabBase || "";
 
 cabKm.value=d.cabKm || "";
 
-offer.value=d.offer || "";
-
 coupon.value=d.coupon || "";
+
+discount.value=d.discount || "";
 
 
 }
@@ -188,22 +179,22 @@ doc(db,"settings","app"),
 {
 
 
-bikeBase:bikeBase.value,
+bikeBase:Number(bikeBase.value),
 
 
-bikeKm:bikeKm.value,
+bikeKm:Number(bikeKm.value),
 
 
-cabBase:cabBase.value,
+cabBase:Number(cabBase.value),
 
 
-cabKm:cabKm.value,
+cabKm:Number(cabKm.value),
 
 
-offer:offer.value,
+coupon:coupon.value,
 
 
-coupon:coupon.value
+discount:Number(discount.value)
 
 
 
@@ -216,13 +207,14 @@ coupon:coupon.value
 alert("Settings Saved ✅");
 
 
+
 }
 
 
 
 
 
-loadSettings();
+load();
 
 
 
