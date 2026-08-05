@@ -20,11 +20,15 @@ serverTimestamp
 
 // Add Rating
 
+
 export async function addRating(
 
 rideId,
+
 userId,
+
 rating,
+
 comment
 
 ){
@@ -46,7 +50,7 @@ userId:userId,
 
 rating:rating,
 
-comment:comment || "",
+comment:comment,
 
 createdAt:serverTimestamp()
 
