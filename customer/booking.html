@@ -17,9 +17,7 @@
 
 
 <div class="header">
-
 🚕 RiderX Booking
-
 </div>
 
 
@@ -28,33 +26,24 @@
 
 <select id="service">
 
-<option value="Bike Taxi">
-🏍 Bike Taxi
-</option>
+<option value="Bike Taxi">🏍 Bike Taxi</option>
 
-<option value="Cab">
-🚕 Cab
-</option>
+<option value="Cab">🚕 Cab</option>
 
-<option value="Parcel">
-📦 Parcel
-</option>
+<option value="Parcel">📦 Parcel</option>
 
-<option value="Food">
-🍔 Food
-</option>
+<option value="Food">🍔 Food</option>
 
 </select>
 
 
 
-<input id="pickup" placeholder="Pickup" readonly>
+<input id="pickup" placeholder="Pickup Location" readonly>
+
 
 
 <button onclick="getPickup()">
-
-📍 Current Location
-
+📍 Use Current Location
 </button>
 
 
@@ -63,34 +52,38 @@
 
 
 
+<input id="coupon" placeholder="Coupon Code">
+
+
+
+<button onclick="applyCoupon()">
+🎁 Apply Coupon
+</button>
+
+
+
 <button onclick="calculateRide()">
-
-Calculate Fare
-
+📏 Calculate Fare
 </button>
 
 
 
 <p id="distance">
-
-Distance:-
-
+Distance: -
 </p>
 
 
-<p id="price">
 
-Fare:-
-
+<p id="fare">
+Fare: -
 </p>
 
 
 
 <button onclick="bookRide()">
-
-Confirm Ride
-
+Confirm Booking
 </button>
+
 
 
 </div>
@@ -103,9 +96,7 @@ Confirm Ride
 
 import {db} from "../firebase/config.js";
 
-
 import {getFareSettings} from "../js/fare.js";
-
 
 import {getCoordinates} from "../js/geocode.js";
 
@@ -125,35 +116,36 @@ from
 
 
 
-let pickupLat;
 
-let pickupLng;
+let pickupLat=null;
 
-let dropLat;
+let pickupLng=null;
 
-let dropLng;
+let dropLat=null;
+
+let dropLng=null;
+
 
 let distance=0;
 
 let finalFare=0;
 
-let settings;
+
+let settings={};
+
+let couponDiscount=0;
 
 
 
 
-async function loadFare(){
+async function loadSettings(){
 
-
-settings=await getFareSettings();
-
+settings = await getFareSettings();
 
 }
 
 
-
-loadFare();
-
+loadSettings();
 
 
 
@@ -165,18 +157,17 @@ window.getPickup=function(){
 
 navigator.geolocation.getCurrentPosition(
 
-(pos)=>{
+(position)=>{
 
 
-pickupLat=pos.coords.latitude;
+pickupLat=position.coords.latitude;
 
-pickupLng=pos.coords.longitude;
+pickupLng=position.coords.longitude;
 
 
-pickup.value=
+document.getElementById("pickup").value=
 
 pickupLat+","+pickupLng;
-
 
 
 }
@@ -192,26 +183,75 @@ pickupLat+","+pickupLng;
 
 
 
+window.applyCoupon=function(){
+
+
+let code=
+
+document.getElementById("coupon").value;
+
+
+
+if(
+
+code==settings.coupon
+
+){
+
+
+couponDiscount=
+
+Number(settings.discount || 0);
+
+
+
+alert(
+
+"Coupon Applied 🎁 "+couponDiscount+"% OFF"
+
+);
+
+
+
+}
+
+else{
+
+
+couponDiscount=0;
+
+
+alert("Invalid Coupon ❌");
+
+
+}
+
+
+}
+
+
+
+
+
+
 
 window.calculateRide=async function(){
 
 
 
-let dropAddress=
-
-drop.value;
-
-
-
 let result=
 
-await getCoordinates(dropAddress);
+await getCoordinates(
+
+document.getElementById("drop").value
+
+);
 
 
 
 if(!result){
 
-alert("Location not found");
+alert("Drop location not found");
 
 return;
 
@@ -228,11 +268,9 @@ dropLng=result.lng;
 let R=6371;
 
 
-
 let dLat=
 
 (dropLat-pickupLat)*Math.PI/180;
-
 
 
 let dLng=
@@ -281,7 +319,7 @@ Math.sqrt(1-a)
 
 let type=
 
-service.value;
+document.getElementById("service").value;
 
 
 
@@ -294,11 +332,10 @@ Number(settings.bikeBase)
 
 +
 
-(distance*Number(settings.bikeKm));
+distance*Number(settings.bikeKm);
 
 
 }
-
 
 else if(type=="Cab"){
 
@@ -309,7 +346,7 @@ Number(settings.cabBase)
 
 +
 
-(distance*Number(settings.cabKm));
+distance*Number(settings.cabKm);
 
 
 }
@@ -317,7 +354,9 @@ Number(settings.cabBase)
 else{
 
 
-finalFare=100+(distance*10);
+finalFare=
+
+100+(distance*10);
 
 
 }
@@ -326,18 +365,11 @@ finalFare=100+(distance*10);
 
 
 
-let discount=
-
-Number(settings.offer || 0);
-
-
-
 finalFare=
 
 finalFare-
 
-(finalFare*discount/100);
-
+(finalFare*couponDiscount/100);
 
 
 
@@ -349,7 +381,7 @@ document.getElementById("distance").innerHTML=
 
 
 
-document.getElementById("price").innerHTML=
+document.getElementById("fare").innerHTML=
 
 "Fare: ₹"+Math.round(finalFare);
 
@@ -387,10 +419,19 @@ dropLng,
 distance,
 
 
-service:service.value,
+service:
+
+document.getElementById("service").value,
 
 
-fare:"₹"+Math.round(finalFare),
+fare:
+
+"₹"+Math.round(finalFare),
+
+
+coupon:
+
+document.getElementById("coupon").value,
 
 
 status:"Pending",
@@ -402,7 +443,6 @@ paymentStatus:"Pending",
 createdAt:serverTimestamp()
 
 
-
 }
 
 );
@@ -412,7 +452,10 @@ createdAt:serverTimestamp()
 alert("Ride Booked ✅");
 
 
+
 }
+
+
 
 
 
