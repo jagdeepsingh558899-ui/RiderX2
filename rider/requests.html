@@ -10,86 +10,14 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-
-<style>
-
-body{
-margin:0;
-background:#111;
-color:white;
-font-family:Arial,sans-serif;
-}
-
-
-.header{
-
-background:#ffcc00;
-color:#000;
-padding:20px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-
-}
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-.request-card{
-
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin-bottom:15px;
-
-}
-
-
-button{
-
-width:100%;
-padding:13px;
-margin-top:10px;
-border:none;
-border-radius:10px;
-background:#ffcc00;
-font-weight:bold;
-
-}
-
-
-.back{
-
-display:block;
-background:#ffcc00;
-color:#000;
-padding:13px;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-margin-top:20px;
-font-weight:bold;
-
-}
-
-</style>
-
 </head>
-
 
 
 <body>
 
 
 <div class="header">
-
-📩 Ride Requests
-
+📩 New Ride Requests
 </div>
 
 
@@ -99,16 +27,14 @@ font-weight:bold;
 
 <div id="requestList">
 
-Loading requests...
+Loading...
 
 </div>
 
 
 
 <a class="back" href="dashboard.html">
-
 ⬅ Back Dashboard
-
 </a>
 
 
@@ -117,18 +43,215 @@ Loading requests...
 
 
 
+
 <script type="module">
+
+
+import { db } from "../firebase/config.js";
 
 
 import {
 
-loadRideRequests
+collection,
+getDocs,
+query,
+where,
+doc,
+updateDoc,
+serverTimestamp
 
-} from "../js/requests.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-loadRideRequests();
+
+
+
+async function loadRequests(){
+
+
+let box =
+document.getElementById("requestList");
+
+
+
+const q=query(
+
+collection(db,"rides"),
+
+where("status","==","Pending")
+
+);
+
+
+
+const snapshot =
+await getDocs(q);
+
+
+
+box.innerHTML="";
+
+
+
+if(snapshot.empty){
+
+
+box.innerHTML=
+"<p>No requests available</p>";
+
+return;
+
+}
+
+
+
+
+
+snapshot.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+box.innerHTML += `
+
+
+<div class="request-card">
+
+
+<h3>
+🏍 ${data.service}
+</h3>
+
+
+<p>
+📍 Pickup:
+${data.pickup}
+</p>
+
+
+<p>
+📍 Drop:
+${data.drop}
+</p>
+
+
+<p>
+💰 Fare:
+${data.fare}
+</p>
+
+
+
+<button onclick="acceptRide('${ride.id}')">
+
+Accept Ride
+
+</button>
+
+
+
+<button onclick="rejectRide('${ride.id}')">
+
+Reject
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+window.acceptRide = async function(id){
+
+
+await updateDoc(
+
+doc(db,"rides",id),
+
+{
+
+
+status:"Accepted",
+
+acceptedAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+alert("Ride Accepted ✅");
+
+
+loadRequests();
+
+
+}
+
+
+
+
+
+
+window.rejectRide = async function(id){
+
+
+await updateDoc(
+
+doc(db,"rides",id),
+
+{
+
+
+status:"Rejected"
+
+
+}
+
+);
+
+
+
+loadRequests();
+
+
+}
+
+
+
+
+loadRequests();
+
+
+
+setInterval(
+
+loadRequests,
+
+10000
+
+);
 
 
 </script>
