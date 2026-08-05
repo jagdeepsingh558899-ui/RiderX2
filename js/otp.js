@@ -34,6 +34,7 @@ window.sendOTP=function(){
 
 
 let phone =
+
 document.getElementById("phone").value;
 
 
@@ -72,12 +73,6 @@ window.recaptchaVerifier
 confirmationResult=result;
 
 
-localStorage.setItem(
-"phone",
-phone
-);
-
-
 window.location.href=
 "verify-otp.html";
 
@@ -99,20 +94,31 @@ alert(error.message);
 
 
 
+
+
 window.verifyOTP=function(){
 
 
-let code =
+let otp =
+
 document.getElementById("otp").value;
 
 
 
-confirmationResult.confirm(code)
+confirmationResult.confirm(otp)
 
 .then(async(result)=>{
 
 
 let user=result.user;
+
+
+
+let role =
+
+localStorage.getItem("role")
+
+|| "customer";
 
 
 
@@ -124,7 +130,15 @@ doc(db,"users",user.uid),
 
 phone:user.phoneNumber,
 
-role:"customer"
+role:role,
+
+createdAt:new Date()
+
+},
+
+{
+
+merge:true
 
 }
 
@@ -132,8 +146,24 @@ role:"customer"
 
 
 
+if(role=="rider"){
+
+
+window.location.href=
+"../rider/dashboard.html";
+
+
+}
+
+else{
+
+
 window.location.href=
 "../customer/menu.html";
+
+
+}
+
 
 
 })
@@ -141,7 +171,7 @@ window.location.href=
 .catch(()=>{
 
 
-alert("Wrong OTP");
+alert("Invalid OTP");
 
 
 });
