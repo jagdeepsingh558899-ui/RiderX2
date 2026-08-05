@@ -1,143 +1,139 @@
-import { db } from "../firebase/config.js";
+// =====================================
+// RiderX Payment System V2
+// =====================================
 
+import { auth, db } from "../firebase/config.js";
 
 import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-doc,
-setDoc,
-getDoc,
-updateDoc
+import {
+    doc,
+    getDoc,
+    updateDoc,
+    addDoc,
+    collection,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-}
+const fareAmount = document.getElementById("fareAmount");
+const payBtn = document.getElementById("payBtn");
+const paymentStatus = document.getElementById("paymentStatus");
 
-from
+let currentUser = null;
+let bookingId = "";
+let fare = 0;
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+onAuthStateChanged(auth, async (user) => {
 
+    if (!user) {
 
+        window.location.href = "../auth/login.html";
+        return;
 
+    }
 
-// Payment
+    currentUser = user;
 
+    bookingId = new URLSearchParams(window.location.search).get("booking");
 
-let amount =
+    if (!bookingId) {
 
-localStorage.getItem("fare") || 0;
+        paymentStatus.innerHTML = "Booking Not Found";
+        return;
 
+    }
 
+    const bookingRef = doc(db, "bookings", bookingId);
 
-let amountBox =
+    const bookingSnap = await getDoc(bookingRef);
 
-document.getElementById("amount");
+    if (!bookingSnap.exists()) {
 
+        paymentStatus.innerHTML = "Booking Not Found";
+        return;
 
-if(amountBox){
+    }
 
-amountBox.innerHTML =
-"Amount: ₹"+amount;
+    fare = bookingSnap.data().fare;
 
-}
-
-
-
-
-window.cashPayment=function(){
-
-
-document.getElementById("message").innerHTML =
-
-"Cash Payment Selected ✅";
-
-
-};
-
-
-
-
-
-window.upiPayment=function(){
-
-
-document.getElementById("message").innerHTML =
-
-"UPI Payment Selected ✅";
-
-
-};
-
-
-
-
-
-
-
-// Rider Wallet Example
-
-
-let balanceBox =
-
-document.getElementById("balance");
-
-
-
-if(balanceBox){
-
-
-let riderId="riderDemo";
-
-
-
-const walletRef =
-
-doc(
-
-db,
-
-"wallet",
-
-riderId
-
-);
-
-
-
-getDoc(walletRef)
-
-.then((data)=>{
-
-
-if(data.exists()){
-
-
-balanceBox.innerHTML =
-
-"Balance: ₹"+data.data().balance;
-
-
-}
-
-
-else{
-
-
-setDoc(
-
-walletRef,
-
-{
-
-balance:0
-
-}
-
-);
-
-
-}
-
+    fareAmount.innerHTML = "₹" + fare;
 
 });
 
+payBtn.onclick = async () => {
 
+    const method =
+        document.querySelector('input[name="payment"]:checked').value;
 
-}
+    try {
+
+        if (method === "Wallet") {
+
+            const walletRef = doc(db, "wallets", currentUser.uid);
+
+            const walletSnap = await getDoc(walletRef);
+
+            if (!walletSnap.exists()) {
+
+                alert("Wallet Not Found");
+                return;
+
+            }
+
+            const balance = walletSnap.data().balance;
+
+            if (balance < fare) {
+
+                alert("Insufficient Wallet Balance");
+                return;
+
+            }
+
+            await updateDoc(walletRef, {
+
+                balance: balance - fare
+
+            });
+
+        }
+
+        await updateDoc(
+            doc(db, "bookings", bookingId),
+            {
+
+                paymentMethod: method,
+                paymentStatus: "Paid",
+                paidAt: serverTimestamp()
+
+            }
+        );
+
+        await addDoc(collection(db, "payments"), {
+
+            bookingId: bookingId,
+            customerId: currentUser.uid,
+            amount: fare,
+            method: method,
+            status: "Paid",
+            createdAt: serverTimestamp()
+
+        });
+
+        paymentStatus.innerHTML =
+            "✅ Payment Successful";
+
+        payBtn.disabled = true;
+
+        alert("Payment Completed Successfully");
+
+    }
+
+    catch (error) {
+
+        alert(error.message);
+
+    }
+
+};
