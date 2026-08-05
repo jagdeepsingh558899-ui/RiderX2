@@ -17,7 +17,7 @@
 
 #map{
 
-height:400px;
+height:450px;
 width:100%;
 border-radius:15px;
 
@@ -33,7 +33,7 @@ border-radius:15px;
 
 <div class="header">
 
-🗺️ Live Ride Tracking
+🗺️ RiderX Live Tracking
 
 </div>
 
@@ -45,10 +45,9 @@ border-radius:15px;
 <div id="map"></div>
 
 
+<a href="ride-status.html">
 
-<a class="back" href="dashboard.html">
-
-⬅ Back Dashboard
+⬅ Back Ride Status
 
 </a>
 
@@ -66,7 +65,7 @@ border-radius:15px;
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
@@ -74,7 +73,11 @@ import {
 doc,
 getDoc
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
@@ -106,53 +109,40 @@ attribution:"OpenStreetMap"
 
 
 
-let marker;
+let riderMarker;
 
 
 
 
-async function trackRider(){
+
+async function loadRider(){
 
 
 
-let riderId = localStorage.getItem("riderId");
+let snap = await getDoc(
 
-
-
-if(!riderId){
-
-return;
-
-}
-
-
-
-let location = await getDoc(
-
-doc(db,"locations",riderId)
+doc(db,"locations","rider")
 
 );
 
 
 
-
-if(location.exists()){
-
-
-let data = location.data();
+if(snap.exists()){
 
 
+let data=snap.data();
 
-if(marker){
 
-map.removeLayer(marker);
+
+if(riderMarker){
+
+map.removeLayer(riderMarker);
 
 }
 
 
 
-
-marker = L.marker(
+riderMarker=L.marker(
 
 [
 
@@ -166,7 +156,11 @@ data.longitude
 
 .addTo(map)
 
-.bindPopup("🏍 Rider Location")
+.bindPopup(
+
+"🏍 Rider Location"
+
+)
 
 .openPopup();
 
@@ -196,13 +190,13 @@ data.longitude
 
 
 
-trackRider();
 
+loadRider();
 
 
 setInterval(
 
-trackRider,
+loadRider,
 
 5000
 
