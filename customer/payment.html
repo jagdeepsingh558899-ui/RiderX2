@@ -9,72 +9,152 @@
 <title>RiderX Payment</title>
 
 <link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/dashboard.css">
+
+
+<style>
+
+.box{
+
+background:#1d1d1d;
+padding:25px;
+border-radius:15px;
+text-align:center;
+
+}
+
+
+button{
+
+width:100%;
+padding:15px;
+margin-top:15px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
 
 </head>
 
+
 <body>
 
-<header class="topbar">
 
-<h1>
-Rider<span>X</span>
-</h1>
+<div class="header">
 
-</header>
+💳 Payment
+
+</div>
+
+
 
 <div class="container">
 
-<h2>💳 Payment</h2>
 
-<div class="service-card">
+<div class="box">
 
-<h3>Total Fare</h3>
 
-<h1 id="fareAmount">
-₹0
-</h1>
+<h2 id="amount">
 
-</div>
+Amount
 
-<div class="service-card">
+</h2>
 
-<h3>Select Payment Method</h3>
 
-<label>
-<input type="radio" name="payment" value="Cash" checked>
-Cash
-</label>
 
-<br><br>
+<button onclick="pay('Cash')">
 
-<label>
-<input type="radio" name="payment" value="Wallet">
-Wallet
-</label>
-
-<br><br>
-
-<label>
-<input type="radio" name="payment" value="UPI">
-UPI
-</label>
-
-</div>
-
-<button id="payBtn">
-
-Pay Now 💳
+💵 Cash Payment
 
 </button>
 
-<div id="paymentStatus"
-style="margin-top:20px;text-align:center;">
-</div>
+
+
+<button onclick="pay('Online')">
+
+📱 Online Payment
+
+</button>
+
+
+
+<p id="msg"></p>
+
 
 </div>
 
-<script type="module" src="../js/payment.js"></script>
+
+</div>
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+updateDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+let rideId=
+
+localStorage.getItem("rideId");
+
+
+
+
+
+
+
+window.pay=async function(method){
+
+
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+payment:method,
+
+paymentStatus:"Paid"
+
+}
+
+);
+
+
+
+document.getElementById("msg").innerHTML=
+
+"Payment Successful ✅";
+
+
+}
+
+
+
+</script>
+
 
 </body>
 
