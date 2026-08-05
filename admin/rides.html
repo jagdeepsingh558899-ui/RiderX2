@@ -1,14 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rides</title>
+<title>RiderX Admin - Rides</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#111;
+    color:white;
+}
+
+.header{
+    background:#ffcc00;
+    color:#000;
+    padding:20px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.container{
+    padding:20px;
+}
+
+.ride-card{
+
+    background:#1d1d1d;
+    padding:15px;
+    margin:15px 0;
+    border-radius:12px;
+    border:1px solid #333;
+
+}
+
+.ride-card h3{
+    color:#ffcc00;
+}
+
+
+.back{
+
+display:inline-block;
+margin-top:20px;
+background:#ffcc00;
+color:#000;
+padding:12px 20px;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+
+}
+
+</style>
 
 </head>
 
@@ -16,36 +67,140 @@
 <body>
 
 
-<div class="splash">
+<div class="header">
+🚦 RiderX All Rides
+</div>
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+<div class="container">
 
 
-<h2>All Rides</h2>
+<h2>Ride History</h2>
 
 
-<div id="rides">
+<div id="rideList">
+Loading rides...
+</div>
 
-Loading...
+
+<a class="back" href="dashboard.html">
+⬅ Back Dashboard
+</a>
+
 
 </div>
 
 
-<button onclick="history.back()">
-Back
-</button>
+
+<script type="module">
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+collection,
+getDocs
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+async function loadRides(){
+
+
+let box=document.getElementById("rideList");
+
+
+try{
+
+
+const snapshot=await getDocs(collection(db,"rides"));
+
+
+box.innerHTML="";
+
+
+if(snapshot.empty){
+
+box.innerHTML="<p>No rides found</p>";
+return;
+
+}
+
+
+
+snapshot.forEach((doc)=>{
+
+
+let data=doc.data();
+
+
+box.innerHTML += `
+
+<div class="ride-card">
+
+<h3>
+🚕 Ride ID: ${doc.id}
+</h3>
+
+
+<p>
+👤 Customer: ${data.customer || "N/A"}
+</p>
+
+
+<p>
+🏍 Rider: ${data.rider || "Not Assigned"}
+</p>
+
+
+<p>
+📍 Pickup: ${data.pickup || "N/A"}
+</p>
+
+
+<p>
+📍 Drop: ${data.drop || "N/A"}
+</p>
+
+
+<p>
+💰 Fare: ₹${data.fare || "0"}
+</p>
+
+
+<p>
+Status: ${data.status || "Pending"}
+</p>
 
 
 </div>
 
+`;
+
+});
 
 
-<script type="module" src="../js/admin.js"></script>
+}
+
+catch(error){
+
+box.innerHTML="Error loading rides";
+console.log(error);
+
+}
+
+
+}
+
+
+
+loadRides();
+
+
+</script>
 
 
 </body>
-
 </html>
