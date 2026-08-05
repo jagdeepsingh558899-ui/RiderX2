@@ -1,195 +1,105 @@
-import { db, auth } from "../firebase/config.js";
+// =================================
+// RiderX Rider Dashboard
+// =================================
+
+
+import { db } from "../firebase/config.js";
 
 
 import {
 
-doc,
-getDoc,
-setDoc
+collection,
+getDocs,
+query,
+where
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-import {
-
-ref,
-set,
-remove
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
+// Load Rider Stats
 
-let riderId;
-
-
-
-let online=false;
+export async function loadRiderStats(){
 
 
-
-const user = auth.currentUser;
-
+let rideCount = document.getElementById("rides");
 
 
-if(user){
-
-riderId=user.uid;
-
-
-checkApproval();
-
-}
+if(!rideCount) return;
 
 
 
+try{
 
 
-async function checkApproval(){
+const q = query(
 
+collection(db,"rides"),
 
-let rider = await getDoc(
-
-doc(
-
-db,
-
-"riders",
-
-riderId
-
-)
+where("status","==","Completed")
 
 );
 
 
 
-if(rider.exists()){
-
-
-let data=rider.data();
+const snapshot = await getDocs(q);
 
 
 
-if(data.status=="approved"){
+rideCount.innerHTML = snapshot.size;
 
-
-document.getElementById("approval").innerHTML=
-
-"Approved ✅";
 
 
 }
 
+
+catch(error){
+
+console.log(error);
+
+rideCount.innerHTML = "0";
+
+}
+
+
+}
+
+
+
+
+
+
+// Rider Online Status
+
+
+export function setRiderStatus(status){
+
+
+let statusBox =
+document.getElementById("status");
+
+
+
+if(!statusBox) return;
+
+
+
+if(status=="online"){
+
+
+statusBox.innerHTML="🟢 Online";
+
+
+}
 
 else{
 
 
-document.getElementById("approval").innerHTML=
-
-"Waiting For Approval ⏳";
+statusBox.innerHTML="⚫ Offline";
 
 
 }
 
 
 }
-
-
-}
-
-
-
-
-
-
-window.goOnline=function(){
-
-
-
-online=true;
-
-
-
-navigator.geolocation.watchPosition(
-
-(position)=>{
-
-
-set(
-
-ref(
-
-db,
-
-"onlineRiders/"+riderId
-
-),
-
-{
-
-lat:
-
-position.coords.latitude,
-
-
-lng:
-
-position.coords.longitude,
-
-
-online:true
-
-}
-
-);
-
-
-}
-
-);
-
-
-
-alert("You are Online 🟢");
-
-
-};
-
-
-
-
-
-
-window.goOffline=function(){
-
-
-remove(
-
-ref(
-
-db,
-
-"onlineRiders/"+riderId
-
-)
-
-);
-
-
-
-alert("You are Offline 🔴");
-
-
-};
