@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Ride Details</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
+<style>
+
+#map{
+
+height:400px;
+width:100%;
+border-radius:15px;
+
+}
+
+.card{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin:15px;
+
+}
+
+button{
+
+width:100%;
+padding:14px;
+background:#ffcc00;
+border:0;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+🏍 Ride Details
+
+</div>
+
+
+
+<div class="card">
+
+
+<p id="pickup">
+
+Pickup:
+
+</p>
+
+
+<p id="drop">
+
+Drop:
+
+</p>
+
+
+<p id="distance">
+
+Distance:
+
+</p>
+
+
+<p id="fare">
+
+Fare:
+
+</p>
+
+
+</div>
+
+
+
+<div id="map"></div>
+
+
+
+<div class="card">
+
+
+<button onclick="startRide()">
+
+▶ Start Ride
+
+</button>
+
+
+</div>
+
+
+
+
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+getDoc,
+updateDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+let map=L.map("map").setView(
+
+[26.9124,75.7873],
+
+13
+
+);
+
+
+
+L.tileLayer(
+
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+)
+
+.addTo(map);
+
+
+
+
+
+let rideId=localStorage.getItem("rideId");
+
+
+
+
+async function loadRide(){
+
+
+let snap=await getDoc(
+
+doc(db,"rides",rideId)
+
+);
+
+
+
+let data=snap.data();
+
+
+
+document.getElementById("pickup").innerHTML=
+
+"📍 Pickup: "+data.pickupLat+","+data.pickupLng;
+
+
+
+document.getElementById("drop").innerHTML=
+
+"🏁 Drop: "+data.dropLat+","+data.dropLng;
+
+
+
+document.getElementById("distance").innerHTML=
+
+"📏 Distance: "+data.distance+" KM";
+
+
+
+document.getElementById("fare").innerHTML=
+
+"💰 Fare: "+data.fare;
+
+
+
+
+
+let line=L.polyline(
+
+[
+
+[data.pickupLat,data.pickupLng],
+
+[data.dropLat,data.dropLng]
+
+]
+
+)
+
+.addTo(map);
+
+
+
+map.fitBounds(
+
+line.getBounds()
+
+);
+
+
+
+}
+
+
+
+
+
+window.startRide=async function(){
+
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+
+status:"Started"
+
+}
+
+);
+
+
+
+alert("Ride Started 🏍");
+
+
+}
+
+
+
+loadRide();
+
+
+
+</script>
+
+
+</body>
+
+</html>
