@@ -1,5 +1,5 @@
 // =================================
-// RiderX Admin Fare System
+// RiderX Fare & Coupon Settings
 // =================================
 
 
@@ -44,6 +44,7 @@ return snap.data();
 
 return {
 
+
 bikeBase:50,
 
 bikeKm:10,
@@ -52,7 +53,10 @@ cabBase:100,
 
 cabKm:15,
 
-offer:0
+coupon:"",
+
+discount:0
+
 
 };
 
