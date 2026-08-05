@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Admin Settings</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+.box{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin:15px 0;
+
+}
+
+
+input{
+
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:8px;
+border:none;
+
+}
+
+
+button{
+
+width:100%;
+padding:14px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+⚙️ Admin Settings
+
+</div>
+
+
+<div class="container">
+
+
+
+<div class="box">
+
+
+<h3>🏍 Bike Fare</h3>
+
+
+<input id="bikeBase" placeholder="Base Fare">
+
+
+<input id="bikeKm" placeholder="Per KM Fare">
+
+
+
+<h3>🚕 Cab Fare</h3>
+
+
+<input id="cabBase" placeholder="Base Fare">
+
+
+<input id="cabKm" placeholder="Per KM Fare">
+
+
+
+<h3>🎁 Offer</h3>
+
+
+<input id="offer" placeholder="Discount %">
+
+
+<input id="coupon" placeholder="Coupon Code">
+
+
+
+<button onclick="saveSettings()">
+
+Save Settings
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+setDoc,
+getDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+async function loadSettings(){
+
+
+let snap=await getDoc(
+
+doc(db,"settings","app")
+
+);
+
+
+
+if(snap.exists()){
+
+
+let d=snap.data();
+
+
+
+bikeBase.value=d.bikeBase || "";
+
+bikeKm.value=d.bikeKm || "";
+
+cabBase.value=d.cabBase || "";
+
+cabKm.value=d.cabKm || "";
+
+offer.value=d.offer || "";
+
+coupon.value=d.coupon || "";
+
+
+}
+
+
+
+}
+
+
+
+
+
+window.saveSettings=async function(){
+
+
+
+await setDoc(
+
+doc(db,"settings","app"),
+
+{
+
+
+bikeBase:bikeBase.value,
+
+
+bikeKm:bikeKm.value,
+
+
+cabBase:cabBase.value,
+
+
+cabKm:cabKm.value,
+
+
+offer:offer.value,
+
+
+coupon:coupon.value
+
+
+
+}
+
+);
+
+
+
+alert("Settings Saved ✅");
+
+
+}
+
+
+
+
+
+loadSettings();
+
+
+
+</script>
+
+
+</body>
+
+</html>
