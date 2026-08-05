@@ -10,20 +10,11 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-<style>
 
-body{
-margin:0;
-background:#111;
-color:white;
-font-family:Arial,sans-serif;
-}
+<style>
 
 .box{
 
-width:90%;
-max-width:400px;
-margin:50px auto;
 background:#1d1d1d;
 padding:25px;
 border-radius:15px;
@@ -34,20 +25,17 @@ text-align:center;
 
 .star{
 
-font-size:40px;
+font-size:35px;
 cursor:pointer;
-color:#777;
 
 }
 
 
-textarea,input{
+textarea{
 
 width:100%;
-padding:12px;
-margin:10px 0;
-border-radius:10px;
-border:none;
+height:100px;
+margin-top:15px;
 
 }
 
@@ -56,6 +44,7 @@ button{
 
 width:100%;
 padding:14px;
+margin-top:15px;
 background:#ffcc00;
 border:none;
 border-radius:10px;
@@ -71,24 +60,48 @@ font-weight:bold;
 <body>
 
 
-<div class="box">
+<div class="header">
 
-
-<h1>⭐ Rate Rider</h1>
-
-
-<div>
-
-<span class="star" onclick="setRating(1)">★</span>
-<span class="star" onclick="setRating(2)">★</span>
-<span class="star" onclick="setRating(3)">★</span>
-<span class="star" onclick="setRating(4)">★</span>
-<span class="star" onclick="setRating(5)">★</span>
+⭐ Rate Rider
 
 </div>
 
 
-<textarea id="comment" placeholder="Write feedback"></textarea>
+
+<div class="container">
+
+
+<div class="box">
+
+
+<h2>
+
+How was your ride?
+
+</h2>
+
+
+
+<div>
+
+
+<span class="star" onclick="rate(1)">☆</span>
+
+<span class="star" onclick="rate(2)">☆</span>
+
+<span class="star" onclick="rate(3)">☆</span>
+
+<span class="star" onclick="rate(4)">☆</span>
+
+<span class="star" onclick="rate(5)">☆</span>
+
+
+</div>
+
+
+
+<textarea id="review" placeholder="Write review"></textarea>
+
 
 
 <button onclick="submitRating()">
@@ -98,7 +111,7 @@ Submit Rating
 </button>
 
 
-<p id="msg"></p>
+</div>
 
 
 </div>
@@ -110,21 +123,63 @@ Submit Rating
 <script type="module">
 
 
-import { addRating } from "../js/rating.js";
+import {db} from "../firebase/config.js";
 
 
-let selectedRating = 0;
+import {
 
-
-
-window.setRating=function(num){
-
-selectedRating=num;
-
-document.getElementById("msg").innerHTML =
-num+" Star Selected ⭐";
+collection,
+addDoc,
+doc,
+getDoc,
+serverTimestamp
 
 }
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+let rating=0;
+
+
+let rideId=
+
+localStorage.getItem("rideId");
+
+
+
+function rate(value){
+
+
+rating=value;
+
+
+let stars=document.querySelectorAll(".star");
+
+
+
+stars.forEach((s,i)=>{
+
+
+s.innerHTML=
+
+i<value ? "★" : "☆";
+
+
+});
+
+
+}
+
+
+window.rate=rate;
+
+
+
 
 
 
@@ -132,39 +187,60 @@ num+" Star Selected ⭐";
 window.submitRating=async function(){
 
 
-if(selectedRating==0){
 
-alert("Select rating");
+let ride=
 
-return;
+await getDoc(
 
-}
-
-
-
-let result = await addRating(
-
-"ride",
-
-"user",
-
-selectedRating,
-
-document.getElementById("comment").value
+doc(db,"rides",rideId)
 
 );
 
 
 
-if(result){
+let data=ride.data();
 
-document.getElementById("msg").innerHTML=
-"Thanks for rating ✅";
+
+
+await addDoc(
+
+collection(db,"reviews"),
+
+{
+
+
+rideId,
+
+riderId:data.riderId,
+
+
+rating,
+
+
+review:
+
+document.getElementById("review").value,
+
+
+createdAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+alert("Thanks for rating ⭐");
+
+
+location.href="home.html";
+
+
 
 }
 
 
-}
 
 
 
