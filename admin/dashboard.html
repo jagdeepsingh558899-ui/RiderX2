@@ -6,43 +6,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Dashboard</title>
+<title>RiderX Admin</title>
 
 <link rel="stylesheet" href="../css/style.css">
-
-
-<style>
-
-.card{
-
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin:15px 0;
-
-}
-
-
-.title{
-
-color:#ffcc00;
-font-size:22px;
-font-weight:bold;
-
-}
-
-
-.item{
-
-background:#222;
-padding:12px;
-margin-top:10px;
-border-radius:10px;
-
-}
-
-</style>
-
 
 </head>
 
@@ -57,15 +23,23 @@ border-radius:10px;
 </div>
 
 
-
 <div class="container">
 
 
-<div class="card">
+<h2 id="welcome">
 
-<div class="title">
+Checking Access...
+
+</h2>
+
+
+
+<div id="panel" style="display:none;">
+
+
+<h3>
 Users
-</div>
+</h3>
 
 <div id="users">
 
@@ -73,40 +47,18 @@ Loading...
 
 </div>
 
-</div>
 
 
-
-
-<div class="card">
-
-<div class="title">
-Riders
-</div>
-
-<div id="riders">
-
-Loading...
-
-</div>
-
-</div>
-
-
-
-
-
-<div class="card">
-
-<div class="title">
-All Rides
-</div>
+<h3>
+Rides
+</h3>
 
 <div id="rides">
 
 Loading...
 
 </div>
+
 
 </div>
 
@@ -121,11 +73,24 @@ Loading...
 <script type="module">
 
 
-import {db} from "../firebase/config.js";
+import {auth,db} from "../firebase/config.js";
 
 
 import {
 
+onAuthStateChanged
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+import {
+
+doc,
+getDoc,
 collection,
 getDocs
 
@@ -139,27 +104,76 @@ from
 
 
 
-
-async function loadAdmin(){
-
+onAuthStateChanged(auth,async(user)=>{
 
 
-let userBox =
-document.getElementById("users");
+
+if(!user){
 
 
-let riderBox =
-document.getElementById("riders");
+window.location.href="../auth/login.html";
 
 
-let rideBox =
-document.getElementById("rides");
+return;
 
+
+}
 
 
 
 
-let users = await getDocs(
+
+let adminDoc=await getDoc(
+
+doc(db,"users",user.uid)
+
+);
+
+
+
+if(!adminDoc.exists() || adminDoc.data().role!="admin"){
+
+
+alert("Access Denied ❌");
+
+
+window.location.href="../index.html";
+
+
+return;
+
+
+}
+
+
+
+document.getElementById("welcome").innerHTML=
+
+"Welcome Admin ✅";
+
+
+
+document.getElementById("panel").style.display="block";
+
+
+
+loadData();
+
+
+
+});
+
+
+
+
+
+
+
+async function loadData(){
+
+
+
+let users=await getDocs(
 
 collection(db,"users")
 
@@ -167,56 +181,15 @@ collection(db,"users")
 
 
 
-userBox.innerHTML="";
+document.getElementById("users").innerHTML=
 
-riderBox.innerHTML="";
-
-
-
-users.forEach((user)=>{
-
-
-let data=user.data();
-
-
-
-let html=`
-
-<div class="item">
-
-👤 ${data.name || "User"}
-
-<br>
-
-📧 ${data.email || ""}
-
-</div>
-
-`;
-
-
-
-userBox.innerHTML += html;
-
-
-
-if(data.role=="rider"){
-
-
-riderBox.innerHTML += html;
-
-
-}
-
-
-
-});
+"Total Users: "+users.size;
 
 
 
 
 
-let rides = await getDocs(
+let rides=await getDocs(
 
 collection(db,"rides")
 
@@ -224,57 +197,13 @@ collection(db,"rides")
 
 
 
-rideBox.innerHTML="";
+document.getElementById("rides").innerHTML=
 
-
-
-rides.forEach((ride)=>{
-
-
-let data=ride.data();
-
-
-
-rideBox.innerHTML += `
-
-<div class="item">
-
-
-🚕 ${data.service || "Ride"}
-
-<br>
-
-📍 ${data.pickupLat || ""}
-
-<br>
-
-🏁 ${data.dropLat || ""}
-
-<br>
-
-💰 ${data.fare || ""}
-
-<br>
-
-Status: ${data.status}
-
-
-</div>
-
-`;
-
-
-
-});
-
+"Total Rides: "+rides.size;
 
 
 
 }
-
-
-
-loadAdmin();
 
 
 
