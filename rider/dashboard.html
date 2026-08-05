@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Dashboard</title>
+<title>RiderX Rider Dashboard</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
@@ -50,39 +50,30 @@ font-weight:bold;
 </div>
 
 
-<div class="container">
 
+<div class="container">
 
 
 <div class="card">
 
 
 <h3 id="name">
-
 Rider
-
 </h3>
 
 
 <p id="status">
-
-Status: Offline
-
+Offline
 </p>
 
 
-
 <button onclick="goOnline()">
-
-🟢 Online
-
+🟢 Go Online
 </button>
 
 
 <button onclick="goOffline()">
-
-🔴 Offline
-
+🔴 Go Offline
 </button>
 
 
@@ -91,16 +82,27 @@ Status: Offline
 
 
 
+<h3>
+My Current Ride
+</h3>
+
+
+<div id="currentRide">
+
+No Ride
+
+</div>
+
+
 
 <h3>
 Available Rides
 </h3>
 
 
+<div id="rides">
 
-<div id="rideList">
-
-Go Online to see rides
+Go Online
 
 </div>
 
@@ -126,9 +128,9 @@ doc,
 getDoc,
 updateDoc,
 collection,
-getDocs,
 query,
-where
+where,
+getDocs
 
 }
 
@@ -139,8 +141,9 @@ from
 
 
 
-
 let uid;
+
+let currentRideId=null;
 
 
 
@@ -159,8 +162,7 @@ return;
 uid=user.uid;
 
 
-
-let userDoc=await getDoc(
+let u=await getDoc(
 
 doc(db,"users",uid)
 
@@ -169,7 +171,7 @@ doc(db,"users",uid)
 
 document.getElementById("name").innerHTML=
 
-userDoc.data().name || "Rider";
+u.data().name || "Rider";
 
 
 });
@@ -180,7 +182,9 @@ userDoc.data().name || "Rider";
 
 
 
+
 window.goOnline=async function(){
+
 
 
 await updateDoc(
@@ -198,10 +202,11 @@ online:true
 
 document.getElementById("status").innerHTML=
 
-"Status: 🟢 Online";
+"🟢 Online";
 
 
 loadRides();
+
 
 
 }
@@ -211,7 +216,10 @@ loadRides();
 
 
 
+
+
 window.goOffline=async function(){
+
 
 
 await updateDoc(
@@ -230,13 +238,7 @@ online:false
 
 document.getElementById("status").innerHTML=
 
-"Status: 🔴 Offline";
-
-
-
-document.getElementById("rideList").innerHTML=
-
-"Go Online to see rides";
+"🔴 Offline";
 
 
 }
@@ -245,17 +247,7 @@ document.getElementById("rideList").innerHTML=
 
 
 
-
-
-
 async function loadRides(){
-
-
-
-let box=
-
-document.getElementById("rideList");
-
 
 
 let q=query(
@@ -271,86 +263,47 @@ where("status","==","Pending")
 let snap=await getDocs(q);
 
 
+let box=document.getElementById("rides");
+
 
 box.innerHTML="";
 
 
 
-if(snap.empty){
+snap.forEach((r)=>{
 
 
-box.innerHTML="No rides available";
-
-
-return;
-
-
-}
+let data=r.data();
 
 
 
-snap.forEach((ride)=>{
-
-
-
-let data=ride.data();
-
-
-
-box.innerHTML += `
+box.innerHTML +=`
 
 
 <div class="card">
 
 
-<h3>
-
-${data.service}
-
-</h3>
-
+<h3>${data.service}</h3>
 
 
 <p>
-
-📍 Pickup:
-<br>
-${data.pickupLat},
-${data.pickupLng}
-
-</p>
-
-
-
-<p>
-
-🏁 Drop:
-<br>
-${data.dropLat},
-${data.dropLng}
-
-</p>
-
-
-
-<p>
-
 💰 ${data.fare}
-
 </p>
 
 
+<p>
+📍 ${data.pickupLat},${data.pickupLng}
+</p>
 
-<button onclick="acceptRide('${ride.id}')">
 
-Accept Ride
+<button onclick="acceptRide('${r.id}')">
+
+Accept
 
 </button>
 
 
-
 </div>
-
 
 
 `;
@@ -373,6 +326,7 @@ Accept Ride
 window.acceptRide=async function(id){
 
 
+
 await updateDoc(
 
 doc(db,"rides",id),
@@ -389,6 +343,9 @@ riderId:uid
 
 
 
+currentRideId=id;
+
+
 localStorage.setItem(
 
 "rideId",
@@ -399,12 +356,120 @@ id
 
 
 
-alert("Ride Accepted ✅");
-
-
-
-window.location.href="map.html";
+loadCurrentRide();
 
 
 
 }
+
+
+
+
+
+
+
+async function loadCurrentRide(){
+
+
+
+if(!currentRideId)return;
+
+
+
+let r=await getDoc(
+
+doc(db,"rides",currentRideId)
+
+);
+
+
+
+let box=document.getElementById("currentRide");
+
+
+
+let data=r.data();
+
+
+
+box.innerHTML=`
+
+<div class="card">
+
+
+Status: ${data.status}
+
+
+<button onclick="changeStatus('Arriving')">
+
+🚗 Arriving
+
+</button>
+
+
+<button onclick="changeStatus('Started')">
+
+▶️ Start Ride
+
+</button>
+
+
+<button onclick="changeStatus('Completed')">
+
+✅ Complete Ride
+
+</button>
+
+
+</div>
+
+`;
+
+
+
+}
+
+
+
+
+
+
+
+
+window.changeStatus=async function(status){
+
+
+
+await updateDoc(
+
+doc(db,"rides",currentRideId),
+
+{
+
+status:status
+
+}
+
+);
+
+
+
+alert("Ride "+status+" ✅");
+
+
+loadCurrentRide();
+
+
+
+}
+
+
+
+
+
+</script>
+
+
+</body>
+
+</html>
