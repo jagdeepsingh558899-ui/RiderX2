@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Receipt</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+.receipt{
+
+background:#1d1d1d;
+padding:25px;
+border-radius:15px;
+
+}
+
+
+.row{
+
+padding:10px;
+border-bottom:1px solid #333;
+
+}
+
+
+button{
+
+width:100%;
+padding:14px;
+margin-top:20px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+🧾 RiderX Receipt
+
+</div>
+
+
+
+<div class="container">
+
+
+<div class="receipt">
+
+
+<h2>
+Ride Receipt
+</h2>
+
+
+
+<div class="row" id="service"></div>
+
+<div class="row" id="fare"></div>
+
+<div class="row" id="payment"></div>
+
+<div class="row" id="status"></div>
+
+
+
+<button onclick="goHome()">
+
+🏠 Home
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+getDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+let rideId=
+
+localStorage.getItem("rideId");
+
+
+
+
+
+
+async function loadReceipt(){
+
+
+
+let snap=
+
+await getDoc(
+
+doc(db,"rides",rideId)
+
+);
+
+
+
+if(!snap.exists()){
+
+return;
+
+}
+
+
+
+let data=snap.data();
+
+
+
+document.getElementById("service").innerHTML=
+
+"🚕 Service: "+data.service;
+
+
+
+document.getElementById("fare").innerHTML=
+
+"💰 Fare: "+data.fare;
+
+
+
+document.getElementById("payment").innerHTML=
+
+"💳 Payment: "+
+
+(data.paymentMethod || "Pending");
+
+
+
+document.getElementById("status").innerHTML=
+
+"✅ Status: "+data.status;
+
+
+
+}
+
+
+
+window.goHome=function(){
+
+location.href="home.html";
+
+}
+
+
+
+
+loadReceipt();
+
+
+
+</script>
+
+
+</body>
+
+</html>
