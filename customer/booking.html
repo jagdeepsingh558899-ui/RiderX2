@@ -428,8 +428,7 @@ document.getElementById("fare").innerHTML=
 window.bookRide=async function(){
 
 
-
-await addDoc(
+let ride=await addDoc(
 
 collection(db,"rides"),
 
@@ -479,16 +478,26 @@ createdAt:serverTimestamp()
 
 
 
+
+
+localStorage.setItem(
+
+"rideId",
+
+ride.id
+
+);
+
+
+
 alert("Ride Booked ✅");
 
 
+
+window.location.href=
+
+"ride-status.html";
+
+
+
 }
-
-
-
-</script>
-
-
-</body>
-
-</html>
