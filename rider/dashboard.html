@@ -10,32 +10,28 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-
 <style>
 
-#map{
-height:450px;
-width:100%;
+.box{
+
+background:#1d1d1d;
+padding:20px;
 border-radius:15px;
-margin-top:15px;
+margin:15px 0;
+
 }
 
-.ride{
-background:#1d1d1d;
-padding:15px;
-margin-top:10px;
-border-radius:12px;
-}
 
 button{
+
 width:100%;
 padding:14px;
 margin-top:10px;
 background:#ffcc00;
-border:0;
+border:none;
 border-radius:10px;
 font-weight:bold;
+
 }
 
 </style>
@@ -48,69 +44,79 @@ font-weight:bold;
 
 <div class="header">
 
-🏍 RiderX Rider
+🏍 Rider Dashboard
 
 </div>
+
 
 
 <div class="container">
 
 
-<h2 id="status">
-⚫ Offline
-</h2>
+<div class="box">
+
+
+<h3 id="name">
+
+Rider
+
+</h3>
+
+
+<p id="approval">
+
+Checking approval...
+
+</p>
+
+
+
+<p id="status">
+
+Status: Offline
+
+</p>
+
 
 
 <button onclick="goOnline()">
+
 🟢 Go Online
+
 </button>
+
 
 
 <button onclick="goOffline()">
-⚫ Go Offline
+
+🔴 Go Offline
+
 </button>
 
 
 
-<div id="map"></div>
-
-
-<h2>
-Nearby Rides
-</h2>
-
-
-<div id="rideList">
-
-Waiting...
-
 </div>
+
 
 
 </div>
 
 
-
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
 
 <script type="module">
 
 
-  import {db, auth} from "../firebase/config.js";
+import {auth,db} from "../firebase/config.js";
 
 
 import {
 
-collection,
-getDocs,
-query,
-where,
 doc,
+getDoc,
 updateDoc,
-setDoc
+serverTimestamp
 
 }
 
@@ -122,283 +128,118 @@ from
 
 
 
-let map;
 
-let riderMarker;
-
-let rideMarkers=[];
+let uid;
 
 
+let locationWatch;
 
 
 
-function initMap(){
 
 
-map=L.map("map").setView(
 
-[26.9124,75.7873],
-
-13
-
-);
+auth.onAuthStateChanged(async(user)=>{
 
 
-L.tileLayer(
+if(!user){
 
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+window.location.href="../auth/login.html";
 
-{
-
-attribution:"OpenStreetMap"
-
-}
-
-).addTo(map);
-
+return;
 
 }
 
 
+uid=user.uid;
 
 
 
-function clearMarkers(){
+let snap=await getDoc(
 
-
-rideMarkers.forEach(m=>{
-
-map.removeLayer(m);
-
-});
-
-
-rideMarkers=[];
-
-
-}
-
-
-
-
-
-window.goOnline=function(){
-
-
-document.getElementById("status").innerHTML="🟢 Online";
-
-
-navigator.geolocation.watchPosition(async(pos)=>{
-
-
-let lat=pos.coords.latitude;
-
-let lng=pos.coords.longitude;
-
-
-
-if(riderMarker){
-
-map.removeLayer(riderMarker);
-
-}
-
-
-
-riderMarker=L.marker(
-
-[lat,lng]
-
-)
-
-.addTo(map)
-
-.bindPopup("🏍 You");
-
-
-
-map.setView([lat,lng],15);
-
-
-
-await setDoc(
-
-doc(db,"locations",auth.currentUser.uid)
-
-{
-
-latitude:lat,
-
-longitude:lng,
-
-status:"online"
-
-}
+doc(db,"users",uid)
 
 );
 
 
 
-loadRides();
+let data=snap.data();
 
+
+
+document.getElementById("name").innerHTML=
+
+data.name || "Rider";
+
+
+
+
+if(data.approved!=true){
+
+
+document.getElementById("approval").innerHTML=
+
+"⏳ Waiting For Admin Approval";
+
+
+return;
+
+
+}
+
+
+
+document.getElementById("approval").innerHTML=
+
+"✅ Approved";
 
 
 });
 
 
 
-}
-
-
-
-
-
-window.goOffline=function(){
-
-
-document.getElementById("status").innerHTML="⚫ Offline";
-
-
-}
 
 
 
 
 
 
-
-
-async function loadRides(){
-
-
-clearMarkers();
-
-
-let box=document.getElementById("rideList");
-
-
-box.innerHTML="";
+window.goOnline=async function(){
 
 
 
-let q=query(
+let user=await getDoc(
 
-collection(db,"rides"),
-
-where("status","==","Pending")
+doc(db,"users",uid)
 
 );
 
 
 
-let snap=await getDocs(q);
+if(user.data().approved!=true){
 
 
+alert("Admin approval required");
 
-snap.forEach((ride)=>{
-
-
-let data=ride.data();
-
-
-
-if(data.pickupLat && data.pickupLng){
-
-
-
-let marker=L.marker(
-
-[
-
-data.pickupLat,
-
-data.pickupLng
-
-]
-
-)
-
-.addTo(map);
-
-
-
-marker.bindPopup(`
-
-📍 Pickup
-
-<br>
-
-💰 ${data.fare}
-
-<br>
-
-🏁 ${data.drop}
-
-<br>
-
-<button onclick="acceptRide('${ride.id}')">
-
-Accept
-
-</button>
-
-`);
-
-
-
-rideMarkers.push(marker);
+return;
 
 
 }
 
 
-
-
-box.innerHTML +=`
-
-<div class="ride">
-
-📍 ${data.pickup}
-
-<br>
-
-🏁 ${data.drop}
-
-<br>
-
-💰 ${data.fare}
-
-
-<button onclick="acceptRide('${ride.id}')">
-
-Accept Ride
-
-</button>
-
-
-</div>
-
-`;
-
-
-
-});
-
-
-
-}
-window.acceptRide=async function(id){
 
 
 await updateDoc(
 
-doc(db,"rides",id),
+doc(db,"users",uid),
 
 {
 
-status:"Accepted",
 
-riderId:"rider"
+online:true,
+
+lastOnline:serverTimestamp()
+
 
 }
 
@@ -406,15 +247,44 @@ riderId:"rider"
 
 
 
-localStorage.setItem(
-"rideId",
-id
+
+
+navigator.geolocation.watchPosition(
+
+async(pos)=>{
+
+
+
+await updateDoc(
+
+doc(db,"users",uid),
+
+{
+
+
+lat:pos.coords.latitude,
+
+lng:pos.coords.longitude
+
+
+}
+
 );
 
 
 
-window.location.href =
-"ride-details.html";
+}
+
+);
+
+
+
+
+
+document.getElementById("status").innerHTML=
+
+"Status: 🟢 Online";
+
 
 
 }
@@ -424,3 +294,42 @@ window.location.href =
 
 
 
+
+
+
+window.goOffline=async function(){
+
+
+
+await updateDoc(
+
+doc(db,"users",uid),
+
+{
+
+
+online:false
+
+
+}
+
+);
+
+
+
+document.getElementById("status").innerHTML=
+
+"Status: 🔴 Offline";
+
+
+
+}
+
+
+
+</script>
+
+
+</body>
+
+</html>
