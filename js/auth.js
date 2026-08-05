@@ -1,6 +1,5 @@
 // =================================
 // RiderX Authentication System
-// Gmail + Mobile Support
 // =================================
 
 
@@ -11,51 +10,30 @@ import {
 
 createUserWithEmailAndPassword,
 signInWithEmailAndPassword,
-RecaptchaVerifier,
-signInWithPhoneNumber
+signOut
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 import {
 
 doc,
-setDoc
+setDoc,
+getDoc
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
+// Register User
 
-// ================================
-// Gmail Register
-// ================================
-
-
-window.registerEmail = async function(){
-
-
-const name =
-document.getElementById("name").value;
-
-
-const email =
-document.getElementById("email").value;
-
-
-const password =
-document.getElementById("password").value;
-
-
+export async function registerUser(
+name,
+email,
+password,
+role
+){
 
 try{
 
@@ -69,20 +47,21 @@ password
 
 
 
-const user =
-userCredential.user;
-
-
-
 await setDoc(
-doc(db,"users",user.uid),
+
+doc(
+db,
+"users",
+userCredential.user.uid
+),
+
 {
 
 name:name,
 
 email:email,
 
-role:"customer",
+role:role,
 
 createdAt:new Date()
 
@@ -92,189 +71,99 @@ createdAt:new Date()
 
 
 
-alert("RiderX Account Created");
-
-
-window.location.href="../customer/home.html";
+return true;
 
 
 }
-
 
 catch(error){
 
-alert(error.message);
+console.log(error);
+
+return false;
 
 }
-
-
-};
-
-
-
-
-
-
-
-// ================================
-// Mobile OTP Register
-// ================================
-
-
-window.registerPhone = async function(){
-
-
-
-const name =
-document.getElementById("name").value;
-
-
-const phone =
-document.getElementById("phone").value;
-
-
-
-window.recaptchaVerifier =
-new RecaptchaVerifier(
-auth,
-"recaptcha-container",
-{
-
-size:"normal"
-
-}
-
-);
-
-
-
-const appVerifier =
-window.recaptchaVerifier;
-
-
-
-try{
-
-
-const confirmationResult =
-
-await signInWithPhoneNumber(
-auth,
-phone,
-appVerifier
-);
-
-
-
-window.confirmationResult =
-confirmationResult;
-
-
-
-let otp =
-prompt("Enter OTP");
-
-
-const result =
-await confirmationResult.confirm(otp);
-
-
-
-const user =
-result.user;
-
-
-
-await setDoc(
-
-doc(db,"users",user.uid),
-
-{
-
-name:name,
-
-phone:phone,
-
-role:"customer",
-
-createdAt:new Date()
-
-}
-
-);
-
-
-
-alert("Mobile Account Created");
-
-
-window.location.href="../customer/home.html";
 
 
 }
 
 
-catch(error){
-
-alert(error.message);
-
-}
-
-
-};
 
 
 
+// Login User
 
 
-
-
-// ================================
-// Login
-// ================================
-
-
-window.login = async function(){
-
-
-const email =
-document.getElementById("email").value;
-
-
-const password =
-document.getElementById("password").value;
-
-
-
-try{
-
-
-await signInWithEmailAndPassword(
-
-auth,
-
+export async function loginUser(
 email,
-
 password
+){
+
+
+try{
+
+
+const userCredential =
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+
+
+const userDoc =
+await getDoc(
+
+doc(
+db,
+"users",
+userCredential.user.uid
+)
 
 );
 
 
 
-alert("Login Successful");
+if(userDoc.exists()){
 
 
-window.location.href="../customer/home.html";
+return userDoc.data();
 
 
 }
 
+
+return null;
+
+
+}
 
 catch(error){
 
-alert(error.message);
+console.log(error);
+
+return null;
 
 }
 
 
-};
+}
+
+
+
+
+
+// Logout
+
+
+export async function logoutUser(){
+
+
+await signOut(auth);
+
+
+window.location.href="../index.html";
+
+
+}
