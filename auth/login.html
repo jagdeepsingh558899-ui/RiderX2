@@ -10,13 +10,16 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
 
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
+
+margin:0;
+background:#111;
+color:white;
+font-family:Arial,sans-serif;
+
 }
 
 
@@ -47,7 +50,6 @@ padding:14px;
 margin:10px 0;
 border:none;
 border-radius:10px;
-font-size:16px;
 
 }
 
@@ -55,12 +57,11 @@ font-size:16px;
 button{
 
 width:100%;
-padding:15px;
+padding:14px;
 background:#ffcc00;
 border:none;
 border-radius:10px;
 font-weight:bold;
-font-size:16px;
 
 }
 
@@ -96,21 +97,17 @@ Login
 
 
 
-<input 
-id="email"
-placeholder="Email">
+<input id="email" placeholder="Email">
 
 
-
-<input 
-id="password"
-type="password"
-placeholder="Password">
+<input id="password" type="password" placeholder="Password">
 
 
 
 <button onclick="login()">
+
 Login
+
 </button>
 
 
@@ -120,12 +117,16 @@ Login
 
 
 <a href="register.html">
+
 Create New Account
+
 </a>
 
 
 
 </div>
+
+
 
 
 
@@ -152,47 +153,78 @@ getDoc
 
 
 
+
+
+
+
 window.login = async function(){
 
 
-let email=document.getElementById("email").value;
 
-let password=document.getElementById("password").value;
+let email =
+
+document.getElementById("email").value;
+
+
+
+let password =
+
+document.getElementById("password").value;
+
+
 
 
 
 try{
 
 
-const result = await signInWithEmailAndPassword(
+let user = await signInWithEmailAndPassword(
+
 auth,
+
 email,
+
 password
+
 );
 
 
 
-const userDoc = await getDoc(
-doc(db,"users",result.user.uid)
+
+
+let profile = await getDoc(
+
+doc(db,"users",user.user.uid)
+
 );
 
 
 
-let role=userDoc.data().role;
+
+
+let data = profile.data();
 
 
 
-if(role=="rider"){
 
-window.location.href="../rider/dashboard.html";
+
+if(data.role=="rider"){
+
+
+location.href="../rider/dashboard.html";
+
 
 }
 
 else{
 
-window.location.href="../customer/dashboard.html";
+
+location.href="../customer/dashboard.html";
+
 
 }
+
+
 
 
 
@@ -206,6 +238,7 @@ error.message;
 
 
 }
+
 
 
 
