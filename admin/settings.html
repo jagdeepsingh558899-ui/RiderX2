@@ -6,23 +6,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Settings</title>
+<title>RiderX Admin Control</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
 <style>
 
 .box{
-
 background:#1d1d1d;
 padding:20px;
 border-radius:15px;
 margin:15px 0;
-
 }
 
-
-input{
+input,textarea{
 
 width:100%;
 padding:12px;
@@ -32,13 +29,12 @@ border:none;
 
 }
 
-
 button{
 
 width:100%;
 padding:14px;
 background:#ffcc00;
-border:none;
+border:0;
 border-radius:10px;
 font-weight:bold;
 
@@ -54,10 +50,9 @@ font-weight:bold;
 
 <div class="header">
 
-⚙️ Admin Control Panel
+⚙️ RiderX Admin Control
 
 </div>
-
 
 
 <div class="container">
@@ -66,19 +61,33 @@ font-weight:bold;
 <div class="box">
 
 
+<h3>📱 App Customization</h3>
+
+
+<input id="appName" placeholder="App Name">
+
+
+<input id="logo" placeholder="Logo Image URL">
+
+
+<textarea id="banner" placeholder="Banner Message"></textarea>
+
+
+
+
 <h3>💰 Fare Settings</h3>
 
 
 <input id="bikeBase" placeholder="Bike Base Fare">
 
-<input id="bikeKm" placeholder="Bike Per KM">
 
+<input id="bikeKm" placeholder="Bike Per KM">
 
 
 <input id="cabBase" placeholder="Cab Base Fare">
 
-<input id="cabKm" placeholder="Cab Per KM">
 
+<input id="cabKm" placeholder="Cab Per KM">
 
 
 
@@ -94,57 +103,38 @@ font-weight:bold;
 
 
 
-
-<h3>🚦 Services Control</h3>
-
+<h3>🚦 Services</h3>
 
 
 <label>
-
 <input type="checkbox" id="bike">
-
 🏍 Bike Taxi
-
 </label>
 
-
-<br><br>
-
+<br>
 
 <label>
-
 <input type="checkbox" id="cab">
-
 🚕 Cab
-
 </label>
 
-
-<br><br>
-
+<br>
 
 <label>
-
 <input type="checkbox" id="parcel">
-
 📦 Parcel
-
 </label>
+
+<br>
+
+<label>
+<input type="checkbox" id="food">
+🍔 Food
+</label>
+
 
 
 <br><br>
-
-
-<label>
-
-<input type="checkbox" id="food">
-
-🍔 Food
-
-</label>
-
-
-
 
 
 <button onclick="saveSettings()">
@@ -188,13 +178,10 @@ from
 
 
 
-
 async function load(){
 
 
-let snap=
-
-await getDoc(
+let snap=await getDoc(
 
 doc(db,"settings","app")
 
@@ -208,6 +195,12 @@ if(snap.exists()){
 let d=snap.data();
 
 
+appName.value=d.appName || "";
+
+logo.value=d.logo || "";
+
+banner.value=d.banner || "";
+
 
 bikeBase.value=d.bikeBase || "";
 
@@ -216,6 +209,7 @@ bikeKm.value=d.bikeKm || "";
 cabBase.value=d.cabBase || "";
 
 cabKm.value=d.cabKm || "";
+
 
 coupon.value=d.coupon || "";
 
@@ -232,10 +226,13 @@ parcel.checked=d.parcel ?? true;
 food.checked=d.food ?? true;
 
 
+
 }
 
 
+
 }
+
 
 
 
@@ -253,12 +250,25 @@ doc(db,"settings","app"),
 {
 
 
+appName:appName.value,
+
+
+logo:logo.value,
+
+
+banner:banner.value,
+
+
+
 bikeBase:Number(bikeBase.value),
+
 
 bikeKm:Number(bikeKm.value),
 
 
+
 cabBase:Number(cabBase.value),
+
 
 cabKm:Number(cabKm.value),
 
@@ -266,15 +276,19 @@ cabKm:Number(cabKm.value),
 
 coupon:coupon.value,
 
+
 discount:Number(discount.value),
 
 
 
 bike:bike.checked,
 
+
 cab:cab.checked,
 
+
 parcel:parcel.checked,
+
 
 food:food.checked
 
@@ -286,7 +300,7 @@ food:food.checked
 
 
 
-alert("All Settings Saved ✅");
+alert("Admin Settings Saved ✅");
 
 
 }
