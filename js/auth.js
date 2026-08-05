@@ -1,5 +1,6 @@
 // =================================
-// RiderX Authentication
+// RiderX Authentication System
+// Gmail + Mobile Support
 // =================================
 
 
@@ -9,7 +10,9 @@ import { auth, db } from "../firebase/config.js";
 import {
 
 createUserWithEmailAndPassword,
-signInWithEmailAndPassword
+signInWithEmailAndPassword,
+RecaptchaVerifier,
+signInWithPhoneNumber
 
 }
 
@@ -32,9 +35,13 @@ from
 
 
 
-// Register Function
 
-window.register = async function(){
+// ================================
+// Gmail Register
+// ================================
+
+
+window.registerEmail = async function(){
 
 
 const name =
@@ -91,14 +98,12 @@ alert("RiderX Account Created");
 window.location.href="../customer/home.html";
 
 
-
 }
+
 
 catch(error){
 
-
 alert(error.message);
-
 
 }
 
@@ -109,7 +114,124 @@ alert(error.message);
 
 
 
-// Login Function
+
+
+// ================================
+// Mobile OTP Register
+// ================================
+
+
+window.registerPhone = async function(){
+
+
+
+const name =
+document.getElementById("name").value;
+
+
+const phone =
+document.getElementById("phone").value;
+
+
+
+window.recaptchaVerifier =
+new RecaptchaVerifier(
+auth,
+"recaptcha-container",
+{
+
+size:"normal"
+
+}
+
+);
+
+
+
+const appVerifier =
+window.recaptchaVerifier;
+
+
+
+try{
+
+
+const confirmationResult =
+
+await signInWithPhoneNumber(
+auth,
+phone,
+appVerifier
+);
+
+
+
+window.confirmationResult =
+confirmationResult;
+
+
+
+let otp =
+prompt("Enter OTP");
+
+
+const result =
+await confirmationResult.confirm(otp);
+
+
+
+const user =
+result.user;
+
+
+
+await setDoc(
+
+doc(db,"users",user.uid),
+
+{
+
+name:name,
+
+phone:phone,
+
+role:"customer",
+
+createdAt:new Date()
+
+}
+
+);
+
+
+
+alert("Mobile Account Created");
+
+
+window.location.href="../customer/home.html";
+
+
+}
+
+
+catch(error){
+
+alert(error.message);
+
+}
+
+
+};
+
+
+
+
+
+
+
+// ================================
+// Login
+// ================================
 
 
 window.login = async function(){
@@ -128,9 +250,13 @@ try{
 
 
 await signInWithEmailAndPassword(
+
 auth,
+
 email,
+
 password
+
 );
 
 
@@ -141,14 +267,12 @@ alert("Login Successful");
 window.location.href="../customer/home.html";
 
 
-
 }
+
 
 catch(error){
 
-
 alert(error.message);
-
 
 }
 
