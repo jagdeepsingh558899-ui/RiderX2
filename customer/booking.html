@@ -10,79 +10,6 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-<style>
-
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
-}
-
-.header{
-    background:#ffcc00;
-    color:#000;
-    padding:20px;
-    text-align:center;
-    font-size:25px;
-    font-weight:bold;
-}
-
-.container{
-    padding:20px;
-}
-
-
-.box{
-
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-
-}
-
-
-input,select{
-
-width:100%;
-padding:14px;
-margin:10px 0;
-border-radius:10px;
-border:none;
-font-size:16px;
-
-}
-
-
-button{
-
-width:100%;
-padding:15px;
-background:#ffcc00;
-border:none;
-border-radius:10px;
-font-weight:bold;
-font-size:17px;
-
-}
-
-
-.back{
-
-display:block;
-margin-top:15px;
-background:#ffcc00;
-color:#000;
-padding:12px;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;
-
-}
-
-</style>
-
 </head>
 
 
@@ -102,21 +29,13 @@ font-weight:bold;
 
 <select id="service">
 
-<option value="Bike Taxi">
-🏍 Bike Taxi
-</option>
+<option value="Bike Taxi">🏍 Bike Taxi</option>
 
-<option value="Cab">
-🚕 Cab
-</option>
+<option value="Cab">🚕 Cab</option>
 
-<option value="Parcel">
-📦 Parcel
-</option>
+<option value="Parcel">📦 Parcel</option>
 
-<option value="Food">
-🍔 Food
-</option>
+<option value="Food">🍔 Food</option>
 
 </select>
 
@@ -125,6 +44,13 @@ font-weight:bold;
 <input 
 id="pickup"
 placeholder="Pickup Location">
+
+
+
+<button onclick="getLocation()">
+📍 Use Current Location
+</button>
+
 
 
 <input 
@@ -140,9 +66,11 @@ readonly>
 
 
 
+
 <button onclick="calculateFare()">
 Calculate Fare
 </button>
+
 
 
 
@@ -164,6 +92,7 @@ Confirm Booking
 
 
 
+
 <script type="module">
 
 
@@ -173,63 +102,139 @@ import { db } from "../firebase/config.js";
 import {
 
 collection,
-addDoc
+addDoc,
+serverTimestamp
 
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-function calculateFare(){
 
-let service=document.getElementById("service").value;
 
-let price=0;
+// Current Location
+
+
+window.getLocation=function(){
+
+
+if(navigator.geolocation){
+
+
+navigator.geolocation.getCurrentPosition(
+
+(position)=>{
+
+
+let lat =
+position.coords.latitude;
+
+
+let lng =
+position.coords.longitude;
+
+
+
+document.getElementById("pickup").value =
+
+"Lat: "+lat+" , Lng: "+lng;
+
+
+
+},
+
+
+()=>{
+
+alert("Location permission denied");
+
+}
+
+
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+window.calculateFare=function(){
+
+
+let service =
+document.getElementById("service").value;
+
+
+let fare=0;
 
 
 if(service=="Bike Taxi"){
-price=50;
+
+fare=50;
+
 }
 
 else if(service=="Cab"){
-price=150;
+
+fare=150;
+
 }
 
 else if(service=="Parcel"){
-price=80;
+
+fare=80;
+
 }
 
 else{
-price=100;
-}
 
-
-document.getElementById("fare").value="₹"+price;
-
+fare=100;
 
 }
 
 
 
-window.calculateFare=calculateFare;
+document.getElementById("fare").value="₹"+fare;
+
+
+}
+
+
+
+
+
 
 
 
 window.bookRide=async function(){
 
 
-let pickup=document.getElementById("pickup").value;
+let pickup =
+document.getElementById("pickup").value;
 
-let drop=document.getElementById("drop").value;
 
-let service=document.getElementById("service").value;
+let drop =
+document.getElementById("drop").value;
 
-let fare=document.getElementById("fare").value;
+
+let service =
+document.getElementById("service").value;
+
+
+let fare =
+document.getElementById("fare").value;
 
 
 
 if(!pickup || !drop){
 
-alert("Please enter pickup and drop");
+alert("Pickup and Drop required");
 
 return;
 
@@ -237,7 +242,11 @@ return;
 
 
 
-await addDoc(collection(db,"rides"),{
+await addDoc(
+
+collection(db,"rides"),
+
+{
 
 
 pickup:pickup,
@@ -250,14 +259,16 @@ fare:fare,
 
 status:"Pending",
 
-createdAt:new Date()
+createdAt:serverTimestamp()
 
 
-});
+}
+
+);
 
 
 
-alert("Ride booked successfully");
+alert("Ride Requested ✅");
 
 
 window.location.href="history.html";
