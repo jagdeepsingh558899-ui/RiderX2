@@ -17,7 +17,9 @@
 
 
 <div class="header">
+
 🚕 RiderX Booking
+
 </div>
 
 
@@ -26,23 +28,32 @@
 
 <select id="service">
 
-<option value="Bike Taxi">🏍 Bike Taxi</option>
+<option value="Bike Taxi">
+🏍 Bike Taxi
+</option>
 
-<option value="Cab">🚕 Cab</option>
+<option value="Cab">
+🚕 Cab
+</option>
 
-<option value="Parcel">📦 Parcel</option>
+<option value="Parcel">
+📦 Parcel
+</option>
 
-<option value="Food">🍔 Food</option>
+<option value="Food">
+🍔 Food
+</option>
 
 </select>
 
 
-<input id="pickup" placeholder="Pickup Location" readonly>
+
+<input id="pickup" placeholder="Pickup" readonly>
 
 
 <button onclick="getPickup()">
 
-📍 Use Current Location
+📍 Current Location
 
 </button>
 
@@ -54,7 +65,7 @@
 
 <button onclick="calculateRide()">
 
-📏 Calculate Fare
+Calculate Fare
 
 </button>
 
@@ -62,19 +73,22 @@
 
 <p id="distance">
 
-Distance: -
+Distance:-
+
+</p>
+
+
+<p id="price">
+
+Fare:-
 
 </p>
 
 
 
-<input id="fare" placeholder="Fare" readonly>
-
-
-
 <button onclick="bookRide()">
 
-Confirm Booking
+Confirm Ride
 
 </button>
 
@@ -88,6 +102,9 @@ Confirm Booking
 
 
 import {db} from "../firebase/config.js";
+
+
+import {getFareSettings} from "../js/fare.js";
 
 
 import {getCoordinates} from "../js/geocode.js";
@@ -112,13 +129,33 @@ let pickupLat;
 
 let pickupLng;
 
-
 let dropLat;
 
 let dropLng;
 
-
 let distance=0;
+
+let finalFare=0;
+
+let settings;
+
+
+
+
+async function loadFare(){
+
+
+settings=await getFareSettings();
+
+
+}
+
+
+
+loadFare();
+
+
+
 
 
 
@@ -136,14 +173,13 @@ pickupLat=pos.coords.latitude;
 pickupLng=pos.coords.longitude;
 
 
-
-document.getElementById("pickup").value=
+pickup.value=
 
 pickupLat+","+pickupLng;
 
 
-}
 
+}
 
 );
 
@@ -156,25 +192,26 @@ pickupLat+","+pickupLng;
 
 
 
+
 window.calculateRide=async function(){
 
 
 
-let address=
+let dropAddress=
 
-document.getElementById("drop").value;
+drop.value;
 
 
 
 let result=
 
-await getCoordinates(address);
+await getCoordinates(dropAddress);
 
 
 
 if(!result){
 
-alert("Drop location not found");
+alert("Location not found");
 
 return;
 
@@ -195,6 +232,7 @@ let R=6371;
 let dLat=
 
 (dropLat-pickupLat)*Math.PI/180;
+
 
 
 let dLng=
@@ -221,34 +259,87 @@ Math.sin(dLng/2)**2;
 
 distance=
 
-(R*2*Math.atan2(
+(
+
+R*
+
+2*
+
+Math.atan2(
 
 Math.sqrt(a),
 
 Math.sqrt(1-a)
 
-)).toFixed(2);
+)
+
+).toFixed(2);
 
 
 
 
-let service=
 
-document.getElementById("service").value;
+let type=
 
-
-
-let fare=50;
+service.value;
 
 
 
-if(service=="Cab")
-
-fare=100;
+if(type=="Bike Taxi"){
 
 
+finalFare=
 
-fare += distance*10;
+Number(settings.bikeBase)
+
++
+
+(distance*Number(settings.bikeKm));
+
+
+}
+
+
+else if(type=="Cab"){
+
+
+finalFare=
+
+Number(settings.cabBase)
+
++
+
+(distance*Number(settings.cabKm));
+
+
+}
+
+else{
+
+
+finalFare=100+(distance*10);
+
+
+}
+
+
+
+
+
+let discount=
+
+Number(settings.offer || 0);
+
+
+
+finalFare=
+
+finalFare-
+
+(finalFare*discount/100);
+
+
+
 
 
 
@@ -258,9 +349,9 @@ document.getElementById("distance").innerHTML=
 
 
 
-document.getElementById("fare").value=
+document.getElementById("price").innerHTML=
 
-"₹"+Math.round(fare);
+"Fare: ₹"+Math.round(finalFare);
 
 
 
@@ -283,33 +374,33 @@ collection(db,"rides"),
 {
 
 
-pickupLat:pickupLat,
+pickupLat,
 
-pickupLng:pickupLng,
-
-
-dropLat:dropLat,
-
-dropLng:dropLng,
+pickupLng,
 
 
-distance:distance,
+dropLat,
+
+dropLng,
 
 
-service:
-
-document.getElementById("service").value,
+distance,
 
 
-fare:
+service:service.value,
 
-document.getElementById("fare").value,
+
+fare:"₹"+Math.round(finalFare),
 
 
 status:"Pending",
 
 
+paymentStatus:"Pending",
+
+
 createdAt:serverTimestamp()
+
 
 
 }
@@ -319,7 +410,6 @@ createdAt:serverTimestamp()
 
 
 alert("Ride Booked ✅");
-
 
 
 }
