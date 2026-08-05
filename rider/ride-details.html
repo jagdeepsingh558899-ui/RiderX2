@@ -10,42 +10,6 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-
-
-<style>
-
-#map{
-
-height:400px;
-width:100%;
-border-radius:15px;
-
-}
-
-.card{
-
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin:15px;
-
-}
-
-button{
-
-width:100%;
-padding:14px;
-background:#ffcc00;
-border:0;
-border-radius:10px;
-font-weight:bold;
-
-}
-
-</style>
-
-
 </head>
 
 
@@ -60,46 +24,56 @@ font-weight:bold;
 
 
 
+<div class="container">
+
+
 <div class="card">
+
+
+<h3 id="service">
+
+Ride
+
+</h3>
 
 
 <p id="pickup">
 
-Pickup:
+📍 Pickup:
 
 </p>
 
 
 <p id="drop">
 
-Drop:
+🏁 Drop:
 
 </p>
 
 
 <p id="distance">
 
-Distance:
+📏 Distance:
 
 </p>
 
 
 <p id="fare">
 
-Fare:
+💰 Fare:
+
+</p>
+
+
+<p id="status">
+
+Status:
 
 </p>
 
 
 </div>
 
-
-
-<div id="map"></div>
-
-
-
-<div class="card">
 
 
 <button onclick="startRide()">
@@ -109,13 +83,18 @@ Fare:
 </button>
 
 
+
+<button onclick="completeRide()">
+
+🏁 Complete Ride
+
+</button>
+
+
+
 </div>
 
 
-
-
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
 
@@ -140,30 +119,9 @@ from
 
 
 
-
-let map=L.map("map").setView(
-
-[26.9124,75.7873],
-
-13
-
-);
+let rideId = localStorage.getItem("rideId");
 
 
-
-L.tileLayer(
-
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-
-)
-
-.addTo(map);
-
-
-
-
-
-let rideId=localStorage.getItem("rideId");
 
 
 
@@ -180,6 +138,12 @@ doc(db,"rides",rideId)
 
 
 let data=snap.data();
+
+
+
+document.getElementById("service").innerHTML=
+
+data.service;
 
 
 
@@ -207,29 +171,9 @@ document.getElementById("fare").innerHTML=
 
 
 
+document.getElementById("status").innerHTML=
 
-
-let line=L.polyline(
-
-[
-
-[data.pickupLat,data.pickupLng],
-
-[data.dropLat,data.dropLng]
-
-]
-
-)
-
-.addTo(map);
-
-
-
-map.fitBounds(
-
-line.getBounds()
-
-);
+"Status: "+data.status;
 
 
 
@@ -240,6 +184,7 @@ line.getBounds()
 
 
 window.startRide=async function(){
+
 
 
 await updateDoc(
@@ -260,7 +205,47 @@ status:"Started"
 alert("Ride Started 🏍");
 
 
+loadRide();
+
+
 }
+
+
+
+
+
+
+
+window.completeRide=async function(){
+
+
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+
+status:"Completed"
+
+}
+
+);
+
+
+
+alert("Ride Completed ✅");
+
+
+
+loadRide();
+
+
+}
+
+
+
 
 
 
