@@ -1,93 +1,102 @@
+// =================================
+// RiderX Admin Rider Management
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
 collection,
-onSnapshot,
-doc,
-updateDoc
+getDocs,
+query,
+where,
+updateDoc,
+doc
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-const box =
 
-document.getElementById("riders");
-
+// Load Riders
 
 
+export async function loadRiders(){
 
-onSnapshot(
 
-collection(db,"riders"),
+let box = document.getElementById("riderList");
 
-(snapshot)=>{
+
+if(!box) return;
+
+
+
+try{
+
+
+const q = query(
+
+collection(db,"users"),
+
+where("role","==","rider")
+
+);
+
+
+
+const snapshot = await getDocs(q);
+
 
 
 box.innerHTML="";
 
 
 
-snapshot.forEach((item)=>{
+if(snapshot.empty){
 
 
-let rider = item.data();
+box.innerHTML="<p>No riders found</p>";
+
+return;
 
 
-box.innerHTML +=
+}
 
-`
 
-<div class="card">
+
+snapshot.forEach((rider)=>{
+
+
+let data = rider.data();
+
+
+
+box.innerHTML += `
+
+<div class="rider-card">
 
 
 <h3>
-${rider.name}
+🏍 ${data.name || "Rider"}
 </h3>
 
 
 <p>
-Bike: ${rider.bike}
+📧 ${data.email || ""}
 </p>
 
 
 <p>
-Number: ${rider.vehicleNumber}
+Status: ${data.status || "Offline"}
 </p>
 
 
-<p>
-Licence: ${rider.license}
-</p>
-
-
-<p>
-Status: ${rider.status}
-</p>
-
-
-
-<button onclick="approveRider('${item.id}')">
-
-Approve ✅
-
+<button onclick="approveRider('${rider.id}')">
+Approve
 </button>
-
-
-
-<button onclick="rejectRider('${item.id}')">
-
-Reject ❌
-
-</button>
-
 
 
 </div>
@@ -99,7 +108,27 @@ Reject ❌
 });
 
 
-});
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+box.innerHTML="Error loading riders";
+
+
+}
+
+
+}
+
+
+
+
+
+// Approve Rider
 
 
 window.approveRider = async function(id){
@@ -107,43 +136,22 @@ window.approveRider = async function(id){
 
 await updateDoc(
 
-doc(db,"riders",id),
+doc(db,"users",id),
 
 {
 
-status:"approved"
+status:"Approved"
 
 }
 
 );
 
 
-alert("Rider Approved");
+
+alert("Rider Approved ✅");
 
 
-};
+loadRiders();
 
-
-
-
-
-window.rejectRider = async function(id){
-
-
-await updateDoc(
-
-doc(db,"riders",id),
-
-{
-
-status:"rejected"
 
 }
-
-);
-
-
-alert("Rider Rejected");
-
-
-};
