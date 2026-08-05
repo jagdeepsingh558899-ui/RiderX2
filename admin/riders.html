@@ -6,48 +6,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Manage Riders</title>
+<title>RiderX Admin Riders</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
 
 <style>
 
-body{
-
-margin:0;
-background:#111;
-color:white;
-font-family:Arial,sans-serif;
-
-}
-
-
-.header{
-
-background:#ffcc00;
-color:#000;
-padding:20px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-
-}
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-.rider-card{
+.card{
 
 background:#1d1d1d;
 padding:20px;
 border-radius:15px;
-margin-bottom:15px;
+margin:15px 0;
 
 }
 
@@ -55,25 +26,11 @@ margin-bottom:15px;
 button{
 
 width:100%;
-padding:13px;
+padding:12px;
+margin-top:10px;
 background:#ffcc00;
 border:none;
 border-radius:10px;
-font-weight:bold;
-
-}
-
-
-.back{
-
-display:block;
-margin-top:20px;
-padding:13px;
-background:#ffcc00;
-color:#000;
-border-radius:10px;
-text-align:center;
-text-decoration:none;
 font-weight:bold;
 
 }
@@ -83,13 +40,12 @@ font-weight:bold;
 </head>
 
 
-
 <body>
 
 
 <div class="header">
 
-🏍 Manage Riders
+🏍 Rider Approval
 
 </div>
 
@@ -98,22 +54,16 @@ font-weight:bold;
 <div class="container">
 
 
-<div id="riderList">
+<div id="list">
 
-Loading riders...
+Loading...
+
+</div>
+
 
 </div>
 
 
-
-<a class="back" href="dashboard.html">
-
-⬅ Back Dashboard
-
-</a>
-
-
-</div>
 
 
 
@@ -121,11 +71,195 @@ Loading riders...
 <script type="module">
 
 
+import {db} from "../firebase/config.js";
+
+
 import {
 
-loadRiders
+collection,
+getDocs,
+doc,
+updateDoc
 
-} from "../js/admin-rider.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+async function loadRiders(){
+
+
+
+let snap=await getDocs(
+
+collection(db,"users")
+
+);
+
+
+
+let box=document.getElementById("list");
+
+box.innerHTML="";
+
+
+
+
+
+snap.forEach((user)=>{
+
+
+let data=user.data();
+
+
+
+if(data.role=="rider"){
+
+
+
+box.innerHTML += `
+
+
+<div class="card">
+
+
+<h3>
+
+🏍 ${data.name || "Rider"}
+
+</h3>
+
+
+
+<p>
+
+📧 ${data.email || ""}
+
+</p>
+
+
+
+<p>
+
+Status:
+
+${data.approved ? "Approved ✅" : "Pending ⏳"}
+
+</p>
+
+
+
+<button onclick="approve('${user.id}')">
+
+Approve Rider
+
+</button>
+
+
+
+<button onclick="reject('${user.id}')">
+
+Reject Rider
+
+</button>
+
+
+
+</div>
+
+
+
+`;
+
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+window.approve=async function(id){
+
+
+
+await updateDoc(
+
+doc(db,"users",id),
+
+{
+
+
+approved:true
+
+}
+
+
+);
+
+
+
+alert("Rider Approved ✅");
+
+
+loadRiders();
+
+
+
+}
+
+
+
+
+
+
+
+window.reject=async function(id){
+
+
+
+await updateDoc(
+
+doc(db,"users",id),
+
+{
+
+
+approved:false
+
+}
+
+
+);
+
+
+
+alert("Rider Rejected ❌");
+
+
+loadRiders();
+
+
+
+}
+
+
 
 
 
@@ -134,7 +268,6 @@ loadRiders();
 
 
 </script>
-
 
 
 </body>
