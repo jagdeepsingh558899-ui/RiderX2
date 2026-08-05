@@ -12,18 +12,16 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
-
 <style>
 
 #map{
 
-height:400px;
+height:450px;
 width:100%;
 border-radius:15px;
 margin-top:15px;
 
 }
-
 
 button{
 
@@ -34,6 +32,15 @@ background:#ffcc00;
 border:none;
 border-radius:10px;
 font-weight:bold;
+
+}
+
+.ride{
+
+background:#1d1d1d;
+padding:15px;
+border-radius:12px;
+margin-top:10px;
 
 }
 
@@ -53,28 +60,22 @@ font-weight:bold;
 
 
 
-
 <div class="container">
 
 
 
 <div class="card">
 
-
 <h2>
-
-Rider Control
-
+Rider Status
 </h2>
 
 
-
-<p id="status">
+<h3 id="status">
 
 ⚫ Offline
 
-</p>
-
+</h3>
 
 
 <button onclick="goOnline()">
@@ -82,6 +83,7 @@ Rider Control
 🟢 Go Online
 
 </button>
+
 
 
 <button onclick="goOffline()">
@@ -96,30 +98,23 @@ Rider Control
 
 
 
-<div class="card">
+
+<div id="map"></div>
 
 
-<h3>
 
+
+<h2>
 Nearby Rides
+</h2>
 
-</h3>
 
 
 <div id="rideList">
 
-Waiting...
+No rides
 
 </div>
-
-
-</div>
-
-
-
-
-<div id="map"></div>
-
 
 
 
@@ -130,7 +125,6 @@ Waiting...
 </a>
 
 
-
 <a href="profile.html">
 
 👤 Profile
@@ -138,13 +132,14 @@ Waiting...
 </a>
 
 
+
 </div>
 
 
 
 
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 
 
 
@@ -161,6 +156,7 @@ getDocs,
 query,
 where,
 doc,
+updateDoc,
 setDoc
 
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
@@ -171,6 +167,7 @@ setDoc
 let map;
 
 let riderMarker;
+
 
 
 
@@ -189,7 +186,13 @@ map=L.map("map").setView(
 
 L.tileLayer(
 
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+attribution:"OpenStreetMap"
+
+}
 
 ).addTo(map);
 
@@ -200,7 +203,8 @@ L.tileLayer(
 
 
 
-window.goOnline=async function(){
+window.goOnline=function(){
+
 
 
 document.getElementById("status").innerHTML=
@@ -211,13 +215,12 @@ document.getElementById("status").innerHTML=
 
 navigator.geolocation.watchPosition(
 
-async(pos)=>{
+async(position)=>{
 
 
-let lat=pos.coords.latitude;
+let lat=position.coords.latitude;
 
-let lng=pos.coords.longitude;
-
+let lng=position.coords.longitude;
 
 
 
@@ -226,7 +229,6 @@ if(riderMarker){
 map.removeLayer(riderMarker);
 
 }
-
 
 
 
@@ -244,14 +246,21 @@ riderMarker=L.marker(
 
 
 
-map.setView([lat,lng],15);
+map.setView(
+
+[lat,lng],
+
+15
+
+);
+
 
 
 
 
 await setDoc(
 
-doc(db,"riders","current"),
+doc(db,"locations","rider"),
 
 {
 
@@ -267,12 +276,13 @@ status:"online"
 
 
 
-
 loadRides();
 
 
 
 }
+
+
 
 );
 
@@ -302,7 +312,9 @@ document.getElementById("status").innerHTML=
 
 
 
+
 async function loadRides(){
+
 
 
 let box=document.getElementById("rideList");
@@ -337,25 +349,43 @@ let data=ride.data();
 box.innerHTML +=`
 
 
-<div class="card">
+<div class="ride">
 
 
-📍 ${data.pickup}
-
-<br>
-
-🏁 ${data.drop}
+📍 Pickup:
 
 <br>
 
-💰 ${data.fare}
+${data.pickup}
 
 
-<button>
+<br><br>
+
+
+🏁 Drop:
+
+<br>
+
+${data.drop}
+
+
+<br><br>
+
+
+💰 Price:
+
+${data.fare}
+
+
+<br><br>
+
+
+<button onclick="acceptRide('${ride.id}')">
 
 Accept Ride
 
 </button>
+
 
 
 </div>
@@ -364,10 +394,45 @@ Accept Ride
 `;
 
 
+
 });
 
 
 }
+
+
+
+
+
+window.acceptRide=async function(id){
+
+
+await updateDoc(
+
+doc(db,"rides",id),
+
+{
+
+
+status:"Accepted",
+
+rider:"rider"
+
+}
+
+);
+
+
+
+alert("Ride Accepted ✅");
+
+
+loadRides();
+
+
+}
+
+
 
 
 
