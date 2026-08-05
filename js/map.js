@@ -1,18 +1,19 @@
 // =================================
-// RiderX Map Location System
+// RiderX Advanced Map System
 // =================================
+
 
 
 let map;
 
-let pickupMarker;
+let markers=[];
 
-let dropMarker;
-
-
+let routeLine;
 
 
-// Initialize Map
+
+
+// Create Map
 
 export function createMap(){
 
@@ -58,126 +59,180 @@ return map;
 
 
 
-// Add Pickup Location
+// Clear Old Markers
 
 
-export function setPickup(
-
-lat,
-lng
-
-){
+function clearMarkers(){
 
 
-if(pickupMarker){
-
-map.removeLayer(pickupMarker);
-
-}
+markers.forEach((m)=>{
 
 
+map.removeLayer(m);
 
-pickupMarker = L.marker(
-
-[lat,lng]
-
-)
-
-.addTo(map)
-
-.bindPopup("Pickup Location")
-
-.openPopup();
-
-
-}
-
-
-
-
-
-// Add Drop Location
-
-
-export function setDrop(
-
-lat,
-lng
-
-){
-
-
-if(dropMarker){
-
-map.removeLayer(dropMarker);
-
-}
-
-
-
-dropMarker = L.marker(
-
-[lat,lng]
-
-)
-
-.addTo(map)
-
-.bindPopup("Drop Location")
-
-.openPopup();
-
-
-}
-
-
-
-
-
-// Get Current Location
-
-
-export function getCurrentLocation(){
-
-
-return new Promise((resolve)=>{
-
-
-if(navigator.geolocation){
-
-
-navigator.geolocation.getCurrentPosition(
-
-(position)=>{
-
-
-resolve({
-
-lat:position.coords.latitude,
-
-lng:position.coords.longitude
 
 });
 
 
+markers=[];
+
+
+if(routeLine){
+
+map.removeLayer(routeLine);
+
 }
 
+
+}
+
+
+
+
+
+
+// Show Ride On Map
+
+
+export function showRide(
+
+pickup,
+
+drop,
+
+fare,
+
+distance
+
+){
+
+
+
+clearMarkers();
+
+
+
+
+let pickupMarker = L.marker(
+
+pickup
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"📍 Pickup<br>💰 ₹"+fare
 
 );
 
 
+
+
+let dropMarker = L.marker(
+
+drop
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"🏁 Drop<br>📏 "+distance+" km"
+
+);
+
+
+
+
+
+markers.push(
+
+pickupMarker,
+
+dropMarker
+
+);
+
+
+
+
+
+routeLine = L.polyline(
+
+[
+
+pickup,
+
+drop
+
+]
+
+)
+
+.addTo(map);
+
+
+
+map.fitBounds(
+
+routeLine.getBounds()
+
+);
+
+
+
 }
 
-else{
 
 
-resolve(null);
 
+
+
+// Rider Current Location
+
+
+export function showRiderLocation(
+
+lat,
+
+lng
+
+){
+
+
+
+let rider = L.marker(
+
+[lat,lng],
+
+{
+
+icon:L.icon({
+
+iconUrl:
+"https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
+
+iconSize:[40,40]
+
+})
 
 }
 
+)
 
-});
+.addTo(map);
+
+
+
+rider.bindPopup(
+
+"🏍 Rider"
+
+);
+
 
 
 }
