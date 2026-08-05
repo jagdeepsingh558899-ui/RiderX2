@@ -1,77 +1,98 @@
+// =================================
+// RiderX Rider Matching System
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
-ref,
-onValue
+collection,
+getDocs,
+query,
+where
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+// Find Available Riders
+
+export async function findAvailableRider(){
+
+
+try{
+
+
+const q = query(
+
+collection(db,"riders"),
+
+where("status","==","online")
+
+);
+
+
+
+const snapshot = await getDocs(q);
+
+
+
+if(snapshot.empty){
+
+
+return null;
+
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
 
+let rider = null;
 
 
 
-const box =
-
-document.getElementById("riders");
+snapshot.forEach((doc)=>{
 
 
-
-if(box){
-
-
-onValue(
-
-ref(db,"onlineRiders"),
-
-(snapshot)=>{
+if(!rider){
 
 
-box.innerHTML="";
+rider={
+
+id:doc.id,
+
+...doc.data()
+
+};
 
 
-
-snapshot.forEach((rider)=>{
-
-
-let data=rider.val();
-
-
-
-box.innerHTML +=
-
-`
-
-<div class="card">
-
-<h3>
-Nearby Rider 🏍
-</h3>
-
-<p>
-Lat: ${data.lat}
-</p>
-
-<p>
-Lng: ${data.lng}
-</p>
-
-
-</div>
-
-`;
-
+}
 
 
 });
 
 
-});
+
+return rider;
+
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+return null;
+
+
+}
 
 
 }
