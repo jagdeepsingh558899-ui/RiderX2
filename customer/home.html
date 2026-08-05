@@ -1,18 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-
-<title>RiderX Home</title>
-
+<title>RiderX</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
+
+<style>
+
+.logo{
+
+width:100px;
+height:100px;
+object-fit:cover;
+border-radius:50%;
+
+}
+
+
+.banner{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin-top:20px;
+
+}
+
+
+button{
+
+width:100%;
+padding:15px;
+margin-top:20px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
 
 </head>
 
@@ -20,69 +53,35 @@
 <body>
 
 
-<div class="splash">
+<div class="header" id="appName">
 
-
-<img src="../assets/logo.png" class="logo">
-
-
-<h1>
-Rider<span>X</span>
-</h1>
-
-
-
-<input placeholder="Where to go?"
-onclick="book()">
-
-
-
-<h2>
-Services
-</h2>
-
-
-
-<button onclick="bike()">
-
-🏍 Bike Taxi
-
-</button>
-
-
-
-<button onclick="cab()">
-
-🚕 Cab
-
-</button>
-
-
-
-<button onclick="parcel()">
-
-📦 Parcel
-
-</button>
-
-
-
-<h2>
-Recent Rides
-</h2>
-
-
-<div id="rides">
-
-No rides yet
+RiderX
 
 </div>
 
 
 
-<button onclick="profile()">
+<div class="container">
 
-👤 Profile
+
+<img id="logo"
+class="logo"
+src="../assets/logo.png">
+
+
+
+<div class="banner" id="banner">
+
+Welcome to RiderX 🚕
+
+</div>
+
+
+
+
+<button onclick="goBooking()">
+
+🚕 Book Ride
 
 </button>
 
@@ -92,7 +91,115 @@ No rides yet
 
 
 
-<script src="../js/home.js"></script>
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+getDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+async function loadApp(){
+
+
+
+let snap=await getDoc(
+
+doc(db,"settings","app")
+
+);
+
+
+
+if(snap.exists()){
+
+
+let data=snap.data();
+
+
+
+if(data.appName){
+
+
+document.getElementById("appName").innerHTML=
+
+data.appName;
+
+
+document.title=data.appName;
+
+
+}
+
+
+
+
+if(data.logo){
+
+
+document.getElementById("logo").src=
+
+data.logo;
+
+
+}
+
+
+
+if(data.banner){
+
+
+document.getElementById("banner").innerHTML=
+
+data.banner;
+
+
+}
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+window.goBooking=function(){
+
+
+window.location.href="booking.html";
+
+
+}
+
+
+
+
+
+loadApp();
+
+
+
+</script>
 
 
 </body>
