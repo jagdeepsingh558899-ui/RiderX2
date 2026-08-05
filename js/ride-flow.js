@@ -1,179 +1,46 @@
+// =================================
+// RiderX Ride Flow System
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
-collection,
-addDoc,
-onSnapshot,
 doc,
 updateDoc
 
-}
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-from
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
+// Assign Rider To Ride
 
+export async function assignRider(
 
-// Customer Search Ride
+rideId,
+riderId
 
+){
 
-let statusBox =
 
-document.getElementById("status");
-
-
-
-if(statusBox){
-
-
-onSnapshot(
-
-collection(db,"rides"),
-
-(snapshot)=>{
-
-
-snapshot.forEach((ride)=>{
-
-
-let data = ride.data();
-
-
-
-if(data.status=="accepted"){
-
-
-statusBox.innerHTML=
-
-"Rider Found ✅";
-
-
-localStorage.setItem(
-
-"rideId",
-
-ride.id
-
-);
-
-
-
-window.location.href=
-
-"ride-status.html";
-
-
-}
-
-
-});
-
-
-}
-
-);
-
-
-}
-
-
-
-
-
-
-// Show Customer Status
-
-
-let rideBox =
-
-document.getElementById("ride");
-
-
-
-if(rideBox){
-
-
-let id =
-
-localStorage.getItem("rideId");
-
-
-
-if(id){
-
-
-onSnapshot(
-
-doc(db,"rides",id),
-
-(data)=>{
-
-
-let ride=data.data();
-
-
-
-rideBox.innerHTML=
-
-`
-
-<h3>
-Status: ${ride.status}
-</h3>
-
-
-<p>
-Fare: ₹${ride.fare || 0}
-</p>
-
-
-`;
-
-
-
-}
-
-);
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-// Rider Accept
-
-
-window.acceptRide = async function(){
-
-
-let id =
-
-localStorage.getItem("rideId");
-
-
-
-if(id){
+try{
 
 
 await updateDoc(
 
-doc(db,"rides",id),
+doc(db,"rides",rideId),
 
 {
 
-status:"accepted"
+
+riderId:riderId,
+
+status:"Accepted"
+
 
 }
 
@@ -181,23 +48,74 @@ status:"accepted"
 
 
 
-alert("Ride Accepted");
+return true;
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+return false;
 
 
 }
 
 
-};
+}
 
 
 
 
 
 
-window.rejectRide=function(){
+// Complete Ride
 
 
-alert("Ride Rejected");
+export async function completeRide(
+
+rideId
+
+){
 
 
-};
+try{
+
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+
+status:"Completed"
+
+
+}
+
+);
+
+
+
+return true;
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+return false;
+
+
+}
+
+
+}
