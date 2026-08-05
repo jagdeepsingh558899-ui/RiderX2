@@ -6,13 +6,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Rider Dashboard</title>
+<title>RiderX Dashboard</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
 
-.box{
+.card{
 
 background:#1d1d1d;
 padding:20px;
@@ -25,7 +26,7 @@ margin:15px 0;
 button{
 
 width:100%;
-padding:14px;
+padding:12px;
 margin-top:10px;
 background:#ffcc00;
 border:none;
@@ -44,16 +45,16 @@ font-weight:bold;
 
 <div class="header">
 
-🏍 Rider Dashboard
+🏍 RiderX Rider
 
 </div>
-
 
 
 <div class="container">
 
 
-<div class="box">
+
+<div class="card">
 
 
 <h3 id="name">
@@ -61,14 +62,6 @@ font-weight:bold;
 Rider
 
 </h3>
-
-
-<p id="approval">
-
-Checking approval...
-
-</p>
-
 
 
 <p id="status">
@@ -81,25 +74,41 @@ Status: Offline
 
 <button onclick="goOnline()">
 
-🟢 Go Online
+🟢 Online
 
 </button>
-
 
 
 <button onclick="goOffline()">
 
-🔴 Go Offline
+🔴 Offline
 
 </button>
 
 
+</div>
+
+
+
+
+
+<h3>
+Available Rides
+</h3>
+
+
+
+<div id="rideList">
+
+Go Online to see rides
 
 </div>
 
 
 
 </div>
+
+
 
 
 
@@ -116,7 +125,10 @@ import {
 doc,
 getDoc,
 updateDoc,
-serverTimestamp
+collection,
+getDocs,
+query,
+where
 
 }
 
@@ -128,14 +140,7 @@ from
 
 
 
-
 let uid;
-
-
-let locationWatch;
-
-
-
 
 
 
@@ -144,7 +149,7 @@ auth.onAuthStateChanged(async(user)=>{
 
 if(!user){
 
-window.location.href="../auth/login.html";
+location.href="../auth/login.html";
 
 return;
 
@@ -155,43 +160,16 @@ uid=user.uid;
 
 
 
-let snap=await getDoc(
+let userDoc=await getDoc(
 
 doc(db,"users",uid)
 
 );
 
 
-
-let data=snap.data();
-
-
-
 document.getElementById("name").innerHTML=
 
-data.name || "Rider";
-
-
-
-
-if(data.approved!=true){
-
-
-document.getElementById("approval").innerHTML=
-
-"⏳ Waiting For Admin Approval";
-
-
-return;
-
-
-}
-
-
-
-document.getElementById("approval").innerHTML=
-
-"✅ Approved";
+userDoc.data().name || "Rider";
 
 
 });
@@ -202,83 +180,20 @@ document.getElementById("approval").innerHTML=
 
 
 
-
-
 window.goOnline=async function(){
 
 
-
-let user=await getDoc(
-
-doc(db,"users",uid)
-
-);
-
-
-
-if(user.data().approved!=true){
-
-
-alert("Admin approval required");
-
-return;
-
-
-}
-
-
-
-
 await updateDoc(
 
 doc(db,"users",uid),
 
 {
 
-
-online:true,
-
-lastOnline:serverTimestamp()
-
+online:true
 
 }
 
 );
-
-
-
-
-
-navigator.geolocation.watchPosition(
-
-async(pos)=>{
-
-
-
-await updateDoc(
-
-doc(db,"users",uid),
-
-{
-
-
-lat:pos.coords.latitude,
-
-lng:pos.coords.longitude
-
-
-}
-
-);
-
-
-
-}
-
-);
-
-
-
 
 
 document.getElementById("status").innerHTML=
@@ -286,11 +201,10 @@ document.getElementById("status").innerHTML=
 "Status: 🟢 Online";
 
 
+loadRides();
+
 
 }
-
-
-
 
 
 
@@ -300,16 +214,13 @@ document.getElementById("status").innerHTML=
 window.goOffline=async function(){
 
 
-
 await updateDoc(
 
 doc(db,"users",uid),
 
 {
 
-
 online:false
-
 
 }
 
@@ -323,7 +234,176 @@ document.getElementById("status").innerHTML=
 
 
 
+document.getElementById("rideList").innerHTML=
+
+"Go Online to see rides";
+
+
 }
+
+
+
+
+
+
+
+
+async function loadRides(){
+
+
+
+let box=
+
+document.getElementById("rideList");
+
+
+
+let q=query(
+
+collection(db,"rides"),
+
+where("status","==","Pending")
+
+);
+
+
+
+let snap=await getDocs(q);
+
+
+
+box.innerHTML="";
+
+
+
+if(snap.empty){
+
+
+box.innerHTML="No rides available";
+
+
+return;
+
+
+}
+
+
+
+snap.forEach((ride)=>{
+
+
+
+let data=ride.data();
+
+
+
+box.innerHTML += `
+
+
+<div class="card">
+
+
+<h3>
+
+${data.service}
+
+</h3>
+
+
+
+<p>
+
+📍 Pickup:
+<br>
+${data.pickupLat},
+${data.pickupLng}
+
+</p>
+
+
+
+<p>
+
+🏁 Drop:
+<br>
+${data.dropLat},
+${data.dropLng}
+
+</p>
+
+
+
+<p>
+
+💰 ${data.fare}
+
+</p>
+
+
+
+<button onclick="acceptRide('${ride.id}')">
+
+Accept Ride
+
+</button>
+
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+window.acceptRide=async function(id){
+
+
+
+await updateDoc(
+
+doc(db,"rides",id),
+
+{
+
+
+status:"Accepted",
+
+
+riderId:uid
+
+
+}
+
+);
+
+
+
+alert("Ride Accepted ✅");
+
+
+
+loadRides();
+
+
+
+}
+
+
 
 
 
