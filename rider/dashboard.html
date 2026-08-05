@@ -15,33 +15,27 @@
 <style>
 
 #map{
-
 height:450px;
 width:100%;
 border-radius:15px;
 margin-top:15px;
+}
 
+.ride{
+background:#1d1d1d;
+padding:15px;
+margin-top:10px;
+border-radius:12px;
 }
 
 button{
-
 width:100%;
 padding:14px;
 margin-top:10px;
 background:#ffcc00;
-border:none;
+border:0;
 border-radius:10px;
 font-weight:bold;
-
-}
-
-.ride{
-
-background:#1d1d1d;
-padding:15px;
-border-radius:12px;
-margin-top:10px;
-
 }
 
 </style>
@@ -59,49 +53,26 @@ margin-top:10px;
 </div>
 
 
-
 <div class="container">
 
 
-
-<div class="card">
-
-<h2>
-Rider Status
+<h2 id="status">
+⚫ Offline
 </h2>
 
 
-<h3 id="status">
-
-⚫ Offline
-
-</h3>
-
-
 <button onclick="goOnline()">
-
 🟢 Go Online
-
 </button>
-
 
 
 <button onclick="goOffline()">
-
 ⚫ Go Offline
-
 </button>
-
-
-</div>
-
-
 
 
 
 <div id="map"></div>
-
-
 
 
 <h2>
@@ -109,28 +80,11 @@ Nearby Rides
 </h2>
 
 
-
 <div id="rideList">
 
-No rides
+Waiting...
 
 </div>
-
-
-
-<a href="earnings.html">
-
-💰 Earnings
-
-</a>
-
-
-<a href="profile.html">
-
-👤 Profile
-
-</a>
-
 
 
 </div>
@@ -142,11 +96,10 @@ No rides
 
 
 
-
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
@@ -159,7 +112,12 @@ doc,
 updateDoc,
 setDoc
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
 
 
 
@@ -167,6 +125,9 @@ setDoc
 let map;
 
 let riderMarker;
+
+let rideMarkers=[];
+
 
 
 
@@ -181,7 +142,6 @@ map=L.map("map").setView(
 13
 
 );
-
 
 
 L.tileLayer(
@@ -203,24 +163,37 @@ attribution:"OpenStreetMap"
 
 
 
+function clearMarkers(){
+
+
+rideMarkers.forEach(m=>{
+
+map.removeLayer(m);
+
+});
+
+
+rideMarkers=[];
+
+
+}
+
+
+
+
+
 window.goOnline=function(){
 
 
-
-document.getElementById("status").innerHTML=
-
-"🟢 Online";
+document.getElementById("status").innerHTML="🟢 Online";
 
 
-
-navigator.geolocation.watchPosition(
-
-async(position)=>{
+navigator.geolocation.watchPosition(async(pos)=>{
 
 
-let lat=position.coords.latitude;
+let lat=pos.coords.latitude;
 
-let lng=position.coords.longitude;
+let lng=pos.coords.longitude;
 
 
 
@@ -240,21 +213,11 @@ riderMarker=L.marker(
 
 .addTo(map)
 
-.bindPopup("🏍 You")
-
-.openPopup();
+.bindPopup("🏍 You");
 
 
 
-map.setView(
-
-[lat,lng],
-
-15
-
-);
-
-
+map.setView([lat,lng],15);
 
 
 
@@ -280,17 +243,11 @@ loadRides();
 
 
 
-}
-
-
-
-);
+});
 
 
 
 }
-
-
 
 
 
@@ -299,9 +256,7 @@ loadRides();
 window.goOffline=function(){
 
 
-document.getElementById("status").innerHTML=
-
-"⚫ Offline";
+document.getElementById("status").innerHTML="⚫ Offline";
 
 
 }
@@ -316,8 +271,13 @@ document.getElementById("status").innerHTML=
 async function loadRides(){
 
 
+clearMarkers();
+
 
 let box=document.getElementById("rideList");
+
+
+box.innerHTML="";
 
 
 
@@ -335,10 +295,6 @@ let snap=await getDocs(q);
 
 
 
-box.innerHTML="";
-
-
-
 snap.forEach((ride)=>{
 
 
@@ -346,38 +302,71 @@ let data=ride.data();
 
 
 
-box.innerHTML +=`
+if(data.pickupLat && data.pickupLng){
 
+
+
+let marker=L.marker(
+
+[
+
+data.pickupLat,
+
+data.pickupLng
+
+]
+
+)
+
+.addTo(map);
+
+
+
+marker.bindPopup(`
+
+📍 Pickup
+
+<br>
+
+💰 ${data.fare}
+
+<br>
+
+🏁 ${data.drop}
+
+<br>
+
+<button onclick="acceptRide('${ride.id}')">
+
+Accept
+
+</button>
+
+`);
+
+
+
+rideMarkers.push(marker);
+
+
+}
+
+
+
+
+box.innerHTML +=`
 
 <div class="ride">
 
-
-📍 Pickup:
-
-<br>
-
-${data.pickup}
-
-
-<br><br>
-
-
-🏁 Drop:
+📍 ${data.pickup}
 
 <br>
 
-${data.drop}
+🏁 ${data.drop}
 
+<br>
 
-<br><br>
-
-
-💰 Price:
-
-${data.fare}
-
-
-<br><br>
+💰 ${data.fare}
 
 
 <button onclick="acceptRide('${ride.id}')">
@@ -387,9 +376,7 @@ Accept Ride
 </button>
 
 
-
 </div>
-
 
 `;
 
@@ -398,7 +385,10 @@ Accept Ride
 });
 
 
+
 }
+
+
 
 
 
@@ -413,15 +403,13 @@ doc(db,"rides",id),
 
 {
 
-
 status:"Accepted",
 
-rider:"rider"
+riderId:"rider"
 
 }
 
 );
-
 
 
 alert("Ride Accepted ✅");
@@ -435,15 +423,14 @@ loadRides();
 
 
 
-
-
-
 initMap();
+
+
+setInterval(loadRides,10000);
 
 
 
 </script>
-
 
 
 </body>
