@@ -10,55 +10,31 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
 <style>
 
-body{
-margin:0;
-background:#111;
-color:white;
-font-family:Arial,sans-serif;
-}
+#map{
 
-.header{
-background:#ffcc00;
-color:#000;
-padding:20px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-}
-
-.container{
-padding:20px;
-}
-
-.card{
-background:#1d1d1d;
-padding:20px;
+height:400px;
+width:100%;
 border-radius:15px;
-margin-bottom:15px;
+margin-top:15px;
+
 }
+
 
 button{
+
 width:100%;
 padding:14px;
 margin-top:10px;
+background:#ffcc00;
 border:none;
 border-radius:10px;
-background:#ffcc00;
 font-weight:bold;
-}
 
-a{
-display:block;
-background:#ffcc00;
-color:#000;
-padding:14px;
-margin-top:15px;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;
 }
 
 </style>
@@ -76,27 +52,42 @@ font-weight:bold;
 </div>
 
 
+
+
 <div class="container">
+
 
 
 <div class="card">
 
+
 <h2>
-Welcome Rider
+
+Rider Control
+
 </h2>
 
+
+
 <p id="status">
+
 ⚫ Offline
+
 </p>
 
 
+
 <button onclick="goOnline()">
-Go Online
+
+🟢 Go Online
+
 </button>
 
 
 <button onclick="goOffline()">
-Go Offline
+
+⚫ Go Offline
+
 </button>
 
 
@@ -104,16 +95,22 @@ Go Offline
 
 
 
+
 <div class="card">
 
+
 <h3>
-📩 Ride Requests
+
+Nearby Rides
+
 </h3>
 
 
-<a href="requests.html">
-View Requests
-</a>
+<div id="rideList">
+
+Waiting...
+
+</div>
 
 
 </div>
@@ -121,53 +118,267 @@ View Requests
 
 
 
-<div class="card">
+<div id="map"></div>
 
-<h3>
-💰 Earnings
-</h3>
+
 
 
 <a href="earnings.html">
-My Earnings
+
+💰 Earnings
+
 </a>
 
 
-</div>
-
-
-
-
-<div class="card">
 
 <a href="profile.html">
+
 👤 Profile
+
 </a>
 
-</div>
-
-
 
 </div>
+
+
+
+
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
 
 <script type="module">
 
+
+import { db } from "../firebase/config.js";
+
+
 import {
 
-goOnline,
-goOffline
+collection,
+getDocs,
+query,
+where,
+doc,
+setDoc
 
-} from "../js/rider.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-window.goOnline=goOnline;
 
-window.goOffline=goOffline;
+
+let map;
+
+let riderMarker;
+
+
+
+function initMap(){
+
+
+map=L.map("map").setView(
+
+[26.9124,75.7873],
+
+13
+
+);
+
+
+
+L.tileLayer(
+
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+).addTo(map);
+
+
+}
+
+
+
+
+
+window.goOnline=async function(){
+
+
+document.getElementById("status").innerHTML=
+
+"🟢 Online";
+
+
+
+navigator.geolocation.watchPosition(
+
+async(pos)=>{
+
+
+let lat=pos.coords.latitude;
+
+let lng=pos.coords.longitude;
+
+
+
+
+if(riderMarker){
+
+map.removeLayer(riderMarker);
+
+}
+
+
+
+
+riderMarker=L.marker(
+
+[lat,lng]
+
+)
+
+.addTo(map)
+
+.bindPopup("🏍 You")
+
+.openPopup();
+
+
+
+map.setView([lat,lng],15);
+
+
+
+
+await setDoc(
+
+doc(db,"riders","current"),
+
+{
+
+latitude:lat,
+
+longitude:lng,
+
+status:"online"
+
+}
+
+);
+
+
+
+
+loadRides();
+
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+window.goOffline=function(){
+
+
+document.getElementById("status").innerHTML=
+
+"⚫ Offline";
+
+
+}
+
+
+
+
+
+
+
+async function loadRides(){
+
+
+let box=document.getElementById("rideList");
+
+
+
+let q=query(
+
+collection(db,"rides"),
+
+where("status","==","Pending")
+
+);
+
+
+
+let snap=await getDocs(q);
+
+
+
+box.innerHTML="";
+
+
+
+snap.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+box.innerHTML +=`
+
+
+<div class="card">
+
+
+📍 ${data.pickup}
+
+<br>
+
+🏁 ${data.drop}
+
+<br>
+
+💰 ${data.fare}
+
+
+<button>
+
+Accept Ride
+
+</button>
+
+
+</div>
+
+
+`;
+
+
+});
+
+
+}
+
+
+
+
+
+initMap();
+
 
 
 </script>
+
 
 
 </body>
