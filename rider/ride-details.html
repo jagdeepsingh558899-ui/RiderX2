@@ -219,13 +219,11 @@ loadRide();
 window.completeRide=async function(){
 
 
-
 await updateDoc(
 
 doc(db,"rides",rideId),
 
 {
-
 
 status:"Completed"
 
@@ -235,27 +233,54 @@ status:"Completed"
 
 
 
+localStorage.setItem(
+
+"rideId",
+
+rideId
+
+);
+
+
+
 alert("Ride Completed ✅");
 
 
 
-loadRide();
+window.completeRide=async function(){
 
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+status:"Completed"
 
 }
 
+);
 
 
 
+localStorage.setItem(
+
+"rideId",
+
+rideId
+
+);
 
 
-loadRide();
+
+alert("Ride Completed ✅");
 
 
 
-</script>
+window.location.href=
+
+"../customer/payment.html";
 
 
-</body>
-
-</html>
+}
