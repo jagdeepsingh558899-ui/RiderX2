@@ -1,76 +1,49 @@
+// =================================
+// RiderX Ride Tracking System
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
-ref,
-set,
-onValue
+doc,
+setDoc,
+getDoc
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-// Rider Live Location
+
+// Update Rider Location
+
+export async function updateRiderLocation(
+
+riderId,
+lat,
+lng
+
+){
 
 
-window.startTracking=function(){
+try{
 
 
-if(navigator.geolocation){
+await setDoc(
 
-
-
-navigator.geolocation.watchPosition(
-
-(position)=>{
-
-
-let lat =
-position.coords.latitude;
-
-
-let lng =
-position.coords.longitude;
-
-
-
-set(
-
-ref(
-db,
-"liveRider/location"
-),
+doc(db,"locations",riderId),
 
 {
+
 
 latitude:lat,
 
 longitude:lng,
 
-time:new Date().toString()
-
-}
-
-);
-
-
-
-let status =
-document.getElementById("status");
-
-
-if(status){
-
-status.innerHTML =
-"Location Sharing ON 🟢";
-
-}
+updatedAt:new Date()
 
 
 }
@@ -79,74 +52,74 @@ status.innerHTML =
 
 
 
-}
-
-else{
-
-
-alert("GPS Not Supported");
+return true;
 
 
 }
 
-
-};
-
+catch(error){
 
 
+console.log(error);
 
 
-
-
-// Customer Tracking
-
-
-const locationBox =
-document.getElementById("location");
-
-
-
-if(locationBox){
-
-
-onValue(
-
-ref(db,"liveRider/location"),
-
-(snapshot)=>{
-
-
-let data =
-snapshot.val();
-
-
-
-if(data){
-
-
-locationBox.innerHTML =
-
-`
-
-Latitude: ${data.latitude}
-
-<br>
-
-Longitude: ${data.longitude}
-
-<br>
-
-Updated: ${data.time}
-
-`;
+return false;
 
 
 }
 
 
 }
+
+
+
+
+
+// Get Rider Location
+
+
+export async function getRiderLocation(
+
+riderId
+
+){
+
+
+try{
+
+
+const location = await getDoc(
+
+doc(db,"locations",riderId)
 
 );
+
+
+
+if(location.exists()){
+
+
+return location.data();
+
+
+}
+
+
+return null;
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+return null;
+
+
+}
 
 
 }
