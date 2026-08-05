@@ -1,104 +1,149 @@
+// =================================
+// RiderX Ride Requests System
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
 collection,
-query,
-where,
-onSnapshot,
+getDocs,
 doc,
-updateDoc
+updateDoc,
+query,
+where
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-const box =
-document.getElementById("rideRequests");
+// Load Pending Requests
+
+export async function loadRideRequests(){
+
+
+let box = document.getElementById("requestList");
+
+
+if(!box) return;
 
 
 
-const q =
-query(
+try{
+
+
+const q = query(
 
 collection(db,"rides"),
 
-where(
-"status",
-"==",
-"requested"
-)
+where("status","==","Pending")
 
 );
 
 
 
+const snapshot = await getDocs(q);
 
-onSnapshot(q,(snapshot)=>{
 
 
 box.innerHTML="";
 
 
 
-snapshot.forEach((item)=>{
+if(snapshot.empty){
 
 
-let data=item.data();
+box.innerHTML =
+"<p>No ride requests available</p>";
+
+
+return;
+
+
+}
+
+
+
+
+snapshot.forEach((ride)=>{
+
+
+let data = ride.data();
 
 
 
 box.innerHTML += `
 
-<div class="card">
 
-<h3>${data.type}</h3>
+<div class="request-card">
+
+
+<h3>
+🚕 ${data.service || "Ride"}
+</h3>
+
 
 <p>
-Pickup: ${data.pickup}
+📍 ${data.pickup || "N/A"}
+➡
+${data.drop || "N/A"}
 </p>
+
 
 <p>
-Drop: ${data.drop}
-</p>
-
-<p>
-Fare: ₹${data.fare}
+💰 Fare: ₹${data.fare || 0}
 </p>
 
 
-<button onclick="acceptRide('${item.id}')">
+
+<button onclick="acceptRide('${ride.id}')">
 Accept
 </button>
 
 
-<button onclick="rejectRide('${item.id}')">
+<button onclick="rejectRide('${ride.id}')">
 Reject
 </button>
 
 
 </div>
 
+
 `;
 
 
-});
-
 
 });
 
 
+}
+
+
+catch(error){
+
+console.log(error);
+
+box.innerHTML="Error loading requests";
+
+
+}
+
+
+}
 
 
 
 
-window.acceptRide=async function(id){
+
+
+
+// Accept Ride
+
+
+window.acceptRide = async function(id){
 
 
 await updateDoc(
@@ -107,7 +152,7 @@ doc(db,"rides",id),
 
 {
 
-status:"accepted"
+status:"Accepted"
 
 }
 
@@ -117,13 +162,20 @@ status:"accepted"
 alert("Ride Accepted");
 
 
-};
+loadRideRequests();
+
+
+}
 
 
 
 
 
-window.rejectRide=async function(id){
+
+// Reject Ride
+
+
+window.rejectRide = async function(id){
 
 
 await updateDoc(
@@ -132,7 +184,7 @@ doc(db,"rides",id),
 
 {
 
-status:"rejected"
+status:"Rejected"
 
 }
 
@@ -142,14 +194,7 @@ status:"rejected"
 alert("Ride Rejected");
 
 
-};
+loadRideRequests();
 
 
-
-
-
-window.backHome=function(){
-
-window.location.href="dashboard.html";
-
-};
+}
