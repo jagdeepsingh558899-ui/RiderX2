@@ -10,7 +10,6 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-
 <style>
 
 .box{
@@ -22,6 +21,7 @@ margin:15px 0;
 
 }
 
+
 input{
 
 width:100%;
@@ -32,12 +32,13 @@ border:none;
 
 }
 
+
 button{
 
 width:100%;
 padding:14px;
 background:#ffcc00;
-border:0;
+border:none;
 border-radius:10px;
 font-weight:bold;
 
@@ -53,7 +54,7 @@ font-weight:bold;
 
 <div class="header">
 
-⚙️ Admin Settings
+⚙️ Admin Control Panel
 
 </div>
 
@@ -65,7 +66,8 @@ font-weight:bold;
 <div class="box">
 
 
-<h3>🏍 Bike Fare</h3>
+<h3>💰 Fare Settings</h3>
+
 
 <input id="bikeBase" placeholder="Bike Base Fare">
 
@@ -73,15 +75,16 @@ font-weight:bold;
 
 
 
-<h3>🚕 Cab Fare</h3>
-
 <input id="cabBase" placeholder="Cab Base Fare">
 
 <input id="cabKm" placeholder="Cab Per KM">
 
 
 
-<h3>🎁 Coupon Offer</h3>
+
+
+<h3>🎁 Coupon</h3>
+
 
 <input id="coupon" placeholder="Coupon Code">
 
@@ -90,17 +93,73 @@ font-weight:bold;
 
 
 
+
+
+<h3>🚦 Services Control</h3>
+
+
+
+<label>
+
+<input type="checkbox" id="bike">
+
+🏍 Bike Taxi
+
+</label>
+
+
+<br><br>
+
+
+<label>
+
+<input type="checkbox" id="cab">
+
+🚕 Cab
+
+</label>
+
+
+<br><br>
+
+
+<label>
+
+<input type="checkbox" id="parcel">
+
+📦 Parcel
+
+</label>
+
+
+<br><br>
+
+
+<label>
+
+<input type="checkbox" id="food">
+
+🍔 Food
+
+</label>
+
+
+
+
+
 <button onclick="saveSettings()">
 
-Save Settings
+Save All Settings
 
 </button>
 
 
+
 </div>
 
 
 </div>
+
 
 
 
@@ -128,10 +187,14 @@ from
 
 
 
+
+
 async function load(){
 
 
-let snap=await getDoc(
+let snap=
+
+await getDoc(
 
 doc(db,"settings","app")
 
@@ -143,6 +206,7 @@ if(snap.exists()){
 
 
 let d=snap.data();
+
 
 
 bikeBase.value=d.bikeBase || "";
@@ -158,11 +222,21 @@ coupon.value=d.coupon || "";
 discount.value=d.discount || "";
 
 
+
+bike.checked=d.bike ?? true;
+
+cab.checked=d.cab ?? true;
+
+parcel.checked=d.parcel ?? true;
+
+food.checked=d.food ?? true;
+
+
 }
 
 
-
 }
+
 
 
 
@@ -181,20 +255,28 @@ doc(db,"settings","app"),
 
 bikeBase:Number(bikeBase.value),
 
-
 bikeKm:Number(bikeKm.value),
 
 
 cabBase:Number(cabBase.value),
 
-
 cabKm:Number(cabKm.value),
+
 
 
 coupon:coupon.value,
 
+discount:Number(discount.value),
 
-discount:Number(discount.value)
+
+
+bike:bike.checked,
+
+cab:cab.checked,
+
+parcel:parcel.checked,
+
+food:food.checked
 
 
 
@@ -204,8 +286,7 @@ discount:Number(discount.value)
 
 
 
-alert("Settings Saved ✅");
-
+alert("All Settings Saved ✅");
 
 
 }
