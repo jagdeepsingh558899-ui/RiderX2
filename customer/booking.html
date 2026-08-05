@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Book Ride</title>
+<title>RiderX Booking</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
@@ -17,11 +17,8 @@
 
 
 <div class="header">
-
-🚕 Book Ride
-
+🚕 RiderX Booking
 </div>
-
 
 
 <div class="container">
@@ -29,23 +26,21 @@
 
 <select id="service">
 
-<option>Bike Taxi</option>
-<option>Cab</option>
-<option>Parcel</option>
-<option>Food</option>
+<option value="Bike Taxi">🏍 Bike Taxi</option>
+
+<option value="Cab">🚕 Cab</option>
+
+<option value="Parcel">📦 Parcel</option>
+
+<option value="Food">🍔 Food</option>
 
 </select>
 
 
-
-<input id="pickup" placeholder="Pickup Location">
-
-
-<input id="drop" placeholder="Drop Location">
+<input id="pickup" placeholder="Pickup Location" readonly>
 
 
-
-<button onclick="getLocation()">
+<button onclick="getPickup()">
 
 📍 Use Current Location
 
@@ -53,15 +48,27 @@
 
 
 
-<input id="fare" placeholder="Fare" readonly>
+<input id="drop" placeholder="Drop Location">
 
 
 
-<button onclick="calculateFare()">
+<button onclick="calculateRide()">
 
-Calculate Fare
+📏 Calculate Fare
 
 </button>
+
+
+
+<p id="distance">
+
+Distance: -
+
+</p>
+
+
+
+<input id="fare" placeholder="Fare" readonly>
 
 
 
@@ -72,9 +79,7 @@ Confirm Booking
 </button>
 
 
-
 </div>
-
 
 
 
@@ -82,7 +87,10 @@ Confirm Booking
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
+
+
+import {getCoordinates} from "../js/geocode.js";
 
 
 import {
@@ -91,40 +99,47 @@ collection,
 addDoc,
 serverTimestamp
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-let pickupLat = null;
+let pickupLat;
 
-let pickupLng = null;
-
-
+let pickupLng;
 
 
+let dropLat;
 
-window.getLocation=function(){
+let dropLng;
+
+
+let distance=0;
+
+
+
+
+window.getPickup=function(){
 
 
 navigator.geolocation.getCurrentPosition(
 
-(position)=>{
+(pos)=>{
 
 
-pickupLat =
-position.coords.latitude;
+pickupLat=pos.coords.latitude;
 
-
-pickupLng =
-position.coords.longitude;
+pickupLng=pos.coords.longitude;
 
 
 
-document.getElementById("pickup").value =
+document.getElementById("pickup").value=
 
-pickupLat + "," + pickupLng;
-
+pickupLat+","+pickupLng;
 
 
 }
@@ -141,10 +156,83 @@ pickupLat + "," + pickupLng;
 
 
 
-window.calculateFare=function(){
+window.calculateRide=async function(){
 
 
-let service =
+
+let address=
+
+document.getElementById("drop").value;
+
+
+
+let result=
+
+await getCoordinates(address);
+
+
+
+if(!result){
+
+alert("Drop location not found");
+
+return;
+
+}
+
+
+
+dropLat=result.lat;
+
+dropLng=result.lng;
+
+
+
+let R=6371;
+
+
+
+let dLat=
+
+(dropLat-pickupLat)*Math.PI/180;
+
+
+let dLng=
+
+(dropLng-pickupLng)*Math.PI/180;
+
+
+
+let a=
+
+Math.sin(dLat/2)**2+
+
+Math.cos(pickupLat*Math.PI/180)
+
+*
+
+Math.cos(dropLat*Math.PI/180)
+
+*
+
+Math.sin(dLng/2)**2;
+
+
+
+distance=
+
+(R*2*Math.atan2(
+
+Math.sqrt(a),
+
+Math.sqrt(1-a)
+
+)).toFixed(2);
+
+
+
+
+let service=
 
 document.getElementById("service").value;
 
@@ -156,30 +244,27 @@ let fare=50;
 
 if(service=="Cab")
 
-fare=150;
-
-
-
-if(service=="Parcel")
-
-fare=80;
-
-
-
-if(service=="Food")
-
 fare=100;
+
+
+
+fare += distance*10;
+
+
+
+document.getElementById("distance").innerHTML=
+
+"Distance: "+distance+" KM";
 
 
 
 document.getElementById("fare").value=
 
-"₹"+fare;
+"₹"+Math.round(fare);
 
 
 
 }
-
 
 
 
@@ -191,22 +276,6 @@ window.bookRide=async function(){
 
 
 
-let drop =
-
-document.getElementById("drop").value;
-
-
-
-if(!pickupLat){
-
-alert("Please select pickup location");
-
-return;
-
-}
-
-
-
 await addDoc(
 
 collection(db,"rides"),
@@ -214,19 +283,17 @@ collection(db,"rides"),
 {
 
 
-pickup:
-
-document.getElementById("pickup").value,
-
-
-drop:drop,
-
-
 pickupLat:pickupLat,
-
 
 pickupLng:pickupLng,
 
+
+dropLat:dropLat,
+
+dropLng:dropLng,
+
+
+distance:distance,
 
 
 service:
@@ -234,11 +301,9 @@ service:
 document.getElementById("service").value,
 
 
-
 fare:
 
 document.getElementById("fare").value,
-
 
 
 status:"Pending",
@@ -247,23 +312,17 @@ status:"Pending",
 createdAt:serverTimestamp()
 
 
-
 }
 
 );
 
 
 
-alert("Ride Requested ✅");
+alert("Ride Booked ✅");
 
-
-
-window.location.href="ride-status.html";
 
 
 }
-
-
 
 
 
