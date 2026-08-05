@@ -1,150 +1,81 @@
-// =====================================
-// RiderX Wallet System V2
-// =====================================
+// =================================
+// RiderX Wallet System
+// =================================
 
-import { auth, db } from "../firebase/config.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { db } from "../firebase/config.js";
+
 
 import {
-    doc,
-    getDoc,
-    setDoc,
-    updateDoc,
-    collection,
-    addDoc,
-    serverTimestamp,
-    query,
-    where,
-    getDocs
+
+collection,
+getDocs,
+query,
+where
+
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const walletBalance = document.getElementById("walletBalance");
-const amount = document.getElementById("amount");
-const addMoneyBtn = document.getElementById("addMoneyBtn");
-const transactionList = document.getElementById("transactionList");
 
-let currentUser = null;
 
-onAuthStateChanged(auth, async (user) => {
 
-    if (!user) {
 
-        window.location.href = "../auth/login.html";
-        return;
+// Get Rider Earnings
 
-    }
 
-    currentUser = user;
+export async function getWalletBalance(){
 
-    await loadWallet();
-    await loadTransactions();
+
+try{
+
+
+const q = query(
+
+collection(db,"rides"),
+
+where("status","==","Completed")
+
+);
+
+
+
+const snapshot = await getDocs(q);
+
+
+
+let total = 0;
+
+
+
+snapshot.forEach((ride)=>{
+
+
+let data = ride.data();
+
+
+
+total += Number(data.fare || 0);
+
+
 
 });
 
-async function loadWallet() {
 
-    const walletRef = doc(db, "wallets", currentUser.uid);
 
-    const walletDoc = await getDoc(walletRef);
+return total;
 
-    if (!walletDoc.exists()) {
-
-        await setDoc(walletRef, {
-            balance: 0
-        });
-
-        walletBalance.innerHTML = "₹0";
-        return;
-
-    }
-
-    walletBalance.innerHTML = "₹" + walletDoc.data().balance;
 
 }
 
-addMoneyBtn.onclick = async () => {
+catch(error){
 
-    const money = Number(amount.value);
 
-    if (money <= 0) {
+console.log(error);
 
-        alert("Enter valid amount");
-        return;
 
-    }
+return 0;
 
-    const walletRef = doc(db, "wallets", currentUser.uid);
 
-    const walletDoc = await getDoc(walletRef);
+}
 
-    const currentBalance = walletDoc.data().balance;
-
-    const newBalance = currentBalance + money;
-
-    await updateDoc(walletRef, {
-
-        balance: newBalance
-
-    });
-
-    await addDoc(collection(db, "wallet_transactions"), {
-
-        userId: currentUser.uid,
-        type: "Credit",
-        amount: money,
-        createdAt: serverTimestamp()
-
-    });
-
-    walletBalance.innerHTML = "₹" + newBalance;
-
-    amount.value = "";
-
-    await loadTransactions();
-
-    alert("Money Added Successfully");
-
-};
-
-async function loadTransactions() {
-
-    transactionList.innerHTML = "";
-
-    const q = query(
-        collection(db, "wallet_transactions"),
-        where("userId", "==", currentUser.uid)
-    );
-
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
-
-        transactionList.innerHTML =
-        "<p>No Transactions</p>";
-
-        return;
-
-    }
-
-    snapshot.forEach((doc) => {
-
-        const data = doc.data();
-
-        transactionList.innerHTML += `
-
-        <div class="service-card">
-
-            <p><b>${data.type}</b></p>
-
-            <p>₹${data.amount}</p>
-
-        </div>
-
-        `;
-
-    });
 
 }
