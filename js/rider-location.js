@@ -1,91 +1,108 @@
+// =================================
+// RiderX Rider Live Location
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
-ref,
-set,
-remove
+doc,
+setDoc
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+// Start Rider Location Tracking
+
+
+export function startLocationTracking(riderId){
+
+
+if(!navigator.geolocation){
+
+
+console.log("Location not supported");
+
+return;
+
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-
-
-
-
-let watch;
-
-
-
-window.goOnline=function(){
 
 
 navigator.geolocation.watchPosition(
 
-(pos)=>{
+async(position)=>{
 
 
-set(
+let latitude =
+position.coords.latitude;
 
-ref(
+
+let longitude =
+position.coords.longitude;
+
+
+
+await setDoc(
+
+doc(
 
 db,
 
-"onlineRiders/demoRider"
+"locations",
+
+riderId
 
 ),
 
 {
 
-lat:pos.coords.latitude,
 
-lng:pos.coords.longitude,
+latitude:latitude,
 
-online:true
+longitude:longitude,
+
+online:true,
+
+updatedAt:new Date()
+
 
 }
 
 );
 
 
-document.getElementById("status").innerHTML=
 
-"Online 🟢";
+},
+
+(error)=>{
+
+
+console.log(error);
 
 
 },
 
-);
+{
+
+enableHighAccuracy:true,
+
+maximumAge:10000,
+
+timeout:5000
 
 
-};
+}
 
-
-
-
-
-window.goOffline=function(){
-
-
-remove(
-
-ref(
-
-db,
-
-"onlineRiders/demoRider"
-
-)
 
 );
 
 
-document.getElementById("status").innerHTML=
 
-"Offline 🔴";
-
-
-};
+}
