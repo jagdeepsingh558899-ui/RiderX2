@@ -10,20 +10,24 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
 
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
+
+margin:0;
+background:#111;
+color:white;
+font-family:Arial,sans-serif;
+
 }
+
 
 .box{
 
 width:90%;
 max-width:400px;
-margin:50px auto;
+margin:40px auto;
 background:#1d1d1d;
 padding:25px;
 border-radius:15px;
@@ -46,7 +50,6 @@ padding:14px;
 margin:10px 0;
 border:none;
 border-radius:10px;
-font-size:16px;
 
 }
 
@@ -54,12 +57,11 @@ font-size:16px;
 button{
 
 width:100%;
-padding:15px;
+padding:14px;
 background:#ffcc00;
 border:none;
 border-radius:10px;
 font-weight:bold;
-font-size:16px;
 
 }
 
@@ -94,6 +96,7 @@ Create Account
 </h2>
 
 
+
 <input id="name" placeholder="Full Name">
 
 
@@ -103,12 +106,12 @@ Create Account
 <input id="password" type="password" placeholder="Password">
 
 
-
 <select id="role">
 
 <option value="customer">
 Customer
 </option>
+
 
 <option value="rider">
 Rider
@@ -118,8 +121,11 @@ Rider
 
 
 
+
 <button onclick="register()">
+
 Register
+
 </button>
 
 
@@ -127,12 +133,17 @@ Register
 <p id="msg"></p>
 
 
+
 <a href="login.html">
-Already have account? Login
+
+Already Account? Login
+
 </a>
 
 
 </div>
+
+
 
 
 
@@ -159,60 +170,95 @@ setDoc
 
 
 
+
+
 window.register = async function(){
 
 
-let name=document.getElementById("name").value;
+let name =
+document.getElementById("name").value;
 
-let email=document.getElementById("email").value;
 
-let password=document.getElementById("password").value;
+let email =
+document.getElementById("email").value;
 
-let role=document.getElementById("role").value;
+
+let password =
+document.getElementById("password").value;
+
+
+let role =
+document.getElementById("role").value;
+
+
 
 
 try{
 
 
-const userCredential = await createUserWithEmailAndPassword(
+let user = await createUserWithEmailAndPassword(
+
 auth,
+
 email,
+
 password
+
 );
+
+
 
 
 await setDoc(
-doc(db,"users",userCredential.user.uid),
+
+doc(db,"users",user.user.uid),
+
 {
 
 name:name,
+
 email:email,
+
 role:role,
+
+status:"Active",
+
 createdAt:new Date()
 
 }
+
 );
+
 
 
 
 document.getElementById("msg").innerHTML=
-"Registration Successful";
+"Account Created ✅";
+
+
 
 
 setTimeout(()=>{
 
+
 if(role=="rider"){
 
-window.location.href="../rider/dashboard.html";
+
+location.href="../rider/dashboard.html";
+
 
 }
+
 else{
 
-window.location.href="../customer/dashboard.html";
+
+location.href="../customer/dashboard.html";
+
 
 }
 
-},1500);
+
+},1000);
 
 
 
@@ -220,7 +266,10 @@ window.location.href="../customer/dashboard.html";
 
 catch(error){
 
-document.getElementById("msg").innerHTML=error.message;
+
+document.getElementById("msg").innerHTML=
+error.message;
+
 
 }
 
