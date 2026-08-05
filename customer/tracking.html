@@ -12,7 +12,6 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
-
 <style>
 
 #map{
@@ -33,7 +32,7 @@ border-radius:15px;
 
 <div class="header">
 
-🗺️ RiderX Live Tracking
+🗺️ Tracking Rider
 
 </div>
 
@@ -45,21 +44,13 @@ border-radius:15px;
 <div id="map"></div>
 
 
-<a href="ride-status.html">
-
-⬅ Back Ride Status
-
-</a>
-
 
 </div>
 
 
 
 
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 
 
 <script type="module">
@@ -70,6 +61,11 @@ import {db} from "../firebase/config.js";
 
 import {
 
+collection,
+getDocs,
+query,
+orderBy,
+limit,
 doc,
 getDoc
 
@@ -82,8 +78,7 @@ from
 
 
 
-
-let map = L.map("map").setView(
+let map=L.map("map").setView(
 
 [26.9124,75.7873],
 
@@ -113,24 +108,83 @@ let riderMarker;
 
 
 
+let riderId=null;
 
 
-async function loadRider(){
 
 
 
-let snap = await getDoc(
+async function getAcceptedRide(){
 
 
-doc(db,"locations",riderId)
+let q=query(
+
+collection(db,"rides"),
+
+orderBy("createdAt","desc"),
+
+limit(1)
+
 );
 
 
 
-if(snap.exists()){
+let snap=await getDocs(q);
 
 
-let data=snap.data();
+
+snap.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+if(data.status=="Accepted"){
+
+
+riderId=data.riderId;
+
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+async function trackRider(){
+
+
+if(!riderId){
+
+return;
+
+}
+
+
+
+let location=await getDoc(
+
+doc(db,"locations",riderId)
+
+);
+
+
+
+if(location.exists()){
+
+
+let data=location.data();
 
 
 
@@ -158,7 +212,7 @@ data.longitude
 
 .bindPopup(
 
-"🏍 Rider Location"
+"🏍 Your Rider"
 
 )
 
@@ -191,16 +245,31 @@ data.longitude
 
 
 
-loadRider();
+
+async function start(){
+
+
+await getAcceptedRide();
+
+
+trackRider();
+
 
 
 setInterval(
 
-loadRider,
+trackRider,
 
 5000
 
 );
+
+
+}
+
+
+
+start();
 
 
 
