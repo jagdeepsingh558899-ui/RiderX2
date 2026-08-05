@@ -13,64 +13,20 @@
 
 <style>
 
-body{
-
-margin:0;
-background:#111;
-color:white;
-font-family:Arial,sans-serif;
-
-}
-
-
-.header{
-
-background:#ffcc00;
-color:#000;
-padding:20px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-
-}
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-.card{
+.box{
 
 background:#1d1d1d;
 padding:25px;
 border-radius:15px;
-text-align:center;
+margin:15px 0;
 
 }
 
 
-.money{
+.amount{
 
-font-size:40px;
+font-size:35px;
 color:#ffcc00;
-font-weight:bold;
-
-}
-
-
-.back{
-
-display:block;
-margin-top:20px;
-background:#ffcc00;
-color:#000;
-padding:14px;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
 font-weight:bold;
 
 }
@@ -78,7 +34,6 @@ font-weight:bold;
 </style>
 
 </head>
-
 
 
 <body>
@@ -95,15 +50,14 @@ font-weight:bold;
 <div class="container">
 
 
-<div class="card">
+<div class="box">
 
-
-<h2>
+<h3>
 Total Earnings
-</h2>
+</h3>
 
 
-<div class="money" id="earning">
+<div class="amount" id="earning">
 
 ₹0
 
@@ -114,7 +68,25 @@ Total Earnings
 
 
 
-<a class="back" href="dashboard.html">
+<div class="box">
+
+<h3>
+Completed Rides
+</h3>
+
+
+<h2 id="rides">
+
+0
+
+</h2>
+
+
+</div>
+
+
+
+<a href="dashboard.html">
 
 ⬅ Back Dashboard
 
@@ -126,38 +98,106 @@ Total Earnings
 
 
 
+
 <script type="module">
+
+
+import {db} from "../firebase/config.js";
 
 
 import {
 
-getWalletBalance
+collection,
+getDocs,
+query,
+where
 
-} from "../js/wallet.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-async function load(){
 
 
-let amount = await getWalletBalance();
+async function loadEarnings(){
 
 
 
-document.getElementById("earning").innerHTML =
-"₹"+amount;
+let q=query(
+
+collection(db,"rides"),
+
+where("status","==","Completed")
+
+);
+
+
+
+let snap=await getDocs(q);
+
+
+
+let total=0;
+
+let count=0;
+
+
+
+snap.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+let price=
+
+Number(
+
+String(data.fare)
+
+.replace("₹","")
+
+);
+
+
+
+total += price;
+
+count++;
+
+
+
+});
+
+
+
+document.getElementById("earning").innerHTML=
+
+"₹"+total;
+
+
+
+document.getElementById("rides").innerHTML=
+
+count;
+
 
 
 }
 
 
 
-load();
+
+
+loadEarnings();
 
 
 
 </script>
-
 
 
 </body>
