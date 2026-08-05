@@ -1,15 +1,65 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-<title>Admin Rider Approval</title>
+<title>RiderX Admin - Riders</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#111;
+    color:white;
+}
+
+.header{
+    background:#ffcc00;
+    color:#000;
+    padding:20px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.container{
+    padding:20px;
+}
+
+.rider-card{
+
+    background:#1d1d1d;
+    padding:15px;
+    margin:15px 0;
+    border-radius:12px;
+    border:1px solid #333;
+
+}
+
+.rider-card h3{
+    color:#ffcc00;
+}
+
+
+.back{
+
+display:inline-block;
+margin-top:20px;
+background:#ffcc00;
+color:#000;
+padding:12px 20px;
+border-radius:10px;
+text-decoration:none;
+font-weight:bold;
+
+}
+
+</style>
 
 </head>
 
@@ -17,35 +67,131 @@
 <body>
 
 
-<div class="splash">
+<div class="header">
+🏍 RiderX Riders
+</div>
 
 
-<img src="../assets/logo.png" class="logo">
+<div class="container">
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+<h2>All Riders</h2>
 
 
-<h2>
-Rider Approval
-</h2>
+<div id="riderList">
+Loading riders...
+</div>
 
 
-<div id="riders">
+<a class="back" href="dashboard.html">
+⬅ Back Dashboard
+</a>
 
-Loading Riders...
 
 </div>
 
 
+
+<script type="module">
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+collection,
+getDocs
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+async function loadRiders(){
+
+
+let box=document.getElementById("riderList");
+
+
+try{
+
+
+const snapshot=await getDocs(collection(db,"riders"));
+
+
+box.innerHTML="";
+
+
+if(snapshot.empty){
+
+box.innerHTML="<p>No riders found</p>";
+return;
+
+}
+
+
+
+snapshot.forEach((doc)=>{
+
+
+let data=doc.data();
+
+
+box.innerHTML += `
+
+<div class="rider-card">
+
+<h3>
+${data.name || "Rider"}
+</h3>
+
+
+<p>
+📧 Email: ${data.email || "N/A"}
+</p>
+
+
+<p>
+📱 Phone: ${data.phone || "N/A"}
+</p>
+
+
+<p>
+🏍 Vehicle: ${data.vehicle || "N/A"}
+</p>
+
+
+<p>
+ID: ${doc.id}
+</p>
+
+
 </div>
 
+`;
 
-<script type="module" src="../js/admin-rider.js"></script>
+
+});
+
+
+}
+
+catch(error){
+
+box.innerHTML="Error loading riders";
+console.log(error);
+
+}
+
+
+}
+
+
+
+loadRiders();
+
+
+</script>
 
 
 </body>
-
 </html>
