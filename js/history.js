@@ -1,89 +1,131 @@
-// =====================================
-// RiderX Ride History System V2
-// =====================================
+// =================================
+// RiderX Ride History
+// =================================
 
-import { auth, db } from "../firebase/config.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { db } from "../firebase/config.js";
+
 
 import {
-    collection,
-    query,
-    where,
-    orderBy,
-    getDocs
+
+collection,
+getDocs,
+query,
+orderBy
+
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const historyList = document.getElementById("historyList");
 
-onAuthStateChanged(auth, async (user) => {
 
-    if (!user) {
-        window.location.href = "../auth/login.html";
-        return;
-    }
 
-    try {
+// Load Ride History
 
-        const q = query(
-            collection(db, "bookings"),
-            where("customerId", "==", user.uid),
-            orderBy("createdAt", "desc")
-        );
+export async function loadRideHistory(){
 
-        const snapshot = await getDocs(q);
 
-        historyList.innerHTML = "";
+let rideBox = document.getElementById("rideList");
 
-        if (snapshot.empty) {
 
-            historyList.innerHTML = `
-                <div class="service-card">
-                    <h3>No Ride History</h3>
-                </div>
-            `;
+if(!rideBox) return;
 
-            return;
-        }
 
-        snapshot.forEach((ride) => {
 
-            const data = ride.data();
+try{
 
-            historyList.innerHTML += `
 
-            <div class="service-card">
+const q = query(
 
-                <h3>${data.service}</h3>
+collection(db,"rides"),
 
-                <p><b>Pickup:</b> ${data.pickup}</p>
+orderBy("createdAt","desc")
 
-                <p><b>Drop:</b> ${data.drop}</p>
+);
 
-                <p><b>Fare:</b> ₹${data.fare}</p>
 
-                <p><b>Status:</b> ${data.status}</p>
 
-                <a href="rating.html?booking=${ride.id}">
-                    <button>
-                        Rate Ride ⭐
-                    </button>
-                </a>
+const snapshot = await getDocs(q);
 
-            </div>
 
-            `;
 
-        });
+rideBox.innerHTML="";
 
-    }
 
-    catch (error) {
 
-        alert(error.message);
+if(snapshot.empty){
 
-    }
+
+rideBox.innerHTML =
+"<p>No rides found</p>";
+
+
+return;
+
+
+}
+
+
+
+
+snapshot.forEach((doc)=>{
+
+
+let ride = doc.data();
+
+
+
+rideBox.innerHTML += `
+
+
+<div class="ride-card">
+
+
+<h3>
+${ride.service || "Ride"}
+</h3>
+
+
+<p>
+📍 ${ride.pickup || "N/A"} 
+➡ 
+${ride.drop || "N/A"}
+</p>
+
+
+<p>
+💰 Fare: ₹${ride.fare || 0}
+</p>
+
+
+<p>
+Status: ${ride.status || "Pending"}
+</p>
+
+
+</div>
+
+
+`;
+
+
 
 });
+
+
+
+}
+
+
+catch(error){
+
+
+console.log(error);
+
+
+rideBox.innerHTML =
+"Unable to load rides";
+
+
+}
+
+
+}
