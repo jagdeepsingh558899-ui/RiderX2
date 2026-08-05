@@ -1,58 +1,35 @@
-function book(){
+// =================================
+// RiderX Home System
+// =================================
 
-localStorage.setItem(
 
-"rideType",
 
-"bike"
+// Check Login Status
+
+
+export function checkUser(){
+
+
+let user = localStorage.getItem(
+
+"riderx_user"
 
 );
 
 
-window.location.href=
 
-"booking.html";
+if(user){
+
+
+return JSON.parse(user);
+
 
 }
 
 
 
+return null;
 
-function bike(){
-
-localStorage.setItem(
-
-"rideType",
-
-"bike"
-
-);
-
-
-window.location.href=
-
-"booking.html";
-
-}
-
-
-
-
-
-function cab(){
-
-localStorage.setItem(
-
-"rideType",
-
-"cab"
-
-);
-
-
-window.location.href=
-
-"booking.html";
 
 }
 
@@ -60,20 +37,22 @@ window.location.href=
 
 
 
-function parcel(){
+
+
+// Save User Session
+
+
+export function saveUser(user){
+
 
 localStorage.setItem(
 
-"rideType",
+"riderx_user",
 
-"parcel"
+JSON.stringify(user)
 
 );
 
-
-window.location.href=
-
-"booking.html";
 
 }
 
@@ -81,10 +60,38 @@ window.location.href=
 
 
 
-function profile(){
 
-window.location.href=
+// Welcome Message
 
-"profile.html";
+
+export function showWelcome(){
+
+
+let box = document.getElementById("welcome");
+
+
+if(!box){
+
+return;
+
+}
+
+
+
+let user = checkUser();
+
+
+
+if(user){
+
+
+box.innerHTML =
+
+"Welcome "+user.name;
+
+
+}
+
+
 
 }
