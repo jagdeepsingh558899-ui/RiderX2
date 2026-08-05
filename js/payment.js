@@ -1,139 +1,90 @@
-// =====================================
-// RiderX Payment System V2
-// =====================================
+// =================================
+// RiderX Payment System
+// =================================
 
-import { auth, db } from "../firebase/config.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { db } from "../firebase/config.js";
+
 
 import {
-    doc,
-    getDoc,
-    updateDoc,
-    addDoc,
-    collection,
-    serverTimestamp
+
+collection,
+addDoc,
+serverTimestamp
+
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const fareAmount = document.getElementById("fareAmount");
-const payBtn = document.getElementById("payBtn");
-const paymentStatus = document.getElementById("paymentStatus");
 
-let currentUser = null;
-let bookingId = "";
-let fare = 0;
 
-onAuthStateChanged(auth, async (user) => {
 
-    if (!user) {
+// Create Payment Record
 
-        window.location.href = "../auth/login.html";
-        return;
+export async function createPayment(
 
-    }
+customer,
+amount,
+method
 
-    currentUser = user;
+){
 
-    bookingId = new URLSearchParams(window.location.search).get("booking");
 
-    if (!bookingId) {
+try{
 
-        paymentStatus.innerHTML = "Booking Not Found";
-        return;
 
-    }
+await addDoc(
 
-    const bookingRef = doc(db, "bookings", bookingId);
+collection(db,"payments"),
 
-    const bookingSnap = await getDoc(bookingRef);
+{
 
-    if (!bookingSnap.exists()) {
 
-        paymentStatus.innerHTML = "Booking Not Found";
-        return;
+customer:customer,
 
-    }
+amount:amount,
 
-    fare = bookingSnap.data().fare;
+method:method,
 
-    fareAmount.innerHTML = "₹" + fare;
+status:"Paid",
 
-});
+createdAt:serverTimestamp()
 
-payBtn.onclick = async () => {
 
-    const method =
-        document.querySelector('input[name="payment"]:checked').value;
+}
 
-    try {
+);
 
-        if (method === "Wallet") {
 
-            const walletRef = doc(db, "wallets", currentUser.uid);
 
-            const walletSnap = await getDoc(walletRef);
+return true;
 
-            if (!walletSnap.exists()) {
 
-                alert("Wallet Not Found");
-                return;
+}
 
-            }
+catch(error){
 
-            const balance = walletSnap.data().balance;
 
-            if (balance < fare) {
+console.log(error);
 
-                alert("Insufficient Wallet Balance");
-                return;
 
-            }
+return false;
 
-            await updateDoc(walletRef, {
 
-                balance: balance - fare
+}
 
-            });
 
-        }
+}
 
-        await updateDoc(
-            doc(db, "bookings", bookingId),
-            {
 
-                paymentMethod: method,
-                paymentStatus: "Paid",
-                paidAt: serverTimestamp()
 
-            }
-        );
 
-        await addDoc(collection(db, "payments"), {
 
-            bookingId: bookingId,
-            customerId: currentUser.uid,
-            amount: fare,
-            method: method,
-            status: "Paid",
-            createdAt: serverTimestamp()
+// Payment Status
 
-        });
 
-        paymentStatus.innerHTML =
-            "✅ Payment Successful";
+export function paymentSuccess(){
 
-        payBtn.disabled = true;
 
-        alert("Payment Completed Successfully");
+alert("Payment Successful ✅");
 
-    }
 
-    catch (error) {
-
-        alert(error.message);
-
-    }
-
-};
+}
