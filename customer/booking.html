@@ -6,29 +6,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Map Booking</title>
+<title>RiderX Book Ride</title>
 
 <link rel="stylesheet" href="../css/style.css">
-
-
-<!-- Leaflet Map -->
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-
-<style>
-
-#map{
-
-height:300px;
-width:100%;
-border-radius:15px;
-margin:15px 0;
-
-}
-
-
-</style>
 
 </head>
 
@@ -38,7 +18,7 @@ margin:15px 0;
 
 <div class="header">
 
-🚕 RiderX Booking
+🚕 Book Ride
 
 </div>
 
@@ -47,21 +27,14 @@ margin:15px 0;
 <div class="container">
 
 
-<div class="box">
-
-
 <select id="service">
 
-<option value="Bike Taxi">🏍 Bike Taxi</option>
-
-<option value="Cab">🚕 Cab</option>
-
-<option value="Parcel">📦 Parcel</option>
-
-<option value="Food">🍔 Food</option>
+<option>Bike Taxi</option>
+<option>Cab</option>
+<option>Parcel</option>
+<option>Food</option>
 
 </select>
-
 
 
 
@@ -72,12 +45,15 @@ margin:15px 0;
 
 
 
-<div id="map"></div>
+<button onclick="getLocation()">
+
+📍 Use Current Location
+
+</button>
 
 
 
 <input id="fare" placeholder="Fare" readonly>
-
 
 
 
@@ -91,7 +67,7 @@ Calculate Fare
 
 <button onclick="bookRide()">
 
-Confirm Ride
+Confirm Booking
 
 </button>
 
@@ -100,22 +76,6 @@ Confirm Ride
 </div>
 
 
-
-<a class="back" href="dashboard.html">
-
-⬅ Back
-
-</a>
-
-
-
-</div>
-
-
-
-
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
 
@@ -136,42 +96,9 @@ serverTimestamp
 
 
 
-let map;
+let pickupLat = null;
 
-
-let marker;
-
-
-
-
-function initMap(){
-
-
-map = L.map("map").setView(
-
-[26.9124,75.7873],
-
-13
-
-);
-
-
-
-L.tileLayer(
-
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-{
-
-attribution:"OpenStreetMap"
-
-}
-
-).addTo(map);
-
-
-
-}
+let pickupLng = null;
 
 
 
@@ -185,40 +112,23 @@ navigator.geolocation.getCurrentPosition(
 (position)=>{
 
 
-let lat=position.coords.latitude;
-
-let lng=position.coords.longitude;
-
+pickupLat =
+position.coords.latitude;
 
 
-if(marker){
+pickupLng =
+position.coords.longitude;
 
-map.removeLayer(marker);
+
+
+document.getElementById("pickup").value =
+
+pickupLat + "," + pickupLng;
+
+
 
 }
 
-
-
-marker=L.marker([lat,lng])
-
-.addTo(map)
-
-.bindPopup("Pickup")
-
-.openPopup();
-
-
-
-map.setView([lat,lng],15);
-
-
-
-document.getElementById("pickup").value=
-
-lat+","+lng;
-
-
-}
 
 );
 
@@ -234,23 +144,20 @@ lat+","+lng;
 window.calculateFare=function(){
 
 
-let service=
+let service =
 
 document.getElementById("service").value;
 
 
-let fare=100;
 
+let fare=50;
 
-
-if(service=="Bike Taxi")
-
-fare=50;
 
 
 if(service=="Cab")
 
 fare=150;
+
 
 
 if(service=="Parcel")
@@ -259,10 +166,20 @@ fare=80;
 
 
 
-document.getElementById("fare").value="₹"+fare;
+if(service=="Food")
+
+fare=100;
+
+
+
+document.getElementById("fare").value=
+
+"₹"+fare;
+
 
 
 }
+
 
 
 
@@ -273,20 +190,43 @@ document.getElementById("fare").value="₹"+fare;
 window.bookRide=async function(){
 
 
+
+let drop =
+
+document.getElementById("drop").value;
+
+
+
+if(!pickupLat){
+
+alert("Please select pickup location");
+
+return;
+
+}
+
+
+
 await addDoc(
 
 collection(db,"rides"),
 
 {
 
+
 pickup:
 
 document.getElementById("pickup").value,
 
 
-drop:
+drop:drop,
 
-document.getElementById("drop").value,
+
+pickupLat:pickupLat,
+
+
+pickupLng:pickupLng,
+
 
 
 service:
@@ -294,9 +234,11 @@ service:
 document.getElementById("service").value,
 
 
+
 fare:
 
 document.getElementById("fare").value,
+
 
 
 status:"Pending",
@@ -305,22 +247,24 @@ status:"Pending",
 createdAt:serverTimestamp()
 
 
+
 }
 
 );
 
 
 
-alert("Ride Booked ✅");
+alert("Ride Requested ✅");
+
+
+
+window.location.href="ride-status.html";
 
 
 }
 
 
 
-
-
-initMap();
 
 
 </script>
