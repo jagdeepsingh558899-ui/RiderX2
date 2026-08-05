@@ -1,75 +1,77 @@
-// =====================================
-// RiderX Rating & Review System V2
-// =====================================
+// =================================
+// RiderX Rating System
+// =================================
 
-import { auth, db } from "../firebase/config.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { db } from "../firebase/config.js";
+
 
 import {
-    collection,
-    addDoc,
-    serverTimestamp
+
+collection,
+addDoc,
+serverTimestamp
+
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-let currentUser = null;
 
-const rating = document.getElementById("rating");
-const review = document.getElementById("review");
-const submitRatingBtn = document.getElementById("submitRatingBtn");
 
-onAuthStateChanged(auth, (user) => {
 
-    if (!user) {
 
-        window.location.href = "../auth/login.html";
-        return;
+// Add Rating
 
-    }
+export async function addRating(
 
-    currentUser = user;
+rideId,
+userId,
+rating,
+comment
 
-});
+){
 
-submitRatingBtn.onclick = async () => {
 
-    const bookingId = new URLSearchParams(window.location.search).get("booking");
+try{
 
-    if (!bookingId) {
 
-        alert("Booking ID not found.");
-        return;
+await addDoc(
 
-    }
+collection(db,"ratings"),
 
-    try {
+{
 
-        await addDoc(collection(db, "reviews"), {
 
-            bookingId: bookingId,
+rideId:rideId,
 
-            customerId: currentUser.uid,
+userId:userId,
 
-            rating: Number(rating.value),
+rating:rating,
 
-            review: review.value.trim(),
+comment:comment || "",
 
-            createdAt: serverTimestamp()
+createdAt:serverTimestamp()
 
-        });
 
-        alert("Thank you for your feedback ⭐");
+}
 
-        window.location.href = "history.html";
+);
 
-    }
 
-    catch (error) {
 
-        alert(error.message);
+return true;
 
-    }
 
-};
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+return false;
+
+
+}
+
+
+}
