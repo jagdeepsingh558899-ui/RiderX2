@@ -1,84 +1,65 @@
-// =====================================
-// RiderX Ride Complete System V2
-// =====================================
+// =================================
+// RiderX Ride Complete System
+// =================================
 
-import { auth, db } from "../firebase/config.js";
+
+import { db } from "../firebase/config.js";
+
 
 import {
-    doc,
-    updateDoc,
-    serverTimestamp
+
+doc,
+updateDoc,
+serverTimestamp
+
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-let currentUser = null;
 
-onAuthStateChanged(auth, (user) => {
 
-    if (!user) {
 
-        window.location.href = "../auth/login.html";
-        return;
+// Complete Ride
 
-    }
 
-    currentUser = user;
+export async function completeRide(rideId){
 
-});
 
-const completeRideBtn =
-document.getElementById("completeRideBtn");
+try{
 
-if (completeRideBtn) {
 
-    completeRideBtn.onclick = async () => {
+await updateDoc(
 
-        const bookingId =
-        completeRideBtn.dataset.booking;
+doc(db,"rides",rideId),
 
-        if (!bookingId) {
+{
 
-            alert("Booking ID Not Found");
-            return;
 
-        }
+status:"Completed",
 
-        try {
+completedAt:serverTimestamp()
 
-            await updateDoc(
 
-                doc(db, "bookings", bookingId),
+}
 
-                {
+);
 
-                    status: "completed",
 
-                    rideCompletedAt: serverTimestamp(),
 
-                    paymentStatus: "pending"
+return true;
 
-                }
 
-            );
+}
 
-            completeRideBtn.disabled = true;
+catch(error){
 
-            completeRideBtn.innerHTML =
-            "Ride Completed ✅";
 
-            alert("Ride Completed Successfully");
+console.log(error);
 
-        }
 
-        catch (error) {
+return false;
 
-            alert(error.message);
 
-        }
+}
 
-    };
 
 }
