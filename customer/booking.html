@@ -1,15 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 
 <title>RiderX Booking</title>
 
+
 <link rel="stylesheet" href="../css/style.css">
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
+<style>
+
+#map{
+
+height:350px;
+
+border-radius:20px;
+
+margin:15px 0;
+
+}
+
+</style>
+
 
 </head>
 
@@ -28,40 +49,51 @@ Rider<span>X</span>
 </h1>
 
 
-<h2 id="rideType">
-Book Ride
+<h2>
+Book Your Ride
 </h2>
 
 
 
-<button onclick="getLocation()">
-📍 Use Current Location
-</button>
+<div id="map"></div>
 
 
-<br><br>
 
-
-<input id="pickup" 
-placeholder="Pickup Location">
-
-
-<br><br>
+<input id="pickup"
+placeholder="Pickup Location"
+readonly>
 
 
 <input id="drop"
 placeholder="Drop Location">
 
 
-<br><br>
+
+<select id="vehicle">
+
+<option value="bike">
+🏍 Bike
+</option>
 
 
-<input id="distance"
-placeholder="Distance KM"
-readonly>
+<option value="cab">
+🚕 Cab
+</option>
 
 
-<br><br>
+<option value="parcel">
+📦 Parcel
+</option>
+
+
+</select>
+
+
+
+<h3 id="distance">
+Distance: 0 KM
+</h3>
+
 
 
 <h3 id="fare">
@@ -69,14 +101,21 @@ Fare: ₹0
 </h3>
 
 
-<button onclick="calculateFare()">
+
+<button onclick="calculateRide()">
+
 Calculate Fare
+
 </button>
+
 
 
 <button onclick="bookRide()">
-Confirm Ride
+
+Book Ride
+
 </button>
+
 
 
 <p id="message"></p>
@@ -87,7 +126,10 @@ Confirm Ride
 
 
 
-<script type="module" src="../js/map.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+<script type="module" src="../js/booking.js"></script>
 
 
 </body>
