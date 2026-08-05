@@ -10,23 +10,20 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-
 <style>
 
 .box{
 
 background:#1d1d1d;
-padding:25px;
+padding:20px;
 border-radius:15px;
-text-align:center;
 
 }
-
 
 button{
 
 width:100%;
-padding:15px;
+padding:14px;
 margin-top:15px;
 background:#ffcc00;
 border:none;
@@ -59,23 +56,30 @@ font-weight:bold;
 
 <h2 id="amount">
 
-Amount
+Payment
 
 </h2>
 
 
 
-<button onclick="pay('Cash')">
+<select id="method">
 
-💵 Cash Payment
+<option value="Cash">
+💵 Cash
+</option>
 
-</button>
+
+<option value="Online">
+📱 Online
+</option>
+
+</select>
 
 
 
-<button onclick="pay('Online')">
+<button onclick="pay()">
 
-📱 Online Payment
+Confirm Payment
 
 </button>
 
@@ -88,7 +92,6 @@ Amount
 
 
 </div>
-
 
 
 
@@ -123,8 +126,13 @@ localStorage.getItem("rideId");
 
 
 
+window.pay=async function(){
 
-window.pay=async function(method){
+
+
+let method=
+
+document.getElementById("method").value;
 
 
 
@@ -134,9 +142,12 @@ doc(db,"rides",rideId),
 
 {
 
-payment:method,
+
+paymentMethod:method,
+
 
 paymentStatus:"Paid"
+
 
 }
 
@@ -147,6 +158,7 @@ paymentStatus:"Paid"
 document.getElementById("msg").innerHTML=
 
 "Payment Successful ✅";
+
 
 
 }
