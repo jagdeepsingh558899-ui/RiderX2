@@ -8,7 +8,7 @@ import { initializeApp } from
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 
-// Firebase Authentication
+// Authentication
 import { getAuth } from 
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
@@ -18,15 +18,14 @@ import { getFirestore } from
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-// Firebase Configuration
+
+// Firebase Config
 
 const firebaseConfig = {
 
 apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
 
 authDomain: "riderx-1.firebaseapp.com",
-
-databaseURL: "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
 
 projectId: "riderx-1",
 
@@ -41,9 +40,11 @@ measurementId: "G-SM8KLBVPWN"
 };
 
 
+
 // Initialize Firebase
 
 const app = initializeApp(firebaseConfig);
+
 
 
 // Export Services
