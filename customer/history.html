@@ -10,6 +10,33 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+
+<style>
+
+.ride-card{
+
+background:#1d1d1d;
+padding:20px;
+margin:15px 0;
+border-radius:15px;
+
+}
+
+
+button{
+
+width:100%;
+padding:12px;
+margin-top:10px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
+
 </head>
 
 
@@ -23,22 +50,16 @@
 </div>
 
 
+
 <div class="container">
 
 
 <div id="rideList">
 
-Loading rides...
+Loading...
 
 </div>
 
-
-
-<a class="back" href="dashboard.html">
-
-⬅ Back Dashboard
-
-</a>
 
 
 </div>
@@ -50,7 +71,7 @@ Loading rides...
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
@@ -60,7 +81,12 @@ getDocs,
 query,
 orderBy
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
 
 
 
@@ -69,12 +95,11 @@ orderBy
 async function loadHistory(){
 
 
-let box =
-document.getElementById("rideList");
+let box=document.getElementById("rideList");
 
 
 
-const q=query(
+let q=query(
 
 collection(db,"rides"),
 
@@ -84,8 +109,7 @@ orderBy("createdAt","desc")
 
 
 
-const snapshot =
-await getDocs(q);
+let snap=await getDocs(q);
 
 
 
@@ -93,7 +117,7 @@ box.innerHTML="";
 
 
 
-snapshot.forEach((ride)=>{
+snap.forEach((ride)=>{
 
 
 let data=ride.data();
@@ -107,41 +131,73 @@ box.innerHTML += `
 
 
 <h3>
+
 ${data.service || "Ride"}
+
 </h3>
 
 
 <p>
-📍 ${data.pickup}
+📍 Pickup:
+<br>
+${data.pickupLat || ""}
+,
+${data.pickupLng || ""}
 </p>
 
 
 <p>
-➡️ ${data.drop}
+
+🏁 Drop:
+<br>
+
+${data.dropLat || ""}
+,
+${data.dropLng || ""}
+
 </p>
 
 
 <p>
-💰 ${data.fare}
+
+💰 Fare:
+${data.fare || ""}
+
 </p>
 
 
 <p>
-Status: ${data.status}
+
+Status:
+${data.status}
+
+</p>
+
+
+<p>
+
+Payment:
+${data.payment || "Pending"}
+
 </p>
 
 
 
 ${
+
 data.status=="Completed"
 
 ?
 
-`<a href="rating.html">
+`
+
+<button onclick="rateRide()">
 
 ⭐ Rate Rider
 
-</a>`
+</button>
+
+`
 
 :
 
@@ -161,11 +217,27 @@ data.status=="Completed"
 });
 
 
+
 }
 
 
 
+
+
+
+window.rateRide=function(){
+
+
+window.location.href="rating.html";
+
+
+}
+
+
+
+
 loadHistory();
+
 
 
 </script>
