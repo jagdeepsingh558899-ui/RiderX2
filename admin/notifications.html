@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Notifications</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+.box{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+
+}
+
+
+textarea{
+
+width:100%;
+height:120px;
+padding:12px;
+border-radius:10px;
+
+}
+
+
+button{
+
+width:100%;
+padding:14px;
+margin-top:15px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+.msg{
+
+background:#222;
+padding:12px;
+margin-top:15px;
+border-radius:10px;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+📢 Admin Notifications
+
+</div>
+
+
+
+<div class="container">
+
+
+<div class="box">
+
+
+<textarea id="message" placeholder="Write announcement"></textarea>
+
+
+
+<button onclick="sendNotification()">
+
+Send Notification
+
+</button>
+
+
+</div>
+
+
+
+<h3>
+Previous Messages
+</h3>
+
+
+<div id="list">
+
+Loading...
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+collection,
+addDoc,
+getDocs,
+serverTimestamp
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+
+window.sendNotification=async function(){
+
+
+
+let text=
+
+document.getElementById("message").value;
+
+
+
+if(!text){
+
+alert("Enter message");
+
+return;
+
+}
+
+
+
+
+
+await addDoc(
+
+collection(db,"notifications"),
+
+{
+
+
+message:text,
+
+
+createdAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+alert("Notification Sent ✅");
+
+
+
+document.getElementById("message").value="";
+
+
+loadNotifications();
+
+
+
+}
+
+
+
+
+
+
+
+async function loadNotifications(){
+
+
+
+let snap=await getDocs(
+
+collection(db,"notifications")
+
+);
+
+
+
+let box=document.getElementById("list");
+
+box.innerHTML="";
+
+
+
+snap.forEach((n)=>{
+
+
+box.innerHTML +=`
+
+
+<div class="msg">
+
+📢 ${n.data().message}
+
+</div>
+
+
+`;
+
+
+});
+
+
+
+}
+
+
+
+
+
+loadNotifications();
+
+
+
+</script>
+
+
+</body>
+
+</html>
