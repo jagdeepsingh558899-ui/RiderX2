@@ -1,56 +1,126 @@
+// =================================
+// RiderX Rider System
+// =================================
+
+
 import { db } from "../firebase/config.js";
 
 
 import {
 
 doc,
-setDoc
+updateDoc
+
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+// Update Rider Online Status
+
+
+export async function updateRiderStatus(
+
+riderId,
+
+status
+
+){
+
+
+try{
+
+
+await updateDoc(
+
+doc(
+
+db,
+
+"users",
+
+riderId
+
+),
+
+{
+
+
+status:status
+
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-let online=false;
-
-
-
-window.toggleOnline=function(){
-
-
-online=!online;
-
-
-document.getElementById("status").innerHTML =
-online ? "Online 🟢" : "Offline 🔴";
-
-
-
-alert(
-online ?
-"Rider is Online" :
-"Rider is Offline"
 );
 
 
 
-};
+return true;
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+return false;
+
+
+}
+
+
+}
 
 
 
-window.openRequests=function(){
-
-window.location.href="requests.html";
-
-};
 
 
+// Go Online
 
-window.openProfile=function(){
 
-window.location.href="profile.html";
+export function goOnline(){
 
-};
+
+let status =
+document.getElementById("status");
+
+
+if(status){
+
+
+status.innerHTML="🟢 Online";
+
+
+}
+
+
+}
+
+
+
+
+
+// Go Offline
+
+
+export function goOffline(){
+
+
+let status =
+document.getElementById("status");
+
+
+if(status){
+
+
+status.innerHTML="⚫ Offline";
+
+
+}
+
+
+}
