@@ -13,69 +13,36 @@
 
 <style>
 
-body{
-
-margin:0;
-background:#111;
-color:white;
-font-family:Arial,sans-serif;
-
-}
-
-
-.header{
-
-background:#ffcc00;
-color:#000;
-padding:20px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-
-}
-
-
-.container{
-
-padding:20px;
-
-}
-
-
 .card{
 
 background:#1d1d1d;
 padding:20px;
 border-radius:15px;
-margin-bottom:15px;
-text-align:center;
+margin:15px 0;
 
 }
 
 
-.number{
+.title{
 
-font-size:35px;
 color:#ffcc00;
+font-size:22px;
 font-weight:bold;
 
 }
 
 
-a{
+.item{
 
-display:block;
-background:#ffcc00;
-color:#000;
-padding:14px;
+background:#222;
+padding:12px;
+margin-top:10px;
 border-radius:10px;
-text-decoration:none;
-font-weight:bold;
-margin-top:15px;
 
 }
 
 </style>
+
 
 </head>
 
@@ -94,50 +61,54 @@ margin-top:15px;
 <div class="container">
 
 
+<div class="card">
+
+<div class="title">
+Users
+</div>
+
+<div id="users">
+
+Loading...
+
+</div>
+
+</div>
+
+
+
 
 <div class="card">
 
-<h3>
-👥 Total Users
-</h3>
+<div class="title">
+Riders
+</div>
 
-<div class="number" id="usersCount">
-0
+<div id="riders">
+
+Loading...
+
 </div>
 
 </div>
+
 
 
 
 
 <div class="card">
 
-<h3>
-🚕 Total Rides
-</h3>
+<div class="title">
+All Rides
+</div>
 
-<div class="number" id="ridesCount">
-0
+<div id="rides">
+
+Loading...
+
 </div>
 
 </div>
-
-
-
-
-<a href="riders.html">
-
-🏍 Manage Riders
-
-</a>
-
-
-
-<a href="../index.html">
-
-⬅ Home
-
-</a>
 
 
 
@@ -150,23 +121,164 @@ margin-top:15px;
 <script type="module">
 
 
+import {db} from "../firebase/config.js";
+
+
 import {
 
-loadUsersCount,
-loadRidesCount
+collection,
+getDocs
 
-} from "../js/admin.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-loadUsersCount();
 
-loadRidesCount();
+
+
+async function loadAdmin(){
+
+
+
+let userBox =
+document.getElementById("users");
+
+
+let riderBox =
+document.getElementById("riders");
+
+
+let rideBox =
+document.getElementById("rides");
+
+
+
+
+
+let users = await getDocs(
+
+collection(db,"users")
+
+);
+
+
+
+userBox.innerHTML="";
+
+riderBox.innerHTML="";
+
+
+
+users.forEach((user)=>{
+
+
+let data=user.data();
+
+
+
+let html=`
+
+<div class="item">
+
+👤 ${data.name || "User"}
+
+<br>
+
+📧 ${data.email || ""}
+
+</div>
+
+`;
+
+
+
+userBox.innerHTML += html;
+
+
+
+if(data.role=="rider"){
+
+
+riderBox.innerHTML += html;
+
+
+}
+
+
+
+});
+
+
+
+
+
+let rides = await getDocs(
+
+collection(db,"rides")
+
+);
+
+
+
+rideBox.innerHTML="";
+
+
+
+rides.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+rideBox.innerHTML += `
+
+<div class="item">
+
+
+🚕 ${data.service || "Ride"}
+
+<br>
+
+📍 ${data.pickupLat || ""}
+
+<br>
+
+🏁 ${data.dropLat || ""}
+
+<br>
+
+💰 ${data.fare || ""}
+
+<br>
+
+Status: ${data.status}
+
+
+</div>
+
+`;
+
+
+
+});
+
+
+
+
+}
+
+
+
+loadAdmin();
 
 
 
 </script>
-
 
 
 </body>
