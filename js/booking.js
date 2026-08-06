@@ -1,7 +1,6 @@
 // =====================================
 // RiderX Booking System
-// Admin Fare Connected
-// Map + Pickup Drop + Booking
+// Admin Fare + Map + Distance + Booking
 // =====================================
 
 
@@ -31,66 +30,69 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
+
+
 const service =
 document.getElementById("service");
-
 
 const pickup =
 document.getElementById("pickup");
 
-
 const drop =
 document.getElementById("drop");
-
 
 const fareBox =
 document.getElementById("fare");
 
-
 const distanceBox =
 document.getElementById("distance");
 
-
 const bookBtn =
 document.getElementById("bookBtn");
-
 
 const locationBtn =
 document.getElementById("locationBtn");
 
 
 
-let currentUser=null;
 
+
+let currentUser=null;
 
 let map=null;
 
-
 let pickupMarker=null;
-
 
 let dropMarker=null;
 
-
 let pickupCoords=null;
-
 
 let dropCoords=null;
 
+let distance=0;
 
 let fare=0;
 
 
 
+
+
 let fareSettings={
 
+base:50,
+
 bike:8,
+
 cab:15,
+
 parcel:80,
+
 food:60,
+
 night:3
 
 };
+
 
 
 
@@ -126,6 +128,7 @@ location.href="../auth/login.html";
 
 
 
+
 // =====================
 // LOAD ADMIN FARE
 // =====================
@@ -134,7 +137,12 @@ location.href="../auth/login.html";
 async function loadFare(){
 
 
-const snap = await getDoc(
+try{
+
+
+const snap=
+
+await getDoc(
 
 doc(db,"settings","fare")
 
@@ -145,8 +153,24 @@ doc(db,"settings","fare")
 if(snap.exists()){
 
 
-fareSettings=snap.data();
+fareSettings={
 
+...fareSettings,
+
+...snap.data()
+
+};
+
+
+}
+
+
+
+}
+
+catch(error){
+
+console.log(error);
 
 }
 
@@ -163,18 +187,26 @@ loadFare();
 
 
 
+
 // =====================
-// MAP
+// MAP INIT
 // =====================
 
 
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
 
 
 setTimeout(()=>{
 
 
-map=L.map("map").setView(
+
+map=L.map("map")
+
+.setView(
 
 [30.7333,76.7794],
 
@@ -184,18 +216,21 @@ map=L.map("map").setView(
 
 
 
+
+
 L.tileLayer(
 
 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
 {
 
-maxZoom:19,
-attribution:"© OpenStreetMap"
+maxZoom:19
 
 }
 
 ).addTo(map);
+
+
 
 
 
@@ -206,7 +241,13 @@ map.invalidateSize();
 
 
 
-map.on("click",(e)=>{
+
+map.on(
+
+"click",
+
+(e)=>{
+
 
 
 if(!pickupCoords){
@@ -215,6 +256,7 @@ if(!pickupCoords){
 pickupCoords={
 
 lat:e.latlng.lat,
+
 lng:e.latlng.lng
 
 };
@@ -224,79 +266,113 @@ lng:e.latlng.lng
 pickup.value=
 
 pickupCoords.lat.toFixed(6)+
+
 ", "+
+
 pickupCoords.lng.toFixed(6);
 
 
 
-pickupMarker=L.marker(
+pickupMarker=
 
-[e.latlng.lat,e.latlng.lng]
+L.marker(
+
+[
+
+pickupCoords.lat,
+
+pickupCoords.lng
+
+]
 
 )
 
 .addTo(map)
 
-.bindPopup("Pickup")
+.bindPopup("📍 Pickup")
 
 .openPopup();
 
 
 
 }
+
+
 
 
 
 else if(!dropCoords){
 
 
+
 dropCoords={
 
 lat:e.latlng.lat,
+
 lng:e.latlng.lng
 
 };
 
 
 
+
 drop.value=
 
 dropCoords.lat.toFixed(6)+
+
 ", "+
+
 dropCoords.lng.toFixed(6);
 
 
 
-dropMarker=L.marker(
+dropMarker=
 
-[e.latlng.lat,e.latlng.lng]
+L.marker(
+
+[
+
+dropCoords.lat,
+
+dropCoords.lng
+
+]
 
 )
 
 .addTo(map)
 
-.bindPopup("Drop")
+.bindPopup("🏁 Drop")
 
 .openPopup();
+
+
 
 
 
 calculateFare();
 
 
+
 }
 
 
 
-});
+}
+
+);
 
 
 
 
-},300);
+},500);
 
 
-});
+}
+
+);
+
+
 
 
 
@@ -327,11 +403,15 @@ lng:position.coords.longitude
 
 
 
+
 pickup.value=
 
 pickupCoords.lat.toFixed(6)+
+
 ", "+
+
 pickupCoords.lng.toFixed(6);
+
 
 
 
@@ -345,7 +425,9 @@ map.removeLayer(pickupMarker);
 
 
 
-pickupMarker=L.marker(
+pickupMarker=
+
+L.marker(
 
 [
 
@@ -359,9 +441,11 @@ pickupCoords.lng
 
 .addTo(map)
 
-.bindPopup("Pickup")
+.bindPopup("📍 Your Location")
 
 .openPopup();
+
+
 
 
 
@@ -381,20 +465,28 @@ pickupCoords.lng
 
 
 
-},
 
+},
 
 ()=>{
 
-alert("Location permission allow karo");
+
+alert(
+
+"Location permission allow karo"
+
+);
+
 
 }
-
 
 );
 
 
 };
+
+
+
 
 
 
@@ -410,76 +502,95 @@ alert("Location permission allow karo");
 function calculateFare(){
 
 
+
 if(!pickupCoords || !dropCoords)
 
 return;
 
 
 
-let km=
+
+
+distance=
 
 map.distance(
 
-[pickupCoords.lat,pickupCoords.lng],
+[
 
-[dropCoords.lat,dropCoords.lng]
+pickupCoords.lat,
+
+pickupCoords.lng
+
+],
+
+[
+
+dropCoords.lat,
+
+dropCoords.lng
+
+]
 
 )/1000;
 
 
 
-km=Number(km.toFixed(1));
+
+
+distance=
+
+Number(distance.toFixed(1));
+
+
 
 
 
 distanceBox.innerHTML=
 
-km+" KM";
+distance+" KM";
 
 
 
 
-let base=0;
 
 let rate=0;
+
+let base=
+
+fareSettings.base || 50;
+
+
 
 
 
 if(service.value==="Bike Taxi"){
 
-rate=fareSettings.bike || 8;
 
-base=20;
+rate=fareSettings.bike;
 
 }
-
 
 
 if(service.value==="Cab"){
 
-rate=fareSettings.cab || 15;
 
-base=50;
+rate=fareSettings.cab;
 
 }
-
 
 
 if(service.value==="Parcel"){
 
-rate=fareSettings.parcel || 80;
 
-base=0;
+rate=fareSettings.parcel;
 
 }
-
 
 
 if(service.value==="Food"){
 
-rate=fareSettings.food || 60;
 
-base=0;
+rate=fareSettings.food;
 
 }
 
@@ -487,13 +598,22 @@ base=0;
 
 
 
-let hour=new Date().getHours();
+
+let hour=
+
+new Date().getHours();
+
+
 
 
 
 if(hour>=22 || hour<6){
 
-rate += fareSettings.night || 3;
+
+rate +=
+
+Number(fareSettings.night || 0);
+
 
 }
 
@@ -501,17 +621,34 @@ rate += fareSettings.night || 3;
 
 
 
-if(service.value==="Parcel" || service.value==="Food"){
 
-fare=rate;
+
+if(
+
+service.value==="Parcel" ||
+
+service.value==="Food"
+
+){
+
+
+fare=
+
+rate;
+
 
 }
 
 else{
 
-fare=base+(km*rate);
+
+fare=
+
+base+(distance*rate);
+
 
 }
+
 
 
 
@@ -529,13 +666,23 @@ Math.round(fare);
 
 
 
+
+
 service.addEventListener(
 
 "change",
 
-calculateFare
+()=>{
+
+
+calculateFare();
+
+
+}
 
 );
+
+
 
 
 
@@ -549,7 +696,29 @@ calculateFare
 // =====================
 
 
-bookBtn.onclick=async()=>{
+bookBtn.onclick=
+
+async()=>{
+
+
+
+if(!currentUser){
+
+
+alert(
+
+"Login required"
+
+);
+
+
+return;
+
+
+}
+
+
+
 
 
 if(!pickupCoords || !dropCoords){
@@ -557,15 +726,22 @@ if(!pickupCoords || !dropCoords){
 
 alert(
 
-"Map se Pickup aur Drop select karo"
+"Pickup aur Drop select karo"
 
 );
 
 
 return;
 
+
 }
 
+
+
+
+
+
+try{
 
 
 
@@ -578,16 +754,27 @@ collection(db,"rides"),
 {
 
 
-customerId:currentUser.uid,
+customerId:
+
+currentUser.uid,
 
 
-service:service.value,
+service:
+
+service.value,
 
 
-pickup:pickup.value,
+
+pickup:
+
+pickup.value,
 
 
-drop:drop.value,
+
+drop:
+
+drop.value,
+
 
 
 pickupCoords,
@@ -596,18 +783,33 @@ pickupCoords,
 dropCoords,
 
 
-fare,
+
+distance,
 
 
-status:"Pending",
+
+fare:
+
+Math.round(fare),
 
 
-createdAt:serverTimestamp()
+
+status:
+
+"Pending",
+
+
+
+createdAt:
+
+serverTimestamp()
+
 
 
 }
 
 );
+
 
 
 
@@ -623,6 +825,9 @@ ride.id
 
 
 
+
+
+
 alert(
 
 "Ride Booked Successfully ✅"
@@ -631,7 +836,24 @@ alert(
 
 
 
-location.href="ride-status.html";
+
+
+
+location.href=
+
+"ride-status.html";
+
+
+
+}
+
+catch(error){
+
+
+alert(error.message);
+
+
+}
 
 
 
@@ -640,8 +862,9 @@ location.href="ride-status.html";
 
 
 
+
 console.log(
 
-"RiderX Booking + Admin Fare Loaded"
+"RiderX Booking System Ready"
 
 );
