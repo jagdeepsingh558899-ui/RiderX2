@@ -4,336 +4,64 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX History</title>
+
+<title>RiderX Ride History</title>
+
 
 <link rel="stylesheet" href="../css/style.css">
 
 
-<style>
-
-body{
-background:#000;
-color:white;
-font-family:Arial;
-}
-
-
-.header{
-
-background:#111;
-padding:20px;
-font-size:22px;
-border-bottom:2px solid #FFD600;
-
-}
-
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-
-.ride-card{
-
-background:#111;
-padding:20px;
-margin-bottom:15px;
-border-radius:18px;
-border:1px solid #333;
-
-}
-
-
-
-h3{
-
-color:#FFD600;
-
-}
-
-
-
-button{
-
-width:100%;
-padding:12px;
-margin-top:15px;
-border:none;
-border-radius:12px;
-background:#FFD600;
-font-weight:bold;
-
-}
-
-
-
-</style>
-
-
 </head>
+
 
 
 <body>
 
 
 
-<div class="header">
+<div class="topbar">
+
+<h2>
 
 📜 Ride History
 
+</h2>
+
+
 </div>
+
+
 
 
 
 <div class="container">
 
 
-<div id="rideList">
-
-Loading...
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-<script type="module">
-
-
-import { auth, db } from "../firebase/config.js";
-
-
-import {
-
-collection,
-query,
-where,
-getDocs,
-orderBy
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
-auth.onAuthStateChanged(async(user)=>{
-
-
-if(!user){
-
-return;
-
-}
-
-
-
-loadHistory(user.uid);
-
-
-
-});
-
-
-
-
-
-
-
-async function loadHistory(uid){
-
-
-let box =
-document.getElementById("rideList");
-
-
-
-const q=query(
-
-collection(db,"rides"),
-
-where("customerId","==",uid),
-
-orderBy("createdAt","desc")
-
-);
-
-
-
-
-
-const snap =
-await getDocs(q);
-
-
-
-box.innerHTML="";
-
-
-
-
-
-if(snap.empty){
-
-box.innerHTML=
-
-"<p>No rides found</p>";
-
-return;
-
-}
-
-
-
-
-
-snap.forEach((ride)=>{
-
-
-let data=ride.data();
-
-
-
-
-box.innerHTML += `
-
-
-<div class="ride-card">
-
-
-<h3>
-
-${data.service || "Ride"}
-
-</h3>
-
-
+<div id="historyList">
 
 <p>
-
-📍 Pickup
-
-<br>
-
-${data.pickup || "-"}
-
+Loading rides...
 </p>
-
-
-
-<p>
-
-🏁 Drop
-
-<br>
-
-${data.drop || "-"}
-
-</p>
-
-
-
-<p>
-
-💰 Fare:
-
-₹${data.fare || 0}
-
-</p>
-
-
-
-<p>
-
-Status:
-
-${data.status || "Pending"}
-
-</p>
-
-
-
-<p>
-
-Payment:
-
-${data.paymentStatus || "Pending"}
-
-</p>
-
-
-
-
-
-${
-data.status==="Completed"
-
-?
-
-`
-
-<button onclick="rateRide()">
-
-⭐ Rate Rider
-
-</button>
-
-`
-
-:
-
-""
-
-}
-
-
 
 
 </div>
 
 
-`;
-
-
-
-});
-
-
-
-}
+</div>
 
 
 
 
 
-window.rateRide=function(){
 
 
-window.location.href="rating.html";
-
-
-};
-
-
-
-</script>
+<script type="module" src="../js/History.js"></script>
 
 
 </body>
+
 
 </html>
