@@ -2,272 +2,103 @@
 // RiderX Firebase Messaging Setup
 // =====================================
 
+import {
+  app,
+  auth,
+  db
+} from "./config.js";
 
 import {
-
-app,
-
-auth,
-
-db
-
-}
-
-from "./config.js";
-
-
+  getMessaging,
+  getToken,
+  onMessage
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-messaging.js";
 
 import {
+  doc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-
-getMessaging,
-
-getToken,
-
-onMessage
-
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-messaging.js";
-
-
-
-import {
-
-
-doc,
-
-setDoc
-
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
-
-const messaging =
-
-getMessaging(app);
-
-
-
-
-
-
-
-
+const messaging = getMessaging(app);
 
 // =====================================
 // REQUEST NOTIFICATION PERMISSION
 // =====================================
 
+export async function enableNotification() {
 
+  try {
 
-export async function enableNotification(){
+    const permission = await Notification.requestPermission();
 
+    if (permission === "granted") {
 
+      const token = await getToken(messaging, {
 
-try{
+        vapidKey: "BL9_-5Z7YfbA9iJsPj5SYF1PUSpTo2sCIoyL5cjBHOUOoQeDulTTznkqL_N-87z2MAKCfcEdY0PYA9Bdv48kd3g"
 
+      });
 
+      if (token) {
 
-const permission =
+        await saveToken(token);
 
-await Notification.requestPermission();
+        console.log("FCM Token:", token);
 
+      }
 
+    } else {
 
+      console.log("Notification Permission Denied");
 
+    }
 
+  } catch (error) {
 
-if(permission==="granted"){
+    console.error("Notification Error:", error);
 
-
-
-const token =
-
-await getToken(
-
-messaging,
-
-{
-
-
-vapidKey:
-
-"YOUR_FIREBASE_VAPID_KEY"
-
+  }
 
 }
-
-);
-
-
-
-
-
-
-
-if(token){
-
-
-
-saveToken(token);
-
-
-
-}
-
-
-
-}
-
-
-
-}
-
-
-
-catch(error){
-
-
-
-console.log(error);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-
 
 // =====================================
 // SAVE TOKEN
 // =====================================
 
+async function saveToken(token) {
 
+  const user = auth.currentUser;
 
-async function saveToken(token){
+  if (!user) return;
 
-
-
-const user =
-
-auth.currentUser;
-
-
-
-if(!user){
-
-return;
-
-}
-
-
-
-
-
-
-await setDoc(
-
-doc(
-
-db,
-
-"users",
-
-user.uid
-
-),
-
-
-{
-
-
-notificationToken:
-
-token
-
-
-
-},
-
-
-{
-
-
-merge:true
-
+  await setDoc(
+    doc(db, "users", user.uid),
+    {
+      notificationToken: token
+    },
+    {
+      merge: true
+    }
+  );
 
 }
-
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
 
 // =====================================
 // FOREGROUND MESSAGE
 // =====================================
 
+onMessage(messaging, (payload) => {
 
+  console.log("Notification Received:", payload);
 
-onMessage(
+  if (payload.notification) {
 
-messaging,
+    alert(
+      `${payload.notification.title}\n\n${payload.notification.body}`
+    );
 
-(payload)=>{
+  }
 
+});
 
-
-console.log(
-
-"Notification Received",
-
-payload
-
-);
-
-
-
-
-alert(
-
-payload.notification?.title || "RiderX"
-
-);
-
-
-
-}
-
-);
+export { messaging };
