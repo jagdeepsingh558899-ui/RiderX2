@@ -10,20 +10,17 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 
 
 <style>
 
 #map{
-
 height:350px;
 width:100%;
 border-radius:15px;
 margin-bottom:15px;
-
 }
-
 
 input,select,button{
 
@@ -33,7 +30,6 @@ margin-top:10px;
 border-radius:10px;
 
 }
-
 
 button{
 
@@ -46,7 +42,6 @@ font-weight:bold;
 </style>
 
 </head>
-
 
 
 <body>
@@ -73,16 +68,13 @@ font-weight:bold;
 🏍 Bike Taxi
 </option>
 
-
 <option value="Cab">
 🚕 Cab
 </option>
 
-
 <option value="Parcel">
 📦 Parcel
 </option>
-
 
 </select>
 
@@ -91,11 +83,8 @@ font-weight:bold;
 <input id="pickup" placeholder="Pickup Location" readonly>
 
 
-
 <button onclick="getPickup()">
-
 📍 Use Current Location
-
 </button>
 
 
@@ -107,19 +96,14 @@ font-weight:bold;
 <input id="coupon" placeholder="Coupon Code">
 
 
-
 <button onclick="applyCoupon()">
-
 🎁 Apply Coupon
-
 </button>
 
 
 
 <button onclick="calculateRide()">
-
 📏 Calculate Fare
-
 </button>
 
 
@@ -139,9 +123,7 @@ Fare: -
 
 
 <button onclick="bookRide()">
-
 Confirm Booking
-
 </button>
 
 
@@ -149,7 +131,7 @@ Confirm Booking
 
 
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
 
 
@@ -175,8 +157,33 @@ from
 
 
 
+let map;
 
-let map = L.map("map").setView([26.9124,75.7873],13);
+let marker;
+
+
+
+let pickupLat=null;
+let pickupLng=null;
+
+let dropLat=null;
+let dropLng=null;
+
+let distance=0;
+let finalFare=0;
+
+let discount=0;
+
+
+
+
+window.onload=function(){
+
+
+map=L.map("map").setView(
+[26.9124,75.7873],
+13
+);
 
 
 
@@ -194,23 +201,7 @@ attribution:"© OpenStreetMap"
 
 
 
-
-
-let pickupLat=null;
-
-let pickupLng=null;
-
-let dropLat=null;
-
-let dropLng=null;
-
-let distance=0;
-
-let finalFare=0;
-
-let discount=0;
-
-let marker=null;
+};
 
 
 
@@ -233,8 +224,7 @@ pickupLng=position.coords.longitude;
 
 document.getElementById("pickup").value=
 
-pickupLat.toFixed(6)+","+pickupLng.toFixed(6);
-
+pickupLat+","+pickupLng;
 
 
 
@@ -243,7 +233,6 @@ if(marker){
 map.removeLayer(marker);
 
 }
-
 
 
 
@@ -275,9 +264,7 @@ map.setView(
 
 ()=>{
 
-
 alert("Location permission allow karo");
-
 
 }
 
@@ -285,9 +272,6 @@ alert("Location permission allow karo");
 
 
 }
-
-
-
 
 
 
@@ -318,10 +302,10 @@ let applied=false;
 
 
 
-snap.forEach((c)=>{
+snap.forEach((doc)=>{
 
 
-let data=c.data();
+let data=doc.data();
 
 
 
@@ -360,8 +344,6 @@ applied ?
 
 
 
-
-
 window.calculateRide=async function(){
 
 
@@ -382,7 +364,7 @@ document.getElementById("drop").value;
 
 
 
-let response=
+let res=
 
 await fetch(
 
@@ -392,13 +374,13 @@ await fetch(
 
 
 
-let result=
+let data=
 
-await response.json();
+await res.json();
 
 
 
-if(!result.length){
+if(data.length==0){
 
 alert("Drop location nahi mila");
 
@@ -408,16 +390,20 @@ return;
 
 
 
-dropLat=Number(result[0].lat);
+dropLat=
 
-dropLng=Number(result[0].lon);
+Number(data[0].lat);
+
+
+dropLng=
+
+Number(data[0].lon);
 
 
 
 
 
 let R=6371;
-
 
 
 let dLat=
@@ -428,6 +414,7 @@ let dLat=
 let dLng=
 
 (dropLng-pickupLng)*Math.PI/180;
+
 
 
 
@@ -487,7 +474,6 @@ document.getElementById("fare").innerHTML=
 
 
 }
-
 
 
 
@@ -566,7 +552,6 @@ location.href="ride-status.html";
 
 
 }
-
 
 
 
