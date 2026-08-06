@@ -1,28 +1,79 @@
-// =================================
-// RiderX Advanced Navigation Map V3
-// Leaflet + OSRM Routing
-// =================================
+// ==========================================
+// RiderX Customer Live Tracking V1
+// Rider Location + Ride Status + Map
+// ==========================================
+
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+doc,
+onSnapshot,
+getDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
 
 
 let map;
 
-let markers = {};
 
-let routeLine;
+let riderMarker=null;
 
+let pickupMarker=null;
 
+let dropMarker=null;
 
-// CREATE MAP
-
-export function createMap(){
-
-
-if(!document.getElementById("map"))
-return;
+let routeLine=null;
 
 
 
-map = L.map("map")
+const rideId =
+
+localStorage.getItem("rideId");
+
+
+
+
+
+
+const statusBox =
+
+document.getElementById("rideStatus");
+
+
+
+
+
+const riderName =
+
+document.getElementById("riderName");
+
+
+
+
+
+const vehicle =
+
+document.getElementById("vehicle");
+
+
+
+
+
+
+
+
+// MAP INIT
+
+
+map=L.map("map")
 
 .setView(
 
@@ -36,15 +87,7 @@ map = L.map("map")
 
 L.tileLayer(
 
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-{
-
-maxZoom:19,
-
-attribution:"© OpenStreetMap"
-
-}
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 
 )
 
@@ -52,121 +95,149 @@ attribution:"© OpenStreetMap"
 
 
 
-return map;
-
-
-}
-
-
-
-
-
-// CLEAR MAP
-
-
-export function clearMap(){
-
-
-Object.values(markers).forEach(marker=>{
-
-
-if(marker)
-
-map.removeLayer(marker);
-
-
-});
-
-
-markers={};
-
-
-
-if(routeLine){
-
-
-map.removeLayer(routeLine);
-
-
-routeLine=null;
-
-
-}
-
-
-}
 
 
 
 
 
 
+// RIDE LISTENER
 
-// SHOW PICKUP DROP
+
+if(rideId){
 
 
-export function showRide(
+onSnapshot(
 
-pickup,
+doc(db,"rides",rideId),
 
-drop,
+(snapshot)=>{
 
-fare,
 
-distance
+if(!snapshot.exists())
+
+return;
+
+
+
+const ride=snapshot.data();
+
+
+
+
+statusBox.innerHTML=
+
+ride.status;
+
+
+
+if(
+
+ride.pickupCoords
+
+&&
+
+!pickupMarker
 
 ){
 
 
-if(!map)
-return;
+pickupMarker=
 
-
-clearMap();
-
-
-
-markers.pickup = L.marker(
-
-pickup
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-"📍 Pickup<br>₹"+fare
-
-);
-
-
-
-markers.drop = L.marker(
-
-drop
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-"🏁 Drop<br>"+distance+" KM"
-
-);
-
-
-
-drawRoute(
+L.marker(
 
 [
 
-pickup,
+ride.pickupCoords.lat,
 
-drop
+ride.pickupCoords.lng
 
 ]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"📍 Pickup"
+
+);
+
+
+}
+
+
+
+
+
+if(
+
+ride.dropCoords
+
+&&
+
+!dropMarker
+
+){
+
+
+dropMarker=
+
+L.marker(
+
+[
+
+ride.dropCoords.lat,
+
+ride.dropCoords.lng
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"🏁 Drop"
+
+);
+
+
+}
+
+
+
+
+
+if(
+
+ride.riderId
+
+){
+
+
+loadRider(
+
+ride.riderId
+
+);
+
+
+listenRiderLocation(
+
+ride.riderId
+
+);
+
+
+}
+
+
+
+
+}
 
 );
 
@@ -180,101 +251,115 @@ drop
 
 
 
-// RIDER LIVE MARKER
 
 
-export function showRiderLocation(
-
-lat,
-
-lng
-
-){
+// RIDER DATA
 
 
+async function loadRider(uid){
 
-if(!map)
+
+const snap=
+
+await getDoc(
+
+doc(db,"users",uid)
+
+);
+
+
+
+if(snap.exists()){
+
+
+const data=snap.data();
+
+
+riderName.innerHTML=
+
+data.name || "Rider";
+
+
+
+vehicle.innerHTML=
+
+data.vehicleNumber || "-";
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+// LIVE RIDER LOCATION
+
+
+function listenRiderLocation(uid){
+
+
+
+onSnapshot(
+
+doc(db,"riders",uid),
+
+(snapshot)=>{
+
+
+if(!snapshot.exists())
+
 return;
 
 
 
-let position=[lat,lng];
+const data=snapshot.data();
 
 
 
-if(markers.rider){
+if(!data.location)
+
+return;
 
 
-markers.rider.setLatLng(position);
+
+const lat=
+
+data.location.lat;
 
 
-}
 
-else{
+const lng=
+
+data.location.lng;
 
 
-markers.rider = L.marker(
 
-position,
 
-{
 
-icon:L.icon({
 
-iconUrl:
-"https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
+if(!riderMarker){
 
-iconSize:[45,45]
 
-})
+riderMarker=
 
-}
+L.marker(
+
+[lat,lng]
 
 )
 
 .addTo(map)
 
 .bindPopup(
+
 "🏍 Rider"
-);
-
-
-}
-
-
-
-map.panTo(position);
-
-
-
-}
-
-
-
-
-
-
-
-
-// CUSTOMER MARKER
-
-
-export function showCustomerLocation(
-
-lat,
-
-lng
-
-){
-
-
-
-if(markers.customer){
-
-
-markers.customer.setLatLng(
-
-[lat,lng]
 
 );
 
@@ -284,16 +369,10 @@ markers.customer.setLatLng(
 else{
 
 
-markers.customer=L.marker(
+riderMarker.setLatLng(
 
 [lat,lng]
 
-)
-
-.addTo(map)
-
-.bindPopup(
-"👤 Customer"
 );
 
 
@@ -301,55 +380,22 @@ markers.customer=L.marker(
 
 
 
-}
+
+
+
+map.setView(
+
+[lat,lng],
+
+15
+
+);
 
 
 
 
-
-
-
-
-
-// ROUTE DRAW
-
-
-export function drawRoute(points){
-
-
-
-if(!map)
-return;
-
-
-
-if(routeLine){
-
-map.removeLayer(routeLine);
 
 }
-
-
-
-routeLine=L.polyline(
-
-points,
-
-{
-
-weight:5
-
-}
-
-)
-
-.addTo(map);
-
-
-
-map.fitBounds(
-
-routeLine.getBounds()
 
 );
 
@@ -359,88 +405,6 @@ routeLine.getBounds()
 
 
 
-
-
-
-
-// FREE NAVIGATION ROUTE
-
-export async function getRoute(
-
-start,
-
-end
-
-){
-
-
-
-let url =
-
-`https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
-
-
-
-
-try{
-
-
-let res = await fetch(url);
-
-
-let data = await res.json();
-
-
-
-if(data.routes.length){
-
-
-let coords =
-
-data.routes[0]
-
-.geometry.coordinates.map(
-
-c=>[
-
-c[1],
-
-c[0]
-
-]
-
-);
-
-
-
-drawRoute(coords);
-
-
-
-return data.routes[0];
-
-
-
-}
-
-
-
-}
-
-catch(e){
-
-
-console.log(
-"Route error",
-e
-);
-
-
-}
-
-
-
-}
 
 
 
@@ -448,5 +412,7 @@ e
 
 
 console.log(
-"RiderX Navigation Map V3 Loaded"
+
+"RiderX Customer Map V1 Loaded"
+
 );
