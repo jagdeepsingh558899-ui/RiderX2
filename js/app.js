@@ -1,101 +1,261 @@
 // =====================================
-// RiderX App Loader
+// RiderX App Loader + Auth Redirect
+// =====================================
+
+
+import { auth, db } from "../firebase/config.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+import {
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+// =====================================
+// Splash Screen
 // =====================================
 
 window.addEventListener("load", () => {
 
-    const splash = document.getElementById("splash");
-    const app = document.getElementById("app");
 
-    // 3 Second Splash Screen
+    const splash = document.getElementById("splash");
+
 
     setTimeout(() => {
 
-        splash.style.opacity = "0";
-        splash.style.transition = "0.8s";
 
-        setTimeout(() => {
+        if(splash){
 
-            splash.style.display = "none";
+            splash.style.opacity="0";
+            splash.style.transition="0.8s";
 
-            app.style.display = "block";
 
-            app.style.opacity = "0";
+            setTimeout(()=>{
 
-            setTimeout(() => {
+                splash.style.display="none";
 
-                app.style.transition = "0.6s";
-                app.style.opacity = "1";
+                checkUser();
 
-            }, 100);
 
-        }, 800);
+            },800);
 
-    }, 3000);
+
+        }else{
+
+            checkUser();
+
+        }
+
+
+
+    },3000);
+
+
 
 });
+
+
+
+
+// =====================================
+// Firebase User Check
+// =====================================
+
+
+function checkUser(){
+
+
+onAuthStateChanged(auth, async(user)=>{
+
+
+    if(user){
+
+
+        try{
+
+
+            const userRef = doc(db,"users",user.uid);
+
+            const userSnap = await getDoc(userRef);
+
+
+
+            if(userSnap.exists()){
+
+
+                const role = userSnap.data().role;
+
+
+
+                if(role==="admin"){
+
+                    window.location.href =
+                    "admin/dashboard.html";
+
+                }
+
+
+                else if(role==="rider"){
+
+                    window.location.href =
+                    "rider/dashboard.html";
+
+                }
+
+
+                else{
+
+                    window.location.href =
+                    "customer/home.html";
+
+                }
+
+
+            }
+
+            else{
+
+
+                window.location.href =
+                "auth/role.html";
+
+
+            }
+
+
+
+        }catch(error){
+
+
+            console.log(
+            "Role Check Error:",
+            error
+            );
+
+
+            window.location.href =
+            "auth/login.html";
+
+
+        }
+
+
+
+    }
+
+    else{
+
+
+        window.location.href =
+        "auth/login.html";
+
+
+    }
+
+
+
+});
+
+
+}
+
+
+
 
 
 // =====================================
 // Disable Right Click
 // =====================================
 
-document.addEventListener("contextmenu", (e) => {
+document.addEventListener(
+"contextmenu",
+(e)=>{
 
-    e.preventDefault();
+e.preventDefault();
 
 });
+
+
 
 
 // =====================================
 // Network Status
 // =====================================
 
-window.addEventListener("online", () => {
 
-    console.log("Internet Connected");
+window.addEventListener(
+"online",
+()=>{
+
+console.log(
+"RiderX Internet Connected"
+);
 
 });
 
-window.addEventListener("offline", () => {
 
-    alert("No Internet Connection");
+window.addEventListener(
+"offline",
+()=>{
+
+alert(
+"No Internet Connection"
+);
 
 });
+
+
 
 
 // =====================================
 // Service Worker
 // =====================================
 
-if ("serviceWorker" in navigator) {
 
-    window.addEventListener("load", () => {
+if("serviceWorker" in navigator){
 
-        navigator.serviceWorker
-            .register("sw.js")
-            .then(() => {
 
-                console.log("Service Worker Registered");
+window.addEventListener(
+"load",
+()=>{
 
-            })
-            .catch((err) => {
 
-                console.log(err);
+navigator.serviceWorker.register(
+"sw.js"
+)
 
-            });
+.then(()=>{
 
-    });
+console.log(
+"RiderX Service Worker Active"
+);
+
+})
+
+
+.catch((error)=>{
+
+console.log(
+"SW Error",
+error
+);
+
+});
+
+
+});
+
 
 }
 
 
-// =====================================
-// App Ready
-// =====================================
 
-console.log("==================================");
-console.log(" RiderX Mobile App Loaded ");
-console.log(" Splash Animation Ready ");
-console.log(" Professional UI Enabled ");
-console.log("==================================");
+
+console.log(
+"RiderX App Loaded"
+);
