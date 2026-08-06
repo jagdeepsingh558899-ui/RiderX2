@@ -8,56 +8,69 @@
 
 <title>RiderX Trip</title>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
-
-
 body{
 
+margin:0;
 background:#000;
 color:white;
-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
+font-family:Arial;
 
 }
+
+
+.header{
+
+padding:18px;
+background:#111;
+text-align:center;
+font-size:22px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+#map{
+
+height:45vh;
+width:100%;
+
+}
+
 
 
 .box{
 
-width:90%;
-max-width:380px;
+padding:20px;
+
+}
+
+
+
+.card{
+
 background:#111;
-padding:25px;
-border-radius:20px;
-border:2px solid #FFD600;
-text-align:center;
+padding:20px;
+border-radius:18px;
+margin-top:15px;
 
 }
 
-
-h1 span{
-
-color:#FFD600;
-
-}
 
 
 input,button{
 
 width:100%;
-padding:15px;
-margin-top:15px;
-border-radius:12px;
+padding:14px;
+margin-top:12px;
 border:none;
+border-radius:12px;
 
 }
 
@@ -73,19 +86,14 @@ font-weight:bold;
 #completeBtn{
 
 display:none;
-background:white;
+
+background:#fff;
 
 }
 
 
-#msg{
-
-margin-top:15px;
-
-}
 
 </style>
-
 
 </head>
 
@@ -93,36 +101,47 @@ margin-top:15px;
 <body>
 
 
+<div class="header">
+
+🏍 RiderX Trip
+
+</div>
+
+
+
+<div id="map"></div>
+
+
 
 <div class="box">
 
 
-<h1>
-
-RIDER<span>X</span>
-
-</h1>
+<div class="card">
 
 
+<h2 id="status">
 
-<h2 id="title">
-
-Enter Customer OTP
+Go To Pickup Location
 
 </h2>
 
 
+<p id="info">
 
-<input id="otpInput" placeholder="4 Digit OTP">
+Loading...
+
+</p>
 
 
 
-<button id="verifyBtn">
+<input id="otp" placeholder="Enter Customer OTP">
+
+
+<button id="startBtn">
 
 Start Ride
 
 </button>
-
 
 
 <button id="completeBtn">
@@ -140,8 +159,13 @@ Complete Ride
 </div>
 
 
+</div>
 
 
+
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
 
@@ -156,12 +180,14 @@ import {
 doc,
 getDoc,
 updateDoc,
-serverTimestamp,
-setDoc
+setDoc,
+serverTimestamp
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 import {
@@ -176,62 +202,65 @@ from "../js/ride-complete.js";
 
 
 
-let rideId=
 
+let rideId =
 localStorage.getItem("rideId");
 
 
 
-let verifyBtn=
-document.getElementById("verifyBtn");
+let map=L.map("map")
 
+.setView(
 
-let completeBtn=
-document.getElementById("completeBtn");
+[30.7333,76.7794],
 
+13
 
-let msg=
-document.getElementById("msg");
-
-
+);
 
 
 
+L.tileLayer(
 
-// OTP VERIFY
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 
+)
 
-verifyBtn.onclick=async()=>{
-
-
-
-let otp=
-
-document.getElementById("otpInput").value;
-
-
-
-if(!otp){
-
-msg.innerHTML="OTP enter karo";
-
-return;
-
-}
+.addTo(map);
 
 
 
 
 
-let rideRef=
+let riderMarker=null;
 
-doc(db,"rides",rideId);
+let pickupMarker=null;
+
+let dropMarker=null;
+
+let routeLine=null;
+
+
+let rideData=null;
+
+let started=false;
+
+
+
+
+
+
+async function loadRide(){
 
 
 
 let snap=
 
-await getDoc(rideRef);
+await getDoc(
+
+doc(db,"rides",rideId)
+
+);
 
 
 
@@ -239,56 +268,107 @@ if(!snap.exists()) return;
 
 
 
-let data=snap.data();
+rideData=snap.data();
 
 
 
 
 
-if(String(data.otp)===String(otp)){
+if(rideData.pickupCoords){
 
 
 
-await updateDoc(
+pickupMarker=L.marker(
 
-rideRef,
+[
 
-{
+rideData.pickupCoords.lat,
+
+rideData.pickupCoords.lng
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup("📍 Pickup");
 
 
-status:"Started",
-
-startedAt:serverTimestamp()
 
 }
 
+
+
+
+if(rideData.dropCoords){
+
+
+
+dropMarker=L.marker(
+
+[
+
+rideData.dropCoords.lat,
+
+rideData.dropCoords.lng
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup("🏁 Drop");
+
+
+}
+
+
+
+}
+
+
+
+loadRide();
+
+
+
+
+
+
+
+
+function startLocation(){
+
+
+
+let riderId=auth.currentUser.uid;
+
+
+
+
+navigator.geolocation.watchPosition(
+
+async(pos)=>{
+
+
+
+let lat=pos.coords.latitude;
+
+let lng=pos.coords.longitude;
+
+
+
+
+if(riderMarker){
+
+
+riderMarker.setLatLng(
+
+[lat,lng]
+
 );
-
-
-
-
-
-msg.innerHTML="Ride Started ✅";
-
-
-
-verifyBtn.style.display="none";
-
-document.getElementById("otpInput").style.display="none";
-
-
-document.getElementById("title").innerHTML=
-
-"Trip Running 🏍️";
-
-
-
-completeBtn.style.display="block";
-
-
-
-startLiveLocation();
-
 
 
 }
@@ -296,48 +376,29 @@ startLiveLocation();
 else{
 
 
-msg.innerHTML="Wrong OTP ❌";
+riderMarker=L.marker(
+
+[lat,lng]
+
+)
+
+.addTo(map)
+
+.bindPopup("🏍 You");
 
 
 }
 
 
-};
 
 
+map.setView(
 
+[lat,lng],
 
+15
 
-
-
-
-// RIDER LIVE LOCATION
-
-
-function startLiveLocation(){
-
-
-
-let riderId=
-
-auth.currentUser.uid;
-
-
-
-navigator.geolocation.watchPosition(
-
-async(position)=>{
-
-
-let lat=
-
-position.coords.latitude;
-
-
-
-let lng=
-
-position.coords.longitude;
+);
 
 
 
@@ -354,9 +415,9 @@ lat,
 
 lng,
 
-status:"On Trip",
-
 rideId,
+
+status: started ? "On Trip":"Going Pickup",
 
 updatedAt:serverTimestamp()
 
@@ -381,7 +442,101 @@ updatedAt:serverTimestamp()
 
 
 
-completeBtn.onclick=async()=>{
+document.getElementById("startBtn").onclick=async()=>{
+
+
+
+let otp=
+
+document.getElementById("otp").value;
+
+
+
+
+
+let snap=
+
+await getDoc(
+
+doc(db,"rides",rideId)
+
+);
+
+
+
+let data=snap.data();
+
+
+
+
+
+
+if(String(data.otp)!==String(otp)){
+
+
+document.getElementById("msg").innerHTML=
+
+"Wrong OTP ❌";
+
+
+return;
+
+}
+
+
+
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+
+status:"Started",
+
+startedAt:serverTimestamp()
+
+}
+
+);
+
+
+
+started=true;
+
+
+
+document.getElementById("status").innerHTML=
+
+"Trip Started 🏁";
+
+
+
+document.getElementById("msg").innerHTML=
+
+"Ride Started ✅";
+
+
+
+document.getElementById("otp").style.display="none";
+
+document.getElementById("startBtn").style.display="none";
+
+
+document.getElementById("completeBtn").style.display="block";
+
+
+
+};
+
+
+
+
+
+
+
+document.getElementById("completeBtn").onclick=async()=>{
 
 
 
@@ -394,17 +549,10 @@ await completeRide(rideId);
 if(done){
 
 
-msg.innerHTML="Ride Completed ✅";
+alert("Ride Completed ✅");
 
 
-
-setTimeout(()=>{
-
-
-location.href="dashboard.html";
-
-
-},1500);
+location.href="../customer/receipt.html";
 
 
 }
@@ -415,8 +563,14 @@ location.href="dashboard.html";
 
 
 
-</script>
 
+
+
+startLocation();
+
+
+
+</script>
 
 
 </body>
