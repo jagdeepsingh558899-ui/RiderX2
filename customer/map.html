@@ -4,30 +4,77 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Map</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 
 <style>
 
-#map{
+body{
 
-height:400px;
-
-width:100%;
-
-border-radius:15px;
+background:#000;
+color:white;
+padding:15px;
 
 }
 
+
+.header{
+
+text-align:center;
+margin-bottom:15px;
+
+}
+
+
+.header h1{
+
+font-size:35px;
+
+}
+
+
+.header span{
+
+color:#00eaff;
+
+}
+
+
+#map{
+
+height:450px;
+width:100%;
+border-radius:20px;
+overflow:hidden;
+
+}
+
+
+button{
+
+width:100%;
+padding:16px;
+margin-top:20px;
+
+border:none;
+border-radius:15px;
+
+background:#00eaff;
+
+font-size:18px;
+font-weight:bold;
+
+}
+
+
 </style>
+
 
 </head>
 
@@ -35,41 +82,113 @@ border-radius:15px;
 <body>
 
 
-<div class="splash">
-
+<div class="header">
 
 <h1>
-Rider<span>X</span>
+RIDER<span>X</span>
 </h1>
 
+<p>
+Find your ride
+</p>
 
-<h2>
-Find Rider
-</h2>
+</div>
+
 
 
 <div id="map"></div>
 
 
-<br>
 
+<button id="locationBtn">
 
-<button onclick="getCustomerLocation()">
-
-My Location
+📍 My Location
 
 </button>
 
-
-
-</div>
 
 
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
-<script type="module" src="../js/leaflet-map.js"></script>
+<script type="module">
+
+
+import { initMap, addMarker } from "../js/leaflet-map.js";
+
+
+
+const map = initMap();
+
+
+
+document
+.getElementById("locationBtn")
+.addEventListener("click",()=>{
+
+
+if(!navigator.geolocation){
+
+alert("Location not supported");
+
+return;
+
+}
+
+
+
+navigator.geolocation.getCurrentPosition(
+
+(position)=>{
+
+
+let lat = position.coords.latitude;
+
+let lng = position.coords.longitude;
+
+
+
+map.setView(
+[lat,lng],
+16
+);
+
+
+
+addMarker(
+map,
+lat,
+lng,
+"📍 Your Location"
+);
+
+
+
+},
+
+
+()=>{
+
+
+alert(
+"Location permission allow karo"
+);
+
+
+}
+
+
+
+);
+
+
+
+});
+
+
+
+</script>
 
 
 </body>
