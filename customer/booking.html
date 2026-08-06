@@ -66,7 +66,13 @@ Distance: -
 Fare: -
 </p>
 
+<input id="coupon" placeholder="Enter Coupon Code">
 
+<button onclick="applyCoupon()">
+Apply Coupon
+</button>
+
+<p id="couponMsg"></p>
 
 <button onclick="bookRide()">
 Confirm Booking
@@ -81,7 +87,73 @@ Confirm Booking
 
 
 <script type="module">
+let discount = 0;
 
+
+window.applyCoupon = async function(){
+
+
+let code = 
+document.getElementById("coupon").value.toUpperCase();
+
+
+
+let snap = await getDocs(
+
+collection(db,"coupons")
+
+);
+
+
+
+let found=false;
+
+
+
+snap.forEach((c)=>{
+
+
+let data=c.data();
+
+
+
+if(data.code == code){
+
+
+found=true;
+
+
+discount=data.discount;
+
+
+
+document.getElementById("couponMsg").innerHTML=
+
+"Coupon Applied ✅";
+
+
+}
+
+
+
+});
+
+
+
+
+if(!found){
+
+
+document.getElementById("couponMsg").innerHTML=
+
+"Invalid Coupon ❌";
+
+
+}
+
+
+
+}
 
 import {db} from "../firebase/config.js";
 
