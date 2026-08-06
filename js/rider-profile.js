@@ -1,142 +1,73 @@
-// =====================================
+// =================================
 // RiderX Rider Profile System
-// =====================================
+// Load + Update + Logout
+// =================================
 
 
 import {
 
 auth,
-
 db
 
-}
-
-from "../firebase/config.js";
-
+} from "../firebase/Firebase-config.js";
 
 
 import {
 
 onAuthStateChanged,
-
 signOut
 
-}
-
-from
-
+} from
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
 
 
 import {
 
 doc,
+getDoc,
+setDoc
 
-getDoc
-
-}
-
-from
-
+} from
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
 
-
-
-
-const nameBox =
-
-document.getElementById("name");
-
-
-
-const emailBox =
-
-document.getElementById("email");
-
-
-
-const phoneBox =
-
-document.getElementById("phone");
-
-
-
-const vehicleBox =
-
-document.getElementById("vehicle");
-
-
-
-const licenseBox =
-
-document.getElementById("license");
-
-
-
-const logoutBtn =
-
-document.getElementById("logout");
+let riderId = null;
 
 
 
 
 
+// Load Rider Profile
 
 
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
 
 
-// =====================================
-// LOAD RIDER PROFILE
-// =====================================
+if(user){
 
 
-
-onAuthStateChanged(auth,async(user)=>{
-
-
-
-if(!user){
-
-
-
-window.location.href=
-
-"../auth/login.html";
-
-
-return;
-
-
-}
+riderId = user.uid;
 
 
 
 
 
-
-
-try{
-
-
-
-const snap =
-
-await getDoc(
+const riderRef =
 
 doc(
 
 db,
 
-"users",
+"riders",
 
 user.uid
-
-)
 
 );
 
@@ -145,58 +76,70 @@ user.uid
 
 
 
+const riderSnap =
 
-if(snap.exists()){
-
-
-
-const data = snap.data();
+await getDoc(riderRef);
 
 
 
 
-nameBox.innerHTML =
+
+
+if(riderSnap.exists()){
+
+
+
+const data = riderSnap.data();
+
+
+
+
+
+document.getElementById("riderName").innerHTML =
 
 data.name || "Rider";
 
 
 
-emailBox.innerHTML =
+document.getElementById("riderEmail").innerHTML =
 
-data.email || user.email;
-
-
-
-phoneBox.innerHTML =
-
-data.phone || user.phoneNumber || "Not Added";
+data.email || "";
 
 
 
-vehicleBox.innerHTML =
 
-data.vehicle || "Not Added";
+document.getElementById("name").value =
+
+data.name || "";
 
 
 
-licenseBox.innerHTML =
+document.getElementById("phone").value =
 
-data.license || "Not Added";
+data.phone || "";
+
+
+
+document.getElementById("bikeModel").value =
+
+data.bikeModel || "";
+
+
+
+document.getElementById("vehicleNumber").value =
+
+data.vehicleNumber || "";
+
+
+
+document.getElementById("license").value =
+
+data.license || "";
 
 
 
 }
 
-
-
-}
-
-
-
-catch(error){
-
-
-console.log(error);
 
 
 }
@@ -213,54 +156,137 @@ console.log(error);
 
 
 
-// =====================================
-// LOGOUT
-// =====================================
+// Save Rider Profile
+
+
+const saveBtn =
+
+document.getElementById("saveRiderProfile");
 
 
 
-if(logoutBtn){
+
+
+if(saveBtn){
 
 
 
-logoutBtn.onclick=async()=>{
-
-
-try{
-
-
-await signOut(auth);
+saveBtn.onclick = async()=>{
 
 
 
-alert(
 
-"Logout Successful"
+
+await setDoc(
+
+doc(
+
+db,
+
+"riders",
+
+riderId
+
+),
+
+
+{
+
+
+name:
+
+document.getElementById("name").value,
+
+
+phone:
+
+document.getElementById("phone").value,
+
+
+bikeModel:
+
+document.getElementById("bikeModel").value,
+
+
+vehicleNumber:
+
+document.getElementById("vehicleNumber").value,
+
+
+license:
+
+document.getElementById("license").value
+
+
+
+},
+
+
+{
+
+merge:true
+
+}
+
+
 
 );
 
 
 
-window.location.href=
+
+
+alert(
+
+"Rider Profile Updated"
+
+);
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+
+// Logout
+
+
+const logout =
+
+document.getElementById("logout");
+
+
+
+
+
+if(logout){
+
+
+
+logout.onclick = ()=>{
+
+
+
+signOut(auth)
+
+.then(()=>{
+
+
+window.location.href =
 
 "../auth/login.html";
 
 
-
-}
-
-
-catch(error){
-
-
-
-alert(
-error.message
-);
-
-
-
-}
+});
 
 
 
