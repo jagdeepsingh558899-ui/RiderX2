@@ -1,38 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-
-
-<title>Trip Control</title>
+<title>RiderX Start Trip</title>
 
 
-<link rel="stylesheet" href="../css/style.css">
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+height:100vh;
+
+}
+
+
+.box{
+
+width:90%;
+max-width:380px;
+
+background:#111;
+
+padding:25px;
+
+border-radius:20px;
+
+border:2px solid #FFD600;
+
+text-align:center;
+
+}
+
+
+
+h1 span{
+
+color:#FFD600;
+
+}
+
+
+
+input{
+
+width:100%;
+
+padding:15px;
+
+margin-top:20px;
+
+border-radius:12px;
+
+border:none;
+
+font-size:18px;
+
+text-align:center;
+
+}
+
+
+
+button{
+
+width:100%;
+
+padding:15px;
+
+margin-top:20px;
+
+background:#FFD600;
+
+border:none;
+
+border-radius:12px;
+
+font-weight:bold;
+
+}
+
+
+
+#msg{
+
+margin-top:15px;
+
+}
+
+</style>
+
 
 </head>
+
 
 
 <body>
 
 
-<div class="splash">
+
+<div class="box">
 
 
 <h1>
-Rider<span>X</span>
+
+RIDER<span>X</span>
+
 </h1>
 
 
+
 <h2>
-Trip Control
+
+Enter Customer OTP
+
 </h2>
 
 
-<button onclick="startRide()">
+
+<input id="otpInput" placeholder="4 Digit OTP">
+
+
+
+<button id="verifyBtn">
 
 Start Ride
 
@@ -40,11 +141,7 @@ Start Ride
 
 
 
-<button onclick="completeRide()">
-
-Complete Ride
-
-</button>
+<p id="msg"></p>
 
 
 
@@ -52,7 +149,139 @@ Complete Ride
 
 
 
-<script type="module" src="../js/trip.js"></script>
+
+
+<script type="module">
+
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+doc,
+getDoc,
+updateDoc,
+serverTimestamp
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+let rideId =
+localStorage.getItem("rideId");
+
+
+
+const btn =
+document.getElementById("verifyBtn");
+
+
+
+btn.onclick=async()=>{
+
+
+let enteredOtp =
+document.getElementById("otpInput").value;
+
+
+
+if(!enteredOtp){
+
+return;
+
+}
+
+
+
+const rideRef =
+doc(db,"rides",rideId);
+
+
+
+const snap =
+await getDoc(rideRef);
+
+
+
+if(!snap.exists()){
+
+return;
+
+}
+
+
+
+let data =
+snap.data();
+
+
+
+
+
+if(String(data.otp) === String(enteredOtp)){
+
+
+
+await updateDoc(
+
+rideRef,
+
+{
+
+
+status:"Started",
+
+
+startedAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+document.getElementById("msg").innerHTML=
+
+"Ride Started ✅";
+
+
+
+setTimeout(()=>{
+
+
+location.href="live.html";
+
+
+},1500);
+
+
+
+}
+
+else{
+
+
+document.getElementById("msg").innerHTML=
+
+"Wrong OTP ❌";
+
+
+}
+
+
+
+};
+
+
+
+</script>
+
 
 
 </body>
