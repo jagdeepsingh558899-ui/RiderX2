@@ -1,121 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<meta name="theme-color"
-content="#FFD600">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RiderX</title>
 
-<link rel="stylesheet"
-href="css/style.css">
+<link rel="manifest" href="manifest.json">
 
-<link rel="manifest"
-href="manifest.json">
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#000;
+    height:100vh;
+    overflow:hidden;
+}
+
+
+/* Splash Screen */
+
+#splash{
+
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100vh;
+
+    background:#000;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:9999;
+
+    animation:hideSplash 1s ease 3.5s forwards;
+
+}
+
+
+.logo-box{
+
+    text-align:center;
+
+    animation:logoAnimation 2s ease;
+
+}
+
+
+.logo{
+
+    width:180px;
+    height:180px;
+
+    border-radius:50%;
+
+    object-fit:contain;
+
+    filter:drop-shadow(0 0 20px #00eaff);
+
+    animation:pulse 1.5s infinite;
+
+}
+
+
+.logo-text{
+
+    color:white;
+
+    font-size:38px;
+
+    font-weight:800;
+
+    letter-spacing:3px;
+
+    margin-top:15px;
+
+}
+
+
+.logo-text span{
+
+    color:#00eaff;
+
+}
+
+
+
+@keyframes logoAnimation{
+
+0%{
+    transform:scale(0);
+    opacity:0;
+}
+
+70%{
+    transform:scale(1.15);
+    opacity:1;
+}
+
+100%{
+    transform:scale(1);
+}
+
+}
+
+
+
+@keyframes pulse{
+
+0%{
+    transform:scale(1);
+}
+
+50%{
+    transform:scale(1.08);
+}
+
+100%{
+    transform:scale(1);
+}
+
+}
+
+
+
+@keyframes hideSplash{
+
+to{
+
+opacity:0;
+visibility:hidden;
+
+}
+
+}
+
+
+
+#app{
+
+height:100vh;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+color:white;
+
+font-size:25px;
+
+}
+
+
+</style>
+
 
 </head>
 
+
 <body>
 
-<!-- Splash Screen -->
 
-<div id="splash" class="splash">
+<div id="splash">
 
 <div class="logo-box">
 
-<div class="bike">
 
-🏍
+<!-- Logo Image -->
+
+<img class="logo" src="assets/logo.png">
+
+
+<div class="logo-text">
+
+RIDER<span>X</span>
 
 </div>
 
-<h1>
-
-Rider<span>X</span>
-
-</h1>
-
-<p>
-
-Ride Smarter
-
-</p>
-
-<div class="loader"></div>
 
 </div>
 
 </div>
 
-<!-- Main App -->
 
-<div id="app" style="display:none;">
 
-<header class="topbar">
-
-<h1>
-
-Rider<span>X</span>
-
-</h1>
-
-</header>
-
-<div class="home">
-
-<div class="welcome">
-
-<h2>
+<div id="app">
 
 Welcome To RiderX
 
-</h2>
-
-<p>
-
-Fast • Safe • Affordable
-
-</p>
-
 </div>
 
-<div class="main-buttons">
 
-<a
-href="auth/login.html">
 
-<button>
+<script type="module" src="js/app.js"></script>
 
-Login
-
-</button>
-
-</a>
-
-<a
-href="auth/register.html">
-
-<button>
-
-Create Account
-
-</button>
-
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<script src="js/app.js"></script>
 
 </body>
+
 </html>
