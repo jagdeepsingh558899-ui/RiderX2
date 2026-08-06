@@ -10,6 +10,39 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
+
+<style>
+
+#map{
+
+height:350px;
+width:100%;
+border-radius:15px;
+margin:15px 0;
+
+}
+
+input,select,button{
+
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:10px;
+
+}
+
+button{
+
+background:#ffcc00;
+border:none;
+font-weight:bold;
+
+}
+
+</style>
+
 </head>
 
 
@@ -17,16 +50,38 @@
 
 
 <div class="header">
+
 🚕 RiderX Booking
+
 </div>
+
 
 
 <div class="container">
 
 
+
+<div id="map"></div>
+
+
+
 <select id="service">
 
+<option value="Bike Taxi">
+🏍 Bike Taxi
+</option>
+
+<option value="Cab">
+🚕 Cab
+</option>
+
+<option value="Parcel">
+📦 Parcel
+</option>
+
+
 </select>
+
 
 
 
@@ -34,25 +89,35 @@
 
 
 <button onclick="getPickup()">
+
 📍 Use Current Location
+
 </button>
+
 
 
 
 <input id="drop" placeholder="Drop Location">
 
 
+
 <input id="coupon" placeholder="Coupon Code">
 
 
+
 <button onclick="applyCoupon()">
+
 🎁 Apply Coupon
+
 </button>
 
 
 
+
 <button onclick="calculateRide()">
+
 📏 Calculate Fare
+
 </button>
 
 
@@ -66,16 +131,17 @@ Distance: -
 Fare: -
 </p>
 
-<input id="coupon" placeholder="Enter Coupon Code">
 
-<button onclick="applyCoupon()">
-Apply Coupon
-</button>
 
 <p id="couponMsg"></p>
 
+
+
+
 <button onclick="bookRide()">
+
 Confirm Booking
+
 </button>
 
 
@@ -86,19 +152,147 @@ Confirm Booking
 
 
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
 <script type="module">
-let discount = 0;
 
 
-window.applyCoupon = async function(){
+import {db} from "../firebase/config.js";
 
 
-let code = 
+import {
+
+collection,
+addDoc,
+serverTimestamp,
+getDocs
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+let map = L.map("map").setView([26.9124,75.7873],13);
+
+
+
+L.tileLayer(
+
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+).addTo(map);
+
+
+
+
+
+let pickupLat=null;
+let pickupLng=null;
+
+let dropLat=null;
+let dropLng=null;
+
+let distance=0;
+let finalFare=0;
+
+let discount=0;
+
+
+
+
+let marker;
+
+
+
+
+
+
+window.getPickup=function(){
+
+
+
+navigator.geolocation.getCurrentPosition(
+
+(pos)=>{
+
+
+pickupLat=pos.coords.latitude;
+
+pickupLng=pos.coords.longitude;
+
+
+
+document.getElementById("pickup").value=
+
+pickupLat+","+pickupLng;
+
+
+
+if(marker){
+
+map.removeLayer(marker);
+
+}
+
+
+
+marker=L.marker(
+
+[pickupLat,pickupLng]
+
+)
+
+.addTo(map)
+
+.bindPopup("Pickup")
+
+.openPopup();
+
+
+
+map.setView(
+
+[pickupLat,pickupLng],
+
+15
+
+);
+
+
+
+}
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+window.applyCoupon=async function(){
+
+
+
+let code=
+
 document.getElementById("coupon").value.toUpperCase();
 
 
 
-let snap = await getDocs(
+let snap=
+
+await getDocs(
 
 collection(db,"coupons")
 
@@ -117,14 +311,23 @@ let data=c.data();
 
 
 
-if(data.code == code){
+if(data.code==code){
+
+
+discount=data.discount;
 
 
 found=true;
 
 
-discount=data.discount;
+}
 
+
+});
+
+
+
+if(found){
 
 
 document.getElementById("couponMsg").innerHTML=
@@ -134,14 +337,10 @@ document.getElementById("couponMsg").innerHTML=
 
 }
 
+else{
 
 
-});
-
-
-
-
-if(!found){
+discount=0;
 
 
 document.getElementById("couponMsg").innerHTML=
@@ -152,211 +351,8 @@ document.getElementById("couponMsg").innerHTML=
 }
 
 
-
 }
 
-import {db} from "../firebase/config.js";
-
-
-import {getFareSettings} from "../js/fare.js";
-
-
-import {getCoordinates} from "../js/geocode.js";
-
-
-import {let fareRates={};
-
-
-async function loadFareRates(){
-
-
-let snap = await getDoc(
-
-doc(db,"settings","fare")
-
-);
-
-
-
-if(snap.exists()){
-
-fareRates=snap.data();
-
-}
-
-
-}
-
-
-loadFareRates();
-
-collection,
-addDoc,
-serverTimestamp
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-let settings={};
-
-
-let pickupLat;
-
-let pickupLng;
-
-
-let dropLat;
-
-let dropLng;
-
-
-let distance=0;
-
-let finalFare=0;
-
-let couponDiscount=0;
-
-
-
-
-
-
-async function loadSettings(){
-
-
-settings=await getFareSettings();
-
-
-
-let service=document.getElementById("service");
-
-service.innerHTML="";
-
-
-
-if(settings.bike){
-
-service.innerHTML+=
-
-`<option value="Bike Taxi">🏍 Bike Taxi</option>`;
-
-}
-
-
-
-if(settings.cab){
-
-service.innerHTML+=
-
-`<option value="Cab">🚕 Cab</option>`;
-
-}
-
-
-
-if(settings.parcel){
-
-service.innerHTML+=
-
-`<option value="Parcel">📦 Parcel</option>`;
-
-}
-
-
-
-if(settings.food){
-
-service.innerHTML+=
-
-`<option value="Food">🍔 Food</option>`;
-
-}
-
-
-
-}
-
-
-
-loadSettings();
-
-
-
-
-
-
-window.getPickup=function(){
-
-
-navigator.geolocation.getCurrentPosition(
-
-(pos)=>{
-
-
-pickupLat=pos.coords.latitude;
-
-pickupLng=pos.coords.longitude;
-
-
-document.getElementById("pickup").value=
-
-pickupLat+","+pickupLng;
-
-
-}
-
-);
-
-
-}
-
-
-
-
-
-
-window.applyCoupon=function(){
-
-
-let code=
-
-document.getElementById("coupon").value;
-
-
-
-if(code==settings.coupon){
-
-
-couponDiscount=
-
-Number(settings.discount || 0);
-
-
-
-alert("Coupon Applied ✅");
-
-
-}
-
-else{
-
-
-couponDiscount=0;
-
-alert("Invalid Coupon ❌");
-
-
-}
-
-
-}
 
 
 
@@ -368,19 +364,9 @@ window.calculateRide=async function(){
 
 
 
-let result=
+if(!pickupLat){
 
-await getCoordinates(
-
-document.getElementById("drop").value
-
-);
-
-
-
-if(!result){
-
-alert("Drop location not found");
+alert("Pickup location select karo");
 
 return;
 
@@ -388,19 +374,68 @@ return;
 
 
 
-dropLat=result.lat;
+let place=
 
-dropLng=result.lng;
+document.getElementById("drop").value;
+
+
+
+let res=
+
+await fetch(
+
+"https://nominatim.openstreetmap.org/search?format=json&q="+place
+
+);
+
+
+
+let data=
+
+await res.json();
+
+
+
+if(!data.length){
+
+alert("Drop location nahi mila");
+
+return;
+
+}
+
+
+
+dropLat=
+
+Number(data[0].lat);
+
+
+
+dropLng=
+
+Number(data[0].lon);
+
 
 
 
 let R=6371;
 
 
-let dLat=(dropLat-pickupLat)*Math.PI/180;
+
+let dLat=
+
+(dropLat-pickupLat)
+
+*Math.PI/180;
 
 
-let dLng=(dropLng-pickupLng)*Math.PI/180;
+
+let dLng=
+
+(dropLng-pickupLng)
+
+*Math.PI/180;
 
 
 
@@ -408,13 +443,9 @@ let a=
 
 Math.sin(dLat/2)**2+
 
-Math.cos(pickupLat*Math.PI/180)
+Math.cos(pickupLat*Math.PI/180)*
 
-*
-
-Math.cos(dropLat*Math.PI/180)
-
-*
+Math.cos(dropLat*Math.PI/180)*
 
 Math.sin(dLng/2)**2;
 
@@ -422,80 +453,26 @@ Math.sin(dLng/2)**2;
 
 distance=
 
-(
-
-R*
-
-2*
-
-Math.atan2(
+R*2*Math.atan2(
 
 Math.sqrt(a),
 
 Math.sqrt(1-a)
 
-)
-
-).toFixed(2);
-
-
-
-
-
-
-let type=
-
-document.getElementById("service").value;
-
-
-
-if(type=="Bike Taxi"){
-
-
-finalFare=fareRates.bike
-
-Number(settings.bikeBase)
-
-+
-
-distance*Number(settings.bikeKm);
-
-
-}
-
-else if(type=="Cab"){
-
-
-finalFare=fareRates.cab
-
-Number(settings.cabBase)
-
-+
-
-distance*Number(settings.cabKm);
-
-
-}
-
-else{
-
-
-finalFare=
-
-100+(distance*10);
-
-
-}
-
+);
 
 
 
 
 finalFare=
 
-finalFare-
+50+(distance*10);
 
-(finalFare*couponDiscount/100);
+
+
+finalFare=
+
+finalFare-(finalFare*discount/100);
 
 
 
@@ -503,7 +480,7 @@ finalFare-
 
 document.getElementById("distance").innerHTML=
 
-"Distance: "+distance+" KM";
+"Distance: "+distance.toFixed(2)+" KM";
 
 
 
@@ -521,10 +498,15 @@ document.getElementById("fare").innerHTML=
 
 
 
+
+
 window.bookRide=async function(){
 
 
-let ride=await addDoc(
+
+let ride=
+
+await addDoc(
 
 collection(db,"rides"),
 
@@ -553,10 +535,6 @@ fare:
 
 "₹"+Math.round(finalFare),
 
-
-coupon:
-
-document.getElementById("coupon").value,
 
 
 status:"Pending",
@@ -590,10 +568,18 @@ alert("Ride Booked ✅");
 
 
 
-window.location.href=
-
-"ride-status.html";
+location.href="ride-status.html";
 
 
 
 }
+
+
+
+
+</script>
+
+
+</body>
+
+</html>
