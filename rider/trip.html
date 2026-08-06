@@ -23,9 +23,7 @@ body{
 
 background:#000;
 color:white;
-
 height:100vh;
-
 display:flex;
 justify-content:center;
 align-items:center;
@@ -33,24 +31,17 @@ align-items:center;
 }
 
 
-
 .box{
 
 width:90%;
 max-width:380px;
-
 background:#111;
-
 padding:25px;
-
 border-radius:20px;
-
 border:2px solid #FFD600;
-
 text-align:center;
 
 }
-
 
 
 h1 span{
@@ -60,50 +51,21 @@ color:#FFD600;
 }
 
 
-
-input{
+input,button{
 
 width:100%;
-
 padding:15px;
-
-margin-top:20px;
-
+margin-top:15px;
 border-radius:12px;
-
 border:none;
 
-font-size:18px;
-
-text-align:center;
-
 }
-
 
 
 button{
 
-width:100%;
-
-padding:15px;
-
-margin-top:15px;
-
 background:#FFD600;
-
-border:none;
-
-border-radius:12px;
-
 font-weight:bold;
-
-}
-
-
-
-.complete{
-
-background:white;
 
 }
 
@@ -111,9 +73,9 @@ background:white;
 #completeBtn{
 
 display:none;
+background:white;
 
 }
-
 
 
 #msg{
@@ -121,8 +83,6 @@ display:none;
 margin-top:15px;
 
 }
-
-
 
 </style>
 
@@ -144,6 +104,7 @@ RIDER<span>X</span>
 </h1>
 
 
+
 <h2 id="title">
 
 Enter Customer OTP
@@ -152,9 +113,7 @@ Enter Customer OTP
 
 
 
-<input 
-id="otpInput"
-placeholder="4 Digit OTP">
+<input id="otpInput" placeholder="4 Digit OTP">
 
 
 
@@ -166,7 +125,7 @@ Start Ride
 
 
 
-<button id="completeBtn" class="complete">
+<button id="completeBtn">
 
 Complete Ride
 
@@ -185,10 +144,11 @@ Complete Ride
 
 
 
+
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db,auth} from "../firebase/config.js";
 
 
 import {
@@ -196,7 +156,8 @@ import {
 doc,
 getDoc,
 updateDoc,
-serverTimestamp
+serverTimestamp,
+setDoc
 
 }
 
@@ -215,34 +176,38 @@ from "../js/ride-complete.js";
 
 
 
-let rideId =
+let rideId=
 
 localStorage.getItem("rideId");
 
 
 
-
-const verifyBtn =
+let verifyBtn=
 document.getElementById("verifyBtn");
 
 
-const completeBtn =
+let completeBtn=
 document.getElementById("completeBtn");
 
 
-const msg =
+let msg=
 document.getElementById("msg");
 
 
 
 
 
+
+// OTP VERIFY
+
+
 verifyBtn.onclick=async()=>{
 
 
-let otp =
-document.getElementById("otpInput").value;
 
+let otp=
+
+document.getElementById("otpInput").value;
 
 
 
@@ -257,24 +222,20 @@ return;
 
 
 
-const rideRef =
+
+let rideRef=
+
 doc(db,"rides",rideId);
 
 
 
-const snap =
+let snap=
+
 await getDoc(rideRef);
 
 
 
-if(!snap.exists()){
-
-msg.innerHTML="Ride not found";
-
-return;
-
-}
-
+if(!snap.exists()) return;
 
 
 
@@ -284,7 +245,7 @@ let data=snap.data();
 
 
 
-if(String(data.otp) === String(otp)){
+if(String(data.otp)===String(otp)){
 
 
 
@@ -297,13 +258,13 @@ rideRef,
 
 status:"Started",
 
-
 startedAt:serverTimestamp()
-
 
 }
 
 );
+
+
 
 
 
@@ -317,10 +278,16 @@ document.getElementById("otpInput").style.display="none";
 
 
 document.getElementById("title").innerHTML=
+
 "Trip Running 🏍️";
 
 
+
 completeBtn.style.display="block";
+
+
+
+startLiveLocation();
 
 
 
@@ -335,8 +302,78 @@ msg.innerHTML="Wrong OTP ❌";
 }
 
 
-
 };
+
+
+
+
+
+
+
+
+// RIDER LIVE LOCATION
+
+
+function startLiveLocation(){
+
+
+
+let riderId=
+
+auth.currentUser.uid;
+
+
+
+navigator.geolocation.watchPosition(
+
+async(position)=>{
+
+
+let lat=
+
+position.coords.latitude;
+
+
+
+let lng=
+
+position.coords.longitude;
+
+
+
+
+
+await setDoc(
+
+doc(db,"riderLocations",riderId),
+
+{
+
+
+lat,
+
+lng,
+
+status:"On Trip",
+
+rideId,
+
+updatedAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+}
+
+);
+
+
+
+}
 
 
 
@@ -347,7 +384,10 @@ msg.innerHTML="Wrong OTP ❌";
 completeBtn.onclick=async()=>{
 
 
-let done = await completeRide(rideId);
+
+let done=
+
+await completeRide(rideId);
 
 
 
@@ -361,14 +401,14 @@ msg.innerHTML="Ride Completed ✅";
 setTimeout(()=>{
 
 
-window.location.href="dashboard.html";
+location.href="dashboard.html";
 
 
 },1500);
 
 
-
 }
+
 
 
 };
