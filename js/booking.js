@@ -1,6 +1,6 @@
 // =====================================
 // RiderX Booking System
-// Admin Fare + Map + Distance + Booking
+// Admin Fare + Map + Distance + OTP
 // =====================================
 
 
@@ -31,29 +31,19 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
+const service=document.getElementById("service");
 
-const service =
-document.getElementById("service");
+const pickup=document.getElementById("pickup");
 
-const pickup =
-document.getElementById("pickup");
+const drop=document.getElementById("drop");
 
-const drop =
-document.getElementById("drop");
+const fareBox=document.getElementById("fare");
 
-const fareBox =
-document.getElementById("fare");
+const distanceBox=document.getElementById("distance");
 
-const distanceBox =
-document.getElementById("distance");
+const bookBtn=document.getElementById("bookBtn");
 
-const bookBtn =
-document.getElementById("bookBtn");
-
-const locationBtn =
-document.getElementById("locationBtn");
-
-
+const locationBtn=document.getElementById("locationBtn");
 
 
 
@@ -65,15 +55,15 @@ let pickupMarker=null;
 
 let dropMarker=null;
 
+
 let pickupCoords=null;
 
 let dropCoords=null;
 
+
 let distance=0;
 
 let fare=0;
-
-
 
 
 
@@ -97,12 +87,7 @@ night:3
 
 
 
-
-
-// =====================
 // AUTH
-// =====================
-
 
 onAuthStateChanged(auth,(user)=>{
 
@@ -129,15 +114,9 @@ location.href="../auth/login.html";
 
 
 
-// =====================
 // LOAD ADMIN FARE
-// =====================
-
 
 async function loadFare(){
-
-
-try{
 
 
 const snap=
@@ -165,18 +144,7 @@ fareSettings={
 }
 
 
-
 }
-
-catch(error){
-
-console.log(error);
-
-}
-
-
-}
-
 
 
 loadFare();
@@ -188,10 +156,8 @@ loadFare();
 
 
 
-// =====================
-// MAP INIT
-// =====================
 
+// MAP
 
 document.addEventListener(
 
@@ -203,7 +169,6 @@ document.addEventListener(
 setTimeout(()=>{
 
 
-
 map=L.map("map")
 
 .setView(
@@ -213,8 +178,6 @@ map=L.map("map")
 13
 
 );
-
-
 
 
 
@@ -241,12 +204,7 @@ map.invalidateSize();
 
 
 
-
-map.on(
-
-"click",
-
-(e)=>{
+map.on("click",(e)=>{
 
 
 
@@ -265,17 +223,11 @@ lng:e.latlng.lng
 
 pickup.value=
 
-pickupCoords.lat.toFixed(6)+
-
-", "+
-
-pickupCoords.lng.toFixed(6);
+pickupCoords.lat.toFixed(6)+", "+pickupCoords.lng.toFixed(6);
 
 
 
-pickupMarker=
-
-L.marker(
+pickupMarker=L.marker(
 
 [
 
@@ -297,12 +249,7 @@ pickupCoords.lng
 
 }
 
-
-
-
-
 else if(!dropCoords){
-
 
 
 dropCoords={
@@ -315,20 +262,13 @@ lng:e.latlng.lng
 
 
 
-
 drop.value=
 
-dropCoords.lat.toFixed(6)+
-
-", "+
-
-dropCoords.lng.toFixed(6);
+dropCoords.lat.toFixed(6)+", "+dropCoords.lng.toFixed(6);
 
 
 
-dropMarker=
-
-L.marker(
+dropMarker=L.marker(
 
 [
 
@@ -348,8 +288,6 @@ dropCoords.lng
 
 
 
-
-
 calculateFare();
 
 
@@ -358,19 +296,14 @@ calculateFare();
 
 
 
-}
-
-);
-
+});
 
 
 
 },500);
 
 
-}
-
-);
+});
 
 
 
@@ -380,9 +313,7 @@ calculateFare();
 
 
 
-// =====================
 // CURRENT LOCATION
-// =====================
 
 
 locationBtn.onclick=()=>{
@@ -403,31 +334,15 @@ lng:position.coords.longitude
 
 
 
-
 pickup.value=
 
-pickupCoords.lat.toFixed(6)+
-
-", "+
-
-pickupCoords.lng.toFixed(6);
+pickupCoords.lat.toFixed(6)+", "+pickupCoords.lng.toFixed(6);
 
 
 
 
 
-if(pickupMarker){
-
-map.removeLayer(pickupMarker);
-
-}
-
-
-
-
-pickupMarker=
-
-L.marker(
+pickupMarker=L.marker(
 
 [
 
@@ -465,20 +380,17 @@ pickupCoords.lng
 
 
 
-
 },
+
 
 ()=>{
 
 
-alert(
-
-"Location permission allow karo"
-
-);
+alert("Location permission allow karo");
 
 
 }
+
 
 );
 
@@ -494,19 +406,15 @@ alert(
 
 
 
-// =====================
-// FARE CALCULATION
-// =====================
+// FARE
 
 
 function calculateFare(){
 
 
-
 if(!pickupCoords || !dropCoords)
 
 return;
-
 
 
 
@@ -535,13 +443,9 @@ dropCoords.lng
 
 
 
-
-
 distance=
 
 Number(distance.toFixed(1));
-
-
 
 
 
@@ -552,72 +456,45 @@ distance+" KM";
 
 
 
-
 let rate=0;
 
-let base=
-
-fareSettings.base || 50;
 
 
-
-
-
-if(service.value==="Bike Taxi"){
-
+if(service.value==="Bike Taxi")
 
 rate=fareSettings.bike;
 
-}
 
 
-if(service.value==="Cab"){
-
+if(service.value==="Cab")
 
 rate=fareSettings.cab;
 
-}
 
 
-if(service.value==="Parcel"){
-
+if(service.value==="Parcel")
 
 rate=fareSettings.parcel;
 
-}
 
 
-if(service.value==="Food"){
-
+if(service.value==="Food")
 
 rate=fareSettings.food;
 
-}
 
 
 
 
-
-
-let hour=
-
-new Date().getHours();
-
-
+let hour=new Date().getHours();
 
 
 
 if(hour>=22 || hour<6){
 
-
-rate +=
-
-Number(fareSettings.night || 0);
-
+rate += Number(fareSettings.night || 0);
 
 }
-
-
 
 
 
@@ -632,9 +509,7 @@ service.value==="Food"
 ){
 
 
-fare=
-
-rate;
+fare=rate;
 
 
 }
@@ -644,12 +519,14 @@ else{
 
 fare=
 
-base+(distance*rate);
+(fareSettings.base || 50)
+
++
+
+(distance*rate);
 
 
 }
-
-
 
 
 
@@ -665,20 +542,11 @@ Math.round(fare);
 
 
 
-
-
-
 service.addEventListener(
 
 "change",
 
-()=>{
-
-
-calculateFare();
-
-
-}
+calculateFare
 
 );
 
@@ -690,33 +558,45 @@ calculateFare();
 
 
 
+// OTP GENERATOR
 
-// =====================
+
+function generateOTP(){
+
+
+return Math.floor(
+
+1000+
+
+Math.random()*9000
+
+).toString();
+
+
+}
+
+
+
+
+
+
+
+
+
 // BOOK RIDE
-// =====================
 
 
-bookBtn.onclick=
-
-async()=>{
-
+bookBtn.onclick=async()=>{
 
 
 if(!currentUser){
 
 
-alert(
-
-"Login required"
-
-);
-
+alert("Login required");
 
 return;
 
-
 }
-
 
 
 
@@ -724,17 +604,20 @@ return;
 if(!pickupCoords || !dropCoords){
 
 
-alert(
-
-"Pickup aur Drop select karo"
-
-);
-
+alert("Pickup aur Drop select karo");
 
 return;
 
 
 }
+
+
+
+
+
+let otp=
+
+generateOTP();
 
 
 
@@ -794,9 +677,15 @@ Math.round(fare),
 
 
 
-status:
+otp,
 
-"Pending",
+
+
+status:"Pending",
+
+
+
+paymentStatus:"Pending",
 
 
 
@@ -805,10 +694,10 @@ createdAt:
 serverTimestamp()
 
 
-
 }
 
 );
+
 
 
 
@@ -830,7 +719,7 @@ ride.id
 
 alert(
 
-"Ride Booked Successfully ✅"
+"Ride Booked ✅\nOTP: "+otp
 
 );
 
@@ -838,10 +727,7 @@ alert(
 
 
 
-
-location.href=
-
-"ride-status.html";
+location.href="ride-status.html";
 
 
 
@@ -865,6 +751,6 @@ alert(error.message);
 
 console.log(
 
-"RiderX Booking System Ready"
+"RiderX Booking + OTP Ready"
 
 );
