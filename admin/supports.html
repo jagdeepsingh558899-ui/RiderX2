@@ -1,272 +1,560 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiderX Control Tower | Premium Support Center</title>
+    <link rel="stylesheet" href="../css/Style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#08080A',
+                            dark: '#0F1015',
+                            card: '#161822',
+                            border: '#232636',
+                            yellow: '#FFE500',
+                            yellowDark: '#D4BC00',
+                            gray: '#8E94A8',
+                            emerald: '#10B981',
+                            rose: '#F43F5E',
+                            amber: '#F59E0B',
+                            indigo: '#6366F1',
+                            cyan: '#06B6D4'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #08080A;
+            color: #FFFFFF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(22, 24, 34, 0.95) 0%, rgba(15, 16, 21, 0.98) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 229, 0, 0.08);
+        }
 
-<title>RiderX Support</title>
+        .glass-panel-interactive {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-<link rel="stylesheet" href="../css/style.css">
+        .glass-panel-interactive:hover {
+            border-color: rgba(255, 229, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -8px rgba(255, 229, 0, 0.1);
+        }
 
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0F1015;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #232636;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #FFE500;
+        }
 
-<style>
-
-.card{
-
-background:#111;
-padding:20px;
-border-radius:18px;
-margin:15px 0;
-border:1px solid #333;
-
-}
-
-
-button{
-
-width:100%;
-padding:14px;
-margin-top:10px;
-background:#FFD600;
-border:none;
-border-radius:12px;
-font-weight:bold;
-
-}
-
-
-.status{
-
-color:#FFD600;
-
-}
-
-
-</style>
-
+        .modal-backdrop {
+            background-color: rgba(8, 8, 10, 0.85);
+            backdrop-filter: blur(8px);
+        }
+    </style>
 </head>
-
-
-<body>
-
-
-<div class="header">
-
-🛠 RiderX Support
-
-</div>
-
-
-
-<div class="container">
-
-
-<h2>
-Support Requests
-</h2>
-
-
-<div id="supportList">
-
-Loading...
-
-</div>
-
-
-</div>
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-collection,
-getDocs,
-doc,
-updateDoc,
-orderBy,
-query
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-async function loadSupport(){
-
-
-
-const box =
-document.getElementById("supportList");
-
-
-
-const q=query(
-
-collection(db,"supports"),
-
-orderBy("createdAt","desc")
-
-);
-
-
-
-const snap =
-await getDocs(q);
-
-
-
-box.innerHTML="";
-
-
-
-
-
-if(snap.empty){
-
-
-box.innerHTML=
-
-"<p>No Support Requests</p>";
-
-
-return;
-
-}
-
-
-
-
-
-snap.forEach((item)=>{
-
-
-let data=item.data();
-
-
-
-box.innerHTML += `
-
-
-<div class="card">
-
-
-<h3>
-
-${data.subject || "Support"}
-
-</h3>
-
-
-<p>
-
-👤 User:
-
-${data.userId || "-"}
-
-</p>
-
-
-
-<p>
-
-📝 Message:
-
-<br>
-
-${data.message || "-"}
-
-</p>
-
-
-
-<p class="status">
-
-Status:
-
-${data.status || "Pending"}
-
-</p>
-
-
-
-<button onclick="closeTicket('${item.id}')">
-
-✅ Resolve
-
-</button>
-
-
-
-</div>
-
-
-`;
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-window.closeTicket=async(id)=>{
-
-
-await updateDoc(
-
-doc(db,"supports",id),
-
-{
-
-status:"Resolved"
-
-}
-
-);
-
-
-
-alert("Ticket Resolved ✅");
-
-
-loadSupport();
-
-
-};
-
-
-
-
-
-loadSupport();
-
-
-
-</script>
-
-
+<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
+
+    <!-- Top Global Navbar -->
+    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3">
+        <div class="max-w-[1700px] mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <a href="./Dashboard.html" class="flex items-center gap-3">
+                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-9 w-auto object-contain" onerror="this.src='https://via.placeholder.com/130x35/08080A/FFE500?text=RiderX+Admin'">
+                </a>
+                <span class="text-xs font-extrabold bg-brand-yellow/10 text-brand-yellow px-3 py-1 rounded-full border border-brand-yellow/20 uppercase tracking-wider hidden sm:inline-block">
+                    Admin Support Center & Ticket Operations
+                </span>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block w-64 lg:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
+                    <input type="text" id="searchInput" placeholder="Search ticket ID, user name, issue..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow" oninput="filterTicketsTable()">
+                </div>
+
+                <button onclick="refreshTicketsData()" id="refreshBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow hover:text-brand-yellow transition">
+                    <i class="fa-solid fa-rotate-right text-xs" id="refreshIcon"></i>
+                    <span class="hidden md:inline">Sync Support</span>
+                </button>
+
+                <div class="flex items-center gap-3 border-l border-brand-border pl-4">
+                    <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Support+Head&background=FFE500&color=08080A" alt="Admin" class="w-9 h-9 rounded-xl border border-brand-yellow object-cover">
+                    <div class="hidden xl:block text-left">
+                        <h4 class="text-xs font-extrabold text-white">Support Chief</h4>
+                        <p class="text-[10px] text-brand-yellow font-mono">Control Tower</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-grow max-w-[1700px] w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+
+        <!-- Navigation Tabs / Quick Return -->
+        <div class="flex items-center justify-between border-b border-brand-border pb-4">
+            <div class="flex items-center gap-3">
+                <a href="./Dashboard.html" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition">
+                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Control Tower
+                </a>
+                <span class="text-xs font-extrabold text-white bg-brand-yellow/10 text-brand-yellow px-4 py-2 rounded-xl border border-brand-yellow/25">
+                    <i class="fa-solid fa-headset mr-1.5"></i> Active Support & Helpdesk Tickets
+                </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition">
+                    <i class="fa-solid fa-print text-brand-cyan mr-1"></i> Print Tickets Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
+                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Total Tickets</span>
+                <h3 class="text-xl font-black text-white" id="statTotal">0</h3>
+            </div>
+            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
+                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Open Tickets</span>
+                <h3 class="text-xl font-black text-brand-amber" id="statOpen">0</h3>
+            </div>
+            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
+                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Pending Tickets</span>
+                <h3 class="text-xl font-black text-brand-cyan" id="statPending">0</h3>
+            </div>
+            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
+                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Resolved Today</span>
+                <h3 class="text-xl font-black text-brand-emerald" id="statResolvedToday">0</h3>
+            </div>
+            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
+                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Avg Response Time</span>
+                <h3 class="text-xl font-black text-brand-yellow" id="statAvgTime">4.2m</h3>
+            </div>
+            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
+                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Satisfaction</span>
+                <h3 class="text-xl font-black text-brand-indigo" id="statCSAT">98.4%</h3>
+            </div>
+        </div>
+
+        <!-- Filters & Category Selector Bar -->
+        <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Status Filter Pills -->
+            <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto custom-scrollbar pb-1 md:pb-0">
+                <button onclick="filterByStatus('all')" id="filter-status-all" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0">All Tickets</button>
+                <button onclick="filterByStatus('open')" id="filter-status-open" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Open</button>
+                <button onclick="filterByStatus('pending')" id="filter-status-pending" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Pending</button>
+                <button onclick="filterByStatus('resolved')" id="filter-status-resolved" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Resolved</button>
+                <button onclick="filterByStatus('closed')" id="filter-status-closed" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Closed</button>
+            </div>
+
+            <!-- Category & Priority Filters -->
+            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                <select id="userTypeFilter" onchange="filterTicketsTable()" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                    <option value="all">All Users (Customer & Rider)</option>
+                    <option value="customer">Customer Tickets</option>
+                    <option value="rider">Rider Tickets</option>
+                </select>
+                <select id="categoryFilter" onchange="filterTicketsTable()" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                    <option value="all">All Categories</option>
+                    <option value="technical">Technical Issues</option>
+                    <option value="payment">Payment Issues</option>
+                    <option value="booking">Booking Issues</option>
+                    <option value="account">Account Issues</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Premium Ticket Table -->
+        <div class="glass-panel rounded-3xl overflow-hidden">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-brand-border text-[10px] font-extrabold text-brand-gray uppercase tracking-wider bg-brand-dark/50">
+                            <th class="py-3.5 px-4">Ticket ID</th>
+                            <th class="py-3.5 px-4">User Details</th>
+                            <th class="py-3.5 px-4">Category & Subject</th>
+                            <th class="py-3.5 px-4">Priority</th>
+                            <th class="py-3.5 px-4">Status</th>
+                            <th class="py-3.5 px-4">Assigned Admin</th>
+                            <th class="py-3.5 px-4 text-center">Action Control</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketsTableBody" class="divide-y divide-brand-border/40 text-xs">
+                        <!-- Dynamic Ticket Rows -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="p-4 border-t border-brand-border flex items-center justify-between bg-brand-dark/40">
+                <span class="text-xs text-brand-gray" id="paginationInfo">Showing 0-0 of 0 tickets</span>
+                <div class="flex items-center gap-2">
+                    <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs text-brand-gray hover:text-white transition">Previous</button>
+                    <span class="text-xs font-mono text-brand-yellow px-2" id="pageNumberDisplay">1</span>
+                    <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs text-brand-gray hover:text-white transition">Next</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Ticket Details & Full Conversation Panel -->
+    <div id="ticketDetailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-panel max-w-4xl w-full rounded-3xl p-6 space-y-6 border-brand-yellow/30 shadow-2xl max-h-[92vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-brand-border pb-4">
+                <div class="flex items-center gap-3">
+                    <img id="modalUserAvatar" src="https://ui-avatars.com/api/?name=User" class="w-10 h-10 rounded-xl object-cover border border-brand-yellow">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-white" id="modalTicketSubject">Ticket Subject Here</h3>
+                        <p class="text-xs text-brand-yellow font-mono" id="modalTicketId">ID: TCK-0000</p>
+                    </div>
+                </div>
+                <button onclick="closeTicketModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto custom-scrollbar space-y-6 flex-grow pr-1">
+                <!-- User & Trip Details Info Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
+                        <span class="text-[10px] font-bold text-brand-gray uppercase">User Profile</span>
+                        <p id="modalUserName" class="text-xs font-bold text-white">John Doe (Customer)</p>
+                        <p id="modalUserPhone" class="text-[11px] text-brand-gray">+91 9876543210</p>
+                    </div>
+                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
+                        <span class="text-[10px] font-bold text-brand-gray uppercase">Ride / Payment Info</span>
+                        <p id="modalRideId" class="text-xs font-bold text-brand-yellow">Ride ID: RDX-8899</p>
+                        <p id="modalPaymentAmount" class="text-[11px] text-emerald-400">Amount: ₹350 (Paid)</p>
+                    </div>
+                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
+                        <span class="text-[10px] font-bold text-brand-gray uppercase">Ticket Metadata</span>
+                        <p id="modalCategory" class="text-xs font-bold text-brand-cyan">Technical Issue</p>
+                        <p id="modalPriority" class="text-[11px] text-brand-amber">Priority: High</p>
+                    </div>
+                </div>
+
+                <!-- Full Conversation / Chat Stream -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-brand-yellow"></i> Conversation Transcript
+                    </h4>
+                    <div id="modalConversationContainer" class="bg-brand-dark p-4 rounded-2xl border border-brand-border space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
+                        <!-- Dynamic Messages -->
+                    </div>
+                </div>
+
+                <!-- Attachments Section -->
+                <div class="space-y-2">
+                    <h4 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-paperclip text-brand-yellow"></i> Attached Documents & Images
+                    </h4>
+                    <div class="flex items-center gap-3" id="modalAttachmentsContainer">
+                        <!-- Dynamic attachments -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reply Box & Actions -->
+            <div class="border-t border-brand-border pt-4 space-y-3">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="adminReplyInput" placeholder="Type reply to user..." class="flex-grow bg-brand-dark border border-brand-border rounded-xl px-4 py-2 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow">
+                    <button onclick="sendAdminReply()" class="px-5 py-2 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Send Reply
+                    </button>
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateTicketStatus('resolved')" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-xs font-bold text-emerald-400 hover:bg-emerald-500 hover:text-white transition">Mark Resolved</button>
+                        <button onclick="updateTicketStatus('closed')" class="px-3 py-1.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-brand-gray hover:text-white transition">Close Ticket</button>
+                    </div>
+                    <button onclick="closeTicketModal()" class="text-xs text-brand-gray hover:text-white">Close Panel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
+    <footer class="border-t border-brand-border/60 bg-brand-black py-4 px-4 lg:px-8 mt-auto">
+        <div class="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-gray">
+            <div class="flex items-center gap-2">
+                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-5 w-auto object-contain opacity-70">
+                <span>&copy; 2026 RiderX Control Tower. All rights reserved.</span>
+            </div>
+            <span class="text-brand-emerald flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> Secure Support Desk</span>
+        </div>
+    </footer>
+
+    <!-- Firebase & Core JS Scripts -->
+    <script type="module" src="../firebase/firebase-config.js"></script>
+    <script type="module" src="../js/Admin.js"></script>
+    <script type="module" src="../js/Chat.js"></script>
+    <script type="module" src="../js/Notification.js"></script>
+
+    <!-- Page Logic Module -->
+    <script type="module">
+        import { auth, db } from '../firebase/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, getDocs, doc, updateDoc, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let allTicketsData = [];
+        let currentStatusFilter = 'all';
+        let currentActiveTicketId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) {
+                    window.location.href = '../auth/login.html';
+                    return;
+                }
+                loadTicketsRealtime();
+            });
+        });
+
+        function loadTicketsRealtime() {
+            const ticketsRef = collection(db, "support_tickets");
+            onSnapshot(ticketsRef, (snapshot) => {
+                allTicketsData = [];
+                snapshot.forEach(docSnap => {
+                    allTicketsData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                updateStatistics(allTicketsData);
+                renderTicketsTable(allTicketsData);
+            }, (error) => {
+                console.error("Error fetching support tickets:", error);
+            });
+        }
+
+        function updateStatistics(tickets) {
+            document.getElementById('statTotal').innerText = tickets.length;
+            document.getElementById('statOpen').innerText = tickets.filter(t => t.status === 'open').length;
+            document.getElementById('statPending').innerText = tickets.filter(t => t.status === 'pending').length;
+            document.getElementById('statResolvedToday').innerText = tickets.filter(t => t.status === 'resolved').length;
+        }
+
+        window.renderTicketsTable = function(tickets) {
+            const tbody = document.getElementById('ticketsTableBody');
+            tbody.innerHTML = '';
+
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const userTypeFilter = document.getElementById('userTypeFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            const filtered = tickets.filter(ticket => {
+                const subject = (ticket.subject || '').toLowerCase();
+                const userName = (ticket.userName || ticket.name || '').toLowerCase();
+                const ticketId = ticket.id.toLowerCase();
+
+                const matchesSearch = subject.includes(searchTerm) || userName.includes(searchTerm) || ticketId.includes(searchTerm);
+                
+                let matchesStatus = true;
+                if (currentStatusFilter !== 'all') {
+                    matchesStatus = ticket.status === currentStatusFilter;
+                }
+
+                let matchesUserType = true;
+                if (userTypeFilter !== 'all') {
+                    matchesUserType = (ticket.userType || 'customer').toLowerCase() === userTypeFilter;
+                }
+
+                let matchesCategory = true;
+                if (categoryFilter !== 'all') {
+                    matchesCategory = (ticket.category || '').toLowerCase().includes(categoryFilter);
+                }
+
+                return matchesSearch && matchesStatus && matchesUserType && matchesCategory;
+            });
+
+            document.getElementById('paginationInfo').innerText = `Showing 1-${filtered.length} of ${filtered.length} tickets`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-brand-gray">No support tickets found matching criteria.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(ticket => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-brand-dark/50 transition";
+                
+                const photo = ticket.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(ticket.userName || 'User')}&background=FFE500&color=08080A`;
+                
+                let priorityBadge = `<span class="px-2 py-0.5 rounded-full bg-brand-gray/10 text-brand-gray border border-brand-gray/30 text-[10px] font-extrabold">Low</span>`;
+                if (ticket.priority === 'high') priorityBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px] font-extrabold">High</span>`;
+                else if (ticket.priority === 'medium') priorityBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold">Medium</span>`;
+
+                let statusBadge = `<span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold">Open</span>`;
+                if (ticket.status === 'resolved') statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold">Resolved</span>`;
+                else if (ticket.status === 'closed') statusBadge = `<span class="px-2 py-0.5 rounded-full bg-brand-gray/10 text-brand-gray border border-brand-gray/30 text-[10px] font-extrabold">Closed</span>`;
+
+                row.innerHTML = `
+                    <td class="py-3 px-4 font-mono font-bold text-brand-yellow">
+                        #${ticket.id.substring(0,8).toUpperCase()}
+                    </td>
+                    <td class="py-3 px-4 font-bold text-white flex items-center gap-3">
+                        <img src="${photo}" class="w-8 h-8 rounded-xl object-cover border border-brand-border">
+                        <div>
+                            <p class="font-extrabold text-white">${ticket.userName || 'Support User'}</p>
+                            <span class="text-[10px] text-brand-gray uppercase">${ticket.userType || 'Customer'}</span>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <p class="font-bold text-white">${ticket.subject || 'General Inquiry'}</p>
+                        <span class="text-[10px] text-brand-cyan uppercase">${ticket.category || 'General'}</span>
+                    </td>
+                    <td class="py-3 px-4">
+                        ${priorityBadge}
+                    </td>
+                    <td class="py-3 px-4">
+                        ${statusBadge}
+                    </td>
+                    <td class="py-3 px-4 text-brand-gray text-[11px]">
+                        ${ticket.assignedAdmin || 'Support Desk'}
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="openTicketDetails('${ticket.id}')" title="View Ticket" class="p-1.5 rounded-lg bg-brand-dark border border-brand-border hover:border-brand-yellow text-brand-yellow transition">
+                                <i class="fa-solid fa-eye text-xs"></i>
+                            </button>
+                            <button onclick="updateTicketStatusQuick('${ticket.id}', 'resolved')" title="Mark Resolved" class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white transition">
+                                <i class="fa-solid fa-check text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        };
+
+        window.filterByStatus = function(status) {
+            currentStatusFilter = status;
+            document.querySelectorAll('.status-filter-btn').forEach(btn => {
+                btn.className = "status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0";
+            });
+            document.getElementById(`filter-status-${status}`).className = "status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0";
+            renderTicketsTable(allTicketsData);
+        };
+
+        window.filterTicketsTable = function() {
+            renderTicketsTable(allTicketsData);
+        };
+
+        window.openTicketDetails = function(ticketId) {
+            const ticket = allTicketsData.find(t => t.id === ticketId);
+            if (!ticket) return;
+            currentActiveTicketId = ticketId;
+
+            document.getElementById('modalTicketSubject').innerText = ticket.subject || 'Support Request';
+            document.getElementById('modalTicketId').innerText = `ID: ${ticketId.toUpperCase()}`;
+            document.getElementById('modalUserName').innerText = `${ticket.userName || 'User'} (${ticket.userType || 'Customer'})`;
+            document.getElementById('modalUserPhone').innerText = ticket.phone || '+91 9876543210';
+            document.getElementById('modalRideId').innerText = `Ride ID: ${ticket.rideId || 'RDX-9988'}`;
+            document.getElementById('modalPaymentAmount').innerText = `Amount: ₹${ticket.amount || '350'} (${ticket.paymentStatus || 'Paid'})`;
+            document.getElementById('modalCategory').innerText = ticket.category || 'Technical';
+            document.getElementById('modalPriority').innerText = `Priority: ${(ticket.priority || 'Medium').toUpperCase()}`;
+            document.getElementById('modalUserAvatar').src = ticket.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(ticket.userName || 'User')}&background=FFE500&color=08080A`;
+
+            const chatContainer = document.getElementById('modalConversationContainer');
+            chatContainer.innerHTML = `
+                <div class="bg-brand-dark/60 p-3 rounded-xl border border-brand-border space-y-1">
+                    <p class="text-[10px] text-brand-yellow font-bold">${ticket.userName || 'User'} (${ticket.userType || 'Customer'})</p>
+                    <p class="text-xs text-white">${ticket.description || ticket.message || 'Help required with booking ride.'}</p>
+                </div>
+            `;
+
+            const attachmentsContainer = document.getElementById('modalAttachmentsContainer');
+            attachmentsContainer.innerHTML = `
+                <div class="px-3 py-2 bg-brand-dark border border-brand-border rounded-xl text-xs font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-image text-brand-yellow"></i> screenshot_issue.png
+                </div>
+            `;
+
+            document.getElementById('ticketDetailModal').classList.remove('hidden');
+        };
+
+        window.closeTicketModal = function() {
+            document.getElementById('ticketDetailModal').classList.add('hidden');
+        };
+
+        window.sendAdminReply = async function() {
+            const replyText = document.getElementById('adminReplyInput').value.trim();
+            if (!replyText || !currentActiveTicketId) return;
+
+            try {
+                await updateDoc(doc(db, "support_tickets", currentActiveTicketId), {
+                    lastReply: replyText,
+                    status: 'pending',
+                    updatedAt: serverTimestamp()
+                });
+                alert("Reply sent successfully to user.");
+                document.getElementById('adminReplyInput').value = '';
+                closeTicketModal();
+            } catch (err) {
+                console.error("Error sending reply:", err);
+            }
+        };
+
+        window.updateTicketStatus = async function(status) {
+            if (!currentActiveTicketId) return;
+            try {
+                await updateDoc(doc(db, "support_tickets", currentActiveTicketId), {
+                    status: status,
+                    updatedAt: serverTimestamp()
+                });
+                alert(`Ticket status updated to ${status}.`);
+                closeTicketModal();
+            } catch (err) {
+                console.error("Error updating status:", err);
+            }
+        };
+
+        window.updateTicketStatusQuick = async function(ticketId, status) {
+            try {
+                await updateDoc(doc(db, "support_tickets", ticketId), {
+                    status: status,
+                    updatedAt: serverTimestamp()
+                });
+                alert("Ticket marked as resolved.");
+            } catch (err) {
+                console.error("Error updating ticket:", err);
+            }
+        };
+
+        window.refreshTicketsData = function() {
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('fa-spin');
+            setTimeout(() => icon.classList.remove('fa-spin'), 800);
+        };
+    </script>
 </body>
-
 </html>
