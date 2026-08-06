@@ -4,186 +4,162 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX - Premium Ride Service</title>
+<title>RiderX - Ride Fast & Safe</title>
 
-<meta name="theme-color" content="#FFD600">
+
+<!-- PWA -->
 
 <link rel="manifest" href="manifest.json">
 
-<link rel="stylesheet" href="css/style.css">
-
-<link rel="icon" href="assets/logo.svg">
+<meta name="theme-color" content="#FFD600">
 
 
-<style>
+<!-- Logo Icon -->
 
-body{
-    margin:0;
-    background:#000;
-    overflow:hidden;
-}
+<link rel="icon" href="assets/logo.png">
 
 
-#splash{
+<!-- CSS -->
 
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100vh;
+<link rel="stylesheet" href="css/Style.css">
 
-background:#000;
+<link rel="stylesheet" href="css/Responsive.css">
 
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-
-z-index:9999;
-
-}
-
-
-.logo{
-
-width:130px;
-height:130px;
-
-animation:
-logoScale 1.8s infinite alternate;
-
-}
-
-
-.title{
-
-color:#FFD600;
-
-font-size:35px;
-
-font-weight:900;
-
-letter-spacing:2px;
-
-margin-top:20px;
-
-animation:
-fadeIn 2s;
-
-}
-
-
-.loader{
-
-width:50px;
-height:50px;
-
-border:5px solid #333;
-
-border-top:5px solid #FFD600;
-
-border-radius:50%;
-
-margin-top:35px;
-
-animation:spin 1s linear infinite;
-
-}
-
-
-
-.status{
-
-color:white;
-
-margin-top:20px;
-
-font-size:14px;
-
-}
-
-
-
-@keyframes spin{
-
-100%{
-transform:rotate(360deg);
-}
-
-}
-
-
-@keyframes logoScale{
-
-from{
-transform:scale(.8);
-}
-
-to{
-transform:scale(1);
-}
-
-}
-
-
-
-@keyframes fadeIn{
-
-from{
-opacity:0;
-}
-
-to{
-opacity:1;
-}
-
-}
-
-
-</style>
+<link rel="stylesheet" href="css/Animation.css">
 
 
 </head>
 
 
-
 <body>
 
 
-<!-- Splash Screen -->
+<!-- Splash -->
+
+<div class="splash" id="splash">
+
+<img src="assets/logo.png" alt="RiderX">
+
+</div>
 
 
-<div id="splash">
+
+<!-- Navbar -->
 
 
-<img src="assets/logo.svg" class="logo">
+<nav class="navbar">
 
 
-<div class="title">
+<div class="logo">
+
+<img src="assets/logo.png" alt="RiderX Logo">
+
+<span>RiderX</span>
+
+</div>
+
+
+<div class="nav-links">
+
+<a href="#services">Services</a>
+
+<a href="auth/login.html">Login</a>
+
+<a href="auth/register.html">Register</a>
+
+</div>
+
+
+</nav>
+
+
+
+
+<!-- Hero -->
+
+
+<section class="dashboard-wrapper page">
+
+
+<div class="welcome-card">
+
+
+<div>
+
+<h1>
+
+Ride Anywhere With <span style="color:#FFD600">
+
 RiderX
+
+</span>
+
+</h1>
+
+
+<p>
+
+Fast, Safe and Affordable rides in Chandigarh
+
+</p>
+
+
+<br>
+
+
+<a href="customer/booking.html" class="btn btn-animation">
+
+Book Ride
+
+</a>
+
+
 </div>
 
 
-<div class="loader"></div>
 
-
-<div class="status" id="status">
-Starting RiderX...
-</div>
-
+<img src="assets/logo.png" alt="RiderX">
 
 </div>
 
 
 
 
+<!-- Join Cards -->
 
-<!-- Main App -->
+
+<div class="grid">
 
 
-<div id="app" style="display:none;">
+
+<div class="card fade-in">
+
+
+<h2 style="color:#FFD600">
+
+Customer
+
+</h2>
+
+
+<p>
+
+Book Bike Taxi, Cab, Parcel and Food Delivery
+
+</p>
+
+
+<br>
+
+
+<a href="auth/register.html" class="btn">
+
+Join as Customer
+
+</a>
 
 
 </div>
@@ -192,208 +168,170 @@ Starting RiderX...
 
 
 
-<script type="module">
+<div class="card fade-in">
 
 
-// Firebase Import
+<h2 style="color:#FFD600">
 
-import { initializeApp }
-from 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+Rider
 
+</h2>
 
-import { getAuth,onAuthStateChanged }
-from
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
+<p>
 
+Earn money by accepting rides
 
-import { firebaseConfig }
-from "./firebase/config.js";
+</p>
 
 
+<br>
 
 
+<a href="auth/register.html" class="btn">
 
-// Firebase Start
+Join as Rider
 
+</a>
 
-let firebaseReady=false;
 
+</div>
 
-try{
 
 
-const app = initializeApp(firebaseConfig);
+</div>
 
-const auth=getAuth(app);
 
 
-firebaseReady=true;
 
+<!-- Services -->
 
-console.log(
-"Firebase Connected"
-);
 
+<section id="services">
 
 
-onAuthStateChanged(auth,(user)=>{
+<br><br>
 
 
-if(user){
+<h1>
 
+Our Services
 
-console.log(
-"User Logged In",
-user.email
-);
+</h1>
 
 
-// future dashboard redirect
+<br>
 
 
-}
 
-else{
+<div class="grid">
 
 
-console.log(
-"No User Login"
-);
+<div class="card">
 
+<h2>🏍 Bike Taxi</h2>
 
-}
+<p>Quick rides at affordable prices</p>
 
+</div>
 
 
-});
 
+<div class="card">
 
+<h2>🚕 Cab</h2>
 
-}
+<p>Comfortable city rides</p>
 
-catch(error){
+</div>
 
 
-console.log(
-"Firebase Error",
-error
-);
 
 
-}
+<div class="card">
 
+<h2>📦 Parcel</h2>
 
+<p>Fast delivery service</p>
 
+</div>
 
 
 
 
-// Status Update Function
+<div class="card">
 
+<h2>🍔 Food</h2>
 
-function updateStatus(text){
+<p>Food delivery service</p>
 
-document.getElementById("status").innerHTML=text;
+</div>
 
-}
 
+</div>
 
 
+</section>
 
 
 
 
-// Internet Check
 
+<!-- Install App -->
 
-function checkInternet(){
 
+<br><br>
 
-if(navigator.onLine){
 
-updateStatus(
-"Internet Connected ✓"
-);
+<div class="card" style="text-align:center;">
 
 
-}
+<h2>
 
-else{
+Install RiderX App
 
-updateStatus(
-"No Internet Connection"
-);
+</h2>
 
 
-}
+<p>
 
+Get faster access from your phone
 
-}
+</p>
 
 
+<br>
 
 
+<button id="installBtn" class="btn">
 
+📲 Install App
 
-// GPS Permission Check
+</button>
 
 
-function checkGPS(){
+</div>
 
 
-if(
-navigator.geolocation
-){
 
+</section>
 
 
-navigator.geolocation.getCurrentPosition(
 
-()=>{
 
 
-updateStatus(
-"Location Ready ✓"
-);
 
 
-},
+<script>
 
 
-()=>{
+// Splash Hide
 
+setTimeout(()=>{
 
-updateStatus(
-"Location Permission Required"
-);
+document.getElementById("splash").style.display="none";
 
-
-}
-
-
-);
-
-
-
-}
-
-else{
-
-
-updateStatus(
-"GPS Not Supported"
-);
-
-
-}
-
-
-
-}
-
-
+},2500);
 
 
 
@@ -402,8 +340,10 @@ updateStatus(
 // PWA Install
 
 
-let installPrompt;
+let deferredPrompt;
 
+
+const installBtn=document.getElementById("installBtn");
 
 
 window.addEventListener(
@@ -413,13 +353,11 @@ window.addEventListener(
 
 e.preventDefault();
 
-installPrompt=e;
+
+deferredPrompt=e;
 
 
-console.log(
-"PWA Ready"
-);
-
+installBtn.style.display="inline-flex";
 
 
 });
@@ -427,101 +365,27 @@ console.log(
 
 
 
+installBtn.addEventListener(
+"click",
+async()=>{
 
 
+if(deferredPrompt){
 
 
-// App Start Sequence
+deferredPrompt.prompt();
 
 
-
-async function startRiderX(){
-
+let result=await deferredPrompt.userChoice;
 
 
-updateStatus(
-"Checking Internet..."
-);
-
-
-checkInternet();
-
-
-
-await new Promise(
-r=>setTimeout(r,1000)
-);
-
-
-
-updateStatus(
-"Checking Location..."
-);
-
-
-checkGPS();
-
-
-
-await new Promise(
-r=>setTimeout(r,1000)
-);
-
-
-
-if(firebaseReady){
-
-
-updateStatus(
-"Firebase Connected ✓"
-);
-
-
-
-}
-
-else{
-
-
-updateStatus(
-"Firebase Failed"
-);
+deferredPrompt=null;
 
 
 }
 
 
-
-await new Promise(
-r=>setTimeout(r,1500)
-);
-
-
-
-document.getElementById(
-"splash"
-).style.display="none";
-
-
-
-document.getElementById(
-"app"
-).style.display="block";
-
-
-
-window.location.href="auth/login.html";
-
-
-
-}
-
-
-
-
-
-startRiderX();
-
+});
 
 
 
@@ -530,32 +394,17 @@ startRiderX();
 // Service Worker
 
 
-if(
-"serviceWorker" in navigator
-){
+if("serviceWorker" in navigator){
 
 
-navigator.serviceWorker.register(
-"sw.js"
-)
+navigator.serviceWorker.register("sw.js")
 
-.then(()=>{
+.then(()=>console.log("RiderX App Ready"))
 
-console.log(
-"Service Worker Active"
-);
-
-})
-
-.catch(err=>{
-
-console.log(err);
-
-});
+.catch(err=>console.log(err));
 
 
 }
-
 
 
 </script>
