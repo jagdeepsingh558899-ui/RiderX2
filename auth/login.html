@@ -10,243 +10,183 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-
 <style>
 
 body{
-
 margin:0;
 background:#111;
 color:white;
 font-family:Arial,sans-serif;
-
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
 }
 
-
 .box{
-
 width:90%;
 max-width:400px;
-margin:50px auto;
 background:#1d1d1d;
 padding:25px;
 border-radius:15px;
-
+box-shadow:0 0 20px rgba(255,204,0,.2);
 }
-
 
 h1{
-
 text-align:center;
 color:#ffcc00;
-
+margin-bottom:10px;
 }
 
+h2{
+text-align:center;
+margin-bottom:20px;
+}
 
 input{
-
 width:100%;
 padding:14px;
 margin:10px 0;
 border:none;
 border-radius:10px;
-
+box-sizing:border-box;
+font-size:16px;
 }
 
-
 button{
-
 width:100%;
 padding:14px;
 background:#ffcc00;
 border:none;
 border-radius:10px;
 font-weight:bold;
-
+font-size:16px;
+cursor:pointer;
+margin-top:10px;
 }
 
+button:hover{
+opacity:.9;
+}
 
-a{
-
-display:block;
+#msg{
 text-align:center;
 margin-top:15px;
-color:#ffcc00;
+color:#ff5555;
+word-break:break-word;
+}
 
+a{
+display:block;
+text-align:center;
+margin-top:20px;
+color:#ffcc00;
+text-decoration:none;
+font-weight:bold;
 }
 
 </style>
 
 </head>
 
-
 <body>
-
 
 <div class="box">
 
+<h1>🏍 RiderX</h1>
 
-<h1>
-🏍 RiderX
-</h1>
+<h2>Login</h2>
 
+<input
+type="email"
+id="email"
+placeholder="Enter Email"
+required>
 
-<h2>
-Login
-</h2>
-
-
-
-<input id="email" placeholder="Email">
-
-
-<input id="password" type="password" placeholder="Password">
-
-
+<input
+type="password"
+id="password"
+placeholder="Enter Password"
+required>
 
 <button onclick="login()">
-
 Login
-
 </button>
-
-
 
 <p id="msg"></p>
 
-
-
 <a href="register.html">
-
 Create New Account
-
 </a>
-
-
 
 </div>
 
-
-
-
-
-
 <script type="module">
-
 
 import { auth, db } from "../firebase/config.js";
 
-
 import {
-
 signInWithEmailAndPassword
-
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-
 import {
-
 doc,
 getDoc
-
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
 
 window.login = async function(){
 
+const email=document.getElementById("email").value.trim();
+const password=document.getElementById("password").value;
 
+const msg=document.getElementById("msg");
+msg.innerHTML="";
 
-let email =
-
-document.getElementById("email").value;
-
-
-
-let password =
-
-document.getElementById("password").value;
-
-
-
-
+if(email==="" || password===""){
+msg.innerHTML="Please enter email and password.";
+return;
+}
 
 try{
 
-
-let user = await signInWithEmailAndPassword(
-
+const userCredential=await signInWithEmailAndPassword(
 auth,
-
 email,
-
 password
-
 );
 
-
-
-
-
-let profile = await getDoc(
-
-doc(db,"users",user.user.uid)
-
+const profile=await getDoc(
+doc(db,"users",userCredential.user.uid)
 );
 
-
-
-
-
-let data = profile.data();
-
-
-
-
-
-if(data.role=="rider"){
-
-
-location.href="../rider/dashboard.html";
-
-
+if(!profile.exists()){
+msg.innerHTML="User profile not found.";
+return;
 }
 
+const data=profile.data();
+
+if(data.role==="admin"){
+window.location.href="../admin/dashboard.html";
+}
+else if(data.role==="rider"){
+window.location.href="../rider/dashboard.html";
+}
 else{
-
-
-location.href="../customer/dashboard.html";
-
-
+window.location.href="../customer/home.html";
 }
-
-
-
-
 
 }
 
 catch(error){
 
-
-document.getElementById("msg").innerHTML=
-error.message;
-
+msg.innerHTML=error.message;
 
 }
 
-
-
-
 }
-
 
 </script>
-
 
 </body>
 
