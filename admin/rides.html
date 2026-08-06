@@ -10,15 +10,15 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-
 <style>
 
 .card{
 
-background:#1d1d1d;
+background:#111;
 padding:20px;
-border-radius:15px;
+border-radius:18px;
 margin:15px 0;
+border:1px solid #333;
 
 }
 
@@ -28,12 +28,21 @@ button{
 width:100%;
 padding:12px;
 margin-top:10px;
-background:#ffcc00;
+background:#FFD600;
 border:none;
-border-radius:10px;
+border-radius:12px;
 font-weight:bold;
 
 }
+
+
+.status{
+
+color:#FFD600;
+font-weight:bold;
+
+}
+
 
 </style>
 
@@ -45,7 +54,7 @@ font-weight:bold;
 
 <div class="header">
 
-🚕 Manage Rides
+🚕 RiderX Manage Rides
 
 </div>
 
@@ -78,15 +87,13 @@ import {
 collection,
 getDocs,
 doc,
-updateDoc
+updateDoc,
+orderBy,
+query
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
@@ -95,19 +102,39 @@ from
 async function loadRides(){
 
 
+let box=document.getElementById("rides");
 
-let snap = await getDocs(
 
-collection(db,"rides")
+box.innerHTML="Loading...";
+
+
+
+const q=query(
+
+collection(db,"rides"),
+
+orderBy("createdAt","desc")
 
 );
 
 
 
-let box=document.getElementById("rides");
+const snap=await getDocs(q);
+
 
 
 box.innerHTML="";
+
+
+
+if(snap.empty){
+
+box.innerHTML="<p>No rides found</p>";
+
+return;
+
+}
+
 
 
 
@@ -126,7 +153,7 @@ box.innerHTML += `
 
 <h3>
 
-${data.service || "Ride"}
+🏍 ${data.service || "Ride"}
 
 </h3>
 
@@ -134,19 +161,11 @@ ${data.service || "Ride"}
 
 <p>
 
-💰 Fare: ${data.fare || "-"}
-
-</p>
-
-
-
-<p>
-
 📍 Pickup:
 
-${data.pickupLat},
+<br>
 
-${data.pickupLng}
+${data.pickup || "-"}
 
 </p>
 
@@ -156,9 +175,20 @@ ${data.pickupLng}
 
 🏁 Drop:
 
-${data.dropLat},
+<br>
 
-${data.dropLng}
+${data.drop || "-"}
+
+</p>
+
+
+
+
+<p>
+
+📏 Distance:
+
+${data.distance || 0} KM
 
 </p>
 
@@ -166,9 +196,29 @@ ${data.dropLng}
 
 <p>
 
+💰 Fare:
+
+₹${data.fare || 0}
+
+</p>
+
+
+
+<p class="status">
+
 Status:
 
-${data.status}
+${data.status || "Pending"}
+
+</p>
+
+
+
+<p>
+
+Customer:
+
+${data.customerId || "-"}
 
 </p>
 
@@ -181,6 +231,7 @@ Rider:
 ${data.riderId || "Not Assigned"}
 
 </p>
+
 
 
 
@@ -201,6 +252,7 @@ ${data.riderId || "Not Assigned"}
 });
 
 
+
 }
 
 
@@ -208,9 +260,7 @@ ${data.riderId || "Not Assigned"}
 
 
 
-
-window.cancelRide=async function(id){
-
+window.cancelRide=async(id)=>{
 
 
 await updateDoc(
@@ -218,6 +268,7 @@ await updateDoc(
 doc(db,"rides",id),
 
 {
+
 
 status:"Cancelled"
 
@@ -230,12 +281,11 @@ status:"Cancelled"
 alert("Ride Cancelled ❌");
 
 
+
 loadRides();
 
 
-
-}
-
+};
 
 
 
