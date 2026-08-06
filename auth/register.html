@@ -4,201 +4,453 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Register</title>
 
+<link rel="stylesheet"
+href="../css/style.css">
+
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
-
 
 body{
 
 background:#000;
-color:white;
-
-height:100vh;
 
 display:flex;
+
 justify-content:center;
+
 align-items:center;
+
+min-height:100vh;
+
+padding:20px;
 
 }
 
+.register-box{
 
+width:100%;
 
-.box{
-
-width:90%;
-max-width:400px;
+max-width:430px;
 
 background:#111;
 
-padding:25px;
-
-border-radius:20px;
-
 border:2px solid #FFD600;
 
+border-radius:25px;
+
+padding:30px 25px;
+
+box-shadow:0 0 30px rgba(255,214,0,.15);
+
+animation:zoomIn .8s;
+
 }
 
-
-
-h1{
+.logo{
 
 text-align:center;
-margin-bottom:20px;
+
+margin-bottom:25px;
 
 }
 
+.logo img{
 
-span{
+width:95px;
+
+height:95px;
+
+margin-bottom:15px;
+
+}
+
+.logo h1{
+
+color:#FFD600;
+
+font-size:38px;
+
+}
+
+.logo span{
+
+color:#fff;
+
+}
+
+.logo p{
+
+color:#aaa;
+
+margin-top:8px;
+
+}
+
+.input-box{
+
+margin-top:18px;
+
+}
+
+.input-box label{
+
+display:block;
+
+margin-bottom:8px;
 
 color:#FFD600;
 
 }
 
-
-
-input,
-select{
+.input-box input,
+.input-box select{
 
 width:100%;
 
-padding:15px;
+height:55px;
 
-margin-top:15px;
-
-border-radius:12px;
+background:#222;
 
 border:none;
 
+border-radius:15px;
+
+padding:0 15px;
+
+color:#fff;
+
 font-size:16px;
+
+outline:none;
 
 }
 
+.input-box input::placeholder{
 
+color:#888;
+
+}
 
 button{
 
 width:100%;
 
-padding:15px;
+height:55px;
 
-margin-top:20px;
+margin-top:28px;
 
 background:#FFD600;
 
-border:none;
+color:#111;
 
-border-radius:12px;
+font-size:18px;
 
 font-weight:bold;
 
-font-size:17px;
+border:none;
+
+border-radius:15px;
+
+cursor:pointer;
 
 }
 
+button:active{
 
+transform:scale(.97);
 
-a{
+}
 
-display:block;
+#msg{
+
+margin-top:18px;
 
 text-align:center;
 
-color:#FFD600;
+color:#ff4d4d;
 
-margin-top:20px;
+min-height:20px;
 
 }
 
+.bottom{
 
+margin-top:25px;
+
+text-align:center;
+
+color:#ccc;
+
+}
+
+.bottom a{
+
+color:#FFD600;
+
+text-decoration:none;
+
+font-weight:bold;
+
+}
 
 </style>
 
-
 </head>
-
 
 <body>
 
+<div class="register-box">
 
+<div class="logo">
 
-<div class="box">
+<img src="../assets/logo.svg" alt="RiderX">
 
+<h1>Rider<span>X</span></h1>
 
-<h1>
-
-RIDER<span>X</span>
-
-</h1>
-
-
-
-<input id="name" placeholder="Full Name">
-
-
-
-<input id="email" type="email" placeholder="Email">
-
-
-
-<input id="password" type="password" placeholder="Password">
-
-
-
-<select id="role">
-
-
-<option value="customer">
-
-Customer
-
-</option>
-
-
-<option value="rider">
-
-Rider
-
-</option>
-
-
-</select>
-
-
-
-<button id="registerBtn">
-
-Create Account
-
-</button>
-
-
-
-<a href="login.html">
-
-Already have account? Login
-
-</a>
-
-
+<p>Create Your Account</p>
 
 </div>
 
+<div class="input-box">
 
+<label>Full Name</label>
 
+<input
+type="text"
+id="name"
+placeholder="Enter Full Name">
 
-<script type="module" src="../js/register.js"></script>
+</div>
 
+<div class="input-box">
 
+<label>Email</label>
+
+<input
+type="email"
+id="email"
+placeholder="Enter Email">
+
+</div>
+
+<div class="input-box">
+
+<label>Password</label>
+
+<input
+type="password"
+id="password"
+placeholder="Enter Password">
+
+</div>
+
+<div class="input-box">
+
+<label>Confirm Password</label>
+
+<input
+type="password"
+id="confirmPassword"
+placeholder="Confirm Password">
+
+</div>
+
+<div class="input-box">
+
+<label>Account Type</label>
+
+<select id="role">
+
+<option value="customer">Customer</option>
+
+<option value="rider">Rider</option>
+
+</select>
+
+</div>
+
+<button id="registerBtn"
+onclick="registerUser()">
+
+CREATE ACCOUNT
+
+</button>
+
+<p id="msg"></p>
+
+<div class="bottom">
+
+Already have an account?
+
+<a href="login.html">
+
+Login
+
+</a>
+
+</div>
+
+<script type="module">
+  import { auth, db } from "../firebase/config.js";
+
+import {
+createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+import {
+doc,
+setDoc,
+serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+window.registerUser = async function(){
+
+const name=document.getElementById("name").value.trim();
+
+const email=document.getElementById("email").value.trim();
+
+const password=document.getElementById("password").value;
+
+const confirmPassword=document.getElementById("confirmPassword").value;
+
+const role=document.getElementById("role").value;
+
+const msg=document.getElementById("msg");
+
+const btn=document.getElementById("registerBtn");
+
+msg.innerHTML="";
+
+if(name==="" || email==="" || password==="" || confirmPassword===""){
+
+msg.innerHTML="Please fill all fields.";
+
+return;
+
+}
+
+if(password!==confirmPassword){
+
+msg.innerHTML="Passwords do not match.";
+
+return;
+
+}
+
+if(password.length<6){
+
+msg.innerHTML="Password must be at least 6 characters.";
+
+return;
+
+}
+
+btn.disabled=true;
+
+btn.innerHTML="Creating Account...";
+
+try{
+
+const userCredential=
+
+await createUserWithEmailAndPassword(
+
+auth,
+
+email,
+
+password
+
+);
+
+await setDoc(
+
+doc(db,"users",userCredential.user.uid),
+
+{
+
+uid:userCredential.user.uid,
+
+name:name,
+
+email:email,
+
+role:role,
+
+status:"active",
+
+wallet:0,
+
+rating:5,
+
+totalRides:0,
+
+createdAt:serverTimestamp()
+
+}
+
+);
+
+alert("Account Created Successfully 🎉");
+
+window.location.href="login.html";
+
+}
+
+catch(error){
+
+switch(error.code){
+
+case "auth/email-already-in-use":
+
+msg.innerHTML="Email already registered.";
+
+break;
+
+case "auth/invalid-email":
+
+msg.innerHTML="Invalid email address.";
+
+break;
+
+case "auth/weak-password":
+
+msg.innerHTML="Password is too weak.";
+
+break;
+
+default:
+
+msg.innerHTML=error.message;
+
+}
+
+btn.disabled=false;
+
+btn.innerHTML="CREATE ACCOUNT";
+
+}
+
+};
+
+document.getElementById("confirmPassword")
+
+.addEventListener("keypress",(e)=>{
+
+if(e.key==="Enter"){
+
+registerUser();
+
+}
+
+});
+
+</script>
 
 </body>
 
