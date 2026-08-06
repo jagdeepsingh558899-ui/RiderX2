@@ -13,26 +13,61 @@
 
 <style>
 
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+font-size:22px;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.total{
+
+background:#FFD600;
+color:#000;
+padding:20px;
+border-radius:20px;
+font-size:25px;
+font-weight:bold;
+margin-bottom:20px;
+
+}
+
+
+
 .card{
 
-background:#1d1d1d;
+background:#111;
 padding:20px;
-border-radius:15px;
-margin:15px 0;
+border-radius:18px;
+margin-bottom:15px;
+
+border:1px solid #333;
 
 }
 
-
-.number{
-
-font-size:30px;
-color:#ffcc00;
-font-weight:bold;
-
-}
 
 </style>
-
 
 </head>
 
@@ -40,61 +75,43 @@ font-weight:bold;
 <body>
 
 
+
 <div class="header">
 
-💰 My Earnings
+💰 Rider Earnings
 
 </div>
+
+
 
 
 <div class="container">
 
 
 
-<div class="card">
+<div class="total">
 
-<h3>
-Completed Rides
-</h3>
+Total: ₹<span id="total">
 
-<div class="number" id="rides">
 0
-</div>
 
-</div>
+</span>
 
-
-
-<div class="card">
-
-<h3>
-Total Fare
-</h3>
-
-<div class="number" id="total">
-₹0
-</div>
 
 </div>
 
 
 
+<div id="rideList">
 
-<div class="card">
-
-<h3>
-My Earning
-</h3>
-
-<div class="number" id="earning">
-₹0
-</div>
+Loading...
 
 </div>
 
 
 
 </div>
+
 
 
 
@@ -104,7 +121,7 @@ My Earning
 <script type="module">
 
 
-import {auth,db} from "../firebase/config.js";
+import { auth, db } from "../firebase/config.js";
 
 
 import {
@@ -112,66 +129,24 @@ import {
 collection,
 query,
 where,
-getDocs,
-doc,
-getDoc
+getDocs
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
 
-
-async function load(){
-
+auth.onAuthStateChanged(async(user)=>{
 
 
-let user=auth.currentUser;
+if(user){
 
+loadEarnings(user.uid);
 
-
-if(!user)return;
-
-
-
-
-let rides=await getDocs(
-
-query(
-
-collection(db,"rides"),
-
-where("riderId","==",user.uid),
-
-where("status","==","Completed")
-
-)
-
-);
-
-
-
-
-
-let total=0;
-
-
-
-rides.forEach((r)=>{
-
-
-total += Number(
-
-String(r.data().fare)
-
-.replace("₹","")
-
-);
+}
 
 
 });
@@ -181,27 +156,53 @@ String(r.data().fare)
 
 
 
-let commission=
+async function loadEarnings(uid){
 
-await getDoc(
 
-doc(db,"settings","commission")
+
+let list=document.getElementById("rideList");
+
+
+
+const q=query(
+
+collection(db,"rides"),
+
+where("riderId","==",uid),
+
+where("status","==","Completed")
 
 );
 
 
 
-let percent=80;
+
+
+const snap=
+
+await getDocs(q);
 
 
 
-if(commission.exists()){
 
 
-percent=
+let total=0;
 
-commission.data().riderCommission || 80;
 
+
+list.innerHTML="";
+
+
+
+
+
+if(snap.empty){
+
+list.innerHTML=
+
+"<p>No completed rides</p>";
+
+return;
 
 }
 
@@ -209,29 +210,82 @@ commission.data().riderCommission || 80;
 
 
 
-let earning=
-
-total*percent/100;
+snap.forEach((ride)=>{
 
 
+let data=ride.data();
 
 
 
-document.getElementById("rides").innerHTML=
+total += Number(data.fare || 0);
 
-rides.size;
+
+
+
+list.innerHTML += `
+
+
+<div class="card">
+
+
+<h3>
+
+${data.service || "Ride"}
+
+</h3>
+
+
+<p>
+
+📍 ${data.pickup || "-"}
+
+</p>
+
+
+<p>
+
+🏁 ${data.drop || "-"}
+
+</p>
+
+
+
+<p>
+
+💰 Fare:
+
+₹${data.fare || 0}
+
+</p>
+
+
+
+<p>
+
+Payment:
+
+${data.paymentStatus || "Pending"}
+
+</p>
+
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
 
 
 
 document.getElementById("total").innerHTML=
 
-"₹"+total;
-
-
-
-document.getElementById("earning").innerHTML=
-
-"₹"+Math.round(earning);
+total;
 
 
 
@@ -241,11 +295,8 @@ document.getElementById("earning").innerHTML=
 
 
 
-load();
-
-
-
 </script>
+
 
 
 </body>
