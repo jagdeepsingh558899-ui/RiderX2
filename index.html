@@ -8,10 +8,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>RiderX - Ride & Delivery</title>
+<title>RiderX</title>
 
 
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
 
 
 <meta name="theme-color" content="#FFD600">
@@ -23,21 +23,22 @@
 </head>
 
 
-
 <body>
 
 
 
-<!-- Splash -->
+
 
 <div class="splash" id="splash">
 
 
-<img 
-src="assets/logo.png"
-class="splash-logo"
->
+<img
 
+src="assets/logo.png"
+
+class="splash-logo"
+
+>
 
 
 <div class="splash-title">
@@ -48,7 +49,6 @@ Rider<span>X</span>
 
 
 
-
 <div class="loading">
 
 <span></span>
@@ -56,7 +56,6 @@ Rider<span>X</span>
 </div>
 
 
-
 </div>
 
 
@@ -67,7 +66,7 @@ Rider<span>X</span>
 
 
 
-<div class="container">
+<div class="container" style="display:none;" id="main">
 
 
 
@@ -89,7 +88,7 @@ Rider<span>X</span>
 
 <p>
 
-Bike Taxi • Cab • Parcel • Food
+Ride • Parcel • Food
 
 </p>
 
@@ -104,20 +103,19 @@ Bike Taxi • Cab • Parcel • Food
 
 
 
-
 <div class="card">
 
 
 <h2>
 
-Welcome To RiderX
+Welcome to RiderX
 
 </h2>
 
 
 <p>
 
-Fast, safe and affordable rides anytime.
+Your smart city ride and delivery app
 
 </p>
 
@@ -125,198 +123,32 @@ Fast, safe and affordable rides anytime.
 
 <button
 
-id="installApp"
-
 class="btn"
 
-style="display:none;margin-top:15px;"
+onclick="location.href='auth/login.html'">
 
->
-
-📲 Install RiderX App
+Login
 
 </button>
 
 
 
-</div>
 
+<button
 
+class="btn-outline"
 
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-
-Customer
-
-</h3>
-
-
-<p>
-
-Book rides and track your rider live.
-
-</p>
-
-
-
-
-<a href="auth/login.html">
-
-
-<button class="btn">
-
-Login Customer
-
-</button>
-
-
-</a>
-
-
-
-
-<a href="auth/register.html">
-
-
-<button class="btn-outline" style="margin-top:12px;">
+onclick="location.href='auth/register.html'">
 
 Create Account
 
 </button>
 
 
-</a>
-
-
 
 </div>
 
 
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-
-Rider Partner
-
-</h3>
-
-
-<p>
-
-Earn money by accepting rides.
-
-</p>
-
-
-
-
-<a href="auth/login.html">
-
-
-<button class="btn">
-
-Rider Login
-
-</button>
-
-
-</a>
-
-
-
-
-<a href="auth/register.html">
-
-
-<button class="btn-outline" style="margin-top:12px;">
-
-Join RiderX
-
-</button>
-
-
-</a>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-
-Why RiderX?
-
-</h3>
-
-
-<p>
-
-🏍 Bike Taxi
-
-</p>
-
-
-<p>
-
-🚕 Cab Service
-
-</p>
-
-
-<p>
-
-📦 Parcel Delivery
-
-</p>
-
-
-<p>
-
-🍔 Food Delivery
-
-</p>
-
-
-<p>
-
-📍 Live Tracking
-
-</p>
-
-
-<p>
-
-💬 Chat & Call Support
-
-</p>
-
-
-
-</div>
 
 
 
@@ -330,10 +162,6 @@ Why RiderX?
 
 
 
-
-
-
-<script type="module" src="js/App.js"></script>
 
 
 
@@ -341,16 +169,88 @@ Why RiderX?
 <script>
 
 
+// Splash
+
+
+window.onload=()=>{
+
+
 setTimeout(()=>{
 
 
-document
-.getElementById("splash")
-.classList
-.add("hide");
+document.getElementById("splash")
+
+.classList.add("hide");
 
 
-},2500);
+
+document.getElementById("main")
+
+.style.display="block";
+
+
+},2000);
+
+
+
+};
+
+
+
+
+
+
+
+
+// Service Worker
+
+
+if(
+
+"serviceWorker" in navigator
+
+){
+
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+
+navigator.serviceWorker.register(
+
+"sw.js"
+
+)
+
+.then(()=>{
+
+
+console.log(
+
+"RiderX PWA Ready"
+
+);
+
+
+})
+
+
+.catch((err)=>{
+
+
+console.log(err);
+
+
+});
+
+
+});
+
+
+}
 
 
 
@@ -361,6 +261,5 @@ document
 
 
 </body>
-
 
 </html>
