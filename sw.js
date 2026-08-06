@@ -1,179 +1,38 @@
-/* =========================================
-   RiderX Service Worker
-   Final Cache Version
-========================================= */
+const CACHE_NAME = "riderx-clean-v10";
 
 
-const CACHE_NAME = "riderx-v2";
+self.addEventListener("install", (event)=>{
+    self.skipWaiting();
+});
 
 
+self.addEventListener("activate", (event)=>{
 
-const FILES_TO_CACHE = [
+    event.waitUntil(
 
+        caches.keys().then(keys=>{
 
-"/",
+            return Promise.all(
+                keys.map(key=>caches.delete(key))
+            );
 
-"/index.html",
+        })
 
-"/manifest.json",
+    );
 
+    self.clients.claim();
 
-"/css/Style.css",
+});
 
-"/css/Responsive.css",
 
-"/css/Animation.css",
 
+self.addEventListener("fetch",(event)=>{
 
-"/assets/logo.png"
+    event.respondWith(
 
+        fetch(event.request)
+        .catch(()=>caches.match(event.request))
 
-];
+    );
 
-
-
-
-
-
-// Install
-
-
-self.addEventListener(
-
-"install",
-
-(event)=>{
-
-
-event.waitUntil(
-
-
-caches.open(CACHE_NAME)
-
-.then((cache)=>{
-
-
-return cache.addAll(FILES_TO_CACHE);
-
-
-})
-
-
-);
-
-
-
-self.skipWaiting();
-
-
-}
-
-);
-
-
-
-
-
-
-
-
-// Activate
-
-
-self.addEventListener(
-
-"activate",
-
-(event)=>{
-
-
-event.waitUntil(
-
-
-caches.keys()
-
-.then((cacheNames)=>{
-
-
-return Promise.all(
-
-
-cacheNames.map((cache)=>{
-
-
-if(cache !== CACHE_NAME){
-
-
-return caches.delete(cache);
-
-
-}
-
-
-
-})
-
-
-);
-
-
-})
-
-
-);
-
-
-
-self.clients.claim();
-
-
-}
-
-);
-
-
-
-
-
-
-
-
-// Fetch
-
-
-self.addEventListener(
-
-"fetch",
-
-(event)=>{
-
-
-event.respondWith(
-
-
-fetch(event.request)
-
-.then((response)=>{
-
-
-return response;
-
-
-})
-
-.catch(()=>{
-
-
-return caches.match(event.request);
-
-
-})
-
-
-);
-
-
-
-}
-
-);
+});
