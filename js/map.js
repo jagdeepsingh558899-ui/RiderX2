@@ -1,53 +1,27 @@
-// =====================================
-// RiderX Live GPS Map System
-// Leaflet + GPS
-// =====================================
-
-
-
-import {
-
-db,
-auth
-
-}
-
-from "../firebase/config.js";
-
-
-
-import {
-
-doc,
-setDoc
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
+// =================================
+// RiderX Map System
+// Leaflet + OpenStreetMap
+// =================================
 
 
 
 let map;
 
-let marker;
+let userMarker;
+
+let userLocation = {
+
+lat:30.7333,
+
+lng:76.7794
+
+};
 
 
 
 
 
-
-
-// =====================================
-// INIT MAP
-// =====================================
-
+// Initialize Map
 
 
 function initMap(){
@@ -56,7 +30,7 @@ function initMap(){
 
 map = L.map("map").setView(
 
-[30.7333,76.7794],
+[userLocation.lat,userLocation.lng],
 
 13
 
@@ -66,16 +40,16 @@ map = L.map("map").setView(
 
 
 
+// OpenStreetMap Layer
+
 
 L.tileLayer(
 
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 
 {
 
-
-maxZoom:19
-
+maxZoom:19,
 
 }
 
@@ -85,48 +59,24 @@ maxZoom:19
 
 
 
+// Default Marker
 
 
-getLocation();
+userMarker = L.marker(
 
+[userLocation.lat,userLocation.lng]
 
+)
 
-}
+.addTo(map)
 
+.bindPopup(
 
+"RiderX Pickup Location"
 
+)
 
-
-
-
-
-
-// =====================================
-// GET GPS LOCATION
-// =====================================
-
-
-
-function getLocation(){
-
-
-
-if(!navigator.geolocation){
-
-
-
-alert(
-
-"GPS not supported"
-
-);
-
-
-
-return;
-
-
-}
+.openPopup();
 
 
 
@@ -134,19 +84,28 @@ return;
 
 
 
-navigator.geolocation.watchPosition(
+// Get Current Location
+
+
+if(navigator.geolocation){
+
+
+
+navigator.geolocation.getCurrentPosition(
+
+
 
 (position)=>{
 
 
 
-const lat =
+userLocation.lat =
 
 position.coords.latitude;
 
 
 
-const lng =
+userLocation.lng =
 
 position.coords.longitude;
 
@@ -154,94 +113,43 @@ position.coords.longitude;
 
 
 
-
-
-if(!marker){
-
-
-
-marker =
-
-L.marker(
-
-[lat,lng]
-
-).addTo(map);
+updateMarker();
 
 
 
-map.setView(
-
-[lat,lng],
-
-16
-
-);
 
 
+const pickup =
+document.getElementById("pickup");
+
+
+
+if(pickup){
+
+pickup.value =
+
+`${userLocation.lat.toFixed(5)}, ${userLocation.lng.toFixed(5)}`;
 
 }
-
-else{
-
-
-
-marker.setLatLng(
-
-[lat,lng]
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-saveLocation(
-
-lat,
-
-lng
-
-);
 
 
 
 
 
 },
-
-
 
 
 
 (error)=>{
 
 
+console.log(
 
-console.log(error);
+"Location permission denied",
 
+error
 
-
-},
-
-
-
-{
-
-
-enableHighAccuracy:true,
-
-
-maximumAge:1000,
-
-
-timeout:10000
+);
 
 
 }
@@ -256,77 +164,48 @@ timeout:10000
 
 
 
-
-
-
-
-
-
-// =====================================
-// SAVE LIVE LOCATION
-// =====================================
-
-
-
-async function saveLocation(lat,lng){
-
-
-
-const user = auth.currentUser;
-
-
-
-if(!user){
-
-return;
-
 }
 
 
 
 
 
+// Update Marker
 
 
-await setDoc(
-
-doc(
-
-db,
-
-"locations",
-
-user.uid
-
-),
-
-
-{
-
-
-lat:lat,
-
-
-lng:lng,
-
-
-updatedAt:
-
-new Date()
+function updateMarker(){
 
 
 
-},
+if(userMarker){
 
 
-{
+
+userMarker.setLatLng(
+
+[
+
+userLocation.lat,
+
+userLocation.lng
+
+]
+
+);
 
 
-merge:true
 
+map.setView(
 
-}
+[
 
+userLocation.lat,
+
+userLocation.lng
+
+],
+
+15
 
 );
 
@@ -336,9 +215,41 @@ merge:true
 
 
 
+}
 
 
 
 
 
-window.initMap = initMap;
+
+
+// Expose Location
+
+
+window.RiderXLocation = userLocation;
+
+
+
+
+
+// Start Map
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+if(document.getElementById("map")){
+
+
+initMap();
+
+
+}
+
+
+
+});
