@@ -4,31 +4,44 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+
 <title>RiderX Admin Dashboard</title>
+
 
 <link rel="stylesheet" href="../css/style.css">
 
 
 <style>
 
+
 body{
 
+margin:0;
+
 background:#000;
+
 color:white;
-font-family:Arial;
+
+font-family:Arial,sans-serif;
 
 }
+
 
 
 .header{
 
 background:#111;
+
 padding:20px;
-border-bottom:2px solid #FFD600;
-font-size:24px;
+
+font-size:28px;
+
 font-weight:bold;
+
+color:#FFD600;
 
 }
 
@@ -45,7 +58,9 @@ padding:20px;
 .grid{
 
 display:grid;
-grid-template-columns:repeat(2,1fr);
+
+grid-template-columns:1fr 1fr;
+
 gap:15px;
 
 }
@@ -55,20 +70,22 @@ gap:15px;
 .card{
 
 background:#111;
+
 padding:20px;
-border-radius:18px;
-border:1px solid #333;
-text-align:center;
+
+border-radius:20px;
 
 }
 
 
 
-.number{
+.value{
 
-font-size:32px;
-color:#FFD600;
+font-size:30px;
+
 font-weight:bold;
+
+color:#FFD600;
 
 }
 
@@ -76,30 +93,48 @@ font-weight:bold;
 
 .menu{
 
-margin-top:25px;
-
-}
-
-
-
-.menu a{
-
-display:block;
 background:#111;
-padding:15px;
-margin-top:10px;
-border-radius:12px;
-color:white;
-text-decoration:none;
-border-left:4px solid #FFD600;
+
+margin-top:20px;
+
+padding:20px;
+
+border-radius:20px;
 
 }
+
+
+
+.option{
+
+background:#222;
+
+padding:15px;
+
+margin:10px 0;
+
+border-radius:15px;
+
+cursor:pointer;
+
+}
+
+
+
+.option:hover{
+
+background:#FFD600;
+
+color:#000;
+
+}
+
 
 
 </style>
 
-
 </head>
+
 
 
 <body>
@@ -108,14 +143,16 @@ border-left:4px solid #FFD600;
 
 <div class="header">
 
-⚡ RiderX Admin Panel
+⚡ RiderX Admin
 
 </div>
 
 
 
 
+
 <div class="container">
+
 
 
 <div class="grid">
@@ -124,10 +161,12 @@ border-left:4px solid #FFD600;
 
 <div class="card">
 
-<h3>Customers</h3>
+Customers
 
-<div class="number" id="customers">
+<div class="value" id="customers">
+
 0
+
 </div>
 
 </div>
@@ -136,64 +175,40 @@ border-left:4px solid #FFD600;
 
 <div class="card">
 
-<h3>Riders</h3>
+Riders
 
-<div class="number" id="riders">
+<div class="value" id="riders">
+
 0
-</div>
 
 </div>
 
+</div>
 
 
 
 <div class="card">
 
-<h3>Total Rides</h3>
+Live Rides
 
-<div class="number" id="rides">
+<div class="value" id="rides">
+
 0
-</div>
 
 </div>
 
+</div>
 
 
 
 <div class="card">
 
-<h3>Revenue</h3>
+Revenue
 
-<div class="number">
+<div class="value" id="revenue">
 
-₹<span id="revenue">0</span>
+₹0
 
-</div>
-
-</div>
-
-
-
-
-<div class="card">
-
-<h3>Pending</h3>
-
-<div class="number" id="pending">
-0
-</div>
-
-</div>
-
-
-
-
-<div class="card">
-
-<h3>Completed</h3>
-
-<div class="number" id="completed">
-0
 </div>
 
 </div>
@@ -201,6 +216,9 @@ border-left:4px solid #FFD600;
 
 
 </div>
+
+
+
 
 
 
@@ -209,42 +227,54 @@ border-left:4px solid #FFD600;
 <div class="menu">
 
 
-<h2>
+<h3>
 
-Admin Controls
+Management
 
-</h2>
-
-
-<a href="fare-settings.html">
-💰 Fare Settings
-</a>
+</h3>
 
 
-<a href="rider-approval.html">
-🏍 Rider Approval
-</a>
+
+<div class="option"
+onclick="location.href='riders.html'">
+
+🏍 Manage Riders
+
+</div>
 
 
-<a href="customers.html">
-👥 Customers
-</a>
+
+<div class="option"
+onclick="location.href='customers.html'">
+
+👥 Manage Customers
+
+</div>
 
 
-<a href="riders.html">
-🚴 Riders
-</a>
+
+<div class="option"
+onclick="location.href='pricing.html'">
+
+💰 Fare & Commission
+
+</div>
 
 
-<a href="rides.html">
-📋 All Rides
-</a>
+
+<div class="option"
+onclick="location.href='offers.html'">
+
+🎁 Offers & Coupons
+
+</div>
 
 
-<a href="payments.html">
-💳 Payments
-</a>
 
+<div class="option"
+onclick="location.href='settings.html'">
+
+⚙ App Settings
 
 </div>
 
@@ -256,158 +286,13 @@ Admin Controls
 
 
 
+</div>
 
 
-<script type="module">
 
 
-import {db} from "../firebase/config.js";
 
-
-import {
-
-collection,
-getDocs
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
-async function loadAdmin(){
-
-
-
-let users=
-
-await getDocs(
-
-collection(db,"users")
-
-);
-
-
-
-let riders=
-
-await getDocs(
-
-collection(db,"riders")
-
-);
-
-
-
-let rides=
-
-await getDocs(
-
-collection(db,"rides")
-
-);
-
-
-
-
-
-let completed=0;
-
-let pending=0;
-
-let revenue=0;
-
-
-
-
-
-
-rides.forEach((ride)=>{
-
-
-let data=ride.data();
-
-
-
-if(data.status==="Completed"){
-
-completed++;
-
-}
-
-
-
-if(data.status==="Pending"){
-
-pending++;
-
-}
-
-
-
-if(data.paymentStatus==="Paid"){
-
-revenue += Number(data.fare || 0);
-
-}
-
-
-
-});
-
-
-
-
-
-
-document.getElementById("customers").innerHTML=
-
-users.size;
-
-
-
-document.getElementById("riders").innerHTML=
-
-riders.size;
-
-
-
-document.getElementById("rides").innerHTML=
-
-rides.size;
-
-
-
-document.getElementById("completed").innerHTML=
-
-completed;
-
-
-
-document.getElementById("pending").innerHTML=
-
-pending;
-
-
-
-document.getElementById("revenue").innerHTML=
-
-revenue;
-
-
-
-}
-
-
-
-loadAdmin();
-
-
-
-</script>
+<script type="module" src="../js/admin.js"></script>
 
 
 
