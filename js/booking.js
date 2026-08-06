@@ -1,64 +1,92 @@
-// =====================================
+// =================================
 // RiderX Booking System
-// Fare + Ride Request
-// =====================================
+// Ride Request + Fare Calculation
+// =================================
 
 
 import {
 
-db,
-auth
+auth,
+rtdb
 
-}
-
-from "../firebase/config.js";
+} from "../firebase/Firebase-config.js";
 
 
 
 import {
 
-collection,
-addDoc,
-serverTimestamp
+onAuthStateChanged
+
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+
+import {
+
+ref,
+push,
+set
+
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+
+
+
+
+let selectedType = "Bike Taxi";
+
+let currentUser = null;
+
+
+
+
+
+// User Check
+
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+
+if(user){
+
+currentUser=user;
+
 
 }
 
-from
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-let selectedService="bike";
-
-let selectedPayment="cash";
-
-let distance=5; // temporary default km
+});
 
 
 
 
 
-// =====================================
-// SERVICE SELECT
-// =====================================
 
 
-const services =
-
-document.querySelectorAll(".service");
+// Ride Type Select
 
 
+document.querySelectorAll(".option")
 
-services.forEach(service=>{
-
-
-service.onclick=()=>{
+.forEach(option=>{
 
 
-services.forEach(item=>{
+option.addEventListener(
+
+"click",
+
+()=>{
+
+
+document.querySelectorAll(".option")
+
+.forEach(item=>{
 
 item.classList.remove("active");
 
@@ -66,65 +94,20 @@ item.classList.remove("active");
 
 
 
-service.classList.add("active");
+option.classList.add("active");
 
 
 
-selectedService =
+selectedType =
 
-service.dataset.type;
-
-
-
-calculateFare();
-
-
-};
-
-
-});
+option.dataset.type;
 
 
 
+}
 
 
-
-
-// =====================================
-// PAYMENT SELECT
-// =====================================
-
-
-
-const paymentButtons =
-
-document.querySelectorAll(".payment button");
-
-
-
-paymentButtons.forEach(btn=>{
-
-
-btn.onclick=()=>{
-
-
-paymentButtons.forEach(b=>{
-
-b.classList.remove("active");
-
-});
-
-
-btn.classList.add("active");
-
-
-selectedPayment =
-
-btn.innerText.toLowerCase();
-
-
-
-};
+);
 
 
 });
@@ -136,12 +119,43 @@ btn.innerText.toLowerCase();
 
 
 
-// =====================================
-// FARE CALCULATION
-// =====================================
+// Distance Calculator
+
+function calculateDistance(){
 
 
-function calculateFare(){
+
+// Temporary distance
+
+// Later GPS route API connect hoga
+
+
+let distance =
+
+Math.floor(
+
+Math.random()*10
+
+)+1;
+
+
+
+return distance;
+
+
+
+}
+
+
+
+
+
+
+// Fare Calculator
+
+
+function calculateFare(distance){
+
 
 
 let hour =
@@ -154,18 +168,10 @@ let pricePerKm;
 
 
 
-if(hour>=22 || hour<6){
+if(hour >=22 || hour <6){
 
 
-pricePerKm=11;
-
-
-}
-
-else if(distance>10){
-
-
-pricePerKm=9;
+pricePerKm = 11;
 
 
 }
@@ -173,25 +179,23 @@ pricePerKm=9;
 else{
 
 
-pricePerKm=8;
+pricePerKm = 8;
+
+
+if(distance > 10){
+
+
+pricePerKm = 9;
+
+
+}
 
 
 }
 
 
 
-let fare =
-
-distance * pricePerKm;
-
-
-
-
-document.getElementById(
-"fare"
-).innerHTML =
-
-"₹"+fare;
+return distance * pricePerKm;
 
 
 
@@ -199,27 +203,16 @@ document.getElementById(
 
 
 
-calculateFare();
 
 
 
-
-
-
-
-
-
-// =====================================
-// CREATE RIDE REQUEST
-// =====================================
+// Book Ride
 
 
 
 const bookBtn =
 
-document.getElementById(
-"bookRide"
-);
+document.getElementById("bookRide");
 
 
 
@@ -229,23 +222,27 @@ if(bookBtn){
 
 
 
-bookBtn.onclick=async()=>{
+bookBtn.addEventListener(
+
+"click",
+
+async()=>{
+
+
 
 
 
 const pickup =
 
-document.getElementById(
-"pickup"
-).value;
+document.getElementById("pickup").value;
 
 
 
 const drop =
 
-document.getElementById(
-"drop"
-).value;
+document.getElementById("drop").value;
+
+
 
 
 
@@ -253,14 +250,122 @@ document.getElementById(
 if(!pickup || !drop){
 
 
-alert(
-"Enter pickup and drop location"
-);
+document.getElementById("message").innerHTML =
+
+"Please enter pickup and drop location";
 
 
 return;
 
+
 }
+
+
+
+
+
+
+
+if(!currentUser){
+
+
+document.getElementById("message").innerHTML =
+
+"Please login first";
+
+
+return;
+
+
+}
+
+
+
+
+
+
+let distance =
+
+calculateDistance();
+
+
+
+let fare =
+
+calculateFare(distance);
+
+
+
+
+
+document.getElementById("distance").innerHTML =
+
+distance+" KM";
+
+
+
+
+document.getElementById("fare").innerHTML =
+
+"₹"+fare;
+
+
+
+
+
+
+
+const rideData = {
+
+
+customerId:
+
+currentUser.uid,
+
+
+service:
+
+selectedType,
+
+
+pickup:
+
+
+pickup,
+
+
+drop:
+
+drop,
+
+
+distance:
+
+distance,
+
+
+fare:
+
+fare,
+
+
+status:
+
+"searching",
+
+
+
+createdAt:
+
+Date.now()
+
+
+
+};
+
+
+
+
 
 
 
@@ -269,74 +374,21 @@ try{
 
 
 
-const user = auth.currentUser;
+const rideRef =
 
+push(
 
+ref(rtdb,"rides")
 
-if(!user){
-
-
-alert(
-"Please login first"
 );
 
 
-return;
 
+await set(
 
-}
+rideRef,
 
-
-
-
-
-
-
-await addDoc(
-
-collection(
-db,
-"rides"
-),
-
-
-{
-
-
-customerId:user.uid,
-
-
-pickup:pickup,
-
-
-drop:drop,
-
-
-service:selectedService,
-
-
-payment:selectedPayment,
-
-
-distance:distance,
-
-
-fare:document.getElementById(
-"fare"
-).innerText,
-
-
-status:"searching",
-
-
-createdAt:
-serverTimestamp()
-
-
-
-}
-
-
+rideData
 
 );
 
@@ -344,15 +396,13 @@ serverTimestamp()
 
 
 
-alert(
 
-"Ride Requested Successfully"
+document.getElementById("message").innerHTML =
 
-);
-
+"Ride Request Sent 🚀";
 
 
-window.location.href="history.html";
+
 
 
 
@@ -363,21 +413,19 @@ window.location.href="history.html";
 catch(error){
 
 
-console.log(error);
+document.getElementById("message").innerHTML =
 
-
-alert(
-error.message
-);
-
+error.message;
 
 
 }
 
 
 
-};
+}
 
+
+);
 
 
 }
