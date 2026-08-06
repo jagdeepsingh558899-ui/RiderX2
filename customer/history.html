@@ -6,41 +6,81 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Ride History</title>
+<title>RiderX History</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
 
 <style>
 
-.ride-card{
+body{
+background:#000;
+color:white;
+font-family:Arial;
+}
 
-background:#1d1d1d;
+
+.header{
+
+background:#111;
 padding:20px;
-margin:15px 0;
-border-radius:15px;
+font-size:22px;
+border-bottom:2px solid #FFD600;
 
 }
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.ride-card{
+
+background:#111;
+padding:20px;
+margin-bottom:15px;
+border-radius:18px;
+border:1px solid #333;
+
+}
+
+
+
+h3{
+
+color:#FFD600;
+
+}
+
 
 
 button{
 
 width:100%;
 padding:12px;
-margin-top:10px;
-background:#ffcc00;
+margin-top:15px;
 border:none;
-border-radius:10px;
+border-radius:12px;
+background:#FFD600;
 font-weight:bold;
 
 }
 
+
+
 </style>
+
 
 </head>
 
 
 <body>
+
 
 
 <div class="header">
@@ -68,40 +108,66 @@ Loading...
 
 
 
+
 <script type="module">
 
 
-import {db} from "../firebase/config.js";
+import { auth, db } from "../firebase/config.js";
 
 
 import {
 
 collection,
-getDocs,
 query,
+where,
+getDocs,
 orderBy
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
 
 
-async function loadHistory(){
+auth.onAuthStateChanged(async(user)=>{
 
 
-let box=document.getElementById("rideList");
+if(!user){
+
+return;
+
+}
 
 
 
-let q=query(
+loadHistory(user.uid);
+
+
+
+});
+
+
+
+
+
+
+
+async function loadHistory(uid){
+
+
+let box =
+document.getElementById("rideList");
+
+
+
+const q=query(
 
 collection(db,"rides"),
+
+where("customerId","==",uid),
 
 orderBy("createdAt","desc")
 
@@ -109,7 +175,10 @@ orderBy("createdAt","desc")
 
 
 
-let snap=await getDocs(q);
+
+
+const snap =
+await getDocs(q);
 
 
 
@@ -117,10 +186,27 @@ box.innerHTML="";
 
 
 
+
+
+if(snap.empty){
+
+box.innerHTML=
+
+"<p>No rides found</p>";
+
+return;
+
+}
+
+
+
+
+
 snap.forEach((ride)=>{
 
 
 let data=ride.data();
+
 
 
 
@@ -137,55 +223,65 @@ ${data.service || "Ride"}
 </h3>
 
 
-<p>
-📍 Pickup:
-<br>
-${data.pickupLat || ""}
-,
-${data.pickupLng || ""}
-</p>
-
 
 <p>
 
-🏁 Drop:
+📍 Pickup
+
 <br>
 
-${data.dropLat || ""}
-,
-${data.dropLng || ""}
+${data.pickup || "-"}
 
 </p>
+
+
+
+<p>
+
+🏁 Drop
+
+<br>
+
+${data.drop || "-"}
+
+</p>
+
 
 
 <p>
 
 💰 Fare:
-${data.fare || ""}
+
+₹${data.fare || 0}
 
 </p>
+
 
 
 <p>
 
 Status:
-${data.status}
+
+${data.status || "Pending"}
 
 </p>
+
 
 
 <p>
 
 Payment:
-${data.payment || "Pending"}
+
+${data.paymentStatus || "Pending"}
 
 </p>
 
 
 
-${
 
-data.status=="Completed"
+
+${
+data.status==="Completed"
 
 ?
 
@@ -207,6 +303,7 @@ data.status=="Completed"
 
 
 
+
 </div>
 
 
@@ -224,19 +321,13 @@ data.status=="Completed"
 
 
 
-
 window.rateRide=function(){
 
 
 window.location.href="rating.html";
 
 
-}
-
-
-
-
-loadHistory();
+};
 
 
 
