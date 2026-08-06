@@ -1,1030 +1,823 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiderX Premium Wallet | Ultra Ride Hailing</title>
-    
-    <!-- CSS Dependencies -->
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#090A0F',
-                            dark: '#12141C',
-                            card: '#1A1D29',
-                            yellow: '#FFE500',
-                            yellowDark: '#CCA800',
-                            gray: '#8A8F9E',
-                            border: '#2A2E3D'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- QRCode & HTML2PDF Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-    <style>
-        body {
-            background-color: #090A0F;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8">
 
-        .glass-card {
-            background: linear-gradient(135deg, rgba(26, 29, 41, 0.85) 0%, rgba(18, 20, 28, 0.95) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.12);
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .glass-card-interactive {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
 
-        .glass-card-interactive:hover {
-            border-color: rgba(255, 229, 0, 0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(255, 229, 0, 0.1);
-        }
+<title>RiderX | Wallet</title>
 
-        .wallet-card-bg {
-            background: linear-gradient(135deg, #12141C 0%, #1A1D29 50%, #090A0F 100%);
-            border: 1px solid rgba(255, 229, 0, 0.25);
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
 
-        .text-glow {
-            text-shadow: 0 0 12px rgba(255, 229, 0, 0.4);
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #12141C;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #2A2E3D;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
 
-        .pulse-yellow {
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 229, 0, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(255, 229, 0, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 229, 0, 0); }
-        }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-        .tab-btn.active {
-            background-color: #FFE500;
-            color: #090A0F;
-            font-weight: 700;
-        }
-    </style>
+
+
+<style>
+
+:root{
+
+--yellow:#FFE500;
+--black:#080808;
+--card:#151515;
+--gray:#999;
+
+}
+
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+
+}
+
+
+
+body{
+
+background:var(--black);
+color:white;
+padding-bottom:80px;
+
+}
+
+
+
+/* Header */
+
+.header{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:20px;
+
+}
+
+
+
+.logo{
+
+font-size:28px;
+font-weight:800;
+
+}
+
+
+
+.logo span{
+
+color:var(--yellow);
+
+}
+
+
+
+.back{
+
+color:var(--yellow);
+font-size:22px;
+
+}
+
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+
+
+/* Wallet Card */
+
+
+.wallet-card{
+
+
+background:linear-gradient(
+135deg,
+#FFE500,
+#ffb300
+);
+
+
+color:black;
+
+border-radius:25px;
+
+padding:30px;
+
+box-shadow:
+0 15px 40px rgba(255,229,0,.25);
+
+
+}
+
+
+
+.wallet-card p{
+
+font-size:14px;
+
+font-weight:600;
+
+}
+
+
+
+.balance{
+
+font-size:40px;
+
+font-weight:800;
+
+margin-top:10px;
+
+}
+
+
+
+
+
+.action{
+
+display:flex;
+
+gap:15px;
+
+margin-top:25px;
+
+}
+
+
+
+
+.action button{
+
+
+flex:1;
+
+padding:14px;
+
+border:none;
+
+border-radius:15px;
+
+font-weight:700;
+
+cursor:pointer;
+
+}
+
+
+
+
+.add{
+
+background:black;
+
+color:white;
+
+}
+
+
+
+.history{
+
+background:white;
+
+color:black;
+
+}
+
+
+
+
+
+/* Sections */
+
+
+.card{
+
+
+background:var(--card);
+
+border-radius:20px;
+
+padding:20px;
+
+margin-top:20px;
+
+border:1px solid rgba(255,229,0,.2);
+
+
+}
+
+
+
+
+.card h3{
+
+margin-bottom:15px;
+
+}
+
+
+
+
+
+.transaction{
+
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+padding:15px 0;
+
+border-bottom:1px solid #333;
+
+}
+
+
+
+.transaction:last-child{
+
+border:none;
+
+}
+
+
+
+.green{
+
+color:#00e676;
+
+}
+
+
+
+.yellow{
+
+color:var(--yellow);
+
+}
+
+
+
+
+.referral{
+
+
+text-align:center;
+
+}
+
+
+
+.referral i{
+
+font-size:45px;
+
+color:var(--yellow);
+
+margin-bottom:10px;
+
+}
+
+
+
+
+
+.referral button{
+
+margin-top:15px;
+
+padding:13px 25px;
+
+background:var(--yellow);
+
+color:black;
+
+border:none;
+
+border-radius:12px;
+
+font-weight:700;
+
+}
+
+
+
+
+/* Bottom Nav */
+
+
+.bottom-nav{
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+
+right:0;
+
+height:70px;
+
+background:#111;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:1px solid #222;
+
+}
+
+
+
+.bottom-nav a{
+
+color:#777;
+
+text-decoration:none;
+
+text-align:center;
+
+font-size:12px;
+
+}
+
+
+
+.bottom-nav i{
+
+display:block;
+
+font-size:20px;
+
+margin-bottom:5px;
+
+}
+
+
+
+.active{
+
+color:var(--yellow)!important;
+
+}
+
+
+
+</style>
+
+
 </head>
-<body class="min-h-screen pb-24 lg:pb-8 flex flex-col custom-scrollbar">
-
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-brand-black/80 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3.5">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="./Dashboard.html" class="flex items-center gap-2 group">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX'">
-                </a>
-                <span class="text-xs bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-semibold border border-brand-yellow/20">PAY WALLET</span>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <div id="kycBadge" class="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <i class="fa-solid fa-circle-check text-[10px]"></i>
-                    <span>KYC VERIFIED</span>
-                </div>
-
-                <button onclick="openModal('modalSettings')" class="w-9 h-9 rounded-full bg-brand-card hover:bg-brand-border text-brand-gray hover:text-brand-yellow flex items-center justify-center transition border border-brand-border" title="Wallet Settings">
-                    <i class="fa-solid fa-gear text-sm"></i>
-                </button>
-
-                <div class="relative group">
-                    <button class="flex items-center gap-2 p-1 rounded-full border border-brand-border bg-brand-card">
-                        <img id="userAvatar" src="https://ui-avatars.com/api/?name=User&background=FFE500&color=090A0F" class="w-7 h-7 rounded-full object-cover" alt="User">
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
-
-        <!-- Top Overview Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            <!-- Digital Wallet Pass Card (5 Cols) -->
-            <div class="lg:col-span-5 flex flex-col justify-between">
-                <div class="wallet-card-bg relative overflow-hidden rounded-2xl p-6 h-full flex flex-col justify-between min-h-[220px]">
-                    <!-- Card Background Elements -->
-                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-brand-yellow/10 rounded-full blur-2xl pointer-events-none"></div>
-                    <div class="absolute right-0 bottom-0 opacity-5 pointer-events-none pr-4 pb-2">
-                        <i class="fa-solid fa-wallet text-9xl text-white"></i>
-                    </div>
-
-                    <!-- Card Header -->
-                    <div class="flex justify-between items-start z-10">
-                        <div>
-                            <p class="text-xs uppercase tracking-widest text-brand-gray font-semibold">RiderX Black Pass</p>
-                            <h2 class="text-lg font-bold text-white tracking-wide mt-0.5" id="walletHolderName">Loading...</h2>
-                        </div>
-                        <img src="../assets/Logo/RiderX-logo.png" alt="RiderX" class="h-6 w-auto opacity-90" onerror="this.src='https://via.placeholder.com/80x25/090A0F/FFE500?text=RiderX'">
-                    </div>
-
-                    <!-- Card Balance -->
-                    <div class="my-4 z-10">
-                        <p class="text-xs text-brand-gray font-medium">Available Balance</p>
-                        <div class="flex items-baseline gap-1 mt-1">
-                            <span class="text-2xl font-bold text-brand-yellow">₹</span>
-                            <span class="text-4xl font-extrabold text-white tracking-tight text-glow" id="displayMainBalance">0.00</span>
-                        </div>
-                    </div>
-
-                    <!-- Card Footer -->
-                    <div class="flex justify-between items-end pt-2 border-t border-brand-border/40 z-10">
-                        <div>
-                            <p class="text-[10px] text-brand-gray uppercase tracking-wider">Wallet Account ID</p>
-                            <p class="text-xs font-mono text-gray-300 font-semibold tracking-wider mt-0.5" id="displayWalletNum">RX-0000-0000-0000</p>
-                        </div>
-                        <button onclick="openModal('modalQR')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-yellow text-brand-black text-xs font-bold hover:bg-yellow-300 transition shadow-lg shadow-brand-yellow/10">
-                            <i class="fa-solid fa-qrcode"></i>
-                            <span>My QR</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats & Quick Actions (7 Cols) -->
-            <div class="lg:col-span-7 flex flex-col justify-between space-y-4">
-                
-                <!-- Quick Metrics Grid -->
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="glass-card p-4 rounded-xl flex flex-col justify-between">
-                        <div class="flex items-center justify-between text-brand-gray text-xs">
-                            <span>Cashback</span>
-                            <i class="fa-solid fa-bolt text-brand-yellow"></i>
-                        </div>
-                        <div class="mt-2">
-                            <p class="text-lg font-bold text-white">₹<span id="displayCashback">0.00</span></p>
-                            <p class="text-[10px] text-emerald-400 mt-0.5"><i class="fa-solid fa-arrow-trend-up"></i> Auto-credited</p>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-4 rounded-xl flex flex-col justify-between">
-                        <div class="flex items-center justify-between text-brand-gray text-xs">
-                            <span>Rewards</span>
-                            <i class="fa-solid fa-star text-amber-400"></i>
-                        </div>
-                        <div class="mt-2">
-                            <p class="text-lg font-bold text-white"><span id="displayRewards">0</span> <span class="text-xs font-normal text-brand-gray">Pts</span></p>
-                            <p class="text-[10px] text-brand-yellow mt-0.5 cursor-pointer hover:underline" onclick="openModal('modalRedeem')">Redeem Code</p>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-4 rounded-xl flex flex-col justify-between">
-                        <div class="flex items-center justify-between text-brand-gray text-xs">
-                            <span>Total Saved</span>
-                            <i class="fa-solid fa-piggy-bank text-emerald-400"></i>
-                        </div>
-                        <div class="mt-2">
-                            <p class="text-lg font-bold text-white">₹<span id="displaySavings">0.00</span></p>
-                            <p class="text-[10px] text-gray-400 mt-0.5">Rides & Offers</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Primary Action Hub -->
-                <div class="glass-card p-5 rounded-2xl">
-                    <p class="text-xs font-semibold text-brand-gray uppercase tracking-wider mb-4">Quick Money Transfer</p>
-                    <div class="grid grid-cols-4 gap-3">
-                        <button onclick="openModal('modalAddMoney')" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-brand-dark/80 hover:bg-brand-yellow/10 border border-brand-border hover:border-brand-yellow/40 transition group">
-                            <div class="w-10 h-10 rounded-full bg-brand-yellow/10 text-brand-yellow flex items-center justify-center group-hover:bg-brand-yellow group-hover:text-brand-black transition">
-                                <i class="fa-solid fa-plus text-base"></i>
-                            </div>
-                            <span class="text-xs font-semibold text-gray-200 group-hover:text-white">Add</span>
-                        </button>
-
-                        <button onclick="openModal('modalSendMoney')" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-brand-dark/80 hover:bg-brand-yellow/10 border border-brand-border hover:border-brand-yellow/40 transition group">
-                            <div class="w-10 h-10 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition">
-                                <i class="fa-solid fa-paper-plane text-sm"></i>
-                            </div>
-                            <span class="text-xs font-semibold text-gray-200 group-hover:text-white">Send</span>
-                        </button>
-
-                        <button onclick="openModal('modalScan')" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-brand-dark/80 hover:bg-brand-yellow/10 border border-brand-border hover:border-brand-yellow/40 transition group">
-                            <div class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition">
-                                <i class="fa-solid fa-qrcode text-sm"></i>
-                            </div>
-                            <span class="text-xs font-semibold text-gray-200 group-hover:text-white">Scan QR</span>
-                        </button>
-
-                        <button onclick="openModal('modalWithdraw')" class="flex flex-col items-center gap-2 p-3 rounded-xl bg-brand-dark/80 hover:bg-brand-yellow/10 border border-brand-border hover:border-brand-yellow/40 transition group">
-                            <div class="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition">
-                                <i class="fa-solid fa-building-columns text-sm"></i>
-                            </div>
-                            <span class="text-xs font-semibold text-gray-200 group-hover:text-white">Withdraw</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Promos & Promo Banners Carousel -->
-        <div class="glass-card rounded-2xl p-4 overflow-hidden">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-tags text-brand-yellow"></i>
-                    <h3 class="text-sm font-bold text-white">Active Cashback & Coupon Rewards</h3>
-                </div>
-                <button onclick="openModal('modalRedeem')" class="text-xs text-brand-yellow hover:underline font-semibold">Apply Promo Code</button>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                <div class="bg-gradient-to-r from-purple-900/40 to-brand-card border border-purple-500/30 p-3 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded">RIDE50</span>
-                        <p class="text-xs font-semibold text-white mt-1">Get 50% Cashback</p>
-                        <p class="text-[10px] text-gray-400">On next 3 premium sedan rides</p>
-                    </div>
-                    <button onclick="quickApplyPromo('RIDE50')" class="px-2.5 py-1 text-xs bg-purple-500 text-white rounded-lg font-bold hover:bg-purple-600 transition">Claim</button>
-                </div>
-
-                <div class="bg-gradient-to-r from-emerald-900/40 to-brand-card border border-emerald-500/30 p-3 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 bg-emerald-500/20 text-emerald-300 rounded">ADD100</span>
-                        <p class="text-xs font-semibold text-white mt-1">Flat ₹100 Topup Bonus</p>
-                        <p class="text-[10px] text-gray-400">Min add money ₹1,000 via UPI</p>
-                    </div>
-                    <button onclick="quickApplyPromo('ADD100')" class="px-2.5 py-1 text-xs bg-emerald-500 text-white rounded-lg font-bold hover:bg-emerald-600 transition">Claim</button>
-                </div>
-
-                <div class="bg-gradient-to-r from-amber-900/40 to-brand-card border border-amber-500/30 p-3 rounded-xl flex items-center justify-between">
-                    <div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 bg-amber-500/20 text-amber-300 rounded">REF250</span>
-                        <p class="text-xs font-semibold text-white mt-1">Referral Boost</p>
-                        <p class="text-[10px] text-gray-400">Earn ₹250 per friend invited</p>
-                    </div>
-                    <button onclick="copyReferralLink()" class="px-2.5 py-1 text-xs bg-amber-500 text-brand-black rounded-lg font-bold hover:bg-amber-400 transition">Invite</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Transactions Section -->
-        <div class="glass-card rounded-2xl p-5 space-y-4">
-            
-            <!-- Controls Bar Header -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-brand-border/60 pb-4">
-                <div>
-                    <h3 class="text-base font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-clock-rotate-left text-brand-yellow"></i>
-                        <span>Recent Transactions</span>
-                    </h3>
-                    <p class="text-xs text-brand-gray mt-0.5">Real-time ledger of your wallet activity</p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="downloadStatementPDF()" class="px-3 py-1.5 rounded-lg bg-brand-card hover:bg-brand-border border border-brand-border text-xs text-white flex items-center gap-1.5 transition font-medium">
-                        <i class="fa-solid fa-file-pdf text-red-400"></i>
-                        <span>Statement PDF</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filters & Search Toolbar -->
-            <div class="flex flex-col lg:flex-row gap-3 justify-between items-stretch lg:items-center">
-                <!-- Search Box -->
-                <div class="relative flex-grow max-w-md">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                    <input type="text" id="txnSearchInput" placeholder="Search by description, ID, amount..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow transition">
-                </div>
-
-                <!-- Date & Type Filter Tabs -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex items-center bg-brand-dark p-1 rounded-xl border border-brand-border overflow-x-auto custom-scrollbar">
-                        <button onclick="setFilterPeriod('all')" class="tab-btn active px-3 py-1 rounded-lg text-xs transition">All</button>
-                        <button onclick="setFilterPeriod('today')" class="tab-btn px-3 py-1 rounded-lg text-xs text-brand-gray hover:text-white transition">Today</button>
-                        <button onclick="setFilterPeriod('week')" class="tab-btn px-3 py-1 rounded-lg text-xs text-brand-gray hover:text-white transition">Week</button>
-                        <button onclick="setFilterPeriod('month')" class="tab-btn px-3 py-1 rounded-lg text-xs text-brand-gray hover:text-white transition">Month</button>
-                        <button onclick="setFilterPeriod('year')" class="tab-btn px-3 py-1 rounded-lg text-xs text-brand-gray hover:text-white transition">Year</button>
-                    </div>
-
-                    <select id="txnTypeSelect" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        <option value="ALL">All Categories</option>
-                        <option value="CREDIT">Credits Only</option>
-                        <option value="DEBIT">Debits Only</option>
-                        <option value="RIDE">Ride Payments</option>
-                        <option value="REFUND">Refunds</option>
-                        <option value="CASHBACK">Cashback</option>
-                        <option value="REFERRAL">Referral Bonus</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Custom Date Range Row (Hidden by Default) -->
-            <div id="customDateContainer" class="hidden flex items-center gap-2 pt-2 border-t border-brand-border/40">
-                <span class="text-xs text-brand-gray">From:</span>
-                <input type="date" id="startDate" class="bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1 text-xs text-white">
-                <span class="text-xs text-brand-gray">To:</span>
-                <input type="date" id="endDate" class="bg-brand-dark border border-brand-border rounded-lg px-2.5 py-1 text-xs text-white">
-                <button onclick="applyCustomDateFilter()" class="px-3 py-1 bg-brand-yellow text-brand-black text-xs font-bold rounded-lg hover:bg-yellow-300">Apply</button>
-            </div>
-
-            <!-- Transaction Table / List -->
-            <div id="txnContainer" class="overflow-x-auto custom-scrollbar min-h-[250px]">
-                <table class="w-full text-left text-xs text-brand-gray">
-                    <thead class="text-[11px] uppercase bg-brand-dark/80 text-brand-gray border-b border-brand-border">
-                        <tr>
-                            <th class="py-3 px-4 font-semibold">Transaction Details</th>
-                            <th class="py-3 px-4 font-semibold">Category</th>
-                            <th class="py-3 px-4 font-semibold">Date & Time</th>
-                            <th class="py-3 px-4 font-semibold">Method</th>
-                            <th class="py-3 px-4 font-semibold text-right">Amount</th>
-                            <th class="py-3 px-4 font-semibold text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="txnTableBody" class="divide-y divide-brand-border/40">
-                        <!-- Dynamic Firebase Rows Injected Here -->
-                        <tr>
-                            <td colspan="6" class="py-8 text-center text-brand-gray">
-                                <i class="fa-solid fa-spinner fa-spin text-brand-yellow text-xl mb-2"></i>
-                                <p>Loading real-time transaction ledger...</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- Floating Action Button (Mobile Only) -->
-    <button onclick="openModal('modalAddMoney')" class="lg:hidden fixed right-5 bottom-20 z-40 w-14 h-14 rounded-full bg-brand-yellow text-brand-black shadow-2xl flex items-center justify-center pulse-yellow font-bold">
-        <i class="fa-solid fa-plus text-xl"></i>
-    </button>
-
-    <!-- Mobile Bottom Navigation Bar -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 border-t border-brand-border backdrop-blur-lg px-6 py-2.5">
-        <div class="flex items-center justify-between max-w-md mx-auto">
-            <a href="./Dashboard.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-compass text-base"></i>
-                <span class="text-[10px] font-medium">Explore</span>
-            </a>
-            <a href="./Activity.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-clock-rotate-left text-base"></i>
-                <span class="text-[10px] font-medium">Rides</span>
-            </a>
-            <a href="./Wallet.html" class="flex flex-col items-center gap-1 text-brand-yellow font-bold">
-                <i class="fa-solid fa-wallet text-base"></i>
-                <span class="text-[10px]">Wallet</span>
-            </a>
-            <a href="./Profile.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-user text-base"></i>
-                <span class="text-[10px] font-medium">Account</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- ================================================================= -->
-    <!-- MODAL POPUPS (ADD MONEY, SEND, SCAN, WITHDRAW, SETTINGS, DETAILS) -->
-    <!-- ================================================================= -->
-
-    <!-- Modal: Add Money -->
-    <div id="modalAddMoney" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-brand-yellow/30 space-y-4">
-            <button onclick="closeModal('modalAddMoney')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-wallet text-brand-yellow"></i> Add Money to Wallet
-            </h3>
-            
-            <form id="formAddMoney" onsubmit="executeAddMoney(event)" class="space-y-4">
-                <div>
-                    <label class="text-xs text-brand-gray font-medium">Enter Amount (₹)</label>
-                    <div class="relative mt-1">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-brand-yellow font-bold">₹</span>
-                        <input type="number" id="addAmountInput" min="10" max="50000" required placeholder="500" class="w-full bg-brand-dark border border-brand-border rounded-xl pl-8 pr-4 py-2.5 text-base font-bold text-white focus:outline-none focus:border-brand-yellow">
-                    </div>
-                    <!-- Quick Amount Chips -->
-                    <div class="flex gap-2 mt-2">
-                        <button type="button" onclick="setAddAmount(500)" class="px-2.5 py-1 rounded-lg bg-brand-dark border border-brand-border text-xs text-gray-300 hover:border-brand-yellow">+₹500</button>
-                        <button type="button" onclick="setAddAmount(1000)" class="px-2.5 py-1 rounded-lg bg-brand-dark border border-brand-border text-xs text-gray-300 hover:border-brand-yellow">+₹1,000</button>
-                        <button type="button" onclick="setAddAmount(2000)" class="px-2.5 py-1 rounded-lg bg-brand-dark border border-brand-border text-xs text-gray-300 hover:border-brand-yellow">+₹2,000</button>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-xs text-brand-gray font-medium">Select Payment Method</label>
-                    <div class="grid grid-cols-2 gap-2 mt-1.5">
-                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-brand-dark border border-brand-border cursor-pointer hover:border-brand-yellow">
-                            <input type="radio" name="addPayMethod" value="UPI" checked class="accent-brand-yellow">
-                            <span class="text-xs text-white font-semibold"><i class="fa-solid fa-mobile-screen text-brand-yellow mr-1"></i> UPI / QR</span>
-                        </label>
-                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-brand-dark border border-brand-border cursor-pointer hover:border-brand-yellow">
-                            <input type="radio" name="addPayMethod" value="CARD" class="accent-brand-yellow">
-                            <span class="text-xs text-white font-semibold"><i class="fa-solid fa-credit-card text-blue-400 mr-1"></i> Debit/Credit</span>
-                        </label>
-                        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-brand-dark border border-brand-border cursor-pointer hover:border-brand-yellow">
-                            <input type="radio" name="addPayMethod" value="NETBANKING" class="accent-brand-yellow">
-                            <span class="text-xs text-white font-semibold"><i class="fa-solid fa-building-columns text-emerald-400 mr-1"></i> Net Banking</span>
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" class="w-full py-3 rounded-xl bg-brand-yellow text-brand-black font-bold text-sm hover:bg-yellow-300 transition shadow-lg shadow-brand-yellow/10">
-                    Proceed to Add Funds
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Send Money -->
-    <div id="modalSendMoney" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-brand-yellow/30 space-y-4">
-            <button onclick="closeModal('modalSendMoney')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-paper-plane text-blue-400"></i> Send Money Instantly
-            </h3>
-
-            <form id="formSendMoney" onsubmit="executeSendMoney(event)" class="space-y-4">
-                <div>
-                    <label class="text-xs text-brand-gray font-medium">Recipient Phone / Wallet ID</label>
-                    <input type="text" id="sendRecipientInput" required placeholder="e.g. +91 9876543210 or RX-..." class="w-full mt-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-
-                <div>
-                    <label class="text-xs text-brand-gray font-medium">Amount (₹)</label>
-                    <input type="number" id="sendAmountInput" min="1" required placeholder="0.00" class="w-full mt-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-base font-bold text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-
-                <div>
-                    <label class="text-xs text-brand-gray font-medium">Note / Remarks (Optional)</label>
-                    <input type="text" id="sendNoteInput" placeholder="e.g. Dinner ride split" class="w-full mt-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-
-                <button type="submit" class="w-full py-3 rounded-xl bg-blue-500 text-white font-bold text-sm hover:bg-blue-600 transition shadow-lg shadow-blue-500/20">
-                    Send Payment Now
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Withdraw Money -->
-    <div id="modalWithdraw" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-brand-yellow/30 space-y-4">
-            <button onclick="closeModal('modalWithdraw')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-building-columns text-emerald-400"></i> Withdraw to Bank
-            </h3>
-
-            <form id="formWithdraw" onsubmit="executeWithdraw(event)" class="space-y-4">
-                <div>
-                    <label class="text-xs text-brand-gray font-medium">Bank Account / UPI ID</label>
-                    <input type="text" id="withdrawDestInput" required placeholder="name@upi or Account No." class="w-full mt-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-
-                <div>
-                    <label class="text-xs text-brand-gray font-medium">Withdrawal Amount (₹)</label>
-                    <input type="number" id="withdrawAmountInput" min="100" required placeholder="100.00" class="w-full mt-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-base font-bold text-white focus:outline-none focus:border-brand-yellow">
-                    <p class="text-[10px] text-brand-gray mt-1">Instant processing fee: ₹0 (Free for verified KYC)</p>
-                </div>
-
-                <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 text-white font-bold text-sm hover:bg-emerald-600 transition shadow-lg shadow-emerald-500/20">
-                    Withdraw Funds
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal: Show QR Code -->
-    <div id="modalQR" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-sm rounded-2xl p-6 relative border border-brand-yellow/30 text-center space-y-4">
-            <button onclick="closeModal('modalQR')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            
-            <h3 class="text-base font-bold text-white">Receive Money</h3>
-            <p class="text-xs text-brand-gray">Scan to pay directly into this RiderX Wallet</p>
-
-            <div class="bg-white p-4 rounded-2xl inline-block border-4 border-brand-yellow shadow-2xl mx-auto">
-                <div id="qrcodeDisplay" class="flex justify-center"></div>
-            </div>
-
-            <p class="text-xs font-mono text-brand-yellow font-bold" id="qrWalletIDText">RX-0000-0000-0000</p>
-        </div>
-    </div>
-
-    <!-- Modal: Scan QR -->
-    <div id="modalScan" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-purple-500/30 text-center space-y-4">
-            <button onclick="closeModal('modalScan')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-base font-bold text-white flex items-center justify-center gap-2">
-                <i class="fa-solid fa-qrcode text-purple-400"></i> Scan & Pay
-            </h3>
-
-            <div class="w-full h-56 bg-brand-dark rounded-xl border-2 border-dashed border-purple-500/50 flex flex-col items-center justify-center gap-3 relative overflow-hidden">
-                <i class="fa-solid fa-camera text-3xl text-purple-400 animate-bounce"></i>
-                <p class="text-xs text-brand-gray">Position QR code within frame</p>
-                <div class="absolute inset-x-0 top-0 h-1 bg-purple-500 shadow-[0_0_15px_#a855f7] animate-pulse"></div>
-            </div>
-
-            <div class="pt-2">
-                <input type="text" id="manualScanID" placeholder="Or enter recipient Wallet ID" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-purple-400">
-                <button onclick="processManualScan()" class="w-full mt-2 py-2 rounded-xl bg-purple-500 text-white font-bold text-xs hover:bg-purple-600 transition">Proceed</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Redeem Promo Code -->
-    <div id="modalRedeem" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-brand-yellow/30 space-y-4">
-            <button onclick="closeModal('modalRedeem')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-ticket text-brand-yellow"></i> Apply Promo or Reward Code
-            </h3>
-
-            <div class="space-y-3">
-                <input type="text" id="promoCodeInput" placeholder="Enter Code (e.g. RIDE50)" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-sm uppercase font-bold text-white focus:outline-none focus:border-brand-yellow">
-                <button onclick="submitPromoCode()" class="w-full py-2.5 rounded-xl bg-brand-yellow text-brand-black font-bold text-xs hover:bg-yellow-300 transition">Apply Voucher</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Wallet Settings & KYC -->
-    <div id="modalSettings" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-brand-border space-y-4">
-            <button onclick="closeModal('modalSettings')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-sliders text-brand-yellow"></i> Wallet Settings
-            </h3>
-
-            <div class="space-y-3 text-xs">
-                <div class="p-3 bg-brand-dark rounded-xl border border-brand-border flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold text-white">KYC Verification</p>
-                        <p class="text-brand-gray text-[10px]">Govt ID Approved</p>
-                    </div>
-                    <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[10px] font-bold">VERIFIED</span>
-                </div>
-
-                <div class="p-3 bg-brand-dark rounded-xl border border-brand-border flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold text-white">Auto-Topup</p>
-                        <p class="text-brand-gray text-[10px]">Add ₹500 when balance &lt; ₹100</p>
-                    </div>
-                    <input type="checkbox" class="accent-brand-yellow w-4 h-4 cursor-pointer">
-                </div>
-
-                <div class="p-3 bg-brand-dark rounded-xl border border-brand-border flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold text-white">Payment PIN Protection</p>
-                        <p class="text-brand-gray text-[10px]">Require PIN for transfers &gt; ₹1,000</p>
-                    </div>
-                    <input type="checkbox" checked class="accent-brand-yellow w-4 h-4 cursor-pointer">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal: Transaction Details PDF / Receipt -->
-    <div id="modalTxnDetails" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-brand-border space-y-4" id="printableReceipt">
-            <button onclick="closeModal('modalTxnDetails')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            
-            <div class="text-center pb-3 border-b border-brand-border">
-                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX" class="h-6 mx-auto mb-1" onerror="this.src='https://via.placeholder.com/80x25/090A0F/FFE500?text=RiderX'">
-                <p class="text-[10px] text-brand-gray">Transaction Receipt</p>
-            </div>
-
-            <div class="space-y-2 text-xs">
-                <div class="flex justify-between py-1 border-b border-brand-border/40">
-                    <span class="text-brand-gray">Transaction ID</span>
-                    <span id="dtlTxnId" class="font-mono text-white font-bold">---</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-brand-border/40">
-                    <span class="text-brand-gray">Description</span>
-                    <span id="dtlDesc" class="text-white font-semibold">---</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-brand-border/40">
-                    <span class="text-brand-gray">Category / Type</span>
-                    <span id="dtlCategory" class="text-brand-yellow font-bold">---</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-brand-border/40">
-                    <span class="text-brand-gray">Date & Time</span>
-                    <span id="dtlDate" class="text-white">---</span>
-                </div>
-                <div class="flex justify-between py-1 border-b border-brand-border/40">
-                    <span class="text-brand-gray">Amount</span>
-                    <span id="dtlAmount" class="text-base font-extrabold text-white">---</span>
-                </div>
-                <div class="flex justify-between py-1">
-                    <span class="text-brand-gray">Status</span>
-                    <span id="dtlStatus" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400">SUCCESSFUL</span>
-                </div>
-            </div>
-
-            <div class="pt-2 flex gap-2">
-                <button onclick="window.print()" class="w-full py-2 rounded-xl bg-brand-dark border border-brand-border text-xs text-white font-bold hover:bg-brand-border">Print</button>
-                <button onclick="closeModal('modalTxnDetails')" class="w-full py-2 rounded-xl bg-brand-yellow text-brand-black text-xs font-bold hover:bg-yellow-300">Close</button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ================================================================= -->
-    <!-- JAVASCRIPT & FIREBASE INTEGRATION ENGINE -->
-    <!-- ================================================================= -->
-    
-    <!-- App Core Scripts -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/App.js"></script>
-    <script type="module" src="../js/Wallet.js"></script>
-
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc, collection, query, where, onSnapshot, addDoc, serverTimestamp, increment, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Local state
-        let currentUser = null;
-        let walletData = null;
-        let allTransactions = [];
-        let activePeriodFilter = 'all';
-
-        // Security Guard & Realtime Synchronizer
-        document.addEventListener('DOMContentLoaded', () => {
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    window.location.href = '../auth/customer-login.html';
-                    return;
-                }
-                currentUser = user;
-                initializeWalletListener(user.uid);
-                initializeTransactionsListener(user.uid);
-            });
-
-            // Bind filter listeners
-            document.getElementById('txnSearchInput').addEventListener('input', applyFiltersAndRender);
-            document.getElementById('txnTypeSelect').addEventListener('change', applyFiltersAndRender);
-        });
-
-        // 1. Realtime Wallet Subscription
-        function initializeWalletListener(uid) {
-            const walletRef = doc(db, "wallet", uid);
-            onSnapshot(walletRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    walletData = snapshot.data();
-                    updateWalletUI(walletData);
-                } else {
-                    // Fallback to customer profile
-                    getDoc(doc(db, "customers", uid)).then((custSnap) => {
-                        const name = custSnap.exists() ? custSnap.data().fullName || 'Valued Customer' : 'Valued Customer';
-                        updateWalletUI({
-                            balance: 0.00,
-                            cashback: 0.00,
-                            rewards: 0,
-                            savings: 0.00,
-                            walletNumber: 'RX-' + uid.substring(0, 10).toUpperCase(),
-                            holderName: name
-                        });
-                    });
-                }
-            });
-        }
-
-        function updateWalletUI(data) {
-            document.getElementById('displayMainBalance').innerText = (data.balance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-            document.getElementById('displayCashback').innerText = (data.cashback || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-            document.getElementById('displayRewards').innerText = (data.rewards || 0);
-            document.getElementById('displaySavings').innerText = (data.savings || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-            
-            const walletNum = data.walletNumber || ('RX-' + (currentUser ? currentUser.uid.substring(0,10).toUpperCase() : '000000'));
-            document.getElementById('displayWalletNum').innerText = walletNum;
-            document.getElementById('qrWalletIDText').innerText = walletNum;
-            document.getElementById('walletHolderName').innerText = data.holderName || currentUser.displayName || 'RiderX Customer';
-
-            if (currentUser.photoURL) {
-                document.getElementById('userAvatar').src = currentUser.photoURL;
-            }
-
-            // Generate QR Code dynamically
-            const qrContainer = document.getElementById("qrcodeDisplay");
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, {
-                text: walletNum,
-                width: 140,
-                height: 140,
-                colorDark : "#090A0F",
-                colorLight : "#FFFFFF",
-                correctLevel : QRCode.CorrectLevel.H
-            });
-        }
-
-        // 2. Realtime Transactions Subscription
-        function initializeTransactionsListener(uid) {
-            const q = query(collection(db, "transactions"), where("userId", "==", uid));
-            onSnapshot(q, (snapshot) => {
-                allTransactions = [];
-                snapshot.forEach((doc) => {
-                    allTransactions.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Sort descending by timestamp
-                allTransactions.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                applyFiltersAndRender();
-            });
-        }
-
-        // Filter Logic Implementation
-        window.setFilterPeriod = function(period) {
-            activePeriodFilter = period;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'text-brand-gray'));
-            event.target.classList.add('active');
-
-            const customBox = document.getElementById('customDateContainer');
-            if(period === 'custom') {
-                customBox.classList.remove('hidden');
-            } else {
-                customBox.classList.add('hidden');
-            }
-
-            applyFiltersAndRender();
-        };
-
-        window.applyCustomDateFilter = function() {
-            applyFiltersAndRender();
-        };
-
-        function applyFiltersAndRender() {
-            const searchQuery = document.getElementById('txnSearchInput').value.toLowerCase();
-            const typeFilter = document.getElementById('txnTypeSelect').value;
-            
-            const now = new Date();
-            let filtered = allTransactions.filter(txn => {
-                // Search term match
-                const matchSearch = (txn.description || '').toLowerCase().includes(searchQuery) || 
-                                    (txn.id || '').toLowerCase().includes(searchQuery) ||
-                                    (txn.amount || '').toString().includes(searchQuery);
-
-                // Type match
-                let matchType = true;
-                if(typeFilter !== 'ALL') {
-                    matchType = txn.type === typeFilter || txn.category === typeFilter;
-                }
-
-                // Date period match
-                let matchDate = true;
-                if (txn.timestamp) {
-                    const txnDate = new Date(txn.timestamp.seconds * 1000);
-                    if (activePeriodFilter === 'today') {
-                        matchDate = txnDate.toDateString() === now.toDateString();
-                    } else if (activePeriodFilter === 'week') {
-                        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        matchDate = txnDate >= oneWeekAgo;
-                    } else if (activePeriodFilter === 'month') {
-                        matchDate = txnDate.getMonth() === now.getMonth() && txnDate.getFullYear() === now.getFullYear();
-                    } else if (activePeriodFilter === 'year') {
-                        matchDate = txnDate.getFullYear() === now.getFullYear();
-                    } else if (activePeriodFilter === 'custom') {
-                        const start = new Date(document.getElementById('startDate').value);
-                        const end = new Date(document.getElementById('endDate').value);
-                        if (!isNaN(start) && !isNaN(end)) {
-                            matchDate = txnDate >= start && txnDate <= end;
-                        }
-                    }
-                }
-
-                return matchSearch && matchType && matchDate;
-            });
-
-            renderTransactionsTable(filtered);
-        }
-
-        function renderTransactionsTable(transactions) {
-            const tbody = document.getElementById('txnTableBody');
-            if (transactions.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-brand-gray">
-                            <i class="fa-solid fa-receipt text-2xl text-brand-border mb-2"></i>
-                            <p>No transaction history found for selected filters.</p>
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = transactions.map(txn => {
-                const isCredit = txn.flow === 'CREDIT' || txn.type === 'CREDIT' || txn.type === 'REFUND' || txn.type === 'CASHBACK';
-                const dateStr = txn.timestamp ? new Date(txn.timestamp.seconds * 1000).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Just now';
-                
-                let iconClass = 'fa-arrow-up-right text-red-400 bg-red-500/10';
-                if(isCredit) iconClass = 'fa-arrow-down-left text-emerald-400 bg-emerald-500/10';
-                if(txn.category === 'RIDE') iconClass = 'fa-car text-brand-yellow bg-brand-yellow/10';
-
-                return `
-                    <tr class="hover:bg-brand-dark/40 transition">
-                        <td class="py-3 px-4 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${iconClass}">
-                                <i class="fa-solid ${iconClass.split(' ')[0]} text-xs"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-semibold text-white">${txn.description || 'Wallet Transaction'}</p>
-                                <p class="text-[10px] text-brand-gray font-mono">ID: ${txn.id.substring(0,8)}...</p>
-                            </div>
-                        </td>
-                        <td class="py-3 px-4">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border border-brand-border ${isCredit ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'}">
-                                ${txn.type || 'GENERAL'}
-                            </span>
-                        </td>
-                        <td class="py-3 px-4 text-[11px] text-gray-300">${dateStr}</td>
-                        <td class="py-3 px-4 text-[11px] font-semibold text-brand-gray">${txn.method || 'Wallet Pass'}</td>
-                        <td class="py-3 px-4 text-right font-bold text-xs ${isCredit ? 'text-emerald-400' : 'text-white'}">
-                            ${isCredit ? '+' : '-'}₹${parseFloat(txn.amount || 0).toFixed(2)}
-                        </td>
-                        <td class="py-3 px-4 text-center">
-                            <button onclick="viewTxnDetails('${txn.id}')" class="text-brand-gray hover:text-brand-yellow p-1">
-                                <i class="fa-solid fa-circle-info"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Transaction Actions Execution
-        window.executeAddMoney = async function(e) {
-            e.preventDefault();
-            const amount = parseFloat(document.getElementById('addAmountInput').value);
-            const method = document.querySelector('input[name="addPayMethod"]:checked').value;
-
-            if(!amount || amount < 10) return;
-
-            try {
-                // Update Firebase Wallet Balance
-                const walletRef = doc(db, "wallet", currentUser.uid);
-                await updateDoc(walletRef, {
-                    balance: increment(amount),
-                    savings: increment(amount * 0.02) // 2% bonus incentive
-                });
-
-                // Create Ledger Entry
-                await addDoc(collection(db, "transactions"), {
-                    userId: currentUser.uid,
-                    amount: amount,
-                    flow: 'CREDIT',
-                    type: 'CREDIT',
-                    category: 'TOPUP',
-                    method: method,
-                    description: `Added Money via ${method}`,
-                    timestamp: serverTimestamp()
-                });
-
-                closeModal('modalAddMoney');
-                alert(`Successfully added ₹${amount} to your wallet!`);
-            } catch(err) {
-                console.error("Error adding money:", err);
-                alert("Transaction failed. Please try again.");
-            }
-        };
-
-        window.executeSendMoney = async function(e) {
-            e.preventDefault();
-            const recipient = document.getElementById('sendRecipientInput').value;
-            const amount = parseFloat(document.getElementById('sendAmountInput').value);
-            const note = document.getElementById('sendNoteInput').value;
-
-            if(walletData && walletData.balance < amount) {
-                alert("Insufficient wallet balance!");
-                return;
-            }
-
-            try {
-                const walletRef = doc(db, "wallet", currentUser.uid);
-                await updateDoc(walletRef, { balance: increment(-amount) });
-
-                await addDoc(collection(db, "transactions"), {
-                    userId: currentUser.uid,
-                    amount: amount,
-                    flow: 'DEBIT',
-                    type: 'DEBIT',
-                    category: 'TRANSFER',
-                    method: 'WALLET',
-                    description: `Sent to ${recipient} (${note || 'P2P Transfer'})`,
-                    timestamp: serverTimestamp()
-                });
-
-                closeModal('modalSendMoney');
-                alert(`Sent ₹${amount} to ${recipient}`);
-            } catch(err) {
-                console.error(err);
-            }
-        };
-
-        window.executeWithdraw = async function(e) {
-            e.preventDefault();
-            const dest = document.getElementById('withdrawDestInput').value;
-            const amount = parseFloat(document.getElementById('withdrawAmountInput').value);
-
-            if(walletData && walletData.balance < amount) {
-                alert("Insufficient balance for withdrawal!");
-                return;
-            }
-
-            try {
-                const walletRef = doc(db, "wallet", currentUser.uid);
-                await updateDoc(walletRef, { balance: increment(-amount) });
-
-                await addDoc(collection(db, "transactions"), {
-                    userId: currentUser.uid,
-                    amount: amount,
-                    flow: 'DEBIT',
-                    type: 'DEBIT',
-                    category: 'WITHDRAWAL',
-                    method: 'BANK_UPI',
-                    description: `Bank Withdrawal to ${dest}`,
-                    timestamp: serverTimestamp()
-                });
-
-                closeModal('modalWithdraw');
-                alert(`Withdrawal request of ₹${amount} initiated successfully!`);
-            } catch(err) {
-                console.error(err);
-            }
-        };
-
-        // Helper Modal Controllers
-        window.openModal = function(id) {
-            document.getElementById(id).classList.remove('hidden');
-        };
-        window.closeModal = function(id) {
-            document.getElementById(id).classList.add('hidden');
-        };
-        window.setAddAmount = function(val) {
-            document.getElementById('addAmountInput').value = val;
-        };
-        window.quickApplyPromo = function(code) {
-            openModal('modalRedeem');
-            document.getElementById('promoCodeInput').value = code;
-        };
-        window.submitPromoCode = function() {
-            const code = document.getElementById('promoCodeInput').value;
-            alert(`Promo code ${code} redeemed! Bonus credited to cashback.`);
-            closeModal('modalRedeem');
-        };
-        window.copyReferralLink = function() {
-            navigator.clipboard.writeText(`https://riderx.app/invite?ref=${currentUser.uid.substring(0,6)}`);
-            alert("Referral link copied to clipboard!");
-        };
-        window.viewTxnDetails = function(txnId) {
-            const txn = allTransactions.find(t => t.id === txnId);
-            if (!txn) return;
-
-            document.getElementById('dtlTxnId').innerText = txn.id;
-            document.getElementById('dtlDesc').innerText = txn.description || 'Transaction';
-            document.getElementById('dtlCategory').innerText = txn.type || 'General';
-            document.getElementById('dtlDate').innerText = txn.timestamp ? new Date(txn.timestamp.seconds * 1000).toLocaleString() : 'N/A';
-            document.getElementById('dtlAmount').innerText = `₹${parseFloat(txn.amount || 0).toFixed(2)}`;
-
-            openModal('modalTxnDetails');
-        };
-        window.downloadStatementPDF = function() {
-            const element = document.getElementById('txnContainer');
-            const opt = {
-                margin:       0.5,
-                filename:     `RiderX_Wallet_Statement_${new Date().toISOString().slice(0,10)}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        };
-    </script>
+
+
+<body>
+
+
+
+<div class="header">
+
+
+<a href="home.html" class="back">
+
+<i class="fa-solid fa-arrow-left"></i>
+
+</a>
+
+
+
+<div class="logo">
+
+RIDER<span>X</span>
+
+</div>
+
+
+<div></div>
+
+
+</div>
+
+
+
+
+
+<div class="container">
+
+
+
+<div class="wallet-card">
+
+
+<p>
+
+Available Balance
+
+</p>
+
+
+<div class="balance" id="balance">
+
+₹0
+
+</div>
+
+
+
+<div class="action">
+
+
+<button class="add" onclick="addMoney()">
+
+<i class="fa-solid fa-plus"></i>
+
+Add Money
+
+</button>
+
+
+<button class="history">
+
+<i class="fa-solid fa-clock"></i>
+
+History
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+<i class="fa-solid fa-list" style="color:#FFE500"></i>
+
+Transactions
+
+</h3>
+
+
+<div id="transactions">
+
+
+<p style="color:#999">
+
+No transactions yet
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+<div class="card referral">
+
+
+<i class="fa-solid fa-gift"></i>
+
+
+<h3>
+
+Refer & Earn
+
+</h3>
+
+
+<p style="color:#aaa">
+
+Invite friends and earn RiderX rewards
+
+</p>
+
+
+
+<button onclick="shareReferral()">
+
+Share Referral
+
+</button>
+
+
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script src="../firebase/firebase-config.js"></script>
+
+
+
+<script>
+
+
+const auth = firebase.auth();
+
+const db = firebase.firestore();
+
+
+
+
+auth.onAuthStateChanged(async(user)=>{
+
+
+if(!user){
+
+window.location.href="../auth/login.html";
+
+return;
+
+}
+
+
+
+loadWallet(user.uid);
+
+
+
+});
+
+
+
+
+
+
+async function loadWallet(uid){
+
+
+
+try{
+
+
+const walletDoc = await db.collection("wallets")
+.doc(uid)
+.get();
+
+
+
+if(walletDoc.exists){
+
+
+
+let data = walletDoc.data();
+
+
+
+document.getElementById("balance")
+.innerHTML =
+"₹"+(data.balance || 0);
+
+
+
+}
+
+else{
+
+
+document.getElementById("balance")
+.innerHTML="₹0";
+
+
+}
+
+
+
+
+const transactions =
+await db.collection("wallets")
+.doc(uid)
+.collection("transactions")
+.orderBy("createdAt","desc")
+.limit(10)
+.get();
+
+
+
+let html="";
+
+
+
+transactions.forEach((doc)=>{
+
+
+let data = doc.data();
+
+
+
+html += `
+
+<div class="transaction">
+
+
+<div>
+
+${data.title || "Ride Payment"}
+
+<br>
+
+<small style="color:#999">
+
+${data.date || ""}
+
+</small>
+
+
+</div>
+
+
+<div class="${data.type==="credit" ? "green":"yellow"}">
+
+
+${data.type==="credit" ? "+" : "-"}
+₹${data.amount || 0}
+
+
+</div>
+
+
+</div>
+
+`;
+
+
+
+});
+
+
+
+if(html){
+
+document.getElementById("transactions")
+.innerHTML=html;
+
+}
+
+
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+
+
+
+}
+
+
+
+
+
+function addMoney(){
+
+
+alert(
+"Online wallet recharge will be available soon."
+);
+
+
+}
+
+
+
+
+function shareReferral(){
+
+
+if(navigator.share){
+
+
+navigator.share({
+
+title:"RiderX",
+
+text:"Join RiderX and get rewards"
+
+});
+
+
+}
+
+else{
+
+
+alert(
+"Share RiderX with your friends"
+);
+
+
+}
+
+
+
+}
+
+
+
+</script>
+
+
+
+
+
+<!-- Bottom Navigation -->
+
+
+<div class="bottom-nav">
+
+
+<a href="home.html">
+
+<i class="fa-solid fa-house"></i>
+
+Home
+
+</a>
+
+
+
+<a href="booking.html">
+
+<i class="fa-solid fa-motorcycle"></i>
+
+Booking
+
+</a>
+
+
+
+<a href="history.html">
+
+<i class="fa-solid fa-clock"></i>
+
+History
+
+</a>
+
+
+
+<a href="wallet.html" class="active">
+
+<i class="fa-solid fa-wallet"></i>
+
+Wallet
+
+</a>
+
+
+
+<a href="profile.html">
+
+<i class="fa-solid fa-user"></i>
+
+Profile
+
+</a>
+
+
+
+</div>
+
+
+
+
 </body>
+
 </html>
