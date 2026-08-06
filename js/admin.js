@@ -1,115 +1,91 @@
-// =================================
-// RiderX Admin System
-// =================================
+// =====================================
+// RiderX Admin Dashboard V2
+// =====================================
 
-
-import { db } from "../firebase/config.js";
-
+import { auth, db } from "../firebase/config.js";
 
 import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-collection,
-getDocs
-
+import {
+    collection,
+    getDocs,
+    query,
+    where
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+const totalCustomers = document.getElementById("totalCustomers");
+const totalRiders = document.getElementById("totalRiders");
+const activeBookings = document.getElementById("activeBookings");
+const totalEarnings = document.getElementById("totalEarnings");
 
+onAuthStateChanged(auth, async (user) => {
 
+    if (!user) {
 
+        window.location.href = "../auth/login.html";
+        return;
 
-// Load Users Count
+    }
 
+    try {
 
-export async function loadUsersCount(){
+        // Customers
+        const customerQuery = query(
+            collection(db, "users"),
+            where("role", "==", "customer")
+        );
 
+        const customerSnap = await getDocs(customerQuery);
 
-let box =
-document.getElementById("usersCount");
+        totalCustomers.innerHTML = customerSnap.size;
 
+        // Riders
+        const riderQuery = query(
+            collection(db, "users"),
+            where("role", "==", "rider")
+        );
 
+        const riderSnap = await getDocs(riderQuery);
 
-if(!box) return;
+        totalRiders.innerHTML = riderSnap.size;
 
+        // Active Bookings
+        const bookingQuery = query(
+            collection(db, "bookings"),
+            where("status", "!=", "completed")
+        );
 
+        const bookingSnap = await getDocs(bookingQuery);
 
-try{
+        activeBookings.innerHTML = bookingSnap.size;
 
+        // Earnings
+        const paymentSnap = await getDocs(collection(db, "payments"));
 
-const snapshot = await getDocs(
+        let total = 0;
 
-collection(db,"users")
+        paymentSnap.forEach((doc) => {
 
-);
+            const data = doc.data();
 
+            if (data.amount) {
+                total += Number(data.amount);
+            }
 
+        });
 
-box.innerHTML = snapshot.size;
+        totalEarnings.innerHTML = "₹" + total;
 
+    }
 
+    catch (error) {
 
-}
+        console.error(error);
 
-catch(error){
+        alert(error.message);
 
+    }
 
-console.log(error);
-
-
-box.innerHTML="0";
-
-
-}
-
-
-}
-
-
-
-
-
-
-// Load Rides Count
-
-
-export async function loadRidesCount(){
-
-
-let box =
-document.getElementById("ridesCount");
-
-
-
-if(!box) return;
-
-
-
-try{
-
-
-const snapshot = await getDocs(
-
-collection(db,"rides")
-
-);
-
-
-
-box.innerHTML = snapshot.size;
-
-
-
-}
-
-catch(error){
-
-
-console.log(error);
-
-
-box.innerHTML="0";
-
-
-}
-
-
-}
+});
