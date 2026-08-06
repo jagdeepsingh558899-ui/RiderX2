@@ -6,269 +6,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Riders</title>
+<title>RiderX Admin - Riders</title>
 
 <link rel="stylesheet" href="../css/style.css">
-
-
-<style>
-
-.card{
-
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin:15px 0;
-
-}
-
-
-button{
-
-width:100%;
-padding:12px;
-margin-top:10px;
-background:#ffcc00;
-border:none;
-border-radius:10px;
-font-weight:bold;
-
-}
-
-</style>
+<link rel="stylesheet" href="../css/dashboard.css">
 
 </head>
 
-
 <body>
 
+<header class="topbar">
 
-<div class="header">
+<h1>
+Rider<span>X</span>
+</h1>
 
-🏍 Rider Approval
-
-</div>
-
-
+</header>
 
 <div class="container">
 
+<h2>🏍 Rider Management</h2>
 
-<div id="list">
+<input
+type="text"
+id="searchRider"
+placeholder="Search Rider..."
+>
 
-Loading...
+<div id="riderList">
+
+<div class="service-card">
+
+<h3>No Riders Found</h3>
 
 </div>
 
+</div>
 
 </div>
 
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-collection,
-getDocs,
-doc,
-updateDoc
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
-async function loadRiders(){
-
-
-
-let snap=await getDocs(
-
-collection(db,"users")
-
-);
-
-
-
-let box=document.getElementById("list");
-
-box.innerHTML="";
-
-
-
-
-
-snap.forEach((user)=>{
-
-
-let data=user.data();
-
-
-
-if(data.role=="rider"){
-
-
-
-box.innerHTML += `
-
-
-<div class="card">
-
-
-<h3>
-
-🏍 ${data.name || "Rider"}
-
-</h3>
-
-
-
-<p>
-
-📧 ${data.email || ""}
-
-</p>
-
-
-
-<p>
-
-Status:
-
-${data.approved ? "Approved ✅" : "Pending ⏳"}
-
-</p>
-
-
-
-<button onclick="approve('${user.id}')">
-
-Approve Rider
-
-</button>
-
-
-
-<button onclick="reject('${user.id}')">
-
-Reject Rider
-
-</button>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-}
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-window.approve=async function(id){
-
-
-
-await updateDoc(
-
-doc(db,"users",id),
-
-{
-
-
-approved:true
-
-}
-
-
-);
-
-
-
-alert("Rider Approved ✅");
-
-
-loadRiders();
-
-
-
-}
-
-
-
-
-
-
-
-window.reject=async function(id){
-
-
-
-await updateDoc(
-
-doc(db,"users",id),
-
-{
-
-
-approved:false
-
-}
-
-
-);
-
-
-
-alert("Rider Rejected ❌");
-
-
-loadRiders();
-
-
-
-}
-
-
-
-
-
-loadRiders();
-
-
-
-</script>
-
+<script type="module" src="../js/admin-riders.js"></script>
 
 </body>
 
