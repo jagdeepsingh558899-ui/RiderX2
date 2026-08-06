@@ -1,54 +1,120 @@
-// =================================
+// =====================================
 // RiderX Firebase Configuration
-// =================================
+// =====================================
 
 
 // Firebase App
-import { initializeApp } from 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+import { initializeApp } 
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 
 // Authentication
-import { getAuth } from 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+import { getAuth } 
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 // Firestore Database
-import { getFirestore } from 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+import { getFirestore } 
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+// Storage
+
+import { getStorage } 
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+
+
+// Realtime Database
+
+import { getDatabase } 
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
 
 
-// Firebase Config
+
+
+// =====================================
+// YOUR FIREBASE CONFIG
+// =====================================
+
 
 const firebaseConfig = {
 
-apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
 
-authDomain: "riderx-1.firebaseapp.com",
+apiKey: "YOUR_API_KEY",
 
-projectId: "riderx-1",
 
-storageBucket: "riderx-1.firebasestorage.app",
+authDomain: "YOUR_PROJECT.firebaseapp.com",
 
-messagingSenderId: "261640190671",
 
-appId: "1:261640190671:web:701b3ce5dcb6135fd955ba",
+projectId: "YOUR_PROJECT_ID",
 
-measurementId: "G-SM8KLBVPWN"
+
+storageBucket: "YOUR_PROJECT.appspot.com",
+
+
+messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+
+
+appId: "YOUR_APP_ID",
+
+
+databaseURL:
+"https://YOUR_PROJECT-default-rtdb.firebaseio.com"
+
 
 };
 
 
 
+
+
+
+
 // Initialize Firebase
+
 
 const app = initializeApp(firebaseConfig);
 
 
 
-// Export Services
 
-export const auth = getAuth(app);
+// Firebase Services
 
-export const db = getFirestore(app);
+
+const auth = getAuth(app);
+
+
+const db = getFirestore(app);
+
+
+const storage = getStorage(app);
+
+
+const realtimeDB = getDatabase(app);
+
+
+
+
+
+// Export
+
+
+export {
+
+app,
+
+auth,
+
+db,
+
+storage,
+
+realtimeDB,
+
+firebaseConfig
+
+};
