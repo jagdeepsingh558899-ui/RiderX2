@@ -16,11 +16,14 @@
 <style>
 
 #map{
-height:350px;
-width:100%;
+height:350px !important;
+width:100% !important;
+display:block;
+background:#ddd;
 border-radius:15px;
 margin-bottom:15px;
 }
+
 
 input,select,button{
 
@@ -30,6 +33,7 @@ margin-top:10px;
 border-radius:10px;
 
 }
+
 
 button{
 
@@ -48,18 +52,14 @@ font-weight:bold;
 
 
 <div class="header">
-
 🚕 RiderX Booking
-
 </div>
-
 
 
 <div class="container">
 
 
 <div id="map"></div>
-
 
 
 <select id="service">
@@ -79,7 +79,6 @@ font-weight:bold;
 </select>
 
 
-
 <input id="pickup" placeholder="Pickup Location" readonly>
 
 
@@ -88,9 +87,7 @@ font-weight:bold;
 </button>
 
 
-
 <input id="drop" placeholder="Drop Location">
-
 
 
 <input id="coupon" placeholder="Coupon Code">
@@ -101,11 +98,9 @@ font-weight:bold;
 </button>
 
 
-
 <button onclick="calculateRide()">
 📏 Calculate Fare
 </button>
-
 
 
 <p id="distance">
@@ -121,7 +116,6 @@ Fare: -
 <p id="couponMsg"></p>
 
 
-
 <button onclick="bookRide()">
 Confirm Booking
 </button>
@@ -130,9 +124,7 @@ Confirm Booking
 </div>
 
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-
 
 
 <script type="module">
@@ -156,11 +148,9 @@ from
 
 
 
-
 let map;
 
-let marker;
-
+let marker=null;
 
 
 let pickupLat=null;
@@ -176,7 +166,6 @@ let discount=0;
 
 
 
-
 setTimeout(()=>{
 
 
@@ -184,7 +173,6 @@ map=L.map("map").setView(
 [26.9124,75.7873],
 13
 );
-
 
 
 L.tileLayer(
@@ -196,21 +184,10 @@ attribution:"© OpenStreetMap"
 
 
 
-setTimeout(()=>{
-
 map.invalidateSize();
-
-},500);
-
 
 
 },1000);
-
-
-
-
-
-
 window.getPickup=function(){
 
 
@@ -222,7 +199,6 @@ navigator.geolocation.getCurrentPosition(
 pickupLat=position.coords.latitude;
 
 pickupLng=position.coords.longitude;
-
 
 
 document.getElementById("pickup").value=
@@ -282,7 +258,6 @@ alert("Location permission allow karo");
 
 
 window.applyCoupon=async function(){
-
 
 
 let code=
@@ -367,7 +342,7 @@ document.getElementById("drop").value;
 
 
 
-let res=
+let response=
 
 await fetch(
 
@@ -377,13 +352,13 @@ await fetch(
 
 
 
-let data=
+let result=
 
-await res.json();
+await response.json();
 
 
 
-if(data.length==0){
+if(result.length==0){
 
 alert("Drop location nahi mila");
 
@@ -395,12 +370,12 @@ return;
 
 dropLat=
 
-Number(data[0].lat);
+Number(result[0].lat);
 
 
 dropLng=
 
-Number(data[0].lon);
+Number(result[0].lon);
 
 
 
@@ -417,7 +392,6 @@ let dLat=
 let dLng=
 
 (dropLng-pickupLng)*Math.PI/180;
-
 
 
 
@@ -459,7 +433,6 @@ finalFare=
 finalFare=
 
 finalFare-(finalFare*discount/100);
-
 
 
 
@@ -536,7 +509,6 @@ createdAt:serverTimestamp()
 
 
 
-
 localStorage.setItem(
 
 "rideId",
@@ -557,10 +529,33 @@ location.href="ride-status.html";
 }
 
 
-
 </script>
 
 
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
