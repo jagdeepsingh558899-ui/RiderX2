@@ -5,22 +5,16 @@
 
 
 import {
-
 auth,
 db
-
 }
-
 from "../firebase/config.js";
 
 
 
 import {
 
-
 signInWithEmailAndPassword,
-
-createUserWithEmailAndPassword,
 
 sendPasswordResetEmail,
 
@@ -29,7 +23,6 @@ RecaptchaVerifier,
 signInWithPhoneNumber,
 
 onAuthStateChanged
-
 
 }
 
@@ -41,11 +34,9 @@ from
 
 import {
 
-
 doc,
 
 getDoc
-
 
 }
 
@@ -68,8 +59,8 @@ if(user){
 
 
 console.log(
-"User Active:",
-user.phoneNumber || user.email
+"Logged User:",
+user.email || user.phoneNumber
 );
 
 
@@ -77,18 +68,23 @@ user.phoneNumber || user.email
 try{
 
 
-const userDoc =
-await getDoc(
-doc(db,"users",user.uid)
+const snap = await getDoc(
+
+doc(
+db,
+"users",
+user.uid
+)
+
 );
 
 
 
-if(userDoc.exists()){
+if(snap.exists()){
 
 
-let role =
-userDoc.data().role;
+const role =
+snap.data().role;
 
 
 
@@ -101,7 +97,6 @@ window.location.href =
 
 }
 
-
 else{
 
 
@@ -112,7 +107,9 @@ window.location.href =
 }
 
 
+
 }
+
 
 
 }
@@ -122,7 +119,6 @@ catch(error){
 console.log(error);
 
 }
-
 
 
 }
@@ -137,28 +133,45 @@ console.log(error);
 
 
 
+
 // =====================================
 // EMAIL LOGIN
 // =====================================
 
 
-const emailLogin =
+const emailBtn =
 document.getElementById("emailLogin");
 
 
 
-if(emailLogin){
+if(emailBtn){
 
 
-emailLogin.onclick=async()=>{
+emailBtn.addEventListener(
+"click",
+
+async()=>{
 
 
-let email =
+const email =
 document.getElementById("email").value;
 
 
-let password =
+
+const password =
 document.getElementById("password").value;
+
+
+
+if(!email || !password){
+
+alert(
+"Enter email and password"
+);
+
+return;
+
+}
 
 
 
@@ -197,11 +210,12 @@ error.message
 
 
 
-};
+}
+
+);
 
 
 }
-
 
 
 
@@ -226,18 +240,21 @@ if(forgot){
 forgot.onclick=async()=>{
 
 
-let email =
+const email =
 document.getElementById("email").value;
 
 
 
 if(!email){
 
+
 alert(
-"Enter Email First"
+"Enter your email"
 );
 
+
 return;
+
 
 }
 
@@ -247,13 +264,17 @@ try{
 
 
 await sendPasswordResetEmail(
+
 auth,
+
 email
+
 );
 
 
+
 alert(
-"Password Reset Link Sent"
+"Reset email sent"
 );
 
 
@@ -285,9 +306,14 @@ error.message
 
 
 
+
 // =====================================
 // PHONE OTP LOGIN
 // =====================================
+
+
+
+let confirmationResult;
 
 
 
@@ -296,7 +322,8 @@ document.getElementById("sendOtp");
 
 
 
-let confirmationResult;
+const verifyOtp =
+document.getElementById("verifyOtp");
 
 
 
@@ -312,7 +339,7 @@ new RecaptchaVerifier(
 
 auth,
 
-'recaptcha-container',
+"recaptcha-container",
 
 {
 
@@ -324,19 +351,23 @@ size:"invisible"
 
 
 
-sendOtp.onclick=async()=>{
+
+sendOtp.onclick = async()=>{
 
 
-let phone =
+const phone =
+
 document.getElementById("phone").value;
 
 
 
-if(phone.length<10){
+if(phone.length!==10){
+
 
 alert(
-"Enter Valid Number"
+"Enter valid mobile number"
 );
+
 
 return;
 
@@ -362,15 +393,16 @@ window.recaptchaVerifier
 
 
 
-document.getElementById(
-"otp"
-).classList.remove("hidden");
+document
+.getElementById("otp")
+.classList
+.remove("hidden");
 
 
 
-document.getElementById(
-"verifyOtp"
-).classList.remove("hidden");
+verifyOtp
+.classList
+.remove("hidden");
 
 
 
@@ -385,9 +417,13 @@ alert(
 catch(error){
 
 
+console.log(error);
+
+
 alert(
 error.message
 );
+
 
 
 }
@@ -407,17 +443,9 @@ error.message
 
 
 
-
-
 // =====================================
 // VERIFY OTP
 // =====================================
-
-
-const verifyOtp =
-
-document.getElementById("verifyOtp");
-
 
 
 
@@ -425,12 +453,26 @@ if(verifyOtp){
 
 
 
-verifyOtp.onclick=async()=>{
+verifyOtp.onclick = async()=>{
 
 
-let otp =
+const otp =
 
 document.getElementById("otp").value;
+
+
+
+if(!otp){
+
+
+alert(
+"Enter OTP"
+);
+
+
+return;
+
+}
 
 
 
@@ -455,8 +497,9 @@ catch(error){
 
 
 alert(
-"Wrong OTP"
+"Invalid OTP"
 );
+
 
 
 }
