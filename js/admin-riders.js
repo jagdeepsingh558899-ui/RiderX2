@@ -1,75 +1,53 @@
-// =================================
+// =====================================
 // RiderX Admin Rider Management
-// =================================
+// =====================================
 
-import {db} from "../firebase/config.js";
 
 import {
 
+db
+
+}
+
+from "../firebase/config.js";
+
+
+
+import {
+
+
 collection,
-getDocs,
+
+query,
+
+where,
+
+onSnapshot,
+
 doc,
+
 updateDoc
+
 
 }
 
 from
+
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-const riderList =
-document.getElementById("riderList");
-
-const search =
-document.getElementById("searchRider");
 
 
 
-let riders=[];
 
+const ridersBox =
 
-
-async function loadRiders(){
-
-
-const snap =
-await getDocs(
-collection(db,"users")
+document.getElementById(
+"riders"
 );
 
 
-riders=[];
-
-
-snap.forEach((user)=>{
-
-
-let data=user.data();
-
-
-
-if(data.role==="rider"){
-
-riders.push({
-
-id:user.id,
-
-...data
-
-});
-
-}
-
-
-});
-
-
-
-showRiders(riders);
-
-
-}
 
 
 
@@ -77,44 +55,98 @@ showRiders(riders);
 
 
 
-function showRiders(list){
+// =====================================
+// LOAD RIDERS
+// =====================================
 
 
-riderList.innerHTML="";
+
+function loadRiders(){
 
 
 
-if(list.length===0){
+const q = query(
+
+collection(
+db,
+"users"
+),
 
 
-riderList.innerHTML=
+where(
+
+"role",
+
+"==",
+
+"rider"
+
+)
+
+
+);
+
+
+
+
+
+
+
+onSnapshot(q,(snapshot)=>{
+
+
+
+if(snapshot.empty){
+
+
+
+ridersBox.innerHTML=
 
 `
-<div class="service-card">
 
-<h3>No Riders Found</h3>
+<div class="empty">
+
+No Riders Found
 
 </div>
+
 `;
 
 return;
 
+
 }
 
 
 
 
 
-list.forEach((rider)=>{
+
+ridersBox.innerHTML="";
 
 
 
-riderList.innerHTML +=
+
+
+
+snapshot.forEach((riderDoc)=>{
+
+
+
+const rider = riderDoc.data();
+
+
+
+
+
+
+ridersBox.innerHTML +=
+
 
 
 `
 
-<div class="service-card">
+<div class="rider-card">
 
 
 <h3>
@@ -124,40 +156,57 @@ riderList.innerHTML +=
 </h3>
 
 
-<p>
+
+<div class="info">
 
 📱 ${rider.phone || "No Phone"}
 
-</p>
-
-
-<p>
-
-📧 ${rider.email || ""}
-
-</p>
+</div>
 
 
 
-<p>
+<div class="info">
+
+📧 ${rider.email || "No Email"}
+
+</div>
+
+
+
+<div class="status">
 
 Status:
 
-${rider.approved ? "✅ Approved" : "⏳ Pending"}
+${rider.status || "pending"}
 
-</p>
+</div>
 
 
 
-<button onclick="approveRider('${rider.id}')">
 
-${rider.approved ? "Approved" : "Approve Rider"}
+
+<button onclick="approveRider('${riderDoc.id}')">
+
+Approve Rider
+
+</button>
+
+
+
+
+
+<button class="block"
+
+onclick="blockRider('${riderDoc.id}')">
+
+Block Rider
 
 </button>
 
 
 
 </div>
+
 
 `;
 
@@ -166,12 +215,26 @@ ${rider.approved ? "Approved" : "Approve Rider"}
 });
 
 
+
+
+
+});
+
+
+
 }
 
 
 
 
 
+
+
+
+
+// =====================================
+// APPROVE RIDER
+// =====================================
 
 
 
@@ -180,25 +243,36 @@ window.approveRider = async(id)=>{
 
 await updateDoc(
 
-doc(db,"users",id),
+doc(
+
+db,
+
+"users",
+
+id
+
+),
+
 
 {
 
 
-approved:true,
+status:"approved"
 
-status:"Approved"
 
 }
 
+
 );
 
 
 
-alert("Rider Approved ✅");
+alert(
 
+"Rider Approved"
 
-loadRiders();
+);
+
 
 
 };
@@ -209,34 +283,56 @@ loadRiders();
 
 
 
-search.oninput=()=>{
 
 
-let value=
-
-search.value.toLowerCase();
-
-
-
-let filtered=
-
-riders.filter((r)=>
+// =====================================
+// BLOCK RIDER
+// =====================================
 
 
-(r.name || "")
-.toLowerCase()
-.includes(value)
+
+window.blockRider = async(id)=>{
+
+
+await updateDoc(
+
+doc(
+
+db,
+
+"users",
+
+id
+
+),
+
+
+{
+
+
+status:"blocked"
+
+
+}
 
 
 );
 
 
 
-showRiders(filtered);
+alert(
+
+"Rider Blocked"
+
+);
 
 
 
 };
+
+
+
+
 
 
 
