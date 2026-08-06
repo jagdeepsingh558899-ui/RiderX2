@@ -7,10 +7,12 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+
 <title>RiderX - Ride Fast & Safe</title>
 
 
 <link rel="manifest" href="manifest.json">
+
 
 <meta name="theme-color" content="#FFD600">
 
@@ -28,13 +30,12 @@
 </head>
 
 
-
 <body>
 
 
-<!-- =========================
-RiderX Splash Screen
-========================= -->
+<!-- ======================
+RiderX Splash
+====================== -->
 
 
 <div class="splash" id="splash">
@@ -46,7 +47,7 @@ src="assets/logo.png"
 
 class="splash-logo"
 
-alt="RiderX Logo">
+alt="RiderX">
 
 
 <h2>
@@ -65,12 +66,15 @@ Ride Fast • Ride Safe
 
 
 
-<!-- =========================
-Main App
-========================= -->
+
+<!-- ======================
+Main Website
+====================== -->
 
 
 <div id="app">
+
+
 
 
 
@@ -87,7 +91,7 @@ Main App
 
 src="assets/logo.png"
 
-alt="RiderX">
+alt="RiderX Logo">
 
 
 <span>
@@ -105,17 +109,23 @@ RiderX
 
 
 <a href="#services">
+
 Services
+
 </a>
 
 
 <a href="auth/login.html">
+
 Login
+
 </a>
 
 
 <a href="auth/register.html">
+
 Register
+
 </a>
 
 
@@ -130,11 +140,11 @@ Register
 
 
 
+
 <!-- Hero -->
 
 
 <section class="dashboard-wrapper page">
-
 
 
 <div class="welcome-card">
@@ -152,6 +162,7 @@ Ride Anywhere With
 RiderX
 </span>
 
+
 </h1>
 
 
@@ -161,6 +172,7 @@ RiderX
 Fast, Safe and Affordable rides in Chandigarh
 
 </p>
+
 
 
 
@@ -182,6 +194,8 @@ Book Ride
 
 
 
+
+
 <div class="hero-badge">
 
 🏍 RiderX
@@ -190,6 +204,7 @@ Book Ride
 
 
 
+
 </div>
 
 
@@ -198,7 +213,7 @@ Book Ride
 
 
 
-<!-- Join -->
+<!-- Join Cards -->
 
 
 <div class="grid">
@@ -209,7 +224,9 @@ Book Ride
 
 
 <h2>
+
 Customer
+
 </h2>
 
 
@@ -230,7 +247,9 @@ Join as Customer
 </a>
 
 
+
 </div>
+
 
 
 
@@ -242,7 +261,9 @@ Join as Customer
 
 
 <h2>
+
 Rider
+
 </h2>
 
 
@@ -263,11 +284,13 @@ Join as Rider
 </a>
 
 
-</div>
-
-
 
 </div>
+
+
+
+</div>
+
 
 
 
@@ -285,11 +308,14 @@ Join as Rider
 
 
 <h1>
+
 Our Services
+
 </h1>
 
 
 <br>
+
 
 
 
@@ -304,10 +330,13 @@ Our Services
 </h2>
 
 <p>
+
 Quick rides at affordable prices
+
 </p>
 
 </div>
+
 
 
 
@@ -319,10 +348,14 @@ Quick rides at affordable prices
 </h2>
 
 <p>
+
 Comfortable city rides
+
 </p>
 
 </div>
+
+
 
 
 
@@ -334,10 +367,14 @@ Comfortable city rides
 </h2>
 
 <p>
+
 Fast delivery service
+
 </p>
 
 </div>
+
+
 
 
 
@@ -349,10 +386,13 @@ Fast delivery service
 </h2>
 
 <p>
+
 Food delivery service
+
 </p>
 
 </div>
+
 
 
 
@@ -361,46 +401,6 @@ Food delivery service
 
 
 </section>
-
-
-
-
-
-
-
-
-<!-- Install App -->
-
-
-<br><br>
-
-
-
-<div class="card">
-
-
-<h2>
-📲 Install RiderX App
-</h2>
-
-
-<p>
-Get faster access from your phone
-</p>
-
-
-<br>
-
-
-
-<button id="installBtn" class="btn">
-
-Install App
-
-</button>
-
-
-</div>
 
 
 
@@ -424,9 +424,9 @@ Install App
 <script>
 
 
-// ==========================
-// Splash Controller
-// ==========================
+// ======================
+// Splash
+// ======================
 
 
 window.addEventListener("load",()=>{
@@ -439,6 +439,7 @@ const splash =
 document.getElementById("splash");
 
 
+
 splash.classList.add("splash-hide");
 
 
@@ -446,7 +447,8 @@ splash.classList.add("splash-hide");
 setTimeout(()=>{
 
 
-splash.style.display="none";
+splash.remove();
+
 
 
 },800);
@@ -465,70 +467,9 @@ splash.style.display="none";
 
 
 
-// ==========================
-// PWA Install
-// ==========================
-
-
-let deferredPrompt;
-
-
-
-const installBtn =
-document.getElementById("installBtn");
-
-
-
-
-window.addEventListener(
-"beforeinstallprompt",
-(e)=>{
-
-
-e.preventDefault();
-
-
-deferredPrompt=e;
-
-
-});
-
-
-
-
-
-installBtn.addEventListener(
-"click",
-async()=>{
-
-
-if(deferredPrompt){
-
-
-deferredPrompt.prompt();
-
-
-await deferredPrompt.userChoice;
-
-
-deferredPrompt=null;
-
-
-}
-
-
-});
-
-
-
-
-
-
-
-
-// ==========================
+// ======================
 // Service Worker
-// ==========================
+// ======================
 
 
 if("serviceWorker" in navigator){
@@ -539,11 +480,10 @@ navigator.serviceWorker.register("sw.js")
 .then(()=>{
 
 
-console.log("RiderX Service Ready");
+console.log("RiderX Ready");
 
 
 })
-
 
 .catch((error)=>{
 
