@@ -11,10 +11,29 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+
+<style>
+
+button{
+
+width:90%;
+margin:10px 5%;
+padding:15px;
+border:none;
+border-radius:15px;
+background:#FFD600;
+font-weight:bold;
+
+}
+
+</style>
+
+
 </head>
 
 
 <body>
+
 
 
 <div class="splash">
@@ -28,35 +47,134 @@ Rider<span>X</span>
 </h1>
 
 
-<h2>Admin Menu</h2>
+<h2>⚡ Admin Panel</h2>
+
 
 
 
 <button onclick="go('dashboard.html')">
-Dashboard
+
+📊 Dashboard
+
 </button>
+
+
 
 
 <button onclick="go('users.html')">
-Users
+
+👥 Users
+
 </button>
+
+
+
+
+<button onclick="go('customers.html')">
+
+👤 Customers
+
+</button>
+
+
+
+
+<button onclick="go('riders.html')">
+
+🏍 Riders
+
+</button>
+
+
 
 
 <button onclick="go('rides.html')">
-Rides
+
+🚕 Rides
+
 </button>
+
+
+
+
+<button onclick="go('payments.html')">
+
+💳 Payments
+
+</button>
+
+
+
+
+<button onclick="go('settings.html')">
+
+⚙️ Settings
+
+</button>
+
+
 
 
 <button onclick="logout()">
-Logout
+
+🚪 Logout
+
 </button>
+
+
 
 
 </div>
 
 
 
-<script src="../js/menu.js"></script>
+
+
+<script type="module">
+
+
+import {auth} from "../firebase/config.js";
+
+
+import {
+
+signOut
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+
+
+
+window.go=function(page){
+
+location.href=page;
+
+};
+
+
+
+
+
+window.logout=async function(){
+
+
+await signOut(auth);
+
+
+location.href="../auth/login.html";
+
+
+};
+
+
+
+</script>
+
 
 
 </body>
