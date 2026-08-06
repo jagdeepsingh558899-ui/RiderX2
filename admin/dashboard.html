@@ -6,30 +6,82 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Dashboard</title>
+<title>RiderX Admin</title>
+
 
 <link rel="stylesheet" href="../css/style.css">
 
 
 <style>
 
-.card{
+body{
 
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin:15px 0;
+background:#000;
+color:white;
+font-family:Arial;
 
 }
+
+
+.header{
+
+background:#111;
+padding:20px;
+border-bottom:2px solid #FFD600;
+font-size:24px;
+font-weight:bold;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.grid{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+
+}
+
+
+
+.card{
+
+background:#111;
+padding:20px;
+border-radius:18px;
+text-align:center;
+border:1px solid #333;
+
+}
+
 
 
 .number{
 
 font-size:30px;
-color:#ffcc00;
+color:#FFD600;
 font-weight:bold;
 
 }
+
+
+a{
+
+text-decoration:none;
+color:white;
+
+}
+
+
 
 </style>
 
@@ -40,9 +92,10 @@ font-weight:bold;
 <body>
 
 
+
 <div class="header">
 
-⚙️ RiderX Admin Dashboard
+⚡ RiderX Admin Panel
 
 </div>
 
@@ -52,28 +105,33 @@ font-weight:bold;
 
 
 
+<div class="grid">
+
+
+
 <div class="card">
 
-<h3>
-👥 Users
-</h3>
+<h3>Customers</h3>
 
-<div class="number" id="users">
+<div class="number" id="customers">
+
 0
+
 </div>
 
 </div>
+
 
 
 
 <div class="card">
 
-<h3>
-🏍 Riders
-</h3>
+<h3>Riders</h3>
 
 <div class="number" id="riders">
+
 0
+
 </div>
 
 </div>
@@ -83,12 +141,12 @@ font-weight:bold;
 
 <div class="card">
 
-<h3>
-🚕 Total Rides
-</h3>
+<h3>Rides</h3>
 
 <div class="number" id="rides">
+
 0
+
 </div>
 
 </div>
@@ -98,31 +156,19 @@ font-weight:bold;
 
 <div class="card">
 
-<h3>
-✅ Completed Rides
-</h3>
+<h3>Completed</h3>
 
 <div class="number" id="completed">
+
 0
-</div>
 
-</div>
-
-
-
-
-<div class="card">
-
-<h3>
-💰 Earnings
-</h3>
-
-<div class="number" id="earning">
-₹0
 </div>
 
 </div>
 
+
+
+</div>
 
 
 
@@ -137,53 +183,57 @@ font-weight:bold;
 <script type="module">
 
 
-import {db} from "../firebase/config.js";
+import { db } from "../firebase/config.js";
 
 
 import {
 
 collection,
-getDocs
+getDocs,
+query,
+where
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
 
+async function loadAdmin(){
 
 
 
-async function loadDashboard(){
+let users =
+await getDocs(collection(db,"users"));
 
 
 
-let users=
-
-await getDocs(
-
-collection(db,"users")
-
-);
+let riders =
+await getDocs(collection(db,"riders"));
 
 
 
-let riders=0;
+let rides =
+await getDocs(collection(db,"rides"));
 
 
-users.forEach((u)=>{
 
 
-if(u.data().role=="rider"){
 
-riders++;
+let complete=0;
+
+
+
+rides.forEach((r)=>{
+
+
+if(r.data().status==="Completed"){
+
+complete++;
 
 }
-
 
 });
 
@@ -191,7 +241,7 @@ riders++;
 
 
 
-document.getElementById("users").innerHTML=
+document.getElementById("customers").innerHTML=
 
 users.size;
 
@@ -199,60 +249,7 @@ users.size;
 
 document.getElementById("riders").innerHTML=
 
-riders;
-
-
-
-
-
-
-
-let rides=
-
-await getDocs(
-
-collection(db,"rides")
-
-);
-
-
-
-let completed=0;
-
-let earning=0;
-
-
-
-rides.forEach((r)=>{
-
-
-let data=r.data();
-
-
-
-if(data.status=="Completed"){
-
-
-completed++;
-
-
-
-earning += Number(
-
-String(data.fare)
-
-.replace("₹","")
-
-);
-
-
-}
-
-
-
-});
-
-
+riders.size;
 
 
 
@@ -264,13 +261,7 @@ rides.size;
 
 document.getElementById("completed").innerHTML=
 
-completed;
-
-
-
-document.getElementById("earning").innerHTML=
-
-"₹"+earning;
+complete;
 
 
 
@@ -278,14 +269,12 @@ document.getElementById("earning").innerHTML=
 
 
 
-
-
-
-loadDashboard();
+loadAdmin();
 
 
 
 </script>
+
 
 
 </body>
