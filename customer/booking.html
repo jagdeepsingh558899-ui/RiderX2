@@ -8,7 +8,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>RiderX Book Ride</title>
+<title>RiderX Booking</title>
+
+
+<link rel="manifest" href="../manifest.json">
+
+<meta name="theme-color" content="#FFD600">
 
 
 <link rel="stylesheet" href="../css/style.css">
@@ -27,7 +32,7 @@
 <div class="topbar">
 
 <h2>
-🏍 Book Ride
+🏍 RiderX
 </h2>
 
 </div>
@@ -42,6 +47,32 @@
 
 
 
+
+<!-- INSTALL APP -->
+
+<div class="card">
+
+
+<button id="installApp" style="display:none;">
+
+📲 Install RiderX App
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- MAP -->
+
+
 <div class="map-container">
 
 <div id="map"></div>
@@ -53,42 +84,174 @@
 
 
 
+
+
+
+<!-- MAIN OPTIONS -->
+
+
 <div class="card">
 
 
-
 <h3>
-Select Service
+Choose Service
 </h3>
 
 
 
-<select id="service" class="input">
+<button id="rideOption" class="btn">
+
+🏍 Book Ride
+
+</button>
 
 
-<option>
-Bike Taxi
-</option>
 
 
-<option>
-Cab
-</option>
+<button id="parcelOption" class="btn-outline">
+
+📦 Book Parcel
+
+</button>
 
 
-<option>
-Parcel
-</option>
+
+</div>
 
 
-<option>
-Food
-</option>
 
 
-</select>
 
 
+
+
+
+<!-- RIDE SECTION -->
+
+
+<div id="rideSection" class="card">
+
+
+<h3>
+Book Ride
+</h3>
+
+
+
+
+<div class="service-buttons">
+
+
+
+<button class="service-btn active" data-service="Bike">
+
+🏍 Bike
+
+</button>
+
+
+
+<button class="service-btn" data-service="Taxi">
+
+🚕 Taxi
+
+</button>
+
+
+
+<button class="service-btn" data-service="Cab">
+
+🚗 Cab
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- PARCEL SECTION -->
+
+
+<div id="parcelSection" class="card" style="display:none;">
+
+
+<h3>
+Book Parcel
+
+</h3>
+
+
+
+
+<div class="service-buttons">
+
+
+
+<button class="service-btn active" data-service="Parcel">
+
+📦 Parcel
+
+</button>
+
+
+
+<button class="service-btn" data-service="Food">
+
+🍔 Food
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<input 
+type="hidden"
+id="service"
+value="Bike"
+>
+
+
+
+
+
+
+
+
+
+<!-- LOCATION -->
+
+
+<div class="card">
+
+
+<h3>
+Location
+</h3>
 
 
 
@@ -107,14 +270,11 @@ readonly
 
 
 
-
 <button id="locationBtn" class="btn">
 
 📍 Use My Location
 
 </button>
-
-
 
 
 
@@ -131,9 +291,6 @@ placeholder="Drop Location"
 >
 
 
-
-
-
 </div>
 
 
@@ -143,8 +300,11 @@ placeholder="Drop Location"
 
 
 
-<div class="card">
 
+<!-- PAYMENT -->
+
+
+<div class="card">
 
 
 <h3>
@@ -163,13 +323,11 @@ Payment Method
 </option>
 
 
-
 <option value="Online">
 
-💳 Online Payment
+💳 Online
 
 </option>
-
 
 
 </select>
@@ -185,8 +343,11 @@ Payment Method
 
 
 
-<div class="booking-card">
 
+<!-- FARE -->
+
+
+<div class="booking-card">
 
 
 <div class="booking-title">
@@ -209,6 +370,25 @@ Fare
 
 
 </div>
+
+
+
+<div class="booking-row">
+
+<span>
+Service
+</span>
+
+
+<b id="selectedService">
+
+Bike
+
+</b>
+
+
+</div>
+
 
 
 
@@ -240,15 +420,14 @@ Distance
 
 
 
+
+
 <button id="bookBtn" class="btn">
 
 
-Confirm Booking
-
+Book Ride
 
 </button>
-
-
 
 
 
@@ -262,10 +441,139 @@ Confirm Booking
 
 
 
+
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
+<script type="module" src="../js/App.js"></script>
+
+
 <script type="module" src="../js/booking.js"></script>
+
+
+
+
+
+<script>
+
+
+const rideOption =
+document.getElementById("rideOption");
+
+
+const parcelOption =
+document.getElementById("parcelOption");
+
+
+const rideSection =
+document.getElementById("rideSection");
+
+
+const parcelSection =
+document.getElementById("parcelSection");
+
+
+const buttons =
+document.querySelectorAll(".service-btn");
+
+
+const service =
+document.getElementById("service");
+
+
+const selected =
+document.getElementById("selectedService");
+
+
+
+
+
+
+rideOption.onclick=()=>{
+
+
+rideSection.style.display="block";
+
+parcelSection.style.display="none";
+
+
+service.value="Bike";
+
+
+selected.innerHTML="Bike";
+
+
+};
+
+
+
+
+
+parcelOption.onclick=()=>{
+
+
+rideSection.style.display="none";
+
+parcelSection.style.display="block";
+
+
+service.value="Parcel";
+
+
+selected.innerHTML="Parcel";
+
+
+};
+
+
+
+
+
+
+
+buttons.forEach(btn=>{
+
+
+btn.onclick=()=>{
+
+
+buttons.forEach(b=>{
+
+b.classList.remove("active");
+
+});
+
+
+
+btn.classList.add("active");
+
+
+
+service.value =
+btn.dataset.service;
+
+
+
+selected.innerHTML =
+btn.dataset.service;
+
+
+
+};
+
+
+});
+
+
+
+
+
+</script>
+
+
+
+
 
 
 
