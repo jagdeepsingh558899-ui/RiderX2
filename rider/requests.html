@@ -6,45 +6,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Requests</title>
+<title>RiderX Ride Requests</title>
 
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 
 <style>
 
 body{
+
+margin:0;
 background:#000;
 color:white;
 font-family:Arial;
+
 }
 
 
 .header{
 
-background:#111;
 padding:20px;
+background:#111;
 font-size:22px;
 font-weight:bold;
+text-align:center;
 border-bottom:2px solid #FFD600;
 
 }
 
 
-.container{
 
-padding:20px;
+#map{
+
+height:45vh;
+width:100%;
 
 }
 
 
 
-.request-card{
+.container{
+
+padding:15px;
+
+}
+
+
+
+.card{
 
 background:#111;
-padding:20px;
-border-radius:18px;
-margin-bottom:15px;
-border:1px solid #333;
+padding:15px;
+border-radius:15px;
+margin-top:15px;
 
 }
 
@@ -53,22 +67,15 @@ border:1px solid #333;
 button{
 
 width:100%;
-padding:14px;
+padding:12px;
 margin-top:10px;
+background:#FFD600;
 border:none;
 border-radius:12px;
-background:#FFD600;
 font-weight:bold;
 
 }
 
-
-
-.reject{
-
-background:white;
-
-}
 
 
 </style>
@@ -80,11 +87,16 @@ background:white;
 <body>
 
 
+
 <div class="header">
 
-📩 New Ride Requests
+🏍 Rider Requests
 
 </div>
+
+
+
+<div id="map"></div>
 
 
 
@@ -104,18 +116,25 @@ Loading...
 
 
 
+
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+
 <script type="module">
 
 
-import { auth, db } from "../firebase/config.js";
+import {auth,db} from "../firebase/config.js";
 
 
 import {
 
 collection,
+getDocs,
 query,
 where,
-getDocs,
 doc,
 updateDoc,
 serverTimestamp
@@ -127,22 +146,120 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-let riderId=null;
+
+let map =
+
+L.map("map").setView(
+
+[30.7333,76.7794],
+
+13
+
+);
 
 
 
+L.tileLayer(
 
-auth.onAuthStateChanged((user)=>{
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
-if(user){
+{
 
-riderId=user.uid;
-
-loadRequests();
+maxZoom:19
 
 }
 
-});
+).addTo(map);
+
+
+
+
+
+
+let riderMarker=null;
+
+
+
+let rideMarkers=[];
+
+
+
+
+
+
+function showRiderLocation(){
+
+
+
+navigator.geolocation.watchPosition(
+
+(position)=>{
+
+
+let lat =
+position.coords.latitude;
+
+
+let lng =
+position.coords.longitude;
+
+
+
+
+
+if(riderMarker){
+
+
+riderMarker.setLatLng(
+
+[lat,lng]
+
+);
+
+
+}
+
+else{
+
+
+riderMarker=L.marker(
+
+[lat,lng]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"🏍 You"
+
+);
+
+
+
+}
+
+
+
+map.setView(
+
+[lat,lng],
+
+15
+
+);
+
+
+
+}
+
+
+);
+
+
+
+}
 
 
 
@@ -152,7 +269,28 @@ loadRequests();
 async function loadRequests(){
 
 
-let box=document.getElementById("requestList");
+
+let box =
+document.getElementById("requestList");
+
+
+
+box.innerHTML="";
+
+
+
+
+rideMarkers.forEach(m=>{
+
+map.removeLayer(m);
+
+});
+
+
+rideMarkers=[];
+
+
+
 
 
 const q=query(
@@ -165,19 +303,22 @@ where("status","==","Pending")
 
 
 
-const snapshot=await getDocs(q);
+const snap =
+await getDocs(q);
 
 
 
-box.innerHTML="";
 
 
+if(snap.empty){
 
-if(snapshot.empty){
 
-box.innerHTML="<p>No ride requests</p>";
+box.innerHTML=
+
+"<p>No rides available</p>";
 
 return;
+
 
 }
 
@@ -185,38 +326,98 @@ return;
 
 
 
-snapshot.forEach((ride)=>{
+
+snap.forEach((ride)=>{
 
 
-let data=ride.data();
+
+let data =
+ride.data();
+
+
+
+
+
+if(data.pickupCoords){
+
+
+
+let marker=L.marker(
+
+[
+
+data.pickupCoords.lat,
+
+data.pickupCoords.lng
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"📍 Customer Pickup"
+
+);
+
+
+
+rideMarkers.push(marker);
+
+
+
+}
+
+
+
 
 
 
 box.innerHTML += `
 
-<div class="request-card">
+
+<div class="card">
 
 
-<h2>
+<h3>
+
 🏍 ${data.service}
-</h2>
+
+</h3>
 
 
 <p>
+
 📍 Pickup:
+
+<br>
+
 ${data.pickup}
+
 </p>
 
 
+
 <p>
-📍 Drop:
+
+🏁 Drop:
+
+<br>
+
 ${data.drop}
+
 </p>
 
 
+
 <p>
+
 💰 Fare:
+
 ₹${data.fare}
+
 </p>
 
 
@@ -228,17 +429,12 @@ Accept Ride
 </button>
 
 
-<button class="reject" onclick="rejectRide('${ride.id}')">
-
-Reject
-
-</button>
-
-
 
 </div>
 
+
 `;
+
 
 
 
@@ -255,6 +451,13 @@ Reject
 window.acceptRide=async(id)=>{
 
 
+
+let user=
+
+auth.currentUser;
+
+
+
 await updateDoc(
 
 doc(db,"rides",id),
@@ -265,7 +468,7 @@ doc(db,"rides",id),
 status:"Accepted",
 
 
-riderId:riderId,
+riderId:user.uid,
 
 
 acceptedAt:serverTimestamp()
@@ -277,12 +480,26 @@ acceptedAt:serverTimestamp()
 
 
 
+localStorage.setItem(
+
+"rideId",
+
+id
+
+);
+
+
+
 alert(
+
 "Ride Accepted ✅"
+
 );
 
 
-loadRequests();
+
+location.href="trip.html";
+
 
 
 };
@@ -292,33 +509,22 @@ loadRequests();
 
 
 
-window.rejectRide=async(id)=>{
 
-
-await updateDoc(
-
-doc(db,"rides",id),
-
-{
-
-
-status:"Rejected"
-
-}
-
-);
-
+showRiderLocation();
 
 
 loadRequests();
 
 
-};
 
+setInterval(
 
+loadRequests,
 
+10000
 
-setInterval(loadRequests,10000);
+);
+
 
 
 </script>
