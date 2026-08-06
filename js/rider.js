@@ -1,67 +1,72 @@
-// =====================================
+// =================================
 // RiderX Rider System
-// Online + Ride Requests
-// =====================================
+// Live Ride Request + Accept Reject
+// =================================
 
 
 import {
 
-db,
-auth
+auth,
+rtdb
 
-}
-
-from "../firebase/config.js";
+} from "../firebase/Firebase-config.js";
 
 
 
 import {
 
+onAuthStateChanged
 
-collection,
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-query,
 
-where,
 
-onSnapshot,
+import {
 
-doc,
+ref,
+onValue,
+update
 
-updateDoc,
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
-serverTimestamp
+
+
+
+
+let riderId = null;
+
+let online = true;
+
+
+
+
+
+
+// Login Check
+
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+
+if(user){
+
+
+riderId = user.uid;
+
+
+loadRides();
 
 
 }
 
-from
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-let isOnline=false;
-
-
-
-
-
-const statusBtn =
-
-document.getElementById(
-"statusBtn"
-);
-
-
-
-const rideBox =
-
-document.getElementById(
-"rideRequests"
-);
+});
 
 
 
@@ -70,37 +75,43 @@ document.getElementById(
 
 
 
-
-// =====================================
-// ONLINE OFFLINE
-// =====================================
+// Online Toggle
 
 
-if(statusBtn){
+const toggle =
+
+document.getElementById("statusToggle");
 
 
+const statusText =
 
-statusBtn.onclick=async()=>{
-
-
-isOnline=!isOnline;
+document.getElementById("statusText");
 
 
 
-if(isOnline){
 
-
-statusBtn.innerHTML="ONLINE";
-
-
-statusBtn.style.background="#FFD600";
-
-statusBtn.style.color="#000";
+if(toggle){
 
 
 
-listenRides();
+toggle.addEventListener(
 
+"click",
+
+()=>{
+
+
+online = !online;
+
+
+
+if(online){
+
+
+toggle.classList.add("active");
+
+
+statusText.innerHTML="Online";
 
 
 }
@@ -108,26 +119,21 @@ listenRides();
 else{
 
 
-statusBtn.innerHTML="OFFLINE";
+toggle.classList.remove("active");
 
 
-statusBtn.style.background="#333";
-
-statusBtn.style.color="#FFD600";
-
-
-
-rideBox.innerHTML=
-
-"No requests available";
-
+statusText.innerHTML="Offline";
 
 
 }
 
 
 
-};
+}
+
+
+);
+
 
 
 }
@@ -139,35 +145,20 @@ rideBox.innerHTML=
 
 
 
-
-// =====================================
-// LISTEN NEW RIDES
-// =====================================
+// Load Ride Requests
 
 
-
-function listenRides(){
+function loadRides(){
 
 
 
-const q = query(
+const ridesRef =
 
-collection(
-db,
+ref(
+
+rtdb,
+
 "rides"
-),
-
-
-where(
-
-"status",
-
-"==",
-
-"searching"
-
-)
-
 
 );
 
@@ -175,88 +166,145 @@ where(
 
 
 
+onValue(
 
+ridesRef,
 
-onSnapshot(q,(snapshot)=>{
-
-
-
-if(snapshot.empty){
+(snapshot)=>{
 
 
 
-rideBox.innerHTML=
+const rideList =
 
-"No requests available";
+document.getElementById("rideList");
+
+
+
+
+if(!rideList)
 
 return;
 
 
-}
+
+
+rideList.innerHTML="";
 
 
 
 
 
-rideBox.innerHTML="";
+
+snapshot.forEach((child)=>{
+
+
+
+const ride = child.val();
+
+
+const rideId = child.key;
 
 
 
 
 
-snapshot.forEach((rideDoc)=>{
+if(
+
+ride.status === "searching"
+
+&& online
+
+){
 
 
 
-const ride = rideDoc.data();
+
+
+rideList.innerHTML += `
 
 
 
-
-
-rideBox.innerHTML +=
+<div class="booking-card">
 
 
 
-`
+<h3>
 
-<div class="request">
+${ride.service}
 
-
-<p>
-
-🏍 ${ride.service}
-
-</p>
+</h3>
 
 
-<p>
+
+<div class="location">
+
+
+<p class="pickup">
 
 📍 ${ride.pickup}
 
 </p>
 
 
-<p>
 
-📍 ${ride.drop}
+<p class="drop">
 
-</p>
-
-
-<p>
-
-💰 ${ride.fare}
+🏁 ${ride.drop}
 
 </p>
 
 
 
-<button 
+</div>
 
-onclick="acceptRide('${rideDoc.id}')">
 
-Accept Ride
+
+
+<p>
+
+Distance:
+
+${ride.distance} KM
+
+</p>
+
+
+
+<h2 class="fare">
+
+₹${ride.fare}
+
+</h2>
+
+
+
+
+
+<div class="request-buttons">
+
+
+
+<button
+
+class="btn btn-success"
+
+onclick="acceptRide('${rideId}')">
+
+Accept
+
+</button>
+
+
+
+
+
+<button
+
+class="btn btn-danger"
+
+onclick="rejectRide('${rideId}')">
+
+Reject
 
 </button>
 
@@ -265,15 +313,29 @@ Accept Ride
 </div>
 
 
+
+
+</div>
+
+
+
 `;
 
 
 
-});
+}
 
 
 
 });
+
+
+
+
+}
+
+
+);
 
 
 
@@ -285,42 +347,22 @@ Accept Ride
 
 
 
+// Accept Ride
 
 
-// =====================================
-// ACCEPT RIDE
-// =====================================
-
-
-
-window.acceptRide = async(id)=>{
+window.acceptRide = async function(id){
 
 
 
-const user = auth.currentUser;
+await update(
 
+ref(
 
+rtdb,
 
-if(!user){
+"rides/"+id
 
-return;
-
-}
-
-
-
-try{
-
-
-
-await updateDoc(
-
-doc(
-db,
-"rides",
-id
 ),
-
 
 {
 
@@ -328,47 +370,60 @@ id
 status:"accepted",
 
 
-riderId:user.uid,
-
-
-acceptedAt:
-serverTimestamp()
-
+riderId:riderId
 
 
 }
 
+
 );
-
-
 
 
 
 alert(
 
-"Ride Accepted"
+"Ride Accepted 🚀"
 
 );
 
 
 
+};
+
+
+
+
+
+
+
+
+// Reject Ride
+
+
+window.rejectRide = async function(id){
+
+
+
+await update(
+
+ref(
+
+rtdb,
+
+"rides/"+id
+
+),
+
+{
+
+
+status:"rejected"
 
 
 }
 
-catch(error){
-
-
-
-alert(
-
-error.message
 
 );
-
-
-
-}
 
 
 
