@@ -1,57 +1,30 @@
 // ==========================================
-// RiderX Customer Live Tracking V2
-// Firebase Rider Location + Live Map
+// RiderX Customer Live Tracking V4
+// Live Rider Location + Status + OTP
 // ==========================================
 
 
-import { db } from "../firebase/config.js";
+import { auth, db } from "../firebase/config.js";
 
 
 import {
 
 doc,
-onSnapshot,
-updateDoc,
-serverTimestamp
+getDoc,
+onSnapshot
 
 }
 
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-
 import {
 
-createMap,
-showRiderLocation,
-showCustomerLocation
+onAuthStateChanged
 
 }
 
-from "./Map.js";
-
-
-
-
-
-const statusBox =
-document.getElementById("status");
-
-
-const riderName =
-document.getElementById("riderName");
-
-
-const distanceBox =
-document.getElementById("distance");
-
-
-const etaBox =
-document.getElementById("eta");
-
-
-const cancelBtn =
-document.getElementById("cancelBtn");
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
@@ -59,47 +32,129 @@ document.getElementById("cancelBtn");
 
 let map;
 
+let riderMarker;
 
-let rideId =
-localStorage.getItem("rideId");
+let user=null;
+
+let rideId=null;
+
+let currentRide=null;
 
 
-let riderId=null;
 
 
 
-if(!rideId){
 
-alert("Ride not found");
 
-location.href="booking.html";
+const statusBox =
+document.getElementById("rideStatus");
+
+
+const otpBox =
+document.getElementById("otpBox");
+
+
+const otpText =
+document.getElementById("rideOTP");
+
+
+const riderCard =
+document.getElementById("riderCard");
+
+
+const riderName =
+document.getElementById("riderName");
+
+
+const riderPhone =
+document.getElementById("riderPhone");
+
+
+const pickupText =
+document.getElementById("pickupText");
+
+
+const dropText =
+document.getElementById("dropText");
+
+
+const fareText =
+document.getElementById("fareText");
+
+
+
+const callBtn =
+document.getElementById("callRider");
+
+
+const chatBtn =
+document.getElementById("chatRider");
+
+
+
+
+
+
+
+
+
+// AUTH
+
+
+onAuthStateChanged(auth,(u)=>{
+
+
+if(!u){
+
+location.href="../auth/login.html";
+
+return;
 
 }
 
 
+user=u;
+
+
+rideId=
+
+localStorage.getItem("rideId");
 
 
 
-
-
-// START MAP
-
-
-window.addEventListener(
-
-"load",
-
-()=>{
-
-
-map=createMap();
-
+if(rideId){
 
 loadRide();
 
 
-
 }
+
+
+
+});
+
+
+
+
+
+
+
+
+
+// MAP CREATE
+
+
+function createMap(){
+
+
+
+map=L.map("map")
+
+.setView(
+
+[30.7333,76.7794],
+
+14
 
 );
 
@@ -107,166 +162,213 @@ loadRide();
 
 
 
+L.tileLayer(
+
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+maxZoom:19
+
+}
+
+)
+
+.addTo(map);
 
 
 
-// LOAD RIDE STATUS
-
-
-function loadRide(){
+}
 
 
 
-onSnapshot(
+
+
+createMap();
+
+
+
+
+
+
+
+
+
+// LOAD RIDE
+
+
+async function loadRide(){
+
+
+
+const rideRef=
 
 doc(
+
 db,
+
 "rides",
+
 rideId
-),
-
-
-(snapshot)=>{
-
-
-if(!snapshot.exists())
-return;
-
-
-
-let ride=snapshot.data();
-
-
-
-
-statusBox.innerHTML =
-ride.status;
-
-
-
-
-
-if(ride.pickupCoords){
-
-
-showCustomerLocation(
-
-ride.pickupCoords.lat,
-
-ride.pickupCoords.lng
 
 );
-
-
-}
-
-
-
-
-
-if(
-
-ride.status==="accepted"
-
-){
-
-
-
-riderId =
-ride.riderId;
-
-
-
-statusBox.innerHTML =
-"🏍 Rider Arriving";
-
-
-
-trackRider();
-
-
-
-}
-
-
-
-
-
-if(
-
-ride.status==="started"
-
-){
-
-
-statusBox.innerHTML =
-"🚕 Ride Started";
-
-
-}
-
-
-
-if(
-
-ride.status==="completed"
-
-){
-
-
-statusBox.innerHTML =
-"✅ Ride Completed";
-
-
-}
-
-
-
-
-
-}
-
-
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-// TRACK RIDER
-
-
-function trackRider(){
-
-
-
-if(!riderId)
-return;
 
 
 
 onSnapshot(
 
-doc(
-db,
-"riders",
-riderId
-),
-
+rideRef,
 
 (snapshot)=>{
 
 
+
 if(!snapshot.exists())
+
 return;
+
+
+
+currentRide=snapshot.data();
+
+
+
+updateUI();
+
+
+
+if(
+
+currentRide.riderId
+
+){
+
+
+listenRider(
+
+currentRide.riderId
+
+);
+
+
+
+}
+
+
+
+}
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function updateUI(){
+
+
+
+statusBox.innerHTML=
+
+currentRide.status || "Searching";
+
+
+
+pickupText.innerHTML=
+
+currentRide.pickup || "-";
+
+
+dropText.innerHTML=
+
+currentRide.drop || "-";
+
+
+fareText.innerHTML=
+
+currentRide.fare || 0;
+
+
+
+
+
+
+if(currentRide.otp){
+
+
+otpBox.style.display="block";
+
+
+otpText.innerHTML=
+
+currentRide.otp;
+
+
+
+}
+
+
+
+
+
+if(currentRide.riderId){
+
+
+riderCard.style.display="block";
+
+
+}
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// RIDER LIVE LOCATION
+
+
+function listenRider(riderId){
+
+
+
+const riderRef=
+
+doc(
+
+db,
+
+"riders",
+
+riderId
+
+);
+
+
+
+
+onSnapshot(
+
+riderRef,
+
+(snapshot)=>{
 
 
 
@@ -274,113 +376,32 @@ let data=snapshot.data();
 
 
 
-if(!data.location)
-return;
+if(
 
-
-
-
-let lat =
-data.location.lat;
-
-
-let lng =
-data.location.lng;
-
-
-
-
-
-showRiderLocation(
-
-lat,
-
-lng
-
-);
-
-
-
-
-updateDistance(
-
-lat,
-
-lng
-
-);
-
-
-
-}
-
-
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-// DISTANCE
-
-
-function updateDistance(
-
-lat,
-
-lng
+data && data.location
 
 ){
 
 
+showRider(
 
-let customerLocation =
-[30.7333,76.7794];
+data.location.lat,
 
+data.location.lng
 
-
-let riderLocation =
-[lat,lng];
-
+);
 
 
-let km =
-
-L.latLng(
-customerLocation
-)
-
-.distanceTo(
-
-L.latLng(
-riderLocation
-)
-
-)
-
- /1000;
+}
 
 
 
-
-distanceBox.innerHTML =
-
-km.toFixed(1)+" KM";
+}
 
 
 
+);
 
-etaBox.innerHTML =
-
-Math.ceil(km*3)+" min";
 
 
 }
@@ -391,45 +412,97 @@ Math.ceil(km*3)+" min";
 
 
 
-// CANCEL
 
 
-cancelBtn.onclick=async()=>{
+function showRider(lat,lng){
 
 
 
-await updateDoc(
+if(!riderMarker){
 
-doc(
-db,
-"rides",
-rideId
-),
+
+
+riderMarker=
+
+L.marker(
+
+[lat,lng],
 
 {
 
 
-status:"cancelled",
+icon:
+
+L.icon({
+
+iconUrl:
+
+"https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
 
 
-cancelledAt:
-serverTimestamp()
+iconSize:[45,45]
+
+
+})
+
+
+
+}
+
+)
+
+.addTo(map);
+
 
 
 }
 
 
+else{
+
+
+riderMarker.setLatLng(
+
+[lat,lng]
+
 );
 
+
+}
+
+
+
+map.setView(
+
+[lat,lng],
+
+15
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// CALL
+
+
+callBtn.onclick=()=>{
 
 
 alert(
-"Ride Cancelled"
+
+"Calling Rider..."
+
 );
-
-
-
-location.href="booking.html";
 
 
 };
@@ -438,6 +511,40 @@ location.href="booking.html";
 
 
 
+
+
+
+
+// CHAT
+
+
+chatBtn.onclick=()=>{
+
+
+localStorage.setItem(
+
+"rideId",
+
+rideId
+
+);
+
+
+
+location.href="chat.html";
+
+
+};
+
+
+
+
+
+
+
+
 console.log(
-"RiderX Customer Live Tracking V2 Loaded"
+
+"RiderX Customer Live Map V4 Loaded"
+
 );
