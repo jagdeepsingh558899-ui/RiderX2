@@ -2,119 +2,83 @@
 // RiderX Firebase Configuration
 // =====================================
 
-
-// Firebase App
-
-import { initializeApp } 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 // Authentication
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-import { getAuth } 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-
-// Firestore Database
-
-import { getFirestore } 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
+// Firestore
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 // Storage
-
-import { getStorage } 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
-
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 
 // Realtime Database
+import { getDatabase } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
-import { getDatabase } 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
-
-
-
-
+// Analytics (Optional)
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
 
 // =====================================
-// YOUR FIREBASE CONFIG
+// FIREBASE CONFIG
 // =====================================
-
 
 const firebaseConfig = {
 
+  apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
 
-apiKey: "YOUR_API_KEY",
+  authDomain: "riderx-1.firebaseapp.com",
 
+  databaseURL: "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "riderx-1",
 
+  storageBucket: "riderx-1.firebasestorage.app",
 
-projectId: "YOUR_PROJECT_ID",
+  messagingSenderId: "261640190671",
 
+  appId: "1:261640190671:web:701b3ce5dcb6135fd955ba",
 
-storageBucket: "YOUR_PROJECT.appspot.com",
-
-
-messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-
-
-appId: "YOUR_APP_ID",
-
-
-databaseURL:
-"https://YOUR_PROJECT-default-rtdb.firebaseio.com"
-
+  measurementId: "G-SM8KLBVPWN"
 
 };
 
-
-
-
-
-
-
-// Initialize Firebase
-
+// =====================================
+// INITIALIZE FIREBASE
+// =====================================
 
 const app = initializeApp(firebaseConfig);
 
+// Analytics
+const analytics = getAnalytics(app);
 
-
-
-// Firebase Services
-
-
+// Services
 const auth = getAuth(app);
-
 
 const db = getFirestore(app);
 
-
 const storage = getStorage(app);
-
 
 const realtimeDB = getDatabase(app);
 
-
-
-
-
-// Export
-
+// =====================================
+// EXPORTS
+// =====================================
 
 export {
 
-app,
+  app,
 
-auth,
+  analytics,
 
-db,
+  auth,
 
-storage,
+  db,
 
-realtimeDB,
+  storage,
 
-firebaseConfig
+  realtimeDB,
+
+  firebaseConfig
 
 };
