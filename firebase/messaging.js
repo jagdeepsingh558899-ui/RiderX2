@@ -1,41 +1,84 @@
-// ==========================================
+// =====================================
 // RiderX Firebase Messaging Setup
-// Push Notification System
-// ==========================================
-
-
-import { app } from "./config.js";
+// =====================================
 
 
 import {
 
-getMessaging,
-getToken,
-onMessage
+app,
+
+auth,
+
+db
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-messaging.js";
+from "./config.js";
+
+
+
+import {
+
+
+getMessaging,
+
+getToken,
+
+onMessage
+
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-messaging.js";
+
+
+
+import {
+
+
+doc,
+
+setDoc
+
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
 
-const messaging = getMessaging(app);
+
+
+const messaging =
+
+getMessaging(app);
 
 
 
 
 
 
-// ASK NOTIFICATION PERMISSION
 
 
-export async function requestNotificationPermission(){
+
+// =====================================
+// REQUEST NOTIFICATION PERMISSION
+// =====================================
+
+
+
+export async function enableNotification(){
 
 
 
 try{
+
 
 
 const permission =
@@ -46,11 +89,14 @@ await Notification.requestPermission();
 
 
 
+
 if(permission==="granted"){
 
 
 
-const token = await getToken(
+const token =
+
+await getToken(
 
 messaging,
 
@@ -69,17 +115,14 @@ vapidKey:
 
 
 
-console.log(
-
-"RiderX Notification Token:",
-
-token
-
-);
 
 
 
-return token;
+if(token){
+
+
+
+saveToken(token);
 
 
 
@@ -88,15 +131,95 @@ return token;
 
 
 }
+
+
+
+}
+
+
 
 catch(error){
 
 
-console.log(
 
-"Notification Error",
+console.log(error);
 
-error
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SAVE TOKEN
+// =====================================
+
+
+
+async function saveToken(token){
+
+
+
+const user =
+
+auth.currentUser;
+
+
+
+if(!user){
+
+return;
+
+}
+
+
+
+
+
+
+await setDoc(
+
+doc(
+
+db,
+
+"users",
+
+user.uid
+
+),
+
+
+{
+
+
+notificationToken:
+
+token
+
+
+
+},
+
+
+{
+
+
+merge:true
+
+
+}
+
 
 );
 
@@ -106,16 +229,16 @@ error
 
 
 
-}
 
 
 
 
 
 
-
-
+// =====================================
 // FOREGROUND MESSAGE
+// =====================================
+
 
 
 onMessage(
@@ -125,9 +248,10 @@ messaging,
 (payload)=>{
 
 
+
 console.log(
 
-"New Notification",
+"Notification Received",
 
 payload
 
@@ -135,39 +259,15 @@ payload
 
 
 
-if(
-
-payload.notification
-
-){
-
 
 alert(
 
-payload.notification.title+
-
-"\n"+
-
-payload.notification.body
-
-);
-
-
-}
-
-
-
-}
+payload.notification?.title || "RiderX"
 
 );
 
 
 
-
-
-
-console.log(
-
-"RiderX Messaging Ready"
+}
 
 );
