@@ -10,88 +10,56 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-
 <style>
 
 body{
-
 margin:0;
 background:#000;
 color:white;
 font-family:Arial;
-
 }
 
-
 .header{
-
 padding:18px;
 background:#111;
 text-align:center;
 font-size:22px;
 font-weight:bold;
 border-bottom:2px solid #FFD600;
-
 }
-
-
 
 #map{
-
-height:45vh;
+height:55vh;
 width:100%;
-
 }
-
-
 
 .box{
-
-padding:20px;
-
+padding:15px;
 }
 
-
-
 .card{
-
 background:#111;
 padding:20px;
 border-radius:18px;
-margin-top:15px;
-
 }
 
-
-
 input,button{
-
 width:100%;
 padding:14px;
 margin-top:12px;
-border:none;
 border-radius:12px;
-
+border:none;
 }
-
 
 button{
-
 background:#FFD600;
 font-weight:bold;
-
 }
-
 
 #completeBtn{
-
 display:none;
-
-background:#fff;
-
+background:white;
 }
-
-
 
 </style>
 
@@ -102,62 +70,50 @@ background:#fff;
 
 
 <div class="header">
-
 🏍 RiderX Trip
-
 </div>
-
 
 
 <div id="map"></div>
 
 
-
 <div class="box">
-
 
 <div class="card">
 
 
 <h2 id="status">
-
-Go To Pickup Location
-
+Going Pickup 📍
 </h2>
 
 
-<p id="info">
-
-Loading...
-
+<p id="distance">
+Distance: -
 </p>
 
+
+<p id="eta">
+ETA: -
+</p>
 
 
 <input id="otp" placeholder="Enter Customer OTP">
 
 
 <button id="startBtn">
-
 Start Ride
-
 </button>
 
 
 <button id="completeBtn">
-
 Complete Ride
-
 </button>
-
 
 
 <p id="msg"></p>
 
 
-
 </div>
-
 
 </div>
 
@@ -192,6 +148,16 @@ from
 
 import {
 
+drawRoute,
+clearRoute
+
+}
+
+from "../js/route.js";
+
+
+import {
+
 completeRide
 
 }
@@ -202,13 +168,11 @@ from "../js/ride-complete.js";
 
 
 
-
-let rideId =
-localStorage.getItem("rideId");
+let rideId = localStorage.getItem("rideId");
 
 
 
-let map=L.map("map")
+let map = L.map("map")
 
 .setView(
 
@@ -238,13 +202,9 @@ let pickupMarker=null;
 
 let dropMarker=null;
 
-let routeLine=null;
-
-
-let rideData=null;
+let ride=null;
 
 let started=false;
-
 
 
 
@@ -253,10 +213,7 @@ let started=false;
 async function loadRide(){
 
 
-
-let snap=
-
-await getDoc(
+let snap=await getDoc(
 
 doc(db,"rides",rideId)
 
@@ -267,24 +224,22 @@ doc(db,"rides",rideId)
 if(!snap.exists()) return;
 
 
-
-rideData=snap.data();
-
+ride=snap.data();
 
 
 
 
-if(rideData.pickupCoords){
 
+if(ride.pickupCoords){
 
 
 pickupMarker=L.marker(
 
 [
 
-rideData.pickupCoords.lat,
+ride.pickupCoords.lat,
 
-rideData.pickupCoords.lng
+ride.pickupCoords.lng
 
 ]
 
@@ -295,23 +250,20 @@ rideData.pickupCoords.lng
 .bindPopup("📍 Pickup");
 
 
-
 }
 
 
 
-
-if(rideData.dropCoords){
-
+if(ride.dropCoords){
 
 
 dropMarker=L.marker(
 
 [
 
-rideData.dropCoords.lat,
+ride.dropCoords.lat,
 
-rideData.dropCoords.lng
+ride.dropCoords.lng
 
 ]
 
@@ -330,6 +282,8 @@ rideData.dropCoords.lng
 
 
 
+
+
 loadRide();
 
 
@@ -339,24 +293,15 @@ loadRide();
 
 
 
-function startLocation(){
-
-
-
-let riderId=auth.currentUser.uid;
-
-
-
-
 navigator.geolocation.watchPosition(
 
-async(pos)=>{
+async(position)=>{
 
 
+let lat=position.coords.latitude;
 
-let lat=pos.coords.latitude;
+let lng=position.coords.longitude;
 
-let lng=pos.coords.longitude;
 
 
 
@@ -384,7 +329,7 @@ riderMarker=L.marker(
 
 .addTo(map)
 
-.bindPopup("🏍 You");
+.bindPopup("🏍 Rider");
 
 
 }
@@ -392,13 +337,97 @@ riderMarker=L.marker(
 
 
 
-map.setView(
 
-[lat,lng],
+let riderPoint={
 
-15
+lat,
+
+lng
+
+};
+
+
+
+
+
+if(!started && ride?.pickupCoords){
+
+
+
+let result=
+
+await drawRoute(
+
+map,
+
+riderPoint,
+
+ride.pickupCoords
 
 );
+
+
+
+
+if(result){
+
+
+distance.innerHTML=
+
+"Distance: "+result.distance+" KM";
+
+
+eta.innerHTML=
+
+"ETA: "+result.time+" Minutes";
+
+
+}
+
+
+
+}
+
+
+
+
+
+if(started && ride?.dropCoords){
+
+
+
+let result=
+
+await drawRoute(
+
+map,
+
+riderPoint,
+
+ride.dropCoords
+
+);
+
+
+
+if(result){
+
+
+distance.innerHTML=
+
+"Distance: "+result.distance+" KM";
+
+
+eta.innerHTML=
+
+"ETA: "+result.time+" Minutes";
+
+
+}
+
+
+
+}
 
 
 
@@ -406,7 +435,7 @@ map.setView(
 
 await setDoc(
 
-doc(db,"riderLocations",riderId),
+doc(db,"riderLocations",auth.currentUser.uid),
 
 {
 
@@ -434,8 +463,6 @@ updatedAt:serverTimestamp()
 
 
 
-}
-
 
 
 
@@ -445,12 +472,9 @@ updatedAt:serverTimestamp()
 document.getElementById("startBtn").onclick=async()=>{
 
 
-
 let otp=
 
 document.getElementById("otp").value;
-
-
 
 
 
@@ -469,15 +493,10 @@ let data=snap.data();
 
 
 
-
-
 if(String(data.otp)!==String(otp)){
 
 
-document.getElementById("msg").innerHTML=
-
-"Wrong OTP ❌";
-
+msg.innerHTML="Wrong OTP ❌";
 
 return;
 
@@ -497,6 +516,7 @@ status:"Started",
 
 startedAt:serverTimestamp()
 
+
 }
 
 );
@@ -507,25 +527,22 @@ started=true;
 
 
 
-document.getElementById("status").innerHTML=
-
-"Trip Started 🏁";
+clearRoute(map);
 
 
 
-document.getElementById("msg").innerHTML=
-
-"Ride Started ✅";
+status.innerHTML="Trip Started 🏁";
 
 
-
-document.getElementById("otp").style.display="none";
-
-document.getElementById("startBtn").style.display="none";
+msg.innerHTML="Ride Started ✅";
 
 
-document.getElementById("completeBtn").style.display="block";
+otp.style.display="none";
 
+startBtn.style.display="none";
+
+
+completeBtn.style.display="block";
 
 
 };
@@ -536,8 +553,8 @@ document.getElementById("completeBtn").style.display="block";
 
 
 
-document.getElementById("completeBtn").onclick=async()=>{
 
+completeBtn.onclick=async()=>{
 
 
 let done=
@@ -562,11 +579,6 @@ location.href="../customer/receipt.html";
 };
 
 
-
-
-
-
-startLocation();
 
 
 
