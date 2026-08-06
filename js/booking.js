@@ -1,242 +1,130 @@
-// ==========================================
-// RiderX Booking Engine V6
-// Ride + Parcel + Food Booking
-// Map + Fare + Firebase
-// ==========================================
+// =====================================
+// RiderX Booking System
+// Fare + Ride Request
+// =====================================
 
 
-import { auth, db } from "../firebase/config.js";
+import {
+
+db,
+auth
+
+}
+
+from "../firebase/config.js";
+
 
 
 import {
 
 collection,
 addDoc,
-doc,
-getDoc,
-setDoc,
 serverTimestamp
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from
 
-
-import {
-
-onAuthStateChanged
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
 
+let selectedService="bike";
 
-let currentUser=null;
+let selectedPayment="cash";
 
-let map;
-
-let pickupCoords=null;
-
-let dropCoords=null;
-
-let pickupMarker=null;
-
-let dropMarker=null;
-
-let distance=0;
-
-let fare=0;
-
-let selectedService="Bike";
+let distance=5; // temporary default km
 
 
 
 
 
-
-const pickup =
-document.getElementById("pickup");
-
-
-const drop =
-document.getElementById("drop");
+// =====================================
+// SERVICE SELECT
+// =====================================
 
 
-const fareBox =
-document.getElementById("fare");
+const services =
 
-
-const distanceBox =
-document.getElementById("distance");
-
-
-const bookBtn =
-document.getElementById("bookBtn");
-
-
-const locationBtn =
-document.getElementById("locationBtn");
-
-
-const paymentMethod =
-document.getElementById("paymentMethod");
+document.querySelectorAll(".service");
 
 
 
+services.forEach(service=>{
 
 
+service.onclick=()=>{
 
 
+services.forEach(item=>{
 
-
-// AUTH
-
-
-onAuthStateChanged(auth,(user)=>{
-
-
-if(!user){
-
-location.href="../auth/login.html";
-
-return;
-
-}
-
-
-currentUser=user;
-
+item.classList.remove("active");
 
 });
 
 
 
+service.classList.add("active");
 
 
 
+selectedService =
 
+service.dataset.type;
 
-
-// MAP
-
-
-window.onload=()=>{
-
-
-map=L.map("map")
-
-.setView(
-
-[30.7333,76.7794],
-
-13
-
-);
-
-
-
-L.tileLayer(
-
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-
-)
-
-.addTo(map);
-
-
-
-
-
-map.on("click",(e)=>{
-
-
-if(!pickupCoords){
-
-
-setPickup(
-
-e.latlng.lat,
-
-e.latlng.lng
-
-);
-
-
-}
-
-else{
-
-
-setDrop(
-
-e.latlng.lat,
-
-e.latlng.lng
-
-);
 
 
 calculateFare();
 
 
-}
+};
 
 
 });
 
 
-};
 
 
 
 
 
+// =====================================
+// PAYMENT SELECT
+// =====================================
 
 
 
+const paymentButtons =
 
-// SERVICE SELECT
+document.querySelectorAll(".payment button");
 
 
-document.querySelectorAll(".serviceBtn")
 
-.forEach(btn=>{
+paymentButtons.forEach(btn=>{
 
 
 btn.onclick=()=>{
 
 
-selectedService=
+paymentButtons.forEach(b=>{
 
-btn.dataset.service;
-
-
-
-document.querySelectorAll(".serviceBtn")
-
-.forEach(b=>{
-
-
-b.style.opacity="0.5";
-
+b.classList.remove("active");
 
 });
 
 
-btn.style.opacity="1";
+btn.classList.add("active");
 
 
+selectedPayment =
 
-calculateFare();
+btn.innerText.toLowerCase();
 
 
 
 };
-
 
 
 });
@@ -248,268 +136,36 @@ calculateFare();
 
 
 
-
-// PICKUP
-
-
-function setPickup(lat,lng){
-
-
-pickupCoords={lat,lng};
-
-
-
-pickup.value=
-
-lat.toFixed(6)+","+lng.toFixed(6);
-
-
-
-if(pickupMarker)
-
-map.removeLayer(pickupMarker);
-
-
-
-pickupMarker=
-
-L.marker(
-
-[lat,lng]
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-"📍 Pickup"
-
-);
-
-
-}
-
-
-
-
-
-
-
-
-
-// DROP
-
-
-function setDrop(lat,lng){
-
-
-dropCoords={lat,lng};
-
-
-
-drop.value=
-
-lat.toFixed(6)+","+lng.toFixed(6);
-
-
-
-if(dropMarker)
-
-map.removeLayer(dropMarker);
-
-
-
-dropMarker=
-
-L.marker(
-
-[lat,lng]
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-"🏁 Drop"
-
-);
-
-
-}
-
-
-
-
-
-
-
-
-
-// LOCATION
-
-
-locationBtn.onclick=()=>{
-
-
-navigator.geolocation.getCurrentPosition(
-
-(pos)=>{
-
-
-setPickup(
-
-pos.coords.latitude,
-
-pos.coords.longitude
-
-);
-
-
-
-map.setView(
-
-[
-
-pos.coords.latitude,
-
-pos.coords.longitude
-
-],
-
-16
-
-);
-
-
-
-},
-
-()=>{
-
-
-alert(
-
-"Location permission allow karo"
-
-);
-
-
-}
-
-);
-
-
-};
-
-
-
-
-
-
-
-
-
-// FARE
+// =====================================
+// FARE CALCULATION
+// =====================================
 
 
 function calculateFare(){
 
 
-if(!pickupCoords || !dropCoords)
+let hour =
 
-return;
-
-
-
-distance=
-
-map.distance(
-
-[
-
-pickupCoords.lat,
-
-pickupCoords.lng
-
-],
-
-[
-
-dropCoords.lat,
-
-dropCoords.lng
-
-]
-
-)/1000;
+new Date().getHours();
 
 
 
-distance=
-
-Number(
-
-distance.toFixed(1)
-
-);
+let pricePerKm;
 
 
 
-distanceBox.innerHTML=
-
-distance+" KM";
+if(hour>=22 || hour<6){
 
 
+pricePerKm=11;
 
 
+}
 
-let rate=0;
-
-
-
-
-if(selectedService==="Bike")
-
-rate=8;
+else if(distance>10){
 
 
-if(selectedService==="Taxi")
-
-rate=12;
-
-
-if(selectedService==="Cab")
-
-rate=15;
-
-
-if(selectedService==="Parcel")
-
-rate=80;
-
-
-if(selectedService==="Food")
-
-rate=60;
-
-
-
-
-
-
-
-if(
-
-selectedService==="Parcel" ||
-
-selectedService==="Food"
-
-){
-
-
-fare=rate;
+pricePerKm=9;
 
 
 }
@@ -517,57 +173,94 @@ fare=rate;
 else{
 
 
-fare=
-
-50+(distance*rate);
+pricePerKm=8;
 
 
 }
 
 
 
+let fare =
+
+distance * pricePerKm;
 
 
-fareBox.innerHTML=
 
-Math.round(fare);
+
+document.getElementById(
+"fare"
+).innerHTML =
+
+"₹"+fare;
+
 
 
 }
 
 
 
+calculateFare();
 
 
 
 
 
 
-// BOOK
+
+
+
+// =====================================
+// CREATE RIDE REQUEST
+// =====================================
+
+
+
+const bookBtn =
+
+document.getElementById(
+"bookRide"
+);
+
+
+
+
+
+if(bookBtn){
+
 
 
 bookBtn.onclick=async()=>{
 
 
-if(!currentUser)
 
-return alert(
+const pickup =
 
-"Login Required"
+document.getElementById(
+"pickup"
+).value;
 
+
+
+const drop =
+
+document.getElementById(
+"drop"
+).value;
+
+
+
+
+if(!pickup || !drop){
+
+
+alert(
+"Enter pickup and drop location"
 );
 
 
+return;
 
-if(!pickupCoords || !dropCoords)
-
-return alert(
-
-"Pickup Drop select karo"
-
-);
-
-
+}
 
 
 
@@ -576,121 +269,74 @@ try{
 
 
 
-let ride = await addDoc(
+const user = auth.currentUser;
 
-collection(db,"rides"),
+
+
+if(!user){
+
+
+alert(
+"Please login first"
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+await addDoc(
+
+collection(
+db,
+"rides"
+),
+
 
 {
 
 
-customerId:
-
-currentUser.uid,
+customerId:user.uid,
 
 
-
-service:
-
-selectedService,
+pickup:pickup,
 
 
-
-pickup:
-
-pickup.value,
+drop:drop,
 
 
-
-drop:
-
-drop.value,
+service:selectedService,
 
 
-
-pickupCoords,
-
+payment:selectedPayment,
 
 
-dropCoords,
+distance:distance,
 
 
-
-distance,
-
-
-
-fare:
-
-Math.round(fare),
+fare:document.getElementById(
+"fare"
+).innerText,
 
 
-
-paymentMethod:
-
-paymentMethod.value,
-
-
-
-status:
-
-"searching",
-
+status:"searching",
 
 
 createdAt:
-
 serverTimestamp()
 
 
 
 }
 
-);
 
-
-
-
-
-
-
-await setDoc(
-
-doc(
-
-db,
-
-"liveLocations",
-
-currentUser.uid
-
-),
-
-{
-
-role:"customer",
-
-rideId:ride.id,
-
-location:pickupCoords,
-
-updatedAt:
-
-serverTimestamp()
-
-}
-
-);
-
-
-
-
-
-
-localStorage.setItem(
-
-"rideId",
-
-ride.id
 
 );
 
@@ -700,28 +346,30 @@ ride.id
 
 alert(
 
-"Booking Created ✅"
+"Ride Requested Successfully"
 
 );
 
 
 
-location.href="Home.html";
-
-
+window.location.href="history.html";
 
 
 
 }
+
+
 
 catch(error){
 
 
+console.log(error);
+
+
 alert(
-
 error.message
-
 );
+
 
 
 }
@@ -732,10 +380,4 @@ error.message
 
 
 
-
-
-console.log(
-
-"RiderX Booking V6 Loaded"
-
-);
+}
