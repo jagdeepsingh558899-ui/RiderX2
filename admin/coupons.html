@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Coupons</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+.card{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin:15px 0;
+
+}
+
+
+input{
+
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:8px;
+border:none;
+
+}
+
+
+button{
+
+width:100%;
+padding:12px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+margin-top:10px;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+🎁 Coupon Management
+
+</div>
+
+
+<div class="container">
+
+
+<div class="card">
+
+
+<input id="code" placeholder="Coupon Code">
+
+
+<input id="discount" placeholder="Discount %">
+
+
+
+<button onclick="addCoupon()">
+
+Add Coupon
+
+</button>
+
+
+</div>
+
+
+
+<div id="list">
+
+Loading...
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+collection,
+addDoc,
+getDocs,
+deleteDoc,
+doc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+
+window.addCoupon=async function(){
+
+
+
+await addDoc(
+
+collection(db,"coupons"),
+
+{
+
+
+code:
+
+code.value.toUpperCase(),
+
+
+discount:
+
+Number(discount.value)
+
+
+
+}
+
+);
+
+
+
+alert("Coupon Added ✅");
+
+
+loadCoupons();
+
+
+}
+
+
+
+
+
+
+
+async function loadCoupons(){
+
+
+
+let snap=
+
+await getDocs(
+
+collection(db,"coupons")
+
+);
+
+
+
+let box=
+
+document.getElementById("list");
+
+
+
+box.innerHTML="";
+
+
+
+snap.forEach((c)=>{
+
+
+let data=c.data();
+
+
+
+box.innerHTML +=`
+
+
+<div class="card">
+
+
+<h3>
+
+${data.code}
+
+</h3>
+
+
+
+<p>
+
+Discount: ${data.discount}%
+
+</p>
+
+
+
+<button onclick="removeCoupon('${c.id}')">
+
+Delete
+
+</button>
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+window.removeCoupon=async function(id){
+
+
+
+await deleteDoc(
+
+doc(db,"coupons",id)
+
+);
+
+
+
+alert("Coupon Deleted 🗑️");
+
+
+loadCoupons();
+
+
+
+}
+
+
+
+
+
+
+loadCoupons();
+
+
+
+</script>
+
+
+</body>
+
+</html>
