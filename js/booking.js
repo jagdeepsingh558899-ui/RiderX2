@@ -1,28 +1,22 @@
 // =====================================
-// RiderX Booking System Final
+// RiderX Booking System
+// Map Pickup Drop + Ride Create
 // =====================================
 
 
 import { auth, db } from "../firebase/config.js";
 
-
 import {
-
 collection,
 addDoc,
 serverTimestamp
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 import {
-
 onAuthStateChanged
-
 }
-
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
@@ -34,11 +28,11 @@ const service =
 document.getElementById("service");
 
 
-const pickup =
+const pickupBox =
 document.getElementById("pickup");
 
 
-const drop =
+const dropBox =
 document.getElementById("drop");
 
 
@@ -46,27 +40,34 @@ const fareBox =
 document.getElementById("fare");
 
 
-const bookBtn =
-document.getElementById("bookBtn");
-
-
 const distanceBox =
 document.getElementById("distance");
 
 
+const bookBtn =
+document.getElementById("bookBtn");
 
-let currentUser=null;
+
+const locationBtn =
+document.getElementById("locationBtn");
+
+
+
+let user=null;
 
 
 let map;
 
 
-let marker=null;
+let pickupMarker=null;
+
+let dropMarker=null;
 
 
-let pickupLat=null;
+let pickupCoords=null;
 
-let pickupLng=null;
+let dropCoords=null;
+
 
 
 let fare=0;
@@ -74,23 +75,24 @@ let fare=0;
 
 
 
-// ================================
-// User Check
-// ================================
+
+// ============================
+// AUTH
+// ============================
 
 
-onAuthStateChanged(auth,(user)=>{
+onAuthStateChanged(auth,(u)=>{
 
 
-if(user){
+if(u){
 
-currentUser=user;
+user=u;
 
 }
 
 else{
 
-window.location.href="../auth/login.html";
+location.href="../auth/login.html";
 
 }
 
@@ -101,9 +103,13 @@ window.location.href="../auth/login.html";
 
 
 
-// ================================
-// Create Map
-// ================================
+
+// ============================
+// MAP INIT
+// ============================
+
+
+window.onload=()=>{
 
 
 map=L.map("map").setView(
@@ -122,9 +128,7 @@ L.tileLayer(
 
 {
 
-maxZoom:19,
-
-attribution:"© OpenStreetMap"
+maxZoom:19
 
 }
 
@@ -132,115 +136,100 @@ attribution:"© OpenStreetMap"
 
 
 
-
-
 setTimeout(()=>{
 
 map.invalidateSize();
 
-},500);
+},1000);
 
 
 
 
 
-// ================================
-// Current Location
-// ================================
+// Map Click
 
-
-document
-.getElementById("locationBtn")
-.onclick=function(){
+map.on("click",(e)=>{
 
 
 
-navigator.geolocation.getCurrentPosition(
-
-(position)=>{
+if(!pickupCoords){
 
 
-pickupLat =
-position.coords.latitude;
+pickupCoords={
+
+lat:e.latlng.lat,
+
+lng:e.latlng.lng
+
+};
 
 
-pickupLng =
-position.coords.longitude;
+pickupBox.value=
 
-
-
-pickup.value =
-
-pickupLat.toFixed(6)
-
-+
-
-", "
-
-+
-
-pickupLng.toFixed(6);
+pickupCoords.lat.toFixed(5)+
+", "+
+pickupCoords.lng.toFixed(5);
 
 
 
+pickupMarker=L.marker(
 
-if(marker){
-
-map.removeLayer(marker);
-
-}
-
-
-
-
-marker=L.marker(
-
-[pickupLat,pickupLng]
+[e.latlng.lat,e.latlng.lng]
 
 )
 
 .addTo(map)
 
-.bindPopup(
-
-"📍 Pickup Location"
-
-)
+.bindPopup("Pickup")
 
 .openPopup();
 
 
 
-map.setView(
+}
 
-[pickupLat,pickupLng],
-
-16
-
-);
+else if(!dropCoords){
 
 
+dropCoords={
 
-calculateFare();
+lat:e.latlng.lat,
 
+lng:e.latlng.lng
 
-
-},
-
-
-()=>{
+};
 
 
-alert(
-"Location permission allow karo"
-);
+dropBox.value=
+
+dropCoords.lat.toFixed(5)+
+", "+
+dropCoords.lng.toFixed(5);
+
+
+
+dropMarker=L.marker(
+
+[e.latlng.lat,e.latlng.lng]
+
+)
+
+.addTo(map)
+
+.bindPopup("Drop")
+
+.openPopup();
+
+
+
+calculateDistance();
 
 
 }
 
 
-);
 
+});
 
 
 };
@@ -250,41 +239,186 @@ alert(
 
 
 
-// ================================
-// Fare
-// ================================
+
+// ============================
+// CURRENT LOCATION
+// ============================
 
 
-function calculateFare(){
+locationBtn.onclick=()=>{
 
 
-let base=50;
+navigator.geolocation.getCurrentPosition(
+
+(pos)=>{
+
+
+pickupCoords={
+
+lat:pos.coords.latitude,
+
+lng:pos.coords.longitude
+
+};
 
 
 
-if(service.value==="Cab"){
+pickupBox.value=
 
-base=120;
+pickupCoords.lat.toFixed(5)+
+", "+
+pickupCoords.lng.toFixed(5);
+
+
+
+if(pickupMarker){
+
+map.removeLayer(pickupMarker);
 
 }
 
 
-if(service.value==="Parcel"){
 
-base=80;
+pickupMarker=L.marker(
+
+[
+
+pickupCoords.lat,
+
+pickupCoords.lng
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup("Your Pickup")
+
+.openPopup();
+
+
+
+map.setView(
+
+[
+
+pickupCoords.lat,
+
+pickupCoords.lng
+
+],
+
+16
+
+);
+
+
+
+},
+
+()=>{
+
+alert(
+"Location permission allow karo"
+);
 
 }
 
 
-if(service.value==="Food"){
+);
 
-base=60;
+
+};
+
+
+
+
+
+
+
+
+// ============================
+// DISTANCE
+// ============================
+
+
+function calculateDistance(){
+
+
+if(!pickupCoords || !dropCoords)
+return;
+
+
+
+let distance =
+
+map.distance(
+
+[
+
+pickupCoords.lat,
+
+pickupCoords.lng
+
+],
+
+[
+
+dropCoords.lat,
+
+dropCoords.lng
+
+]
+
+)
+
+/
+
+1000;
+
+
+
+distance=
+
+Number(distance.toFixed(1));
+
+
+
+distanceBox.innerHTML=
+
+distance+" KM";
+
+
+
+
+let rate=8;
+
+
+
+let hour=
+
+new Date().getHours();
+
+
+
+if(hour>=22 || hour<6){
+
+rate=11;
+
+}
+
+else if(distance>10){
+
+rate=9;
 
 }
 
 
 
-fare=base+40;
+fare=
+
+50+(distance*rate);
 
 
 
@@ -294,12 +428,8 @@ Math.round(fare);
 
 
 
-distanceBox.innerHTML=
-
-"5 KM";
-
-
 }
+
 
 
 
@@ -308,98 +438,70 @@ service.addEventListener(
 
 "change",
 
-calculateFare
+calculateDistance
 
 );
 
 
 
-calculateFare();
 
 
 
-
-
-// ================================
-// Booking
-// ================================
+// ============================
+// BOOK RIDE
+// ============================
 
 
 bookBtn.onclick=async()=>{
 
 
-
-if(!pickup.value){
+if(!pickupCoords || !dropCoords){
 
 alert(
-"Pickup select karo"
+"Pickup aur Drop map se select karo"
 );
 
 return;
 
 }
-
-
-
-if(!drop.value){
-
-alert(
-"Drop location enter karo"
-);
-
-return;
-
-}
-
 
 
 
 try{
 
 
-const ride = await addDoc(
+let ride=await addDoc(
 
 collection(db,"rides"),
 
 {
 
 
-customerId:
-
-currentUser.uid,
+customerId:user.uid,
 
 
-service:
-
-service.value,
+service:service.value,
 
 
-pickup:
-
-pickup.value,
+pickup:pickupBox.value,
 
 
-drop:
-
-drop.value,
+drop:dropBox.value,
 
 
-pickupLat,
+pickupCoords,
 
-pickupLng,
+
+dropCoords,
 
 
 fare,
 
 
-status:
-
-"Pending",
+status:"Pending",
 
 
-createdAt:
-
-serverTimestamp()
+createdAt:serverTimestamp()
 
 
 }
@@ -419,30 +521,21 @@ ride.id
 
 
 alert(
-
 "Ride Booked Successfully ✅"
-
 );
 
 
 
-window.location.href=
-
-"ride-status.html";
-
+location.href="ride-status.html";
 
 
 
 }
 
-catch(error){
+catch(e){
 
 
-alert(
-
-error.message
-
-);
+alert(e.message);
 
 
 }
@@ -455,7 +548,5 @@ error.message
 
 
 console.log(
-
-"RiderX Booking Map Loaded"
-
+"RiderX Booking Loaded"
 );
