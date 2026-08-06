@@ -13,38 +13,80 @@
 
 <style>
 
-.card{
+body{
 
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
+background:#000;
+color:white;
+font-family:Arial;
 
 }
+
+
+.header{
+
+background:#111;
+padding:20px;
+font-size:24px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.box{
+
+background:#111;
+padding:20px;
+border-radius:20px;
+
+}
+
 
 
 input{
 
 width:100%;
-padding:12px;
-margin:10px 0;
-border-radius:8px;
+padding:14px;
+margin-top:12px;
+border-radius:12px;
 border:none;
 
 }
+
 
 
 button{
 
 width:100%;
-padding:14px;
-background:#ffcc00;
+padding:15px;
+margin-top:20px;
 border:none;
-border-radius:10px;
+border-radius:12px;
+background:#FFD600;
 font-weight:bold;
 
 }
 
+
+
+h3{
+
+color:#FFD600;
+
+}
+
+
 </style>
+
 
 </head>
 
@@ -54,7 +96,7 @@ font-weight:bold;
 
 <div class="header">
 
-💰 Fare Settings
+⚙️ Fare Settings
 
 </div>
 
@@ -63,45 +105,70 @@ font-weight:bold;
 <div class="container">
 
 
-<div class="card">
-
-
-<h3>🏍 Bike Taxi</h3>
-
-<input id="bike" placeholder="Bike Fare Per KM">
+<div class="box">
 
 
 
-<h3>🚕 Cab</h3>
+<h3>
+Bike Taxi
+</h3>
 
-<input id="cab" placeholder="Cab Fare Per KM">
+<input id="bike" placeholder="Bike ₹ per KM">
 
 
 
-<h3>📦 Parcel</h3>
+<h3>
+Cab
+</h3>
+
+<input id="cab" placeholder="Cab ₹ per KM">
+
+
+
+<h3>
+Parcel
+</h3>
 
 <input id="parcel" placeholder="Parcel Charge">
 
 
 
-<h3>🍔 Food Delivery</h3>
+<h3>
+Food
+</h3>
 
-<input id="food" placeholder="Food Delivery Charge">
+<input id="food" placeholder="Food Charge">
 
 
 
-<button onclick="saveFare()">
+<h3>
+Night Charge
+</h3>
 
-Save Fare
+<input id="night" placeholder="Night Extra Charge">
+
+
+
+
+
+<button id="saveBtn">
+
+Save Fare Settings
 
 </button>
 
 
 
+
+<p id="msg"></p>
+
+
+
 </div>
 
 
 </div>
+
 
 
 
@@ -110,7 +177,7 @@ Save Fare
 <script type="module">
 
 
-import {db} from "../firebase/config.js";
+import { db } from "../firebase/config.js";
 
 
 import {
@@ -121,11 +188,13 @@ getDoc
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
+
+
+
+const ref = doc(db,"settings","fare");
 
 
 
@@ -134,29 +203,41 @@ from
 async function loadFare(){
 
 
-let snap=
-
-await getDoc(
-
-doc(db,"settings","fare")
-
-);
+const snap = await getDoc(ref);
 
 
 
 if(snap.exists()){
 
 
-let d=snap.data();
+let data=snap.data();
 
 
-bike.value=d.bike || "";
+bike.value=data.bike || 8;
 
-cab.value=d.cab || "";
+cab.value=data.cab || 15;
 
-parcel.value=d.parcel || "";
+parcel.value=data.parcel || 80;
 
-food.value=d.food || "";
+food.value=data.food || 60;
+
+night.value=data.night || 3;
+
+
+}
+
+else{
+
+
+bike.value=8;
+
+cab.value=15;
+
+parcel.value=80;
+
+food.value=60;
+
+night.value=3;
 
 
 }
@@ -168,29 +249,25 @@ food.value=d.food || "";
 
 
 
-
-window.saveFare=async function(){
-
+saveBtn.onclick=async()=>{
 
 
 await setDoc(
 
-doc(db,"settings","fare"),
+ref,
 
 {
 
 
 bike:Number(bike.value),
 
-
 cab:Number(cab.value),
-
 
 parcel:Number(parcel.value),
 
+food:Number(food.value),
 
-food:Number(food.value)
-
+night:Number(night.value)
 
 
 }
@@ -199,13 +276,11 @@ food:Number(food.value)
 
 
 
-alert("Fare Updated ✅");
-
-
-}
+msg.innerHTML="Fare Updated Successfully ✅";
 
 
 
+};
 
 
 
@@ -215,6 +290,7 @@ loadFare();
 
 
 </script>
+
 
 
 </body>
