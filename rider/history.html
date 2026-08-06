@@ -1,96 +1,963 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RiderX Captain | Ride History & Earnings Statement</title>
+    
+    <!-- CSS & Frameworks -->
+    <link rel="stylesheet" href="../css/Style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#090A0F',
+                            dark: '#12141C',
+                            card: '#1A1D29',
+                            yellow: '#FFE500',
+                            yellowDark: '#CCA800',
+                            gray: '#8A8F9E',
+                            border: '#2A2E3D',
+                            emerald: '#10B981',
+                            rose: '#F43F5E',
+                            amber: '#F59E0B',
+                            blue: '#3B82F6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- html2pdf.js for Client-Side Invoice Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<meta charset="UTF-8">
+    <style>
+        body {
+            background-color: #090A0F;
+            color: #FFFFFF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        .glass-card {
+            background: linear-gradient(135deg, rgba(26, 29, 41, 0.92) 0%, rgba(18, 20, 28, 0.98) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 229, 0, 0.12);
+        }
 
+        .glass-card-interactive {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-<title>RiderX Earnings History</title>
+        .glass-card-interactive:hover {
+            border-color: rgba(255, 229, 0, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px -6px rgba(255, 229, 0, 0.12);
+        }
 
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #12141C;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2A2E3D;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #FFE500;
+        }
 
-<link rel="stylesheet" href="../css/style.css">
+        @keyframes skeletonShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #12141C 25%, #2A2E3D 50%, #12141C 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s infinite;
+        }
 
-
+        /* Modal Overlay backdrop */
+        .modal-backdrop {
+            background-color: rgba(9, 10, 15, 0.85);
+            backdrop-filter: blur(8px);
+        }
+    </style>
 </head>
+<body class="min-h-screen pb-28 lg:pb-12 flex flex-col custom-scrollbar">
 
+    <!-- Top Dashboard Header -->
+    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="./Home.html" class="flex items-center gap-2">
+                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX+Captain'">
+                </a>
+                <span class="text-[10px] bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-bold border border-brand-yellow/20 hidden sm:inline-block uppercase tracking-wider">CAPTAIN STATEMENT HUB</span>
+            </div>
 
-<body>
+            <!-- Profile Summary Dropdown/Badge -->
+            <div class="flex items-center gap-4">
+                <button onclick="exportFullHistoryCSV()" class="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition">
+                    <i class="fa-solid fa-file-csv text-brand-yellow"></i>
+                    <span>Export CSV</span>
+                </button>
 
+                <a href="./Profile.html" class="flex items-center gap-2.5 pl-2 border-l border-brand-border/60">
+                    <img id="riderProfilePhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" class="w-9 h-9 rounded-full object-cover border-2 border-brand-yellow" alt="Captain Profile">
+                    <div class="hidden sm:block text-left">
+                        <p id="riderProfileName" class="text-xs font-extrabold text-white leading-tight">Captain Loading...</p>
+                        <p class="text-[10px] text-brand-gray flex items-center gap-1">
+                            <span id="riderVehicleType" class="text-brand-yellow font-bold uppercase">CAB</span> • 
+                            <i class="fa-solid fa-star text-amber-400 text-[9px]"></i> 
+                            <span id="riderRatingText">4.92</span>
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </header>
 
-<div class="topbar">
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
 
-<h2>
+        <!-- Top Overview Financial Stats Cards Bar -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            
+            <div class="glass-card p-4 rounded-2xl space-y-1 relative overflow-hidden">
+                <div class="flex items-center justify-between text-brand-gray text-[10px] uppercase font-bold tracking-wider">
+                    <span>Total Trips</span>
+                    <i class="fa-solid fa-route text-brand-yellow text-sm"></i>
+                </div>
+                <p id="statTotalTrips" class="text-xl font-extrabold text-white font-mono">0</p>
+                <span class="text-[10px] text-emerald-400 font-medium"><i class="fa-solid fa-arrow-up-right"></i> All Time</span>
+            </div>
 
-💰 Rider Earnings
+            <div class="glass-card p-4 rounded-2xl space-y-1 relative overflow-hidden">
+                <div class="flex items-center justify-between text-brand-gray text-[10px] uppercase font-bold tracking-wider">
+                    <span>Today's Net</span>
+                    <i class="fa-solid fa-sun text-amber-400 text-sm"></i>
+                </div>
+                <p id="statTodayEarnings" class="text-xl font-extrabold text-brand-yellow font-mono">₹0.00</p>
+                <span id="statTodayTripsCount" class="text-[10px] text-brand-gray">0 rides today</span>
+            </div>
 
-</h2>
+            <div class="glass-card p-4 rounded-2xl space-y-1 relative overflow-hidden">
+                <div class="flex items-center justify-between text-brand-gray text-[10px] uppercase font-bold tracking-wider">
+                    <span>This Week</span>
+                    <i class="fa-solid fa-calendar-week text-emerald-400 text-sm"></i>
+                </div>
+                <p id="statWeeklyEarnings" class="text-xl font-extrabold text-white font-mono">₹0.00</p>
+                <span class="text-[10px] text-emerald-400 font-medium"><i class="fa-solid fa-chart-line"></i> Active Cycle</span>
+            </div>
 
+            <div class="glass-card p-4 rounded-2xl space-y-1 relative overflow-hidden">
+                <div class="flex items-center justify-between text-brand-gray text-[10px] uppercase font-bold tracking-wider">
+                    <span>This Month</span>
+                    <i class="fa-solid fa-calendar-days text-brand-blue text-sm"></i>
+                </div>
+                <p id="statMonthlyEarnings" class="text-xl font-extrabold text-white font-mono">₹0.00</p>
+                <span class="text-[10px] text-brand-gray">Monthly Payout</span>
+            </div>
 
-</div>
+            <div class="glass-card p-4 rounded-2xl space-y-1 relative overflow-hidden col-span-2 md:col-span-1 border-brand-yellow/30">
+                <div class="flex items-center justify-between text-brand-gray text-[10px] uppercase font-bold tracking-wider">
+                    <span>Total Lifetime Net</span>
+                    <i class="fa-solid fa-wallet text-brand-yellow text-sm"></i>
+                </div>
+                <p id="statTotalEarnings" class="text-2xl font-black text-brand-yellow font-mono">₹0.00</p>
+                <span class="text-[10px] text-emerald-400 font-bold"><i class="fa-solid fa-shield-halved"></i> Verified Statement</span>
+            </div>
 
+        </div>
 
+        <!-- Filter, Search & Controls Panel -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Search Input -->
+                <div class="relative w-full md:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
+                    <input type="text" id="searchInput" onkeyup="applyFilters()" placeholder="Search by Ride ID, Customer Name, Address..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow transition">
+                </div>
 
+                <!-- Date Range Filter Chips -->
+                <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar w-full md:w-auto pb-1 md:pb-0">
+                    <button onclick="setDateFilter('ALL', this)" class="filter-date-btn active-date-chip px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-yellow text-brand-black transition shrink-0">All Time</button>
+                    <button onclick="setDateFilter('TODAY', this)" class="filter-date-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white hover:border-brand-yellow transition shrink-0">Today</button>
+                    <button onclick="setDateFilter('YESTERDAY', this)" class="filter-date-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white hover:border-brand-yellow transition shrink-0">Yesterday</button>
+                    <button onclick="setDateFilter('WEEK', this)" class="filter-date-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white hover:border-brand-yellow transition shrink-0">This Week</button>
+                    <button onclick="setDateFilter('MONTH', this)" class="filter-date-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white hover:border-brand-yellow transition shrink-0">This Month</button>
+                    <button onclick="toggleCustomDateModal()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-yellow hover:bg-brand-yellow/10 transition shrink-0 flex items-center gap-1">
+                        <i class="fa-solid fa-sliders"></i> Custom Date
+                    </button>
+                </div>
 
+            </div>
 
-<div class="container">
+            <div class="pt-3 border-t border-brand-border/60 flex flex-wrap items-center justify-between gap-4 text-xs">
+                
+                <!-- Status Select Filter -->
+                <div class="flex items-center gap-2">
+                    <span class="text-brand-gray font-bold text-[11px] uppercase">Ride Status:</span>
+                    <select id="filterStatus" onchange="applyFilters()" class="bg-brand-dark border border-brand-border text-white rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-brand-yellow">
+                        <option value="ALL">All Statuses</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="MISSED">Missed / Expired</option>
+                    </select>
+                </div>
 
+                <!-- Ride Type Filter -->
+                <div class="flex items-center gap-2">
+                    <span class="text-brand-gray font-bold text-[11px] uppercase">Service Category:</span>
+                    <select id="filterCategory" onchange="applyFilters()" class="bg-brand-dark border border-brand-border text-white rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-brand-yellow">
+                        <option value="ALL">All Services</option>
+                        <option value="BIKE">Bike Taxi</option>
+                        <option value="CAB">Cab Comfort / Sedan</option>
+                        <option value="AUTO">Auto Rickshaw</option>
+                        <option value="PARCEL">Parcel Delivery</option>
+                        <option value="FOOD">Food Express</option>
+                    </select>
+                </div>
 
+                <!-- Record Count Indicator -->
+                <div class="text-brand-gray text-[11px] font-mono">
+                    Showing <span id="displayedCount" class="text-brand-yellow font-bold">0</span> of <span id="totalCount" class="text-white font-bold">0</span> Rides
+                </div>
 
-<div class="card">
+            </div>
 
+        </div>
 
-<h3>
+        <!-- Skeleton Loading State -->
+        <div id="skeletonLoader" class="space-y-4">
+            <div class="glass-card p-5 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="h-4 w-32 skeleton rounded"></div>
+                    <div class="h-5 w-20 skeleton rounded-full"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="h-10 skeleton rounded-xl"></div>
+                    <div class="h-10 skeleton rounded-xl"></div>
+                </div>
+            </div>
+            <div class="glass-card p-5 rounded-2xl space-y-3">
+                <div class="flex items-center justify-between">
+                    <div class="h-4 w-32 skeleton rounded"></div>
+                    <div class="h-5 w-20 skeleton rounded-full"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="h-10 skeleton rounded-xl"></div>
+                    <div class="h-10 skeleton rounded-xl"></div>
+                </div>
+            </div>
+        </div>
 
-Total Earnings
+        <!-- Empty State Container -->
+        <div id="emptyState" class="hidden glass-card p-12 rounded-2xl text-center space-y-4 max-w-lg mx-auto">
+            <div class="w-16 h-16 mx-auto rounded-full bg-brand-dark border border-brand-border flex items-center justify-center text-brand-yellow text-2xl">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3 class="text-base font-extrabold text-white">No Ride Statements Found</h3>
+            <p class="text-xs text-brand-gray leading-relaxed">No ride history matches your current search or date filter selection. Try adjusting your parameters or complete new rides.</p>
+            <button onclick="resetFilters()" class="px-4 py-2 rounded-xl bg-brand-yellow text-brand-black text-xs font-bold hover:bg-yellow-300 transition">
+                Reset All Filters
+            </button>
+        </div>
 
-</h3>
+        <!-- Ride Cards List Container (Infinite Dynamic Scrollable Container) -->
+        <div id="rideListContainer" class="space-y-4">
+            <!-- Dynamic Inject via Firebase -->
+        </div>
 
+        <!-- Infinite Scroll Loading Trigger Marker -->
+        <div id="infiniteScrollMarker" class="text-center py-6 hidden">
+            <i class="fa-solid fa-circle-notch fa-spin text-brand-yellow text-lg"></i>
+            <p class="text-[10px] text-brand-gray mt-1">Loading more ride logs...</p>
+        </div>
 
-<h1 style="color:#FFD600">
+    </main>
 
-₹<span id="totalEarning">
+    <!-- Custom Date Range Picker Modal -->
+    <div id="customDateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-md w-full rounded-2xl p-6 space-y-5 border-brand-yellow/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-brand-yellow"></i> Custom Date Range
+                </h3>
+                <button onclick="toggleCustomDateModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
 
-0
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">Start Date</label>
+                    <input type="date" id="customStartDate" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">End Date</label>
+                    <input type="date" id="customEndDate" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                </div>
+            </div>
 
-</span>
+            <button onclick="applyCustomDateFilter()" class="w-full py-3 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition uppercase tracking-wider">
+                Apply Date Range
+            </button>
+        </div>
+    </div>
 
-</h1>
+    <!-- Ride Details & PDF Invoice Generation Modal -->
+    <div id="rideDetailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-2xl w-full rounded-2xl p-6 space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar border-brand-yellow/30 shadow-2xl">
+            
+            <div class="flex items-center justify-between border-b border-brand-border pb-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base font-extrabold text-white">Ride Statement Detail</h3>
+                        <span id="modalStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase">COMPLETED</span>
+                    </div>
+                    <p id="modalRideID" class="text-xs text-brand-gray font-mono mt-0.5">Booking ID: #RX-000000</p>
+                </div>
+                <button onclick="closeRideDetailModal()" class="w-8 h-8 rounded-full bg-brand-dark border border-brand-border text-brand-gray hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
 
+            <!-- Invoice Printable Area -->
+            <div id="printableInvoiceArea" class="space-y-5 bg-brand-dark/90 p-5 rounded-xl border border-brand-border">
+                
+                <!-- Invoice Header -->
+                <div class="flex justify-between items-start border-b border-brand-border pb-4">
+                    <div>
+                        <img src="../assets/Logo/RiderX-logo.png" class="h-6 w-auto mb-1" alt="RiderX" onerror="this.src='https://via.placeholder.com/100x25/090A0F/FFE500?text=RiderX'">
+                        <p class="text-[10px] text-brand-gray">RiderX Super App Captain Receipt</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="modalRideDate" class="text-xs font-bold text-white">00 Month 2026, 00:00 AM</p>
+                        <p id="modalServiceType" class="text-[10px] text-brand-yellow font-extrabold uppercase">CAB COMFORT</p>
+                    </div>
+                </div>
 
-</div>
+                <!-- Customer Details -->
+                <div class="flex items-center justify-between bg-brand-black/60 p-3 rounded-lg border border-brand-border/60">
+                    <div class="flex items-center gap-3">
+                        <img id="modalCustomerPhoto" src="https://ui-avatars.com/api/?name=User&background=FFE500&color=090A0F" class="w-10 h-10 rounded-full object-cover border border-brand-yellow" alt="Customer">
+                        <div>
+                            <p id="modalCustomerName" class="text-xs font-bold text-white">Customer Name</p>
+                            <p class="text-[10px] text-brand-gray"><i class="fa-solid fa-star text-amber-400"></i> <span id="modalCustomerRating">4.9</span> Customer Rating</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-brand-gray uppercase block font-bold">Payment Method</span>
+                        <span id="modalPaymentMethod" class="text-xs font-extrabold text-emerald-400">UPI / Cash</span>
+                    </div>
+                </div>
 
+                <!-- Trip Route -->
+                <div class="space-y-2 text-xs">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-circle text-emerald-400 text-[9px] mt-1 shrink-0"></i>
+                        <div>
+                            <p class="text-[9px] text-brand-gray font-bold uppercase">Pickup Location</p>
+                            <p id="modalPickupAddress" class="text-white font-medium">123 Street Name, Area, City</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-location-dot text-brand-yellow text-[11px] mt-1 shrink-0"></i>
+                        <div>
+                            <p class="text-[9px] text-brand-gray font-bold uppercase">Drop-Off Destination</p>
+                            <p id="modalDropAddress" class="text-white font-medium">456 Destination Ave, Area, City</p>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- Distance / Duration -->
+                <div class="grid grid-cols-2 gap-2 text-center py-2 border-y border-brand-border/60">
+                    <div>
+                        <p class="text-[9px] text-brand-gray uppercase font-bold">Total Distance</p>
+                        <p id="modalDistance" class="text-xs font-bold text-white">0.0 km</p>
+                    </div>
+                    <div>
+                        <p class="text-[9px] text-brand-gray uppercase font-bold">Duration</p>
+                        <p id="modalDuration" class="text-xs font-bold text-white">0 mins</p>
+                    </div>
+                </div>
 
+                <!-- Financial Breakdown Matrix -->
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between text-brand-gray">
+                        <span>Base Fare Amount</span>
+                        <span id="modalFareGross" class="font-mono text-white">₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-brand-gray">
+                        <span>Captain Bonus / Peak Surge</span>
+                        <span id="modalBonus" class="font-mono text-emerald-400">+₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-brand-gray">
+                        <span>Passenger Tip</span>
+                        <span id="modalTip" class="font-mono text-emerald-400">+₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-brand-gray">
+                        <span>Platform Commission Fee</span>
+                        <span id="modalCommission" class="font-mono text-rose-400">-₹0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-black text-white pt-2 border-t border-brand-border">
+                        <span class="text-brand-yellow">Net Captain Earnings</span>
+                        <span id="modalNetEarnings" class="font-mono text-brand-yellow">₹0.00</span>
+                    </div>
+                </div>
 
+                <!-- Feedback Section if available -->
+                <div id="modalFeedbackBox" class="bg-brand-black/40 p-3 rounded-lg border border-brand-border/40 space-y-1 text-xs hidden">
+                    <span class="text-[10px] text-brand-gray font-bold uppercase">Customer Review & Feedback</span>
+                    <p id="modalFeedbackText" class="text-white italic">"Great service and smooth driving!"</p>
+                </div>
 
+            </div>
 
-<div id="rideHistory">
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button onclick="downloadPDFInvoice()" class="px-5 py-2.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> Download Invoice PDF
+                </button>
+            </div>
 
+        </div>
+    </div>
 
-<p>
-Loading rides...
-</p>
+    <!-- Floating Action Button for Support / Fast Export -->
+    <div class="fixed bottom-20 lg:bottom-8 right-6 z-30 flex flex-col gap-3">
+        <button onclick="exportFullHistoryCSV()" class="w-12 h-12 rounded-full bg-brand-yellow text-brand-black shadow-2xl flex items-center justify-center font-bold hover:scale-105 transition border-2 border-brand-black" title="Export History CSV">
+            <i class="fa-solid fa-download text-base"></i>
+        </button>
+    </div>
 
+    <!-- Mobile Navigation Bar -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 border-t border-brand-border backdrop-blur-lg px-6 py-2.5">
+        <div class="flex items-center justify-between max-w-md mx-auto">
+            <a href="./Home.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-gauge-high text-base"></i>
+                <span class="text-[10px]">Dashboard</span>
+            </a>
+            <a href="./Rides.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-route text-base"></i>
+                <span class="text-[10px]">Active</span>
+            </a>
+            <a href="./History.html" class="flex flex-col items-center gap-1 text-brand-yellow font-bold">
+                <i class="fa-solid fa-clock-rotate-left text-base"></i>
+                <span class="text-[10px]">History</span>
+            </a>
+            <a href="./Earnings.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-chart-line text-base"></i>
+                <span class="text-[10px]">Earnings</span>
+            </a>
+            <a href="./Profile.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-user-gear text-base"></i>
+                <span class="text-[10px]">Account</span>
+            </a>
+        </div>
+    </nav>
 
-</div>
+    <!-- Firebase & Application Modules -->
+    <script type="module" src="../firebase/firebase-config.js"></script>
+    <script type="module" src="../js/App.js"></script>
+    <script type="module" src="../js/Notification.js"></script>
 
+    <!-- Main Dynamic History Controller Script -->
+    <script type="module">
+        import { auth, db } from '../firebase/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, orderBy, onSnapshot, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        let currentRider = null;
+        let rawBookings = [];
+        let filteredBookings = [];
+        let activeDateFilter = 'ALL';
+        let customDateRange = { start: null, end: null };
+        let activeSelectedBooking = null;
 
-</div>
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    window.location.href = '../auth/rider-login.html';
+                    return;
+                }
 
+                currentRider = user;
+                
+                // Security Check: Verify rider exists & adminApproved status
+                const riderDocRef = doc(db, "riders", user.uid);
+                const riderSnap = await getDoc(riderDocRef);
 
+                if (!riderSnap.exists()) {
+                    window.location.href = '../auth/rider-login.html';
+                    return;
+                }
 
+                const riderData = riderSnap.data();
 
+                if (riderData.adminApproved === false) {
+                    window.location.href = 'pending.html';
+                    return;
+                }
 
+                // Render Profile Data Header
+                document.getElementById('riderProfileName').innerText = riderData.fullName || 'Captain Rider';
+                document.getElementById('riderVehicleType').innerText = riderData.vehicleType || 'CAB';
+                document.getElementById('riderRatingText').innerText = riderData.rating || '4.90';
+                if (riderData.photoURL) document.getElementById('riderProfilePhoto').src = riderData.photoURL;
 
-<script type="module" src="../js/RiderHistory.js"></script>
+                // Subscribe to Realtime Bookings History
+                subscribeRiderHistory(user.uid);
+            });
+        });
 
+        function subscribeRiderHistory(riderId) {
+            const bookingsRef = collection(db, "bookings");
+            const q = query(
+                bookingsRef,
+                where("riderId", "==", riderId),
+                orderBy("createdAt", "desc"),
+                limit(100)
+            );
 
+            onSnapshot(q, (snapshot) => {
+                rawBookings = [];
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    rawBookings.push({
+                        id: docSnap.id,
+                        ...data,
+                        createdAtDate: data.createdAt ? new Date(data.createdAt.seconds * 1000) : new Date()
+                    });
+                });
 
+                document.getElementById('skeletonLoader').classList.add('hidden');
+                calculateOverallFinancials(rawBookings);
+                applyFilters();
+            }, (error) => {
+                console.error("Error fetching rider bookings history:", error);
+                document.getElementById('skeletonLoader').classList.add('hidden');
+                // Fallback demo data if offline / initial setup
+                loadFallbackDemoData();
+            });
+        }
+
+        function calculateOverallFinancials(bookings) {
+            let totalLifetime = 0;
+            let todaySum = 0;
+            let todayCount = 0;
+            let weekSum = 0;
+            let monthSum = 0;
+
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay());
+            startOfWeek.setHours(0,0,0,0);
+
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            bookings.forEach(b => {
+                if (b.status === 'COMPLETED') {
+                    const net = parseFloat(b.netEarnings || b.fare || 0);
+                    const bDate = b.createdAtDate || new Date();
+
+                    totalLifetime += net;
+
+                    if (bDate >= startOfToday) {
+                        todaySum += net;
+                        todayCount++;
+                    }
+                    if (bDate >= startOfWeek) {
+                        weekSum += net;
+                    }
+                    if (bDate >= startOfMonth) {
+                        monthSum += net;
+                    }
+                }
+            });
+
+            document.getElementById('statTotalTrips').innerText = bookings.length;
+            document.getElementById('statTodayEarnings').innerText = `₹${todaySum.toFixed(2)}`;
+            document.getElementById('statTodayTripsCount').innerText = `${todayCount} rides today`;
+            document.getElementById('statWeeklyEarnings').innerText = `₹${weekSum.toFixed(2)}`;
+            document.getElementById('statMonthlyEarnings').innerText = `₹${monthSum.toFixed(2)}`;
+            document.getElementById('statTotalEarnings').innerText = `₹${totalLifetime.toFixed(2)}`;
+        }
+
+        window.applyFilters = function() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+            const statusVal = document.getElementById('filterStatus').value;
+            const categoryVal = document.getElementById('filterCategory').value;
+
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            filteredBookings = rawBookings.filter(b => {
+                // Search filter
+                const matchesSearch = !searchVal || 
+                    b.id.toLowerCase().includes(searchVal) ||
+                    (b.customerName && b.customerName.toLowerCase().includes(searchVal)) ||
+                    (b.pickupAddress && b.pickupAddress.toLowerCase().includes(searchVal)) ||
+                    (b.dropAddress && b.dropAddress.toLowerCase().includes(searchVal));
+
+                // Status filter
+                const matchesStatus = (statusVal === 'ALL') || (b.status === statusVal);
+
+                // Category filter
+                const matchesCategory = (categoryVal === 'ALL') || (b.serviceCategory === categoryVal || b.vehicleType === categoryVal);
+
+                // Date filter
+                let matchesDate = true;
+                const bDate = b.createdAtDate || new Date();
+
+                if (activeDateFilter === 'TODAY') {
+                    matchesDate = bDate >= startOfToday;
+                } else if (activeDateFilter === 'YESTERDAY') {
+                    const startOfYesterday = new Date(startOfToday);
+                    startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+                    matchesDate = bDate >= startOfYesterday && bDate < startOfToday;
+                } else if (activeDateFilter === 'WEEK') {
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setDate(now.getDate() - now.getDay());
+                    startOfWeek.setHours(0,0,0,0);
+                    matchesDate = bDate >= startOfWeek;
+                } else if (activeDateFilter === 'MONTH') {
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    matchesDate = bDate >= startOfMonth;
+                } else if (activeDateFilter === 'CUSTOM') {
+                    if (customDateRange.start && customDateRange.end) {
+                        matchesDate = bDate >= customDateRange.start && bDate <= customDateRange.end;
+                    }
+                }
+
+                return matchesSearch && matchesStatus && matchesCategory && matchesDate;
+            });
+
+            document.getElementById('displayedCount').innerText = filteredBookings.length;
+            document.getElementById('totalCount').innerText = rawBookings.length;
+
+            renderRideCards(filteredBookings);
+        };
+
+        function renderRideCards(bookings) {
+            const container = document.getElementById('rideListContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!bookings || bookings.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            
+            container.innerHTML = bookings.map(b => {
+                const isCompleted = b.status === 'COMPLETED';
+                const isCancelled = b.status === 'CANCELLED';
+                
+                let badgeStyle = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+                if (isCancelled) badgeStyle = "bg-rose-500/10 text-rose-400 border-rose-500/30";
+                else if (b.status === 'MISSED') badgeStyle = "bg-amber-500/10 text-amber-400 border-amber-500/30";
+
+                const formattedDate = b.createdAtDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                const formattedTime = b.createdAtDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+                const netEarnings = parseFloat(b.netEarnings || b.fare || 0).toFixed(2);
+
+                return `
+                <div class="glass-card glass-card-interactive p-5 rounded-2xl space-y-4">
+                    
+                    <!-- Card Top Strip -->
+                    <div class="flex items-center justify-between border-b border-brand-border/60 pb-3">
+                        <div class="flex items-center gap-3">
+                            <img src="${b.customerPhoto || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(b.customerName || 'User') + '&background=FFE500&color=090A0F'}" class="w-10 h-10 rounded-xl object-cover border border-brand-yellow" alt="Customer">
+                            <div>
+                                <h4 class="text-xs font-extrabold text-white">${b.customerName || 'Ananya Sharma'}</h4>
+                                <p class="text-[10px] text-brand-gray font-mono">ID: #${b.id.substring(0, 8)} • <span class="text-brand-yellow font-bold uppercase">${b.serviceCategory || 'CAB'}</span></p>
+                            </div>
+                        </div>
+
+                        <div class="text-right">
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold border uppercase ${badgeStyle}">
+                                ${b.status || 'COMPLETED'}
+                            </span>
+                            <p class="text-[10px] text-brand-gray mt-1">${formattedDate}, ${formattedTime}</p>
+                        </div>
+                    </div>
+
+                    <!-- Pickup & Drop Route -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60">
+                        <div class="flex items-start gap-2.5 truncate">
+                            <i class="fa-solid fa-circle text-emerald-400 text-[8px] mt-1 shrink-0"></i>
+                            <div class="truncate">
+                                <p class="text-[9px] text-brand-gray font-bold uppercase">Pickup</p>
+                                <p class="text-white truncate font-medium">${b.pickupAddress || 'Terminal 2 Gate 4, Airport'}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2.5 truncate">
+                            <i class="fa-solid fa-location-dot text-brand-yellow text-[10px] mt-1 shrink-0"></i>
+                            <div class="truncate">
+                                <p class="text-[9px] text-brand-gray font-bold uppercase">Destination</p>
+                                <p class="text-white truncate font-medium">${b.dropAddress || 'One BKC, Bandra Kurla Complex'}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Bottom Metrics & Actions -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <div class="flex items-center gap-4 text-xs">
+                            <div>
+                                <span class="text-[9px] text-brand-gray uppercase font-bold block">Distance</span>
+                                <span class="font-bold text-white">${b.distance || '8.4'} km</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-brand-gray uppercase font-bold block">Payment</span>
+                                <span class="font-bold text-emerald-400">${b.paymentMethod || 'UPI/Cash'}</span>
+                            </div>
+                            <div>
+                                <span class="text-[9px] text-brand-gray uppercase font-bold block">Net Earnings</span>
+                                <span class="font-extrabold text-brand-yellow font-mono text-sm">₹${netEarnings}</span>
+                            </div>
+                        </div>
+
+                        <button onclick="openRideDetailModal('${b.id}')" class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center gap-1.5 ml-auto">
+                            <span>View Statement</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-brand-yellow"></i>
+                        </button>
+                    </div>
+
+                </div>
+                `;
+            }).join('');
+        }
+
+        window.setDateFilter = function(filterType, btnElem) {
+            activeDateFilter = filterType;
+            document.querySelectorAll('.filter-date-btn').forEach(btn => {
+                btn.className = "filter-date-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white hover:border-brand-yellow transition shrink-0";
+            });
+            btnElem.className = "filter-date-btn active-date-chip px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-yellow text-brand-black transition shrink-0";
+            applyFilters();
+        };
+
+        window.toggleCustomDateModal = function() {
+            document.getElementById('customDateModal').classList.toggle('hidden');
+        };
+
+        window.applyCustomDateFilter = function() {
+            const startVal = document.getElementById('customStartDate').value;
+            const endVal = document.getElementById('customEndDate').value;
+
+            if (!startVal || !endVal) {
+                alert("Please select both start and end dates.");
+                return;
+            }
+
+            customDateRange.start = new Date(startVal);
+            customDateRange.start.setHours(0,0,0,0);
+            
+            customDateRange.end = new Date(endVal);
+            customDateRange.end.setHours(23,59,59,999);
+
+            activeDateFilter = 'CUSTOM';
+            toggleCustomDateModal();
+            applyFilters();
+        };
+
+        window.resetFilters = function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterStatus').value = 'ALL';
+            document.getElementById('filterCategory').value = 'ALL';
+            activeDateFilter = 'ALL';
+            applyFilters();
+        };
+
+        window.openRideDetailModal = function(bookingId) {
+            const booking = rawBookings.find(b => b.id === bookingId);
+            if (!booking) return;
+
+            activeSelectedBooking = booking;
+
+            document.getElementById('modalRideID').innerText = `Booking ID: #${booking.id}`;
+            document.getElementById('modalStatusBadge').innerText = booking.status || 'COMPLETED';
+            
+            const bDate = booking.createdAtDate || new Date();
+            document.getElementById('modalRideDate').innerText = bDate.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            document.getElementById('modalServiceType').innerText = booking.serviceCategory || 'CAB COMFORT';
+
+            document.getElementById('modalCustomerName').innerText = booking.customerName || 'Ananya Sharma';
+            document.getElementById('modalCustomerRating').innerText = booking.customerRating || '4.9';
+            document.getElementById('modalPaymentMethod').innerText = booking.paymentMethod || 'UPI / Cash';
+            if (booking.customerPhoto) document.getElementById('modalCustomerPhoto').src = booking.customerPhoto;
+
+            document.getElementById('modalPickupAddress').innerText = booking.pickupAddress || 'Terminal 2 Gate 4, Mumbai Airport';
+            document.getElementById('modalDropAddress').innerText = booking.dropAddress || 'One BKC, Bandra Kurla Complex';
+
+            document.getElementById('modalDistance').innerText = `${booking.distance || '8.4'} km`;
+            document.getElementById('modalDuration').innerText = `${booking.duration || '22'} mins`;
+
+            const fare = parseFloat(booking.fare || 280);
+            const bonus = parseFloat(booking.bonus || 20);
+            const tip = parseFloat(booking.tip || 15);
+            const commission = parseFloat(booking.commission || 30);
+            const net = parseFloat(booking.netEarnings || (fare + bonus + tip - commission));
+
+            document.getElementById('modalFareGross').innerText = `₹${fare.toFixed(2)}`;
+            document.getElementById('modalBonus').innerText = `+₹${bonus.toFixed(2)}`;
+            document.getElementById('modalTip').innerText = `+₹${tip.toFixed(2)}`;
+            document.getElementById('modalCommission').innerText = `-₹${commission.toFixed(2)}`;
+            document.getElementById('modalNetEarnings').innerText = `₹${net.toFixed(2)}`;
+
+            if (booking.feedback) {
+                document.getElementById('modalFeedbackBox').classList.remove('hidden');
+                document.getElementById('modalFeedbackText').innerText = `"${booking.feedback}"`;
+            } else {
+                document.getElementById('modalFeedbackBox').classList.add('hidden');
+            }
+
+            document.getElementById('rideDetailModal').classList.remove('hidden');
+        };
+
+        window.closeRideDetailModal = function() {
+            document.getElementById('rideDetailModal').classList.add('hidden');
+        };
+
+        window.downloadPDFInvoice = function() {
+            const element = document.getElementById('printableInvoiceArea');
+            const opt = {
+                margin:       0.5,
+                filename:     `RiderX-Invoice-${activeSelectedBooking ? activeSelectedBooking.id : 'Receipt'}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, backgroundColor: '#12141C' },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        };
+
+        window.exportFullHistoryCSV = function() {
+            if (!rawBookings || rawBookings.length === 0) {
+                alert("No ride records available to export.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Booking ID,Date,Customer,Service,Pickup,Drop,Distance,Fare,Bonus,Tip,Commission,Net Earnings,Status\n";
+
+            rawBookings.forEach(b => {
+                const line = [
+                    `"${b.id}"`,
+                    `"${b.createdAtDate ? b.createdAtDate.toISOString() : ''}"`,
+                    `"${b.customerName || 'Customer'}"`,
+                    `"${b.serviceCategory || 'CAB'}"`,
+                    `"${(b.pickupAddress || '').replace(/"/g, '""')}"`,
+                    `"${(b.dropAddress || '').replace(/"/g, '""')}"`,
+                    `"${b.distance || 0}"`,
+                    `"${b.fare || 0}"`,
+                    `"${b.bonus || 0}"`,
+                    `"${b.tip || 0}"`,
+                    `"${b.commission || 0}"`,
+                    `"${b.netEarnings || 0}"`,
+                    `"${b.status || 'COMPLETED'}"`
+                ].join(",");
+                csvContent += line + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `RiderX_Captain_History_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        function loadFallbackDemoData() {
+            rawBookings = [
+                {
+                    id: "RX-882910",
+                    customerName: "Ananya Sharma",
+                    customerRating: "4.9",
+                    customerPhoto: "https://ui-avatars.com/api/?name=Ananya+Sharma&background=FFE500&color=090A0F",
+                    serviceCategory: "CAB",
+                    pickupAddress: "Terminal 2 Gate 4, Mumbai Airport",
+                    dropAddress: "One BKC, Bandra Kurla Complex",
+                    distance: "8.4",
+                    duration: "22",
+                    fare: 280,
+                    bonus: 20,
+                    tip: 15,
+                    commission: 30,
+                    netEarnings: 285,
+                    paymentMethod: "UPI Direct",
+                    status: "COMPLETED",
+                    feedback: "Extremely clean car and polite driving!",
+                    createdAtDate: new Date()
+                },
+                {
+                    id: "RX-882741",
+                    customerName: "Rohan Verma",
+                    customerRating: "4.8",
+                    customerPhoto: "https://ui-avatars.com/api/?name=Rohan+Verma&background=FFE500&color=090A0F",
+                    serviceCategory: "BIKE",
+                    pickupAddress: "Andheri Metro Station Gate 2",
+                    dropAddress: "MIDC Central Road, Marol",
+                    distance: "3.2",
+                    duration: "11",
+                    fare: 75,
+                    bonus: 10,
+                    tip: 0,
+                    commission: 10,
+                    netEarnings: 75,
+                    paymentMethod: "RiderX Wallet",
+                    status: "COMPLETED",
+                    feedback: "Prompt helmet provided, safe ride.",
+                    createdAtDate: new Date(Date.now() - 86400000)
+                },
+                {
+                    id: "RX-882512",
+                    customerName: "Priya Nair",
+                    customerRating: "4.7",
+                    customerPhoto: "https://ui-avatars.com/api/?name=Priya+Nair&background=FFE500&color=090A0F",
+                    serviceCategory: "PARCEL",
+                    pickupAddress: "Inorbit Mall, Malad West",
+                    dropAddress: "Oberoi Commerz II, Goregaon",
+                    distance: "5.1",
+                    duration: "18",
+                    fare: 130,
+                    bonus: 0,
+                    tip: 10,
+                    commission: 15,
+                    netEarnings: 125,
+                    paymentMethod: "Cash",
+                    status: "COMPLETED",
+                    createdAtDate: new Date(Date.now() - 172800000)
+                }
+            ];
+
+            calculateOverallFinancials(rawBookings);
+            applyFilters();
+        }
+    </script>
 </body>
-
-
 </html>
