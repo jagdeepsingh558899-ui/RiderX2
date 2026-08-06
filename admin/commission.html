@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Commission</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+.box{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+
+}
+
+
+input{
+
+width:100%;
+padding:12px;
+margin:10px 0;
+border-radius:8px;
+border:none;
+
+}
+
+
+button{
+
+width:100%;
+padding:14px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+💰 Commission Settings
+
+</div>
+
+
+
+<div class="container">
+
+
+<div class="box">
+
+
+<h3>
+🏍 Rider Commission
+</h3>
+
+
+<input id="riderCommission" placeholder="Rider Commission %">
+
+
+
+<h3>
+🏦 Platform Commission
+</h3>
+
+
+<input id="platformCommission" placeholder="Platform Commission %">
+
+
+
+<button onclick="saveCommission()">
+
+Save Commission
+
+</button>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+setDoc,
+getDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+
+async function load(){
+
+
+let snap=
+
+await getDoc(
+
+doc(db,"settings","commission")
+
+);
+
+
+
+if(snap.exists()){
+
+
+let d=snap.data();
+
+
+
+riderCommission.value=
+
+d.riderCommission || "";
+
+
+
+platformCommission.value=
+
+d.platformCommission || "";
+
+
+}
+
+
+
+}
+
+
+
+
+
+window.saveCommission=async function(){
+
+
+
+await setDoc(
+
+doc(db,"settings","commission"),
+
+{
+
+
+riderCommission:
+
+Number(riderCommission.value),
+
+
+
+platformCommission:
+
+Number(platformCommission.value)
+
+
+
+}
+
+);
+
+
+
+alert("Commission Saved ✅");
+
+
+}
+
+
+
+
+
+
+load();
+
+
+
+</script>
+
+
+</body>
+
+</html>
