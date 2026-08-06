@@ -1,431 +1,165 @@
-// =================================
+// =========================================
 // RiderX Booking System
-// Ride Request + Fare Calculation
-// =================================
+// Real Time Ride Create Engine
+// =========================================
 
-
-import {
-
-auth,
-rtdb
-
-} from "../firebase/Firebase-config.js";
-
-
+import { database } from "../firebase/Firebase-config.js";
 
 import {
+    ref,
+    push,
+    set,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-onAuthStateChanged
 
-} from
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+// Create Ride
+export async function createRide(rideData){
 
+    try{
 
+        const ridesRef = ref(database,"rides");
 
-import {
+        const newRide = push(ridesRef);
 
-ref,
-push,
-set
 
-} from
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+        const ride = {
 
+            rideId:newRide.key,
 
+            customerId: rideData.customerId || "",
 
+            customerName: rideData.customerName || "Customer",
 
+            customerPhone: rideData.customerPhone || "",
 
-let selectedType = "Bike Taxi";
 
-let currentUser = null;
+            pickup:{
+                address: rideData.pickupAddress || "",
+                lat: rideData.pickupLat || 0,
+                lng: rideData.pickupLng || 0
+            },
 
 
+            drop:{
+                address: rideData.dropAddress || "",
+                lat: rideData.dropLat || 0,
+                lng: rideData.dropLng || 0
+            },
 
 
+            serviceType:
+            rideData.serviceType || "Bike Taxi",
 
-// User Check
 
+            vehicleType:
+            rideData.vehicleType || "Bike",
 
-onAuthStateChanged(
 
-auth,
+            fare:
+            rideData.fare || 0,
 
-(user)=>{
 
+            payment:
+            rideData.payment || "Cash",
 
-if(user){
 
-currentUser=user;
+            status:
+            "searching_rider",
 
 
-}
+            riderId:
+            "",
 
 
-});
+            riderName:
+            "",
 
 
+            riderPhone:
+            "",
 
 
+            createdAt:
+            serverTimestamp()
 
+        };
 
 
-// Ride Type Select
+        await set(newRide,ride);
 
 
-document.querySelectorAll(".option")
+        console.log(
+            "Ride Created:",
+            newRide.key
+        );
 
-.forEach(option=>{
 
+        return {
 
-option.addEventListener(
+            success:true,
 
-"click",
+            rideId:newRide.key
 
-()=>{
+        };
 
 
-document.querySelectorAll(".option")
+    }
 
-.forEach(item=>{
+    catch(error){
 
-item.classList.remove("active");
+        console.log(
+            "Booking Error:",
+            error
+        );
 
-});
 
+        return {
 
+            success:false,
 
-option.classList.add("active");
+            error:error.message
 
+        };
 
-
-selectedType =
-
-option.dataset.type;
-
-
-
-}
-
-
-);
-
-
-});
-
-
-
-
-
-
-
-
-// Distance Calculator
-
-function calculateDistance(){
-
-
-
-// Temporary distance
-
-// Later GPS route API connect hoga
-
-
-let distance =
-
-Math.floor(
-
-Math.random()*10
-
-)+1;
-
-
-
-return distance;
-
-
+    }
 
 }
 
 
 
+// Update Ride Status
 
+export async function updateRideStatus(
+    rideId,
+    status
+){
 
+    try{
 
-// Fare Calculator
 
+        const rideRef =
+        ref(database,
+        `rides/${rideId}/status`);
 
-function calculateFare(distance){
 
+        await set(
+            rideRef,
+            status
+        );
 
 
-let hour =
+        return true;
 
-new Date().getHours();
 
+    }
 
+    catch(error){
 
-let pricePerKm;
+        console.log(error);
 
+        return false;
 
-
-if(hour >=22 || hour <6){
-
-
-pricePerKm = 11;
-
-
-}
-
-else{
-
-
-pricePerKm = 8;
-
-
-if(distance > 10){
-
-
-pricePerKm = 9;
-
-
-}
-
-
-}
-
-
-
-return distance * pricePerKm;
-
-
-
-}
-
-
-
-
-
-
-// Book Ride
-
-
-
-const bookBtn =
-
-document.getElementById("bookRide");
-
-
-
-
-
-if(bookBtn){
-
-
-
-bookBtn.addEventListener(
-
-"click",
-
-async()=>{
-
-
-
-
-
-const pickup =
-
-document.getElementById("pickup").value;
-
-
-
-const drop =
-
-document.getElementById("drop").value;
-
-
-
-
-
-
-if(!pickup || !drop){
-
-
-document.getElementById("message").innerHTML =
-
-"Please enter pickup and drop location";
-
-
-return;
-
-
-}
-
-
-
-
-
-
-
-if(!currentUser){
-
-
-document.getElementById("message").innerHTML =
-
-"Please login first";
-
-
-return;
-
-
-}
-
-
-
-
-
-
-let distance =
-
-calculateDistance();
-
-
-
-let fare =
-
-calculateFare(distance);
-
-
-
-
-
-document.getElementById("distance").innerHTML =
-
-distance+" KM";
-
-
-
-
-document.getElementById("fare").innerHTML =
-
-"₹"+fare;
-
-
-
-
-
-
-
-const rideData = {
-
-
-customerId:
-
-currentUser.uid,
-
-
-service:
-
-selectedType,
-
-
-pickup:
-
-
-pickup,
-
-
-drop:
-
-drop,
-
-
-distance:
-
-distance,
-
-
-fare:
-
-fare,
-
-
-status:
-
-"searching",
-
-
-
-createdAt:
-
-Date.now()
-
-
-
-};
-
-
-
-
-
-
-
-
-try{
-
-
-
-const rideRef =
-
-push(
-
-ref(rtdb,"rides")
-
-);
-
-
-
-await set(
-
-rideRef,
-
-rideData
-
-);
-
-
-
-
-
-
-document.getElementById("message").innerHTML =
-
-"Ride Request Sent 🚀";
-
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-document.getElementById("message").innerHTML =
-
-error.message;
-
-
-}
-
-
-
-}
-
-
-);
-
+    }
 
 }
