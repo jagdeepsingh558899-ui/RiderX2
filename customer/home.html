@@ -6,47 +6,168 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX</title>
-
-<link rel="stylesheet" href="../css/style.css">
-
+<title>RiderX Home</title>
 
 <style>
 
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+
+body{
+
+background:#f5f5f5;
+}
+
+
+.header{
+
+background:#000;
+color:white;
+padding:20px;
+border-radius:0 0 25px 25px;
+
+}
+
+
 .logo{
 
-width:100px;
-height:100px;
-border-radius:50%;
-object-fit:cover;
+font-size:32px;
+font-weight:800;
+letter-spacing:2px;
+
+}
+
+.logo span{
+
+color:#00eaff;
 
 }
 
 
-.box{
+.welcome{
 
-background:#1d1d1d;
+margin-top:10px;
+font-size:18px;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.location-box{
+
+background:white;
+padding:20px;
+border-radius:20px;
+box-shadow:0 5px 20px #ddd;
+
+}
+
+
+
+.input{
+
+background:#f1f1f1;
 padding:15px;
-border-radius:15px;
-margin-top:15px;
+border-radius:12px;
+margin-bottom:12px;
 
 }
 
 
-button{
 
-width:100%;
-padding:14px;
-margin-top:15px;
-background:#ffcc00;
+input{
+
 border:none;
-border-radius:10px;
+outline:none;
+background:none;
+width:100%;
+font-size:16px;
+
+}
+
+
+
+.ride-title{
+
+margin:25px 0 15px;
+font-size:22px;
 font-weight:bold;
 
 }
 
-</style>
 
+
+.cards{
+
+display:flex;
+gap:15px;
+
+}
+
+
+
+.card{
+
+background:white;
+width:33%;
+padding:15px;
+border-radius:18px;
+text-align:center;
+box-shadow:0 5px 15px #ddd;
+
+}
+
+
+
+.card img{
+
+width:45px;
+height:45px;
+
+}
+
+
+
+.card p{
+
+margin-top:8px;
+font-weight:bold;
+
+}
+
+
+
+button{
+
+margin-top:25px;
+width:100%;
+padding:17px;
+
+border:none;
+border-radius:15px;
+
+background:#00eaff;
+
+font-size:18px;
+font-weight:bold;
+
+}
+
+
+</style>
 
 </head>
 
@@ -54,9 +175,15 @@ font-weight:bold;
 <body>
 
 
-<div class="header" id="appName">
+<div class="header">
 
-RiderX
+<div class="logo">
+RIDER<span>X</span>
+</div>
+
+<div class="welcome">
+Book your ride anytime
+</div>
 
 </div>
 
@@ -65,31 +192,16 @@ RiderX
 <div class="container">
 
 
-<img id="logo"
-class="logo"
-src="../assets/logo.png">
+<div class="location-box">
 
 
-
-<div class="box" id="banner">
-
-Welcome to RiderX 🚕
-
+<div class="input">
+<input placeholder="📍 Pickup Location">
 </div>
 
 
-
-<div class="box">
-
-<h3>
-📢 Notifications
-</h3>
-
-
-<div id="notifications">
-
-Loading...
-
+<div class="input">
+<input placeholder="🏁 Drop Location">
 </div>
 
 
@@ -97,148 +209,44 @@ Loading...
 
 
 
-<button onclick="goBooking()">
+<div class="ride-title">
+Choose Ride
+</div>
 
-🚕 Book Ride
 
+
+<div class="cards">
+
+
+<div class="card">
+🚲
+<p>Bike</p>
+</div>
+
+
+<div class="card">
+🛺
+<p>Auto</p>
+</div>
+
+
+<div class="card">
+🚕
+<p>Cab</p>
+</div>
+
+
+</div>
+
+
+
+<button>
+Book Ride
 </button>
 
 
-
 </div>
 
-
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-doc,
-getDoc,
-collection,
-getDocs
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
-
-async function loadApp(){
-
-
-
-let snap=await getDoc(
-
-doc(db,"settings","app")
-
-);
-
-
-
-if(snap.exists()){
-
-
-let data=snap.data();
-
-
-
-if(data.appName)
-
-appName.innerHTML=data.appName;
-
-
-
-if(data.logo)
-
-logo.src=data.logo;
-
-
-
-if(data.banner)
-
-banner.innerHTML=data.banner;
-
-
-
-}
-
-
-
-
-
-let notes=await getDocs(
-
-collection(db,"notifications")
-
-);
-
-
-
-let box=
-
-document.getElementById("notifications");
-
-
-
-box.innerHTML="";
-
-
-
-notes.forEach((n)=>{
-
-
-box.innerHTML +=`
-
-<p>
-
-📢 ${n.data().message}
-
-</p>
-
-`;
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-window.goBooking=function(){
-
-location.href="booking.html";
-
-}
-
-
-
-
-
-loadApp();
-
-
-
-</script>
 
 
 </body>
