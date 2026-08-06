@@ -1,91 +1,208 @@
 // =====================================
-// RiderX Admin Dashboard V2
+// RiderX Admin Dashboard
+// Compatible With Current Ride System
 // =====================================
 
-import { auth, db } from "../firebase/config.js";
+
+import { db, auth } from "../firebase/config.js";
+
 
 import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
 
 import {
-    collection,
-    getDocs,
-    query,
-    where
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-const totalCustomers = document.getElementById("totalCustomers");
-const totalRiders = document.getElementById("totalRiders");
-const activeBookings = document.getElementById("activeBookings");
-const totalEarnings = document.getElementById("totalEarnings");
+collection,
+getDocs
 
-onAuthStateChanged(auth, async (user) => {
+}
 
-    if (!user) {
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-        window.location.href = "../auth/login.html";
-        return;
 
-    }
 
-    try {
 
-        // Customers
-        const customerQuery = query(
-            collection(db, "users"),
-            where("role", "==", "customer")
-        );
 
-        const customerSnap = await getDocs(customerQuery);
+const totalCustomers =
+document.getElementById("totalCustomers");
 
-        totalCustomers.innerHTML = customerSnap.size;
 
-        // Riders
-        const riderQuery = query(
-            collection(db, "users"),
-            where("role", "==", "rider")
-        );
+const totalRiders =
+document.getElementById("totalRiders");
 
-        const riderSnap = await getDocs(riderQuery);
 
-        totalRiders.innerHTML = riderSnap.size;
+const activeBookings =
+document.getElementById("activeBookings");
 
-        // Active Bookings
-        const bookingQuery = query(
-            collection(db, "bookings"),
-            where("status", "!=", "completed")
-        );
 
-        const bookingSnap = await getDocs(bookingQuery);
+const totalEarnings =
+document.getElementById("totalEarnings");
 
-        activeBookings.innerHTML = bookingSnap.size;
 
-        // Earnings
-        const paymentSnap = await getDocs(collection(db, "payments"));
 
-        let total = 0;
 
-        paymentSnap.forEach((doc) => {
 
-            const data = doc.data();
+onAuthStateChanged(auth, async(user)=>{
 
-            if (data.amount) {
-                total += Number(data.amount);
-            }
 
-        });
+if(!user){
 
-        totalEarnings.innerHTML = "₹" + total;
+location.href="../auth/login.html";
 
-    }
+return;
 
-    catch (error) {
+}
 
-        console.error(error);
 
-        alert(error.message);
 
-    }
+try{
+
+
+
+// USERS
+
+const usersSnap =
+await getDocs(
+collection(db,"users")
+);
+
+
+
+let customers=0;
+let riders=0;
+
+
+
+usersSnap.forEach((u)=>{
+
+
+let data=u.data();
+
+
+
+if(data.role==="customer"){
+
+customers++;
+
+}
+
+
+
+if(data.role==="rider"){
+
+riders++;
+
+}
+
+
+
+});
+
+
+
+if(totalCustomers)
+
+totalCustomers.innerHTML=customers;
+
+
+
+if(totalRiders)
+
+totalRiders.innerHTML=riders;
+
+
+
+
+
+
+
+
+// RIDES
+
+
+const ridesSnap =
+await getDocs(
+collection(db,"rides")
+);
+
+
+
+let active=0;
+
+let earnings=0;
+
+
+
+ridesSnap.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+if(
+
+data.status==="Pending" ||
+
+data.status==="Accepted" ||
+
+data.status==="Started"
+
+){
+
+active++;
+
+}
+
+
+
+if(data.status==="Completed"){
+
+earnings += Number(data.fare || 0);
+
+}
+
+
+
+});
+
+
+
+
+
+
+if(activeBookings)
+
+activeBookings.innerHTML=active;
+
+
+
+if(totalEarnings)
+
+totalEarnings.innerHTML="₹"+earnings;
+
+
+
+}
+
+
+catch(error){
+
+
+console.log(
+"Admin Dashboard Error:",
+error
+);
+
+
+}
+
+
 
 });
