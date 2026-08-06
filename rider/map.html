@@ -6,29 +6,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Map</title>
+<title>RiderX Live Route</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 
 <style>
 
+body{
+
+margin:0;
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+padding:20px;
+background:#111;
+text-align:center;
+font-size:22px;
+border-bottom:2px solid #FFD600;
+
+}
+
+
 #map{
 
-height:80vh;
+height:75vh;
 width:100%;
 
 }
 
+
 .info{
 
-background:#1d1d1d;
 padding:15px;
-border-radius:10px;
+background:#111;
 
 }
+
 
 </style>
 
@@ -38,14 +58,13 @@ border-radius:10px;
 <body>
 
 
+
 <div class="header">
 
-🗺️ Ride Map
+🏍 Rider Navigation
 
 </div>
 
-
-<div class="container">
 
 
 <div class="info" id="info">
@@ -55,34 +74,32 @@ Loading Ride...
 </div>
 
 
+
 <div id="map"></div>
 
 
-</div>
 
 
 
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
 
 <script type="module">
 
 
-import {db} from "../firebase/config.js";
+import {db,auth} from "../firebase/config.js";
 
 
 import {
 
 doc,
-getDoc
+getDoc,
+onSnapshot
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
@@ -91,6 +108,35 @@ from
 let rideId=
 
 localStorage.getItem("rideId");
+
+
+
+let map=L.map("map");
+
+
+
+L.tileLayer(
+
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+maxZoom:19
+
+}
+
+).addTo(map);
+
+
+
+
+let riderMarker=null;
+
+let pickupMarker=null;
+
+let dropMarker=null;
+
+let route=null;
 
 
 
@@ -110,11 +156,8 @@ doc(db,"rides",rideId)
 
 
 
-if(!snap.exists()){
+if(!snap.exists()) return;
 
-return;
-
-}
 
 
 
@@ -124,19 +167,31 @@ let data=snap.data();
 
 
 
+let pickup=data.pickupCoords;
+
+let drop=data.dropCoords;
+
+
+
+
+
 document.getElementById("info").innerHTML=
 
 `
 
-🚕 ${data.service}
+🏍 ${data.service}
 
 <br>
 
-💰 ${data.fare}
+💰 Fare ₹${data.fare}
 
 <br>
 
-📏 ${data.distance} KM
+📍 Pickup → ${data.pickup}
+
+<br>
+
+🏁 Drop → ${data.drop}
 
 `;
 
@@ -144,111 +199,146 @@ document.getElementById("info").innerHTML=
 
 
 
-let map=L.map('map').setView(
+pickupMarker=L.marker(
+
+[pickup.lat,pickup.lng]
+
+)
+
+.addTo(map)
+
+.bindPopup("📍 Customer Pickup");
+
+
+
+
+
+dropMarker=L.marker(
+
+[drop.lat,drop.lng]
+
+)
+
+.addTo(map)
+
+.bindPopup("🏁 Drop Location");
+
+
+
+
+
+route=L.polyline(
 
 [
 
-data.pickupLat,
+[pickup.lat,pickup.lng],
 
-data.pickupLng
+[drop.lat,drop.lng]
 
-],
+]
 
-13
+)
+
+.addTo(map);
+
+
+
+
+
+map.fitBounds(
+
+route.getBounds()
 
 );
 
 
 
-L.tileLayer(
 
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 
-).addTo(map);
+startRiderTracking();
 
 
 
-
-
-let pickup=L.marker(
-
-[
-
-data.pickupLat,
-
-data.pickupLng
-
-]
-
-).addTo(map);
-
-
-
-pickup.bindPopup("📍 Pickup").openPopup();
+}
 
 
 
 
 
-let drop=L.marker(
 
-[
 
-data.dropLat,
-
-data.dropLng
-
-]
-
-).addTo(map);
+function startRiderTracking(){
 
 
 
-drop.bindPopup("🏁 Drop");
+let riderId=
+
+auth.currentUser.uid;
 
 
 
+onSnapshot(
+
+doc(db,"riderLocations",riderId),
+
+(snap)=>{
 
 
-let line=L.polyline(
-
-[
-
-[
-
-data.pickupLat,
-
-data.pickupLng
-
-],
-
-
-[
-
-data.dropLat,
-
-data.dropLng
-
-]
-
-
-]
-
-]
-
-).addTo(map);
+if(!snap.exists()) return;
 
 
 
 
+let data=snap.data();
 
-map.fitBounds(line.getBounds());
 
+
+
+if(riderMarker){
+
+
+riderMarker.setLatLng(
+
+[data.lat,data.lng]
+
+);
+
+
+}
+
+else{
+
+
+riderMarker=L.marker(
+
+[data.lat,data.lng]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"🏍 You"
+
+)
+
+.openPopup();
+
+
+}
 
 
 
 
 }
+
+);
+
+
+
+}
+
 
 
 
@@ -257,6 +347,7 @@ loadRide();
 
 
 </script>
+
 
 
 </body>
