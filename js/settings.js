@@ -1,94 +1,33 @@
-
-// ==========================================
-// RiderX Settings System V1
-// Dark Mode + Language + Logout + Install
-// ==========================================
-
-
-import { auth } from "../firebase/config.js";
+// =====================================
+// RiderX Admin Settings System
+// =====================================
 
 
 import {
 
-signOut
+db
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+from "../firebase/config.js";
 
 
 
+import {
 
 
-const darkMode =
-document.getElementById("darkMode");
+doc,
 
+getDoc,
 
-const notifications =
-document.getElementById("notifications");
-
-
-const language =
-document.getElementById("language");
-
-
-const logout =
-document.getElementById("logout");
-
-
-const installBtn =
-document.getElementById("installApp");
-
-
-
-
-
-
-// DARK MODE
-
-
-if(localStorage.getItem("darkMode")==="off"){
-
-darkMode.checked=false;
-
-}
-
-
-
-
-darkMode.onchange=()=>{
-
-
-if(darkMode.checked){
-
-
-localStorage.setItem(
-"darkMode",
-"on"
-);
-
-
-document.body.style.background="#000";
+setDoc
 
 
 }
 
-else{
+from
 
-
-localStorage.setItem(
-"darkMode",
-"off"
-);
-
-
-document.body.style.background="#fff";
-
-
-}
-
-
-};
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
@@ -97,23 +36,47 @@ document.body.style.background="#fff";
 
 
 
+const settingsRef =
 
-// NOTIFICATION
+doc(
 
+db,
 
-notifications.onchange=()=>{
+"settings",
 
-
-localStorage.setItem(
-
-"notifications",
-
-notifications.checked
+"app"
 
 );
 
 
-};
+
+
+
+
+
+
+
+const fields = [
+
+"appName",
+
+"supportNumber",
+
+"bikeService",
+
+"cabService",
+
+"parcelService",
+
+"foodService",
+
+"cashPayment",
+
+"onlinePayment",
+
+"maintenance"
+
+];
 
 
 
@@ -123,88 +86,142 @@ notifications.checked
 
 
 
-// LANGUAGE
-
-
-language.value=
-
-localStorage.getItem("language")
-||
-"English";
+// =====================================
+// LOAD SETTINGS
+// =====================================
 
 
 
+async function loadSettings(){
 
-language.onchange=()=>{
 
 
-localStorage.setItem(
+try{
 
-"language",
 
-language.value
+
+const snap =
+
+await getDoc(
+
+settingsRef
 
 );
 
 
-};
+
+
+
+
+if(snap.exists()){
+
+
+
+const data = snap.data();
 
 
 
 
 
+fields.forEach(field=>{
 
 
 
+const element =
 
-// LOGOUT
-
-
-logout.onclick=async()=>{
-
-
-await signOut(auth);
-
-
-location.href="../auth/login.html";
-
-
-};
+document.getElementById(field);
 
 
 
 
 
+if(element){
 
 
 
+element.value =
 
-// PWA INSTALL
-
-
-let deferredPrompt;
+data[field] || "";
 
 
-
-window.addEventListener(
-
-"beforeinstallprompt",
-
-(e)=>{
-
-
-e.preventDefault();
-
-
-deferredPrompt=e;
-
-
-
-if(installBtn){
-
-installBtn.style.display="flex";
 
 }
+
+
+
+});
+
+
+
+}
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+console.log(error);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SAVE SETTINGS
+// =====================================
+
+
+
+const saveBtn =
+
+document.getElementById(
+"saveSettings"
+);
+
+
+
+
+
+
+if(saveBtn){
+
+
+
+saveBtn.onclick = async()=>{
+
+
+
+let settings={};
+
+
+
+
+
+
+fields.forEach(field=>{
+
+
+
+settings[field] =
+
+document.getElementById(field).value;
 
 
 
@@ -215,24 +232,56 @@ installBtn.style.display="flex";
 
 
 
-installBtn.onclick=async()=>{
 
 
-if(!deferredPrompt)
-
-return;
+try{
 
 
 
-deferredPrompt.prompt();
+await setDoc(
+
+settingsRef,
+
+settings,
+
+{
+
+merge:true
+
+}
+
+);
 
 
 
-await deferredPrompt.userChoice;
 
 
 
-deferredPrompt=null;
+alert(
+
+"Settings Saved Successfully"
+
+);
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+alert(
+
+error.message
+
+);
+
+
+
+}
 
 
 
@@ -240,12 +289,13 @@ deferredPrompt=null;
 
 
 
+}
 
 
 
 
-console.log(
 
-"RiderX Settings JS Loaded"
 
-);
+
+
+loadSettings();
