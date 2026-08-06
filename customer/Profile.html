@@ -8,16 +8,211 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>RiderX Customer Profile</title>
-
-
-<link rel="manifest" href="../manifest.json">
-
-
-<meta name="theme-color" content="#FFD600">
+<title>RiderX Profile</title>
 
 
 <link rel="stylesheet" href="../css/style.css">
+
+
+
+<style>
+
+
+body{
+
+margin:0;
+
+background:#000;
+
+color:white;
+
+font-family:Arial,sans-serif;
+
+padding-bottom:80px;
+
+}
+
+
+
+.header{
+
+background:#111;
+
+padding:20px;
+
+font-size:25px;
+
+font-weight:bold;
+
+color:#FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.profile-card{
+
+background:#111;
+
+padding:25px;
+
+border-radius:25px;
+
+text-align:center;
+
+}
+
+
+
+.avatar{
+
+width:90px;
+
+height:90px;
+
+border-radius:50%;
+
+background:#FFD600;
+
+color:#000;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:40px;
+
+margin:auto;
+
+}
+
+
+
+.name{
+
+font-size:25px;
+
+font-weight:bold;
+
+margin-top:15px;
+
+}
+
+
+
+.info-card{
+
+background:#111;
+
+padding:20px;
+
+border-radius:20px;
+
+margin-top:20px;
+
+}
+
+
+
+.row{
+
+padding:15px 0;
+
+border-bottom:1px solid #333;
+
+}
+
+
+
+button{
+
+width:100%;
+
+padding:15px;
+
+margin-top:15px;
+
+border:none;
+
+border-radius:15px;
+
+font-size:16px;
+
+font-weight:bold;
+
+background:#FFD600;
+
+color:#000;
+
+}
+
+
+
+.logout{
+
+background:#ff3333;
+
+color:white;
+
+}
+
+
+
+.bottom{
+
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+
+width:100%;
+
+height:70px;
+
+background:#111;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+
+}
+
+
+
+.bottom div{
+
+text-align:center;
+
+font-size:13px;
+
+}
+
+
+
+.active{
+
+color:#FFD600;
+
+}
+
+
+
+</style>
 
 
 </head>
@@ -27,21 +222,11 @@
 
 
 
+<div class="header">
 
-
-<div class="topbar">
-
-
-<h2>
 👤 Profile
-</h2>
-
 
 </div>
-
-
-
-
 
 
 
@@ -50,56 +235,21 @@
 
 
 
+<div class="profile-card">
 
 
+<div class="avatar">
 
-
-<!-- INSTALL APP -->
-
-
-<div class="card">
-
-
-<button id="installApp" class="btn">
-
-📲 Install RiderX App
-
-</button>
-
+👤
 
 </div>
 
 
+<div class="name" id="name">
 
+Customer
 
-
-
-
-
-
-<div class="card profile-card">
-
-
-
-<img
-
-id="profileImage"
-
-src="../assets/user.png"
-
-class="profile-img"
-
->
-
-
-
-
-
-<h3>
-
-Customer Profile
-
-</h3>
+</div>
 
 
 
@@ -110,116 +260,57 @@ Customer Profile
 
 
 
+<div class="info-card">
 
 
 
-<div class="card">
+<div class="row">
+
+📧 Email:
+
+<span id="email">
+
+Loading...
+
+</span>
+
+</div>
 
 
 
-<input
+<div class="row">
 
-id="name"
+📱 Phone:
 
-class="input"
+<span id="phone">
 
-placeholder="Full Name"
+Loading...
 
->
+</span>
 
-
-
-
+</div>
 
 
 
-<input
+<button>
 
-id="phone"
-
-class="input"
-
-placeholder="Mobile Number"
-
-readonly
-
->
-
-
-
-
-
-
-
-<input
-
-id="email"
-
-class="input"
-
-placeholder="Email"
-
-readonly
-
->
-
-
-
-
-
-
-
-
-<input
-
-id="address"
-
-class="input"
-
-placeholder="Address"
-
->
-
-
-
-
-
-
-
-<button
-
-id="saveProfile"
-
-class="btn">
-
-💾 Save Profile
+Edit Profile
 
 </button>
 
 
 
+<button>
+
+⚙ Settings
+
+</button>
 
 
 
-</div>
+<button class="logout" id="logout">
 
-
-
-
-
-
-
-
-<div class="card">
-
-
-<button
-
-class="btn-outline"
-
-onclick="location.href='Settings.html'">
-
-⚙️ Settings
+Logout
 
 </button>
 
@@ -229,11 +320,6 @@ onclick="location.href='Settings.html'">
 
 
 
-
-
-
-
-
 </div>
 
 
@@ -243,10 +329,10 @@ onclick="location.href='Settings.html'">
 
 
 
-<div class="bottom-nav">
+<div class="bottom">
 
 
-<a href="Home.html">
+<div onclick="location.href='home.html'">
 
 🏠
 
@@ -254,24 +340,35 @@ onclick="location.href='Settings.html'">
 
 Home
 
-</a>
+</div>
 
 
 
-<a href="Booking.html">
+<div onclick="location.href='history.html'">
 
-🏍
+📜
 
 <br>
 
-Book
+History
 
-</a>
-
-
+</div>
 
 
-<a class="active">
+
+<div onclick="location.href='wallet.html'">
+
+💰
+
+<br>
+
+Wallet
+
+</div>
+
+
+
+<div class="active">
 
 👤
 
@@ -279,19 +376,7 @@ Book
 
 Profile
 
-</a>
-
-
-
-<a href="Settings.html">
-
-⚙️
-
-<br>
-
-Settings
-
-</a>
+</div>
 
 
 
@@ -302,11 +387,11 @@ Settings
 
 
 
+<script type="module" src="../js/profile.js"></script>
 
-
-<script type="module" src="../js/Profile.js"></script>
 
 
 </body>
+
 
 </html>
