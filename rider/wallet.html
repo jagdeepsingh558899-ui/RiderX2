@@ -1,295 +1,841 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RiderX Captain | Wallet & Payout Hub</title>
+    
+    <!-- CSS & Frameworks -->
+    <link rel="stylesheet" href="../css/Style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#090A0F',
+                            dark: '#12141C',
+                            card: '#1A1D29',
+                            yellow: '#FFE500',
+                            yellowDark: '#CCA800',
+                            gray: '#8A8F9E',
+                            border: '#2A2E3D',
+                            emerald: '#10B981',
+                            rose: '#F43F5E',
+                            amber: '#F59E0B',
+                            blue: '#3B82F6',
+                            purple: '#8B5CF6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- QRCodeJS for Dynamic Wallet QR Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<meta charset="UTF-8">
+    <style>
+        body {
+            background-color: #090A0F;
+            color: #FFFFFF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        .glass-card {
+            background: linear-gradient(135deg, rgba(26, 29, 41, 0.92) 0%, rgba(18, 20, 28, 0.98) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 229, 0, 0.12);
+        }
 
+        .glass-card-interactive {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-<title>RiderX Earnings</title>
+        .glass-card-interactive:hover {
+            border-color: rgba(255, 229, 0, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px -6px rgba(255, 229, 0, 0.12);
+        }
 
+        .wallet-chip-gradient {
+            background: linear-gradient(135deg, #1A1D29 0%, #090A0F 100%);
+            border: 1px solid rgba(255, 229, 0, 0.25);
+        }
 
-<link rel="icon" href="../assets/logo.png">
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #12141C;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2A2E3D;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #FFE500;
+        }
 
+        @keyframes skeletonShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #12141C 25%, #2A2E3D 50%, #12141C 75%);
+            background-size: 200% 100%;
+            animation: skeletonShimmer 1.5s infinite;
+        }
 
-<link rel="stylesheet" href="../css/Style.css">
-
-<link rel="stylesheet" href="../css/Dashboard.css">
-
-<link rel="stylesheet" href="../css/Responsive.css">
-
-<link rel="stylesheet" href="../css/Animation.css">
-
-
+        .modal-backdrop {
+            background-color: rgba(9, 10, 15, 0.85);
+            backdrop-filter: blur(8px);
+        }
+    </style>
 </head>
-
-
-
-<body>
-
-
-
-<nav class="navbar">
-
-
-<div class="logo">
-
-
-<img src="../assets/logo.png">
-
-
-<span>RiderX Rider</span>
-
-
-</div>
-
-
-</nav>
-
-
-
-
-
-
-
-<div class="dashboard-wrapper page">
-
-
-
-
-
-
-<div class="wallet-card fade-in">
-
-
-
-<img src="../assets/logo.png">
-
-
-<h1>
-
-RiderX Earnings
-
-</h1>
-
-
-
-
-<h2 id="totalEarning">
-
-₹0
-
-</h2>
-
-
-
-<p>
-
-Total Earnings
-
-</p>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<br>
-
-
-
-
-
-<div class="dashboard-stats">
-
-
-
-<div class="dashboard-stat">
-
-
-<h2 id="todayEarning">
-
-₹0
-
-</h2>
-
-
-<p>
-
-Today's Earning
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-<div class="dashboard-stat">
-
-
-<h2 id="rideCount">
-
-0
-
-</h2>
-
-
-<p>
-
-Completed Rides
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="dashboard-stat">
-
-
-<h2 id="pending">
-
-₹0
-
-</h2>
-
-
-<p>
-
-Pending
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<br>
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-
-💰 Withdraw
-
-</h2>
-
-
-
-<p>
-
-Transfer your earnings
-
-</p>
-
-
-
-<br>
-
-
-
-<button class="btn">
-
-Withdraw Now
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-<br>
-
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-
-📄 Transactions
-
-</h2>
-
-
-
-<div id="transactions">
-
-
-<p>
-
-No transactions
-
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<script type="module" src="../js/RiderWallet.js"></script>
-
-
-
+<body class="min-h-screen pb-28 lg:pb-12 flex flex-col custom-scrollbar">
+
+    <!-- Top Dashboard Header -->
+    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="./Home.html" class="flex items-center gap-2">
+                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX+Captain'">
+                </a>
+                <span class="text-[10px] bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-bold border border-brand-yellow/20 hidden sm:inline-block uppercase tracking-wider">WALLET & PAYOUT HUB</span>
+            </div>
+
+            <!-- Rider Quick Profile Badge -->
+            <div class="flex items-center gap-4">
+                <button onclick="openWithdrawModal()" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-brand-yellow text-brand-black text-xs font-extrabold hover:bg-yellow-300 transition shadow-lg">
+                    <i class="fa-solid fa-building-columns"></i>
+                    <span>Payout Cash</span>
+                </button>
+
+                <a href="./Profile.html" class="flex items-center gap-2.5 pl-2 border-l border-brand-border/60">
+                    <img id="headerRiderPhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" class="w-9 h-9 rounded-full object-cover border-2 border-brand-yellow" alt="Captain Profile">
+                    <div class="hidden sm:block text-left">
+                        <p id="headerRiderName" class="text-xs font-extrabold text-white leading-tight">Captain Loading...</p>
+                        <p class="text-[10px] text-brand-gray flex items-center gap-1">
+                            <span id="headerWalletID" class="text-brand-yellow font-bold font-mono">WAL-000000</span>
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+
+        <!-- Top Banner: Premium Wallet Digital Card & Quick QR -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Digital Premium Wallet Card (2 Cols on Large Screen) -->
+            <div class="lg:col-span-2 glass-card p-6 rounded-3xl relative overflow-hidden flex flex-col justify-between space-y-6 border-brand-yellow/30">
+                <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-brand-yellow/5 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- Top Card Bar -->
+                <div class="flex items-center justify-between z-10">
+                    <div class="flex items-center gap-3">
+                        <img id="cardRiderPhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" class="w-12 h-12 rounded-full object-cover border-2 border-brand-yellow" alt="Captain Avatar">
+                        <div>
+                            <h2 id="cardRiderName" class="text-base font-extrabold text-white">Captain Rider</h2>
+                            <p class="text-[10px] text-brand-gray flex items-center gap-1">
+                                <i class="fa-solid fa-wallet text-brand-yellow"></i>
+                                <span id="cardWalletID" class="font-mono text-white font-bold">RX-WAL-882091</span>
+                            </p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        ACTIVE PAYOUT ACCOUNT
+                    </span>
+                </div>
+
+                <!-- Balance Showcase -->
+                <div class="z-10 space-y-1">
+                    <span class="text-xs font-bold text-brand-gray uppercase tracking-wider">Available Wallet Balance</span>
+                    <div class="flex items-baseline gap-2">
+                        <span id="walletAvailableBalance" class="text-4xl sm:text-5xl font-black text-brand-yellow font-mono">₹0.00</span>
+                        <span class="text-xs text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> Instant Withdrawal Ready</span>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons Bar -->
+                <div class="pt-4 border-t border-brand-border/60 flex flex-wrap items-center justify-between gap-3 z-10">
+                    <div class="flex items-center gap-2">
+                        <button onclick="openWithdrawModal()" class="px-5 py-2.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition flex items-center gap-2 shadow-xl">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Withdraw Money
+                        </button>
+                        <button onclick="openBankModal()" class="px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center gap-2">
+                            <i class="fa-solid fa-building-columns text-brand-yellow"></i>
+                            <span id="bankBtnText">Bank Details</span>
+                        </button>
+                    </div>
+
+                    <div class="text-[11px] text-brand-gray font-mono">
+                        Auto-Settlement: <span class="text-white font-bold">Daily at 11:59 PM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet Dynamic QR Code & Instant Deposit Widget -->
+            <div class="glass-card p-6 rounded-3xl flex flex-col items-center justify-center text-center space-y-3 relative">
+                <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode text-brand-yellow"></i> Captain Receiver QR
+                </h3>
+                <p class="text-[10px] text-brand-gray">Scan to receive direct ride payments, tips or cashback credits.</p>
+
+                <div class="p-3 bg-white rounded-2xl border-2 border-brand-yellow shadow-xl my-1">
+                    <div id="walletQRCode" class="w-28 h-28 flex items-center justify-center"></div>
+                </div>
+
+                <div class="text-[10px] font-mono text-brand-gray">
+                    UPI ID: <span id="cardUpiIDDisplay" class="text-brand-yellow font-bold">riderx.captain@upi</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Financial Metrics Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+            
+            <div class="glass-card p-3.5 rounded-2xl space-y-1">
+                <span class="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Today</span>
+                <p id="statToday" class="text-lg font-black text-white font-mono">₹0.00</p>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-2xl space-y-1">
+                <span class="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">This Week</span>
+                <p id="statWeekly" class="text-lg font-black text-white font-mono">₹0.00</p>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-2xl space-y-1">
+                <span class="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">This Month</span>
+                <p id="statMonthly" class="text-lg font-black text-white font-mono">₹0.00</p>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-2xl space-y-1">
+                <span class="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Lifetime Net</span>
+                <p id="statLifetime" class="text-lg font-black text-brand-yellow font-mono">₹0.00</p>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-2xl space-y-1">
+                <span class="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Incentives</span>
+                <p id="statIncentives" class="text-lg font-black text-emerald-400 font-mono">₹0.00</p>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-2xl space-y-1">
+                <span class="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Peak Bonuses</span>
+                <p id="statBonuses" class="text-lg font-black text-emerald-400 font-mono">₹0.00</p>
+            </div>
+
+            <div class="glass-card p-3.5 rounded-2xl space-y-1 col-span-2 md:col-span-1">
+                <span class="text-[9px] text-brand-gray font-bold uppercase tracking-wider block">Referral & Cash</span>
+                <p id="statReferrals" class="text-lg font-black text-brand-purple font-mono">₹0.00</p>
+            </div>
+
+        </div>
+
+        <!-- Bank & Payout Method Summary Card -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-brand-border/60 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-building-columns text-brand-yellow text-sm"></i>
+                    <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Linked Settlement Bank Account</h3>
+                </div>
+                <button onclick="openBankModal()" class="text-xs text-brand-yellow font-bold hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Bank Details
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
+                    <span class="text-[10px] text-brand-gray uppercase font-bold block">Bank Name</span>
+                    <p id="displayBankName" class="font-extrabold text-white">Not Configured</p>
+                </div>
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
+                    <span class="text-[10px] text-brand-gray uppercase font-bold block">Account Holder</span>
+                    <p id="displayAccountHolder" class="font-extrabold text-white">--</p>
+                </div>
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
+                    <span class="text-[10px] text-brand-gray uppercase font-bold block">Account Number</span>
+                    <p id="displayAccountNumber" class="font-mono font-extrabold text-brand-yellow">XXXX-XXXX-0000</p>
+                </div>
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
+                    <span class="text-[10px] text-brand-gray uppercase font-bold block">IFSC Code</span>
+                    <p id="displayIfscCode" class="font-mono font-extrabold text-white">----0000000</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Ledger Control Panel -->
+        <div class="glass-card p-5 rounded-2xl space-y-4">
+            
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-brand-yellow"></i> Wallet Activity Ledger
+                </h3>
+
+                <!-- Transaction Category Filters -->
+                <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar w-full md:w-auto pb-1 md:pb-0">
+                    <button onclick="setTxFilter('ALL', this)" class="tx-filter-btn active-tx-chip px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-yellow text-brand-black transition shrink-0">All Txns</button>
+                    <button onclick="setTxFilter('CREDIT', this)" class="tx-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition shrink-0">Credits</button>
+                    <button onclick="setTxFilter('DEBIT', this)" class="tx-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition shrink-0">Debits / Payouts</button>
+                    <button onclick="setTxFilter('RIDE_INCOME', this)" class="tx-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition shrink-0">Ride Fares</button>
+                    <button onclick="setTxFilter('INCENTIVE', this)" class="tx-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition shrink-0">Incentives & Bonuses</button>
+                    <button onclick="setTxFilter('PENALTY', this)" class="tx-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition shrink-0">Penalties</button>
+                </div>
+
+            </div>
+
+            <!-- Skeleton Loading State for Ledger -->
+            <div id="txSkeletonLoader" class="space-y-3">
+                <div class="h-12 skeleton rounded-xl"></div>
+                <div class="h-12 skeleton rounded-xl"></div>
+                <div class="h-12 skeleton rounded-xl"></div>
+            </div>
+
+            <!-- Empty State Container -->
+            <div id="txEmptyState" class="hidden text-center py-12 space-y-3">
+                <div class="w-12 h-12 mx-auto rounded-full bg-brand-dark border border-brand-border flex items-center justify-center text-brand-yellow text-xl">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <p class="text-xs text-brand-gray font-medium">No transaction records found matching your selected filter.</p>
+            </div>
+
+            <!-- Dynamic Transactions Table Container -->
+            <div id="txTableWrapper" class="overflow-x-auto custom-scrollbar hidden">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="border-b border-brand-border/60 text-[10px] text-brand-gray uppercase font-extrabold tracking-wider">
+                            <th class="py-3 px-3">Txn ID & Date</th>
+                            <th class="py-3 px-3">Type</th>
+                            <th class="py-3 px-3">Description / Reference</th>
+                            <th class="py-3 px-3 text-right">Amount</th>
+                            <th class="py-3 px-3 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txTableBody" class="divide-y divide-brand-border/40 font-medium">
+                        <!-- Dynamic Firebase Ingestion -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal 1: Add/Edit Bank Account Modal -->
+    <div id="bankModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-lg w-full rounded-2xl p-6 space-y-5 border-brand-yellow/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-building-columns text-brand-yellow"></i> Settlement Bank Account Details
+                </h3>
+                <button onclick="closeBankModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="bankForm" onsubmit="handleBankSave(event)" class="space-y-4">
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">Account Holder Name</label>
+                    <input type="text" id="inputHolderName" required placeholder="Full Name as on Bank Passbook" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-brand-gray uppercase">Bank Name</label>
+                        <input type="text" id="inputBankName" required placeholder="HDFC, ICICI, SBI..." class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-brand-gray uppercase">IFSC Code</label>
+                        <input type="text" id="inputIfscCode" required placeholder="HDFC0001234" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white uppercase focus:outline-none focus:border-brand-yellow font-mono">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-brand-gray uppercase">Account Number</label>
+                        <input type="password" id="inputAccountNumber" required placeholder="Bank Account Number" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow font-mono">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold text-brand-gray uppercase">Confirm Account Number</label>
+                        <input type="text" id="inputConfirmAccountNumber" required placeholder="Re-enter Account Number" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow font-mono">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">Primary UPI ID (Instant Payouts)</label>
+                    <input type="text" id="inputUpiId" placeholder="username@upi" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow font-mono">
+                </div>
+
+                <button type="submit" id="saveBankBtn" class="w-full py-3 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition uppercase tracking-wider">
+                    Save Bank Credentials
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: Withdraw Money Modal -->
+    <div id="withdrawModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-md w-full rounded-2xl p-6 space-y-5 border-brand-yellow/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-hand-holding-dollar text-brand-yellow"></i> Withdraw To Bank / UPI
+                </h3>
+                <button onclick="closeWithdrawModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="withdrawForm" onsubmit="handleWithdrawalSubmit(event)" class="space-y-4">
+                
+                <div class="bg-brand-dark/80 p-3.5 rounded-xl border border-brand-border/60 flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] text-brand-gray uppercase font-bold block">Withdrawable Balance</span>
+                        <span id="withdrawMaxAvailable" class="text-xl font-black text-brand-yellow font-mono">₹0.00</span>
+                    </div>
+                    <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-bold">Zero Fee</span>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">Enter Withdrawal Amount (₹)</label>
+                    <input type="number" id="inputWithdrawAmount" min="100" step="10" required placeholder="Min ₹100" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-base text-white font-mono font-bold focus:outline-none focus:border-brand-yellow">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">Payout Destination</label>
+                    <select id="selectPayoutMode" class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                        <option value="BANK">Linked Bank Account (IMPS - Instant)</option>
+                        <option value="UPI">Direct UPI Settlement</option>
+                    </select>
+                </div>
+
+                <div class="text-[10px] text-brand-gray space-y-1 bg-brand-dark/40 p-3 rounded-lg border border-brand-border/40">
+                    <p class="flex items-center gap-1 text-white font-bold"><i class="fa-solid fa-shield-halved text-brand-yellow"></i> Security Guarantee</p>
+                    <p>Withdrawals are processed instantly via IMPS / UPI 24x7. Minimum withdrawal limit is ₹100.</p>
+                </div>
+
+                <button type="submit" id="submitWithdrawBtn" class="w-full py-3 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition uppercase tracking-wider shadow-lg">
+                    Confirm & Transfer Funds
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Bar -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 border-t border-brand-border backdrop-blur-lg px-6 py-2.5">
+        <div class="flex items-center justify-between max-w-md mx-auto">
+            <a href="./Home.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-gauge-high text-base"></i>
+                <span class="text-[10px]">Dashboard</span>
+            </a>
+            <a href="./Rides.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-route text-base"></i>
+                <span class="text-[10px]">Active</span>
+            </a>
+            <a href="./History.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-clock-rotate-left text-base"></i>
+                <span class="text-[10px]">History</span>
+            </a>
+            <a href="./Wallet.html" class="flex flex-col items-center gap-1 text-brand-yellow font-bold">
+                <i class="fa-solid fa-wallet text-base"></i>
+                <span class="text-[10px]">Wallet</span>
+            </a>
+            <a href="./Profile.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
+                <i class="fa-solid fa-user-gear text-base"></i>
+                <span class="text-[10px]">Account</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Firebase & Application Modules -->
+    <script type="module" src="../firebase/firebase-config.js"></script>
+    <script type="module" src="../js/App.js"></script>
+    <script type="module" src="../js/Wallet.js"></script>
+
+    <!-- Page Module Script -->
+    <script type="module">
+        import { auth, db } from '../firebase/firebase-config.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentRider = null;
+        let walletData = null;
+        let rawTxns = [];
+        let activeTxFilter = 'ALL';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    window.location.href = '../auth/rider-login.html';
+                    return;
+                }
+
+                currentRider = user;
+
+                // Check rider approval
+                const riderDoc = await getDoc(doc(db, "riders", user.uid));
+                if (riderDoc.exists()) {
+                    const rData = riderDoc.data();
+                    if (rData.adminApproved === false) {
+                        window.location.href = 'pending.html';
+                        return;
+                    }
+
+                    document.getElementById('headerRiderName').innerText = rData.fullName || 'Captain Rider';
+                    document.getElementById('cardRiderName').innerText = rData.fullName || 'Captain Rider';
+                    if (rData.photoURL) {
+                        document.getElementById('headerRiderPhoto').src = rData.photoURL;
+                        document.getElementById('cardRiderPhoto').src = rData.photoURL;
+                    }
+                }
+
+                // Subscribe to Wallet & Txns realtime
+                subscribeWallet(user.uid);
+                subscribeTransactions(user.uid);
+            });
+        });
+
+        function subscribeWallet(uid) {
+            const walletRef = doc(db, "wallet", uid);
+            onSnapshot(walletRef, (snap) => {
+                if (snap.exists()) {
+                    walletData = snap.data();
+                    renderWalletData(walletData);
+                } else {
+                    // Fallback default structure
+                    renderWalletData({
+                        balance: 0,
+                        walletId: `WAL-${uid.substring(0,6).toUpperCase()}`,
+                        todayEarnings: 0,
+                        weeklyEarnings: 0,
+                        monthlyEarnings: 0,
+                        lifetimeEarnings: 0,
+                        incentives: 0,
+                        bonuses: 0,
+                        referrals: 0,
+                        bankDetails: null
+                    });
+                }
+            });
+        }
+
+        function renderWalletData(w) {
+            const availBal = parseFloat(w.balance || 0);
+            document.getElementById('walletAvailableBalance').innerText = `₹${availBal.toFixed(2)}`;
+            document.getElementById('withdrawMaxAvailable').innerText = `₹${availBal.toFixed(2)}`;
+            
+            const walId = w.walletId || `WAL-${currentRider.uid.substring(0,6).toUpperCase()}`;
+            document.getElementById('headerWalletID').innerText = walId;
+            document.getElementById('cardWalletID').innerText = walId;
+
+            document.getElementById('statToday').innerText = `₹${parseFloat(w.todayEarnings || 0).toFixed(2)}`;
+            document.getElementById('statWeekly').innerText = `₹${parseFloat(w.weeklyEarnings || 0).toFixed(2)}`;
+            document.getElementById('statMonthly').innerText = `₹${parseFloat(w.monthlyEarnings || 0).toFixed(2)}`;
+            document.getElementById('statLifetime').innerText = `₹${parseFloat(w.lifetimeEarnings || 0).toFixed(2)}`;
+            document.getElementById('statIncentives').innerText = `₹${parseFloat(w.incentives || 0).toFixed(2)}`;
+            document.getElementById('statBonuses').innerText = `₹${parseFloat(w.bonuses || 0).toFixed(2)}`;
+            document.getElementById('statReferrals').innerText = `₹${parseFloat(w.referrals || 0).toFixed(2)}`;
+
+            // Render Bank Details if exist
+            if (w.bankDetails) {
+                const bd = w.bankDetails;
+                document.getElementById('displayBankName').innerText = bd.bankName || 'Configured';
+                document.getElementById('displayAccountHolder').innerText = bd.holderName || '--';
+                const accNum = bd.accountNumber || '';
+                document.getElementById('displayAccountNumber').innerText = accNum ? `XXXX-XXXX-${accNum.slice(-4)}` : 'XXXX-XXXX-0000';
+                document.getElementById('displayIfscCode').innerText = bd.ifscCode || '----';
+                document.getElementById('bankBtnText').innerText = 'Edit Bank Details';
+
+                if (bd.upiId) {
+                    document.getElementById('cardUpiIDDisplay').innerText = bd.upiId;
+                    renderQRCode(bd.upiId);
+                } else {
+                    renderQRCode(`upi://pay?pa=riderx.${currentRider.uid.substring(0,6)}@upi&pn=RiderXCaptain`);
+                }
+            } else {
+                renderQRCode(`upi://pay?pa=riderx.${currentRider.uid.substring(0,6)}@upi&pn=RiderXCaptain`);
+            }
+        }
+
+        function renderQRCode(text) {
+            const qrContainer = document.getElementById('walletQRCode');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: text,
+                width: 100,
+                height: 100,
+                colorDark: "#090A0F",
+                colorLight: "#FFFFFF",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function subscribeTransactions(uid) {
+            const txRef = collection(db, "wallet", uid, "transactions");
+            const q = query(txRef, orderBy("timestamp", "desc"));
+
+            onSnapshot(q, (snap) => {
+                rawTxns = [];
+                snap.forEach(docSnap => {
+                    const d = docSnap.data();
+                    rawTxns.push({
+                        id: docSnap.id,
+                        ...d,
+                        dateObj: d.timestamp ? new Date(d.timestamp.seconds * 1000) : new Date()
+                    });
+                });
+
+                document.getElementById('txSkeletonLoader').classList.add('hidden');
+                applyTxFilter();
+            }, (err) => {
+                console.error("Error subscribing to txns:", err);
+                document.getElementById('txSkeletonLoader').classList.add('hidden');
+                // Fallback demo ledger
+                loadFallbackDemoLedger();
+            });
+        }
+
+        window.setTxFilter = function(filterType, btnElem) {
+            activeTxFilter = filterType;
+            document.querySelectorAll('.tx-filter-btn').forEach(btn => {
+                btn.className = "tx-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition shrink-0";
+            });
+            btnElem.className = "tx-filter-btn active-tx-chip px-3 py-1.5 rounded-xl text-xs font-bold bg-brand-yellow text-brand-black transition shrink-0";
+            applyTxFilter();
+        };
+
+        function applyTxFilter() {
+            let filtered = rawTxns.filter(t => {
+                if (activeTxFilter === 'ALL') return true;
+                if (activeTxFilter === 'CREDIT') return t.type === 'CREDIT';
+                if (activeTxFilter === 'DEBIT') return t.type === 'DEBIT' || t.category === 'WITHDRAWAL';
+                if (activeTxFilter === 'RIDE_INCOME') return t.category === 'RIDE_INCOME';
+                if (activeTxFilter === 'INCENTIVE') return t.category === 'INCENTIVE' || t.category === 'BONUS';
+                if (activeTxFilter === 'PENALTY') return t.category === 'PENALTY';
+                return true;
+            });
+
+            renderTxTable(filtered);
+        }
+
+        function renderTxTable(txList) {
+            const wrapper = document.getElementById('txTableWrapper');
+            const empty = document.getElementById('txEmptyState');
+            const tbody = document.getElementById('txTableBody');
+
+            if (!txList || txList.length === 0) {
+                wrapper.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            wrapper.classList.remove('hidden');
+
+            tbody.innerHTML = txList.map(t => {
+                const isCredit = t.type === 'CREDIT';
+                const amtClass = isCredit ? 'text-emerald-400 font-extrabold' : 'text-rose-400 font-extrabold';
+                const amtSign = isCredit ? '+' : '-';
+                const dateStr = t.dateObj.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+                let badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+                if (t.status === 'PENDING') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+                if (t.status === 'FAILED') badgeColor = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+
+                return `
+                <tr class="hover:bg-brand-dark/50 transition">
+                    <td class="py-3 px-3">
+                        <p class="font-mono text-white text-xs">${t.id.substring(0, 10)}</p>
+                        <p class="text-[10px] text-brand-gray">${dateStr}</p>
+                    </td>
+                    <td class="py-3 px-3">
+                        <span class="text-[10px] font-bold uppercase ${isCredit ? 'text-emerald-400' : 'text-rose-400'}">
+                            ${t.category || (isCredit ? 'CREDIT' : 'DEBIT')}
+                        </span>
+                    </td>
+                    <td class="py-3 px-3">
+                        <p class="text-white text-xs font-medium">${t.description || 'Transaction'}</p>
+                        ${t.referenceId ? `<p class="text-[9px] text-brand-gray font-mono">Ref: #${t.referenceId}</p>` : ''}
+                    </td>
+                    <td class="py-3 px-3 text-right font-mono text-sm ${amtClass}">
+                        ${amtSign}₹${parseFloat(t.amount || 0).toFixed(2)}
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${badgeColor}">
+                            ${t.status || 'SUCCESS'}
+                        </span>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // Modals Logic
+        window.openBankModal = function() {
+            if (walletData && walletData.bankDetails) {
+                const bd = walletData.bankDetails;
+                document.getElementById('inputHolderName').value = bd.holderName || '';
+                document.getElementById('inputBankName').value = bd.bankName || '';
+                document.getElementById('inputIfscCode').value = bd.ifscCode || '';
+                document.getElementById('inputAccountNumber').value = bd.accountNumber || '';
+                document.getElementById('inputConfirmAccountNumber').value = bd.accountNumber || '';
+                document.getElementById('inputUpiId').value = bd.upiId || '';
+            }
+            document.getElementById('bankModal').classList.remove('hidden');
+        };
+
+        window.closeBankModal = function() {
+            document.getElementById('bankModal').classList.add('hidden');
+        };
+
+        window.handleBankSave = async function(e) {
+            e.preventDefault();
+            const accNum = document.getElementById('inputAccountNumber').value;
+            const confirmAccNum = document.getElementById('inputConfirmAccountNumber').value;
+
+            if (accNum !== confirmAccNum) {
+                alert("Account numbers do not match!");
+                return;
+            }
+
+            const btn = document.getElementById('saveBankBtn');
+            btn.disabled = true;
+            btn.innerText = "Saving Bank Details...";
+
+            const bankDetails = {
+                holderName: document.getElementById('inputHolderName').value.trim(),
+                bankName: document.getElementById('inputBankName').value.trim(),
+                ifscCode: document.getElementById('inputIfscCode').value.trim().toUpperCase(),
+                accountNumber: accNum.trim(),
+                upiId: document.getElementById('inputUpiId').value.trim(),
+                updatedAt: new Date()
+            };
+
+            try {
+                const walletRef = doc(db, "wallet", currentRider.uid);
+                await updateDoc(walletRef, { bankDetails: bankDetails });
+                closeBankModal();
+            } catch (err) {
+                console.error("Failed to save bank details:", err);
+                alert("Error saving bank details. Please try again.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Save Bank Credentials";
+            }
+        };
+
+        window.openWithdrawModal = function() {
+            document.getElementById('withdrawModal').classList.remove('hidden');
+        };
+
+        window.closeWithdrawModal = function() {
+            document.getElementById('withdrawModal').classList.add('hidden');
+        };
+
+        window.handleWithdrawalSubmit = async function(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('inputWithdrawAmount').value);
+            const currentBal = walletData ? parseFloat(walletData.balance || 0) : 0;
+
+            if (amount < 100) {
+                alert("Minimum withdrawal amount is ₹100.");
+                return;
+            }
+
+            if (amount > currentBal) {
+                alert("Insufficient wallet balance for this withdrawal.");
+                return;
+            }
+
+            const btn = document.getElementById('submitWithdrawBtn');
+            btn.disabled = true;
+            btn.innerText = "Processing Transfer...";
+
+            try {
+                const newBal = currentBal - amount;
+                const walletRef = doc(db, "wallet", currentRider.uid);
+
+                // Update Wallet Balance
+                await updateDoc(walletRef, {
+                    balance: newBal,
+                    updatedAt: new Date()
+                });
+
+                // Add Transaction Record
+                const txRef = collection(db, "wallet", currentRider.uid, "transactions");
+                await addDoc(txRef, {
+                    type: "DEBIT",
+                    category: "WITHDRAWAL",
+                    amount: amount,
+                    description: `Bank Withdrawal Payout to ${document.getElementById('selectPayoutMode').value}`,
+                    status: "SUCCESS",
+                    timestamp: new Date()
+                });
+
+                closeWithdrawModal();
+                alert(`₹${amount.toFixed(2)} payout initiated successfully! Funds credited via IMPS.`);
+            } catch (err) {
+                console.error("Withdrawal error:", err);
+                alert("Payout failed. Please try again.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Confirm & Transfer Funds";
+            }
+        };
+
+        function loadFallbackDemoLedger() {
+            rawTxns = [
+                {
+                    id: "TXN-998201",
+                    type: "CREDIT",
+                    category: "RIDE_INCOME",
+                    amount: 285.00,
+                    description: "Ride Fare Settlement #RX-882910",
+                    status: "SUCCESS",
+                    dateObj: new Date()
+                },
+                {
+                    id: "TXN-998188",
+                    type: "CREDIT",
+                    category: "INCENTIVE",
+                    amount: 150.00,
+                    description: "Peak Hour Completed Target Bonus",
+                    status: "SUCCESS",
+                    dateObj: new Date(Date.now() - 3600000)
+                },
+                {
+                    id: "TXN-997902",
+                    type: "DEBIT",
+                    category: "WITHDRAWAL",
+                    amount: 500.00,
+                    description: "Instant Payout to HDFC Bank (IMPS)",
+                    status: "SUCCESS",
+                    dateObj: new Date(Date.now() - 86400000)
+                }
+            ];
+
+            applyTxFilter();
+        }
+    </script>
 </body>
-
 </html>
