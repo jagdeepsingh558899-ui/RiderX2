@@ -4,65 +4,83 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Live Map</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<title>RiderX Live Ride</title>
+
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
 
 <style>
 
 body{
-    margin:0;
-    background:#000;
-    color:white;
-    font-family:Arial;
-}
-
-
-.header{
-
-    text-align:center;
-    padding:20px;
-    font-size:30px;
-    font-weight:bold;
-
-}
-
-
-.header span{
-
-    color:#FFD600;
-
+margin:0;
+background:#000;
+color:white;
 }
 
 
 #map{
 
-    width:100%;
-    height:500px;
+height:75vh;
+width:100%;
 
 }
 
+
+.card{
+
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+
+background:#111;
+
+padding:20px;
+
+border-radius:25px 25px 0 0;
+
+z-index:999;
+
+}
+
+
+.status{
+
+font-size:18px;
+font-weight:bold;
+
+}
 
 
 button{
 
-    width:90%;
-    margin:20px 5%;
-    padding:15px;
+width:100%;
+padding:14px;
 
-    border:none;
-    border-radius:15px;
+margin-top:10px;
 
-    background:#FFD600;
+border-radius:15px;
 
-    font-size:18px;
-    font-weight:bold;
+border:none;
+
+background:#FFD600;
+
+font-weight:bold;
 
 }
 
+
+
 </style>
+
 
 </head>
 
@@ -70,9 +88,10 @@ button{
 <body>
 
 
+
 <div class="header">
 
-RIDER<span>X</span>
+🚕 RiderX Live Ride
 
 </div>
 
@@ -82,11 +101,80 @@ RIDER<span>X</span>
 
 
 
-<button id="location">
 
-📍 My Location
+
+<div class="card">
+
+
+<div class="status" id="status">
+
+Searching Rider...
+
+</div>
+
+
+<hr>
+
+
+<p>
+
+🏍 Rider:
+
+<span id="riderName">
+
+Waiting...
+
+</span>
+
+</p>
+
+
+<p>
+
+📍 Distance:
+
+<span id="distance">
+
+-
+
+</span>
+
+</p>
+
+
+<p>
+
+⏱ ETA:
+
+<span id="eta">
+
+-
+
+</span>
+
+</p>
+
+
+
+<button id="callBtn">
+
+📞 Call Rider
 
 </button>
+
+
+<button id="cancelBtn">
+
+Cancel Ride
+
+</button>
+
+
+
+</div>
+
+
+
 
 
 
@@ -94,110 +182,10 @@ RIDER<span>X</span>
 
 
 
-<script>
-
-
-let map = L.map('map').setView(
-
-[30.7333,76.7794],
-
-13
-
-);
-
-
-
-L.tileLayer(
-
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-
-{
-
-maxZoom:19,
-
-attribution:'© OpenStreetMap'
-
-}
-
-).addTo(map);
-
-
-
-document
-.getElementById("location")
-.onclick=function(){
-
-
-navigator.geolocation.getCurrentPosition(
-
-function(position){
-
-
-let lat =
-position.coords.latitude;
-
-
-let lng =
-position.coords.longitude;
-
-
-
-map.setView(
-
-[lat,lng],
-
-16
-
-);
-
-
-
-L.marker(
-
-[lat,lng]
-
-)
-
-.addTo(map)
-
-.bindPopup(
-"You are here"
-)
-
-.openPopup();
-
-
-
-},
-
-
-function(){
-
-alert(
-"Location permission allow karo"
-);
-
-}
-
-
-);
-
-
-
-};
-
-
-setTimeout(()=>{
-
-map.invalidateSize();
-
-},1000);
-
-
-
-</script>
+<script type="module" src="../js/customer-map.js"></script>
 
 
 </body>
+
 
 </html>
