@@ -1,12 +1,10 @@
-//
-// =====================================
-// RiderX Premium Service Worker
-// PWA Offline + Cache System
-// =====================================
-//
+/* =========================================
+   RiderX Service Worker
+   Final Cache Version
+========================================= */
 
 
-const CACHE_NAME = "riderx-v1";
+const CACHE_NAME = "riderx-v2";
 
 
 
@@ -20,7 +18,6 @@ const FILES_TO_CACHE = [
 "/manifest.json",
 
 
-
 "/css/Style.css",
 
 "/css/Responsive.css",
@@ -28,36 +25,10 @@ const FILES_TO_CACHE = [
 "/css/Animation.css",
 
 
-
-"/assets/logo.png",
-
-
-
-"/auth/login.html",
-
-"/auth/register.html",
-
-
-
-"/customer/booking.html",
-
-"/customer/profile.html",
-
-"/customer/wallet.html",
-
-"/customer/history.html",
-
-
-
-"/rider/profile.html",
-
-"/rider/wallet.html"
-
+"/assets/logo.png"
 
 
 ];
-
-
 
 
 
@@ -79,27 +50,20 @@ event.waitUntil(
 
 caches.open(CACHE_NAME)
 
-.then(
-
-(cache)=>{
+.then((cache)=>{
 
 
-return cache.addAll(
-
-FILES_TO_CACHE
-
-);
+return cache.addAll(FILES_TO_CACHE);
 
 
 })
 
 
-
 );
 
 
-self.skipWaiting();
 
+self.skipWaiting();
 
 
 }
@@ -128,44 +92,32 @@ event.waitUntil(
 
 caches.keys()
 
-.then(
-
-(keys)=>{
+.then((cacheNames)=>{
 
 
 return Promise.all(
 
 
-keys.map(
-
-(key)=>{
+cacheNames.map((cache)=>{
 
 
-if(
-
-key !== CACHE_NAME
-
-){
+if(cache !== CACHE_NAME){
 
 
-return caches.delete(key);
+return caches.delete(cache);
 
 
 }
 
 
 
-}
-
-
-)
+})
 
 
 );
 
 
 })
-
 
 
 );
@@ -199,25 +151,20 @@ self.addEventListener(
 event.respondWith(
 
 
-caches.match(
+fetch(event.request)
 
-event.request
-
-)
-
-.then(
-
-(response)=>{
+.then((response)=>{
 
 
-return response ||
+return response;
 
-fetch(
 
-event.request
+})
 
-);
+.catch(()=>{
 
+
+return caches.match(event.request);
 
 
 })
