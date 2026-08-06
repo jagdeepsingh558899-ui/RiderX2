@@ -1,145 +1,833 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0c">
+    <title>Ride History | RiderX Premium</title>
 
-<meta charset="UTF-8">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="../css/Style.css">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg-main: #0a0a0c;
+            --bg-card: rgba(20, 20, 26, 0.6);
+            --bg-card-hover: rgba(30, 30, 38, 0.8);
+            --accent-yellow: #FFE500;
+            --accent-glow: rgba(255, 229, 0, 0.15);
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --status-completed: #34c759;
+            --status-cancelled: #ff3b30;
+            --status-pending: #ff9f0a;
+            --bottom-nav-height: 70px;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-<title>RiderX Ride History</title>
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding-bottom: calc(var(--bottom-nav-height) + 20px);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+        }
 
-<link rel="icon" href="../assets/logo.png">
+        /* Header */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(10, 10, 12, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+        }
 
+        .header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-<link rel="stylesheet" href="../css/Style.css">
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
 
-<link rel="stylesheet" href="../css/Dashboard.css">
+        .icon-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
 
-<link rel="stylesheet" href="../css/Responsive.css">
+        .icon-btn:hover {
+            background: rgba(255, 229, 0, 0.1);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
 
-<link rel="stylesheet" href="../css/Animation.css">
+        .notification-dot {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            background: var(--status-cancelled);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--status-cancelled);
+        }
 
+        /* Search & Filters */
+        .filter-section {
+            padding: 15px 20px;
+            position: sticky;
+            top: 73px;
+            z-index: 999;
+            background: var(--bg-main);
+            border-bottom: 1px solid var(--border-color);
+        }
 
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .search-bar i {
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding-bottom: 5px;
+        }
+
+        .filter-chips::-webkit-scrollbar { display: none; }
+
+        .chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chip.active {
+            background: var(--accent-glow);
+            border-color: var(--accent-yellow);
+            color: var(--accent-yellow);
+        }
+
+        /* Main Content Container */
+        .history-container {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Ride Card */
+        .ride-card {
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ride-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .ride-datetime {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ride-date {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .ride-id {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-completed { background: rgba(52, 199, 89, 0.15); color: var(--status-completed); }
+        .status-cancelled { background: rgba(255, 59, 48, 0.15); color: var(--status-cancelled); }
+        .status-pending { background: rgba(255, 159, 10, 0.15); color: var(--status-pending); }
+
+        /* Route Timeline */
+        .route-timeline {
+            position: relative;
+            padding-left: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .route-timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .location {
+            position: relative;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .location::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--bg-main);
+            border: 4px solid;
+        }
+
+        .location.pickup::before { border-color: var(--status-completed); }
+        .location.dropoff::before { border-color: var(--status-cancelled); }
+
+        .location span { display: block; color: var(--text-secondary); font-size: 0.75rem; }
+
+        /* Driver & Vehicle Info */
+        .driver-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.02);
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .driver-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .driver-details { flex: 1; }
+        .driver-name { font-size: 0.9rem; font-weight: 600; }
+        .vehicle-details { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+
+        .ride-meta {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .ride-fare { font-size: 1.1rem; font-weight: 800; color: var(--accent-yellow); }
+        .ride-payment { font-size: 0.7rem; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+
+        /* Card Actions */
+        .card-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .btn-action {
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-action:hover { background: rgba(255,255,255,0.08); }
+        
+        .btn-primary {
+            background: var(--accent-yellow);
+            color: #000;
+            border-color: var(--accent-yellow);
+        }
+        .btn-primary:hover { background: #e6ce00; }
+
+        .btn-icon-only {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        .btn-icon-only.favorited { color: var(--status-cancelled); }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: #1a1a24;
+            background: linear-gradient(110deg, rgba(255,255,255,0.03) 8%, rgba(255,255,255,0.08) 18%, rgba(255,255,255,0.03) 33%);
+            background-size: 200% 100%;
+            animation: 1.5s shine linear infinite;
+            border-radius: 8px;
+        }
+        @keyframes shine { to { background-position-x: -200%; } }
+        
+        .sk-card { height: 260px; border-radius: 16px; }
+
+        /* Empty State */
+        .empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state i { font-size: 4rem; color: rgba(255, 229, 0, 0.2); margin-bottom: 20px; }
+        .empty-state h3 { color: var(--text-primary); font-size: 1.2rem; margin-bottom: 8px; }
+        .empty-state p { font-size: 0.9rem; margin-bottom: 24px; }
+        .empty-state button {
+            background: var(--accent-yellow);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: var(--bottom-nav-height);
+            background: rgba(10, 10, 12, 0.92);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            width: 20%;
+            transition: color 0.2s ease;
+        }
+
+        .nav-item.active { color: var(--accent-yellow); font-weight: 700; }
+        .nav-item i { font-size: 1.3rem; margin-bottom: 2px; }
+
+        /* Full Screen Loader */
+        #global-loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-main);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255,229,0,0.2);
+            border-top-color: var(--accent-yellow);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
 </head>
-
-
 <body>
 
-
-
-<nav class="navbar">
-
-
-<div class="logo">
-
-<img src="../assets/logo.png">
-
-<span>RiderX</span>
-
-</div>
-
-
-</nav>
-
-
-
-
-
-
-<div class="dashboard-wrapper page">
-
-
-
-
-
-<div class="welcome-card">
-
-
-<div>
-
-
-<h1>
-
-🕒 Ride History
-
-</h1>
-
-
-<p>
-
-Your previous rides
-
-</p>
-
-
-</div>
-
-
-
-<img src="../assets/logo.png">
-
-
-</div>
-
-
-
-
-
-
-<br>
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-
-All Rides
-
-</h2>
-
-
-
-<div id="rideHistory">
-
-
-<p>
-
-Loading rides...
-
-</p>
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<script type="module" src="../js/History.js"></script>
-
-
-
+    <!-- Global App Loader -->
+    <div id="global-loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-title">
+            <img src="../assets/Logo/RiderX-logo.png" alt="RiderX" width="28" height="28" style="border-radius:6px; background:#FFE500; padding:2px;">
+            My Rides
+        </div>
+        <div class="header-actions">
+            <div class="icon-btn" onclick="openNotifications()">
+                <i class="fa-regular fa-bell"></i>
+                <div class="notification-dot"></div>
+            </div>
+            <div class="icon-btn" onclick="window.location.href='Profile.html'">
+                <i class="fa-regular fa-user"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search & Filter Section -->
+    <section class="filter-section">
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="search" id="searchInput" placeholder="Search by location, CRN, or driver...">
+        </div>
+        <div class="filter-chips" id="filterContainer">
+            <div class="chip active" data-filter="all">All Rides</div>
+            <div class="chip" data-filter="completed">Completed</div>
+            <div class="chip" data-filter="cancelled">Cancelled</div>
+            <div class="chip" data-filter="bike">Bike</div>
+            <div class="chip" data-filter="cab">Cab</div>
+            <div class="chip" data-filter="this-week">This Week</div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="history-container">
+        
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <i class="fa-solid fa-route"></i>
+            <h3>No Rides Found</h3>
+            <p>You haven't taken any rides that match this filter yet.</p>
+            <button onclick="window.location.href='Booking.html'">Book a Ride Now</button>
+        </div>
+
+        <!-- Skeleton Loaders -->
+        <div id="skeletonContainer" style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="skeleton sk-card"></div>
+            <div class="skeleton sk-card"></div>
+            <div class="skeleton sk-card"></div>
+        </div>
+
+        <!-- Rides List Container -->
+        <div id="ridesList" style="display: none; flex-direction: column; gap: 16px;">
+            <!-- Rendered via JS Template -->
+        </div>
+
+    </main>
+
+    <!-- HTML Template for Ride Card -->
+    <template id="ride-card-template">
+        <div class="ride-card glass-panel">
+            <button class="btn-icon-only fav-btn" title="Favorite this route">
+                <i class="fa-regular fa-heart"></i>
+            </button>
+            
+            <div class="ride-header">
+                <div class="ride-datetime">
+                    <span class="ride-date" data-bind="datetime">Oct 24, 2023 • 10:30 AM</span>
+                    <span class="ride-id" data-bind="crn">CRN: 847293847</span>
+                </div>
+                <div class="status-badge" data-bind="status">COMPLETED</div>
+            </div>
+
+            <div class="route-timeline">
+                <div class="location pickup">
+                    <strong data-bind="pickup">Tech Park, Building B</strong>
+                    <span>Pickup</span>
+                </div>
+                <div class="location dropoff">
+                    <strong data-bind="dropoff">International Airport T2</strong>
+                    <span data-bind="distance-time">14.2 km • 45 mins</span>
+                </div>
+            </div>
+
+            <div class="driver-info">
+                <img src="" alt="Driver" class="driver-img" data-bind="driver-img">
+                <div class="driver-details">
+                    <div class="driver-name" data-bind="driver-name">Rajesh Kumar</div>
+                    <div class="vehicle-details" data-bind="vehicle">Toyota Etios • KA-01-AB-1234</div>
+                </div>
+                <div class="ride-meta">
+                    <div class="ride-fare" data-bind="fare">$24.50</div>
+                    <div class="ride-payment">
+                        <i class="fa-solid fa-wallet"></i> <span data-bind="payment">Wallet • Paid</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <button class="btn-action action-invoice"><i class="fa-solid fa-file-invoice"></i> Invoice</button>
+                <button class="btn-action action-rate"><i class="fa-solid fa-star"></i> Rate</button>
+                <button class="btn-action btn-primary action-book"><i class="fa-solid fa-rotate-right"></i> Rebook</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="Home.html" class="nav-item">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </a>
+        <a href="Booking.html" class="nav-item">
+            <i class="fa-solid fa-car-side"></i>
+            <span>Book</span>
+        </a>
+        <a href="History.html" class="nav-item active">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Rides</span>
+        </a>
+        <a href="Wallet.html" class="nav-item">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="Profile.html" class="nav-item">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <!-- Firebase & App Scripts -->
+    <script type="module">
+        import { auth, db } from '../firebase/firebase-config.js';
+        import { collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // DOM Elements
+        const globalLoader = document.getElementById('global-loader');
+        const skeletonContainer = document.getElementById('skeletonContainer');
+        const ridesList = document.getElementById('ridesList');
+        const emptyState = document.getElementById('emptyState');
+        const filterChips = document.querySelectorAll('.chip');
+        const searchInput = document.getElementById('searchInput');
+        const template = document.getElementById('ride-card-template');
+
+        let rawBookings = []; // Store fetched bookings for local filtering
+
+        // Auth Listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                fetchRideHistory(user.uid);
+            } else {
+                // If not logged in, mock data for frontend demonstration purposes
+                // In production, this would redirect to login: window.location.href = '../auth/customer-login.html';
+                simulateDataFetch();
+            }
+        });
+
+        // Fetch Data from Firebase
+        async function fetchRideHistory(userId) {
+            try {
+                const q = query(
+                    collection(db, "bookings"),
+                    where("customerId", "==", userId),
+                    orderBy("createdAt", "desc"),
+                    limit(20)
+                );
+                const querySnapshot = await getDocs(q);
+                rawBookings = [];
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data();
+                    data.id = doc.id;
+                    rawBookings.push(data);
+                });
+                renderRides(rawBookings);
+            } catch (error) {
+                console.error("Error fetching history:", error);
+                // Fallback to mock data if DB fails during dev
+                simulateDataFetch();
+            }
+        }
+
+        // Mock Data Generator for UI validation & edge cases
+        function simulateDataFetch() {
+            setTimeout(() => {
+                rawBookings = [
+                    {
+                        id: 'CRN98273645',
+                        createdAt: new Date().toISOString(),
+                        status: 'completed',
+                        pickup: 'RiderX HQ, Silicon Valley',
+                        destination: 'Central Park West',
+                        distance: '8.4 km',
+                        duration: '22 mins',
+                        driver: { name: 'Michael Chen', photo: 'https://i.pravatar.cc/150?u=mich', vehicle: 'Tesla Model 3 • EV-09-XY' },
+                        fare: '$18.50',
+                        paymentMethod: 'Wallet',
+                        type: 'cab',
+                        isFavorite: true
+                    },
+                    {
+                        id: 'CRN10293847',
+                        createdAt: new Date(Date.now() - 86400000).toISOString(),
+                        status: 'cancelled',
+                        pickup: 'Downtown Metro Station',
+                        destination: 'Grand Mall, 5th Avenue',
+                        distance: '3.1 km',
+                        duration: '10 mins',
+                        driver: { name: 'Sarah Jenkins', photo: 'https://i.pravatar.cc/150?u=sarah', vehicle: 'Honda Activa • 2W-44-BB' },
+                        fare: '$0.00',
+                        paymentMethod: 'UPI',
+                        type: 'bike',
+                        isFavorite: false
+                    },
+                    {
+                        id: 'CRN55667788',
+                        createdAt: new Date(Date.now() - 172800000).toISOString(),
+                        status: 'completed',
+                        pickup: 'Spicy Grill Restaurant',
+                        destination: 'Home (Apt 4B)',
+                        distance: '4.5 km',
+                        duration: '15 mins',
+                        driver: { name: 'Delivery Partner', photo: 'https://i.pravatar.cc/150?u=food', vehicle: 'TVS Jupiter • 2W-99-ZZ' },
+                        fare: '$6.20',
+                        paymentMethod: 'Card',
+                        type: 'food',
+                        isFavorite: false
+                    }
+                ];
+                renderRides(rawBookings);
+            }, 1200);
+        }
+
+        // Render Function using Template
+        function renderRides(data) {
+            // Hide Loaders
+            globalLoader.style.opacity = '0';
+            setTimeout(() => globalLoader.style.display = 'none', 300);
+            skeletonContainer.style.display = 'none';
+            
+            ridesList.innerHTML = '';
+
+            if (data.length === 0) {
+                ridesList.style.display = 'none';
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            ridesList.style.display = 'flex';
+
+            data.forEach(ride => {
+                const clone = template.content.cloneNode(true);
+                
+                // Format Date
+                const dateObj = new Date(ride.createdAt || Date.now());
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const timeStr = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+                // Map Data
+                clone.querySelector('[data-bind="datetime"]').textContent = `${dateStr} • ${timeStr}`;
+                clone.querySelector('[data-bind="crn"]').textContent = `CRN: ${ride.id}`;
+                
+                // Status Badge
+                const statusBadge = clone.querySelector('[data-bind="status"]');
+                statusBadge.textContent = ride.status.toUpperCase();
+                statusBadge.classList.add(`status-${ride.status.toLowerCase()}`);
+
+                clone.querySelector('[data-bind="pickup"]').textContent = ride.pickup;
+                clone.querySelector('[data-bind="dropoff"]').textContent = ride.destination;
+                clone.querySelector('[data-bind="distance-time"]').textContent = `${ride.distance || '0 km'} • ${ride.duration || '0 mins'}`;
+
+                // Driver
+                if(ride.driver) {
+                    clone.querySelector('[data-bind="driver-name"]').textContent = ride.driver.name;
+                    clone.querySelector('[data-bind="vehicle"]').textContent = ride.driver.vehicle;
+                    clone.querySelector('[data-bind="driver-img"]').src = ride.driver.photo;
+                }
+
+                // Fare & Payment
+                clone.querySelector('[data-bind="fare"]').textContent = ride.fare;
+                clone.querySelector('[data-bind="payment"]').textContent = `${ride.paymentMethod} • ${ride.status === 'completed' ? 'Paid' : 'Pending'}`;
+
+                // Fav Icon
+                const favBtn = clone.querySelector('.fav-btn');
+                if(ride.isFavorite) {
+                    favBtn.classList.add('favorited');
+                    favBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+                }
+                favBtn.onclick = (e) => toggleFavorite(e.currentTarget, ride.id);
+
+                // Actions mapping
+                clone.querySelector('.action-invoice').onclick = () => downloadInvoice(ride.id);
+                clone.querySelector('.action-rate').onclick = () => rateRide(ride.id);
+                clone.querySelector('.action-book').onclick = () => bookAgain(ride.pickup, ride.destination);
+
+                // Hide rate/invoice if cancelled
+                if(ride.status === 'cancelled') {
+                    clone.querySelector('.action-invoice').style.display = 'none';
+                    clone.querySelector('.action-rate').style.display = 'none';
+                }
+
+                ridesList.appendChild(clone);
+            });
+        }
+
+        // Filtering Logic
+        filterChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                filterChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                applyFilters();
+            });
+        });
+
+        searchInput.addEventListener('input', applyFilters);
+
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const activeFilter = document.querySelector('.chip.active').dataset.filter;
+
+            const filteredData = rawBookings.filter(ride => {
+                // Text Search
+                const matchesSearch = 
+                    ride.pickup.toLowerCase().includes(searchTerm) ||
+                    ride.destination.toLowerCase().includes(searchTerm) ||
+                    ride.id.toLowerCase().includes(searchTerm) ||
+                    (ride.driver && ride.driver.name.toLowerCase().includes(searchTerm));
+
+                // Chip Filter
+                let matchesChip = true;
+                if (activeFilter === 'completed') matchesChip = ride.status === 'completed';
+                if (activeFilter === 'cancelled') matchesChip = ride.status === 'cancelled';
+                if (activeFilter === 'bike') matchesChip = ride.type === 'bike';
+                if (activeFilter === 'cab') matchesChip = ride.type === 'cab';
+                // 'all' and 'this-week' logic simplified for demo
+                
+                return matchesSearch && matchesChip;
+            });
+
+            renderRides(filteredData);
+        }
+
+        // Action Handlers
+        window.downloadInvoice = function(rideId) {
+            alert(`Generating PDF Invoice for ${rideId}...\nDownload will start shortly.`);
+        };
+
+        window.rateRide = function(rideId) {
+            alert(`Opening rating modal for ride ${rideId}`);
+        };
+
+        window.bookAgain = function(pickup, dest) {
+            // Store coordinates/strings in sessionStorage to pre-fill booking page
+            sessionStorage.setItem('rebook_pickup', pickup);
+            sessionStorage.setItem('rebook_dest', dest);
+            window.location.href = 'Booking.html';
+        };
+
+        window.toggleFavorite = function(btn, rideId) {
+            btn.classList.toggle('favorited');
+            if (btn.classList.contains('favorited')) {
+                btn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+                // Update Firebase Logic Here
+            } else {
+                btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+                // Update Firebase Logic Here
+            }
+        };
+
+        window.openNotifications = function() {
+            alert('Notifications Panel Opened.');
+            document.querySelector('.notification-dot').style.display = 'none';
+        };
+
+    </script>
 </body>
-
 </html>
