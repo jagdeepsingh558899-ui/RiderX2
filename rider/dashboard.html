@@ -8,26 +8,15 @@
 
 <title>RiderX Rider Dashboard</title>
 
+<link rel="stylesheet" href="../css/style.css">
 
 <style>
 
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-
-}
-
-
 body{
-
 background:#000;
 color:white;
-
+font-family:Arial;
 }
-
 
 
 .header{
@@ -35,12 +24,10 @@ color:white;
 background:#111;
 padding:20px;
 border-bottom:2px solid #FFD600;
-
 display:flex;
 justify-content:space-between;
 
 }
-
 
 
 .logo{
@@ -58,13 +45,11 @@ color:#FFD600;
 }
 
 
-
 .container{
 
 padding:20px;
 
 }
-
 
 
 .box{
@@ -77,16 +62,6 @@ margin-bottom:15px;
 }
 
 
-
-.online{
-
-color:#00ff66;
-font-weight:bold;
-
-}
-
-
-
 .grid{
 
 display:grid;
@@ -94,7 +69,6 @@ grid-template-columns:repeat(2,1fr);
 gap:15px;
 
 }
-
 
 
 .card{
@@ -107,7 +81,6 @@ text-align:center;
 }
 
 
-
 .number{
 
 font-size:30px;
@@ -117,34 +90,21 @@ font-weight:bold;
 }
 
 
-
-button{
+button,a{
 
 width:100%;
 padding:14px;
-margin-top:15px;
+margin-top:12px;
 border:none;
 border-radius:12px;
 background:#FFD600;
+color:#000;
 font-weight:bold;
-
-}
-
-
-
-a{
-
-display:block;
-background:#111;
-color:white;
 text-decoration:none;
-padding:15px;
-margin-top:10px;
-border-radius:12px;
-border-left:4px solid #FFD600;
+display:block;
+text-align:center;
 
 }
-
 
 
 </style>
@@ -155,26 +115,17 @@ border-left:4px solid #FFD600;
 <body>
 
 
-
 <div class="header">
 
-
 <div class="logo">
-
 RIDER<span>X</span>
-
 </div>
-
 
 <div>
-
 🏍️
-
 </div>
 
-
 </div>
-
 
 
 
@@ -183,37 +134,23 @@ RIDER<span>X</span>
 
 
 
-
-
 <div class="box">
 
-
 <h2>
-
 Welcome Rider
-
 </h2>
 
-
 <p id="status">
-
-Offline 🔴
-
+Loading...
 </p>
 
 
-
 <button onclick="goOnline()">
-
-Go Online
-
+🟢 Go Online
 </button>
 
 
-
 </div>
-
-
 
 
 
@@ -222,24 +159,17 @@ Go Online
 <div class="grid">
 
 
-
 <div class="card">
 
 <h3>
-
 Trips
-
 </h3>
 
 <div class="number" id="trips">
-
 0
-
 </div>
 
-
 </div>
-
 
 
 
@@ -247,23 +177,17 @@ Trips
 <div class="card">
 
 <h3>
-
 Earnings
-
 </h3>
-
 
 <div class="number">
 
 ₹<span id="earnings">
-
 0
-
 </span>
 
 </div>
 
-
 </div>
 
 
@@ -273,21 +197,14 @@ Earnings
 <div class="card">
 
 <h3>
-
 Pending
-
 </h3>
-
 
 <div class="number" id="pending">
-
 0
-
 </div>
 
-
 </div>
-
 
 
 
@@ -295,25 +212,18 @@ Pending
 <div class="card">
 
 <h3>
-
 Completed
-
 </h3>
 
-
 <div class="number" id="completed">
-
 0
-
 </div>
-
 
 </div>
 
 
 
 </div>
-
 
 
 
@@ -324,49 +234,37 @@ Completed
 
 
 <h2>
-
 Quick Menu
-
 </h2>
 
 
-
 <a href="online.html">
-
-🟢 Go Online Map
-
+🟢 Online Map
 </a>
-
 
 
 <a href="requests.html">
-
 📩 Ride Requests
-
 </a>
-
 
 
 <a href="trip.html">
-
 🏍 Current Trip
-
 </a>
 
+
+<a href="earnings.html">
+💰 Earnings
+</a>
 
 
 <a href="wallet.html">
-
-💰 Wallet
-
+💳 Wallet
 </a>
-
 
 
 <a href="profile.html">
-
 👤 Profile
-
 </a>
 
 
@@ -375,12 +273,7 @@ Quick Menu
 
 
 
-
-
-
 </div>
-
-
 
 
 
@@ -406,97 +299,35 @@ where
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
+import {
 
-
-
-
-
-async function loadDashboard(){
-
-
-
-let user=
-
-auth.currentUser;
-
-
-
-if(!user)
-
-return;
-
-
-
-
-
-
-let q=query(
-
-collection(db,"rides"),
-
-where(
-
-"riderId",
-
-"==",
-
-user.uid
-
-)
-
-);
-
-
-
-
-
-let snap=
-
-await getDocs(q);
-
-
-
-
-
-
-let trips=0;
-
-let completed=0;
-
-let earnings=0;
-
-
-
-
-
-
-snap.forEach((ride)=>{
-
-
-let data=
-
-ride.data();
-
-
-
-
-trips++;
-
-
-
-
-if(data.status==="Completed"){
-
-
-completed++;
-
-
-earnings += Number(data.fare || 0);
-
+onAuthStateChanged
 
 }
 
+from
 
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+
+
+
+
+onAuthStateChanged(auth,(user)=>{
+
+
+if(user){
+
+loadDashboard(user.uid);
+
+}
+
+else{
+
+location.href="../auth/login.html";
+
+}
 
 
 });
@@ -506,23 +337,89 @@ earnings += Number(data.fare || 0);
 
 
 
-document.getElementById("trips").innerHTML=
 
-trips;
-
-
-
-document.getElementById("completed").innerHTML=
-
-completed;
+async function loadDashboard(uid){
 
 
 
-document.getElementById("earnings").innerHTML=
+let q=query(
 
-earnings;
+collection(db,"rides"),
+
+where("riderId","==",uid)
+
+);
 
 
+
+let snap=await getDocs(q);
+
+
+
+let trips=0;
+
+let completed=0;
+
+let pending=0;
+
+let earnings=0;
+
+
+
+
+snap.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+trips++;
+
+
+
+if(data.status==="Completed"){
+
+
+completed++;
+
+earnings += Number(data.fare || 0);
+
+
+}
+
+
+
+if(data.status==="Pending"){
+
+
+pending++;
+
+
+}
+
+
+
+});
+
+
+
+
+
+document.getElementById("trips").innerHTML=trips;
+
+
+document.getElementById("completed").innerHTML=completed;
+
+
+document.getElementById("pending").innerHTML=pending;
+
+
+document.getElementById("earnings").innerHTML=earnings;
+
+
+document.getElementById("status").innerHTML=
+
+"Online Ready 🟢";
 
 
 
@@ -531,26 +428,18 @@ earnings;
 
 
 
-window.goOnline=function(){
 
+
+
+window.goOnline=()=>{
 
 location.href="online.html";
 
-
-}
-
-
-
-
-
-
-loadDashboard();
+};
 
 
 
 </script>
-
-
 
 
 </body>
