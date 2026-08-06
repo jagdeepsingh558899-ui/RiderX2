@@ -2,7 +2,6 @@
 // RiderX Firebase Configuration
 // =========================================
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
   authDomain: "riderx-1.firebaseapp.com",
@@ -16,16 +15,23 @@ const firebaseConfig = {
 
 
 // Initialize Firebase
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+if (typeof firebase !== "undefined") {
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+        console.log("RiderX Firebase Initialized");
+    } else {
+        firebase.app();
+        console.log("RiderX Firebase Already Running");
+    }
+
+
+    // Firebase Services
+    window.auth = firebase.auth();
+    window.db = firebase.firestore();
+    window.database = firebase.database();
+    window.storage = firebase.storage();
+
 } else {
-    firebase.app();
+    console.error("Firebase SDK not loaded");
 }
-
-
-// Firebase Services
-const auth = firebase.auth();
-const database = firebase.database();
-const storage = firebase.storage();
-
-console.log("RiderX Firebase Connected Successfully");
