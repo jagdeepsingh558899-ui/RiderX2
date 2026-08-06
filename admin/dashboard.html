@@ -6,8 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin</title>
-
+<title>RiderX Admin Dashboard</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
@@ -58,8 +57,8 @@ gap:15px;
 background:#111;
 padding:20px;
 border-radius:18px;
-text-align:center;
 border:1px solid #333;
+text-align:center;
 
 }
 
@@ -67,20 +66,34 @@ border:1px solid #333;
 
 .number{
 
-font-size:30px;
+font-size:32px;
 color:#FFD600;
 font-weight:bold;
 
 }
 
 
-a{
 
-text-decoration:none;
-color:white;
+.menu{
+
+margin-top:25px;
 
 }
 
+
+
+.menu a{
+
+display:block;
+background:#111;
+padding:15px;
+margin-top:10px;
+border-radius:12px;
+color:white;
+text-decoration:none;
+border-left:4px solid #FFD600;
+
+}
 
 
 </style>
@@ -101,8 +114,8 @@ color:white;
 
 
 
-<div class="container">
 
+<div class="container">
 
 
 <div class="grid">
@@ -114,13 +127,10 @@ color:white;
 <h3>Customers</h3>
 
 <div class="number" id="customers">
-
 0
-
 </div>
 
 </div>
-
 
 
 
@@ -129,8 +139,34 @@ color:white;
 <h3>Riders</h3>
 
 <div class="number" id="riders">
-
 0
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<h3>Total Rides</h3>
+
+<div class="number" id="rides">
+0
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<h3>Revenue</h3>
+
+<div class="number">
+
+₹<span id="revenue">0</span>
 
 </div>
 
@@ -141,12 +177,10 @@ color:white;
 
 <div class="card">
 
-<h3>Rides</h3>
+<h3>Pending</h3>
 
-<div class="number" id="rides">
-
+<div class="number" id="pending">
 0
-
 </div>
 
 </div>
@@ -159,13 +193,57 @@ color:white;
 <h3>Completed</h3>
 
 <div class="number" id="completed">
-
 0
-
 </div>
 
 </div>
 
+
+
+</div>
+
+
+
+
+
+<div class="menu">
+
+
+<h2>
+
+Admin Controls
+
+</h2>
+
+
+<a href="fare-settings.html">
+💰 Fare Settings
+</a>
+
+
+<a href="rider-approval.html">
+🏍 Rider Approval
+</a>
+
+
+<a href="customers.html">
+👥 Customers
+</a>
+
+
+<a href="riders.html">
+🚴 Riders
+</a>
+
+
+<a href="rides.html">
+📋 All Rides
+</a>
+
+
+<a href="payments.html">
+💳 Payments
+</a>
 
 
 </div>
@@ -183,15 +261,13 @@ color:white;
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
 
 collection,
-getDocs,
-query,
-where
+getDocs
 
 }
 
@@ -201,41 +277,87 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
+
 async function loadAdmin(){
 
 
 
-let users =
-await getDocs(collection(db,"users"));
+let users=
+
+await getDocs(
+
+collection(db,"users")
+
+);
 
 
 
-let riders =
-await getDocs(collection(db,"riders"));
+let riders=
+
+await getDocs(
+
+collection(db,"riders")
+
+);
 
 
 
-let rides =
-await getDocs(collection(db,"rides"));
+let rides=
+
+await getDocs(
+
+collection(db,"rides")
+
+);
 
 
 
 
 
-let complete=0;
+let completed=0;
+
+let pending=0;
+
+let revenue=0;
 
 
 
-rides.forEach((r)=>{
 
 
-if(r.data().status==="Completed"){
 
-complete++;
+rides.forEach((ride)=>{
+
+
+let data=ride.data();
+
+
+
+if(data.status==="Completed"){
+
+completed++;
 
 }
 
+
+
+if(data.status==="Pending"){
+
+pending++;
+
+}
+
+
+
+if(data.paymentStatus==="Paid"){
+
+revenue += Number(data.fare || 0);
+
+}
+
+
+
 });
+
 
 
 
@@ -261,7 +383,19 @@ rides.size;
 
 document.getElementById("completed").innerHTML=
 
-complete;
+completed;
+
+
+
+document.getElementById("pending").innerHTML=
+
+pending;
+
+
+
+document.getElementById("revenue").innerHTML=
+
+revenue;
 
 
 
