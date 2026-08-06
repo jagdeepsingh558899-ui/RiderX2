@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Service Settings</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+font-size:24px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.box{
+
+background:#111;
+padding:20px;
+border-radius:20px;
+
+}
+
+
+
+.row{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+background:#222;
+padding:15px;
+margin-top:15px;
+border-radius:12px;
+
+}
+
+
+
+input{
+
+width:22px;
+height:22px;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:15px;
+margin-top:25px;
+border:none;
+border-radius:12px;
+background:#FFD600;
+font-weight:bold;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+
+<div class="header">
+
+⚙️ Service Control
+
+</div>
+
+
+
+<div class="container">
+
+
+<div class="box">
+
+
+
+<div class="row">
+
+<span>🏍 Bike Taxi</span>
+
+<input type="checkbox" id="bike">
+
+</div>
+
+
+
+
+<div class="row">
+
+<span>🚕 Cab</span>
+
+<input type="checkbox" id="cab">
+
+</div>
+
+
+
+
+<div class="row">
+
+<span>📦 Parcel</span>
+
+<input type="checkbox" id="parcel">
+
+</div>
+
+
+
+
+<div class="row">
+
+<span>🍔 Food</span>
+
+<input type="checkbox" id="food">
+
+</div>
+
+
+
+
+<button id="save">
+
+Save Settings
+
+</button>
+
+
+
+<p id="msg"></p>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<script type="module">
+
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+doc,
+setDoc,
+getDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+const ref = doc(
+
+db,
+
+"settings",
+
+"services"
+
+);
+
+
+
+
+
+async function load(){
+
+
+const snap = await getDoc(ref);
+
+
+
+if(snap.exists()){
+
+
+let data=snap.data();
+
+
+bike.checked=data.bike;
+
+cab.checked=data.cab;
+
+parcel.checked=data.parcel;
+
+food.checked=data.food;
+
+
+}
+
+else{
+
+
+bike.checked=true;
+
+cab.checked=true;
+
+parcel.checked=true;
+
+food.checked=true;
+
+
+}
+
+
+
+}
+
+
+
+
+save.onclick=async()=>{
+
+
+
+await setDoc(
+
+ref,
+
+{
+
+
+bike:bike.checked,
+
+
+cab:cab.checked,
+
+
+parcel:parcel.checked,
+
+
+food:food.checked
+
+
+
+}
+
+);
+
+
+
+msg.innerHTML=
+
+"Services Updated ✅";
+
+
+
+};
+
+
+
+
+load();
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
