@@ -1,63 +1,89 @@
 // =====================================
-// RiderX Admin Dashboard
-// Compatible With Current Ride System
+// RiderX Admin Dashboard System
 // =====================================
 
 
-import { db, auth } from "../firebase/config.js";
-
-
 import {
 
-onAuthStateChanged
+db
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+from "../firebase/config.js";
+
 
 
 import {
+
 
 collection,
+
+query,
+
+where,
+
+onSnapshot,
+
 getDocs
 
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-const totalCustomers =
-document.getElementById("totalCustomers");
-
-
-const totalRiders =
-document.getElementById("totalRiders");
-
-
-const activeBookings =
-document.getElementById("activeBookings");
-
-
-const totalEarnings =
-document.getElementById("totalEarnings");
-
-
-
-
-
-onAuthStateChanged(auth, async(user)=>{
-
-
-if(!user){
-
-location.href="../auth/login.html";
-
-return;
 
 }
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+
+const customerBox =
+
+document.getElementById(
+"customers"
+);
+
+
+
+const riderBox =
+
+document.getElementById(
+"riders"
+);
+
+
+
+const rideBox =
+
+document.getElementById(
+"rides"
+);
+
+
+
+const revenueBox =
+
+document.getElementById(
+"revenue"
+);
+
+
+
+
+
+
+
+
+
+// =====================================
+// COUNT USERS
+// =====================================
+
+
+
+async function loadUsers(){
 
 
 
@@ -65,30 +91,41 @@ try{
 
 
 
-// USERS
-
 const usersSnap =
+
 await getDocs(
-collection(db,"users")
+
+collection(
+db,
+"users"
+)
+
 );
 
 
 
+
 let customers=0;
+
 let riders=0;
 
 
 
-usersSnap.forEach((u)=>{
 
 
-let data=u.data();
+
+usersSnap.forEach(doc=>{
+
+
+let data=doc.data();
 
 
 
 if(data.role==="customer"){
 
+
 customers++;
+
 
 }
 
@@ -96,75 +133,9 @@ customers++;
 
 if(data.role==="rider"){
 
+
 riders++;
 
-}
-
-
-
-});
-
-
-
-if(totalCustomers)
-
-totalCustomers.innerHTML=customers;
-
-
-
-if(totalRiders)
-
-totalRiders.innerHTML=riders;
-
-
-
-
-
-
-
-
-// RIDES
-
-
-const ridesSnap =
-await getDocs(
-collection(db,"rides")
-);
-
-
-
-let active=0;
-
-let earnings=0;
-
-
-
-ridesSnap.forEach((ride)=>{
-
-
-let data=ride.data();
-
-
-
-if(
-
-data.status==="Pending" ||
-
-data.status==="Accepted" ||
-
-data.status==="Started"
-
-){
-
-active++;
-
-}
-
-
-
-if(data.status==="Completed"){
-
-earnings += Number(data.fare || 0);
 
 }
 
@@ -177,32 +148,205 @@ earnings += Number(data.fare || 0);
 
 
 
-if(activeBookings)
 
-activeBookings.innerHTML=active;
+customerBox.innerHTML=
+
+customers;
 
 
 
-if(totalEarnings)
+riderBox.innerHTML=
 
-totalEarnings.innerHTML="₹"+earnings;
+riders;
 
 
 
 }
+
 
 
 catch(error){
 
 
-console.log(
-"Admin Dashboard Error:",
-error
-);
+
+console.log(error);
+
 
 
 }
 
 
 
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// LIVE RIDES
+// =====================================
+
+
+
+function loadRides(){
+
+
+
+const q = query(
+
+collection(
+db,
+"rides"
+),
+
+
+where(
+
+"status",
+
+"!=",
+
+"completed"
+
+)
+
+
+);
+
+
+
+
+
+
+
+onSnapshot(q,(snapshot)=>{
+
+
+
+rideBox.innerHTML=
+
+snapshot.size;
+
+
+
 });
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// REVENUE
+// =====================================
+
+
+
+function loadRevenue(){
+
+
+
+const q = query(
+
+collection(
+db,
+"rides"
+),
+
+
+where(
+
+"status",
+
+"==",
+
+"completed"
+
+)
+
+
+);
+
+
+
+
+
+
+
+
+onSnapshot(q,(snapshot)=>{
+
+
+
+let total=0;
+
+
+
+snapshot.forEach(doc=>{
+
+
+const ride = doc.data();
+
+
+
+let fare =
+
+Number(
+
+ride.fare?.replace("₹","")
+
+);
+
+
+
+total += fare;
+
+
+
+});
+
+
+
+
+
+
+
+revenueBox.innerHTML=
+
+"₹"+total;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+loadUsers();
+
+
+loadRides();
+
+
+loadRevenue();
