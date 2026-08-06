@@ -1,301 +1,870 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>RiderX Admin Dashboard</title>
-
-
-<link rel="stylesheet" href="../css/style.css">
-
-
-<style>
-
-
-body{
-
-margin:0;
-
-background:#000;
-
-color:white;
-
-font-family:Arial,sans-serif;
-
-}
-
-
-
-.header{
-
-background:#111;
-
-padding:20px;
-
-font-size:28px;
-
-font-weight:bold;
-
-color:#FFD600;
-
-}
-
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-
-.grid{
-
-display:grid;
-
-grid-template-columns:1fr 1fr;
-
-gap:15px;
-
-}
-
-
-
-.card{
-
-background:#111;
-
-padding:20px;
-
-border-radius:20px;
-
-}
-
-
-
-.value{
-
-font-size:30px;
-
-font-weight:bold;
-
-color:#FFD600;
-
-}
-
-
-
-.menu{
-
-background:#111;
-
-margin-top:20px;
-
-padding:20px;
-
-border-radius:20px;
-
-}
-
-
-
-.option{
-
-background:#222;
-
-padding:15px;
-
-margin:10px 0;
-
-border-radius:15px;
-
-cursor:pointer;
-
-}
-
-
-
-.option:hover{
-
-background:#FFD600;
-
-color:#000;
-
-}
-
-
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiderX Control Tower | Premium Admin Operations Suite</title>
+    <link rel="stylesheet" href="../css/Style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#08080A',
+                            dark: '#0F1015',
+                            card: '#161822',
+                            border: '#232636',
+                            yellow: '#FFE500',
+                            yellowDark: '#D4BC00',
+                            gray: '#8E94A8',
+                            emerald: '#10B981',
+                            rose: '#F43F5E',
+                            amber: '#F59E0B',
+                            indigo: '#6366F1',
+                            cyan: '#06B6D4'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        body {
+            background-color: #08080A;
+            color: #FFFFFF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(22, 24, 34, 0.95) 0%, rgba(15, 16, 21, 0.98) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 229, 0, 0.08);
+        }
+
+        .glass-panel-interactive {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel-interactive:hover {
+            border-color: rgba(255, 229, 0, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -8px rgba(255, 229, 0, 0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0F1015;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #232636;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #FFE500;
+        }
+
+        #realtimeMap {
+            height: 100%;
+            width: 100%;
+            border-radius: 1rem;
+            z-index: 10;
+        }
+
+        .leaflet-container {
+            background-color: #0F1015 !important;
+        }
+
+        .pulse-live {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-emerald 2s infinite;
+        }
+
+        @keyframes pulse-emerald {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .modal-backdrop {
+            background-color: rgba(8, 8, 10, 0.85);
+            backdrop-filter: blur(8px);
+        }
+    </style>
 </head>
-
-
-
-<body>
-
-
-
-<div class="header">
-
-⚡ RiderX Admin
-
-</div>
-
-
-
-
-
-<div class="container">
-
-
-
-<div class="grid">
-
-
-
-<div class="card">
-
-Customers
-
-<div class="value" id="customers">
-
-0
-
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-Riders
-
-<div class="value" id="riders">
-
-0
-
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-Live Rides
-
-<div class="value" id="rides">
-
-0
-
-</div>
-
-</div>
-
-
-
-<div class="card">
-
-Revenue
-
-<div class="value" id="revenue">
-
-₹0
-
-</div>
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="menu">
-
-
-<h3>
-
-Management
-
-</h3>
-
-
-
-<div class="option"
-onclick="location.href='riders.html'">
-
-🏍 Manage Riders
-
-</div>
-
-
-
-<div class="option"
-onclick="location.href='customers.html'">
-
-👥 Manage Customers
-
-</div>
-
-
-
-<div class="option"
-onclick="location.href='pricing.html'">
-
-💰 Fare & Commission
-
-</div>
-
-
-
-<div class="option"
-onclick="location.href='offers.html'">
-
-🎁 Offers & Coupons
-
-</div>
-
-
-
-<div class="option"
-onclick="location.href='settings.html'">
-
-⚙ App Settings
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-<script type="module" src="../js/admin.js"></script>
-
-
-
+<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
+
+    <!-- Top Global Header -->
+    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3">
+        <div class="max-w-[1700px] mx-auto flex items-center justify-between">
+            
+            <!-- Left Branding & Global Controls -->
+            <div class="flex items-center gap-6">
+                <a href="./Dashboard.html" class="flex items-center gap-3">
+                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-9 w-auto object-contain" onerror="this.src='https://via.placeholder.com/130x35/08080A/FFE500?text=RiderX+Admin'">
+                </a>
+                <div class="hidden md:flex items-center gap-2 bg-brand-dark px-3 py-1.5 rounded-xl border border-brand-border">
+                    <span class="w-2.5 h-2.5 rounded-full bg-brand-emerald pulse-live"></span>
+                    <span class="text-xs font-extrabold text-white tracking-wider uppercase">System Health: 99.98%</span>
+                </div>
+            </div>
+
+            <!-- Search & Actions -->
+            <div class="flex items-center gap-4">
+                
+                <div class="relative hidden sm:block w-64 lg:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
+                    <input type="text" id="globalSearchInput" placeholder="Search Rider, Captain, Trip ID, City..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow">
+                </div>
+
+                <!-- Live Auto Sync Status -->
+                <button onclick="refreshDashboardData()" id="refreshBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow hover:text-brand-yellow transition">
+                    <i class="fa-solid fa-rotate-right text-xs" id="refreshIcon"></i>
+                    <span class="hidden md:inline">Sync Data</span>
+                </button>
+
+                <!-- Notifications -->
+                <div class="relative">
+                    <button onclick="toggleAdminNotifications()" class="w-9 h-9 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-center text-brand-gray hover:text-brand-yellow hover:border-brand-yellow/40 transition">
+                        <i class="fa-solid fa-bell text-sm"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-yellow"></span>
+                    </button>
+                </div>
+
+                <!-- Admin Profile Dropdown -->
+                <div class="flex items-center gap-3 border-l border-brand-border pl-4">
+                    <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin+X&background=FFE500&color=08080A" alt="Admin" class="w-9 h-9 rounded-xl border border-brand-yellow object-cover">
+                    <div class="hidden xl:block text-left">
+                        <h4 id="adminNameDisplay" class="text-xs font-extrabold text-white">Super Admin</h4>
+                        <p class="text-[10px] text-brand-yellow font-mono">ID: ADM-9901</p>
+                    </div>
+                    <button onclick="handleAdminLogout()" class="p-2 text-brand-gray hover:text-brand-rose transition">
+                        <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Main Operational Workspace -->
+    <main class="flex-grow max-w-[1700px] w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+
+        <!-- Top Navigation Pills / View Switcher -->
+        <div class="flex items-center justify-between border-b border-brand-border pb-4 overflow-x-auto custom-scrollbar gap-4">
+            <div class="flex items-center gap-2">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn px-4 py-2 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition">
+                    <i class="fa-solid fa-chart-line mr-1.5"></i> Control Tower Overview
+                </button>
+                <button onclick="switchTab('captains')" id="tab-captains" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white hover:bg-brand-dark transition">
+                    <i class="fa-solid fa-user-shield mr-1.5"></i> Captain Approvals
+                </button>
+                <button onclick="switchTab('trips')" id="tab-trips" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white hover:bg-brand-dark transition">
+                    <i class="fa-solid fa-route mr-1.5"></i> Live Trips
+                </button>
+                <button onclick="switchTab('users')" id="tab-users" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white hover:bg-brand-dark transition">
+                    <i class="fa-solid fa-users mr-1.5"></i> Users & Riders
+                </button>
+                <button onclick="switchTab('finance')" id="tab-finance" class="tab-btn px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white hover:bg-brand-dark transition">
+                    <i class="fa-solid fa-wallet mr-1.5"></i> Payouts & Revenue
+                </button>
+            </div>
+
+            <div class="flex items-center gap-3 shrink-0">
+                <span class="text-xs text-brand-gray font-mono hidden sm:inline">Selected Region: <strong class="text-white">All India HQ</strong></span>
+                <button onclick="exportSystemReport()" class="px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-brand-yellow hover:bg-brand-yellow hover:text-brand-black transition">
+                    <i class="fa-solid fa-download mr-1.5"></i> Export Executive PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- VIEW 1: OVERVIEW & REAL-TIME DISPATCH MATRIX -->
+        <div id="view-overview" class="space-y-6">
+
+            <!-- Executive KPI Metrics Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Metric 1 -->
+                <div class="glass-panel p-5 rounded-2xl glass-panel-interactive space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-brand-gray uppercase tracking-wider">Total Gross Fare (GMV)</span>
+                        <div class="w-8 h-8 rounded-xl bg-brand-yellow/10 text-brand-yellow flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-indian-rupee-sign"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <h2 class="text-2xl font-black text-white" id="statTotalRevenue">₹8,42,950</h2>
+                        <span class="text-xs font-bold text-brand-emerald flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> +18.4%</span>
+                    </div>
+                    <p class="text-[10px] text-brand-gray">Platform Revenue: <span class="text-brand-yellow font-bold" id="statNetCommission">₹1,68,590 (20%)</span></p>
+                </div>
+
+                <!-- Metric 2 -->
+                <div class="glass-panel p-5 rounded-2xl glass-panel-interactive space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-brand-gray uppercase tracking-wider">Active Fleet On Road</span>
+                        <div class="w-8 h-8 rounded-xl bg-brand-emerald/10 text-brand-emerald flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-taxi"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <h2 class="text-2xl font-black text-white" id="statActiveCaptains">1,248</h2>
+                        <span class="text-xs font-bold text-brand-emerald flex items-center gap-1"><i class="fa-solid fa-circle text-[8px]"></i> Live</span>
+                    </div>
+                    <p class="text-[10px] text-brand-gray">Online: <span class="text-white font-bold" id="statOnlineCaptains">890</span> | On Trip: <span class="text-brand-emerald font-bold" id="statOnTripCaptains">358</span></p>
+                </div>
+
+                <!-- Metric 3 -->
+                <div class="glass-panel p-5 rounded-2xl glass-panel-interactive space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-brand-gray uppercase tracking-wider">Pending Captain Approvals</span>
+                        <div class="w-8 h-8 rounded-xl bg-brand-amber/10 text-brand-amber flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-user-clock"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <h2 class="text-2xl font-black text-brand-amber" id="statPendingApprovals">42</h2>
+                        <span class="text-xs font-bold text-brand-amber flex items-center gap-1">Action Required</span>
+                    </div>
+                    <p class="text-[10px] text-brand-gray">Avg Audit Time: <span class="text-white font-bold">14 Mins</span></p>
+                </div>
+
+                <!-- Metric 4 -->
+                <div class="glass-panel p-5 rounded-2xl glass-panel-interactive space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-extrabold text-brand-gray uppercase tracking-wider">Completed Rides Today</span>
+                        <div class="w-8 h-8 rounded-xl bg-brand-cyan/10 text-brand-cyan flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <h2 class="text-2xl font-black text-white" id="statCompletedTrips">3,890</h2>
+                        <span class="text-xs font-bold text-brand-cyan flex items-center gap-1"><i class="fa-solid fa-arrow-trend-up"></i> +9.2%</span>
+                    </div>
+                    <p class="text-[10px] text-brand-gray">Cancellation Rate: <span class="text-brand-rose font-bold" id="statCancelRate">2.1%</span></p>
+                </div>
+
+            </div>
+
+            <!-- Real-Time Geospatial Map & Live Feed Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Live Fleet Map (2 Columns) -->
+                <div class="lg:col-span-2 glass-panel p-5 rounded-3xl space-y-4 flex flex-col justify-between h-[520px]">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-earth-asia text-brand-yellow text-sm"></i>
+                            <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Real-Time GPS Fleet Tracking & Demand Heatmap</h3>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] bg-brand-dark px-2.5 py-1 rounded-full border border-brand-border text-brand-gray font-mono">Live Sync Engine v3.8</span>
+                        </div>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div class="flex-grow w-full relative overflow-hidden rounded-2xl border border-brand-border">
+                        <div id="realtimeMap"></div>
+                    </div>
+                </div>
+
+                <!-- Live Trip Stream Feed (1 Column) -->
+                <div class="glass-panel p-5 rounded-3xl space-y-4 h-[520px] flex flex-col justify-between">
+                    <div class="flex items-center justify-between border-b border-brand-border/60 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-satellite-dish text-brand-emerald text-sm pulse-live rounded-full"></i>
+                            <h3 class="text-xs font-extrabold text-white uppercase tracking-wider">Live Trip Activity Feed</h3>
+                        </div>
+                        <span class="text-[10px] text-brand-yellow font-mono" id="liveFeedCount">12 Active Trips</span>
+                    </div>
+
+                    <div class="flex-grow overflow-y-auto custom-scrollbar space-y-3 pr-1" id="liveTripFeedContainer">
+                        <!-- Dynamic Injections -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <div class="glass-panel p-5 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-brand-yellow"></i> Hourly Booking Volatility vs Completion
+                        </h3>
+                        <span class="text-[10px] text-brand-gray">Today's Data</span>
+                    </div>
+                    <div class="h-64 relative">
+                        <canvas id="tripsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-5 rounded-3xl space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie text-brand-yellow"></i> Vehicle Category Distribution
+                        </h3>
+                        <span class="text-[10px] text-brand-gray">Fleet Breakdown</span>
+                    </div>
+                    <div class="h-64 relative flex items-center justify-center">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- VIEW 2: CAPTAIN APPROVALS & COMPLIANCE MATRIX -->
+        <div id="view-captains" class="hidden space-y-6">
+            
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-brand-border/60 pb-4">
+                    <div>
+                        <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-id-card text-brand-yellow"></i> Captain Onboarding Verification Desk
+                        </h2>
+                        <p class="text-xs text-brand-gray">Review and verify submitted documents for new RiderX Captains</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <select id="filterCaptainStatus" onchange="filterCaptainTable()" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                            <option value="pending">Pending Verification</option>
+                            <option value="approved">Approved Captains</option>
+                            <option value="rejected">Rejected Applications</option>
+                            <option value="all">All Submissions</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Captain Applications Table -->
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-brand-border text-[10px] font-extrabold text-brand-gray uppercase tracking-wider bg-brand-dark/40">
+                                <th class="py-3 px-4">Captain</th>
+                                <th class="py-3 px-4">Contact</th>
+                                <th class="py-3 px-4">Vehicle Details</th>
+                                <th class="py-3 px-4">Uploaded Documents</th>
+                                <th class="py-3 px-4">Submitted Date</th>
+                                <th class="py-3 px-4 text-center">Audit Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="captainApprovalTableBody" class="divide-y divide-brand-border/40 text-xs">
+                            <!-- Dynamic Rows Injected Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- VIEW 3: LIVE TRIPS MANAGEMENT -->
+        <div id="view-trips" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-brand-border/60 pb-4">
+                    <div>
+                        <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-route text-brand-yellow"></i> Real-time Ride Dispatch & Live Monitor
+                        </h2>
+                        <p class="text-xs text-brand-gray">Monitor ongoing rides, driver assignment, SOS alerts, and active cancellations</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-brand-border text-[10px] font-extrabold text-brand-gray uppercase tracking-wider bg-brand-dark/40">
+                                <th class="py-3 px-4">Trip ID</th>
+                                <th class="py-3 px-4">Rider</th>
+                                <th class="py-3 px-4">Captain</th>
+                                <th class="py-3 px-4">Pickup / Dropoff</th>
+                                <th class="py-3 px-4">Fare</th>
+                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4 text-center">Intervention</th>
+                            </tr>
+                        </thead>
+                        <tbody id="liveTripsTableBody" class="divide-y divide-brand-border/40 text-xs">
+                            <!-- Dynamic Injection -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: USER & RIDER MANAGEMENT -->
+        <div id="view-users" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
+                    <div>
+                        <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-users text-brand-yellow"></i> Registered Customer Directory
+                        </h2>
+                        <p class="text-xs text-brand-gray">Manage rider accounts, wallet balances, ratings, and account status</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-brand-border text-[10px] font-extrabold text-brand-gray uppercase tracking-wider bg-brand-dark/40">
+                                <th class="py-3 px-4">User</th>
+                                <th class="py-3 px-4">Email / Phone</th>
+                                <th class="py-3 px-4">Total Rides</th>
+                                <th class="py-3 px-4">Rating</th>
+                                <th class="py-3 px-4">Status</th>
+                                <th class="py-3 px-4 text-center">Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-brand-border/40 text-xs">
+                            <!-- Dynamic Injection -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: FINANCE & PAYOUTS -->
+        <div id="view-finance" class="hidden space-y-6">
+            <div class="glass-panel p-6 rounded-3xl space-y-4">
+                <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
+                    <div>
+                        <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-wallet text-brand-yellow"></i> Captain Settlement & Platform Commissions
+                        </h2>
+                        <p class="text-xs text-brand-gray">Approve weekly payouts, process earnings settlements, and manage platform cut</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pb-2">
+                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border">
+                        <span class="text-[10px] text-brand-gray font-bold uppercase">Pending Driver Settlements</span>
+                        <h3 class="text-xl font-black text-white mt-1">₹3,45,200</h3>
+                    </div>
+                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border">
+                        <span class="text-[10px] text-brand-gray font-bold uppercase">Processed Today</span>
+                        <h3 class="text-xl font-black text-brand-emerald mt-1">₹1,89,400</h3>
+                    </div>
+                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border">
+                        <span class="text-[10px] text-brand-gray font-bold uppercase">Commission Vault</span>
+                        <h3 class="text-xl font-black text-brand-yellow mt-1">₹89,200</h3>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-brand-border text-[10px] font-extrabold text-brand-gray uppercase tracking-wider bg-brand-dark/40">
+                                <th class="py-3 px-4">Captain</th>
+                                <th class="py-3 px-4">UPI / Bank Account</th>
+                                <th class="py-3 px-4">Gross Earnings</th>
+                                <th class="py-3 px-4">Platform Fee (20%)</th>
+                                <th class="py-3 px-4">Net Payable</th>
+                                <th class="py-3 px-4 text-center">Payout Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payoutsTableBody" class="divide-y divide-brand-border/40 text-xs">
+                            <!-- Dynamic Injection -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal 1: Captain Document Review Drawer/Modal -->
+    <div id="reviewCaptainModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-panel max-w-3xl w-full rounded-3xl p-6 space-y-6 border-brand-yellow/30 shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-brand-border pb-4">
+                <div>
+                    <h3 class="text-base font-extrabold text-white uppercase tracking-wider" id="modalCaptainName">Review Captain Documents</h3>
+                    <p class="text-xs text-brand-yellow font-mono" id="modalCaptainId">ID: CAP-0000</p>
+                </div>
+                <button onclick="closeReviewModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto custom-scrollbar space-y-5 flex-grow pr-1">
+                
+                <!-- Captain Identity Details -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-brand-dark/80 p-4 rounded-2xl border border-brand-border">
+                    <div>
+                        <span class="text-[10px] font-bold text-brand-gray uppercase">Phone</span>
+                        <p id="modalCaptainPhone" class="text-xs font-bold text-white">+91 9876543210</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-brand-gray uppercase">Vehicle Category</span>
+                        <p id="modalCaptainVehicleType" class="text-xs font-bold text-brand-yellow">Prime Sedan</p>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold text-brand-gray uppercase">Vehicle Number</span>
+                        <p id="modalCaptainVehicleNo" class="text-xs font-bold text-white">KA-01-EQ-9988</p>
+                    </div>
+                </div>
+
+                <!-- Documents Grid -->
+                <div class="space-y-3">
+                    <h4 class="text-xs font-extrabold text-white uppercase tracking-wider">Submitted Credentials & Images</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="modalDocsContainer">
+                        <!-- Dynamic Injections -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Audit Buttons -->
+            <div class="flex items-center justify-end gap-3 border-t border-brand-border pt-4">
+                <button onclick="rejectCaptainApplication()" class="px-5 py-2.5 rounded-xl bg-brand-rose/20 text-brand-rose border border-brand-rose/30 font-bold text-xs hover:bg-brand-rose hover:text-white transition">
+                    Reject Application
+                </button>
+                <button onclick="approveCaptainApplication()" class="px-5 py-2.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">
+                    Approve Captain & Activate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Admin System Notifications Modal -->
+    <div id="adminNotificationsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 space-y-4 border-brand-yellow/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-bell text-brand-yellow"></i> System Alerts & Audit Logs
+                </h3>
+                <button onclick="toggleAdminNotifications()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-brand-yellow">Surge Auto-Triggered</span>
+                        <span class="text-[9px] text-brand-gray">2m ago</span>
+                    </div>
+                    <p class="text-brand-gray">Airport Hotspot demand exceeded 1.8x multiplier threshold.</p>
+                </div>
+
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white">New Captain Onboarding</span>
+                        <span class="text-[9px] text-brand-gray">12m ago</span>
+                    </div>
+                    <p class="text-brand-gray">Captain Rajesh M. submitted DL and RC for verification.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
+    <footer class="border-t border-brand-border/60 bg-brand-black py-4 px-4 lg:px-8 mt-auto">
+        <div class="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-gray">
+            <div class="flex items-center gap-2">
+                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-5 w-auto object-contain opacity-70">
+                <span>&copy; 2026 RiderX Enterprise Control Tower. All rights reserved.</span>
+            </div>
+            <div class="flex items-center gap-4 text-[11px]">
+                <span class="text-brand-emerald flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> Encrypted Session</span>
+                <span>Server Time: <strong class="text-white font-mono" id="serverClock">02:32 IST</strong></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase & Core JS Scripts -->
+    <script type="module" src="../firebase/firebase-config.js"></script>
+    <script type="module" src="../js/Admin.js"></script>
+    <script type="module" src="../js/App.js"></script>
+    <script type="module" src="../js/Map.js"></script>
+    <script type="module" src="../js/Notification.js"></script>
+
+    <!-- Admin Dashboard Logic -->
+    <script type="module">
+        import { auth, db } from '../firebase/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { collection, query, where, getDocs, doc, updateDoc, onSnapshot, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentAdmin = null;
+        let selectedCaptainUid = null;
+        let leafletMap = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check Security & Auth
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    window.location.href = '../auth/rider-login.html';
+                    return;
+                }
+
+                currentAdmin = user;
+                if (user.displayName) {
+                    document.getElementById('adminNameDisplay').innerText = user.displayName;
+                }
+
+                initializeControlTowerMap();
+                initializeCharts();
+                setupRealtimeListeners();
+                updateServerClock();
+            });
+        });
+
+        // Initialize Map
+        function initializeControlTowerMap() {
+            if (document.getElementById('realtimeMap')) {
+                leafletMap = L.map('realtimeMap', {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([12.9716, 77.5946], 12); // Default to Tech Hub Coordinates
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    maxZoom: 19
+                }).addTo(leafletMap);
+
+                // Add Dummy Live Fleet Pins
+                const locations = [
+                    { lat: 12.9716, lng: 77.5946, name: "Captain Vikram", type: "Sedan" },
+                    { lat: 12.9352, lng: 77.6245, name: "Captain Ankit", type: "XL" },
+                    { lat: 12.9783, lng: 77.6408, name: "Captain Suresh", type: "Bike" }
+                ];
+
+                locations.forEach(loc => {
+                    L.circleMarker([loc.lat, loc.lng], {
+                        radius: 8,
+                        fillColor: "#FFE500",
+                        color: "#08080A",
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    }).addTo(leafletMap).bindPopup(`<b style="color:#08080A">${loc.name}</b><br><span style="color:#666">${loc.type}</span>`);
+                });
+            }
+        }
+
+        // Initialize Analytics Charts
+        function initializeCharts() {
+            const ctx1 = document.getElementById('tripsChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['06 AM', '09 AM', '12 PM', '03 PM', '06 PM', '09 PM', '12 AM'],
+                    datasets: [{
+                        label: 'Rides Booked',
+                        data: [420, 1120, 850, 780, 1450, 1100, 480],
+                        backgroundColor: '#FFE500',
+                        borderRadius: 6
+                    }, {
+                        label: 'Completed',
+                        data: [400, 1080, 830, 760, 1400, 1070, 460],
+                        backgroundColor: '#10B981',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#8E94A8', font: { family: 'Plus Jakarta Sans' } } } },
+                    scales: {
+                        x: { ticks: { color: '#8E94A8' }, grid: { display: false } },
+                        y: { ticks: { color: '#8E94A8' }, grid: { color: '#232636' } }
+                    }
+                }
+            });
+
+            const ctx2 = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['RiderX Go', 'Prime Sedan', 'RiderX XL', 'Bike Moto'],
+                    datasets: [{
+                        data: [45, 25, 15, 15],
+                        backgroundColor: ['#FFE500', '#10B981', '#06B6D4', '#F59E0B'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#8E94A8' } } }
+                }
+            });
+        }
+
+        // Realtime Firebase Snapshots
+        function setupRealtimeListeners() {
+            // Listen to Captain Approvals
+            const captainsRef = collection(db, "riders");
+            onSnapshot(captainsRef, (snapshot) => {
+                const tableBody = document.getElementById('captainApprovalTableBody');
+                tableBody.innerHTML = '';
+
+                let pendingCount = 0;
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const uid = docSnap.id;
+
+                    if (!data.adminApproved) pendingCount++;
+
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-brand-dark/60 transition";
+                    row.innerHTML = `
+                        <td class="py-3 px-4 font-bold text-white flex items-center gap-2">
+                            <img src="${data.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.fullName || 'Captain')}" class="w-7 h-7 rounded-lg object-cover">
+                            <span>${data.fullName || 'Captain Partner'}</span>
+                        </td>
+                        <td class="py-3 px-4 text-brand-gray">${data.phone || 'N/A'}</td>
+                        <td class="py-3 px-4"><span class="text-brand-yellow font-bold">${data.vehicleType || 'Sedan'}</span> (${data.vehicleNumber || 'N/A'})</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-0.5 rounded bg-brand-dark border border-brand-border text-[10px] text-brand-gray">DL, RC, Ins</span>
+                        </td>
+                        <td class="py-3 px-4 text-brand-gray">${data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'Today'}</td>
+                        <td class="py-3 px-4 text-center">
+                            ${data.adminApproved ? 
+                                `<span class="text-brand-emerald font-bold text-[11px]"><i class="fa-solid fa-check"></i> Approved</span>` : 
+                                `<button onclick="openReviewModal('${uid}', '${data.fullName}', '${data.phone}', '${data.vehicleType}', '${data.vehicleNumber}')" class="px-3 py-1 rounded-lg bg-brand-yellow text-brand-black font-extrabold text-[11px] hover:bg-yellow-300">Audit</button>`}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+
+                document.getElementById('statPendingApprovals').innerText = pendingCount;
+            });
+
+            // Populate Live Stream Activity
+            const liveStream = document.getElementById('liveTripFeedContainer');
+            liveStream.innerHTML = `
+                <div class="bg-brand-dark/80 p-3 rounded-2xl border border-brand-border space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-brand-yellow">#RX-9921 • In Progress</span>
+                        <span class="font-mono text-white font-bold">₹340</span>
+                    </div>
+                    <p class="text-[11px] text-brand-gray">Airport T2 &rarr; Indiranagar 100ft Rd</p>
+                </div>
+                <div class="bg-brand-dark/80 p-3 rounded-2xl border border-brand-border space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-brand-emerald">#RX-9920 • Completed</span>
+                        <span class="font-mono text-white font-bold">₹180</span>
+                    </div>
+                    <p class="text-[11px] text-brand-gray">Koramangala 5th Block &rarr; MG Road</p>
+                </div>
+            `;
+        }
+
+        // Window Interactive Functions
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white hover:bg-brand-dark transition";
+            });
+            document.getElementById(`tab-${tabName}`).className = "tab-btn px-4 py-2 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition";
+
+            ['overview', 'captains', 'trips', 'users', 'finance'].forEach(view => {
+                document.getElementById(`view-${view}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+        };
+
+        window.openReviewModal = function(uid, name, phone, vType, vNo) {
+            selectedCaptainUid = uid;
+            document.getElementById('modalCaptainName').innerText = `Review: ${name}`;
+            document.getElementById('modalCaptainId').innerText = `ID: ${uid.substring(0, 10).toUpperCase()}`;
+            document.getElementById('modalCaptainPhone').innerText = phone || '+91 9876543210';
+            document.getElementById('modalCaptainVehicleType').innerText = vType || 'Prime Sedan';
+            document.getElementById('modalCaptainVehicleNo').innerText = vNo || 'KA-01-EQ-9988';
+
+            const docsContainer = document.getElementById('modalDocsContainer');
+            docsContainer.innerHTML = `
+                <div class="bg-brand-dark p-3 rounded-xl border border-brand-border space-y-2">
+                    <span class="text-[10px] font-bold text-brand-gray uppercase">Driving License</span>
+                    <img src="https://via.placeholder.com/400x250/08080A/FFE500?text=Driving+License+Scan" class="w-full h-36 object-cover rounded-lg">
+                </div>
+                <div class="bg-brand-dark p-3 rounded-xl border border-brand-border space-y-2">
+                    <span class="text-[10px] font-bold text-brand-gray uppercase">Vehicle RC</span>
+                    <img src="https://via.placeholder.com/400x250/08080A/FFE500?text=Vehicle+RC+Document" class="w-full h-36 object-cover rounded-lg">
+                </div>
+            `;
+
+            document.getElementById('reviewCaptainModal').classList.remove('hidden');
+        };
+
+        window.closeReviewModal = function() {
+            document.getElementById('reviewCaptainModal').classList.add('hidden');
+        };
+
+        window.approveCaptainApplication = async function() {
+            if (!selectedCaptainUid) return;
+            try {
+                const captainRef = doc(db, "riders", selectedCaptainUid);
+                await updateDoc(captainRef, {
+                    adminApproved: true,
+                    status: 'active',
+                    approvedAt: new Date()
+                });
+                alert("Captain account successfully approved and activated!");
+                closeReviewModal();
+            } catch (err) {
+                console.error("Approval error:", err);
+                alert("Failed to approve captain. Try again.");
+            }
+        };
+
+        window.rejectCaptainApplication = async function() {
+            if (!selectedCaptainUid) return;
+            try {
+                const captainRef = doc(db, "riders", selectedCaptainUid);
+                await updateDoc(captainRef, {
+                    adminApproved: false,
+                    status: 'rejected',
+                    rejectedAt: new Date()
+                });
+                alert("Captain application rejected.");
+                closeReviewModal();
+            } catch (err) {
+                console.error("Rejection error:", err);
+            }
+        };
+
+        window.refreshDashboardData = function() {
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('fa-spin');
+            setTimeout(() => { icon.classList.remove('fa-spin'); }, 800);
+        };
+
+        window.toggleAdminNotifications = function() {
+            document.getElementById('adminNotificationsModal').classList.toggle('hidden');
+        };
+
+        window.handleAdminLogout = async function() {
+            await signOut(auth);
+            window.location.href = '../auth/rider-login.html';
+        };
+
+        window.exportSystemReport = function() {
+            alert("Generating executive PDF compliance report...");
+        };
+
+        function updateServerClock() {
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('serverClock').innerText = now.toLocaleTimeString() + ' IST';
+            }, 1000);
+        }
+    </script>
 </body>
-
 </html>
