@@ -8,19 +8,15 @@
 
 <title>RiderX Rider Dashboard</title>
 
-
 <link rel="stylesheet" href="../css/style.css">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
 
 </head>
 
 
 <body>
 
-
-<!-- TOP BAR -->
 
 <div class="topbar">
 
@@ -38,23 +34,59 @@
 
 
 
-<!-- RIDER STATUS -->
+<!-- APP INSTALL -->
 
+<div class="card">
+
+<h3>
+RiderX App
+</h3>
+
+<p>
+Install RiderX for better experience
+</p>
+
+
+<button 
+id="installApp"
+class="btn"
+style="display:none">
+
+📲 Install RiderX App
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- RIDER STATUS -->
 
 <div class="card">
 
 
-<h3>Rider Status</h3>
+<h3>
+Rider Status
+</h3>
 
 
 <p id="riderStatus">
 
-You are Offline
+Offline 🔴
 
 </p>
 
 
-<button id="onlineBtn" class="btn">
+
+<button 
+id="onlineBtn"
+class="btn">
 
 Go Online
 
@@ -69,8 +101,9 @@ Go Online
 
 
 
-<!-- MAP -->
 
+
+<!-- MAP -->
 
 <div class="map-container">
 
@@ -84,8 +117,9 @@ Go Online
 
 
 
-<!-- NEW RIDE REQUEST -->
 
+
+<!-- NEW REQUEST -->
 
 <div class="card">
 
@@ -102,56 +136,71 @@ New Ride Request
 
 <div class="booking-row">
 
-<span>Pickup</span>
+<span>
+Pickup
+</span>
 
-<b id="requestPickup">-</b>
-
-
-</div>
-
-
-
-<div class="booking-row">
-
-<span>Drop</span>
-
-<b id="requestDrop">-</b>
-
-
-</div>
-
-
-
-
-<div class="booking-row">
-
-<span>Fare</span>
-
-<b id="requestFare">
-
-₹0
-
+<b id="requestPickup">
+-
 </b>
 
+</div>
+
+
+
+
+
+<div class="booking-row">
+
+<span>
+Drop
+</span>
+
+<b id="requestDrop">
+-
+</b>
 
 </div>
 
 
 
 
-<button id="acceptBtn" class="btn">
 
-Accept Ride
+<div class="booking-row">
+
+<span>
+Fare
+</span>
+
+<b id="requestFare">
+₹0
+</b>
+
+</div>
+
+
+
+
+
+<button 
+id="acceptBtn"
+class="btn">
+
+✅ Accept Ride
 
 </button>
 
 
 
-<button id="rejectBtn" class="btn-outline">
 
-Reject
+<button 
+id="rejectBtn"
+class="btn-outline">
+
+❌ Reject
 
 </button>
+
 
 
 
@@ -189,49 +238,54 @@ Active Ride
 
 
 
+
 <div id="activeRide" style="display:none;">
 
 
 
+
 <div class="booking-row">
 
-<span>Status</span>
+<span>
+Status
+</span>
 
 <b id="rideStatus">
-
 -
-
 </b>
+
 
 </div>
 
 
 
 
+
 <div class="booking-row">
 
-<span>Customer</span>
+<span>
+Customer
+</span>
 
 <b id="customerName">
-
 -
-
 </b>
 
 
 </div>
+
 
 
 
 
 <div class="booking-row">
 
-<span>Fare</span>
+<span>
+Fare
+</span>
 
 <b id="activeFare">
-
 ₹0
-
 </b>
 
 
@@ -242,7 +296,22 @@ Active Ride
 
 
 
-<button id="callCustomer" class="btn">
+
+<button 
+id="navigationBtn"
+class="btn">
+
+🗺 Open Navigation
+
+</button>
+
+
+
+
+
+<button 
+id="callCustomer"
+class="btn">
 
 📞 Call Customer
 
@@ -251,7 +320,10 @@ Active Ride
 
 
 
-<button id="chatCustomer" class="btn-outline">
+
+<button 
+id="chatCustomer"
+class="btn-outline">
 
 💬 Chat Customer
 
@@ -260,9 +332,96 @@ Active Ride
 
 
 
+</div>
 
 
-<button id="arrivedBtn" class="btn">
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- OTP -->
+
+<div class="card" id="otpCard" style="display:none;">
+
+
+<h3>
+🔐 Verify Customer OTP
+</h3>
+
+
+<p>
+Customer से OTP लें
+</p>
+
+
+
+
+<input
+
+id="otpInput"
+
+class="input"
+
+type="number"
+
+placeholder="Enter 4 Digit OTP"
+
+>
+
+
+
+
+<button
+
+id="verifyOtpBtn"
+
+class="btn">
+
+Verify OTP
+
+</button>
+
+
+
+<p id="otpStatus">
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- RIDE CONTROL -->
+
+<div class="card">
+
+
+<h3>
+Ride Control
+</h3>
+
+
+
+
+<button
+
+id="arrivedBtn"
+
+class="btn">
 
 📍 Arrived Pickup
 
@@ -271,7 +430,12 @@ Active Ride
 
 
 
-<button id="startRideBtn" class="btn">
+
+<button
+
+id="startRideBtn"
+
+class="btn">
 
 🏍 Start Ride
 
@@ -280,7 +444,12 @@ Active Ride
 
 
 
-<button id="completeRideBtn" class="btn">
+
+<button
+
+id="completeRideBtn"
+
+class="btn">
 
 ✅ Complete Ride
 
@@ -292,8 +461,6 @@ Active Ride
 
 
 
-</div>
-
 
 
 
@@ -301,7 +468,6 @@ Active Ride
 
 
 <!-- EARNING -->
-
 
 <div class="card">
 
@@ -313,7 +479,8 @@ Today's Earnings
 
 <h1 style="color:#FFD600">
 
-₹<span id="earning">
+₹
+<span id="earning">
 
 0
 
@@ -322,10 +489,6 @@ Today's Earnings
 </h1>
 
 
-</div>
-
-
-
 
 </div>
 
@@ -333,9 +496,13 @@ Today's Earnings
 
 
 
+</div>
 
 
-<!-- BOTTOM NAV -->
+
+
+
+
 
 
 <div class="bottom-nav">
@@ -350,14 +517,13 @@ Home
 </a>
 
 
-<a>
+<a href="History.html">
 
 💰
 <br>
 Wallet
 
 </a>
-
 
 
 <a>
@@ -369,9 +535,7 @@ Profile
 </a>
 
 
-
 </div>
-
 
 
 
@@ -383,14 +547,13 @@ Profile
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
+<script type="module" src="../js/App.js"></script>
+
+
 <script type="module" src="../js/rider.js"></script>
 
 
 </body>
 
+
 </html>
-<button id="installApp" class="btn" style="display:none; margin-top:15px;">
-
-📲 Install RiderX App
-
-</button>
