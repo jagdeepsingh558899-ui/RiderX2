@@ -1,5 +1,10 @@
+// =========================================
+// RiderX Firebase Configuration
+// =========================================
+
+// Firebase Config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
   authDomain: "riderx-1.firebaseapp.com",
   databaseURL: "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "riderx-1",
@@ -9,8 +14,18 @@ const firebaseConfig = {
   measurementId: "G-SM8KLBVPWN"
 };
 
-firebase.initializeApp(firebaseConfig);
 
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+} else {
+    firebase.app();
+}
+
+
+// Firebase Services
 const auth = firebase.auth();
-const db = firebase.firestore();
+const database = firebase.database();
 const storage = firebase.storage();
+
+console.log("RiderX Firebase Connected Successfully");
