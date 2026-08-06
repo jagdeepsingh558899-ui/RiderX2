@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Fare Settings</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+.card{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+
+}
+
+
+input{
+
+width:100%;
+padding:12px;
+margin:10px 0;
+border-radius:8px;
+border:none;
+
+}
+
+
+button{
+
+width:100%;
+padding:14px;
+background:#ffcc00;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+💰 Fare Settings
+
+</div>
+
+
+
+<div class="container">
+
+
+<div class="card">
+
+
+<h3>🏍 Bike Taxi</h3>
+
+<input id="bike" placeholder="Bike Fare Per KM">
+
+
+
+<h3>🚕 Cab</h3>
+
+<input id="cab" placeholder="Cab Fare Per KM">
+
+
+
+<h3>📦 Parcel</h3>
+
+<input id="parcel" placeholder="Parcel Charge">
+
+
+
+<h3>🍔 Food Delivery</h3>
+
+<input id="food" placeholder="Food Delivery Charge">
+
+
+
+<button onclick="saveFare()">
+
+Save Fare
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+setDoc,
+getDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+
+async function loadFare(){
+
+
+let snap=
+
+await getDoc(
+
+doc(db,"settings","fare")
+
+);
+
+
+
+if(snap.exists()){
+
+
+let d=snap.data();
+
+
+bike.value=d.bike || "";
+
+cab.value=d.cab || "";
+
+parcel.value=d.parcel || "";
+
+food.value=d.food || "";
+
+
+}
+
+
+
+}
+
+
+
+
+
+window.saveFare=async function(){
+
+
+
+await setDoc(
+
+doc(db,"settings","fare"),
+
+{
+
+
+bike:Number(bike.value),
+
+
+cab:Number(cab.value),
+
+
+parcel:Number(parcel.value),
+
+
+food:Number(food.value)
+
+
+
+}
+
+);
+
+
+
+alert("Fare Updated ✅");
+
+
+}
+
+
+
+
+
+
+
+loadFare();
+
+
+
+</script>
+
+
+</body>
+
+</html>
