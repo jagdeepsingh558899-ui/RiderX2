@@ -1,33 +1,25 @@
-// =====================================
+// =================================
 // RiderX Authentication System
-// Email + Phone OTP
-// =====================================
+// Register + Role Management
+// =================================
 
+
+// Firebase
 
 import {
+
 auth,
 db
-}
-from "../firebase/config.js";
+
+} from "../firebase/Firebase-config.js";
 
 
 
 import {
 
-signInWithEmailAndPassword,
+createUserWithEmailAndPassword
 
-sendPasswordResetEmail,
-
-RecaptchaVerifier,
-
-signInWithPhoneNumber,
-
-onAuthStateChanged
-
-}
-
-from
-
+} from
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
@@ -35,60 +27,230 @@ from
 import {
 
 doc,
+setDoc,
+serverTimestamp
 
-getDoc
-
-}
-
-from
-
+} from
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-// =====================================
-// AUTO LOGIN CHECK
-// =====================================
+// Elements
 
 
-onAuthStateChanged(auth, async(user)=>{
+const form = document.getElementById("registerForm");
+
+const message = document.getElementById("message");
 
 
-if(user){
+
+let selectedRole = "customer";
 
 
-console.log(
-"Logged User:",
-user.email || user.phoneNumber
-);
+
+
+// Role Select
+
+
+const customerRole =
+document.getElementById("customerRole");
+
+
+const riderRole =
+document.getElementById("riderRole");
+
+
+
+
+
+if(customerRole && riderRole){
+
+
+customerRole.onclick = ()=>{
+
+
+selectedRole="customer";
+
+
+customerRole.classList.add("active");
+
+riderRole.classList.remove("active");
+
+
+};
+
+
+
+riderRole.onclick = ()=>{
+
+
+selectedRole="rider";
+
+
+riderRole.classList.add("active");
+
+customerRole.classList.remove("active");
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+// Register
+
+
+if(form){
+
+
+form.addEventListener(
+"submit",
+async(e)=>{
+
+
+e.preventDefault();
+
+
+
+const name =
+document.getElementById("name").value.trim();
+
+
+
+const phone =
+document.getElementById("phone").value.trim();
+
+
+
+const email =
+document.getElementById("email").value.trim();
+
+
+
+const password =
+document.getElementById("password").value;
+
+
+
+const confirmPassword =
+document.getElementById("confirmPassword").value;
+
+
+
+
+
+
+if(password !== confirmPassword){
+
+
+message.innerHTML =
+"Password does not match";
+
+
+return;
+
+
+}
+
 
 
 
 try{
 
 
-const snap = await getDoc(
 
-doc(
-db,
-"users",
-user.uid
-)
+message.innerHTML =
+"Creating account...";
+
+
+
+
+// Firebase Auth Create
+
+
+const userCredential =
+await createUserWithEmailAndPassword(
+
+auth,
+
+email,
+
+password
 
 );
 
 
 
-if(snap.exists()){
-
-
-const role =
-snap.data().role;
+const user =
+userCredential.user;
 
 
 
-if(role==="rider"){
+
+
+// Save User Data
+
+
+
+await setDoc(
+
+doc(
+db,
+"users",
+user.uid
+
+),
+
+
+{
+
+
+uid:user.uid,
+
+name:name,
+
+phone:phone,
+
+email:email,
+
+role:selectedRole,
+
+
+createdAt:
+serverTimestamp()
+
+
+}
+
+
+
+);
+
+
+
+
+
+
+message.innerHTML =
+"Account Created Successfully";
+
+
+
+
+
+setTimeout(()=>{
+
+
+
+if(selectedRole==="rider"){
 
 
 window.location.href =
@@ -108,91 +270,10 @@ window.location.href =
 
 
 
-}
+},1500);
 
 
 
-}
-
-catch(error){
-
-console.log(error);
-
-}
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-
-// =====================================
-// EMAIL LOGIN
-// =====================================
-
-
-const emailBtn =
-document.getElementById("emailLogin");
-
-
-
-if(emailBtn){
-
-
-emailBtn.addEventListener(
-"click",
-
-async()=>{
-
-
-const email =
-document.getElementById("email").value;
-
-
-
-const password =
-document.getElementById("password").value;
-
-
-
-if(!email || !password){
-
-alert(
-"Enter email and password"
-);
-
-return;
-
-}
-
-
-
-try{
-
-
-await signInWithEmailAndPassword(
-
-auth,
-
-email,
-
-password
-
-);
-
-
-
-alert(
-"Login Successful"
-);
 
 
 
@@ -201,9 +282,8 @@ alert(
 catch(error){
 
 
-alert(
-error.message
-);
+message.innerHTML =
+error.message;
 
 
 }
@@ -212,302 +292,6 @@ error.message
 
 }
 
-);
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// FORGOT PASSWORD
-// =====================================
-
-
-const forgot =
-document.getElementById("forgot");
-
-
-
-if(forgot){
-
-
-forgot.onclick=async()=>{
-
-
-const email =
-document.getElementById("email").value;
-
-
-
-if(!email){
-
-
-alert(
-"Enter your email"
-);
-
-
-return;
-
-
-}
-
-
-
-try{
-
-
-await sendPasswordResetEmail(
-
-auth,
-
-email
 
 );
-
-
-
-alert(
-"Reset email sent"
-);
-
-
-
-}
-
-catch(error){
-
-
-alert(
-error.message
-);
-
-
-}
-
-
-
-};
-
-
-}
-
-
-
-
-
-
-
-
-
-
-// =====================================
-// PHONE OTP LOGIN
-// =====================================
-
-
-
-let confirmationResult;
-
-
-
-const sendOtp =
-document.getElementById("sendOtp");
-
-
-
-const verifyOtp =
-document.getElementById("verifyOtp");
-
-
-
-
-
-if(sendOtp){
-
-
-
-window.recaptchaVerifier =
-
-new RecaptchaVerifier(
-
-auth,
-
-"recaptcha-container",
-
-{
-
-size:"invisible"
-
-}
-
-);
-
-
-
-
-sendOtp.onclick = async()=>{
-
-
-const phone =
-
-document.getElementById("phone").value;
-
-
-
-if(phone.length!==10){
-
-
-alert(
-"Enter valid mobile number"
-);
-
-
-return;
-
-}
-
-
-
-
-try{
-
-
-confirmationResult =
-
-await signInWithPhoneNumber(
-
-auth,
-
-"+91"+phone,
-
-window.recaptchaVerifier
-
-);
-
-
-
-document
-.getElementById("otp")
-.classList
-.remove("hidden");
-
-
-
-verifyOtp
-.classList
-.remove("hidden");
-
-
-
-alert(
-"OTP Sent"
-);
-
-
-
-}
-
-catch(error){
-
-
-console.log(error);
-
-
-alert(
-error.message
-);
-
-
-
-}
-
-
-
-};
-
-
-
-}
-
-
-
-
-
-
-
-
-// =====================================
-// VERIFY OTP
-// =====================================
-
-
-
-if(verifyOtp){
-
-
-
-verifyOtp.onclick = async()=>{
-
-
-const otp =
-
-document.getElementById("otp").value;
-
-
-
-if(!otp){
-
-
-alert(
-"Enter OTP"
-);
-
-
-return;
-
-}
-
-
-
-try{
-
-
-await confirmationResult.confirm(
-otp
-);
-
-
-
-alert(
-"Phone Login Successful"
-);
-
-
-
-}
-
-catch(error){
-
-
-alert(
-"Invalid OTP"
-);
-
-
-
-}
-
-
-
-};
-
-
-
 }
