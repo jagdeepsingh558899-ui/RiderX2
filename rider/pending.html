@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RiderX Captain | Verification Pending</title>
+    
+    <!-- CSS & Frameworks -->
+    <link rel="stylesheet" href="../css/Style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            black: '#090A0F',
+                            dark: '#12141C',
+                            card: '#1A1D29',
+                            yellow: '#FFE500',
+                            yellowDark: '#CCA800',
+                            gray: '#8A8F9E',
+                            border: '#2A2E3D',
+                            emerald: '#10B981',
+                            rose: '#F43F5E',
+                            amber: '#F59E0B',
+                            blue: '#3B82F6'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #090A0F;
+            color: #FFFFFF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(26, 29, 41, 0.92) 0%, rgba(18, 20, 28, 0.98) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 229, 0, 0.12);
+        }
+
+        .glass-card-interactive {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-interactive:hover {
+            border-color: rgba(255, 229, 0, 0.35);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px -6px rgba(255, 229, 0, 0.12);
+        }
+
+        /* Radar Scanning Radar Animation */
+        .radar-spinner {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 229, 0, 0.15) 0%, rgba(9, 10, 15, 0) 70%);
+            border: 2px solid rgba(255, 229, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .radar-spinner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #FFE500;
+            animation: spin 1.8s linear infinite;
+        }
+
+        .radar-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(255, 229, 0, 0.1);
+            animation: pulseWave 2.2s ease-out infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulseWave {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #12141C;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2A2E3D;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #FFE500;
+        }
+
+        .modal-backdrop {
+            background-color: rgba(9, 10, 15, 0.85);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3.5">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            
+            <div class="flex items-center gap-3">
+                <a href="../index.html" class="flex items-center gap-2">
+                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX+Captain'">
+                </a>
+                <span class="text-[10px] bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-bold border border-brand-yellow/20 hidden sm:inline-block uppercase tracking-wider">
+                    Captain Onboarding
+                </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Notifications Bell Dropdown Toggle -->
+                <div class="relative">
+                    <button onclick="toggleNotificationsModal()" class="w-9 h-9 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-center text-brand-gray hover:text-brand-yellow hover:border-brand-yellow/40 transition">
+                        <i class="fa-solid fa-bell text-sm"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-yellow"></span>
+                    </button>
+                </div>
+
+                <!-- Refresh Button -->
+                <button onclick="checkRiderStatusManual()" id="refreshBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow hover:text-brand-yellow transition">
+                    <i class="fa-solid fa-rotate text-xs" id="refreshIcon"></i>
+                    <span class="hidden sm:inline">Refresh Status</span>
+                </button>
+
+                <!-- Logout Button -->
+                <button onclick="handleRiderLogout()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-bold text-rose-400 hover:bg-rose-500/20 transition">
+                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 lg:px-8 py-8 space-y-6">
+
+        <!-- Welcome Banner + Status Card -->
+        <div class="glass-card p-6 sm:p-8 rounded-3xl relative overflow-hidden border-brand-yellow/20">
+            <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-yellow/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 z-10 relative">
+                
+                <!-- Profile Avatar & Details -->
+                <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
+                    <div class="relative">
+                        <img id="riderProfilePhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" alt="Rider Photo" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-brand-yellow shadow-xl">
+                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 border-2 border-brand-black flex items-center justify-center text-brand-black text-[10px]">
+                            <i class="fa-solid fa-clock"></i>
+                        </span>
+                    </div>
+
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-center sm:justify-start gap-2">
+                            <h1 id="riderWelcomeName" class="text-xl sm:text-2xl font-black text-white">Welcome, Captain!</h1>
+                            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold uppercase tracking-wider">
+                                Pending Approval
+                            </span>
+                        </div>
+                        <p class="text-xs text-brand-gray max-w-md">Your captain application has been received and is currently under priority review by our compliance team.</p>
+                        <p class="text-[11px] text-brand-yellow font-mono font-semibold pt-1" id="riderDocIdText">
+                            Captain ID: <span class="text-white">VERIFYING...</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Radar Scan Animation -->
+                <div class="flex flex-col items-center justify-center text-center space-y-2">
+                    <div class="radar-spinner">
+                        <div class="radar-pulse"></div>
+                        <i class="fa-solid fa-shield-halved text-brand-yellow text-3xl z-10"></i>
+                    </div>
+                    <span class="text-[10px] font-bold text-brand-gray uppercase tracking-widest">Live Auto-Check</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Verification Progress Tracker -->
+        <div class="glass-card p-6 rounded-3xl space-y-6">
+            
+            <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
+                <div>
+                    <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-bars-staggered text-brand-yellow"></i> Verification Timeline
+                    </h2>
+                    <p class="text-xs text-brand-gray mt-0.5">Step 3 of 4 is currently in progress</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs font-mono font-bold text-brand-yellow" id="estApprovalTime">Est. 2 to 6 Hours</span>
+                    <p class="text-[10px] text-brand-gray">Expected Completion</p>
+                </div>
+            </div>
+
+            <!-- Overall Progress Bar -->
+            <div class="space-y-2">
+                <div class="flex justify-between text-xs font-bold">
+                    <span class="text-white">Onboarding Completion</span>
+                    <span class="text-brand-yellow font-mono" id="progressPercentText">75%</span>
+                </div>
+                <div class="w-full h-3 bg-brand-dark rounded-full border border-brand-border/80 overflow-hidden p-0.5">
+                    <div id="progressBarFill" class="h-full bg-gradient-to-r from-amber-500 to-brand-yellow rounded-full transition-all duration-700 ease-out" style="width: 75%;"></div>
+                </div>
+            </div>
+
+            <!-- Timeline Steps Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                
+                <!-- Step 1 -->
+                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-emerald-500/30 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold text-sm">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block">Step 1</span>
+                        <h3 class="text-xs font-extrabold text-white">Registration Completed</h3>
+                        <p class="text-[10px] text-brand-gray mt-0.5">Profile created successfully</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-emerald-500/30 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold text-sm">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block">Step 2</span>
+                        <h3 class="text-xs font-extrabold text-white">Documents Uploaded</h3>
+                        <p class="text-[10px] text-brand-gray mt-0.5">All required credentials submitted</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-amber-500/50 shadow-lg shadow-amber-500/5 flex items-start gap-3 relative overflow-hidden">
+                    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold text-sm animate-pulse">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-amber-400 font-extrabold uppercase tracking-wider block">Step 3</span>
+                        <h3 class="text-xs font-extrabold text-white">Admin Verification</h3>
+                        <p class="text-[10px] text-brand-gray mt-0.5">In Progress by Compliance</p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="bg-brand-dark/40 p-4 rounded-2xl border border-brand-border/60 flex items-start gap-3 opacity-60">
+                    <div class="w-8 h-8 rounded-xl bg-brand-border text-brand-gray flex items-center justify-center shrink-0 font-bold text-sm">
+                        4
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-brand-gray font-extrabold uppercase tracking-wider block">Step 4</span>
+                        <h3 class="text-xs font-extrabold text-white">Account Activation</h3>
+                        <p class="text-[10px] text-brand-gray mt-0.5">Ready to accept trip requests</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Document Verification Grid -->
+        <div class="glass-card p-6 rounded-3xl space-y-4">
+            
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-brand-border/60 pb-4">
+                <div>
+                    <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-file-shield text-brand-yellow"></i> Document Audit Status
+                    </h2>
+                    <p class="text-xs text-brand-gray">Status of documents submitted during captain registration</p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="openDocumentsModal()" class="px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center gap-2">
+                        <i class="fa-solid fa-eye text-brand-yellow"></i> View Uploads
+                    </button>
+                    <button onclick="openEditDocsModal()" class="px-3.5 py-2 rounded-xl bg-brand-yellow text-brand-black text-xs font-extrabold hover:bg-yellow-300 transition flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square"></i> Update / Edit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Documents Checklist Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="documentsGrid">
+                
+                <!-- Profile Photo -->
+                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
+                            <i class="fa-solid fa-user-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white">Profile Photo</h4>
+                            <span id="status-photo" class="text-[10px] text-emerald-400 font-bold">Uploaded & Verified</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+                </div>
+
+                <!-- Driving License -->
+                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
+                            <i class="fa-solid fa-id-card"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white">Driving License</h4>
+                            <span id="status-license" class="text-[10px] text-amber-400 font-bold">Under Review</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
+                </div>
+
+                <!-- RC -->
+                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
+                            <i class="fa-solid fa-car-rear"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white">Vehicle RC</h4>
+                            <span id="status-rc" class="text-[10px] text-amber-400 font-bold">Under Review</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
+                </div>
+
+                <!-- Vehicle Photo -->
+                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
+                            <i class="fa-solid fa-camera"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white">Vehicle Photo</h4>
+                            <span id="status-vehicle" class="text-[10px] text-amber-400 font-bold">Under Review</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
+                </div>
+
+                <!-- Insurance -->
+                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white">Vehicle Insurance</h4>
+                            <span id="status-insurance" class="text-[10px] text-amber-400 font-bold">Under Review</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
+                </div>
+
+                <!-- Aadhaar Identification -->
+                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
+                            <i class="fa-solid fa-address-card"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-white">National ID Proof</h4>
+                            <span id="status-aadhaar" class="text-[10px] text-amber-400 font-bold">Under Review</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Tips While Waiting & Support Box -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Pro Tips (2 Columns) -->
+            <div class="md:col-span-2 glass-card p-6 rounded-3xl space-y-4">
+                <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-brand-yellow"></i> Pro Tips While You Wait
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
+                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
+                            <i class="fa-solid fa-mobile-screen"></i> Keep Phone Ready
+                        </div>
+                        <p class="text-brand-gray text-[11px]">Ensure your registered phone line is active for compliance verification calls if needed.</p>
+                    </div>
+
+                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
+                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-cat"></i> Clean Vehicle
+                        </div>
+                        <p class="text-brand-gray text-[11px]">Prepare your vehicle clean & sanitized to maintain high initial captain rating scores.</p>
+                    </div>
+
+                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
+                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
+                            <i class="fa-solid fa-route"></i> Know Hotspots
+                        </div>
+                        <p class="text-brand-gray text-[11px]">Familiarize with peak demand zones near airport, railway station and tech parks.</p>
+                    </div>
+
+                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
+                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
+                            <i class="fa-solid fa-building-columns"></i> Bank Account
+                        </div>
+                        <p class="text-brand-gray text-[11px]">Keep your bank passbook/UPI ready for instantaneous payout setups after activation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support & Assistance Box -->
+            <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
+                <div class="space-y-2">
+                    <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-headset text-brand-yellow"></i> Need Assistance?
+                    </h3>
+                    <p class="text-xs text-brand-gray">Have questions about your pending verification? Connect with RiderX Captain Support 24/7.</p>
+                </div>
+
+                <div class="space-y-2 pt-2">
+                    <a href="tel:+18001234567" class="w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-phone text-brand-yellow"></i> Call Onboarding Desk
+                    </a>
+                    <button onclick="openFaqModal()" class="w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-brand-gray hover:text-white transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-question"></i> View Captain FAQs
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal 1: View Documents Modal -->
+    <div id="viewDocsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-2xl w-full rounded-2xl p-6 space-y-5 border-brand-yellow/30 shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-file-contract text-brand-yellow"></i> Submitted Documents
+                </h3>
+                <button onclick="closeDocumentsModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto custom-scrollbar space-y-4 pr-1 flex-grow" id="docsListModalContainer">
+                <!-- Dynamic Injection -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Edit / Update Documents Modal -->
+    <div id="editDocsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-lg w-full rounded-2xl p-6 space-y-5 border-brand-yellow/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-brand-yellow"></i> Re-upload Document
+                </h3>
+                <button onclick="closeEditDocsModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <form id="editDocForm" onsubmit="handleDocReupload(event)" class="space-y-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">Select Document to Replace</label>
+                    <select id="selectDocType" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                        <option value="drivingLicense">Driving License</option>
+                        <option value="rc">Vehicle RC</option>
+                        <option value="vehiclePhoto">Vehicle Photo</option>
+                        <option value="insurance">Insurance Policy</option>
+                        <option value="aadhaar">National ID Proof</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-brand-gray uppercase">Upload Clear Image / PDF</label>
+                    <input type="file" id="inputDocFile" accept="image/*,application/pdf" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2 text-xs text-brand-gray file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand-yellow file:text-brand-black hover:file:bg-yellow-300">
+                </div>
+
+                <div class="text-[10px] text-brand-gray bg-brand-dark/40 p-3 rounded-lg border border-brand-border/40">
+                    Ensure document image is clear, unblurred, and all four corners are visible. Max file size: 5MB.
+                </div>
+
+                <button type="submit" id="docUploadSubmitBtn" class="w-full py-3 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition uppercase tracking-wider">
+                    Submit Updated Document
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 3: Notifications Modal -->
+    <div id="notificationsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-md w-full rounded-2xl p-6 space-y-4 border-brand-yellow/30 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-bell text-brand-yellow"></i> Onboarding Updates
+                </h3>
+                <button onclick="toggleNotificationsModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-white">Application Received</span>
+                        <span class="text-[9px] text-brand-gray">Just now</span>
+                    </div>
+                    <p class="text-[11px] text-brand-gray">Your documents are undergoing initial automated compliance scanning.</p>
+                </div>
+
+                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-brand-yellow">Welcome to RiderX</span>
+                        <span class="text-[9px] text-brand-gray">10m ago</span>
+                    </div>
+                    <p class="text-[11px] text-brand-gray">Thanks for registering as a RiderX Captain! Verification is fast and automated.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: FAQ Modal -->
+    <div id="faqModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
+        <div class="glass-card max-w-lg w-full rounded-2xl p-6 space-y-4 border-brand-yellow/30 shadow-2xl max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-brand-border pb-3">
+                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-brand-yellow"></i> Onboarding FAQs
+                </h3>
+                <button onclick="closeFaqModal()" class="text-brand-gray hover:text-white">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto custom-scrollbar space-y-3 text-xs pr-1">
+                <div class="bg-brand-dark/80 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
+                    <h4 class="font-extrabold text-white">How long does verification take?</h4>
+                    <p class="text-brand-gray text-[11px]">Most captain applications are approved within 2 to 6 hours during operational business windows.</p>
+                </div>
+                <div class="bg-brand-dark/80 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
+                    <h4 class="font-extrabold text-white">Why is my document marked under review?</h4>
+                    <p class="text-brand-gray text-[11px]">Our team verifies identity details against government registries for rider and captain safety.</p>
+                </div>
+                <div class="bg-brand-dark/80 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
+                    <h4 class="font-extrabold text-white">Can I edit uploaded documents?</h4>
+                    <p class="text-brand-gray text-[11px]">Yes, click the 'Update / Edit' button on the audit status section to re-upload any document.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Footer -->
+    <footer class="border-t border-brand-border/60 bg-brand-black py-6 px-4 lg:px-8 mt-auto">
+        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-gray">
+            <div class="flex items-center gap-2">
+                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-5 w-auto object-contain opacity-70">
+                <span>&copy; 2026 RiderX Technologies Inc. All rights reserved.</span>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <a href="../terms.html" class="hover:text-brand-yellow transition">Terms & Conditions</a>
+                <a href="../privacy.html" class="hover:text-brand-yellow transition">Privacy Policy</a>
+                <a href="../support.html" class="hover:text-brand-yellow transition">Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase & Application Modules -->
+    <script type="module" src="../firebase/firebase-config.js"></script>
+    <script type="module" src="../js/App.js"></script>
+
+    <!-- Page Module Script -->
+    <script type="module">
+        import { auth, db } from '../firebase/firebase-config.js';
+        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        let currentRider = null;
+        let autoCheckInterval = null;
+        let riderDocData = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check Security Auth
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    window.location.href = '../auth/rider-login.html';
+                    return;
+                }
+
+                currentRider = user;
+                subscribeToRiderDoc(user.uid);
+
+                // Start 10-second polling check fallback
+                autoCheckInterval = setInterval(() => {
+                    checkRiderStatusSilent(user.uid);
+                }, 10000);
+            });
+        });
+
+        function subscribeToRiderDoc(uid) {
+            const riderRef = doc(db, "riders", uid);
+            onSnapshot(riderRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    riderDocData = docSnap.data();
+                    
+                    // IF APPROVED -> REDIRECT IMMEDIATELY TO HOME
+                    if (riderDocData.adminApproved === true) {
+                        window.location.href = '../rider/Home.html';
+                        return;
+                    }
+
+                    renderRiderDetails(riderDocData, uid);
+                } else {
+                    console.warn("Rider document not found in Firestore.");
+                }
+            }, (error) => {
+                console.error("Snapshot error:", error);
+            });
+        }
+
+        async function checkRiderStatusSilent(uid) {
+            try {
+                const riderRef = doc(db, "riders", uid);
+                const snap = await getDoc(riderRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.adminApproved === true) {
+                        window.location.href = '../rider/Home.html';
+                    }
+                }
+            } catch (err) {
+                console.error("Silent check error:", err);
+            }
+        }
+
+        function renderRiderDetails(data, uid) {
+            // Name & Photo
+            const fullName = data.fullName || data.name || "Captain";
+            document.getElementById('riderWelcomeName').innerText = `Welcome, ${fullName}!`;
+            
+            if (data.photoURL || data.profilePhoto) {
+                document.getElementById('riderProfilePhoto').src = data.photoURL || data.profilePhoto;
+            } else {
+                document.getElementById('riderProfilePhoto').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=FFE500&color=090A0F`;
+            }
+
+            document.getElementById('riderDocIdText').innerHTML = `Captain ID: <span class="text-white font-mono">${uid.substring(0, 10).toUpperCase()}</span>`;
+
+            // Document status rendering
+            const docs = data.documents || {};
+            updateDocBadge('status-photo', data.photoURL || data.profilePhoto || docs.profilePhoto);
+            updateDocBadge('status-license', docs.drivingLicense);
+            updateDocBadge('status-rc', docs.rc);
+            updateDocBadge('status-vehicle', docs.vehiclePhoto);
+            updateDocBadge('status-insurance', docs.insurance);
+            updateDocBadge('status-aadhaar', docs.aadhaar);
+        }
+
+        function updateDocBadge(elementId, docVal) {
+            const elem = document.getElementById(elementId);
+            if (!elem) return;
+
+            if (docVal) {
+                elem.innerText = "Uploaded & Under Review";
+                elem.className = "text-[10px] text-emerald-400 font-bold";
+            } else {
+                elem.innerText = "Pending Upload";
+                elem.className = "text-[10px] text-amber-400 font-bold";
+            }
+        }
+
+        // Global Action Functions
+        window.checkRiderStatusManual = async function() {
+            const icon = document.getElementById('refreshIcon');
+            icon.classList.add('fa-spin');
+
+            if (currentRider) {
+                await checkRiderStatusSilent(currentRider.uid);
+            }
+
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+            }, 800);
+        };
+
+        window.handleRiderLogout = async function() {
+            try {
+                if (autoCheckInterval) clearInterval(autoCheckInterval);
+                await signOut(auth);
+                window.location.href = '../auth/rider-login.html';
+            } catch (err) {
+                console.error("Logout error:", err);
+            }
+        };
+
+        window.openDocumentsModal = function() {
+            const container = document.getElementById('docsListModalContainer');
+            container.innerHTML = '';
+
+            const docs = (riderDocData && riderDocData.documents) ? riderDocData.documents : {};
+            const docItems = [
+                { title: "Profile Photo", url: riderDocData?.photoURL || docs.profilePhoto },
+                { title: "Driving License", url: docs.drivingLicense },
+                { title: "Vehicle RC", url: docs.rc },
+                { title: "Vehicle Photo", url: docs.vehiclePhoto },
+                { title: "Insurance Policy", url: docs.insurance },
+                { title: "National ID Proof", url: docs.aadhaar }
+            ];
+
+            docItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "bg-brand-dark/90 p-4 rounded-xl border border-brand-border/60 flex flex-col sm:flex-row items-center justify-between gap-3";
+                
+                itemDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-file-image text-brand-yellow text-lg"></i>
+                        <div>
+                            <p class="text-xs font-bold text-white">${item.title}</p>
+                            <p class="text-[10px] text-brand-gray">${item.url ? 'File Uploaded' : 'Not Uploaded Yet'}</p>
+                        </div>
+                    </div>
+                    ${item.url ? `<a href="${item.url}" target="_blank" class="px-3 py-1.5 rounded-lg bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/30 text-[11px] font-bold hover:bg-brand-yellow hover:text-brand-black transition">Preview Document</a>` : '<span class="text-[10px] text-amber-400 font-bold">Missing</span>'}
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            document.getElementById('viewDocsModal').classList.remove('hidden');
+        };
+
+        window.closeDocumentsModal = function() {
+            document.getElementById('viewDocsModal').classList.add('hidden');
+        };
+
+        window.openEditDocsModal = function() {
+            document.getElementById('editDocsModal').classList.remove('hidden');
+        };
+
+        window.closeEditDocsModal = function() {
+            document.getElementById('editDocsModal').classList.add('hidden');
+        };
+
+        window.handleDocReupload = async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('docUploadSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting...";
+
+            try {
+                // Simulating document update submission to firestore
+                const docType = document.getElementById('selectDocType').value;
+                const riderRef = doc(db, "riders", currentRider.uid);
+
+                const updateObj = {};
+                updateObj[`documents.${docType}`] = `https://via.placeholder.com/600x400/1A1D29/FFE500?text=${docType}+Updated`;
+                updateObj[`updatedAt`] = new Date();
+
+                await updateDoc(riderRef, updateObj);
+
+                alert("Document successfully submitted for re-verification!");
+                closeEditDocsModal();
+            } catch (err) {
+                console.error("Reupload error:", err);
+                alert("Failed to submit document. Please try again.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Updated Document";
+            }
+        };
+
+        window.toggleNotificationsModal = function() {
+            const modal = document.getElementById('notificationsModal');
+            modal.classList.toggle('hidden');
+        };
+
+        window.openFaqModal = function() {
+            document.getElementById('faqModal').classList.remove('hidden');
+        };
+
+        window.closeFaqModal = function() {
+            document.getElementById('faqModal').classList.add('hidden');
+        };
+    </script>
+</body>
+</html>
