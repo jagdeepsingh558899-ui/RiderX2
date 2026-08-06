@@ -1,6 +1,7 @@
+
 // ==========================================
-// RiderX Rider Engine V4
-// GPS + Ride Accept + OTP + Status + Chat
+// RiderX Rider Engine V6
+// Online + Live Location + Ride Request
 // ==========================================
 
 
@@ -14,10 +15,9 @@ query,
 where,
 onSnapshot,
 doc,
-setDoc,
 updateDoc,
-serverTimestamp,
-getDoc
+setDoc,
+serverTimestamp
 
 }
 
@@ -35,114 +35,45 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
-// ELEMENTS
+
+let currentUser=null;
+
+let online=false;
+
+let map;
+
+let riderMarker=null;
+
+let pickupMarker=null;
+
+let dropMarker=null;
+
+let currentRide=null;
+
+
+
+
+
 
 
 const onlineBtn =
 document.getElementById("onlineBtn");
 
 
-const riderStatus =
+const status =
 document.getElementById("riderStatus");
 
 
-const rideRequest =
+const requestBox =
 document.getElementById("rideRequest");
 
 
-const noRide =
-document.getElementById("noRide");
-
-
-const requestPickup =
-document.getElementById("requestPickup");
-
-
-const requestDrop =
-document.getElementById("requestDrop");
-
-
-const requestFare =
-document.getElementById("requestFare");
-
-
-
 const acceptBtn =
-document.getElementById("acceptBtn");
+document.getElementById("acceptRide");
 
 
 const rejectBtn =
-document.getElementById("rejectBtn");
-
-
-
-const activeRide =
-document.getElementById("activeRide");
-
-
-const rideStatus =
-document.getElementById("rideStatus");
-
-
-const activeFare =
-document.getElementById("activeFare");
-
-
-
-const otpCard =
-document.getElementById("otpCard");
-
-
-const otpInput =
-document.getElementById("otpInput");
-
-
-const verifyOtpBtn =
-document.getElementById("verifyOtpBtn");
-
-
-const otpStatus =
-document.getElementById("otpStatus");
-
-
-
-const arrivedBtn =
-document.getElementById("arrivedBtn");
-
-
-const startRideBtn =
-document.getElementById("startRideBtn");
-
-
-const completeRideBtn =
-document.getElementById("completeRideBtn");
-
-
-const callCustomer =
-document.getElementById("callCustomer");
-
-
-const chatCustomer =
-document.getElementById("chatCustomer");
-
-
-const navigationBtn =
-document.getElementById("navigationBtn");
-
-
-
-
-
-let currentUser=null;
-
-let online=false;
-
-let currentRide=null;
-
-let watchId=null;
-
-let otpVerified=false;
-
+document.getElementById("rejectRide");
 
 
 
@@ -168,7 +99,7 @@ return;
 currentUser=user;
 
 
-listenRides();
+initMap();
 
 
 });
@@ -180,158 +111,85 @@ listenRides();
 
 
 
-// ONLINE
+
+// MAP
+
+
+function initMap(){
+
+
+map=L.map("map")
+
+.setView(
+
+[30.7333,76.7794],
+
+13
+
+);
+
+
+
+L.tileLayer(
+
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+)
+
+.addTo(map);
+
+
+
+
+
+startRideListener();
+
+
+}
+
+
+
+
+
+
+
+
+
+// ONLINE BUTTON
 
 
 onlineBtn.onclick=()=>{
 
 
+online=!online;
+
+
+
 if(online){
 
-goOffline();
 
-}
-
-else{
-
-goOnline();
-
-}
-
-};
+onlineBtn.innerHTML="🟢 Online";
 
 
-
-
-
-
-
-async function goOnline(){
-
-
-online=true;
-
-
-onlineBtn.innerHTML="Go Offline";
-
-
-riderStatus.innerHTML="Online 🟢";
+status.innerHTML="Online";
 
 
 startGPS();
 
 
-await saveStatus(true);
-
-
 }
 
 
+else{
 
 
+onlineBtn.innerHTML="🔴 Offline";
 
 
-
-
-async function goOffline(){
-
-
-online=false;
-
-
-onlineBtn.innerHTML="Go Online";
-
-
-riderStatus.innerHTML="Offline 🔴";
-
-
-
-if(watchId){
-
-navigator.geolocation.clearWatch(watchId);
-
-}
-
-
-
-await saveStatus(false);
+status.innerHTML="Offline";
 
 
 }
-
-
-
-
-
-
-
-
-async function saveStatus(status){
-
-
-
-await setDoc(
-
-doc(
-db,
-"riders",
-currentUser.uid
-),
-
-{
-
-online:status,
-
-status:
-
-status ? "available":"offline",
-
-updatedAt:
-serverTimestamp()
-
-
-},
-
-{
-merge:true
-}
-
-);
-
-
-}
-
-
-
-
-
-
-
-
-
-// LIVE GPS
-
-
-function startGPS(){
-
-
-
-watchId =
-
-navigator.geolocation.watchPosition(
-
-async(position)=>{
-
-
-let location={
-
-
-lat:
-position.coords.latitude,
-
-
-lng:
-position.coords.longitude
 
 
 };
@@ -339,26 +197,115 @@ position.coords.longitude
 
 
 
+
+
+
+
+
+// GPS
+
+
+function startGPS(){
+
+
+navigator.geolocation.watchPosition(
+
+async(pos)=>{
+
+
+const lat=
+pos.coords.latitude;
+
+
+const lng=
+pos.coords.longitude;
+
+
+
+
+if(!riderMarker){
+
+
+riderMarker=
+
+L.marker(
+
+[lat,lng]
+
+)
+
+.addTo(map);
+
+
+}
+
+else{
+
+
+riderMarker.setLatLng(
+
+[lat,lng]
+
+);
+
+
+}
+
+
+
+map.setView(
+
+[lat,lng],
+
+15
+
+);
+
+
+
+
+
 await setDoc(
 
 doc(
+
 db,
+
 "riders",
+
 currentUser.uid
+
 ),
 
 {
 
-location,
 
-updatedAt:
-serverTimestamp()
+online:true,
+
+
+location:{
+
+lat,
+
+lng
 
 },
 
+
+updatedAt:
+
+serverTimestamp()
+
+
+},
+
+
 {
+
 merge:true
+
 }
+
 
 );
 
@@ -366,13 +313,15 @@ merge:true
 
 },
 
+
 (error)=>{
 
-
-console.log(error);
-
+alert(
+"GPS permission allow karo"
+);
 
 },
+
 
 {
 
@@ -381,9 +330,7 @@ enableHighAccuracy:true
 }
 
 
-
 );
-
 
 
 }
@@ -396,14 +343,16 @@ enableHighAccuracy:true
 
 
 
-// FIND RIDES
+// LISTEN RIDES
 
 
-function listenRides(){
+function startRideListener(){
 
 
 
-const q=query(
+const q=
+
+query(
 
 collection(db,"rides"),
 
@@ -421,28 +370,21 @@ where(
 
 
 
-onSnapshot(q,(snapshot)=>{
+
+
+onSnapshot(q,(snap)=>{
 
 
 
-snapshot.forEach((item)=>{
-
-
-let ride=item.data();
+snap.forEach((doc)=>{
 
 
 
-currentRide={
-
-id:item.id,
-
-...ride
-
-};
+const ride=doc.data();
 
 
+showRide(doc.id,ride);
 
-showRequest();
 
 
 });
@@ -463,31 +405,230 @@ showRequest();
 
 
 
-function showRequest(){
+// SHOW REQUEST
+
+
+function showRide(id,ride){
 
 
 
-rideRequest.style.display="block";
+currentRide={
 
-noRide.style.display="none";
+id,
 
+...ride
 
-
-requestPickup.innerHTML=
-
-currentRide.pickup;
+};
 
 
 
-requestDrop.innerHTML=
 
-currentRide.drop;
-
+requestBox.style.display="block";
 
 
-requestFare.innerHTML=
 
-"₹"+currentRide.fare;
+
+
+document.getElementById(
+
+"rideService"
+
+)
+
+.innerHTML=
+
+ride.serviceType;
+
+
+
+
+
+document.getElementById(
+
+"pickupLocation"
+
+)
+
+.innerHTML=
+
+ride.pickup;
+
+
+
+
+
+document.getElementById(
+
+"dropLocation"
+
+)
+
+.innerHTML=
+
+ride.drop;
+
+
+
+
+
+document.getElementById(
+
+"rideDistance"
+
+)
+
+.innerHTML=
+
+ride.distance+" KM";
+
+
+
+
+
+document.getElementById(
+
+"rideFare"
+
+)
+
+.innerHTML=
+
+ride.fare;
+
+
+
+
+
+document.getElementById(
+
+"payment"
+
+)
+
+.innerHTML=
+
+ride.paymentMethod;
+
+
+
+
+
+showMarkers(
+
+ride.pickupCoords,
+
+ride.dropCoords
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// MARKERS
+
+
+function showMarkers(pickup,drop){
+
+
+
+if(pickupMarker)
+
+map.removeLayer(pickupMarker);
+
+
+if(dropMarker)
+
+map.removeLayer(dropMarker);
+
+
+
+
+
+pickupMarker=
+
+L.marker(
+
+[
+
+pickup.lat,
+
+pickup.lng
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"📍 Pickup"
+
+);
+
+
+
+
+
+dropMarker=
+
+L.marker(
+
+[
+
+drop.lat,
+
+drop.lng
+
+]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"🏁 Drop"
+
+);
+
+
+
+
+
+
+map.fitBounds(
+
+[
+
+[
+
+pickup.lat,
+
+pickup.lng
+
+],
+
+[
+
+drop.lat,
+
+drop.lng
+
+]
+
+]
+
+);
 
 
 
@@ -528,16 +669,15 @@ currentRide.id
 {
 
 
-status:"accepted",
-
 riderId:
 
 currentUser.uid,
 
 
-acceptedAt:
+status:
 
-serverTimestamp()
+"accepted"
+
 
 
 }
@@ -546,284 +686,11 @@ serverTimestamp()
 
 
 
-rideRequest.style.display="none";
-
-
-activeRide.style.display="block";
-
-
-otpCard.style.display="block";
-
-
-
-rideStatus.innerHTML="Accepted";
-
-
-activeFare.innerHTML=
-
-"₹"+currentRide.fare;
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// OTP VERIFY
-
-
-verifyOtpBtn.onclick=async()=>{
-
-
-if(!currentRide)
-
-return;
-
-
-
-let otp=
-
-otpInput.value;
-
-
-
-
-if(
-
-otp === currentRide.otp
-
-){
-
-
-
-otpVerified=true;
-
-
-otpStatus.innerHTML=
-
-"OTP Verified ✅";
-
-
-
-await updateDoc(
-
-doc(
-
-db,
-
-"rides",
-
-currentRide.id
-
-),
-
-{
-
-
-otpVerified:true
-
-
-}
-
-);
-
-
-
-}
-
-else{
-
-
-otpStatus.innerHTML=
-
-"Wrong OTP ❌";
-
-
-}
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// ARRIVED
-
-
-arrivedBtn.onclick=async()=>{
-
-
-await updateDoc(
-
-doc(
-
-db,
-
-"rides",
-
-currentRide.id
-
-),
-
-{
-
-
-status:"arriving"
-
-
-}
-
-);
-
-
-
-rideStatus.innerHTML=
-
-"Arrived Pickup";
-
-
-};
-
-
-
-
-
-
-
-
-
-// START RIDE
-
-
-startRideBtn.onclick=async()=>{
-
-
-if(!otpVerified){
-
-
-alert("First verify OTP");
-
-
-return;
-
-
-}
-
-
-
-await updateDoc(
-
-doc(
-
-db,
-
-"rides",
-
-currentRide.id
-
-),
-
-{
-
-
-status:"started",
-
-startedAt:
-
-serverTimestamp()
-
-
-}
-
-);
-
-
-
-rideStatus.innerHTML=
-
-"Ride Started 🏍";
-
-
-};
-
-
-
-
-
-
-
-
-
-// COMPLETE
-
-
-completeRideBtn.onclick=async()=>{
-
-
-await updateDoc(
-
-doc(
-
-db,
-
-"rides",
-
-currentRide.id
-
-),
-
-{
-
-
-status:"completed",
-
-completedAt:
-
-serverTimestamp()
-
-
-}
-
-);
-
-
-
-rideStatus.innerHTML=
-
-"Completed ✅";
-
-
-};
-
-
-
-
-
-
-
-
-
-// CALL
-
-
-callCustomer.onclick=()=>{
 
 
 alert(
 
-"Call Customer system will connect"
+"Ride Accepted"
 
 );
 
@@ -837,77 +704,25 @@ alert(
 
 
 
-// CHAT
+
+// REJECT
 
 
-chatCustomer.onclick=()=>{
+rejectBtn.onclick=()=>{
 
 
-localStorage.setItem(
-
-"rideId",
-
-currentRide.id
-
-);
+requestBox.style.display="none";
 
 
-location.href="chat.html";
+currentRide=null;
 
 
 };
-
-
-
-
-
-
-
-
-// NAVIGATION
-
-
-navigationBtn.onclick=()=>{
-
-
-if(currentRide){
-
-
-let url =
-
-"https://www.google.com/maps/dir/?api=1&destination="
-
-+
-
-currentRide.pickupCoords.lat
-
-+
-
-","
-
-+
-
-currentRide.pickupCoords.lng;
-
-
-
-window.open(url,"_blank");
-
-
-}
-
-
-
-};
-
-
 
 
 
 
 
 console.log(
-
-"RiderX Rider Engine V4 Loaded"
-
+"RiderX Rider V6 Loaded"
 );
