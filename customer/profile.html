@@ -1,779 +1,518 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customer Profile | RiderX Premium</title>
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#090A0F',
-                            dark: '#12141C',
-                            card: '#1A1D29',
-                            yellow: '#FFE500',
-                            yellowDark: '#CCA800',
-                            gray: '#8A8F9E',
-                            border: '#2A2E3D'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #090A0F;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
 
-        .glass-card {
-            background: linear-gradient(135deg, rgba(26, 29, 41, 0.85) 0%, rgba(18, 20, 28, 0.95) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.12);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .glass-card-interactive {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+<title>RiderX | Profile</title>
 
-        .glass-card-interactive:hover {
-            border-color: rgba(255, 229, 0, 0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(255, 229, 0, 0.1);
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #12141C;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #2A2E3D;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        .tab-btn.active {
-            background-color: #FFE500;
-            color: #090A0F;
-            font-weight: 700;
-        }
 
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #FFE500;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #FFE500;
-        }
-    </style>
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+}
+
+
+body{
+
+background:#080808;
+color:white;
+min-height:100vh;
+
+}
+
+
+.header{
+
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:20px;
+
+}
+
+
+.logo{
+
+font-size:26px;
+font-weight:800;
+
+}
+
+.logo span{
+
+color:#ffe500;
+
+}
+
+
+.back{
+
+color:#ffe500;
+font-size:22px;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.profile-card{
+
+background:#151515;
+border:1px solid rgba(255,229,0,.2);
+border-radius:20px;
+padding:25px;
+text-align:center;
+
+}
+
+
+
+.profile-img{
+
+width:110px;
+height:110px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #ffe500;
+
+}
+
+
+
+.upload{
+
+margin-top:15px;
+
+}
+
+
+
+.upload input{
+
+display:none;
+
+}
+
+
+.upload label{
+
+background:#ffe500;
+color:#000;
+padding:10px 20px;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+
+}
+
+
+
+.form{
+
+margin-top:25px;
+
+}
+
+
+
+.input{
+
+margin-bottom:15px;
+
+}
+
+
+
+label{
+
+display:block;
+color:#aaa;
+font-size:14px;
+margin-bottom:5px;
+
+}
+
+
+
+input{
+
+width:100%;
+padding:14px;
+border-radius:10px;
+border:none;
+outline:none;
+background:#222;
+color:white;
+
+}
+
+
+
+button{
+
+width:100%;
+margin-top:15px;
+padding:14px;
+border:none;
+border-radius:12px;
+background:#ffe500;
+font-weight:700;
+cursor:pointer;
+
+}
+
+
+
+.logout{
+
+background:#ff3333;
+color:white;
+
+}
+
+
+
+.nav{
+
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:70px;
+background:#111;
+display:flex;
+justify-content:space-around;
+align-items:center;
+
+}
+
+
+
+.nav a{
+
+color:#aaa;
+text-decoration:none;
+font-size:12px;
+text-align:center;
+
+}
+
+
+.nav i{
+
+font-size:20px;
+display:block;
+margin-bottom:5px;
+
+}
+
+
+.active{
+
+color:#ffe500!important;
+
+}
+
+
+</style>
+
 </head>
-<body class="min-h-screen pb-24 lg:pb-8 flex flex-col custom-scrollbar">
-
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-brand-black/80 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3.5">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="./Dashboard.html" class="flex items-center gap-2">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX'">
-                </a>
-                <span class="text-xs bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-semibold border border-brand-yellow/20">ACCOUNT PROFILE</span>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button onclick="confirmLogout()" class="px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-bold transition flex items-center gap-2">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span class="hidden sm:inline">Logout</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
-
-        <!-- Header Profile Identity Hero -->
-        <div class="glass-card rounded-2xl p-6 relative overflow-hidden">
-            <div class="absolute -right-10 -top-10 w-48 h-48 bg-brand-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
-                <!-- Profile Avatar & Photo Change -->
-                <div class="relative group">
-                    <div class="w-28 h-28 rounded-full border-2 border-brand-yellow p-1 bg-brand-dark shadow-xl overflow-hidden relative">
-                        <img id="profilePhoto" src="https://ui-avatars.com/api/?name=User&background=FFE500&color=090A0F" class="w-full h-full rounded-full object-cover" alt="Profile Photo">
-                        <div id="photoSpinner" class="hidden absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <i class="fa-solid fa-spinner fa-spin text-brand-yellow text-xl"></i>
-                        </div>
-                    </div>
-                    <label for="photoFileInput" class="absolute bottom-0 right-0 w-9 h-9 bg-brand-yellow text-brand-black rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-yellow-300 transition border-2 border-brand-black">
-                        <i class="fa-solid fa-camera text-sm"></i>
-                    </label>
-                    <input type="file" id="photoFileInput" accept="image/*" class="hidden" onchange="uploadProfilePhoto(event)">
-                </div>
-
-                <!-- Info Overview -->
-                <div class="flex-grow text-center md:text-left space-y-2">
-                    <div class="flex flex-col md:flex-row md:items-center gap-2 justify-between">
-                        <div>
-                            <h1 id="hdrFullName" class="text-2xl font-extrabold text-white">Loading Profile...</h1>
-                            <p id="hdrEmail" class="text-xs text-brand-gray">loading...</p>
-                        </div>
-                        <div class="flex items-center justify-center md:justify-start gap-2">
-                            <span id="kycBadge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                                <i class="fa-solid fa-shield-check mr-1"></i> VERIFIED USER
-                            </span>
-                            <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20">
-                                <i class="fa-solid fa-crown mr-1"></i> BLACK MEMBER
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Quick Metrics Strip -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-brand-border/60">
-                        <div class="bg-brand-dark/60 p-2.5 rounded-xl border border-brand-border/40">
-                            <p class="text-[10px] text-brand-gray uppercase font-semibold">Total Rides</p>
-                            <p id="statTotalRides" class="text-base font-bold text-white">0</p>
-                        </div>
-                        <div class="bg-brand-dark/60 p-2.5 rounded-xl border border-brand-border/40">
-                            <p class="text-[10px] text-brand-gray uppercase font-semibold">Distance</p>
-                            <p id="statTotalDistance" class="text-base font-bold text-white">0.0 km</p>
-                        </div>
-                        <div class="bg-brand-dark/60 p-2.5 rounded-xl border border-brand-border/40">
-                            <p class="text-[10px] text-brand-gray uppercase font-semibold">Total Spent</p>
-                            <p id="statTotalSpent" class="text-base font-bold text-brand-yellow">₹0.00</p>
-                        </div>
-                        <div class="bg-brand-dark/60 p-2.5 rounded-xl border border-brand-border/40">
-                            <p class="text-[10px] text-brand-gray uppercase font-semibold">Wallet Balance</p>
-                            <p id="statWalletBalance" class="text-base font-bold text-emerald-400">₹0.00</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section Tabs Navigation -->
-        <div class="flex items-center bg-brand-dark p-1.5 rounded-2xl border border-brand-border overflow-x-auto custom-scrollbar gap-1">
-            <button onclick="switchTab('tabPersonal')" id="btnTabPersonal" class="tab-btn active px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-user"></i> Personal Info
-            </button>
-            <button onclick="switchTab('tabAddresses')" id="btnTabAddresses" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-brand-gray hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-location-dot"></i> Saved Places
-            </button>
-            <button onclick="switchTab('tabSettings')" id="btnTabSettings" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-brand-gray hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-gear"></i> Preferences & Security
-            </button>
-            <button onclick="switchTab('tabRewards')" id="btnTabRewards" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-brand-gray hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-gift"></i> Rewards & Referral
-            </button>
-            <button onclick="switchTab('tabSupport')" id="btnTabSupport" class="tab-btn px-4 py-2 rounded-xl text-xs font-semibold text-brand-gray hover:text-white whitespace-nowrap transition flex items-center gap-2">
-                <i class="fa-solid fa-headset"></i> Help & Support
-            </button>
-        </div>
-
-        <!-- TAB CONTENT: Personal Information Form -->
-        <div id="tabPersonal" class="tab-content space-y-6">
-            <form id="formProfile" onsubmit="saveProfileChanges(event)" class="glass-card rounded-2xl p-6 space-y-6">
-                <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
-                    <div>
-                        <h3 class="text-base font-bold text-white">Personal Information</h3>
-                        <p class="text-xs text-brand-gray">Update your personal account details</p>
-                    </div>
-                    <button type="submit" id="btnSaveProfile" class="px-5 py-2 rounded-xl bg-brand-yellow text-brand-black font-bold text-xs hover:bg-yellow-300 transition shadow-lg shadow-brand-yellow/10 flex items-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                        <label class="text-xs font-semibold text-brand-gray">Full Name</label>
-                        <input type="text" id="inputFullName" required class="w-full mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-brand-gray">Mobile Number</label>
-                        <input type="tel" id="inputMobile" required class="w-full mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-brand-gray">Email Address</label>
-                        <input type="email" id="inputEmail" disabled class="w-full mt-1.5 bg-brand-dark/50 border border-brand-border/50 text-gray-500 cursor-not-allowed rounded-xl px-4 py-2.5 text-xs">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-brand-gray">Date of Birth</label>
-                        <input type="date" id="inputDOB" class="w-full mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-brand-gray">Gender</label>
-                        <select id="selectGender" class="w-full mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                            <option value="Prefer not to say">Prefer not to say</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-semibold text-brand-gray">Emergency Contact</label>
-                        <input type="tel" id="inputEmergency" placeholder="+91 0000000000" class="w-full mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                    </div>
-                </div>
-
-                <div class="border-t border-brand-border/60 pt-4">
-                    <h4 class="text-xs font-bold text-brand-gray uppercase tracking-wider mb-3">Address Details</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="text-xs font-semibold text-brand-gray">Street Address</label>
-                            <input type="text" id="inputAddress" placeholder="Flat / House No., Street" class="w-full mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-brand-gray">City</label>
-                            <input type="text" id="inputCity" placeholder="e.g. Mumbai" class="w-full mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-brand-gray">State & Pincode</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="text" id="inputState" placeholder="State" class="mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                                <input type="text" id="inputPincode" placeholder="Pincode" class="mt-1.5 bg-brand-dark border border-brand-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- TAB CONTENT: Saved Addresses & Favorites -->
-        <div id="tabAddresses" class="tab-content hidden space-y-6">
-            <div class="glass-card rounded-2xl p-6 space-y-4">
-                <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
-                    <div>
-                        <h3 class="text-base font-bold text-white">Saved Addresses & Favorite Places</h3>
-                        <p class="text-xs text-brand-gray">Manage frequent destinations for fast ride booking</p>
-                    </div>
-                    <button onclick="openModal('modalAddAddress')" class="px-4 py-2 rounded-xl bg-brand-yellow text-brand-black font-bold text-xs hover:bg-yellow-300 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-plus"></i> Add New Place
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="addressListContainer">
-                    <!-- Home Preset Card -->
-                    <div class="bg-brand-dark p-4 rounded-xl border border-brand-border flex items-start justify-between">
-                        <div class="flex gap-3">
-                            <div class="w-9 h-9 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-house text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-bold text-white">Home</h4>
-                                <p id="addrHomeText" class="text-xs text-brand-gray mt-0.5">Not set yet</p>
-                            </div>
-                        </div>
-                        <button onclick="editPresetAddress('Home')" class="text-xs text-brand-yellow hover:underline font-semibold">Edit</button>
-                    </div>
-
-                    <!-- Work Preset Card -->
-                    <div class="bg-brand-dark p-4 rounded-xl border border-brand-border flex items-start justify-between">
-                        <div class="flex gap-3">
-                            <div class="w-9 h-9 rounded-full bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-briefcase text-sm"></i>
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-bold text-white">Work / Office</h4>
-                                <p id="addrWorkText" class="text-xs text-brand-gray mt-0.5">Not set yet</p>
-                            </div>
-                        </div>
-                        <button onclick="editPresetAddress('Work')" class="text-xs text-brand-yellow hover:underline font-semibold">Edit</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB CONTENT: Settings & Security -->
-        <div id="tabSettings" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Preferences -->
-                <div class="glass-card rounded-2xl p-6 space-y-4">
-                    <h3 class="text-base font-bold text-white border-b border-brand-border/60 pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-brand-yellow"></i> App Preferences
-                    </h3>
-
-                    <div class="space-y-4 text-xs">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="font-bold text-white">Language</p>
-                                <p class="text-brand-gray text-[10px]">Select preferred display language</p>
-                            </div>
-                            <select id="selectLanguage" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                                <option value="en">English (US)</option>
-                                <option value="hi">Hindi (हिंदी)</option>
-                                <option value="mr">Marathi (मराठी)</option>
-                            </select>
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="font-bold text-white">Dark Mode Theme</p>
-                                <p class="text-brand-gray text-[10px]">Ultra Dark High-Contrast UI</p>
-                            </div>
-                            <input type="checkbox" checked disabled class="accent-brand-yellow w-4 h-4 cursor-not-allowed">
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="font-bold text-white">Push Notifications</p>
-                                <p class="text-brand-gray text-[10px]">Ride updates & promotion alerts</p>
-                            </div>
-                            <input type="checkbox" id="chkPushNotif" checked class="accent-brand-yellow w-4 h-4 cursor-pointer">
-                        </div>
-
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="font-bold text-white">WhatsApp Updates</p>
-                                <p class="text-brand-gray text-[10px]">Get receipts & trip alerts on WhatsApp</p>
-                            </div>
-                            <input type="checkbox" id="chkWhatsapp" checked class="accent-brand-yellow w-4 h-4 cursor-pointer">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Security & Password -->
-                <div class="glass-card rounded-2xl p-6 space-y-4">
-                    <h3 class="text-base font-bold text-white border-b border-brand-border/60 pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-lock text-brand-yellow"></i> Security Settings
-                    </h3>
-
-                    <form id="formChangePassword" onsubmit="executePasswordChange(event)" class="space-y-3">
-                        <p class="text-xs font-bold text-white">Change Password</p>
-                        <div>
-                            <input type="password" id="inputCurrPassword" placeholder="Current Password" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        </div>
-                        <div>
-                            <input type="password" id="inputNewPassword" placeholder="New Password" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        </div>
-                        <button type="submit" class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-yellow text-brand-yellow font-bold text-xs hover:bg-brand-yellow hover:text-brand-black transition">Update Password</button>
-                    </form>
-
-                    <div class="border-t border-brand-border/60 pt-4 space-y-2">
-                        <p class="text-xs font-bold text-white">Active Sessions & Devices</p>
-                        <div class="p-3 bg-brand-dark rounded-xl border border-brand-border flex items-center justify-between">
-                            <div class="flex items-center gap-2 text-xs">
-                                <i class="fa-solid fa-mobile-screen text-brand-yellow"></i>
-                                <div>
-                                    <p class="text-white font-semibold">Current Device (Mobile Web)</p>
-                                    <p class="text-[10px] text-brand-gray">Active now</p>
-                                </div>
-                            </div>
-                            <span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded font-bold">THIS DEVICE</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Danger Zone -->
-            <div class="glass-card rounded-2xl p-6 border-red-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h4 class="text-sm font-bold text-red-400">Danger Zone</h4>
-                    <p class="text-xs text-brand-gray">Deleting your account will permanently wipe all trip history and wallet balance.</p>
-                </div>
-                <button onclick="confirmDeleteAccount()" class="px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 font-bold text-xs transition whitespace-nowrap">
-                    Delete Account
-                </button>
-            </div>
-        </div>
-
-        <!-- TAB CONTENT: Rewards & Referrals -->
-        <div id="tabRewards" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Invite & Earn -->
-                <div class="glass-card rounded-2xl p-6 space-y-4">
-                    <h3 class="text-base font-bold text-white border-b border-brand-border/60 pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-users text-brand-yellow"></i> Invite Friends & Earn
-                    </h3>
-                    <p class="text-xs text-brand-gray">Share your unique code. Earn ₹250 in your RiderX Wallet when a friend completes their first ride.</p>
-
-                    <div class="bg-brand-dark p-4 rounded-xl border border-brand-yellow/30 flex items-center justify-between">
-                        <div>
-                            <p class="text-[10px] text-brand-gray uppercase font-semibold">Your Referral Code</p>
-                            <p id="displayRefCode" class="text-lg font-mono font-bold text-brand-yellow tracking-widest">RX-REF-00</p>
-                        </div>
-                        <button onclick="copyReferralCode()" class="px-3 py-1.5 rounded-lg bg-brand-yellow text-brand-black text-xs font-bold hover:bg-yellow-300 transition">
-                            <i class="fa-solid fa-copy mr-1"></i> Copy
-                        </button>
-                    </div>
-
-                    <button onclick="shareReferralLink()" class="w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-white text-xs font-bold transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-share-nodes text-brand-yellow"></i> Share Referral Link
-                    </button>
-                </div>
-
-                <!-- Rewards Overview -->
-                <div class="glass-card rounded-2xl p-6 space-y-4">
-                    <h3 class="text-base font-bold text-white border-b border-brand-border/60 pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-trophy text-amber-400"></i> Active Rewards & Coupons
-                    </h3>
-                    <div class="space-y-3">
-                        <div class="bg-brand-dark p-3 rounded-xl border border-brand-border flex items-center justify-between">
-                            <div>
-                                <span class="px-2 py-0.5 bg-brand-yellow/20 text-brand-yellow text-[10px] font-bold rounded">WELCOME50</span>
-                                <p class="text-xs font-semibold text-white mt-1">50% Off First 3 Rides</p>
-                            </div>
-                            <span class="text-xs font-bold text-emerald-400">ACTIVE</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB CONTENT: Help, Support & About -->
-        <div id="tabSupport" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- FAQs & Contact (2 Cols) -->
-                <div class="lg:col-span-2 glass-card rounded-2xl p-6 space-y-4">
-                    <h3 class="text-base font-bold text-white border-b border-brand-border/60 pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-question text-brand-yellow"></i> Frequently Asked Questions
-                    </h3>
-
-                    <div class="space-y-3 text-xs">
-                        <details class="bg-brand-dark p-3 rounded-xl border border-brand-border cursor-pointer">
-                            <summary class="font-bold text-white">How do I update my profile photo?</summary>
-                            <p class="text-brand-gray mt-2">Go to Personal Info tab, hover over your current profile picture and click the camera icon to upload a photo.</p>
-                        </details>
-
-                        <details class="bg-brand-dark p-3 rounded-xl border border-brand-border cursor-pointer">
-                            <summary class="font-bold text-white">How does the emergency contact work?</summary>
-                            <p class="text-brand-gray mt-2">During any active ride, tapping the SOS button will instantly share your live trip GPS with your emergency contact.</p>
-                        </details>
-
-                        <details class="bg-brand-dark p-3 rounded-xl border border-brand-border cursor-pointer">
-                            <summary class="font-bold text-white">How do I redeem my cashback?</summary>
-                            <p class="text-brand-gray mt-2">Cashback is automatically credited to your RiderX Pay Wallet balance immediately after qualifying rides.</p>
-                        </details>
-                    </div>
-
-                    <div class="pt-4 border-t border-brand-border/60 flex flex-col sm:flex-row gap-3">
-                        <button onclick="alert('Contacting RiderX Priority Support Hotline...')" class="flex-1 py-3 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-white font-bold text-xs transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-phone text-brand-yellow"></i> Call 24/7 Support
-                        </button>
-                        <button onclick="alert('Opening Support Chat Ticket...')" class="flex-1 py-3 rounded-xl bg-brand-yellow text-brand-black font-bold text-xs hover:bg-yellow-300 transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-comments"></i> Start Live Chat
-                        </button>
-                    </div>
-                </div>
-
-                <!-- About RiderX App -->
-                <div class="glass-card rounded-2xl p-6 space-y-4 text-center">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX" class="h-10 mx-auto" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX'">
-                    <p class="text-xs text-brand-gray">RiderX Premium Ride Hailing Super App</p>
-                    <p class="text-[11px] font-mono text-brand-yellow font-bold">Version 4.2.0-PROD</p>
-
-                    <div class="pt-3 border-t border-brand-border/60 space-y-2">
-                        <button onclick="alert('Thank you for rating RiderX 5-Stars!')" class="w-full py-2 rounded-xl bg-brand-dark border border-brand-border text-xs text-white hover:text-brand-yellow font-semibold">
-                            <i class="fa-solid fa-star text-amber-400 mr-1"></i> Rate Us on App Store
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Mobile Bottom Navigation Bar -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 border-t border-brand-border backdrop-blur-lg px-6 py-2.5">
-        <div class="flex items-center justify-between max-w-md mx-auto">
-            <a href="./Dashboard.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-compass text-base"></i>
-                <span class="text-[10px] font-medium">Explore</span>
-            </a>
-            <a href="./Activity.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-clock-rotate-left text-base"></i>
-                <span class="text-[10px] font-medium">Rides</span>
-            </a>
-            <a href="./Wallet.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-wallet text-base"></i>
-                <span class="text-[10px] font-medium">Wallet</span>
-            </a>
-            <a href="./Profile.html" class="flex flex-col items-center gap-1 text-brand-yellow font-bold">
-                <i class="fa-solid fa-user text-base"></i>
-                <span class="text-[10px]">Account</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- Modal: Add / Edit Saved Address -->
-    <div id="modalAddAddress" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-md rounded-2xl p-6 relative border border-brand-yellow/30 space-y-4">
-            <button onclick="closeModal('modalAddAddress')" class="absolute top-4 right-4 text-brand-gray hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-location-dot text-brand-yellow"></i> Save Favorite Place
-            </h3>
-
-            <form id="formSaveAddress" onsubmit="executeSaveAddress(event)" class="space-y-3">
-                <div>
-                    <label class="text-xs font-semibold text-brand-gray">Label Name</label>
-                    <input type="text" id="modalAddrLabel" placeholder="e.g. Home, Office, Gym" required class="w-full mt-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-brand-gray">Full Address / Location</label>
-                    <textarea id="modalAddrText" rows="3" required placeholder="Full location address..." class="w-full mt-1 bg-brand-dark border border-brand-border rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-brand-yellow"></textarea>
-                </div>
-                <button type="submit" class="w-full py-2.5 rounded-xl bg-brand-yellow text-brand-black font-bold text-xs hover:bg-yellow-300 transition">Save Address</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Firebase & App Logic -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/App.js"></script>
-
-    <script type="module">
-        import { auth, db, storage } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc, updateDoc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-        let currentUser = null;
-        let customerData = {};
-
-        document.addEventListener('DOMContentLoaded', () => {
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    window.location.href = '../auth/customer-login.html';
-                    return;
-                }
-                currentUser = user;
-                loadCustomerProfile(user.uid);
-                loadRideStatistics(user.uid);
-                loadWalletBalance(user.uid);
-            });
-        });
-
-        // Load Main Customer Document
-        async function loadCustomerProfile(uid) {
-            try {
-                const docRef = doc(db, "customers", uid);
-                const docSnap = await getDoc(docRef);
-
-                if (docSnap.exists()) {
-                    customerData = docSnap.data();
-                    populateForm(customerData);
-                } else {
-                    // Initialize empty customer
-                    customerData = {
-                        fullName: currentUser.displayName || 'RiderX Customer',
-                        email: currentUser.email,
-                        mobile: currentUser.phoneNumber || ''
-                    };
-                    populateForm(customerData);
-                }
-            } catch (err) {
-                console.error("Error loading profile:", err);
-            }
-        }
-
-        function populateForm(data) {
-            document.getElementById('hdrFullName').innerText = data.fullName || 'RiderX Customer';
-            document.getElementById('hdrEmail').innerText = currentUser.email;
-            
-            if (data.photoURL || currentUser.photoURL) {
-                document.getElementById('profilePhoto').src = data.photoURL || currentUser.photoURL;
-            }
-
-            document.getElementById('inputFullName').value = data.fullName || '';
-            document.getElementById('inputMobile').value = data.mobile || '';
-            document.getElementById('inputEmail').value = currentUser.email || '';
-            document.getElementById('inputDOB').value = data.dob || '';
-            document.getElementById('selectGender').value = data.gender || 'Male';
-            document.getElementById('inputEmergency').value = data.emergencyContact || '';
-            
-            document.getElementById('inputAddress').value = data.address || '';
-            document.getElementById('inputCity').value = data.city || '';
-            document.getElementById('inputState').value = data.state || '';
-            document.getElementById('inputPincode').value = data.pincode || '';
-
-            document.getElementById('displayRefCode').innerText = data.referralCode || ('RX-' + currentUser.uid.substring(0,6).toUpperCase());
-
-            if (data.homeAddress) document.getElementById('addrHomeText').innerText = data.homeAddress;
-            if (data.workAddress) document.getElementById('addrWorkText').innerText = data.workAddress;
-        }
-
-        // Load Ride Metrics from Bookings
-        async function loadRideStatistics(uid) {
-            try {
-                const q = query(collection(db, "bookings"), where("customerId", "==", uid));
-                const querySnap = await getDocs(q);
-                
-                let count = 0;
-                let totalDist = 0;
-                let totalSpent = 0;
-
-                querySnap.forEach((doc) => {
-                    const b = doc.data();
-                    count++;
-                    totalDist += parseFloat(b.distanceKm || 0);
-                    totalSpent += parseFloat(b.fareAmount || 0);
-                });
-
-                document.getElementById('statTotalRides').innerText = count;
-                document.getElementById('statTotalDistance').innerText = totalDist.toFixed(1) + ' km';
-                document.getElementById('statTotalSpent').innerText = '₹' + totalSpent.toFixed(2);
-            } catch(e) {
-                console.log("Stats load error:", e);
-            }
-        }
-
-        // Load Wallet Metrics
-        async function loadWalletBalance(uid) {
-            try {
-                const wRef = doc(db, "wallet", uid);
-                const wSnap = await getDoc(wRef);
-                if (wSnap.exists()) {
-                    document.getElementById('statWalletBalance').innerText = '₹' + (wSnap.data().balance || 0).toFixed(2);
-                }
-            } catch(e) {
-                console.log("Wallet load error:", e);
-            }
-        }
-
-        // Save Profile Updates
-        window.saveProfileChanges = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveProfile');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
-
-            const updated = {
-                fullName: document.getElementById('inputFullName').value,
-                mobile: document.getElementById('inputMobile').value,
-                dob: document.getElementById('inputDOB').value,
-                gender: document.getElementById('selectGender').value,
-                emergencyContact: document.getElementById('inputEmergency').value,
-                address: document.getElementById('inputAddress').value,
-                city: document.getElementById('inputCity').value,
-                state: document.getElementById('inputState').value,
-                pincode: document.getElementById('inputPincode').value,
-                updatedAt: new Date()
-            };
-
-            try {
-                await setDoc(doc(db, "customers", currentUser.uid), updated, { merge: true });
-                document.getElementById('hdrFullName').innerText = updated.fullName;
-                alert("Profile details saved successfully!");
-            } catch (err) {
-                console.error("Save error:", err);
-                alert("Failed to save profile.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Changes`;
-            }
-        };
-
-        // Firebase Photo Upload
-        window.uploadProfilePhoto = async function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const spinner = document.getElementById('photoSpinner');
-            spinner.classList.remove('hidden');
-
-            try {
-                const storageRef = ref(storage, `profiles/${currentUser.uid}_${Date.now()}`);
-                await uploadBytes(storageRef, file);
-                const downloadURL = await getDownloadURL(storageRef);
-
-                await updateDoc(doc(db, "customers", currentUser.uid), { photoURL: downloadURL });
-                document.getElementById('profilePhoto').src = downloadURL;
-                alert("Profile photo updated!");
-            } catch (err) {
-                console.error("Upload error:", err);
-                alert("Failed to upload image.");
-            } finally {
-                spinner.classList.add('hidden');
-            }
-        };
-
-        // Tab Switching
-        window.switchTab = function(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active', 'text-brand-gray'));
-            
-            document.getElementById(tabId).classList.remove('hidden');
-            event.currentTarget.classList.add('active');
-        };
-
-        // Modals & Extras
-        window.openModal = id => document.getElementById(id).classList.remove('hidden');
-        window.closeModal = id => document.getElementById(id).classList.add('hidden');
-
-        window.editPresetAddress = function(type) {
-            document.getElementById('modalAddrLabel').value = type;
-            openModal('modalAddAddress');
-        };
-
-        window.executeSaveAddress = async function(e) {
-            e.preventDefault();
-            const label = document.getElementById('modalAddrLabel').value;
-            const text = document.getElementById('modalAddrText').value;
-
-            const updateField = {};
-            if (label.toLowerCase() === 'home') updateField.homeAddress = text;
-            else if (label.toLowerCase() === 'work') updateField.workAddress = text;
-
-            await updateDoc(doc(db, "customers", currentUser.uid), updateField);
-            if(updateField.homeAddress) document.getElementById('addrHomeText').innerText = text;
-            if(updateField.workAddress) document.getElementById('addrWorkText').innerText = text;
-
-            closeModal('modalAddAddress');
-            alert("Address saved!");
-        };
-
-        window.executePasswordChange = async function(e) {
-            e.preventDefault();
-            const newPass = document.getElementById('inputNewPassword').value;
-            try {
-                await updatePassword(currentUser, newPass);
-                alert("Password updated successfully!");
-            } catch(err) {
-                alert("Failed to update password: " + err.message);
-            }
-        };
-
-        window.confirmLogout = function() {
-            if (confirm("Are you sure you want to log out from RiderX?")) {
-                signOut(auth).then(() => {
-                    window.location.href = '../auth/customer-login.html';
-                });
-            }
-        };
-
-        window.confirmDeleteAccount = function() {
-            if (confirm("CRITICAL: Are you sure you want to permanently delete your RiderX account? This action cannot be undone.")) {
-                alert("Account deletion request submitted.");
-            }
-        };
-
-        window.copyReferralCode = function() {
-            const code = document.getElementById('displayRefCode').innerText;
-            navigator.clipboard.writeText(code);
-            alert("Referral code copied!");
-        };
-    </script>
+
+
+<body>
+
+
+<div class="header">
+
+<a href="home.html" class="back">
+<i class="fa-solid fa-arrow-left"></i>
+</a>
+
+
+<div class="logo">
+RIDER<span>X</span>
+</div>
+
+
+</div>
+
+
+
+
+<div class="container">
+
+
+<div class="profile-card">
+
+
+<img id="profileImage"
+src="https://via.placeholder.com/150"
+class="profile-img">
+
+
+<div class="upload">
+
+<label for="photo">
+<i class="fa fa-camera"></i>
+Change Photo
+</label>
+
+<input type="file" id="photo" accept="image/*">
+
+</div>
+
+
+
+<div class="form">
+
+
+<div class="input">
+
+<label>Name</label>
+
+<input id="name" type="text">
+
+</div>
+
+
+
+<div class="input">
+
+<label>Email</label>
+
+<input id="email" type="email" readonly>
+
+</div>
+
+
+
+<div class="input">
+
+<label>Mobile Number</label>
+
+<input id="phone" type="text">
+
+</div>
+
+
+
+<button onclick="saveProfile()">
+
+Save Profile
+
+</button>
+
+
+
+<button class="logout" onclick="logout()">
+
+Logout
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="nav">
+
+
+<a href="home.html">
+<i class="fa fa-home"></i>
+Home
+</a>
+
+
+
+<a href="booking.html">
+<i class="fa fa-motorcycle"></i>
+Book
+</a>
+
+
+
+<a href="history.html">
+<i class="fa fa-clock"></i>
+History
+</a>
+
+
+
+<a class="active" href="profile.html">
+<i class="fa fa-user"></i>
+Profile
+</a>
+
+
+
+</div>
+
+
+
+
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+
+<script src="../firebase/firebase-config.js"></script>
+
+
+
+<script>
+
+
+const auth=firebase.auth();
+
+const db=firebase.firestore();
+
+
+
+let currentUser=null;
+
+
+
+auth.onAuthStateChanged(async(user)=>{
+
+
+if(!user){
+
+location.href="../auth/login.html";
+
+return;
+
+}
+
+
+currentUser=user;
+
+
+
+document.getElementById("email").value=user.email;
+
+
+
+const doc=await db.collection("customers")
+.doc(user.uid)
+.get();
+
+
+
+if(doc.exists){
+
+
+const data=doc.data();
+
+
+document.getElementById("name").value=
+data.fullName || data.name || "";
+
+
+document.getElementById("phone").value=
+data.mobileNumber || data.phone || "";
+
+
+if(data.photoURL){
+
+document.getElementById("profileImage").src=data.photoURL;
+
+}
+
+
+}
+
+
+
+});
+
+
+
+
+
+async function saveProfile(){
+
+
+try{
+
+
+await db.collection("customers")
+.doc(currentUser.uid)
+.update({
+
+fullName:
+document.getElementById("name").value,
+
+mobileNumber:
+document.getElementById("phone").value
+
+
+});
+
+
+alert("Profile Updated Successfully");
+
+
+}
+
+
+catch(e){
+
+alert(e.message);
+
+}
+
+
+}
+
+
+
+
+async function logout(){
+
+
+await auth.signOut();
+
+location.href="../auth/login.html";
+
+
+}
+
+
+
+
+</script>
+
+
 </body>
 </html>
