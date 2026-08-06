@@ -1,55 +1,59 @@
-// =================================
-// RiderX Service Worker
-// Fast App Loading + Cache
-// =================================
+//
+// =====================================
+// RiderX Premium Service Worker
+// PWA Offline + Cache System
+// =====================================
+//
 
 
 const CACHE_NAME = "riderx-v1";
 
 
+
 const FILES_TO_CACHE = [
 
-    "/",
 
-    "/index.html",
+"/",
 
-    "/manifest.json",
+"/index.html",
 
-
-    "/assets/logo.png",
+"/manifest.json",
 
 
-    "/css/Style.css",
 
-    "/css/Responsive.css",
+"/css/Style.css",
 
-    "/css/Dashboard.css",
+"/css/Responsive.css",
 
-    "/css/Auth.css",
-
-    "/css/Animation.css",
+"/css/Animation.css",
 
 
-    "/auth/login.html",
 
-    "/auth/register.html",
-
-
-    "/customer/home.html",
-
-    "/customer/booking.html",
-
-    "/customer/profile.html",
+"/assets/logo.png",
 
 
-    "/rider/home.html",
 
-    "/rider/rides.html",
+"/auth/login.html",
 
-    "/rider/profile.html",
+"/auth/register.html",
 
 
-    "/admin/dashboard.html"
+
+"/customer/booking.html",
+
+"/customer/profile.html",
+
+"/customer/wallet.html",
+
+"/customer/history.html",
+
+
+
+"/rider/profile.html",
+
+"/rider/wallet.html"
+
+
 
 ];
 
@@ -57,24 +61,39 @@ const FILES_TO_CACHE = [
 
 
 
+
+
+
 // Install
 
+
 self.addEventListener(
+
 "install",
-event=>{
+
+(event)=>{
 
 
 event.waitUntil(
 
+
 caches.open(CACHE_NAME)
 
-.then(cache=>{
+.then(
+
+(cache)=>{
 
 
-return cache.addAll(FILES_TO_CACHE);
+return cache.addAll(
+
+FILES_TO_CACHE
+
+);
 
 
 })
+
+
 
 );
 
@@ -82,7 +101,11 @@ return cache.addAll(FILES_TO_CACHE);
 self.skipWaiting();
 
 
-});
+
+}
+
+);
+
 
 
 
@@ -92,24 +115,37 @@ self.skipWaiting();
 
 // Activate
 
+
 self.addEventListener(
+
 "activate",
-event=>{
+
+(event)=>{
 
 
 event.waitUntil(
 
+
 caches.keys()
 
-.then(keys=>{
+.then(
+
+(keys)=>{
 
 
 return Promise.all(
 
-keys.map(key=>{
+
+keys.map(
+
+(key)=>{
 
 
-if(key !== CACHE_NAME){
+if(
+
+key !== CACHE_NAME
+
+){
 
 
 return caches.delete(key);
@@ -118,7 +154,11 @@ return caches.delete(key);
 }
 
 
-})
+
+}
+
+
+)
 
 
 );
@@ -126,13 +166,18 @@ return caches.delete(key);
 
 })
 
+
+
 );
+
 
 
 self.clients.claim();
 
 
-});
+}
+
+);
 
 
 
@@ -143,19 +188,36 @@ self.clients.claim();
 
 // Fetch
 
+
 self.addEventListener(
+
 "fetch",
-event=>{
+
+(event)=>{
 
 
 event.respondWith(
 
-caches.match(event.request)
 
-.then(response=>{
+caches.match(
+
+event.request
+
+)
+
+.then(
+
+(response)=>{
 
 
-return response || fetch(event.request);
+return response ||
+
+fetch(
+
+event.request
+
+);
+
 
 
 })
@@ -164,59 +226,7 @@ return response || fetch(event.request);
 );
 
 
-});
-
-
-
-
-
-
-
-
-// Push Notification Ready
-
-self.addEventListener(
-"push",
-event=>{
-
-
-let data={
-
-title:"RiderX",
-
-body:"New ride notification"
-
-};
-
-
-
-if(event.data){
-
-data=event.data.json();
 
 }
-
-
-
-event.waitUntil(
-
-self.registration.showNotification(
-
-data.title,
-
-{
-
-body:data.body,
-
-icon:"assets/logo.png",
-
-badge:"assets/logo.png"
-
-}
-
-)
 
 );
-
-
-});
