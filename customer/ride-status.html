@@ -56,16 +56,40 @@ margin:20px 0;
 
 
 
+.card{
+
+background:#222;
+padding:15px;
+margin-top:15px;
+border-radius:12px;
+
+}
+
+
+
+.otp{
+
+font-size:40px;
+color:#FFD600;
+letter-spacing:8px;
+margin:15px;
+
+}
+
+
+
 button{
 
 width:100%;
 padding:15px;
+margin-top:15px;
 border:none;
 border-radius:12px;
 background:#FFD600;
 font-weight:bold;
 
 }
+
 
 
 </style>
@@ -82,7 +106,6 @@ font-weight:bold;
 RIDER<span>X</span>
 
 </div>
-
 
 
 
@@ -105,17 +128,42 @@ Searching Rider...
 
 
 
-<p id="details">
 
-Please wait
+<div class="card" id="details">
 
-</p>
+Please wait...
+
+</div>
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+🔐 Pickup OTP
+
+</h3>
+
+
+<div class="otp" id="otp">
+
+----
+
+</div>
+
+
+</div>
+
+
 
 
 
 <button id="trackBtn" style="display:none">
 
-View Live Tracking
+🗺 View Live Tracking
 
 </button>
 
@@ -128,16 +176,17 @@ View Live Tracking
 
 
 
+
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
 
 doc,
-getDoc
+onSnapshot
 
 }
 
@@ -147,36 +196,23 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-let rideId = localStorage.getItem("rideId");
+let rideId=
+
+localStorage.getItem("rideId");
 
 
 
 
-async function checkRide(){
 
+onSnapshot(
 
-if(!rideId){
+doc(db,"rides",rideId),
 
-return;
-
-}
-
-
-
-const snap = await getDoc(
-
-doc(db,"rides",rideId)
-
-);
+(snap)=>{
 
 
 
-if(!snap.exists()){
-
-return;
-
-}
-
+if(!snap.exists()) return;
 
 
 
@@ -184,78 +220,126 @@ let data=snap.data();
 
 
 
-let status=document.getElementById("status");
-
-let details=document.getElementById("details");
-
-let btn=document.getElementById("trackBtn");
+document.getElementById("status").innerHTML=
 
 
+data.status==="Pending"
+
+?
+
+"🔎 Searching Rider..."
+
+:
+
+data.status==="Accepted"
+
+?
+
+"🏍 Rider Coming"
+
+:
+
+data.status==="Started"
+
+?
+
+"🚕 Ride Started"
+
+:
+
+"✅ Ride Completed";
 
 
 
-if(data.status==="Pending"){
 
 
-status.innerHTML="🔎 Searching Rider...";
+
+document.getElementById("details").innerHTML=
+
+`
+
+Service: ${data.service}
+
+<br><br>
+
+Pickup:
+
+${data.pickup}
+
+<br><br>
+
+Drop:
+
+${data.drop}
+
+<br><br>
+
+Fare:
+
+₹${data.fare}
+
+<br><br>
+
+Rider:
+
+${data.riderId || "Searching..."}
+
+`;
 
 
-details.innerHTML="Nearby riders are checking your ride";
+
+
+
+
+if(data.otp){
+
+
+document.getElementById("otp").innerHTML=
+
+data.otp;
 
 
 }
 
 
 
-if(data.status==="Accepted"){
-
-
-status.innerHTML="✅ Rider Found";
-
-
-details.innerHTML=
-
-"Your rider is coming";
-
-
-btn.style.display="block";
 
 
 
-btn.onclick=()=>{
+if(
+
+data.status==="Accepted" ||
+
+data.status==="Started"
+
+){
 
 
-window.location.href="live-tracking.html";
+document.getElementById("trackBtn").style.display="block";
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+document.getElementById("trackBtn").onclick=()=>{
+
+
+location.href="live-tracking.html";
 
 
 };
 
 
-}
-
-
-
-}
-
-
-
-
-checkRide();
-
-
-
-setInterval(
-
-checkRide,
-
-5000
-
-);
-
-
 
 </script>
-
 
 
 
