@@ -13,6 +13,7 @@
 
 <link rel="manifest" href="../manifest.json">
 
+
 <meta name="theme-color" content="#FFD600">
 
 
@@ -28,14 +29,19 @@
 <body>
 
 
-
 <div class="topbar">
 
-<h2>
-🏍 RiderX
+
+<h2 id="pageTitle">
+
+🏍 Book Ride
+
 </h2>
 
+
 </div>
+
+
 
 
 
@@ -48,29 +54,6 @@
 
 
 
-<!-- INSTALL APP -->
-
-<div class="card">
-
-
-<button id="installApp" style="display:none;">
-
-📲 Install RiderX App
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- MAP -->
 
 
 <div class="map-container">
@@ -87,90 +70,42 @@
 
 
 
-<!-- MAIN OPTIONS -->
-
-
 <div class="card">
 
 
 <h3>
-Choose Service
-</h3>
 
+Select Service
 
-
-<button id="rideOption" class="btn">
-
-🏍 Book Ride
-
-</button>
-
-
-
-
-<button id="parcelOption" class="btn-outline">
-
-📦 Book Parcel
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- RIDE SECTION -->
-
-
-<div id="rideSection" class="card">
-
-
-<h3>
-Book Ride
 </h3>
 
 
 
 
-<div class="service-buttons">
+<div id="rideServices">
 
 
-
-<button class="service-btn active" data-service="Bike">
+<button class="btn serviceBtn" data-service="Bike">
 
 🏍 Bike
 
 </button>
 
 
-
-<button class="service-btn" data-service="Taxi">
+<button class="btn serviceBtn" data-service="Taxi">
 
 🚕 Taxi
 
 </button>
 
 
-
-<button class="service-btn" data-service="Cab">
+<button class="btn serviceBtn" data-service="Cab">
 
 🚗 Cab
 
 </button>
 
 
-
-</div>
-
-
-
 </div>
 
 
@@ -180,41 +115,23 @@ Book Ride
 
 
 
-
-<!-- PARCEL SECTION -->
-
-
-<div id="parcelSection" class="card" style="display:none;">
+<div id="deliveryServices" style="display:none;">
 
 
-<h3>
-Book Parcel
-
-</h3>
-
-
-
-
-<div class="service-buttons">
-
-
-
-<button class="service-btn active" data-service="Parcel">
+<button class="btn serviceBtn" data-service="Parcel">
 
 📦 Parcel
 
 </button>
 
 
-
-<button class="service-btn" data-service="Food">
+<button class="btn serviceBtn" data-service="Food">
 
 🍔 Food
 
 </button>
 
 
-
 </div>
 
 
@@ -227,32 +144,9 @@ Book Parcel
 
 
 
-
-
-<input 
-type="hidden"
-id="service"
-value="Bike"
->
-
-
-
-
-
-
-
-
-
-<!-- LOCATION -->
 
 
 <div class="card">
-
-
-<h3>
-Location
-</h3>
-
 
 
 <input
@@ -279,7 +173,6 @@ readonly
 
 
 
-
 <input
 
 id="drop"
@@ -289,6 +182,8 @@ class="input"
 placeholder="Drop Location"
 
 >
+
+
 
 
 </div>
@@ -301,16 +196,14 @@ placeholder="Drop Location"
 
 
 
-<!-- PAYMENT -->
-
-
 <div class="card">
 
 
 <h3>
-Payment Method
-</h3>
 
+Payment
+
+</h3>
 
 
 <select id="paymentMethod" class="input">
@@ -321,6 +214,7 @@ Payment Method
 💵 Cash
 
 </option>
+
 
 
 <option value="Online">
@@ -344,30 +238,19 @@ Payment Method
 
 
 
-<!-- FARE -->
-
-
 <div class="booking-card">
 
 
-<div class="booking-title">
-
-
 <h3>
+
 Fare
+
 </h3>
 
 
 <div class="booking-price">
 
-₹<span id="fare">
-
-0
-
-</span>
-
-</div>
-
+₹<span id="fare">0</span>
 
 </div>
 
@@ -376,27 +259,9 @@ Fare
 <div class="booking-row">
 
 <span>
-Service
-</span>
 
-
-<b id="selectedService">
-
-Bike
-
-</b>
-
-
-</div>
-
-
-
-
-
-<div class="booking-row">
-
-<span>
 Distance
+
 </span>
 
 
@@ -408,8 +273,6 @@ Distance
 
 
 </div>
-
-
 
 
 </div>
@@ -424,10 +287,11 @@ Distance
 
 <button id="bookBtn" class="btn">
 
-
-Book Ride
+Confirm Booking
 
 </button>
+
+
 
 
 
@@ -446,9 +310,6 @@ Book Ride
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
-<script type="module" src="../js/App.js"></script>
-
-
 <script type="module" src="../js/booking.js"></script>
 
 
@@ -458,122 +319,38 @@ Book Ride
 <script>
 
 
-const rideOption =
-document.getElementById("rideOption");
+const params =
+new URLSearchParams(location.search);
 
 
-const parcelOption =
-document.getElementById("parcelOption");
 
+let service =
+params.get("service");
 
-const rideSection =
-document.getElementById("rideSection");
 
 
-const parcelSection =
-document.getElementById("parcelSection");
+if(service==="Parcel" || service==="Food"){
 
 
-const buttons =
-document.querySelectorAll(".service-btn");
+document.getElementById(
+"pageTitle"
+).innerHTML="📦 Book Delivery";
 
 
-const service =
-document.getElementById("service");
+document.getElementById(
+"rideServices"
+).style.display="none";
 
 
-const selected =
-document.getElementById("selectedService");
+document.getElementById(
+"deliveryServices"
+).style.display="block";
 
 
-
-
-
-
-rideOption.onclick=()=>{
-
-
-rideSection.style.display="block";
-
-parcelSection.style.display="none";
-
-
-service.value="Bike";
-
-
-selected.innerHTML="Bike";
-
-
-};
-
-
-
-
-
-parcelOption.onclick=()=>{
-
-
-rideSection.style.display="none";
-
-parcelSection.style.display="block";
-
-
-service.value="Parcel";
-
-
-selected.innerHTML="Parcel";
-
-
-};
-
-
-
-
-
-
-
-buttons.forEach(btn=>{
-
-
-btn.onclick=()=>{
-
-
-buttons.forEach(b=>{
-
-b.classList.remove("active");
-
-});
-
-
-
-btn.classList.add("active");
-
-
-
-service.value =
-btn.dataset.service;
-
-
-
-selected.innerHTML =
-btn.dataset.service;
-
-
-
-};
-
-
-});
-
-
-
+}
 
 
 </script>
-
-
-
-
 
 
 
