@@ -10,6 +10,29 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+<style>
+
+.card{
+background:#111;
+padding:20px;
+border-radius:20px;
+margin:20px;
+}
+
+button{
+
+width:90%;
+margin:10px 5%;
+padding:15px;
+background:#FFD600;
+border:none;
+border-radius:12px;
+font-weight:bold;
+
+}
+
+</style>
+
 </head>
 
 
@@ -24,52 +47,38 @@
 
 
 
-<div class="container">
-
-
 <div class="card">
 
 
-<h3 id="service">
-
+<h2 id="service">
 Ride
-
-</h3>
+</h2>
 
 
 <p id="pickup">
-
 📍 Pickup:
-
 </p>
 
 
 <p id="drop">
-
 🏁 Drop:
-
 </p>
 
 
 <p id="distance">
-
 📏 Distance:
-
 </p>
 
 
 <p id="fare">
-
 💰 Fare:
-
 </p>
 
 
 <p id="status">
-
 Status:
-
 </p>
+
 
 
 </div>
@@ -92,8 +101,6 @@ Status:
 
 
 
-</div>
-
 
 
 
@@ -108,7 +115,8 @@ import {
 
 doc,
 getDoc,
-updateDoc
+updateDoc,
+serverTimestamp
 
 }
 
@@ -125,11 +133,10 @@ let rideId = localStorage.getItem("rideId");
 
 
 
-
 async function loadRide(){
 
 
-let snap=await getDoc(
+const snap = await getDoc(
 
 doc(db,"rides",rideId)
 
@@ -137,37 +144,42 @@ doc(db,"rides",rideId)
 
 
 
+if(!snap.exists()) return;
+
+
+
 let data=snap.data();
+
 
 
 
 document.getElementById("service").innerHTML=
 
-data.service;
+"🏍 "+data.service;
 
 
 
 document.getElementById("pickup").innerHTML=
 
-"📍 Pickup: "+data.pickupLat+","+data.pickupLng;
+"📍 Pickup: "+data.pickup;
 
 
 
 document.getElementById("drop").innerHTML=
 
-"🏁 Drop: "+data.dropLat+","+data.dropLng;
+"🏁 Drop: "+data.drop;
 
 
 
 document.getElementById("distance").innerHTML=
 
-"📏 Distance: "+data.distance+" KM";
+"📏 Distance: "+(data.distance || 0)+" KM";
 
 
 
 document.getElementById("fare").innerHTML=
 
-"💰 Fare: "+data.fare;
+"💰 Fare: ₹"+data.fare;
 
 
 
@@ -183,8 +195,8 @@ document.getElementById("status").innerHTML=
 
 
 
-window.startRide=async function(){
 
+window.startRide=async()=>{
 
 
 await updateDoc(
@@ -193,8 +205,9 @@ doc(db,"rides",rideId),
 
 {
 
+status:"Started",
 
-status:"Started"
+startedAt:serverTimestamp()
 
 }
 
@@ -204,83 +217,57 @@ status:"Started"
 
 alert("Ride Started 🏍");
 
+loadRide();
+
+
+};
+
+
+
+
+
+
+
+window.completeRide=async()=>{
+
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+status:"Completed",
+
+completedAt:serverTimestamp()
+
+}
+
+);
+
+
+
+alert("Ride Completed ✅");
+
+
+
+location.href="../customer/receipt.html";
+
+
+
+};
+
+
+
+
 
 loadRide();
 
 
-}
+
+</script>
 
 
+</body>
 
-
-
-
-
-window.completeRide=async function(){
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-status:"Completed"
-
-}
-
-);
-
-
-
-localStorage.setItem(
-
-"rideId",
-
-rideId
-
-);
-
-
-
-alert("Ride Completed ✅");
-
-
-
-window.completeRide=async function(){
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-status:"Completed"
-
-}
-
-);
-
-
-
-localStorage.setItem(
-
-"rideId",
-
-rideId
-
-);
-
-
-
-alert("Ride Completed ✅");
-
-
-
-window.location.href=
-
-"../customer/payment.html";
-
-
-}
+</html>
