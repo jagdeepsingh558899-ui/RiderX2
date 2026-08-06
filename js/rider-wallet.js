@@ -1,168 +1,143 @@
-// =====================================
-// RiderX Rider Wallet System
-// Earnings Calculator
-// =====================================
+// =================================
+// RiderX Rider Wallet & Earnings
+// =================================
 
 
 import {
 
-db,
-auth
+auth,
+rtdb
 
-}
-
-from "../firebase/config.js";
-
+} from "../firebase/Firebase-config.js";
 
 
 import {
 
+onAuthStateChanged
 
-collection,
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-query,
 
-where,
+import {
 
-onSnapshot
+ref,
+onValue
+
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+
+
+
+
+let riderId = null;
+
+
+
+
+
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+
+if(user){
+
+
+riderId = user.uid;
+
+
+loadEarnings();
+
 
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
+});
 
 
 
 
-const totalBox =
-
-document.getElementById(
-"total"
-);
 
 
 
-const todayBox =
 
-document.getElementById(
-"today"
-);
+function loadEarnings(){
 
 
 
-const ridesBox =
+const ridesRef =
 
-document.getElementById(
+ref(
+
+rtdb,
+
 "rides"
+
 );
 
 
+
+
+
+onValue(
+
+ridesRef,
+
+(snapshot)=>{
+
+
+
+let total = 0;
+
+let today = 0;
+
+let count = 0;
 
 
 
 const transactionBox =
 
-document.getElementById(
-"transactions"
-);
+document.getElementById("transactions");
 
 
 
-
-
-
-
-
-
-function loadWallet(){
-
-
-
-const user = auth.currentUser;
-
-
-
-if(!user){
-
-return;
-
-}
-
-
-
-
-
-
-
-const q = query(
-
-collection(
-db,
-"rides"
-),
-
-
-where(
-"riderId",
-"==",
-user.uid
-),
-
-
-where(
-"status",
-"==",
-"completed"
-)
-
-
-);
-
-
-
-
-
-
-
-
-
-onSnapshot(q,(snapshot)=>{
-
-
-
-let total=0;
-
-let today=0;
-
-let count=0;
-
-
+if(transactionBox)
 
 transactionBox.innerHTML="";
 
 
 
 
-const currentDate =
-
-new Date()
-.toDateString();
 
 
 
+snapshot.forEach((child)=>{
+
+
+
+const ride = child.val();
 
 
 
 
-snapshot.forEach(doc=>{
 
 
+if(
 
-const ride = doc.data();
+ride.riderId === riderId
+
+&&
+
+ride.status==="completed"
+
+){
 
 
 
@@ -171,33 +146,54 @@ count++;
 
 
 
-let fare =
 
-Number(
+total += Number(
 
-ride.fare
-.replace("₹","")
+ride.fare || 0
 
 );
 
 
 
-total += fare;
+
+
+
+let date =
+
+new Date(
+
+ride.createdAt
+
+);
+
+
+
+
+
+
+let now =
+
+new Date();
+
+
+
 
 
 
 if(
 
-ride.completedAt &&
-
-ride.completedAt.toDate()
-.toDateString()
-===currentDate
+date.toDateString() === now.toDateString()
 
 ){
 
 
-today += fare;
+
+today += Number(
+
+ride.fare || 0
+
+);
+
 
 
 }
@@ -207,28 +203,70 @@ today += fare;
 
 
 
-transactionBox.innerHTML +=
+
+if(transactionBox){
 
 
 
-`
-
-<div class="transaction">
+transactionBox.innerHTML += `
 
 
-🏍 ${ride.service}
+
+<div class="booking-card">
 
 
-<br>
+<h3>
+
+${ride.service}
+
+</h3>
 
 
-💰 ₹${fare}
+
+<p>
+
+${ride.pickup}
+
+➡️
+
+${ride.drop}
+
+</p>
+
+
+
+<h3>
+
+₹${ride.fare}
+
+</h3>
+
+
+
+<small>
+
+${date.toLocaleString()}
+
+</small>
 
 
 </div>
 
 
+
 `;
+
+
+
+}
+
+
+
+
+
+}
+
+
 
 
 
@@ -240,20 +278,23 @@ transactionBox.innerHTML +=
 
 
 
-
-totalBox.innerHTML =
+document.getElementById("totalEarning").innerHTML =
 
 "₹"+total;
 
 
 
-todayBox.innerHTML =
+
+
+document.getElementById("todayEarning").innerHTML =
 
 "₹"+today;
 
 
 
-ridesBox.innerHTML =
+
+
+document.getElementById("rideCount").innerHTML =
 
 count;
 
@@ -261,39 +302,12 @@ count;
 
 
 
-
-
-if(count===0){
-
-
-transactionBox.innerHTML=
-
-"No transactions yet";
-
-
 }
 
 
 
-
-});
+);
 
 
 
 }
-
-
-
-
-
-
-
-
-
-auth.onAuthStateChanged(()=>{
-
-
-loadWallet();
-
-
-});
