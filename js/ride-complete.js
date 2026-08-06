@@ -10,7 +10,8 @@ import {
 
 doc,
 updateDoc,
-serverTimestamp
+serverTimestamp,
+getDoc
 
 }
 
@@ -27,9 +28,30 @@ export async function completeRide(rideId){
 try{
 
 
+const rideRef = doc(db,"rides",rideId);
+
+
+
+const snap = await getDoc(rideRef);
+
+
+
+if(!snap.exists()){
+
+return false;
+
+}
+
+
+
+const data = snap.data();
+
+
+
+
 await updateDoc(
 
-doc(db,"rides",rideId),
+rideRef,
 
 {
 
@@ -40,12 +62,45 @@ status:"Completed",
 paymentStatus:"Pending",
 
 
-completedAt:serverTimestamp()
+completedAt:serverTimestamp(),
+
+
+earning:data.fare || 0
 
 
 }
 
 );
+
+
+
+
+
+// Rider offline
+
+if(data.riderId){
+
+
+await updateDoc(
+
+doc(db,"riderLocations",data.riderId),
+
+{
+
+
+status:"Offline",
+
+updatedAt:serverTimestamp()
+
+
+}
+
+);
+
+
+}
+
+
 
 
 
@@ -59,8 +114,11 @@ catch(error){
 
 
 console.log(
+
 "Complete Ride Error:",
+
 error
+
 );
 
 
