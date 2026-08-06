@@ -10,51 +10,112 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+text-align:center;
+font-size:24px;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+.box{
+
+margin:20px;
+background:#111;
+padding:25px;
+border-radius:20px;
+text-align:center;
+
+}
+
+
+
+.status{
+
+font-size:22px;
+color:#FFD600;
+margin:20px 0;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:15px;
+border:none;
+border-radius:12px;
+background:#FFD600;
+font-weight:bold;
+
+}
+
+
+</style>
+
 </head>
 
 
 <body>
 
 
+
 <div class="header">
 
-🚕 Ride Status
+RIDER<span>X</span>
 
 </div>
 
 
 
-<div class="container">
+
+<div class="box">
 
 
-<div class="card">
+<h2>
 
-
-<h2 id="status">
-
-Loading...
+Your Ride
 
 </h2>
 
 
-<p id="fare">
 
-Fare:-
+<div id="status" class="status">
+
+Searching Rider...
+
+</div>
+
+
+
+<p id="details">
+
+Please wait
 
 </p>
 
 
-<p id="rider">
 
-Rider:-
+<button id="trackBtn" style="display:none">
 
-</p>
-
-
-
-<button onclick="openTracking()">
-
-🗺️ Track Rider
+View Live Tracking
 
 </button>
 
@@ -63,8 +124,6 @@ Rider:-
 </div>
 
 
-</div>
-
 
 
 
@@ -72,20 +131,17 @@ Rider:-
 <script type="module">
 
 
-import {db} from "../firebase/config.js";
+import { db } from "../firebase/config.js";
 
 
 import {
 
 doc,
-getDoc,
-onSnapshot
+getDoc
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
@@ -96,16 +152,10 @@ let rideId = localStorage.getItem("rideId");
 
 
 
-
-function loadStatus(){
-
+async function checkRide(){
 
 
 if(!rideId){
-
-document.getElementById("status").innerHTML=
-
-"No Ride Found";
 
 return;
 
@@ -113,93 +163,100 @@ return;
 
 
 
-onSnapshot(
+const snap = await getDoc(
 
-doc(db,"rides",rideId),
-
-async(snapshot)=>{
-
-
-
-let data=snapshot.data();
-
-
-
-if(!data)return;
-
-
-
-document.getElementById("status").innerHTML=
-
-"Status: "+data.status;
-
-
-
-document.getElementById("fare").innerHTML=
-
-"Fare: "+data.fare;
-
-
-
-if(data.riderId){
-
-
-let rider=await getDoc(
-
-doc(db,"users",data.riderId)
+doc(db,"rides",rideId)
 
 );
 
 
 
-if(rider.exists()){
+if(!snap.exists()){
 
-
-document.getElementById("rider").innerHTML=
-
-"Rider: "+
-
-(rider.data().name || "Rider");
-
-
-}
-
+return;
 
 }
 
 
 
+
+let data=snap.data();
+
+
+
+let status=document.getElementById("status");
+
+let details=document.getElementById("details");
+
+let btn=document.getElementById("trackBtn");
+
+
+
+
+
+if(data.status==="Pending"){
+
+
+status.innerHTML="🔎 Searching Rider...";
+
+
+details.innerHTML="Nearby riders are checking your ride";
+
+
 }
 
+
+
+if(data.status==="Accepted"){
+
+
+status.innerHTML="✅ Rider Found";
+
+
+details.innerHTML=
+
+"Your rider is coming";
+
+
+btn.style.display="block";
+
+
+
+btn.onclick=()=>{
+
+
+window.location.href="live-tracking.html";
+
+
+};
+
+
+}
+
+
+
+}
+
+
+
+
+checkRide();
+
+
+
+setInterval(
+
+checkRide,
+
+5000
 
 );
-
-
-
-}
-
-
-
-
-
-
-window.openTracking=function(){
-
-
-window.location.href=
-
-"live-tracking.html";
-
-
-}
-
-
-
-loadStatus();
 
 
 
 </script>
+
+
 
 
 </body>
