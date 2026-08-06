@@ -1,7 +1,7 @@
 // ==========================================
 // RiderX Booking Engine V6
 // Ride + Parcel + Food Booking
-// Fare + Payment + OTP + Firebase
+// Map + Fare + Firebase
 // ==========================================
 
 
@@ -34,8 +34,28 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
-const service =
-document.getElementById("service");
+
+let currentUser=null;
+
+let map;
+
+let pickupCoords=null;
+
+let dropCoords=null;
+
+let pickupMarker=null;
+
+let dropMarker=null;
+
+let distance=0;
+
+let fare=0;
+
+let selectedService="Bike";
+
+
+
+
 
 
 const pickup =
@@ -67,67 +87,6 @@ document.getElementById("paymentMethod");
 
 
 
-const rideOption =
-document.getElementById("rideOption");
-
-
-const parcelOption =
-document.getElementById("parcelOption");
-
-
-
-
-
-
-
-let currentUser=null;
-
-
-let bookingMode="ride";
-
-
-let map;
-
-
-let pickupCoords=null;
-
-let dropCoords=null;
-
-
-let pickupMarker=null;
-
-let dropMarker=null;
-
-
-let distance=0;
-
-let fare=0;
-
-
-
-
-
-
-let fareSettings={
-
-base:50,
-
-bike:8,
-
-taxi:12,
-
-cab:15,
-
-parcel:80,
-
-food:60,
-
-night:3
-
-};
-
-
-
 
 
 
@@ -136,79 +95,23 @@ night:3
 
 // AUTH
 
+
 onAuthStateChanged(auth,(user)=>{
 
 
-if(user){
-
-currentUser=user;
-
-}
-
-else{
+if(!user){
 
 location.href="../auth/login.html";
 
+return;
+
 }
+
+
+currentUser=user;
 
 
 });
-
-
-
-
-
-
-
-
-
-// FARE SETTINGS
-
-
-async function loadFare(){
-
-
-try{
-
-
-const snap=
-
-await getDoc(
-
-doc(db,"settings","fare")
-
-);
-
-
-
-if(snap.exists()){
-
-
-fareSettings={
-
-...fareSettings,
-
-...snap.data()
-
-};
-
-
-}
-
-
-}
-
-catch(e){
-
-console.log(e);
-
-}
-
-
-}
-
-
-loadFare();
 
 
 
@@ -265,7 +168,7 @@ e.latlng.lng
 
 }
 
-else if(!dropCoords){
+else{
 
 
 setDrop(
@@ -283,7 +186,6 @@ calculateFare();
 }
 
 
-
 });
 
 
@@ -297,10 +199,64 @@ calculateFare();
 
 
 
+// SERVICE SELECT
+
+
+document.querySelectorAll(".serviceBtn")
+
+.forEach(btn=>{
+
+
+btn.onclick=()=>{
+
+
+selectedService=
+
+btn.dataset.service;
+
+
+
+document.querySelectorAll(".serviceBtn")
+
+.forEach(b=>{
+
+
+b.style.opacity="0.5";
+
+
+});
+
+
+btn.style.opacity="1";
+
+
+
+calculateFare();
+
+
+
+};
+
+
+
+});
+
+
+
+
+
+
+
+
+
+// PICKUP
+
+
 function setPickup(lat,lng){
 
 
 pickupCoords={lat,lng};
+
 
 
 pickup.value=
@@ -323,8 +279,13 @@ L.marker(
 
 )
 
-.addTo(map);
+.addTo(map)
 
+.bindPopup(
+
+"📍 Pickup"
+
+);
 
 
 }
@@ -336,10 +297,15 @@ L.marker(
 
 
 
+
+// DROP
+
+
 function setDrop(lat,lng){
 
 
 dropCoords={lat,lng};
+
 
 
 drop.value=
@@ -362,8 +328,13 @@ L.marker(
 
 )
 
-.addTo(map);
+.addTo(map)
 
+.bindPopup(
+
+"🏁 Drop"
+
+);
 
 
 }
@@ -376,7 +347,7 @@ L.marker(
 
 
 
-// CURRENT LOCATION
+// LOCATION
 
 
 locationBtn.onclick=()=>{
@@ -413,8 +384,19 @@ pos.coords.longitude
 
 
 
-}
+},
 
+()=>{
+
+
+alert(
+
+"Location permission allow karo"
+
+);
+
+
+}
 
 );
 
@@ -429,69 +411,15 @@ pos.coords.longitude
 
 
 
-// SERVICE MODE
-
-
-if(rideOption){
-
-
-rideOption.onclick=()=>{
-
-
-bookingMode="ride";
-
-
-bookBtn.innerHTML="Book Ride";
-
-
-};
-
-
-}
-
-
-
-if(parcelOption){
-
-
-parcelOption.onclick=()=>{
-
-
-bookingMode="parcel";
-
-
-service.value="Parcel";
-
-
-bookBtn.innerHTML="Book Parcel";
-
-
-};
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-// FARE CALCULATION
+// FARE
 
 
 function calculateFare(){
 
 
-
 if(!pickupCoords || !dropCoords)
 
 return;
-
 
 
 
@@ -519,7 +447,6 @@ dropCoords.lng
 
 
 
-
 distance=
 
 Number(
@@ -542,66 +469,32 @@ let rate=0;
 
 
 
-switch(service.value){
+
+if(selectedService==="Bike")
+
+rate=8;
 
 
-case "Bike":
+if(selectedService==="Taxi")
 
-rate=fareSettings.bike;
-
-break;
+rate=12;
 
 
+if(selectedService==="Cab")
 
-case "Taxi":
-
-rate=fareSettings.taxi;
-
-break;
+rate=15;
 
 
+if(selectedService==="Parcel")
 
-case "Cab":
-
-rate=fareSettings.cab;
-
-break;
+rate=80;
 
 
+if(selectedService==="Food")
 
-case "Parcel":
-
-rate=fareSettings.parcel;
-
-break;
+rate=60;
 
 
-
-case "Food":
-
-rate=fareSettings.food;
-
-break;
-
-
-}
-
-
-
-
-
-
-let hour=
-
-new Date().getHours();
-
-
-
-if(hour>=22 || hour<6){
-
-rate+=Number(fareSettings.night);
-
-}
 
 
 
@@ -609,9 +502,9 @@ rate+=Number(fareSettings.night);
 
 if(
 
-service.value==="Parcel" ||
+selectedService==="Parcel" ||
 
-service.value==="Food"
+selectedService==="Food"
 
 ){
 
@@ -626,13 +519,10 @@ else{
 
 fare=
 
-fareSettings.base+
-
-(distance*rate);
+50+(distance*rate);
 
 
 }
-
 
 
 
@@ -643,38 +533,6 @@ fareBox.innerHTML=
 Math.round(fare);
 
 
-
-}
-
-
-
-service.onchange=
-
-calculateFare;
-
-
-
-
-
-
-
-
-
-// OTP
-
-
-function generateOTP(){
-
-
-return Math.floor(
-
-1000+
-
-Math.random()*9000
-
-).toString();
-
-
 }
 
 
@@ -685,33 +543,30 @@ Math.random()*9000
 
 
 
-// BOOKING
+// BOOK
 
 
 bookBtn.onclick=async()=>{
 
 
-
 if(!currentUser)
 
-return alert("Login Required");
+return alert(
 
+"Login Required"
 
+);
 
 
 
 if(!pickupCoords || !dropCoords)
 
-return alert("Pickup Drop select karo");
+return alert(
 
+"Pickup Drop select karo"
 
+);
 
-
-
-
-let otp=
-
-generateOTP();
 
 
 
@@ -720,9 +575,8 @@ generateOTP();
 try{
 
 
-const ride=
 
-await addDoc(
+let ride = await addDoc(
 
 collection(db,"rides"),
 
@@ -735,15 +589,9 @@ currentUser.uid,
 
 
 
-bookingType:
+service:
 
-bookingMode,
-
-
-
-serviceType:
-
-service.value,
+selectedService,
 
 
 
@@ -761,6 +609,8 @@ drop.value,
 
 pickupCoords,
 
+
+
 dropCoords,
 
 
@@ -775,19 +625,9 @@ Math.round(fare),
 
 
 
-otp,
-
-
-
 paymentMethod:
 
 paymentMethod.value,
-
-
-
-paymentStatus:
-
-"pending",
 
 
 
@@ -805,10 +645,7 @@ serverTimestamp()
 
 }
 
-
-
 );
-
 
 
 
@@ -836,7 +673,9 @@ rideId:ride.id,
 
 location:pickupCoords,
 
-updatedAt:serverTimestamp()
+updatedAt:
+
+serverTimestamp()
 
 }
 
@@ -859,26 +698,17 @@ ride.id
 
 
 
-
 alert(
 
-bookingMode==="ride"
-
-?
-
-"Ride Searching 🚕"
-
-:
-
-"Parcel Searching 📦"
+"Booking Created ✅"
 
 );
 
 
 
+location.href="Home.html";
 
 
-location.href="map.html";
 
 
 
@@ -887,7 +717,11 @@ location.href="map.html";
 catch(error){
 
 
-alert(error.message);
+alert(
+
+error.message
+
+);
 
 
 }
@@ -895,8 +729,6 @@ alert(error.message);
 
 
 };
-
-
 
 
 
