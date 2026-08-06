@@ -6,24 +6,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Start Trip</title>
+<title>RiderX Trip</title>
 
 
 <style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
 
 body{
 
 background:#000;
 color:white;
-font-family:Arial;
+
+height:100vh;
 
 display:flex;
 justify-content:center;
 align-items:center;
 
-height:100vh;
-
 }
+
 
 
 .box{
@@ -79,7 +87,7 @@ width:100%;
 
 padding:15px;
 
-margin-top:20px;
+margin-top:15px;
 
 background:#FFD600;
 
@@ -93,17 +101,33 @@ font-weight:bold;
 
 
 
+.complete{
+
+background:white;
+
+}
+
+
+#completeBtn{
+
+display:none;
+
+}
+
+
+
 #msg{
 
 margin-top:15px;
 
 }
 
+
+
 </style>
 
 
 </head>
-
 
 
 <body>
@@ -120,8 +144,7 @@ RIDER<span>X</span>
 </h1>
 
 
-
-<h2>
+<h2 id="title">
 
 Enter Customer OTP
 
@@ -129,7 +152,9 @@ Enter Customer OTP
 
 
 
-<input id="otpInput" placeholder="4 Digit OTP">
+<input 
+id="otpInput"
+placeholder="4 Digit OTP">
 
 
 
@@ -141,11 +166,20 @@ Start Ride
 
 
 
+<button id="completeBtn" class="complete">
+
+Complete Ride
+
+</button>
+
+
+
 <p id="msg"></p>
 
 
 
 </div>
+
 
 
 
@@ -169,32 +203,57 @@ serverTimestamp
 from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
+import {
+
+completeRide
+
+}
+
+from "../js/ride-complete.js";
+
+
 
 
 
 let rideId =
+
 localStorage.getItem("rideId");
 
 
 
-const btn =
+
+const verifyBtn =
 document.getElementById("verifyBtn");
 
 
+const completeBtn =
+document.getElementById("completeBtn");
 
-btn.onclick=async()=>{
+
+const msg =
+document.getElementById("msg");
 
 
-let enteredOtp =
+
+
+
+verifyBtn.onclick=async()=>{
+
+
+let otp =
 document.getElementById("otpInput").value;
 
 
 
-if(!enteredOtp){
+
+if(!otp){
+
+msg.innerHTML="OTP enter karo";
 
 return;
 
 }
+
 
 
 
@@ -210,20 +269,22 @@ await getDoc(rideRef);
 
 if(!snap.exists()){
 
+msg.innerHTML="Ride not found";
+
 return;
 
 }
 
 
 
-let data =
-snap.data();
+
+let data=snap.data();
 
 
 
 
 
-if(String(data.otp) === String(enteredOtp)){
+if(String(data.otp) === String(otp)){
 
 
 
@@ -246,19 +307,20 @@ startedAt:serverTimestamp()
 
 
 
-document.getElementById("msg").innerHTML=
-
-"Ride Started ✅";
+msg.innerHTML="Ride Started ✅";
 
 
 
-setTimeout(()=>{
+verifyBtn.style.display="none";
+
+document.getElementById("otpInput").style.display="none";
 
 
-location.href="live.html";
+document.getElementById("title").innerHTML=
+"Trip Running 🏍️";
 
 
-},1500);
+completeBtn.style.display="block";
 
 
 
@@ -267,13 +329,46 @@ location.href="live.html";
 else{
 
 
-document.getElementById("msg").innerHTML=
-
-"Wrong OTP ❌";
+msg.innerHTML="Wrong OTP ❌";
 
 
 }
 
+
+
+};
+
+
+
+
+
+
+
+completeBtn.onclick=async()=>{
+
+
+let done = await completeRide(rideId);
+
+
+
+if(done){
+
+
+msg.innerHTML="Ride Completed ✅";
+
+
+
+setTimeout(()=>{
+
+
+window.location.href="dashboard.html";
+
+
+},1500);
+
+
+
+}
 
 
 };
