@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>RiderX Customer Home</title>
+
+
+<link rel="manifest" href="../manifest.json">
+
+
+<meta name="theme-color" content="#FFD600">
+
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+</head>
+
+
+<body>
+
+
+<div class="topbar">
+
+
+<h2>
+RiderX
+</h2>
+
+
+<div>
+
+<a href="Profile.html">
+👤
+</a>
+
+<a href="Settings.html">
+⚙️
+</a>
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="container">
+
+
+
+
+
+
+
+<!-- INSTALL -->
+
+
+<div class="card">
+
+
+<button id="installApp" class="btn">
+
+📲 Install RiderX App
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- LOCATION -->
+
+
+<div class="card">
+
+
+<h3>
+📍 Your Location
+</h3>
+
+
+<p id="currentLocation">
+
+Getting location...
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- SERVICES -->
+
+
+<div class="card">
+
+
+<h3>
+Choose Service
+</h3>
+
+
+
+
+
+<button 
+
+class="btn"
+
+onclick="location.href='Booking.html?service=Bike'">
+
+🏍 Bike
+
+</button>
+
+
+
+
+
+<button 
+
+class="btn"
+
+onclick="location.href='Booking.html?service=Taxi'">
+
+🚕 Taxi
+
+</button>
+
+
+
+
+
+<button 
+
+class="btn"
+
+onclick="location.href='Booking.html?service=Cab'">
+
+🚗 Cab
+
+</button>
+
+
+
+
+
+<button
+
+class="btn"
+
+onclick="location.href='Booking.html?service=Parcel'">
+
+📦 Parcel
+
+</button>
+
+
+
+
+
+<button
+
+class="btn"
+
+onclick="location.href='Booking.html?service=Food'">
+
+🍔 Food
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- QUICK -->
+
+
+<div class="card">
+
+
+<h3>
+Quick Access
+</h3>
+
+
+
+<button class="btn-outline">
+
+💳 Wallet
+
+</button>
+
+
+
+<button class="btn-outline">
+
+📜 Ride History
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="bottom-nav">
+
+
+<a class="active">
+
+🏠
+
+<br>
+
+Home
+
+</a>
+
+
+
+<a href="Booking.html">
+
+🏍
+
+<br>
+
+Book
+
+</a>
+
+
+
+<a href="Profile.html">
+
+👤
+
+<br>
+
+Profile
+
+</a>
+
+
+
+<a href="Settings.html">
+
+⚙️
+
+<br>
+
+Settings
+
+</a>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {
+
+auth
+
+}
+
+from "../firebase/config.js";
+
+
+
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+
+
+
+onAuthStateChanged(auth,(user)=>{
+
+
+if(!user){
+
+location.href="../auth/login.html";
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+// Location
+
+
+navigator.geolocation.getCurrentPosition(
+
+(pos)=>{
+
+
+document.getElementById(
+
+"currentLocation"
+
+)
+
+.innerHTML=
+
+pos.coords.latitude.toFixed(5)
+
++
+
+", "
+
++
+
+pos.coords.longitude.toFixed(5);
+
+
+
+},
+
+()=>{
+
+
+document.getElementById(
+
+"currentLocation"
+
+)
+
+.innerHTML=
+
+"Location permission required";
+
+
+}
+
+);
+
+
+
+
+
+
+
+// Install App
+
+
+let deferredPrompt;
+
+
+window.addEventListener(
+
+"beforeinstallprompt",
+
+(e)=>{
+
+
+e.preventDefault();
+
+
+deferredPrompt=e;
+
+
+
+document.getElementById(
+
+"installApp"
+
+)
+
+.style.display="flex";
+
+
+
+});
+
+
+
+
+
+document.getElementById(
+
+"installApp"
+
+)
+
+.onclick=async()=>{
+
+
+if(deferredPrompt){
+
+
+deferredPrompt.prompt();
+
+
+deferredPrompt=null;
+
+
+}
+
+
+};
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
