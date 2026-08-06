@@ -1,60 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin - Rides</title>
+<title>RiderX Admin Rides</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
 
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111;
-    color:white;
-}
+.card{
 
-.header{
-    background:#ffcc00;
-    color:#000;
-    padding:20px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
-}
-
-.container{
-    padding:20px;
-}
-
-.ride-card{
-
-    background:#1d1d1d;
-    padding:15px;
-    margin:15px 0;
-    border-radius:12px;
-    border:1px solid #333;
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin:15px 0;
 
 }
 
-.ride-card h3{
-    color:#ffcc00;
-}
 
+button{
 
-.back{
-
-display:inline-block;
-margin-top:20px;
+width:100%;
+padding:12px;
+margin-top:10px;
 background:#ffcc00;
-color:#000;
-padding:12px 20px;
+border:none;
 border-radius:10px;
-text-decoration:none;
 font-weight:bold;
 
 }
@@ -68,139 +44,209 @@ font-weight:bold;
 
 
 <div class="header">
-🚦 RiderX All Rides
+
+🚕 Manage Rides
+
 </div>
+
 
 
 <div class="container">
 
 
-<h2>Ride History</h2>
+<div id="rides">
+
+Loading...
+
+</div>
 
 
-<div id="rideList">
-Loading rides...
 </div>
 
 
-<a class="back" href="dashboard.html">
-⬅ Back Dashboard
-</a>
-
-
-</div>
 
 
 
 <script type="module">
 
-import { db } from "../firebase/config.js";
+
+import {db} from "../firebase/config.js";
 
 
 import {
 
 collection,
-getDocs
+getDocs,
+doc,
+updateDoc
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
 
 
 
 async function loadRides(){
 
 
-let box=document.getElementById("rideList");
+
+let snap = await getDocs(
+
+collection(db,"rides")
+
+);
 
 
-try{
 
-
-const snapshot=await getDocs(collection(db,"rides"));
+let box=document.getElementById("rides");
 
 
 box.innerHTML="";
 
 
-if(snapshot.empty){
 
-box.innerHTML="<p>No rides found</p>";
-return;
-
-}
+snap.forEach((ride)=>{
 
 
+let data=ride.data();
 
-snapshot.forEach((doc)=>{
-
-
-let data=doc.data();
 
 
 box.innerHTML += `
 
-<div class="ride-card">
+
+<div class="card">
+
 
 <h3>
-🚕 Ride ID: ${doc.id}
+
+${data.service || "Ride"}
+
 </h3>
 
 
+
 <p>
-👤 Customer: ${data.customer || "N/A"}
+
+💰 Fare: ${data.fare || "-"}
+
 </p>
 
 
+
 <p>
-🏍 Rider: ${data.rider || "Not Assigned"}
+
+📍 Pickup:
+
+${data.pickupLat},
+
+${data.pickupLng}
+
 </p>
 
 
+
 <p>
-📍 Pickup: ${data.pickup || "N/A"}
+
+🏁 Drop:
+
+${data.dropLat},
+
+${data.dropLng}
+
 </p>
 
 
+
 <p>
-📍 Drop: ${data.drop || "N/A"}
+
+Status:
+
+${data.status}
+
 </p>
 
 
+
 <p>
-💰 Fare: ₹${data.fare || "0"}
+
+Rider:
+
+${data.riderId || "Not Assigned"}
+
 </p>
 
 
-<p>
-Status: ${data.status || "Pending"}
-</p>
+
+<button onclick="cancelRide('${ride.id}')">
+
+❌ Cancel Ride
+
+</button>
 
 
 </div>
 
+
 `;
+
+
 
 });
 
 
 }
 
-catch(error){
 
-box.innerHTML="Error loading rides";
-console.log(error);
+
+
+
+
+
+window.cancelRide=async function(id){
+
+
+
+await updateDoc(
+
+doc(db,"rides",id),
+
+{
+
+status:"Cancelled"
+
+}
+
+);
+
+
+
+alert("Ride Cancelled ❌");
+
+
+loadRides();
+
+
 
 }
 
 
-}
 
 
 
 loadRides();
 
 
+
 </script>
 
 
 </body>
+
 </html>
