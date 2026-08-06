@@ -1,169 +1,118 @@
-// =================================
+// =====================================
 // RiderX Authentication System
-// =================================
+// =====================================
 
 
-import { auth, db } from "../firebase/config.js";
-
-
-import {
-
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-signOut
-
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { auth } from "../firebase/config.js";
 
 
 import {
 
-doc,
-setDoc,
-getDoc
+signInWithEmailAndPassword
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
 
-
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
-// Register User
-
-export async function registerUser(
-name,
-email,
-password,
-role
-){
-
-try{
 
 
-const userCredential =
-await createUserWithEmailAndPassword(
-auth,
-email,
-password
+
+const loginBtn = 
+document.getElementById("loginBtn");
+
+
+
+const emailBox =
+document.getElementById("email");
+
+
+const passwordBox =
+document.getElementById("password");
+
+
+
+
+
+
+loginBtn.onclick = async ()=>{
+
+
+let email = emailBox.value.trim();
+
+let password = passwordBox.value.trim();
+
+
+
+if(!email || !password){
+
+alert(
+"Email aur password enter karo"
 );
 
-
-
-await setDoc(
-
-doc(
-db,
-"users",
-userCredential.user.uid
-),
-
-{
-
-name:name,
-
-email:email,
-
-role:role,
-
-createdAt:new Date()
-
-}
-
-);
-
-
-
-return true;
-
-
-}
-
-catch(error){
-
-console.log(error);
-
-return false;
-
-}
-
+return;
 
 }
 
 
 
-
-
-// Login User
-
-
-export async function loginUser(
-email,
-password
-){
 
 
 try{
 
 
-const userCredential =
 await signInWithEmailAndPassword(
+
 auth,
+
 email,
+
 password
-);
-
-
-
-const userDoc =
-await getDoc(
-
-doc(
-db,
-"users",
-userCredential.user.uid
-)
 
 );
 
 
 
-if(userDoc.exists()){
+
+let role = localStorage.getItem("role");
 
 
-return userDoc.data();
+
+
+if(role==="rider"){
+
+
+window.location.href="../rider/dashboard.html";
+
+
+}
+
+else{
+
+
+window.location.href="../customer/dashboard.html";
 
 
 }
 
 
-return null;
+
 
 
 }
 
 catch(error){
 
-console.log(error);
 
-return null;
+alert(
 
-}
+"Login Failed: "+error.message
 
-
-}
-
-
-
-
-
-// Logout
-
-
-export async function logoutUser(){
-
-
-await signOut(auth);
-
-
-window.location.href="../index.html";
+);
 
 
 }
+
+
+
+};
