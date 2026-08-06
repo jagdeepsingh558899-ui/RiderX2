@@ -7,78 +7,57 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
-<title>RiderX Rides</title>
-
-
-<link rel="icon" href="../assets/logo.png">
-
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<title>RiderX - Rider Rides</title>
 
 
 <link rel="stylesheet" href="../css/Style.css">
 
-<link rel="stylesheet" href="../css/Dashboard.css">
-
-<link rel="stylesheet" href="../css/Responsive.css">
-
-<link rel="stylesheet" href="../css/Animation.css">
-
-
 </head>
-
 
 
 <body>
 
 
-<nav class="navbar">
+<div class="dashboard-wrapper">
 
 
-<div class="logo">
 
-<img src="../assets/logo.png">
+<div class="card">
 
-<span>RiderX Rider</span>
+
+<h2>
+Rider Status
+</h2>
+
+
+<p id="riderStatus">
+Offline
+</p>
+
+
+<button 
+id="onlineBtn"
+class="btn">
+
+Go Online
+
+</button>
+
 
 </div>
 
 
-<div class="nav-links">
-
-<a href="home.html">Home</a>
-
-<a href="profile.html">Profile</a>
-
-</div>
-
-
-</nav>
 
 
 
 
 
-
-<div class="dashboard-wrapper page">
-
+<div class="card">
 
 
-<div class="ride-request">
-
-
-
-<h1>
-
-🚀 Available Rides
-
-</h1>
-
-
-
-<br>
-
+<h2>
+New Ride Requests
+</h2>
 
 
 
@@ -86,15 +65,17 @@
 
 
 <p>
-
-Searching new rides...
-
+Waiting for rides...
 </p>
 
 
 </div>
 
 
+</div>
+
+
+
 
 
 </div>
@@ -104,86 +85,276 @@ Searching new rides...
 
 
 
-
-<br>
-
+<script type="module">
 
 
+import { database } 
+from "../firebase/Firebase-config.js";
 
 
-<!-- Live Tracking Map -->
+import {
 
+ref,
+onValue,
+update
+
+}
+
+from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+
+
+
+let riderOnline=false;
+
+
+const riderId =
+localStorage.getItem("userId");
+
+
+
+
+
+const statusText =
+document.getElementById("riderStatus");
+
+
+const onlineBtn =
+document.getElementById("onlineBtn");
+
+
+const rideList =
+document.getElementById("rideList");
+
+
+
+
+
+
+
+// Online Toggle
+
+
+onlineBtn.onclick = ()=>{
+
+
+riderOnline = !riderOnline;
+
+
+
+if(riderOnline){
+
+
+statusText.innerHTML="Online";
+
+
+onlineBtn.innerHTML="Go Offline";
+
+
+
+update(
+
+ref(database,
+"riders/"+riderId),
+
+{
+
+online:true,
+
+status:"available"
+
+}
+
+
+);
+
+
+
+}
+
+else{
+
+
+statusText.innerHTML="Offline";
+
+
+onlineBtn.innerHTML="Go Online";
+
+
+
+update(
+
+ref(database,
+"riders/"+riderId),
+
+{
+
+online:false,
+
+status:"offline"
+
+}
+
+
+);
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// Listen New Rides
+
+
+const ridesRef =
+ref(database,"rides");
+
+
+
+
+
+onValue(ridesRef,(snapshot)=>{
+
+
+rideList.innerHTML="";
+
+
+
+snapshot.forEach((child)=>{
+
+
+const ride =
+child.val();
+
+
+
+const rideId =
+child.key;
+
+
+
+
+
+if(
+ride.status==="searching_rider"
+&& riderOnline
+){
+
+
+
+rideList.innerHTML += `
 
 <div class="card">
 
 
-<h2>
-
-📍 Live Tracking
-
-</h2>
+<h3>
+New Ride
+</h3>
 
 
-<div id="map" class="map-container"></div>
-
-
-</div>
-
-
-
-
-
-
-<br>
-
-
-
-
-
-<div class="card">
-
-
-<h2>
-
-Ride Status
-
-</h2>
-
-
-<p id="rideStatus">
-
-Waiting for ride...
-
+<p>
+Pickup:
+${ride.pickup.address}
 </p>
 
 
+<p>
+Drop:
+${ride.drop.address}
+</p>
+
+
+<p>
+Fare:
+₹${ride.fare}
+</p>
+
+
+
+<button 
+class="btn"
+onclick="acceptRide('${rideId}')">
+
+Accept
+
+</button>
+
+
 </div>
 
 
+`;
+
+
+
+}
+
+
+
+});
+
+
+});
 
 
 
 
 
-</div>
+
+
+
+// Accept Ride
+
+
+window.acceptRide =
+async function(rideId){
+
+
+await update(
+
+ref(database,
+"rides/"+rideId),
+
+{
+
+
+riderId:riderId,
+
+
+status:"rider_found"
+
+
+}
+
+
+);
+
+
+
+alert(
+"Ride Accepted"
+);
+
+
+}
 
 
 
 
 
-
-
-
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-
-<script type="module" src="../js/RiderRide.js"></script>
-
-<script type="module" src="../js/TrackingMap.js"></script>
-
-<script type="module" src="../js/LiveLocation.js"></script>
-
+</script>
 
 
 </body>
