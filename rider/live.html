@@ -1,75 +1,251 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RiderX Live</title>
 
-<title>Rider Live Trip</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+
+margin:0;
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+padding:20px;
+background:#111;
+border-bottom:2px solid #FFD600;
+text-align:center;
+
+}
+
+
+#map{
+
+height:80vh;
+width:100%;
+
+}
+
+
+button{
+
+width:90%;
+margin:15px 5%;
+padding:15px;
+border:none;
+border-radius:12px;
+background:#FFD600;
+font-weight:bold;
+
+}
+
+
+</style>
+
 
 </head>
+
 
 
 <body>
 
 
-<div class="splash">
+<div class="header">
 
-
-<img src="../assets/logo.png" class="logo">
-
-
-<h1>
-Rider<span>X</span>
-</h1>
-
-
-<h2>
-Live Trip
-</h2>
-
-
-<h3 id="status">
-
-Offline
-
-</h3>
-
-
-
-<button onclick="startTripLocation()">
-
-Start Location 🟢
-
-</button>
-
-
-
-<button onclick="startRide()">
-
-Start Ride
-
-</button>
-
-
-
-<button onclick="completeRide()">
-
-Complete Ride
-
-</button>
-
-
+🏍 Rider Live Location
 
 </div>
 
 
 
-<script type="module" src="../js/trip.js"></script>
+<div id="map"></div>
+
+
+
+<button id="startBtn">
+
+Start Sharing Location
+
+</button>
+
+
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+
+<script type="module">
+
+
+import { auth, db } from "../firebase/config.js";
+
+
+import {
+
+doc,
+setDoc,
+serverTimestamp
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+let map =
+L.map("map").setView(
+
+[30.7333,76.7794],
+
+13
+
+);
+
+
+
+L.tileLayer(
+
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+).addTo(map);
+
+
+
+let marker=null;
+
+
+
+let riderId=null;
+
+
+
+
+auth.onAuthStateChanged((user)=>{
+
+if(user){
+
+riderId=user.uid;
+
+}
+
+});
+
+
+
+
+
+document.getElementById("startBtn").onclick=()=>{
+
+
+navigator.geolocation.watchPosition(
+
+async(position)=>{
+
+
+let lat =
+position.coords.latitude;
+
+
+let lng =
+position.coords.longitude;
+
+
+
+
+
+if(marker){
+
+marker.setLatLng([lat,lng]);
+
+}
+
+else{
+
+
+marker=L.marker([lat,lng])
+
+.addTo(map)
+
+.bindPopup("You");
+
+}
+
+
+
+map.setView(
+
+[lat,lng],
+
+16
+
+);
+
+
+
+
+
+await setDoc(
+
+doc(db,"riderLocations",riderId),
+
+{
+
+
+lat,
+
+lng,
+
+updatedAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+
+
+},
+
+(error)=>{
+
+alert("Location permission allow karo");
+
+},
+
+
+{
+
+enableHighAccuracy:true
+
+}
+
+
+);
+
+
+};
+
+
+
+</script>
+
 
 
 </body>
