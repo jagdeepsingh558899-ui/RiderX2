@@ -6,73 +6,38 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Book Ride</title>
+<title>RiderX Booking</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 
 <style>
 
-body{
-background:#000;
-color:white;
-margin:0;
-font-family:Arial;
-}
+#map{
 
+width:100%;
+height:350px;
+border-radius:20px;
 
-.topbar{
-background:#111;
-padding:15px;
-text-align:center;
-border-bottom:2px solid #FFD600;
-}
-
-
-.topbar h1{
-margin:0;
-}
-
-
-.topbar span{
-color:#FFD600;
 }
 
 
 .container{
+
 padding:15px;
+
 }
 
 
-#map{
-
-width:100%;
-height:400px;
-border-radius:20px;
-margin-bottom:15px;
-}
-
-
-input,
-select,
-button{
+input,select,button{
 
 width:100%;
 padding:14px;
 margin-top:12px;
 border-radius:12px;
 border:none;
-font-size:16px;
-
-}
-
-
-input,select{
-
-background:white;
-color:black;
 
 }
 
@@ -81,16 +46,6 @@ button{
 
 background:#FFD600;
 font-weight:bold;
-
-}
-
-
-.info{
-
-background:#111;
-padding:15px;
-border-radius:15px;
-margin-top:15px;
 
 }
 
@@ -104,11 +59,10 @@ margin-top:15px;
 <body>
 
 
-<div class="topbar">
 
-<h1>
-RIDER<span>X</span>
-</h1>
+<div class="header">
+
+🏍 Book Ride
 
 </div>
 
@@ -117,63 +71,73 @@ RIDER<span>X</span>
 <div class="container">
 
 
-
 <div id="map"></div>
 
 
 
 <select id="service">
 
-<option value="Bike Taxi">🏍 Bike Taxi</option>
+<option value="Bike Taxi">
 
-<option value="Cab">🚕 Cab</option>
+🏍 Bike Taxi
 
-<option value="Parcel">📦 Parcel</option>
+</option>
 
-<option value="Food">🍔 Food</option>
+<option value="Cab">
+
+🚕 Cab
+
+</option>
+
+<option value="Parcel">
+
+📦 Parcel
+
+</option>
+
+<option value="Food">
+
+🍔 Food
+
+</option>
+
 
 </select>
 
 
 
-<input 
-id="pickup"
-placeholder="Pickup Location"
-readonly>
-
-
-
-<input 
-id="drop"
-placeholder="Drop Location"
-readonly>
-
-
-
-<div class="info">
-
-
-<p>
-Distance:
-<span id="distance">0 KM</span>
-</p>
-
-
-<p>
-Fare:
-₹<span id="fare">0</span>
-</p>
-
-
-</div>
-
+<input id="pickup" placeholder="Pickup Location" readonly>
 
 
 <button id="locationBtn">
 
-📍 Use Current Location
+📍 Use My Location
 
 </button>
+
+
+
+<input id="drop" placeholder="Drop Location">
+
+
+
+<p>
+
+Distance:
+
+<span id="distance">-</span>
+
+</p>
+
+
+
+<p>
+
+Fare:
+
+₹<span id="fare">0</span>
+
+</p>
 
 
 
@@ -190,10 +154,125 @@ Confirm Booking
 
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
 <script type="module" src="../js/booking.js"></script>
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+doc,
+getDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+async function loadServices(){
+
+
+
+const snap = await getDoc(
+
+doc(db,"settings","services")
+
+);
+
+
+
+if(!snap.exists()) return;
+
+
+
+let data=snap.data();
+
+
+
+let select=document.getElementById("service");
+
+
+
+[...select.options].forEach(option=>{
+
+
+let name=option.value;
+
+
+
+if(
+
+name==="Bike Taxi" && !data.bike
+
+){
+
+option.style.display="none";
+
+}
+
+
+
+if(
+
+name==="Cab" && !data.cab
+
+){
+
+option.style.display="none";
+
+}
+
+
+
+if(
+
+name==="Parcel" && !data.parcel
+
+){
+
+option.style.display="none";
+
+}
+
+
+
+if(
+
+name==="Food" && !data.food
+
+){
+
+option.style.display="none";
+
+}
+
+
+
+});
+
+
+
+}
+
+
+
+loadServices();
+
+
+
+</script>
+
 
 
 </body>
