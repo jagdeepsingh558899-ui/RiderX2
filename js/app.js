@@ -1,165 +1,103 @@
-// =====================================
-// RiderX App Loader + Auth Redirect
-// =====================================
+// ==========================================
+// RiderX PWA Install System V1
+// Download / Install App Button
+// ==========================================
 
 
-import { auth, db } from "../firebase/config.js";
+let deferredPrompt = null;
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-import {
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+const installBtn = document.getElementById(
+"installApp"
+);
 
 
-// =====================================
-// Splash Screen
-// =====================================
 
-window.addEventListener("load", () => {
 
 
-    const splash = document.getElementById("splash");
+window.addEventListener(
 
+"beforeinstallprompt",
 
-    setTimeout(() => {
+(event)=>{
 
 
-        if(splash){
+event.preventDefault();
 
-            splash.style.opacity="0";
-            splash.style.transition="0.8s";
 
+deferredPrompt = event;
 
-            setTimeout(()=>{
 
-                splash.style.display="none";
 
-                checkUser();
+if(installBtn){
 
 
-            },800);
+installBtn.style.display="block";
 
 
-        }else{
+}
 
-            checkUser();
 
-        }
 
+}
 
+);
 
-    },3000);
 
 
 
-});
 
 
 
 
-// =====================================
-// Firebase User Check
-// =====================================
+if(installBtn){
 
 
-function checkUser(){
+installBtn.onclick=async()=>{
 
 
-onAuthStateChanged(auth, async(user)=>{
 
+if(!deferredPrompt)
 
-    if(user){
+return;
 
 
-        try{
 
+deferredPrompt.prompt();
 
-            const userRef = doc(db,"users",user.uid);
 
-            const userSnap = await getDoc(userRef);
 
+const result =
 
+await deferredPrompt.userChoice;
 
-            if(userSnap.exists()){
 
 
-                const role = userSnap.data().role;
+if(result.outcome==="accepted"){
 
 
+console.log(
 
-                if(role==="admin"){
+"RiderX App Installed"
 
-                    window.location.href =
-                    "admin/dashboard.html";
+);
 
-                }
 
+}
 
-                else if(role==="rider"){
 
-                    window.location.href =
-                    "rider/dashboard.html";
 
-                }
+deferredPrompt=null;
 
 
-                else{
 
-                    window.location.href =
-                    "customer/home.html";
+installBtn.style.display="none";
 
-                }
 
 
-            }
+};
 
-            else{
-
-
-                window.location.href =
-                "auth/role.html";
-
-
-            }
-
-
-
-        }catch(error){
-
-
-            console.log(
-            "Role Check Error:",
-            error
-            );
-
-
-            window.location.href =
-            "auth/login.html";
-
-
-        }
-
-
-
-    }
-
-    else{
-
-
-        window.location.href =
-        "auth/login.html";
-
-
-    }
-
-
-
-});
 
 
 }
@@ -168,87 +106,64 @@ onAuthStateChanged(auth, async(user)=>{
 
 
 
-// =====================================
-// Disable Right Click
-// =====================================
-
-document.addEventListener(
-"contextmenu",
-(e)=>{
-
-e.preventDefault();
-
-});
 
 
 
+// REGISTER SERVICE WORKER
 
-// =====================================
-// Network Status
-// =====================================
+
+if(
+
+"serviceWorker" in navigator
+
+){
+
 
 
 window.addEventListener(
-"online",
-()=>{
 
-console.log(
-"RiderX Internet Connected"
-);
-
-});
-
-
-window.addEventListener(
-"offline",
-()=>{
-
-alert(
-"No Internet Connection"
-);
-
-});
-
-
-
-
-// =====================================
-// Service Worker
-// =====================================
-
-
-if("serviceWorker" in navigator){
-
-
-window.addEventListener(
 "load",
+
 ()=>{
 
 
 navigator.serviceWorker.register(
-"sw.js"
+
+"/sw.js"
+
 )
 
 .then(()=>{
 
+
 console.log(
+
 "RiderX Service Worker Active"
+
 );
+
 
 })
 
+.catch(error=>{
 
-.catch((error)=>{
 
 console.log(
+
 "SW Error",
+
 error
+
 );
 
+
 });
 
 
-});
+
+}
+
+);
 
 
 }
@@ -256,6 +171,9 @@ error
 
 
 
+
 console.log(
-"RiderX App Loaded"
+
+"RiderX App System Loaded"
+
 );
