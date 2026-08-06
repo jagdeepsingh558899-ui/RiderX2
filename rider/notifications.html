@@ -4,12 +4,71 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rider Notifications</title>
+<title>RiderX Notifications</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+font-size:24px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+.notification{
+
+background:#111;
+padding:18px;
+border-radius:15px;
+margin-bottom:15px;
+border-left:4px solid #FFD600;
+
+}
+
+
+.time{
+
+font-size:12px;
+color:#aaa;
+margin-top:8px;
+
+}
+
+
+.empty{
+
+text-align:center;
+margin-top:50px;
+color:#aaa;
+
+}
+
+
+</style>
 
 </head>
 
@@ -17,23 +76,20 @@
 <body>
 
 
-<div class="splash">
+
+<div class="header">
+
+🔔 Notifications
+
+</div>
 
 
-<img src="../assets/logo.png" class="logo">
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+<div class="container">
 
 
-<h2>
-Ride Alerts
-</h2>
-
-
-<div id="notifications">
+<div id="list">
 
 Loading...
 
@@ -44,7 +100,223 @@ Loading...
 
 
 
-<script type="module" src="../js/notification.js"></script>
+
+
+
+
+<script type="module">
+
+
+import {auth,db} from "../firebase/config.js";
+
+
+import {
+
+collection,
+query,
+where,
+getDocs,
+orderBy
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+import {
+
+onAuthStateChanged
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+
+
+
+
+
+
+onAuthStateChanged(auth,(user)=>{
+
+
+if(user){
+
+loadNotifications(user.uid);
+
+}
+
+else{
+
+location.href="../auth/login.html";
+
+}
+
+
+});
+
+
+
+
+
+
+
+
+async function loadNotifications(uid){
+
+
+
+let box=document.getElementById("list");
+
+
+
+const q=query(
+
+collection(db,"notifications"),
+
+where("userId","==",uid),
+
+orderBy("createdAt","desc")
+
+);
+
+
+
+
+try{
+
+
+let snap=await getDocs(q);
+
+
+
+box.innerHTML="";
+
+
+
+
+
+if(snap.empty){
+
+
+box.innerHTML=
+
+`
+
+<div class="empty">
+
+No notifications 🔔
+
+</div>
+
+`;
+
+return;
+
+
+}
+
+
+
+
+
+
+
+snap.forEach((n)=>{
+
+
+let data=n.data();
+
+
+
+box.innerHTML +=
+
+`
+
+<div class="notification">
+
+
+<h3>
+
+${data.title || "RiderX"}
+
+</h3>
+
+
+<p>
+
+${data.message || ""}
+
+</p>
+
+
+<div class="time">
+
+${
+
+data.createdAt ?
+
+new Date(
+data.createdAt.toDate()
+).toLocaleString()
+
+:
+
+""
+
+}
+
+</div>
+
+
+
+</div>
+
+`;
+
+
+
+});
+
+
+
+}
+
+catch(error){
+
+
+console.log(error);
+
+
+box.innerHTML=
+
+`
+
+<div class="empty">
+
+No notifications found
+
+</div>
+
+`;
+
+
+}
+
+
+
+}
+
+
+
+
+
+</script>
 
 
 </body>
