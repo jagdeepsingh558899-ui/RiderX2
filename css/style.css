@@ -1,145 +1,196 @@
-/* =====================================
-   RiderX Professional Theme
-===================================== */
+/* ==========================================
+   RiderX Premium Mobile Theme
+========================================== */
 
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
+-webkit-tap-highlight-color:transparent;
+}
+
+html{
+
+scroll-behavior:smooth;
+
 }
 
 body{
-background:#000;
-color:#fff;
+
+background:#0d0d0d;
+color:#ffffff;
 overflow-x:hidden;
+
 }
 
-/* ================= Splash ================= */
+/* ===============================
+Splash Screen
+=============================== */
 
 .splash{
 
 position:fixed;
+
 top:0;
 left:0;
+
 width:100%;
 height:100vh;
 
+background:#000;
+
 display:flex;
+
 justify-content:center;
 align-items:center;
 
-background:#000;
-z-index:9999;
+z-index:99999;
 
 }
 
 .logo-box{
 
-text-align:center;
+display:flex;
 
-animation:zoomIn 1.2s ease;
+flex-direction:column;
+
+align-items:center;
+
+animation:zoomIn 1s ease;
 
 }
 
-.bike{
+.logo-box img{
 
-font-size:70px;
+width:120px;
+height:120px;
 
-animation:ride 2s infinite;
+object-fit:contain;
+
+animation:logoFloat 2s infinite;
+
+filter:drop-shadow(0 0 20px #FFD600);
 
 }
 
 .logo-box h1{
 
-font-size:52px;
+margin-top:20px;
+
+font-size:42px;
+
 font-weight:bold;
+
 color:#FFD600;
-
-margin-top:10px;
-
-text-shadow:0 0 20px #FFD600;
-
-}
-
-.logo-box span{
-
-color:#fff;
-
-}
-
-.logo-box p{
-
-margin-top:12px;
-font-size:18px;
-color:#bbb;
 
 letter-spacing:2px;
 
 }
 
+.logo-box span{
+
+color:#ffffff;
+
+}
+
+.logo-box p{
+
+margin-top:8px;
+
+color:#bbbbbb;
+
+font-size:16px;
+
+letter-spacing:3px;
+
+}
+
 .loader{
 
-margin:30px auto;
+margin-top:35px;
 
-width:50px;
-height:50px;
+width:55px;
+height:55px;
 
 border-radius:50%;
 
 border:5px solid #333;
+
 border-top:5px solid #FFD600;
 
 animation:spin 1s linear infinite;
 
 }
 
-/* ================= Main App ================= */
+/* ===============================
+Top Bar
+=============================== */
 
 .topbar{
 
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
 height:65px;
 
+background:#111111;
+
 display:flex;
+
 justify-content:center;
 align-items:center;
 
-background:#111;
-
 border-bottom:2px solid #FFD600;
+
+z-index:100;
 
 }
 
 .topbar h1{
 
-color:#FFD600;
+font-size:28px;
 
-font-size:30px;
+color:#FFD600;
 
 }
 
 .topbar span{
 
-color:white;
+color:#ffffff;
 
 }
 
+/* ===============================
+Home
+=============================== */
+
 .home{
 
-padding:30px 20px;
+padding-top:90px;
+
+padding-left:18px;
+
+padding-right:18px;
+
+padding-bottom:90px;
 
 }
 
 .welcome{
 
 text-align:center;
-margin-top:40px;
+
+margin-top:20px;
 
 }
 
 .welcome h2{
 
-font-size:32px;
+font-size:30px;
 
 margin-bottom:10px;
 
@@ -147,34 +198,47 @@ margin-bottom:10px;
 
 .welcome p{
 
-color:#bbb;
+font-size:16px;
+
+color:#bdbdbd;
 
 }
 
+/* ===============================
+Buttons
+=============================== */
+
 .main-buttons{
 
-margin-top:50px;
+margin-top:40px;
 
 display:flex;
+
 flex-direction:column;
 
 gap:18px;
 
 }
 
-button{
+.main-buttons a{
+
+text-decoration:none;
+
+}
+
+.main-buttons button{
 
 width:100%;
 
-padding:16px;
+height:55px;
 
 border:none;
 
-border-radius:15px;
+border-radius:16px;
 
 background:#FFD600;
 
-color:#000;
+color:#111;
 
 font-size:18px;
 
@@ -182,17 +246,222 @@ font-weight:bold;
 
 transition:.3s;
 
+cursor:pointer;
+
 }
 
-button:active{
+.main-buttons button:active{
+
+transform:scale(.96);
+
+}
+/* ===============================
+Cards
+=============================== */
+
+.service-card{
+
+background:#181818;
+
+border:1px solid #2d2d2d;
+
+border-radius:18px;
+
+padding:18px;
+
+margin-bottom:18px;
+
+box-shadow:0 4px 15px rgba(0,0,0,.35);
+
+}
+
+.service-card h3{
+
+margin-bottom:15px;
+
+color:#FFD600;
+
+font-size:20px;
+
+}
+
+.service-card label{
+
+display:block;
+
+margin-bottom:8px;
+
+font-size:15px;
+
+color:#cccccc;
+
+}
+
+.service-card input,
+.service-card select{
+
+width:100%;
+
+height:52px;
+
+margin-top:10px;
+
+padding:0 15px;
+
+border:none;
+
+border-radius:14px;
+
+background:#262626;
+
+color:#ffffff;
+
+font-size:16px;
+
+outline:none;
+
+}
+
+.service-card input::placeholder{
+
+color:#999999;
+
+}
+
+/* ===============================
+Map
+=============================== */
+
+#map{
+
+width:100%;
+
+height:320px;
+
+border-radius:18px;
+
+overflow:hidden;
+
+margin-top:10px;
+
+border:2px solid #FFD600;
+
+}
+
+/* ===============================
+Fare
+=============================== */
+
+#fare{
+
+font-size:28px;
+
+font-weight:bold;
+
+color:#FFD600;
+
+}
+
+/* ===============================
+Booking Button
+=============================== */
+
+#bookBtn{
+
+width:100%;
+
+height:58px;
+
+border:none;
+
+border-radius:18px;
+
+margin-top:20px;
+
+background:#FFD600;
+
+color:#111111;
+
+font-size:18px;
+
+font-weight:bold;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+#bookBtn:active{
 
 transform:scale(.97);
 
 }
 
-/* ================= Animations ================= */
+/* ===============================
+Bottom Navigation
+=============================== */
+
+.bottom-nav{
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+
+width:100%;
+
+height:70px;
+
+background:#111111;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:2px solid #FFD600;
+
+z-index:999;
+
+}
+
+.bottom-nav a{
+
+text-decoration:none;
+
+color:#ffffff;
+
+font-size:13px;
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+gap:5px;
+
+}
+
+.bottom-nav a.active{
+
+color:#FFD600;
+
+}
+/* ===============================
+Animations
+=============================== */
 
 @keyframes spin{
+
+0%{
+
+transform:rotate(0deg);
+
+}
 
 100%{
 
@@ -207,67 +476,81 @@ transform:rotate(360deg);
 0%{
 
 opacity:0;
-transform:scale(.4);
+
+transform:scale(.5);
 
 }
 
 100%{
 
 opacity:1;
+
 transform:scale(1);
 
 }
 
 }
 
-@keyframes ride{
+@keyframes logoFloat{
 
 0%{
 
-transform:translateX(-10px);
+transform:translateY(0px);
 
 }
 
 50%{
 
-transform:translateX(10px);
+transform:translateY(-10px);
 
 }
 
 100%{
 
-transform:translateX(-10px);
+transform:translateY(0px);
 
 }
 
 }
 
-/* ================= Mobile ================= */
+@keyframes fadeUp{
 
-@media(max-width:768px){
+0%{
 
-.logo-box h1{
+opacity:0;
 
-font-size:42px;
-
-}
-
-.bike{
-
-font-size:60px;
+transform:translateY(20px);
 
 }
 
-.welcome h2{
+100%{
 
-font-size:26px;
+opacity:1;
 
-}
-
-button{
-
-font-size:16px;
+transform:translateY(0);
 
 }
 
 }
+
+/* ===============================
+Scrollbar
+=============================== */
+
+::-webkit-scrollbar{
+
+width:6px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+background:#FFD600;
+
+border-radius:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+background:#111111
