@@ -164,7 +164,31 @@ import {getFareSettings} from "../js/fare.js";
 import {getCoordinates} from "../js/geocode.js";
 
 
-import {
+import {let fareRates={};
+
+
+async function loadFareRates(){
+
+
+let snap = await getDoc(
+
+doc(db,"settings","fare")
+
+);
+
+
+
+if(snap.exists()){
+
+fareRates=snap.data();
+
+}
+
+
+}
+
+
+loadFareRates();
 
 collection,
 addDoc,
@@ -428,7 +452,7 @@ document.getElementById("service").value;
 if(type=="Bike Taxi"){
 
 
-finalFare=
+finalFare=fareRates.bike
 
 Number(settings.bikeBase)
 
@@ -442,7 +466,7 @@ distance*Number(settings.bikeKm);
 else if(type=="Cab"){
 
 
-finalFare=
+finalFare=fareRates.cab
 
 Number(settings.cabBase)
 
