@@ -1,6 +1,6 @@
 // ==========================================
-// RiderX Rider Engine V3
-// Online + GPS + Ride Accept + Status Flow
+// RiderX Rider Engine V4
+// GPS + Ride Accept + OTP + Status + Chat
 // ==========================================
 
 
@@ -16,7 +16,8 @@ onSnapshot,
 doc,
 setDoc,
 updateDoc,
-serverTimestamp
+serverTimestamp,
+getDoc
 
 }
 
@@ -65,6 +66,7 @@ const requestFare =
 document.getElementById("requestFare");
 
 
+
 const acceptBtn =
 document.getElementById("acceptBtn");
 
@@ -84,6 +86,24 @@ document.getElementById("rideStatus");
 
 const activeFare =
 document.getElementById("activeFare");
+
+
+
+const otpCard =
+document.getElementById("otpCard");
+
+
+const otpInput =
+document.getElementById("otpInput");
+
+
+const verifyOtpBtn =
+document.getElementById("verifyOtpBtn");
+
+
+const otpStatus =
+document.getElementById("otpStatus");
+
 
 
 const arrivedBtn =
@@ -106,6 +126,10 @@ const chatCustomer =
 document.getElementById("chatCustomer");
 
 
+const navigationBtn =
+document.getElementById("navigationBtn");
+
+
 
 
 
@@ -116,6 +140,10 @@ let online=false;
 let currentRide=null;
 
 let watchId=null;
+
+let otpVerified=false;
+
+
 
 
 
@@ -137,7 +165,6 @@ return;
 }
 
 
-
 currentUser=user;
 
 
@@ -153,7 +180,7 @@ listenRides();
 
 
 
-// ONLINE BUTTON
+// ONLINE
 
 
 onlineBtn.onclick=()=>{
@@ -171,16 +198,12 @@ goOnline();
 
 }
 
-
 };
 
 
 
 
 
-
-
-// ONLINE
 
 
 async function goOnline(){
@@ -192,15 +215,13 @@ online=true;
 onlineBtn.innerHTML="Go Offline";
 
 
-riderStatus.innerHTML="You are Online 🟢";
-
+riderStatus.innerHTML="Online 🟢";
 
 
 startGPS();
 
 
-
-await updateRiderStatus(true);
+await saveStatus(true);
 
 
 }
@@ -210,9 +231,6 @@ await updateRiderStatus(true);
 
 
 
-
-
-// OFFLINE
 
 
 async function goOffline(){
@@ -224,16 +242,19 @@ online=false;
 onlineBtn.innerHTML="Go Online";
 
 
-riderStatus.innerHTML="You are Offline";
+riderStatus.innerHTML="Offline 🔴";
 
 
-if(watchId)
+
+if(watchId){
 
 navigator.geolocation.clearWatch(watchId);
 
+}
 
 
-await updateRiderStatus(false);
+
+await saveStatus(false);
 
 
 }
@@ -245,10 +266,7 @@ await updateRiderStatus(false);
 
 
 
-// SAVE RIDER STATUS
-
-
-async function updateRiderStatus(status){
+async function saveStatus(status){
 
 
 
@@ -265,7 +283,8 @@ currentUser.uid
 online:status,
 
 status:
-status?"available":"offline",
+
+status ? "available":"offline",
 
 updatedAt:
 serverTimestamp()
@@ -289,14 +308,15 @@ merge:true
 
 
 
-// GPS
+
+// LIVE GPS
 
 
 function startGPS(){
 
 
 
-watchId=
+watchId =
 
 navigator.geolocation.watchPosition(
 
@@ -346,7 +366,6 @@ merge:true
 
 },
 
-
 (error)=>{
 
 
@@ -355,16 +374,12 @@ console.log(error);
 
 },
 
-
 {
 
-
-enableHighAccuracy:true,
-
-maximumAge:0
-
+enableHighAccuracy:true
 
 }
+
 
 
 );
@@ -380,7 +395,8 @@ maximumAge:0
 
 
 
-// LISTEN SEARCHING RIDES
+
+// FIND RIDES
 
 
 function listenRides(){
@@ -392,17 +408,21 @@ const q=query(
 collection(db,"rides"),
 
 where(
+
 "status",
+
 "==",
+
 "searching"
+
 )
 
 );
 
 
 
-
 onSnapshot(q,(snapshot)=>{
+
 
 
 snapshot.forEach((item)=>{
@@ -422,15 +442,15 @@ id:item.id,
 
 
 
-showRequest(ride);
+showRequest();
+
+
+});
 
 
 
 });
 
-
-
-});
 
 
 }
@@ -442,10 +462,8 @@ showRequest(ride);
 
 
 
-// SHOW REQUEST
 
-
-function showRequest(ride){
+function showRequest(){
 
 
 
@@ -456,19 +474,25 @@ noRide.style.display="none";
 
 
 requestPickup.innerHTML=
-ride.pickup;
+
+currentRide.pickup;
+
 
 
 requestDrop.innerHTML=
-ride.drop;
+
+currentRide.drop;
+
 
 
 requestFare.innerHTML=
-"₹"+ride.fare;
+
+"₹"+currentRide.fare;
 
 
 
 }
+
 
 
 
@@ -484,17 +508,21 @@ acceptBtn.onclick=async()=>{
 
 
 if(!currentRide)
-return;
 
+return;
 
 
 
 await updateDoc(
 
 doc(
+
 db,
+
 "rides",
+
 currentRide.id
+
 ),
 
 {
@@ -503,10 +531,12 @@ currentRide.id
 status:"accepted",
 
 riderId:
+
 currentUser.uid,
 
 
 acceptedAt:
+
 serverTimestamp()
 
 
@@ -516,25 +546,13 @@ serverTimestamp()
 
 
 
-showActiveRide();
-
-
-
-};
-
-
-
-
-
-
-
-function showActiveRide(){
+rideRequest.style.display="none";
 
 
 activeRide.style.display="block";
 
 
-rideRequest.style.display="none";
+otpCard.style.display="block";
 
 
 
@@ -547,27 +565,92 @@ activeFare.innerHTML=
 
 
 
+};
+
+
+
+
+
+
+
+
+
+// OTP VERIFY
+
+
+verifyOtpBtn.onclick=async()=>{
+
+
+if(!currentRide)
+
+return;
+
+
+
+let otp=
+
+otpInput.value;
+
+
+
+
+if(
+
+otp === currentRide.otp
+
+){
+
+
+
+otpVerified=true;
+
+
+otpStatus.innerHTML=
+
+"OTP Verified ✅";
+
+
+
+await updateDoc(
+
+doc(
+
+db,
+
+"rides",
+
+currentRide.id
+
+),
+
+{
+
+
+otpVerified:true
+
+
+}
+
+);
+
+
+
+}
+
+else{
+
+
+otpStatus.innerHTML=
+
+"Wrong OTP ❌";
+
+
 }
 
 
 
-
-
-
-
-// REJECT
-
-
-rejectBtn.onclick=()=>{
-
-
-rideRequest.style.display="none";
-
-
-currentRide=null;
-
-
 };
+
 
 
 
@@ -582,22 +665,23 @@ currentRide=null;
 arrivedBtn.onclick=async()=>{
 
 
-if(!currentRide)
-return;
-
-
-
 await updateDoc(
 
 doc(
+
 db,
+
 "rides",
+
 currentRide.id
+
 ),
 
 {
 
-status:"arriving",
+
+status:"arriving"
+
 
 }
 
@@ -605,7 +689,9 @@ status:"arriving",
 
 
 
-rideStatus.innerHTML="Arrived Pickup";
+rideStatus.innerHTML=
+
+"Arrived Pickup";
 
 
 };
@@ -624,19 +710,38 @@ rideStatus.innerHTML="Arrived Pickup";
 startRideBtn.onclick=async()=>{
 
 
+if(!otpVerified){
+
+
+alert("First verify OTP");
+
+
+return;
+
+
+}
+
+
+
 await updateDoc(
 
 doc(
+
 db,
+
 "rides",
+
 currentRide.id
+
 ),
 
 {
 
+
 status:"started",
 
 startedAt:
+
 serverTimestamp()
 
 
@@ -646,7 +751,9 @@ serverTimestamp()
 
 
 
-rideStatus.innerHTML="Ride Started";
+rideStatus.innerHTML=
+
+"Ride Started 🏍";
 
 
 };
@@ -668,16 +775,22 @@ completeRideBtn.onclick=async()=>{
 await updateDoc(
 
 doc(
+
 db,
+
 "rides",
+
 currentRide.id
+
 ),
 
 {
 
+
 status:"completed",
 
 completedAt:
+
 serverTimestamp()
 
 
@@ -687,10 +800,13 @@ serverTimestamp()
 
 
 
-rideStatus.innerHTML="Completed";
+rideStatus.innerHTML=
+
+"Completed ✅";
 
 
 };
+
 
 
 
@@ -706,11 +822,14 @@ callCustomer.onclick=()=>{
 
 
 alert(
-"Call system connect hoga"
+
+"Call Customer system will connect"
+
 );
 
 
 };
+
 
 
 
@@ -724,6 +843,15 @@ alert(
 chatCustomer.onclick=()=>{
 
 
+localStorage.setItem(
+
+"rideId",
+
+currentRide.id
+
+);
+
+
 location.href="chat.html";
 
 
@@ -734,6 +862,52 @@ location.href="chat.html";
 
 
 
+
+
+// NAVIGATION
+
+
+navigationBtn.onclick=()=>{
+
+
+if(currentRide){
+
+
+let url =
+
+"https://www.google.com/maps/dir/?api=1&destination="
+
++
+
+currentRide.pickupCoords.lat
+
++
+
+","
+
++
+
+currentRide.pickupCoords.lng;
+
+
+
+window.open(url,"_blank");
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
 console.log(
-"RiderX Rider Engine V3 Loaded"
+
+"RiderX Rider Engine V4 Loaded"
+
 );
