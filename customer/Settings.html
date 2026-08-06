@@ -11,13 +11,9 @@
 <title>RiderX Customer Settings</title>
 
 
-<link rel="manifest" href="../manifest.json">
+<link rel="stylesheet" href="../css/Style.css">
 
-
-<meta name="theme-color" content="#FFD600">
-
-
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 
 </head>
@@ -26,37 +22,75 @@
 <body>
 
 
+<nav class="navbar">
 
-<div class="topbar">
+
+<div class="logo">
 
 
-<h2>
-⚙️ Settings
-</h2>
+<img src="../assets/logo.png">
+
+
+<span>
+RiderX
+</span>
 
 
 </div>
 
 
+</nav>
 
 
 
 
 
-<div class="container">
 
 
-
-
+<div class="dashboard-wrapper page">
 
 
 
 <div class="card">
 
 
-<button id="installApp" class="btn">
+<h2>
+
+⚙ Settings
+
+</h2>
+
+
+<br>
+
+
+
+<!-- Install App -->
+
+
+<div class="card">
+
+
+<h3>
 
 📲 Install RiderX App
+
+</h3>
+
+
+<p>
+
+Install app for faster booking experience
+
+</p>
+
+
+<br>
+
+
+<button id="installBtn" class="btn">
+
+Install App
 
 </button>
 
@@ -70,128 +104,43 @@
 
 
 
-<div class="card">
 
-
-<h3>
-🌙 Appearance
-</h3>
-
-
-
-<div class="booking-row">
-
-
-<span>
-
-Dark Mode
-
-</span>
-
-
-
-<input
-
-type="checkbox"
-
-id="darkMode"
-
-checked
-
->
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
+<!-- Language -->
 
 
 <div class="card">
 
 
 <h3>
-🔔 Notifications
-</h3>
 
-
-
-<div class="booking-row">
-
-
-<span>
-
-Ride Updates
-
-</span>
-
-
-
-<input
-
-type="checkbox"
-
-id="notifications"
-
-checked
-
->
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
 🌐 Language
+
 </h3>
 
 
+<br>
 
 
-<select id="language" class="input">
+<select class="input-box" id="language">
 
 
-<option value="English">
+<option>
 
 English
 
 </option>
 
 
+<option>
 
-<option value="Hindi">
-
-हिंदी
+Hindi
 
 </option>
-
 
 
 </select>
 
 
-
 </div>
 
 
@@ -202,36 +151,25 @@ English
 
 
 
-<div class="card">
-
-
-<button class="btn-outline">
-
-📞 Help & Support
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
+<!-- Dark Mode -->
 
 
 <div class="card">
 
 
-<button
+<h3>
 
-id="logout"
+🌙 Dark Mode
 
-class="btn-outline">
+</h3>
 
-🚪 Logout
+
+<br>
+
+
+<button id="darkBtn" class="btn">
+
+Enable Dark Mode
 
 </button>
 
@@ -244,66 +182,38 @@ class="btn-outline">
 
 
 
+
+
+<!-- Account -->
+
+
+<div class="card">
+
+
+<h3>
+
+👤 Account
+
+</h3>
+
+
+<br>
+
+
+<a href="Profile.html" class="btn">
+
+Edit Profile
+
+</a>
+
+
 </div>
 
 
 
 
 
-
-
-
-
-<div class="bottom-nav">
-
-
-<a href="Home.html">
-
-🏠
-
-<br>
-
-Home
-
-</a>
-
-
-
-<a href="Booking.html">
-
-🏍
-
-<br>
-
-Book
-
-</a>
-
-
-
-
-<a href="Profile.html">
-
-👤
-
-<br>
-
-Profile
-
-</a>
-
-
-
-<a class="active">
-
-⚙️
-
-<br>
-
-Settings
-
-</a>
-
+</div>
 
 
 </div>
@@ -315,7 +225,110 @@ Settings
 
 
 
-<script type="module" src="../js/Settings.js"></script>
+<script>
+
+
+// Install App
+
+
+let deferredPrompt;
+
+
+
+const installBtn =
+document.getElementById("installBtn");
+
+
+
+window.addEventListener(
+
+"beforeinstallprompt",
+
+(e)=>{
+
+
+e.preventDefault();
+
+
+deferredPrompt=e;
+
+
+});
+
+
+
+
+
+
+installBtn.onclick=async()=>{
+
+
+if(deferredPrompt){
+
+
+deferredPrompt.prompt();
+
+
+await deferredPrompt.userChoice;
+
+
+deferredPrompt=null;
+
+
+}
+
+
+};
+
+
+
+
+
+
+
+
+// Dark Mode
+
+
+const darkBtn =
+document.getElementById("darkBtn");
+
+
+
+darkBtn.onclick=()=>{
+
+
+document.body.classList.toggle("dark-mode");
+
+
+
+localStorage.setItem(
+
+"darkMode",
+
+"on"
+
+);
+
+
+};
+
+
+
+
+
+if(localStorage.getItem("darkMode")){
+
+
+document.body.classList.add("dark-mode");
+
+
+}
+
+
+
+</script>
+
 
 
 </body>
