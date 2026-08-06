@@ -8,80 +8,11 @@
 
 <title>RiderX Rider Dashboard</title>
 
+
 <link rel="stylesheet" href="../css/style.css">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<style>
-
-body{
-background:#000;
-color:white;
-}
-
-.container{
-padding:15px;
-}
-
-
-.card{
-
-background:#111;
-padding:20px;
-border-radius:20px;
-margin-top:15px;
-
-}
-
-
-.online{
-
-background:#00c853;
-color:white;
-
-}
-
-
-.offline{
-
-background:#d50000;
-color:white;
-
-}
-
-
-button{
-
-width:100%;
-padding:15px;
-border-radius:15px;
-border:none;
-font-weight:bold;
-margin-top:10px;
-
-}
-
-
-#map{
-
-height:300px;
-border-radius:20px;
-
-}
-
-
-.ride{
-
-display:none;
-
-background:#222;
-padding:15px;
-border-radius:15px;
-
-}
-
-
-</style>
 
 </head>
 
@@ -89,11 +20,17 @@ border-radius:15px;
 <body>
 
 
-<div class="header">
+<!-- TOP BAR -->
 
-🏍 RiderX Rider
+<div class="topbar">
+
+<h2>🏍 RiderX</h2>
+
+<img src="../assets/logo.png">
 
 </div>
+
+
 
 
 
@@ -101,16 +38,25 @@ border-radius:15px;
 
 
 
+<!-- RIDER STATUS -->
+
+
 <div class="card">
 
-<h2 id="riderName">
-Rider
-</h2>
+
+<h3>Rider Status</h3>
 
 
-<button id="onlineBtn" class="offline">
+<p id="riderStatus">
 
-Offline
+You are Offline
+
+</p>
+
+
+<button id="onlineBtn" class="btn">
+
+Go Online
 
 </button>
 
@@ -121,47 +67,79 @@ Offline
 
 
 
+
+
+<!-- MAP -->
+
+
+<div class="map-container">
+
 <div id="map"></div>
 
+</div>
 
 
+
+
+
+
+
+<!-- NEW RIDE REQUEST -->
 
 
 <div class="card">
+
 
 <h3>
 New Ride Request
 </h3>
 
 
-<div id="rideBox" class="ride">
+
+<div id="rideRequest" style="display:none;">
 
 
-<p>
-Pickup:
-<span id="pickup">
--
-</span>
-</p>
+
+<div class="booking-row">
+
+<span>Pickup</span>
+
+<b id="requestPickup">-</b>
 
 
-<p>
-Drop:
-<span id="drop">
--
-</span>
-</p>
+</div>
 
 
-<p>
-Fare:
-₹<span id="fare">
-0
-</span>
-</p>
+
+<div class="booking-row">
+
+<span>Drop</span>
+
+<b id="requestDrop">-</b>
 
 
-<button id="acceptBtn">
+</div>
+
+
+
+
+<div class="booking-row">
+
+<span>Fare</span>
+
+<b id="requestFare">
+
+₹0
+
+</b>
+
+
+</div>
+
+
+
+
+<button id="acceptBtn" class="btn">
 
 Accept Ride
 
@@ -169,20 +147,160 @@ Accept Ride
 
 
 
-<button id="rejectBtn">
+<button id="rejectBtn" class="btn-outline">
 
 Reject
 
 </button>
 
 
-</div>
-
 
 </div>
 
 
 
+<p id="noRide">
+
+Waiting for rides...
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ACTIVE RIDE -->
+
+
+<div class="card">
+
+
+<h3>
+Active Ride
+</h3>
+
+
+
+<div id="activeRide" style="display:none;">
+
+
+
+<div class="booking-row">
+
+<span>Status</span>
+
+<b id="rideStatus">
+
+-
+
+</b>
+
+</div>
+
+
+
+
+<div class="booking-row">
+
+<span>Customer</span>
+
+<b id="customerName">
+
+-
+
+</b>
+
+
+</div>
+
+
+
+
+<div class="booking-row">
+
+<span>Fare</span>
+
+<b id="activeFare">
+
+₹0
+
+</b>
+
+
+</div>
+
+
+
+
+
+
+<button id="callCustomer" class="btn">
+
+📞 Call Customer
+
+</button>
+
+
+
+
+<button id="chatCustomer" class="btn-outline">
+
+💬 Chat Customer
+
+</button>
+
+
+
+
+
+
+<button id="arrivedBtn" class="btn">
+
+📍 Arrived Pickup
+
+</button>
+
+
+
+
+<button id="startRideBtn" class="btn">
+
+🏍 Start Ride
+
+</button>
+
+
+
+
+<button id="completeRideBtn" class="btn">
+
+✅ Complete Ride
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- EARNING -->
 
 
 <div class="card">
@@ -193,12 +311,14 @@ Today's Earnings
 </h3>
 
 
-<h1>
+<h1 style="color:#FFD600">
+
 ₹<span id="earning">
 
 0
 
 </span>
+
 </h1>
 
 
@@ -206,7 +326,55 @@ Today's Earnings
 
 
 
+
 </div>
+
+
+
+
+
+
+
+<!-- BOTTOM NAV -->
+
+
+<div class="bottom-nav">
+
+
+<a class="active">
+
+🏠
+<br>
+Home
+
+</a>
+
+
+<a>
+
+💰
+<br>
+Wallet
+
+</a>
+
+
+
+<a>
+
+👤
+<br>
+Profile
+
+</a>
+
+
+
+</div>
+
+
+
+
 
 
 
