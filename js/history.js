@@ -1,60 +1,110 @@
-// =================================
-// RiderX Ride History
-// =================================
+// ==========================================
+// RiderX Customer History System V1
+// ==========================================
 
 
-import { db } from "../firebase/config.js";
+import { auth, db } from "../firebase/config.js";
 
 
 import {
 
 collection,
-getDocs,
 query,
-orderBy
+where,
+orderBy,
+onSnapshot
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
 
-
-
-
-// Load Ride History
-
-export async function loadRideHistory(){
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-let rideBox = document.getElementById("rideList");
+import {
+
+onAuthStateChanged
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
-if(!rideBox) return;
 
 
 
-try{
+const historyList =
+document.getElementById("historyList");
 
 
-const q = query(
+
+let user=null;
+
+
+
+
+
+
+
+onAuthStateChanged(auth,(u)=>{
+
+
+if(!u){
+
+location.href="../auth/login.html";
+
+return;
+
+}
+
+
+user=u;
+
+
+loadHistory();
+
+
+});
+
+
+
+
+
+
+
+
+function loadHistory(){
+
+
+
+const q=query(
 
 collection(db,"rides"),
 
-orderBy("createdAt","desc")
+where(
+"customerId",
+"==",
+user.uid
+)
 
 );
 
 
 
-const snapshot = await getDocs(q);
+
+
+onSnapshot(q,(snapshot)=>{
 
 
 
-rideBox.innerHTML="";
+historyList.innerHTML="";
+
 
 
 
 if(snapshot.empty){
 
 
-rideBox.innerHTML =
+historyList.innerHTML=
+
 "<p>No rides found</p>";
 
 
@@ -66,18 +116,29 @@ return;
 
 
 
-snapshot.forEach((doc)=>{
 
-
-let ride = doc.data();
+snapshot.forEach((item)=>{
 
 
 
-rideBox.innerHTML += `
+let ride=item.data();
 
 
-<div class="ride-card">
 
+
+let card=document.createElement("div");
+
+
+
+card.className="card";
+
+
+
+
+card.innerHTML=
+
+
+`
 
 <h3>
 ${ride.service || "Ride"}
@@ -85,26 +146,49 @@ ${ride.service || "Ride"}
 
 
 <p>
-📍 ${ride.pickup || "N/A"} 
-➡ 
-${ride.drop || "N/A"}
+
+📍 ${ride.pickup}
+
 </p>
 
 
 <p>
-💰 Fare: ₹${ride.fare || 0}
+
+🏁 ${ride.drop}
+
 </p>
 
 
 <p>
-Status: ${ride.status || "Pending"}
+
+💰 ₹${ride.fare}
+
 </p>
 
 
-</div>
+<p>
+
+💳 ${ride.paymentMethod || "Cash"}
+
+</p>
+
+
+<p>
+
+Status:
+
+<b>${ride.status}</b>
+
+</p>
 
 
 `;
+
+
+
+
+
+historyList.appendChild(card);
 
 
 
@@ -112,20 +196,19 @@ Status: ${ride.status || "Pending"}
 
 
 
-}
 
 
-catch(error){
+});
 
 
-console.log(error);
 
-
-rideBox.innerHTML =
-"Unable to load rides";
 
 
 }
 
 
-}
+
+
+console.log(
+"RiderX History Loaded"
+);
