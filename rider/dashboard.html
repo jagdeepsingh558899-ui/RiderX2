@@ -8,13 +8,16 @@
 
 <title>RiderX Rider Dashboard</title>
 
+
 <style>
 
 *{
+
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:Arial;
+
 }
 
 
@@ -30,13 +33,10 @@ color:white;
 .header{
 
 background:#111;
-
 padding:20px;
-
 border-bottom:2px solid #FFD600;
 
 display:flex;
-
 justify-content:space-between;
 
 }
@@ -67,35 +67,31 @@ padding:20px;
 
 
 
-.status{
+.box{
 
 background:#111;
-
 padding:20px;
-
 border-radius:20px;
-
-margin-bottom:20px;
+margin-bottom:15px;
 
 }
 
 
 
-.status button{
+.online{
 
-margin-top:15px;
-
-padding:12px;
-
-width:100%;
-
-border:none;
-
-border-radius:12px;
-
-background:#FFD600;
-
+color:#00ff66;
 font-weight:bold;
+
+}
+
+
+
+.grid{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
 
 }
 
@@ -104,32 +100,48 @@ font-weight:bold;
 .card{
 
 background:#111;
-
 padding:20px;
-
-border-radius:20px;
-
-margin-top:15px;
+border-radius:18px;
+text-align:center;
 
 }
 
 
 
-.card button{
+.number{
+
+font-size:30px;
+color:#FFD600;
+font-weight:bold;
+
+}
+
+
+
+button{
 
 width:100%;
-
 padding:14px;
-
 margin-top:15px;
-
 border:none;
-
 border-radius:12px;
-
 background:#FFD600;
-
 font-weight:bold;
+
+}
+
+
+
+a{
+
+display:block;
+background:#111;
+color:white;
+text-decoration:none;
+padding:15px;
+margin-top:10px;
+border-radius:12px;
+border-left:4px solid #FFD600;
 
 }
 
@@ -145,6 +157,7 @@ font-weight:bold;
 
 
 <div class="header">
+
 
 <div class="logo">
 
@@ -170,58 +183,85 @@ RIDER<span>X</span>
 
 
 
-<div class="status">
+
+
+<div class="box">
 
 
 <h2>
 
-Rider Dashboard
+Welcome Rider
 
 </h2>
 
 
-<p>
+<p id="status">
 
-Online / Offline
+Offline 🔴
 
 </p>
 
 
-<button>
+
+<button onclick="goOnline()">
 
 Go Online
 
 </button>
 
 
+
 </div>
+
+
+
+
+
+
+
+<div class="grid">
+
+
+
+<div class="card">
+
+<h3>
+
+Trips
+
+</h3>
+
+<div class="number" id="trips">
+
+0
+
+</div>
+
+
+</div>
+
 
 
 
 
 <div class="card">
 
-
 <h3>
 
-New Ride Requests
+Earnings
 
 </h3>
 
 
-<p>
+<div class="number">
 
-No new rides
+₹<span id="earnings">
 
-</p>
+0
 
+</span>
 
-
-<button onclick="openRequests()">
-
-View Requests
-
-</button>
+</div>
 
 
 </div>
@@ -229,19 +269,283 @@ View Requests
 
 
 
+
+<div class="card">
+
+<h3>
+
+Pending
+
+</h3>
+
+
+<div class="number" id="pending">
+
+0
+
+</div>
+
+
 </div>
 
 
 
 
-<script>
+
+<div class="card">
+
+<h3>
+
+Completed
+
+</h3>
 
 
-function openRequests(){
+<div class="number" id="completed">
 
-window.location.href="rides.html";
+0
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="box">
+
+
+<h2>
+
+Quick Menu
+
+</h2>
+
+
+
+<a href="online.html">
+
+🟢 Go Online Map
+
+</a>
+
+
+
+<a href="requests.html">
+
+📩 Ride Requests
+
+</a>
+
+
+
+<a href="trip.html">
+
+🏍 Current Trip
+
+</a>
+
+
+
+<a href="wallet.html">
+
+💰 Wallet
+
+</a>
+
+
+
+<a href="profile.html">
+
+👤 Profile
+
+</a>
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {auth,db} from "../firebase/config.js";
+
+
+import {
+
+collection,
+getDocs,
+query,
+where
 
 }
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+
+async function loadDashboard(){
+
+
+
+let user=
+
+auth.currentUser;
+
+
+
+if(!user)
+
+return;
+
+
+
+
+
+
+let q=query(
+
+collection(db,"rides"),
+
+where(
+
+"riderId",
+
+"==",
+
+user.uid
+
+)
+
+);
+
+
+
+
+
+let snap=
+
+await getDocs(q);
+
+
+
+
+
+
+let trips=0;
+
+let completed=0;
+
+let earnings=0;
+
+
+
+
+
+
+snap.forEach((ride)=>{
+
+
+let data=
+
+ride.data();
+
+
+
+
+trips++;
+
+
+
+
+if(data.status==="Completed"){
+
+
+completed++;
+
+
+earnings += Number(data.fare || 0);
+
+
+}
+
+
+
+
+});
+
+
+
+
+
+
+document.getElementById("trips").innerHTML=
+
+trips;
+
+
+
+document.getElementById("completed").innerHTML=
+
+completed;
+
+
+
+document.getElementById("earnings").innerHTML=
+
+earnings;
+
+
+
+
+
+}
+
+
+
+
+window.goOnline=function(){
+
+
+location.href="online.html";
+
+
+}
+
+
+
+
+
+
+loadDashboard();
+
 
 
 </script>
