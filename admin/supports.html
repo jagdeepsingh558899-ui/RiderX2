@@ -6,18 +6,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Support</title>
+<title>RiderX Support</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
 
 <style>
 
 .card{
 
-background:#1d1d1d;
+background:#111;
 padding:20px;
-border-radius:15px;
+border-radius:18px;
 margin:15px 0;
+border:1px solid #333;
 
 }
 
@@ -25,11 +27,11 @@ margin:15px 0;
 button{
 
 width:100%;
-padding:12px;
+padding:14px;
 margin-top:10px;
 background:#FFD600;
 border:none;
-border-radius:10px;
+border-radius:12px;
 font-weight:bold;
 
 }
@@ -38,7 +40,6 @@ font-weight:bold;
 .status{
 
 color:#FFD600;
-font-weight:bold;
 
 }
 
@@ -53,7 +54,7 @@ font-weight:bold;
 
 <div class="header">
 
-🛠 RiderX Support Center
+🛠 RiderX Support
 
 </div>
 
@@ -63,7 +64,7 @@ font-weight:bold;
 
 
 <h2>
-Customer & Rider Complaints
+Support Requests
 </h2>
 
 
@@ -91,7 +92,9 @@ import {
 collection,
 getDocs,
 doc,
-updateDoc
+updateDoc,
+orderBy,
+query
 
 }
 
@@ -103,18 +106,27 @@ from
 
 
 
-
 async function loadSupport(){
 
 
-let box=document.getElementById("supportList");
+
+const box =
+document.getElementById("supportList");
 
 
-let snap=await getDocs(
 
-collection(db,"supports")
+const q=query(
+
+collection(db,"supports"),
+
+orderBy("createdAt","desc")
 
 );
+
+
+
+const snap =
+await getDocs(q);
 
 
 
@@ -122,11 +134,15 @@ box.innerHTML="";
 
 
 
+
+
 if(snap.empty){
+
 
 box.innerHTML=
 
 "<p>No Support Requests</p>";
+
 
 return;
 
@@ -143,7 +159,7 @@ let data=item.data();
 
 
 
-box.innerHTML +=`
+box.innerHTML += `
 
 
 <div class="card">
@@ -151,7 +167,7 @@ box.innerHTML +=`
 
 <h3>
 
-${data.type || "Support"}
+${data.subject || "Support"}
 
 </h3>
 
@@ -165,6 +181,7 @@ ${data.userId || "-"}
 </p>
 
 
+
 <p>
 
 📝 Message:
@@ -174,6 +191,7 @@ ${data.userId || "-"}
 ${data.message || "-"}
 
 </p>
+
 
 
 <p class="status">
@@ -186,9 +204,9 @@ ${data.status || "Pending"}
 
 
 
-<button onclick="resolveSupport('${item.id}')">
+<button onclick="closeTicket('${item.id}')">
 
-✅ Mark Resolved
+✅ Resolve
 
 </button>
 
@@ -204,7 +222,6 @@ ${data.status || "Pending"}
 });
 
 
-
 }
 
 
@@ -213,7 +230,8 @@ ${data.status || "Pending"}
 
 
 
-window.resolveSupport=async(id)=>{
+
+window.closeTicket=async(id)=>{
 
 
 await updateDoc(
@@ -230,15 +248,13 @@ status:"Resolved"
 
 
 
-alert("Support Closed ✅");
+alert("Ticket Resolved ✅");
 
 
 loadSupport();
 
 
-}
-
-
+};
 
 
 
@@ -249,7 +265,6 @@ loadSupport();
 
 
 </script>
-
 
 
 </body>
