@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="RiderX - Premium Customer Login for quick, safe, and luxurious rides.">
+  <meta name="theme-color" content="#0a0a0c">
+  <title>Customer Login | RiderX Super App</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="../assets/Logo/RiderX-logo.png">
+  
+  <!-- Preconnect and Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- External Master Stylesheet -->
+  <link rel="stylesheet" href="../css/Style.css">
+
+  <style>
+    :root {
+      --bg-dark: #0a0a0c;
+      --bg-card: rgba(18, 18, 22, 0.75);
+      --yellow-primary: #FFE600;
+      --yellow-hover: #E6CF00;
+      --yellow-glow: rgba(255, 230, 0, 0.25);
+      --text-main: #FFFFFF;
+      --text-muted: #9A9AA6;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --border-focus: rgba(255, 230, 0, 0.5);
+      --danger: #FF4D4D;
+      --success: #00E676;
+      --glass-blur: blur(16px);
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(255, 230, 0, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(255, 230, 0, 0.03) 0%, transparent 40%);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Background Elements */
+    .bg-glow-1 {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 400px;
+      height: 400px;
+      background: var(--yellow-glow);
+      filter: blur(140px);
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Layout Header */
+    .app-header {
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 20px 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .btn-back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      backdrop-filter: var(--glass-blur);
+      transition: var(--transition-fast);
+    }
+
+    .btn-back-home:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    .lang-selector {
+      position: relative;
+    }
+
+    .lang-selector select {
+      appearance: none;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 30px 8px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      backdrop-filter: var(--glass-blur);
+      outline: none;
+      transition: var(--transition-fast);
+    }
+
+    .lang-selector select:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .lang-selector select option {
+      background-color: #121216;
+      color: var(--text-main);
+    }
+
+    .lang-selector::after {
+      content: "\f0d7";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* Main Container */
+    .auth-container {
+      width: 100%;
+      max-width: 440px;
+      padding: 0 20px 30px 20px;
+      z-index: 10;
+      margin: auto 0;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
+      border-radius: 28px;
+      padding: 36px 28px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      animation: cardAppear 0.5s ease-out forwards;
+    }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Logo & Headings */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-logo {
+      height: 48px;
+      width: auto;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 4px 12px rgba(255, 230, 0, 0.3));
+    }
+
+    .brand-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .brand-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Navigation Tabs */
+    .tab-switcher {
+      display: flex;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn.active {
+      background: var(--yellow-primary);
+      color: #000;
+      box-shadow: 0 2px 10px var(--yellow-glow);
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i.field-icon {
+      position: absolute;
+      left: 16px;
+      color: var(--text-muted);
+      font-size: 1rem;
+      transition: var(--transition-fast);
+    }
+
+    .form-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 14px 16px 14px 46px;
+      border-radius: 14px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition-fast);
+    }
+
+    .form-input:focus {
+      border-color: var(--yellow-primary);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 0 0 3px var(--yellow-glow);
+    }
+
+    .form-input:focus + i.field-icon {
+      color: var(--yellow-primary);
+    }
+
+    /* Password Specific */
+    .toggle-password {
+      position: absolute;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0;
+      transition: var(--transition-fast);
+    }
+
+    .toggle-password:hover {
+      color: var(--text-main);
+    }
+
+    /* Password Strength Indicator */
+    .strength-meter {
+      height: 4px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .strength-meter-fill {
+      height: 100%;
+      width: 0%;
+      transition: var(--transition-smooth);
+      border-radius: 2px;
+    }
+
+    /* Options Row */
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+      font-size: 0.85rem;
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-container input {
+      display: none;
+    }
+
+    .custom-checkmark {
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+    }
+
+    .checkbox-container input:checked + .custom-checkmark {
+      background: var(--yellow-primary);
+      border-color: var(--yellow-primary);
+    }
+
+    .checkbox-container input:checked + .custom-checkmark::after {
+      content: "\f00c";
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      font-size: 0.65rem;
+      color: #000;
+    }
+
+    .btn-forgot-password {
+      color: var(--yellow-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .btn-forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    /* Buttons */
+    .btn-primary {
+      width: 100%;
+      background: var(--yellow-primary);
+      color: #000;
+      border: none;
+      padding: 15px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: var(--transition-fast);
+      box-shadow: 0 4px 15px var(--yellow-glow);
+    }
+
+    .btn-primary:hover {
+      background: var(--yellow-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Phone OTP Inputs */
+    .otp-container {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .otp-input {
+      width: 50px;
+      height: 56px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      outline: none;
+      transition: var(--transition-fast);
+    }
+
+    .otp-input:focus {
+      border-color: var(--yellow-primary);
+      box-shadow: 0 0 0 3px var(--yellow-glow);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Divider */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 24px 0;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .auth-divider span {
+      padding: 0 12px;
+    }
+
+    /* Google Login Button */
+    .btn-google {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 14px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: var(--transition-fast);
+    }
+
+    .btn-google:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-google svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Register Prompt */
+    .register-prompt {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .register-prompt a {
+      color: var(--yellow-primary);
+      font-weight: 700;
+      text-decoration: none;
+      margin-left: 4px;
+    }
+
+    .register-prompt a:hover {
+      text-decoration: underline;
+    }
+
+    /* Alert / Notification Box */
+    .alert-box {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-box.error {
+      background: rgba(255, 77, 77, 0.1);
+      border: 1px solid rgba(255, 77, 77, 0.3);
+      color: var(--danger);
+    }
+
+    .alert-box.success {
+      background: rgba(0, 230, 118, 0.1);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      color: var(--success);
+    }
+
+    /* Spinner Animation */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Recaptcha Container */
+    #recaptcha-container {
+      margin-top: 10px;
+    }
+
+    /* Footer */
+    .app-footer {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      z-index: 10;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition-fast);
+    }
+
+    .footer-links a:hover {
+      color: var(--text-main);
+    }
+
+    /* Hidden Utilities */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Decorative Glow -->
+  <div class="bg-glow-1"></div>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <a href="../index.html" class="btn-back-home" id="btn-back-home">
+      <i class="fa-solid fa-arrow-left"></i> Home
+    </a>
+
+    <div class="lang-selector">
+      <select id="languageSelect" aria-label="Select Language">
+        <option value="en">English (US)</option>
+        <option value="es">Español</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- Main Card Component -->
+  <main class="auth-container">
+    <div class="auth-card">
+      
+      <!-- Brand & Title -->
+      <div class="brand-header">
+        <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="brand-logo" onerror="this.src='https://via.placeholder.com/150x50/121216/FFE600?text=RiderX'">
+        <h1 class="brand-title">Customer Login</h1>
+        <p class="brand-subtitle">Access your luxury rides and instant deliveries</p>
+      </div>
+
+      <!-- Alert Notification Banner -->
+      <div id="alertBox" class="alert-box" role="alert">
+        <i id="alertIcon" class="fa-solid fa-circle-exclamation"></i>
+        <span id="alertMessage"> An error occurred. Please try again.</span>
+      </div>
+
+      <!-- Tab Navigation Switcher -->
+      <div class="tab-switcher" role="tablist">
+        <button class="tab-btn active" id="tabEmail" role="tab" aria-selected="true" onclick="switchTab('email')">
+          <i class="fa-regular fa-envelope"></i> Email
+        </button>
+        <button class="tab-btn" id="tabPhone" role="tab" aria-selected="false" onclick="switchTab('phone')">
+          <i class="fa-solid fa-mobile-screen-button"></i> Phone OTP
+        </button>
+      </div>
+
+      <!-- SECTION 1: EMAIL & PASSWORD LOGIN FORM -->
+      <form id="emailLoginForm" onsubmit="handleEmailLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="loginEmail" class="form-input" placeholder="name@domain.com" required autocomplete="email">
+            <i class="fa-regular fa-envelope field-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password" oninput="checkPasswordStrength(this.value)">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginPassword', 'toggleIcon')">
+              <i class="fa-regular fa-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+          <div class="strength-meter" id="strengthMeter">
+            <div class="strength-meter-fill" id="strengthMeterFill"></div>
+          </div>
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-container">
+            <input type="checkbox" id="rememberMe">
+            <span class="custom-checkmark"></span>
+            Remember me
+          </label>
+          <button type="button" class="btn-forgot-password" id="btnForgotPassword" onclick="handleForgotPassword()">Forgot Password?</button>
+        </div>
+
+        <button type="submit" class="btn-primary" id="btnEmailLogin">
+          <span>Login</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <!-- SECTION 2: PHONE OTP LOGIN FORM -->
+      <form id="phoneLoginForm" class="hidden" onsubmit="handleSendOTP(event)">
+        <!-- Step 1: Send Phone OTP -->
+        <div id="phoneStep1">
+          <div class="form-group">
+            <label class="form-label" for="phoneNumber">Mobile Number</label>
+            <div class="input-wrapper">
+              <input type="tel" id="phoneNumber" class="form-input" placeholder="+1 234 567 8900" required>
+              <i class="fa-solid fa-phone field-icon"></i>
+            </div>
+          </div>
+          <div id="recaptcha-container"></div>
+          <button type="submit" class="btn-primary" id="btnSendOTP" style="margin-top: 15px;">
+            <span>Send OTP</span> <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+
+        <!-- Step 2: Enter & Verify OTP -->
+        <div id="phoneStep2" class="hidden">
+          <div class="form-group" style="text-align: center;">
+            <label class="form-label">Enter 6-Digit Code</label>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Sent to <span id="sentPhoneDisplay" style="color: var(--text-main); font-weight: 600;"></span></p>
+            <div class="otp-container" id="otpInputs">
+              <input type="text" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" required>
+              <input type="text" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" required>
+              <input type="text" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" required>
+              <input type="text" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" required>
+              <input type="text" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" required>
+              <input type="text" maxlength="1" class="otp-input" inputmode="numeric" pattern="[0-9]*" required>
+            </div>
+          </div>
+
+          <button type="button" class="btn-primary" id="btnVerifyOTP" onclick="handleVerifyOTP()">
+            <span>Verify OTP</span> <i class="fa-solid fa-check-double"></i>
+          </button>
+          
+          <div style="text-align: center; margin-top: 14px;">
+            <button type="button" class="btn-forgot-password" onclick="resetPhoneForm()">Change Phone Number</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Social / Third-Party Dividers -->
+      <div class="auth-divider">
+        <span>OR CONTINUE WITH</span>
+      </div>
+
+      <!-- Google OAuth Button -->
+      <button type="button" class="btn-google" id="btnGoogleLogin" onclick="handleGoogleLogin()">
+        <svg viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <!-- Redirect to Registration -->
+      <div class="register-prompt">
+        Don't have an account? <a href="register.html" id="btnRegister">Register</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <div class="footer-links">
+      <a href="#">Terms & Conditions</a>
+      <span>•</span>
+      <a href="#">Privacy Policy</a>
+      <span>•</span>
+      <a href="#">Need Help?</a>
+    </div>
+    <p>&copy; 2026 RiderX Inc. All rights reserved.</p>
+  </footer>
+
+  <!-- Firebase Logic Integration -->
+  <script type="module">
+    import { 
+      auth, 
+      signInWithEmailAndPassword, 
+      GoogleAuthProvider, 
+      signInWithPopup, 
+      RecaptchaVerifier, 
+      signInWithPhoneNumber, 
+      sendPasswordResetEmail,
+      onAuthStateChanged
+    } from "../firebase/firebase-config.js";
+
+    // Global Confirmation Result Holder for Phone OTP
+    window.confirmationResult = null;
+
+    // Check Auto Sign-In / Existing Session
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User already signed in, auto-redirect to Customer Home
+        window.location.href = "../customer/Home.html";
+      }
+    });
+
+    // Initialize Recaptcha Verifier
+    window.initRecaptcha = function() {
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response) => {
+            // reCAPTCHA solved
+          },
+          'expired-callback': () => {
+            showAlert("reCAPTCHA expired. Please try again.", "error");
+          }
+        });
+      }
+    };
+
+    // 1. Email & Password Login Action
+    window.handleEmailLogin = async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      if (!email || !password) {
+        showAlert("Please enter both email and password.", "error");
+        return;
+      }
+
+      setLoading('btnEmailLogin', true, 'Logging in...');
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        
+        if (rememberMe) {
+          localStorage.setItem('riderx_remembered_email', email);
+        } else {
+          localStorage.removeItem('riderx_remembered_email');
+        }
+
+        showAlert("Login successful! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "../customer/Home.html";
+        }, 1200);
+
+      } catch (error) {
+        setLoading('btnEmailLogin', false, '<span>Login</span> <i class="fa-solid fa-arrow-right"></i>');
+        handleFirebaseError(error);
+      }
+    };
+
+    // 2. Google OAuth Login Action
+    window.handleGoogleLogin = async function() {
+      const provider = new GoogleAuthProvider();
+      setLoading('btnGoogleLogin', true, 'Connecting Google...');
+
+      try {
+        const result = await signInWithPopup(auth, provider);
+        showAlert("Google Authentication Successful! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "../customer/Home.html";
+        }, 1200);
+      } catch (error) {
+        setLoading('btnGoogleLogin', false, '<svg viewBox="0 0 24 24" style="width:18px;height:18px;"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> <span>Continue with Google</span>');
+        handleFirebaseError(error);
+      }
+    };
+
+    // 3. Send Phone OTP Action
+    window.handleSendOTP = async function(e) {
+      e.preventDefault();
+      const phone = document.getElementById('phoneNumber').value.trim();
+
+      if (!phone || phone.length < 8) {
+        showAlert("Please enter a valid phone number with country code.", "error");
+        return;
+      }
+
+      initRecaptcha();
+      setLoading('btnSendOTP', true, 'Sending Code...');
+
+      try {
+        const appVerifier = window.recaptchaVerifier;
+        const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
+        window.confirmationResult = confirmationResult;
+        
+        document.getElementById('sentPhoneDisplay').innerText = phone;
+        document.getElementById('phoneStep1').classList.add('hidden');
+        document.getElementById('phoneStep2').classList.remove('hidden');
+        
+        showAlert("Verification code sent to your phone.", "success");
+      } catch (error) {
+        setLoading('btnSendOTP', false, '<span>Send OTP</span> <i class="fa-solid fa-paper-plane"></i>');
+        handleFirebaseError(error);
+        if (window.recaptchaVerifier) {
+          window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
+        }
+      }
+    };
+
+    // 4. Verify OTP Action
+    window.handleVerifyOTP = async function() {
+      const inputs = document.querySelectorAll('.otp-input');
+      let code = '';
+      inputs.forEach(input => code += input.value);
+
+      if (code.length !== 6) {
+        showAlert("Please enter the complete 6-digit verification code.", "error");
+        return;
+      }
+
+      setLoading('btnVerifyOTP', true, 'Verifying...');
+
+      try {
+        const result = await window.confirmationResult.confirm(code);
+        showAlert("Phone Verification Successful! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = "../customer/Home.html";
+        }, 1200);
+      } catch (error) {
+        setLoading('btnVerifyOTP', false, '<span>Verify OTP</span> <i class="fa-solid fa-check-double"></i>');
+        handleFirebaseError(error);
+      }
+    };
+
+    // 5. Password Reset Request
+    window.handleForgotPassword = async function() {
+      const email = document.getElementById('loginEmail').value.trim();
+
+      if (!email) {
+        showAlert("Please enter your email address to reset password.", "error");
+        document.getElementById('loginEmail').focus();
+        return;
+      }
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showAlert("Password reset link sent to your email address.", "success");
+      } catch (error) {
+        handleFirebaseError(error);
+      }
+    };
+
+    // Unified Firebase Error Handler
+    function handleFirebaseError(error) {
+      console.error("Auth Error:", error);
+      let message = "An error occurred during authentication.";
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          message = "Invalid email or password. Please try again.";
+          break;
+        case 'auth/invalid-email':
+          message = "Please enter a valid email address.";
+          break;
+        case 'auth/too-many-requests':
+          message = "Too many failed attempts. Please try again later.";
+          break;
+        case 'auth/invalid-phone-number':
+          message = "The phone number format is invalid.";
+          break;
+        case 'auth/invalid-verification-code':
+          message = "Invalid verification code. Please check and try again.";
+          break;
+        default:
+          message = error.message || message;
+      }
+      
+      showAlert(message, "error");
+    }
+  </script>
+
+  <!-- Dynamic UI Control Scripts -->
+  <script>
+    // Tab Switching Logic
+    function switchTab(tab) {
+      const tabEmail = document.getElementById('tabEmail');
+      const tabPhone = document.getElementById('tabPhone');
+      const emailForm = document.getElementById('emailLoginForm');
+      const phoneForm = document.getElementById('phoneLoginForm');
+
+      hideAlert();
+
+      if (tab === 'email') {
+        tabEmail.classList.add('active');
+        tabEmail.setAttribute('aria-selected', 'true');
+        tabPhone.classList.remove('active');
+        tabPhone.setAttribute('aria-selected', 'false');
+        
+        emailForm.classList.remove('hidden');
+        phoneForm.classList.add('hidden');
+      } else {
+        tabPhone.classList.add('active');
+        tabPhone.setAttribute('aria-selected', 'true');
+        tabEmail.classList.remove('active');
+        tabEmail.setAttribute('aria-selected', 'false');
+        
+        phoneForm.classList.remove('hidden');
+        emailForm.classList.add('hidden');
+      }
+    }
+
+    // Toggle Password Visibility
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Password Strength Indicator Logic
+    function checkPasswordStrength(password) {
+      const meter = document.getElementById('strengthMeter');
+      const fill = document.getElementById('strengthMeterFill');
+      
+      if (!password) {
+        meter.style.display = 'none';
+        return;
+      }
+      
+      meter.style.display = 'block';
+      let strength = 0;
+
+      if (password.length >= 6) strength += 25;
+      if (password.length >= 10) strength += 25;
+      if (/[A-Z]/.test(password) && /[0-9]/.test(password)) strength += 25;
+      if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+
+      fill.style.width = strength + '%';
+
+      if (strength <= 25) {
+        fill.style.background = '#FF4D4D';
+      } else if (strength <= 50) {
+        fill.style.background = '#FF944D';
+      } else if (strength <= 75) {
+        fill.style.background = '#FFD633';
+      } else {
+        fill.style.background = '#00E676';
+      }
+    }
+
+    // OTP Automatic Navigation Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const otpContainer = document.getElementById('otpInputs');
+      if (otpContainer) {
+        const inputs = otpContainer.querySelectorAll('.otp-input');
+        
+        inputs.forEach((input, index) => {
+          input.addEventListener('input', (e) => {
+            if (e.target.value.length === 1) {
+              if (index < inputs.length - 1) {
+                inputs[index + 1].focus();
+              }
+            }
+          });
+
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && index > 0) {
+              inputs[index - 1].focus();
+            }
+          });
+
+          // Handle paste action
+          input.addEventListener('paste', (e) => {
+            const pasteData = e.clipboardData.getData('text').trim();
+            if (pasteData.length === inputs.length && /^\d+$/.test(pasteData)) {
+              pasteData.split('').forEach((char, i) => {
+                inputs[i].value = char;
+              });
+              inputs[inputs.length - 1].focus();
+            }
+          });
+        });
+      }
+
+      // Restore remembered email if exists
+      const savedEmail = localStorage.getItem('riderx_remembered_email');
+      if (savedEmail) {
+        const emailInput = document.getElementById('loginEmail');
+        const rememberCheckbox = document.getElementById('rememberMe');
+        if (emailInput) emailInput.value = savedEmail;
+        if (rememberCheckbox) rememberCheckbox.checked = true;
+      }
+    });
+
+    // Phone Step Reset
+    function resetPhoneForm() {
+      document.getElementById('phoneStep2').classList.add('hidden');
+      document.getElementById('phoneStep1').classList.remove('hidden');
+      const inputs = document.querySelectorAll('.otp-input');
+      inputs.forEach(input => input.value = '');
+    }
+
+    // UI Feedback Helpers: Loading Spinner & Alerts
+    function setLoading(buttonId, isLoading, originalText) {
+      const btn = document.getElementById(buttonId);
+      if (!btn) return;
+
+      if (isLoading) {
+        btn.disabled = true;
+        btn.innerHTML = `<div class="spinner"></div> <span>Processing...</span>`;
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    }
+
+    function showAlert(message, type = 'error') {
+      const alertBox = document.getElementById('alertBox');
+      const alertMessage = document.getElementById('alertMessage');
+      const alertIcon = document.getElementById('alertIcon');
+
+      alertMessage.innerText = message;
+      alertBox.className = `alert-box ${type}`;
+
+      if (type === 'error') {
+        alertIcon.className = 'fa-solid fa-circle-exclamation';
+      } else {
+        alertIcon.className = 'fa-solid fa-circle-check';
+      }
+
+      alertBox.style.display = 'flex';
+    }
+
+    function hideAlert() {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.style.display = 'none';
+    }
+  </script>
+</body>
+                                                                                                                                                                                  </html>
