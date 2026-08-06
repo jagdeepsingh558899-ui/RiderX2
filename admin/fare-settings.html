@@ -33,7 +33,6 @@ border-bottom:2px solid #FFD600;
 }
 
 
-
 .container{
 
 padding:20px;
@@ -41,12 +40,22 @@ padding:20px;
 }
 
 
-
 .box{
 
 background:#111;
-padding:20px;
+padding:25px;
 border-radius:20px;
+border:1px solid #333;
+
+}
+
+
+
+label{
+
+color:#FFD600;
+display:block;
+margin-top:15px;
 
 }
 
@@ -56,9 +65,10 @@ input{
 
 width:100%;
 padding:14px;
-margin-top:12px;
+margin-top:8px;
 border-radius:12px;
 border:none;
+font-size:16px;
 
 }
 
@@ -78,8 +88,9 @@ font-weight:bold;
 
 
 
-h3{
+#msg{
 
+margin-top:15px;
 color:#FFD600;
 
 }
@@ -94,11 +105,13 @@ color:#FFD600;
 <body>
 
 
+
 <div class="header">
 
-⚙️ Fare Settings
+⚙️ RiderX Fare Settings
 
 </div>
+
 
 
 
@@ -109,43 +122,62 @@ color:#FFD600;
 
 
 
-<h3>
-Bike Taxi
-</h3>
+<label>
+Base Fare
+</label>
 
-<input id="bike" placeholder="Bike ₹ per KM">
-
-
-
-<h3>
-Cab
-</h3>
-
-<input id="cab" placeholder="Cab ₹ per KM">
+<input id="base" type="number">
 
 
 
-<h3>
-Parcel
-</h3>
-
-<input id="parcel" placeholder="Parcel Charge">
 
 
+<label>
+🏍 Bike Taxi Per KM
+</label>
 
-<h3>
-Food
-</h3>
-
-<input id="food" placeholder="Food Charge">
+<input id="bike" type="number">
 
 
 
-<h3>
-Night Charge
-</h3>
 
-<input id="night" placeholder="Night Extra Charge">
+
+<label>
+🚕 Cab Per KM
+</label>
+
+<input id="cab" type="number">
+
+
+
+
+
+<label>
+📦 Parcel Starting Charge
+</label>
+
+<input id="parcel" type="number">
+
+
+
+
+
+<label>
+🍔 Food Delivery Charge
+</label>
+
+<input id="food" type="number">
+
+
+
+
+
+<label>
+🌙 Night Extra Charge
+</label>
+
+<input id="night" type="number">
+
 
 
 
@@ -156,7 +188,6 @@ Night Charge
 Save Fare Settings
 
 </button>
-
 
 
 
@@ -174,10 +205,11 @@ Save Fare Settings
 
 
 
+
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
@@ -194,7 +226,11 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-const ref = doc(db,"settings","fare");
+let ref=
+
+doc(db,"settings","fare");
+
+
 
 
 
@@ -203,15 +239,22 @@ const ref = doc(db,"settings","fare");
 async function loadFare(){
 
 
-const snap = await getDoc(ref);
+
+let snap=
+
+await getDoc(ref);
 
 
 
 if(snap.exists()){
 
 
+
 let data=snap.data();
 
+
+
+base.value=data.base || 50;
 
 bike.value=data.bike || 8;
 
@@ -224,10 +267,13 @@ food.value=data.food || 60;
 night.value=data.night || 3;
 
 
+
 }
 
 else{
 
+
+base.value=50;
 
 bike.value=8;
 
@@ -243,13 +289,17 @@ night.value=3;
 }
 
 
-
 }
 
 
 
 
+
+
+
+
 saveBtn.onclick=async()=>{
+
 
 
 await setDoc(
@@ -258,6 +308,8 @@ ref,
 
 {
 
+
+base:Number(base.value),
 
 bike:Number(bike.value),
 
@@ -270,17 +322,24 @@ food:Number(food.value),
 night:Number(night.value)
 
 
+
 }
 
 );
 
 
 
-msg.innerHTML="Fare Updated Successfully ✅";
+
+
+msg.innerHTML=
+
+"Fare Settings Updated ✅";
 
 
 
 };
+
+
 
 
 
