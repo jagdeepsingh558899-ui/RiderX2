@@ -6,9 +6,73 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Ride Requests</title>
+<title>RiderX Requests</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+body{
+background:#000;
+color:white;
+font-family:Arial;
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+font-size:22px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.request-card{
+
+background:#111;
+padding:20px;
+border-radius:18px;
+margin-bottom:15px;
+border:1px solid #333;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:14px;
+margin-top:10px;
+border:none;
+border-radius:12px;
+background:#FFD600;
+font-weight:bold;
+
+}
+
+
+
+.reject{
+
+background:white;
+
+}
+
+
+</style>
+
 
 </head>
 
@@ -17,7 +81,9 @@
 
 
 <div class="header">
+
 📩 New Ride Requests
+
 </div>
 
 
@@ -33,13 +99,7 @@ Loading...
 
 
 
-<a class="back" href="dashboard.html">
-⬅ Back Dashboard
-</a>
-
-
 </div>
-
 
 
 
@@ -47,20 +107,42 @@ Loading...
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import { auth, db } from "../firebase/config.js";
 
 
 import {
 
 collection,
-getDocs,
 query,
 where,
+getDocs,
 doc,
 updateDoc,
 serverTimestamp
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+let riderId=null;
+
+
+
+
+auth.onAuthStateChanged((user)=>{
+
+if(user){
+
+riderId=user.uid;
+
+loadRequests();
+
+}
+
+});
 
 
 
@@ -70,9 +152,7 @@ serverTimestamp
 async function loadRequests(){
 
 
-let box =
-document.getElementById("requestList");
-
+let box=document.getElementById("requestList");
 
 
 const q=query(
@@ -85,8 +165,7 @@ where("status","==","Pending")
 
 
 
-const snapshot =
-await getDocs(q);
+const snapshot=await getDocs(q);
 
 
 
@@ -96,9 +175,7 @@ box.innerHTML="";
 
 if(snapshot.empty){
 
-
-box.innerHTML=
-"<p>No requests available</p>";
+box.innerHTML="<p>No ride requests</p>";
 
 return;
 
@@ -117,13 +194,12 @@ let data=ride.data();
 
 box.innerHTML += `
 
-
 <div class="request-card">
 
 
-<h3>
+<h2>
 🏍 ${data.service}
-</h3>
+</h2>
 
 
 <p>
@@ -140,7 +216,7 @@ ${data.drop}
 
 <p>
 💰 Fare:
-${data.fare}
+₹${data.fare}
 </p>
 
 
@@ -152,8 +228,7 @@ Accept Ride
 </button>
 
 
-
-<button onclick="rejectRide('${ride.id}')">
+<button class="reject" onclick="rejectRide('${ride.id}')">
 
 Reject
 
@@ -162,7 +237,6 @@ Reject
 
 
 </div>
-
 
 `;
 
@@ -178,9 +252,7 @@ Reject
 
 
 
-
-
-window.acceptRide = async function(id){
+window.acceptRide=async(id)=>{
 
 
 await updateDoc(
@@ -192,6 +264,10 @@ doc(db,"rides",id),
 
 status:"Accepted",
 
+
+riderId:riderId,
+
+
 acceptedAt:serverTimestamp()
 
 
@@ -201,20 +277,22 @@ acceptedAt:serverTimestamp()
 
 
 
-alert("Ride Accepted ✅");
+alert(
+"Ride Accepted ✅"
+);
 
 
 loadRequests();
 
 
-}
+};
 
 
 
 
 
 
-window.rejectRide = async function(id){
+window.rejectRide=async(id)=>{
 
 
 await updateDoc(
@@ -226,7 +304,6 @@ doc(db,"rides",id),
 
 status:"Rejected"
 
-
 }
 
 );
@@ -236,22 +313,12 @@ status:"Rejected"
 loadRequests();
 
 
-}
+};
 
 
 
 
-loadRequests();
-
-
-
-setInterval(
-
-loadRequests,
-
-10000
-
-);
+setInterval(loadRequests,10000);
 
 
 </script>
