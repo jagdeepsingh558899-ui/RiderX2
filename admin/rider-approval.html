@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Rider Approval</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+font-size:24px;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.card{
+
+background:#111;
+padding:20px;
+border-radius:18px;
+margin-bottom:15px;
+border:1px solid #333;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:13px;
+margin-top:10px;
+border:none;
+border-radius:12px;
+background:#FFD600;
+font-weight:bold;
+
+}
+
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+
+<div class="header">
+
+🏍 Rider Approval
+
+</div>
+
+
+
+
+<div class="container">
+
+
+<div id="list">
+
+Loading...
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+collection,
+getDocs,
+query,
+where,
+doc,
+updateDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+async function loadRiders(){
+
+
+
+let box=document.getElementById("list");
+
+
+
+const q=query(
+
+collection(db,"riders"),
+
+where("status","==","Pending")
+
+);
+
+
+
+const snap=await getDocs(q);
+
+
+
+box.innerHTML="";
+
+
+
+
+
+if(snap.empty){
+
+box.innerHTML=
+
+"<p>No Pending Riders</p>";
+
+return;
+
+}
+
+
+
+
+
+snap.forEach((r)=>{
+
+
+
+let data=r.data();
+
+
+
+box.innerHTML+=`
+
+
+<div class="card">
+
+
+<h3>
+
+🏍 ${data.name || "Rider"}
+
+</h3>
+
+
+<p>
+
+Bike:
+
+${data.bike || "-"}
+
+</p>
+
+
+
+<p>
+
+Number:
+
+${data.number || "-"}
+
+</p>
+
+
+
+<p>
+
+License:
+
+${data.license || "-"}
+
+</p>
+
+
+
+<button onclick="approve('${r.id}')">
+
+Approve Rider ✅
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+window.approve=async(id)=>{
+
+
+
+await updateDoc(
+
+doc(db,"riders",id),
+
+{
+
+
+status:"Approved"
+
+
+}
+
+);
+
+
+
+alert(
+
+"Rider Approved ✅"
+
+);
+
+
+
+loadRiders();
+
+
+
+};
+
+
+
+
+
+loadRiders();
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
