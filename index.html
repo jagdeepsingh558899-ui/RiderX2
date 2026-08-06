@@ -4,55 +4,173 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
-<title>RiderX</title>
-
-
-<link rel="manifest" href="manifest.json">
-
+<title>RiderX - Premium Ride Service</title>
 
 <meta name="theme-color" content="#FFD600">
 
+<link rel="manifest" href="manifest.json">
 
 <link rel="stylesheet" href="css/style.css">
+
+<link rel="icon" href="assets/logo.svg">
+
+
+<style>
+
+body{
+    margin:0;
+    background:#000;
+    overflow:hidden;
+}
+
+
+#splash{
+
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100vh;
+
+background:#000;
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
+z-index:9999;
+
+}
+
+
+.logo{
+
+width:130px;
+height:130px;
+
+animation:
+logoScale 1.8s infinite alternate;
+
+}
+
+
+.title{
+
+color:#FFD600;
+
+font-size:35px;
+
+font-weight:900;
+
+letter-spacing:2px;
+
+margin-top:20px;
+
+animation:
+fadeIn 2s;
+
+}
+
+
+.loader{
+
+width:50px;
+height:50px;
+
+border:5px solid #333;
+
+border-top:5px solid #FFD600;
+
+border-radius:50%;
+
+margin-top:35px;
+
+animation:spin 1s linear infinite;
+
+}
+
+
+
+.status{
+
+color:white;
+
+margin-top:20px;
+
+font-size:14px;
+
+}
+
+
+
+@keyframes spin{
+
+100%{
+transform:rotate(360deg);
+}
+
+}
+
+
+@keyframes logoScale{
+
+from{
+transform:scale(.8);
+}
+
+to{
+transform:scale(1);
+}
+
+}
+
+
+
+@keyframes fadeIn{
+
+from{
+opacity:0;
+}
+
+to{
+opacity:1;
+}
+
+}
+
+
+</style>
 
 
 </head>
 
 
+
 <body>
 
 
+<!-- Splash Screen -->
 
 
-
-<div class="splash" id="splash">
-
-
-<img
-
-src="assets/logo.png"
-
-class="splash-logo"
-
->
+<div id="splash">
 
 
-<div class="splash-title">
+<img src="assets/logo.svg" class="logo">
 
-Rider<span>X</span>
 
+<div class="title">
+RiderX
 </div>
 
 
+<div class="loader"></div>
 
-<div class="loading">
 
-<span></span>
-
+<div class="status" id="status">
+Starting RiderX...
 </div>
 
 
@@ -62,36 +180,10 @@ Rider<span>X</span>
 
 
 
+<!-- Main App -->
 
 
-
-
-<div class="container" style="display:none;" id="main">
-
-
-
-
-
-<div class="logo">
-
-
-<img src="assets/logo.png">
-
-
-<h1>
-
-Rider<span>X</span>
-
-</h1>
-
-
-
-<p>
-
-Ride • Parcel • Food
-
-</p>
-
+<div id="app" style="display:none;">
 
 
 </div>
@@ -100,102 +192,335 @@ Ride • Parcel • Food
 
 
 
+<script type="module">
 
 
+// Firebase Import
 
-<div class="card">
+import { initializeApp }
+from 
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 
-<h2>
+import { getAuth,onAuthStateChanged }
+from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-Welcome to RiderX
 
-</h2>
 
+import { firebaseConfig }
+from "./firebase/config.js";
 
-<p>
 
-Your smart city ride and delivery app
 
-</p>
 
 
+// Firebase Start
 
-<button
 
-class="btn"
+let firebaseReady=false;
 
-onclick="location.href='auth/login.html'">
 
-Login
+try{
 
-</button>
 
+const app = initializeApp(firebaseConfig);
 
+const auth=getAuth(app);
 
 
-<button
+firebaseReady=true;
 
-class="btn-outline"
 
-onclick="location.href='auth/register.html'">
+console.log(
+"Firebase Connected"
+);
 
-Create Account
 
-</button>
 
+onAuthStateChanged(auth,(user)=>{
 
 
-</div>
+if(user){
 
 
+console.log(
+"User Logged In",
+user.email
+);
 
 
+// future dashboard redirect
 
 
+}
 
+else{
 
-</div>
 
+console.log(
+"No User Login"
+);
 
 
+}
 
 
 
+});
 
 
 
+}
 
-<script>
+catch(error){
 
 
-// Splash
+console.log(
+"Firebase Error",
+error
+);
 
 
-window.onload=()=>{
+}
 
 
-setTimeout(()=>{
 
 
-document.getElementById("splash")
 
-.classList.add("hide");
 
 
+// Status Update Function
 
-document.getElementById("main")
 
-.style.display="block";
+function updateStatus(text){
 
+document.getElementById("status").innerHTML=text;
 
-},2000);
+}
 
 
 
-};
 
 
+
+
+// Internet Check
+
+
+function checkInternet(){
+
+
+if(navigator.onLine){
+
+updateStatus(
+"Internet Connected ✓"
+);
+
+
+}
+
+else{
+
+updateStatus(
+"No Internet Connection"
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+// GPS Permission Check
+
+
+function checkGPS(){
+
+
+if(
+navigator.geolocation
+){
+
+
+
+navigator.geolocation.getCurrentPosition(
+
+()=>{
+
+
+updateStatus(
+"Location Ready ✓"
+);
+
+
+},
+
+
+()=>{
+
+
+updateStatus(
+"Location Permission Required"
+);
+
+
+}
+
+
+);
+
+
+
+}
+
+else{
+
+
+updateStatus(
+"GPS Not Supported"
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+// PWA Install
+
+
+let installPrompt;
+
+
+
+window.addEventListener(
+"beforeinstallprompt",
+(e)=>{
+
+
+e.preventDefault();
+
+installPrompt=e;
+
+
+console.log(
+"PWA Ready"
+);
+
+
+
+});
+
+
+
+
+
+
+
+
+// App Start Sequence
+
+
+
+async function startRiderX(){
+
+
+
+updateStatus(
+"Checking Internet..."
+);
+
+
+checkInternet();
+
+
+
+await new Promise(
+r=>setTimeout(r,1000)
+);
+
+
+
+updateStatus(
+"Checking Location..."
+);
+
+
+checkGPS();
+
+
+
+await new Promise(
+r=>setTimeout(r,1000)
+);
+
+
+
+if(firebaseReady){
+
+
+updateStatus(
+"Firebase Connected ✓"
+);
+
+
+
+}
+
+else{
+
+
+updateStatus(
+"Firebase Failed"
+);
+
+
+}
+
+
+
+await new Promise(
+r=>setTimeout(r,1500)
+);
+
+
+
+document.getElementById(
+"splash"
+).style.display="none";
+
+
+
+document.getElementById(
+"app"
+).style.display="block";
+
+
+
+window.location.href="auth/login.html";
+
+
+
+}
+
+
+
+
+
+startRiderX();
 
 
 
@@ -206,46 +531,25 @@ document.getElementById("main")
 
 
 if(
-
 "serviceWorker" in navigator
-
 ){
 
 
-window.addEventListener(
-
-"load",
-
-()=>{
-
-
 navigator.serviceWorker.register(
-
 "sw.js"
-
 )
 
 .then(()=>{
 
-
 console.log(
-
-"RiderX PWA Ready"
-
+"Service Worker Active"
 );
-
 
 })
 
-
-.catch((err)=>{
-
+.catch(err=>{
 
 console.log(err);
-
-
-});
-
 
 });
 
@@ -255,8 +559,6 @@ console.log(err);
 
 
 </script>
-
-
 
 
 
