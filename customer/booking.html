@@ -10,40 +10,83 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 
 <style>
 
+body{
+background:#000;
+color:white;
+}
+
+
+.container{
+
+padding:15px;
+
+}
+
+
+.header{
+
+text-align:center;
+font-size:28px;
+font-weight:bold;
+padding:20px;
+
+}
+
+
+.header span{
+
+color:#00eaff;
+
+}
+
+
 #map{
-height:350px !important;
-width:100% !important;
-display:block;
-background:#ddd;
-border-radius:15px;
+
+height:350px;
+width:100%;
+border-radius:20px;
 margin-bottom:15px;
+
 }
 
 
 input,select,button{
 
 width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:10px;
+padding:14px;
+margin-top:12px;
+border-radius:12px;
+border:none;
+font-size:16px;
 
 }
 
 
 button{
 
-background:#ffcc00;
-border:none;
+background:#00eaff;
 font-weight:bold;
 
 }
 
+
+.card{
+
+background:#111;
+padding:15px;
+border-radius:15px;
+margin-top:15px;
+
+}
+
+
 </style>
+
 
 </head>
 
@@ -52,14 +95,18 @@ font-weight:bold;
 
 
 <div class="header">
-🚕 RiderX Booking
+
+RIDER<span>X</span> Booking
+
 </div>
+
 
 
 <div class="container">
 
 
 <div id="map"></div>
+
 
 
 <select id="service">
@@ -76,486 +123,71 @@ font-weight:bold;
 📦 Parcel
 </option>
 
+<option value="Food">
+🍔 Food Delivery
+</option>
+
 </select>
+
 
 
 <input id="pickup" placeholder="Pickup Location" readonly>
 
 
-<button onclick="getPickup()">
-📍 Use Current Location
+
+<button id="locationBtn">
+
+📍 Use My Location
+
 </button>
 
 
-<input id="drop" placeholder="Drop Location">
+
+<input id="drop" placeholder="Enter Drop Location">
 
 
-<input id="coupon" placeholder="Coupon Code">
 
-
-<button onclick="applyCoupon()">
-🎁 Apply Coupon
-</button>
-
-
-<button onclick="calculateRide()">
-📏 Calculate Fare
-</button>
+<div class="card">
 
 
 <p id="distance">
-Distance: -
+
+Distance : -
+
 </p>
 
 
-<p id="fare">
-Fare: -
+<p>
+
+Fare : ₹<span id="fare">0</span>
+
 </p>
-
-
-<p id="couponMsg"></p>
-
-
-<button onclick="bookRide()">
-Confirm Booking
-</button>
 
 
 </div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
+<button id="bookBtn">
 
-<script type="module">
+Confirm Ride
 
+</button>
 
-import {db} from "../firebase/config.js";
 
 
-import {
+</div>
 
-collection,
-addDoc,
-serverTimestamp,
-getDocs
 
-}
 
-from
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 
-let map;
-
-let marker=null;
-
-
-let pickupLat=null;
-let pickupLng=null;
-
-let dropLat=null;
-let dropLng=null;
-
-let distance=0;
-let finalFare=0;
-
-let discount=0;
-
-
-
-setTimeout(()=>{
-
-
-map=L.map("map").setView(
-[26.9124,75.7873],
-13
-);
-
-
-L.tileLayer(
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-{
-attribution:"© OpenStreetMap"
-}
-).addTo(map);
-
-
-
-map.invalidateSize();
-
-
-},1000);
-window.getPickup=function(){
-
-
-navigator.geolocation.getCurrentPosition(
-
-(position)=>{
-
-
-pickupLat=position.coords.latitude;
-
-pickupLng=position.coords.longitude;
-
-
-document.getElementById("pickup").value=
-
-pickupLat+","+pickupLng;
-
-
-
-if(marker){
-
-map.removeLayer(marker);
-
-}
-
-
-
-marker=L.marker(
-
-[pickupLat,pickupLng]
-
-)
-
-.addTo(map)
-
-.bindPopup("Pickup Location")
-
-.openPopup();
-
-
-
-map.setView(
-
-[pickupLat,pickupLng],
-
-15
-
-);
-
-
-
-},
-
-()=>{
-
-alert("Location permission allow karo");
-
-}
-
-);
-
-
-}
-
-
-
-
-
-
-window.applyCoupon=async function(){
-
-
-let code=
-
-document.getElementById("coupon").value.toUpperCase();
-
-
-
-let snap=
-
-await getDocs(
-
-collection(db,"coupons")
-
-);
-
-
-
-let applied=false;
-
-
-
-snap.forEach((doc)=>{
-
-
-let data=doc.data();
-
-
-
-if(data.code==code){
-
-
-discount=data.discount;
-
-
-applied=true;
-
-
-}
-
-
-});
-
-
-
-document.getElementById("couponMsg").innerHTML=
-
-applied ?
-
-"Coupon Applied ✅"
-
-:
-
-"Invalid Coupon ❌";
-
-
-}
-
-
-
-
-
-
-
-window.calculateRide=async function(){
-
-
-
-if(!pickupLat){
-
-alert("Pehle pickup location lo");
-
-return;
-
-}
-
-
-
-let place=
-
-document.getElementById("drop").value;
-
-
-
-let response=
-
-await fetch(
-
-"https://nominatim.openstreetmap.org/search?format=json&q="+place
-
-);
-
-
-
-let result=
-
-await response.json();
-
-
-
-if(result.length==0){
-
-alert("Drop location nahi mila");
-
-return;
-
-}
-
-
-
-dropLat=
-
-Number(result[0].lat);
-
-
-dropLng=
-
-Number(result[0].lon);
-
-
-
-
-
-let R=6371;
-
-
-let dLat=
-
-(dropLat-pickupLat)*Math.PI/180;
-
-
-let dLng=
-
-(dropLng-pickupLng)*Math.PI/180;
-
-
-
-let a=
-
-Math.sin(dLat/2)**2+
-
-Math.cos(pickupLat*Math.PI/180)
-
-*
-
-Math.cos(dropLat*Math.PI/180)
-
-*
-
-Math.sin(dLng/2)**2;
-
-
-
-distance=
-
-R*2*Math.atan2(
-
-Math.sqrt(a),
-
-Math.sqrt(1-a)
-
-);
-
-
-
-
-finalFare=
-
-50+(distance*10);
-
-
-
-finalFare=
-
-finalFare-(finalFare*discount/100);
-
-
-
-
-document.getElementById("distance").innerHTML=
-
-"Distance: "+distance.toFixed(2)+" KM";
-
-
-
-document.getElementById("fare").innerHTML=
-
-"Fare: ₹"+Math.round(finalFare);
-
-
-
-}
-
-
-
-
-
-
-
-
-window.bookRide=async function(){
-
-
-
-let ride=
-
-await addDoc(
-
-collection(db,"rides"),
-
-{
-
-
-pickupLat,
-
-pickupLng,
-
-
-dropLat,
-
-dropLng,
-
-
-distance,
-
-
-service:
-
-document.getElementById("service").value,
-
-
-fare:
-
-"₹"+Math.round(finalFare),
-
-
-status:"Pending",
-
-
-paymentStatus:"Pending",
-
-
-createdAt:serverTimestamp()
-
-
-}
-
-);
-
-
-
-localStorage.setItem(
-
-"rideId",
-
-ride.id
-
-);
-
-
-
-alert("Ride Booked ✅");
-
-
-
-location.href="ride-status.html";
-
-
-}
-
-
-</script>
+<script type="module" src="../js/booking.js"></script>
 
 
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
