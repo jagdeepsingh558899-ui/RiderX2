@@ -8,6 +8,7 @@
 
 <title>RiderX Online</title>
 
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 
@@ -37,17 +38,16 @@ border-bottom:2px solid #FFD600;
 
 #map{
 
-height:75vh;
+height:55vh;
 width:100%;
 
 }
 
 
-
 button{
 
 width:90%;
-margin:20px 5%;
+margin:15px 5%;
 padding:15px;
 border:none;
 border-radius:15px;
@@ -57,8 +57,30 @@ font-weight:bold;
 }
 
 
-</style>
+.card{
 
+background:#111;
+margin:15px;
+padding:15px;
+border-radius:15px;
+border:1px solid #333;
+
+}
+
+
+.accept{
+
+background:#FFD600;
+padding:10px;
+border:none;
+border-radius:10px;
+width:100%;
+font-weight:bold;
+
+}
+
+
+</style>
 
 </head>
 
@@ -69,7 +91,7 @@ font-weight:bold;
 
 <div class="header">
 
-🏍 RiderX Rider Map
+🏍 RiderX Rider Online
 
 </div>
 
@@ -85,6 +107,13 @@ font-weight:bold;
 
 </button>
 
+
+
+<div id="rides">
+
+No rides nearby
+
+</div>
 
 
 
@@ -104,6 +133,11 @@ import {
 
 doc,
 setDoc,
+collection,
+query,
+where,
+getDocs,
+updateDoc,
 serverTimestamp
 
 }
@@ -114,9 +148,9 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
+let map=L.map("map")
 
-let map =
-L.map("map").setView(
+.setView(
 
 [30.7333,76.7794],
 
@@ -130,15 +164,11 @@ L.map("map").setView(
 
 L.tileLayer(
 
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 
-{
+)
 
-maxZoom:19
-
-}
-
-).addTo(map);
+.addTo(map);
 
 
 
@@ -146,12 +176,19 @@ maxZoom:19
 
 let marker=null;
 
+let riderLat=null;
+
+let riderLng=null;
+
+let online=false;
 
 
 
 
-const btn =
-document.getElementById("onlineBtn");
+
+let btn=document.getElementById("onlineBtn");
+
+
 
 
 
@@ -160,17 +197,29 @@ document.getElementById("onlineBtn");
 btn.onclick=()=>{
 
 
+online=true;
+
+
+btn.innerHTML=
+
+"🟢 Rider Online";
+
+
+
+
 
 navigator.geolocation.watchPosition(
 
 async(position)=>{
 
 
-let lat =
+riderLat=
+
 position.coords.latitude;
 
 
-let lng =
+riderLng=
+
 position.coords.longitude;
 
 
@@ -182,7 +231,7 @@ if(marker){
 
 marker.setLatLng(
 
-[lat,lng]
+[riderLat,riderLng]
 
 );
 
@@ -194,7 +243,7 @@ else{
 
 marker=L.marker(
 
-[lat,lng]
+[riderLat,riderLng]
 
 )
 
@@ -202,7 +251,7 @@ marker=L.marker(
 
 .bindPopup(
 
-"You are Online 🟢"
+"🟢 You Online"
 
 )
 
@@ -215,9 +264,10 @@ marker=L.marker(
 
 
 
+
 map.setView(
 
-[lat,lng],
+[riderLat,riderLng],
 
 16
 
@@ -227,7 +277,9 @@ map.setView(
 
 
 
-let user =
+
+let user=
+
 auth.currentUser;
 
 
@@ -243,9 +295,9 @@ doc(db,"riderLocations",user.uid),
 {
 
 
-lat,
+lat:riderLat,
 
-lng,
+lng:riderLng,
 
 status:"Online",
 
@@ -263,17 +315,20 @@ updatedAt:serverTimestamp()
 
 
 
+loadNearbyRides();
+
+
 
 },
 
-
-(error)=>{
+()=>{
 
 
 alert(
-"Location permission allow karo"
-);
 
+"Location permission allow karo"
+
+);
 
 },
 
@@ -285,18 +340,258 @@ enableHighAccuracy:true
 }
 
 
+
+);
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================
+// LOAD RIDES
+// =====================
+
+
+async function loadNearbyRides(){
+
+
+
+if(!online)
+
+return;
+
+
+
+
+let q=query(
+
+collection(db,"rides"),
+
+where(
+
+"status",
+
+"==",
+
+"Pending"
+
+)
+
 );
 
 
 
-btn.innerHTML=
 
-"🟢 Rider Online";
+
+let snap=
+
+await getDocs(q);
+
+
+
+
+
+let box=
+
+document.getElementById("rides");
+
+
+
+box.innerHTML="";
+
+
+
+
+
+if(snap.empty){
+
+
+box.innerHTML=
+
+"<p>No nearby rides</p>";
+
+return;
+
+
+}
+
+
+
+
+
+
+snap.forEach((ride)=>{
+
+
+let data=
+
+ride.data();
+
+
+
+
+
+let card=
+
+document.createElement("div");
+
+
+
+card.className="card";
+
+
+
+
+
+card.innerHTML=
+
+`
+
+<h3>
+
+🏍 ${data.service}
+
+</h3>
+
+
+<p>
+
+📍 Pickup:
+
+${data.pickup}
+
+</p>
+
+
+<p>
+
+🏁 Drop:
+
+${data.drop}
+
+</p>
+
+
+<p>
+
+💰 ₹${data.fare}
+
+</p>
+
+
+
+<button class="accept">
+
+Accept Ride
+
+</button>
+
+`;
+
+
+
+
+
+
+card.querySelector("button")
+
+.onclick=
+
+async()=>{
+
+
+
+
+
+let user=
+
+auth.currentUser;
+
+
+
+
+
+await updateDoc(
+
+doc(db,"rides",ride.id),
+
+{
+
+
+status:"Accepted",
+
+riderId:user.uid,
+
+acceptedAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+
+
+localStorage.setItem(
+
+"rideId",
+
+ride.id
+
+);
+
+
+
+alert(
+
+"Ride Accepted ✅"
+
+);
+
+
+
+location.href="trip.html";
 
 
 
 };
 
+
+
+
+
+box.appendChild(card);
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+setInterval(()=>{
+
+
+if(online)
+
+loadNearbyRides();
+
+
+},10000);
 
 
 
