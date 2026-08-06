@@ -1,237 +1,298 @@
 /* =========================================
-   RiderX Premium Global Style
+   RiderX Premium Style
    Black + Yellow Theme
    ========================================= */
+
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 
 :root{
-    --primary:#FFD600;
-    --secondary:#FFC400;
-    --dark:#0b0b0b;
-    --dark2:#151515;
-    --card:#1c1c1c;
-    --white:#ffffff;
-    --gray:#a5a5a5;
-    --success:#00c853;
-    --danger:#ff1744;
-    --shadow:0 10px 30px rgba(0,0,0,0.35);
+
+--primary:#FFD600;
+
+--secondary:#FFC400;
+
+--dark:#080808;
+
+--dark2:#111;
+
+--card:#181818;
+
+--white:#fff;
+
+--gray:#aaa;
+
+--success:#00c853;
+
+--danger:#ff1744;
+
+--shadow:0 15px 35px rgba(0,0,0,.45);
+
 }
+
 
 
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
+
+margin:0;
+
+padding:0;
+
+box-sizing:border-box;
+
+font-family:'Poppins',sans-serif;
+
 }
+
 
 
 body{
-    background:#0b0b0b;
-    color:white;
-    min-height:100vh;
+
+background:var(--dark);
+
+color:white;
+
+min-height:100vh;
+
+overflow-x:hidden;
+
 }
 
 
-/* Scrollbar */
+
+
+/* Scroll */
+
 
 ::-webkit-scrollbar{
-    width:6px;
+
+width:6px;
+
 }
 
-::-webkit-scrollbar-track{
-    background:#111;
-}
 
 ::-webkit-scrollbar-thumb{
-    background:var(--primary);
-    border-radius:20px;
+
+background:var(--primary);
+
+border-radius:20px;
+
 }
 
 
 
-/* =========================================
-   Logo
-   ========================================= */
+
+
+/* =========================
+Logo
+========================= */
+
 
 .logo{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    font-size:24px;
-    font-weight:700;
-    color:var(--primary);
+
+display:flex;
+
+align-items:center;
+
+gap:12px;
+
+font-size:24px;
+
+font-weight:800;
+
+color:var(--primary);
+
 }
+
 
 
 .logo img{
-    width:55px;
-    height:55px;
-    object-fit:contain;
-    animation:logoPulse 2s infinite;
-}
 
+width:52px;
 
-@keyframes logoPulse{
+height:52px;
 
-    0%{
-        transform:scale(1);
-    }
+object-fit:contain;
 
-    50%{
-        transform:scale(1.08);
-    }
-
-    100%{
-        transform:scale(1);
-    }
+/* Static logo - no duplicate animation */
 
 }
 
 
 
-/* =========================================
-   Splash Screen
-   ========================================= */
+
+
+/* =========================
+Splash Screen
+========================= */
 
 
 .splash{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100vh;
-    background:#000;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
-}
 
+position:fixed;
 
-.splash img{
-    width:130px;
-    animation:splashLogo 2s infinite;
-}
+inset:0;
 
+background:#000;
 
-@keyframes splashLogo{
+display:flex;
 
-    0%{
-        opacity:.5;
-        transform:scale(.8);
-    }
+flex-direction:column;
 
-    50%{
-        opacity:1;
-        transform:scale(1);
-    }
+justify-content:center;
 
-    100%{
-        opacity:.5;
-        transform:scale(.8);
-    }
+align-items:center;
+
+z-index:99999;
 
 }
 
 
 
-/* =========================================
-   Buttons
-   ========================================= */
+.splash-logo{
 
+width:150px;
 
-.btn{
+height:150px;
 
-    display:inline-flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
+object-fit:contain;
 
-    padding:14px 25px;
-
-    border:none;
-    outline:none;
-
-    border-radius:14px;
-
-    background:var(--primary);
-    color:#000;
-
-    font-size:15px;
-    font-weight:700;
-
-    cursor:pointer;
-
-    transition:.3s;
-
-}
-
-
-.btn:hover{
-
-    transform:translateY(-3px);
-
-    box-shadow:
-    0 8px 20px rgba(255,214,0,.35);
+animation:splashZoom 2s ease infinite;
 
 }
 
 
 
-.btn-dark{
+.splash h2{
 
-    background:#222;
-    color:white;
+margin-top:20px;
 
-}
+font-size:35px;
 
+font-weight:800;
 
-.btn-danger{
+color:var(--primary);
 
-    background:var(--danger);
-    color:white;
-
-}
-
-
-
-.btn-success{
-
-    background:var(--success);
-    color:white;
+letter-spacing:2px;
 
 }
 
 
 
+.splash p{
 
-/* =========================================
-   Navbar
-   ========================================= */
+color:#aaa;
+
+margin-top:8px;
+
+font-size:14px;
+
+}
+
+
+
+.splash-hide{
+
+animation:splashFade .8s forwards;
+
+}
+
+
+
+@keyframes splashZoom{
+
+
+0%{
+
+transform:scale(.75);
+
+opacity:0;
+
+}
+
+
+
+40%{
+
+transform:scale(1.08);
+
+opacity:1;
+
+}
+
+
+
+100%{
+
+transform:scale(1);
+
+opacity:1;
+
+}
+
+
+}
+
+
+
+
+@keyframes splashFade{
+
+
+from{
+
+opacity:1;
+
+}
+
+
+
+to{
+
+opacity:0;
+
+visibility:hidden;
+
+}
+
+
+}
+
+
+
+
+
+
+
+/* =========================
+Navbar
+========================= */
 
 
 .navbar{
 
-    width:100%;
-    height:75px;
+height:75px;
 
-    background:#111;
+width:100%;
 
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+background:#111;
 
-    padding:0 25px;
+display:flex;
 
-    position:sticky;
-    top:0;
+align-items:center;
 
-    z-index:100;
+justify-content:space-between;
 
-    box-shadow:var(--shadow);
+padding:0 25px;
+
+position:sticky;
+
+top:0;
+
+z-index:1000;
+
+box-shadow:var(--shadow);
 
 }
 
@@ -239,18 +300,23 @@ body{
 
 .nav-links{
 
-    display:flex;
-    gap:20px;
+display:flex;
+
+gap:25px;
 
 }
 
 
+
 .nav-links a{
 
-    color:white;
-    text-decoration:none;
+color:white;
 
-    transition:.3s;
+text-decoration:none;
+
+font-weight:500;
+
+transition:.3s;
 
 }
 
@@ -258,121 +324,151 @@ body{
 
 .nav-links a:hover{
 
-    color:var(--primary);
+color:var(--primary);
 
 }
 
 
 
-/* =========================================
-   Cards
-   ========================================= */
 
 
-.card{
 
-    background:var(--card);
 
-    border-radius:22px;
+/* =========================
+Buttons
+========================= */
 
-    padding:25px;
 
-    box-shadow:var(--shadow);
+.btn{
 
-    border:1px solid rgba(255,214,0,.1);
 
-    animation:fadeUp .5s ease;
+display:inline-flex;
+
+align-items:center;
+
+justify-content:center;
+
+gap:8px;
+
+
+padding:14px 26px;
+
+
+border:none;
+
+border-radius:15px;
+
+
+background:var(--primary);
+
+color:#000;
+
+
+font-weight:800;
+
+
+cursor:pointer;
+
+
+text-decoration:none;
+
+
+transition:.3s;
+
 
 }
 
 
 
-@keyframes fadeUp{
-
-    from{
-
-        opacity:0;
-        transform:translateY(20px);
-
-    }
+.btn:hover{
 
 
-    to{
+transform:translateY(-4px);
 
-        opacity:1;
-        transform:translateY(0);
 
-    }
+box-shadow:
+
+0 10px 25px rgba(255,214,0,.35);
+
 
 }
 
 
 
-/* =========================================
-   Forms
-   ========================================= */
 
+.btn-dark{
 
-.input-box{
+background:#222;
 
-    width:100%;
-
-    margin-bottom:18px;
-
-}
-
-
-.input-box label{
-
-    display:block;
-
-    margin-bottom:7px;
-
-    color:#ddd;
-
-}
-
-
-.input-box input,
-.input-box select,
-.input-box textarea{
-
-
-    width:100%;
-
-    padding:15px;
-
-    border-radius:14px;
-
-    border:none;
-
-    outline:none;
-
-    background:#222;
-
-    color:white;
+color:white;
 
 }
 
 
 
-.input-box input:focus,
-.input-box select:focus{
+.btn-success{
 
-    border:1px solid var(--primary);
+background:var(--success);
+
+color:white;
 
 }
 
 
 
-/* =========================================
-   Dashboard
-   ========================================= */
+.btn-danger{
+
+background:var(--danger);
+
+color:white;
+
+}
 
 
-.dashboard{
 
-    padding:25px;
+
+
+/* =========================
+Main Cards
+========================= */
+
+
+.dashboard-wrapper{
+
+padding:25px;
+
+}
+
+
+
+.page{
+
+animation:pageShow .5s ease;
+
+}
+
+
+
+@keyframes pageShow{
+
+
+from{
+
+opacity:0;
+
+transform:translateY(15px);
+
+}
+
+
+to{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
 
 }
 
@@ -380,58 +476,142 @@ body{
 
 .grid{
 
-    display:grid;
 
-    grid-template-columns:
-    repeat(auto-fit,minmax(250px,1fr));
+display:grid;
 
-    gap:20px;
+grid-template-columns:
+
+repeat(auto-fit,minmax(250px,1fr));
+
+
+gap:20px;
+
 
 }
 
 
 
-.stat-card{
 
-    background:#181818;
 
-    padding:25px;
+.card{
 
-    border-radius:20px;
 
-    border-left:5px solid var(--primary);
+background:var(--card);
+
+
+border-radius:24px;
+
+
+padding:25px;
+
+
+box-shadow:var(--shadow);
+
+
+border:1px solid rgba(255,214,0,.12);
+
 
 }
 
 
 
-.stat-card h2{
+.card h2{
 
-    color:var(--primary);
+color:var(--primary);
+
+}
+/* =========================
+   Welcome / Hero
+========================= */
+
+
+.welcome-card{
+
+background:#151515;
+
+border-radius:25px;
+
+padding:35px;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+gap:25px;
+
+box-shadow:var(--shadow);
 
 }
 
 
 
-.stat-card p{
+.welcome-card h1{
 
-    color:#aaa;
+font-size:38px;
 
 }
-/* =========================================
-   Booking Design
-   ========================================= */
+
+
+
+.welcome-card p{
+
+color:#aaa;
+
+margin-top:10px;
+
+}
+
+
+
+
+.hero-badge{
+
+width:150px;
+
+height:150px;
+
+border-radius:50%;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+background:var(--primary);
+
+color:#000;
+
+font-size:22px;
+
+font-weight:800;
+
+box-shadow:
+
+0 0 40px rgba(255,214,0,.35);
+
+}
+
+
+
+
+
+/* =========================
+Booking
+========================= */
 
 
 .booking-box{
 
-    background:#161616;
+background:#161616;
 
-    padding:25px;
+padding:25px;
 
-    border-radius:25px;
+border-radius:25px;
 
-    box-shadow:var(--shadow);
+box-shadow:var(--shadow);
 
 }
 
@@ -439,14 +619,13 @@ body{
 
 .ride-type{
 
-    display:grid;
+display:grid;
 
-    grid-template-columns:
-    repeat(2,1fr);
+grid-template-columns:repeat(2,1fr);
 
-    gap:15px;
+gap:15px;
 
-    margin:20px 0;
+margin:20px 0;
 
 }
 
@@ -454,17 +633,17 @@ body{
 
 .ride-type .option{
 
-    background:#222;
+background:#222;
 
-    padding:18px;
+padding:18px;
 
-    border-radius:18px;
+border-radius:18px;
 
-    text-align:center;
+text-align:center;
 
-    cursor:pointer;
+cursor:pointer;
 
-    transition:.3s;
+transition:.3s;
 
 }
 
@@ -472,35 +651,93 @@ body{
 
 .ride-type .option:hover{
 
-    background:var(--primary);
+background:var(--primary);
 
-    color:black;
-
-    transform:translateY(-5px);
+color:black;
 
 }
 
 
 
 
-/* =========================================
-   Map
-   ========================================= */
+
+/* =========================
+Inputs
+========================= */
+
+
+.input-box{
+
+width:100%;
+
+margin-bottom:18px;
+
+}
+
+
+
+.input-box label{
+
+display:block;
+
+margin-bottom:8px;
+
+color:#ddd;
+
+}
+
+
+
+.input-box input,
+.input-box select,
+.input-box textarea{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+outline:none;
+
+border-radius:15px;
+
+background:#222;
+
+color:white;
+
+}
+
+
+
+.input-box input:focus{
+
+border:1px solid var(--primary);
+
+}
+
+
+
+
+
+/* =========================
+Map
+========================= */
 
 
 .map-container{
 
-    width:100%;
+height:400px;
 
-    height:400px;
+width:100%;
 
-    border-radius:25px;
+border-radius:25px;
 
-    overflow:hidden;
+overflow:hidden;
 
-    border:2px solid var(--primary);
+border:2px solid var(--primary);
 
-    box-shadow:var(--shadow);
+box-shadow:var(--shadow);
 
 }
 
@@ -508,26 +745,28 @@ body{
 
 .leaflet-container{
 
-    background:#111!important;
+background:#111!important;
 
 }
 
 
 
-/* =========================================
-   Ride Status
-   ========================================= */
+
+
+/* =========================
+Status
+========================= */
 
 
 .status-box{
 
-    background:#171717;
+background:#171717;
 
-    padding:25px;
+padding:25px;
 
-    border-radius:25px;
+border-radius:25px;
 
-    text-align:center;
+text-align:center;
 
 }
 
@@ -535,67 +774,168 @@ body{
 
 .status{
 
-    display:inline-block;
+display:inline-block;
 
-    padding:10px 20px;
+padding:10px 22px;
 
-    border-radius:30px;
+border-radius:30px;
 
-    background:var(--primary);
+background:var(--primary);
 
-    color:#000;
+color:black;
 
-    font-weight:700;
-
-    animation:pulseStatus 1.5s infinite;
-
-}
-
-
-
-@keyframes pulseStatus{
-
-    0%{
-
-        box-shadow:0 0 0 0 rgba(255,214,0,.6);
-
-    }
-
-    70%{
-
-        box-shadow:0 0 0 15px rgba(255,214,0,0);
-
-    }
-
-    100%{
-
-        box-shadow:0 0 0 0 rgba(255,214,0,0);
-
-    }
+font-weight:800;
 
 }
 
 
 
 
-/* =========================================
-   Rider Card
-   ========================================= */
+
+/* =========================
+Profile
+========================= */
+
+
+.profile-card{
+
+background:#181818;
+
+padding:30px;
+
+border-radius:25px;
+
+box-shadow:var(--shadow);
+
+}
+
+
+
+.profile-img{
+
+width:120px;
+
+height:120px;
+
+border-radius:50%;
+
+object-fit:cover;
+
+border:4px solid var(--primary);
+
+margin:auto;
+
+display:block;
+
+}
+
+
+
+
+
+.profile-form{
+
+margin-top:25px;
+
+}
+
+
+
+
+
+/* =========================
+Wallet
+========================= */
+
+
+.wallet-card{
+
+background:
+
+linear-gradient(135deg,#222,#111);
+
+padding:30px;
+
+border-radius:25px;
+
+box-shadow:var(--shadow);
+
+}
+
+
+
+.wallet-card h1,
+.wallet-card h2{
+
+color:var(--primary);
+
+}
+
+
+
+
+
+/* =========================
+Dashboard Stats
+========================= */
+
+
+.dashboard-stats{
+
+display:grid;
+
+grid-template-columns:
+
+repeat(auto-fit,minmax(200px,1fr));
+
+gap:20px;
+
+}
+
+
+
+.dashboard-stat{
+
+background:#181818;
+
+padding:25px;
+
+border-radius:20px;
+
+border-left:5px solid var(--primary);
+
+}
+
+
+
+.dashboard-stat h2{
+
+color:var(--primary);
+
+}
+
+
+
+
+
+/* =========================
+Rider Card
+========================= */
 
 
 .rider-card{
 
-    display:flex;
+display:flex;
 
-    align-items:center;
+align-items:center;
 
-    gap:15px;
+gap:15px;
 
-    background:#181818;
+background:#181818;
 
-    padding:20px;
+padding:20px;
 
-    border-radius:20px;
+border-radius:20px;
 
 }
 
@@ -603,111 +943,36 @@ body{
 
 .rider-card img{
 
-    width:70px;
+width:70px;
 
-    height:70px;
+height:70px;
 
-    border-radius:50%;
+border-radius:50%;
 
-    object-fit:cover;
+border:3px solid var(--primary);
 
-    border:3px solid var(--primary);
-
-}
-
-
-
-.rider-info h3{
-
-    color:var(--primary);
+object-fit:cover;
 
 }
 
 
 
 
-/* =========================================
-   Profile
-   ========================================= */
 
-
-.profile{
-
-    text-align:center;
-
-}
-
-
-
-.profile img{
-
-    width:120px;
-
-    height:120px;
-
-    border-radius:50%;
-
-    object-fit:cover;
-
-    border:4px solid var(--primary);
-
-}
-
-
-
-.profile h2{
-
-    margin-top:15px;
-
-}
-
-
-
-
-/* =========================================
-   Wallet
-   ========================================= */
-
-
-.wallet-card{
-
-    background:linear-gradient(
-    135deg,
-    #222,
-    #111
-    );
-
-    padding:30px;
-
-    border-radius:25px;
-
-}
-
-
-
-.wallet-card h1{
-
-    color:var(--primary);
-
-}
-
-
-
-
-/* =========================================
-   Admin Panel
-   ========================================= */
+/* =========================
+Admin
+========================= */
 
 
 .sidebar{
 
-    width:260px;
+width:260px;
 
-    min-height:100vh;
+min-height:100vh;
 
-    background:#111;
+background:#111;
 
-    padding:25px;
+padding:25px;
 
 }
 
@@ -715,17 +980,17 @@ body{
 
 .sidebar a{
 
-    display:block;
+display:block;
 
-    padding:15px;
+padding:15px;
 
-    color:white;
+margin-bottom:10px;
 
-    text-decoration:none;
+color:white;
 
-    border-radius:12px;
+text-decoration:none;
 
-    margin-bottom:10px;
+border-radius:12px;
 
 }
 
@@ -733,41 +998,34 @@ body{
 
 .sidebar a:hover{
 
-    background:var(--primary);
+background:var(--primary);
 
-    color:black;
-
-}
-
-
-
-.admin-content{
-
-    padding:25px;
+color:black;
 
 }
 
 
 
 
-/* =========================================
-   Loading Animation
-   ========================================= */
+
+/* =========================
+Loading
+========================= */
 
 
 .loader{
 
-    width:45px;
+width:45px;
 
-    height:45px;
+height:45px;
 
-    border:5px solid #333;
+border:5px solid #333;
 
-    border-top:5px solid var(--primary);
+border-top:5px solid var(--primary);
 
-    border-radius:50%;
+border-radius:50%;
 
-    animation:spin 1s linear infinite;
+animation:spin 1s linear infinite;
 
 }
 
@@ -775,36 +1033,41 @@ body{
 
 @keyframes spin{
 
-    from{
+to{
 
-        transform:rotate(0deg);
+transform:rotate(360deg);
 
-    }
-
-    to{
-
-        transform:rotate(360deg);
-
-    }
+}
 
 }
 
 
 
 
-/* =========================================
-   Mobile Responsive
-   ========================================= */
+
+
+/* =========================
+Mobile
+========================= */
 
 
 @media(max-width:768px){
 
 
+
 .navbar{
 
-    height:65px;
+height:65px;
 
-    padding:0 15px;
+padding:0 15px;
+
+}
+
+
+
+.logo{
+
+font-size:20px;
 
 }
 
@@ -812,9 +1075,9 @@ body{
 
 .logo img{
 
-    width:45px;
+width:45px;
 
-    height:45px;
+height:45px;
 
 }
 
@@ -822,15 +1085,45 @@ body{
 
 .nav-links{
 
-    display:none;
+display:none;
 
 }
 
 
 
-.dashboard{
+.dashboard-wrapper{
 
-    padding:15px;
+padding:15px;
+
+}
+
+
+
+.welcome-card{
+
+flex-direction:column;
+
+text-align:center;
+
+padding:25px;
+
+}
+
+
+
+.welcome-card h1{
+
+font-size:28px;
+
+}
+
+
+
+.hero-badge{
+
+width:120px;
+
+height:120px;
 
 }
 
@@ -838,31 +1131,7 @@ body{
 
 .grid{
 
-    grid-template-columns:1fr;
-
-}
-
-
-
-.map-container{
-
-    height:300px;
-
-}
-
-
-
-.ride-type{
-
-    grid-template-columns:1fr;
-
-}
-
-
-
-.card{
-
-    padding:18px;
+grid-template-columns:1fr;
 
 }
 
@@ -870,46 +1139,33 @@ body{
 
 .btn{
 
-    width:100%;
+width:100%;
 
 }
 
 
 
-.sidebar{
+.ride-type{
 
-    width:100%;
-
-    min-height:auto;
+grid-template-columns:1fr;
 
 }
 
 
 
-}
+.map-container{
 
-
-
-@media(max-width:400px){
-
-.logo{
-
-    font-size:20px;
+height:300px;
 
 }
+
 
 
 .card{
 
-    border-radius:15px;
+padding:18px;
 
 }
 
+
 }
-
-
-/* =========================================
-   RiderX End
-   Logo Path:
-   /assets/logo.png
-   ========================================= */
