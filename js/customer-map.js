@@ -1,29 +1,36 @@
-// ==========================================
-// RiderX Customer Map System V5
-// Live Rider Tracking + Ride Status
-// ==========================================
-
-
-import { auth, db } from "../firebase/config.js";
+// =====================================
+// RiderX Customer Map System
+// GPS + Fare + Booking
+// =====================================
 
 
 import {
 
-doc,
-onSnapshot
+db,
+
+auth
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "../firebase/config.js";
+
 
 
 import {
 
-onAuthStateChanged
+collection,
+
+addDoc,
+
+serverTimestamp
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
 
 
 
@@ -31,71 +38,35 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 let map;
 
-let riderMarker=null;
+let marker;
 
-let user=null;
+let currentLat;
 
-let rideId=null;
+let currentLng;
 
+let selectedService="Bike Taxi";
 
-
-
-
-
-const statusBox =
-document.getElementById("rideStatus");
-
-
-const otpBox =
-document.getElementById("otpBox");
-
-
-const otpText =
-document.getElementById("rideOTP");
-
-
-const riderCard =
-document.getElementById("riderCard");
-
-
-const pickupText =
-document.getElementById("pickupText");
-
-
-const dropText =
-document.getElementById("dropText");
-
-
-const fareText =
-document.getElementById("fareText");
+let distance=0;
 
 
 
 
 
-// ==============================
-// CREATE MAP
-// ==============================
+
+
+
+
+// =====================================
+// INIT MAP
+// =====================================
+
 
 
 function initMap(){
 
 
-if(!document.getElementById("map")){
 
-return;
-
-}
-
-
-
-map = L.map("map",{
-
-zoomControl:true
-
-})
-
-.setView(
+map=L.map("map").setView(
 
 [30.7333,76.7794],
 
@@ -107,29 +78,28 @@ zoomControl:true
 
 
 
+
+
 L.tileLayer(
 
 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
 {
 
-maxZoom:19,
 
-attribution:"© OpenStreetMap"
+maxZoom:19
+
 
 }
 
-)
-
-.addTo(map);
+).addTo(map);
 
 
 
-setTimeout(()=>{
 
-map.invalidateSize();
 
-},500);
+
+getGPS();
 
 
 
@@ -140,7 +110,34 @@ map.invalidateSize();
 
 
 
-initMap();
+
+
+
+// =====================================
+// GPS
+// =====================================
+
+
+
+function getGPS(){
+
+
+
+navigator.geolocation.getCurrentPosition(
+
+(position)=>{
+
+
+
+currentLat=
+
+position.coords.latitude;
+
+
+
+currentLng=
+
+position.coords.longitude;
 
 
 
@@ -148,42 +145,125 @@ initMap();
 
 
 
+marker=L.marker(
+
+[currentLat,currentLng]
+
+).addTo(map);
 
 
-// ==============================
-// AUTH
-// ==============================
 
 
-onAuthStateChanged(auth,(u)=>{
+
+map.setView(
+
+[currentLat,currentLng],
+
+16
+
+);
 
 
-if(!u){
 
-window.location.href="../auth/login.html";
 
-return;
+
+
+
+document.getElementById(
+
+"pickup"
+
+).value=
+
+currentLat+","+currentLng;
+
+
+
+
+
+
+
+},
+
+(error)=>{
+
+
+
+alert(
+
+"GPS Permission Required"
+
+);
+
+
 
 }
 
 
 
-user=u;
+);
 
 
-
-rideId=
-
-localStorage.getItem("rideId");
-
-
-
-
-if(rideId){
-
-loadRide();
 
 }
+
+
+
+
+
+
+
+
+
+// =====================================
+// SERVICE SELECT
+// =====================================
+
+
+
+document.querySelectorAll(
+
+".service"
+
+).forEach(btn=>{
+
+
+
+btn.onclick=()=>{
+
+
+
+document.querySelectorAll(
+
+".service"
+
+).forEach(x=>{
+
+
+x.classList.remove("active");
+
+
+});
+
+
+
+
+
+btn.classList.add("active");
+
+
+
+selectedService=
+
+btn.dataset.service;
+
+
+
+calculateFare();
+
+
+
+};
 
 
 
@@ -197,70 +277,257 @@ loadRide();
 
 
 
-// ==============================
-// LOAD RIDE
-// ==============================
-
-
-function loadRide(){
+// =====================================
+// FARE CALCULATION
+// =====================================
 
 
 
-const rideRef=
+function calculateFare(){
 
-doc(
 
-db,
 
-"rides",
+let rate=8;
 
-rideId
+
+
+if(selectedService==="Cab"){
+
+
+rate=12;
+
+
+}
+
+
+
+if(selectedService==="Parcel"){
+
+
+rate=10;
+
+
+}
+
+
+
+if(selectedService==="Food"){
+
+
+rate=20;
+
+
+}
+
+
+
+
+
+
+let fare=
+
+Math.max(
+
+50,
+
+distance*rate
 
 );
 
 
 
-onSnapshot(
-
-rideRef,
-
-(snapshot)=>{
 
 
 
-if(!snapshot.exists()){
+document.getElementById(
+
+"fare"
+
+).innerHTML=
+
+"₹"+Math.round(fare);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// BOOK RIDE
+// =====================================
+
+
+
+document.getElementById(
+
+"bookRide"
+
+).onclick=async()=>{
+
+
+
+const user=
+
+auth.currentUser;
+
+
+
+if(!user){
+
+
+
+alert(
+
+"Please login first"
+
+);
+
+
 
 return;
 
+
 }
 
 
 
-const ride=snapshot.data();
+
+
+
+const pickup=
+
+document.getElementById(
+
+"pickup"
+
+).value;
+
+
+
+const drop=
+
+document.getElementById(
+
+"drop"
+
+).value;
 
 
 
 
 
-updateRide(ride);
+
+if(!drop){
 
 
 
+alert(
 
-
-if(ride.riderId){
-
-listenRider(
-
-ride.riderId
+"Enter destination"
 
 );
 
+
+
+return;
+
+
 }
 
 
 
+
+
+
+
+try{
+
+
+
+await addDoc(
+
+collection(
+
+db,
+
+"rides"
+
+),
+
+
+{
+
+
+customerId:user.uid,
+
+
+service:selectedService,
+
+
+pickup:pickup,
+
+
+drop:drop,
+
+
+fare:document.getElementById(
+
+"fare"
+
+).innerHTML,
+
+
+status:"searching",
+
+
+createdAt:
+
+serverTimestamp()
+
+
+
 }
+
+
+);
+
+
+
+
+
+
+alert(
+
+"Ride Searching..."
+
+);
+
+
+
+window.location.href=
+
+"home.html";
+
+
+
+}
+
+
+
+catch(error){
+
+
+
+alert(
+
+error.message
 
 );
 
@@ -270,52 +537,13 @@ ride.riderId
 
 
 
+};
 
 
 
 
 
 
-// ==============================
-// UPDATE UI
-// ==============================
 
 
-function updateRide(ride){
-
-
-
-statusBox.innerHTML=
-
-ride.status || "Searching Rider...";
-
-
-
-
-pickupText.innerHTML=
-
-ride.pickup || "-";
-
-
-
-dropText.innerHTML=
-
-ride.drop || "-";
-
-
-
-fareText.innerHTML=
-
-ride.fare || 0;
-
-
-
-
-
-if(ride.otp){
-
-
-otpBox.style.display="block";
-
-
-otpText.innerHTML
+initMap();
