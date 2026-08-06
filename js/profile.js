@@ -1,103 +1,131 @@
+// =================================
+// RiderX Profile System
+// Load + Update + Logout
+// =================================
 
-// ==========================================
-// RiderX Profile System V1
-// Load + Update User Profile
-// ==========================================
+
+import {
+
+auth,
+db
+
+} from "../firebase/Firebase-config.js";
 
 
-import { auth, db } from "../firebase/config.js";
+import {
+
+onAuthStateChanged,
+signOut
+
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 import {
 
 doc,
 getDoc,
-setDoc,
-serverTimestamp
+updateDoc
+
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+let userId = null;
+
+
+
+
+
+// Load Profile
+
+
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
+
+
+if(user){
+
+
+userId = user.uid;
+
+
+
+const userRef =
+
+doc(
+
+db,
+
+"users",
+
+user.uid
+
+);
+
+
+
+
+
+const userSnap =
+
+await getDoc(userRef);
+
+
+
+
+
+if(userSnap.exists()){
+
+
+
+const data = userSnap.data();
+
+
+
+
+
+document.getElementById("userName").innerHTML =
+
+data.name || "User";
+
+
+
+document.getElementById("userEmail").innerHTML =
+
+data.email;
+
+
+
+document.getElementById("name").value =
+
+data.name || "";
+
+
+
+document.getElementById("phone").value =
+
+data.phone || "";
+
+
+
+document.getElementById("email").value =
+
+data.email || "";
+
+
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-
-import {
-
-onAuthStateChanged
 
 }
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-
-
-
-
-
-
-const nameInput =
-document.getElementById("name");
-
-
-const phoneInput =
-document.getElementById("phone");
-
-
-const emailInput =
-document.getElementById("email");
-
-
-const vehicleType =
-document.getElementById("vehicleType");
-
-
-const vehicleNumber =
-document.getElementById("vehicleNumber");
-
-
-const saveBtn =
-document.getElementById("saveProfile");
-
-
-
-
-
-let userId=null;
-
-
-
-
-
-
-
-
-onAuthStateChanged(auth,async(user)=>{
-
-
-if(!user){
-
-location.href="../auth/login.html";
-
-return;
-
-}
-
-
-
-userId=user.uid;
-
-
-
-phoneInput.value =
-user.phoneNumber || "";
-
-
-
-emailInput.value =
-user.email || "";
-
-
-
-loadProfile();
 
 
 
@@ -111,86 +139,43 @@ loadProfile();
 
 
 
-async function loadProfile(){
+// Save Profile
 
 
-const ref=
+const saveBtn =
 
-doc(
-
-db,
-
-"users",
-
-userId
-
-);
+document.getElementById("saveProfile");
 
 
 
-const snap=
-
-await getDoc(ref);
 
 
-
-if(snap.exists()){
-
-
-const data=snap.data();
+if(saveBtn){
 
 
 
-nameInput.value =
-data.name || "";
+saveBtn.onclick = async()=>{
 
 
 
-if(vehicleType){
-
-vehicleType.value =
-data.vehicleType || "Bike";
-
-}
 
 
+const name =
 
-if(vehicleNumber){
-
-vehicleNumber.value =
-data.vehicleNumber || "";
-
-}
+document.getElementById("name").value;
 
 
 
-}
+const phone =
+
+document.getElementById("phone").value;
 
 
 
 
 
 
-}
-
-
-
-
-
-
-
-
-
-saveBtn.onclick=async()=>{
-
-
-if(!userId)
-
-return;
-
-
-
-await setDoc(
+await updateDoc(
 
 doc(
 
@@ -202,36 +187,19 @@ userId
 
 ),
 
-{
-
-name:
-
-nameInput.value,
-
-
-vehicleType:
-
-vehicleType?.value || "",
-
-
-vehicleNumber:
-
-vehicleNumber?.value || "",
-
-
-updatedAt:
-
-serverTimestamp()
-
-
-},
-
 
 {
 
-merge:true
+
+name:name,
+
+phone:phone
+
+
 
 }
+
+
 
 );
 
@@ -239,20 +207,59 @@ merge:true
 
 alert(
 
-"Profile Updated ✅"
+"Profile Updated Successfully"
 
 );
+
+
+
+};
+
+}
+
+
+
+
+
+
+
+
+
+// Logout
+
+
+const logout =
+
+document.getElementById("logout");
+
+
+
+
+
+if(logout){
+
+
+
+logout.onclick = ()=>{
+
+
+
+signOut(auth)
+
+.then(()=>{
+
+
+window.location.href =
+
+"../auth/login.html";
+
+
+});
+
 
 
 };
 
 
 
-
-
-
-console.log(
-
-"RiderX Profile JS Loaded"
-
-);
+}
