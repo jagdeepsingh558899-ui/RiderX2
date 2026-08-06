@@ -4,37 +4,124 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Profile</title>
+<title>RiderX Rider Profile</title>
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
+
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+
+.header{
+
+background:#111;
+padding:20px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.profile{
+
+background:#111;
+padding:25px;
+border-radius:20px;
+text-align:center;
+
+}
+
+
+
+.photo{
+
+width:100px;
+height:100px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #FFD600;
+
+}
+
+
+
+.name{
+
+font-size:26px;
+margin-top:15px;
+
+}
+
+
 
 .card{
 
 background:#1d1d1d;
-padding:20px;
+padding:15px;
+margin-top:15px;
 border-radius:15px;
-margin:15px 0;
+text-align:left;
 
 }
+
 
 
 .rating{
 
 font-size:30px;
-color:#ffcc00;
+color:#FFD600;
+text-align:center;
 
 }
 
+
+
+button{
+
+width:100%;
+padding:15px;
+margin-top:20px;
+background:#FFD600;
+border:none;
+border-radius:12px;
+font-weight:bold;
+
+}
+
+
+
 </style>
+
 
 </head>
 
 
 <body>
+
 
 
 <div class="header">
@@ -45,15 +132,36 @@ color:#ffcc00;
 
 
 
+
 <div class="container">
 
 
-<div class="card">
+
+<div class="profile">
 
 
-<h2 id="name">
+<img id="photo"
+
+src="../assets/profile.png"
+
+class="photo">
+
+
+
+<h2 class="name" id="name">
+
 Rider
+
 </h2>
+
+
+
+<p id="phone">
+
+📱 Phone:
+
+</p>
+
 
 
 <p id="email">
@@ -64,19 +172,13 @@ Rider
 
 
 
-<p id="rides">
-
-🚕 Completed Rides: 0
-
-</p>
-
-
 
 <div class="rating" id="rating">
 
 ⭐ 0
 
 </div>
+
 
 
 <p id="reviews">
@@ -87,10 +189,76 @@ Reviews: 0
 
 
 
+
+
+<div class="card">
+
+
+<h3>
+
+🏍 Bike Details
+
+</h3>
+
+
+<p id="bike">
+
+Bike:
+
+</p>
+
+
+<p id="vehicle">
+
+Vehicle Number:
+
+</p>
+
+
+
 </div>
 
 
+
+
+
+<div class="card">
+
+
+<h3>
+
+🚕 Ride History
+
+</h3>
+
+
+<p id="rides">
+
+Completed Rides: 0
+
+</p>
+
+
 </div>
+
+
+
+
+<button onclick="history.back()">
+
+Back
+
+</button>
+
+
+
+
+</div>
+
+
+
+</div>
+
 
 
 
@@ -115,9 +283,9 @@ where
 
 }
 
-from
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
 
 
 
@@ -127,19 +295,23 @@ async function loadProfile(){
 
 
 
-let user=auth.currentUser;
+let user=
+
+auth.currentUser;
 
 
 
-if(!user){
+if(!user)
 
 return;
 
-}
 
 
 
-let profile=await getDoc(
+
+let userSnap=
+
+await getDoc(
 
 doc(db,"users",user.uid)
 
@@ -147,7 +319,15 @@ doc(db,"users",user.uid)
 
 
 
-let data=profile.data();
+
+
+if(userSnap.exists()){
+
+
+
+let data=userSnap.data();
+
+
 
 
 
@@ -159,14 +339,55 @@ data.name || "Rider";
 
 document.getElementById("email").innerHTML=
 
-"📧 "+(data.email || "");
+"📧 "+(data.email || user.email);
+
+
+
+document.getElementById("phone").innerHTML=
+
+"📱 "+(data.phone || "Not Added");
+
+
+
+
+
+document.getElementById("bike").innerHTML=
+
+"🏍 Bike: "+(data.bike || "Not Added");
+
+
+
+
+
+document.getElementById("vehicle").innerHTML=
+
+"🔢 Vehicle No: "+(data.vehicle || "Not Added");
+
+
+
+
+
+if(data.photo){
+
+
+document.getElementById("photo").src=data.photo;
+
+
+}
+
+
+
+}
 
 
 
 
 
 
-let rides=await getDocs(
+
+let rides=
+
+await getDocs(
 
 query(
 
@@ -182,9 +403,11 @@ where("status","==","Completed")
 
 
 
+
+
 document.getElementById("rides").innerHTML=
 
-"🚕 Completed Rides: "+rides.size;
+"Completed Rides: "+rides.size;
 
 
 
@@ -192,7 +415,9 @@ document.getElementById("rides").innerHTML=
 
 
 
-let reviews=await getDocs(
+let reviews=
+
+await getDocs(
 
 query(
 
@@ -206,16 +431,27 @@ where("riderId","==",user.uid)
 
 
 
+
+
+
 let total=0;
+
 
 
 reviews.forEach((r)=>{
 
 
-total += Number(r.data().rating || 0);
+total += Number(
+
+r.data().rating || 0
+
+);
 
 
 });
+
+
+
 
 
 
@@ -228,6 +464,8 @@ reviews.size ?
 :
 
 0;
+
+
 
 
 
@@ -254,6 +492,8 @@ loadProfile();
 
 
 </script>
+
+
 
 
 </body>
