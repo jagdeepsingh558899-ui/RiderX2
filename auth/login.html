@@ -4,183 +4,125 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Login</title>
 
-<link rel="stylesheet"
-href="../css/style.css">
+<link rel="stylesheet" href="../css/style.css">
 
 <style>
 
 body{
-
 background:#000;
 display:flex;
 justify-content:center;
 align-items:center;
 min-height:100vh;
 padding:20px;
-
 }
 
 .login-box{
-
 width:100%;
 max-width:420px;
-
 background:#111;
-
 border:2px solid #FFD600;
-
 border-radius:25px;
-
 padding:30px 25px;
-
 box-shadow:0 0 30px rgba(255,214,0,.15);
-
 animation:zoomIn .8s;
-
 }
 
 .logo{
-
 text-align:center;
 margin-bottom:25px;
-
 }
 
 .logo img{
-
 width:95px;
 height:95px;
 margin-bottom:15px;
-
 }
 
 .logo h1{
-
 color:#FFD600;
 font-size:38px;
-
 }
 
 .logo span{
-
 color:#fff;
-
 }
 
 .logo p{
-
 color:#aaa;
 margin-top:8px;
-
 }
 
 .input-box{
-
 margin-top:18px;
-
 }
 
 .input-box label{
-
 display:block;
 margin-bottom:8px;
 color:#FFD600;
-
 }
 
 .input-box input{
-
 width:100%;
 height:55px;
-
 background:#222;
-
 border:none;
-
 border-radius:15px;
-
 padding:0 15px;
-
 color:#fff;
-
 font-size:16px;
-
 outline:none;
-
 }
 
 .input-box input::placeholder{
-
 color:#888;
-
 }
 
 button{
-
 width:100%;
-
 height:55px;
-
 margin-top:28px;
-
 background:#FFD600;
-
 color:#111;
-
 font-size:18px;
-
 font-weight:bold;
-
 border:none;
-
 border-radius:15px;
-
 cursor:pointer;
-
 transition:.3s;
+}
 
+button:hover{
+opacity:.9;
 }
 
 button:active{
-
 transform:scale(.97);
-
 }
 
 #msg{
-
 margin-top:18px;
-
 text-align:center;
-
-color:#ff5252;
-
+color:#ff4d4d;
 font-size:14px;
-
+min-height:20px;
 }
 
 .bottom{
-
 margin-top:25px;
-
 text-align:center;
-
+color:#ccc;
 }
 
 .bottom a{
-
 color:#FFD600;
-
 text-decoration:none;
-
 font-weight:bold;
-
 }
 
 </style>
@@ -193,7 +135,7 @@ font-weight:bold;
 
 <div class="logo">
 
-<img src="../assets/logo.svg">
+<img src="../assets/logo.svg" alt="RiderX">
 
 <h1>Rider<span>X</span></h1>
 
@@ -223,8 +165,7 @@ placeholder="Enter Password">
 
 </div>
 
-<button
-onclick="login()">
+<button onclick="login()">
 
 LOGIN
 
@@ -247,7 +188,8 @@ Register
 </div>
 
 <script type="module">
-  import { auth } from "../firebase/config.js";
+
+import { auth, db } from "../firebase/config.js";
 
 import {
 signInWithEmailAndPassword
@@ -258,42 +200,133 @@ doc,
 getDoc
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-import { db } from "../firebase/config.js";
-
 window.login = async function(){
 
-const email =
-document.getElementById("email").value.trim();
+const email=document.getElementById("email").value.trim();
 
-const password =
-document.getElementById("password").value;
+const password=document.getElementById("password").value;
 
-const msg =
-document.getElementById("msg");
+const msg=document.getElementById("msg");
 
-msg.innerHTML = "";
+msg.innerHTML="";
 
 if(email==="" || password===""){
 
-msg.innerHTML = "Please fill all fields.";
+msg.innerHTML="Please fill all fields.";
+
 return;
 
 }
 
 try{
 
-const userCredential =
+const userCredential=
+
 await signInWithEmailAndPassword(
+
 auth,
+
 email,
+
 password
+
 );
 
-const userDoc =
+const userDoc=
+
 await getDoc(
+
 doc(db,"users",userCredential.user.uid)
+
 );
 
 if(!userDoc.exists()){
 
-msg
+msg.innerHTML="User data not found.";
+
+return;
+
+}
+
+const data=userDoc.data();
+  if(data.role==="admin"){
+
+window.location.href="../admin/dashboard.html";
+
+}
+
+else if(data.role==="rider"){
+
+window.location.href="../rider/dashboard.html";
+
+}
+
+else{
+
+window.location.href="../customer/dashboard.html";
+
+}
+
+}
+
+catch(error){
+
+switch(error.code){
+
+case "auth/invalid-credential":
+
+msg.innerHTML="Invalid Email or Password";
+
+break;
+
+case "auth/user-not-found":
+
+msg.innerHTML="User Not Found";
+
+break;
+
+case "auth/wrong-password":
+
+msg.innerHTML="Wrong Password";
+
+break;
+
+case "auth/invalid-email":
+
+msg.innerHTML="Invalid Email Address";
+
+break;
+
+case "auth/too-many-requests":
+
+msg.innerHTML="Too many attempts. Try again later.";
+
+break;
+
+default:
+
+msg.innerHTML=error.message;
+
+}
+
+}
+
+};
+
+document.getElementById("password")
+
+.addEventListener("keypress",(e)=>{
+
+if(e.key==="Enter"){
+
+login();
+
+}
+
+});
+
+</script>
+
+</body>
+
+</html>
