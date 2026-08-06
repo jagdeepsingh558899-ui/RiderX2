@@ -1,6 +1,6 @@
 // =================================
-// RiderX Advanced Live Map System V2
-// Live Rider + Customer + Route
+// RiderX Advanced Navigation Map V3
+// Leaflet + OSRM Routing
 // =================================
 
 
@@ -8,21 +8,17 @@ let map;
 
 let markers = {};
 
-let routeLine = null;
+let routeLine;
 
 
-// ===============================
+
 // CREATE MAP
-// ===============================
 
 export function createMap(){
 
 
-if(!document.getElementById("map")){
-
-return null;
-
-}
+if(!document.getElementById("map"))
+return;
 
 
 
@@ -65,9 +61,7 @@ return map;
 
 
 
-// ===============================
-// REMOVE OBJECTS
-// ===============================
+// CLEAR MAP
 
 
 export function clearMap(){
@@ -76,11 +70,9 @@ export function clearMap(){
 Object.values(markers).forEach(marker=>{
 
 
-if(marker){
+if(marker)
 
 map.removeLayer(marker);
-
-}
 
 
 });
@@ -102,7 +94,6 @@ routeLine=null;
 }
 
 
-
 }
 
 
@@ -111,9 +102,7 @@ routeLine=null;
 
 
 
-// ===============================
 // SHOW PICKUP DROP
-// ===============================
 
 
 export function showRide(
@@ -129,10 +118,8 @@ distance
 ){
 
 
-
 if(!map)
 return;
-
 
 
 clearMap();
@@ -155,8 +142,6 @@ pickup
 
 
 
-
-
 markers.drop = L.marker(
 
 drop
@@ -173,9 +158,7 @@ drop
 
 
 
-
-
-routeLine = L.polyline(
+drawRoute(
 
 [
 
@@ -183,24 +166,7 @@ pickup,
 
 drop
 
-],
-
-{
-
-weight:5
-
-}
-
-)
-
-.addTo(map);
-
-
-
-
-map.fitBounds(
-
-routeLine.getBounds()
+]
 
 );
 
@@ -214,12 +180,10 @@ routeLine.getBounds()
 
 
 
-// ===============================
-// CUSTOMER LOCATION
-// ===============================
+// RIDER LIVE MARKER
 
 
-export function showCustomerLocation(
+export function showRiderLocation(
 
 lat,
 
@@ -232,6 +196,76 @@ lng
 if(!map)
 return;
 
+
+
+let position=[lat,lng];
+
+
+
+if(markers.rider){
+
+
+markers.rider.setLatLng(position);
+
+
+}
+
+else{
+
+
+markers.rider = L.marker(
+
+position,
+
+{
+
+icon:L.icon({
+
+iconUrl:
+"https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
+
+iconSize:[45,45]
+
+})
+
+}
+
+)
+
+.addTo(map)
+
+.bindPopup(
+"🏍 Rider"
+);
+
+
+}
+
+
+
+map.panTo(position);
+
+
+
+}
+
+
+
+
+
+
+
+
+// CUSTOMER MARKER
+
+
+export function showCustomerLocation(
+
+lat,
+
+lng
+
+){
 
 
 
@@ -250,7 +284,7 @@ markers.customer.setLatLng(
 else{
 
 
-markers.customer = L.marker(
+markers.customer=L.marker(
 
 [lat,lng]
 
@@ -259,9 +293,7 @@ markers.customer = L.marker(
 .addTo(map)
 
 .bindPopup(
-
 "👤 Customer"
-
 );
 
 
@@ -277,108 +309,12 @@ markers.customer = L.marker(
 
 
 
-// ===============================
-// LIVE RIDER LOCATION
-// ===============================
 
 
-export function showRiderLocation(
-
-lat,
-
-lng
-
-){
+// ROUTE DRAW
 
 
-
-if(!map)
-return;
-
-
-
-if(markers.rider){
-
-
-markers.rider.setLatLng(
-
-[lat,lng]
-
-);
-
-
-}
-
-else{
-
-
-markers.rider = L.marker(
-
-[lat,lng],
-
-{
-
-
-icon:L.icon({
-
-
-iconUrl:
-
-"https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
-
-
-iconSize:
-
-[45,45]
-
-
-
-})
-
-
-}
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-"🏍 Rider"
-
-);
-
-
-}
-
-
-
-map.panTo(
-
-[lat,lng]
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// ===============================
-// DRAW LIVE ROUTE
-// ===============================
-
-
-export function drawRoute(
-
-points
-
-){
+export function drawRoute(points){
 
 
 
@@ -389,16 +325,13 @@ return;
 
 if(routeLine){
 
-
 map.removeLayer(routeLine);
-
 
 }
 
 
 
-
-routeLine = L.polyline(
+routeLine=L.polyline(
 
 points,
 
@@ -429,6 +362,91 @@ routeLine.getBounds()
 
 
 
+
+// FREE NAVIGATION ROUTE
+
+export async function getRoute(
+
+start,
+
+end
+
+){
+
+
+
+let url =
+
+`https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
+
+
+
+
+try{
+
+
+let res = await fetch(url);
+
+
+let data = await res.json();
+
+
+
+if(data.routes.length){
+
+
+let coords =
+
+data.routes[0]
+
+.geometry.coordinates.map(
+
+c=>[
+
+c[1],
+
+c[0]
+
+]
+
+);
+
+
+
+drawRoute(coords);
+
+
+
+return data.routes[0];
+
+
+
+}
+
+
+
+}
+
+catch(e){
+
+
 console.log(
-"RiderX Live Map System Loaded"
+"Route error",
+e
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+console.log(
+"RiderX Navigation Map V3 Loaded"
 );
