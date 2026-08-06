@@ -6,9 +6,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin</title>
+<title>RiderX Admin Dashboard</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+.card{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin:15px 0;
+
+}
+
+
+.number{
+
+font-size:30px;
+color:#ffcc00;
+font-weight:bold;
+
+}
+
+</style>
+
 
 </head>
 
@@ -18,53 +42,93 @@
 
 <div class="header">
 
-⚙️ RiderX Admin
+⚙️ RiderX Admin Dashboard
 
 </div>
+
 
 
 <div class="container">
 
 
-<h2 id="welcome">
 
-Checking Access...
-
-</h2>
-
-
-
-<div id="panel" style="display:none;">
-
+<div class="card">
 
 <h3>
-Users
+👥 Users
 </h3>
 
-<div id="users">
-
-Loading...
+<div class="number" id="users">
+0
+</div>
 
 </div>
 
 
+
+<div class="card">
 
 <h3>
-Rides
+🏍 Riders
 </h3>
 
-<div id="rides">
-
-Loading...
+<div class="number" id="riders">
+0
+</div>
 
 </div>
 
 
+
+
+<div class="card">
+
+<h3>
+🚕 Total Rides
+</h3>
+
+<div class="number" id="rides">
+0
+</div>
+
 </div>
 
 
 
+
+<div class="card">
+
+<h3>
+✅ Completed Rides
+</h3>
+
+<div class="number" id="completed">
+0
 </div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<h3>
+💰 Earnings
+</h3>
+
+<div class="number" id="earning">
+₹0
+</div>
+
+</div>
+
+
+
+
+</div>
+
+
 
 
 
@@ -73,24 +137,11 @@ Loading...
 <script type="module">
 
 
-import {auth,db} from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
 
-onAuthStateChanged
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
-
-import {
-
-doc,
-getDoc,
 collection,
 getDocs
 
@@ -104,60 +155,98 @@ from
 
 
 
-onAuthStateChanged(auth,async(user)=>{
 
 
 
-if(!user){
-
-
-window.location.href="../auth/login.html";
-
-
-return;
-
-
-}
+async function loadDashboard(){
 
 
 
+let users=
 
+await getDocs(
 
-let adminDoc=await getDoc(
-
-doc(db,"users",user.uid)
+collection(db,"users")
 
 );
 
 
 
-if(!adminDoc.exists() || adminDoc.data().role!="admin"){
+let riders=0;
 
 
-alert("Access Denied ❌");
+users.forEach((u)=>{
 
 
-window.location.href="../index.html";
+if(u.data().role=="rider"){
 
-
-return;
-
+riders++;
 
 }
 
 
-
-document.getElementById("welcome").innerHTML=
-
-"Welcome Admin ✅";
+});
 
 
 
-document.getElementById("panel").style.display="block";
+
+
+document.getElementById("users").innerHTML=
+
+users.size;
 
 
 
-loadData();
+document.getElementById("riders").innerHTML=
+
+riders;
+
+
+
+
+
+
+
+let rides=
+
+await getDocs(
+
+collection(db,"rides")
+
+);
+
+
+
+let completed=0;
+
+let earning=0;
+
+
+
+rides.forEach((r)=>{
+
+
+let data=r.data();
+
+
+
+if(data.status=="Completed"){
+
+
+completed++;
+
+
+
+earning += Number(
+
+String(data.fare)
+
+.replace("₹","")
+
+);
+
+
+}
 
 
 
@@ -167,43 +256,32 @@ loadData();
 
 
 
-
-
-async function loadData(){
-
-
-
-let users=await getDocs(
-
-collection(db,"users")
-
-);
-
-
-
-document.getElementById("users").innerHTML=
-
-"Total Users: "+users.size;
-
-
-
-
-
-let rides=await getDocs(
-
-collection(db,"rides")
-
-);
-
-
-
 document.getElementById("rides").innerHTML=
 
-"Total Rides: "+rides.size;
+rides.size;
+
+
+
+document.getElementById("completed").innerHTML=
+
+completed;
+
+
+
+document.getElementById("earning").innerHTML=
+
+"₹"+earning;
 
 
 
 }
+
+
+
+
+
+
+loadDashboard();
 
 
 
