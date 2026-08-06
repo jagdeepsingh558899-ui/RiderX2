@@ -150,7 +150,7 @@ async function registerUserAccount(data){
             setTimeout(()=>{
 
                 window.location.href =
-                "../customer/Home.html";
+                "../customer/home.html";
 
             },1500);
 
@@ -206,7 +206,7 @@ async function loginUser(email,password){
         if(customer.exists){
 
             window.location.href =
-            "../customer/Home.html";
+            "../customer/home.html";
 
             return;
         }
