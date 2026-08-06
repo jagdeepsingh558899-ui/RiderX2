@@ -1,7 +1,7 @@
 /* ==========================================================
-   RiderX v4 Professional CSS
+   RiderX v4 FINAL PROFESSIONAL CSS
    Theme: Black + Yellow
-   App Like UI
+   App Like Design
 ========================================================== */
 
 
@@ -12,14 +12,14 @@
 
 --primary:#FFD600;
 --secondary:#FFC107;
---black:#000;
---dark:#111;
+--black:#000000;
+--dark:#111111;
 --card:#1b1b1b;
---card2:#242424;
---white:#fff;
---gray:#aaa;
---success:#00c853;
---danger:#ff3d00;
+--card-light:#242424;
+--white:#ffffff;
+--gray:#aaaaaa;
+--green:#00c853;
+--red:#ff3d00;
 
 --radius:20px;
 
@@ -51,13 +51,13 @@ scroll-behavior:smooth;
 
 body{
 
-background:#000;
+background:var(--black);
 
 color:white;
 
 min-height:100vh;
 
-padding-bottom:80px;
+padding-bottom:90px;
 
 }
 
@@ -73,21 +73,27 @@ color:inherit;
 
 
 
-button{
+img{
 
-border:none;
+max-width:100%;
 
-cursor:pointer;
-
-font-family:"Poppins",sans-serif;
+display:block;
 
 }
 
 
 
-img{
+button{
 
-max-width:100%;
+border:none;
+
+outline:none;
+
+cursor:pointer;
+
+font-family:"Poppins",sans-serif;
+
+transition:.25s;
 
 }
 
@@ -97,7 +103,7 @@ max-width:100%;
 
 
 /* ===============================
-   Container
+   CONTAINER
 ================================ */
 
 
@@ -118,13 +124,12 @@ padding:18px;
 
 
 
-
 /* ===============================
-   Text
+   TEXT
 ================================ */
 
 
-h1,h2,h3{
+h1,h2,h3,h4{
 
 font-weight:700;
 
@@ -133,9 +138,11 @@ font-weight:700;
 
 p{
 
-color:#bbb;
+color:#bdbdbd;
 
 font-size:14px;
+
+line-height:1.6;
 
 }
 
@@ -147,12 +154,11 @@ font-size:14px;
 
 
 /* ===============================
-   Top Bar
+   TOP BAR
 ================================ */
 
 
 .topbar{
-
 
 height:70px;
 
@@ -173,7 +179,6 @@ top:0;
 z-index:1000;
 
 border-bottom:1px solid #222;
-
 
 }
 
@@ -209,7 +214,7 @@ border:2px solid var(--primary);
 
 
 /* ===============================
-   Logo
+   LOGO
 ================================ */
 
 
@@ -220,6 +225,7 @@ text-align:center;
 margin-top:25px;
 
 }
+
 
 
 .logo img{
@@ -233,6 +239,7 @@ margin:auto;
 }
 
 
+
 .logo h1{
 
 font-size:40px;
@@ -240,6 +247,7 @@ font-size:40px;
 color:var(--primary);
 
 }
+
 
 
 .logo span{
@@ -255,9 +263,8 @@ color:white;
 
 
 
-
 /* ===============================
-   Cards
+   CARD
 ================================ */
 
 
@@ -267,9 +274,9 @@ background:var(--card);
 
 padding:20px;
 
-border-radius:var(--radius);
-
 margin-top:18px;
+
+border-radius:22px;
 
 box-shadow:var(--shadow);
 
@@ -285,12 +292,11 @@ border:1px solid #222;
 
 
 /* ===============================
-   Buttons
+   BUTTON
 ================================ */
 
 
 .btn{
-
 
 width:100%;
 
@@ -314,14 +320,13 @@ align-items:center;
 
 justify-content:center;
 
-
-box-shadow:
-
-0 8px 25px rgba(255,214,0,.25);
+}
 
 
-transition:.25s;
 
+.btn:hover{
+
+transform:translateY(-2px);
 
 }
 
@@ -339,7 +344,6 @@ transform:scale(.96);
 
 .btn-outline{
 
-
 width:100%;
 
 height:55px;
@@ -354,8 +358,9 @@ color:var(--primary);
 
 border-radius:16px;
 
-font-weight:700;
+font-size:16px;
 
+font-weight:700;
 
 }
 
@@ -367,13 +372,14 @@ font-weight:700;
 
 
 /* ===============================
-   Inputs
+   INPUTS
 ================================ */
 
 
 .input,
 input,
-select{
+select,
+textarea{
 
 
 width:100%;
@@ -386,9 +392,9 @@ color:white;
 
 padding:0 15px;
 
-border-radius:15px;
-
 margin-top:12px;
+
+border-radius:15px;
 
 border:1px solid #333;
 
@@ -397,13 +403,20 @@ border:1px solid #333;
 
 
 
-.input:focus,
-input:focus{
+input::placeholder{
+
+color:#888;
+
+}
+
+
+
+input:focus,
+select:focus{
 
 border-color:var(--primary);
 
 }
-
 
 
 
@@ -419,7 +432,6 @@ border-color:var(--primary);
 
 #installApp{
 
-
 width:100%;
 
 height:55px;
@@ -432,7 +444,7 @@ border-radius:18px;
 
 font-size:17px;
 
-font-weight:700;
+font-weight:800;
 
 display:flex;
 
@@ -442,52 +454,19 @@ justify-content:center;
 
 gap:8px;
 
-
 box-shadow:
 
 0 8px 25px rgba(255,214,0,.35);
 
-
-animation:installPulse 2s infinite;
-
-
 }
 
 
 
+#installApp:active{
 
-@keyframes installPulse{
-
-
-0%{
-
-box-shadow:
-
-0 0 0 0 rgba(255,214,0,.5);
+transform:scale(.95);
 
 }
-
-
-70%{
-
-box-shadow:
-
-0 0 0 15px rgba(255,214,0,0);
-
-}
-
-
-100%{
-
-box-shadow:
-
-0 0 0 0 rgba(255,214,0,0);
-
-}
-
-
-}
-
 
 
 
@@ -497,22 +476,21 @@ box-shadow:
 
 
 /* ===============================
-   MAP FIX
+   MAP SYSTEM FIX
 ================================ */
 
 
 .map-container{
 
-
 width:100%;
 
 height:350px;
 
+margin-top:18px;
+
 border-radius:22px;
 
 overflow:hidden;
-
-margin-top:18px;
 
 background:#111;
 
@@ -520,13 +498,11 @@ border:2px solid #222;
 
 box-shadow:var(--shadow);
 
-
 }
 
 
 
 #map{
-
 
 width:100%;
 
@@ -534,16 +510,11 @@ height:100%;
 
 min-height:300px;
 
-z-index:1;
-
-
 }
 
 
 
-
 .leaflet-container{
-
 
 width:100%;
 
@@ -551,17 +522,68 @@ height:100%;
 
 background:#222;
 
+}
+
+
+
+
+
+
+/* ===============================
+   LOCATION CARD
+================================ */
+
+
+.location-card{
+
+background:#1b1b1b;
+
+padding:18px;
+
+border-radius:20px;
+
+margin-top:15px;
+
+display:flex;
+
+gap:15px;
+
+align-items:center;
+
+}
+
+
+
+.location-icon{
+
+width:50px;
+
+height:50px;
+
+border-radius:50%;
+
+background:var(--primary);
+
+color:#111;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+font-size:22px;
 
 }
 /* ==========================================================
-   RiderX v4 Professional CSS
+   RiderX v4 FINAL CSS
    Part 2/2
 ========================================================== */
 
 
 
 /* ===============================
-   Splash Screen
+   SPLASH SCREEN
 ================================ */
 
 
@@ -577,16 +599,16 @@ display:flex;
 
 flex-direction:column;
 
-align-items:center;
-
 justify-content:center;
+
+align-items:center;
 
 z-index:99999;
 
 transition:.5s;
 
-
 }
+
 
 
 .splash.hide{
@@ -617,9 +639,9 @@ font-size:42px;
 
 font-weight:800;
 
-color:var(--primary);
-
 margin-top:15px;
+
+color:var(--primary);
 
 }
 
@@ -633,8 +655,6 @@ color:white;
 
 
 
-
-
 .loading{
 
 width:180px;
@@ -645,18 +665,19 @@ background:#222;
 
 border-radius:20px;
 
-margin-top:20px;
-
 overflow:hidden;
+
+margin-top:20px;
 
 }
 
 
+
 .loading span{
 
-display:block;
-
 height:100%;
+
+display:block;
 
 background:var(--primary);
 
@@ -670,10 +691,8 @@ animation:loading 2s infinite;
 
 
 
-
-
 /* ===============================
-   Booking
+   BOOKING
 ================================ */
 
 
@@ -693,17 +712,13 @@ box-shadow:var(--shadow);
 
 
 
-.booking-row{
+.booking-title{
 
 display:flex;
 
 justify-content:space-between;
 
-padding:12px 0;
-
-color:#ccc;
-
-border-bottom:1px solid #292929;
+align-items:center;
 
 }
 
@@ -721,6 +736,20 @@ color:var(--primary);
 
 
 
+.booking-row{
+
+display:flex;
+
+justify-content:space-between;
+
+padding:12px 0;
+
+border-bottom:1px solid #333;
+
+color:#ccc;
+
+}
+
 
 
 
@@ -728,17 +757,49 @@ color:var(--primary);
 
 
 /* ===============================
-   Ride Status
+   OTP CARD
+================================ */
+
+
+#otpBox{
+
+text-align:center;
+
+}
+
+
+
+#rideOTP{
+
+font-size:40px;
+
+letter-spacing:8px;
+
+color:var(--primary);
+
+font-weight:800;
+
+}
+
+
+
+
+
+
+
+
+/* ===============================
+   RIDE STATUS
 ================================ */
 
 
 .timeline{
 
-margin-top:20px;
+position:relative;
 
 padding-left:30px;
 
-position:relative;
+margin-top:20px;
 
 }
 
@@ -766,9 +827,9 @@ background:var(--primary);
 
 .timeline-item{
 
-margin-bottom:25px;
-
 position:relative;
+
+margin-bottom:25px;
 
 }
 
@@ -782,11 +843,11 @@ position:absolute;
 
 left:-28px;
 
-top:4px;
+top:5px;
 
-width:16px;
+width:15px;
 
-height:16px;
+height:15px;
 
 border-radius:50%;
 
@@ -800,14 +861,16 @@ background:var(--primary);
 
 
 
-
-
 /* ===============================
-   Chat UI
+   CHAT
 ================================ */
 
 
 #chatBox{
+
+height:400px;
+
+overflow-y:auto;
 
 background:#111;
 
@@ -821,15 +884,13 @@ padding:15px;
 
 .chat-message{
 
-
 max-width:80%;
 
-padding:12px;
+padding:12px 15px;
 
 border-radius:18px;
 
 margin-top:10px;
-
 
 }
 
@@ -837,13 +898,11 @@ margin-top:10px;
 
 .chat-own{
 
+margin-left:auto;
 
 background:var(--primary);
 
 color:#111;
-
-margin-left:auto;
-
 
 }
 
@@ -851,17 +910,13 @@ margin-left:auto;
 
 .chat-other{
 
+margin-right:auto;
 
 background:#333;
 
 color:white;
 
-margin-right:auto;
-
-
 }
-
-
 
 
 
@@ -870,125 +925,19 @@ margin-right:auto;
 
 
 /* ===============================
-   Bottom Navigation
+   RIDER / CUSTOMER INFO
 ================================ */
 
 
-.bottom-nav{
-
-
-position:fixed;
-
-bottom:0;
-
-left:0;
-
-width:100%;
-
-
-height:75px;
-
-
-background:#111;
-
-
-display:flex;
-
-justify-content:space-around;
-
-align-items:center;
-
-
-border-top:1px solid #222;
-
-
-z-index:9999;
-
-
-}
-
-
-
-.bottom-nav a{
-
+.profile-card{
 
 text-align:center;
 
-color:#888;
-
-font-size:12px;
-
-font-weight:600;
-
-
 }
 
-
-
-.bottom-nav a.active{
-
-
-color:var(--primary);
-
-
-}
-
-
-
-
-
-
-
-
-
-/* ===============================
-   Wallet
-================================ */
-
-
-.wallet-card{
-
-
-background:#1b1b1b;
-
-padding:20px;
-
-border-radius:22px;
-
-margin-top:15px;
-
-
-}
-
-
-
-.wallet-amount{
-
-
-font-size:35px;
-
-color:var(--primary);
-
-font-weight:800;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* ===============================
-   Profile
-================================ */
 
 
 .profile-img{
-
 
 width:90px;
 
@@ -1000,6 +949,40 @@ border:3px solid var(--primary);
 
 margin:auto;
 
+}
+
+
+
+
+
+
+
+/* ===============================
+   WALLET
+================================ */
+
+
+.wallet-card{
+
+background:var(--card);
+
+padding:20px;
+
+border-radius:22px;
+
+margin-top:18px;
+
+}
+
+
+
+.wallet-amount{
+
+font-size:36px;
+
+font-weight:800;
+
+color:var(--primary);
 
 }
 
@@ -1009,15 +992,71 @@ margin:auto;
 
 
 
+/* ===============================
+   BOTTOM NAVIGATION
+================================ */
+
+
+.bottom-nav{
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+
+width:100%;
+
+height:75px;
+
+background:#111;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:1px solid #222;
+
+z-index:9999;
+
+}
+
+
+
+.bottom-nav a{
+
+color:#888;
+
+font-size:12px;
+
+text-align:center;
+
+font-weight:600;
+
+}
+
+
+
+.bottom-nav a.active{
+
+color:var(--primary);
+
+}
+
+
+
+
+
 
 
 /* ===============================
-   Loading
+   LOADER
 ================================ */
 
 
 .loading-overlay{
-
 
 position:fixed;
 
@@ -1035,28 +1074,26 @@ flex-direction:column;
 
 z-index:99999;
 
-
 }
 
 
 
 .loader{
 
-
 width:65px;
 
 height:65px;
+
+border-radius:50%;
 
 border:6px solid #333;
 
 border-top:6px solid var(--primary);
 
-border-radius:50%;
-
 animation:spin 1s linear infinite;
 
-
 }
+
 
 
 
@@ -1065,12 +1102,11 @@ animation:spin 1s linear infinite;
 
 
 /* ===============================
-   Animations
+   ANIMATIONS
 ================================ */
 
 
 @keyframes spin{
-
 
 100%{
 
@@ -1078,13 +1114,11 @@ transform:rotate(360deg);
 
 }
 
-
 }
 
 
 
 @keyframes logoPop{
-
 
 0%{
 
@@ -1103,17 +1137,15 @@ opacity:1;
 
 }
 
-
 }
 
 
 
 @keyframes loading{
 
-
 0%{
 
-width:0;
+width:0%;
 
 }
 
@@ -1123,7 +1155,6 @@ width:0;
 width:100%;
 
 }
-
 
 }
 
@@ -1135,7 +1166,7 @@ width:100%;
 
 
 /* ===============================
-   Responsive
+   RESPONSIVE
 ================================ */
 
 
@@ -1150,17 +1181,17 @@ padding:15px;
 
 
 
-h1{
+.map-container{
 
-font-size:30px;
+height:300px;
 
 }
 
 
 
-.map-container{
+.splash-title{
 
-height:300px;
+font-size:36px;
 
 }
 
@@ -1171,7 +1202,6 @@ height:300px;
 height:52px;
 
 }
-
 
 
 }
