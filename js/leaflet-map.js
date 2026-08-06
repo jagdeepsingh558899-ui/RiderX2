@@ -1,17 +1,25 @@
 // =================================
-// RiderX Free Map System (Leaflet)
+// RiderX Leaflet Map System
 // =================================
 
 
-// Initialize Map
+let riderMap;
+
+
+
+// Create Map
 
 export function initMap(){
 
 
-let mapElement = document.getElementById("map");
+const mapElement =
+document.getElementById("map");
+
 
 
 if(!mapElement){
+
+console.log("Map element not found");
 
 return;
 
@@ -19,15 +27,13 @@ return;
 
 
 
-let map = L.map("map").setView(
+riderMap = L.map("map").setView(
 
-[26.9124,75.7873],
+[30.7333,76.7794],
 
 13
 
 );
-
-
 
 
 
@@ -42,11 +48,11 @@ attribution:
 
 }
 
-).addTo(map);
+).addTo(riderMap);
 
 
 
-return map;
+return riderMap;
 
 
 }
@@ -54,10 +60,8 @@ return map;
 
 
 
-
-
-
 // Add Marker
+
 
 export function addMarker(
 
@@ -69,26 +73,73 @@ title
 ){
 
 
-
-let marker = L.marker(
+const marker = L.marker(
 
 [lat,lng]
 
-).addTo(map);
+)
+
+.addTo(map);
 
 
 
 if(title){
 
-
-marker.bindPopup(title);
-
+marker.bindPopup(title)
+.openPopup();
 
 }
 
 
 
 return marker;
+
+
+}
+
+
+
+
+// Show Route
+
+
+export function showRoute(
+
+map,
+pickup,
+drop
+
+){
+
+
+const line = L.polyline(
+
+[
+
+pickup,
+drop
+
+],
+
+{
+
+color:"#00eaff"
+
+}
+
+)
+
+.addTo(map);
+
+
+
+map.fitBounds(
+line.getBounds()
+);
+
+
+
+return line;
 
 
 }
