@@ -37,15 +37,16 @@ font-weight:bold;
 
 .info{
 
-padding:12px;
+padding:15px;
 background:#111;
+line-height:1.6;
 
 }
 
 
 #map{
 
-height:80vh;
+height:75vh;
 width:100%;
 
 }
@@ -56,7 +57,6 @@ width:100%;
 
 
 <body>
-
 
 
 <div class="header">
@@ -73,9 +73,7 @@ Searching Rider...
 </div>
 
 
-
 <div id="map"></div>
-
 
 
 
@@ -102,10 +100,8 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-
 let rideId =
 localStorage.getItem("rideId");
-
 
 
 let map =
@@ -121,7 +117,7 @@ L.map("map").setView(
 
 L.tileLayer(
 
-"https://tile.openstreetmap.org/{x}/{y}.png",
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
 {
 
@@ -130,7 +126,6 @@ maxZoom:19
 }
 
 ).addTo(map);
-
 
 
 
@@ -144,6 +139,43 @@ let dropMarker=null;
 let route=null;
 
 
+let pickup=null;
+
+
+
+
+
+function distanceKm(lat1,lon1,lat2,lon2){
+
+
+let R=6371;
+
+
+let dLat=(lat2-lat1)*Math.PI/180;
+
+let dLon=(lon2-lon1)*Math.PI/180;
+
+
+let a=
+
+Math.sin(dLat/2)*Math.sin(dLat/2)+
+
+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+
+Math.sin(dLon/2)*Math.sin(dLon/2);
+
+
+
+let c=
+
+2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+
+
+return (R*c).toFixed(2);
+
+
+}
+
 
 
 
@@ -152,7 +184,9 @@ async function loadRide(){
 
 
 
-let snap = await getDoc(
+let snap=
+
+await getDoc(
 
 doc(db,"rides",rideId)
 
@@ -168,6 +202,11 @@ let data=snap.data();
 
 
 
+pickup=data.pickupCoords;
+
+let drop=data.dropCoords;
+
+
 
 document.getElementById("status").innerHTML=
 
@@ -179,15 +218,15 @@ Status: ${data.status}
 
 Service: ${data.service}
 
+<br>
+
+Distance: Waiting...
+
+<br>
+
+ETA: Waiting...
+
 `;
-
-
-
-
-
-let pickup=data.pickupCoords;
-
-let drop=data.dropCoords;
 
 
 
@@ -203,11 +242,7 @@ pickupMarker=L.marker(
 
 .addTo(map)
 
-.bindPopup(
-
-"📍 Pickup"
-
-);
+.bindPopup("📍 Pickup");
 
 
 }
@@ -225,11 +260,7 @@ dropMarker=L.marker(
 
 .addTo(map)
 
-.bindPopup(
-
-"🏁 Drop"
-
-);
+.bindPopup("🏁 Drop");
 
 
 
@@ -265,16 +296,12 @@ route.getBounds()
 
 if(data.riderId){
 
-
 trackRider(data.riderId);
 
-
 }
 
 
-
 }
-
 
 
 
@@ -293,9 +320,7 @@ doc(db,"riderLocations",riderId),
 (snap)=>{
 
 
-
 if(!snap.exists()) return;
-
 
 
 
@@ -303,10 +328,7 @@ let data=snap.data();
 
 
 
-
-
 if(riderMarker){
-
 
 
 riderMarker.setLatLng(
@@ -314,7 +336,6 @@ riderMarker.setLatLng(
 [data.lat,data.lng]
 
 );
-
 
 
 }
@@ -332,17 +353,67 @@ riderMarker=L.marker(
 
 .bindPopup(
 
-"🏍 Your Rider"
+"🏍 Rider"
 
 )
 
 .openPopup();
 
 
-
 }
 
 
+
+
+
+if(pickup){
+
+
+let km=
+
+distanceKm(
+
+data.lat,
+
+data.lng,
+
+pickup.lat,
+
+pickup.lng
+
+);
+
+
+
+let eta=
+
+Math.ceil(
+
+km/0.5
+
+);
+
+
+
+document.getElementById("status").innerHTML=
+
+`
+
+Status: Rider Coming 🏍
+
+<br>
+
+Distance: ${km} KM
+
+<br>
+
+ETA: ${eta} Minutes
+
+`;
+
+
+
+}
 
 
 
@@ -367,7 +438,6 @@ map.panTo(
 
 
 
-
 onSnapshot(
 
 doc(db,"rides",rideId),
@@ -379,20 +449,6 @@ if(snap.exists()){
 
 
 let data=snap.data();
-
-
-document.getElementById("status").innerHTML=
-
-`
-
-Status: ${data.status}
-
-<br>
-
-Service: ${data.service}
-
-`;
-
 
 
 if(data.riderId){
@@ -409,6 +465,7 @@ trackRider(data.riderId);
 
 
 });
+
 
 
 
