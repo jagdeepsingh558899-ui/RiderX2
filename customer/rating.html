@@ -15,9 +15,10 @@
 
 .box{
 
-background:#1d1d1d;
+background:#111;
 padding:25px;
-border-radius:15px;
+border-radius:20px;
+border:2px solid #FFD600;
 text-align:center;
 
 }
@@ -25,7 +26,7 @@ text-align:center;
 
 .star{
 
-font-size:35px;
+font-size:40px;
 cursor:pointer;
 
 }
@@ -35,7 +36,9 @@ textarea{
 
 width:100%;
 height:100px;
-margin-top:15px;
+margin-top:20px;
+border-radius:12px;
+padding:10px;
 
 }
 
@@ -43,14 +46,15 @@ margin-top:15px;
 button{
 
 width:100%;
-padding:14px;
+padding:15px;
 margin-top:15px;
-background:#ffcc00;
+background:#FFD600;
 border:none;
-border-radius:10px;
+border-radius:12px;
 font-weight:bold;
 
 }
+
 
 </style>
 
@@ -58,6 +62,7 @@ font-weight:bold;
 
 
 <body>
+
 
 
 <div class="header">
@@ -86,13 +91,9 @@ How was your ride?
 
 
 <span class="star" onclick="rate(1)">☆</span>
-
 <span class="star" onclick="rate(2)">☆</span>
-
 <span class="star" onclick="rate(3)">☆</span>
-
 <span class="star" onclick="rate(4)">☆</span>
-
 <span class="star" onclick="rate(5)">☆</span>
 
 
@@ -100,7 +101,9 @@ How was your ride?
 
 
 
-<textarea id="review" placeholder="Write review"></textarea>
+
+<textarea id="review" placeholder="Write your review"></textarea>
+
 
 
 
@@ -111,10 +114,16 @@ Submit Rating
 </button>
 
 
+
+<p id="msg"></p>
+
+
+
 </div>
 
 
 </div>
+
 
 
 
@@ -132,13 +141,13 @@ collection,
 addDoc,
 doc,
 getDoc,
+updateDoc,
 serverTimestamp
 
 }
 
-from
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
@@ -152,28 +161,38 @@ localStorage.getItem("rideId");
 
 
 
+
+
+
+
 function rate(value){
 
 
 rating=value;
 
 
-let stars=document.querySelectorAll(".star");
+document.querySelectorAll(".star")
+.forEach((star,index)=>{
 
 
+star.innerHTML=
 
-stars.forEach((s,i)=>{
+index < value
 
+?
 
-s.innerHTML=
+"★"
 
-i<value ? "★" : "☆";
+:
+
+"☆";
 
 
 });
 
 
 }
+
 
 
 window.rate=rate;
@@ -184,11 +203,28 @@ window.rate=rate;
 
 
 
-window.submitRating=async function(){
+window.submitRating=async()=>{
 
 
 
-let ride=
+if(rating===0){
+
+
+document.getElementById("msg").innerHTML=
+
+"Please select stars ⭐";
+
+
+return;
+
+
+}
+
+
+
+
+
+let rideSnap=
 
 await getDoc(
 
@@ -198,7 +234,16 @@ doc(db,"rides",rideId)
 
 
 
-let data=ride.data();
+if(!rideSnap.exists()) return;
+
+
+
+let data=
+
+rideSnap.data();
+
+
+
 
 
 
@@ -209,12 +254,13 @@ collection(db,"reviews"),
 {
 
 
-rideId,
-
-riderId:data.riderId,
+rideId:rideId,
 
 
-rating,
+riderId:data.riderId || "",
+
+
+rating:rating,
 
 
 review:
@@ -231,20 +277,51 @@ createdAt:serverTimestamp()
 
 
 
-alert("Thanks for rating ⭐");
 
 
-location.href="home.html";
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
 
 
+rated:true
 
 }
 
+);
 
+
+
+
+
+
+document.getElementById("msg").innerHTML=
+
+"Thank you for rating ⭐";
+
+
+
+
+
+setTimeout(()=>{
+
+
+location.href="history.html";
+
+
+},1500);
+
+
+
+};
 
 
 
 </script>
+
 
 
 </body>
