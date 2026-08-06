@@ -1,80 +1,135 @@
-// =================================
-// RiderX Service Worker
-// =================================
+// ==========================================
+// RiderX Service Worker V2
+// PWA + Cache System
+// ==========================================
 
 
 const CACHE_NAME = "riderx-v2";
 
 
+
 const FILES_TO_CACHE = [
+
 
 "/",
 
-"index.html",
+"/index.html",
 
-"manifest.json",
+"/manifest.json",
 
-"assets/logo.png",
 
-"css/style.css",
 
-"auth/login.html",
+"/css/style.css",
 
-"auth/register.html",
 
-"auth/role.html",
 
-"customer/home.html",
+"/assets/logo.png",
 
-"customer/booking.html",
 
-"customer/map.html",
 
-"customer/dashboard.html",
+"/auth/login.html",
 
-"rider/dashboard.html"
+"/auth/register.html",
+
+
+
+"/customer/Home.html",
+
+"/customer/booking.html",
+
+"/customer/map.html",
+
+"/customer/History.html",
+
+
+
+"/rider/Home.html",
+
+"/rider/History.html",
+
+
+
+"/js/App.js",
+
+"/js/booking.js",
+
+"/js/Map.js",
+
+"/js/Chat.js",
+
+"/js/History.js",
+
+"/js/RiderHistory.js",
+
+
 
 ];
 
 
 
 
-// Install
+
+
+
+
+// INSTALL
+
 
 self.addEventListener(
+
 "install",
-(event)=>{
 
-
-self.skipWaiting();
+event=>{
 
 
 event.waitUntil(
+
 
 caches.open(CACHE_NAME)
 
 .then(cache=>{
 
-return cache.addAll(FILES_TO_CACHE);
 
-})
+return cache.addAll(
+
+FILES_TO_CACHE
 
 );
 
 
-});
+})
+
+
+);
+
+
+self.skipWaiting();
+
+
+}
+
+);
 
 
 
 
-// Activate
+
+
+
+
+
+// ACTIVATE
+
 
 self.addEventListener(
+
 "activate",
-(event)=>{
+
+event=>{
 
 
 event.waitUntil(
+
 
 caches.keys()
 
@@ -83,12 +138,19 @@ caches.keys()
 
 return Promise.all(
 
+
 keys.map(key=>{
 
 
-if(key!==CACHE_NAME){
+if(
+
+key!==CACHE_NAME
+
+){
+
 
 return caches.delete(key);
+
 
 }
 
@@ -105,33 +167,54 @@ return caches.delete(key);
 );
 
 
+
 self.clients.claim();
 
 
-});
-
-
-
-
-
-// Fetch
-
-self.addEventListener(
-"fetch",
-(event)=>{
-
-
-event.respondWith(
-
-fetch(event.request)
-
-.catch(()=>{
-
-return caches.match(event.request);
-
-})
+}
 
 );
 
 
-});
+
+
+
+
+
+
+
+// FETCH
+
+
+self.addEventListener(
+
+"fetch",
+
+event=>{
+
+
+event.respondWith(
+
+
+caches.match(
+
+event.request
+
+)
+
+.then(response=>{
+
+
+return response || fetch(event.request);
+
+
+})
+
+
+);
+
+
+
+}
+
+);
