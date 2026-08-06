@@ -8,32 +8,132 @@
 
 <title>RiderX Rider Dashboard</title>
 
-<link rel="stylesheet" href="../css/style.css">
-
-
 <style>
 
-.card{
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
 
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin:15px 0;
+
+body{
+
+background:#000;
+color:white;
 
 }
 
 
-button{
+
+.header{
+
+background:#111;
+
+padding:20px;
+
+border-bottom:2px solid #FFD600;
+
+display:flex;
+
+justify-content:space-between;
+
+}
+
+
+
+.logo{
+
+font-size:28px;
+font-weight:900;
+
+}
+
+
+.logo span{
+
+color:#FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.status{
+
+background:#111;
+
+padding:20px;
+
+border-radius:20px;
+
+margin-bottom:20px;
+
+}
+
+
+
+.status button{
+
+margin-top:15px;
+
+padding:12px;
 
 width:100%;
-padding:12px;
-margin-top:10px;
-background:#ffcc00;
+
 border:none;
-border-radius:10px;
+
+border-radius:12px;
+
+background:#FFD600;
+
 font-weight:bold;
 
 }
+
+
+
+.card{
+
+background:#111;
+
+padding:20px;
+
+border-radius:20px;
+
+margin-top:15px;
+
+}
+
+
+
+.card button{
+
+width:100%;
+
+padding:14px;
+
+margin-top:15px;
+
+border:none;
+
+border-radius:12px;
+
+background:#FFD600;
+
+font-weight:bold;
+
+}
+
+
 
 </style>
 
@@ -43,300 +143,83 @@ font-weight:bold;
 <body>
 
 
+
 <div class="header">
 
-🏍 RiderX Rider
+<div class="logo">
+
+RIDER<span>X</span>
 
 </div>
+
+
+<div>
+
+🏍️
+
+</div>
+
+
+</div>
+
+
 
 
 
 <div class="container">
-<div class="card">
-
-<h3>
-📢 Notifications
-</h3>
-
-<div id="notifications">
-Loading...
-</div>
-
-</div>
-
-<div class="card">
 
 
-<h3 id="name">
-Rider
-</h3>
+
+<div class="status">
 
 
-<p id="status">
-Offline
+<h2>
+
+Rider Dashboard
+
+</h2>
+
+
+<p>
+
+Online / Offline
+
 </p>
 
 
-<button onclick="goOnline()">
-🟢 Go Online
-</button>
-
-
-<button onclick="goOffline()">
-🔴 Go Offline
-</button>
-
-
-</div>
-
-
-
-
-<h3>
-My Current Ride
-</h3>
-
-
-<div id="currentRide">
-
-No Ride
-
-</div>
-
-
-
-<h3>
-Available Rides
-</h3>
-
-
-<div id="rides">
+<button>
 
 Go Online
 
+</button>
+
+
 </div>
 
 
-
-</div>
-
-
-
-
-
-
-
-<script type="module">
-
-
-import {auth,db} from "../firebase/config.js";
-
-
-import {async function loadNotifications(){
-
-let snap = await getDocs(
-collection(db,"notifications")
-);
-
-
-let box=document.getElementById("notifications");
-
-box.innerHTML="";
-
-
-snap.forEach((n)=>{
-
-box.innerHTML += `
-
-<p>
-📢 ${n.data().message}
-</p>
-
-`;
-
-});
-
-
-}
-
-
-loadNotifications();
-
-doc,
-getDoc,
-updateDoc,
-collection,
-query,
-where,
-getDocs
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-let uid;
-
-let currentRideId=null;
-
-
-
-auth.onAuthStateChanged(async(user)=>{
-
-
-if(!user){
-
-location.href="../auth/login.html";
-
-return;
-
-}
-
-
-uid=user.uid;
-
-
-let u=await getDoc(
-
-doc(db,"users",uid)
-
-);
-
-
-document.getElementById("name").innerHTML=
-
-u.data().name || "Rider";
-
-
-});
-
-
-
-
-
-
-
-
-window.goOnline=async function(){
-
-
-
-await updateDoc(
-
-doc(db,"users",uid),
-
-{
-
-online:true
-
-}
-
-);
-
-
-document.getElementById("status").innerHTML=
-
-"🟢 Online";
-
-
-loadRides();
-
-
-
-}
-
-
-
-
-
-
-
-
-window.goOffline=async function(){
-
-
-
-await updateDoc(
-
-doc(db,"users",uid),
-
-{
-
-online:false
-
-}
-
-);
-
-
-
-document.getElementById("status").innerHTML=
-
-"🔴 Offline";
-
-
-}
-
-
-
-
-
-async function loadRides(){
-
-
-let q=query(
-
-collection(db,"rides"),
-
-where("status","==","Pending")
-
-);
-
-
-
-let snap=await getDocs(q);
-
-
-let box=document.getElementById("rides");
-
-
-box.innerHTML="";
-
-
-
-snap.forEach((r)=>{
-
-
-let data=r.data();
-
-
-
-box.innerHTML +=`
 
 
 <div class="card">
 
 
-<h3>${data.service}</h3>
+<h3>
+
+New Ride Requests
+
+</h3>
 
 
 <p>
-💰 ${data.fare}
+
+No new rides
+
 </p>
 
 
-<p>
-📍 ${data.pickupLat},${data.pickupLng}
-</p>
 
+<button onclick="openRequests()">
 
-<button onclick="acceptRide('${r.id}')">
-
-Accept
+View Requests
 
 </button>
 
@@ -344,168 +227,26 @@ Accept
 </div>
 
 
-`;
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-window.acceptRide=async function(id){
-
-
-
-await updateDoc(
-
-doc(db,"rides",id),
-
-{
-
-status:"Accepted",
-
-riderId:uid
-
-}
-
-);
-
-
-
-currentRideId=id;
-
-
-localStorage.setItem(
-
-"rideId",
-
-id
-
-);
-
-
-
-loadCurrentRide();
-
-
-
-}
-
-
-
-
-
-
-
-async function loadCurrentRide(){
-
-
-
-if(!currentRideId)return;
-
-
-
-let r=await getDoc(
-
-doc(db,"rides",currentRideId)
-
-);
-
-
-
-let box=document.getElementById("currentRide");
-
-
-
-let data=r.data();
-
-
-
-box.innerHTML=`
-
-<div class="card">
-
-
-Status: ${data.status}
-
-
-<button onclick="changeStatus('Arriving')">
-
-🚗 Arriving
-
-</button>
-
-
-<button onclick="changeStatus('Started')">
-
-▶️ Start Ride
-
-</button>
-
-
-<button onclick="changeStatus('Completed')">
-
-✅ Complete Ride
-
-</button>
 
 
 </div>
 
-`;
 
 
 
-}
+<script>
 
 
+function openRequests(){
 
-
-
-
-
-
-window.changeStatus=async function(status){
-
-
-
-await updateDoc(
-
-doc(db,"rides",currentRideId),
-
-{
-
-status:status
+window.location.href="rides.html";
 
 }
-
-);
-
-
-
-alert("Ride "+status+" ✅");
-
-
-loadCurrentRide();
-
-
-
-}
-
-
-
 
 
 </script>
+
+
 
 
 </body>
