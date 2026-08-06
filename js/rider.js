@@ -1,6 +1,6 @@
 // ==========================================
-// RiderX Rider Engine V1
-// Online + GPS + Ride Request + Accept
+// RiderX Rider Live Engine V2
+// Online + GPS Tracking + Active Ride
 // ==========================================
 
 
@@ -11,10 +11,6 @@ import {
 
 doc,
 setDoc,
-collection,
-query,
-where,
-onSnapshot,
 updateDoc,
 serverTimestamp
 
@@ -34,89 +30,19 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
-// ELEMENTS
-
 
 const onlineBtn =
 document.getElementById("onlineBtn");
 
 
-const rideBox =
-document.getElementById("rideBox");
-
-
-const pickup =
-document.getElementById("pickup");
-
-
-const drop =
-document.getElementById("drop");
-
-
-const fare =
-document.getElementById("fare");
-
-
-const acceptBtn =
-document.getElementById("acceptBtn");
-
-
-const rejectBtn =
-document.getElementById("rejectBtn");
-
-
-
-
 
 let currentUser=null;
 
-let isOnline=false;
-
-let currentRide=null;
+let online=false;
 
 let watchId=null;
 
-
-
-// MAP
-
-
-let map;
-
-
-let riderMarker=null;
-
-
-
-window.onload=()=>{
-
-
-map=L.map("map")
-.setView(
-[30.7333,76.7794],
-13
-);
-
-
-
-L.tileLayer(
-
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-{
-
-maxZoom:19
-
-}
-
-).addTo(map);
-
-
-
-};
-
-
-
+let activeRide=null;
 
 
 
@@ -135,15 +61,10 @@ return;
 }
 
 
-
 currentUser=user;
 
 
-startRideListener();
-
-
 });
-
 
 
 
@@ -156,30 +77,19 @@ startRideListener();
 onlineBtn.onclick=()=>{
 
 
-if(!currentUser)
-return;
-
-
-
-if(isOnline){
-
+if(online){
 
 goOffline();
 
-
 }
-
 else{
 
-
 goOnline();
-
 
 }
 
 
 };
-
 
 
 
@@ -192,8 +102,7 @@ goOnline();
 async function goOnline(){
 
 
-
-isOnline=true;
+online=true;
 
 
 onlineBtn.innerHTML="Online";
@@ -203,11 +112,7 @@ onlineBtn.className="online";
 
 
 
-startLocation();
-
-
-
-listenLocationPermission();
+startGPS();
 
 
 
@@ -224,7 +129,8 @@ listenLocationPermission();
 async function goOffline(){
 
 
-isOnline=false;
+online=false;
+
 
 
 onlineBtn.innerHTML="Offline";
@@ -253,17 +159,20 @@ currentUser.uid
 
 {
 
+
 online:false,
 
 status:"offline",
 
 updatedAt:serverTimestamp()
 
+
 },
 
 {
 merge:true
 }
+
 
 );
 
@@ -277,21 +186,20 @@ merge:true
 
 
 
-// LIVE LOCATION
+
+// GPS TRACKING
 
 
-function startLocation(){
+function startGPS(){
 
 
 
-watchId=
-
-navigator.geolocation.watchPosition(
+watchId = navigator.geolocation.watchPosition(
 
 async(position)=>{
 
 
-if(!isOnline)
+if(!online)
 return;
 
 
@@ -314,6 +222,7 @@ position.coords.longitude
 
 
 
+
 await setDoc(
 
 doc(
@@ -324,18 +233,25 @@ currentUser.uid
 
 {
 
+
 online:true,
 
 status:"available",
 
+
 location,
 
+
 updatedAt:serverTimestamp()
+
+
 
 },
 
 {
+
 merge:true
+
 }
 
 
@@ -345,31 +261,30 @@ merge:true
 
 
 
-showMarker(location);
-
-
 
 },
-
-
 
 (error)=>{
 
 
-alert(
-"GPS permission allow karo"
+console.log(
+"GPS Error",
+error
 );
 
 
 },
 
 
-
 {
+
 
 enableHighAccuracy:true,
 
-maximumAge:0
+maximumAge:0,
+
+timeout:10000
+
 
 }
 
@@ -387,186 +302,52 @@ maximumAge:0
 
 
 
-// MAP MARKER
+// SEND ACTIVE RIDE LOCATION
 
 
-function showMarker(location){
+export async function sendRideLocation(location){
 
 
 
-if(!map)
+if(!currentUser || !activeRide)
 return;
 
 
 
-if(riderMarker)
 
-map.removeLayer(riderMarker);
-
-
-
-riderMarker=L.marker(
-
-[
-location.lat,
-location.lng
-]
-
-)
-
-.addTo(map)
-
-.bindPopup(
-"Your Location"
-);
-
-
-map.setView(
-
-[
-location.lat,
-location.lng
-],
-
-16
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-// LISTEN RIDES
-
-
-function startRideListener(){
-
-
-
-const q=query(
-
-collection(db,"rides"),
-
-where(
-"status",
-"==",
-"searching"
-)
-
-);
-
-
-
-
-onSnapshot(q,(snap)=>{
-
-
-snap.forEach((item)=>{
-
-
-let ride=item.data();
-
-
-
-currentRide={
-
-id:item.id,
-
-...ride
-
-};
-
-
-
-
-
-showRide(ride);
-
-
-
-});
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-// SHOW REQUEST
-
-
-function showRide(ride){
-
-
-rideBox.style.display="block";
-
-
-
-pickup.innerHTML=
-ride.pickup;
-
-
-
-drop.innerHTML=
-ride.drop;
-
-
-
-fare.innerHTML=
-ride.fare;
-
-
-
-}
-
-
-
-
-
-
-
-// ACCEPT
-
-
-acceptBtn.onclick=async()=>{
-
-
-if(!currentRide)
-return;
-
-
-
-await updateDoc(
+await setDoc(
 
 doc(
+
 db,
-"rides",
-currentRide.id
+
+"liveLocations",
+
+activeRide
+
 ),
 
 {
 
-status:"accepted",
 
 riderId:
+
 currentUser.uid,
 
-acceptedAt:
+
+location,
+
+
+updatedAt:
 serverTimestamp()
+
+
+},
+
+
+{
+
+merge:true
 
 }
 
@@ -574,14 +355,7 @@ serverTimestamp()
 );
 
 
-
-alert(
-"Ride Accepted"
-);
-
-
-
-};
+}
 
 
 
@@ -589,25 +363,21 @@ alert(
 
 
 
-// REJECT
+
+// SET ACTIVE RIDE
 
 
-rejectBtn.onclick=()=>{
+export function setActiveRide(id){
 
 
-rideBox.style.display="none";
+activeRide=id;
 
 
-currentRide=null;
-
-
-
-};
-
+}
 
 
 
 
 console.log(
-"RiderX Rider Engine Loaded"
+"RiderX Live Rider Engine V2 Ready"
 );
