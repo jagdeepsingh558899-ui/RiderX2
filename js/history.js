@@ -1,247 +1,265 @@
-// =====================================
+// =================================
 // RiderX Customer Ride History
-// =====================================
+// =================================
 
 
 import {
 
-db,
-auth
+auth,
+rtdb
 
-}
-
-from "../firebase/config.js";
-
+} from "../firebase/Firebase-config.js";
 
 
 import {
 
+onAuthStateChanged
 
-collection,
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-query,
 
-where,
+import {
 
-onSnapshot,
+ref,
+onValue
 
-orderBy
+} from
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+
+
+
+
+
+let customerId = null;
+
+
+
+
+
+
+onAuthStateChanged(
+
+auth,
+
+(user)=>{
+
+
+if(user){
+
+
+customerId = user.uid;
+
+
+loadHistory();
 
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
+});
 
 
 
-const ridesBox =
 
-document.getElementById(
+
+
+
+function loadHistory(){
+
+
+
+const ridesRef =
+
+ref(
+
+rtdb,
+
 "rides"
+
 );
 
 
 
 
 
+onValue(
 
+ridesRef,
 
-function loadRides(){
-
-
-
-const user = auth.currentUser;
+(snapshot)=>{
 
 
 
-if(!user){
+const box =
+
+document.getElementById("rideHistory");
 
 
-ridesBox.innerHTML =
 
-`
-<div class="empty">
-Please Login First
-</div>
-`;
+if(!box)
 
 return;
 
 
-}
+
+
+
+box.innerHTML="";
 
 
 
 
 
 
-const q = query(
-
-collection(db,"rides"),
+let found = false;
 
 
-where(
-"customerId",
-"==",
-user.uid
-),
 
 
-orderBy(
-"createdAt",
-"desc"
+
+
+
+snapshot.forEach((child)=>{
+
+
+
+const ride = child.val();
+
+
+
+
+
+
+if(
+
+ride.customerId === customerId
+
+){
+
+
+
+found=true;
+
+
+
+
+
+let date =
+
+new Date(
+
+ride.createdAt
+
 )
 
-
-);
-
+.toLocaleString();
 
 
 
 
 
 
-onSnapshot(q,(snapshot)=>{
+box.innerHTML += `
 
 
 
-if(snapshot.empty){
+<div class="booking-card">
 
 
 
-ridesBox.innerHTML =
+<h2>
 
-`
-<div class="empty">
+${ride.service}
 
-No Rides Found
-
-</div>
-`;
-
-return;
-
-
-}
+</h2>
 
 
 
 
+<p>
+
+📍 ${ride.pickup}
+
+</p>
 
 
 
-ridesBox.innerHTML="";
+<p>
 
+🏁 ${ride.drop}
 
-
-
-
-snapshot.forEach(doc=>{
-
-
-
-const ride = doc.data();
-
+</p>
 
 
 
 
-ridesBox.innerHTML +=
+<p>
+
+Distance:
+
+${ride.distance} KM
+
+</p>
 
 
-
-`
-
-<div class="ride-card">
 
 
 <h3>
 
-${ride.service?.toUpperCase()}
+₹${ride.fare}
 
 </h3>
 
 
-<div class="info">
-
-📍 From:
-${ride.pickup}
-
-</div>
 
 
-<div class="info">
-
-📍 To:
-${ride.drop}
-
-</div>
-
-
-<div class="info">
-
-💰 Fare:
-${ride.fare}
-
-</div>
-
-
-<div class="info">
-
-💳 Payment:
-${ride.payment}
-
-</div>
-
-
-
-<div class="status">
+<p>
 
 Status:
+
 ${ride.status}
 
-</div>
+</p>
 
 
 
-${
+<small>
 
-ride.riderName ?
+${date}
 
-`
-
-<div class="info">
-
-🏍 Rider:
-${ride.riderName}
-
-</div>
-
-`
-
-:""
-
-}
+</small>
 
 
 
 </div>
+
 
 
 `;
 
 
 
-});
+}
 
 
 
 });
 
+
+
+
+
+
+
+if(!found){
+
+
+box.innerHTML =
+
+"<p>No rides found</p>";
 
 
 }
@@ -250,11 +268,12 @@ ${ride.riderName}
 
 
 
-
-auth.onAuthStateChanged(()=>{
-
-
-loadRides();
+}
 
 
-});
+
+);
+
+
+
+}
