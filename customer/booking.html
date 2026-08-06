@@ -4,53 +4,17 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Booking</title>
+
+<title>RiderX Book Ride</title>
+
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-
-<style>
-
-#map{
-
-width:100%;
-height:350px;
-border-radius:20px;
-
-}
-
-
-.container{
-
-padding:15px;
-
-}
-
-
-input,select,button{
-
-width:100%;
-padding:14px;
-margin-top:12px;
-border-radius:12px;
-border:none;
-
-}
-
-
-button{
-
-background:#FFD600;
-font-weight:bold;
-
-}
-
-
-</style>
 
 
 </head>
@@ -60,45 +24,65 @@ font-weight:bold;
 
 
 
-<div class="header">
+<div class="topbar">
 
+<h2>
 🏍 Book Ride
+</h2>
 
 </div>
+
+
 
 
 
 <div class="container">
 
 
+
+
+
+<div class="map-container">
+
 <div id="map"></div>
 
+</div>
 
 
-<select id="service">
 
-<option value="Bike Taxi">
 
-🏍 Bike Taxi
 
+
+<div class="card">
+
+
+
+<h3>
+Select Service
+</h3>
+
+
+
+<select id="service" class="input">
+
+
+<option>
+Bike Taxi
 </option>
 
-<option value="Cab">
 
-🚕 Cab
-
+<option>
+Cab
 </option>
 
-<option value="Parcel">
 
-📦 Parcel
-
+<option>
+Parcel
 </option>
 
-<option value="Food">
 
-🍔 Food
-
+<option>
+Food
 </option>
 
 
@@ -106,10 +90,25 @@ font-weight:bold;
 
 
 
-<input id="pickup" placeholder="Pickup Location" readonly>
 
 
-<button id="locationBtn">
+<input
+
+id="pickup"
+
+class="input"
+
+placeholder="Pickup Location"
+
+readonly
+
+>
+
+
+
+
+
+<button id="locationBtn" class="btn">
 
 📍 Use My Location
 
@@ -117,39 +116,148 @@ font-weight:bold;
 
 
 
-<input id="drop" placeholder="Drop Location">
 
 
 
-<p>
 
-Distance:
+<input
 
-<span id="distance">-</span>
+id="drop"
 
-</p>
+class="input"
 
+placeholder="Drop Location"
 
-
-<p>
-
-Fare:
-
-₹<span id="fare">0</span>
-
-</p>
+>
 
 
 
-<button id="bookBtn">
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+
+<h3>
+Payment Method
+</h3>
+
+
+
+<select id="paymentMethod" class="input">
+
+
+<option value="Cash">
+
+💵 Cash
+
+</option>
+
+
+
+<option value="Online">
+
+💳 Online Payment
+
+</option>
+
+
+
+</select>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="booking-card">
+
+
+
+<div class="booking-title">
+
+
+<h3>
+Fare
+</h3>
+
+
+<div class="booking-price">
+
+₹<span id="fare">
+
+0
+
+</span>
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="booking-row">
+
+<span>
+Distance
+</span>
+
+
+<b id="distance">
+
+-
+
+</b>
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<button id="bookBtn" class="btn">
+
 
 Confirm Booking
+
 
 </button>
 
 
 
+
+
+
+
 </div>
+
+
+
 
 
 
@@ -158,120 +266,6 @@ Confirm Booking
 
 
 <script type="module" src="../js/booking.js"></script>
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-doc,
-getDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-async function loadServices(){
-
-
-
-const snap = await getDoc(
-
-doc(db,"settings","services")
-
-);
-
-
-
-if(!snap.exists()) return;
-
-
-
-let data=snap.data();
-
-
-
-let select=document.getElementById("service");
-
-
-
-[...select.options].forEach(option=>{
-
-
-let name=option.value;
-
-
-
-if(
-
-name==="Bike Taxi" && !data.bike
-
-){
-
-option.style.display="none";
-
-}
-
-
-
-if(
-
-name==="Cab" && !data.cab
-
-){
-
-option.style.display="none";
-
-}
-
-
-
-if(
-
-name==="Parcel" && !data.parcel
-
-){
-
-option.style.display="none";
-
-}
-
-
-
-if(
-
-name==="Food" && !data.food
-
-){
-
-option.style.display="none";
-
-}
-
-
-
-});
-
-
-
-}
-
-
-
-loadServices();
-
-
-
-</script>
 
 
 
