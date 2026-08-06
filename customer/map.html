@@ -8,33 +8,205 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>RiderX Live Ride</title>
+<title>RiderX Book Ride</title>
 
 
 <link rel="stylesheet" href="../css/style.css">
 
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
+
+<style>
+
+body{
+
+margin:0;
+
+background:#000;
+
+color:white;
+
+font-family:Arial,sans-serif;
+
+}
+
+
+.header{
+
+background:#111;
+
+padding:18px;
+
+color:#FFD600;
+
+font-size:26px;
+
+font-weight:900;
+
+}
+
+
+
+.container{
+
+padding:15px;
+
+}
+
+
+
+#map{
+
+height:350px;
+
+width:100%;
+
+border-radius:20px;
+
+overflow:hidden;
+
+}
+
+
+
+.card{
+
+background:#111;
+
+padding:18px;
+
+border-radius:20px;
+
+margin-top:15px;
+
+}
+
+
+
+label{
+
+color:#FFD600;
+
+font-weight:bold;
+
+}
+
+
+
+input,select{
+
+width:100%;
+
+padding:14px;
+
+margin-top:8px;
+
+margin-bottom:12px;
+
+background:#222;
+
+color:white;
+
+border:none;
+
+border-radius:12px;
+
+box-sizing:border-box;
+
+}
+
+
+
+.services{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:10px;
+
+}
+
+
+
+.service{
+
+background:#222;
+
+padding:15px;
+
+text-align:center;
+
+border-radius:15px;
+
+cursor:pointer;
+
+}
+
+
+
+.active{
+
+background:#FFD600;
+
+color:#000;
+
+}
+
+
+
+.fare{
+
+font-size:28px;
+
+color:#FFD600;
+
+font-weight:bold;
+
+}
+
+
+
+button{
+
+width:100%;
+
+padding:16px;
+
+border:none;
+
+border-radius:15px;
+
+background:#FFD600;
+
+color:#000;
+
+font-weight:bold;
+
+font-size:17px;
+
+margin-top:15px;
+
+}
+
+
+
+</style>
 
 </head>
+
 
 
 <body>
 
 
 
-<div class="topbar">
+<div class="header">
 
-
-<h2>
-🚕 Live Ride
-</h2>
-
+🏍 RiderX Ride
 
 </div>
-
-
 
 
 
@@ -44,16 +216,40 @@
 
 
 
-
-
-
-<div class="map-container">
-
 <div id="map"></div>
 
+
+
+
+
+<div class="card">
+
+
+<label>
+
+Pickup Location
+
+</label>
+
+
+<input id="pickup" placeholder="Current location">
+
+
+
+
+
+<label>
+
+Drop Location
+
+</label>
+
+
+<input id="drop" placeholder="Enter destination">
+
+
+
 </div>
-
-
 
 
 
@@ -64,21 +260,53 @@
 <div class="card">
 
 
-<h3>
-Ride Status
-</h3>
+<label>
+
+Select Service
+
+</label>
 
 
-<h2 id="rideStatus">
 
-Searching...
+<div class="services">
 
-</h2>
+
+<div class="service active" data-service="Bike Taxi">
+
+🏍 Bike
+
+</div>
+
+
+
+<div class="service" data-service="Cab">
+
+🚕 Cab
+
+</div>
+
+
+
+<div class="service" data-service="Parcel">
+
+📦 Parcel
+
+</div>
+
+
+
+<div class="service" data-service="Food">
+
+🍔 Food
+
+</div>
 
 
 </div>
 
 
+
+</div>
 
 
 
@@ -89,62 +317,26 @@ Searching...
 <div class="card">
 
 
-<h3>
-Rider Details
-</h3>
+Estimated Fare
+
+
+<div class="fare" id="fare">
+
+₹0
+
+</div>
 
 
 
-<p>
+<button id="bookRide">
 
-Name:
-
-<b id="riderName">
-
-Waiting...
-
-</b>
-
-</p>
-
-
-
-<p>
-
-Vehicle:
-
-<b id="vehicle">
-
--
-
-</b>
-
-</p>
-
-
-
-
-
-<button class="btn">
-
-📞 Call Rider
-
-</button>
-
-
-
-<button class="btn-outline">
-
-💬 Chat
+Book Ride
 
 </button>
 
 
 
 </div>
-
-
-
 
 
 
@@ -158,10 +350,13 @@ Vehicle:
 
 
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
-<script type="module" src="../js/map.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+<script type="module" src="../js/customer-map.js"></script>
+
 
 
 </body>
