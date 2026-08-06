@@ -1,11 +1,9 @@
 /* =========================================
-   RiderX Premium Style
-   Final Clean Version
-   Black + Yellow Theme
+   RiderX Premium Global Style
+   Black + Electric Yellow Theme
 ========================================= */
 
-
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 
 :root{
@@ -13,9 +11,8 @@
 --primary:#FFD600;
 --secondary:#FFC400;
 
---dark:#080808;
---dark2:#111111;
-
+--dark:#050505;
+--dark2:#101010;
 --card:#181818;
 
 --white:#ffffff;
@@ -24,10 +21,9 @@
 --success:#00c853;
 --danger:#ff1744;
 
---shadow:0 15px 35px rgba(0,0,0,.45);
+--shadow:0 20px 50px rgba(0,0,0,.55);
 
 }
-
 
 
 *{
@@ -40,7 +36,6 @@ font-family:'Poppins',sans-serif;
 }
 
 
-
 html{
 
 scroll-behavior:smooth;
@@ -48,27 +43,20 @@ scroll-behavior:smooth;
 }
 
 
-
 body{
 
 background:var(--dark);
-
 color:white;
-
 min-height:100vh;
-
 overflow-x:hidden;
 
 }
 
 
 
-
-
 /* =========================
 Scrollbar
 ========================= */
-
 
 ::-webkit-scrollbar{
 
@@ -80,37 +68,62 @@ width:6px;
 ::-webkit-scrollbar-thumb{
 
 background:var(--primary);
-
 border-radius:20px;
 
 }
 
 
 
-
-
 /* =========================
-Splash Screen
+Premium Splash Screen
 ========================= */
 
 
 .splash{
 
 position:fixed;
-
 inset:0;
 
 background:#000;
 
 display:flex;
-
 align-items:center;
-
 justify-content:center;
-
 flex-direction:column;
 
 z-index:99999;
+
+overflow:hidden;
+
+}
+
+
+
+.splash::before{
+
+content:"";
+
+position:absolute;
+
+width:320px;
+height:320px;
+
+background:var(--primary);
+
+filter:blur(130px);
+
+opacity:.25;
+
+animation:glowPulse 2s infinite;
+
+}
+
+
+
+.logo-glow{
+
+position:relative;
+z-index:2;
 
 }
 
@@ -118,27 +131,29 @@ z-index:99999;
 
 .splash-logo{
 
-width:160px;
-
-height:160px;
+width:170px;
+height:170px;
 
 object-fit:contain;
 
-filter:drop-shadow(0 0 25px #FFD600);
+filter:
+drop-shadow(0 0 20px #FFD600)
+drop-shadow(0 0 50px #FFD600);
 
-animation:logoAnimation 2s ease infinite;
+
+animation:
+logoZoom 2.5s ease infinite;
 
 }
 
 
 
-@keyframes logoAnimation{
+@keyframes logoZoom{
 
 
 0%{
 
-transform:scale(.6);
-
+transform:scale(.5);
 opacity:0;
 
 }
@@ -147,7 +162,6 @@ opacity:0;
 40%{
 
 transform:scale(1.15);
-
 opacity:1;
 
 }
@@ -164,10 +178,37 @@ transform:scale(1);
 
 transform:scale(1);
 
-opacity:1;
+}
 
 }
 
+
+
+@keyframes glowPulse{
+
+
+0%{
+
+transform:scale(.8);
+opacity:.15;
+
+}
+
+
+50%{
+
+transform:scale(1.3);
+opacity:.35;
+
+}
+
+
+100%{
+
+transform:scale(.8);
+opacity:.15;
+
+}
 
 }
 
@@ -175,15 +216,17 @@ opacity:1;
 
 .splash h2{
 
-margin-top:20px;
+margin-top:25px;
 
-font-size:36px;
+font-size:40px;
 
-font-weight:800;
+font-weight:900;
 
-letter-spacing:3px;
+letter-spacing:5px;
 
 color:var(--primary);
+
+z-index:2;
 
 }
 
@@ -193,9 +236,13 @@ color:var(--primary);
 
 margin-top:8px;
 
-font-size:14px;
-
 color:#aaa;
+
+font-size:15px;
+
+letter-spacing:1px;
+
+z-index:2;
 
 }
 
@@ -203,30 +250,21 @@ color:#aaa;
 
 .splash-hide{
 
-animation:fadeOut .8s forwards;
+animation:splashFade .8s forwards;
 
 }
 
 
-
-@keyframes fadeOut{
-
-
-from{
-
-opacity:1;
-
-}
+@keyframes splashFade{
 
 
 to{
 
 opacity:0;
-
 visibility:hidden;
+transform:scale(1.1);
 
 }
-
 
 }
 
@@ -235,7 +273,189 @@ visibility:hidden;
 
 
 /* =========================
-Logo
+Welcome Screen
+========================= */
+
+
+.welcome-screen{
+
+min-height:100vh;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+padding:20px;
+
+background:
+
+radial-gradient(circle at top,#222,#000 65%);
+
+opacity:0;
+
+transform:translateY(30px);
+
+transition:.8s;
+
+}
+
+
+
+.welcome-screen.show{
+
+opacity:1;
+
+transform:translateY(0);
+
+}
+
+
+
+.welcome-box{
+
+width:100%;
+
+max-width:430px;
+
+padding:40px 30px;
+
+background:rgba(255,255,255,.06);
+
+border:1px solid rgba(255,214,0,.2);
+
+backdrop-filter:blur(20px);
+
+border-radius:35px;
+
+text-align:center;
+
+box-shadow:var(--shadow);
+
+}
+
+
+
+.welcome-logo{
+
+width:110px;
+height:110px;
+
+object-fit:contain;
+
+filter:drop-shadow(0 0 25px var(--primary));
+
+margin-bottom:20px;
+
+}
+
+
+
+.welcome-box h1{
+
+font-size:32px;
+
+font-weight:800;
+
+}
+
+
+.welcome-box h1 span{
+
+color:var(--primary);
+
+}
+
+
+
+.welcome-box p{
+
+color:var(--gray);
+
+margin:15px 0 35px;
+
+}
+
+ 
+/* =========================
+JOIN BUTTONS
+========================= */
+
+
+.join-buttons{
+
+display:flex;
+
+flex-direction:column;
+
+gap:18px;
+
+}
+
+
+
+.join-btn{
+
+padding:18px;
+
+border-radius:18px;
+
+text-decoration:none;
+
+font-size:16px;
+
+font-weight:800;
+
+transition:.35s;
+
+display:flex;
+
+align-items:center;
+
+justify-content:center;
+
+}
+
+
+
+.join-btn.customer{
+
+background:var(--primary);
+
+color:#000;
+
+}
+
+
+
+.join-btn.rider{
+
+background:#171717;
+
+color:var(--primary);
+
+border:1px solid var(--primary);
+
+}
+
+
+
+.join-btn:hover{
+
+transform:translateY(-5px);
+
+box-shadow:
+
+0 15px 35px rgba(255,214,0,.35);
+
+}
+
+
+
+
+/* =========================
+LOGO
 ========================= */
 
 
@@ -266,7 +486,6 @@ height:52px;
 object-fit:contain;
 
 }
-
 
 
 
@@ -337,7 +556,6 @@ color:var(--primary);
 
 
 
-
 /* =========================
 Buttons
 ========================= */
@@ -353,11 +571,9 @@ justify-content:center;
 
 gap:8px;
 
-padding:14px 26px;
+padding:14px 28px;
 
-border:none;
-
-border-radius:15px;
+border-radius:16px;
 
 background:var(--primary);
 
@@ -365,9 +581,11 @@ color:#000;
 
 font-weight:800;
 
-cursor:pointer;
-
 text-decoration:none;
+
+border:none;
+
+cursor:pointer;
 
 transition:.3s;
 
@@ -379,7 +597,9 @@ transition:.3s;
 
 transform:translateY(-4px);
 
-box-shadow:0 10px 25px rgba(255,214,0,.35);
+box-shadow:
+
+0 12px 30px rgba(255,214,0,.35);
 
 }
 
@@ -392,27 +612,6 @@ background:#222;
 color:white;
 
 }
-
-
-
-.btn-success{
-
-background:var(--success);
-
-color:white;
-
-}
-
-
-
-.btn-danger{
-
-background:var(--danger);
-
-color:white;
-
-}
-
 
 
 
@@ -432,7 +631,7 @@ padding:25px;
 
 .page{
 
-animation:pageShow .5s ease;
+animation:pageShow .6s ease;
 
 }
 
@@ -445,7 +644,7 @@ from{
 
 opacity:0;
 
-transform:translateY(15px);
+transform:translateY(20px);
 
 }
 
@@ -459,8 +658,13 @@ transform:translateY(0);
 }
 
 
-}/* =========================
-Cards & Grid
+}
+
+
+
+
+/* =========================
+Cards
 ========================= */
 
 
@@ -478,17 +682,30 @@ gap:20px;
 
 
 
+
 .card{
 
 background:var(--card);
 
-border-radius:24px;
-
 padding:25px;
+
+border-radius:25px;
+
+border:1px solid rgba(255,214,0,.12);
 
 box-shadow:var(--shadow);
 
-border:1px solid rgba(255,214,0,.12);
+transition:.35s;
+
+}
+
+
+
+.card:hover{
+
+transform:translateY(-6px);
+
+border-color:var(--primary);
 
 }
 
@@ -525,9 +742,9 @@ Hero Section
 
 background:#151515;
 
-border-radius:25px;
+border-radius:30px;
 
-padding:35px;
+padding:40px;
 
 display:flex;
 
@@ -535,7 +752,7 @@ align-items:center;
 
 justify-content:space-between;
 
-gap:25px;
+gap:30px;
 
 box-shadow:var(--shadow);
 
@@ -545,7 +762,9 @@ box-shadow:var(--shadow);
 
 .welcome-card h1{
 
-font-size:38px;
+font-size:40px;
+
+font-weight:800;
 
 }
 
@@ -563,17 +782,18 @@ color:var(--primary);
 
 color:#aaa;
 
-margin-top:10px;
+margin-top:12px;
 
 }
 
 
 
+
 .hero-badge{
 
-width:150px;
+width:160px;
 
-height:150px;
+height:160px;
 
 border-radius:50%;
 
@@ -589,17 +809,13 @@ color:#000;
 
 font-size:22px;
 
-font-weight:800;
+font-weight:900;
 
 box-shadow:
 
-0 0 40px rgba(255,214,0,.35);
+0 0 50px rgba(255,214,0,.4);
 
 }
-
-
-
-
 
 /* =========================
 Booking
@@ -713,14 +929,6 @@ border-radius:15px;
 
 
 
-.input-box input:focus{
-
-border:1px solid var(--primary);
-
-}
-
-
-
 
 
 /* =========================
@@ -826,17 +1034,9 @@ object-fit:cover;
 
 border:4px solid var(--primary);
 
-margin:auto;
-
 display:block;
 
-}
-
-
-
-.profile-form{
-
-margin-top:25px;
+margin:auto;
 
 }
 
@@ -1008,7 +1208,7 @@ color:#000;
 
 
 /* =========================
-Loading
+Loader
 ========================= */
 
 
@@ -1045,7 +1245,7 @@ transform:rotate(360deg);
 
 
 /* =========================
-Mobile
+Mobile Responsive
 ========================= */
 
 
@@ -1096,73 +1296,4 @@ padding:15px;
 
 
 
-.welcome-card{
-
-flex-direction:column;
-
-text-align:center;
-
-padding:25px;
-
-}
-
-
-
-.welcome-card h1{
-
-font-size:28px;
-
-}
-
-
-
-.hero-badge{
-
-width:120px;
-
-height:120px;
-
-}
-
-
-
-.grid{
-
-grid-template-columns:1fr;
-
-}
-
-
-
-.btn{
-
-width:100%;
-
-}
-
-
-
-.ride-type{
-
-grid-template-columns:1fr;
-
-}
-
-
-
-.map-container{
-
-height:300px;
-
-}
-
-
-
-.card{
-
-padding:18px;
-
-}
-
-
-}
+.w
