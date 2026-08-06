@@ -12,10 +12,12 @@
 <style>
 
 *{
+
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:Arial;
+
 }
 
 
@@ -23,7 +25,6 @@ body{
 
 background:#000;
 color:white;
-
 padding:20px;
 
 }
@@ -33,11 +34,8 @@ padding:20px;
 .box{
 
 background:#111;
-
 border:2px solid #FFD600;
-
 border-radius:20px;
-
 padding:25px;
 
 }
@@ -55,11 +53,8 @@ color:#FFD600;
 .item{
 
 margin-top:15px;
-
 background:#222;
-
 padding:15px;
-
 border-radius:12px;
 
 }
@@ -69,17 +64,11 @@ border-radius:12px;
 button{
 
 width:100%;
-
 padding:15px;
-
-margin-top:20px;
-
+margin-top:15px;
 background:#FFD600;
-
 border:none;
-
 border-radius:12px;
-
 font-weight:bold;
 
 }
@@ -106,12 +95,26 @@ RIDER<span>X</span>
 </h1>
 
 
+
 <h2>
 
-Ride Receipt
+🧾 Ride Receipt
 
 </h2>
 
+
+
+<div class="item">
+
+Receipt ID:
+
+<span id="id">
+
+-
+
+</span>
+
+</div>
 
 
 
@@ -121,12 +124,11 @@ Service:
 
 <span id="service">
 
-Loading...
+-
 
 </span>
 
 </div>
-
 
 
 
@@ -158,7 +160,6 @@ Drop:
 
 
 
-
 <div class="item">
 
 Fare:
@@ -173,10 +174,9 @@ Fare:
 
 
 
-
 <div class="item">
 
-Payment Status:
+Payment:
 
 <span id="payment">
 
@@ -188,21 +188,36 @@ Pending
 
 
 
+<div class="item">
 
-<button onclick="payCash()">
+Date:
 
-💵 Pay Cash
+<span id="date">
+
+-
+
+</span>
+
+</div>
+
+
+
+
+<button onclick="window.print()">
+
+🖨 Print Receipt
 
 </button>
 
 
 
 
-<button onclick="payOnline()">
+<button onclick="rateRide()">
 
-💳 Online Payment
+⭐ Rate Rider
 
 </button>
+
 
 
 
@@ -217,14 +232,13 @@ Pending
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
 
 doc,
-getDoc,
-updateDoc
+getDoc
 
 }
 
@@ -234,7 +248,7 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-let rideId =
+let rideId=
 
 localStorage.getItem("rideId");
 
@@ -246,7 +260,9 @@ async function loadReceipt(){
 
 
 
-const snap = await getDoc(
+let snap=
+
+await getDoc(
 
 doc(db,"rides",rideId)
 
@@ -254,11 +270,7 @@ doc(db,"rides",rideId)
 
 
 
-if(!snap.exists()){
-
-return;
-
-}
+if(!snap.exists()) return;
 
 
 
@@ -267,23 +279,47 @@ let data=snap.data();
 
 
 
+
+document.getElementById("id").innerHTML=
+
+rideId;
+
+
+
 document.getElementById("service").innerHTML=
-data.service;
+
+data.service || "-";
 
 
 
 document.getElementById("pickup").innerHTML=
-data.pickup;
+
+data.pickup || "-";
 
 
 
 document.getElementById("drop").innerHTML=
-data.drop;
+
+data.drop || "-";
 
 
 
 document.getElementById("fare").innerHTML=
-data.fare;
+
+data.fare || 0;
+
+
+
+document.getElementById("payment").innerHTML=
+
+data.paymentStatus || "Pending";
+
+
+
+
+document.getElementById("date").innerHTML=
+
+new Date().toLocaleString();
 
 
 
@@ -291,55 +327,16 @@ data.fare;
 
 
 
-window.payCash=async()=>{
 
 
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
+window.rateRide=function(){
 
 
-paymentMethod:"Cash",
+location.href="rating.html";
 
-paymentStatus:"Paid"
 
 }
 
-);
-
-
-alert("Cash Payment Completed ✅");
-
-
-};
-
-
-
-window.payOnline=async()=>{
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-
-paymentMethod:"Online",
-
-paymentStatus:"Paid"
-
-}
-
-);
-
-
-alert("Online Payment Started 💳");
-
-
-};
 
 
 
@@ -349,7 +346,6 @@ loadReceipt();
 
 
 </script>
-
 
 
 </body>
