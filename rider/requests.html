@@ -19,16 +19,18 @@ color:white;
 font-family:Arial;
 }
 
+
 .header{
 
 padding:20px;
 background:#111;
+text-align:center;
 font-size:22px;
 font-weight:bold;
-text-align:center;
 border-bottom:2px solid #FFD600;
 
 }
+
 
 #map{
 
@@ -37,6 +39,7 @@ width:100%;
 
 }
 
+
 .container{
 
 padding:15px;
@@ -44,12 +47,14 @@ padding:15px;
 }
 
 
+
 .card{
 
 background:#111;
-padding:15px;
-border-radius:15px;
+padding:18px;
+border-radius:18px;
 margin-top:15px;
+border:1px solid #333;
 
 }
 
@@ -57,14 +62,15 @@ margin-top:15px;
 button{
 
 width:100%;
-padding:12px;
-margin-top:10px;
+padding:14px;
+margin-top:12px;
 background:#FFD600;
 border:none;
 border-radius:12px;
 font-weight:bold;
 
 }
+
 
 </style>
 
@@ -81,22 +87,27 @@ font-weight:bold;
 </div>
 
 
+
 <div id="map"></div>
+
 
 
 <div class="container">
 
 <div id="requestList">
 
-Loading...
+Loading Rides...
 
 </div>
 
 </div>
+
+
 
 
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 
 
 
@@ -109,22 +120,36 @@ import {auth,db} from "../firebase/config.js";
 import {
 
 collection,
-getDocs,
 query,
 where,
+getDocs,
 doc,
 updateDoc,
-serverTimestamp,
-setDoc
+serverTimestamp
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-let map=L.map("map").setView(
+
+let map;
+
+
+
+let riderMarker=null;
+
+
+let markers=[];
+
+
+
+
+map=L.map("map").setView(
 
 [30.7333,76.7794],
 
@@ -149,35 +174,28 @@ maxZoom:19
 
 
 
-let riderMarker=null;
-
-let rideMarkers=[];
 
 
 
+function riderLocation(){
 
-function startLocation(){
 
 
 navigator.geolocation.watchPosition(
 
-async(position)=>{
+(pos)=>{
 
 
-let lat=position.coords.latitude;
+let lat=pos.coords.latitude;
 
-let lng=position.coords.longitude;
+let lng=pos.coords.longitude;
 
 
 
 if(riderMarker){
 
 
-riderMarker.setLatLng(
-
-[lat,lng]
-
-);
+riderMarker.setLatLng([lat,lng]);
 
 
 }
@@ -201,72 +219,14 @@ riderMarker=L.marker(
 
 
 
-map.setView(
-
-[lat,lng],
-
-15
-
-);
-
-
-
-
-let user=auth.currentUser;
-
-
-
-if(user){
-
-
-await setDoc(
-
-doc(db,"riderLocations",user.uid),
-
-{
-
-
-lat,
-
-lng,
-
-status:"Online",
-
-updatedAt:serverTimestamp()
-
-
 }
 
 );
 
 
-}
-
-
-
-},
-
-
-(error)=>{
-
-
-alert("Location permission allow karo");
-
-
-},
-
-
-{
-
-enableHighAccuracy:true
 
 }
 
-
-);
-
-
-}
 
 
 
@@ -285,20 +245,22 @@ box.innerHTML="";
 
 
 
-rideMarkers.forEach((m)=>{
 
+markers.forEach(m=>{
 
 map.removeLayer(m);
-
 
 });
 
 
-rideMarkers=[];
+markers=[];
 
 
 
-const q=query(
+
+
+
+let q=query(
 
 collection(db,"rides"),
 
@@ -308,7 +270,11 @@ where("status","==","Pending")
 
 
 
-const snap=await getDocs(q);
+
+
+let snap=await getDocs(q);
+
+
 
 
 
@@ -316,10 +282,11 @@ const snap=await getDocs(q);
 if(snap.empty){
 
 
-box.innerHTML="<p>No rides available</p>";
+box.innerHTML=
+
+"<h3>No Ride Available</h3>";
 
 return;
-
 
 }
 
@@ -332,6 +299,8 @@ snap.forEach((ride)=>{
 
 
 let data=ride.data();
+
+
 
 
 
@@ -353,10 +322,15 @@ data.pickupCoords.lng
 
 .addTo(map)
 
-.bindPopup("📍 Customer Pickup");
+.bindPopup(
+
+"📍 Customer Pickup"
+
+);
 
 
-rideMarkers.push(marker);
+
+markers.push(marker);
 
 
 }
@@ -365,17 +339,18 @@ rideMarkers.push(marker);
 
 
 
-box.innerHTML += `
+box.innerHTML +=`
 
 
 <div class="card">
 
 
-<h3>
+<h2>
 
-🏍 ${data.service}
+${data.service || "Ride"}
 
-</h3>
+</h2>
+
 
 
 <p>
@@ -389,6 +364,7 @@ ${data.pickup}
 </p>
 
 
+
 <p>
 
 🏁 Drop:
@@ -398,6 +374,7 @@ ${data.pickup}
 ${data.drop}
 
 </p>
+
 
 
 <p>
@@ -437,7 +414,9 @@ Accept Ride
 
 
 
-window.acceptRide=async(id)=>{
+
+window.acceptRide=async function(id){
+
 
 
 let user=auth.currentUser;
@@ -446,13 +425,13 @@ let user=auth.currentUser;
 
 if(!user){
 
-
-alert("Rider login required");
+alert("Login Required");
 
 return;
 
-
 }
+
+
 
 
 
@@ -465,14 +444,18 @@ doc(db,"rides",id),
 
 status:"Accepted",
 
+
 riderId:user.uid,
 
+
 acceptedAt:serverTimestamp()
+
 
 
 }
 
 );
+
 
 
 
@@ -487,15 +470,12 @@ id
 
 
 
-alert(
-
-"Ride Accepted ✅"
-
-);
+alert("Ride Accepted ✅");
 
 
 
-location.href="trip.html";
+location.href="live.html";
+
 
 
 };
@@ -505,7 +485,7 @@ location.href="trip.html";
 
 
 
-startLocation();
+riderLocation();
 
 
 loadRequests();
