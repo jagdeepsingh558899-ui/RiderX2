@@ -4,181 +4,296 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Login</title>
 
-<link rel="stylesheet" href="../css/style.css">
-
+<link rel="stylesheet"
+href="../css/style.css">
 
 <style>
 
 body{
 
 background:#000;
-color:white;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-font-family:Arial;
+min-height:100vh;
+padding:20px;
 
 }
 
+.login-box{
 
-
-.box{
-
-width:90%;
-max-width:380px;
+width:100%;
+max-width:420px;
 
 background:#111;
 
-padding:25px;
+border:2px solid #FFD600;
 
-border-radius:20px;
+border-radius:25px;
 
-border:1px solid #FFD600;
+padding:30px 25px;
+
+box-shadow:0 0 30px rgba(255,214,0,.15);
+
+animation:zoomIn .8s;
 
 }
 
-
-
-h1{
+.logo{
 
 text-align:center;
-
 margin-bottom:25px;
 
 }
 
+.logo img{
 
+width:95px;
+height:95px;
+margin-bottom:15px;
 
-span{
+}
 
+.logo h1{
+
+color:#FFD600;
+font-size:38px;
+
+}
+
+.logo span{
+
+color:#fff;
+
+}
+
+.logo p{
+
+color:#aaa;
+margin-top:8px;
+
+}
+
+.input-box{
+
+margin-top:18px;
+
+}
+
+.input-box label{
+
+display:block;
+margin-bottom:8px;
 color:#FFD600;
 
 }
 
-
-
-input{
+.input-box input{
 
 width:100%;
+height:55px;
 
-padding:15px;
-
-margin-top:15px;
-
-border-radius:12px;
+background:#222;
 
 border:none;
 
+border-radius:15px;
+
+padding:0 15px;
+
+color:#fff;
+
 font-size:16px;
+
+outline:none;
 
 }
 
+.input-box input::placeholder{
 
+color:#888;
+
+}
 
 button{
 
 width:100%;
 
-padding:15px;
+height:55px;
 
-margin-top:20px;
-
-border-radius:12px;
-
-border:none;
+margin-top:28px;
 
 background:#FFD600;
 
+color:#111;
+
+font-size:18px;
+
 font-weight:bold;
 
-font-size:17px;
+border:none;
+
+border-radius:15px;
+
+cursor:pointer;
+
+transition:.3s;
 
 }
 
+button:active{
 
+transform:scale(.97);
 
-a{
+}
 
-color:#FFD600;
+#msg{
 
-display:block;
+margin-top:18px;
 
 text-align:center;
 
-margin-top:20px;
+color:#ff5252;
+
+font-size:14px;
 
 }
 
+.bottom{
 
+margin-top:25px;
+
+text-align:center;
+
+}
+
+.bottom a{
+
+color:#FFD600;
+
+text-decoration:none;
+
+font-weight:bold;
+
+}
 
 </style>
 
-
 </head>
-
 
 <body>
 
+<div class="login-box">
 
+<div class="logo">
 
-<div class="box">
+<img src="../assets/logo.svg">
 
+<h1>Rider<span>X</span></h1>
 
-<h1>
-
-RIDER<span>X</span>
-
-</h1>
-
-
-
-<input 
-id="email"
-type="email"
-placeholder="Email">
-
-
-
-<input 
-id="password"
-type="password"
-placeholder="Password">
-
-
-
-<button id="loginBtn">
-
-Login
-
-</button>
-
-
-
-
-<a href="register.html">
-
-Create New Account
-
-</a>
-
-
+<p>Welcome Back</p>
 
 </div>
 
+<div class="input-box">
 
+<label>Email</label>
 
+<input
+type="email"
+id="email"
+placeholder="Enter Email">
 
+</div>
 
+<div class="input-box">
 
-<script type="module" src="../js/auth.js"></script>
+<label>Password</label>
 
+<input
+type="password"
+id="password"
+placeholder="Enter Password">
 
-</body>
+</div>
 
+<button
+onclick="login()">
 
-</html>
+LOGIN
+
+</button>
+
+<p id="msg"></p>
+
+<div class="bottom">
+
+Don't have an account?
+
+<a href="register.html">
+
+Register
+
+</a>
+
+</div>
+
+</div>
+
+<script type="module">
+  import { auth } from "../firebase/config.js";
+
+import {
+signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+import {
+doc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+import { db } from "../firebase/config.js";
+
+window.login = async function(){
+
+const email =
+document.getElementById("email").value.trim();
+
+const password =
+document.getElementById("password").value;
+
+const msg =
+document.getElementById("msg");
+
+msg.innerHTML = "";
+
+if(email==="" || password===""){
+
+msg.innerHTML = "Please fill all fields.";
+return;
+
+}
+
+try{
+
+const userCredential =
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+const userDoc =
+await getDoc(
+doc(db,"users",userCredential.user.uid)
+);
+
+if(!userDoc.exists()){
+
+msg
