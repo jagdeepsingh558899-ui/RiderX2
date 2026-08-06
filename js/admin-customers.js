@@ -1,128 +1,119 @@
-// =================================
+// =====================================
 // RiderX Admin Customer Management
-// =================================
-
-
-import {db} from "../firebase/config.js";
+// =====================================
 
 
 import {
 
+db
+
+}
+
+from "../firebase/config.js";
+
+
+
+import {
+
+
 collection,
-getDocs
+
+query,
+
+where,
+
+onSnapshot,
+
+doc,
+
+updateDoc
+
 
 }
 
 from
+
 "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
-const customerList =
-document.getElementById("customerList");
-
-
-const search =
-document.getElementById("searchCustomer");
 
 
 
-let customers=[];
+const customersBox =
 
+document.getElementById(
+"customers"
+);
 
 
 
 
 
 
-async function loadCustomers(){
 
 
-const snap = await getDocs(
 
-collection(db,"users")
+// =====================================
+// LOAD CUSTOMERS
+// =====================================
+
+
+
+function loadCustomers(){
+
+
+
+const q = query(
+
+collection(
+db,
+"users"
+),
+
+
+where(
+
+"role",
+
+"==",
+
+"customer"
+
+)
+
 
 );
 
 
 
-customers=[];
-
-
-
-snap.forEach((user)=>{
-
-
-let data=user.data();
-
-
-
-if(data.role==="customer"){
-
-
-customers.push({
-
-id:user.id,
-
-...data
-
-});
-
-
-}
-
-
-
-});
 
 
 
 
-
-showCustomers(customers);
-
-
-
-}
+onSnapshot(q,(snapshot)=>{
 
 
 
+if(snapshot.empty){
 
 
 
-
-function showCustomers(list){
-
-
-customerList.innerHTML="";
-
-
-
-
-
-if(list.length===0){
-
-
-customerList.innerHTML=
-
+customersBox.innerHTML=
 
 `
 
-<div class="service-card">
-
-<h3>
+<div class="empty">
 
 No Customers Found
-
-</h3>
 
 </div>
 
 `;
 
-
 return;
+
 
 }
 
@@ -130,16 +121,33 @@ return;
 
 
 
-list.forEach((customer)=>{
+
+
+customersBox.innerHTML="";
 
 
 
-customerList.innerHTML +=
+
+
+
+snapshot.forEach((customerDoc)=>{
+
+
+
+const customer = customerDoc.data();
+
+
+
+
+
+
+customersBox.innerHTML +=
+
 
 
 `
 
-<div class="service-card">
+<div class="customer-card">
 
 
 <h3>
@@ -150,29 +158,49 @@ customerList.innerHTML +=
 
 
 
-<p>
+<div class="info">
 
 📱 ${customer.phone || "No Phone"}
 
-</p>
+</div>
 
 
 
-<p>
+<div class="info">
 
-📧 ${customer.email || ""}
+📧 ${customer.email || "No Email"}
 
-</p>
+</div>
 
 
 
-<p>
+<div class="status">
 
-Account:
+Status:
 
-${customer.status || "Active"}
+${customer.status || "active"}
 
-</p>
+</div>
+
+
+
+
+
+<button onclick="blockCustomer('${customerDoc.id}')">
+
+Block Customer
+
+</button>
+
+
+
+
+
+<button onclick="unblockCustomer('${customerDoc.id}')">
+
+Unblock Customer
+
+</button>
 
 
 
@@ -180,6 +208,12 @@ ${customer.status || "Active"}
 
 
 `;
+
+
+
+});
+
+
 
 
 
@@ -197,35 +231,105 @@ ${customer.status || "Active"}
 
 
 
-search.oninput=()=>{
-
-
-let value=
-
-search.value.toLowerCase();
+// =====================================
+// BLOCK CUSTOMER
+// =====================================
 
 
 
-
-let filtered=
-
-customers.filter((c)=>
+window.blockCustomer = async(id)=>{
 
 
-(c.name || "")
-.toLowerCase()
-.includes(value)
+await updateDoc(
+
+doc(
+
+db,
+
+"users",
+
+id
+
+),
+
+
+{
+
+
+status:"blocked"
+
+
+}
 
 
 );
 
 
 
-showCustomers(filtered);
+alert(
+
+"Customer Blocked"
+
+);
 
 
 
 };
+
+
+
+
+
+
+
+
+
+// =====================================
+// UNBLOCK CUSTOMER
+// =====================================
+
+
+
+window.unblockCustomer = async(id)=>{
+
+
+await updateDoc(
+
+doc(
+
+db,
+
+"users",
+
+id
+
+),
+
+
+{
+
+
+status:"active"
+
+
+}
+
+
+);
+
+
+
+alert(
+
+"Customer Activated"
+
+);
+
+
+
+};
+
+
 
 
 
