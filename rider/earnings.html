@@ -14,11 +14,9 @@
 <style>
 
 body{
-
 background:#000;
 color:white;
 font-family:Arial;
-
 }
 
 
@@ -32,13 +30,11 @@ border-bottom:2px solid #FFD600;
 }
 
 
-
 .container{
 
 padding:20px;
 
 }
-
 
 
 .total{
@@ -54,18 +50,22 @@ margin-bottom:20px;
 }
 
 
-
 .card{
 
 background:#111;
 padding:20px;
 border-radius:18px;
 margin-bottom:15px;
-
 border:1px solid #333;
 
 }
 
+
+h3{
+
+color:#FFD600;
+
+}
 
 </style>
 
@@ -73,7 +73,6 @@ border:1px solid #333;
 
 
 <body>
-
 
 
 <div class="header">
@@ -91,14 +90,10 @@ border:1px solid #333;
 
 <div class="total">
 
-Total: ₹<span id="total">
-
-0
-
-</span>
-
+Total Earnings: ₹<span id="total">0</span>
 
 </div>
+
 
 
 
@@ -121,7 +116,7 @@ Loading...
 <script type="module">
 
 
-import { auth, db } from "../firebase/config.js";
+import {auth,db} from "../firebase/config.js";
 
 
 import {
@@ -129,22 +124,45 @@ import {
 collection,
 query,
 where,
-getDocs
+getDocs,
+orderBy
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+import {
+
+onAuthStateChanged
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
 
 
-auth.onAuthStateChanged(async(user)=>{
+
+
+
+onAuthStateChanged(auth,(user)=>{
 
 
 if(user){
 
 loadEarnings(user.uid);
+
+}
+
+else{
+
+location.href="../auth/login.html";
 
 }
 
@@ -156,11 +174,15 @@ loadEarnings(user.uid);
 
 
 
+
 async function loadEarnings(uid){
 
 
 
 let list=document.getElementById("rideList");
+
+
+let total=0;
 
 
 
@@ -178,15 +200,7 @@ where("status","==","Completed")
 
 
 
-const snap=
-
-await getDocs(q);
-
-
-
-
-
-let total=0;
+const snap=await getDocs(q);
 
 
 
@@ -198,11 +212,17 @@ list.innerHTML="";
 
 if(snap.empty){
 
+
 list.innerHTML=
 
-"<p>No completed rides</p>";
+"<p>No completed rides found</p>";
+
+
+document.getElementById("total").innerHTML=0;
+
 
 return;
+
 
 }
 
@@ -210,7 +230,9 @@ return;
 
 
 
+
 snap.forEach((ride)=>{
+
 
 
 let data=ride.data();
@@ -235,37 +257,33 @@ ${data.service || "Ride"}
 </h3>
 
 
-<p>
-
-📍 ${data.pickup || "-"}
-
-</p>
-
 
 <p>
-
-🏁 ${data.drop || "-"}
-
+📍 Pickup:
+<br>
+${data.pickup || "-"}
 </p>
 
 
 
 <p>
+🏁 Drop:
+<br>
+${data.drop || "-"}
+</p>
 
+
+
+<p>
 💰 Fare:
-
 ₹${data.fare || 0}
-
 </p>
 
 
 
 <p>
-
 Payment:
-
 ${data.paymentStatus || "Pending"}
-
 </p>
 
 
@@ -290,7 +308,6 @@ total;
 
 
 }
-
 
 
 
