@@ -6,30 +6,38 @@
 console.log("RiderX Auth Loaded");
 
 
-// Toast
-function showToast(message, type = "info") {
+// ================================
+// UI HELPERS
+// ================================
+
+function showToast(message){
     alert(message);
 }
 
 
-// Loader
-function showLoader() {
-    console.log("RiderX Loading...");
-}
-
-function hideLoader() {
-    console.log("RiderX Loaded");
+function showLoader(){
+    console.log("Loading...");
 }
 
 
-// Password Toggle
-function togglePasswordVisibility(id, icon) {
+function hideLoader(){
+    console.log("Done");
+}
+
+
+// ================================
+// PASSWORD TOGGLE
+// ================================
+
+function togglePasswordVisibility(id, icon){
 
     const input = document.getElementById(id);
 
-    if (!input) return;
+    if(!input) return;
 
-    if (input.type === "password") {
+
+    if(input.type === "password"){
+
         input.type = "text";
 
         if(icon){
@@ -37,7 +45,7 @@ function togglePasswordVisibility(id, icon) {
             icon.classList.add("fa-eye-slash");
         }
 
-    } else {
+    }else{
 
         input.type = "password";
 
@@ -45,406 +53,535 @@ function togglePasswordVisibility(id, icon) {
             icon.classList.remove("fa-eye-slash");
             icon.classList.add("fa-eye");
         }
+
     }
+
 }
 
 
-// Register Customer / Rider
+// ================================
+// REGISTER USER
+// ================================
+
 async function registerUserAccount(data){
 
-    try {
+try{
 
-        showLoader();
-
-        const {
-            role,
-            fullName,
-            mobileNumber,
-            email,
-            password
-        } = data;
+showLoader();
 
 
-        const userCredential =
-        await firebase.auth()
-        .createUserWithEmailAndPassword(
-            email,
-            password
-        );
-
-
-        const user = userCredential.user;
-
-
-        await user.updateProfile({
-            displayName: fullName
-        });
+const {
+    role,
+    fullName,
+    mobileNumber,
+    email,
+    password
+}=data;
 
 
 
-        const userData = {
-
-            uid:user.uid,
-
-            fullName:fullName,
-
-            mobileNumber:mobileNumber,
-
-            email:email,
-
-            role:role,
-
-            createdAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-
-        };
+const userCredential =
+await firebase.auth()
+.createUserWithEmailAndPassword(
+email,
+password
+);
 
 
 
-        if(role === "rider"){
-
-
-            userData.status="Pending";
-            userData.adminApproved=false;
-
-
-            await firebase.firestore()
-            .collection("riders")
-            .doc(user.uid)
-            .set(userData);
+const user=userCredential.user;
 
 
 
-            showToast(
-            "Rider registration completed. Waiting for approval"
-            );
+await user.updateProfile({
 
+displayName:fullName
 
-            setTimeout(()=>{
-
-                window.location.href =
-                "../rider/pending.html";
-
-            },1500);
+});
 
 
 
-        } else {
+const userData={
+
+uid:user.uid,
+
+fullName:fullName,
+
+mobileNumber:mobileNumber,
+
+email:email,
+
+role:role,
+
+createdAt:
+firebase.firestore.FieldValue.serverTimestamp()
+
+};
 
 
-            userData.status="Active";
 
 
-            await firebase.firestore()
-            .collection("customers")
-            .doc(user.uid)
-            .set(userData);
+// CUSTOMER
+
+if(role==="customer"){
+
+
+userData.status="Active";
+
+
+await firebase.firestore()
+.collection("customers")
+.doc(user.uid)
+.set(userData);
 
 
 
-            showToast(
-            "Customer account created successfully"
-            );
+showToast(
+"Customer register successfully"
+);
 
 
-            setTimeout(()=>{
 
-                window.location.href =
-                "../customer/home.html";
+setTimeout(()=>{
 
-            },1500);
-
-        }
+window.location.href=
+"../customer/home.html";
 
 
-    }
+},1500);
 
-    catch(error){
 
-        console.error(error);
-
-        showToast(error.message);
-
-    }
-
-    finally{
-
-        hideLoader();
-
-    }
 
 }
 
 
 
-// Login
+// RIDER
+
+else{
+
+
+userData.status="Pending";
+
+userData.adminApproved=false;
+
+
+
+await firebase.firestore()
+.collection("riders")
+.doc(user.uid)
+.set(userData);
+
+
+
+showToast(
+"Rider registration submitted"
+);
+
+
+
+setTimeout(()=>{
+
+window.location.href=
+"../rider/pending.html";
+
+
+},1500);
+
+
+}
+
+
+
+}
+
+catch(error){
+
+console.log(error);
+
+showToast(error.message);
+
+
+}
+
+finally{
+
+hideLoader();
+
+}
+
+
+}
+
+
+
+// ================================
+// LOGIN USER
+// ================================
+
 async function loginUser(email,password){
 
-    try{
+try{
 
 
-        const result =
-        await firebase.auth()
-        .signInWithEmailAndPassword(
-            email,
-            password
-        );
-
-
-        const uid=result.user.uid;
+const result =
+await firebase.auth()
+.signInWithEmailAndPassword(
+email,
+password
+);
 
 
 
-        const customer =
-        await firebase.firestore()
-        .collection("customers")
-        .doc(uid)
-        .get();
+const uid=result.user.uid;
 
 
 
-        if(customer.exists){
-
-            window.location.href =
-            "../customer/home.html";
-
-            return;
-        }
+const customer =
+await firebase.firestore()
+.collection("customers")
+.doc(uid)
+.get();
 
 
 
-
-        const rider =
-        await firebase.firestore()
-        .collection("riders")
-        .doc(uid)
-        .get();
+if(customer.exists){
 
 
-
-        if(rider.exists){
-
-
-            const data=rider.data();
+window.location.href =
+"../customer/home.html";
 
 
-            if(data.adminApproved){
-
-                window.location.href =
-                "../rider/Home.html";
-
-            }
-            else{
-
-                window.location.href =
-                "../rider/pending.html";
-
-            }
-
-            return;
-
-        }
-
-
-
-        window.location.href =
-        "../auth/register.html";
-
-
-    }
-
-    catch(error){
-
-        showToast(error.message);
-
-    }
+return;
 
 }
 
 
 
-// Google Login
+
+const rider =
+await firebase.firestore()
+.collection("riders")
+.doc(uid)
+.get();
+
+
+
+if(rider.exists){
+
+
+if(rider.data().adminApproved===true){
+
+
+window.location.href =
+"../rider/home.html";
+
+
+}else{
+
+
+window.location.href =
+"../rider/pending.html";
+
+
+}
+
+
+return;
+
+}
+
+
+
+window.location.href =
+"../auth/register.html";
+
+
+}
+
+
+catch(error){
+
+showToast(error.message);
+
+}
+
+
+}
+// ================================
+// GOOGLE LOGIN
+// ================================
 
 async function handleGoogleSignUp(){
 
-    try{
+try{
 
 
-        const provider =
-        new firebase.auth.GoogleAuthProvider();
-
-
-
-        const result =
-        await firebase.auth()
-        .signInWithPopup(provider);
+const provider =
+new firebase.auth.GoogleAuthProvider();
 
 
 
-        const user=result.user;
+const result =
+await firebase.auth()
+.signInWithPopup(provider);
 
 
 
-        await firebase.firestore()
-        .collection("customers")
-        .doc(user.uid)
-        .set({
-
-            uid:user.uid,
-
-            fullName:
-            user.displayName || "Customer",
-
-            email:user.email,
-
-            role:"customer",
-
-            createdAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-
-
-        },
-        {merge:true});
+const user=result.user;
 
 
 
-        window.location.href =
-        "../customer/Home.html";
+await firebase.firestore()
+.collection("customers")
+.doc(user.uid)
+.set({
+
+uid:user.uid,
+
+fullName:user.displayName || "Customer",
+
+email:user.email,
+
+role:"customer",
+
+createdAt:
+firebase.firestore.FieldValue.serverTimestamp()
 
 
-    }
+},
+{
+merge:true
+});
 
-    catch(error){
 
-        showToast(error.message);
 
-    }
+window.location.href =
+"../customer/home.html";
+
+
+}
+
+catch(error){
+
+showToast(error.message);
+
+}
+
 
 }
 
 
 
-// OTP
+// ================================
+// PHONE OTP
+// ================================
 
-let confirmationResult = null;
+let confirmationResult=null;
+
 
 
 function openPhoneOTPModal(){
 
-    document.getElementById("otpModal").style.display="flex";
+
+const modal =
+document.getElementById("otpModal");
 
 
-    window.recaptchaVerifier =
-    new firebase.auth.RecaptchaVerifier(
-        "recaptcha-container",
-        {
-            size:"invisible"
-        }
-    );
+if(modal){
+
+modal.style.display="flex";
 
 }
+
+
+
+window.recaptchaVerifier =
+new firebase.auth.RecaptchaVerifier(
+"recaptcha-container",
+{
+size:"invisible"
+});
+
+
+}
+
+
+
+
+function closePhoneOTPModal(){
+
+
+const modal =
+document.getElementById("otpModal");
+
+
+if(modal){
+
+modal.style.display="none";
+
+}
+
+
+}
+
 
 
 
 async function requestOTP(){
 
-    const phone =
-    document.getElementById("otpPhoneNumber").value;
+
+try{
+
+
+const phone =
+document.getElementById(
+"otpPhoneNumber"
+).value;
 
 
 
-    try{
-
-
-        confirmationResult =
-        await firebase.auth()
-        .signInWithPhoneNumber(
-            phone,
-            window.recaptchaVerifier
-        );
+confirmationResult =
+await firebase.auth()
+.signInWithPhoneNumber(
+phone,
+window.recaptchaVerifier
+);
 
 
 
-        document.getElementById("otpInputGroup")
-        .style.display="block";
+document.getElementById(
+"otpInputGroup"
+).style.display="block";
 
 
-        document.getElementById("sendOtpBtn")
-        .style.display="none";
+
+document.getElementById(
+"sendOtpBtn"
+).style.display="none";
 
 
-        document.getElementById("verifyOtpBtn")
-        .style.display="block";
+
+document.getElementById(
+"verifyOtpBtn"
+).style.display="block";
 
 
-        showToast("OTP sent");
 
+showToast("OTP sent successfully");
 
-    }
-
-    catch(error){
-
-        showToast(error.message);
-
-    }
 
 }
+
+
+catch(error){
+
+showToast(error.message);
+
+}
+
+
+}
+
+
 
 
 
 async function verifyOTP(){
 
-    const code =
-    document.getElementById("otpCode").value;
+
+try{
 
 
-    try{
-
-        await confirmationResult.confirm(code);
-
-
-        window.location.href =
-        "../customer/Home.html";
+const code =
+document.getElementById(
+"otpCode"
+).value;
 
 
-    }
 
-    catch(error){
+await confirmationResult.confirm(code);
 
-        showToast(error.message);
 
-    }
+
+window.location.href =
+"../customer/home.html";
+
+
+}
+
+
+catch(error){
+
+showToast(error.message);
+
+}
+
 
 }
 
 
 
-// Close OTP
 
-function closePhoneOTPModal(){
+// ================================
+// LOGOUT
+// ================================
 
-    document.getElementById("otpModal")
-    .style.display="none";
+async function logout(){
+
+
+await firebase.auth().signOut();
+
+
+window.location.href =
+"../auth/login.html";
+
 
 }
 
 
 
-// Make Functions Global
 
-window.registerUserAccount = registerUserAccount;
+// ================================
+// GLOBAL FUNCTIONS
+// ================================
 
-window.loginUser = loginUser;
+window.registerUserAccount =
+registerUserAccount;
 
-window.handleGoogleSignUp = handleGoogleSignUp;
 
-window.openPhoneOTPModal = openPhoneOTPModal;
+window.loginUser =
+loginUser;
 
-window.requestOTP = requestOTP;
 
-window.verifyOTP = verifyOTP;
+window.handleGoogleSignUp =
+handleGoogleSignUp;
 
-window.closePhoneOTPModal = closePhoneOTPModal;
+
+window.openPhoneOTPModal =
+openPhoneOTPModal;
+
+
+window.closePhoneOTPModal =
+closePhoneOTPModal;
+
+
+window.requestOTP =
+requestOTP;
+
+
+window.verifyOTP =
+verifyOTP;
+
 
 window.togglePasswordVisibility =
 togglePasswordVisibility;
+
+
+window.logout =
+logout;
+
+
+console.log(
+"RiderX Auth System Ready"
+);
