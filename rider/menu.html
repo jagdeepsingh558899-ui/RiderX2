@@ -7,9 +7,80 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Rider Menu</title>
+<title>RiderX Menu</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+text-align:center;
+font-size:26px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.menu-card{
+
+background:#111;
+padding:18px;
+margin-top:15px;
+border-radius:15px;
+border-left:4px solid #FFD600;
+font-size:18px;
+cursor:pointer;
+
+}
+
+
+
+.menu-card:hover{
+
+background:#222;
+
+}
+
+
+
+.logout{
+
+background:#ff3333;
+
+}
+
+
+
+.logo{
+
+color:#FFD600;
+
+}
+
+</style>
+
 
 </head>
 
@@ -17,44 +88,81 @@
 <body>
 
 
-<div class="splash">
 
+<div class="header">
 
-<img src="../assets/logo.png" class="logo">
+<span class="logo">RIDER</span>X Menu
 
-
-<h1>
-Rider<span>X</span>
-</h1>
-
-
-<h2>Rider Menu</h2>
+</div>
 
 
 
-<button onclick="go('dashboard.html')">
+
+<div class="container">
+
+
+
+<div class="menu-card" onclick="go('dashboard.html')">
+
 🏍 Dashboard
-</button>
+
+</div>
 
 
-<button onclick="go('requests.html')">
+
+<div class="menu-card" onclick="go('requests.html')">
+
 📩 Ride Requests
-</button>
+
+</div>
 
 
-<button onclick="go('live.html')">
-📍 Live Location
-</button>
+
+<div class="menu-card" onclick="go('trip.html')">
+
+🚕 Current Trip
+
+</div>
 
 
-<button onclick="go('wallet.html')">
-💰 Wallet
-</button>
+
+<div class="menu-card" onclick="go('earnings.html')">
+
+💰 Earnings
+
+</div>
 
 
-<button onclick="logout()">
-Logout
-</button>
+
+<div class="menu-card" onclick="go('wallet.html')">
+
+💳 Wallet
+
+</div>
+
+
+
+<div class="menu-card" onclick="go('profile.html')">
+
+👤 Profile
+
+</div>
+
+
+
+<div class="menu-card" onclick="go('notifications.html')">
+
+🔔 Notifications
+
+</div>
+
+
+
+<div class="menu-card logout" onclick="logout()">
+
+🚪 Logout
+
+</div>
 
 
 
@@ -62,7 +170,54 @@ Logout
 
 
 
-<script src="../js/menu.js"></script>
+
+
+
+
+<script type="module">
+
+
+import {auth} from "../firebase/config.js";
+
+
+import {
+
+signOut
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+
+
+
+window.go=function(page){
+
+location.href=page;
+
+};
+
+
+
+
+
+window.logout=async function(){
+
+
+await signOut(auth);
+
+
+location.href="../auth/login.html";
+
+
+};
+
+
+
+</script>
 
 
 </body>
