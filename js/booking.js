@@ -1,6 +1,7 @@
 // ==========================================
-// RiderX Booking Engine V5
-// Fare + Payment + OTP + Ride Create
+// RiderX Booking Engine V6
+// Ride + Parcel + Food Booking
+// Fare + Payment + OTP + Firebase
 // ==========================================
 
 
@@ -66,9 +67,23 @@ document.getElementById("paymentMethod");
 
 
 
+const rideOption =
+document.getElementById("rideOption");
+
+
+const parcelOption =
+document.getElementById("parcelOption");
+
+
+
+
+
 
 
 let currentUser=null;
+
+
+let bookingMode="ride";
 
 
 let map;
@@ -91,12 +106,15 @@ let fare=0;
 
 
 
-let fareSettings={
 
+
+let fareSettings={
 
 base:50,
 
 bike:8,
+
+taxi:12,
 
 cab:15,
 
@@ -106,7 +124,6 @@ food:60,
 
 night:3
 
-
 };
 
 
@@ -115,8 +132,9 @@ night:3
 
 
 
-// AUTH
 
+
+// AUTH
 
 onAuthStateChanged(auth,(user)=>{
 
@@ -143,20 +161,21 @@ location.href="../auth/login.html";
 
 
 
-// LOAD FARE
+
+// FARE SETTINGS
 
 
 async function loadFare(){
 
 
-const snap = await getDoc(
+try{
 
-doc(
-db,
-"settings",
-"fare"
 
-)
+const snap=
+
+await getDoc(
+
+doc(db,"settings","fare")
 
 );
 
@@ -176,6 +195,14 @@ fareSettings={
 
 }
 
+
+}
+
+catch(e){
+
+console.log(e);
+
+}
 
 
 }
@@ -268,8 +295,9 @@ calculateFare();
 
 
 
-function setPickup(lat,lng){
 
+
+function setPickup(lat,lng){
 
 
 pickupCoords={lat,lng};
@@ -281,13 +309,22 @@ lat.toFixed(6)+","+lng.toFixed(6);
 
 
 
-pickupMarker=L.marker(
+if(pickupMarker)
+
+map.removeLayer(pickupMarker);
+
+
+
+pickupMarker=
+
+L.marker(
 
 [lat,lng]
 
 )
 
 .addTo(map);
+
 
 
 }
@@ -298,8 +335,8 @@ pickupMarker=L.marker(
 
 
 
-function setDrop(lat,lng){
 
+function setDrop(lat,lng){
 
 
 dropCoords={lat,lng};
@@ -311,13 +348,22 @@ lat.toFixed(6)+","+lng.toFixed(6);
 
 
 
-dropMarker=L.marker(
+if(dropMarker)
+
+map.removeLayer(dropMarker);
+
+
+
+dropMarker=
+
+L.marker(
 
 [lat,lng]
 
 )
 
 .addTo(map);
+
 
 
 }
@@ -328,7 +374,9 @@ dropMarker=L.marker(
 
 
 
-// LOCATION
+
+
+// CURRENT LOCATION
 
 
 locationBtn.onclick=()=>{
@@ -367,8 +415,8 @@ pos.coords.longitude
 
 }
 
-);
 
+);
 
 
 };
@@ -381,10 +429,63 @@ pos.coords.longitude
 
 
 
-// FARE
+// SERVICE MODE
+
+
+if(rideOption){
+
+
+rideOption.onclick=()=>{
+
+
+bookingMode="ride";
+
+
+bookBtn.innerHTML="Book Ride";
+
+
+};
+
+
+}
+
+
+
+if(parcelOption){
+
+
+parcelOption.onclick=()=>{
+
+
+bookingMode="parcel";
+
+
+service.value="Parcel";
+
+
+bookBtn.innerHTML="Book Parcel";
+
+
+};
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+// FARE CALCULATION
 
 
 function calculateFare(){
+
 
 
 if(!pickupCoords || !dropCoords)
@@ -429,10 +530,10 @@ distance.toFixed(1)
 
 
 
-
 distanceBox.innerHTML=
 
 distance+" KM";
+
 
 
 
@@ -441,38 +542,64 @@ let rate=0;
 
 
 
-if(service.value==="Bike Taxi")
+switch(service.value){
+
+
+case "Bike":
 
 rate=fareSettings.bike;
 
+break;
 
 
-if(service.value==="Cab")
+
+case "Taxi":
+
+rate=fareSettings.taxi;
+
+break;
+
+
+
+case "Cab":
 
 rate=fareSettings.cab;
 
+break;
 
 
-if(service.value==="Parcel")
+
+case "Parcel":
 
 rate=fareSettings.parcel;
 
+break;
 
 
-if(service.value==="Food")
+
+case "Food":
 
 rate=fareSettings.food;
 
+break;
+
+
+}
 
 
 
-let hour=new Date().getHours();
+
+
+
+let hour=
+
+new Date().getHours();
 
 
 
 if(hour>=22 || hour<6){
 
-rate += Number(fareSettings.night);
+rate+=Number(fareSettings.night);
 
 }
 
@@ -509,6 +636,8 @@ fareSettings.base+
 
 
 
+
+
 fareBox.innerHTML=
 
 Math.round(fare);
@@ -519,10 +648,11 @@ Math.round(fare);
 
 
 
-
 service.onchange=
 
 calculateFare;
+
+
 
 
 
@@ -554,7 +684,8 @@ Math.random()*9000
 
 
 
-// BOOK
+
+// BOOKING
 
 
 bookBtn.onclick=async()=>{
@@ -564,6 +695,7 @@ bookBtn.onclick=async()=>{
 if(!currentUser)
 
 return alert("Login Required");
+
 
 
 
@@ -584,19 +716,13 @@ generateOTP();
 
 
 
-let payment =
-
-paymentMethod.value;
-
-
-
-
-
 
 try{
 
 
-const ride = await addDoc(
+const ride=
+
+await addDoc(
 
 collection(db,"rides"),
 
@@ -608,7 +734,14 @@ customerId:
 currentUser.uid,
 
 
-service:
+
+bookingType:
+
+bookingMode,
+
+
+
+serviceType:
 
 service.value,
 
@@ -648,7 +781,7 @@ otp,
 
 paymentMethod:
 
-payment,
+paymentMethod.value,
 
 
 
@@ -673,7 +806,9 @@ serverTimestamp()
 }
 
 
+
 );
+
 
 
 
@@ -701,13 +836,11 @@ rideId:ride.id,
 
 location:pickupCoords,
 
-updatedAt:
-serverTimestamp()
+updatedAt:serverTimestamp()
 
 }
 
 );
-
 
 
 
@@ -725,20 +858,27 @@ ride.id
 
 
 
+
+
 alert(
 
+bookingMode==="ride"
+
+?
+
 "Ride Searching 🚕"
+
+:
+
+"Parcel Searching 📦"
 
 );
 
 
 
 
-location.href=
 
-"map.html";
-
-
+location.href="map.html";
 
 
 
@@ -754,12 +894,16 @@ alert(error.message);
 
 
 
-
 };
 
 
 
 
+
+
+
 console.log(
-"RiderX Booking V5 Loaded"
+
+"RiderX Booking V6 Loaded"
+
 );
