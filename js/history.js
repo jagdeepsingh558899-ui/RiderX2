@@ -1,42 +1,48 @@
-// ==========================================
-// RiderX Customer History System V1
-// ==========================================
-
-
-import { auth, db } from "../firebase/config.js";
+// =====================================
+// RiderX Customer Ride History
+// =====================================
 
 
 import {
+
+db,
+auth
+
+}
+
+from "../firebase/config.js";
+
+
+
+import {
+
 
 collection,
+
 query,
+
 where,
-orderBy,
-onSnapshot
+
+onSnapshot,
+
+orderBy
+
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from
 
-
-import {
-
-onAuthStateChanged
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
 
 
-const historyList =
-document.getElementById("historyList");
+const ridesBox =
 
-
-
-let user=null;
+document.getElementById(
+"rides"
+);
 
 
 
@@ -44,48 +50,56 @@ let user=null;
 
 
 
-onAuthStateChanged(auth,(u)=>{
+function loadRides(){
 
 
-if(!u){
 
-location.href="../auth/login.html";
+const user = auth.currentUser;
+
+
+
+if(!user){
+
+
+ridesBox.innerHTML =
+
+`
+<div class="empty">
+Please Login First
+</div>
+`;
 
 return;
 
+
 }
 
 
-user=u;
-
-
-loadHistory();
-
-
-});
 
 
 
 
-
-
-
-
-function loadHistory(){
-
-
-
-const q=query(
+const q = query(
 
 collection(db,"rides"),
+
 
 where(
 "customerId",
 "==",
 user.uid
+),
+
+
+orderBy(
+"createdAt",
+"desc"
 )
 
+
 );
+
+
 
 
 
@@ -95,18 +109,19 @@ onSnapshot(q,(snapshot)=>{
 
 
 
-historyList.innerHTML="";
-
-
-
-
 if(snapshot.empty){
 
 
-historyList.innerHTML=
 
-"<p>No rides found</p>";
+ridesBox.innerHTML =
 
+`
+<div class="empty">
+
+No Rides Found
+
+</div>
+`;
 
 return;
 
@@ -117,90 +132,115 @@ return;
 
 
 
-snapshot.forEach((item)=>{
 
 
-
-let ride=item.data();
-
-
-
-
-let card=document.createElement("div");
-
-
-
-card.className="card";
+ridesBox.innerHTML="";
 
 
 
 
-card.innerHTML=
+
+snapshot.forEach(doc=>{
+
+
+
+const ride = doc.data();
+
+
+
+
+
+ridesBox.innerHTML +=
+
 
 
 `
 
+<div class="ride-card">
+
+
 <h3>
-${ride.service || "Ride"}
+
+${ride.service?.toUpperCase()}
+
 </h3>
 
 
-<p>
+<div class="info">
 
-📍 ${ride.pickup}
+📍 From:
+${ride.pickup}
 
-</p>
-
-
-<p>
-
-🏁 ${ride.drop}
-
-</p>
+</div>
 
 
-<p>
+<div class="info">
 
-💰 ₹${ride.fare}
+📍 To:
+${ride.drop}
 
-</p>
-
-
-<p>
-
-💳 ${ride.paymentMethod || "Cash"}
-
-</p>
+</div>
 
 
-<p>
+<div class="info">
+
+💰 Fare:
+${ride.fare}
+
+</div>
+
+
+<div class="info">
+
+💳 Payment:
+${ride.payment}
+
+</div>
+
+
+
+<div class="status">
 
 Status:
+${ride.status}
 
-<b>${ride.status}</b>
+</div>
 
-</p>
+
+
+${
+
+ride.riderName ?
+
+`
+
+<div class="info">
+
+🏍 Rider:
+${ride.riderName}
+
+</div>
+
+`
+
+:""
+
+}
+
+
+
+</div>
 
 
 `;
 
 
 
-
-
-historyList.appendChild(card);
-
-
-
 });
 
 
 
-
-
 });
-
-
 
 
 
@@ -209,6 +249,12 @@ historyList.appendChild(card);
 
 
 
-console.log(
-"RiderX History Loaded"
-);
+
+
+auth.onAuthStateChanged(()=>{
+
+
+loadRides();
+
+
+});
