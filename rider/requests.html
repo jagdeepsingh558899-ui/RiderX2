@@ -10,18 +10,14 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-
 <style>
 
 body{
-
 margin:0;
 background:#000;
 color:white;
 font-family:Arial;
-
 }
-
 
 .header{
 
@@ -34,8 +30,6 @@ border-bottom:2px solid #FFD600;
 
 }
 
-
-
 #map{
 
 height:45vh;
@@ -43,14 +37,11 @@ width:100%;
 
 }
 
-
-
 .container{
 
 padding:15px;
 
 }
-
 
 
 .card{
@@ -61,7 +52,6 @@ border-radius:15px;
 margin-top:15px;
 
 }
-
 
 
 button{
@@ -76,16 +66,12 @@ font-weight:bold;
 
 }
 
-
-
 </style>
-
 
 </head>
 
 
 <body>
-
 
 
 <div class="header">
@@ -95,13 +81,10 @@ font-weight:bold;
 </div>
 
 
-
 <div id="map"></div>
 
 
-
 <div class="container">
-
 
 <div id="requestList">
 
@@ -109,13 +92,7 @@ Loading...
 
 </div>
 
-
-
 </div>
-
-
-
-
 
 
 
@@ -137,7 +114,8 @@ query,
 where,
 doc,
 updateDoc,
-serverTimestamp
+serverTimestamp,
+setDoc
 
 }
 
@@ -146,10 +124,7 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
-
-let map =
-
-L.map("map").setView(
+let map=L.map("map").setView(
 
 [30.7333,76.7794],
 
@@ -174,36 +149,24 @@ maxZoom:19
 
 
 
-
-
 let riderMarker=null;
-
-
 
 let rideMarkers=[];
 
 
 
 
-
-
-function showRiderLocation(){
-
+function startLocation(){
 
 
 navigator.geolocation.watchPosition(
 
-(position)=>{
+async(position)=>{
 
 
-let lat =
-position.coords.latitude;
+let lat=position.coords.latitude;
 
-
-let lng =
-position.coords.longitude;
-
-
+let lng=position.coords.longitude;
 
 
 
@@ -230,15 +193,11 @@ riderMarker=L.marker(
 
 .addTo(map)
 
-.bindPopup(
-
-"🏍 You"
-
-);
-
+.bindPopup("🏍 You");
 
 
 }
+
 
 
 
@@ -252,14 +211,63 @@ map.setView(
 
 
 
+
+let user=auth.currentUser;
+
+
+
+if(user){
+
+
+await setDoc(
+
+doc(db,"riderLocations",user.uid),
+
+{
+
+
+lat,
+
+lng,
+
+status:"Online",
+
+updatedAt:serverTimestamp()
+
+
+}
+
+);
+
+
+}
+
+
+
+},
+
+
+(error)=>{
+
+
+alert("Location permission allow karo");
+
+
+},
+
+
+{
+
+enableHighAccuracy:true
+
 }
 
 
 );
 
 
-
 }
+
 
 
 
@@ -270,26 +278,23 @@ async function loadRequests(){
 
 
 
-let box =
-document.getElementById("requestList");
-
+let box=document.getElementById("requestList");
 
 
 box.innerHTML="";
 
 
 
+rideMarkers.forEach((m)=>{
 
-rideMarkers.forEach(m=>{
 
 map.removeLayer(m);
+
 
 });
 
 
 rideMarkers=[];
-
-
 
 
 
@@ -303,9 +308,7 @@ where("status","==","Pending")
 
 
 
-const snap =
-await getDocs(q);
-
+const snap=await getDocs(q);
 
 
 
@@ -313,9 +316,7 @@ await getDocs(q);
 if(snap.empty){
 
 
-box.innerHTML=
-
-"<p>No rides available</p>";
+box.innerHTML="<p>No rides available</p>";
 
 return;
 
@@ -326,20 +327,16 @@ return;
 
 
 
-
 snap.forEach((ride)=>{
 
 
 
-let data =
-ride.data();
-
+let data=ride.data();
 
 
 
 
 if(data.pickupCoords){
-
 
 
 let marker=L.marker(
@@ -356,20 +353,13 @@ data.pickupCoords.lng
 
 .addTo(map)
 
-.bindPopup(
-
-"📍 Customer Pickup"
-
-);
-
+.bindPopup("📍 Customer Pickup");
 
 
 rideMarkers.push(marker);
 
 
-
 }
-
 
 
 
@@ -399,7 +389,6 @@ ${data.pickup}
 </p>
 
 
-
 <p>
 
 🏁 Drop:
@@ -409,7 +398,6 @@ ${data.pickup}
 ${data.drop}
 
 </p>
-
 
 
 <p>
@@ -437,7 +425,6 @@ Accept Ride
 
 
 
-
 });
 
 
@@ -448,13 +435,24 @@ Accept Ride
 
 
 
+
+
 window.acceptRide=async(id)=>{
 
 
+let user=auth.currentUser;
 
-let user=
 
-auth.currentUser;
+
+if(!user){
+
+
+alert("Rider login required");
+
+return;
+
+
+}
 
 
 
@@ -467,9 +465,7 @@ doc(db,"rides",id),
 
 status:"Accepted",
 
-
 riderId:user.uid,
-
 
 acceptedAt:serverTimestamp()
 
@@ -477,6 +473,7 @@ acceptedAt:serverTimestamp()
 }
 
 );
+
 
 
 
@@ -501,7 +498,6 @@ alert(
 location.href="trip.html";
 
 
-
 };
 
 
@@ -509,8 +505,7 @@ location.href="trip.html";
 
 
 
-
-showRiderLocation();
+startLocation();
 
 
 loadRequests();
@@ -528,7 +523,6 @@ loadRequests,
 
 
 </script>
-
 
 
 </body>
