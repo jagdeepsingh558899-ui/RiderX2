@@ -10,34 +10,54 @@
 
 <link rel="stylesheet" href="../css/style.css">
 
+
 <style>
 
 .box{
 
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
+background:#111;
+padding:25px;
+border-radius:20px;
+border:2px solid #FFD600;
 
 }
 
-button{
+
+select,button{
 
 width:100%;
-padding:14px;
+padding:15px;
 margin-top:15px;
-background:#ffcc00;
 border:none;
-border-radius:10px;
+border-radius:12px;
+
+}
+
+
+button{
+
+background:#FFD600;
 font-weight:bold;
 
 }
 
+
+.amount{
+
+font-size:30px;
+color:#FFD600;
+
+}
+
+
 </style>
+
 
 </head>
 
 
 <body>
+
 
 
 <div class="header">
@@ -48,36 +68,62 @@ font-weight:bold;
 
 
 
+
 <div class="container">
 
 
 <div class="box">
 
 
-<h2 id="amount">
 
-Payment
+<h2>
+
+RiderX Payment
 
 </h2>
 
 
 
+<h3>
+
+Total Fare
+
+</h3>
+
+
+
+<div class="amount">
+
+₹<span id="fare">0</span>
+
+</div>
+
+
+
+
 <select id="method">
 
+
 <option value="Cash">
+
 💵 Cash
+
 </option>
 
 
 <option value="Online">
+
 📱 Online
+
 </option>
+
 
 </select>
 
 
 
-<button onclick="pay()">
+
+<button id="payBtn">
 
 Confirm Payment
 
@@ -85,13 +131,17 @@ Confirm Payment
 
 
 
+
 <p id="msg"></p>
 
 
+
 </div>
 
 
 </div>
+
+
 
 
 
@@ -105,13 +155,13 @@ import {db} from "../firebase/config.js";
 import {
 
 doc,
-updateDoc
+getDoc,
+updateDoc,
+serverTimestamp
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 
@@ -125,14 +175,48 @@ localStorage.getItem("rideId");
 
 
 
+async function loadFare(){
 
-window.pay=async function(){
+
+
+let snap=
+
+await getDoc(
+
+doc(db,"rides",rideId)
+
+);
+
+
+
+if(snap.exists()){
+
+
+document.getElementById("fare").innerHTML=
+
+snap.data().fare || 0;
+
+
+}
+
+
+
+}
+
+
+
+
+document.getElementById("payBtn").onclick=
+
+async()=>{
 
 
 
 let method=
 
 document.getElementById("method").value;
+
+
 
 
 
@@ -146,12 +230,17 @@ doc(db,"rides",rideId),
 paymentMethod:method,
 
 
-paymentStatus:"Paid"
+paymentStatus:"Paid",
+
+
+paidAt:serverTimestamp()
 
 
 }
 
 );
+
+
 
 
 
@@ -161,11 +250,30 @@ document.getElementById("msg").innerHTML=
 
 
 
-}
+
+
+setTimeout(()=>{
+
+
+location.href="receipt.html";
+
+
+},1500);
+
+
+
+};
+
+
+
+
+
+loadFare();
 
 
 
 </script>
+
 
 
 </body>
