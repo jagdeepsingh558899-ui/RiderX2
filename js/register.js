@@ -1,9 +1,19 @@
 // =====================================
-// RiderX Registration System
+// RiderX Register System
+// Customer + Rider
 // =====================================
 
 
-import { auth, db } from "../firebase/config.js";
+import {
+
+auth,
+
+db
+
+}
+
+from "../firebase/config.js";
+
 
 
 import {
@@ -12,76 +22,181 @@ createUserWithEmailAndPassword
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
 import {
 
 doc,
-setDoc,
-serverTimestamp
+
+setDoc
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+// =====================================
+// ROLE SELECT
+// =====================================
+
+
+let selectedRole="customer";
+
+
+
+const customerRole =
+
+document.getElementById(
+"customerRole"
+);
+
+
+
+const riderRole =
+
+document.getElementById(
+"riderRole"
+);
 
 
 
 
 
-const nameBox =
-document.getElementById("name");
+if(customerRole){
 
 
-const emailBox =
-document.getElementById("email");
+customerRole.onclick=()=>{
 
 
-const passwordBox =
-document.getElementById("password");
+selectedRole="customer";
 
 
-const roleBox =
-document.getElementById("role");
+customerRole.classList.add(
+"active"
+);
+
+
+riderRole.classList.remove(
+"active"
+);
+
+
+};
+
+
+}
+
+
+
+
+if(riderRole){
+
+
+riderRole.onclick=()=>{
+
+
+selectedRole="rider";
+
+
+riderRole.classList.add(
+"active"
+);
+
+
+customerRole.classList.remove(
+"active"
+);
+
+
+};
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// REGISTER
+// =====================================
 
 
 const registerBtn =
-document.getElementById("registerBtn");
+
+document.getElementById(
+"registerBtn"
+);
 
 
 
 
 
-
-
-registerBtn.onclick = async()=>{
-
-
-let name =
-nameBox.value.trim();
-
-
-let email =
-emailBox.value.trim();
-
-
-let password =
-passwordBox.value.trim();
-
-
-let role =
-roleBox.value;
+if(registerBtn){
 
 
 
+registerBtn.onclick=async()=>{
 
 
-if(!name || !email || !password){
+const name =
+
+document.getElementById(
+"name"
+).value;
+
+
+
+const phone =
+
+document.getElementById(
+"phone"
+).value;
+
+
+
+const email =
+
+document.getElementById(
+"email"
+).value;
+
+
+
+const password =
+
+document.getElementById(
+"password"
+).value;
+
+
+
+
+
+if(
+!name ||
+!phone ||
+!email ||
+!password
+
+){
+
 
 alert(
-"Sabhi details fill karo"
+"Please fill all details"
 );
+
 
 return;
 
@@ -94,7 +209,10 @@ return;
 try{
 
 
-const userCredential = await createUserWithEmailAndPassword(
+
+const userCredential =
+
+await createUserWithEmailAndPassword(
 
 auth,
 
@@ -106,7 +224,10 @@ password
 
 
 
-const user = userCredential.user;
+const user =
+
+userCredential.user;
+
 
 
 
@@ -114,55 +235,62 @@ const user = userCredential.user;
 
 await setDoc(
 
-doc(db,"users",user.uid),
+doc(
+db,
+"users",
+user.uid
+),
+
 
 {
+
+
+uid:user.uid,
 
 
 name:name,
 
 
+phone:phone,
+
+
 email:email,
 
 
-role:role,
+role:selectedRole,
 
 
-createdAt:serverTimestamp()
+createdAt:
+new Date()
+
 
 
 }
 
-);
-
-
-
-
-
-localStorage.setItem(
-
-"role",
-
-role
 
 );
+
 
 
 
 
 
 alert(
-"Account Created Successfully ✅"
+"Account Created Successfully"
 );
 
 
 
 
 
-if(role==="rider"){
+if(selectedRole==="rider"){
 
 
-window.location.href="../rider/dashboard.html";
+
+window.location.href =
+
+"../rider/home.html";
+
 
 
 }
@@ -170,25 +298,30 @@ window.location.href="../rider/dashboard.html";
 else{
 
 
-window.location.href="../customer/dashboard.html";
+
+window.location.href =
+
+"../customer/home.html";
+
+
+
+}
+
+
 
 
 }
 
 
-
-
-
-}
 
 catch(error){
 
 
+
 alert(
-
 error.message
-
 );
+
 
 
 }
@@ -196,3 +329,7 @@ error.message
 
 
 };
+
+
+
+}
