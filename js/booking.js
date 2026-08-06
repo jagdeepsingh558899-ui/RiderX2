@@ -1,6 +1,6 @@
 // =====================================
 // RiderX Booking System
-// Map Pickup Drop + Ride Create
+// Fixed Map Loading + Pickup Drop
 // =====================================
 
 
@@ -21,81 +21,59 @@ from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 
+const service = document.getElementById("service");
 
-// Elements
+const pickup = document.getElementById("pickup");
 
-const service =
-document.getElementById("service");
+const drop = document.getElementById("drop");
 
+const fareBox = document.getElementById("fare");
 
-const pickupBox =
-document.getElementById("pickup");
+const distanceBox = document.getElementById("distance");
 
+const bookBtn = document.getElementById("bookBtn");
 
-const dropBox =
-document.getElementById("drop");
-
-
-const fareBox =
-document.getElementById("fare");
-
-
-const distanceBox =
-document.getElementById("distance");
-
-
-const bookBtn =
-document.getElementById("bookBtn");
-
-
-const locationBtn =
-document.getElementById("locationBtn");
+const locationBtn = document.getElementById("locationBtn");
 
 
 
-let user=null;
+let currentUser = null;
+
+let map = null;
+
+let pickupMarker = null;
+
+let dropMarker = null;
 
 
-let map;
+let pickupCoords = null;
+
+let dropCoords = null;
 
 
-let pickupMarker=null;
-
-let dropMarker=null;
-
-
-let pickupCoords=null;
-
-let dropCoords=null;
-
-
-
-let fare=0;
+let fare = 0;
 
 
 
 
 
 // ============================
-// AUTH
+// AUTH CHECK
 // ============================
 
 
-onAuthStateChanged(auth,(u)=>{
+onAuthStateChanged(auth,(user)=>{
 
+if(user){
 
-if(u){
-
-user=u;
+currentUser = user;
 
 }
-
 else{
 
-location.href="../auth/login.html";
+window.location.href="../auth/login.html";
 
 }
-
 
 });
 
@@ -105,14 +83,17 @@ location.href="../auth/login.html";
 
 
 // ============================
-// MAP INIT
+// MAP LOAD
 // ============================
 
 
-window.onload=()=>{
+document.addEventListener("DOMContentLoaded",()=>{
 
 
-map=L.map("map").setView(
+setTimeout(()=>{
+
+
+map = L.map("map").setView(
 
 [30.7333,76.7794],
 
@@ -128,7 +109,9 @@ L.tileLayer(
 
 {
 
-maxZoom:19
+maxZoom:19,
+
+attribution:"© OpenStreetMap"
 
 }
 
@@ -136,20 +119,14 @@ maxZoom:19
 
 
 
-setTimeout(()=>{
-
 map.invalidateSize();
 
-},1000);
 
 
 
-
-
-// Map Click
+// MAP CLICK
 
 map.on("click",(e)=>{
-
 
 
 if(!pickupCoords){
@@ -164,29 +141,35 @@ lng:e.latlng.lng
 };
 
 
-pickupBox.value=
+pickup.value =
 
-pickupCoords.lat.toFixed(5)+
+pickupCoords.lat.toFixed(6)+
 ", "+
-pickupCoords.lng.toFixed(5);
+pickupCoords.lng.toFixed(6);
 
 
 
 pickupMarker=L.marker(
 
-[e.latlng.lat,e.latlng.lng]
+[
+
+pickupCoords.lat,
+
+pickupCoords.lng
+
+]
 
 )
 
 .addTo(map)
 
-.bindPopup("Pickup")
+.bindPopup("Pickup Location")
 
 .openPopup();
 
 
-
 }
+
 
 else if(!dropCoords){
 
@@ -200,39 +183,50 @@ lng:e.latlng.lng
 };
 
 
-dropBox.value=
 
-dropCoords.lat.toFixed(5)+
+drop.value =
+
+dropCoords.lat.toFixed(6)+
 ", "+
-dropCoords.lng.toFixed(5);
+dropCoords.lng.toFixed(6);
 
 
 
 dropMarker=L.marker(
 
-[e.latlng.lat,e.latlng.lng]
+[
+
+dropCoords.lat,
+
+dropCoords.lng
+
+]
 
 )
 
 .addTo(map)
 
-.bindPopup("Drop")
+.bindPopup("Drop Location")
 
 .openPopup();
 
 
 
-calculateDistance();
+calculateFare();
 
 
 }
 
 
-
 });
 
 
-};
+
+},300);
+
+
+
+});
 
 
 
@@ -250,24 +244,24 @@ locationBtn.onclick=()=>{
 
 navigator.geolocation.getCurrentPosition(
 
-(pos)=>{
+(position)=>{
 
 
 pickupCoords={
 
-lat:pos.coords.latitude,
+lat:position.coords.latitude,
 
-lng:pos.coords.longitude
+lng:position.coords.longitude
 
 };
 
 
 
-pickupBox.value=
+pickup.value=
 
-pickupCoords.lat.toFixed(5)+
+pickupCoords.lat.toFixed(6)+
 ", "+
-pickupCoords.lng.toFixed(5);
+pickupCoords.lng.toFixed(6);
 
 
 
@@ -293,7 +287,7 @@ pickupCoords.lng
 
 .addTo(map)
 
-.bindPopup("Your Pickup")
+.bindPopup("Your Location")
 
 .openPopup();
 
@@ -319,9 +313,7 @@ pickupCoords.lng
 
 ()=>{
 
-alert(
-"Location permission allow karo"
-);
+alert("Location permission allow karo");
 
 }
 
@@ -337,13 +329,12 @@ alert(
 
 
 
-
 // ============================
-// DISTANCE
+// FARE
 // ============================
 
 
-function calculateDistance(){
+function calculateFare(){
 
 
 if(!pickupCoords || !dropCoords)
@@ -351,7 +342,7 @@ return;
 
 
 
-let distance =
+let km =
 
 map.distance(
 
@@ -371,34 +362,24 @@ dropCoords.lng
 
 ]
 
-)
-
-/
-
-1000;
+)/1000;
 
 
 
-distance=
-
-Number(distance.toFixed(1));
+km = Number(km.toFixed(1));
 
 
 
 distanceBox.innerHTML=
 
-distance+" KM";
-
+km+" KM";
 
 
 
 let rate=8;
 
 
-
-let hour=
-
-new Date().getHours();
+let hour=new Date().getHours();
 
 
 
@@ -408,7 +389,7 @@ rate=11;
 
 }
 
-else if(distance>10){
+else if(km>10){
 
 rate=9;
 
@@ -418,7 +399,7 @@ rate=9;
 
 fare=
 
-50+(distance*rate);
+50+(km*rate);
 
 
 
@@ -438,9 +419,10 @@ service.addEventListener(
 
 "change",
 
-calculateDistance
+calculateFare
 
 );
+
 
 
 
@@ -458,7 +440,7 @@ bookBtn.onclick=async()=>{
 if(!pickupCoords || !dropCoords){
 
 alert(
-"Pickup aur Drop map se select karo"
+"Map se Pickup aur Drop select karo"
 );
 
 return;
@@ -470,27 +452,34 @@ return;
 try{
 
 
-let ride=await addDoc(
+const ride = await addDoc(
 
 collection(db,"rides"),
 
 {
 
 
-customerId:user.uid,
+customerId:
+
+currentUser.uid,
 
 
-service:service.value,
+service:
+
+service.value,
 
 
-pickup:pickupBox.value,
+pickup:
+
+pickup.value,
 
 
-drop:dropBox.value,
+drop:
+
+drop.value,
 
 
 pickupCoords,
-
 
 dropCoords,
 
@@ -521,25 +510,26 @@ ride.id
 
 
 alert(
+
 "Ride Booked Successfully ✅"
+
 );
 
 
 
-location.href="ride-status.html";
+window.location.href="ride-status.html";
 
 
 
 }
 
-catch(e){
+catch(error){
 
 
-alert(e.message);
+alert(error.message);
 
 
 }
-
 
 
 };
@@ -547,6 +537,4 @@ alert(e.message);
 
 
 
-console.log(
-"RiderX Booking Loaded"
-);
+console.log("RiderX Booking Ready");
