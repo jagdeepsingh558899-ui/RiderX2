@@ -1,36 +1,32 @@
-// =================================
-// RiderX Notification System
-// =================================
-
-
-
-// Show Notification
+// ==========================================
+// RiderX Notification Manager V1
+// ==========================================
 
 
 export function showNotification(
 
 title,
+
 message
 
 ){
 
 
 
-if(!("Notification" in window)){
+if(
 
+"Notification" in window
 
-alert(message);
-
-return;
-
-
-}
+){
 
 
 
+if(
 
+Notification.permission==="granted"
 
-if(Notification.permission === "granted"){
+){
+
 
 
 new Notification(
@@ -39,9 +35,13 @@ title,
 
 {
 
+
 body:message,
 
-icon:"../assets/logo.svg"
+
+icon:"../assets/logo.png"
+
+
 
 }
 
@@ -54,32 +54,12 @@ icon:"../assets/logo.svg"
 else{
 
 
-Notification.requestPermission()
-.then((permission)=>{
+Notification.requestPermission();
 
-
-if(permission==="granted"){
-
-
-new Notification(
-
-title,
-
-{
-
-body:message,
-
-icon:"../assets/logo.svg"
-
-}
-
-);
 
 
 }
 
-
-});
 
 
 }
@@ -92,19 +72,17 @@ icon:"../assets/logo.svg"
 
 
 
+// NEW RIDE
 
 
-// Ride Accepted Notification
-
-
-export function rideAccepted(){
+export function newRideNotification(){
 
 
 showNotification(
 
-"RiderX",
+"🏍 New Ride Request",
 
-"Your ride has been accepted 🏍"
+"New customer ride available"
 
 );
 
@@ -117,19 +95,102 @@ showNotification(
 
 
 
-// Ride Completed Notification
+// RIDE ACCEPTED
 
 
-export function rideCompleted(){
+export function rideAcceptedNotification(){
+
 
 
 showNotification(
 
-"RiderX",
+"✅ Rider Found",
 
-"Ride completed successfully ✅"
+"Your rider has accepted the ride"
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// RIDER ARRIVING
+
+
+export function riderArrivingNotification(){
+
+
+showNotification(
+
+"🏍 Rider Arriving",
+
+"Your rider is coming"
 
 );
 
 
 }
+
+
+
+
+
+
+
+
+// RIDE START
+
+
+export function rideStartNotification(){
+
+
+showNotification(
+
+"🚕 Ride Started",
+
+"Your ride has started"
+
+);
+
+
+}
+
+
+
+
+
+
+
+// CHAT
+
+
+export function chatNotification(){
+
+
+showNotification(
+
+"💬 New Message",
+
+"You received a new message"
+
+);
+
+
+}
+
+
+
+
+
+console.log(
+
+"RiderX Notification Manager Loaded"
+
+);
