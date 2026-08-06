@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -9,108 +10,119 @@
 
 <link rel="manifest" href="manifest.json">
 
+
 <style>
 
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial, sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
 }
+
 
 body{
-    background:#000;
-    height:100vh;
-    overflow:hidden;
+
+background:#000;
+height:100vh;
+color:white;
+
 }
 
 
-/* Splash Screen */
 
 #splash{
 
-    position:fixed;
-    top:0;
-    left:0;
+position:fixed;
+top:0;
+left:0;
 
-    width:100%;
-    height:100vh;
+width:100%;
+height:100vh;
 
-    background:#000;
+background:#000;
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
+display:flex;
+justify-content:center;
+align-items:center;
 
-    z-index:9999;
+z-index:9999;
 
-    animation:hideSplash 1s ease 3.5s forwards;
+animation:hideSplash 1s ease 3s forwards;
 
 }
+
 
 
 .logo-box{
 
-    text-align:center;
+text-align:center;
 
-    animation:logoAnimation 2s ease;
+animation:logoAnimation 2s ease;
 
 }
+
 
 
 .logo{
 
-    width:180px;
-    height:180px;
+width:170px;
+height:170px;
 
-    border-radius:50%;
+object-fit:contain;
 
-    object-fit:contain;
+filter:drop-shadow(0 0 20px #FFD600);
 
-    filter:drop-shadow(0 0 20px #00eaff);
-
-    animation:pulse 1.5s infinite;
+animation:pulse 1.5s infinite;
 
 }
+
 
 
 .logo-text{
 
-    color:white;
+font-size:38px;
+font-weight:900;
 
-    font-size:38px;
+margin-top:15px;
 
-    font-weight:800;
-
-    letter-spacing:3px;
-
-    margin-top:15px;
+letter-spacing:3px;
 
 }
+
 
 
 .logo-text span{
 
-    color:#00eaff;
+color:#FFD600;
 
 }
+
 
 
 
 @keyframes logoAnimation{
 
 0%{
-    transform:scale(0);
-    opacity:0;
+
+transform:scale(0);
+
+opacity:0;
+
 }
 
 70%{
-    transform:scale(1.15);
-    opacity:1;
+
+transform:scale(1.15);
+
+opacity:1;
+
 }
 
 100%{
-    transform:scale(1);
+
+transform:scale(1);
+
 }
 
 }
@@ -119,16 +131,10 @@ body{
 
 @keyframes pulse{
 
-0%{
-    transform:scale(1);
-}
-
 50%{
-    transform:scale(1.08);
-}
 
-100%{
-    transform:scale(1);
+transform:scale(1.08);
+
 }
 
 }
@@ -148,21 +154,94 @@ visibility:hidden;
 
 
 
+
 #app{
 
 height:100vh;
 
 display:flex;
 
+flex-direction:column;
+
 justify-content:center;
 
 align-items:center;
 
-color:white;
+text-align:center;
 
-font-size:25px;
+padding:20px;
 
 }
+
+
+
+h1{
+
+font-size:40px;
+
+}
+
+
+
+h1 span{
+
+color:#FFD600;
+
+}
+
+
+
+p{
+
+margin-top:10px;
+
+color:#ccc;
+
+}
+
+
+
+.buttons{
+
+width:100%;
+max-width:350px;
+
+margin-top:40px;
+
+}
+
+
+
+button{
+
+width:100%;
+
+padding:16px;
+
+margin-top:15px;
+
+border:none;
+
+border-radius:15px;
+
+font-size:18px;
+
+font-weight:bold;
+
+background:#FFD600;
+
+color:#000;
+
+}
+
+
+
+.rider{
+
+background:white;
+
+}
+
 
 
 </style>
@@ -171,17 +250,18 @@ font-size:25px;
 </head>
 
 
+
 <body>
+
 
 
 <div id="splash">
 
+
 <div class="logo-box">
 
 
-<!-- Logo Image -->
-
-<img class="logo" src="assets/logo.png">
+<img src="assets/logo.png" class="logo">
 
 
 <div class="logo-text">
@@ -193,19 +273,101 @@ RIDER<span>X</span>
 
 </div>
 
+
 </div>
+
+
+
 
 
 
 <div id="app">
 
-Welcome To RiderX
+
+<h1>
+
+Welcome To RIDER<span>X</span>
+
+</h1>
+
+
+<p>
+
+Bike Taxi • Cab • Parcel • Food Delivery
+
+</p>
+
+
+
+<div class="buttons">
+
+
+<button onclick="joinCustomer()">
+
+🚕 Join As Customer
+
+</button>
+
+
+
+<button class="rider" onclick="joinRider()">
+
+🏍 Join As Rider
+
+</button>
+
+
+
+</div>
+
 
 </div>
 
 
 
+
+
+
+<script>
+
+
+function joinCustomer(){
+
+localStorage.setItem(
+"role",
+"customer"
+);
+
+
+window.location.href="auth/login.html";
+
+
+}
+
+
+
+function joinRider(){
+
+localStorage.setItem(
+"role",
+"rider"
+);
+
+
+window.location.href="rider/register.html";
+
+
+}
+
+
+
+</script>
+
+
+
+
 <script type="module" src="js/app.js"></script>
+
 
 
 </body>
