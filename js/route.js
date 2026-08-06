@@ -1,40 +1,98 @@
-// =================================
-// RiderX Route System
-// =================================
+// =====================================
+// RiderX Route Navigation System
+// Pickup -> Drop Route
+// OpenStreetMap Routing
+// =====================================
 
 
-let route;
+let routeLine = null;
 
 
 
-export async function showRoute(
+// Draw Route Between Two Points
+
+export async function drawRoute(
 
 map,
 
-pickup,
+start,
 
-drop
+end
 
 ){
 
 
-if(route){
 
-map.removeLayer(route);
+try{
+
+
+const url =
+
+`https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+
+
+
+
+
+const response =
+
+await fetch(url);
+
+
+
+
+
+const data =
+
+await response.json();
+
+
+
+
+
+if(!data.routes || !data.routes.length)
+
+return;
+
+
+
+
+
+const coordinates =
+
+data.routes[0].geometry.coordinates.map(
+
+(point)=>[
+
+point[1],
+
+point[0]
+
+]
+
+);
+
+
+
+
+
+
+
+if(routeLine){
+
+
+map.removeLayer(routeLine);
+
 
 }
 
 
 
-route = L.polyline(
 
-[
 
-pickup,
+routeLine = L.polyline(
 
-drop
-
-],
+coordinates,
 
 {
 
@@ -48,25 +106,60 @@ weight:5
 
 
 
+
+
+
+
 map.fitBounds(
 
-route.getBounds()
+routeLine.getBounds()
 
 );
 
 
 
-return calculateDistance(
 
-pickup[0],
 
-pickup[1],
 
-drop[0],
+return {
 
-drop[1]
+
+distance:
+
+(data.routes[0].distance/1000).toFixed(2),
+
+
+time:
+
+Math.ceil(
+
+data.routes[0].duration/60
+
+)
+
+
+};
+
+
+
+}
+
+catch(error){
+
+
+console.log(
+
+"Route Error",
+
+error
 
 );
+
+
+return null;
+
+
+}
 
 
 
@@ -76,64 +169,26 @@ drop[1]
 
 
 
-function calculateDistance(
-
-lat1,
-
-lon1,
-
-lat2,
-
-lon2
-
-){
-
-
-let R = 6371;
 
 
 
-let dLat =
-
-(lat2-lat1)*Math.PI/180;
+// Remove Old Route
 
 
-
-let dLon =
-
-(lon2-lon1)*Math.PI/180;
+export function clearRoute(map){
 
 
 
-let a =
-
-Math.sin(dLat/2)**2 +
-
-Math.cos(lat1*Math.PI/180)
-
-*
-
-Math.cos(lat2*Math.PI/180)
-
-*
-
-Math.sin(dLon/2)**2;
+if(routeLine){
 
 
-
-let c =
-
-2*Math.atan2(
-
-Math.sqrt(a),
-
-Math.sqrt(1-a)
-
-);
+map.removeLayer(routeLine);
 
 
+routeLine=null;
 
-return (R*c).toFixed(2);
+
+}
 
 
 }
