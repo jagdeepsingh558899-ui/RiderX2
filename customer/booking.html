@@ -20,9 +20,10 @@
 height:350px;
 width:100%;
 border-radius:15px;
-margin:15px 0;
+margin-bottom:15px;
 
 }
+
 
 input,select,button{
 
@@ -32,6 +33,7 @@ margin-top:10px;
 border-radius:10px;
 
 }
+
 
 button{
 
@@ -43,8 +45,9 @@ font-weight:bold;
 
 </style>
 
-</head><link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+
 
 <body>
 
@@ -60,7 +63,6 @@ font-weight:bold;
 <div class="container">
 
 
-
 <div id="map"></div>
 
 
@@ -71,9 +73,11 @@ font-weight:bold;
 🏍 Bike Taxi
 </option>
 
+
 <option value="Cab">
 🚕 Cab
 </option>
+
 
 <option value="Parcel">
 📦 Parcel
@@ -84,8 +88,8 @@ font-weight:bold;
 
 
 
-
 <input id="pickup" placeholder="Pickup Location" readonly>
+
 
 
 <button onclick="getPickup()">
@@ -93,7 +97,6 @@ font-weight:bold;
 📍 Use Current Location
 
 </button>
-
 
 
 
@@ -110,7 +113,6 @@ font-weight:bold;
 🎁 Apply Coupon
 
 </button>
-
 
 
 
@@ -132,9 +134,7 @@ Fare: -
 </p>
 
 
-
 <p id="couponMsg"></p>
-
 
 
 
@@ -145,10 +145,7 @@ Confirm Booking
 </button>
 
 
-
 </div>
-
-
 
 
 
@@ -178,13 +175,20 @@ from
 
 
 
+
 let map = L.map("map").setView([26.9124,75.7873],13);
 
 
 
 L.tileLayer(
 
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+attribution:"© OpenStreetMap"
+
+}
 
 ).addTo(map);
 
@@ -193,20 +197,20 @@ L.tileLayer(
 
 
 let pickupLat=null;
+
 let pickupLng=null;
 
 let dropLat=null;
+
 let dropLng=null;
 
 let distance=0;
+
 let finalFare=0;
 
 let discount=0;
 
-
-
-
-let marker;
+let marker=null;
 
 
 
@@ -216,21 +220,21 @@ let marker;
 window.getPickup=function(){
 
 
-
 navigator.geolocation.getCurrentPosition(
 
-(pos)=>{
+(position)=>{
 
 
-pickupLat=pos.coords.latitude;
+pickupLat=position.coords.latitude;
 
-pickupLng=pos.coords.longitude;
+pickupLng=position.coords.longitude;
 
 
 
 document.getElementById("pickup").value=
 
-pickupLat+","+pickupLng;
+pickupLat.toFixed(6)+","+pickupLng.toFixed(6);
+
 
 
 
@@ -242,6 +246,7 @@ map.removeLayer(marker);
 
 
 
+
 marker=L.marker(
 
 [pickupLat,pickupLng]
@@ -250,7 +255,7 @@ marker=L.marker(
 
 .addTo(map)
 
-.bindPopup("Pickup")
+.bindPopup("Pickup Location")
 
 .openPopup();
 
@@ -266,12 +271,21 @@ map.setView(
 
 
 
+},
+
+()=>{
+
+
+alert("Location permission allow karo");
+
+
 }
 
 );
 
 
 }
+
 
 
 
@@ -300,7 +314,7 @@ collection(db,"coupons")
 
 
 
-let found=false;
+let applied=false;
 
 
 
@@ -317,7 +331,7 @@ if(data.code==code){
 discount=data.discount;
 
 
-found=true;
+applied=true;
 
 
 }
@@ -327,31 +341,19 @@ found=true;
 
 
 
-if(found){
-
-
 document.getElementById("couponMsg").innerHTML=
 
-"Coupon Applied ✅";
+applied ?
 
+"Coupon Applied ✅"
 
-}
-
-else{
-
-
-discount=0;
-
-
-document.getElementById("couponMsg").innerHTML=
+:
 
 "Invalid Coupon ❌";
 
 
 }
 
-
-}
 
 
 
@@ -366,7 +368,7 @@ window.calculateRide=async function(){
 
 if(!pickupLat){
 
-alert("Pickup location select karo");
+alert("Pehle pickup location lo");
 
 return;
 
@@ -380,7 +382,7 @@ document.getElementById("drop").value;
 
 
 
-let res=
+let response=
 
 await fetch(
 
@@ -390,13 +392,13 @@ await fetch(
 
 
 
-let data=
+let result=
 
-await res.json();
+await response.json();
 
 
 
-if(!data.length){
+if(!result.length){
 
 alert("Drop location nahi mila");
 
@@ -406,15 +408,10 @@ return;
 
 
 
-dropLat=
+dropLat=Number(result[0].lat);
 
-Number(data[0].lat);
+dropLng=Number(result[0].lon);
 
-
-
-dropLng=
-
-Number(data[0].lon);
 
 
 
@@ -425,17 +422,12 @@ let R=6371;
 
 let dLat=
 
-(dropLat-pickupLat)
-
-*Math.PI/180;
-
+(dropLat-pickupLat)*Math.PI/180;
 
 
 let dLng=
 
-(dropLng-pickupLng)
-
-*Math.PI/180;
+(dropLng-pickupLng)*Math.PI/180;
 
 
 
@@ -443,9 +435,13 @@ let a=
 
 Math.sin(dLat/2)**2+
 
-Math.cos(pickupLat*Math.PI/180)*
+Math.cos(pickupLat*Math.PI/180)
 
-Math.cos(dropLat*Math.PI/180)*
+*
+
+Math.cos(dropLat*Math.PI/180)
+
+*
 
 Math.sin(dLng/2)**2;
 
@@ -536,7 +532,6 @@ fare:
 "₹"+Math.round(finalFare),
 
 
-
 status:"Pending",
 
 
@@ -549,7 +544,6 @@ createdAt:serverTimestamp()
 }
 
 );
-
 
 
 
@@ -569,7 +563,6 @@ alert("Ride Booked ✅");
 
 
 location.href="ride-status.html";
-
 
 
 }
