@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Admin Support</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<style>
+
+.card{
+
+background:#1d1d1d;
+padding:20px;
+border-radius:15px;
+margin:15px 0;
+
+}
+
+
+button{
+
+width:100%;
+padding:12px;
+margin-top:10px;
+background:#FFD600;
+border:none;
+border-radius:10px;
+font-weight:bold;
+
+}
+
+
+.status{
+
+color:#FFD600;
+font-weight:bold;
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+🛠 RiderX Support Center
+
+</div>
+
+
+
+<div class="container">
+
+
+<h2>
+Customer & Rider Complaints
+</h2>
+
+
+<div id="supportList">
+
+Loading...
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script type="module">
+
+
+import {db} from "../firebase/config.js";
+
+
+import {
+
+collection,
+getDocs,
+doc,
+updateDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+async function loadSupport(){
+
+
+let box=document.getElementById("supportList");
+
+
+let snap=await getDocs(
+
+collection(db,"supports")
+
+);
+
+
+
+box.innerHTML="";
+
+
+
+if(snap.empty){
+
+box.innerHTML=
+
+"<p>No Support Requests</p>";
+
+return;
+
+}
+
+
+
+
+
+snap.forEach((item)=>{
+
+
+let data=item.data();
+
+
+
+box.innerHTML +=`
+
+
+<div class="card">
+
+
+<h3>
+
+${data.type || "Support"}
+
+</h3>
+
+
+<p>
+
+👤 User:
+
+${data.userId || "-"}
+
+</p>
+
+
+<p>
+
+📝 Message:
+
+<br>
+
+${data.message || "-"}
+
+</p>
+
+
+<p class="status">
+
+Status:
+
+${data.status || "Pending"}
+
+</p>
+
+
+
+<button onclick="resolveSupport('${item.id}')">
+
+✅ Mark Resolved
+
+</button>
+
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+window.resolveSupport=async(id)=>{
+
+
+await updateDoc(
+
+doc(db,"supports",id),
+
+{
+
+status:"Resolved"
+
+}
+
+);
+
+
+
+alert("Support Closed ✅");
+
+
+loadSupport();
+
+
+}
+
+
+
+
+
+
+
+loadSupport();
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
