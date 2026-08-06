@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>RiderX Live Ride</title>
+<title>RiderX Live Tracking</title>
 
 
 <link rel="stylesheet" href="../css/style.css">
@@ -17,124 +17,137 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 
-<style>
+<link rel="manifest" href="/manifest.json">
 
-body{
-margin:0;
-background:#000;
-color:white;
-}
-
-
-#map{
-
-height:75vh;
-width:100%;
-
-}
-
-
-.card{
-
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-
-background:#111;
-
-padding:20px;
-
-border-radius:25px 25px 0 0;
-
-z-index:999;
-
-}
-
-
-.status{
-
-font-size:18px;
-font-weight:bold;
-
-}
-
-
-button{
-
-width:100%;
-padding:14px;
-
-margin-top:10px;
-
-border-radius:15px;
-
-border:none;
-
-background:#FFD600;
-
-font-weight:bold;
-
-}
-
-
-
-</style>
+<meta name="theme-color" content="#FFD600">
 
 
 </head>
+
 
 
 <body>
 
 
 
-<div class="header">
+<div class="topbar">
 
-🚕 RiderX Live Ride
+<h2>
+🏍 RiderX
+</h2>
+
+
+<img src="../assets/logo.png">
+
 
 </div>
 
+
+
+
+
+
+<div class="container">
+
+
+
+
+
+<!-- INSTALL APP -->
+
+<div class="card">
+
+
+<button
+
+id="installApp"
+
+class="btn"
+
+style="display:none">
+
+📲 Install RiderX App
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- MAP -->
+
+
+<div class="map-container">
 
 
 <div id="map"></div>
 
 
+</div>
 
+
+
+
+
+
+
+
+
+<!-- RIDE STATUS -->
 
 
 <div class="card">
 
 
-<div class="status" id="status">
+<h3>
+
+Ride Status
+
+</h3>
+
+
+<h2 id="rideStatus">
 
 Searching Rider...
+
+</h2>
+
 
 </div>
 
 
-<hr>
+
+
+
+
+
+
+<!-- RIDER INFO -->
+
+
+<div class="card" id="riderCard" style="display:none;">
+
+
+<h3>
+
+Your Rider
+
+</h3>
 
 
 <p>
 
-🏍 Rider:
+🏍 Name:
 
 <span id="riderName">
 
-Waiting...
-
-</span>
-
-</p>
-
-
-<p>
-
-📍 Distance:
-
-<span id="distance">
-
 -
 
 </span>
@@ -142,11 +155,12 @@ Waiting...
 </p>
 
 
+
 <p>
 
-⏱ ETA:
+📞 Phone:
 
-<span id="eta">
+<span id="riderPhone">
 
 -
 
@@ -156,22 +170,191 @@ Waiting...
 
 
 
-<button id="callBtn">
+
+<button
+
+id="callRider"
+
+class="btn">
 
 📞 Call Rider
 
 </button>
 
 
-<button id="cancelBtn">
 
-Cancel Ride
+
+
+<button
+
+id="chatRider"
+
+class="btn-outline">
+
+💬 Chat Rider
 
 </button>
 
 
 
 </div>
+
+
+
+
+
+
+
+
+
+<!-- OTP -->
+
+
+<div class="card" id="otpBox" style="display:none;">
+
+
+<h3>
+
+🔐 Ride OTP
+
+</h3>
+
+
+
+<h1 style="color:#FFD600;">
+
+<span id="rideOTP">
+
+----
+
+</span>
+
+</h1>
+
+
+
+<p>
+
+Give this OTP to rider after pickup.
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- RIDE DETAILS -->
+
+
+<div class="card">
+
+
+<h3>
+
+Ride Details
+
+</h3>
+
+
+<p>
+
+📍 Pickup:
+
+<span id="pickupText">
+
+-
+
+</span>
+
+</p>
+
+
+
+<p>
+
+🏁 Drop:
+
+<span id="dropText">
+
+-
+
+</span>
+
+</p>
+
+
+
+<p>
+
+💰 Fare:
+
+₹<span id="fareText">
+
+0
+
+</span>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="bottom-nav">
+
+
+<a class="active">
+
+🏠
+<br>
+Home
+
+</a>
+
+
+<a href="History.html">
+
+📜
+<br>
+History
+
+</a>
+
+
+<a>
+
+👤
+<br>
+Profile
+
+</a>
+
+
+
+</div>
+
+
 
 
 
@@ -182,7 +365,12 @@ Cancel Ride
 
 
 
+<script type="module" src="../js/App.js"></script>
+
+
 <script type="module" src="../js/customer-map.js"></script>
+
+
 
 
 </body>
