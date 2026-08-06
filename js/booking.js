@@ -21,56 +21,48 @@ const fare = document.getElementById("fare");
 const bookBtn = document.getElementById("bookBtn");
 
 let currentUser = null;
+let pickupMarker = null;
 
-onAuthStateChanged(auth,(user)=>{
+// =====================================
+// Authentication
+// =====================================
 
-    if(!user){
+onAuthStateChanged(auth, (user) => {
 
-        window.location.href="../auth/login.html";
+    if (!user) {
+
+        window.location.href = "../auth/login.html";
         return;
 
     }
 
-    currentUser=user;
+    currentUser = user;
 
 });
 
-// ===========================
+// =====================================
 // OpenStreetMap
-// ===========================
+// =====================================
 
-const map=L.map("map").setView([30.7333,76.7794],13);
+const map = L.map("map").setView([30.7333, 76.7794], 13);
 
 L.tileLayer(
+
 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
 {
+
 maxZoom:19,
+
 attribution:"© OpenStreetMap"
+
 }
+
 ).addTo(map);
 
-let pickupMarker=null;
-
-map.on("click",(e)=>{
-
-    if(pickupMarker){
-
-        map.removeLayer(pickupMarker);
-
-    }
-
-    pickupMarker=L.marker(e.latlng).addTo(map);
-
-    pickup.value=
-    e.latlng.lat.toFixed(6)+","+e.latlng.lng.toFixed(6);
-
-    calculateFare();
-
-});
-
-// ===========================
+// =====================================
 // Current Location
-// ===========================
+// =====================================
 
 if(navigator.geolocation){
 
@@ -84,8 +76,11 @@ const lng=position.coords.longitude;
 map.setView([lat,lng],15);
 
 L.marker([lat,lng])
+
 .addTo(map)
-.bindPopup("You are here")
+
+.bindPopup("You are Here")
+
 .openPopup();
 
 },
@@ -100,9 +95,35 @@ console.log(error);
 
 }
 
-// ===========================
+// =====================================
+// Pickup Location
+// =====================================
+
+map.on("click",(e)=>{
+
+if(pickupMarker){
+
+map.removeLayer(pickupMarker);
+
+}
+
+pickupMarker=L.marker(e.latlng).addTo(map);
+
+pickup.value=
+
+e.latlng.lat.toFixed(6)+
+
+","+
+
+e.latlng.lng.toFixed(6);
+
+calculateFare();
+
+});
+
+// =====================================
 // Fare Calculation
-// ===========================
+// =====================================
 
 function calculateFare(){
 
@@ -111,19 +132,27 @@ let baseFare=50;
 switch(service.value){
 
 case "Bike Taxi":
+
 baseFare=50;
+
 break;
 
 case "Cab":
+
 baseFare=120;
+
 break;
 
 case "Parcel":
+
 baseFare=80;
+
 break;
 
 case "Food":
+
 baseFare=60;
+
 break;
 
 }
@@ -136,166 +165,214 @@ distance=10;
 
 }
 
-const total=baseFare+(distance*8);
+const totalFare=
 
-fare.innerHTML=total;
+baseFare+
+
+(distance*8);
+
+fare.innerHTML=totalFare;
 
 }
 
-service.onchange=calculateFare;
+service.addEventListener("change",calculateFare);
 
-drop.oninput=calculateFare;
+drop.addEventListener("input",calculateFare);
 
 calculateFare();
-// ===========================
-// Book Ride
-// ===========================
+// =====================================
+// Booking Validation
+// =====================================
 
-bookBtn.onclick = async () => {
+function validateBooking(){
 
-    if (!currentUser) {
-
-        alert("Please Login First");
-        return;
-
-    }
-
-    if (pickup.value.trim() === "") {
+    if(pickup.value.trim()===""){
 
         alert("Please Select Pickup Location");
-        return;
+        return false;
 
     }
 
-    if (drop.value.trim() === "") {
+    if(drop.value.trim()===""){
 
         alert("Please Enter Drop Location");
-        return;
+        return false;
 
     }
-
-    try {
-
-        const bookingRef = await addDoc(
-
-            collection(db, "bookings"),
-
-            {
-
-                customerId: currentUser.uid,
-
-                service: service.value,
-
-                pickup: pickup.value,
-
-                drop: drop.value,
-
-                fare: Number(fare.innerHTML),
-
-                riderId: null,
-
-                status: "pending",
-
-                paymentStatus: "Pending",
-
-                bookingTime: new Date().toLocaleString(),
-
-                createdAt: serverTimestamp()
-
-            }
-
-        );
-
-        await bookingSuccess(bookingRef.id);
-
-    }
-
-    catch (error) {
-
-        console.log(error);
-
-        alert(error.message);
-
-    }
-
-};
-
-
-// ===========================
-// Booking Success
-// ===========================
-
-async function bookingSuccess(bookingId) {
-
-    alert(
-        "🎉 Ride Booked Successfully!\n\nBooking ID : " + bookingId
-    );
-
-    resetBookingForm();
-
-    setTimeout(() => {
-
-        window.location.href =
-        "../customer/history.html";
-
-    }, 1500);
-
-}
-
-
-// ===========================
-// Reset Form
-// ===========================
-
-function resetBookingForm() {
-
-    service.selectedIndex = 0;
-
-    pickup.value = "";
-
-    drop.value = "";
-
-    calculateFare();
-
-    if (pickupMarker) {
-
-        map.removeLayer(pickupMarker);
-
-        pickupMarker = null;
-
-    }
-
-}
-// ===========================
-// Rider Notification
-// ===========================
-
-async function notifyNearbyRiders(bookingId){
-
-    console.log("Searching Nearby Riders...");
-
-    // Future Update:
-    // Yaha nearby online riders ko notification bheja jayega.
 
     return true;
 
 }
 
 
-// ===========================
-// Live Booking Status
-// ===========================
+// =====================================
+// Reset Booking Form
+// =====================================
 
-async function updateBookingStatus(status){
+function resetBookingForm(){
 
-    console.log("Booking Status :", status);
+    service.selectedIndex=0;
+
+    pickup.value="";
+    drop.value="";
+
+    calculateFare();
+
+    if(pickupMarker){
+
+        map.removeLayer(pickupMarker);
+        pickupMarker=null;
+
+    }
 
 }
 
 
-// ===========================
+// =====================================
+// Booking Success
+// =====================================
+
+async function bookingSuccess(bookingId){
+
+    alert(
+        "🎉 Ride Booked Successfully!\n\nBooking ID : "+bookingId
+    );
+
+    resetBookingForm();
+
+    setTimeout(()=>{
+
+        window.location.href="../customer/history.html";
+
+    },1500);
+
+}
+
+
+// =====================================
+// Rider Notification
+// =====================================
+
+async function notifyNearbyRiders(bookingId){
+
+    console.log("Searching Nearby Riders...");
+
+    // Future:
+    // Nearby online riders ko notification bhejna.
+
+    return true;
+
+}
+// =====================================
+// Book Ride
+// =====================================
+
+bookBtn.addEventListener("click", async()=>{
+
+    if(!currentUser){
+
+        alert("Please Login First");
+        return;
+
+    }
+
+    if(!validateBooking()){
+
+        return;
+
+    }
+
+    try{
+
+        const bookingData={
+
+            customerId:currentUser.uid,
+
+            customerEmail:currentUser.email,
+
+            service:service.value,
+
+            pickup:pickup.value,
+
+            drop:drop.value,
+
+            fare:Number(fare.innerHTML),
+
+            status:"pending",
+
+            paymentStatus:"Pending",
+
+            riderId:null,
+
+            bookingDate:new Date().toLocaleDateString(),
+
+            bookingTime:new Date().toLocaleTimeString(),
+
+            createdAt:serverTimestamp()
+
+        };
+
+        const bookingRef=await addDoc(
+
+            collection(db,"bookings"),
+
+            bookingData
+
+        );
+
+        await notifyNearbyRiders(bookingRef.id);
+
+        await bookingSuccess(bookingRef.id);
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        alert(error.message);
+
+    }
+
+});
+
+
+// =====================================
+// Auto Refresh Fare
+// =====================================
+
+setInterval(()=>{
+
+    calculateFare();
+
+},5000);
+// =====================================
+// Booking Status
+// =====================================
+
+function updateBookingStatus(status){
+
+    console.log("Booking Status :",status);
+
+}
+
+
+// =====================================
+// Page Initialization
+// =====================================
+
+window.addEventListener("load",()=>{
+
+    calculateFare();
+
+    console.log("Booking Page Loaded");
+
+});
+
+
+// =====================================
 // Service Change
-// ===========================
+// =====================================
 
 service.addEventListener("change",()=>{
 
@@ -304,113 +381,188 @@ service.addEventListener("change",()=>{
 });
 
 
-// ===========================
-// Drop Location Change
-// ===========================
+// =====================================
+// Pickup Input
+// =====================================
 
-drop.addEventListener("keyup",()=>{
-
-    calculateFare();
-
-});
-
-
-// ===========================
-// Pickup Location Change
-// ===========================
-
-pickup.addEventListener("keyup",()=>{
+pickup.addEventListener("input",()=>{
 
     calculateFare();
 
 });
 
 
-// ===========================
-// Map Click
-// ===========================
+// =====================================
+// Drop Input
+// =====================================
+
+drop.addEventListener("input",()=>{
+
+    calculateFare();
+
+});
+
+
+// =====================================
+// Map Resize Fix
+// =====================================
+
+setTimeout(()=>{
+
+    map.invalidateSize();
+
+},500);
+
+
+// =====================================
 // Utility Functions
-// ===========================
+// =====================================
 
-function getSelectedService(){
+function getBookingData(){
 
-    return service.value;
+    return{
 
-}
+        service:service.value,
 
-function getPickupLocation(){
+        pickup:pickup.value,
 
-    return pickup.value.trim();
+        drop:drop.value,
 
-}
+        fare:Number(fare.innerHTML)
 
-function getDropLocation(){
-
-    return drop.value.trim();
+    };
 
 }
+// =====================================
+// Booking Summary
+// =====================================
 
+function showBookingSummary(){
 
-// ===========================
-// Validate Booking
-// ===========================
+    const booking=getBookingData();
 
-function validateBooking(){
-
-    if(getPickupLocation()===""){
-
-        alert("Please Select Pickup Location");
-        return false;
-
-    }
-
-    if(getDropLocation()===""){
-
-        alert("Please Enter Drop Location");
-        return false;
-
-    }
-
-    return true;
+    console.log("========== Booking Summary ==========");
+    console.log("Service :",booking.service);
+    console.log("Pickup :",booking.pickup);
+    console.log("Drop :",booking.drop);
+    console.log("Fare : ₹"+booking.fare);
+    console.log("=====================================");
 
 }
 
 
-// ===========================
-// Refresh Fare
-// ===========================
+// =====================================
+// Clear Booking
+// =====================================
 
-setInterval(()=>{
+function clearBooking(){
+
+    service.selectedIndex=0;
+
+    pickup.value="";
+
+    drop.value="";
 
     calculateFare();
 
-},5000);
+    if(pickupMarker){
+
+        map.removeLayer(pickupMarker);
+
+        pickupMarker=null;
+
+    }
+
+}
 
 
-// ===========================
-// Future Features
-// ===========================
+// =====================================
+// Map Zoom Controls
+// =====================================
+
+function zoomIn(){
+
+    map.zoomIn();
+
+}
+
+function zoomOut(){
+
+    map.zoomOut();
+
+}
+
+
+// =====================================
+// Refresh Location
+// =====================================
+
+function refreshLocation(){
+
+    if(!navigator.geolocation){
+
+        return;
+
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        (position)=>{
+
+            const lat=position.coords.latitude;
+
+            const lng=position.coords.longitude;
+
+            map.setView([lat,lng],15);
+
+        },
+
+        (error)=>{
+
+            console.log(error);
+
+        }
+
+    );
+
+}
+
+
+// =====================================
+// Console Message
+// =====================================
+
+console.log("Booking Module Loaded Successfully");
+// =====================================
+// Future Features (Coming Soon)
+// =====================================
 
 // Live Rider Tracking
-// Route Navigation
-// Distance API
+// Customer Live Tracking
 // ETA Calculation
-// Coupon System
+// Route Navigation
 // Wallet Payment
-// Online Payment Gateway
-// SOS Button
+// Razorpay / UPI Payment
+// Coupons & Offers
+// SOS Emergency
 // Ride Sharing
 // Voice Navigation
 // Push Notifications
+// Chat System
+// Calling System
+// Driver Rating
+// Customer Rating
 
 
-// ===========================
+// =====================================
 // RiderX Booking System Ready
-// ===========================
+// =====================================
 
-console.log("=================================");
+console.log("====================================");
 console.log(" RiderX Booking System Ready ");
 console.log(" Firebase Connected ");
 console.log(" OpenStreetMap Loaded ");
-console.log(" Booking Module Active ");
-console.log("=================================");
+console.log(" Booking Service Active ");
+console.log("====================================");
+
+// End of booking.js
