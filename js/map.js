@@ -1,34 +1,36 @@
 // =================================
-// RiderX Advanced Map System
+// RiderX Advanced Live Map System V2
+// Live Rider + Customer + Route
 // =================================
-
 
 
 let map;
 
-let markers=[];
+let markers = {};
 
-let routeLine;
-
-
+let routeLine = null;
 
 
-// Create Map
+// ===============================
+// CREATE MAP
+// ===============================
 
 export function createMap(){
 
 
 if(!document.getElementById("map")){
 
-return;
+return null;
 
 }
 
 
 
-map = L.map("map").setView(
+map = L.map("map")
 
-[26.9124,75.7873],
+.setView(
+
+[30.7333,76.7794],
 
 13
 
@@ -38,15 +40,19 @@ map = L.map("map").setView(
 
 L.tileLayer(
 
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
 {
+
+maxZoom:19,
 
 attribution:"© OpenStreetMap"
 
 }
 
-).addTo(map);
+)
+
+.addTo(map);
 
 
 
@@ -59,39 +65,55 @@ return map;
 
 
 
-// Clear Old Markers
+// ===============================
+// REMOVE OBJECTS
+// ===============================
 
 
-function clearMarkers(){
+export function clearMap(){
 
 
-markers.forEach((m)=>{
+Object.values(markers).forEach(marker=>{
 
 
-map.removeLayer(m);
+if(marker){
+
+map.removeLayer(marker);
+
+}
 
 
 });
 
 
-markers=[];
+markers={};
+
 
 
 if(routeLine){
 
+
 map.removeLayer(routeLine);
 
-}
+
+routeLine=null;
 
 
 }
 
 
 
+}
 
 
 
-// Show Ride On Map
+
+
+
+
+// ===============================
+// SHOW PICKUP DROP
+// ===============================
 
 
 export function showRide(
@@ -108,12 +130,16 @@ distance
 
 
 
-clearMarkers();
+if(!map)
+return;
 
 
 
+clearMap();
 
-let pickupMarker = L.marker(
+
+
+markers.pickup = L.marker(
 
 pickup
 
@@ -123,14 +149,15 @@ pickup
 
 .bindPopup(
 
-"📍 Pickup<br>💰 ₹"+fare
+"📍 Pickup<br>₹"+fare
 
 );
 
 
 
 
-let dropMarker = L.marker(
+
+markers.drop = L.marker(
 
 drop
 
@@ -140,19 +167,7 @@ drop
 
 .bindPopup(
 
-"🏁 Drop<br>📏 "+distance+" km"
-
-);
-
-
-
-
-
-markers.push(
-
-pickupMarker,
-
-dropMarker
+"🏁 Drop<br>"+distance+" KM"
 
 );
 
@@ -168,7 +183,230 @@ pickup,
 
 drop
 
-]
+],
+
+{
+
+weight:5
+
+}
+
+)
+
+.addTo(map);
+
+
+
+
+map.fitBounds(
+
+routeLine.getBounds()
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// CUSTOMER LOCATION
+// ===============================
+
+
+export function showCustomerLocation(
+
+lat,
+
+lng
+
+){
+
+
+
+if(!map)
+return;
+
+
+
+
+if(markers.customer){
+
+
+markers.customer.setLatLng(
+
+[lat,lng]
+
+);
+
+
+}
+
+else{
+
+
+markers.customer = L.marker(
+
+[lat,lng]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"👤 Customer"
+
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// LIVE RIDER LOCATION
+// ===============================
+
+
+export function showRiderLocation(
+
+lat,
+
+lng
+
+){
+
+
+
+if(!map)
+return;
+
+
+
+if(markers.rider){
+
+
+markers.rider.setLatLng(
+
+[lat,lng]
+
+);
+
+
+}
+
+else{
+
+
+markers.rider = L.marker(
+
+[lat,lng],
+
+{
+
+
+icon:L.icon({
+
+
+iconUrl:
+
+"https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
+
+
+iconSize:
+
+[45,45]
+
+
+
+})
+
+
+}
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"🏍 Rider"
+
+);
+
+
+}
+
+
+
+map.panTo(
+
+[lat,lng]
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+// ===============================
+// DRAW LIVE ROUTE
+// ===============================
+
+
+export function drawRoute(
+
+points
+
+){
+
+
+
+if(!map)
+return;
+
+
+
+if(routeLine){
+
+
+map.removeLayer(routeLine);
+
+
+}
+
+
+
+
+routeLine = L.polyline(
+
+points,
+
+{
+
+weight:5
+
+}
 
 )
 
@@ -191,48 +429,6 @@ routeLine.getBounds()
 
 
 
-// Rider Current Location
-
-
-export function showRiderLocation(
-
-lat,
-
-lng
-
-){
-
-
-
-let rider = L.marker(
-
-[lat,lng],
-
-{
-
-icon:L.icon({
-
-iconUrl:
-"https://cdn-icons-png.flaticon.com/512/3448/3448339.png",
-
-iconSize:[40,40]
-
-})
-
-}
-
-)
-
-.addTo(map);
-
-
-
-rider.bindPopup(
-
-"🏍 Rider"
-
+console.log(
+"RiderX Live Map System Loaded"
 );
-
-
-
-}
