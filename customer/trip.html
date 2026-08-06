@@ -1,17 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RiderX Trip</title>
+
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+text-align:center;
+padding:30px;
+
+}
 
 
-<title>Track Trip</title>
+.box{
+
+background:#111;
+padding:25px;
+border-radius:20px;
+border:2px solid #FFD600;
+
+}
 
 
-<link rel="stylesheet" href="../css/style.css">
+h1 span{
+
+color:#FFD600;
+
+}
+
+
+.otp{
+
+font-size:40px;
+color:#FFD600;
+margin:30px;
+
+}
+
+
+button{
+
+padding:15px;
+width:100%;
+border:none;
+border-radius:12px;
+background:#FFD600;
+font-weight:bold;
+
+}
+
+</style>
 
 </head>
 
@@ -19,39 +66,40 @@
 <body>
 
 
-<div class="splash">
-
-
-<img src="../assets/logo.png" class="logo">
+<div class="box">
 
 
 <h1>
-Rider<span>X</span>
+RIDER<span>X</span>
 </h1>
 
 
 <h2>
-Your Trip
+
+Your Ride OTP
 
 </h2>
 
 
-<div id="tripStatus">
 
-Waiting...
+<div class="otp" id="otp">
+
+----
 
 </div>
 
 
+<p>
 
-<h3 id="rating">
+Share this OTP with your rider after arrival
 
-</h3>
+</p>
 
 
-<button onclick="giveRating()">
 
-⭐ Rate Rider
+<button onclick="goTracking()">
+
+Open Tracking
 
 </button>
 
@@ -59,7 +107,82 @@ Waiting...
 </div>
 
 
-<script type="module" src="../js/trip.js"></script>
+
+
+
+<script type="module">
+
+
+import { db } from "../firebase/config.js";
+
+
+import {
+
+doc,
+updateDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+let otp =
+Math.floor(
+
+1000 + Math.random()*9000
+
+);
+
+
+
+document.getElementById("otp").innerHTML=otp;
+
+
+
+
+let rideId =
+localStorage.getItem("rideId");
+
+
+
+if(rideId){
+
+
+await updateDoc(
+
+doc(db,"rides",rideId),
+
+{
+
+
+otp:otp,
+
+status:"OTP_PENDING"
+
+
+}
+
+);
+
+
+}
+
+
+
+
+
+window.goTracking=()=>{
+
+location.href="live-tracking.html";
+
+};
+
+
+
+</script>
+
 
 
 </body>
