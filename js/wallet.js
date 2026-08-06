@@ -1,70 +1,141 @@
-// =================================
-// RiderX Wallet System
-// =================================
-
-
-import { db } from "../firebase/config.js";
+// =====================================
+// RiderX Customer Wallet System
+// =====================================
 
 
 import {
 
+db,
+auth
+
+}
+
+from "../firebase/config.js";
+
+
+
+import {
+
+
+doc,
+
+getDoc,
+
 collection,
-getDocs,
+
 query,
-where
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+where,
 
-
-
+onSnapshot
 
 
-// Get Rider Earnings
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-export async function getWalletBalance(){
+
+
+
+const balanceBox =
+
+document.querySelector(".balance");
+
+
+
+const transactionBox =
+
+document.querySelector(".card .transaction");
+
+
+
+
+
+
+
+
+// =====================================
+// LOAD WALLET
+// =====================================
+
+
+
+async function loadWallet(){
+
+
+
+const user = auth.currentUser;
+
+
+
+if(!user){
+
+return;
+
+}
+
+
 
 
 try{
 
 
-const q = query(
 
-collection(db,"rides"),
+const walletRef =
 
-where("status","==","Completed")
+doc(
+
+db,
+
+"wallets",
+
+user.uid
 
 );
 
 
 
-const snapshot = await getDocs(q);
+const walletSnap =
+
+await getDoc(walletRef);
 
 
 
-let total = 0;
+
+
+if(walletSnap.exists()){
+
+
+let data = walletSnap.data();
 
 
 
-snapshot.forEach((ride)=>{
+balanceBox.innerHTML =
 
+"₹"+(data.balance || 0);
 
-let data = ride.data();
-
-
-
-total += Number(data.fare || 0);
-
-
-
-});
-
-
-
-return total;
 
 
 }
+
+else{
+
+
+balanceBox.innerHTML =
+
+"₹0";
+
+
+}
+
+
+
+}
+
+
 
 catch(error){
 
@@ -72,10 +143,152 @@ catch(error){
 console.log(error);
 
 
-return 0;
+}
+
 
 
 }
 
 
+
+
+
+
+
+
+
+// =====================================
+// LOAD TRANSACTIONS
+// =====================================
+
+
+
+function loadTransactions(){
+
+
+
+const user = auth.currentUser;
+
+
+
+if(!user){
+
+return;
+
 }
+
+
+
+
+
+const q = query(
+
+collection(
+db,
+"transactions"
+),
+
+
+where(
+"userId",
+"==",
+user.uid
+)
+
+
+);
+
+
+
+
+
+
+
+onSnapshot(q,(snapshot)=>{
+
+
+
+if(snapshot.empty){
+
+
+
+transactionBox.innerHTML =
+
+"No transactions yet";
+
+return;
+
+
+}
+
+
+
+
+
+transactionBox.innerHTML="";
+
+
+
+
+
+snapshot.forEach(doc=>{
+
+
+
+const t = doc.data();
+
+
+
+
+
+transactionBox.innerHTML +=
+
+
+
+`
+
+<div class="transaction">
+
+
+${t.type || "Transaction"}
+
+
+<br>
+
+
+₹${t.amount || 0}
+
+
+</div>
+
+
+`;
+
+
+
+});
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+auth.onAuthStateChanged(()=>{
+
+
+loadWallet();
+
+
+loadTransactions();
+
+
+});
