@@ -6,39 +6,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Control</title>
+<title>RiderX Admin Settings</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
 
 <style>
 
 .box{
-background:#1d1d1d;
+
+background:#111;
 padding:20px;
-border-radius:15px;
+border-radius:20px;
 margin:15px 0;
+
 }
 
-input,textarea{
+
+input{
 
 width:100%;
 padding:12px;
 margin:8px 0;
-border-radius:8px;
+border-radius:10px;
 border:none;
 
 }
+
 
 button{
 
 width:100%;
 padding:14px;
-background:#ffcc00;
-border:0;
-border-radius:10px;
+background:#FFD600;
+border:none;
+border-radius:12px;
 font-weight:bold;
 
 }
+
+
+h3{
+
+color:#FFD600;
+
+}
+
 
 </style>
 
@@ -50,7 +63,7 @@ font-weight:bold;
 
 <div class="header">
 
-⚙️ RiderX Admin Control
+⚙️ RiderX Admin Settings
 
 </div>
 
@@ -61,45 +74,22 @@ font-weight:bold;
 <div class="box">
 
 
-<h3>📱 App Customization</h3>
-
-
-<input id="appName" placeholder="App Name">
-
-
-<input id="logo" placeholder="Logo Image URL">
-
-
-<textarea id="banner" placeholder="Banner Message"></textarea>
-
-
-
-
 <h3>💰 Fare Settings</h3>
 
 
-<input id="bikeBase" placeholder="Bike Base Fare">
+<input id="bike" placeholder="Bike ₹ Per KM">
 
 
-<input id="bikeKm" placeholder="Bike Per KM">
+<input id="cab" placeholder="Cab ₹ Per KM">
 
 
-<input id="cabBase" placeholder="Cab Base Fare">
+<input id="parcel" placeholder="Parcel Charge">
 
 
-<input id="cabKm" placeholder="Cab Per KM">
+<input id="food" placeholder="Food Charge">
 
 
-
-
-<h3>🎁 Coupon</h3>
-
-
-<input id="coupon" placeholder="Coupon Code">
-
-
-<input id="discount" placeholder="Discount %">
-
+<input id="night" placeholder="Night Extra Charge">
 
 
 
@@ -107,41 +97,60 @@ font-weight:bold;
 
 
 <label>
-<input type="checkbox" id="bike">
+
+<input type="checkbox" id="bikeService">
+
 🏍 Bike Taxi
+
 </label>
+
 
 <br>
 
+
 <label>
-<input type="checkbox" id="cab">
+
+<input type="checkbox" id="cabService">
+
 🚕 Cab
+
 </label>
+
 
 <br>
 
+
 <label>
-<input type="checkbox" id="parcel">
+
+<input type="checkbox" id="parcelService">
+
 📦 Parcel
+
 </label>
+
 
 <br>
 
+
 <label>
-<input type="checkbox" id="food">
+
+<input type="checkbox" id="foodService">
+
 🍔 Food
+
 </label>
 
 
 
-<br><br>
+<button id="save">
 
-
-<button onclick="saveSettings()">
-
-Save All Settings
+Save Settings
 
 </button>
+
+
+
+<p id="msg"></p>
 
 
 
@@ -164,8 +173,8 @@ import {db} from "../firebase/config.js";
 import {
 
 doc,
-setDoc,
-getDoc
+getDoc,
+setDoc
 
 }
 
@@ -177,58 +186,42 @@ from
 
 
 
+let fareRef =
+doc(db,"settings","fare");
+
+
+let serviceRef =
+doc(db,"settings","services");
+
+
+
+
+
 
 async function load(){
 
 
-let snap=await getDoc(
 
-doc(db,"settings","app")
-
-);
+let fare =
+await getDoc(fareRef);
 
 
 
-if(snap.exists()){
+if(fare.exists()){
 
 
-let d=snap.data();
+let d=fare.data();
 
 
-appName.value=d.appName || "";
+bike.value=d.bike || 8;
 
-logo.value=d.logo || "";
+cab.value=d.cab || 15;
 
-banner.value=d.banner || "";
+parcel.value=d.parcel || 80;
 
+food.value=d.food || 60;
 
-bikeBase.value=d.bikeBase || "";
-
-bikeKm.value=d.bikeKm || "";
-
-cabBase.value=d.cabBase || "";
-
-cabKm.value=d.cabKm || "";
-
-
-coupon.value=d.coupon || "";
-
-discount.value=d.discount || "";
-
-
-
-bike.checked=d.bike ?? true;
-
-cab.checked=d.cab ?? true;
-
-parcel.checked=d.parcel ?? true;
-
-food.checked=d.food ?? true;
-
-
-
-}
-
+night.value=d.night || 3;
 
 
 }
@@ -237,61 +230,54 @@ food.checked=d.food ?? true;
 
 
 
+let services =
+await getDoc(serviceRef);
 
 
-window.saveSettings=async function(){
+
+if(services.exists()){
+
+
+let d=services.data();
+
+
+bikeService.checked=d.bike ?? true;
+
+cabService.checked=d.cab ?? true;
+
+parcelService.checked=d.parcel ?? true;
+
+foodService.checked=d.food ?? true;
+
+
+}
+
+
+}
+
+
+
+
+save.onclick=async()=>{
 
 
 
 await setDoc(
 
-doc(db,"settings","app"),
+fareRef,
 
 {
 
 
-appName:appName.value,
+bike:Number(bike.value),
 
+cab:Number(cab.value),
 
-logo:logo.value,
+parcel:Number(parcel.value),
 
+food:Number(food.value),
 
-banner:banner.value,
-
-
-
-bikeBase:Number(bikeBase.value),
-
-
-bikeKm:Number(bikeKm.value),
-
-
-
-cabBase:Number(cabBase.value),
-
-
-cabKm:Number(cabKm.value),
-
-
-
-coupon:coupon.value,
-
-
-discount:Number(discount.value),
-
-
-
-bike:bike.checked,
-
-
-cab:cab.checked,
-
-
-parcel:parcel.checked,
-
-
-food:food.checked
-
+night:Number(night.value)
 
 
 }
@@ -300,10 +286,34 @@ food:food.checked
 
 
 
-alert("Admin Settings Saved ✅");
+
+
+await setDoc(
+
+serviceRef,
+
+{
+
+
+bike:bikeService.checked,
+
+cab:cabService.checked,
+
+parcel:parcelService.checked,
+
+food:foodService.checked
 
 
 }
+
+);
+
+
+
+msg.innerHTML="Settings Updated ✅";
+
+
+};
 
 
 
