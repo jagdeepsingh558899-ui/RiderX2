@@ -52,7 +52,17 @@ font-weight:bold;
 
 
 <div class="container">
+<div class="card">
 
+<h3>
+📢 Notifications
+</h3>
+
+<div id="notifications">
+Loading...
+</div>
+
+</div>
 
 <div class="card">
 
@@ -122,7 +132,35 @@ Go Online
 import {auth,db} from "../firebase/config.js";
 
 
-import {
+import {async function loadNotifications(){
+
+let snap = await getDocs(
+collection(db,"notifications")
+);
+
+
+let box=document.getElementById("notifications");
+
+box.innerHTML="";
+
+
+snap.forEach((n)=>{
+
+box.innerHTML += `
+
+<p>
+📢 ${n.data().message}
+</p>
+
+`;
+
+});
+
+
+}
+
+
+loadNotifications();
 
 doc,
 getDoc,
