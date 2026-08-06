@@ -9,34 +9,45 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 
 <style>
+
+:root{
+--yellow:#FFE500;
+--black:#080808;
+--card:#151515;
+--gray:#999;
+}
+
 
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Poppins,sans-serif;
+font-family:'Poppins',sans-serif;
 }
 
 
 body{
 
-background:#080808;
+background:var(--black);
 color:white;
 min-height:100vh;
+padding-bottom:80px;
 
 }
 
 
+
 .header{
 
+height:70px;
 display:flex;
 align-items:center;
 justify-content:space-between;
-padding:20px;
+padding:0 20px;
 
 }
 
@@ -50,14 +61,15 @@ font-weight:800;
 
 .logo span{
 
-color:#ffe500;
+color:var(--yellow);
 
 }
 
 
+
 .back{
 
-color:#ffe500;
+color:var(--yellow);
 font-size:22px;
 
 }
@@ -72,12 +84,19 @@ padding:20px;
 
 
 
-.profile-card{
+.card{
 
-background:#151515;
-border:1px solid rgba(255,229,0,.2);
-border-radius:20px;
+background:var(--card);
+border:1px solid rgba(255,229,0,.25);
+border-radius:22px;
 padding:25px;
+
+}
+
+
+
+.profile-top{
+
 text-align:center;
 
 }
@@ -86,39 +105,33 @@ text-align:center;
 
 .profile-img{
 
-width:110px;
 height:110px;
+width:110px;
 border-radius:50%;
 object-fit:cover;
-border:3px solid #ffe500;
+border:3px solid var(--yellow);
 
 }
 
 
 
-.upload{
+.upload-btn{
 
+display:inline-block;
 margin-top:15px;
-
-}
-
-
-
-.upload input{
-
-display:none;
-
-}
-
-
-.upload label{
-
-background:#ffe500;
+background:var(--yellow);
 color:#000;
 padding:10px 20px;
-border-radius:10px;
+border-radius:12px;
+font-weight:700;
 cursor:pointer;
-font-weight:600;
+
+}
+
+
+#photo{
+
+display:none;
 
 }
 
@@ -126,54 +139,56 @@ font-weight:600;
 
 .form{
 
-margin-top:25px;
+margin-top:30px;
 
 }
 
 
 
-.input{
+.field{
 
-margin-bottom:15px;
+margin-bottom:18px;
 
 }
 
 
 
-label{
+.field label{
 
 display:block;
 color:#aaa;
 font-size:14px;
-margin-bottom:5px;
+margin-bottom:6px;
 
 }
 
 
 
-input{
+.field input{
 
 width:100%;
 padding:14px;
-border-radius:10px;
+background:#222;
 border:none;
 outline:none;
-background:#222;
+border-radius:12px;
 color:white;
 
 }
 
 
 
-button{
+.btn{
 
 width:100%;
+padding:15px;
 margin-top:15px;
-padding:14px;
 border:none;
 border-radius:12px;
-background:#ffe500;
+background:var(--yellow);
+color:#000;
 font-weight:700;
+font-size:16px;
 cursor:pointer;
 
 }
@@ -194,12 +209,13 @@ color:white;
 position:fixed;
 bottom:0;
 left:0;
-width:100%;
+right:0;
 height:70px;
 background:#111;
 display:flex;
 justify-content:space-around;
 align-items:center;
+border-top:1px solid #222;
 
 }
 
@@ -207,7 +223,7 @@ align-items:center;
 
 .nav a{
 
-color:#aaa;
+color:#777;
 text-decoration:none;
 font-size:12px;
 text-align:center;
@@ -215,18 +231,20 @@ text-align:center;
 }
 
 
+
 .nav i{
 
-font-size:20px;
 display:block;
-margin-bottom:5px;
+font-size:20px;
+margin-bottom:4px;
 
 }
 
 
+
 .active{
 
-color:#ffe500!important;
+color:var(--yellow)!important;
 
 }
 
@@ -239,9 +257,9 @@ color:#ffe500!important;
 <body>
 
 
-<div class="header">
+<header class="header">
 
-<a href="home.html" class="back">
+<a class="back" href="home.html">
 <i class="fa-solid fa-arrow-left"></i>
 </a>
 
@@ -251,30 +269,41 @@ RIDER<span>X</span>
 </div>
 
 
-</div>
+<div></div>
 
+</header>
 
 
 
 <div class="container">
 
 
-<div class="profile-card">
+<div class="card">
+
+
+<div class="profile-top">
 
 
 <img id="profileImage"
-src="https://via.placeholder.com/150"
+src="../assets/Images/profile.png"
+onerror="this.src='https://via.placeholder.com/150'"
 class="profile-img">
 
 
-<div class="upload">
 
-<label for="photo">
+<br>
+
+
+<label class="upload-btn" for="photo">
+
 <i class="fa fa-camera"></i>
 Change Photo
+
 </label>
 
+
 <input type="file" id="photo" accept="image/*">
+
 
 </div>
 
@@ -283,17 +312,17 @@ Change Photo
 <div class="form">
 
 
-<div class="input">
+<div class="field">
 
-<label>Name</label>
+<label>Full Name</label>
 
-<input id="name" type="text">
+<input id="name" type="text" placeholder="Your Name">
 
 </div>
 
 
 
-<div class="input">
+<div class="field">
 
 <label>Email</label>
 
@@ -303,7 +332,7 @@ Change Photo
 
 
 
-<div class="input">
+<div class="field">
 
 <label>Mobile Number</label>
 
@@ -313,7 +342,7 @@ Change Photo
 
 
 
-<button onclick="saveProfile()">
+<button class="btn" onclick="updateProfile()">
 
 Save Profile
 
@@ -321,69 +350,32 @@ Save Profile
 
 
 
-<button class="logout" onclick="logout()">
+<button class="btn logout" onclick="logout()">
 
 Logout
 
 </button>
 
 
-
-</div>
-
-
-
 </div>
 
 
 </div>
 
 
-
-
-
-<div class="nav">
-
-
-<a href="home.html">
-<i class="fa fa-home"></i>
-Home
-</a>
-
-
-
-<a href="booking.html">
-<i class="fa fa-motorcycle"></i>
-Book
-</a>
-
-
-
-<a href="history.html">
-<i class="fa fa-clock"></i>
-History
-</a>
-
-
-
-<a class="active" href="profile.html">
-<i class="fa fa-user"></i>
-Profile
-</a>
-
-
-
 </div>
 
 
-
-
+<!-- Part 2 continues -->
+  <!-- Firebase -->
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
 
 
 <script src="../firebase/firebase-config.js"></script>
@@ -393,54 +385,63 @@ Profile
 <script>
 
 
-const auth=firebase.auth();
+const auth = firebase.auth();
 
-const db=firebase.firestore();
+const db = firebase.firestore();
 
+const storage = firebase.storage();
 
 
 let currentUser=null;
 
+let selectedPhoto=null;
 
+
+
+// Load Profile
 
 auth.onAuthStateChanged(async(user)=>{
 
 
 if(!user){
 
-location.href="../auth/login.html";
+window.location.href="../auth/login.html";
 
 return;
 
 }
 
 
+
 currentUser=user;
 
 
 
-document.getElementById("email").value=user.email;
+document.getElementById("email").value=user.email || "";
 
 
 
-const doc=await db.collection("customers")
+const snap = await db.collection("customers")
 .doc(user.uid)
 .get();
 
 
 
-if(doc.exists){
+if(snap.exists){
 
 
-const data=doc.data();
+const data=snap.data();
 
 
-document.getElementById("name").value=
+
+document.getElementById("name").value =
 data.fullName || data.name || "";
 
 
-document.getElementById("phone").value=
+
+document.getElementById("phone").value =
 data.mobileNumber || data.phone || "";
+
 
 
 if(data.photoURL){
@@ -453,31 +454,112 @@ document.getElementById("profileImage").src=data.photoURL;
 }
 
 
+});
+
+
+
+
+// Select Image
+
+document.getElementById("photo")
+.addEventListener("change",(e)=>{
+
+
+selectedPhoto=e.target.files[0];
+
+
+
+if(selectedPhoto){
+
+
+const reader=new FileReader();
+
+
+
+reader.onload=function(){
+
+document.getElementById("profileImage").src=
+reader.result;
+
+
+}
+
+
+
+reader.readAsDataURL(selectedPhoto);
+
+
+}
+
+
 
 });
 
 
 
 
+// Update Profile
 
-async function saveProfile(){
+async function updateProfile(){
 
 
 try{
 
 
-await db.collection("customers")
-.doc(currentUser.uid)
-.update({
+let photoURL="";
+
+
+
+if(selectedPhoto){
+
+
+const ref =
+storage.ref(
+"customers/profile/"+currentUser.uid
+);
+
+
+
+await ref.put(selectedPhoto);
+
+
+
+photoURL=
+await ref.getDownloadURL();
+
+
+
+}
+
+
+
+let updateData={
+
 
 fullName:
-document.getElementById("name").value,
+document.getElementById("name").value.trim(),
+
 
 mobileNumber:
-document.getElementById("phone").value
+document.getElementById("phone").value.trim()
 
 
-});
+};
+
+
+
+if(photoURL){
+
+updateData.photoURL=photoURL;
+
+}
+
+
+
+await db.collection("customers")
+.doc(currentUser.uid)
+.update(updateData);
+
 
 
 alert("Profile Updated Successfully");
@@ -486,9 +568,11 @@ alert("Profile Updated Successfully");
 }
 
 
-catch(e){
 
-alert(e.message);
+catch(error){
+
+alert(error.message);
+
 
 }
 
@@ -497,22 +581,85 @@ alert(e.message);
 
 
 
+
+// Logout
 
 async function logout(){
 
 
 await auth.signOut();
 
-location.href="../auth/login.html";
+
+window.location.href="../auth/login.html";
 
 
 }
 
 
 
-
 </script>
 
 
+
+
+
+<!-- Bottom Navigation -->
+
+<div class="nav">
+
+
+<a href="home.html">
+
+<i class="fa fa-home"></i>
+
+Home
+
+</a>
+
+
+
+<a href="booking.html">
+
+<i class="fa fa-motorcycle"></i>
+
+Book
+
+</a>
+
+
+
+<a href="history.html">
+
+<i class="fa fa-clock"></i>
+
+History
+
+</a>
+
+
+
+<a href="wallet.html">
+
+<i class="fa fa-wallet"></i>
+
+Wallet
+
+</a>
+
+
+
+<a class="active" href="profile.html">
+
+<i class="fa fa-user"></i>
+
+Profile
+
+</a>
+
+
+</div>
+
+
 </body>
+
 </html>
