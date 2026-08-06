@@ -4,328 +4,285 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Login</title>
 
+
 <link rel="stylesheet" href="../css/style.css">
+
 
 <style>
 
 body{
+
 background:#000;
+
+color:white;
+
+font-family:Arial,sans-serif;
+
 display:flex;
+
 justify-content:center;
+
 align-items:center;
-min-height:100vh;
-padding:20px;
+
+height:100vh;
+
 }
+
 
 .login-box{
-width:100%;
-max-width:420px;
+
+width:90%;
+
+max-width:400px;
+
 background:#111;
-border:2px solid #FFD600;
+
+padding:30px;
+
 border-radius:25px;
-padding:30px 25px;
-box-shadow:0 0 30px rgba(255,214,0,.15);
-animation:zoomIn .8s;
+
+box-shadow:0 0 25px #FFD600;
+
+text-align:center;
+
 }
+
 
 .logo{
-text-align:center;
-margin-bottom:25px;
+
+width:90px;
+
 }
 
-.logo img{
-width:95px;
-height:95px;
-margin-bottom:15px;
-}
 
-.logo h1{
+h1{
+
 color:#FFD600;
-font-size:38px;
+
 }
 
-.logo span{
-color:#fff;
-}
 
-.logo p{
-color:#aaa;
-margin-top:8px;
-}
+input{
 
-.input-box{
-margin-top:18px;
-}
-
-.input-box label{
-display:block;
-margin-bottom:8px;
-color:#FFD600;
-}
-
-.input-box input{
 width:100%;
-height:55px;
-background:#222;
+
+padding:15px;
+
+margin:10px 0;
+
 border:none;
-border-radius:15px;
-padding:0 15px;
-color:#fff;
+
+border-radius:12px;
+
+background:#222;
+
+color:white;
+
 font-size:16px;
-outline:none;
+
 }
 
-.input-box input::placeholder{
-color:#888;
-}
+
 
 button{
+
 width:100%;
-height:55px;
-margin-top:28px;
-background:#FFD600;
-color:#111;
-font-size:18px;
-font-weight:bold;
+
+padding:15px;
+
+margin-top:15px;
+
 border:none;
-border-radius:15px;
-cursor:pointer;
-transition:.3s;
-}
 
-button:hover{
-opacity:.9;
-}
+border-radius:12px;
 
-button:active{
-transform:scale(.97);
-}
+background:#FFD600;
 
-#msg{
-margin-top:18px;
-text-align:center;
-color:#ff4d4d;
-font-size:14px;
-min-height:20px;
-}
-
-.bottom{
-margin-top:25px;
-text-align:center;
-color:#ccc;
-}
-
-.bottom a{
-color:#FFD600;
-text-decoration:none;
 font-weight:bold;
+
+font-size:16px;
+
+cursor:pointer;
+
 }
+
+
+
+.divider{
+
+margin:20px 0;
+
+color:#aaa;
+
+}
+
+
+
+.link{
+
+color:#FFD600;
+
+margin-top:15px;
+
+display:block;
+
+cursor:pointer;
+
+}
+
+
+
+.hidden{
+
+display:none;
+
+}
+
+
 
 </style>
 
 </head>
 
+
+
 <body>
+
+
 
 <div class="login-box">
 
-<div class="logo">
 
-<img src="../assets/logo.svg" alt="RiderX">
+<img src="../assets/logo.svg" class="logo">
 
-<h1>Rider<span>X</span></h1>
 
-<p>Welcome Back</p>
+<h1>RiderX</h1>
+
+
+<h3 id="title">
+Login
+</h3>
+
+
+
+
+<!-- Phone Login -->
+
+
+<div id="phoneSection">
+
+
+<input 
+type="tel"
+id="phone"
+placeholder="+91 Mobile Number">
+
+
+<button id="sendOtp">
+
+Send OTP
+
+</button>
+
+
+
+<input 
+class="hidden"
+type="text"
+id="otp"
+placeholder="Enter OTP">
+
+
+<button 
+class="hidden"
+id="verifyOtp">
+
+Verify OTP
+
+</button>
+
 
 </div>
 
-<div class="input-box">
 
-<label>Email</label>
+
+
+
+<div class="divider">
+
+OR
+
+</div>
+
+
+
+
+
+<!-- Email Login -->
+
+
+<div id="emailSection">
+
 
 <input
 type="email"
 id="email"
-placeholder="Enter Email">
+placeholder="Email Address">
 
-</div>
 
-<div class="input-box">
-
-<label>Password</label>
 
 <input
 type="password"
 id="password"
-placeholder="Enter Password">
+placeholder="Password">
 
-</div>
 
-<button onclick="login()">
 
-LOGIN
+<button id="emailLogin">
+
+Login With Email
 
 </button>
 
-<p id="msg"></p>
 
-<div class="bottom">
+</div>
 
-Don't have an account?
 
-<a href="register.html">
 
-Register
+
+<a class="link"
+href="register.html">
+
+Create New Account
 
 </a>
 
-</div>
+
+
+<a class="link"
+id="forgot">
+
+Forgot Password?
+
+</a>
+
+
 
 </div>
 
-<script type="module">
 
-import { auth, db } from "../firebase/config.js";
 
-import {
-signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-import {
-doc,
-getDoc
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-window.login = async function(){
 
-const email=document.getElementById("email").value.trim();
+<script type="module" src="../js/auth.js"></script>
 
-const password=document.getElementById("password").value;
 
-const msg=document.getElementById("msg");
-
-msg.innerHTML="";
-
-if(email==="" || password===""){
-
-msg.innerHTML="Please fill all fields.";
-
-return;
-
-}
-
-try{
-
-const userCredential=
-
-await signInWithEmailAndPassword(
-
-auth,
-
-email,
-
-password
-
-);
-
-const userDoc=
-
-await getDoc(
-
-doc(db,"users",userCredential.user.uid)
-
-);
-
-if(!userDoc.exists()){
-
-msg.innerHTML="User data not found.";
-
-return;
-
-}
-
-const data=userDoc.data();
-  if(data.role==="admin"){
-
-window.location.href="../admin/dashboard.html";
-
-}
-
-else if(data.role==="rider"){
-
-window.location.href="../rider/dashboard.html";
-
-}
-
-else{
-
-window.location.href="../customer/dashboard.html";
-
-}
-
-}
-
-catch(error){
-
-switch(error.code){
-
-case "auth/invalid-credential":
-
-msg.innerHTML="Invalid Email or Password";
-
-break;
-
-case "auth/user-not-found":
-
-msg.innerHTML="User Not Found";
-
-break;
-
-case "auth/wrong-password":
-
-msg.innerHTML="Wrong Password";
-
-break;
-
-case "auth/invalid-email":
-
-msg.innerHTML="Invalid Email Address";
-
-break;
-
-case "auth/too-many-requests":
-
-msg.innerHTML="Too many attempts. Try again later.";
-
-break;
-
-default:
-
-msg.innerHTML=error.message;
-
-}
-
-}
-
-};
-
-document.getElementById("password")
-
-.addEventListener("keypress",(e)=>{
-
-if(e.key==="Enter"){
-
-login();
-
-}
-
-});
-
-</script>
 
 </body>
 
