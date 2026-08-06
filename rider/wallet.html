@@ -7,9 +7,93 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rider Wallet</title>
+<title>RiderX Wallet</title>
 
 <link rel="stylesheet" href="../css/style.css">
+
+
+<style>
+
+body{
+
+background:#000;
+color:white;
+font-family:Arial;
+
+}
+
+
+.header{
+
+background:#111;
+padding:20px;
+text-align:center;
+font-size:24px;
+font-weight:bold;
+border-bottom:2px solid #FFD600;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.wallet{
+
+background:#111;
+padding:25px;
+border-radius:20px;
+text-align:center;
+border:1px solid #333;
+
+}
+
+
+
+.balance{
+
+font-size:35px;
+color:#FFD600;
+font-weight:bold;
+margin:20px;
+
+}
+
+
+
+.card{
+
+background:#1d1d1d;
+padding:15px;
+margin-top:15px;
+border-radius:15px;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:15px;
+margin-top:15px;
+background:#FFD600;
+border:none;
+border-radius:12px;
+font-weight:bold;
+
+}
+
+
+
+</style>
+
 
 </head>
 
@@ -17,41 +101,295 @@
 <body>
 
 
-<div class="splash">
+
+<div class="header">
+
+💰 Rider Wallet
+
+</div>
 
 
-<img src="../assets/logo.png" class="logo">
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+
+<div class="container">
+
+
+<div class="wallet">
 
 
 <h2>
-My Wallet
+
+Available Balance
+
 </h2>
 
 
-<h3 id="balance">
 
-Balance: ₹0
+<div class="balance">
 
-</h3>
+₹<span id="balance">
+
+0
+
+</span>
+
+</div>
 
 
-<button onclick="history.back()">
 
-Back
+<button id="withdraw">
+
+Request Withdrawal
 
 </button>
+
+
+
+<p id="msg"></p>
+
 
 
 </div>
 
 
 
-<script type="module" src="../js/payment.js"></script>
+
+
+<div class="card">
+
+
+<h3>
+
+Ride Earnings
+
+</h3>
+
+
+
+<div id="history">
+
+Loading...
+
+</div>
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {auth,db} from "../firebase/config.js";
+
+
+import {
+
+collection,
+query,
+where,
+getDocs,
+addDoc,
+serverTimestamp
+
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+
+
+
+
+async function loadWallet(){
+
+
+
+let user=
+
+auth.currentUser;
+
+
+
+if(!user)
+
+return;
+
+
+
+
+
+let q=query(
+
+collection(db,"rides"),
+
+where(
+
+"riderId",
+
+"==",
+
+user.uid
+
+)
+
+);
+
+
+
+
+
+let snap=
+
+await getDocs(q);
+
+
+
+
+
+let total=0;
+
+
+
+let box=
+
+document.getElementById("history");
+
+
+
+box.innerHTML="";
+
+
+
+
+
+
+snap.forEach((ride)=>{
+
+
+let data=
+
+ride.data();
+
+
+
+
+
+if(data.status==="Completed"){
+
+
+
+total += Number(data.fare || 0);
+
+
+
+
+box.innerHTML +=
+
+`
+
+<div class="card">
+
+🏍 ${data.service}
+
+<br>
+
+💰 ₹${data.fare}
+
+<br>
+
+Status: Completed
+
+</div>
+
+`;
+
+
+
+}
+
+
+
+
+});
+
+
+
+
+
+document.getElementById("balance").innerHTML=
+
+total;
+
+
+
+}
+
+
+
+
+
+document.getElementById("withdraw").onclick=
+
+async()=>{
+
+
+let user=
+
+auth.currentUser;
+
+
+
+await addDoc(
+
+collection(db,"withdrawals"),
+
+{
+
+
+riderId:user.uid,
+
+
+status:"Pending",
+
+
+createdAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+document.getElementById("msg").innerHTML=
+
+"Withdrawal Request Sent ✅";
+
+
+};
+
+
+
+
+
+loadWallet();
+
+
+
+</script>
+
 
 
 </body>
