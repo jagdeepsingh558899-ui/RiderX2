@@ -3,41 +3,58 @@
 // Firebase Compat Version
 // =========================================
 
-
 console.log("RiderX Auth Loaded");
 
 
-// -----------------------------
-// Toast Message
-// -----------------------------
-
-function showToast(message, type="info") {
-
+// Toast
+function showToast(message, type = "info") {
     alert(message);
-
 }
 
 
-// -----------------------------
 // Loader
-// -----------------------------
-
-function showLoader(){
-    console.log("Loading...");
+function showLoader() {
+    console.log("RiderX Loading...");
 }
 
-function hideLoader(){
-    console.log("Loading Complete");
+function hideLoader() {
+    console.log("RiderX Loaded");
 }
 
 
-// -----------------------------
-// Register User
-// -----------------------------
+// Password Toggle
+function togglePasswordVisibility(id, icon) {
 
+    const input = document.getElementById(id);
+
+    if (!input) return;
+
+    if (input.type === "password") {
+        input.type = "text";
+
+        if(icon){
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        }
+
+    } else {
+
+        input.type = "password";
+
+        if(icon){
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+}
+
+
+// Register Customer / Rider
 async function registerUserAccount(data){
 
-    try{
+    try {
+
+        showLoader();
 
         const {
             role,
@@ -48,18 +65,15 @@ async function registerUserAccount(data){
         } = data;
 
 
-        showLoader();
-
-
-        const result = await firebase
-        .auth()
+        const userCredential =
+        await firebase.auth()
         .createUserWithEmailAndPassword(
             email,
             password
         );
 
 
-        const user = result.user;
+        const user = userCredential.user;
 
 
         await user.updateProfile({
@@ -71,12 +85,15 @@ async function registerUserAccount(data){
         const userData = {
 
             uid:user.uid,
-            name:fullName,
-            mobile:mobileNumber,
+
+            fullName:fullName,
+
+            mobileNumber:mobileNumber,
+
             email:email,
+
             role:role,
-            status: role==="rider" ? "Pending" : "Active",
-            adminApproved: role==="rider" ? false : true,
+
             createdAt:
             firebase.firestore.FieldValue.serverTimestamp()
 
@@ -84,7 +101,12 @@ async function registerUserAccount(data){
 
 
 
-        if(role==="rider"){
+        if(role === "rider"){
+
+
+            userData.status="Pending";
+            userData.adminApproved=false;
+
 
             await firebase.firestore()
             .collection("riders")
@@ -92,19 +114,25 @@ async function registerUserAccount(data){
             .set(userData);
 
 
+
             showToast(
-            "Rider application submitted. Waiting for approval"
+            "Rider registration completed. Waiting for approval"
             );
 
 
             setTimeout(()=>{
-                window.location.href="../rider/pending.html";
+
+                window.location.href =
+                "../rider/pending.html";
+
             },1500);
 
 
-        }
 
-        else{
+        } else {
+
+
+            userData.status="Active";
 
 
             await firebase.firestore()
@@ -115,25 +143,30 @@ async function registerUserAccount(data){
 
 
             showToast(
-            "Account created successfully"
+            "Customer account created successfully"
             );
 
 
             setTimeout(()=>{
-                window.location.href="../customer/Home.html";
+
+                window.location.href =
+                "../customer/Home.html";
+
             },1500);
 
         }
 
 
     }
+
     catch(error){
 
-        console.log(error);
+        console.error(error);
 
         showToast(error.message);
 
     }
+
     finally{
 
         hideLoader();
@@ -144,182 +177,274 @@ async function registerUserAccount(data){
 
 
 
-// -----------------------------
-// Login User
-// -----------------------------
-
+// Login
 async function loginUser(email,password){
 
-
-try{
-
-
-const result =
-await firebase.auth()
-.signInWithEmailAndPassword(
-email,
-password
-);
+    try{
 
 
+        const result =
+        await firebase.auth()
+        .signInWithEmailAndPassword(
+            email,
+            password
+        );
 
-const uid=result.user.uid;
+
+        const uid=result.user.uid;
 
 
 
-const customer =
-await firebase.firestore()
-.collection("customers")
-.doc(uid)
-.get();
+        const customer =
+        await firebase.firestore()
+        .collection("customers")
+        .doc(uid)
+        .get();
 
 
 
-if(customer.exists){
+        if(customer.exists){
 
-window.location.href="../customer/Home.html";
-return;
+            window.location.href =
+            "../customer/Home.html";
+
+            return;
+        }
+
+
+
+
+        const rider =
+        await firebase.firestore()
+        .collection("riders")
+        .doc(uid)
+        .get();
+
+
+
+        if(rider.exists){
+
+
+            const data=rider.data();
+
+
+            if(data.adminApproved){
+
+                window.location.href =
+                "../rider/Home.html";
+
+            }
+            else{
+
+                window.location.href =
+                "../rider/pending.html";
+
+            }
+
+            return;
+
+        }
+
+
+
+        window.location.href =
+        "../auth/register.html";
+
+
+    }
+
+    catch(error){
+
+        showToast(error.message);
+
+    }
 
 }
 
 
 
-const rider =
-await firebase.firestore()
-.collection("riders")
-.doc(uid)
-.get();
-
-
-
-if(rider.exists){
-
-
-if(rider.data().adminApproved){
-
-window.location.href="../rider/Home.html";
-
-}
-else{
-
-window.location.href="../rider/pending.html";
-
-}
-
-return;
-
-}
-
-
-
-window.location.href="../auth/register.html";
-
-
-
-}
-catch(error){
-
-showToast(error.message);
-
-}
-
-
-
-}
-
-
-
-// -----------------------------
 // Google Login
-// -----------------------------
 
 async function handleGoogleSignUp(){
 
-
-try{
-
-
-const provider =
-new firebase.auth.GoogleAuthProvider();
+    try{
 
 
-
-const result =
-await firebase.auth()
-.signInWithPopup(provider);
+        const provider =
+        new firebase.auth.GoogleAuthProvider();
 
 
 
-const user=result.user;
+        const result =
+        await firebase.auth()
+        .signInWithPopup(provider);
 
 
 
-await firebase.firestore()
-.collection("customers")
-.doc(user.uid)
-.set({
-
-uid:user.uid,
-name:user.displayName,
-email:user.email,
-role:"customer",
-createdAt:
-firebase.firestore.FieldValue.serverTimestamp()
-
-},{merge:true});
+        const user=result.user;
 
 
 
-window.location.href="../customer/Home.html";
+        await firebase.firestore()
+        .collection("customers")
+        .doc(user.uid)
+        .set({
+
+            uid:user.uid,
+
+            fullName:
+            user.displayName || "Customer",
+
+            email:user.email,
+
+            role:"customer",
+
+            createdAt:
+            firebase.firestore.FieldValue.serverTimestamp()
 
 
-}
-catch(error){
-
-showToast(error.message);
-
-}
+        },
+        {merge:true});
 
 
-}
+
+        window.location.href =
+        "../customer/Home.html";
 
 
-// -----------------------------
-// Password Toggle
-// -----------------------------
+    }
 
-function togglePasswordVisibility(id,icon){
+    catch(error){
 
-const input=document.getElementById(id);
+        showToast(error.message);
 
-
-if(input.type==="password"){
-
-input.type="text";
-
-}
-else{
-
-input.type="password";
-
-}
+    }
 
 }
 
 
-// Export Global Functions
 
-window.registerUserAccount =
-registerUserAccount;
+// OTP
 
-
-window.loginUser =
-loginUser;
+let confirmationResult = null;
 
 
-window.handleGoogleSignUp =
-handleGoogleSignUp;
+function openPhoneOTPModal(){
 
+    document.getElementById("otpModal").style.display="flex";
+
+
+    window.recaptchaVerifier =
+    new firebase.auth.RecaptchaVerifier(
+        "recaptcha-container",
+        {
+            size:"invisible"
+        }
+    );
+
+}
+
+
+
+async function requestOTP(){
+
+    const phone =
+    document.getElementById("otpPhoneNumber").value;
+
+
+
+    try{
+
+
+        confirmationResult =
+        await firebase.auth()
+        .signInWithPhoneNumber(
+            phone,
+            window.recaptchaVerifier
+        );
+
+
+
+        document.getElementById("otpInputGroup")
+        .style.display="block";
+
+
+        document.getElementById("sendOtpBtn")
+        .style.display="none";
+
+
+        document.getElementById("verifyOtpBtn")
+        .style.display="block";
+
+
+        showToast("OTP sent");
+
+
+    }
+
+    catch(error){
+
+        showToast(error.message);
+
+    }
+
+}
+
+
+
+async function verifyOTP(){
+
+    const code =
+    document.getElementById("otpCode").value;
+
+
+    try{
+
+        await confirmationResult.confirm(code);
+
+
+        window.location.href =
+        "../customer/Home.html";
+
+
+    }
+
+    catch(error){
+
+        showToast(error.message);
+
+    }
+
+}
+
+
+
+// Close OTP
+
+function closePhoneOTPModal(){
+
+    document.getElementById("otpModal")
+    .style.display="none";
+
+}
+
+
+
+// Make Functions Global
+
+window.registerUserAccount = registerUserAccount;
+
+window.loginUser = loginUser;
+
+window.handleGoogleSignUp = handleGoogleSignUp;
+
+window.openPhoneOTPModal = openPhoneOTPModal;
+
+window.requestOTP = requestOTP;
+
+window.verifyOTP = verifyOTP;
+
+window.closePhoneOTPModal = closePhoneOTPModal;
 
 window.togglePasswordVisibility =
 togglePasswordVisibility;
