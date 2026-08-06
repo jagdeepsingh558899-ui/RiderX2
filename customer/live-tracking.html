@@ -8,7 +8,6 @@
 
 <title>RiderX Live Tracking</title>
 
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 
@@ -36,16 +35,22 @@ font-weight:bold;
 }
 
 
-#map{
+.info{
 
-height:85vh;
-width:100%;
+padding:12px;
+background:#111;
 
 }
 
 
-</style>
+#map{
 
+height:80vh;
+width:100%;
+
+}
+
+</style>
 
 </head>
 
@@ -57,6 +62,13 @@ width:100%;
 <div class="header">
 
 🏍 Rider Coming...
+
+</div>
+
+
+<div class="info" id="status">
+
+Searching Rider...
 
 </div>
 
@@ -74,7 +86,7 @@ width:100%;
 <script type="module">
 
 
-import { db } from "../firebase/config.js";
+import {db} from "../firebase/config.js";
 
 
 import {
@@ -107,10 +119,9 @@ L.map("map").setView(
 
 
 
-
 L.tileLayer(
 
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+"https://tile.openstreetmap.org/{x}/{y}.png",
 
 {
 
@@ -124,20 +135,24 @@ maxZoom:19
 
 
 
-
 let riderMarker=null;
 
+let pickupMarker=null;
+
+let dropMarker=null;
+
+let route=null;
 
 
 
 
 
-async function trackRider(){
+
+async function loadRide(){
 
 
 
-const rideSnap =
-await getDoc(
+let snap = await getDoc(
 
 doc(db,"rides",rideId)
 
@@ -145,33 +160,129 @@ doc(db,"rides",rideId)
 
 
 
-if(!rideSnap.exists()){
+if(!snap.exists()) return;
 
-return;
+
+
+let data=snap.data();
+
+
+
+
+document.getElementById("status").innerHTML=
+
+`
+
+Status: ${data.status}
+
+<br>
+
+Service: ${data.service}
+
+`;
+
+
+
+
+
+let pickup=data.pickupCoords;
+
+let drop=data.dropCoords;
+
+
+
+
+if(pickup){
+
+
+pickupMarker=L.marker(
+
+[pickup.lat,pickup.lng]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"📍 Pickup"
+
+);
+
 
 }
 
 
 
-let ride =
-rideSnap.data();
+if(drop){
+
+
+dropMarker=L.marker(
+
+[drop.lat,drop.lng]
+
+)
+
+.addTo(map)
+
+.bindPopup(
+
+"🏁 Drop"
+
+);
 
 
 
-let riderId =
-ride.riderId;
+route=L.polyline(
+
+[
+
+[pickup.lat,pickup.lng],
+
+[drop.lat,drop.lng]
+
+]
+
+)
+
+.addTo(map);
 
 
 
+map.fitBounds(
 
-if(!riderId){
+route.getBounds()
 
-return;
+);
+
+
 
 }
 
 
 
+
+
+if(data.riderId){
+
+
+trackRider(data.riderId);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+function trackRider(riderId){
 
 
 
@@ -179,29 +290,16 @@ onSnapshot(
 
 doc(db,"riderLocations",riderId),
 
-(location)=>{
+(snap)=>{
 
 
-if(!location.exists()){
 
-return;
-
-}
+if(!snap.exists()) return;
 
 
 
 
-let data =
-location.data();
-
-
-
-let lat =
-data.lat;
-
-
-let lng =
-data.lng;
+let data=snap.data();
 
 
 
@@ -210,11 +308,13 @@ data.lng;
 if(riderMarker){
 
 
+
 riderMarker.setLatLng(
 
-[lat,lng]
+[data.lat,data.lng]
 
 );
+
 
 
 }
@@ -222,9 +322,9 @@ riderMarker.setLatLng(
 else{
 
 
-riderMarker = L.marker(
+riderMarker=L.marker(
 
-[lat,lng]
+[data.lat,data.lng]
 
 )
 
@@ -245,17 +345,10 @@ riderMarker = L.marker(
 
 
 
-map.setView(
 
-[lat,lng],
+map.panTo(
 
-15
-
-);
-
-
-
-}
+[data.lat,data.lng]
 
 );
 
@@ -263,16 +356,68 @@ map.setView(
 
 }
 
+);
+
+
+
+}
 
 
 
 
-trackRider();
+
+
+
+onSnapshot(
+
+doc(db,"rides",rideId),
+
+(snap)=>{
+
+
+if(snap.exists()){
+
+
+let data=snap.data();
+
+
+document.getElementById("status").innerHTML=
+
+`
+
+Status: ${data.status}
+
+<br>
+
+Service: ${data.service}
+
+`;
+
+
+
+if(data.riderId){
+
+
+trackRider(data.riderId);
+
+
+}
+
+
+}
+
+
+
+});
+
+
+
+
+loadRide();
 
 
 
 </script>
-
 
 
 </body>
