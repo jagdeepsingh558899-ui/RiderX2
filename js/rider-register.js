@@ -1,6 +1,6 @@
-// =================================
+// =====================================
 // RiderX Rider Registration
-// =================================
+// =====================================
 
 
 import { auth, db } from "../firebase/config.js";
@@ -10,38 +10,97 @@ import {
 
 createUserWithEmailAndPassword
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+}
+
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 import {
 
 doc,
-setDoc
+setDoc,
+serverTimestamp
 
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+}
 
-
-
-
-
-
-// Register Rider
+from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-export async function registerRider(
 
-name,
-email,
-password,
-vehicle
 
-){
+
+const registerBtn =
+document.getElementById("registerBtn");
+
+
+const message =
+document.getElementById("message");
+
+
+
+registerBtn.onclick = async()=>{
+
+
+const name =
+document.getElementById("name").value.trim();
+
+
+const bike =
+document.getElementById("bike").value.trim();
+
+
+const number =
+document.getElementById("number").value.trim();
+
+
+const license =
+document.getElementById("license").value.trim();
+
+
+
+
+
+if(!name || !bike || !number || !license){
+
+message.innerHTML =
+"Please fill all details";
+
+return;
+
+}
+
+
+
+
+// Demo email/password for rider account
+// Later rider can login with own email
+
+
+let email =
+prompt("Enter Rider Email");
+
+
+let password =
+prompt("Create Password");
+
+
+
+
+if(!email || !password){
+
+return;
+
+}
+
+
+
 
 
 try{
 
 
-const user = await createUserWithEmailAndPassword(
+const result =
+await createUserWithEmailAndPassword(
 
 auth,
 
@@ -53,32 +112,36 @@ password
 
 
 
+const uid =
+result.user.uid;
+
+
+
+
+
 await setDoc(
 
-doc(
-
-db,
-
-"users",
-
-user.user.uid
-
-),
+doc(db,"riders",uid),
 
 {
 
 
 name:name,
 
-email:email,
 
-role:"rider",
+bike:bike,
 
-vehicle:vehicle,
 
-status:"Pending",
+vehicleNumber:number,
 
-createdAt:new Date()
+
+license:license,
+
+
+status:"offline",
+
+
+createdAt:serverTimestamp()
 
 
 }
@@ -87,7 +150,56 @@ createdAt:new Date()
 
 
 
-return true;
+
+
+await setDoc(
+
+doc(db,"users",uid),
+
+{
+
+
+role:"rider",
+
+
+name:name,
+
+
+email:email,
+
+
+createdAt:serverTimestamp()
+
+
+}
+
+);
+
+
+
+
+
+localStorage.setItem(
+
+"role",
+
+"rider"
+
+);
+
+
+
+
+
+alert(
+"Rider Account Created ✅"
+);
+
+
+
+window.location.href =
+"dashboard.html";
+
 
 
 }
@@ -95,13 +207,12 @@ return true;
 catch(error){
 
 
-console.log(error);
-
-
-return false;
-
-
-}
+message.innerHTML =
+error.message;
 
 
 }
+
+
+
+};
