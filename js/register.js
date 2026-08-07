@@ -1,7 +1,7 @@
 // =====================================
 // RiderX Register System
-// Customer + Rider
-// Firebase v10/v12 Compatible
+// Customer + Rider Fixed Version
+// Firebase v10 Compatible
 // =====================================
 
 
@@ -10,50 +10,38 @@ import {
 auth,
 db
 
-}
-
-from "../firebase/firebase-config.js";
-
+} from "../firebase/firebase-config.js";
 
 
 import {
 
 createUserWithEmailAndPassword
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 
 import {
 
 doc,
-setDoc
+setDoc,
+serverTimestamp
 
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
 
-// =====================================
-// ROLE SELECT
-// =====================================
-
+// Default Role
 
 let selectedRole = "customer";
 
 
 
+
+// Role Buttons
+
 const customerRole =
 document.getElementById("customerRole");
-
 
 
 const riderRole =
@@ -66,24 +54,23 @@ document.getElementById("riderRole");
 if(customerRole){
 
 
-customerRole.onclick = ()=>{
+customerRole.onclick=()=>{
 
 
-selectedRole = "customer";
+selectedRole="customer";
 
 
 customerRole.classList.add("active");
 
-if(riderRole){
 
+if(riderRole)
 riderRole.classList.remove("active");
-
-}
 
 
 };
 
 
+
 }
 
 
@@ -93,25 +80,23 @@ riderRole.classList.remove("active");
 if(riderRole){
 
 
-riderRole.onclick = ()=>{
+riderRole.onclick=()=>{
 
 
-selectedRole = "rider";
+selectedRole="rider";
 
 
 riderRole.classList.add("active");
 
 
-if(customerRole){
-
+if(customerRole)
 customerRole.classList.remove("active");
-
-}
 
 
 };
 
 
+
 }
 
 
@@ -119,9 +104,10 @@ customerRole.classList.remove("active");
 
 
 
-// =====================================
-// REGISTER
-// =====================================
+
+
+
+// Register Button
 
 
 const registerBtn =
@@ -135,7 +121,7 @@ if(registerBtn){
 
 
 
-registerBtn.onclick = async ()=>{
+registerBtn.onclick = async()=>{
 
 
 
@@ -155,7 +141,8 @@ document.getElementById("email").value.trim();
 
 
 const password =
-document.getElementById("password").value.trim();
+document.getElementById("password").value;
+
 
 
 
@@ -174,7 +161,9 @@ alert("Please fill all details");
 
 return;
 
+
 }
+
 
 
 
@@ -183,9 +172,8 @@ return;
 try{
 
 
-// Create Firebase Account
 
-const userCredential =
+const result =
 
 await createUserWithEmailAndPassword(
 
@@ -199,24 +187,16 @@ password
 
 
 
-const user = userCredential.user;
+const user = result.user;
 
 
 
 
 
-// Save User Data
-
-await setDoc(
-
-doc(
-db,
-"users",
-user.uid
-),
 
 
-{
+const userData = {
+
 
 
 uid:user.uid,
@@ -234,64 +214,100 @@ email:email,
 role:selectedRole,
 
 
-
-// Rider approval system
-
-approved:
-
-selectedRole === "rider"
-?
-false
-:
-true,
+createdAt:serverTimestamp()
 
 
 
-status:
-
-selectedRole === "rider"
-?
-"pending"
-:
-"active",
+};
 
 
 
-wallet:0,
 
 
-createdAt:new Date()
+
+
+// Rider Extra Data
+
+
+if(selectedRole==="rider"){
+
+
+
+userData.approved=false;
+
+
+userData.status="pending";
+
+
+userData.vehicleType="bike";
+
+
+userData.rating=5;
+
+
+userData.totalRides=0;
+
 
 
 }
 
 
+
+
+
+
+// Save Main User Collection
+
+
+await setDoc(
+
+doc(
+db,
+"users",
+user.uid
+),
+
+userData
+
 );
 
 
 
 
+
+
+
+
+// Also Save Role Collection
+
+
+
+if(selectedRole==="rider"){
+
+
+
+await setDoc(
+
+doc(
+db,
+"riders",
+user.uid
+),
+
+userData
+
+);
 
 
 
 alert(
-"Account Created Successfully"
+"Rider Account Created. Wait For Approval"
 );
 
 
 
+window.location.href="../rider/pending.html";
 
-
-
-
-// Redirect
-
-if(selectedRole === "rider"){
-
-
-window.location.href =
-
-"../rider/pending.html";
 
 
 }
@@ -299,9 +315,29 @@ window.location.href =
 else{
 
 
-window.location.href =
 
-"../customer/home.html";
+await setDoc(
+
+doc(
+db,
+"customers",
+user.uid
+),
+
+userData
+
+);
+
+
+
+alert(
+"Customer Account Created"
+);
+
+
+
+window.location.href="../customer/home.html";
+
 
 
 }
@@ -310,7 +346,10 @@ window.location.href =
 
 
 
+
 }
+
+
 
 catch(error){
 
@@ -319,13 +358,12 @@ catch(error){
 console.error(error);
 
 
-alert(
-error.message
-);
+alert(error.message);
 
 
 
 }
+
 
 
 
