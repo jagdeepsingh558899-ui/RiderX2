@@ -1,90 +1,510 @@
-// RiderX Customer Engine: Fare Calculation, Booking, & Realtime Tracking
-let map, pickupMarker, dropoffMarker;
+// RiderX Customer Engine
+// Map + GPS + Fare + Ride Booking
+// Firebase v10 Modular SDK
 
-const BASE_FARES = {
-  bike: { base: 20, perKm: 8 },
-  cab: { base: 50, perKm: 15 },
-  parcel: { base: 30, perKm: 10 },
-  food: { base: 25, perKm: 9 }
+
+import {
+
+auth,
+db,
+doc,
+addDoc,
+collection,
+serverTimestamp
+
+}
+
+from "../firebase/firebase-config.js";
+
+
+
+
+
+let map;
+let userMarker;
+
+let selectedService = "bike";
+
+
+
+
+
+
+const fares = {
+
+bike:{
+base:20,
+perKm:8
+},
+
+cab:{
+base:50,
+perKm:15
+},
+
+parcel:{
+base:30,
+perKm:10
+},
+
+food:{
+base:25,
+perKm:9
+}
+
 };
 
-function initCustomerMap() {
-  const defaultLoc = [28.6139, 77.2090]; // Default New Delhi
-  map = L.map('map').setView(defaultLoc, 13);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
+
+
+
+
+
+// ===============================
+// INIT MAP
+// ===============================
+
+
+function initMap(){
+
+
+if(!document.getElementById("map"))
+return;
+
+
+
+map = L.map("map").setView(
+[30.7333,76.7794],
+14
+);
+
+
+
+
+L.tileLayer(
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+
+maxZoom:19,
+attribution:"© OpenStreetMap"
+
 }
 
-function calculateFare(serviceType, distanceKm) {
-  const rate = BASE_FARES[serviceType] || BASE_FARES.bike;
-  const fare = rate.base + (rate.perKm * distanceKm);
-  return Math.round(fare);
+).addTo(map);
+
+
+
+
+startGPS();
+
+
 }
 
-async function requestRide(event) {
-  event.preventDefault();
-  const user = JSON.parse(localStorage.getItem('riderx_user'));
-  if (!user) {
-    alert('Please login first.');
-    window.location.href = '../auth/login.html';
-    return;
-  }
 
-  const pickup = document.getElementById('pickupLocation').value;
-  const dropoff = document.getElementById('dropoffLocation').value;
-  const serviceType = document.getElementById('serviceType').value;
-  const paymentMethod = document.getElementById('paymentMethod').value;
 
-  // Simulated 5km ride for calculation
-  const estimatedDist = 5.5; 
-  const estimatedFare = calculateFare(serviceType, estimatedDist);
 
-  const rideData = {
-    customerId: user.uid,
-    customerName: user.name || 'Customer',
-    pickupLocation: pickup,
-    dropoffLocation: dropoff,
-    serviceType: serviceType,
-    paymentMethod: paymentMethod,
-    fare: estimatedFare,
-    status: 'REQUESTED',
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
 
-  try {
-    const docRef = await db.collection('rides').add(rideData);
-    document.getElementById('bookingStatus').innerHTML = `
-      <div style="background: #222; border: 1px solid #ffcc00; padding: 15px; border-radius: 8px; margin-top: 15px; color: #fff;">
-        <h4 style="color: #ffcc00; margin: 0 0 8px 0;">Ride Requested!</h4>
-        <p>Ride ID: <b>${docRef.id}</b></p>
-        <p>Estimated Fare: <b>₹${estimatedFare}</b></p>
-        <p>Status: <span id="liveStatus" style="color: #00ff66;">Searching for Driver...</span></p>
-      </div>
-    `;
-    listenForRideUpdates(docRef.id);
-  } catch (err) {
-    alert('Failed to book ride: ' + err.message);
-  }
+
+
+
+
+// ===============================
+// GPS
+// ===============================
+
+
+function startGPS(){
+
+
+
+if(!navigator.geolocation){
+
+alert("GPS not supported");
+
+return;
+
 }
 
-function listenForRideUpdates(rideId) {
-  db.collection('rides').doc(rideId).onSnapshot((doc) => {
-    if (doc.exists) {
-      const ride = doc.data();
-      const statusElem = document.getElementById('liveStatus');
-      if (statusElem) {
-        statusElem.innerText = ride.status;
-        if (ride.status === 'ACCEPTED') {
-          statusElem.style.color = '#00e5ff';
-          alert('A driver has accepted your ride request!');
-        } else if (ride.status === 'COMPLETED') {
-          statusElem.style.color = '#00ff66';
-          alert('Ride completed! Thank you for riding with RiderX.');
-        }
-      }
-    }
-  });
+
+
+
+navigator.geolocation.watchPosition(
+
+(position)=>{
+
+
+const lat =
+position.coords.latitude;
+
+
+const lng =
+position.coords.longitude;
+
+
+
+
+if(!userMarker){
+
+
+userMarker =
+L.marker([lat,lng])
+.addTo(map)
+.bindPopup("You are here")
+.openPopup();
+
+
+map.setView(
+[lat,lng],
+16
+);
+
+
+
 }
+
+else{
+
+
+userMarker.setLatLng(
+[lat,lng]
+);
+
+
+}
+
+
+
+},
+
+
+(error)=>{
+
+console.log(
+"GPS Error",
+error
+);
+
+},
+
+
+{
+
+enableHighAccuracy:true
+
+}
+
+
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// FARE
+// ===============================
+
+
+function calculateFare(){
+
+
+
+const distance = 5;
+
+
+
+const fareData =
+fares[selectedService];
+
+
+
+const total =
+fareData.base +
+(
+fareData.perKm *
+distance
+);
+
+
+
+document.getElementById("fare")
+.innerText =
+"₹"+Math.round(total);
+
+
+
+return Math.round(total);
+
+
+}
+
+
+
+
+
+
+
+
+// ===============================
+// SERVICE SELECT
+// ===============================
+
+
+document
+.querySelectorAll(".service")
+.forEach((item)=>{
+
+
+item.onclick = ()=>{
+
+
+document
+.querySelectorAll(".service")
+.forEach(x=>
+x.classList.remove("active")
+);
+
+
+
+item.classList.add("active");
+
+
+
+selectedService =
+item.dataset.service;
+
+
+
+calculateFare();
+
+
+};
+
+
+});
+
+
+
+
+
+
+
+
+
+// ===============================
+// BOOK RIDE
+// ===============================
+
+
+const bookBtn =
+document.getElementById("bookRide");
+
+
+
+if(bookBtn){
+
+
+
+bookBtn.onclick =
+async ()=>{
+
+
+
+const user =
+auth.currentUser;
+
+
+
+if(!user){
+
+
+alert(
+"Please login first"
+);
+
+
+window.location.href =
+"../auth/login.html";
+
+
+return;
+
+}
+
+
+
+
+
+const pickup =
+document
+.getElementById("pickupLocation")
+.value;
+
+
+
+const drop =
+document
+.getElementById("dropoffLocation")
+.value;
+
+
+
+const payment =
+document
+.getElementById("paymentMethod")
+.value;
+
+
+
+if(!pickup || !drop){
+
+
+alert(
+"Enter pickup and drop location"
+);
+
+
+return;
+
+}
+
+
+
+
+
+
+try{
+
+
+const ride = {
+
+
+customerId:user.uid,
+
+
+pickupLocation:pickup,
+
+
+dropLocation:drop,
+
+
+serviceType:selectedService,
+
+
+paymentMethod:payment,
+
+
+fare:calculateFare(),
+
+
+status:"REQUESTED",
+
+
+createdAt:
+serverTimestamp()
+
+
+
+};
+
+
+
+
+
+const ref =
+await addDoc(
+collection(db,"rides"),
+ride
+);
+
+
+
+
+
+document.getElementById(
+"bookingStatus"
+).innerHTML =
+
+
+`
+<div style="
+background:#111;
+padding:15px;
+border-radius:15px;
+margin-top:15px;
+border:1px solid #FFD600">
+
+<h3 style="color:#FFD600">
+
+Ride Requested
+
+</h3>
+
+
+<p>
+Ride ID:
+${ref.id}
+</p>
+
+
+<p>
+Searching RiderX Rider...
+</p>
+
+
+</div>
+`;
+
+
+
+
+
+}
+
+catch(error){
+
+
+alert(
+error.message
+);
+
+
+}
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+// Start
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+initMap();
+
+calculateFare();
+
+
+}
+
+);
