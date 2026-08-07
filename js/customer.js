@@ -1,18 +1,27 @@
-// RiderX Customer Home Engine
-// Map + Pickup + Drop + Fare + Firebase Booking
+// =====================================
+// RiderX Customer Engine
+// Map + Fare + Booking + Firebase
+// =====================================
 
 
 import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
+auth,
+db
+}
+from "../firebase/firebase-config.js";
 
 
 import {
-    collection,
-    addDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+collection,
+addDoc,
+serverTimestamp
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
@@ -22,25 +31,24 @@ console.log("RiderX Customer Engine Loaded");
 
 let map;
 
-let pickupMarker = null;
-let dropMarker = null;
+let pickupMarker;
+let dropMarker;
 
 
-let pickupCoords = null;
-let dropCoords = null;
+let pickupCoords=null;
+let dropCoords=null;
 
 
-let selectedService = "bike";
+let selectedService="bike";
 
 
 
+const baseFare={
 
-const baseFare = {
-
-    bike:20,
-    cab:50,
-    parcel:30,
-    food:25
+bike:20,
+cab:50,
+parcel:30,
+food:25
 
 };
 
@@ -55,21 +63,14 @@ const baseFare = {
 function initMap(){
 
 
-const mapBox =
-document.getElementById("map");
+const mapBox=document.getElementById("map");
 
 
-if(!mapBox){
-
-console.log("Map missing");
-return;
-
-}
+if(!mapBox) return;
 
 
 
-map =
-L.map("map")
+map=L.map("map")
 .setView(
 [30.7333,76.7794],
 13
@@ -78,50 +79,45 @@ L.map("map")
 
 
 L.tileLayer(
+
 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
 {
-maxZoom:19,
-attribution:"OpenStreetMap"
+
+maxZoom:19
+
 }
-)
-.addTo(map);
+
+).addTo(map);
+
+
 
 
 
 map.on("click",(e)=>{
 
 
-let lat =
-e.latlng.lat;
-
-
-let lng =
-e.latlng.lng;
+const lat=e.latlng.lat;
+const lng=e.latlng.lng;
 
 
 
-let text =
+const text =
 lat.toFixed(5)+", "+
 lng.toFixed(5);
+
+
 
 
 
 if(!pickupCoords){
 
 
-pickupCoords={
-lat,
-lng
-};
+pickupCoords={lat,lng};
 
 
 
-if(pickupMarker)
-map.removeLayer(pickupMarker);
-
-
-
-pickupMarker =
+pickupMarker=
 L.marker([lat,lng])
 .addTo(map)
 .bindPopup("Pickup")
@@ -135,33 +131,23 @@ document.getElementById(
 
 
 
-setStatus(
-"Pickup selected"
-);
-
+setStatus("Pickup Selected");
 
 
 }
 
 
 
+
+
 else if(!dropCoords){
 
 
-
-dropCoords={
-lat,
-lng
-};
+dropCoords={lat,lng};
 
 
 
-if(dropMarker)
-map.removeLayer(dropMarker);
-
-
-
-dropMarker =
+dropMarker=
 L.marker([lat,lng])
 .addTo(map)
 .bindPopup("Drop")
@@ -179,10 +165,7 @@ calculateFare();
 
 
 
-setStatus(
-"Drop selected"
-);
-
+setStatus("Drop Selected");
 
 
 }
@@ -200,8 +183,6 @@ setStatus(
 
 
 
-
-
 // ================= SERVICE =================
 
 
@@ -210,10 +191,10 @@ function setupServices(){
 
 document
 .querySelectorAll(".service")
-.forEach(btn=>{
+.forEach(item=>{
 
 
-btn.onclick=()=>{
+item.onclick=()=>{
 
 
 document
@@ -224,16 +205,14 @@ x.classList.remove("active")
 
 
 
-btn.classList.add("active");
+item.classList.add("active");
 
 
 selectedService =
-btn.dataset.service;
-
+item.dataset.service;
 
 
 calculateFare();
-
 
 
 };
@@ -251,22 +230,15 @@ calculateFare();
 
 
 
-
 // ================= FARE =================
 
 
 function calculateFare(){
 
 
-if(
-!pickupCoords ||
-!dropCoords
-){
+if(!pickupCoords || !dropCoords){
 
-document.getElementById(
-"fare"
-).innerText="₹0";
-
+document.getElementById("fare").innerText="₹0";
 
 return 0;
 
@@ -275,42 +247,47 @@ return 0;
 
 
 let km =
-distance(
+getDistance(
+
 pickupCoords.lat,
 pickupCoords.lng,
+
 dropCoords.lat,
 dropCoords.lng
+
 );
 
 
 
-let perKm = 8;
+let rate=8;
+
 
 
 let hour =
-new Date()
-.getHours();
+new Date().getHours();
 
 
 
 if(hour>=22 || hour<6){
 
-perKm=11;
+rate=11;
 
 }
 
 else if(km>10){
 
-perKm=9;
+rate=9;
 
 }
+
+
 
 
 
 let total =
 baseFare[selectedService]
 +
-(km*perKm);
+(km*rate);
 
 
 
@@ -318,9 +295,7 @@ total=Math.round(total);
 
 
 
-document.getElementById(
-"fare"
-).innerText =
+document.getElementById("fare").innerText=
 "₹"+total;
 
 
@@ -340,7 +315,7 @@ return total;
 // ================= DISTANCE =================
 
 
-function distance(
+function getDistance(
 lat1,
 lon1,
 lat2,
@@ -348,22 +323,25 @@ lon2
 ){
 
 
-let R=6371;
+const R=6371;
 
 
-let dLat =
+const dLat=
 (lat2-lat1)
 *Math.PI/180;
 
 
-let dLon =
+const dLon=
 (lon2-lon1)
 *Math.PI/180;
 
 
 
-let a =
-Math.sin(dLat/2)**2 +
+const a=
+
+Math.sin(dLat/2)**2
+
++
 
 Math.cos(lat1*Math.PI/180)
 *
@@ -390,41 +368,31 @@ Math.sqrt(1-a)
 
 
 
-// ================= BOOK =================
+// ================= BOOK RIDE =================
 
 
 function setupBooking(){
 
 
-const btn =
-document.getElementById(
-"bookRide"
-);
+const btn=
+document.getElementById("bookRide");
 
 
 
-if(!btn)
-return;
+if(!btn)return;
 
 
 
-btn.onclick =
-async()=>{
+btn.onclick=async()=>{
 
 
-
-let user =
-auth.currentUser;
+const user=auth.currentUser;
 
 
 
 if(!user){
 
-
-alert(
-"Please Login First"
-);
-
+alert("Please Login First");
 
 return;
 
@@ -432,17 +400,20 @@ return;
 
 
 
-let pickup =
+
+
+const pickup=
 document.getElementById(
 "pickupLocation"
 ).value;
 
 
 
-let drop =
+const drop=
 document.getElementById(
 "dropoffLocation"
 ).value;
+
 
 
 
@@ -456,6 +427,7 @@ alert(
 
 return;
 
+
 }
 
 
@@ -466,7 +438,9 @@ try{
 
 
 await addDoc(
+
 collection(db,"rides"),
+
 {
 
 
@@ -511,6 +485,7 @@ serverTimestamp()
 
 
 
+
 setStatus(
 "Searching RiderX Rider..."
 );
@@ -519,11 +494,13 @@ setStatus(
 
 }
 
+
 catch(error){
 
-alert(
-error.message
-);
+
+console.error(error);
+
+alert(error.message);
 
 
 }
@@ -533,9 +510,7 @@ error.message
 };
 
 
-
 }
-
 
 
 
@@ -546,7 +521,7 @@ error.message
 function setStatus(text){
 
 
-let box =
+const box=
 document.getElementById(
 "bookingStatus"
 );
@@ -560,7 +535,6 @@ box.innerText=text;
 }
 
 
-
 }
 
 
@@ -572,9 +546,7 @@ box.innerText=text;
 // ================= START =================
 
 
-window.addEventListener(
-"load",
-()=>{
+window.onload=()=>{
 
 
 initMap();
@@ -586,5 +558,4 @@ setupServices();
 setupBooking();
 
 
-
-});
+};
