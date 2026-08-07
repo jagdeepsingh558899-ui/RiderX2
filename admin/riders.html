@@ -1,560 +1,428 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiderX Control Tower | Premium Rider Management</title>
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#08080A',
-                            dark: '#0F1015',
-                            card: '#161822',
-                            border: '#232636',
-                            yellow: '#FFE500',
-                            yellowDark: '#D4BC00',
-                            gray: '#8E94A8',
-                            emerald: '#10B981',
-                            rose: '#F43F5E',
-                            amber: '#F59E0B',
-                            indigo: '#6366F1',
-                            cyan: '#06B6D4'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-                    }
-                }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RiderX | Rider Management</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Pro CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Tailwind CSS CDN with Custom Config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              yellowHover: '#EAB308',
+              gold: '#EAB308',
+              dark: '#090D16',
+              card: '#111827',
+              border: 'rgba(255, 255, 255, 0.08)',
+              glass: 'rgba(17, 24, 39, 0.75)'
             }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
+            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+          }
         }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #08080A;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
+      }
+    }
+  </script>
 
-        .glass-panel {
-            background: linear-gradient(135deg, rgba(22, 24, 34, 0.95) 0%, rgba(15, 16, 21, 0.98) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.08);
-        }
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FACC15;
+    }
 
-        .glass-panel-interactive {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-        .glass-panel-interactive:hover {
-            border-color: rgba(255, 229, 0, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px -8px rgba(255, 229, 0, 0.1);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0F1015;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #232636;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
-
-        .modal-backdrop {
-            background-color: rgba(8, 8, 10, 0.85);
-            backdrop-filter: blur(8px);
-        }
-    </style>
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
 
-    <!-- Top Global Navbar -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3">
-        <div class="max-w-[1700px] mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <a href="./Dashboard.html" class="flex items-center gap-3">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-9 w-auto object-contain" onerror="this.src='https://via.placeholder.com/130x35/08080A/FFE500?text=RiderX+Admin'">
-                </a>
-                <span class="text-xs font-extrabold bg-brand-yellow/10 text-brand-yellow px-3 py-1 rounded-full border border-brand-yellow/20 uppercase tracking-wider hidden sm:inline-block">
-                    Rider Management Control Suite
-                </span>
-            </div>
+<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
 
-            <div class="flex items-center gap-4">
-                <div class="relative hidden sm:block w-64 lg:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                    <input type="text" id="searchInput" placeholder="Search by name, phone, email, city..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow" oninput="filterRidersTable()">
-                </div>
-
-                <button onclick="refreshRidersData()" id="refreshBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow hover:text-brand-yellow transition">
-                    <i class="fa-solid fa-rotate-right text-xs" id="refreshIcon"></i>
-                    <span class="hidden md:inline">Sync Data</span>
-                </button>
-
-                <div class="flex items-center gap-3 border-l border-brand-border pl-4">
-                    <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin+X&background=FFE500&color=08080A" alt="Admin" class="w-9 h-9 rounded-xl border border-brand-yellow object-cover">
-                    <div class="hidden xl:block text-left">
-                        <h4 class="text-xs font-extrabold text-white">Super Admin</h4>
-                        <p class="text-[10px] text-brand-yellow font-mono">Control Tower</p>
-                    </div>
-                </div>
-            </div>
+  <!-- TOP HEADER / BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
+        <i class="fa-solid fa-bars-staggered text-lg"></i>
+      </button>
+      <a href="dashboard.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
         </div>
-    </header>
-
-    <!-- Main Workspace Container -->
-    <main class="flex-grow max-w-[1700px] w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
-
-        <!-- Navigation Tabs / Quick Return -->
-        <div class="flex items-center justify-between border-b border-brand-border pb-4">
-            <div class="flex items-center gap-3">
-                <a href="./Dashboard.html" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition">
-                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Control Tower
-                </a>
-                <span class="text-xs font-extrabold text-white bg-brand-yellow/10 text-brand-yellow px-4 py-2 rounded-xl border border-brand-yellow/25">
-                    <i class="fa-solid fa-users-gear mr-1.5"></i> Comprehensive Rider Directory
-                </span>
-            </div>
-
-            <!-- Export Buttons -->
-            <div class="flex items-center gap-2">
-                <button onclick="exportData('csv')" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition">
-                    <i class="fa-solid fa-file-csv text-brand-yellow mr-1"></i> CSV
-                </button>
-                <button onclick="exportData('excel')" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition">
-                    <i class="fa-solid fa-file-excel text-emerald-400 mr-1"></i> Excel
-                </button>
-                <button onclick="exportData('pdf')" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition">
-                    <i class="fa-solid fa-file-pdf text-rose-400 mr-1"></i> PDF
-                </button>
-                <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition hidden sm:inline-block">
-                    <i class="fa-solid fa-print text-brand-cyan mr-1"></i> Print
-                </button>
-            </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
+            RIDER<span class="text-brand-yellow">X</span>
+            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
+          </span>
         </div>
-
-        <!-- Rider Statistics Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Total Riders</span>
-                <h3 class="text-xl font-black text-white" id="statTotal">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Online Riders</span>
-                <h3 class="text-xl font-black text-brand-emerald" id="statOnline">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Offline Riders</span>
-                <h3 class="text-xl font-black text-brand-gray" id="statOffline">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Pending Approval</span>
-                <h3 class="text-xl font-black text-brand-amber" id="statPending">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Approved Active</span>
-                <h3 class="text-xl font-black text-brand-yellow" id="statApproved">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Blocked / Suspended</span>
-                <h3 class="text-xl font-black text-brand-rose" id="statBlocked">0</h3>
-            </div>
-        </div>
-
-        <!-- Filters & Category Selector Bar -->
-        <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-            <!-- Status Filter Pills -->
-            <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto custom-scrollbar pb-1 md:pb-0">
-                <button onclick="filterByStatus('all')" id="filter-status-all" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0">All Riders</button>
-                <button onclick="filterByStatus('online')" id="filter-status-online" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Online</button>
-                <button onclick="filterByStatus('offline')" id="filter-status-offline" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Offline</button>
-                <button onclick="filterByStatus('pending')" id="filter-status-pending" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Pending Approval</button>
-                <button onclick="filterByStatus('approved')" id="filter-status-approved" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Approved</button>
-                <button onclick="filterByStatus('blocked')" id="filter-status-blocked" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Blocked</button>
-            </div>
-
-            <!-- Vehicle Category Filter -->
-            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                <select id="vehicleTypeFilter" onchange="filterRidersTable()" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                    <option value="all">All Vehicle Types</option>
-                    <option value="bike">Bike Moto</option>
-                    <option value="cab">Cab / Sedan / SUV</option>
-                    <option value="auto">Auto Rickshaw</option>
-                    <option value="parcel">Parcel Delivery</option>
-                    <option value="food">Food Delivery</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Riders Directory Table -->
-        <div class="glass-panel rounded-3xl overflow-hidden">
-            <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-brand-border text-[10px] font-extrabold text-brand-gray uppercase tracking-wider bg-brand-dark/50">
-                            <th class="py-3.5 px-4">Rider / Captain</th>
-                            <th class="py-3.5 px-4">Contact & City</th>
-                            <th class="py-3.5 px-4">Vehicle Details</th>
-                            <th class="py-3.5 px-4">Rating & Trips</th>
-                            <th class="py-3.5 px-4">Wallet Balance</th>
-                            <th class="py-3.5 px-4">Status & Approval</th>
-                            <th class="py-3.5 px-4 text-center">Action Control</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ridersTableBody" class="divide-y divide-brand-border/40 text-xs">
-                        <!-- Dynamic Rider Rows -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Bar -->
-            <div class="p-4 border-t border-brand-border flex items-center justify-between bg-brand-dark/40">
-                <span class="text-xs text-brand-gray" id="paginationInfo">Showing 0-0 of 0 riders</span>
-                <div class="flex items-center gap-2">
-                    <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs text-brand-gray hover:text-white transition">Previous</button>
-                    <span class="text-xs font-mono text-brand-yellow px-2" id="pageNumberDisplay">1</span>
-                    <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs text-brand-gray hover:text-white transition">Next</button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Modal: Comprehensive Rider Profile & Documents Modal -->
-    <div id="riderProfileModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="glass-panel max-w-4xl w-full rounded-3xl p-6 space-y-6 border-brand-yellow/30 shadow-2xl max-h-[92vh] flex flex-col">
-            <div class="flex items-center justify-between border-b border-brand-border pb-4">
-                <div class="flex items-center gap-3">
-                    <img id="modalAvatarImg" src="https://ui-avatars.com/api/?name=Captain" class="w-12 h-12 rounded-2xl object-cover border-2 border-brand-yellow">
-                    <div>
-                        <h3 class="text-base font-extrabold text-white" id="modalFullName">Rider Full Name</h3>
-                        <p class="text-xs text-brand-yellow font-mono" id="modalCaptainId">ID: RDX-0000</p>
-                    </div>
-                </div>
-                <button onclick="closeRiderModal()" class="text-brand-gray hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="overflow-y-auto custom-scrollbar space-y-6 flex-grow pr-1">
-                <!-- Info Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
-                        <span class="text-[10px] font-bold text-brand-gray uppercase">Contact Details</span>
-                        <p id="modalPhone" class="text-xs font-bold text-white">+91 9876543210</p>
-                        <p id="modalEmail" class="text-[11px] text-brand-gray">captain@riderx.app</p>
-                    </div>
-                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
-                        <span class="text-[10px] font-bold text-brand-gray uppercase">Vehicle Info</span>
-                        <p id="modalVehicleInfo" class="text-xs font-bold text-brand-yellow">Sedan • KA-01-EQ-9988</p>
-                        <p id="modalCity" class="text-[11px] text-brand-gray">Bangalore HQ</p>
-                    </div>
-                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
-                        <span class="text-[10px] font-bold text-brand-gray uppercase">Financial & Metrics</span>
-                        <p id="modalWallet" class="text-xs font-bold text-emerald-400">Wallet: ₹1,450</p>
-                        <p id="modalRating" class="text-[11px] text-brand-yellow"><i class="fa-solid fa-star"></i> 4.92 (312 Trips)</p>
-                    </div>
-                </div>
-
-                <!-- Documents Section -->
-                <div class="space-y-3">
-                    <h4 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-file-shield text-brand-yellow"></i> Uploaded Documents & Credentials
-                    </h4>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4" id="modalDocumentsGrid">
-                        <!-- Dynamic Document Previews -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between border-t border-brand-border pt-4">
-                <div class="flex items-center gap-2">
-                    <button onclick="downloadAllDocs()" class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition">
-                        <i class="fa-solid fa-download mr-1.5 text-brand-yellow"></i> Download Documents
-                    </button>
-                    <a id="modalCallBtn" href="tel:" class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-emerald-400 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-phone"></i> Call Rider
-                    </a>
-                </div>
-                <button onclick="closeRiderModal()" class="px-5 py-2 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">
-                    Close Profile
-                </button>
-            </div>
-        </div>
+      </a>
     </div>
 
-    <!-- Global Footer -->
-    <footer class="border-t border-brand-border/60 bg-brand-black py-4 px-4 lg:px-8 mt-auto">
-        <div class="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-gray">
-            <div class="flex items-center gap-2">
-                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-5 w-auto object-contain opacity-70">
-                <span>&copy; 2026 RiderX Control Tower. All rights reserved.</span>
-            </div>
-            <span class="text-brand-emerald flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> Secure Admin Operations</span>
+    <div class="flex items-center space-x-3 lg:space-x-5">
+      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <span>Rider Fleet Sync</span>
+      </div>
+
+      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
+        <div class="hidden md:block">
+          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
+          <p class="text-[10px] text-slate-400">Super Admin</p>
         </div>
-    </footer>
+      </div>
+    </div>
+  </header>
 
-    <!-- Firebase & Core JS Scripts -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/Admin.js"></script>
-    <script type="module" src="../js/App.js"></script>
+  <!-- MAIN LAYOUT -->
+  <div class="flex-1 flex overflow-hidden">
 
-    <!-- Page Logic Module -->
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, getDocs, doc, updateData, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <!-- SIDE NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
+      <div class="px-4 py-6 space-y-8 overflow-y-auto">
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
+          <nav class="space-y-1">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
+              <span>Trips & Live Map</span>
+            </a>
+            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
+              <i class="fa-solid fa-motorcycle text-base"></i>
+              <span>Riders</span>
+            </a>
+            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
+                <span>Rider Approvals</span>
+              </div>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
+            </a>
+            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
+              <span>Customers</span>
+            </a>
+          </nav>
+        </div>
 
-        let allRidersData = [];
-        let currentStatusFilter = 'all';
-        let currentSelectedRider = null;
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
+          <nav class="space-y-1">
+            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
+              <span>Fare & Pricing</span>
+            </a>
+            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
+              <span>Commission Rules</span>
+            </a>
+            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
+              <span>Payouts & Wallet</span>
+            </a>
+            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
+              <span>Coupons & Offers</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    window.location.href = '../auth/rider-login.html';
-                    return;
-                }
-                loadRidersRealtime();
-            });
-        });
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
 
-        function loadRidersRealtime() {
-            const ridersRef = collection(db, "riders");
-            onSnapshot(ridersRef, (snapshot) => {
-                allRidersData = [];
-                snapshot.forEach(docSnap => {
-                    allRidersData.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                updateStatistics(allRidersData);
-                renderRidersTable(allRidersData);
-            }, (error) => {
-                console.error("Error fetching riders:", error);
-            });
-        }
+      <!-- HEADER ACTION BAR -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-id-card text-brand-yellow"></i> Rider Directory
+          </h1>
+          <p class="text-xs text-slate-400">Manage registered partner drivers, document verifications, status, and earnings.</p>
+        </div>
 
-        function updateStatistics(riders) {
-            document.getElementById('statTotal').innerText = riders.length;
-            document.getElementById('statOnline').innerText = riders.filter(r => r.isOnline === true).length;
-            document.getElementById('statOffline').innerText = riders.filter(r => r.isOnline !== true).length;
-            document.getElementById('statPending').innerText = riders.filter(r => r.adminApproved !== true && r.status !== 'rejected').length;
-            document.getElementById('statApproved').innerText = riders.filter(r => r.adminApproved === true).length;
-            document.getElementById('statBlocked').innerText = riders.filter(r => r.status === 'blocked' || r.status === 'suspended').length;
-        }
+        <div class="flex items-center space-x-3">
+          <button onclick="exportRidersList()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-brand-border flex items-center space-x-2">
+            <i class="fa-solid fa-file-export text-brand-yellow"></i>
+            <span>Export CSV</span>
+          </button>
+          <a href="rider-approval.html" class="px-4 py-2 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-slate-950 text-xs font-bold transition-all shadow-glow-yellow flex items-center space-x-2">
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Pending Approvals (5)</span>
+          </a>
+        </div>
+      </div>
 
-        window.renderRidersTable = function(riders) {
-            const tbody = document.getElementById('ridersTableBody');
-            tbody.innerHTML = '';
+      <!-- METRIC OVERVIEW CARDS -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-slate-400">Total Drivers</p>
+          <h3 class="text-xl font-extrabold text-white mt-1" id="totalRidersCount">1,280</h3>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-emerald-400">Online & Active</p>
+          <h3 class="text-xl font-extrabold text-white mt-1" id="onlineRidersCount">960</h3>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-amber-400">On Active Trip</p>
+          <h3 class="text-xl font-extrabold text-white mt-1">142</h3>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-rose-400">Suspended / Blocked</p>
+          <h3 class="text-xl font-extrabold text-white mt-1">14</h3>
+        </div>
+      </div>
 
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const vehicleFilter = document.getElementById('vehicleTypeFilter').value;
+      <!-- FILTER & SEARCH BAR -->
+      <div class="glass-panel p-4 rounded-2xl border border-brand-border flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="relative w-full md:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+          <input type="text" id="searchInput" onkeyup="filterRiders()" placeholder="Search name, phone, vehicle no..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-brand-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-yellow" />
+        </div>
 
-            const filtered = riders.filter(rider => {
-                const name = (rider.fullName || rider.name || '').toLowerCase();
-                const phone = (rider.phone || '').toLowerCase();
-                const email = (rider.email || '').toLowerCase();
-                const city = (rider.city || '').toLowerCase();
+        <div class="flex items-center space-x-2 w-full md:w-auto overflow-x-auto">
+          <button onclick="setFilter('all')" class="filter-btn active px-3.5 py-1.5 rounded-lg bg-brand-yellow text-slate-950 font-bold text-xs">All Riders</button>
+          <button onclick="setFilter('online')" class="filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">Online</button>
+          <button onclick="setFilter('offline')" class="filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">Offline</button>
+          <button onclick="setFilter('suspended')" class="filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">Suspended</button>
+        </div>
+      </div>
 
-                const matchesSearch = name.includes(searchTerm) || phone.includes(searchTerm) || email.includes(searchTerm) || city.includes(searchTerm);
-                
-                let matchesStatus = true;
-                if (currentStatusFilter === 'online') matchesStatus = rider.isOnline === true;
-                else if (currentStatusFilter === 'offline') matchesStatus = rider.isOnline !== true;
-                else if (currentStatusFilter === 'pending') matchesStatus = rider.adminApproved !== true && rider.status !== 'rejected';
-                else if (currentStatusFilter === 'approved') matchesStatus = rider.adminApproved === true;
-                else if (currentStatusFilter === 'blocked') matchesStatus = rider.status === 'blocked' || rider.status === 'suspended';
+      <!-- RIDERS TABLE -->
+      <div class="glass-panel rounded-2xl border border-brand-border overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 uppercase text-[10px] font-bold text-slate-400 tracking-wider border-b border-brand-border">
+              <tr>
+                <th class="py-3.5 px-4">Driver Details</th>
+                <th class="py-3.5 px-4">Vehicle Category</th>
+                <th class="py-3.5 px-4">Plate Number</th>
+                <th class="py-3.5 px-4">Verification</th>
+                <th class="py-3.5 px-4">Rating</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ridersTableBody" class="divide-y divide-brand-border font-medium">
+              <!-- Dynamically populated or static fallbacks -->
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-                let matchesVehicle = true;
-                if (vehicleFilter !== 'all') {
-                    matchesVehicle = (rider.vehicleType || '').toLowerCase().includes(vehicleFilter);
-                }
+    </main>
+  </div>
 
-                return matchesSearch && matchesStatus && matchesVehicle;
-            });
+  <!-- RIDER INSPECTION MODAL -->
+  <div id="riderModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-lg rounded-2xl p-6 border border-brand-border space-y-5">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-id-card text-brand-yellow"></i> Partner Driver Profile
+        </h3>
+        <button onclick="closeRiderModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
 
-            document.getElementById('paginationInfo').innerText = `Showing 1-${filtered.length} of ${filtered.length} riders`;
+      <div class="space-y-4 text-xs">
+        <div class="flex items-center space-x-4 bg-slate-900/80 p-3 rounded-xl border border-brand-border">
+          <img id="modalAvatar" src="" class="w-12 h-12 rounded-xl object-cover ring-2 ring-brand-yellow/40" />
+          <div>
+            <h4 id="modalName" class="text-sm font-bold text-white"></h4>
+            <p id="modalPhone" class="text-slate-400"></p>
+            <span id="modalVehicleType" class="inline-block mt-1 px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow font-bold text-[10px]"></span>
+          </div>
+        </div>
 
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-brand-gray">No riders found matching criteria.</td></tr>`;
-                return;
-            }
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
+            <p class="text-slate-400">Total Rides Completed</p>
+            <p id="modalTotalRides" class="text-white font-extrabold text-sm mt-0.5">412</p>
+          </div>
+          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
+            <p class="text-slate-400">Wallet Balance</p>
+            <p id="modalWallet" class="text-emerald-400 font-extrabold text-sm mt-0.5">₹ 1,840</p>
+          </div>
+        </div>
 
-            filtered.forEach(rider => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-brand-dark/50 transition";
-                
-                const photo = rider.photoURL || rider.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(rider.fullName || 'Captain')}&background=FFE500&color=08080A`;
-                const approvalBadge = rider.adminApproved ? 
-                    `<span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold">Approved</span>` : 
-                    `<span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold">Pending</span>`;
+        <div class="space-y-2">
+          <p class="font-bold text-slate-300">Uploaded Verification Documents</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-brand-border flex items-center justify-between">
+              <span class="text-slate-300"><i class="fa-solid fa-file-contract text-brand-yellow mr-2"></i> Driving License</span>
+              <span class="text-emerald-400 font-bold text-[10px]">Verified</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-brand-border flex items-center justify-between">
+              <span class="text-slate-300"><i class="fa-solid fa-car-rear text-brand-yellow mr-2"></i> Vehicle RC</span>
+              <span class="text-emerald-400 font-bold text-[10px]">Verified</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                const onlineBadge = rider.isOnline ? 
-                    `<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span> Online` : 
-                    `<span class="w-2 h-2 rounded-full bg-brand-gray inline-block mr-1"></span> Offline`;
+      <div class="flex items-center space-x-3 pt-2">
+        <button id="blockToggleBtn" onclick="toggleRiderBlockStatus()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all">
+          Suspend Partner Account
+        </button>
+        <button onclick="closeRiderModal()" class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-200 text-xs font-bold hover:bg-slate-700">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 
-                row.innerHTML = `
-                    <td class="py-3 px-4 font-bold text-white flex items-center gap-3">
-                        <img src="${photo}" class="w-8 h-8 rounded-xl object-cover border border-brand-border">
-                        <div>
-                            <p class="font-extrabold text-white">${rider.fullName || rider.name || 'Captain'}</p>
-                            <span class="text-[10px] text-brand-yellow font-mono">ID: ${rider.id.substring(0,8)}</span>
-                        </div>
-                    </td>
-                    <td class="py-3 px-4 text-brand-gray">
-                        <p class="font-bold text-white">${rider.phone || 'N/A'}</p>
-                        <span class="text-[10px]">${rider.city || 'Bangalore'}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <p class="font-bold text-brand-yellow">${rider.vehicleType || 'Sedan'}</p>
-                        <span class="text-[10px] text-brand-gray font-mono">${rider.vehicleNumber || 'KA-01-EQ'}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                        <p class="font-bold text-white"><i class="fa-solid fa-star text-brand-yellow text-[10px]"></i> ${rider.rating || '4.9'}</p>
-                        <span class="text-[10px] text-brand-gray">${rider.totalTrips || '0'} Trips</span>
-                    </td>
-                    <td class="py-3 px-4 font-mono font-bold text-emerald-400">
-                        ₹${rider.walletBalance || '0'}
-                    </td>
-                    <td class="py-3 px-4 space-y-1">
-                        <div>${approvalBadge}</div>
-                        <div class="text-[10px] text-brand-gray">${onlineBadge}</div>
-                    </td>
-                    <td class="py-3 px-4 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="openRiderProfile('${rider.id}')" title="View Profile" class="p-1.5 rounded-lg bg-brand-dark border border-brand-border hover:border-brand-yellow text-brand-yellow transition">
-                                <i class="fa-solid fa-eye text-xs"></i>
-                            </button>
-                            ${!rider.adminApproved ? 
-                                `<button onclick="approveRider('${rider.id}')" title="Approve" class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white transition"><i class="fa-solid fa-check text-xs"></i></button>` : 
-                                `<button onclick="blockRider('${rider.id}')" title="Block" class="p-1.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500 hover:text-white transition"><i class="fa-solid fa-ban text-xs"></i></button>`
-                            }
-                            <button onclick="deleteRider('${rider.id}')" title="Delete" class="p-1.5 rounded-lg bg-brand-dark border border-brand-border hover:border-rose-500 text-rose-400 transition">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        };
+  <script>
+    // Sample Riders Dataset
+    const ridersData = [
+      { id: 'RD-101', name: 'Vikram Singh', phone: '+91 98765 43210', category: 'Bike Taxi', plate: 'DL 01 AB 1234', verified: true, rating: '4.9 ⭐', status: 'online', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120' },
+      { id: 'RD-102', name: 'Amit Verma', phone: '+91 98123 45678', category: 'Sedan Cab', plate: 'HR 26 DQ 9988', verified: true, rating: '4.8 ⭐', status: 'online', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120' },
+      { id: 'RD-103', name: 'Rahul Kumar', phone: '+91 99887 76655', category: 'Parcel Express', plate: 'UP 14 CZ 5544', verified: true, rating: '4.7 ⭐', status: 'offline', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=120' },
+      { id: 'RD-104', name: 'Suresh Raina', phone: '+91 97112 33445', category: 'Auto Rickshaw', plate: 'DL 1R AF 7711', verified: false, rating: '4.2 ⭐', status: 'suspended', avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=120' }
+    ];
 
-        window.filterByStatus = function(status) {
-            currentStatusFilter = status;
-            document.querySelectorAll('.status-filter-btn').forEach(btn => {
-                btn.className = "status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0";
-            });
-            document.getElementById(`filter-status-${status}`).className = "status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0";
-            renderRidersTable(allRidersData);
-        };
+    let currentFilter = 'all';
+    let selectedRiderId = null;
 
-        window.filterRidersTable = function() {
-            renderRidersTable(allRidersData);
-        };
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTable(ridersData);
+      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+    });
 
-        window.openRiderProfile = function(riderId) {
-            const rider = allRidersData.find(r => r.id === riderId);
-            if (!rider) return;
-            currentSelectedRider = rider;
+    function renderTable(data) {
+      const tbody = document.getElementById('ridersTableBody');
+      tbody.innerHTML = '';
 
-            document.getElementById('modalFullName').innerText = rider.fullName || rider.name || 'Captain';
-            document.getElementById('modalCaptainId').innerText = `ID: ${rider.id.toUpperCase()}`;
-            document.getElementById('modalPhone').innerText = rider.phone || '+91 9876543210';
-            document.getElementById('modalEmail').innerText = rider.email || 'captain@riderx.app';
-            document.getElementById('modalVehicleInfo').innerText = `${rider.vehicleType || 'Sedan'} • ${rider.vehicleNumber || 'KA-01-EQ'}`;
-            document.getElementById('modalCity').innerText = rider.city || 'Bangalore HQ';
-            document.getElementById('modalWallet').innerText = `Wallet: ₹${rider.walletBalance || '0'}`;
-            document.getElementById('modalRating').innerHTML = `<i class="fa-solid fa-star"></i> ${rider.rating || '4.9'} (${rider.totalTrips || '0'} Trips)`;
-            document.getElementById('modalAvatarImg').src = rider.photoURL || rider.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(rider.fullName || 'Captain')}&background=FFE500&color=08080A`;
-            document.getElementById('modalCallBtn').href = `tel:${rider.phone || ''}`;
+      data.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition-colors';
 
-            const docsGrid = document.getElementById('modalDocumentsGrid');
-            docsGrid.innerHTML = `
-                <div class="bg-brand-dark p-3 rounded-xl border border-brand-border space-y-1">
-                    <span class="text-[10px] font-bold text-brand-gray uppercase">Driving License</span>
-                    <p class="text-xs font-bold text-white">Verified Scan</p>
-                </div>
-                <div class="bg-brand-dark p-3 rounded-xl border border-brand-border space-y-1">
-                    <span class="text-[10px] font-bold text-brand-gray uppercase">Vehicle RC</span>
-                    <p class="text-xs font-bold text-white">Verified Scan</p>
-                </div>
-                <div class="bg-brand-dark p-3 rounded-xl border border-brand-border space-y-1">
-                    <span class="text-[10px] font-bold text-brand-gray uppercase">Insurance Policy</span>
-                    <p class="text-xs font-bold text-white">Valid & Active</p>
-                </div>
-            `;
+        const statusBadge = r.status === 'online'
+          ? `<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold"><i class="fa-solid fa-circle text-[7px] mr-1 animate-pulse"></i> Online</span>`
+          : r.status === 'offline'
+          ? `<span class="px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-bold">Offline</span>`
+          : `<span class="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold">Suspended</span>`;
 
-            document.getElementById('riderProfileModal').classList.remove('hidden');
-        };
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 flex items-center space-x-3">
+            <img src="${r.avatar}" class="w-9 h-9 rounded-xl object-cover ring-1 ring-brand-border" />
+            <div>
+              <p class="font-bold text-white">${r.name}</p>
+              <p class="text-[11px] text-slate-400">${r.phone}</p>
+            </div>
+          </td>
+          <td class="py-3.5 px-4 font-semibold text-slate-200">${r.category}</td>
+          <td class="py-3.5 px-4 font-mono text-brand-yellow font-bold">${r.plate}</td>
+          <td class="py-3.5 px-4">
+            ${r.verified 
+              ? '<span class="text-emerald-400 font-bold flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Verified</span>' 
+              : '<span class="text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-clock"></i> Pending</span>'}
+          </td>
+          <td class="py-3.5 px-4 font-bold text-amber-300">${r.rating}</td>
+          <td class="py-3.5 px-4">${statusBadge}</td>
+          <td class="py-3.5 px-4 text-right">
+            <button onclick="inspectRider('${r.id}')" class="p-2 rounded-xl bg-slate-800 hover:bg-brand-yellow hover:text-slate-950 text-slate-300 transition-all">
+              <i class="fa-solid fa-address-card"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-        window.closeRiderModal = function() {
-            document.getElementById('riderProfileModal').classList.add('hidden');
-        };
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-brand-yellow', 'text-slate-950', 'font-bold');
+        btn.classList.add('bg-slate-800', 'text-slate-300', 'font-semibold');
+      });
+      event.target.classList.remove('bg-slate-800', 'text-slate-300', 'font-semibold');
+      event.target.classList.add('bg-brand-yellow', 'text-slate-950', 'font-bold');
 
-        window.approveRider = async function(riderId) {
-            try {
-                await updateDoc(doc(db, "riders", riderId), {
-                    adminApproved: true,
-                    status: 'active',
-                    approvedAt: new Date()
-                });
-                alert("Rider successfully approved!");
-            } catch (err) {
-                console.error("Approval error:", err);
-            }
-        };
+      filterRiders();
+    }
 
-        window.blockRider = async function(riderId) {
-            try {
-                await updateDoc(doc(db, "riders", riderId), {
-                    status: 'blocked',
-                    adminApproved: false
-                });
-                alert("Rider blocked successfully.");
-            } catch (err) {
-                console.error("Block error:", err);
-            }
-        };
+    function filterRiders() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = ridersData.filter(r => {
+        const matchesSearch = r.name.toLowerCase().includes(search) || r.phone.includes(search) || r.plate.toLowerCase().includes(search);
+        const matchesFilter = currentFilter === 'all' || r.status === currentFilter;
+        return matchesSearch && matchesFilter;
+      });
+      renderTable(filtered);
+    }
 
-        window.deleteRider = async function(riderId) {
-            if (confirm("Are you sure you want to delete this rider account?")) {
-                try {
-                    await deleteDoc(doc(db, "riders", riderId));
-                    alert("Rider deleted successfully.");
-                } catch (err) {
-                    console.error("Delete error:", err);
-                }
-            }
-        };
+    function inspectRider(id) {
+      selectedRiderId = id;
+      const rider = ridersData.find(r => r.id === id);
+      if (!rider) return;
 
-        window.downloadAllDocs = function() {
-            alert("Preparing encrypted zip archive of captain documents...");
-        };
+      document.getElementById('modalAvatar').src = rider.avatar;
+      document.getElementById('modalName').textContent = rider.name;
+      document.getElementById('modalPhone').textContent = rider.phone;
+      document.getElementById('modalVehicleType').textContent = `${rider.category} • ${rider.plate}`;
+      document.getElementById('riderModal').classList.remove('hidden');
+    }
 
-        window.refreshRidersData = function() {
-            const icon = document.getElementById('refreshIcon');
-            icon.classList.add('fa-spin');
-            setTimeout(() => icon.classList.remove('fa-spin'), 800);
-        };
+    function closeRiderModal() {
+      document.getElementById('riderModal').classList.add('hidden');
+    }
 
-        window.exportData = function(format) {
-            alert(`Exporting rider directory in ${format.toUpperCase()} format...`);
-        };
-    </script>
+    function toggleRiderBlockStatus() {
+      const rider = ridersData.find(r => r.id === selectedRiderId);
+      if (rider) {
+        rider.status = rider.status === 'suspended' ? 'offline' : 'suspended';
+        filterRiders();
+        closeRiderModal();
+      }
+    }
+
+    function exportRidersList() {
+      alert('Rider partner data exported successfully as CSV.');
+    }
+  </script>
 </body>
 </html>
