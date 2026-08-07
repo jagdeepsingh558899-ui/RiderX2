@@ -1,37 +1,22 @@
-// =================================
 // RiderX Login System
-// Firebase Authentication
-// =================================
-
-
-
-import {
-
-auth,
-db
-
-} from "../firebase/Firebase-config.js";
-
+// Firebase v10.8.0 Compatible
 
 
 import {
-
-signInWithEmailAndPassword,
-onAuthStateChanged
-
-} from
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
-
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
 
 import {
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-doc,
-getDoc
 
-} from
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
+import {
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
@@ -50,11 +35,8 @@ document.getElementById("message");
 if(loginForm){
 
 
-
 loginForm.addEventListener(
-
 "submit",
-
 async(e)=>{
 
 
@@ -62,88 +44,84 @@ e.preventDefault();
 
 
 
-
 const email =
-document.getElementById("email").value.trim();
+document.getElementById("email")
+.value
+.trim();
 
 
 
 const password =
-document.getElementById("password").value;
-
-
+document.getElementById("password")
+.value;
 
 
 
 try{
 
 
+if(message){
 
 message.innerHTML =
 "Logging in...";
 
+}
 
 
 
-
-const userCredential =
-
+const result =
 await signInWithEmailAndPassword(
-
 auth,
-
 email,
-
 password
-
 );
 
 
 
-
-
-const user = userCredential.user;
-
-
+const user =
+result.user;
 
 
 
 
-// Get User Role From Firestore
-
-
-const userDoc =
-
+const userSnap =
 await getDoc(
-
-doc(
-
-db,
-
-"users",
-
-user.uid
-
-)
-
+doc(db,"users",user.uid)
 );
 
 
 
 
+if(!userSnap.exists()){
 
 
-if(userDoc.exists()){
+if(message){
+
+message.innerHTML =
+"User profile not found";
+
+}
+
+return;
+
+
+}
+
 
 
 
 const data =
-userDoc.data();
+userSnap.data();
 
 
+
+
+if(message){
 
 message.innerHTML =
 "Login Successful";
+
+}
 
 
 
@@ -153,83 +131,59 @@ setTimeout(()=>{
 
 
 
-if(data.role==="rider"){
+if(data.role==="admin"){
 
 
-
-window.location.href =
-"../rider/home.html";
-
-
-
-}
-
-
-
-else if(data.role==="admin"){
-
-
-
-window.location.href =
+location.href =
 "../admin/dashboard.html";
 
 
-
 }
 
+else if(data.role==="rider"){
 
+
+location.href =
+"../rider/home.html";
+
+
+}
 
 else{
 
 
-
-window.location.href =
+location.href =
 "../customer/home.html";
 
 
-
 }
 
 
 
-},1000);
-
-
-
-
-}
-
-else{
-
-
-message.innerHTML =
-"User profile not found";
-
-
-}
+},500);
 
 
 
 
 }
-
-
 
 catch(error){
 
 
+
+if(message){
+
 message.innerHTML =
 error.message;
 
+}
+
 
 }
 
 
 
-}
-
-
-);
+});
 
 
 }
