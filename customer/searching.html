@@ -1,52 +1,738 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<meta charset="UTF-8">
+  <title>RiderX | Finding Rider</title>
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="stylesheet" href="../css/style.css">
 
-<title>Searching Rider</title>
+  <style>
+    :root {
+      --yellow: #ffe500;
+      --black: #070707;
+      --card: #121212;
+      --gray: #999;
+      --green: #22c55e;
+    }
 
-<link rel="stylesheet" href="../css/style.css">
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
 
+    body {
+      min-height: 100vh;
+      background: var(--black);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 430px;
+      text-align: center;
+    }
+
+    .logo-box {
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 22px;
+      border-radius: 26px;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 45px rgba(255, 229, 0, .22);
+    }
+
+    .logo-box span {
+      color: #000;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    h1 span {
+      color: var(--yellow);
+    }
+
+    .subtitle {
+      color: var(--gray);
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .search-card {
+      background: var(--card);
+      border: 1px solid rgba(255,229,0,.15);
+      border-radius: 24px;
+      padding: 28px 20px;
+    }
+
+    .loader {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 25px;
+      border: 5px solid #292929;
+      border-top-color: var(--yellow);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .status-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    #status {
+      color: var(--gray);
+      font-size: 14px;
+      min-height: 22px;
+    }
+
+    .dots {
+      display: inline-flex;
+      gap: 4px;
+      margin-left: 4px;
+    }
+
+    .dots span {
+      width: 5px;
+      height: 5px;
+      background: var(--yellow);
+      border-radius: 50%;
+      animation: blink 1.2s infinite;
+    }
+
+    .dots span:nth-child(2) {
+      animation-delay: .2s;
+    }
+
+    .dots span:nth-child(3) {
+      animation-delay: .4s;
+    }
+
+    @keyframes blink {
+      0%, 80%, 100% {
+        opacity: .2;
+      }
+      40% {
+        opacity: 1;
+      }
+    }
+
+    .ride-info {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #252525;
+      text-align: left;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 13px;
+      font-size: 13px;
+    }
+
+    .info-row .label {
+      color: var(--gray);
+    }
+
+    .info-row .value {
+      color: white;
+      font-weight: 600;
+      text-align: right;
+    }
+
+    .cancel-btn {
+      width: 100%;
+      margin-top: 22px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid #333;
+      background: #1b1b1b;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .cancel-btn:active {
+      transform: scale(.98);
+    }
+
+    .error {
+      color: #ef4444 !important;
+    }
+
+    .success {
+      color: var(--green) !important;
+    }
+  </style>
 </head>
-
 
 <body>
 
+  <main class="search-container">
 
-<div class="splash">
+    <div class="logo-box">
+      <span>RX</span>
+    </div>
+
+    <h1>RIDER<span>X</span></h1>
+
+    <p class="subtitle">
+      Your ride is being connected with a nearby rider
+    </p>
+
+    <section class="search-card">
+
+      <div class="loader" id="loader"></div>
+
+      <div class="status-title" id="statusTitle">
+        Finding your rider
+      </div>
+
+      <div id="status">
+        Searching nearby riders
+        <span class="dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
+      </div>
+
+      <div class="ride-info">
+
+        <div class="info-row">
+          <span class="label">Ride ID</span>
+          <span class="value" id="rideId">—</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Service</span>
+          <span class="value" id="serviceType">—</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Fare</span>
+          <span class="value" id="fare">—</span>
+        </div>
+
+        <div class="info-row">
+          <span class="label">Status</span>
+          <span class="value" id="rideStatus">SEARCHING</span>
+        </div>
+
+      </div>
+
+      <button
+        class="cancel-btn"
+        id="cancelBtn"
+        type="button"
+        onclick="cancelRide()"
+      >
+        Cancel Ride
+      </button>
+
+    </section>
+
+  </main>
 
 
-<img src="../assets/logo.png" class="logo">
+  <!-- Firebase -->
+  <script type="module">
+
+    import {
+      auth,
+      db,
+      doc,
+      getDoc,
+      updateDoc,
+      onSnapshot
+    } from "../firebase/firebase-config.js";
+
+    let rideId = null;
+    let unsubscribeRide = null;
+    let cancelling = false;
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+    function getRideId() {
+
+      const params = new URLSearchParams(window.location.search);
+
+      return (
+        params.get("rideId") ||
+        localStorage.getItem("riderx_active_ride") ||
+        sessionStorage.getItem("riderx_active_ride")
+      );
+    }
 
 
-<h2>
-Finding Nearby Rider 🏍
-</h2>
+    function setStatus(title, message, type = "") {
+
+      document.getElementById("statusTitle").textContent = title;
+
+      const status = document.getElementById("status");
+
+      status.textContent = message;
+
+      status.className = type;
+    }
 
 
-<div id="status">
+    function updateRideUI(data) {
 
-Searching...
+      document.getElementById("rideId").textContent =
+        rideId ? "#" + rideId.substring(0, 8).toUpperCase() : "—";
 
-</div>
+      document.getElementById("serviceType").textContent =
+        data.serviceType ||
+        data.rideType ||
+        "Bike Taxi";
+
+      if (data.fare !== undefined && data.fare !== null) {
+
+        const fare =
+          typeof data.fare === "number"
+            ? `₹${data.fare}`
+            : data.fare;
+
+        document.getElementById("fare").textContent = fare;
+
+      }
+
+      const status =
+        String(data.status || "SEARCHING").toUpperCase();
+
+      document.getElementById("rideStatus").textContent = status;
 
 
-</div>
+      /*
+       * Rider accepted
+       */
+      if (
+        status === "ACCEPTED" ||
+        status === "RIDER_ACCEPTED" ||
+        status === "DRIVER_ACCEPTED"
+      ) {
+
+        document.getElementById("loader").style.display = "none";
+
+        setStatus(
+          "Rider Found!",
+          "Your rider has accepted the trip.",
+          "success"
+        );
+
+        document.getElementById("cancelBtn").style.display = "none";
+
+        setTimeout(() => {
+
+          window.location.href =
+            "ride.html?rideId=" +
+            encodeURIComponent(rideId);
+
+        }, 700);
+
+        return;
+      }
 
 
+      /*
+       * Rider arrived
+       */
+      if (
+        status === "ARRIVED" ||
+        status === "RIDER_ARRIVED"
+      ) {
 
-<script type="module" src="../js/ride-flow.js"></script>
+        document.getElementById("loader").style.display = "none";
 
+        setStatus(
+          "Rider has arrived",
+          "Please meet your rider.",
+          "success"
+        );
+
+        return;
+      }
+
+
+      /*
+       * Trip started
+       */
+      if (
+        status === "STARTED" ||
+        status === "IN_PROGRESS" ||
+        status === "ONGOING"
+      ) {
+
+        document.getElementById("loader").style.display = "none";
+
+        setStatus(
+          "Ride Started",
+          "Your trip is now in progress.",
+          "success"
+        );
+
+        setTimeout(() => {
+
+          window.location.href =
+            "ride.html?rideId=" +
+            encodeURIComponent(rideId);
+
+        }, 700);
+
+        return;
+      }
+
+
+      /*
+       * Completed
+       */
+      if (
+        status === "COMPLETED" ||
+        status === "COMPLETE"
+      ) {
+
+        document.getElementById("loader").style.display = "none";
+
+        setStatus(
+          "Ride Completed",
+          "Your trip has been completed.",
+          "success"
+        );
+
+        setTimeout(() => {
+
+          window.location.href =
+            "history.html";
+
+        }, 800);
+
+        return;
+      }
+
+
+      /*
+       * Cancelled
+       */
+      if (
+        status === "CANCELLED" ||
+        status === "CANCELED"
+      ) {
+
+        document.getElementById("loader").style.display = "none";
+
+        setStatus(
+          "Ride Cancelled",
+          "This ride has been cancelled.",
+          "error"
+        );
+
+        document.getElementById("cancelBtn").style.display = "none";
+
+        setTimeout(() => {
+
+          window.location.href =
+            "home.html";
+
+        }, 1200);
+
+        return;
+      }
+
+
+      /*
+       * Searching
+       */
+      document.getElementById("loader").style.display = "block";
+
+      setStatus(
+        "Finding your rider",
+        "Searching nearby riders"
+      );
+
+    }
+
+
+    async function initializeRide() {
+
+      try {
+
+        /*
+         * Wait for Firebase authentication
+         */
+        const user = await new Promise((resolve) => {
+
+          const unsubscribe =
+            auth.onAuthStateChanged((currentUser) => {
+
+              unsubscribe();
+              resolve(currentUser);
+
+            });
+
+        });
+
+
+        if (!user) {
+
+          window.location.href =
+            "../auth/login.html";
+
+          return;
+
+        }
+
+
+        rideId = getRideId();
+
+
+        if (!rideId) {
+
+          setStatus(
+            "Ride not found",
+            "No active ride request was found.",
+            "error"
+          );
+
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("cancelBtn").style.display = "none";
+
+          return;
+
+        }
+
+
+        const rideRef =
+          doc(db, "rides", rideId);
+
+
+        /*
+         * Check ride ownership before listening
+         */
+        const rideSnapshot =
+          await getDoc(rideRef);
+
+
+        if (!rideSnapshot.exists()) {
+
+          setStatus(
+            "Ride not found",
+            "This ride request no longer exists.",
+            "error"
+          );
+
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("cancelBtn").style.display = "none";
+
+          return;
+
+        }
+
+
+        const rideData =
+          rideSnapshot.data();
+
+
+        if (
+          rideData.customerId &&
+          rideData.customerId !== user.uid
+        ) {
+
+          setStatus(
+            "Access denied",
+            "This ride does not belong to your account.",
+            "error"
+          );
+
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("cancelBtn").style.display = "none";
+
+          return;
+
+        }
+
+
+        updateRideUI(rideData);
+
+
+        /*
+         * REAL-TIME FIRESTORE LISTENER
+         *
+         * Rider accepts the ride →
+         * Firestore changes →
+         * customer gets update instantly.
+         */
+        unsubscribeRide =
+          onSnapshot(
+            rideRef,
+            (snapshot) => {
+
+              if (!snapshot.exists()) {
+                return;
+              }
+
+              updateRideUI(snapshot.data());
+
+            },
+            (error) => {
+
+              console.error(
+                "Ride listener error:",
+                error
+              );
+
+              setStatus(
+                "Connection problem",
+                "Unable to receive live ride updates.",
+                "error"
+              );
+
+            }
+          );
+
+      } catch (error) {
+
+        console.error(
+          "Searching ride initialization error:",
+          error
+        );
+
+        setStatus(
+          "Something went wrong",
+          error.message || "Please try again.",
+          "error"
+        );
+
+        document.getElementById("loader").style.display = "none";
+
+      }
+
+    }
+
+
+    window.cancelRide = async function () {
+
+      if (cancelling || !rideId) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "Are you sure you want to cancel this ride?"
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      cancelling = true;
+
+      const button =
+        document.getElementById("cancelBtn");
+
+      button.disabled = true;
+      button.textContent = "Cancelling...";
+
+
+      try {
+
+        await updateDoc(
+          doc(db, "rides", rideId),
+          {
+            status: "CANCELLED",
+            cancelledBy: "customer",
+            cancelledAt: new Date()
+          }
+        );
+
+
+        localStorage.removeItem(
+          "riderx_active_ride"
+        );
+
+        sessionStorage.removeItem(
+          "riderx_active_ride"
+        );
+
+
+        setStatus(
+          "Ride Cancelled",
+          "Your ride has been cancelled.",
+          "error"
+        );
+
+
+        setTimeout(() => {
+
+          window.location.href =
+            "home.html";
+
+        }, 800);
+
+      } catch (error) {
+
+        console.error(
+          "Cancel ride error:",
+          error
+        );
+
+        button.disabled = false;
+        button.textContent = "Cancel Ride";
+
+        alert(
+          "Unable to cancel ride. Please try again."
+        );
+
+      } finally {
+
+        cancelling = false;
+
+      }
+
+    };
+
+
+    window.addEventListener(
+      "beforeunload",
+      () => {
+
+        if (unsubscribeRide) {
+          unsubscribeRide();
+        }
+
+      }
+    );
+
+
+    initializeRide();
+
+  </script>
 
 </body>
-
 </html>
