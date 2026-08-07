@@ -1,7 +1,32 @@
 // ======================================
 // RiderX Customer Dashboard
-// Final Fixed JS
+// Firebase Ride System
 // ======================================
+
+
+import { auth, db } 
+from "../../firebase/firebase-config.js";
+
+
+import {
+onAuthStateChanged
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+import {
+
+collection,
+addDoc,
+serverTimestamp
+
+}
+from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+
 
 
 let map;
@@ -9,6 +34,8 @@ let map;
 let userMarker;
 
 let pickupMarker;
+
+let currentUser = null;
 
 let selectedService = "bike";
 
@@ -18,8 +45,54 @@ let currentLocation = null;
 
 
 
+
+
 // ===============================
-// Start App
+// Auth Check
+// ===============================
+
+
+onAuthStateChanged(
+auth,
+(user)=>{
+
+
+if(user){
+
+currentUser = user;
+
+console.log(
+"Customer:",
+user.uid
+);
+
+
+}
+
+else{
+
+
+console.log(
+"User not login"
+);
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+
+// ===============================
+// Start
 // ===============================
 
 
@@ -34,7 +107,8 @@ initMap();
 setupServices();
 
 
-setupBookButton();
+setupBookRide();
+
 
 
 });
@@ -46,8 +120,9 @@ setupBookButton();
 
 
 
+
 // ===============================
-// Map Setup
+// Map
 // ===============================
 
 
@@ -55,7 +130,8 @@ function initMap(){
 
 
 
-map = L.map("map")
+map =
+L.map("map")
 .setView(
 [30.7333,76.7794],
 13
@@ -76,41 +152,22 @@ maxZoom:19
 
 
 
-// Map click pickup select
-
-
 map.on(
 "click",
-function(e){
+(e)=>{
 
 
-
-let lat =
-e.latlng.lat;
-
-
-let lng =
-e.latlng.lng;
-
-
-
-setPickupLocation(
-lat,
-lng
+setPickup(
+e.latlng.lat,
+e.latlng.lng
 );
 
 
-
-}
-
-);
+});
 
 
 
-
-
-getCurrentLocation();
-
+getLocation();
 
 
 }
@@ -122,21 +179,17 @@ getCurrentLocation();
 
 
 
-
 // ===============================
-// Current GPS Location
+// GPS
 // ===============================
 
 
-function getCurrentLocation(){
+function getLocation(){
 
 
 
-if(!navigator.geolocation){
-
+if(!navigator.geolocation)
 return;
-
-}
 
 
 
@@ -155,8 +208,8 @@ position.coords.longitude;
 
 
 currentLocation={
-lat:lat,
-lng:lng
+lat,
+lng
 };
 
 
@@ -167,15 +220,6 @@ map.setView(
 15
 );
 
-
-
-
-
-if(userMarker){
-
-map.removeLayer(userMarker);
-
-}
 
 
 
@@ -192,27 +236,13 @@ L.marker(
 
 
 
-
-setPickupLocation(
+setPickup(
 lat,
 lng
 );
 
 
 
-},
-
-
-
-(error)=>{
-
-
-console.log(
-"Location permission denied"
-);
-
-
-
 }
 
 );
@@ -230,19 +260,20 @@ console.log(
 
 
 // ===============================
-// Pickup Select
+// Pickup
 // ===============================
 
 
-function setPickupLocation(lat,lng){
+function setPickup(
+lat,
+lng
+){
 
 
 
-if(pickupMarker){
-
+if(pickupMarker)
 map.removeLayer(pickupMarker);
 
-}
 
 
 
@@ -252,10 +283,9 @@ L.marker(
 )
 .addTo(map)
 .bindPopup(
-"Pickup Location"
+"Pickup"
 )
 .openPopup();
-
 
 
 
@@ -286,7 +316,7 @@ calculateFare();
 
 
 // ===============================
-// Service Selection
+// Service
 // ===============================
 
 
@@ -294,32 +324,30 @@ function setupServices(){
 
 
 
-const services =
-document.querySelectorAll(".service");
+document
+.querySelectorAll(".service")
+.forEach(
+(item)=>{
 
 
-
-services.forEach(
-(service)=>{
+item.onclick=()=>{
 
 
-service.onclick=function(){
-
-
-
-services.forEach(
-(s)=>
-s.classList.remove("active")
+document
+.querySelectorAll(".service")
+.forEach(
+(x)=>
+x.classList.remove("active")
 );
 
 
 
-service.classList.add("active");
+item.classList.add("active");
 
 
 
 selectedService =
-service.dataset.service;
+item.dataset.service;
 
 
 
@@ -328,7 +356,6 @@ calculateFare();
 
 
 };
-
 
 
 });
@@ -346,7 +373,7 @@ calculateFare();
 
 
 // ===============================
-// Fare Calculation
+// Fare
 // ===============================
 
 
@@ -368,19 +395,11 @@ let rate = 8;
 
 
 
-if(hour >=22 || hour <6){
+if(hour>=22 || hour<6){
 
 rate=11;
 
 }
-
-else if(distance >10){
-
-rate=9;
-
-}
-
-
 
 
 
@@ -388,27 +407,17 @@ let extra=0;
 
 
 
-if(selectedService==="cab"){
-
+if(selectedService==="cab")
 extra=50;
 
-}
 
-
-
-if(selectedService==="parcel"){
-
+if(selectedService==="parcel")
 extra=30;
 
-}
 
-
-
-if(selectedService==="food"){
-
+if(selectedService==="food")
 extra=20;
 
-}
 
 
 
@@ -440,21 +449,14 @@ document
 // ===============================
 
 
-function setupBookButton(){
+function setupBookRide(){
 
 
 
 document
 .getElementById("bookRide")
-.onclick=function(){
-
-
-
-let pickup =
-document
-.getElementById("pickup")
-.value;
-
+.onclick =
+async ()=>{
 
 
 let drop =
@@ -464,14 +466,32 @@ document
 
 
 
-
 if(!drop){
+
 
 alert(
 "Please enter drop location"
 );
 
+
 return;
+
+
+}
+
+
+
+
+if(!currentUser){
+
+
+alert(
+"Please login first"
+);
+
+
+return;
+
 
 }
 
@@ -479,13 +499,21 @@ return;
 
 
 
-let ride={
+let rideData={
 
 
-service:selectedService,
+customerId:
+currentUser.uid,
 
 
-pickup:pickup,
+service:
+selectedService,
+
+
+pickup:
+document
+.getElementById("pickup")
+.value,
 
 
 drop:drop,
@@ -503,11 +531,17 @@ document
 .innerText,
 
 
-status:"searching",
+status:
+"searching",
+
+
+riderId:null,
 
 
 createdAt:
-new Date()
+serverTimestamp()
+
+
 
 };
 
@@ -515,12 +549,23 @@ new Date()
 
 
 
-console.log(
-"RiderX Ride:",
-ride
+
+
+try{
+
+
+const rideRef =
+await addDoc(
+collection(db,"rides"),
+rideData
 );
 
 
+
+console.log(
+"Ride Created:",
+rideRef.id
+);
 
 
 
@@ -532,8 +577,22 @@ alert(
 
 
 
-// Next step:
-// Firestore ride create
+}
+
+
+catch(error){
+
+
+console.log(error);
+
+
+alert(
+"Ride failed"
+);
+
+
+
+}
 
 
 
