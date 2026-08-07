@@ -1,656 +1,114 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>RiderX | Admin Command Center</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RiderX - Admin Operations Console</title>
 
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/app.css">
 
-  <!-- FontAwesome 6 Pro CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-  <!-- Tailwind CSS CDN with Custom Config -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              yellow: '#FACC15',
-              yellowHover: '#EAB308',
-              gold: '#EAB308',
-              dark: '#090D16',
-              card: '#111827',
-              border: 'rgba(255, 255, 255, 0.08)',
-              glass: 'rgba(17, 24, 39, 0.75)'
-            }
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-          },
-          boxShadow: {
-            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
-            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
-          }
-        }
-      }
-    }
-  </script>
-
-  <!-- Leaflet CSS & JS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
 
   <style>
-    /* Custom Scrollbar & Glassmorphic Utilities */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    body {
+      margin: 0;
+      background-color: #000;
+      color: #FFF;
+      font-family: Arial, sans-serif;
+      padding: 20px;
     }
-    ::-webkit-scrollbar-track {
-      background: #090D16;
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
     }
-    ::-webkit-scrollbar-thumb {
-      background: #1F2937;
-      border-radius: 9999px;
+    .metric-card {
+      background: #1E1E1E;
+      padding: 20px;
+      border-radius: 10px;
+      border-bottom: 4px solid #FFC107;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #FACC15;
+    .metric-card h3 { margin: 0; font-size: 28px; }
+    .metric-card p { margin: 5px 0 0 0; color: #AAA; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1E1E1E;
+      border-radius: 8px;
+      overflow: hidden;
     }
-
-    .glass-panel {
-      background: rgba(17, 24, 39, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #333;
     }
-
-    .glass-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-
-    .glass-card:hover {
-      border-color: rgba(250, 204, 21, 0.3);
-      box-shadow: 0 10px 30px -10px rgba(250, 204, 21, 0.15);
-    }
-
-    /* Pulse animation for active riders on map */
-    .pulse-marker {
-      border-radius: 50%;
-      box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
-      animation: pulse-yellow 2s infinite;
-    }
-
-    @keyframes pulse-yellow {
-      0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7);
-      }
-      70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 12px rgba(250, 204, 21, 0);
-      }
-      100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(250, 204, 21, 0);
-      }
-    }
-
-    /* Custom Leaflet Dark Tile Overrides */
-    .leaflet-container {
-      background: #090D16 !important;
-      font-family: 'Plus Jakarta Sans', sans-serif !important;
-    }
-    .leaflet-control-zoom {
-      border: none !important;
-    }
-    .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-      background-color: #111827 !important;
-      color: #FACC15 !important;
-      border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    }
+    th { background: #2A2A2A; color: #FFC107; }
   </style>
 </head>
+<body>
 
-<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
+  <h1>RiderX Central Command</h1>
 
-  <!-- TOP HEADER / BAR -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
-    <!-- Brand & Mobile Toggle -->
-    <div class="flex items-center space-x-4">
-      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
-        <i class="fa-solid fa-bars-staggered text-lg"></i>
-      </button>
-      <a href="dashboard.html" class="flex items-center space-x-3 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
-          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
-        </div>
-        <div>
-          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-            RIDER<span class="text-brand-yellow">X</span>
-            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
-          </span>
-        </div>
-      </a>
+  <div class="metrics">
+    <div class="metric-card">
+      <h3 id="totalRides">0</h3>
+      <p>Total Rides Requested</p>
     </div>
-
-    <!-- Right Controls -->
-    <div class="flex items-center space-x-3 lg:space-x-5">
-      <!-- Live Status Badge -->
-      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-        <span>System Live</span>
-      </div>
-
-      <!-- Quick Notifications -->
-      <div class="relative">
-        <button id="notifBtn" class="relative p-2.5 rounded-xl bg-slate-900/80 border border-brand-border text-slate-300 hover:text-brand-yellow transition-colors">
-          <i class="fa-regular fa-bell text-lg"></i>
-          <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-brand-yellow rounded-full ring-2 ring-slate-900"></span>
-        </button>
-      </div>
-
-      <!-- Admin Profile Dropdown -->
-      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
-        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
-        <div class="hidden md:block">
-          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
-          <p class="text-[10px] text-slate-400">Super Admin</p>
-        </div>
-      </div>
+    <div class="metric-card">
+      <h3 id="activeRiders">0</h3>
+      <p>Active Riders</p>
     </div>
-  </header>
-
-  <!-- MAIN BODY LAYOUT -->
-  <div class="flex-1 flex overflow-hidden">
-
-    <!-- SIDE NAVIGATION -->
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
-      <div class="px-4 py-6 space-y-8 overflow-y-auto">
-        <!-- Section 1: Main -->
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
-          <nav class="space-y-1">
-            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
-              <i class="fa-solid fa-chart-pie text-base"></i>
-              <span>Dashboard</span>
-            </a>
-            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
-              <span>Trips & Live Map</span>
-            </a>
-            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
-              <span>Riders</span>
-            </a>
-            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
-                <span>Rider Approvals</span>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
-            </a>
-            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
-              <span>Customers</span>
-            </a>
-          </nav>
-        </div>
-
-        <!-- Section 2: Management -->
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
-          <nav class="space-y-1">
-            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
-              <span>Fare & Pricing</span>
-            </a>
-            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
-              <span>Commission Rules</span>
-            </a>
-            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
-              <span>Payouts & Wallet</span>
-            </a>
-            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
-              <span>Coupons & Offers</span>
-            </a>
-          </nav>
-        </div>
-
-        <!-- Section 3: System -->
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">System</p>
-          <nav class="space-y-1">
-            <a href="notifications.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-bullhorn text-base group-hover:text-brand-yellow"></i>
-              <span>Broadcast Push</span>
-            </a>
-            <a href="supports.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-headset text-base group-hover:text-brand-yellow"></i>
-              <span>Support Tickets</span>
-            </a>
-            <a href="settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-gear text-base group-hover:text-brand-yellow"></i>
-              <span>App Settings</span>
-            </a>
-          </nav>
-        </div>
-      </div>
-
-      <!-- Quick Action Footer -->
-      <div class="p-4 border-t border-brand-border bg-slate-900/40">
-        <div class="p-3 rounded-xl bg-gradient-to-r from-yellow-500/10 to-amber-500/10 border border-brand-yellow/20 flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-brand-yellow">Platform Mode</p>
-            <p class="text-[10px] text-slate-400">Peak Surge (1.2x Active)</p>
-          </div>
-          <div class="w-3 h-3 rounded-full bg-brand-yellow animate-ping"></div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-8">
-
-      <!-- WELCOME HERO BANNER -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-amber-950/40 border border-brand-border p-6 lg:p-8 shadow-glow-card">
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-brand-yellow/10 border border-brand-yellow/20 text-brand-yellow text-xs font-semibold mb-3">
-              <i class="fa-solid fa-sparkles"></i>
-              <span>Platform Overview • Live India Network</span>
-            </div>
-            <h1 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-              Operational Command <span class="text-brand-yellow">Dashboard</span>
-            </h1>
-            <p class="text-slate-400 text-sm mt-1 max-w-xl">
-              Real-time monitoring for bike taxis, cabs, parcel dispatch, and live rider fleets across active cities.
-            </p>
-          </div>
-          <div class="flex items-center space-x-3">
-            <button onclick="refreshData()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-brand-border flex items-center space-x-2">
-              <i class="fa-solid fa-arrows-rotate text-brand-yellow"></i>
-              <span>Refresh Stats</span>
-            </button>
-            <a href="rides.html" class="px-5 py-2.5 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-slate-950 text-xs font-black transition-all shadow-glow-yellow flex items-center space-x-2">
-              <i class="fa-solid fa-location-dot"></i>
-              <span>Live Fleet Map</span>
-            </a>
-          </div>
-        </div>
-        <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-brand-yellow/5 rounded-full blur-3xl pointer-events-none"></div>
-      </div>
-
-      <!-- KPI METRIC CARDS GRID -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        <!-- Total Revenue Card -->
-        <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Gross Revenue</span>
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-indian-rupee-sign"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <h3 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">₹ 8,42,950</h3>
-            <div class="flex items-center space-x-2 mt-2 text-xs">
-              <span class="text-emerald-400 font-bold flex items-center">
-                <i class="fa-solid fa-arrow-trend-up mr-1"></i> +18.4%
-              </span>
-              <span class="text-slate-500">vs last week</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active Trips Card -->
-        <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Trips</span>
-            <div class="w-10 h-10 rounded-xl bg-brand-yellow/10 border border-brand-yellow/20 text-brand-yellow flex items-center justify-center text-lg">
-              <i class="fa-solid fa-route"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <h3 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight" id="activeTripsCounter">142</h3>
-            <div class="flex items-center space-x-2 mt-2 text-xs">
-              <span class="text-brand-yellow font-bold flex items-center">
-                <i class="fa-solid fa-circle text-[8px] mr-1.5 animate-pulse"></i> Live In-Progress
-              </span>
-              <span class="text-slate-500">across 4 regions</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Active Riders Card -->
-        <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Online Fleet</span>
-            <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-motorcycle"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <h3 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">1,280</h3>
-            <div class="flex items-center space-x-2 mt-2 text-xs">
-              <span class="text-sky-400 font-bold">89% Efficiency</span>
-              <span class="text-slate-500">320 idle</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pending Approvals Card -->
-        <div class="glass-card rounded-2xl p-5 relative overflow-hidden group">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Approvals</span>
-            <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
-              <i class="fa-solid fa-id-card"></i>
-            </div>
-          </div>
-          <div class="mt-4">
-            <h3 class="text-2xl lg:text-3xl font-extrabold text-white tracking-tight">18</h3>
-            <div class="flex items-center space-x-2 mt-2 text-xs">
-              <a href="rider-approval.html" class="text-brand-yellow font-bold underline hover:text-white">Requires Verification →</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MAP + LIVE DISPATCH SPLIT SECTION -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Live Map Tracker (2 cols) -->
-        <div class="lg:col-span-2 glass-panel rounded-2xl p-5 border border-brand-border flex flex-col space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-base font-extrabold text-white flex items-center gap-2">
-                <i class="fa-solid fa-earth-asia text-brand-yellow"></i> Live Dispatch Map Tracking
-              </h2>
-              <p class="text-xs text-slate-400">Real-time GPS positioning for active drivers and requested pickups</p>
-            </div>
-            <div class="flex items-center space-x-2">
-              <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-brand-border text-[11px] text-slate-300 font-medium">
-                <span class="w-2 h-2 rounded-full bg-brand-yellow inline-block mr-1"></span> Bike Taxi
-              </span>
-              <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-brand-border text-[11px] text-slate-300 font-medium">
-                <span class="w-2 h-2 rounded-full bg-sky-400 inline-block mr-1"></span> Premium Cabs
-              </span>
-            </div>
-          </div>
-
-          <!-- Leaflet Map Canvas -->
-          <div id="adminMap" class="w-full h-80 lg:h-[420px] rounded-xl overflow-hidden border border-brand-border shadow-inner relative"></div>
-        </div>
-
-        <!-- Realtime Earnings & Fleet Chart (1 col) -->
-        <div class="glass-panel rounded-2xl p-5 border border-brand-border flex flex-col justify-between space-y-4">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-base font-extrabold text-white">Service Category Revenue</h2>
-              <span class="text-xs text-brand-yellow font-semibold">Today</span>
-            </div>
-            <div class="h-60 relative flex items-center justify-center">
-              <canvas id="categoryChart"></canvas>
-            </div>
-          </div>
-
-          <div class="space-y-3 pt-3 border-t border-brand-border">
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 flex items-center"><i class="fa-solid fa-motorcycle text-brand-yellow mr-2"></i> Bike Taxi</span>
-              <span class="text-white font-bold">₹ 4,12,000 (48%)</span>
-            </div>
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 flex items-center"><i class="fa-solid fa-car text-sky-400 mr-2"></i> Cab Rides</span>
-              <span class="text-white font-bold">₹ 2,90,500 (35%)</span>
-            </div>
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400 flex items-center"><i class="fa-solid fa-box text-emerald-400 mr-2"></i> Parcel Express</span>
-              <span class="text-white font-bold">₹ 1,40,450 (17%)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RECENT TRIPS MONITOR TABLE -->
-      <div class="glass-panel rounded-2xl border border-brand-border p-5 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-base font-extrabold text-white flex items-center gap-2">
-              <i class="fa-solid fa-clock-rotate-left text-brand-yellow"></i> Recent Live Trips
-            </h2>
-            <p class="text-xs text-slate-400">Continuous feed of ride requests, active routes, and completed journeys</p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <input type="text" placeholder="Search ride ID, customer..." class="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-brand-border text-xs text-slate-200 focus:outline-none focus:border-brand-yellow w-48" />
-            <button class="px-3.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Filter</button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-900/80 uppercase text-[10px] font-bold text-slate-400 tracking-wider border-b border-brand-border">
-              <tr>
-                <th class="py-3 px-4">Trip ID</th>
-                <th class="py-3 px-4">Customer</th>
-                <th class="py-3 px-4">Rider</th>
-                <th class="py-3 px-4">Service</th>
-                <th class="py-3 px-4">Pickup / Drop</th>
-                <th class="py-3 px-4">Fare</th>
-                <th class="py-3 px-4">Status</th>
-                <th class="py-3 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-brand-border font-medium">
-              <!-- Row 1 -->
-              <tr class="hover:bg-slate-800/40 transition-colors">
-                <td class="py-3 px-4 text-brand-yellow font-bold">#RX-8849</td>
-                <td class="py-3 px-4 font-semibold text-white">Rohan Sharma</td>
-                <td class="py-3 px-4 text-slate-300">Vikram Singh (Bike)</td>
-                <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow font-bold">Bike Taxi</span></td>
-                <td class="py-3 px-4 max-w-xs truncate text-slate-400">Connaught Place → Cyber Hub, Gurugram</td>
-                <td class="py-3 px-4 font-extrabold text-white">₹ 240</td>
-                <td class="py-3 px-4">
-                  <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold inline-flex items-center">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span> In Progress
-                  </span>
-                </td>
-                <td class="py-3 px-4 text-right">
-                  <button onclick="viewTripDetails('#RX-8849')" class="p-1.5 rounded bg-slate-800 hover:bg-brand-yellow hover:text-slate-950 text-slate-300 transition-colors">
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                </td>
-              </tr>
-              <!-- Row 2 -->
-              <tr class="hover:bg-slate-800/40 transition-colors">
-                <td class="py-3 px-4 text-brand-yellow font-bold">#RX-8848</td>
-                <td class="py-3 px-4 font-semibold text-white">Priya Patel</td>
-                <td class="py-3 px-4 text-slate-300">Amit Verma (Cab)</td>
-                <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 font-bold">Sedan Cab</span></td>
-                <td class="py-3 px-4 max-w-xs truncate text-slate-400">IGI Airport T3 → Indirapuram, Noida</td>
-                <td class="py-3 px-4 font-extrabold text-white">₹ 780</td>
-                <td class="py-3 px-4">
-                  <span class="px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-bold">Completed</span>
-                </td>
-                <td class="py-3 px-4 text-right">
-                  <button onclick="viewTripDetails('#RX-8848')" class="p-1.5 rounded bg-slate-800 hover:bg-brand-yellow hover:text-slate-950 text-slate-300 transition-colors">
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                </td>
-              </tr>
-              <!-- Row 3 -->
-              <tr class="hover:bg-slate-800/40 transition-colors">
-                <td class="py-3 px-4 text-brand-yellow font-bold">#RX-8847</td>
-                <td class="py-3 px-4 font-semibold text-white">Ananya Sen</td>
-                <td class="py-3 px-4 text-slate-300">Rahul Kumar (Parcel)</td>
-                <td class="py-3 px-4"><span class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-bold">Parcel Delivery</span></td>
-                <td class="py-3 px-4 max-w-xs truncate text-slate-400">Saket District Center → Hauz Khas Village</td>
-                <td class="py-3 px-4 font-extrabold text-white">₹ 130</td>
-                <td class="py-3 px-4">
-                  <span class="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-bold">Searching Rider</span>
-                </td>
-                <td class="py-3 px-4 text-right">
-                  <button onclick="viewTripDetails('#RX-8847')" class="p-1.5 rounded bg-slate-800 hover:bg-brand-yellow hover:text-slate-950 text-slate-300 transition-colors">
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-    </main>
-  </div>
-
-  <!-- TRIP DETAILS MODAL -->
-  <div id="tripModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-brand-border space-y-5">
-      <div class="flex items-center justify-between border-b border-brand-border pb-3">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-          <i class="fa-solid fa-receipt text-brand-yellow"></i> Trip Snapshot <span id="modalTripId" class="text-brand-yellow">#RX-0000</span>
-        </h3>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="space-y-3 text-xs">
-        <div class="p-3 rounded-xl bg-slate-900 border border-brand-border space-y-2">
-          <p class="text-slate-400 font-semibold">Route Information</p>
-          <div class="flex items-start space-x-2">
-            <i class="fa-solid fa-circle-dot text-emerald-400 mt-0.5"></i>
-            <span class="text-white font-medium" id="modalPickup">Connaught Place, New Delhi</span>
-          </div>
-          <div class="flex items-start space-x-2">
-            <i class="fa-solid fa-location-dot text-brand-yellow mt-0.5"></i>
-            <span class="text-white font-medium" id="modalDrop">Cyber Hub, Gurugram</span>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div class="p-3 rounded-xl bg-slate-900 border border-brand-border">
-            <p class="text-slate-400">Payment Status</p>
-            <p class="text-white font-bold mt-1">UPI Paid (₹240)</p>
-          </div>
-          <div class="p-3 rounded-xl bg-slate-900 border border-brand-border">
-            <p class="text-slate-400">OTP Verified</p>
-            <p class="text-emerald-400 font-bold mt-1">YES (OTP: 4920)</p>
-          </div>
-        </div>
-      </div>
-
-      <button onclick="closeModal()" class="w-full py-2.5 rounded-xl bg-brand-yellow text-slate-950 text-xs font-black hover:bg-yellow-400 transition-all">
-        Close Window
-      </button>
+    <div class="metric-card">
+      <h3 id="totalRevenue">₹0</h3>
+      <p>Estimated Revenue</p>
     </div>
   </div>
 
-  <!-- JAVASCRIPT INITIALIZATION -->
+  <h2>Recent Transactions</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Ride ID</th>
+        <th>Service</th>
+        <th>Fare</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="ridesTableBody">
+      <tr><td colspan="4">Loading system data...</td></tr>
+    </tbody>
+  </table>
+
   <script>
-    // Sidebar Mobile Toggle
-    const mobileBtn = document.getElementById('mobileMenuBtn');
-    const sidebar = document.getElementById('sidebar');
+    document.addEventListener("DOMContentLoaded", () => {
+      db.collection('rides').onSnapshot((snapshot) => {
+        let count = snapshot.size;
+        let revenue = 0;
+        const tbody = document.getElementById('ridesTableBody');
+        tbody.innerHTML = "";
 
-    mobileBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('-translate-x-full');
-    });
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.fare) revenue += Number(data.fare);
 
-    // Leaflet Live Map Initialization
-    let map;
-    document.addEventListener('DOMContentLoaded', () => {
-      initMap();
-      initChart();
-    });
-
-    function initMap() {
-      // Coordinates for New Delhi / NCR Center
-      const centerLoc = [28.6139, 77.2090];
-      map = L.map('adminMap', {
-        zoomControl: true,
-        attributionControl: false
-      }).setView(centerLoc, 12);
-
-      // Dark theme tile layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19
-      }).addTo(map);
-
-      // Add Sample Fleet Markers
-      const riders = [
-        { lat: 28.6280, lng: 77.2189, name: 'Rider #102 - Bike Taxi', type: 'bike' },
-        { lat: 28.5900, lng: 77.2300, name: 'Cab #405 - Sedan', type: 'cab' },
-        { lat: 28.6350, lng: 77.2240, name: 'Rider #88 - Parcel', type: 'bike' },
-        { lat: 28.5450, lng: 77.1920, name: 'Cab #901 - SUV', type: 'cab' }
-      ];
-
-      riders.forEach(r => {
-        const iconHtml = r.type === 'bike' 
-          ? `<div class="w-7 h-7 rounded-full bg-brand-yellow text-black flex items-center justify-center font-bold text-xs shadow-glow-yellow ring-2 ring-black"><i class="fa-solid fa-motorcycle"></i></div>`
-          : `<div class="w-7 h-7 rounded-full bg-sky-400 text-black flex items-center justify-center font-bold text-xs ring-2 ring-black"><i class="fa-solid fa-car"></i></div>`;
-
-        const customIcon = L.divIcon({
-          html: iconHtml,
-          className: 'custom-leaflet-marker',
-          iconSize: [28, 28]
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${doc.id}</td>
+            <td>${data.serviceType || 'Bike'}</td>
+            <td>₹${data.fare || 0}</td>
+            <td><span style="color:${data.status === 'ACCEPTED' ? '#28a745' : '#FFC107'}">${data.status}</span></td>
+          `;
+          tbody.appendChild(row);
         });
 
-        L.marker([r.lat, r.lng], { icon: customIcon }).addTo(map).bindPopup(`<b style="color:#000">${r.name}</b>`);
+        document.getElementById('totalRides').innerText = count;
+        document.getElementById('totalRevenue').innerText = `₹${revenue}`;
       });
-    }
-
-    // Chart.js Category Breakdown
-    function initChart() {
-      const ctx = document.getElementById('categoryChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Bike Taxi', 'Cab Rides', 'Parcel Express'],
-          datasets: [{
-            data: [48, 35, 17],
-            backgroundColor: ['#FACC15', '#38BDF8', '#10B981'],
-            borderWidth: 0,
-            hoverOffset: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          cutout: '75%'
-        }
-      });
-    }
-
-    function refreshData() {
-      const activeEl = document.getElementById('activeTripsCounter');
-      const randomVal = Math.floor(Math.random() * 20) + 135;
-      activeEl.textContent = randomVal;
-    }
-
-    function viewTripDetails(tripId) {
-      document.getElementById('modalTripId').textContent = tripId;
-      document.getElementById('tripModal').classList.remove('hidden');
-    }
-
-    function closeModal() {
-      document.getElementById('tripModal').classList.add('hidden');
-    }
+    });
   </script>
 </body>
 </html>
