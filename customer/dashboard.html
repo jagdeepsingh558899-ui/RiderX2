@@ -2,53 +2,45 @@
 <html lang="en">
 
 <head>
-  
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Dashboard</title>
+<title>RiderX Customer Dashboard</title>
+
 
 <link rel="stylesheet" href="../css/style.css">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
-
-
 body{
-
+margin:0;
 background:#000;
-color:white;
-
+color:#fff;
+font-family:Arial;
+padding-bottom:80px;
 }
 
 
 .header{
 
+height:65px;
 background:#111;
-
-padding:20px;
-
-border-bottom:2px solid #FFD600;
-
 display:flex;
-
 justify-content:space-between;
-
 align-items:center;
+padding:0 20px;
+border-bottom:2px solid #FFD600;
 
 }
 
 
 .logo{
 
-font-size:28px;
+font-size:30px;
 font-weight:900;
 
 }
@@ -61,118 +53,126 @@ color:#FFD600;
 }
 
 
-.profile{
+#map{
 
-font-size:25px;
-
-}
-
-
-
-.container{
-
-padding:20px;
+height:40vh;
+width:100%;
 
 }
 
 
 
-.welcome{
+.box{
 
 background:#111;
-
 padding:20px;
-
-border-radius:20px;
-
-margin-bottom:20px;
+border-radius:25px 25px 0 0;
 
 }
 
 
 
-.welcome h2 span{
-
-color:#FFD600;
-
-}
-
-
-
-
-.book{
-
-background:#FFD600;
-
-color:#000;
-
-padding:20px;
-
-border-radius:20px;
-
-text-align:center;
-
-font-size:22px;
-
-font-weight:bold;
-
-margin-bottom:20px;
-
-}
-
-
-
-.grid{
+.services{
 
 display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:15px;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
 
 }
 
 
 
-.card{
+.service{
 
+background:#000;
+padding:12px 5px;
+border-radius:15px;
+text-align:center;
+border:1px solid #333;
+font-size:12px;
+
+}
+
+
+.service.active{
+
+background:#FFD600;
+color:#000;
+
+}
+
+
+
+.input{
+
+width:100%;
+padding:14px;
+margin:8px 0;
+background:#000;
+color:#fff;
+border:1px solid #444;
+border-radius:12px;
+
+}
+
+
+
+.fare{
+
+display:flex;
+justify-content:space-between;
+background:#000;
+padding:15px;
+border-radius:15px;
+
+}
+
+
+
+#fare{
+
+color:#FFD600;
+font-size:25px;
+font-weight:bold;
+
+}
+
+
+
+.btn{
+
+width:100%;
+padding:16px;
+margin-top:15px;
+background:#FFD600;
+color:#000;
+border:none;
+border-radius:15px;
+font-size:18px;
+font-weight:bold;
+
+}
+
+
+
+.bottom{
+
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
 background:#111;
+display:flex;
+justify-content:space-around;
+padding:12px 0;
 
-padding:20px;
+}
 
-border-radius:18px;
+
+.bottom div{
 
 text-align:center;
-
-border:1px solid #333;
-
-}
-
-
-
-.card:hover{
-
-border-color:#FFD600;
-
-}
-
-
-
-.icon{
-
-font-size:30px;
-
-margin-bottom:10px;
-
-}
-
-
-
-a{
-
-color:white;
-
-text-decoration:none;
+font-size:12px;
 
 }
 
@@ -198,7 +198,7 @@ RIDER<span>X</span>
 </div>
 
 
-<div class="profile">
+<div>
 
 👤
 
@@ -211,37 +211,153 @@ RIDER<span>X</span>
 
 
 
-<div class="container">
+<div id="map"></div>
 
 
 
-<div class="welcome">
 
 
-<h2>
 
-Welcome <span>Customer</span>
-
-</h2>
+<div class="box">
 
 
-<p>
 
-Book Bike Taxi, Cab, Parcel & Food Delivery
+
+
+<div class="services">
+
+
+<div class="service active" data-type="bike">
+
+🏍️
+<br>
+Bike
+
+</div>
+
+
+<div class="service" data-type="cab">
+
+🚕
+<br>
+Cab
+
+</div>
+
+
+<div class="service" data-type="parcel">
+
+📦
+<br>
+Parcel
+
+</div>
+
+
+<div class="service" data-type="food">
+
+🍔
+<br>
+Food
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<input 
+id="pickup"
+class="input"
+placeholder="Pickup Location">
+
+
+
+
+
+<input 
+id="drop"
+class="input"
+placeholder="Drop Location">
+
+
+
+
+
+
+<div class="fare">
+
+<span>
+Estimated Fare
+</span>
+
+
+<span id="fare">
+
+₹0
+
+</span>
+
+
+</div>
+
+
+
+
+
+
+<select id="payment" class="input">
+
+
+<option value="cash">
+
+💵 Cash
+
+</option>
+
+
+<option value="online">
+
+📱 UPI Online
+
+</option>
+
+
+<option value="wallet">
+
+💳 Wallet
+
+</option>
+
+
+</select>
+
+
+
+
+
+
+
+<button id="bookRide" class="btn">
+
+🚕 Book Ride
+
+</button>
+
+
+
+
+<p id="status"
+style="text-align:center;margin-top:15px;color:#FFD600">
 
 </p>
 
 
-</div>
-
-
-
-
-
-
-<div class="book" onclick="openBooking()">
-
-🚕 Book A Ride
 
 </div>
 
@@ -249,88 +365,50 @@ Book Bike Taxi, Cab, Parcel & Food Delivery
 
 
 
-<div class="grid">
 
 
 
-<a href="history.html">
+<div class="bottom">
 
-<div class="card">
 
-<div class="icon">
+<div onclick="location.href='home.html'">
+
+🏠
+<br>
+Home
+
+</div>
+
+
+
+<div onclick="location.href='history.html'">
 
 📜
-
-</div>
-
+<br>
 History
 
 </div>
 
-</a>
 
 
-
-
-<a href="wallet.html">
-
-<div class="card">
-
-<div class="icon">
+<div onclick="location.href='wallet.html'">
 
 💰
-
-</div>
-
+<br>
 Wallet
 
 </div>
 
-</a>
 
 
-
-
-<a href="notifications.html">
-
-<div class="card">
-
-<div class="icon">
-
-🔔
-
-</div>
-
-Notifications
-
-</div>
-
-</a>
-
-
-
-
-<a href="profile.html">
-
-<div class="card">
-
-<div class="icon">
+<div onclick="location.href='profile.html'">
 
 👤
-
-</div>
-
+<br>
 Profile
 
 </div>
 
-</a>
-
-
-
-
-</div>
-
 
 
 </div>
@@ -340,17 +418,12 @@ Profile
 
 
 
-<script>
 
 
-function openBooking(){
-
-window.location.href="booking.html";
-
-}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
-</script>
+<script type="module" src="../js/customer.js"></script>
 
 
 
