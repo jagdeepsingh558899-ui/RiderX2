@@ -1,6 +1,5 @@
-// RiderX Authentication System
-// Firebase v10 Modular SDK
-// Customer + Rider + Admin Role Management
+// RiderX Authentication Guard
+// Firebase v10.8.0 Compatible
 
 
 import {
@@ -21,8 +20,9 @@ from "../firebase/firebase-config.js";
 
 
 // ===============================
-// ROLE BASED REDIRECT
+// ROLE REDIRECT
 // ===============================
+
 
 async function redirectByRole(uid){
 
@@ -30,18 +30,18 @@ async function redirectByRole(uid){
 try{
 
 
-const userRef =
-doc(db,"users",uid);
-
-
 const snap =
-await getDoc(userRef);
+await getDoc(
+doc(db,"users",uid)
+);
 
 
 
 if(!snap.exists()){
 
-console.log("User profile not found");
+
+console.log("User profile missing");
+
 return;
 
 }
@@ -50,7 +50,6 @@ return;
 
 const user =
 snap.data();
-
 
 
 
@@ -64,12 +63,7 @@ window.location.href =
 
 }
 
-
-
-
-
 else if(user.role==="rider"){
-
 
 
 if(user.approved===true && user.status==="active"){
@@ -93,10 +87,6 @@ window.location.href =
 
 }
 
-
-
-
-
 else{
 
 
@@ -112,16 +102,18 @@ window.location.href =
 
 catch(error){
 
+
 console.error(
-"Redirect Error:",
+"Role Redirect Error:",
 error
 );
 
-}
-
 
 }
 
+
+
+}
 
 
 
@@ -130,7 +122,7 @@ error
 
 
 // ===============================
-// LOGIN SESSION CHECK
+// AUTH CHECK
 // ===============================
 
 
@@ -147,8 +139,13 @@ window.location.pathname;
 if(user){
 
 
-
-if(path.includes("/auth/")){
+if(
+path.includes("/auth/")
+||
+path.endsWith("index.html")
+||
+path==="/"
+){
 
 
 redirectByRole(user.uid);
@@ -163,13 +160,10 @@ redirectByRole(user.uid);
 else{
 
 
-
 if(
 
 path.includes("/customer/") ||
-
 path.includes("/rider/") ||
-
 path.includes("/admin/")
 
 ){
@@ -187,11 +181,7 @@ window.location.href =
 
 
 
-}
-
-);
-
-
+});
 
 
 
@@ -226,7 +216,6 @@ console.error(error);
 
 
 }
-
 
 
 }
