@@ -1,219 +1,363 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RiderX | Commission & Revenue Rules</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<title>RiderX Commission</title>
+  <!-- FontAwesome 6 Pro CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<link rel="stylesheet" href="../css/style.css">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              yellowHover: '#EAB308',
+              gold: '#EAB308',
+              dark: '#090D16',
+              card: '#111827',
+              border: 'rgba(255, 255, 255, 0.08)',
+              glass: 'rgba(17, 24, 39, 0.75)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
+            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+          }
+        }
+      }
+    }
+  </script>
 
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FACC15;
+    }
 
-<style>
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-.box{
-
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-
-}
-
-
-input{
-
-width:100%;
-padding:12px;
-margin:10px 0;
-border-radius:8px;
-border:none;
-
-}
-
-
-button{
-
-width:100%;
-padding:14px;
-background:#ffcc00;
-border:none;
-border-radius:10px;
-font-weight:bold;
-
-}
-
-</style>
-
-
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
 </head>
 
-
-<body>
-
-
-<div class="header">
-
-💰 Commission Settings
-
-</div>
-
-
-
-<div class="container">
-
-
-<div class="box">
-
-
-<h3>
-🏍 Rider Commission
-</h3>
-
-
-<input id="riderCommission" placeholder="Rider Commission %">
-
-
-
-<h3>
-🏦 Platform Commission
-</h3>
-
-
-<input id="platformCommission" placeholder="Platform Commission %">
-
-
-
-<button onclick="saveCommission()">
-
-Save Commission
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-doc,
-setDoc,
-getDoc
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
-
-async function load(){
-
-
-let snap=
-
-await getDoc(
-
-doc(db,"settings","commission")
-
-);
-
-
-
-if(snap.exists()){
-
-
-let d=snap.data();
-
-
-
-riderCommission.value=
-
-d.riderCommission || "";
-
-
-
-platformCommission.value=
-
-d.platformCommission || "";
-
-
-}
-
-
-
-}
-
-
-
-
-
-window.saveCommission=async function(){
-
-
-
-await setDoc(
-
-doc(db,"settings","commission"),
-
-{
-
-
-riderCommission:
-
-Number(riderCommission.value),
-
-
-
-platformCommission:
-
-Number(platformCommission.value)
-
-
-
-}
-
-);
-
-
-
-alert("Commission Saved ✅");
-
-
-}
-
-
-
-
-
-
-load();
-
-
-
-</script>
-
-
+<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- TOP HEADER / BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
+        <i class="fa-solid fa-bars-staggered text-lg"></i>
+      </button>
+      <a href="dashboard.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
+            RIDER<span class="text-brand-yellow">X</span>
+            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <div class="flex items-center space-x-3 lg:space-x-5">
+      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <span>Revenue Engine Live</span>
+      </div>
+
+      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
+        <div class="hidden md:block">
+          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
+          <p class="text-[10px] text-slate-400">Super Admin</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- SIDE NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
+      <div class="px-4 py-6 space-y-8 overflow-y-auto">
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
+          <nav class="space-y-1">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
+              <span>Trips & Live Map</span>
+            </a>
+            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
+              <span>Riders</span>
+            </a>
+            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
+                <span>Rider Approvals</span>
+              </div>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
+            </a>
+            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
+              <span>Customers</span>
+            </a>
+          </nav>
+        </div>
+
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
+          <nav class="space-y-1">
+            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
+              <span>Fare & Pricing</span>
+            </a>
+            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
+              <i class="fa-solid fa-percent text-base"></i>
+              <span>Commission Rules</span>
+            </a>
+            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
+              <span>Payouts & Wallet</span>
+            </a>
+            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
+              <span>Coupons & Offers</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+
+      <!-- HEADER ACTION BAR -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-percent text-brand-yellow"></i> Platform Commission & Revenue Rules
+          </h1>
+          <p class="text-xs text-slate-400">Manage platform commission rates per vehicle type, driver performance tiers, and tax fee deductions.</p>
+        </div>
+
+        <button onclick="saveCommissionRules()" class="px-5 py-2.5 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-slate-950 text-xs font-extrabold transition-all shadow-glow-yellow flex items-center space-x-2">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Deploy Commission Rules</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- COMMISSION SETTINGS BY CATEGORY (2 COLS) -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="glass-panel p-6 rounded-2xl border border-brand-border space-y-5">
+            <div class="flex items-center justify-between border-b border-brand-border pb-4">
+              <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                <i class="fa-solid fa-gears text-brand-yellow"></i> Category Commission Rates
+              </h3>
+              <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                Default Rate: 15%
+              </span>
+            </div>
+
+            <!-- VEHICLE CATEGORY COMMISSION SLIDERS -->
+            <div class="space-y-4">
+              <div class="p-4 bg-slate-900/90 rounded-xl border border-brand-border space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-motorcycle text-brand-yellow"></i> Bike Taxi
+                  </span>
+                  <span id="bikeRateLabel" class="font-extrabold text-brand-yellow">12%</span>
+                </div>
+                <input type="range" id="bikeRateSlider" min="5" max="30" value="12" oninput="updateCommissionCalc()" class="w-full accent-yellow-400 cursor-pointer" />
+              </div>
+
+              <div class="p-4 bg-slate-900/90 rounded-xl border border-brand-border space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-taxi text-brand-yellow"></i> Sedan Cab
+                  </span>
+                  <span id="sedanRateLabel" class="font-extrabold text-brand-yellow">18%</span>
+                </div>
+                <input type="range" id="sedanRateSlider" min="5" max="30" value="18" oninput="updateCommissionCalc()" class="w-full accent-yellow-400 cursor-pointer" />
+              </div>
+
+              <div class="p-4 bg-slate-900/90 rounded-xl border border-brand-border space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-truck-monster text-brand-yellow"></i> SUV Cab
+                  </span>
+                  <span id="suvRateLabel" class="font-extrabold text-brand-yellow">20%</span>
+                </div>
+                <input type="range" id="suvRateSlider" min="5" max="30" value="20" oninput="updateCommissionCalc()" class="w-full accent-yellow-400 cursor-pointer" />
+              </div>
+
+              <div class="p-4 bg-slate-900/90 rounded-xl border border-brand-border space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                  <span class="font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-box text-brand-yellow"></i> Parcel Express
+                  </span>
+                  <span id="parcelRateLabel" class="font-extrabold text-brand-yellow">15%</span>
+                </div>
+                <input type="range" id="parcelRateSlider" min="5" max="30" value="15" oninput="updateCommissionCalc()" class="w-full accent-yellow-400 cursor-pointer" />
+              </div>
+            </div>
+
+            <!-- ADDITIONAL FEES & TAX DEDUCTIONS -->
+            <div class="border-t border-brand-border pt-4 space-y-4">
+              <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Fixed Platform & Statutory Fees</h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div class="space-y-1.5">
+                  <label class="font-semibold text-slate-400">Fixed Technology Fee (Per Trip)</label>
+                  <div class="relative">
+                    <input type="number" id="fixedTechFee" value="5" oninput="updateCommissionCalc()" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2 text-white font-bold focus:outline-none focus:border-brand-yellow" />
+                    <span class="absolute right-3 top-2 text-slate-500 font-bold">₹</span>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="font-semibold text-slate-400">GST Deduction Rate (%)</label>
+                  <div class="relative">
+                    <input type="number" id="gstRate" value="5" oninput="updateCommissionCalc()" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2 text-white font-bold focus:outline-none focus:border-brand-yellow" />
+                    <span class="absolute right-3 top-2 text-slate-500 font-bold">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVENUE SPLIT SIMULATOR (1 COL) -->
+        <div class="space-y-6">
+          <div class="glass-panel p-6 rounded-2xl border border-brand-border space-y-5">
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-pie text-brand-yellow"></i> Split Calculator
+            </h3>
+            <p class="text-xs text-slate-400">Test how a sample ride fare is split between the driver, platform, and tax authority.</p>
+
+            <div class="space-y-3 bg-slate-900/90 p-4 rounded-xl border border-brand-border text-xs">
+              <div class="space-y-1">
+                <label class="text-slate-400 font-medium">Sample Ride Total (₹)</label>
+                <input type="number" id="simRideFare" value="350" oninput="updateCommissionCalc()" class="w-full bg-slate-950 border border-brand-border rounded-lg px-3 py-1.5 text-brand-yellow font-extrabold text-sm" />
+              </div>
+
+              <div class="border-t border-brand-border my-2 pt-3 space-y-2.5">
+                <div class="flex justify-between items-center text-slate-400">
+                  <span>Gross Trip Fare:</span>
+                  <span id="calcGross" class="text-white font-bold">₹ 350</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-400">
+                  <span>Platform Cut (<span id="simCutPct">18%</span>):</span>
+                  <span id="calcPlatformCut" class="text-amber-400 font-bold">₹ 63</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-400">
+                  <span>Fixed Tech Fee:</span>
+                  <span id="calcTechFee" class="text-amber-400 font-bold">₹ 5</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-400">
+                  <span>GST (5%):</span>
+                  <span id="calcGst" class="text-rose-400 font-bold">₹ 17.50</span>
+                </div>
+
+                <div class="border-t border-brand-border pt-3 flex justify-between items-center">
+                  <div>
+                    <p class="font-extrabold text-emerald-400 text-sm">Driver Net Take-Home</p>
+                    <p class="text-[10px] text-slate-500">Credited directly to wallet</p>
+                  </div>
+                  <span id="calcDriverPayout" class="text-lg font-black text-emerald-400">₹ 264.50</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+      updateCommissionCalc();
+    });
+
+    function updateCommissionCalc() {
+      const sedanRate = document.getElementById('sedanRateSlider').value;
+      const bikeRate = document.getElementById('bikeRateSlider').value;
+      const suvRate = document.getElementById('suvRateSlider').value;
+      const parcelRate = document.getElementById('parcelRateSlider').value;
+
+      document.getElementById('sedanRateLabel').textContent = `${sedanRate}%`;
+      document.getElementById('bikeRateLabel').textContent = `${bikeRate}%`;
+      document.getElementById('suvRateLabel').textContent = `${suvRate}%`;
+      document.getElementById('parcelRateLabel').textContent = `${parcelRate}%`;
+
+      const gross = parseFloat(document.getElementById('simRideFare').value) || 0;
+      const techFee = parseFloat(document.getElementById('fixedTechFee').value) || 0;
+      const gstPct = parseFloat(document.getElementById('gstRate').value) || 0;
+
+      const commRate = parseFloat(sedanRate) / 100;
+      const commCut = gross * commRate;
+      const gstAmount = gross * (gstPct / 100);
+      const driverPayout = gross - commCut - techFee - gstAmount;
+
+      document.getElementById('simCutPct').textContent = `${sedanRate}%`;
+      document.getElementById('calcGross').textContent = `₹ ${gross.toFixed(2)}`;
+      document.getElementById('calcPlatformCut').textContent = `₹ ${commCut.toFixed(2)}`;
+      document.getElementById('calcTechFee').textContent = `₹ ${techFee.toFixed(2)}`;
+      document.getElementById('calcGst').textContent = `₹ ${gstAmount.toFixed(2)}`;
+      document.getElementById('calcDriverPayout').textContent = `₹ ${Math.max(0, driverPayout).toFixed(2)}`;
+    }
+
+    function saveCommissionRules() {
+      alert('Commission rates and statutory deduction parameters updated successfully.');
+    }
+  </script>
 </body>
-
 </html>
