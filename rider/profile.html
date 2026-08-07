@@ -10,86 +10,367 @@
 <title>RiderX Rider Profile</title>
 
 
-<link rel="stylesheet" href="../css/Style.css">
-
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 
 <style>
 
-body{
-background:#090A0F;
-color:white;
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
 
 
+body{
+
+background:#050505;
+color:#fff;
+padding-bottom:90px;
+
+}
+
+
+:root{
+
+--yellow:#FFE500;
+--card:#121212;
+
+}
+
+
+
+
+.header{
+
+height:70px;
+
+background:#111;
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:0 20px;
+
+border-bottom:1px solid #222;
+
+}
+
+
+
+.logo{
+
+font-size:30px;
+
+font-weight:900;
+
+}
+
+
+
+.logo span{
+
+color:var(--yellow);
+
+}
+
+
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+
+
 .card{
 
-background:#12141C;
-border:1px solid #2A2E3D;
-border-radius:20px;
+background:var(--card);
+
+border-radius:22px;
+
+padding:20px;
+
+border:1px solid #292929;
+
+margin-bottom:20px;
 
 }
 
 
-.yellow{
 
-color:#FFE500;
+
+
+.profile-top{
+
+text-align:center;
 
 }
 
 
-.btn{
 
-background:#FFE500;
+
+.profile-img{
+
+width:120px;
+
+height:120px;
+
+border-radius:50%;
+
+object-fit:cover;
+
+border:4px solid var(--yellow);
+
+}
+
+
+
+
+
+.photo-btn{
+
+display:inline-block;
+
+margin-top:15px;
+
+background:var(--yellow);
+
 color:#000;
-font-weight:bold;
+
+padding:10px 20px;
+
 border-radius:12px;
 
+font-weight:bold;
+
 }
+
+
+
+
+
+#photoInput{
+
+display:none;
+
+}
+
+
+
+
+
+.name{
+
+font-size:22px;
+
+font-weight:bold;
+
+margin-top:10px;
+
+}
+
+
+
+.rider-id{
+
+color:#999;
+
+margin-top:5px;
+
+}
+
+
+
+
+
+.input-group{
+
+margin-top:15px;
+
+}
+
+
+
+.input-group label{
+
+display:block;
+
+color:#999;
+
+font-size:14px;
+
+margin-bottom:7px;
+
+}
+
 
 
 .input{
 
 width:100%;
-background:#090A0F;
-border:1px solid #2A2E3D;
-padding:12px;
+
+padding:14px;
+
+background:#000;
+
+border:1px solid #333;
+
 border-radius:12px;
+
+color:white;
+
+outline:none;
+
+}
+
+
+
+
+
+.btn{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:14px;
+
+margin-top:15px;
+
+background:var(--yellow);
+
+color:#000;
+
+font-size:16px;
+
+font-weight:bold;
+
+}
+
+
+
+
+
+.setting{
+
+background:#1b1b1b;
+
+color:white;
+
+border:1px solid #333;
+
+}
+
+
+
+.logout{
+
+background:#ff3030;
+
 color:white;
 
 }
+
+
+
+
+.bottom{
+
+position:fixed;
+
+bottom:0;
+
+left:0;
+
+right:0;
+
+height:75px;
+
+background:#111;
+
+display:flex;
+
+justify-content:space-around;
+
+align-items:center;
+
+border-top:1px solid #333;
+
+}
+
+
+
+.bottom a{
+
+color:#777;
+
+text-decoration:none;
+
+text-align:center;
+
+font-size:12px;
+
+}
+
+
+
+.bottom i{
+
+font-size:22px;
+
+display:block;
+
+margin-bottom:5px;
+
+}
+
+
+
+.active{
+
+color:var(--yellow)!important;
+
+}
+
+
 
 </style>
 
 </head>
 
 
-<body class="pb-24">
+
+<body>
 
 
-<header class="p-4 border-b border-gray-800 flex justify-between items-center">
+
+<header class="header">
 
 
-<h1 class="text-2xl font-bold">
+<div class="logo">
 
-RID<span class="yellow">ERX</span>
+RID<span>ERX</span>
 
-</h1>
+</div>
 
 
-<button onclick="handleLogout()"
-class="text-red-400">
+<i onclick="logout()"
+class="fa-solid fa-right-from-bracket"
+style="color:#ff3030;font-size:22px">
 
-<i class="fa-solid fa-right-from-bracket"></i>
-
-</button>
+</i>
 
 
 </header>
@@ -98,107 +379,64 @@ class="text-red-400">
 
 
 
-<main class="p-4 max-w-3xl mx-auto">
-
-
-<div id="profileSkeleton"
-class="card p-6">
-
-Loading Profile...
-
-</div>
+<div class="container">
 
 
 
 
 
-<div id="profileContent"
-class="hidden">
+<div class="card profile-top">
 
 
-<div class="card p-6 mb-5 text-center">
+
+<img id="profileImage"
+
+src="../assets/Logo/RiderX-logo.png"
+
+class="profile-img">
 
 
-<div class="relative inline-block">
+
+<br>
 
 
-<img id="avatarImage"
-src="https://ui-avatars.com/api/?name=Rider"
-class="w-28 h-28 rounded-full border-4 border-yellow-400 object-cover">
-
-
-<label for="photoFileInput"
-class="absolute bottom-0 right-0 bg-yellow-400 text-black p-3 rounded-full cursor-pointer">
+<label class="photo-btn"
+for="photoInput">
 
 
 <i class="fa-solid fa-camera"></i>
+
+Change Photo
 
 
 </label>
 
 
-<input id="photoFileInput"
+
+<input id="photoInput"
 type="file"
-accept="image/*"
-class="hidden"
-onchange="handlePhotoUpload(event)">
-
-
-</div>
+accept="image/*">
 
 
 
-<h2 id="headerFullName"
-class="text-xl font-bold mt-3">
+
+
+<div class="name"
+id="riderName">
 
 Rider
 
-</h2>
-
-
-<p id="headerRiderId"
-class="text-gray-400 text-sm">
-
-ID:-
-
-</p>
-
-
-<div class="mt-3">
-
-
-<span id="headerVehicleType"
-class="yellow font-bold">
-
-BIKE
-
-</span>
-
-
-<span class="mx-2">
-
-|
-
-</span>
-
-
-⭐
-<span id="headerRating">
-
-5.0
-
-</span>
-
 
 </div>
 
 
-<p id="headerTripsCount"
-class="text-gray-400 mt-2">
 
-0 Rides
+<div class="rider-id">
 
-</p>
+Rider ID:
+<span id="riderId">---</span>
+
+</div>
 
 
 
@@ -208,12 +446,12 @@ class="text-gray-400 mt-2">
 
 
 
-<form id="profileForm"
-onsubmit="handleProfileUpdate(event)"
-class="card p-6 space-y-4">
+
+<div class="card">
 
 
-<h3 class="yellow font-bold text-lg">
+
+<h3 style="color:#FFE500">
 
 Personal Information
 
@@ -221,81 +459,537 @@ Personal Information
 
 
 
-<input id="inputFullName"
-class="input"
-placeholder="Full Name">
 
 
+<div class="input-group">
 
-<input id="inputPhone"
-class="input"
-placeholder="Phone"
-disabled>
+<label>Name</label>
 
-
-
-<input id="inputEmail"
-class="input"
-placeholder="Email">
-
-
-
-<input id="inputDOB"
-type="date"
+<input id="name"
 class="input">
 
+</div>
 
 
-<select id="inputGender"
+
+
+<div class="input-group">
+
+<label>Phone</label>
+
+<input id="phone"
 class="input">
 
-
-<option>Male</option>
-
-<option>Female</option>
-
-<option>Other</option>
-
-
-</select>
+</div>
 
 
 
-<input id="inputVehicleType"
+
+
+<div class="input-group">
+
+<label>Email</label>
+
+<input id="email"
 class="input"
-placeholder="Vehicle Type"
-disabled>
+readonly>
+
+</div>
 
 
 
-<textarea id="inputAddress"
+
+
+<div class="input-group">
+
+<label>Address</label>
+
+<textarea id="address"
+class="input"></textarea>
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3 style="color:#FFE500">
+
+Vehicle Details
+
+</h3>
+
+
+
+
+<div class="input-group">
+
+<label>Vehicle Type</label>
+
+<input id="vehicleType"
 class="input"
-placeholder="Address"></textarea>
+placeholder="Bike">
+
+</div>
 
 
 
-<button class="btn w-full p-3">
+
+<div class="input-group">
+
+<label>Vehicle Number</label>
+
+<input id="vehicleNumber"
+class="input"
+placeholder="PB XX XXXX">
+
+</div>
+
+
+
+<button class="btn"
+onclick="saveProfile()">
+
 
 <i class="fa-solid fa-save"></i>
 
 Save Profile
 
+
 </button>
 
 
-</form>
+
+<button class="btn setting"
+onclick="openSettings()">
+
+
+<i class="fa-solid fa-gear"></i>
+
+Settings
+
+
+</button>
+
+
+
+<button class="btn logout"
+onclick="logout()">
+
+
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Logout
+
+
+</button>
+
+
+
+</div>
+<script type="module">
+
+import {
+
+auth,
+db,
+storage
+
+}
+
+from "../firebase/firebase-config.js";
+
+
+
+import {
+
+onAuthStateChanged,
+signOut
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+
+
+import {
+
+doc,
+getDoc,
+setDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+
+import {
+
+ref,
+uploadBytes,
+getDownloadURL
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+
+
+
+
+let currentUser=null;
+
+let selectedPhoto=null;
+
+
+
+
+
+
+
+// ===========================
+// LOAD RIDER PROFILE
+// ===========================
+
+
+onAuthStateChanged(auth,async(user)=>{
+
+
+if(!user){
+
+
+location.href="../auth/login.html";
+
+return;
+
+
+}
+
+
+
+currentUser=user;
+
+
+
+email.value=user.email || "";
+
+
+
+const snap =
+await getDoc(
+doc(db,"users",user.uid)
+);
+
+
+
+if(snap.exists()){
+
+
+const data=snap.data();
+
+
+
+name.value=data.name || "";
+
+phone.value=data.phone || "";
+
+address.value=data.address || "";
+
+vehicleType.value=data.vehicleType || "Bike";
+
+vehicleNumber.value=data.vehicleNumber || "";
+
+
+
+riderName.innerText =
+data.name || "Rider";
+
+
+
+riderId.innerText =
+user.uid.substring(0,8);
+
+
+
+
+if(data.photoURL){
+
+profileImage.src=data.photoURL;
+
+}
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+// ===========================
+// PHOTO SELECT
+// ===========================
+
+
+photoInput.addEventListener(
+"change",
+(e)=>{
+
+
+selectedPhoto=e.target.files[0];
+
+
+
+if(selectedPhoto){
+
+
+let reader=new FileReader();
+
+
+
+reader.onload=()=>{
+
+
+profileImage.src=reader.result;
+
+
+};
+
+
+
+reader.readAsDataURL(selectedPhoto);
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+
+// ===========================
+// SAVE PROFILE
+// ===========================
+
+
+window.saveProfile=async()=>{
+
+
+try{
+
+
+let photoURL="";
+
+
+
+if(selectedPhoto){
+
+
+
+const imageRef =
+ref(
+storage,
+"riders/profile/"+currentUser.uid
+);
+
+
+
+await uploadBytes(
+imageRef,
+selectedPhoto
+);
+
+
+
+photoURL =
+await getDownloadURL(imageRef);
+
+
+
+}
+
+
+
+
+
+let data={
+
+
+name:name.value.trim(),
+
+
+phone:phone.value.trim(),
+
+
+address:address.value.trim(),
+
+
+vehicleType:
+vehicleType.value,
+
+
+vehicleNumber:
+vehicleNumber.value,
+
+
+role:"rider",
+
+
+updatedAt:new Date()
+
+
+
+};
+
+
+
+
+
+if(photoURL){
+
+
+data.photoURL=photoURL;
+
+
+}
+
+
+
+
+
+
+await setDoc(
+
+doc(
+db,
+"users",
+currentUser.uid
+),
+
+
+data,
+
+
+{
+merge:true
+}
+
+);
+
+
+
+alert(
+"Profile Updated Successfully"
+);
+
+
+
+riderName.innerText=name.value;
+
+
+
+}
+
+
+
+catch(error){
+
+
+alert(error.message);
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ===========================
+// SETTINGS
+// ===========================
+
+
+window.openSettings=()=>{
+
+
+location.href="settings.html";
+
+
+};
+
+
+
+
+
+
+
+
+// ===========================
+// LOGOUT
+// ===========================
+
+
+window.logout=async()=>{
+
+
+await signOut(auth);
+
+
+location.href="../auth/login.html";
+
+
+};
+
+
+
+</script>
+
+
+
+
+
 <!-- Bottom Navigation -->
 
-<nav class="fixed bottom-0 left-0 right-0 bg-[#12141C] border-t border-gray-800 p-3">
-
-<div class="flex justify-around text-xs text-gray-400">
+<nav class="bottom">
 
 
-<a href="./Home.html" class="text-center">
+<a href="home.html">
 
-<i class="fa-solid fa-house text-lg"></i>
-
-<br>
+<i class="fa-solid fa-house"></i>
 
 Home
 
@@ -303,11 +997,9 @@ Home
 
 
 
-<a href="./Rides.html" class="text-center">
+<a href="rides.html">
 
-<i class="fa-solid fa-route text-lg"></i>
-
-<br>
+<i class="fa-solid fa-motorcycle"></i>
 
 Rides
 
@@ -316,11 +1008,9 @@ Rides
 
 
 
-<a href="./Wallet.html" class="text-center">
+<a href="wallet.html">
 
-<i class="fa-solid fa-wallet text-lg"></i>
-
-<br>
+<i class="fa-solid fa-wallet"></i>
 
 Wallet
 
@@ -329,27 +1019,28 @@ Wallet
 
 
 
-<a href="./Profile.html" class="text-center text-yellow-400">
+<a href="profile.html" class="active">
 
-<i class="fa-solid fa-user text-lg"></i>
-
-<br>
+<i class="fa-solid fa-user"></i>
 
 Profile
 
 </a>
 
 
-</div>
+<a href="settings.html">
+
+<i class="fa-solid fa-gear"></i>
+
+Settings
+
+</a>
+
+
 
 </nav>
 
 
-
-
-<!-- Firebase Profile JS -->
-
-<script type="module" src="js/profile.js"></script>
 
 
 </body>
