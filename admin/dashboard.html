@@ -14,38 +14,30 @@
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 
-
 <style>
 
 :root{
-
 --yellow:#FFE500;
 --black:#050505;
 --card:#111;
 --border:#222;
 --gray:#999;
-
 }
 
 
 *{
-
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:Arial,sans-serif;
-
 }
 
 
-
 body{
-
 background:var(--black);
 color:white;
 min-height:100vh;
 padding-bottom:80px;
-
 }
 
 
@@ -200,6 +192,16 @@ color:var(--yellow);
 
 
 
+.error{
+
+text-align:center;
+color:red;
+margin-top:15px;
+
+}
+
+
+
 @media(max-width:600px){
 
 .grid{
@@ -207,21 +209,6 @@ color:var(--yellow);
 grid-template-columns:repeat(2,1fr);
 
 }
-
-
-.card{
-
-padding:15px;
-
-}
-
-
-.number{
-
-font-size:24px;
-
-}
-
 
 }
 
@@ -234,7 +221,6 @@ font-size:24px;
 
 
 <header class="header">
-
 
 <div class="logo">
 
@@ -267,6 +253,11 @@ class="loading">
 Loading Dashboard...
 
 </div>
+
+
+
+<div id="error"
+class="error"></div>
 
 
 
@@ -337,13 +328,6 @@ Loading Dashboard...
 
 
 <div class="card">
-<i class="fa-solid fa-calendar-day"></i>
-<div id="todayRevenue" class="number">₹0</div>
-<div class="title">Today Revenue</div>
-</div>
-
-
-<div class="card">
 <i class="fa-solid fa-percent"></i>
 <div id="commission" class="number">₹0</div>
 <div class="title">Admin Commission</div>
@@ -355,69 +339,47 @@ Loading Dashboard...
 <div id="riderEarn" class="number">₹0</div>
 <div class="title">Rider Earnings</div>
 </div>
-</div>
 
+
+</div>
 
 
 <div class="menu">
 
 
 <button onclick="openPage('riders.html')">
-
 <i class="fa-solid fa-motorcycle"></i>
-
 Manage Riders
-
 </button>
-
 
 
 <button onclick="openPage('customers.html')">
-
 <i class="fa-solid fa-users"></i>
-
 Manage Customers
-
 </button>
-
 
 
 <button onclick="openPage('rides.html')">
-
 <i class="fa-solid fa-route"></i>
-
 Manage Rides
-
 </button>
-
 
 
 <button onclick="openPage('fare-settings.html')">
-
 <i class="fa-solid fa-money-bill"></i>
-
 Fare Settings
-
 </button>
-
 
 
 <button onclick="openPage('commission.html')">
-
 <i class="fa-solid fa-percent"></i>
-
 Commission Settings
-
 </button>
-
 
 
 <button onclick="openPage('settings.html')">
-
 <i class="fa-solid fa-gear"></i>
-
 App Settings
-
 </button>
 
 
@@ -425,11 +387,6 @@ App Settings
 
 
 </div>
-
-
-
-
-
 <script type="module">
 
 
@@ -469,68 +426,52 @@ from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
-// ===============================
-// ELEMENT REFERENCES
-// ===============================
-
 
 const customersEl =
 document.getElementById("customers");
 
-
 const ridersEl =
 document.getElementById("riders");
-
 
 const pendingEl =
 document.getElementById("pending");
 
-
 const onlineEl =
 document.getElementById("online");
-
 
 const ridesEl =
 document.getElementById("rides");
 
-
 const activeEl =
 document.getElementById("active");
-
 
 const completedEl =
 document.getElementById("completed");
 
-
 const cancelledEl =
 document.getElementById("cancelled");
-
 
 const revenueEl =
 document.getElementById("revenue");
 
-
-const todayRevenueEl =
-document.getElementById("todayRevenue");
-
-
 const commissionEl =
 document.getElementById("commission");
-
 
 const riderEarnEl =
 document.getElementById("riderEarn");
 
-
 const loading =
 document.getElementById("loading");
+
+const errorBox =
+document.getElementById("error");
 
 
 
 
 
 // ===============================
-// AUTH + ADMIN CHECK
+// ADMIN AUTH
 // ===============================
 
 
@@ -561,11 +502,10 @@ doc(
 db,
 "users",
 user.uid
+
 )
 
 );
-
-
 
 
 
@@ -580,7 +520,7 @@ adminSnap.data().role !== "admin"
 ){
 
 
-alert("Access Denied");
+alert("Admin Access Denied");
 
 
 location.href="../customer/home.html";
@@ -588,31 +528,30 @@ location.href="../customer/home.html";
 
 return;
 
-
 }
 
 
 
-await loadDashboard();
+loadDashboard();
 
 
 
-}
+setInterval(
 
+loadDashboard,
 
-catch(error){
+30000
 
-
-console.error(
-"Admin Auth Error:",
-error
 );
 
 
 
-loading.innerHTML =
-"❌ "+error.message;
+}
 
+catch(error){
+
+
+showError(error.message);
 
 
 }
@@ -625,8 +564,10 @@ loading.innerHTML =
 
 
 
+
+
 // ===============================
-// DASHBOARD FUNCTION
+// DASHBOARD LOAD
 // ===============================
 
 
@@ -636,31 +577,38 @@ async function loadDashboard(){
 try{
 
 
-// USER DATA
+errorBox.innerHTML="";
+
+
+
+
+// USERS
 
 
 const usersSnap =
 await getDocs(
-collection(db,"users")
+
+collection(
+db,
+"users"
+
+)
+
 );
 
 
 
 let customers=0;
-
 let riders=0;
-
 let pending=0;
-
 let online=0;
 
 
 
-usersSnap.forEach((user)=>{
+usersSnap.forEach((u)=>{
 
 
-const data =
-user.data();
+const data=u.data();
 
 
 
@@ -711,67 +659,57 @@ ridersEl.innerText=riders;
 pendingEl.innerText=pending;
 
 onlineEl.innerText=online;
-  
 
 
-// ===============================
-// RIDES DATA
-// ===============================
+
+
+
+
+
+// RIDES
 
 
 const ridesSnap =
 await getDocs(
-collection(db,"rides")
+
+collection(
+db,
+"rides"
+
+)
+
 );
 
 
 
 let active=0;
-
 let completed=0;
-
 let cancelled=0;
 
 let revenue=0;
 
-let todayRevenue=0;
 
 
 
-const today =
-new Date();
+ridesSnap.forEach((r)=>{
 
 
-today.setHours(
-0,
-0,
-0,
-0
-);
-
-
-
-
-
-ridesSnap.forEach((rideDoc)=>{
-
-
-const ride =
-rideDoc.data();
-
-
+const ride=r.data();
 
 
 
 if(
 
-ride.status==="searching" ||
+[
+"searching",
+"accepted",
+"arriving",
+"started"
 
-ride.status==="accepted" ||
+].includes(
+ride.status
 
-ride.status==="arriving" ||
-
-ride.status==="started"
+)
 
 ){
 
@@ -782,65 +720,31 @@ active++;
 
 
 
-
 if(
 ride.status==="completed"
+
 ){
 
 
 completed++;
 
 
-const fare =
+revenue +=
+
 Number(
 ride.fare || 0
+
 );
 
 
 
-revenue += fare;
-
-
-
-
-
-// SAFE DATE CHECK
-
-if(
-
-ride.createdAt &&
-
-typeof ride.createdAt.toDate === "function"
-
-){
-
-
-const rideDate =
-ride.createdAt.toDate();
-
-
-
-if(
-rideDate >= today
-){
-
-todayRevenue += fare;
-
 }
-
-
-}
-
-
-
-}
-
-
 
 
 
 if(
 ride.status==="cancelled"
+
 ){
 
 cancelled++;
@@ -850,7 +754,6 @@ cancelled++;
 
 
 });
-
 
 
 
@@ -877,21 +780,15 @@ revenueEl.innerText =
 "₹"+revenue;
 
 
-todayRevenueEl.innerText =
-"₹"+todayRevenue;
 
 
 
 
 
-
-
-// ===============================
 // COMMISSION
-// ===============================
 
 
-let percent = 20;
+let percent=20;
 
 
 
@@ -902,6 +799,7 @@ doc(
 db,
 "settings",
 "commission"
+
 )
 
 );
@@ -910,12 +808,16 @@ db,
 
 if(
 commissionSnap.exists()
+
 ){
 
 
 percent =
+
 Number(
+
 commissionSnap.data().percent || 20
+
 );
 
 
@@ -923,24 +825,27 @@ commissionSnap.data().percent || 20
 
 
 
+const adminMoney =
 
-
-const adminCommission =
-(revenue * percent) / 100;
+(revenue * percent)/100;
 
 
 
 const riderMoney =
-revenue - adminCommission;
+
+revenue-adminMoney;
+
 
 
 
 commissionEl.innerText =
-"₹"+adminCommission.toFixed(0);
+
+"₹"+adminMoney.toFixed(0);
 
 
 
 riderEarnEl.innerText =
+
 "₹"+riderMoney.toFixed(0);
 
 
@@ -956,23 +861,34 @@ loading.style.display="none";
 catch(error){
 
 
-console.error(
-
-"Dashboard Loading Error:",
-
-error
-
-);
-
-
-
-loading.innerHTML =
-"❌ "+error.message;
+showError(error.message);
 
 
 
 }
 
+
+
+}
+
+
+
+
+
+
+
+function showError(msg){
+
+
+loading.innerHTML =
+"Dashboard Error";
+
+
+errorBox.innerHTML =
+"❌ "+msg;
+
+
+console.log(msg);
 
 
 }
@@ -995,7 +911,6 @@ async()=>{
 await signOut(auth);
 
 
-
 location.href="../auth/login.html";
 
 
@@ -1004,12 +919,6 @@ location.href="../auth/login.html";
 
 
 
-
-
-
-// ===============================
-// PAGE NAVIGATION
-// ===============================
 
 
 window.openPage =
@@ -1024,7 +933,6 @@ location.href=page;
 
 
 </script>
-
 
 
 </body>
