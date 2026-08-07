@@ -10,7 +10,17 @@ content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Admin Login</title>
 
+
 <style>
+
+:root{
+--yellow:#FFE500;
+--black:#050505;
+--card:#111;
+--border:#252525;
+--gray:#999;
+}
+
 
 *{
 margin:0;
@@ -19,188 +29,361 @@ box-sizing:border-box;
 font-family:Arial,sans-serif;
 }
 
+
 body{
-background:#050505;
+
+background:var(--black);
 color:white;
+
 min-height:100vh;
+
 display:flex;
+
 align-items:center;
+
 justify-content:center;
+
 padding:20px;
+
 }
+
 
 .login-box{
+
 width:100%;
-max-width:380px;
-background:#111;
-border:1px solid #222;
-border-radius:24px;
+
+max-width:390px;
+
+background:var(--card);
+
+border:1px solid var(--border);
+
+border-radius:25px;
+
 padding:30px 25px;
-box-shadow:0 20px 60px rgba(0,0,0,.5);
+
+box-shadow:
+0 20px 60px rgba(0,0,0,.5);
+
 }
+
 
 .logo{
+
 text-align:center;
+
 font-size:36px;
+
 font-weight:900;
+
 margin-bottom:8px;
+
 }
+
 
 .logo span{
-color:#FFE500;
+
+color:var(--yellow);
+
 }
+
 
 .subtitle{
+
 text-align:center;
-color:#999;
+
+color:var(--gray);
+
 font-size:14px;
+
 margin-bottom:30px;
+
 }
+
 
 label{
+
 display:block;
+
 font-size:14px;
-margin-bottom:7px;
+
 color:#ccc;
+
+margin-bottom:7px;
+
 }
+
 
 input{
+
 width:100%;
+
 padding:15px;
+
 margin-bottom:18px;
+
 background:#050505;
+
 border:1px solid #333;
+
 border-radius:12px;
+
 color:white;
+
 font-size:16px;
+
 outline:none;
+
 }
+
 
 input:focus{
-border-color:#FFE500;
+
+border-color:var(--yellow);
+
 }
+
 
 button{
+
 width:100%;
+
 padding:16px;
-background:#FFE500;
+
+background:var(--yellow);
+
 color:#000;
+
 border:0;
+
 border-radius:12px;
+
 font-size:17px;
+
 font-weight:bold;
+
 cursor:pointer;
+
 }
+
 
 button:disabled{
+
 opacity:.6;
+
 cursor:not-allowed;
+
 }
 
-#message{
-min-height:22px;
-margin-top:18px;
-text-align:center;
-font-size:14px;
-}
 
 .loading{
+
 display:none;
+
 text-align:center;
-color:#FFE500;
-margin-top:15px;
+
+color:var(--yellow);
+
+margin-top:16px;
+
+font-size:14px;
+
 }
+
+
+.message{
+
+min-height:22px;
+
+margin-top:16px;
+
+text-align:center;
+
+font-size:14px;
+
+line-height:1.5;
+
+}
+
 
 </style>
 
 </head>
 
+
 <body>
+
 
 <div class="login-box">
 
+
 <div class="logo">
+
 RID<span>ERX</span>
+
 </div>
+
 
 <div class="subtitle">
+
 Admin Panel Login
+
 </div>
+
+
 
 <label for="email">
+
 Admin Email
+
 </label>
 
+
 <input
+
 type="email"
+
 id="email"
+
 placeholder="Enter admin email"
+
 autocomplete="email"
+
+
+
 >
+
 
 <label for="password">
+
 Password
+
 </label>
 
+
 <input
+
 type="password"
+
 id="password"
-placeholder="Enter password"
+
+placeholder="Enter admin password"
+
 autocomplete="current-password"
+
+
+
 >
 
+
+
 <button id="loginBtn">
+
 Admin Login
+
 </button>
 
-<div id="loading" class="loading">
+
+
+<div
+id="loading"
+class="loading">
+
 Checking Admin Account...
-</div>
-
-<div id="message"></div>
 
 </div>
+
+
+
+<div
+id="message"
+class="message">
+</div>
+
+
+</div>
+
+
+
 
 
 <script type="module">
 
+
+// =====================================
+// FIREBASE
+// =====================================
+
+
 import {
+
 auth,
 db
+
 }
+
 from "../firebase/firebase-config.js";
 
 
+
 import {
+
 signInWithEmailAndPassword,
 onAuthStateChanged,
 signOut
+
 }
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+from
+"https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
 
 
 import {
+
 doc,
 getDoc
+
 }
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+from
+"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+
+
+
+// =====================================
+// ELEMENTS
+// =====================================
 
 
 const emailInput =
 document.getElementById("email");
 
+
 const passwordInput =
 document.getElementById("password");
+
 
 const loginBtn =
 document.getElementById("loginBtn");
 
-const message =
-document.getElementById("message");
 
 const loading =
 document.getElementById("loading");
 
+
+const message =
+document.getElementById("message");
+
+
+
+
+
+// =====================================
+// MESSAGE
+// =====================================
 
 
 function showMessage(text){
@@ -211,20 +394,46 @@ message.innerText=text;
 
 
 
+
+
+// =====================================
+// LOADING
+// =====================================
+
+
 function setLoading(status){
 
-loading.style.display =
-status ? "block" : "none";
+if(status){
 
-loginBtn.disabled=status;
+loading.style.display="block";
+
+loginBtn.disabled=true;
+
+}else{
+
+loading.style.display="none";
+
+loginBtn.disabled=false;
+
+}
 
 }
 
 
 
-// Check existing Firebase session
 
-onAuthStateChanged(auth, async(user)=>{
+
+// =====================================
+// CHECK EXISTING LOGIN
+// =====================================
+
+
+onAuthStateChanged(
+
+auth,
+
+async(user)=>{
+
 
 if(!user){
 
@@ -232,52 +441,102 @@ return;
 
 }
 
+
 try{
 
-const adminRef =
+
+const userRef =
 doc(
 db,
 "users",
 user.uid
 );
 
-const adminSnap =
-await getDoc(adminRef);
+
+const userSnap =
+await getDoc(userRef);
+
 
 
 if(
-adminSnap.exists() &&
-adminSnap.data().role === "admin"
+
+userSnap.exists() &&
+
+userSnap.data().role === "admin"
+
 ){
 
-location.replace("dashboard.html");
+
+location.replace(
+"dashboard.html"
+);
+
 
 }
+
 
 }catch(error){
 
+
 console.error(
-"Existing session check:",
+"Admin Session Error:",
 error
 );
 
+
 }
+
 
 });
 
 
 
-// Login
+
+
+// =====================================
+// LOGIN BUTTON
+// =====================================
+
 
 loginBtn.addEventListener(
+
 "click",
+
 loginAdmin
+
+);
+
+
+
+
+
+// =====================================
+// ENTER KEY
+// =====================================
+
+
+emailInput.addEventListener(
+
+"keydown",
+
+(event)=>{
+
+if(event.key==="Enter"){
+
+loginAdmin();
+
+}
+
+}
+
 );
 
 
 
 passwordInput.addEventListener(
+
 "keydown",
+
 (event)=>{
 
 if(event.key==="Enter"){
@@ -286,45 +545,54 @@ loginAdmin();
 
 }
 
-});
-
-
-
-emailInput.addEventListener(
-"keydown",
-(event)=>{
-
-if(event.key==="Enter"){
-
-loginAdmin();
-
 }
 
-});
+);
 
+
+
+
+
+// =====================================
+// ADMIN LOGIN
+// =====================================
 
 
 async function loginAdmin(){
 
+
 const email =
 emailInput.value.trim();
+
 
 const password =
 passwordInput.value;
 
 
+
+// EMPTY EMAIL
+
+
 if(!email){
 
-showMessage("❌ Enter admin email");
+showMessage(
+"❌ Please enter admin email"
+);
 
 return;
 
 }
 
 
+
+// EMPTY PASSWORD
+
+
 if(!password){
 
-showMessage("❌ Enter password");
+showMessage(
+"❌ Please enter password"
+);
 
 return;
 
@@ -341,12 +609,23 @@ showMessage("");
 try{
 
 
+// =================================
+// FIREBASE LOGIN
+// =================================
+
+
 const result =
+
 await signInWithEmailAndPassword(
+
 auth,
+
 email,
+
 password
+
 );
+
 
 
 const user =
@@ -354,32 +633,56 @@ result.user;
 
 
 
+
+// =================================
+// FIRESTORE ADMIN CHECK
+// =================================
+
+
 const adminRef =
+
 doc(
+
 db,
+
 "users",
+
 user.uid
+
 );
 
 
+
 const adminSnap =
+
 await getDoc(adminRef);
 
 
 
+
+
+// ADMIN DOCUMENT NOT FOUND
+
+
 if(!adminSnap.exists()){
+
 
 await signOut(auth);
 
+
 showMessage(
-"❌ Admin profile not found in Firestore"
+"❌ Admin profile not found"
 );
 
+
 setLoading(false);
+
 
 return;
 
 }
+
+
 
 
 
@@ -388,15 +691,24 @@ adminSnap.data();
 
 
 
+
+
+// ROLE CHECK
+
+
 if(data.role !== "admin"){
+
 
 await signOut(auth);
 
+
 showMessage(
-"❌ Access Denied: This account is not an admin"
+"❌ Access Denied"
 );
 
+
 setLoading(false);
+
 
 return;
 
@@ -404,26 +716,43 @@ return;
 
 
 
+
+
+// =================================
+// SUCCESS
+// =================================
+
+
 showMessage(
 "✅ Admin Login Successful"
 );
-
 
 
 loading.innerText =
 "Opening Admin Dashboard...";
 
 
+loading.style.display="block";
+
+
 
 setTimeout(()=>{
 
-location.replace("dashboard.html");
 
-},500);
+location.replace(
+"dashboard.html"
+);
+
+
+},700);
 
 
 
-}catch(error){
+}
+
+
+catch(error){
+
 
 console.error(
 "Admin Login Error:",
@@ -432,94 +761,101 @@ error
 
 
 
-let errorMessage =
+let msg =
 "❌ Login failed";
 
 
-if(
-error.code ===
-"auth/invalid-credential"
-){
 
-errorMessage =
+switch(error.code){
+
+
+case "auth/invalid-credential":
+
+msg =
 "❌ Email or password is incorrect";
 
-}
+break;
 
 
-else if(
-error.code ===
-"auth/user-not-found"
-){
 
-errorMessage =
+case "auth/user-not-found":
+
+msg =
 "❌ Admin account not found";
 
-}
+break;
 
 
-else if(
-error.code ===
-"auth/wrong-password"
-){
 
-errorMessage =
+case "auth/wrong-password":
+
+msg =
 "❌ Wrong password";
 
-}
+break;
 
 
-else if(
-error.code ===
-"auth/invalid-email"
-){
 
-errorMessage =
+case "auth/invalid-email":
+
+msg =
 "❌ Invalid email address";
 
-}
+break;
 
 
-else if(
-error.code ===
-"auth/too-many-requests"
-){
 
-errorMessage =
-"❌ Too many attempts. Try again later";
+case "auth/too-many-requests":
 
-}
+msg =
+"❌ Too many login attempts";
+
+break;
 
 
-else if(
-error.code ===
-"permission-denied"
-){
 
-errorMessage =
+case "auth/network-request-failed":
+
+msg =
+"❌ Network error. Check internet";
+
+break;
+
+
+
+case "permission-denied":
+
+msg =
 "❌ Firestore permission denied";
 
-}
+break;
 
 
-else{
 
-errorMessage =
+default:
+
+msg =
 "❌ "+error.message;
 
 }
 
 
 
-showMessage(errorMessage);
+showMessage(msg);
+
 
 setLoading(false);
 
-}
 
 }
+
+
+}
+
+
 
 </script>
+
 
 </body>
 
