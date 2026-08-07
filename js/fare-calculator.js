@@ -13,7 +13,10 @@ import {
 import {
     doc,
     getDoc,
-    setDoc
+    setDoc,
+    collection,
+    addDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
@@ -21,6 +24,12 @@ import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+
+
+
+// ===============================
+// ELEMENTS
+// ===============================
 
 
 const service =
@@ -52,15 +61,12 @@ document.getElementById("status");
 
 
 
-
-
 let currentAdmin = null;
 
 
 
-
 // ===============================
-// ADMIN CHECK
+// ADMIN SECURITY CHECK
 // ===============================
 
 
@@ -71,65 +77,53 @@ async(user)=>{
 
 if(!user){
 
-location.href="../auth/login.html";
-
+window.location.href="../auth/login.html";
 return;
 
 }
 
 
 
-const snap =
+const adminSnap =
 await getDoc(
 doc(db,"users",user.uid)
 );
 
 
 
-if(!snap.exists()){
+if(!adminSnap.exists()){
 
-location.href="../index.html";
-
+window.location.href="../index.html";
 return;
 
 }
 
 
 
-const data =
-snap.data();
+const adminData =
+adminSnap.data();
 
 
 
-if(data.role!=="admin"){
-
+if(adminData.role !== "admin"){
 
 alert("Access Denied");
 
-
-location.href="../customer/home.html";
-
+window.location.href="../customer/home.html";
 
 return;
-
 
 }
 
 
 
-currentAdmin=user.uid;
-
+currentAdmin = user.uid;
 
 
 loadFare();
 
 
-
 });
-
-
-
-
 
 
 
@@ -146,31 +140,35 @@ async function loadFare(){
 try{
 
 
-const fareSnap =
+const snap =
 await getDoc(
-doc(
-db,
-"settings",
-"fare"
-)
+doc(db,"settings","fare")
 );
 
 
 
-if(fareSnap.exists()){
+if(!snap.exists()){
+
+clearFields();
+return;
+
+}
+
 
 
 const data =
-fareSnap.data();
+snap.data();
+
+
+
+const selectedService =
+service.value;
 
 
 
 updateFields(
-data[service.value]
+data[selectedService]
 );
-
-
-}
 
 
 
@@ -178,11 +176,15 @@ data[service.value]
 
 catch(error){
 
-console.log(error);
+console.log(
+"Fare Load Error:",
+error
+);
 
 }
 
 
+
 }
 
 
@@ -190,7 +192,9 @@ console.log(error);
 
 
 
-
+// ===============================
+// SERVICE CHANGE
+// ===============================
 
 
 service.addEventListener(
@@ -206,35 +210,54 @@ loadFare();
 
 
 
-
+// ===============================
+// UPDATE INPUTS
+// ===============================
 
 
 function updateFields(data){
 
 
-if(!data)
+if(!data){
+
+clearFields();
 return;
+
+}
+
 
 
 baseFare.value =
-data.baseFare || 0;
+data.baseFare ?? 0;
 
 
 dayRate.value =
-data.dayRate || 0;
+data.dayRate ?? 0;
 
 
 extraRate.value =
-data.extraRate || 0;
+data.extraRate ?? 0;
 
 
 nightRate.value =
-data.nightRate || 0;
+data.nightRate ?? 0;
 
 
 }
 
 
+
+
+
+
+function clearFields(){
+
+baseFare.value=0;
+dayRate.value=0;
+extraRate.value=0;
+nightRate.value=0;
+
+}
 
 
 
@@ -262,25 +285,28 @@ service.value;
 const fareData = {
 
 
-
 baseFare:
-Number(baseFare.value),
-
+Number(baseFare.value || 0),
 
 
 dayRate:
-Number(dayRate.value),
-
+Number(dayRate.value || 0),
 
 
 extraRate:
-Number(extraRate.value),
-
+Number(extraRate.value || 0),
 
 
 nightRate:
-Number(nightRate.value)
+Number(nightRate.value || 0),
 
+
+updatedBy:
+currentAdmin,
+
+
+updatedAt:
+new Date()
 
 
 };
@@ -288,6 +314,26 @@ Number(nightRate.value)
 
 
 
+
+if(
+isNaN(fareData.baseFare) ||
+isNaN(fareData.dayRate) ||
+isNaN(fareData.extraRate) ||
+isNaN(fareData.nightRate)
+){
+
+status.innerHTML=
+"❌ Invalid Fare Value";
+
+return;
+
+}
+
+
+
+
+
+// SAVE CURRENT FARE
 
 await setDoc(
 
@@ -299,14 +345,10 @@ db,
 
 {
 
-
 [serviceName]:
-
 fareData
 
-
 },
-
 
 {
 
@@ -314,9 +356,47 @@ merge:true
 
 }
 
+);
 
+
+
+
+
+
+
+// SAVE HISTORY
+
+
+await addDoc(
+
+collection(
+db,
+"fare_history"
+),
+
+{
+
+
+service:
+serviceName,
+
+
+fare:
+fareData,
+
+
+admin:
+currentAdmin,
+
+
+time:
+serverTimestamp()
+
+
+}
 
 );
+
 
 
 
@@ -338,11 +418,15 @@ status.innerHTML="";
 }
 
 
+
 catch(error){
 
 
+console.log(error);
+
+
 status.innerHTML =
-error.message;
+"❌ "+error.message;
 
 
 }
