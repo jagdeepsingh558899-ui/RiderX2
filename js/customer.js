@@ -8,6 +8,7 @@ import {
 } from "../firebase/firebase-config.js";
 
 import {
+    console.log("RiderX Customer JS Loaded");
     collection,
     addDoc,
     serverTimestamp
