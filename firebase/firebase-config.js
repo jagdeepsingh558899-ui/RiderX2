@@ -1,67 +1,101 @@
-// Firebase v10 SDK Modular Initialization for RiderX
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged,
-  RecaptchaVerifier,
-  signInWithPhoneNumber
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { 
-  getFirestore, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc, 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  query, 
-  where, 
-  getDocs,
-  orderBy,
-  serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+// ======================================
+// RiderX Firebase Configuration
+// ======================================
 
-// REPLACE WITH YOUR FIREBASE PROJECT CONFIGURATION
+
+// Firebase SDK
+
+import { initializeApp } from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+
+import { getAuth } from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+import { getFirestore } from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+import { getStorage } from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+
+import { getDatabase } from 
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+
+
+
+// Firebase Config
+
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "riderx-app.firebaseapp.com",
-  projectId: "riderx-app",
-  storageBucket: "riderx-app.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef1234567890"
+
+apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
+
+authDomain: "riderx-1.firebaseapp.com",
+
+databaseURL:
+"https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
+
+projectId: "riderx-1",
+
+storageBucket:
+"riderx-1.firebasestorage.app",
+
+messagingSenderId:
+"261640190671",
+
+appId:
+"1:261640190671:web:701b3ce5dcb6135fd955ba",
+
+measurementId:
+"G-SM8KLBVPWN"
+
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
 
-// Global Firebase Helpers
-export { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
-  onAuthStateChanged,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  doc, 
-  setDoc, 
-  getDoc, 
-  updateDoc, 
-  collection, 
-  addDoc, 
-  onSnapshot, 
-  query, 
-  where, 
-  getDocs,
-  orderBy,
-  serverTimestamp,
-  ref,
-  uploadBytes,
-  getDownloadURL
+
+
+
+// Initialize Firebase
+
+const app = initializeApp(firebaseConfig);
+
+
+
+
+
+// Firebase Services
+
+const auth = getAuth(app);
+
+
+const db = getFirestore(app);
+
+
+const storage = getStorage(app);
+
+
+const realtimeDB = getDatabase(app);
+
+
+
+
+
+// Export
+
+export {
+
+app,
+
+auth,
+
+db,
+
+storage,
+
+realtimeDB
+
 };
