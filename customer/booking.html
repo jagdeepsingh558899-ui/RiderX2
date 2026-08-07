@@ -1,1632 +1,1154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-  <title>RiderX | Book Ride</title>
-
-  <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-
-  <style>
-    :root {
-      --yellow: #ffe500;
-      --yellow-dark: #e6cf00;
-      --black: #050505;
-      --panel: #111111;
-      --card: #191919;
-      --input: #242424;
-      --text: #ffffff;
-      --muted: #9b9b9b;
-      --green: #22c55e;
-      --red: #ef4444;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Poppins, sans-serif;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: var(--black);
-      color: var(--text);
-    }
-
-    body {
-      position: relative;
-    }
-
-    /* MAP */
-
-    #map {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      background: #111;
-    }
-
-    .leaflet-container {
-      font-family: Poppins, sans-serif;
-    }
-
-    .leaflet-control-zoom {
-      margin-top: 80px !important;
-    }
-
-    .leaflet-control-zoom a {
-      background: #111 !important;
-      color: var(--yellow) !important;
-      border-color: #333 !important;
-    }
-
-    /* TOP BAR */
-
-    .topbar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-
-      padding:
-        max(14px, env(safe-area-inset-top))
-        15px
-        12px;
-
-      pointer-events: none;
-    }
-
-    .topbar-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      pointer-events: auto;
-    }
-
-    .back-btn,
-    .location-btn {
-      width: 44px;
-      height: 44px;
-
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,.12);
-
-      background: rgba(10,10,10,.90);
-      color: white;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      box-shadow: 0 5px 20px rgba(0,0,0,.35);
-
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .back-btn:active,
-    .location-btn:active {
-      transform: scale(.94);
-    }
-
-    .logo {
-      background: rgba(10,10,10,.92);
-      border: 1px solid rgba(255,229,0,.25);
-
-      padding: 8px 15px;
-      border-radius: 14px;
-
-      font-weight: 800;
-      letter-spacing: -.5px;
-
-      box-shadow: 0 5px 20px rgba(0,0,0,.35);
-    }
-
-    .logo span {
-      color: var(--yellow);
-    }
-
-    /* CENTER MARKER */
-
-    .center-marker {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-
-      transform: translate(-50%, -100%);
-
-      z-index: 500;
-
-      pointer-events: none;
-      display: none;
-    }
-
-    .center-marker-inner {
-      width: 42px;
-      height: 42px;
-
-      background: var(--yellow);
-      color: #000;
-
-      border-radius: 50% 50% 50% 0;
-
-      transform: rotate(-45deg);
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      box-shadow:
-        0 5px 20px rgba(0,0,0,.4),
-        0 0 25px rgba(255,229,0,.35);
-    }
-
-    .center-marker-inner i {
-      transform: rotate(45deg);
-    }
-
-    /* STATUS */
-
-    .map-status {
-      position: absolute;
-
-      top: 70px;
-      left: 50%;
-
-      transform: translateX(-50%);
-
-      z-index: 900;
-
-      background: rgba(10,10,10,.90);
-
-      border: 1px solid rgba(255,255,255,.1);
-
-      padding: 8px 14px;
-
-      border-radius: 999px;
-
-      font-size: 11px;
-      font-weight: 600;
-
-      white-space: nowrap;
-
-      box-shadow: 0 5px 20px rgba(0,0,0,.3);
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-
-      display: inline-block;
-
-      border-radius: 50%;
-
-      background: var(--yellow);
-
-      margin-right: 6px;
-    }
-
-    /* BOTTOM SHEET */
-
-    .booking-sheet {
-      position: absolute;
-
-      left: 0;
-      right: 0;
-      bottom: 0;
-
-      z-index: 1000;
-
-      background:
-        linear-gradient(
-          180deg,
-          rgba(22,22,22,.96),
-          rgba(8,8,8,.99)
-        );
-
-      border-radius: 25px 25px 0 0;
-
-      border-top: 1px solid rgba(255,255,255,.10);
-
-      box-shadow:
-        0 -10px 40px rgba(0,0,0,.55);
-
-      padding:
-        10px
-        15px
-        max(15px, env(safe-area-inset-bottom));
-
-      max-height: 58vh;
-
-      overflow-y: auto;
-
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .handle {
-      width: 42px;
-      height: 4px;
-
-      background: #555;
-
-      border-radius: 99px;
-
-      margin: 0 auto 12px;
-    }
-
-    .sheet-title {
-      font-size: 17px;
-      font-weight: 800;
-      margin-bottom: 12px;
-    }
-
-    /* LOCATION BOX */
-
-    .location-card {
-      background: var(--card);
-
-      border: 1px solid rgba(255,255,255,.08);
-
-      border-radius: 15px;
-
-      overflow: hidden;
-
-      margin-bottom: 13px;
-    }
-
-    .location-row {
-      display: flex;
-      align-items: center;
-
-      min-height: 55px;
-
-      padding: 8px 12px;
-
-      gap: 10px;
-    }
-
-    .location-row + .location-row {
-      border-top: 1px solid #292929;
-    }
-
-    .location-icon {
-      width: 27px;
-      height: 27px;
-
-      flex-shrink: 0;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 50%;
-
-      font-size: 12px;
-    }
-
-    .pickup-icon {
-      background: rgba(34,197,94,.12);
-      color: var(--green);
-    }
-
-    .drop-icon {
-      background: rgba(255,229,0,.12);
-      color: var(--yellow);
-    }
-
-    .location-input-wrap {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .location-label {
-      display: block;
-
-      font-size: 9px;
-      color: var(--muted);
-
-      margin-bottom: 2px;
-
-      text-transform: uppercase;
-      letter-spacing: .5px;
-    }
-
-    .location-input {
-      width: 100%;
-
-      border: none;
-      outline: none;
-
-      background: transparent;
-
-      color: white;
-
-      font-size: 13px;
-      font-weight: 500;
-
-      padding: 0;
-
-      text-overflow: ellipsis;
-    }
-
-    .location-input::placeholder {
-      color: #666;
-    }
-
-    .loc-action {
-      width: 34px;
-      height: 34px;
-
-      border-radius: 50%;
-
-      border: none;
-
-      background: #252525;
-      color: #aaa;
-
-      cursor: pointer;
-    }
-
-    /* SEARCH RESULTS */
-
-    .search-results {
-      display: none;
-
-      position: absolute;
-
-      left: 15px;
-      right: 15px;
-
-      bottom: calc(100% - 70px);
-
-      z-index: 1200;
-
-      background: #171717;
-
-      border: 1px solid #333;
-
-      border-radius: 15px;
-
-      overflow: hidden;
-
-      max-height: 220px;
-
-      box-shadow: 0 10px 35px rgba(0,0,0,.6);
-    }
-
-    .search-result {
-      padding: 12px 14px;
-
-      border-bottom: 1px solid #292929;
-
-      cursor: pointer;
-    }
-
-    .search-result:last-child {
-      border-bottom: none;
-    }
-
-    .search-result:active {
-      background: #262626;
-    }
-
-    .result-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: white;
-    }
-
-    .result-subtitle {
-      font-size: 10px;
-      color: #888;
-      margin-top: 2px;
-    }
-
-    /* SERVICES */
-
-    .service-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      margin-bottom: 8px;
-    }
-
-    .service-title span:first-child {
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .service-title span:last-child {
-      color: #777;
-      font-size: 10px;
-    }
-
-    .service-grid {
-      display: grid;
-
-      grid-template-columns: repeat(4, 1fr);
-
-      gap: 8px;
-
-      margin-bottom: 13px;
-    }
-
-    .service-card {
-      border: 1px solid #303030;
-
-      background: #1b1b1b;
-
-      border-radius: 13px;
-
-      padding: 10px 5px;
-
-      text-align: center;
-
-      cursor: pointer;
-
-      transition: .18s;
-    }
-
-    .service-card i {
-      font-size: 19px;
-      color: #aaa;
-      margin-bottom: 5px;
-    }
-
-    .service-card span {
-      display: block;
-
-      font-size: 9px;
-      font-weight: 600;
-
-      color: #aaa;
-    }
-
-    .service-card.active {
-      background: var(--yellow);
-
-      border-color: var(--yellow);
-
-      color: #000;
-
-      transform: translateY(-1px);
-
-      box-shadow: 0 5px 15px rgba(255,229,0,.18);
-    }
-
-    .service-card.active i,
-    .service-card.active span {
-      color: #000;
-    }
-
-    /* FARE */
-
-    .fare-card {
-      display: flex;
-
-      align-items: center;
-      justify-content: space-between;
-
-      background: #191919;
-
-      border: 1px solid #292929;
-
-      border-radius: 14px;
-
-      padding: 12px 14px;
-
-      margin-bottom: 12px;
-    }
-
-    .fare-left small {
-      color: #777;
-      display: block;
-      font-size: 9px;
-    }
-
-    .fare-left strong {
-      display: block;
-
-      margin-top: 2px;
-
-      font-size: 13px;
-    }
-
-    .fare-right {
-      text-align: right;
-    }
-
-    .fare-amount {
-      font-size: 20px;
-
-      font-weight: 800;
-
-      color: var(--yellow);
-    }
-
-    .fare-distance {
-      color: #777;
-
-      font-size: 9px;
-    }
-
-    /* BOOK BUTTON */
-
-    .book-btn {
-      width: 100%;
-
-      border: none;
-
-      background: var(--yellow);
-
-      color: #000;
-
-      border-radius: 14px;
-
-      padding: 15px;
-
-      font-size: 15px;
-
-      font-weight: 800;
-
-      cursor: pointer;
-
-      box-shadow: 0 8px 25px rgba(255,229,0,.18);
-
-      transition: .18s;
-    }
-
-    .book-btn:active {
-      transform: scale(.98);
-    }
-
-    .book-btn:disabled {
-      background: #555;
-      color: #999;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    /* LOADING */
-
-    .loading-overlay {
-      position: fixed;
-
-      inset: 0;
-
-      z-index: 3000;
-
-      background: rgba(0,0,0,.75);
-
-      backdrop-filter: blur(6px);
-
-      display: none;
-
-      align-items: center;
-      justify-content: center;
-    }
-
-    .loading-box {
-      width: 220px;
-
-      background: #171717;
-
-      border: 1px solid #333;
-
-      border-radius: 20px;
-
-      padding: 25px;
-
-      text-align: center;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-
-      border: 3px solid #333;
-
-      border-top-color: var(--yellow);
-
-      border-radius: 50%;
-
-      animation: spin .8s linear infinite;
-
-      margin: 0 auto 15px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .loading-box p {
-      font-size: 12px;
-      color: #ccc;
-    }
-
-    /* TOAST */
-
-    .toast {
-      position: fixed;
-
-      top: 80px;
-      left: 50%;
-
-      transform: translateX(-50%) translateY(-20px);
-
-      z-index: 4000;
-
-      min-width: 250px;
-      max-width: calc(100% - 30px);
-
-      background: #191919;
-
-      border: 1px solid #333;
-
-      border-radius: 13px;
-
-      padding: 12px 15px;
-
-      display: none;
-
-      font-size: 11px;
-
-      box-shadow: 0 10px 30px rgba(0,0,0,.5);
-    }
-
-    .toast.show {
-      display: block;
-      animation: toastIn .2s ease forwards;
-    }
-
-    @keyframes toastIn {
-      to {
-        transform: translateX(-50%) translateY(0);
-      }
-    }
-
-    .toast.success {
-      border-color: rgba(34,197,94,.5);
-    }
-
-    .toast.error {
-      border-color: rgba(239,68,68,.5);
-    }
-
-    /* DESKTOP */
-
-    @media (min-width: 768px) {
-
-      .booking-sheet {
-        left: 20px;
-        bottom: 20px;
-
-        width: 430px;
-
-        max-height: calc(100vh - 40px);
-
-        border-radius: 24px;
-
-        padding: 18px;
-      }
-
-      .topbar {
-        padding: 18px;
-      }
-
-      .map-status {
-        top: 20px;
-      }
-
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>RiderX | Book Ride</title>
+
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet">
+
+<style>
+:root{
+  --yellow:#ffe500;
+  --black:#050505;
+  --card:#191919;
+  --text:#fff;
+  --muted:#999;
+  --green:#22c55e;
+  --red:#ef4444;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Poppins,sans-serif;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#050505;
+  color:#fff;
+}
+
+body{
+  position:relative;
+}
+
+#map{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+  background:#111;
+}
+
+.leaflet-container{
+  font-family:Poppins,sans-serif;
+}
+
+.leaflet-control-zoom{
+  margin-top:80px!important;
+}
+
+.leaflet-control-zoom a{
+  background:#111!important;
+  color:var(--yellow)!important;
+  border-color:#333!important;
+}
+
+/* TOP BAR */
+
+.topbar{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000;
+  padding:max(14px,env(safe-area-inset-top)) 15px 12px;
+  pointer-events:none;
+}
+
+.topbar-inner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  pointer-events:auto;
+}
+
+.back-btn,
+.location-btn{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(10,10,10,.92);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 5px 20px rgba(0,0,0,.35);
+  text-decoration:none;
+  cursor:pointer;
+}
+
+.back-btn:active,
+.location-btn:active{
+  transform:scale(.94);
+}
+
+.logo{
+  background:rgba(10,10,10,.92);
+  border:1px solid rgba(255,229,0,.25);
+  padding:8px 15px;
+  border-radius:14px;
+  font-weight:800;
+  letter-spacing:-.5px;
+  box-shadow:0 5px 20px rgba(0,0,0,.35);
+}
+
+.logo span{
+  color:var(--yellow);
+}
+
+/* STATUS */
+
+.map-status{
+  position:absolute;
+  top:70px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:900;
+  background:rgba(10,10,10,.92);
+  border:1px solid rgba(255,255,255,.1);
+  padding:8px 14px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;
+  white-space:nowrap;
+  box-shadow:0 5px 20px rgba(0,0,0,.3);
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  display:inline-block;
+  border-radius:50%;
+  background:var(--yellow);
+  margin-right:6px;
+}
+
+/* CENTER MARKER */
+
+.center-marker{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-100%);
+  z-index:500;
+  pointer-events:none;
+  display:none;
+}
+
+.center-marker-inner{
+  width:42px;
+  height:42px;
+  background:var(--yellow);
+  color:#000;
+  border-radius:50% 50% 50% 0;
+  transform:rotate(-45deg);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 5px 20px rgba(0,0,0,.4),
+             0 0 25px rgba(255,229,0,.35);
+}
+
+.center-marker-inner i{
+  transform:rotate(45deg);
+}
+
+/* BOTTOM SHEET */
+
+.booking-sheet{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:1000;
+  background:linear-gradient(180deg,rgba(22,22,22,.97),rgba(8,8,8,.99));
+  border-radius:25px 25px 0 0;
+  border-top:1px solid rgba(255,255,255,.1);
+  box-shadow:0 -10px 40px rgba(0,0,0,.55);
+  padding:10px 15px max(15px,env(safe-area-inset-bottom));
+  max-height:60vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.handle{
+  width:42px;
+  height:4px;
+  background:#555;
+  border-radius:99px;
+  margin:0 auto 12px;
+}
+
+.sheet-title{
+  font-size:17px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+/* LOCATION */
+
+.location-card{
+  background:var(--card);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:15px;
+  overflow:hidden;
+  margin-bottom:13px;
+}
+
+.location-row{
+  display:flex;
+  align-items:center;
+  min-height:55px;
+  padding:8px 12px;
+  gap:10px;
+}
+
+.location-row+.location-row{
+  border-top:1px solid #292929;
+}
+
+.location-icon{
+  width:27px;
+  height:27px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  font-size:12px;
+}
+
+.pickup-icon{
+  background:rgba(34,197,94,.12);
+  color:var(--green);
+}
+
+.drop-icon{
+  background:rgba(255,229,0,.12);
+  color:var(--yellow);
+}
+
+.location-input-wrap{
+  flex:1;
+  min-width:0;
+}
+
+.location-label{
+  display:block;
+  font-size:9px;
+  color:var(--muted);
+  margin-bottom:2px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.location-input{
+  width:100%;
+  border:none;
+  outline:none;
+  background:transparent;
+  color:#fff;
+  font-size:13px;
+  font-weight:500;
+  padding:0;
+  text-overflow:ellipsis;
+}
+
+.location-input::placeholder{
+  color:#666;
+}
+
+.loc-action{
+  width:34px;
+  height:34px;
+  flex-shrink:0;
+  border-radius:50%;
+  border:none;
+  background:#252525;
+  color:#aaa;
+  cursor:pointer;
+}
+
+.loc-action:active{
+  transform:scale(.94);
+}
+
+/* SEARCH */
+
+.search-results{
+  display:none;
+  position:absolute;
+  left:15px;
+  right:15px;
+  bottom:calc(100% - 70px);
+  z-index:1200;
+  background:#171717;
+  border:1px solid #333;
+  border-radius:15px;
+  overflow:hidden;
+  max-height:220px;
+  box-shadow:0 10px 35px rgba(0,0,0,.6);
+}
+
+.search-result{
+  padding:12px 14px;
+  border-bottom:1px solid #292929;
+  cursor:pointer;
+}
+
+.search-result:last-child{
+  border-bottom:none;
+}
+
+.search-result:active{
+  background:#262626;
+}
+
+.result-title{
+  font-size:12px;
+  font-weight:600;
+  color:#fff;
+}
+
+.result-subtitle{
+  font-size:10px;
+  color:#888;
+  margin-top:2px;
+}
+
+/* SERVICES */
+
+.service-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+
+.service-title span:first-child{
+  font-size:12px;
+  font-weight:700;
+}
+
+.service-title span:last-child{
+  color:#777;
+  font-size:10px;
+}
+
+.service-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-bottom:13px;
+}
+
+.service-card{
+  border:1px solid #303030;
+  background:#1b1b1b;
+  border-radius:13px;
+  padding:10px 5px;
+  text-align:center;
+  cursor:pointer;
+  transition:.18s;
+  color:#aaa;
+}
+
+.service-card i{
+  display:block;
+  font-size:19px;
+  margin-bottom:5px;
+}
+
+.service-card span{
+  display:block;
+  font-size:9px;
+  font-weight:600;
+}
+
+.service-card.active{
+  background:var(--yellow);
+  border-color:var(--yellow);
+  color:#000;
+  transform:translateY(-1px);
+  box-shadow:0 5px 15px rgba(255,229,0,.18);
+}
+
+.service-card.active i,
+.service-card.active span{
+  color:#000;
+}
+
+/* FARE */
+
+.fare-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#191919;
+  border:1px solid #292929;
+  border-radius:14px;
+  padding:12px 14px;
+  margin-bottom:12px;
+}
+
+.fare-left small{
+  color:#777;
+  display:block;
+  font-size:9px;
+}
+
+.fare-left strong{
+  display:block;
+  margin-top:2px;
+  font-size:13px;
+}
+
+.fare-right{
+  text-align:right;
+}
+
+.fare-amount{
+  font-size:20px;
+  font-weight:800;
+  color:var(--yellow);
+}
+
+.fare-distance{
+  color:#777;
+  font-size:9px;
+}
+
+/* BOOK */
+
+.book-btn{
+  width:100%;
+  border:none;
+  background:var(--yellow);
+  color:#000;
+  border-radius:14px;
+  padding:15px;
+  font-size:15px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 8px 25px rgba(255,229,0,.18);
+  transition:.18s;
+}
+
+.book-btn:active{
+  transform:scale(.98);
+}
+
+.book-btn:disabled{
+  background:#555;
+  color:#999;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+/* LOADING */
+
+.loading-overlay{
+  position:fixed;
+  inset:0;
+  z-index:3000;
+  background:rgba(0,0,0,.75);
+  backdrop-filter:blur(6px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.loading-box{
+  width:220px;
+  background:#171717;
+  border:1px solid #333;
+  border-radius:20px;
+  padding:25px;
+  text-align:center;
+}
+
+.spinner{
+  width:40px;
+  height:40px;
+  border:3px solid #333;
+  border-top-color:var(--yellow);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  margin:0 auto 15px;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.loading-box p{
+  font-size:12px;
+  color:#ccc;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%) translateY(-20px);
+  z-index:4000;
+  min-width:250px;
+  max-width:calc(100% - 30px);
+  background:#191919;
+  border:1px solid #333;
+  border-radius:13px;
+  padding:12px 15px;
+  display:none;
+  font-size:11px;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+  text-align:center;
+}
+
+.toast.show{
+  display:block;
+  animation:toastIn .2s ease forwards;
+}
+
+@keyframes toastIn{
+  to{
+    transform:translateX(-50%) translateY(0);
+  }
+}
+
+.toast.success{
+  border-color:rgba(34,197,94,.5);
+}
+
+.toast.error{
+  border-color:rgba(239,68,68,.5);
+}
+
+/* DESKTOP */
+
+@media(min-width:768px){
+  .booking-sheet{
+    left:20px;
+    bottom:20px;
+    width:430px;
+    max-height:calc(100vh - 40px);
+    border-radius:24px;
+    padding:18px;
+  }
+
+  .topbar{
+    padding:18px;
+  }
+
+  .map-status{
+    top:20px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- MAP -->
-  <div id="map"></div>
+<div id="map"></div>
 
-  <!-- TOP -->
-  <div class="topbar">
+<div class="topbar">
+  <div class="topbar-inner">
 
-    <div class="topbar-inner">
+    <a href="home.html"
+       class="back-btn"
+       aria-label="Back">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
 
-      <a href="home.html" class="back-btn" aria-label="Back">
-        <i class="fa-solid fa-arrow-left"></i>
-      </a>
+    <div class="logo">
+      RIDER<span>X</span>
+    </div>
 
-      <div class="logo">
-        RIDER<span>X</span>
+    <button class="location-btn"
+            id="currentLocationBtn"
+            aria-label="Current location"
+            type="button">
+      <i class="fa-solid fa-crosshairs"></i>
+    </button>
+
+  </div>
+</div>
+
+<div class="map-status" id="mapStatus">
+  <span class="status-dot"></span>
+  <span id="statusText">Getting your location...</span>
+</div>
+
+<div class="center-marker" id="centerMarker">
+  <div class="center-marker-inner">
+    <i class="fa-solid fa-location-dot"></i>
+  </div>
+</div>
+
+<section class="booking-sheet">
+
+  <div class="handle"></div>
+
+  <h2 class="sheet-title">
+    Where are you going?
+  </h2>
+
+  <div class="location-card">
+
+    <div class="location-row">
+
+      <div class="location-icon pickup-icon">
+        <i class="fa-solid fa-circle"></i>
       </div>
 
-      <button class="location-btn"
-              id="currentLocationBtn"
-              aria-label="Current location">
-        <i class="fa-solid fa-crosshairs"></i>
+      <div class="location-input-wrap">
+
+        <span class="location-label">
+          Pickup
+        </span>
+
+        <input
+          type="text"
+          id="pickup"
+          class="location-input"
+          placeholder="Choose pickup location"
+          autocomplete="off">
+
+      </div>
+
+      <button
+        class="loc-action"
+        id="pickupMapBtn"
+        title="Select pickup on map"
+        type="button">
+
+        <i class="fa-solid fa-map-location-dot"></i>
+
+      </button>
+
+    </div>
+
+    <div class="location-row">
+
+      <div class="location-icon drop-icon">
+        <i class="fa-solid fa-location-dot"></i>
+      </div>
+
+      <div class="location-input-wrap">
+
+        <span class="location-label">
+          Drop
+        </span>
+
+        <input
+          type="text"
+          id="drop"
+          class="location-input"
+          placeholder="Choose destination"
+          autocomplete="off">
+
+      </div>
+
+      <button
+        class="loc-action"
+        id="dropMapBtn"
+        title="Select drop on map"
+        type="button">
+
+        <i class="fa-solid fa-map-location-dot"></i>
+
       </button>
 
     </div>
 
   </div>
 
-  <!-- STATUS -->
-  <div class="map-status" id="mapStatus">
-    <span class="status-dot"></span>
-    <span id="statusText">Move the map to select pickup</span>
+  <div class="search-results" id="searchResults"></div>
+
+  <div class="service-title">
+
+    <span>Choose your service</span>
+
+    <span>RiderX</span>
+
   </div>
 
-  <!-- CENTER MARKER -->
-  <div class="center-marker" id="centerMarker">
-    <div class="center-marker-inner">
-      <i class="fa-solid fa-location-dot"></i>
-    </div>
-  </div>
+  <div class="service-grid">
 
-  <!-- BOOKING SHEET -->
-  <section class="booking-sheet">
-
-    <div class="handle"></div>
-
-    <h2 class="sheet-title">
-      Where are you going?
-    </h2>
-
-    <!-- LOCATION -->
-    <div class="location-card">
-
-      <!-- PICKUP -->
-      <div class="location-row">
-
-        <div class="location-icon pickup-icon">
-          <i class="fa-solid fa-circle"></i>
-        </div>
-
-        <div class="location-input-wrap">
-
-          <span class="location-label">
-            Pickup
-          </span>
-
-          <input
-            type="text"
-            id="pickup"
-            class="location-input"
-            placeholder="Choose pickup location"
-            autocomplete="off"
-          >
-
-        </div>
-
-        <button
-          class="loc-action"
-          id="pickupMapBtn"
-          title="Select pickup on map">
-
-          <i class="fa-solid fa-map-location-dot"></i>
-
-        </button>
-
-      </div>
-
-      <!-- DROP -->
-      <div class="location-row">
-
-        <div class="location-icon drop-icon">
-          <i class="fa-solid fa-location-dot"></i>
-        </div>
-
-        <div class="location-input-wrap">
-
-          <span class="location-label">
-            Drop
-          </span>
-
-          <input
-            type="text"
-            id="drop"
-            class="location-input"
-            placeholder="Choose destination"
-            autocomplete="off"
-          >
-
-        </div>
-
-        <button
-          class="loc-action"
-          id="dropMapBtn"
-          title="Select drop on map">
-
-          <i class="fa-solid fa-map-location-dot"></i>
-
-        </button>
-
-      </div>
-
-    </div>
-
-    <!-- SEARCH RESULTS -->
-    <div class="search-results" id="searchResults"></div>
-
-    <!-- SERVICES -->
-    <div class="service-title">
-
-      <span>
-        Choose your service
-      </span>
-
-      <span>
-        RiderX
-      </span>
-
-    </div>
-
-    <div class="service-grid">
-
-      <button
-        class="service-card active"
-        data-service="bike"
-        type="button">
-
-        <i class="fa-solid fa-motorcycle"></i>
-        <span>Bike Taxi</span>
-
-      </button>
-
-      <button
-        class="service-card"
-        data-service="cab"
-        type="button">
-
-        <i class="fa-solid fa-car"></i>
-        <span>Cab</span>
-
-      </button>
-
-      <button
-        class="service-card"
-        data-service="parcel"
-        type="button">
-
-        <i class="fa-solid fa-box"></i>
-        <span>Parcel</span>
-
-      </button>
-
-      <button
-        class="service-card"
-        data-service="food"
-        type="button">
-
-        <i class="fa-solid fa-utensils"></i>
-        <span>Food</span>
-
-      </button>
-
-    </div>
-
-    <!-- FARE -->
-    <div class="fare-card">
-
-      <div class="fare-left">
-
-        <small>
-          Estimated trip
-        </small>
-
-        <strong id="fareInfo">
-          Select pickup & drop
-        </strong>
-
-      </div>
-
-      <div class="fare-right">
-
-        <div class="fare-amount" id="fareAmount">
-          ₹0
-        </div>
-
-        <div class="fare-distance" id="distanceText">
-          0 km
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- BOOK -->
     <button
-      class="book-btn"
-      id="bookRideBtn"
-      disabled>
+      class="service-card active"
+      data-service="bike"
+      type="button">
 
-      <i class="fa-solid fa-bolt"></i>
-      Book Ride
+      <i class="fa-solid fa-motorcycle"></i>
+      <span>Bike Taxi</span>
 
     </button>
 
-  </section>
+    <button
+      class="service-card"
+      data-service="cab"
+      type="button">
 
-  <!-- LOADING -->
-  <div class="loading-overlay" id="loadingOverlay">
+      <i class="fa-solid fa-car"></i>
+      <span>Cab</span>
 
-    <div class="loading-box">
+    </button>
 
-      <div class="spinner"></div>
+    <button
+      class="service-card"
+      data-service="parcel"
+      type="button">
 
-      <p id="loadingText">
-        Finding your location...
-      </p>
+      <i class="fa-solid fa-box"></i>
+      <span>Parcel</span>
+
+    </button>
+
+    <button
+      class="service-card"
+      data-service="food"
+      type="button">
+
+      <i class="fa-solid fa-utensils"></i>
+      <span>Food</span>
+
+    </button>
+
+  </div>
+
+  <div class="fare-card">
+
+    <div class="fare-left">
+
+      <small>Estimated trip</small>
+
+      <strong id="fareInfo">
+        Select pickup & drop
+      </strong>
+
+    </div>
+
+    <div class="fare-right">
+
+      <div class="fare-amount"
+           id="fareAmount">
+        ₹0
+      </div>
+
+      <div class="fare-distance"
+           id="distanceText">
+        0 km
+      </div>
 
     </div>
 
   </div>
 
-  <!-- TOAST -->
-  <div class="toast" id="toast"></div>
+  <button
+    class="book-btn"
+    id="bookRideBtn"
+    disabled
+    type="button">
+
+    <i class="fa-solid fa-bolt"></i>
+    Book Ride
+
+  </button>
+
+</section>
+
+<div class="loading-overlay"
+     id="loadingOverlay">
+
+  <div class="loading-box">
+
+    <div class="spinner"></div>
+
+    <p id="loadingText">
+      Please wait...
+    </p>
+
+  </div>
+
+</div>
+
+<div class="toast"
+     id="toast"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script type="module">
+
+/*
+========================================================
+RIDERX BOOKING PAGE
+customer/booking.html
+========================================================
+*/
+
+import {
+  auth,
+  db,
+  collection,
+  addDoc,
+  serverTimestamp,
+  onAuthStateChanged
+} from "../firebase/firebase-config.js";
 
 
-  <!-- LEAFLET -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+/* ======================================================
+   RIDERX SETTINGS
+====================================================== */
+
+const RIDERX = {
+
+  defaultLocation: [30.7333, 76.7794],
+
+  cityName: "Chandigarh",
+
+  dayRateFirst10Km: 8,
+
+  dayRateAfter10Km: 9,
+
+  nightRate: 11,
+
+  nightStart: 22,
+
+  nightEnd: 6
+
+};
 
 
-  <!-- RIDERX FIREBASE MODULE -->
-  <script type="module">
+/* ======================================================
+   STATE
+====================================================== */
 
-    import {
-      auth,
-      db,
-      collection,
-      addDoc,
-      serverTimestamp,
-      onAuthStateChanged
-    } from "../firebase/firebase-config.js";
+let map = null;
 
-    /*
-      IMPORTANT
+let pickupMarker = null;
 
-      Firebase configuration is using the Modular SDK.
+let dropMarker = null;
 
-      Therefore this page DOES NOT use:
-      firebase.auth()
-      firebase.firestore()
+let pickupCoords = null;
 
-      It uses:
-      auth
-      db
-      addDoc()
-    */
+let dropCoords = null;
 
+let selectedService = "bike";
 
-    // --------------------------------------------------
-    // RIDERX SETTINGS
-    // --------------------------------------------------
+let selectingMode = "pickup";
 
-    const RIDERX = {
+let currentUser = null;
 
-      // Chandigarh center
-      defaultLocation: [30.7333, 76.7794],
+let routeLayer = null;
 
-      // Allowed service area — Chandigarh focused
-      cityName: "Chandigarh",
+let routeDistanceKm = 0;
 
-      // Fare rules requested for RiderX
-      dayRateFirst10Km: 8,
-      dayRateAfter10Km: 9,
-      nightRate: 11,
+let routeDurationMin = 0;
 
-      // Night: 10 PM - 6 AM
-      nightStart: 22,
-      nightEnd: 6
+let searchTimer = null;
 
-    };
+let isSelectingFromMap = false;
 
 
-    // --------------------------------------------------
-    // STATE
-    // --------------------------------------------------
+/* ======================================================
+   DOM
+====================================================== */
 
-    let map = null;
+const pickupInput =
+  document.getElementById("pickup");
 
-    let pickupMarker = null;
-    let dropMarker = null;
+const dropInput =
+  document.getElementById("drop");
 
-    let pickupCoords = null;
-    let dropCoords = null;
+const fareAmount =
+  document.getElementById("fareAmount");
 
-    let selectedService = "bike";
+const distanceText =
+  document.getElementById("distanceText");
 
-    let selectingMode = "pickup";
+const fareInfo =
+  document.getElementById("fareInfo");
 
-    let currentUser = null;
+const bookRideBtn =
+  document.getElementById("bookRideBtn");
 
-    let routeLayer = null;
+const statusText =
+  document.getElementById("statusText");
 
-    let routeDistanceKm = 0;
+const centerMarker =
+  document.getElementById("centerMarker");
 
-    let routeDurationMin = 0;
+const loadingOverlay =
+  document.getElementById("loadingOverlay");
 
-    let searchTimer = null;
+const loadingText =
+  document.getElementById("loadingText");
 
+const toast =
+  document.getElementById("toast");
 
-    // --------------------------------------------------
-    // DOM
-    // --------------------------------------------------
-
-    const pickupInput =
-      document.getElementById("pickup");
-
-    const dropInput =
-      document.getElementById("drop");
-
-    const fareAmount =
-      document.getElementById("fareAmount");
-
-    const distanceText =
-      document.getElementById("distanceText");
-
-    const fareInfo =
-      document.getElementById("fareInfo");
-
-    const bookRideBtn =
-      document.getElementById("bookRideBtn");
-
-    const statusText =
-      document.getElementById("statusText");
-
-    const centerMarker =
-      document.getElementById("centerMarker");
-
-    const loadingOverlay =
-      document.getElementById("loadingOverlay");
-
-    const loadingText =
-      document.getElementById("loadingText");
-
-    const toast =
-      document.getElementById("toast");
-
-    const searchResults =
-      document.getElementById("searchResults");
+const searchResults =
+  document.getElementById("searchResults");
 
 
-    // --------------------------------------------------
-    // TOAST
-    // --------------------------------------------------
+/* ======================================================
+   TOAST
+====================================================== */
 
-    function showToast(message, type = "") {
+function showToast(message, type = "") {
 
-      toast.textContent = message;
+  toast.textContent = message;
 
-      toast.className = "toast show " + type;
+  toast.className =
+    "toast show " + type;
 
-      setTimeout(() => {
+  setTimeout(() => {
 
-        toast.className = "toast";
+    toast.className = "toast";
 
-      }, 3000);
+  }, 3000);
+}
+
+
+/* ======================================================
+   LOADING
+====================================================== */
+
+function showLoading(message) {
+
+  loadingText.textContent = message;
+
+  loadingOverlay.style.display = "flex";
+}
+
+
+function hideLoading() {
+
+  loadingOverlay.style.display = "none";
+}
+
+
+/* ======================================================
+   ESCAPE HTML
+====================================================== */
+
+function escapeHtml(value) {
+
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+/* ======================================================
+   MAP INITIALIZATION
+====================================================== */
+
+function initMap() {
+
+  map = L.map("map", {
+
+    zoomControl: true,
+
+    attributionControl: true
+
+  }).setView(
+    RIDERX.defaultLocation,
+    13
+  );
+
+
+  L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+
+      maxZoom: 19,
+
+      attribution:
+        "&copy; OpenStreetMap contributors"
+
+    }
+  ).addTo(map);
+
+
+  map.on("movestart", () => {
+
+    if (isSelectingFromMap) {
+
+      centerMarker.style.display =
+        "block";
 
     }
 
+  });
 
-    // --------------------------------------------------
-    // LOADING
-    // --------------------------------------------------
 
-    function showLoading(message) {
+  map.on("moveend", async () => {
 
-      loadingText.textContent = message;
-
-      loadingOverlay.style.display = "flex";
-
+    if (!isSelectingFromMap) {
+      return;
     }
 
+    await updateMapSelection();
 
-    function hideLoading() {
-
-      loadingOverlay.style.display = "none";
-
-    }
+  });
 
 
-    // --------------------------------------------------
-    // MAP INIT
-    // --------------------------------------------------
+  setTimeout(() => {
 
-    function initMap() {
+    map.invalidateSize();
 
-      map = L.map("map", {
+  }, 500);
+}
 
-        zoomControl: true,
 
-        attributionControl: true
+/* ======================================================
+   UPDATE MAP CENTER
+====================================================== */
 
-      }).setView(
-        RIDERX.defaultLocation,
-        13
+async function updateMapSelection() {
+
+  if (!map || !isSelectingFromMap) {
+    return;
+  }
+
+
+  const center =
+    map.getCenter();
+
+
+  const lat =
+    center.lat;
+
+  const lng =
+    center.lng;
+
+
+  statusText.textContent =
+    selectingMode === "pickup"
+      ? "Selecting pickup..."
+      : "Selecting destination...";
+
+
+  try {
+
+    const address =
+      await reverseGeocode(
+        lat,
+        lng
       );
 
 
-      L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
+    if (selectingMode === "pickup") {
 
-          maxZoom: 19,
+      pickupCoords = {
+        lat,
+        lng
+      };
 
-          attribution:
-            "&copy; OpenStreetMap contributors"
+      pickupInput.value =
+        address;
 
-        }
-      ).addTo(map);
-
-
-      // Map moved
-      map.on("movestart", () => {
-
-        centerMarker.style.display = "block";
-
-      });
+      setPickupMarker(
+        lat,
+        lng,
+        address
+      );
 
 
-      map.on("moveend", () => {
+      selectingMode = "drop";
 
-        if (selectingMode) {
+      isSelectingFromMap = false;
 
-          centerMarker.style.display = "block";
-
-          updateMapSelection();
-
-        }
-
-      });
-
-
-      setTimeout(() => {
-
-        map.invalidateSize();
-
-      }, 300);
-
-    }
-
-
-    // --------------------------------------------------
-    // MAP CENTER SELECTION
-    // --------------------------------------------------
-
-    async function updateMapSelection() {
-
-      if (!map) return;
-
-      const center =
-        map.getCenter();
-
-      const lat =
-        center.lat;
-
-      const lng =
-        center.lng;
-
+      centerMarker.style.display =
+        "none";
 
       statusText.textContent =
-        selectingMode === "pickup"
-          ? "Selecting pickup..."
-          : "Selecting destination...";
+        "Pickup selected. Choose destination.";
 
 
-      try {
+      showToast(
+        "Pickup selected. Now select your destination.",
+        "success"
+      );
 
-        const address =
-          await reverseGeocode(lat, lng);
+    } else {
 
+      dropCoords = {
+        lat,
+        lng
+      };
 
-        if (selectingMode === "pickup") {
+      dropInput.value =
+        address;
 
-          pickupCoords = {
-            lat,
-            lng
-          };
-
-          pickupInput.value =
-            address;
-
-          setPickupMarker(
-            lat,
-            lng,
-            address
-          );
-
-
-          selectingMode = "drop";
-
-          statusText.textContent =
-            "Now move map to select destination";
-
-        }
-
-        else {
-
-          dropCoords = {
-            lat,
-            lng
-          };
-
-          dropInput.value =
-            address;
-
-          setDropMarker(
-            lat,
-            lng,
-            address
-          );
-
-
-          statusText.textContent =
-            "Destination selected";
-
-          centerMarker.style.display = "none";
-
-          await calculateRoute();
-
-        }
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Reverse geocode error:",
-          error
-        );
-
-        showToast(
-          "Unable to get this location",
-          "error"
-        );
-
-      }
-
-    }
-
-
-    // --------------------------------------------------
-    // PICKUP MARKER
-    // --------------------------------------------------
-
-    function setPickupMarker(
-      lat,
-      lng,
-      address
-    ) {
-
-      if (pickupMarker) {
-
-        map.removeLayer(
-          pickupMarker
-        );
-
-      }
-
-
-      pickupMarker =
-        L.marker(
-          [lat, lng]
-        )
-        .addTo(map)
-        .bindPopup(
-          `<b>Pickup</b><br>${escapeHtml(address)}`
-        );
-
-    }
-
-
-    // --------------------------------------------------
-    // DROP MARKER
-    // --------------------------------------------------
-
-    function setDropMarker(
-      lat,
-      lng,
-      address
-    ) {
-
-      if (dropMarker) {
-
-        map.removeLayer(
-          dropMarker
-        );
-
-      }
-
-
-      dropMarker =
-        L.marker(
-          [lat, lng]
-        )
-        .addTo(map)
-        .bindPopup(
-          `<b>Drop</b><br>${escapeHtml(address)}`
-        );
-
-    }
-
-
-    // --------------------------------------------------
-    // CURRENT LOCATION
-    // --------------------------------------------------
-
-    async function useCurrentLocation() {
-
-      if (!navigator.geolocation) {
-
-        showToast(
-          "Location is not supported by this browser",
-          "error"
-        );
-
-        return;
-
-      }
-
-
-      showLoading(
-        "Getting your current location..."
+      setDropMarker(
+        lat,
+        lng,
+        address
       );
 
 
-      navigator.geolocation.getCurrentPosition(
+      isSelectingFromMap = false;
 
-        async position => {
+      centerMarker.style.display =
+        "none";
 
-          const lat =
-            position.coords.latitude;
+      statusText.textContent =
+        "Destination selected";
 
-          const lng =
-            position.coords.longitude;
-
-
-          map.setView(
-            [lat, lng],
-            16,
-            {
-              animate: true
-            }
-          );
-
-
-          pickupCoords = {
-            lat,
-            lng
-          };
-
-
-          try {
-
-            const address =
-              await reverseGeocode(
-                lat,
-                lng
-              );
-
-
-            pickupInput.value =
-              address;
-
-
-            setPickupMarker(
-              lat,
-              lng,
-              address
-            );
-
-
-            selectingMode = "drop";
-
-
-            statusText.textContent =
-              "Move map to select destination";
-
-          }
-
-          catch (error) {
-
-            pickupInput.value =
-              `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-
-          }
-
-
-          hideLoading();
-
-        },
-
-        error => {
-
-          hideLoading();
-
-          console.error(
-            "Geolocation error:",
-            error
-          );
-
-
-          showToast(
-            "Location permission allow karein",
-            "error"
-          );
-
-        },
-
-        {
-          enableHighAccuracy: true,
-
-          timeout: 15000,
-
-          maximumAge: 10000
-
-        }
-
-      );
+      await calculateRoute();
 
     }
 
+  } catch (error) {
 
-    // --------------------------------------------------
-    // REVERSE GEOCODING
-    // --------------------------------------------------
+    console.error(
+      "Map selection error:",
+      error
+    );
 
-    async function reverseGeocode(
-      lat,
-      lng
-    ) {
-
-      const url =
-        "https://nominatim.openstreetmap.org/reverse" +
-        `?format=json&lat=${encodeURIComponent(lat)}` +
-        `&lon=${encodeURIComponent(lng)}` +
-        "&zoom=18&addressdetails=1";
+    showToast(
+      "Location address nahi mil paaya.",
+      "error"
+    );
+  }
+}
 
 
-      const response =
-        await fetch(url, {
+/* ======================================================
+   PICKUP MARKER
+====================================================== */
 
-          headers: {
-
-            Accept:
-              "application/json"
-
-          }
-
-        });
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          "Geocoding failed"
-        );
-
-      }
-
-
-      const data =
-        await response.json();
-
-
-      return (
-        data.display_name ||
-        `${lat.toFixed(5)}, ${lng.toFixed(5)}`
-      );
-
-    }
-
-
-    // --------------------------------------------------
-    // SEARCH LOCATION
-    // --------------------------------------------------
-
-    async function searchLocation(
-      value,
-      target
-    ) {
-
-      const query =
-        value.trim();
-
-
-      if (query.length < 3) {
-
-        searchResults.style.display =
-          "none";
-
-        return;
-
-      }
-
-
-      clearTimeout(
-        searchTimer
-      );
-
-
-      searchTimer =
-        setTimeout(
-          async () => {
-
-            try {
-
-              const url =
-                "https://nominatim.openstreetmap.org/search" +
-                `?format=json&q=${encodeURIComponent(query + ", Chandigarh, India")}` +
-                "&limit=5&addressdetails=1";
-
-
-              const response =
-                await fetch(url, {
-
-                  headers: {
-
-                    Accept:
-                      "application/json"
-
-                  }
-
-                });
-
-
-              if (!response.ok) {
-
-                throw new Error(
-                  "Search failed"
-                );
-
-              }
-
-
-              const results =
-                await response.json();
-
-
-              renderSearchResults(
-                results,
-                target
-              );
-
-            }
-
-            catch (error) {
-
-              console.error(
-                "Location search:",
-                error
-              );
-
-            }
-
-          },
-          500
-        );
-
-    }
-
-
-    // --------------------------------------------------
-    // SEARCH
+function setPickup
