@@ -350,3 +350,4 @@ calculateFare();
 
 
 };
+<script type="module" src="js/customer.js"></script>
