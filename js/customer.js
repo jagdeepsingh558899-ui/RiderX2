@@ -1,434 +1,90 @@
-/*
-=================================================
- RiderX Customer Controller
- js/customer.js
-=================================================
-*/
+// RiderX Customer Engine: Fare Calculation, Booking, & Realtime Tracking
+let map, pickupMarker, dropoffMarker;
 
-import { auth, db } from "../firebase/firebase-config.js";
+const BASE_FARES = {
+  bike: { base: 20, perKm: 8 },
+  cab: { base: 50, perKm: 15 },
+  parcel: { base: 30, perKm: 10 },
+  food: { base: 25, perKm: 9 }
+};
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+function initCustomerMap() {
+  const defaultLoc = [28.6139, 77.2090]; // Default New Delhi
+  map = L.map('map').setView(defaultLoc, 13);
 
-import {
-    collection,
-    addDoc,
-    Timestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+}
 
+function calculateFare(serviceType, distanceKm) {
+  const rate = BASE_FARES[serviceType] || BASE_FARES.bike;
+  const fare = rate.base + (rate.perKm * distanceKm);
+  return Math.round(fare);
+}
 
-// ===============================
-// Global State
-// ===============================
+async function requestRide(event) {
+  event.preventDefault();
+  const user = JSON.parse(localStorage.getItem('riderx_user'));
+  if (!user) {
+    alert('Please login first.');
+    window.location.href = '../auth/login.html';
+    return;
+  }
 
-let selectedService = "bike";
-let currentUser = null;
+  const pickup = document.getElementById('pickupLocation').value;
+  const dropoff = document.getElementById('dropoffLocation').value;
+  const serviceType = document.getElementById('serviceType').value;
+  const paymentMethod = document.getElementById('paymentMethod').value;
 
+  // Simulated 5km ride for calculation
+  const estimatedDist = 5.5; 
+  const estimatedFare = calculateFare(serviceType, estimatedDist);
 
-// ===============================
-// Firebase Auth Check
-// ===============================
+  const rideData = {
+    customerId: user.uid,
+    customerName: user.name || 'Customer',
+    pickupLocation: pickup,
+    dropoffLocation: dropoff,
+    serviceType: serviceType,
+    paymentMethod: paymentMethod,
+    fare: estimatedFare,
+    status: 'REQUESTED',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
 
-onAuthStateChanged(auth, (user) => {
+  try {
+    const docRef = await db.collection('rides').add(rideData);
+    document.getElementById('bookingStatus').innerHTML = `
+      <div style="background: #222; border: 1px solid #ffcc00; padding: 15px; border-radius: 8px; margin-top: 15px; color: #fff;">
+        <h4 style="color: #ffcc00; margin: 0 0 8px 0;">Ride Requested!</h4>
+        <p>Ride ID: <b>${docRef.id}</b></p>
+        <p>Estimated Fare: <b>₹${estimatedFare}</b></p>
+        <p>Status: <span id="liveStatus" style="color: #00ff66;">Searching for Driver...</span></p>
+      </div>
+    `;
+    listenForRideUpdates(docRef.id);
+  } catch (err) {
+    alert('Failed to book ride: ' + err.message);
+  }
+}
 
-    if(user){
-
-        currentUser = user;
-
-        console.log(
-            "Customer Login:",
-            user.email
-        );
-
+function listenForRideUpdates(rideId) {
+  db.collection('rides').doc(rideId).onSnapshot((doc) => {
+    if (doc.exists) {
+      const ride = doc.data();
+      const statusElem = document.getElementById('liveStatus');
+      if (statusElem) {
+        statusElem.innerText = ride.status;
+        if (ride.status === 'ACCEPTED') {
+          statusElem.style.color = '#00e5ff';
+          alert('A driver has accepted your ride request!');
+        } else if (ride.status === 'COMPLETED') {
+          statusElem.style.color = '#00ff66';
+          alert('Ride completed! Thank you for riding with RiderX.');
+        }
+      }
     }
-
-});
-
-
-
-// ===============================
-// Service Selection
-// ===============================
-
-const services = document.querySelectorAll(".service");
-
-
-services.forEach(service => {
-
-
-    service.addEventListener("click",()=>{
-
-
-        services.forEach(item=>{
-            item.classList.remove("active");
-        });
-
-
-        service.classList.add("active");
-
-
-        selectedService =
-        service.dataset.service;
-
-
-        calculateFare();
-
-
-    });
-
-
-});
-
-
-
-
-// ===============================
-// Fare Calculation
-// ===============================
-
-function calculateFare(){
-
-
-    let distance = 5;
-
-
-    let fare = 0;
-
-
-
-    switch(selectedService){
-
-
-        case "bike":
-            fare = distance * 8;
-            break;
-
-
-        case "cab":
-            fare = distance * 14;
-            break;
-
-
-        case "parcel":
-            fare = distance * 10;
-            break;
-
-
-        case "food":
-            fare = distance * 40;
-            break;
-
-
-    }
-
-
-
-    const fareBox =
-    document.getElementById("fare");
-
-
-    if(fareBox){
-
-        fareBox.innerText =
-        "₹" + fare;
-
-    }
-
-
+  });
 }
-
-
-
-calculateFare();
-
-
-
-
-// ===============================
-// Book Ride
-// ===============================
-
-
-const bookBtn =
-document.getElementById("bookRide");
-
-
-
-if(bookBtn){
-
-
-bookBtn.addEventListener(
-"click",
-async()=>{
-
-
-const pickup =
-document.getElementById("pickup").value.trim();
-
-
-const drop =
-document.getElementById("drop").value.trim();
-
-
-
-if(!pickup || !drop){
-
-alert(
-"Pickup and Drop location required"
-);
-
-return;
-
-}
-
-
-
-try{
-
-
-const fare =
-Number(
-document
-.getElementById("fare")
-.innerText
-.replace("₹","")
-);
-
-
-
-const rideData = {
-
-
-customerId:
-currentUser ?
-currentUser.uid :
-"guest",
-
-
-serviceType:
-selectedService,
-
-
-pickup:{
-address:pickup
-},
-
-
-drop:{
-address:drop
-},
-
-
-payment:
-document.getElementById("payment").value,
-
-
-fare:fare,
-
-
-status:
-"requested",
-
-
-createdAt:
-Timestamp.now()
-
-
-};
-
-
-
-await addDoc(
-collection(db,"rides"),
-rideData
-);
-
-
-
-openRideModal();
-
-
-
-alert(
-"Ride Requested Successfully"
-);
-
-
-
-}
-catch(error){
-
-
-console.error(
-"Ride Error:",
-error
-);
-
-
-alert(
-"Ride booking failed"
-);
-
-
-
-}
-
-
-
-});
-
-
-}
-
-
-
-
-
-// ===============================
-// Ride Modal
-// ===============================
-
-
-function openRideModal(){
-
-
-const modal =
-document.getElementById("rideModal");
-
-
-if(modal){
-
-modal.style.display="flex";
-
-}
-
-
-
-}
-
-
-
-const cancelBtn =
-document.getElementById("cancelRide");
-
-
-
-if(cancelBtn){
-
-
-cancelBtn.addEventListener(
-"click",
-()=>{
-
-
-const modal =
-document.getElementById("rideModal");
-
-
-if(modal){
-
-modal.style.display="none";
-
-}
-
-
-});
-
-
-}
-
-
-
-
-// ===============================
-// Navigation
-// ===============================
-
-
-window.openHistory = function(){
-
-window.location.href =
-"history.html";
-
-}
-
-
-
-window.openWallet = function(){
-
-window.location.href =
-"wallet.html";
-
-}
-
-
-
-window.openProfile = function(){
-
-window.location.href =
-"profile.html";
-
-}
-
-
-
-
-// ===============================
-// Bottom Menu
-// ===============================
-
-
-const bottom =
-document.querySelectorAll(".bottom div");
-
-
-
-if(bottom.length >= 4){
-
-
-bottom[0].onclick =
-()=>{
-
-window.location.href =
-"home.html";
-
-};
-
-
-
-bottom[1].onclick =
-()=>{
-
-openHistory();
-
-};
-
-
-
-bottom[2].onclick =
-()=>{
-
-openWallet();
-
-};
-
-
-
-bottom[3].onclick =
-()=>{
-
-openProfile();
-
-};
-
-
-
-}
-
-
-
-
-console.log(
-"RiderX Customer JS Loaded Successfully"
-);
