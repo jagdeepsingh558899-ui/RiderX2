@@ -1,539 +1,516 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiderX Control Tower | Premium Admin Settings</title>
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#08080A',
-                            dark: '#0F1015',
-                            card: '#161822',
-                            border: '#232636',
-                            yellow: '#FFE500',
-                            yellowDark: '#D4BC00',
-                            gray: '#8E94A8',
-                            emerald: '#10B981',
-                            rose: '#F43F5E',
-                            amber: '#F59E0B',
-                            indigo: '#6366F1',
-                            cyan: '#06B6D4'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #08080A;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
 
-        .glass-panel {
-            background: linear-gradient(135deg, rgba(22, 24, 34, 0.95) 0%, rgba(15, 16, 21, 0.98) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.08);
-        }
+<meta charset="UTF-8">
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0F1015;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #232636;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
-    </style>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>RiderX Admin Settings</title>
+
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+
+<style>
+
+:root{
+
+--yellow:#FFE500;
+--bg:#050505;
+--card:#111;
+
+}
+
+
+*{
+
+box-sizing:border-box;
+font-family:Arial;
+
+}
+
+
+body{
+
+margin:0;
+background:var(--bg);
+color:white;
+
+}
+
+
+
+.header{
+
+height:70px;
+background:#111;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+
+}
+
+
+
+.logo{
+
+font-size:28px;
+font-weight:900;
+
+}
+
+
+.logo span{
+
+color:var(--yellow);
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.card{
+
+background:var(--card);
+border:1px solid #333;
+border-radius:20px;
+padding:20px;
+
+}
+
+
+
+.group{
+
+margin-bottom:15px;
+
+}
+
+
+
+label{
+
+display:block;
+color:#aaa;
+margin-bottom:7px;
+
+}
+
+
+
+input,
+select{
+
+width:100%;
+padding:14px;
+background:#000;
+color:white;
+border:1px solid #444;
+border-radius:12px;
+font-size:15px;
+
+}
+
+
+
+.switch{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#000;
+padding:15px;
+border-radius:12px;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:15px;
+background:#FFE500;
+color:#000;
+border:0;
+border-radius:15px;
+font-weight:bold;
+font-size:16px;
+
+}
+
+
+
+#msg{
+
+text-align:center;
+margin-top:15px;
+color:#FFE500;
+
+}
+
+
+
+</style>
+
 </head>
-<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
 
-    <!-- Top Global Navbar -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3">
-        <div class="max-w-[1700px] mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <a href="./Dashboard.html" class="flex items-center gap-3">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-9 w-auto object-contain" onerror="this.src='https://via.placeholder.com/130x35/08080A/FFE500?text=RiderX+Admin'">
-                </a>
-                <span class="text-xs font-extrabold bg-brand-yellow/10 text-brand-yellow px-3 py-1 rounded-full border border-brand-yellow/20 uppercase tracking-wider hidden sm:inline-block">
-                    Admin Settings & Global Configuration Suite
-                </span>
-            </div>
 
-            <div class="flex items-center gap-4">
-                <button onclick="saveAllSettings()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition shadow-lg shadow-brand-yellow/10">
-                    <i class="fa-solid fa-floppy-disk text-xs"></i> Save All Changes
-                </button>
+<body>
 
-                <div class="flex items-center gap-3 border-l border-brand-border pl-4">
-                    <img id="adminAvatar" src="https://ui-avatars.com/api/?name=System+Admin&background=FFE500&color=08080A" alt="Admin" class="w-9 h-9 rounded-xl border border-brand-yellow object-cover">
-                    <div class="hidden xl:block text-left">
-                        <h4 class="text-xs font-extrabold text-white">System Admin</h4>
-                        <p class="text-[10px] text-brand-yellow font-mono">Control Tower</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
 
-    <!-- Main Workspace Container -->
-    <main class="flex-grow max-w-[1700px] w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+<header class="header">
 
-        <!-- Navigation Tabs / Quick Return -->
-        <div class="flex items-center justify-between border-b border-brand-border pb-4">
-            <div class="flex items-center gap-3">
-                <a href="./Dashboard.html" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition">
-                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Control Tower
-                </a>
-                <span class="text-xs font-extrabold text-white bg-brand-yellow/10 text-brand-yellow px-4 py-2 rounded-xl border border-brand-yellow/25">
-                    <i class="fa-solid fa-gears mr-1.5"></i> Platform Configuration Panel
-                </span>
-            </div>
-        </div>
 
-        <!-- Settings Sections Navigation Tabs -->
-        <div class="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2">
-            <button onclick="switchTab('general')" id="tab-btn-general" class="px-4 py-2 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0">General Settings</button>
-            <button onclick="switchTab('rides')" id="tab-btn-rides" class="px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Ride Fares & Radius</button>
-            <button onclick="switchTab('commission')" id="tab-btn-commission" class="px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Commission & Bonuses</button>
-            <button onclick="switchTab('payments')" id="tab-btn-payments" class="px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Payment Gateways</button>
-        </div>
+<div class="logo">
 
-        <!-- 1. GENERAL SETTINGS SECTION -->
-        <div id="section-general" class="settings-section glass-panel p-6 rounded-3xl space-y-6">
-            <div class="border-b border-brand-border pb-4 flex items-center justify-between">
-                <div>
-                    <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-building text-brand-yellow"></i> General Platform Settings
-                    </h3>
-                    <p class="text-xs text-brand-gray">Configure core brand details, contact info, region, currency and timezone.</p>
-                </div>
-            </div>
+RID<span>ERX</span>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Company Name</label>
-                    <input type="text" id="setCompanyName" value="RiderX Super App" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Company Logo URL</label>
-                    <input type="text" id="setCompanyLogo" value="../assets/Logo/RiderX-logo.png" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Contact Email</label>
-                    <input type="email" id="setContactEmail" value="support@riderx.app" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Support Number</label>
-                    <input type="text" id="setSupportNumber" value="+91 1800-RIDERX" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2 md:col-span-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Office Address</label>
-                    <input type="text" id="setOfficeAddress" value="RiderX Global Towers, Tech Park, Bangalore, India" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Time Zone</label>
-                    <select id="setTimeZone" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        <option value="IST" selected>Asia/Kolkata (IST)</option>
-                        <option value="UTC">UTC (Coordinated Universal Time)</option>
-                        <option value="EST">America/New_York (EST)</option>
-                    </select>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Currency</label>
-                    <select id="setCurrency" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        <option value="INR" selected>INR (₹ - Indian Rupee)</option>
-                        <option value="USD">USD ($ - US Dollar)</option>
-                        <option value="EUR">EUR (€ - Euro)</option>
-                    </select>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Language</label>
-                    <select id="setLanguage" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        <option value="en" selected>English</option>
-                        <option value="hi">Hindi</option>
-                        <option value="kn">Kannada</option>
-                    </select>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Date Format</label>
-                    <select id="setDateFormat" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
-                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                    </select>
-                </div>
-            </div>
-            <div class="flex justify-end pt-4">
-                <button onclick="saveAllSettings()" class="px-6 py-2.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">Save General Settings</button>
-            </div>
-        </div>
+</div>
 
-        <!-- 2. RIDE SETTINGS SECTION -->
-        <div id="section-rides" class="settings-section glass-panel p-6 rounded-3xl space-y-6 hidden">
-            <div class="border-b border-brand-border pb-4 flex items-center justify-between">
-                <div>
-                    <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-car text-brand-yellow"></i> Ride Fares, Charges & Radius
-                    </h3>
-                    <p class="text-xs text-brand-gray">Configure base fares for all verticals, per KM charges, waiting rates and search radius.</p>
-                </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Bike Base Fare (₹)</label>
-                    <input type="number" id="setBikeFare" value="30" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Cab Base Fare (₹)</label>
-                    <input type="number" id="setCabFare" value="80" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Auto Base Fare (₹)</label>
-                    <input type="number" id="setAutoFare" value="45" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Parcel Base Fare (₹)</label>
-                    <input type="number" id="setParcelFare" value="50" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Food Delivery Base Fare (₹)</label>
-                    <input type="number" id="setFoodFare" value="40" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Per KM Fare (₹)</label>
-                    <input type="number" id="setPerKmFare" value="15" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Waiting Charge (₹/min)</label>
-                    <input type="number" id="setWaitingCharge" value="2" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Toll Charge (₹)</label>
-                    <input type="number" id="setTollCharge" value="50" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Night Charge (₹)</label>
-                    <input type="number" id="setNightCharge" value="30" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Peak Hour Charge (₹)</label>
-                    <input type="number" id="setPeakCharge" value="40" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Minimum Fare (₹)</label>
-                    <input type="number" id="setMinFare" value="50" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Max Booking Distance (KM)</label>
-                    <input type="number" id="setMaxDistance" value="100" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Booking Radius (KM)</label>
-                    <input type="number" id="setBookingRadius" value="5" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-            </div>
-            <div class="flex justify-end pt-4">
-                <button onclick="saveAllSettings()" class="px-6 py-2.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">Save Ride Settings</button>
-            </div>
-        </div>
 
-        <!-- 3. COMMISSION & BONUSES SECTION -->
-        <div id="section-commission" class="settings-section glass-panel p-6 rounded-3xl space-y-6 hidden">
-            <div class="border-b border-brand-border pb-4 flex items-center justify-between">
-                <div>
-                    <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-percent text-brand-yellow"></i> Commission & Incentives Setup
-                    </h3>
-                    <p class="text-xs text-brand-gray">Set platform commission percentages, rider incentives, referral bonuses, and cashback.</p>
-                </div>
-            </div>
+<a href="dashboard.html"
+style="color:#FFE500;font-size:22px">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Platform Commission (%)</label>
-                    <input type="number" id="setCommissionPct" value="15" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Rider Incentive (₹)</label>
-                    <input type="number" id="setRiderIncentive" value="100" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Referral Bonus (₹)</label>
-                    <input type="number" id="setReferralBonus" value="50" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Coupon Discount (%)</label>
-                    <input type="number" id="setCouponDiscount" value="20" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-brand-gray uppercase">Cashback (%)</label>
-                    <input type="number" id="setCashbackPct" value="5" class="w-full bg-brand-dark border border-brand-border rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                </div>
-            </div>
-            <div class="flex justify-end pt-4">
-                <button onclick="saveAllSettings()" class="px-6 py-2.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">Save Commission Settings</button>
-            </div>
-        </div>
+<i class="fa-solid fa-arrow-left"></i>
 
-        <!-- 4. PAYMENT GATEWAYS SECTION -->
-        <div id="section-payments" class="settings-section glass-panel p-6 rounded-3xl space-y-6 hidden">
-            <div class="border-b border-brand-border pb-4 flex items-center justify-between">
-                <div>
-                    <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-wallet text-brand-yellow"></i> Payment Methods & Gateways
-                    </h3>
-                    <p class="text-xs text-brand-gray">Enable or disable payment options and payment gateway integrations.</p>
-                </div>
-            </div>
+</a>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-yellow/10 border border-brand-yellow/20 flex items-center justify-center text-brand-yellow font-bold"><i class="fa-solid fa-money-bill-wave"></i></div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Cash Payment</h4>
-                            <p class="text-[10px] text-brand-gray">Accept cash on ride completion</p>
-                        </div>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="payCash" checked class="sr-only peer">
-                        <div class="w-9 h-5 bg-brand-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-yellow"></div>
-                    </label>
-                </div>
 
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-yellow/10 border border-brand-yellow/20 flex items-center justify-center text-brand-yellow font-bold"><i class="fa-solid fa-qrcode"></i></div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">UPI Gateway</h4>
-                            <p class="text-[10px] text-brand-gray">Google Pay, PhonePe, Paytm</p>
-                        </div>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="payUpi" checked class="sr-only peer">
-                        <div class="w-9 h-5 bg-brand-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-yellow"></div>
-                    </label>
-                </div>
 
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-yellow/10 border border-brand-yellow/20 flex items-center justify-center text-brand-yellow font-bold"><i class="fa-solid fa-wallet"></i></div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">In-App Wallet</h4>
-                            <p class="text-[10px] text-brand-gray">RiderX secure digital wallet</p>
-                        </div>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="payWallet" checked class="sr-only peer">
-                        <div class="w-9 h-5 bg-brand-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-yellow"></div>
-                    </label>
-                </div>
+</header>
 
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-yellow/10 border border-brand-yellow/20 flex items-center justify-center text-brand-yellow font-bold"><i class="fa-solid fa-credit-card"></i></div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Credit / Debit Card</h4>
-                            <p class="text-[10px] text-brand-gray">Visa, Mastercard, RuPay</p>
-                        </div>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="payCard" checked class="sr-only peer">
-                        <div class="w-9 h-5 bg-brand-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-yellow"></div>
-                    </label>
-                </div>
 
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-brand-yellow/10 border border-brand-yellow/20 flex items-center justify-center text-brand-yellow font-bold"><i class="fa-solid fa-bolt"></i></div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Razorpay Gateway</h4>
-                            <p class="text-[10px] text-brand-gray">Primary payment gateway</p>
-                        </div>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="payRazorpay" checked class="sr-only peer">
-                        <div class="w-9 h-5 bg-brand-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-brand-yellow"></div>
-                    </label>
-                </div>
-            </div>
 
-            <div class="flex justify-end pt-4">
-                <button onclick="saveAllSettings()" class="px-6 py-2.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">Save Payment Settings</button>
-            </div>
-        </div>
 
-    </main>
 
-    <!-- Global Footer -->
-    <footer class="border-t border-brand-border/60 bg-brand-black py-4 px-4 lg:px-8 mt-auto">
-        <div class="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-gray">
-            <div class="flex items-center gap-2">
-                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-5 w-auto object-contain opacity-70">
-                <span>&copy; 2026 RiderX Control Tower. All rights reserved.</span>
-            </div>
-            <span class="text-brand-emerald flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> Secure Settings Operations</span>
-        </div>
-    </footer>
+<div class="container">
 
-    <!-- Firebase & Core JS Scripts -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/Admin.js"></script>
-    <script type="module" src="../js/App.js"></script>
 
-    <!-- Page Logic Module -->
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<h2>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    window.location.href = '../auth/login.html';
-                    return;
-                }
-                loadSettingsFromFirebase();
-            });
-        });
+App Settings
 
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.settings-section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(`section-${tabName}`).classList.remove('hidden');
+</h2>
 
-            ['general', 'rides', 'commission', 'payments'].forEach(t => {
-                const btn = document.getElementById(`tab-btn-${t}`);
-                if (t === tabName) {
-                    btn.className = "px-4 py-2 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0";
-                } else {
-                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0";
-                }
-            });
-        };
 
-        async function loadSettingsFromFirebase() {
-            try {
-                const docRef = doc(db, "settings", "platform_config");
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    
-                    // General
-                    if(data.companyName) document.getElementById('setCompanyName').value = data.companyName;
-                    if(data.companyLogo) document.getElementById('setCompanyLogo').value = data.companyLogo;
-                    if(data.contactEmail) document.getElementById('setContactEmail').value = data.contactEmail;
-                    if(data.supportNumber) document.getElementById('setSupportNumber').value = data.supportNumber;
-                    if(data.officeAddress) document.getElementById('setOfficeAddress').value = data.officeAddress;
-                    if(data.timeZone) document.getElementById('setTimeZone').value = data.timeZone;
-                    if(data.currency) document.getElementById('setCurrency').value = data.currency;
-                    if(data.language) document.getElementById('setLanguage').value = data.language;
-                    if(data.dateFormat) document.getElementById('setDateFormat').value = data.dateFormat;
 
-                    // Rides
-                    if(data.bikeFare) document.getElementById('setBikeFare').value = data.bikeFare;
-                    if(data.cabFare) document.getElementById('setCabFare').value = data.cabFare;
-                    if(data.autoFare) document.getElementById('setAutoFare').value = data.autoFare;
-                    if(data.parcelFare) document.getElementById('setParcelFare').value = data.parcelFare;
-                    if(data.foodFare) document.getElementById('setFoodFare').value = data.foodFare;
-                    if(data.perKmFare) document.getElementById('setPerKmFare').value = data.perKmFare;
-                    if(data.waitingCharge) document.getElementById('setWaitingCharge').value = data.waitingCharge;
-                    if(data.tollCharge) document.getElementById('setTollCharge').value = data.tollCharge;
-                    if(data.nightCharge) document.getElementById('setNightCharge').value = data.nightCharge;
-                    if(data.peakCharge) document.getElementById('setPeakCharge').value = data.peakCharge;
-                    if(data.minFare) document.getElementById('setMinFare').value = data.minFare;
-                    if(data.maxDistance) document.getElementById('setMaxDistance').value = data.maxDistance;
-                    if(data.bookingRadius) document.getElementById('setBookingRadius').value = data.bookingRadius;
+<div class="card">
 
-                    // Commission
-                    if(data.commissionPct) document.getElementById('setCommissionPct').value = data.commissionPct;
-                    if(data.riderIncentive) document.getElementById('setRiderIncentive').value = data.riderIncentive;
-                    if(data.referralBonus) document.getElementById('setReferralBonus').value = data.referralBonus;
-                    if(data.couponDiscount) document.getElementById('setCouponDiscount').value = data.couponDiscount;
-                    if(data.cashbackPct) document.getElementById('setCashbackPct').value = data.cashbackPct;
 
-                    // Payments
-                    if(data.payCash !== undefined) document.getElementById('payCash').checked = data.payCash;
-                    if(data.payUpi !== undefined) document.getElementById('payUpi').checked = data.payUpi;
-                    if(data.payWallet !== undefined) document.getElementById('payWallet').checked = data.payWallet;
-                    if(data.payCard !== undefined) document.getElementById('payCard').checked = data.payCard;
-                    if(data.payRazorpay !== undefined) document.getElementById('payRazorpay').checked = data.payRazorpay;
-                }
-            } catch (err) {
-                console.error("Error loading settings:", err);
-            }
-        }
 
-        window.saveAllSettings = async function() {
-            try {
-                const settingsData = {
-                    companyName: document.getElementById('setCompanyName').value,
-                    companyLogo: document.getElementById('setCompanyLogo').value,
-                    contactEmail: document.getElementById('setContactEmail').value,
-                    supportNumber: document.getElementById('setSupportNumber').value,
-                    officeAddress: document.getElementById('setOfficeAddress').value,
-                    timeZone: document.getElementById('setTimeZone').value,
-                    currency: document.getElementById('setCurrency').value,
-                    language: document.getElementById('setLanguage').value,
-                    dateFormat: document.getElementById('setDateFormat').value,
+<div class="group">
 
-                    bikeFare: parseFloat(document.getElementById('setBikeFare').value),
-                    cabFare: parseFloat(document.getElementById('setCabFare').value),
-                    autoFare: parseFloat(document.getElementById('setAutoFare').value),
-                    parcelFare: parseFloat(document.getElementById('setParcelFare').value),
-                    foodFare: parseFloat(document.getElementById('setFoodFare').value),
-                    perKmFare: parseFloat(document.getElementById('setPerKmFare').value),
-                    waitingCharge: parseFloat(document.getElementById('setWaitingCharge').value),
-                    tollCharge: parseFloat(document.getElementById('setTollCharge').value),
-                    nightCharge: parseFloat(document.getElementById('setNightCharge').value),
-                    peakCharge: parseFloat(document.getElementById('setPeakCharge').value),
-                    minFare: parseFloat(document.getElementById('setMinFare').value),
-                    maxDistance: parseFloat(document.getElementById('setMaxDistance').value),
-                    bookingRadius: parseFloat(document.getElementById('setBookingRadius').value),
+<label>
+App Name
+</label>
 
-                    commissionPct: parseFloat(document.getElementById('setCommissionPct').value),
-                    riderIncentive: parseFloat(document.getElementById('setRiderIncentive').value),
-                    referralBonus: parseFloat(document.getElementById('setReferralBonus').value),
-                    couponDiscount: parseFloat(document.getElementById('setCouponDiscount').value),
-                    cashbackPct: parseFloat(document.getElementById('setCashbackPct').value),
+<input id="appName">
 
-                    payCash: document.getElementById('payCash').checked,
-                    payUpi: document.getElementById('payUpi').checked,
-                    payWallet: document.getElementById('payWallet').checked,
-                    payCard: document.getElementById('payCard').checked,
-                    payRazorpay: document.getElementById('payRazorpay').checked,
-                    updatedAt: new Date()
-                };
+</div>
 
-                await setDoc(doc(db, "settings", "platform_config"), settingsData, { merge: true });
-                alert("All RiderX platform settings updated successfully.");
-            } catch (err) {
-                console.error("Error saving settings:", err);
-                alert("Failed to save settings. Please check Firebase connection.");
-            }
-        };
-    </script>
+
+
+
+<div class="group">
+
+<label>
+Logo URL
+</label>
+
+<input id="logo">
+
+</div>
+
+
+
+
+<div class="group">
+
+<label>
+Theme Color
+</label>
+
+<input id="themeColor"
+placeholder="#FFE500">
+
+</div>
+
+
+
+
+
+<div class="group">
+
+<label>
+Support Number
+</label>
+
+<input id="supportNumber"
+type="tel">
+
+</div>
+
+
+
+
+
+<div class="group">
+
+<label>
+Support Email
+</label>
+
+<input id="supportEmail"
+type="email">
+
+</div>
+
+
+
+
+
+<div class="group">
+
+<label>
+App Version
+
+</label>
+
+<input id="version">
+
+</div>
+
+
+
+
+
+
+<div class="group">
+
+<label>
+Default Language
+
+</label>
+
+
+<select id="language">
+
+
+<option value="en">
+English
+</option>
+
+
+<option value="hi">
+Hindi
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+
+<div class="switch">
+
+
+<span>
+Maintenance Mode
+</span>
+
+
+<input id="maintenance"
+type="checkbox">
+
+
+</div>
+
+
+
+
+
+
+<br>
+
+
+
+<button id="saveBtn">
+
+<i class="fa-solid fa-save"></i>
+
+Save Settings
+
+</button>
+
+
+
+<div id="msg"></div>
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script type="module">
+
+
+import {
+
+db
+
+}
+
+from "../firebase/firebase-config.js";
+
+
+import {
+
+doc,
+getDoc,
+setDoc
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+
+
+
+const settingsRef =
+doc(
+db,
+"settings",
+"app"
+);
+
+
+
+
+
+
+
+async function loadSettings(){
+
+
+const snap =
+await getDoc(settingsRef);
+
+
+
+if(snap.exists()){
+
+
+let data=snap.data();
+
+
+
+appName.value=data.appName || "RiderX";
+
+logo.value=data.logo || "";
+
+themeColor.value=data.themeColor || "#FFE500";
+
+supportNumber.value=data.supportNumber || "";
+
+supportEmail.value=data.supportEmail || "";
+
+version.value=data.version || "1.0.0";
+
+language.value=data.language || "en";
+
+maintenance.checked=data.maintenance || false;
+
+
+}
+
+
+}
+
+
+
+
+saveBtn.onclick=async()=>{
+
+
+await setDoc(
+
+settingsRef,
+
+{
+
+
+appName:appName.value,
+
+logo:logo.value,
+
+themeColor:themeColor.value,
+
+supportNumber:supportNumber.value,
+
+supportEmail:supportEmail.value,
+
+version:version.value,
+
+language:language.value,
+
+maintenance:maintenance.checked,
+
+
+updatedAt:new Date()
+
+
+}
+
+);
+
+
+
+msg.innerHTML=
+"✅ Settings Saved Successfully";
+
+
+};
+
+
+
+
+
+loadSettings();
+
+
+
+</script>
+
+
 </body>
+
 </html>
