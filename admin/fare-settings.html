@@ -4,65 +4,56 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RiderX Admin Fare Settings</title>
 
-<title>RiderX Fare Settings</title>
-
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 
 :root{
-
---yellow:#FFE500;
---bg:#050505;
+--yellow:#FFD600;
+--black:#050505;
 --card:#111;
-
+--border:#333;
 }
-
 
 *{
-
+margin:0;
+padding:0;
 box-sizing:border-box;
-font-family:Arial;
-
+font-family:Arial,sans-serif;
 }
-
 
 body{
 
-margin:0;
-background:var(--bg);
+background:var(--black);
 color:white;
+padding-bottom:40px;
 
 }
-
 
 
 .header{
 
-height:70px;
-background:#111;
 display:flex;
-align-items:center;
 justify-content:space-between;
-padding:0 20px;
+align-items:center;
+padding:20px;
+
+background:#111;
+border-bottom:1px solid #222;
 
 }
-
 
 
 .logo{
 
-font-size:28px;
+font-size:30px;
 font-weight:900;
 
 }
-
 
 .logo span{
 
@@ -79,77 +70,96 @@ padding:20px;
 }
 
 
-
 .card{
 
 background:var(--card);
-border:1px solid #333;
+border:1px solid var(--border);
 border-radius:20px;
 padding:20px;
+margin-bottom:20px;
 
 }
 
 
 
-h2{
+.card h2{
 
-margin-top:0;
-
-}
-
-
-
-.group{
-
+color:var(--yellow);
 margin-bottom:15px;
 
 }
 
 
 
+.grid{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+
+}
+
+
+
+.input-box{
+
+display:flex;
+flex-direction:column;
+gap:6px;
+
+}
+
+
 label{
 
-display:block;
 color:#aaa;
-margin-bottom:7px;
+font-size:14px;
 
 }
 
 
 
-input{
+input,select{
 
-width:100%;
-padding:14px;
+padding:13px;
 background:#000;
+color:white;
 border:1px solid #444;
 border-radius:12px;
-color:white;
-font-size:16px;
+outline:none;
 
 }
 
 
 
-.section-title{
+input:focus{
 
-color:var(--yellow);
-font-size:18px;
-margin:20px 0 10px;
+border-color:var(--yellow);
 
 }
 
 
 
-button{
+.service-title{
+
+font-size:20px;
+font-weight:bold;
+margin-bottom:15px;
+
+}
+
+
+
+.save-btn{
 
 width:100%;
-padding:15px;
-border:0;
+padding:16px;
+border:none;
 border-radius:15px;
 background:var(--yellow);
 font-size:17px;
 font-weight:bold;
+cursor:pointer;
 
 }
 
@@ -159,7 +169,19 @@ font-weight:bold;
 
 margin-top:15px;
 text-align:center;
-color:#aaa;
+color:var(--yellow);
+
+}
+
+
+
+@media(max-width:600px){
+
+.grid{
+
+grid-template-columns:1fr;
+
+}
 
 }
 
@@ -172,7 +194,7 @@ color:#aaa;
 <body>
 
 
-<div class="header">
+<header class="header">
 
 
 <div class="logo">
@@ -182,16 +204,10 @@ RID<span>ERX</span>
 </div>
 
 
-<a href="dashboard.html"
-style="color:#FFE500;font-size:22px">
-
-<i class="fa-solid fa-arrow-left"></i>
-
-</a>
+<i class="fa-solid fa-gear"></i>
 
 
-</div>
-
+</header>
 
 
 
@@ -199,109 +215,124 @@ style="color:#FFE500;font-size:22px">
 <div class="container">
 
 
+
+<div class="card">
+
+
 <h2>
-
+<i class="fa-solid fa-money-bill"></i>
 Fare Settings
-
 </h2>
+
+
+<div class="grid">
+
+
+<div class="input-box">
+
+<label>Service</label>
+
+<select id="service">
+
+<option value="bike">
+Bike Taxi
+</option>
+
+<option value="cab">
+Cab
+</option>
+
+<option value="parcel">
+Parcel
+</option>
+
+<option value="food">
+Food
+</option>
+
+</select>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
 
 
 
 <div class="card">
 
 
+<div class="service-title">
 
-<div class="section-title">
-
-Bike Taxi
-
-</div>
-
-
-
-<div class="group">
-
-<label>
-Day Fare Per KM
-</label>
-
-<input id="bikeDay"
-type="number">
+Fare Configuration
 
 </div>
 
 
 
-<div class="group">
+<div class="grid">
 
-<label>
-After 10 KM Fare
-</label>
 
-<input id="bikeAfter10"
-type="number">
+<div class="input-box">
+
+<label>Base Fare ₹</label>
+
+<input id="baseFare"
+type="number"
+placeholder="20">
 
 </div>
 
 
 
 
+<div class="input-box">
 
+<label>Day Per KM ₹ (8AM - 10PM)</label>
 
-<div class="section-title">
-
-Cab
-
-</div>
-
-
-<div class="group">
-
-<label>
-Cab Per KM
-
-</label>
-
-<input id="cab"
-type="number">
+<input id="dayRate"
+type="number"
+placeholder="8">
 
 </div>
 
 
 
 
+<div class="input-box">
 
+<label>After 10 KM Per KM ₹</label>
 
-
-<div class="section-title">
-
-Parcel / Food
-
-</div>
-
-
-
-<div class="group">
-
-<label>
-Parcel Per KM
-</label>
-
-<input id="parcel"
-type="number">
+<input id="extraRate"
+type="number"
+placeholder="9">
 
 </div>
 
 
 
-<div class="group">
 
-<label>
-Food Delivery Charge
-</label>
+<div class="input-box">
 
-<input id="food"
-type="number">
+<label>Night Per KM ₹ (10PM - 6AM)</label>
+
+<input id="nightRate"
+type="number"
+placeholder="11">
+
+</div>
+
+
+
+</div>
+
 
 </div>
 
@@ -311,55 +342,7 @@ type="number">
 
 
 
-<div class="section-title">
-
-Night Fare
-
-</div>
-
-
-
-<div class="group">
-
-<label>
-Night Per KM (10 PM - 6 AM)
-
-</label>
-
-
-<input id="night"
-type="number">
-
-</div>
-
-
-
-
-
-<div class="section-title">
-
-General
-
-</div>
-
-
-
-<div class="group">
-
-<label>
-Minimum Fare
-
-</label>
-
-<input id="minimum"
-type="number">
-
-</div>
-
-
-
-
-<button id="saveBtn">
+<button class="save-btn" id="saveFare">
 
 <i class="fa-solid fa-save"></i>
 
@@ -369,14 +352,8 @@ Save Fare Settings
 
 
 
-<div id="status"
-class="status">
+<div class="status" id="status"></div>
 
-</div>
-
-
-
-</div>
 
 
 
@@ -386,162 +363,7 @@ class="status">
 
 
 
-
-
-<script type="module">
-
-
-import {
-
-db
-
-}
-
-from "../firebase/firebase-config.js";
-
-
-
-import {
-
-doc,
-getDoc,
-setDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-
-
-
-const fareRef =
-doc(
-db,
-"settings",
-"fare"
-);
-
-
-
-
-
-
-
-async function loadSettings(){
-
-
-const snap =
-await getDoc(fareRef);
-
-
-
-if(snap.exists()){
-
-
-const data=snap.data();
-
-
-
-bikeDay.value=data.bikeDay ?? 8;
-
-bikeAfter10.value=data.bikeAfter10 ?? 9;
-
-cab.value=data.cab ?? 12;
-
-parcel.value=data.parcel ?? 8;
-
-food.value=data.food ?? 30;
-
-night.value=data.night ?? 11;
-
-minimum.value=data.minimum ?? 20;
-
-
-
-}
-
-else{
-
-
-bikeDay.value=8;
-
-bikeAfter10.value=9;
-
-cab.value=12;
-
-parcel.value=8;
-
-food.value=30;
-
-night.value=11;
-
-minimum.value=20;
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-saveBtn.onclick=async()=>{
-
-
-await setDoc(
-
-fareRef,
-
-{
-
-
-bikeDay:Number(bikeDay.value),
-
-bikeAfter10:Number(bikeAfter10.value),
-
-cab:Number(cab.value),
-
-parcel:Number(parcel.value),
-
-food:Number(food.value),
-
-night:Number(night.value),
-
-minimum:Number(minimum.value),
-
-
-updatedAt:new Date()
-
-
-}
-
-);
-
-
-
-status.innerHTML=
-"✅ Fare Settings Updated Successfully";
-
-
-};
-
-
-
-
-
-
-loadSettings();
-
-
-
-</script>
-
+<script type="module" src="../js/admin-fare.js"></script>
 
 
 </body>
