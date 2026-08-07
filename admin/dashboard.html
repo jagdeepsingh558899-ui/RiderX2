@@ -1,114 +1,584 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RiderX - Admin Operations Console</title>
 
-  <link rel="stylesheet" href="../css/app.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="../firebase/firebase-config.js"></script>
+<title>RiderX Admin Dashboard</title>
 
-  <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      color: #FFF;
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-    .metric-card {
-      background: #1E1E1E;
-      padding: 20px;
-      border-radius: 10px;
-      border-bottom: 4px solid #FFC107;
-    }
-    .metric-card h3 { margin: 0; font-size: 28px; }
-    .metric-card p { margin: 5px 0 0 0; color: #AAA; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: #1E1E1E;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid #333;
-    }
-    th { background: #2A2A2A; color: #FFC107; }
-  </style>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+
+body{
+background:#050505;
+color:white;
+padding-bottom:30px;
+}
+
+
+.header{
+
+height:70px;
+background:#111;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 20px;
+border-bottom:1px solid #333;
+
+}
+
+
+.logo{
+
+font-size:26px;
+font-weight:900;
+
+}
+
+.logo span{
+
+color:#FFD600;
+
+}
+
+
+.logout{
+
+background:#ff3333;
+color:white;
+border:0;
+padding:10px 16px;
+border-radius:12px;
+font-weight:bold;
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.title{
+
+font-size:26px;
+font-weight:800;
+margin-bottom:20px;
+
+}
+
+
+
+
+.grid{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+
+}
+
+
+
+.card{
+
+background:#151515;
+border:1px solid #292929;
+border-radius:20px;
+padding:18px;
+
+}
+
+
+
+.card i{
+
+font-size:28px;
+color:#FFD600;
+
+}
+
+
+
+.value{
+
+font-size:30px;
+font-weight:800;
+margin-top:12px;
+
+}
+
+
+.name{
+
+color:#aaa;
+margin-top:5px;
+
+}
+
+
+
+
+
+.revenue{
+
+margin-top:20px;
+background:#151515;
+border-radius:20px;
+padding:20px;
+border:1px solid #292929;
+
+}
+
+
+
+.revenue h3{
+
+color:#FFD600;
+margin-bottom:15px;
+
+}
+
+
+
+.money{
+
+font-size:35px;
+font-weight:900;
+
+}
+
+
+
+
+
+.quick{
+
+margin-top:20px;
+
+}
+
+
+.quick h3{
+
+margin-bottom:15px;
+
+}
+
+
+.action{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+
+}
+
+
+
+.action a{
+
+background:#151515;
+border:1px solid #333;
+padding:16px;
+border-radius:15px;
+text-decoration:none;
+color:white;
+
+}
+
+
+
+.action i{
+
+color:#FFD600;
+margin-right:8px;
+
+}
+
+
+
+
+
+.live{
+
+margin-top:25px;
+background:#151515;
+padding:20px;
+border-radius:20px;
+border:1px solid #333;
+
+}
+
+
+.live h3{
+
+color:#FFD600;
+
+}
+
+
+.status{
+
+margin-top:15px;
+padding:15px;
+background:#000;
+border-radius:12px;
+color:#aaa;
+
+}
+
+
+
+
+
+</style>
+
 </head>
+
+
 <body>
 
-  <h1>RiderX Central Command</h1>
 
-  <div class="metrics">
-    <div class="metric-card">
-      <h3 id="totalRides">0</h3>
-      <p>Total Rides Requested</p>
-    </div>
-    <div class="metric-card">
-      <h3 id="activeRiders">0</h3>
-      <p>Active Riders</p>
-    </div>
-    <div class="metric-card">
-      <h3 id="totalRevenue">₹0</h3>
-      <p>Estimated Revenue</p>
-    </div>
-  </div>
+<header class="header">
 
-  <h2>Recent Transactions</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Ride ID</th>
-        <th>Service</th>
-        <th>Fare</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody id="ridesTableBody">
-      <tr><td colspan="4">Loading system data...</td></tr>
-    </tbody>
-  </table>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      db.collection('rides').onSnapshot((snapshot) => {
-        let count = snapshot.size;
-        let revenue = 0;
-        const tbody = document.getElementById('ridesTableBody');
-        tbody.innerHTML = "";
+<div class="logo">
 
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.fare) revenue += Number(data.fare);
+RID<span>ERX</span> ADMIN
 
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${doc.id}</td>
-            <td>${data.serviceType || 'Bike'}</td>
-            <td>₹${data.fare || 0}</td>
-            <td><span style="color:${data.status === 'ACCEPTED' ? '#28a745' : '#FFC107'}">${data.status}</span></td>
-          `;
-          tbody.appendChild(row);
-        });
+</div>
 
-        document.getElementById('totalRides').innerText = count;
-        document.getElementById('totalRevenue').innerText = `₹${revenue}`;
-      });
-    });
-  </script>
+
+<button class="logout"
+onclick="logoutAdmin()">
+
+Logout
+
+</button>
+
+
+</header>
+
+
+
+
+
+
+<div class="container">
+
+
+<div class="title">
+
+Dashboard Overview
+
+</div>
+
+
+
+
+
+<div class="grid">
+
+
+
+<div class="card">
+
+<i class="fa-solid fa-users"></i>
+
+<div class="value" id="customers">
+
+0
+
+</div>
+
+<div class="name">
+
+Customers
+
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<i class="fa-solid fa-motorcycle"></i>
+
+<div class="value" id="riders">
+
+0
+
+</div>
+
+<div class="name">
+
+Total Riders
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="card">
+
+<i class="fa-solid fa-circle-check"></i>
+
+<div class="value" id="onlineRiders">
+
+0
+
+</div>
+
+<div class="name">
+
+Online Riders
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="card">
+
+<i class="fa-solid fa-user-clock"></i>
+
+<div class="value" id="pending">
+
+0
+
+</div>
+
+<div class="name">
+
+Pending Approval
+
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<i class="fa-solid fa-route"></i>
+
+<div class="value" id="rides">
+
+0
+
+</div>
+
+<div class="name">
+
+Total Rides
+
+</div>
+
+</div>
+
+
+
+
+<div class="card">
+
+<i class="fa-solid fa-car-side"></i>
+
+<div class="value" id="activeRides">
+
+0
+
+</div>
+
+<div class="name">
+
+Active Rides
+
+</div>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="revenue">
+
+
+<h3>
+
+Revenue
+
+</h3>
+
+
+<div class="money"
+id="revenue">
+
+₹0
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<div class="quick">
+
+
+<h3>
+
+Quick Actions
+
+</h3>
+
+
+<div class="action">
+
+
+<a href="riders.html">
+
+<i class="fa-solid fa-user-check"></i>
+
+Approve Riders
+
+</a>
+
+
+
+<a href="fare.html">
+
+<i class="fa-solid fa-indian-rupee-sign"></i>
+
+Manage Fare
+
+</a>
+
+
+
+
+<a href="coupons.html">
+
+<i class="fa-solid fa-ticket"></i>
+
+Coupons
+
+</a>
+
+
+
+<a href="settings.html">
+
+<i class="fa-solid fa-gear"></i>
+
+App Settings
+
+</a>
+
+
+
+<a href="customers.html">
+
+<i class="fa-solid fa-users"></i>
+
+Customers
+
+</a>
+
+
+
+<a href="notifications.html">
+
+<i class="fa-solid fa-bell"></i>
+
+Notifications
+
+</a>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="live">
+
+
+<h3>
+
+Live Ride Monitoring
+
+</h3>
+
+
+<div class="status"
+id="liveStatus">
+
+No Active Ride
+
+</div>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
+
+<script type="module"
+src="../js/admin.js"></script>
+
+
 </body>
+
 </html>
