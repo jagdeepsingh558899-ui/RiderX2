@@ -1,165 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-  
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX | Premium Mobility</title>
-
-<link rel="stylesheet" href="css/style.css">
-
-<link rel="manifest" href="manifest.json">
-
-<!-- Icons -->
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RiderX - Premium Ride Hailing</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <link rel="stylesheet" href="assets/app.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
-
-
 <body>
-
-
-<!-- =========================
-RiderX Splash Screen
-========================= -->
-
-<div class="splash" id="splash">
-
-
-<div class="logo-glow">
-
-<img 
-src="assets/logo.png"
-class="splash-logo"
-alt="RiderX">
-
-</div>
-
-
-<h2>RiderX</h2>
-
-<p>Move Faster. Live Better.</p>
-
-
-</div>
-
-
-
-
-<!-- =========================
-Welcome Screen
-========================= -->
-
-
-<section class="welcome-screen" id="welcome">
-
-
-<div class="welcome-box">
-
-
-<img 
-src="assets/Logo/RiderX-logo.png"
-class="welcome-logo"
-alt="RiderX Logo">
-
-
-<h1>
-Welcome to <span>RiderX</span>
-</h1>
-
-
-<p>
-India's next generation mobility platform.
-Bike Taxi • Cab • Parcel • Food Delivery
-</p>
-
-
-
-<div class="join-buttons">
-
-
-<a href="auth/customer-login.html"
-class="join-btn customer">
-
-<i class="fa-solid fa-user"></i>
-
-Join as Customer
-
-</a>
-
-
-
-<a href="auth/rider-login.html"
-class="join-btn rider">
-
-<i class="fa-solid fa-motorcycle"></i>
-
-Join as Rider
-
-</a>
-
-
-
-</div>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-<!-- =========================
-Firebase Scripts
-========================= -->
-
-
-<script type="module"
-src="js/App.js">
-</script>
-
-
-
-<script>
-
-
-// Splash Control
-
-window.addEventListener("load",()=>{
-
-
-setTimeout(()=>{
-
-
-document
-.getElementById("splash")
-.classList.add("splash-hide");
-
-
-
-document
-.getElementById("welcome")
-.classList.add("show");
-
-
-},2500);
-
-
-
-});
-
-
-
-</script>
-
-
-
+  <div class="app-viewport">
+    <!-- Header -->
+    <header class="rx-header">
+      <div class="brand-logo">
+        <i class="fa-solid fa-bolt" style="color: var(--accent-yellow);"></i>
+        RIDER<span>X</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button id="langToggleBtn" class="btn-yellow" style="padding: 6px 12px; font-size: 0.75rem;">HI / EN</button>
+        <button id="userAuthBtn" class="rx-badge" style="cursor: pointer; border:none;"><i class="fa-solid fa-user"></i> Login</button>
+      </div>
+    </header>
+
+    <!-- Map View -->
+    <div id="map"></div>
+
+    <!-- Ride Selection Bottom Sheet -->
+    <div class="bottom-sheet">
+      <div class="service-grid">
+        <div class="service-card active" data-service="bike">
+          <i class="fa-solid fa-motorcycle"></i>
+          <span id="txtBike">Bike Taxi</span>
+        </div>
+        <div class="service-card" data-service="cab">
+          <i class="fa-solid fa-car"></i>
+          <span id="txtCab">Cab Ride</span>
+        </div>
+        <div class="service-card" data-service="parcel">
+          <i class="fa-solid fa-box"></i>
+          <span id="txtParcel">Parcel</span>
+        </div>
+        <div class="service-card" data-service="food">
+          <i class="fa-solid fa-utensils"></i>
+          <span id="txtFood">Food</span>
+        </div>
+      </div>
+
+      <div class="location-inputs">
+        <div class="input-group">
+          <i class="fa-solid fa-circle-dot"></i>
+          <input type="text" id="pickupInput" class="rx-input" placeholder="Pickup Location" value="Connaught Place, New Delhi">
+        </div>
+        <div class="input-group">
+          <i class="fa-solid fa-location-dot"></i>
+          <input type="text" id="dropInput" class="rx-input" placeholder="Where to? (Drop location)" value="Cyber Hub, Gurugram">
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <div>
+          <p style="font-size: 0.75rem; color: var(--text-muted);" id="txtFareEst">Estimated Fare</p>
+          <h3 style="color: var(--accent-yellow);" id="fareDisplay">₹ 145.00</h3>
+        </div>
+        <select id="paymentMethod" class="rx-input" style="width: auto; padding: 8px;">
+          <option value="cash">💵 Cash</option>
+          <option value="wallet">💳 RiderX Wallet</option>
+          <option value="online">📱 UPI / Online</option>
+        </select>
+      </div>
+
+      <button id="bookRideBtn" class="btn-yellow pulse-yellow">
+        <i class="fa-solid fa-paper-plane"></i> <span id="txtBookNow">Book Ride Now</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div id="authModal" class="modal-overlay">
+    <div class="modal-card">
+      <h2 style="color: var(--accent-yellow);" id="txtAuthTitle">Login to RiderX</h2>
+      <input type="email" id="authEmail" class="rx-input" placeholder="Email Address">
+      <input type="password" id="authPassword" class="rx-input" placeholder="Password">
+      <button id="loginSubmitBtn" class="btn-yellow">Login</button>
+      <button id="registerSubmitBtn" class="btn-yellow btn-secondary">Create Account</button>
+      <button id="closeAuthBtn" style="background: none; border: none; color: var(--text-muted); cursor: pointer;">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Ride Status Tracker Modal -->
+  <div id="trackingModal" class="modal-overlay">
+    <div class="modal-card" style="text-align: center;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size: 2.5rem; color: var(--accent-yellow);"></i>
+      <h3 id="rideStatusText">Searching Nearby Riders...</h3>
+      <p style="color: var(--text-muted); font-size: 0.85rem;" id="rideSubText">Connecting you to the nearest driver.</p>
+      
+      <div id="driverDetails" style="display: none; background: var(--bg-card); padding: 12px; border-radius: var(--radius-md); text-align: left; margin-top: 10px;">
+        <h4 id="driverName">Driver: Rahul Sharma</h4>
+        <p style="font-size: 0.85rem; color: var(--text-muted);" id="driverVehicle">Bike: TVS Apache (DL 3S CW 1024)</p>
+        <p style="font-size: 1.1rem; font-weight: 800; color: var(--accent-yellow); margin-top: 6px;">Start OTP: <span id="otpCode">4921</span></p>
+      </div>
+
+      <button id="cancelRideBtn" class="btn-yellow btn-secondary" style="margin-top: 10px;">Cancel Ride Request</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script type="module" src="customer/js/customer.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
 </body>
-
 </html>
