@@ -1,587 +1,92 @@
-// =========================================
-// RiderX Authentication System
-// Firebase Compat Version
-// =========================================
+// RiderX Authentication & Session Management
+document.addEventListener('DOMContentLoaded', () => {
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
 
-console.log("RiderX Auth Loaded");
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = e.target.email.value;
+      const password = e.target.password.value;
+      const role = e.target.role ? e.target.role.value : 'customer';
 
+      try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        // Fetch User Record
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.exists ? userDoc.data() : { role: role };
+        
+        localStorage.setItem('riderx_user', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          role: userData.role || role
+        }));
 
-// ================================
-// UI HELPERS
-// ================================
+        alert('Login Successful!');
+        redirectUser(userData.role || role);
+      } catch (error) {
+        alert('Login Failed: ' + error.message);
+      }
+    });
+  }
 
-function showToast(message){
-    alert(message);
-}
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = e.target.name.value;
+      const email = e.target.email.value;
+      const password = e.target.password.value;
+      const phone = e.target.phone.value;
+      const role = e.target.role ? e.target.role.value : 'customer';
 
+      try {
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        const user = userCredential.user;
 
-function showLoader(){
-    console.log("Loading...");
-}
+        const profileData = {
+          uid: user.uid,
+          name: name,
+          email: email,
+          phone: phone,
+          role: role,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          status: role === 'rider' ? 'pending_approval' : 'active',
+          walletBalance: 0
+        };
 
+        await db.collection('users').doc(user.uid).set(profileData);
 
-function hideLoader(){
-    console.log("Done");
-}
+        localStorage.setItem('riderx_user', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          role: role,
+          name: name
+        }));
 
-
-// ================================
-// PASSWORD TOGGLE
-// ================================
-
-function togglePasswordVisibility(id, icon){
-
-    const input = document.getElementById(id);
-
-    if(!input) return;
-
-
-    if(input.type === "password"){
-
-        input.type = "text";
-
-        if(icon){
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        }
-
-    }else{
-
-        input.type = "password";
-
-        if(icon){
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-        }
-
-    }
-
-}
-
-
-// ================================
-// REGISTER USER
-// ================================
-
-async function registerUserAccount(data){
-
-try{
-
-showLoader();
-
-
-const {
-    role,
-    fullName,
-    mobileNumber,
-    email,
-    password
-}=data;
-
-
-
-const userCredential =
-await firebase.auth()
-.createUserWithEmailAndPassword(
-email,
-password
-);
-
-
-
-const user=userCredential.user;
-
-
-
-await user.updateProfile({
-
-displayName:fullName
-
+        alert('Registration Successful!');
+        redirectUser(role);
+      } catch (error) {
+        alert('Signup Failed: ' + error.message);
+      }
+    });
+  }
 });
 
-
-
-const userData={
-
-uid:user.uid,
-
-fullName:fullName,
-
-mobileNumber:mobileNumber,
-
-email:email,
-
-role:role,
-
-createdAt:
-firebase.firestore.FieldValue.serverTimestamp()
-
-};
-
-
-
-
-// CUSTOMER
-
-if(role==="customer"){
-
-
-userData.status="Active";
-
-
-await firebase.firestore()
-.collection("customers")
-.doc(user.uid)
-.set(userData);
-
-
-
-showToast(
-"Customer register successfully"
-);
-
-
-
-setTimeout(()=>{
-
-window.location.href=
-"../customer/home.html";
-
-
-},1500);
-
-
-
+function redirectUser(role) {
+  if (role === 'admin') {
+    window.location.href = '../admin/dashboard.html';
+  } else if (role === 'rider') {
+    window.location.href = '../rider/dashboard.html';
+  } else {
+    window.location.href = '../customer/dashboard.html';
+  }
 }
 
-
-
-// RIDER
-
-else{
-
-
-userData.status="Pending";
-
-userData.adminApproved=false;
-
-
-
-await firebase.firestore()
-.collection("riders")
-.doc(user.uid)
-.set(userData);
-
-
-
-showToast(
-"Rider registration submitted"
-);
-
-
-
-setTimeout(()=>{
-
-window.location.href=
-"../rider/pending.html";
-
-
-},1500);
-
-
+function logoutUser() {
+  auth.signOut().then(() => {
+    localStorage.removeItem('riderx_user');
+    window.location.href = '../index.html';
+  });
 }
-
-
-
-}
-
-catch(error){
-
-console.log(error);
-
-showToast(error.message);
-
-
-}
-
-finally{
-
-hideLoader();
-
-}
-
-
-}
-
-
-
-// ================================
-// LOGIN USER
-// ================================
-
-async function loginUser(email,password){
-
-try{
-
-
-const result =
-await firebase.auth()
-.signInWithEmailAndPassword(
-email,
-password
-);
-
-
-
-const uid=result.user.uid;
-
-
-
-const customer =
-await firebase.firestore()
-.collection("customers")
-.doc(uid)
-.get();
-
-
-
-if(customer.exists){
-
-
-window.location.href =
-"../customer/home.html";
-
-
-return;
-
-}
-
-
-
-
-const rider =
-await firebase.firestore()
-.collection("riders")
-.doc(uid)
-.get();
-
-
-
-if(rider.exists){
-
-
-if(rider.data().adminApproved===true){
-
-
-window.location.href =
-"../rider/home.html";
-
-
-}else{
-
-
-window.location.href =
-"../rider/pending.html";
-
-
-}
-
-
-return;
-
-}
-
-
-
-window.location.href =
-"../auth/register.html";
-
-
-}
-
-
-catch(error){
-
-showToast(error.message);
-
-}
-
-
-}
-// ================================
-// GOOGLE LOGIN
-// ================================
-
-async function handleGoogleSignUp(){
-
-try{
-
-
-const provider =
-new firebase.auth.GoogleAuthProvider();
-
-
-
-const result =
-await firebase.auth()
-.signInWithPopup(provider);
-
-
-
-const user=result.user;
-
-
-
-await firebase.firestore()
-.collection("customers")
-.doc(user.uid)
-.set({
-
-uid:user.uid,
-
-fullName:user.displayName || "Customer",
-
-email:user.email,
-
-role:"customer",
-
-createdAt:
-firebase.firestore.FieldValue.serverTimestamp()
-
-
-},
-{
-merge:true
-});
-
-
-
-window.location.href =
-"../customer/home.html";
-
-
-}
-
-catch(error){
-
-showToast(error.message);
-
-}
-
-
-}
-
-
-
-// ================================
-// PHONE OTP
-// ================================
-
-let confirmationResult=null;
-
-
-
-function openPhoneOTPModal(){
-
-
-const modal =
-document.getElementById("otpModal");
-
-
-if(modal){
-
-modal.style.display="flex";
-
-}
-
-
-
-window.recaptchaVerifier =
-new firebase.auth.RecaptchaVerifier(
-"recaptcha-container",
-{
-size:"invisible"
-});
-
-
-}
-
-
-
-
-function closePhoneOTPModal(){
-
-
-const modal =
-document.getElementById("otpModal");
-
-
-if(modal){
-
-modal.style.display="none";
-
-}
-
-
-}
-
-
-
-
-async function requestOTP(){
-
-
-try{
-
-
-const phone =
-document.getElementById(
-"otpPhoneNumber"
-).value;
-
-
-
-confirmationResult =
-await firebase.auth()
-.signInWithPhoneNumber(
-phone,
-window.recaptchaVerifier
-);
-
-
-
-document.getElementById(
-"otpInputGroup"
-).style.display="block";
-
-
-
-document.getElementById(
-"sendOtpBtn"
-).style.display="none";
-
-
-
-document.getElementById(
-"verifyOtpBtn"
-).style.display="block";
-
-
-
-showToast("OTP sent successfully");
-
-
-}
-
-
-catch(error){
-
-showToast(error.message);
-
-}
-
-
-}
-
-
-
-
-
-async function verifyOTP(){
-
-
-try{
-
-
-const code =
-document.getElementById(
-"otpCode"
-).value;
-
-
-
-await confirmationResult.confirm(code);
-
-
-
-window.location.href =
-"../customer/home.html";
-
-
-}
-
-
-catch(error){
-
-showToast(error.message);
-
-}
-
-
-}
-
-
-
-
-// ================================
-// LOGOUT
-// ================================
-
-async function logout(){
-
-
-await firebase.auth().signOut();
-
-
-window.location.href =
-"../auth/login.html";
-
-
-}
-
-
-
-
-// ================================
-// GLOBAL FUNCTIONS
-// ================================
-
-window.registerUserAccount =
-registerUserAccount;
-
-
-window.loginUser =
-loginUser;
-
-
-window.handleGoogleSignUp =
-handleGoogleSignUp;
-
-
-window.openPhoneOTPModal =
-openPhoneOTPModal;
-
-
-window.closePhoneOTPModal =
-closePhoneOTPModal;
-
-
-window.requestOTP =
-requestOTP;
-
-
-window.verifyOTP =
-verifyOTP;
-
-
-window.togglePasswordVisibility =
-togglePasswordVisibility;
-
-
-window.logout =
-logout;
-
-
-console.log(
-"RiderX Auth System Ready"
-);
