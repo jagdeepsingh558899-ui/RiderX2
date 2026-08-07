@@ -1,6 +1,6 @@
 /**
  * ============================================================================
- * RiderX Super App - Admin Controller Module (js/Admin.js)
+ * RiderX Super App - Admin Controller Module (js/admin.js)
  * ============================================================================
  * Premium Ride Hailing Super App
  * Theme: Black + Electric Yellow
