@@ -13,7 +13,6 @@
 
 <meta name="theme-color" content="#000000">
 
-
 <link rel="stylesheet" href="assets/app.css">
 
 <link rel="stylesheet" href="assets/animation.css">
@@ -30,14 +29,11 @@ font-family:Arial,sans-serif;
 
 
 body{
-
 background:#000;
-color:white;
+color:#fff;
 height:100vh;
 overflow:hidden;
-
 }
-
 
 
 .splash{
@@ -53,10 +49,7 @@ align-items:center;
 justify-content:center;
 z-index:9999;
 
-animation:hideSplash 3s forwards;
-
 }
-
 
 
 .logo-animation{
@@ -64,53 +57,16 @@ animation:hideSplash 3s forwards;
 font-size:45px;
 font-weight:900;
 letter-spacing:3px;
-animation:logoZoom 2s infinite;
 
 }
 
 
-.logo-animation span{
+.logo-animation span,
+.brand span{
 
 color:#FFD600;
 
 }
-
-
-
-@keyframes logoZoom{
-
-0%{
-transform:scale(.7);
-opacity:0;
-}
-
-50%{
-transform:scale(1.1);
-opacity:1;
-}
-
-100%{
-transform:scale(1);
-}
-
-}
-
-
-
-@keyframes hideSplash{
-
-0%,80%{
-opacity:1;
-}
-
-100%{
-opacity:0;
-visibility:hidden;
-}
-
-}
-
-
 
 
 
@@ -131,13 +87,6 @@ padding:25px;
 
 font-size:42px;
 font-weight:900;
-
-}
-
-
-.brand span{
-
-color:#FFD600;
 
 }
 
@@ -171,7 +120,6 @@ border-radius:15px;
 border:none;
 font-size:18px;
 font-weight:bold;
-cursor:pointer;
 
 }
 
@@ -196,35 +144,14 @@ color:#FFD600;
 
 
 
-.lang{
-
-position:absolute;
-top:25px;
-right:20px;
-
-}
-
-
-
-.lang button{
-
-background:#FFD600;
-border:none;
-padding:8px 15px;
-border-radius:20px;
-font-weight:bold;
-
-}
-
-
 .footer{
 
 position:absolute;
 bottom:30px;
 color:#777;
-font-size:13px;
 
 }
+
 
 
 </style>
@@ -232,16 +159,10 @@ font-size:13px;
 </head>
 
 
-
 <body>
 
 
-
-<!-- SPLASH -->
-
-
 <div class="splash">
-
 
 <div class="logo-animation">
 
@@ -249,32 +170,11 @@ RID<span>ERX</span>
 
 </div>
 
-
 </div>
 
-
-
-
-
-
-<!-- HOME -->
 
 
 <div class="main">
-
-
-
-<div class="lang">
-
-<button id="languageBtn">
-
-HI / EN
-
-</button>
-
-</div>
-
-
 
 
 <div class="brand">
@@ -282,7 +182,6 @@ HI / EN
 RID<span>ERX</span>
 
 </div>
-
 
 
 <p class="tagline">
@@ -293,14 +192,10 @@ India's Premium Bike Taxi, Cab, Parcel & Food Platform
 
 
 
-
-
 <div class="buttons">
 
 
 <button class="btn customer" onclick="joinCustomer()">
-
-<i class="fa-solid fa-user"></i>
 
 Join as Customer
 
@@ -308,21 +203,14 @@ Join as Customer
 
 
 
-
 <button class="btn rider" onclick="joinRider()">
-
-<i class="fa-solid fa-motorcycle"></i>
 
 Join as Rider
 
 </button>
 
 
-
 </div>
-
-
-
 
 
 
@@ -333,11 +221,85 @@ Fast • Safe • Reliable
 </div>
 
 
-
 </div>
 
 
 
+
+
+<script type="module">
+
+import {
+auth,
+db,
+onAuthStateChanged,
+doc,
+getDoc
+}
+from "./firebase/firebase-config.js";
+
+
+
+onAuthStateChanged(auth, async(user)=>{
+
+
+if(!user) return;
+
+
+
+try{
+
+
+const snap =
+await getDoc(
+doc(db,"users",user.uid)
+);
+
+
+
+if(!snap.exists()) return;
+
+
+
+const data =
+snap.data();
+
+
+
+if(data.role==="admin"){
+
+location.href="admin/dashboard.html";
+
+}
+
+else if(data.role==="rider"){
+
+location.href="rider/home.html";
+
+}
+
+else{
+
+location.href="customer/home.html";
+
+}
+
+
+}
+catch(e){
+
+console.log(e);
+
+}
+
+
+});
+
+
+
+
+
+</script>
 
 
 
@@ -347,7 +309,7 @@ Fast • Safe • Reliable
 
 function joinCustomer(){
 
-window.location.href="auth/login.html?role=customer";
+location.href="auth/login.html?role=customer";
 
 }
 
@@ -355,28 +317,10 @@ window.location.href="auth/login.html?role=customer";
 
 function joinRider(){
 
-window.location.href="auth/login.html?role=rider";
+location.href="auth/login.html?role=rider";
 
 }
 
-
-
-
-document.getElementById("languageBtn").onclick=function(){
-
-alert("Language Changed / भाषा बदली गई");
-
-}
-
-
-
-</script>
-
-
-
-
-
-<script>
 
 
 if("serviceWorker" in navigator){
