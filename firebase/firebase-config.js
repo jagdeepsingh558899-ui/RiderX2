@@ -1,22 +1,60 @@
-// RiderX Firebase Core Initialization (Compat Mode for PWA / Script Integration)
+// firebase/firebase-config.js
+// Centralized Firebase Initialization for RiderX Project
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+  getFirestore, 
+  doc, 
+  setDoc, 
+  getDoc, 
+  updateDoc, 
+  collection, 
+  addDoc, 
+  query, 
+  where, 
+  onSnapshot, 
+  runTransaction,
+  serverTimestamp 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// REPLACE WITH YOUR FIREBASE PROJECT CONFIGURATION
 const firebaseConfig = {
-  apiKey: "YOUR_FIREBASE_API_KEY",
-  authDomain: "riderx-app.firebaseapp.com",
-  projectId: "riderx-app",
-  storageBucket: "riderx-app.appspot.com",
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "riderx-production.firebaseapp.com",
+  projectId: "riderx-production",
+  storageBucket: "riderx-production.appspot.com",
   messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:abcdef123456"
+  appId: "1:123456789012:web:abcdef1234567890"
 };
 
-// Initialize Firebase App
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Global Firebase Exports
-const auth = firebase.auth();
-const db = firebase.firestore();
-const realtimeDb = firebase.database();
-const storage = firebase.storage();
-
-console.log("RiderX Firebase Services Initialized Successfully.");
+export {
+  app,
+  auth,
+  db,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  collection,
+  addDoc,
+  query,
+  where,
+  onSnapshot,
+  runTransaction,
+  serverTimestamp
+};
