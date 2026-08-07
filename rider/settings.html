@@ -11,9 +11,287 @@
 <title>RiderX Rider Settings</title>
 
 
-<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<link rel="stylesheet" href="../css/Responsive.css">
+
+<style>
+
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+
+}
+
+
+
+body{
+
+background:#050505;
+color:white;
+
+}
+
+
+
+.header{
+
+height:70px;
+
+background:#111;
+
+display:flex;
+
+align-items:center;
+
+gap:20px;
+
+padding:0 20px;
+
+border-bottom:1px solid #222;
+
+}
+
+
+
+.header i{
+
+color:#FFE500;
+font-size:22px;
+
+}
+
+
+
+.logo{
+
+font-size:30px;
+font-weight:900;
+
+}
+
+
+
+.logo span{
+
+color:#FFE500;
+
+}
+
+
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+
+
+.card{
+
+background:#111;
+
+border:1px solid #333;
+
+border-radius:20px;
+
+padding:20px;
+
+margin-bottom:18px;
+
+}
+
+
+
+
+
+.title{
+
+color:#FFE500;
+
+font-size:18px;
+
+font-weight:bold;
+
+margin-bottom:15px;
+
+}
+
+
+
+
+
+.option{
+
+display:flex;
+
+align-items:center;
+
+justify-content:space-between;
+
+padding:15px 0;
+
+border-bottom:1px solid #222;
+
+}
+
+
+
+.option:last-child{
+
+border:none;
+
+}
+
+
+
+.left{
+
+display:flex;
+
+align-items:center;
+
+gap:15px;
+
+}
+
+
+
+.left i{
+
+color:#FFE500;
+
+font-size:20px;
+
+}
+
+
+
+select{
+
+background:#222;
+
+color:white;
+
+border:none;
+
+padding:10px;
+
+border-radius:10px;
+
+}
+
+
+
+
+.switch{
+
+width:50px;
+
+height:26px;
+
+background:#444;
+
+border-radius:20px;
+
+position:relative;
+
+cursor:pointer;
+
+}
+
+
+
+.switch::after{
+
+content:"";
+
+position:absolute;
+
+width:22px;
+
+height:22px;
+
+background:white;
+
+border-radius:50%;
+
+top:2px;
+
+left:3px;
+
+transition:.3s;
+
+}
+
+
+
+.switch.active{
+
+background:#FFE500;
+
+}
+
+
+
+.switch.active::after{
+
+left:25px;
+
+background:#000;
+
+}
+
+
+
+
+
+
+.btn{
+
+width:100%;
+
+padding:15px;
+
+margin-top:15px;
+
+border-radius:14px;
+
+border:none;
+
+font-size:16px;
+
+font-weight:bold;
+
+background:#FFE500;
+
+color:#000;
+
+}
+
+
+
+.logout{
+
+background:#ff3030;
+
+color:white;
+
+}
+
+
+
+
+</style>
 
 
 </head>
@@ -22,80 +300,74 @@
 <body>
 
 
-<nav class="navbar">
+
+<div class="header">
+
+
+<i onclick="history.back()"
+class="fa-solid fa-arrow-left"></i>
+
 
 
 <div class="logo">
 
+RID<span>ERX</span>
 
-<img src="../assets/logo.png" alt="RiderX">
+</div>
 
+
+</div>
+
+
+
+
+
+
+<div class="container">
+
+
+
+
+
+<div class="card">
+
+
+<div class="title">
+
+<i class="fa-solid fa-mobile-screen"></i>
+
+Application
+
+</div>
+
+
+
+
+<div class="option"
+onclick="installApp()">
+
+
+
+<div class="left">
+
+<i class="fa-solid fa-download"></i>
 
 <span>
-RiderX
+
+Install RiderX App
+
 </span>
 
 
 </div>
 
 
-</nav>
+
+<i class="fa-solid fa-chevron-right"></i>
 
 
+</div>
 
-
-
-
-
-<div class="dashboard-wrapper page">
-
-
-
-<div class="card">
-
-
-<h2>
-
-⚙ Rider Settings
-
-</h2>
-
-
-<br>
-
-
-
-
-
-
-<!-- Install App -->
-
-
-<div class="card">
-
-
-<h3>
-
-📲 Install RiderX App
-
-</h3>
-
-
-<p>
-
-Install app for fast ride requests
-
-</p>
-
-
-<br>
-
-
-<button id="installBtn" class="btn">
-
-Install App
-
-</button>
 
 
 </div>
@@ -107,35 +379,52 @@ Install App
 
 
 
-<!-- Language -->
-
 
 <div class="card">
 
 
-<h3>
+<div class="title">
 
-🌐 Language
+<i class="fa-solid fa-language"></i>
 
-</h3>
+Language
 
-
-<br>
-
-
-<select id="language" class="input-box">
+</div>
 
 
-<option>
+
+
+<div class="option">
+
+
+<div class="left">
+
+<i class="fa-solid fa-globe"></i>
+
+<span>
+
+Language
+
+</span>
+
+
+</div>
+
+
+
+<select onchange="changeLanguage(this.value)">
+
+
+<option value="en">
 
 English
 
 </option>
 
 
-<option>
+<option value="hi">
 
-Hindi
+हिंदी
 
 </option>
 
@@ -143,6 +432,10 @@ Hindi
 </select>
 
 
+
+</div>
+
+
 </div>
 
 
@@ -152,70 +445,237 @@ Hindi
 
 
 
-<!-- Dark Mode -->
+
+<div class="card">
+
+
+<div class="title">
+
+<i class="fa-solid fa-bell"></i>
+
+Rider Alerts
+
+</div>
+
+
+
+
+<div class="option">
+
+
+<div class="left">
+
+<i class="fa-solid fa-motorcycle"></i>
+
+<span>
+
+New Ride Request
+
+</span>
+
+</div>
+
+
+
+<div class="switch active"
+onclick="toggleSwitch(this)">
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<div class="option">
+
+
+<div class="left">
+
+<i class="fa-solid fa-wallet"></i>
+
+<span>
+
+Earnings Notification
+
+</span>
+
+
+</div>
+
+
+
+
+<div class="switch active"
+onclick="toggleSwitch(this)">
+
+</div>
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
 
 
 <div class="card">
 
 
-<h3>
+<div class="title">
 
-🌙 Dark Mode
+Preferences
 
-</h3>
-
-
-<br>
+</div>
 
 
-<button id="darkBtn" class="btn">
 
-Enable Dark Mode
+<div class="option">
+
+
+<div class="left">
+
+<i class="fa-solid fa-moon"></i>
+
+<span>
+
+Dark Mode
+
+</span>
+
+
+</div>
+
+
+
+
+<div class="switch active"
+onclick="toggleSwitch(this)">
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<div class="title">
+
+Support
+
+</div>
+
+
+
+<div class="option"
+onclick="alert('RiderX Support Coming Soon')">
+
+
+<div class="left">
+
+<i class="fa-solid fa-headset"></i>
+
+<span>
+
+Help & Support
+
+</span>
+
+
+</div>
+
+
+<i class="fa-solid fa-chevron-right"></i>
+
+
+</div>
+
+
+
+<div class="option">
+
+
+<div class="left">
+
+<i class="fa-solid fa-shield"></i>
+
+<span>
+
+Privacy Policy
+
+</span>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<button class="btn"
+onclick="location.href='profile.html'">
+
+
+<i class="fa-solid fa-user"></i>
+
+Back To Profile
+
 
 </button>
 
 
-</div>
 
 
 
+<button class="btn logout"
+onclick="logout()">
 
 
 
+<i class="fa-solid fa-right-from-bracket"></i>
+
+Logout
 
 
-<!-- Profile -->
 
-
-<div class="card">
-
-
-<h3>
-
-👤 Rider Profile
-
-</h3>
-
-
-<p>
-
-Manage vehicle and personal details
-
-</p>
-
-
-<br>
-
-
-<a href="Profile.html" class="btn">
-
-Edit Profile
-
-</a>
-
-
-</div>
-
+</button>
 
 
 
@@ -224,38 +684,41 @@ Edit Profile
 </div>
 
 
-</div>
 
 
 
 
 
+<script type="module">
+
+
+import {
+
+auth
+
+}
+
+from "../firebase/firebase-config.js";
+
+
+import {
+
+signOut
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 
 
-<script>
-
-
-// =====================
-// Install App
-// =====================
 
 
 let deferredPrompt;
 
 
 
-const installBtn =
-document.getElementById("installBtn");
-
-
-
-
-
 window.addEventListener(
-
 "beforeinstallprompt",
-
 (e)=>{
 
 
@@ -273,7 +736,7 @@ deferredPrompt=e;
 
 
 
-installBtn.onclick=async()=>{
+window.installApp=async()=>{
 
 
 if(deferredPrompt){
@@ -282,49 +745,23 @@ if(deferredPrompt){
 deferredPrompt.prompt();
 
 
-await deferredPrompt.userChoice;
-
-
 deferredPrompt=null;
 
 
 }
 
-
-};
-
+else{
 
 
-
-
-
-
-
-// =====================
-// Dark Mode
-// =====================
-
-
-const darkBtn =
-document.getElementById("darkBtn");
-
-
-
-darkBtn.onclick=()=>{
-
-
-document.body.classList.toggle("dark-mode");
-
-
-localStorage.setItem(
-
-"riderDarkMode",
-
-"enabled"
-
+alert(
+"Browser menu se Install App select kare"
 );
 
 
+}
+
+
+
 };
 
 
@@ -332,13 +769,56 @@ localStorage.setItem(
 
 
 
-if(localStorage.getItem("riderDarkMode")){
+window.changeLanguage=(lang)=>{
 
 
-document.body.classList.add("dark-mode");
+localStorage.setItem(
+"language",
+lang
+);
 
 
-}
+
+alert(
+lang==="hi"
+?"हिंदी Selected"
+:"English Selected"
+);
+
+
+
+};
+
+
+
+
+
+
+
+window.toggleSwitch=(el)=>{
+
+
+el.classList.toggle("active");
+
+
+};
+
+
+
+
+
+
+
+window.logout=async()=>{
+
+
+await signOut(auth);
+
+
+location.href="../auth/login.html";
+
+
+};
 
 
 
