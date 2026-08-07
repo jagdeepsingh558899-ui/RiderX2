@@ -1,298 +1,385 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RiderX | Driver Approvals</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<title>RiderX Rider Approval</title>
+  <!-- FontAwesome 6 Pro CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<link rel="stylesheet" href="../css/style.css">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              yellowHover: '#EAB308',
+              gold: '#EAB308',
+              dark: '#090D16',
+              card: '#111827',
+              border: 'rgba(255, 255, 255, 0.08)',
+              glass: 'rgba(17, 24, 39, 0.75)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
+            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+          }
+        }
+      }
+    }
+  </script>
 
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FACC15;
+    }
 
-<style>
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-body{
-
-background:#000;
-color:white;
-font-family:Arial;
-
-}
-
-
-.header{
-
-background:#111;
-padding:20px;
-font-size:24px;
-border-bottom:2px solid #FFD600;
-
-}
-
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-
-.card{
-
-background:#111;
-padding:20px;
-border-radius:18px;
-margin-bottom:15px;
-border:1px solid #333;
-
-}
-
-
-
-button{
-
-width:100%;
-padding:13px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-background:#FFD600;
-font-weight:bold;
-
-}
-
-
-
-</style>
-
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
 </head>
 
-
-<body>
-
-
-
-<div class="header">
-
-🏍 Rider Approval
-
-</div>
-
-
-
-
-<div class="container">
-
-
-<div id="list">
-
-Loading...
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-collection,
-getDocs,
-query,
-where,
-doc,
-updateDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-
-async function loadRiders(){
-
-
-
-let box=document.getElementById("list");
-
-
-
-const q=query(
-
-collection(db,"riders"),
-
-where("status","==","Pending")
-
-);
-
-
-
-const snap=await getDocs(q);
-
-
-
-box.innerHTML="";
-
-
-
-
-
-if(snap.empty){
-
-box.innerHTML=
-
-"<p>No Pending Riders</p>";
-
-return;
-
-}
-
-
-
-
-
-snap.forEach((r)=>{
-
-
-
-let data=r.data();
-
-
-
-box.innerHTML+=`
-
-
-<div class="card">
-
-
-<h3>
-
-🏍 ${data.name || "Rider"}
-
-</h3>
-
-
-<p>
-
-Bike:
-
-${data.bike || "-"}
-
-</p>
-
-
-
-<p>
-
-Number:
-
-${data.number || "-"}
-
-</p>
-
-
-
-<p>
-
-License:
-
-${data.license || "-"}
-
-</p>
-
-
-
-<button onclick="approve('${r.id}')">
-
-Approve Rider ✅
-
-</button>
-
-
-
-</div>
-
-
-`;
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-window.approve=async(id)=>{
-
-
-
-await updateDoc(
-
-doc(db,"riders",id),
-
-{
-
-
-status:"Approved"
-
-
-}
-
-);
-
-
-
-alert(
-
-"Rider Approved ✅"
-
-);
-
-
-
-loadRiders();
-
-
-
-};
-
-
-
-
-
-loadRiders();
-
-
-
-</script>
-
-
-
+<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- TOP HEADER / BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
+        <i class="fa-solid fa-bars-staggered text-lg"></i>
+      </button>
+      <a href="dashboard.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
+            RIDER<span class="text-brand-yellow">X</span>
+            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <div class="flex items-center space-x-3 lg:space-x-5">
+      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+        <span id="headerPendingCount">5 Applications Pending</span>
+      </div>
+
+      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
+        <div class="hidden md:block">
+          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
+          <p class="text-[10px] text-slate-400">Super Admin</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- SIDE NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
+      <div class="px-4 py-6 space-y-8 overflow-y-auto">
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
+          <nav class="space-y-1">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
+              <span>Trips & Live Map</span>
+            </a>
+            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
+              <span>Riders</span>
+            </a>
+            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-user-check text-base"></i>
+                <span>Rider Approvals</span>
+              </div>
+              <span id="sidebarPendingBadge" class="px-2 py-0.5 text-[10px] font-bold bg-slate-950 text-brand-yellow rounded-full">5</span>
+            </a>
+            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
+              <span>Customers</span>
+            </a>
+          </nav>
+        </div>
+
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
+          <nav class="space-y-1">
+            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
+              <span>Fare & Pricing</span>
+            </a>
+            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
+              <span>Commission Rules</span>
+            </a>
+            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
+              <span>Payouts & Wallet</span>
+            </a>
+            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
+              <span>Coupons & Offers</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+
+      <!-- HEADER ACTION BAR -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-user-clock text-brand-yellow"></i> Partner Verification Queue
+          </h1>
+          <p class="text-xs text-slate-400">Inspect RC, Driving Licenses, and Identity Verification before granting driver platform access.</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <button onclick="approveAllPending()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all flex items-center space-x-2">
+            <i class="fa-solid fa-check-double"></i>
+            <span>Quick Approve Verified</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS GRID -->
+      <div id="applicationsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </main>
+  </div>
+
+  <!-- DOCUMENT VERIFICATION INSPECTION MODAL -->
+  <div id="docModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-brand-border space-y-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-file-shield text-brand-yellow"></i> Document Inspection: <span id="modalRiderName" class="text-brand-yellow"></span>
+        </h3>
+        <button onclick="closeDocModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
+            <p class="text-slate-400">Vehicle Type & Model</p>
+            <p id="modalVehicle" class="text-white font-bold mt-0.5">Honda Activa 6G (DL 03 XY 8899)</p>
+          </div>
+          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
+            <p class="text-slate-400">Submission Date</p>
+            <p id="modalDate" class="text-white font-bold mt-0.5">Today, 11:20 AM</p>
+          </div>
+        </div>
+
+        <!-- Document Preview Boxes -->
+        <div class="space-y-3">
+          <p class="text-xs font-bold text-slate-300">Driving License Preview</p>
+          <div class="h-44 bg-slate-900 rounded-xl border border-brand-border overflow-hidden relative group">
+            <img id="dlPreviewImg" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            <div class="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <span class="text-xs font-bold text-brand-yellow bg-slate-950/80 px-3 py-1.5 rounded-lg border border-brand-border">High Res Inspection</span>
+            </div>
+          </div>
+
+          <p class="text-xs font-bold text-slate-300">Vehicle RC Preview</p>
+          <div class="h-44 bg-slate-900 rounded-xl border border-brand-border overflow-hidden relative group">
+            <img id="rcPreviewImg" src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            <div class="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <span class="text-xs font-bold text-brand-yellow bg-slate-950/80 px-3 py-1.5 rounded-lg border border-brand-border">High Res Inspection</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center space-x-3 pt-3 border-t border-brand-border">
+        <button onclick="rejectRider()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all">
+          Reject Application
+        </button>
+        <button onclick="approveRider()" class="flex-1 py-2.5 rounded-xl bg-brand-yellow text-slate-950 text-xs font-extrabold hover:bg-yellow-400 transition-all shadow-glow-yellow">
+          Approve Driver Access
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let pendingApplications = [
+      { id: 'APP-201', name: 'Manish Kumar', phone: '+91 98112 00112', category: 'Bike Taxi', plate: 'DL 03 XY 8899', date: 'Today, 11:20 AM', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120' },
+      { id: 'APP-202', name: 'Deepak Sharma', phone: '+91 97113 44556', category: 'Sedan Cab', plate: 'HR 51 B 4321', date: 'Today, 10:45 AM', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=120' },
+      { id: 'APP-203', name: 'Sunil Yadav', phone: '+91 99554 33221', category: 'Auto Rickshaw', plate: 'UP 16 AT 9911', date: 'Yesterday', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&q=80&w=120' },
+      { id: 'APP-204', name: 'Pankaj Joshi', phone: '+91 98990 11223', category: 'Parcel Delivery', plate: 'DL 12 S 7766', date: 'Yesterday', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=120' },
+      { id: 'APP-205', name: 'Harpreet Singh', phone: '+91 98100 99887', category: 'SUV Cab', plate: 'PB 65 AC 1001', date: '2 days ago', avatar: 'https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&q=80&w=120' }
+    ];
+
+    let selectedAppId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderApplications();
+      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+    });
+
+    function renderApplications() {
+      const container = document.getElementById('applicationsContainer');
+      container.innerHTML = '';
+
+      updateBadges();
+
+      if (pendingApplications.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full glass-panel p-12 text-center rounded-2xl space-y-3">
+            <i class="fa-solid fa-circle-check text-4xl text-emerald-400"></i>
+            <h3 class="text-lg font-bold text-white">All Clear!</h3>
+            <p class="text-xs text-slate-400">There are no pending driver verification applications in the queue.</p>
+          </div>
+        `;
+        return;
+      }
+
+      pendingApplications.forEach(app => {
+        const card = document.createElement('div');
+        card.className = 'glass-card rounded-2xl p-5 border border-brand-border space-y-4 flex flex-col justify-between';
+
+        card.innerHTML = `
+          <div class="space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <img src="${app.avatar}" class="w-11 h-11 rounded-xl object-cover ring-2 ring-brand-yellow/30" />
+                <div>
+                  <h4 class="font-extrabold text-white text-sm">${app.name}</h4>
+                  <p class="text-[11px] text-slate-400">${app.phone}</p>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow text-[10px] font-bold">${app.category}</span>
+            </div>
+
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-brand-border space-y-1.5 text-xs">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Vehicle No:</span>
+                <span class="font-mono text-brand-yellow font-bold">${app.plate}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Submitted:</span>
+                <span class="text-slate-300 font-medium">${app.date}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 pt-2">
+            <button onclick="inspectDocs('${app.id}')" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-brand-border">
+              <i class="fa-solid fa-eye mr-1.5 text-brand-yellow"></i> Review Docs
+            </button>
+            <button onclick="quickApprove('${app.id}')" class="p-2 rounded-xl bg-brand-yellow text-slate-950 font-bold hover:bg-yellow-400 transition-all shadow-glow-yellow">
+              <i class="fa-solid fa-check"></i>
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function updateBadges() {
+      const count = pendingApplications.length;
+      document.getElementById('headerPendingCount').textContent = `${count} Applications Pending`;
+      document.getElementById('sidebarPendingBadge').textContent = count;
+    }
+
+    function inspectDocs(id) {
+      selectedAppId = id;
+      const app = pendingApplications.find(a => a.id === id);
+      if (!app) return;
+
+      document.getElementById('modalRiderName').textContent = app.name;
+      document.getElementById('modalVehicle').textContent = `${app.category} (${app.plate})`;
+      document.getElementById('modalDate').textContent = app.date;
+      document.getElementById('docModal').classList.remove('hidden');
+    }
+
+    function closeDocModal() {
+      document.getElementById('docModal').classList.add('hidden');
+    }
+
+    function approveRider() {
+      if (!selectedAppId) return;
+      pendingApplications = pendingApplications.filter(a => a.id !== selectedAppId);
+      renderApplications();
+      closeDocModal();
+    }
+
+    function rejectRider() {
+      const reason = prompt('Specify rejection reason for the partner driver:');
+      if (reason) {
+        pendingApplications = pendingApplications.filter(a => a.id !== selectedAppId);
+        renderApplications();
+        closeDocModal();
+      }
+    }
+
+    function quickApprove(id) {
+      pendingApplications = pendingApplications.filter(a => a.id !== id);
+      renderApplications();
+    }
+
+    function approveAllPending() {
+      if (confirm('Approve all pending rider document applications?')) {
+        pendingApplications = [];
+        renderApplications();
+      }
+    }
+  </script>
 </body>
-
 </html>
