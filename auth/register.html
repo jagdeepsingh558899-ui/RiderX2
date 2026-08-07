@@ -9,15 +9,11 @@
 
 <title>RiderX Register</title>
 
+
 <link rel="stylesheet" href="../assets/app.css">
 
 
 <style>
-
-*{
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
 
 body{
 
@@ -26,14 +22,15 @@ min-height:100vh;
 background:#000;
 color:white;
 display:flex;
-justify-content:center;
 align-items:center;
+justify-content:center;
+font-family:Arial,sans-serif;
 padding:20px;
 
 }
 
 
-.register-box{
+.box{
 
 width:100%;
 max-width:430px;
@@ -45,12 +42,12 @@ border:1px solid #333;
 }
 
 
-
 .logo{
 
 text-align:center;
 font-size:38px;
 font-weight:900;
+
 }
 
 
@@ -62,12 +59,11 @@ color:#FFD600;
 
 
 
-.role-title{
+.role{
 
 text-align:center;
 color:#FFD600;
-margin:15px 0 20px;
-font-size:20px;
+margin:15px;
 
 }
 
@@ -79,17 +75,9 @@ width:100%;
 padding:14px;
 margin:8px 0;
 background:#000;
-border:1px solid #333;
+color:white;
+border:1px solid #444;
 border-radius:12px;
-color:white;
-
-}
-
-
-
-select.input{
-
-color:white;
 
 }
 
@@ -98,9 +86,9 @@ color:white;
 .upload{
 
 background:#000;
-border:1px dashed #FFD600;
 padding:12px;
 border-radius:12px;
+border:1px dashed #FFD600;
 margin:10px 0;
 
 }
@@ -111,21 +99,21 @@ margin:10px 0;
 
 width:100%;
 padding:15px;
-border-radius:12px;
 border:none;
-margin-top:15px;
-font-size:17px;
+border-radius:12px;
+background:#FFD600;
+color:#000;
 font-weight:bold;
-cursor:pointer;
+font-size:17px;
+margin-top:15px;
 
 }
 
 
 
-.create{
+#riderBox{
 
-background:#FFD600;
-color:#000;
+display:none;
 
 }
 
@@ -134,21 +122,13 @@ color:#000;
 .back{
 
 text-align:center;
+color:#aaa;
 margin-top:20px;
-color:#999;
 
 }
-
-
-
-#riderFields{
-
-display:none;
-
-}
-
 
 </style>
+
 
 </head>
 
@@ -156,46 +136,49 @@ display:none;
 <body>
 
 
-<div class="register-box">
+
+<div class="box">
+
 
 
 <div class="logo">
+
 RID<span>ERX</span>
+
 </div>
 
 
 
-<div class="role-title" id="roleTitle">
-Create Account
+<div class="role" id="roleText">
+
+Customer Registration
+
 </div>
 
 
 
-<input 
+
+<input id="name"
 class="input"
-id="name"
 placeholder="Full Name">
 
 
 
-<input 
+<input id="phone"
 class="input"
-id="phone"
 placeholder="Phone Number">
 
 
 
-<input 
+<input id="email"
 class="input"
-id="email"
 type="email"
 placeholder="Email Address">
 
 
 
-<input 
+<input id="password"
 class="input"
-id="password"
 type="password"
 placeholder="Password">
 
@@ -203,32 +186,35 @@ placeholder="Password">
 
 
 
-<!-- Rider Extra Details -->
-
-<div id="riderFields">
+<div id="riderBox">
 
 
-<select class="input" id="vehicleType">
+<select id="vehicle"
+class="input">
+
 
 <option value="">
-Select Vehicle Type
+Select Vehicle
 </option>
+
 
 <option>
 Bike
 </option>
 
+
 <option>
 Cab
 </option>
+
 
 </select>
 
 
 
-<input 
+
+<input id="vehicleNumber"
 class="input"
-id="vehicleNumber"
 placeholder="Vehicle Number">
 
 
@@ -237,13 +223,12 @@ placeholder="Vehicle Number">
 
 <div class="upload">
 
-<label>
-Upload RC
-</label>
+RC Upload
 
-<input 
+<br>
+
+<input id="rc"
 type="file"
-id="rcUpload"
 accept="image/*,.pdf">
 
 </div>
@@ -254,25 +239,26 @@ accept="image/*,.pdf">
 
 <div class="upload">
 
-<label>
-Upload Driving License
-</label>
+Driving License Upload
 
-<input 
+<br>
+
+<input id="license"
 type="file"
-id="licenseUpload"
 accept="image/*,.pdf">
 
 </div>
 
 
+
 </div>
 
 
 
 
 
-<button class="btn create" id="createBtn">
+
+<button id="registerBtn" class="btn">
 
 Create Account
 
@@ -280,11 +266,9 @@ Create Account
 
 
 
+<div class="back" onclick="history.back()">
 
-
-<div class="back" onclick="goBack()">
-
-← Back To Login
+← Back
 
 </div>
 
@@ -298,11 +282,60 @@ Create Account
 
 
 
-<script>
+
+<script type="module">
+
+
+import {auth,db,storage}
+
+from "../firebase/firebase-config.js";
+
+
+
+import {
+
+createUserWithEmailAndPassword
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+
+import {
+
+doc,
+setDoc
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+
+import {
+
+ref,
+uploadBytes,
+getDownloadURL
+
+}
+
+from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+
+
 
 
 const params =
 new URLSearchParams(window.location.search);
+
 
 
 const role =
@@ -314,21 +347,38 @@ params.get("role") || "customer";
 if(role==="rider"){
 
 
-document.getElementById("roleTitle").innerHTML=
+document.getElementById("roleText").innerHTML=
 "Rider Registration";
 
 
-document.getElementById("riderFields").style.display=
+document.getElementById("riderBox").style.display=
 "block";
 
 
 }
 
-else{
 
 
-document.getElementById("roleTitle").innerHTML=
-"Customer Registration";
+
+
+async function uploadFile(file,path){
+
+
+if(!file)
+return "";
+
+
+const fileRef =
+ref(storage,path);
+
+
+await uploadBytes(
+fileRef,
+file
+);
+
+
+return await getDownloadURL(fileRef);
 
 
 }
@@ -337,54 +387,61 @@ document.getElementById("roleTitle").innerHTML=
 
 
 
-document.getElementById("createBtn").onclick=function(){
+
+document
+.getElementById("registerBtn")
+.onclick = async ()=>{
 
 
-let name =
+try{
+
+
+const name =
 document.getElementById("name").value;
 
 
-let phone =
+const phone =
 document.getElementById("phone").value;
 
 
-let email =
+const email =
 document.getElementById("email").value;
 
 
-
-if(name==="" || phone==="" || email===""){
-
-alert("Please fill all required details");
-
-return;
-
-}
+const password =
+document.getElementById("password").value;
 
 
 
 
-if(role==="rider"){
+const userCredential =
+await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
 
 
-alert("Rider account created. Waiting for Admin Approval");
+
+const uid =
+userCredential.user.uid;
 
 
-window.location.href="../rider/home.html";
 
 
-}
 
-else{
-
-
-alert("Customer account created");
+let data={
 
 
-window.location.href="../customer/home.html";
+name:name,
 
+phone:phone,
 
-}
+email:email,
+
+role:role,
+
+createdAt:new Date()
 
 
 
@@ -394,13 +451,106 @@ window.location.href="../customer/home.html";
 
 
 
+if(role==="rider"){
 
-function goBack(){
 
-window.location.href=
-"login.html?role="+role;
+
+const rcURL =
+await uploadFile(
+document.getElementById("rc").files[0],
+"riders/"+uid+"/rc"
+);
+
+
+
+const licenseURL =
+await uploadFile(
+document.getElementById("license").files[0],
+"riders/"+uid+"/license"
+);
+
+
+
+
+data.vehicle =
+document.getElementById("vehicle").value;
+
+
+data.vehicleNumber =
+document.getElementById("vehicleNumber").value;
+
+
+data.rc=rcURL;
+
+
+data.license=licenseURL;
+
+
+data.approved=false;
+
+
+data.status="pending";
+
 
 }
+
+
+
+
+
+await setDoc(
+doc(db,"users",uid),
+data
+);
+
+
+
+
+
+alert(
+"Account Created Successfully"
+);
+
+
+
+
+
+if(role==="rider"){
+
+
+window.location.href=
+"../rider/home.html";
+
+
+}
+
+else{
+
+
+window.location.href=
+"../customer/home.html";
+
+
+}
+
+
+
+
+}
+
+catch(error){
+
+
+alert(
+error.message
+);
+
+
+}
+
+
+
+};
 
 
 
