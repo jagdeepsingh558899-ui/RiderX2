@@ -6,105 +6,39 @@
 
   <title>RiderX | Book Ride</title>
 
-  <!-- Existing RiderX CSS -->
-  <link rel="stylesheet" href="../assets/app.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Leaflet -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
-
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  />
-
-  <!-- Google Font -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
-
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-  <!-- Existing Firebase Config -->
-  <script src="../firebase/firebase-config.js"></script>
-
-  <!-- Existing Fare Calculator -->
-  <script src="../js/fare-calculator.js"></script>
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <style>
     :root {
-      --yellow: #ffd600;
-      --yellow-dark: #e5bd00;
-      --black: #070707;
+      --yellow: #ffe500;
+      --black: #050505;
       --panel: #111111;
-      --panel-2: #181818;
-      --border: rgba(255,255,255,.10);
-      --muted: #9ca3af;
+      --card: #191919;
+      --border: #292929;
+      --muted: #999;
       --green: #22c55e;
       --red: #ef4444;
     }
 
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
       margin: 0;
       padding: 0;
-      overflow: hidden;
-      font-family: Poppins, Arial, sans-serif;
-      background: var(--black);
-      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
     body {
-      position: relative;
+      background: var(--black);
+      color: white;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    /* MAP */
-
-    #map {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      background: #151515;
-    }
-
-    .leaflet-container {
-      font-family: Poppins, Arial, sans-serif;
-      background: #202020;
-    }
-
-    .leaflet-control-zoom {
-      margin-top: 80px !important;
-      margin-right: 12px !important;
-      border: 0 !important;
-    }
-
-    .leaflet-control-zoom a {
-      background: #111 !important;
-      color: var(--yellow) !important;
-      border: 1px solid #333 !important;
-    }
-
-    .leaflet-control-attribution {
-      font-size: 9px !important;
-    }
-
-    /* TOP BAR */
+    /* HEADER */
 
     .topbar {
       position: absolute;
@@ -112,246 +46,262 @@
       left: 0;
       right: 0;
       z-index: 1000;
-      padding: 14px;
-      pointer-events: none;
-    }
 
-    .topbar-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
+
+      padding: 15px;
+      pointer-events: none;
     }
 
-    .top-button {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(10,10,10,.90);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      text-decoration: none;
-      box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    .topbar > * {
       pointer-events: auto;
     }
 
-    .top-button:active {
-      transform: scale(.95);
-    }
+    .back-btn,
+    .location-btn {
+      width: 44px;
+      height: 44px;
 
-    .brand {
-      background: rgba(10,10,10,.90);
-      padding: 8px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: .5px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.35);
-    }
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50%;
 
-    .brand span {
-      color: var(--yellow);
-    }
+      background: rgba(10,10,10,.88);
+      color: white;
 
-    /* LOCATE BUTTON */
-
-    .locate-button {
-      position: absolute;
-      right: 14px;
-      bottom: 360px;
-      z-index: 900;
-      width: 48px;
-      height: 48px;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      background: rgba(15,15,15,.95);
-      color: var(--yellow);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 19px;
-      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+
+      font-size: 18px;
       cursor: pointer;
+
+      backdrop-filter: blur(10px);
     }
 
-    .locate-button:active {
-      transform: scale(.94);
+    .back-btn {
+      text-decoration: none;
     }
 
-    /* PICK MODE */
+    .location-btn {
+      color: var(--yellow);
+    }
 
-    .map-mode {
+    .logo {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .5px;
+
+      background: rgba(10,10,10,.88);
+      padding: 9px 15px;
+      border-radius: 30px;
+
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(10px);
+    }
+
+    .logo span {
+      color: var(--yellow);
+    }
+
+    /* MAP */
+
+    #map {
+      width: 100%;
+      height: 62vh;
+      min-height: 430px;
+      background: #111;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 9px !important;
+    }
+
+    .leaflet-control-zoom {
+      margin-top: 70px !important;
+    }
+
+    .leaflet-control-zoom a {
+      background: #111 !important;
+      color: var(--yellow) !important;
+      border-color: #333 !important;
+    }
+
+    /* MAP INSTRUCTION */
+
+    .map-tip {
       position: absolute;
       top: 72px;
       left: 50%;
       transform: translateX(-50%);
+
       z-index: 900;
-      width: max-content;
-      max-width: calc(100% - 30px);
-      background: rgba(10,10,10,.93);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 9px 15px;
-      font-size: 11px;
-      font-weight: 600;
+
+      width: calc(100% - 40px);
+      max-width: 400px;
+
+      text-align: center;
+
+      padding: 10px 15px;
+
+      border-radius: 25px;
+
+      background: rgba(0,0,0,.82);
+      border: 1px solid rgba(255,229,0,.25);
+
       color: #ddd;
-      box-shadow: 0 8px 30px rgba(0,0,0,.4);
-      display: none;
+      font-size: 12px;
+
+      backdrop-filter: blur(10px);
     }
 
-    .map-mode.show {
-      display: block;
-    }
-
-    .map-mode strong {
+    .map-tip i {
       color: var(--yellow);
+      margin-right: 5px;
     }
 
     /* BOOKING PANEL */
 
     .booking-panel {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1000;
-      background:
-        linear-gradient(
-          180deg,
-          rgba(20,20,20,.96),
-          rgba(8,8,8,.99)
-        );
-      border-top: 1px solid rgba(255,255,255,.10);
+      position: relative;
+      z-index: 20;
+
+      margin-top: -25px;
+
+      background: var(--panel);
+
       border-radius: 26px 26px 0 0;
-      box-shadow: 0 -15px 50px rgba(0,0,0,.55);
-      padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
-      max-height: 62vh;
-      overflow-y: auto;
-      overscroll-behavior: contain;
+
+      padding: 20px 16px 30px;
+
+      box-shadow: 0 -10px 35px rgba(0,0,0,.45);
     }
 
-    .drag-handle {
-      width: 42px;
+    .drag-line {
+      width: 45px;
       height: 4px;
-      border-radius: 999px;
       background: #444;
-      margin: 0 auto 13px;
+      border-radius: 10px;
+      margin: -8px auto 18px;
     }
 
-    .panel-title {
+    .title-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 13px;
+      margin-bottom: 15px;
     }
 
-    .panel-title h2 {
-      margin: 0;
-      font-size: 18px;
-      font-weight: 800;
+    .title-row h2 {
+      font-size: 19px;
     }
 
-    .panel-title small {
-      color: var(--muted);
-      font-size: 10px;
+    .city-badge {
+      font-size: 11px;
+      color: var(--yellow);
+
+      border: 1px solid rgba(255,229,0,.25);
+      background: rgba(255,229,0,.08);
+
+      padding: 6px 9px;
+      border-radius: 20px;
     }
 
-    /* SERVICE GRID */
+    /* SERVICES */
 
     .service-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4,1fr);
       gap: 8px;
-      margin-bottom: 13px;
+
+      margin-bottom: 16px;
     }
 
     .service-card {
-      min-width: 0;
-      background: #191919;
-      border: 1px solid #292929;
+      background: #1d1d1d;
+      border: 1px solid #2c2c2c;
+
       border-radius: 15px;
-      padding: 10px 5px;
+
+      padding: 12px 5px;
+
       text-align: center;
+
       cursor: pointer;
-      transition: .18s ease;
+
+      transition: .2s;
     }
 
-    .service-card:active {
-      transform: scale(.96);
+    .service-card i {
+      display: block;
+
+      color: #aaa;
+      font-size: 21px;
+
+      margin-bottom: 7px;
+    }
+
+    .service-card span {
+      font-size: 11px;
+      color: #bbb;
     }
 
     .service-card.active {
-      background: rgba(255,214,0,.12);
+      background: rgba(255,229,0,.12);
       border-color: var(--yellow);
-      box-shadow: 0 0 20px rgba(255,214,0,.08);
     }
 
-    .service-icon {
-      width: 38px;
-      height: 38px;
-      margin: 0 auto 5px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #242424;
-      color: #ddd;
-      font-size: 18px;
-    }
-
-    .service-card.active .service-icon {
-      background: var(--yellow);
-      color: #000;
-    }
-
-    .service-name {
-      font-size: 10px;
-      font-weight: 700;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    .service-card.active i,
+    .service-card.active span {
+      color: var(--yellow);
     }
 
     /* LOCATION BOX */
 
     .location-box {
-      position: relative;
-      background: #171717;
+      background: #191919;
       border: 1px solid #292929;
       border-radius: 17px;
+
       overflow: hidden;
-      margin-bottom: 11px;
+
+      margin-bottom: 15px;
     }
 
     .location-row {
       display: flex;
       align-items: center;
-      min-height: 56px;
-      padding: 8px 11px;
-      gap: 10px;
+      gap: 12px;
+
+      padding: 13px;
     }
 
     .location-row + .location-row {
       border-top: 1px solid #292929;
     }
 
-    .location-dot {
+    .dot {
       width: 11px;
       height: 11px;
-      flex: 0 0 11px;
+
       border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 0 4px rgba(34,197,94,.10);
+
+      flex-shrink: 0;
     }
 
-    .location-dot.drop {
-      border-radius: 3px;
-      background: var(--yellow);
-      box-shadow: 0 0 0 4px rgba(255,214,0,.10);
+    .pickup-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(34,197,94,.12);
+    }
+
+    .drop-dot {
+      background: var(--red);
+      box-shadow: 0 0 0 4px rgba(239,68,68,.12);
     }
 
     .location-content {
@@ -360,172 +310,144 @@
     }
 
     .location-label {
-      display: block;
-      font-size: 9px;
       color: #888;
-      margin-bottom: 2px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .4px;
+      font-size: 10px;
+      margin-bottom: 3px;
     }
 
     .location-input {
       width: 100%;
-      background: transparent;
+
       border: 0;
       outline: 0;
-      color: #fff;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 0;
-      text-overflow: ellipsis;
+
+      background: transparent;
+      color: white;
+
+      font-size: 14px;
     }
 
     .location-input::placeholder {
       color: #666;
     }
 
-    .map-select-btn {
-      flex: 0 0 auto;
-      width: 35px;
-      height: 35px;
-      border-radius: 11px;
-      border: 1px solid #333;
-      background: #242424;
+    .locate-small {
+      background: #222;
       color: var(--yellow);
+
+      border: 0;
+      width: 34px;
+      height: 34px;
+
+      border-radius: 50%;
+
       cursor: pointer;
-    }
-
-    .map-select-btn.active {
-      background: var(--yellow);
-      color: #000;
-      border-color: var(--yellow);
-    }
-
-    /* INFO */
-
-    .ride-info {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .info-card {
-      background: #171717;
-      border: 1px solid #292929;
-      border-radius: 13px;
-      padding: 9px 6px;
-      text-align: center;
-    }
-
-    .info-card i {
-      color: var(--yellow);
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-
-    .info-card strong {
-      display: block;
-      font-size: 12px;
-      color: #fff;
-    }
-
-    .info-card span {
-      display: block;
-      color: #777;
-      font-size: 8px;
-      margin-top: 1px;
     }
 
     /* FARE */
 
-    .fare-row {
+    .fare-card {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 3px 9px;
+
+      background: #191919;
+      border: 1px solid #292929;
+
+      border-radius: 17px;
+
+      padding: 14px;
+
+      margin-bottom: 14px;
     }
 
-    .fare-label {
-      color: #aaa;
-      font-size: 12px;
-      font-weight: 500;
+    .fare-left small {
+      display: block;
+      color: #888;
+      font-size: 10px;
+      margin-bottom: 4px;
     }
 
-    .fare-value {
+    .fare-left strong {
+      font-size: 20px;
       color: var(--yellow);
-      font-size: 22px;
-      font-weight: 800;
+    }
+
+    .fare-right {
+      text-align: right;
+      font-size: 11px;
+      color: #999;
     }
 
     /* BOOK BUTTON */
 
-    .book-button {
+    .book-btn {
       width: 100%;
-      height: 52px;
+
+      padding: 16px;
+
       border: 0;
       border-radius: 16px;
+
       background: var(--yellow);
       color: #000;
-      font-family: inherit;
-      font-size: 15px;
+
+      font-size: 16px;
       font-weight: 800;
+
       cursor: pointer;
-      box-shadow: 0 8px 25px rgba(255,214,0,.15);
-      transition: .18s ease;
+
+      box-shadow: 0 8px 25px rgba(255,229,0,.15);
     }
 
-    .book-button:active {
-      transform: scale(.985);
-    }
-
-    .book-button:disabled {
-      opacity: .6;
+    .book-btn:disabled {
+      opacity: .55;
       cursor: not-allowed;
-    }
-
-    .book-button i {
-      margin-right: 7px;
-    }
-
-    /* STATUS */
-
-    .status-message {
-      display: none;
-      padding: 9px 11px;
-      margin-bottom: 10px;
-      border-radius: 11px;
-      font-size: 10px;
-      font-weight: 600;
-      background: rgba(255,214,0,.08);
-      color: var(--yellow);
-      border: 1px solid rgba(255,214,0,.18);
-    }
-
-    .status-message.show {
-      display: block;
-    }
-
-    .status-message.error {
-      background: rgba(239,68,68,.10);
-      border-color: rgba(239,68,68,.20);
-      color: #fca5a5;
     }
 
     /* LOADING */
 
-    .loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(0,0,0,.25);
-      border-top-color: #000;
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+
+      z-index: 9999;
+
+      background: rgba(0,0,0,.78);
+
+      display: none;
+
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-box {
+      width: 85%;
+      max-width: 320px;
+
+      background: #171717;
+
+      border: 1px solid #333;
+
+      border-radius: 20px;
+
+      padding: 25px;
+
+      text-align: center;
+    }
+
+    .spinner {
+      width: 42px;
+      height: 42px;
+
+      border: 4px solid #333;
+      border-top-color: var(--yellow);
+
       border-radius: 50%;
-      animation: spin .7s linear infinite;
-      vertical-align: middle;
-      margin-right: 7px;
+
+      animation: spin .8s linear infinite;
+
+      margin: 0 auto 15px;
     }
 
     @keyframes spin {
@@ -534,1114 +456,605 @@
       }
     }
 
-    /* MOBILE */
+    /* TOAST */
 
-    @media (max-width: 380px) {
-      .booking-panel {
-        padding-left: 12px;
-        padding-right: 12px;
-      }
+    .toast {
+      position: fixed;
 
-      .service-grid {
-        gap: 5px;
-      }
+      left: 15px;
+      right: 15px;
+      bottom: 20px;
 
-      .service-card {
-        padding-left: 2px;
-        padding-right: 2px;
-      }
+      z-index: 10000;
 
-      .ride-info {
-        gap: 5px;
-      }
+      background: #202020;
+
+      border: 1px solid #333;
+      border-left: 4px solid var(--yellow);
+
+      border-radius: 13px;
+
+      padding: 13px 15px;
+
+      font-size: 13px;
+
+      display: none;
     }
 
+    /* RESPONSIVE */
+
     @media (min-width: 768px) {
-      .booking-panel {
-        width: 470px;
-        right: 20px;
-        left: auto;
-        bottom: 20px;
-        border-radius: 24px;
-        max-height: calc(100vh - 40px);
+
+      #map {
+        height: 58vh;
       }
 
-      .locate-button {
-        right: 510px;
-        bottom: 35px;
+      .booking-panel {
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
       }
+
     }
   </style>
 </head>
 
 <body>
 
+  <!-- HEADER -->
+
+  <div class="topbar">
+
+    <a href="home.html" class="back-btn">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+
+    <div class="logo">
+      RIDER<span>X</span>
+    </div>
+
+    <button class="location-btn" onclick="useCurrentLocation()">
+      <i class="fa-solid fa-location-crosshairs"></i>
+    </button>
+
+  </div>
+
   <!-- MAP -->
+
   <div id="map"></div>
 
-  <!-- TOP BAR -->
-  <div class="topbar">
-    <div class="topbar-inner">
-
-      <a
-        href="home.html"
-        class="top-button"
-        aria-label="Back"
-      >
-        <i class="fa-solid fa-arrow-left"></i>
-      </a>
-
-      <div class="brand">
-        RIDER<span>X</span>
-      </div>
-
-      <button
-        type="button"
-        class="top-button"
-        onclick="useCurrentLocation()"
-        aria-label="My Location"
-      >
-        <i class="fa-solid fa-location-crosshairs"></i>
-      </button>
-
-    </div>
+  <div class="map-tip">
+    <i class="fa-solid fa-hand-pointer"></i>
+    Map par tap karke pickup location select karein
   </div>
-
-  <!-- MAP MODE -->
-  <div id="mapMode" class="map-mode">
-    Tap on map to select <strong id="mapModeText">pickup</strong>
-  </div>
-
-  <!-- LOCATE -->
-  <button
-    type="button"
-    class="locate-button"
-    onclick="useCurrentLocation()"
-    aria-label="Use current location"
-  >
-    <i class="fa-solid fa-crosshairs"></i>
-  </button>
 
   <!-- BOOKING PANEL -->
+
   <section class="booking-panel">
 
-    <div class="drag-handle"></div>
+    <div class="drag-line"></div>
 
-    <div class="panel-title">
-      <h2>Book your ride</h2>
-      <small>Chandigarh</small>
+    <div class="title-row">
+
+      <h2>Where to?</h2>
+
+      <span class="city-badge">
+        <i class="fa-solid fa-location-dot"></i>
+        Chandigarh
+      </span>
+
     </div>
 
     <!-- SERVICES -->
+
     <div class="service-grid">
 
-      <button
-        type="button"
-        class="service-card active"
-        data-service="bike"
-        onclick="selectService('bike', this)"
-      >
-        <div class="service-icon">
-          <i class="fa-solid fa-motorcycle"></i>
-        </div>
-        <div class="service-name">Bike Taxi</div>
-      </button>
+      <div class="service-card active"
+           data-service="bike"
+           onclick="selectService('bike',this)">
 
-      <button
-        type="button"
-        class="service-card"
-        data-service="cab"
-        onclick="selectService('cab', this)"
-      >
-        <div class="service-icon">
-          <i class="fa-solid fa-car"></i>
-        </div>
-        <div class="service-name">Cab</div>
-      </button>
+        <i class="fa-solid fa-motorcycle"></i>
+        <span>Bike Taxi</span>
 
-      <button
-        type="button"
-        class="service-card"
-        data-service="parcel"
-        onclick="selectService('parcel', this)"
-      >
-        <div class="service-icon">
-          <i class="fa-solid fa-box"></i>
-        </div>
-        <div class="service-name">Parcel</div>
-      </button>
+      </div>
 
-      <button
-        type="button"
-        class="service-card"
-        data-service="food"
-        onclick="selectService('food', this)"
-      >
-        <div class="service-icon">
-          <i class="fa-solid fa-utensils"></i>
-        </div>
-        <div class="service-name">Food</div>
-      </button>
+      <div class="service-card"
+           data-service="cab"
+           onclick="selectService('cab',this)">
+
+        <i class="fa-solid fa-car"></i>
+        <span>Cab</span>
+
+      </div>
+
+      <div class="service-card"
+           data-service="parcel"
+           onclick="selectService('parcel',this)">
+
+        <i class="fa-solid fa-box"></i>
+        <span>Parcel</span>
+
+      </div>
+
+      <div class="service-card"
+           data-service="food"
+           onclick="selectService('food',this)">
+
+        <i class="fa-solid fa-utensils"></i>
+        <span>Food</span>
+
+      </div>
 
     </div>
 
-    <!-- LOCATION -->
+    <!-- PICKUP / DROP -->
+
     <div class="location-box">
 
-      <!-- PICKUP -->
       <div class="location-row">
 
-        <div class="location-dot"></div>
+        <div class="dot pickup-dot"></div>
 
         <div class="location-content">
-          <span class="location-label">Pickup</span>
+
+          <div class="location-label">
+            PICKUP
+          </div>
 
           <input
             id="pickup"
             class="location-input"
-            type="text"
             placeholder="Choose pickup location"
             autocomplete="off"
           >
+
         </div>
 
         <button
-          id="pickupMapBtn"
-          type="button"
-          class="map-select-btn"
-          onclick="selectMapMode('pickup')"
-          title="Select pickup on map"
-        >
-          <i class="fa-solid fa-map-pin"></i>
+          class="locate-small"
+          onclick="useCurrentLocation()"
+          title="Current location">
+
+          <i class="fa-solid fa-location-crosshairs"></i>
+
         </button>
 
       </div>
 
-      <!-- DROP -->
+
       <div class="location-row">
 
-        <div class="location-dot drop"></div>
+        <div class="dot drop-dot"></div>
 
         <div class="location-content">
-          <span class="location-label">Drop</span>
+
+          <div class="location-label">
+            DROP-OFF
+          </div>
 
           <input
             id="drop"
             class="location-input"
-            type="text"
             placeholder="Choose destination"
             autocomplete="off"
           >
+
         </div>
 
-        <button
-          id="dropMapBtn"
-          type="button"
-          class="map-select-btn"
-          onclick="selectMapMode('drop')"
-          title="Select drop on map"
-        >
-          <i class="fa-solid fa-location-dot"></i>
-        </button>
-
-      </div>
-
-    </div>
-
-    <!-- STATUS -->
-    <div id="statusMessage" class="status-message"></div>
-
-    <!-- RIDE INFO -->
-    <div class="ride-info">
-
-      <div class="info-card">
-        <i class="fa-solid fa-route"></i>
-        <strong id="distanceValue">0 km</strong>
-        <span>DISTANCE</span>
-      </div>
-
-      <div class="info-card">
-        <i class="fa-regular fa-clock"></i>
-        <strong id="etaValue">-- min</strong>
-        <span>ETA</span>
-      </div>
-
-      <div class="info-card">
-        <i class="fa-solid fa-location-dot"></i>
-        <strong id="locationStatus">Map</strong>
-        <span>LOCATION</span>
       </div>
 
     </div>
 
     <!-- FARE -->
-    <div class="fare-row">
 
-      <span class="fare-label">
-        Estimated fare
-      </span>
+    <div class="fare-card">
 
-      <span
-        id="fareAmount"
-        class="fare-value"
-      >
-        ₹0
-      </span>
+      <div class="fare-left">
+
+        <small>ESTIMATED FARE</small>
+
+        <strong id="fareAmount">₹0</strong>
+
+      </div>
+
+      <div class="fare-right">
+
+        <div id="distanceText">
+          Select locations
+        </div>
+
+        <div id="serviceText">
+          Bike Taxi
+        </div>
+
+      </div>
 
     </div>
 
     <!-- BOOK -->
+
     <button
       id="bookButton"
-      type="button"
-      class="book-button"
-      onclick="requestRide()"
-    >
+      class="book-btn"
+      onclick="requestRide()">
+
       <i class="fa-solid fa-bolt"></i>
       Book Ride
+
     </button>
 
   </section>
 
+
+  <!-- LOADING -->
+
+  <div class="loading-overlay" id="loadingOverlay">
+
+    <div class="loading-box">
+
+      <div class="spinner"></div>
+
+      <h3>Finding nearby riders</h3>
+
+      <p style="color:#888;font-size:12px;margin-top:8px;">
+        Please wait while RiderX searches for the nearest rider.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div class="toast" id="toast"></div>
+
+
   <!-- LEAFLET -->
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+
+  <!-- FIREBASE -->
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <script src="../firebase/firebase-config.js"></script>
+
+
   <script>
+
     /*
-      ==========================================================
-      RiderX Customer Booking
-      Complete replacement file
-      ==========================================================
+      RiderX Booking System
+
+      IMPORTANT:
+      This file uses the existing firebase-config.js.
+      It supports either:
+        firebase.auth()
+        firebase.firestore()
+
+      or projects where auth/db are exposed globally.
     */
 
-    let selectedService = "bike";
 
     let map = null;
 
     let pickupMarker = null;
+
     let dropMarker = null;
 
-    let routeLayer = null;
+    let routeLine = null;
 
-    let userLocationMarker = null;
+    let selectedService = "bike";
 
     let pickupCoords = null;
+
     let dropCoords = null;
 
-    let mapSelectionMode = null;
-
-    let routeRequestId = 0;
-
-    /*
-      Chandigarh default location.
-    */
-
-    const CHANDIGARH = {
-      lat: 30.7333,
-      lng: 76.7794
-    };
-
-    /*
-      Firebase references.
-      Your existing firebase-config.js normally
-      creates auth/db variables.
-    */
-
-    let firebaseAuth = null;
-    let firestoreDb = null;
-
-    /*
-      ----------------------------------------------------------
-      Helpers
-      ----------------------------------------------------------
-    */
-
-    function getAuthInstance() {
-      try {
-
-        if (typeof auth !== "undefined" && auth) {
-          return auth;
-        }
-
-        if (
-          typeof firebase !== "undefined" &&
-          firebase.auth
-        ) {
-          return firebase.auth();
-        }
-
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-      }
-
-      return null;
-    }
+    let currentDistance = 0;
 
 
-    function getFirestoreInstance() {
-      try {
+    /* Chandigarh default */
 
-        if (typeof db !== "undefined" && db) {
-          return db;
-        }
-
-        if (
-          typeof firebase !== "undefined" &&
-          firebase.firestore
-        ) {
-          return firebase.firestore();
-        }
-
-      } catch (error) {
-        console.error("Firestore initialization error:", error);
-      }
-
-      return null;
-    }
-
-
-    function showStatus(message, isError = false) {
-
-      const element =
-        document.getElementById("statusMessage");
-
-      if (!element) return;
-
-      element.textContent = message;
-
-      element.classList.add("show");
-
-      if (isError) {
-        element.classList.add("error");
-      } else {
-        element.classList.remove("error");
-      }
-    }
-
-
-    function hideStatus() {
-
-      const element =
-        document.getElementById("statusMessage");
-
-      if (!element) return;
-
-      element.classList.remove("show");
-      element.classList.remove("error");
-      element.textContent = "";
-    }
-
-
-    function formatNumber(number) {
-
-      return new Intl.NumberFormat("en-IN", {
-        maximumFractionDigits: 0
-      }).format(number);
-
-    }
-
-
-    function updateLocationStatus(text) {
-
-      const element =
-        document.getElementById("locationStatus");
-
-      if (element) {
-        element.textContent = text;
-      }
-
-    }
+    const CHANDIGARH = [
+      30.7333,
+      76.7794
+    ];
 
 
     /*
-      ----------------------------------------------------------
-      Distance fallback
-      ----------------------------------------------------------
+      Initialize map
     */
 
-    function haversineDistance(lat1, lon1, lat2, lon2) {
+    document.addEventListener("DOMContentLoaded", () => {
 
-      const R = 6371;
+      initializeMap();
 
-      const dLat =
-        (lat2 - lat1) * Math.PI / 180;
+      setupInputs();
 
-      const dLon =
-        (lon2 - lon1) * Math.PI / 180;
+    });
 
-      const a =
-        Math.sin(dLat / 2) *
-        Math.sin(dLat / 2) +
-
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
-      const c =
-        2 *
-        Math.atan2(
-          Math.sqrt(a),
-          Math.sqrt(1 - a)
-        );
-
-      return R * c;
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Fare
-      ----------------------------------------------------------
-
-      Uses existing RiderX FareCalculator if available.
-
-      Otherwise:
-      Day 06:00 - 22:00
-      First 10 km = ₹8/km
-      Above 10 km = ₹9/km
-      Night 22:00 - 06:00 = ₹11/km
-
-      Service multipliers are kept reasonable.
-    */
-
-    function calculateRiderXFare(distanceKm) {
-
-      const distance =
-        Math.max(0, Number(distanceKm) || 0);
-
-      /*
-        Existing project fare calculator.
-      */
-
-      try {
-
-        if (
-          typeof FareCalculator !== "undefined" &&
-          typeof FareCalculator.calculateFare === "function"
-        ) {
-
-          const result =
-            FareCalculator.calculateFare(
-              selectedService,
-              distance
-            );
-
-          if (
-            result &&
-            typeof result.fare !== "undefined"
-          ) {
-
-            return Math.max(
-              0,
-              Math.round(Number(result.fare))
-            );
-
-          }
-
-        }
-
-      } catch (error) {
-
-        console.warn(
-          "Existing FareCalculator failed. Using RiderX fallback.",
-          error
-        );
-
-      }
-
-      /*
-        RiderX fallback pricing.
-      */
-
-      const hour =
-        new Date().getHours();
-
-      let fare = 0;
-
-      if (hour >= 22 || hour < 6) {
-
-        fare =
-          distance * 11;
-
-      } else {
-
-        if (distance <= 10) {
-
-          fare =
-            distance * 8;
-
-        } else {
-
-          fare =
-            (10 * 8) +
-            ((distance - 10) * 9);
-
-        }
-
-      }
-
-      /*
-        Service adjustment.
-      */
-
-      if (selectedService === "cab") {
-        fare *= 1.6;
-      }
-
-      if (selectedService === "parcel") {
-        fare *= 1.15;
-      }
-
-      if (selectedService === "food") {
-        fare *= 1.10;
-      }
-
-      /*
-        Minimum fares.
-      */
-
-      const minimumFare = {
-
-        bike: 40,
-
-        cab: 80,
-
-        parcel: 50,
-
-        food: 45
-
-      };
-
-      fare =
-        Math.max(
-          fare,
-          minimumFare[selectedService] || 40
-        );
-
-      return Math.round(fare);
-
-    }
-
-
-    function updateFare(distanceKm) {
-
-      const fare =
-        calculateRiderXFare(distanceKm);
-
-      const fareElement =
-        document.getElementById("fareAmount");
-
-      if (fareElement) {
-
-        fareElement.textContent =
-          "₹" + formatNumber(fare);
-
-      }
-
-      return fare;
-
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Service selection
-      ----------------------------------------------------------
-    */
-
-    function selectService(service, element) {
-
-      selectedService = service;
-
-      document
-        .querySelectorAll(".service-card")
-        .forEach(card => {
-          card.classList.remove("active");
-        });
-
-      if (element) {
-        element.classList.add("active");
-      }
-
-      if (pickupCoords && dropCoords) {
-
-        requestRoute();
-
-      }
-
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Map initialization
-      ----------------------------------------------------------
-    */
 
     function initializeMap() {
 
-      if (map) return;
-
-      map =
-        L.map("map", {
-          zoomControl: true,
-          attributionControl: true
-        }).setView(
-          [
-            CHANDIGARH.lat,
-            CHANDIGARH.lng
-          ],
-          13
-        );
+      map = L.map("map", {
+        zoomControl: true
+      }).setView(CHANDIGARH, 13);
 
 
       L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
           maxZoom: 19,
-          attribution:
-            '&copy; OpenStreetMap contributors'
+          attribution: "&copy; OpenStreetMap contributors"
         }
       ).addTo(map);
 
 
       /*
-        Map click selection.
+        Map click:
+        First click = pickup
+        Second click = drop
       */
 
-      map.on("click", function(event) {
+      map.on("click", async function(e) {
 
-        if (!mapSelectionMode) {
+        const coords = [
+          e.latlng.lat,
+          e.latlng.lng
+        ];
 
-          /*
-            If no mode selected:
-            first click sets pickup,
-            second click sets drop.
-          */
 
-          if (!pickupCoords) {
+        if (!pickupCoords) {
 
-            selectLocationFromMap(
-              "pickup",
-              event.latlng.lat,
-              event.latlng.lng
-            );
+          await setPickup(
+            coords,
+            "Selected pickup location"
+          );
 
-            return;
-
-          }
-
-          if (!dropCoords) {
-
-            selectLocationFromMap(
-              "drop",
-              event.latlng.lat,
-              event.latlng.lng
-            );
-
-            return;
-
-          }
+          showToast(
+            "Pickup selected. Now tap the map to select drop location."
+          );
 
           return;
         }
 
 
-        selectLocationFromMap(
-          mapSelectionMode,
-          event.latlng.lat,
-          event.latlng.lng
+        if (!dropCoords) {
+
+          await setDrop(
+            coords,
+            "Selected destination"
+          );
+
+          return;
+        }
+
+
+        /*
+          If both already exist,
+          next click changes drop.
+        */
+
+        await setDrop(
+          coords,
+          "Selected destination"
         );
 
       });
 
 
       /*
-        Default pickup.
+        Try user's current location automatically
       */
-
-      setPickup(
-        CHANDIGARH.lat,
-        CHANDIGARH.lng,
-        "Chandigarh"
-      );
-
-      /*
-        Do not force an unrealistic Gurgaon destination.
-        Give customer a nearby default destination so
-        map is immediately visible.
-      */
-
-      setDrop(
-        30.7046,
-        76.7179,
-        "Mohali"
-      );
-
-      requestRoute();
 
       setTimeout(() => {
 
-        map.invalidateSize();
+        useCurrentLocation(false);
 
-      }, 300);
-
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Custom marker icons
-      ----------------------------------------------------------
-    */
-
-    function createPickupIcon() {
-
-      return L.divIcon({
-
-        className: "riderx-pickup-marker",
-
-        html:
-          '<div style="' +
-          'width:32px;' +
-          'height:32px;' +
-          'border-radius:50%;' +
-          'background:#22c55e;' +
-          'border:4px solid white;' +
-          'box-shadow:0 4px 15px rgba(0,0,0,.45);' +
-          '"></div>',
-
-        iconSize: [32, 32],
-
-        iconAnchor: [16, 16]
-
-      });
-
-    }
-
-
-    function createDropIcon() {
-
-      return L.divIcon({
-
-        className: "riderx-drop-marker",
-
-        html:
-          '<div style="' +
-          'width:32px;' +
-          'height:32px;' +
-          'border-radius:8px;' +
-          'background:#ffd600;' +
-          'border:4px solid white;' +
-          'box-shadow:0 4px 15px rgba(0,0,0,.45);' +
-          'transform:rotate(45deg);' +
-          '"></div>',
-
-        iconSize: [32, 32],
-
-        iconAnchor: [16, 16]
-
-      });
+      }, 500);
 
     }
 
 
     /*
-      ----------------------------------------------------------
-      Set pickup
-      ----------------------------------------------------------
+      Current location
     */
 
-    function setPickup(lat, lng, address) {
+    function useCurrentLocation(showMessage = true) {
 
-      pickupCoords = {
-        lat: Number(lat),
-        lng: Number(lng)
-      };
+      if (!navigator.geolocation) {
+
+        showToast(
+          "Your browser does not support GPS location."
+        );
+
+        return;
+
+      }
+
+
+      navigator.geolocation.getCurrentPosition(
+
+        async position => {
+
+          const coords = [
+            position.coords.latitude,
+            position.coords.longitude
+          ];
+
+
+          await setPickup(
+            coords,
+            "Your current location"
+          );
+
+
+          map.setView(coords, 16);
+
+
+          if (showMessage) {
+
+            showToast(
+              "Current location selected as pickup."
+            );
+
+          }
+
+        },
+
+        error => {
+
+          console.error(error);
+
+          showToast(
+            "Location permission allow karein."
+          );
+
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 30000
+        }
+
+      );
+
+    }
+
+
+    /*
+      Pickup marker
+    */
+
+    async function setPickup(coords, address) {
+
+      pickupCoords = coords;
 
 
       if (pickupMarker) {
 
-        pickupMarker.setLatLng([
-          pickupCoords.lat,
-          pickupCoords.lng
-        ]);
-
-      } else {
-
-        pickupMarker =
-          L.marker(
-            [
-              pickupCoords.lat,
-              pickupCoords.lng
-            ],
-            {
-              icon: createPickupIcon(),
-              draggable: true
-            }
-          )
-          .addTo(map)
-          .bindPopup("Pickup");
-
-
-        pickupMarker.on(
-          "dragend",
-          function(event) {
-
-            const position =
-              event.target.getLatLng();
-
-            setPickup(
-              position.lat,
-              position.lng,
-              "Selected location"
-            );
-
-            reverseGeocode(
-              position.lat,
-              position.lng,
-              "pickup"
-            );
-
-          }
-        );
+        map.removeLayer(pickupMarker);
 
       }
 
 
-      if (address) {
+      pickupMarker = L.marker(coords, {
 
-        document.getElementById(
-          "pickup"
-        ).value = address;
+        draggable: true
 
-      }
+      })
+      .addTo(map)
+      .bindPopup("Pickup")
+      .openPopup();
 
 
-      updateLocationStatus("Ready");
+      pickupMarker.on("dragend", function(e) {
 
-      requestRoute();
+        const p = e.target.getLatLng();
+
+        pickupCoords = [
+          p.lat,
+          p.lng
+        ];
+
+        reverseGeocodePickup();
+
+        updateRouteAndFare();
+
+      });
+
+
+      document.getElementById("pickup").value =
+        address || "Pickup location";
+
+
+      reverseGeocodePickup();
+
+      updateRouteAndFare();
 
     }
 
 
     /*
-      ----------------------------------------------------------
-      Set drop
-      ----------------------------------------------------------
+      Drop marker
     */
 
-    function setDrop(lat, lng, address) {
+    async function setDrop(coords, address) {
 
-      dropCoords = {
-        lat: Number(lat),
-        lng: Number(lng)
-      };
+      dropCoords = coords;
 
 
       if (dropMarker) {
 
-        dropMarker.setLatLng([
-          dropCoords.lat,
-          dropCoords.lng
-        ]);
-
-      } else {
-
-        dropMarker =
-          L.marker(
-            [
-              dropCoords.lat,
-              dropCoords.lng
-            ],
-            {
-              icon: createDropIcon(),
-              draggable: true
-            }
-          )
-          .addTo(map)
-          .bindPopup("Drop");
-
-
-        dropMarker.on(
-          "dragend",
-          function(event) {
-
-            const position =
-              event.target.getLatLng();
-
-            setDrop(
-              position.lat,
-              position.lng,
-              "Selected destination"
-            );
-
-            reverseGeocode(
-              position.lat,
-              position.lng,
-              "drop"
-            );
-
-          }
-        );
+        map.removeLayer(dropMarker);
 
       }
 
 
-      if (address) {
+      dropMarker = L.marker(coords, {
 
-        document.getElementById(
-          "drop"
-        ).value = address;
+        draggable: true
+
+      })
+      .addTo(map)
+      .bindPopup("Drop");
+
+
+      dropMarker.on("dragend", function(e) {
+
+        const p = e.target.getLatLng();
+
+        dropCoords = [
+          p.lat,
+          p.lng
+        ];
+
+        reverseGeocodeDrop();
+
+        updateRouteAndFare();
+
+      });
+
+
+      document.getElementById("drop").value =
+        address || "Destination";
+
+
+      reverseGeocodeDrop();
+
+      updateRouteAndFare();
+
+
+      if (pickupCoords) {
+
+        fitMapToRoute();
 
       }
-
-      updateLocationStatus("Ready");
-
-      requestRoute();
 
     }
 
 
     /*
-      ----------------------------------------------------------
-      Map mode
-      ----------------------------------------------------------
+      Reverse geocoding
+      OpenStreetMap Nominatim
     */
 
-    function selectMapMode(mode) {
+    async function reverseGeocodePickup() {
 
-      mapSelectionMode = mode;
+      if (!pickupCoords) return;
 
-      const mapMode =
-        document.getElementById("mapMode");
-
-      const mapModeText =
-        document.getElementById("mapModeText");
-
-      const pickupButton =
-        document.getElementById("pickupMapBtn");
-
-      const dropButton =
-        document.getElementById("dropMapBtn");
-
-
-      if (mode === "pickup") {
-
-        mapModeText.textContent =
-          "pickup";
-
-        pickupButton.classList.add("active");
-        dropButton.classList.remove("active");
-
-      } else {
-
-        mapModeText.textContent =
-          "drop";
-
-        dropButton.classList.add("active");
-        pickupButton.classList.remove("active");
-
-      }
-
-
-      mapMode.classList.add("show");
-
-      showStatus(
-        "Map par tap karke " +
-        (mode === "pickup"
-          ? "pickup"
-          : "drop") +
-        locationText()
-      );
-
-    }
-
-
-    function locationText() {
-
-      return " location select karein.";
-
-    }
-
-
-    function selectLocationFromMap(
-      mode,
-      lat,
-      lng
-    ) {
-
-      if (mode === "pickup") {
-
-        setPickup(
-          lat,
-          lng,
-          "Getting address..."
-        );
-
-        reverseGeocode(
-          lat,
-          lng,
-          "pickup"
-        );
-
-      } else {
-
-        setDrop(
-          lat,
-          lng,
-          "Getting address..."
-        );
-
-        reverseGeocode(
-          lat,
-          lng,
-          "drop"
-        );
-
-      }
-
-
-      mapSelectionMode = null;
-
-      document
-        .getElementById("mapMode")
-        .classList.remove("show");
-
-      document
-        .getElementById("pickupMapBtn")
-        .classList.remove("active");
-
-      document
-        .getElementById("dropMapBtn")
-        .classList.remove("active");
-
-      hideStatus();
-
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Reverse Geocoding
-      ----------------------------------------------------------
-    */
-
-    async function reverseGeocode(
-      lat,
-      lng,
-      type
-    ) {
 
       try {
 
         const url =
           "https://nominatim.openstreetmap.org/reverse" +
-          "?format=jsonv2" +
-          "&lat=" + encodeURIComponent(lat) +
-          "&lon=" + encodeURIComponent(lng) +
+          "?format=json" +
+          "&lat=" + encodeURIComponent(pickupCoords[0]) +
+          "&lon=" + encodeURIComponent(pickupCoords[1]) +
           "&zoom=18" +
           "&addressdetails=1";
 
@@ -1654,116 +1067,45 @@
           });
 
 
-        if (!response.ok) {
-          throw new Error("Address lookup failed");
-        }
+        if (!response.ok) return;
 
 
-        const data =
-          await response.json();
+        const data = await response.json();
 
 
-        let address =
-          data.display_name ||
-          "Selected location";
+        if (data.display_name) {
 
-
-        /*
-          Keep address shorter on mobile.
-        */
-
-        const parts =
-          address
-            .split(",")
-            .map(item => item.trim())
-            .filter(Boolean);
-
-
-        if (parts.length > 4) {
-
-          address =
-            parts
-              .slice(0, 4)
-              .join(", ");
+          document.getElementById("pickup").value =
+            data.display_name;
 
         }
-
-
-        if (type === "pickup") {
-
-          document.getElementById(
-            "pickup"
-          ).value = address;
-
-        } else {
-
-          document.getElementById(
-            "drop"
-          ).value = address;
-
-        }
-
-
-        hideStatus();
 
       } catch (error) {
 
         console.warn(
-          "Reverse geocoding error:",
+          "Pickup reverse geocoding failed",
           error
         );
-
-        if (type === "pickup") {
-
-          document.getElementById(
-            "pickup"
-          ).value =
-            "Selected pickup";
-
-        } else {
-
-          document.getElementById(
-            "drop"
-          ).value =
-            "Selected destination";
-
-        }
 
       }
 
     }
 
 
-    /*
-      ----------------------------------------------------------
-      Search typed location
-      ----------------------------------------------------------
-    */
+    async function reverseGeocodeDrop() {
 
-    async function geocodeAddress(
-      address,
-      type
-    ) {
-
-      const cleanAddress =
-        String(address || "").trim();
-
-      if (!cleanAddress) return;
+      if (!dropCoords) return;
 
 
       try {
 
-        const query =
-          cleanAddress +
-          ", Chandigarh, India";
-
-
         const url =
-          "https://nominatim.openstreetmap.org/search" +
-          "?format=jsonv2" +
-          "&limit=1" +
-          "&q=" +
-          encodeURIComponent(query);
+          "https://nominatim.openstreetmap.org/reverse" +
+          "?format=json" +
+          "&lat=" + encodeURIComponent(dropCoords[0]) +
+          "&lon=" + encodeURIComponent(dropCoords[1]) +
+          "&zoom=18" +
+          "&addressdetails=1";
 
 
         const response =
@@ -1774,78 +1116,24 @@
           });
 
 
-        if (!response.ok) {
-          throw new Error("Location search failed");
-        }
+        if (!response.ok) return;
 
 
-        const results =
-          await response.json();
+        const data = await response.json();
 
 
-        if (!results.length) {
+        if (data.display_name) {
 
-          showStatus(
-            "Location nahi mili. Map par location select karein.",
-            true
-          );
-
-          return;
+          document.getElementById("drop").value =
+            data.display_name;
 
         }
-
-
-        const result =
-          results[0];
-
-
-        const lat =
-          Number(result.lat);
-
-        const lng =
-          Number(result.lon);
-
-
-        if (type === "pickup") {
-
-          setPickup(
-            lat,
-            lng,
-            result.display_name
-          );
-
-        } else {
-
-          setDrop(
-            lat,
-            lng,
-            result.display_name
-          );
-
-        }
-
-
-        map.setView(
-          [lat, lng],
-          15,
-          {
-            animate: true
-          }
-        );
-
-
-        requestRoute();
 
       } catch (error) {
 
-        console.error(
-          "Geocoding error:",
+        console.warn(
+          "Drop reverse geocoding failed",
           error
-        );
-
-        showStatus(
-          "Location search failed. Map se location select karein.",
-          true
         );
 
       }
@@ -1854,53 +1142,257 @@
 
 
     /*
-      ----------------------------------------------------------
-      Route using OSRM
-      ----------------------------------------------------------
+      Distance using Haversine
     */
 
-    async function requestRoute() {
+    function calculateDistance(
+      lat1,
+      lon1,
+      lat2,
+      lon2
+    ) {
 
-      if (!map) return;
+      const R = 6371;
 
-      if (!pickupCoords || !dropCoords) return;
+      const dLat =
+        (lat2 - lat1) *
+        Math.PI / 180;
+
+      const dLon =
+        (lon2 - lon1) *
+        Math.PI / 180;
 
 
-      const currentRequest =
-        ++routeRequestId;
+      const a =
+        Math.sin(dLat / 2) *
+        Math.sin(dLat / 2) +
+
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
 
 
-      const start =
-        pickupCoords;
+      const c =
+        2 *
+        Math.atan2(
+          Math.sqrt(a),
+          Math.sqrt(1 - a)
+        );
 
-      const end =
-        dropCoords;
+
+      return R * c;
+
+    }
+
+
+    /*
+      Fare calculation
+    */
+
+    function calculateFare(distanceKm) {
+
+      if (!distanceKm || distanceKm <= 0) {
+
+        return 0;
+
+      }
+
+
+      let baseFare = 0;
+
+      let perKm = 8;
 
 
       /*
-        Remove previous route.
+        RiderX pricing:
+        6 AM - 10 PM
+        first 10 km = ₹8/km
+        above 10 km = ₹9/km
+
+        10 PM - 6 AM
+        ₹11/km
       */
 
-      if (routeLayer) {
+      const hour =
+        new Date().getHours();
 
-        map.removeLayer(routeLayer);
 
-        routeLayer = null;
+      if (hour >= 22 || hour < 6) {
+
+        perKm = 11;
+
+        baseFare =
+          distanceKm * perKm;
+
+      } else {
+
+        if (distanceKm <= 10) {
+
+          baseFare =
+            distanceKm * 8;
+
+        } else {
+
+          baseFare =
+            (10 * 8) +
+            ((distanceKm - 10) * 9);
+
+        }
 
       }
+
+
+      /*
+        Service multiplier
+      */
+
+      if (selectedService === "cab") {
+
+        baseFare *= 1.5;
+
+      }
+
+      else if (selectedService === "parcel") {
+
+        baseFare *= 1.25;
+
+      }
+
+      else if (selectedService === "food") {
+
+        baseFare *= 1.20;
+
+      }
+
+
+      /*
+        Minimum fare
+      */
+
+      const minimumFare = {
+
+        bike: 30,
+
+        cab: 70,
+
+        parcel: 50,
+
+        food: 40
+
+      };
+
+
+      baseFare =
+        Math.max(
+          baseFare,
+          minimumFare[selectedService] || 30
+        );
+
+
+      return Math.round(baseFare);
+
+    }
+
+
+    /*
+      Update route and fare
+    */
+
+    async function updateRouteAndFare() {
+
+      if (!pickupCoords || !dropCoords) {
+
+        document.getElementById("fareAmount")
+          .textContent = "₹0";
+
+        document.getElementById("distanceText")
+          .textContent = "Select locations";
+
+        return;
+
+      }
+
+
+      currentDistance =
+        calculateDistance(
+          pickupCoords[0],
+          pickupCoords[1],
+          dropCoords[0],
+          dropCoords[1]
+        );
+
+
+      const fare =
+        calculateFare(currentDistance);
+
+
+      document.getElementById("fareAmount")
+        .textContent =
+        "₹" + fare;
+
+
+      document.getElementById("distanceText")
+        .textContent =
+        currentDistance.toFixed(1) + " km";
+
+
+      document.getElementById("serviceText")
+        .textContent =
+        getServiceName();
+
+
+      drawRoute();
+
+    }
+
+
+    function getServiceName() {
+
+      const names = {
+
+        bike: "Bike Taxi",
+
+        cab: "Cab",
+
+        parcel: "Parcel",
+
+        food: "Food"
+
+      };
+
+
+      return names[selectedService] ||
+        "Bike Taxi";
+
+    }
+
+
+    /*
+      Draw approximate route
+      using OSRM
+    */
+
+    async function drawRoute() {
+
+      if (!pickupCoords || !dropCoords) return;
 
 
       try {
 
         const url =
           "https://router.project-osrm.org/route/v1/driving/" +
-          start.lng +
+
+          pickupCoords[1] +
           "," +
-          start.lat +
+          pickupCoords[0] +
           ";" +
-          end.lng +
+
+          dropCoords[1] +
           "," +
-          end.lat +
+          dropCoords[0] +
+
           "?overview=full&geometries=geojson";
 
 
@@ -1908,53 +1400,36 @@
           await fetch(url);
 
 
-        if (!response.ok) {
-          throw new Error("Route service unavailable");
-        }
+        if (!response.ok) return;
 
 
         const data =
           await response.json();
 
 
-        if (currentRequest !== routeRequestId) {
-          return;
-        }
-
-
         if (
           !data.routes ||
           !data.routes.length
-        ) {
+        ) return;
 
-          throw new Error("No route found");
+
+        const geometry =
+          data.routes[0].geometry;
+
+
+        if (routeLine) {
+
+          map.removeLayer(routeLine);
 
         }
 
 
-        const route =
-          data.routes[0];
-
-
-        const distanceKm =
-          route.distance / 1000;
-
-
-        const durationMin =
-          Math.max(
-            1,
-            Math.round(
-              route.duration / 60
-            )
-          );
-
-
-        routeLayer =
+        routeLine =
           L.geoJSON(
-            route.geometry,
+            geometry,
             {
               style: {
-                color: "#FFD600",
+                color: "#FFE500",
                 weight: 5,
                 opacity: .9
               }
@@ -1962,917 +1437,136 @@
           ).addTo(map);
 
 
-        document.getElementById(
-          "distanceValue"
-        ).textContent =
-          distanceKm.toFixed(1) +
+        /*
+          Use road distance instead of
+          straight-line distance
+        */
+
+        const roadDistance =
+          data.routes[0].distance / 1000;
+
+
+        currentDistance =
+          roadDistance;
+
+
+        const fare =
+          calculateFare(
+            currentDistance
+          );
+
+
+        document.getElementById("fareAmount")
+          .textContent =
+          "₹" + fare;
+
+
+        document.getElementById("distanceText")
+          .textContent =
+          roadDistance.toFixed(1) +
           " km";
 
 
-        document.getElementById(
-          "etaValue"
-        ).textContent =
-          durationMin +
-          " min";
-
-
-        updateFare(distanceKm);
-
-
-        const bounds =
-          routeLayer.getBounds();
-
-
-        if (bounds.isValid()) {
-
-          map.fitBounds(
-            bounds,
-            {
-              paddingTopLeft: [30, 100],
-              paddingBottomRight: [30, 380],
-              maxZoom: 15
-            }
-          );
-
-        }
-
-
-        updateLocationStatus("Ready");
+        fitMapToRoute();
 
 
       } catch (error) {
 
         console.warn(
-          "Routing error:",
-          error
-        );
-
-
-        /*
-          Fallback distance.
-        */
-
-        const distanceKm =
-          haversineDistance(
-            start.lat,
-            start.lng,
-            end.lat,
-            end.lng
-          );
-
-
-        const estimatedMinutes =
-          Math.max(
-            1,
-            Math.round(
-              distanceKm / 0.45
-            )
-          );
-
-
-        document.getElementById(
-          "distanceValue"
-        ).textContent =
-          distanceKm.toFixed(1) +
-          " km";
-
-
-        document.getElementById(
-          "etaValue"
-        ).textContent =
-          estimatedMinutes +
-          " min";
-
-
-        updateFare(distanceKm);
-
-
-        /*
-          Draw straight fallback line.
-        */
-
-        routeLayer =
-          L.polyline(
-            [
-              [
-                start.lat,
-                start.lng
-              ],
-              [
-                end.lat,
-                end.lng
-              ]
-            ],
-            {
-              color: "#FFD600",
-              weight: 4,
-              dashArray: "8 8"
-            }
-          ).addTo(map);
-
-      }
-
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Current GPS location
-      ----------------------------------------------------------
-    */
-
-    function useCurrentLocation() {
-
-      if (!navigator.geolocation) {
-
-        showStatus(
-          "Aapke device me GPS available nahi hai.",
-          true
-        );
-
-        return;
-
-      }
-
-
-      showStatus(
-        "Current location find ho rahi hai..."
-      );
-
-
-      navigator.geolocation.getCurrentPosition(
-
-        function(position) {
-
-          const lat =
-            position.coords.latitude;
-
-          const lng =
-            position.coords.longitude;
-
-
-          /*
-            Set pickup to current location.
-          */
-
-          setPickup(
-            lat,
-            lng,
-            "Current Location"
-          );
-
-
-          map.setView(
-            [lat, lng],
-            16,
-            {
-              animate: true
-            }
-          );
-
-
-          /*
-            User location marker.
-          */
-
-          if (userLocationMarker) {
-
-            userLocationMarker.setLatLng([
-              lat,
-              lng
-            ]);
-
-          } else {
-
-            userLocationMarker =
-              L.circleMarker(
-                [lat, lng],
-                {
-                  radius: 8,
-                  color: "#fff",
-                  weight: 3,
-                  fillColor: "#3b82f6",
-                  fillOpacity: 1
-                }
-              )
-              .addTo(map)
-              .bindPopup(
-                "Your current location"
-              );
-
-          }
-
-
-          reverseGeocode(
-            lat,
-            lng,
-            "pickup"
-          );
-
-
-          hideStatus();
-
-        },
-
-        function(error) {
-
-          console.error(
-            "GPS error:",
-            error
-          );
-
-
-          let message =
-            "Location permission allow karein.";
-
-          if (
-            error.code ===
-            error.POSITION_UNAVAILABLE
-          ) {
-
-            message =
-              "Current location available nahi hai.";
-
-          }
-
-          if (
-            error.code ===
-            error.TIMEOUT
-          ) {
-
-            message =
-              "Location request timeout ho gaya.";
-
-          }
-
-
-          showStatus(
-            message,
-            true
-          );
-
-        },
-
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 30000
-        }
-
-      );
-
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Input handling
-      ----------------------------------------------------------
-    */
-
-    function setupLocationInputs() {
-
-      const pickupInput =
-        document.getElementById("pickup");
-
-      const dropInput =
-        document.getElementById("drop");
-
-
-      pickupInput.addEventListener(
-        "change",
-        function() {
-
-          geocodeAddress(
-            this.value,
-            "pickup"
-          );
-
-        }
-      );
-
-
-      dropInput.addEventListener(
-        "change",
-        function() {
-
-          geocodeAddress(
-            this.value,
-            "drop"
-          );
-
-        }
-      );
-
-
-      pickupInput.addEventListener(
-        "keydown",
-        function(event) {
-
-          if (event.key === "Enter") {
-
-            event.preventDefault();
-
-            geocodeAddress(
-              this.value,
-              "pickup"
-            );
-
-            this.blur();
-
-          }
-
-        }
-      );
-
-
-      dropInput.addEventListener(
-        "keydown",
-        function(event) {
-
-          if (event.key === "Enter") {
-
-            event.preventDefault();
-
-            geocodeAddress(
-              this.value,
-              "drop"
-            );
-
-            this.blur();
-
-          }
-
-        }
-      );
-
-    }
-
-
-    /*
-      ----------------------------------------------------------
-      Booking
-      ----------------------------------------------------------
-    */
-
-    async function requestRide() {
-
-      const button =
-        document.getElementById(
-          "bookButton"
-        );
-
-
-      firebaseAuth =
-        getAuthInstance();
-
-      firestoreDb =
-        getFirestoreInstance();
-
-
-      /*
-        Check login.
-      */
-
-      let currentUser = null;
-
-
-      try {
-
-        currentUser =
-          firebaseAuth
-            ? firebaseAuth.currentUser
-            : null;
-
-      } catch (error) {
-
-        console.error(
-          "Auth check error:",
+          "Route service unavailable",
           error
         );
 
       }
 
+    }
 
-      if (!currentUser) {
 
-        showStatus(
-          "Ride book karne ke liye pehle login karein.",
-          true
-        );
+    /*
+      Fit pickup/drop/route
+    */
 
+    function fitMapToRoute() {
 
-        setTimeout(() => {
+      if (!pickupCoords || !dropCoords) return;
 
-          window.location.href =
-            "../auth/login.html";
 
-        }, 900);
+      const bounds =
+        L.latLngBounds([
+          pickupCoords,
+          dropCoords
+        ]);
 
 
-        return;
-
-      }
-
-
-      if (!pickupCoords || !dropCoords) {
-
-        showStatus(
-          "Pickup aur drop location select karein.",
-          true
-        );
-
-        return;
-
-      }
-
-
-      const pickupAddress =
-        document
-          .getElementById("pickup")
-          .value
-          .trim();
-
-
-      const dropAddress =
-        document
-          .getElementById("drop")
-          .value
-          .trim();
-
-
-      if (!pickupAddress) {
-
-        showStatus(
-          "Pickup location select karein.",
-          true
-        );
-
-        return;
-
-      }
-
-
-      if (!dropAddress) {
-
-        showStatus(
-          "Drop location select karein.",
-          true
-        );
-
-        return;
-
-      }
-
-
-      /*
-        Calculate actual route distance.
-      */
-
-      const distanceKm =
-        haversineDistance(
-          pickupCoords.lat,
-          pickupCoords.lng,
-          dropCoords.lat,
-          dropCoords.lng
-        );
-
-
-      /*
-        Fare.
-      */
-
-      const fare =
-        calculateRiderXFare(
-          distanceKm
-        );
-
-
-      /*
-        Prevent accidental zero-distance booking.
-      */
-
-      if (distanceKm < 0.05) {
-
-        showStatus(
-          "Pickup aur drop bahut paas hain. Different destination select karein.",
-          true
-        );
-
-        return;
-
-      }
-
-
-      /*
-        Button loading.
-      */
-
-      button.disabled = true;
-
-      button.innerHTML =
-        '<span class="loading"></span>' +
-        'Booking...';
-
-
-      try {
-
-        if (!firestoreDb) {
-
-          throw new Error(
-            "Firebase Firestore initialize nahi hua."
-          );
-
-        }
-
-
-        /*
-          Customer information.
-        */
-
-        const customerName =
-          currentUser.displayName ||
-          currentUser.email ||
-          "Customer";
-
-
-        const rideData = {
-
-          /*
-            Main identifiers.
-          */
-
-          customerId:
-            currentUser.uid,
-
-          customerName:
-            customerName,
-
-          customerEmail:
-            currentUser.email || "",
-
-
-          /*
-            Service.
-          */
-
-          serviceType:
-            selectedService,
-
-          service:
-            selectedService,
-
-
-          /*
-            Pickup.
-          */
-
-          pickup: {
-
-            address:
-              pickupAddress,
-
-            lat:
-              pickupCoords.lat,
-
-            lng:
-              pickupCoords.lng
-
-          },
-
-
-          /*
-            Drop.
-          */
-
-          drop: {
-
-            address:
-              dropAddress,
-
-            lat:
-              dropCoords.lat,
-
-            lng:
-              dropCoords.lng
-
-          },
-
-
-          /*
-            Fare.
-          */
-
-          fare:
-            fare,
-
-          currency:
-            "INR",
-
-          distanceKm:
-            Number(
-              distanceKm.toFixed(2)
-            ),
-
-
-          /*
-            Status.
-          */
-
-          status:
-            "SEARCHING",
-
-          paymentMethod:
-            "CASH",
-
-          paymentStatus:
-            "PENDING",
-
-
-          /*
-            Rider fields.
-          */
-
-          riderId:
-            null,
-
-          riderName:
-            null,
-
-          riderPhone:
-            null,
-
-
-          /*
-            Ride lifecycle.
-          */
-
-          otp:
-            null,
-
-          startedAt:
-            null,
-
-          completedAt:
-            null,
-
-
-          /*
-            Timestamp.
-          */
-
-          createdAt:
-            firebase.firestore.FieldValue.serverTimestamp(),
-
-          updatedAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-
-        };
-
-
-        const rideRef =
-          await firestoreDb
-            .collection("rides")
-            .add(rideData);
-
-
-        /*
-          Save ride ID locally.
-        */
+      if (routeLine) {
 
         try {
 
-          localStorage.setItem(
-            "riderx_active_ride_id",
-            rideRef.id
+          bounds.extend(
+            routeLine.getBounds()
           );
 
-        } catch (storageError) {
-
-          console.warn(
-            "Local storage unavailable:",
-            storageError
-          );
-
-        }
-
-
-        /*
-          Success.
-        */
-
-        button.innerHTML =
-          '<i class="fa-solid fa-check"></i>' +
-          ' Ride Requested';
-
-
-        showStatus(
-          "Ride request sent. Nearby rider search ho rahi hai."
-        );
-
-
-        /*
-          Try common searching pages.
-          searching.html is preferred if present.
-        */
-
-        setTimeout(() => {
-
-          window.location.href =
-            "searching.html";
-
-        }, 700);
-
-
-      } catch (error) {
-
-        console.error(
-          "RiderX Booking Error:",
-          error
-        );
-
-
-        button.disabled = false;
-
-        button.innerHTML =
-          '<i class="fa-solid fa-bolt"></i>' +
-          ' Book Ride';
-
-
-        showStatus(
-          "Booking failed: " +
-          (
-            error.message ||
-            "Please try again."
-          ),
-          true
-        );
+        } catch (e) {}
 
       }
+
+
+      map.fitBounds(
+        bounds,
+        {
+          padding: [40, 40],
+          maxZoom: 16
+        }
+      );
 
     }
 
 
     /*
-      ----------------------------------------------------------
-      Initial load
-      ----------------------------------------------------------
+      Service selection
     */
 
-    document.addEventListener(
-      "DOMContentLoaded",
-      function() {
+    function selectService(
+      service,
+      element
+    ) {
 
-        /*
-          Firebase references.
-        */
-
-        firebaseAuth =
-          getAuthInstance();
-
-        firestoreDb =
-          getFirestoreInstance();
+      selectedService =
+        service;
 
 
-        /*
-          Map.
-        */
+      document.querySelectorAll(
+        ".service-card"
+      ).forEach(card => {
 
-        initializeMap();
+        card.classList.remove(
+          "active"
+        );
 
-
-        /*
-          Inputs.
-        */
-
-        setupLocationInputs();
+      });
 
 
-        /*
-          Try GPS automatically.
-        */
-
-        if (
-          navigator.geolocation
-        ) {
-
-          navigator.geolocation.getCurrentPosition(
-
-            function(position) {
-
-              const lat =
-                position.coords.latitude;
-
-              const lng =
-                position.coords.longitude;
+      element.classList.add(
+        "active"
+      );
 
 
-              /*
-                Only use GPS automatically
-                when it looks like a valid India
-                location. Otherwise Chandigarh
-                remains the default.
-              */
-
-              setPickup(
-                lat,
-                lng,
-                "Current Location"
-              );
+      document.getElementById(
+        "serviceText"
+      ).textContent =
+        getServiceName();
 
 
-              if (userLocationMarker) {
+      updateRouteAndFare();
 
-                userLocationMarker
-                  .setLatLng([
-                    lat,
-                    lng
-                  ]);
-
-              } else {
-
-                userLocationMarker =
-                  L.circleMarker(
-                    [lat, lng],
-                    {
-                      radius: 8,
-                      color: "#fff",
-                      weight: 3,
-                      fillColor: "#3b82f6",
-                      fillOpacity: 1
-                    }
-                  )
-                  .addTo(map);
-
-              }
-
-
-              reverseGeocode(
-                lat,
-                lng,
-                "pickup"
-              );
-
-
-              map.setView(
-                [lat, lng],
-                15
-              );
-
-            },
-
-            function(error) {
-
-              console.warn(
-                "Automatic GPS unavailable:",
-                error.message
-              );
-
-            },
-
-            {
-              enableHighAccuracy: true,
-              timeout: 10000,
-              maximumAge: 60000
-            }
-
-          );
-
-        }
-
-      }
-    );
+    }
 
 
     /*
-      ----------------------------------------------------------
-      Prevent accidental page zoom/scroll behavior
-      ----------------------------------------------------------
+      Input changes
     */
 
-    document.addEventListener(
-      "touchmove",
-      function(event) {
+    function setupInputs() {
 
-        /*
-          Allow normal scrolling inside booking panel.
-        */
-
-        if (
-          event.target.closest(".booking-panel")
-        ) {
-
-          return;
-
-        }
-
-      },
-      {
-        passive: true
-      }
-    );
-
-  </script>
-
-</body>
-            </html>
+      const pickupInput =
+        document.getElementById(
