@@ -4,12 +4,14 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Admin Dashboard</title>
 
 <link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 
@@ -37,14 +39,19 @@ body{
     padding-bottom:50px;
 }
 
+/* HEADER */
+
 .header{
     height:70px;
     background:#111;
     border-bottom:1px solid #222;
+
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     padding:0 20px;
+
     position:sticky;
     top:0;
     z-index:100;
@@ -53,6 +60,7 @@ body{
 .logo{
     font-size:28px;
     font-weight:900;
+    letter-spacing:-1px;
 }
 
 .logo span{
@@ -80,6 +88,12 @@ body{
     cursor:pointer;
 }
 
+.logout:active{
+    transform:scale(.9);
+}
+
+/* CONTAINER */
+
 .container{
     max-width:1200px;
     margin:auto;
@@ -98,34 +112,61 @@ body{
     margin-bottom:20px;
 }
 
-.loading{
-    text-align:center;
-    color:var(--yellow);
-    margin:15px 0;
+/* STATUS */
+
+.status{
+    background:#101010;
+    border:1px solid #252525;
+    border-radius:14px;
+    padding:12px 15px;
+    margin-bottom:20px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
     font-size:14px;
 }
+
+.status-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--yellow);
+    flex-shrink:0;
+}
+
+.status.success .status-dot{
+    background:var(--green);
+}
+
+.status.error .status-dot{
+    background:var(--red);
+}
+
+.status-text{
+    color:#ccc;
+}
+
+/* ERROR */
 
 .error{
     display:none;
+
     background:#210d0d;
     border:1px solid #662222;
     color:#ff7777;
+
     padding:14px;
     border-radius:12px;
+
     margin-bottom:18px;
+
     font-size:14px;
+    line-height:1.5;
 }
 
-.success{
-    display:none;
-    background:#0d2115;
-    border:1px solid #205c34;
-    color:#55e889;
-    padding:14px;
-    border-radius:12px;
-    margin-bottom:18px;
-    font-size:14px;
-}
+/* GRID */
 
 .grid{
     display:grid;
@@ -137,7 +178,9 @@ body{
     background:var(--card);
     border:1px solid var(--border);
     border-radius:20px;
+
     padding:18px;
+
     min-height:125px;
 }
 
@@ -150,6 +193,7 @@ body{
     font-size:29px;
     font-weight:bold;
     margin-top:12px;
+    word-break:break-word;
 }
 
 .title{
@@ -158,8 +202,10 @@ body{
     margin-top:4px;
 }
 
+/* MANAGEMENT */
+
 .menu{
-    margin-top:25px;
+    margin-top:30px;
 }
 
 .menu-title{
@@ -176,14 +222,22 @@ body{
 
 .menu button{
     width:100%;
+
     padding:16px;
+
     background:#111;
+
     border:1px solid #333;
     border-radius:15px;
+
     color:white;
+
     font-size:16px;
     text-align:left;
+
     cursor:pointer;
+
+    transition:.2s;
 }
 
 .menu button:hover{
@@ -191,10 +245,16 @@ body{
     background:#171717;
 }
 
+.menu button:active{
+    transform:scale(.98);
+}
+
 .menu i{
     width:35px;
     color:var(--yellow);
 }
+
+/* FOOTER */
 
 .footer{
     text-align:center;
@@ -203,7 +263,9 @@ body{
     margin-top:30px;
 }
 
-@media(max-width:900px){
+/* RESPONSIVE */
+
+@media(max-width:1000px){
 
     .grid{
         grid-template-columns:repeat(3,1fr);
@@ -211,7 +273,7 @@ body{
 
 }
 
-@media(max-width:650px){
+@media(max-width:700px){
 
     .header{
         padding:0 15px;
@@ -249,17 +311,32 @@ body{
 
 }
 
+@media(max-width:380px){
+
+    .grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .number{
+        font-size:21px;
+    }
+
+}
+
 </style>
 
 </head>
 
+
 <body>
+
 
 <header class="header">
 
     <div class="logo">
         RID<span>ERX</span>
     </div>
+
 
     <div class="header-right">
 
@@ -268,9 +345,10 @@ body{
             ADMIN
         </div>
 
+
         <i
-            class="fa-solid fa-right-from-bracket logout"
             id="logoutBtn"
+            class="fa-solid fa-right-from-bracket logout"
             title="Logout">
         </i>
 
@@ -279,113 +357,299 @@ body{
 </header>
 
 
+
 <div class="container">
+
 
     <div class="welcome">
         Admin Dashboard
     </div>
+
 
     <div class="subtitle">
         RiderX management & statistics
     </div>
 
 
-    <div id="loading" class="loading">
-        Checking admin access...
+
+    <!-- STATUS -->
+
+    <div
+        id="statusBox"
+        class="status">
+
+        <div class="status-dot"></div>
+
+        <div
+            id="statusText"
+            class="status-text">
+
+            Checking admin access...
+
+        </div>
+
     </div>
 
-    <div id="error" class="error"></div>
 
-    <div id="success" class="success"></div>
 
+    <!-- ERROR -->
+
+    <div
+        id="errorBox"
+        class="error">
+    </div>
+
+
+
+    <!-- STATISTICS -->
 
     <div class="grid">
 
+
         <div class="card">
+
             <i class="fa-solid fa-users"></i>
-            <div id="customers" class="number">0</div>
-            <div class="title">Customers</div>
+
+            <div
+                id="customers"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Customers
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-motorcycle"></i>
-            <div id="riders" class="number">0</div>
-            <div class="title">Riders</div>
+
+            <div
+                id="riders"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Riders
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-clock"></i>
-            <div id="pending" class="number">0</div>
-            <div class="title">Pending Riders</div>
+
+            <div
+                id="pending"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Pending Riders
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-signal"></i>
-            <div id="online" class="number">0</div>
-            <div class="title">Online Riders</div>
+
+            <div
+                id="online"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Online Riders
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-route"></i>
-            <div id="rides" class="number">0</div>
-            <div class="title">Total Rides</div>
+
+            <div
+                id="rides"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Total Rides
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-spinner"></i>
-            <div id="active" class="number">0</div>
-            <div class="title">Active Rides</div>
+
+            <div
+                id="active"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Active Rides
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-circle-check"></i>
-            <div id="completed" class="number">0</div>
-            <div class="title">Completed</div>
+
+            <div
+                id="completed"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Completed
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-xmark"></i>
-            <div id="cancelled" class="number">0</div>
-            <div class="title">Cancelled</div>
+
+            <div
+                id="cancelled"
+                class="number">
+
+                0
+
+            </div>
+
+            <div class="title">
+                Cancelled
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-indian-rupee-sign"></i>
-            <div id="revenue" class="number">₹0</div>
-            <div class="title">Revenue</div>
+
+            <div
+                id="revenue"
+                class="number">
+
+                ₹0
+
+            </div>
+
+            <div class="title">
+                Revenue
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-calendar-day"></i>
-            <div id="todayRevenue" class="number">₹0</div>
-            <div class="title">Today Revenue</div>
+
+            <div
+                id="todayRevenue"
+                class="number">
+
+                ₹0
+
+            </div>
+
+            <div class="title">
+                Today Revenue
+            </div>
+
         </div>
 
 
+
         <div class="card">
+
             <i class="fa-solid fa-percent"></i>
-            <div id="commission" class="number">₹0</div>
-            <div class="title">Admin Commission</div>
+
+            <div
+                id="commission"
+                class="number">
+
+                ₹0
+
+            </div>
+
+            <div class="title">
+                Admin Commission
+            </div>
+
         </div>
+
 
 
         <div class="card">
+
             <i class="fa-solid fa-wallet"></i>
-            <div id="riderEarn" class="number">₹0</div>
-            <div class="title">Rider Earnings</div>
+
+            <div
+                id="riderEarn"
+                class="number">
+
+                ₹0
+
+            </div>
+
+            <div class="title">
+                Rider Earnings
+            </div>
+
         </div>
+
 
     </div>
 
+
+
+    <!-- MANAGEMENT -->
 
     <div class="menu">
 
@@ -396,54 +660,90 @@ body{
 
         <div class="menu-grid">
 
+
             <button onclick="openPage('riders.html')">
+
                 <i class="fa-solid fa-motorcycle"></i>
+
                 Manage Riders
+
             </button>
+
 
 
             <button onclick="openPage('customers.html')">
+
                 <i class="fa-solid fa-users"></i>
+
                 Manage Customers
+
             </button>
+
 
 
             <button onclick="openPage('rides.html')">
+
                 <i class="fa-solid fa-route"></i>
+
                 Manage Rides
+
             </button>
+
 
 
             <button onclick="openPage('fare-settings.html')">
+
                 <i class="fa-solid fa-money-bill"></i>
+
                 Fare Settings
+
             </button>
+
 
 
             <button onclick="openPage('commission.html')">
+
                 <i class="fa-solid fa-percent"></i>
+
                 Commission Settings
+
             </button>
+
 
 
             <button onclick="openPage('settings.html')">
+
                 <i class="fa-solid fa-gear"></i>
+
                 App Settings
+
             </button>
+
 
         </div>
 
     </div>
 
 
+
     <div class="footer">
+
         RiderX Admin Panel
+
     </div>
+
 
 </div>
 
 
+
 <script type="module">
+
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
 
 import {
     auth,
@@ -465,14 +765,24 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-const loading =
-    document.getElementById("loading");
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+
+const statusBox =
+    document.getElementById("statusBox");
+
+const statusText =
+    document.getElementById("statusText");
 
 const errorBox =
-    document.getElementById("error");
+    document.getElementById("errorBox");
 
-const successBox =
-    document.getElementById("success");
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
 
 
 const customersEl =
@@ -511,28 +821,68 @@ const commissionEl =
 const riderEarnEl =
     document.getElementById("riderEarn");
 
-const logoutBtn =
-    document.getElementById("logoutBtn");
 
 
-function money(value){
+/* =========================================================
+   STATUS
+========================================================= */
 
-    const n =
-        Number(value) || 0;
 
-    return "₹" +
-        n.toLocaleString("en-IN");
+function setStatus(text,type=""){
+
+    statusText.textContent = text;
+
+    statusBox.className =
+        "status " + type;
 
 }
 
 
-function getRole(data){
+function showError(text){
+
+    errorBox.style.display = "block";
+
+    errorBox.textContent = text;
+
+}
+
+
+function hideError(){
+
+    errorBox.style.display = "none";
+
+}
+
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+
+function money(value){
+
+    const number =
+        Number(value) || 0;
+
+    return "₹" +
+        number.toLocaleString("en-IN");
+
+}
+
+
+function roleOf(data){
 
     return String(
-        data?.role ||
-        data?.userType ||
-        data?.type ||
+
+        data?.role ??
+
+        data?.userType ??
+
+        data?.type ??
+
         ""
+
     ).trim().toLowerCase();
 
 }
@@ -541,35 +891,14 @@ function getRole(data){
 function isAdmin(data){
 
     return (
-        getRole(data) === "admin" ||
-        getRole(data) === "administrator" ||
+
+        roleOf(data) === "admin" ||
+
+        roleOf(data) === "administrator" ||
+
         data?.isAdmin === true
+
     );
-
-}
-
-
-function hideLoading(){
-
-    loading.style.display = "none";
-
-}
-
-
-function showError(text){
-
-    errorBox.textContent = text;
-
-    errorBox.style.display = "block";
-
-}
-
-
-function showSuccess(text){
-
-    successBox.textContent = text;
-
-    successBox.style.display = "block";
 
 }
 
@@ -577,9 +906,13 @@ function showSuccess(text){
 function statusOf(data){
 
     return String(
-        data?.status ||
-        data?.rideStatus ||
+
+        data?.status ??
+
+        data?.rideStatus ??
+
         ""
+
     ).trim().toLowerCase();
 
 }
@@ -588,34 +921,37 @@ function statusOf(data){
 function amountOf(data){
 
     return Number(
+
         data?.fare ??
+
         data?.amount ??
+
         data?.price ??
+
         data?.totalFare ??
+
         data?.totalAmount ??
+
         0
+
     ) || 0;
 
 }
 
 
-function isToday(data){
 
-    const value =
-        data?.createdAt ||
-        data?.timestamp ||
-        data?.date ||
-        data?.createdDate;
+/* =========================================================
+   DATE
+========================================================= */
 
+
+function convertDate(value){
 
     if(!value){
 
-        return false;
+        return null;
 
     }
-
-
-    let date;
 
 
     try{
@@ -625,37 +961,70 @@ function isToday(data){
             typeof value.toDate === "function"
         ){
 
-            date =
-                value.toDate();
-
-        }else if(
-            typeof value === "object" &&
-            value.seconds
-        ){
-
-            date =
-                new Date(
-                    value.seconds * 1000
-                );
-
-        }else{
-
-            date =
-                new Date(value);
+            return value.toDate();
 
         }
 
-    }catch(e){
 
-        return false;
+        if(
+            typeof value === "object" &&
+            typeof value.seconds === "number"
+        ){
+
+            return new Date(
+                value.seconds * 1000
+            );
+
+        }
+
+
+        const date =
+            new Date(value);
+
+
+        if(
+            Number.isNaN(
+                date.getTime()
+            )
+        ){
+
+            return null;
+
+        }
+
+
+        return date;
+
+    }catch(error){
+
+        return null;
 
     }
 
+}
 
-    if(
-        !date ||
-        Number.isNaN(date.getTime())
-    ){
+
+
+function isToday(data){
+
+    const value =
+
+        data?.createdAt ??
+
+        data?.timestamp ??
+
+        data?.date ??
+
+        data?.createdDate ??
+
+        null;
+
+
+    const date =
+        convertDate(value);
+
+
+    if(!date){
 
         return false;
 
@@ -667,45 +1036,55 @@ function isToday(data){
 
 
     return (
+
         date.getDate() === now.getDate() &&
+
         date.getMonth() === now.getMonth() &&
+
         date.getFullYear() === now.getFullYear()
+
     );
 
 }
 
 
-/*
-    Firestore collection reader.
 
-    If a collection cannot be read,
-    dashboard will continue instead of
-    remaining on loading forever.
-*/
+/* =========================================================
+   SAFE COLLECTION
+========================================================= */
 
-async function readCollection(name){
+
+async function safeCollection(name){
 
     try{
 
-        const snap =
+        const snapshot =
             await getDocs(
-                collection(db,name)
+                collection(
+                    db,
+                    name
+                )
             );
 
-        return snap.docs.map(
+
+        return snapshot.docs.map(
             item => ({
+
                 id:item.id,
+
                 ...item.data()
+
             })
         );
 
     }catch(error){
 
         console.warn(
-            "Firestore collection failed:",
+            "Firestore collection error:",
             name,
             error
         );
+
 
         return [];
 
@@ -714,9 +1093,11 @@ async function readCollection(name){
 }
 
 
-/*
-    Load dashboard statistics
-*/
+
+/* =========================================================
+   LOAD STATISTICS
+========================================================= */
+
 
 async function loadStatistics(){
 
@@ -728,128 +1109,182 @@ async function loadStatistics(){
 
 
     /*
-        Users
+        Each collection is loaded separately.
+        One failed collection cannot freeze dashboard.
     */
 
+
     users =
-        await readCollection("users");
+        await safeCollection(
+            "users"
+        );
 
 
-    let customerCount = 0;
-
-    let riderCount = 0;
-
-    let pendingCount = 0;
-
-    let onlineCount = 0;
+    ridersData =
+        await safeCollection(
+            "riders"
+        );
 
 
-    users.forEach(user => {
-
-        const role =
-            getRole(user);
-
-
-        if(
-            role === "customer" ||
-            role === "user"
-        ){
-
-            customerCount++;
-
-        }
+    rides =
+        await safeCollection(
+            "rides"
+        );
 
 
-        if(role === "rider"){
 
-            riderCount++;
+    /* USERS */
+
+    let customers = 0;
+
+    let riders = 0;
+
+    let pending = 0;
+
+    let online = 0;
 
 
-            const status =
-                String(
-                    user.status ||
-                    user.riderStatus ||
-                    ""
-                ).toLowerCase();
+    users.forEach(
+        user => {
+
+            const role =
+                roleOf(user);
 
 
             if(
-                status === "pending" ||
-                status === "pending_approval" ||
-                status === "pending-approval"
+
+                role === "customer" ||
+
+                role === "user"
+
             ){
 
-                pendingCount++;
+                customers++;
 
             }
 
 
             if(
-                user.online === true ||
-                user.isOnline === true ||
-                status === "online"
+                role === "rider"
             ){
 
-                onlineCount++;
+                riders++;
+
+
+                const status =
+                    String(
+
+                        user.status ??
+
+                        user.riderStatus ??
+
+                        ""
+
+                    ).toLowerCase();
+
+
+                if(
+
+                    status === "pending" ||
+
+                    status === "pending_approval" ||
+
+                    status === "pending-approval"
+
+                ){
+
+                    pending++;
+
+                }
+
+
+                if(
+
+                    user.online === true ||
+
+                    user.isOnline === true ||
+
+                    status === "online"
+
+                ){
+
+                    online++;
+
+                }
 
             }
 
         }
+    );
 
-    });
 
 
     /*
-        Separate riders collection
+        Prefer separate riders collection
+        if your project uses it.
     */
 
-    ridersData =
-        await readCollection("riders");
 
+    if(
+        ridersData.length > 0
+    ){
 
-    if(ridersData.length > 0){
-
-        riderCount =
+        riders =
             ridersData.length;
 
 
-        pendingCount =
+        pending =
             ridersData.filter(
                 rider => {
 
                     const status =
                         String(
-                            rider.status ||
-                            rider.approvalStatus ||
+
+                            rider.status ??
+
+                            rider.approvalStatus ??
+
                             ""
+
                         ).toLowerCase();
 
 
                     return (
+
                         status === "pending" ||
+
                         status === "pending_approval" ||
+
                         status === "pending-approval"
+
                     );
 
                 }
             ).length;
 
 
-        onlineCount =
+        online =
             ridersData.filter(
                 rider => {
 
                     const status =
                         String(
-                            rider.status ||
+
+                            rider.status ??
+
                             ""
+
                         ).toLowerCase();
 
 
                     return (
+
                         rider.online === true ||
+
                         rider.isOnline === true ||
+
                         status === "online"
+
                     );
 
                 }
@@ -858,223 +1293,272 @@ async function loadStatistics(){
     }
 
 
-    /*
-        Rides
-    */
 
-    rides =
-        await readCollection("rides");
+    /* RIDES */
 
+    let active = 0;
 
-    let activeCount = 0;
+    let completed = 0;
 
-    let completedCount = 0;
+    let cancelled = 0;
 
-    let cancelledCount = 0;
+    let revenue = 0;
 
-    let totalRevenue = 0;
-
-    let todayTotal = 0;
+    let todayRevenue = 0;
 
 
-    rides.forEach(ride => {
+    rides.forEach(
+        ride => {
 
-        const status =
-            statusOf(ride);
-
-
-        const amount =
-            amountOf(ride);
+            const status =
+                statusOf(ride);
 
 
-        if(
-            [
-                "accepted",
-                "ongoing",
-                "started",
-                "arriving",
-                "in_progress",
-                "in-progress",
-                "active"
-            ].includes(status)
-        ){
-
-            activeCount++;
-
-        }
+            const amount =
+                amountOf(ride);
 
 
-        if(
-            [
-                "completed",
-                "complete",
-                "finished",
-                "success"
-            ].includes(status)
-        ){
 
-            completedCount++;
+            if(
 
-            totalRevenue += amount;
+                [
+
+                    "accepted",
+
+                    "ongoing",
+
+                    "started",
+
+                    "arriving",
+
+                    "in_progress",
+
+                    "in-progress",
+
+                    "active"
+
+                ].includes(status)
+
+            ){
+
+                active++;
+
+            }
 
 
-            if(isToday(ride)){
 
-                todayTotal += amount;
+            if(
+
+                [
+
+                    "completed",
+
+                    "complete",
+
+                    "finished",
+
+                    "success"
+
+                ].includes(status)
+
+            ){
+
+                completed++;
+
+
+                revenue +=
+                    amount;
+
+
+                if(
+                    isToday(ride)
+                ){
+
+                    todayRevenue +=
+                        amount;
+
+                }
+
+            }
+
+
+
+            if(
+
+                [
+
+                    "cancelled",
+
+                    "canceled",
+
+                    "rejected"
+
+                ].includes(status)
+
+            ){
+
+                cancelled++;
 
             }
 
         }
+    );
 
 
-        if(
-            [
-                "cancelled",
-                "canceled",
-                "rejected"
-            ].includes(status)
-        ){
 
-            cancelledCount++;
+    /* UPDATE UI */
 
-        }
-
-    });
-
-
-    /*
-        Update UI
-    */
 
     customersEl.textContent =
-        customerCount.toLocaleString("en-IN");
+        customers.toLocaleString(
+            "en-IN"
+        );
 
 
     ridersEl.textContent =
-        riderCount.toLocaleString("en-IN");
+        riders.toLocaleString(
+            "en-IN"
+        );
 
 
     pendingEl.textContent =
-        pendingCount.toLocaleString("en-IN");
+        pending.toLocaleString(
+            "en-IN"
+        );
 
 
     onlineEl.textContent =
-        onlineCount.toLocaleString("en-IN");
+        online.toLocaleString(
+            "en-IN"
+        );
 
 
     ridesEl.textContent =
-        rides.length.toLocaleString("en-IN");
+        rides.length.toLocaleString(
+            "en-IN"
+        );
 
 
     activeEl.textContent =
-        activeCount.toLocaleString("en-IN");
+        active.toLocaleString(
+            "en-IN"
+        );
 
 
     completedEl.textContent =
-        completedCount.toLocaleString("en-IN");
+        completed.toLocaleString(
+            "en-IN"
+        );
 
 
     cancelledEl.textContent =
-        cancelledCount.toLocaleString("en-IN");
+        cancelled.toLocaleString(
+            "en-IN"
+        );
 
 
     revenueEl.textContent =
-        money(totalRevenue);
+        money(revenue);
 
 
     todayRevenueEl.textContent =
-        money(todayTotal);
+        money(todayRevenue);
+
 
 
     /*
-        Default commission 20%.
-        Can later be connected to
-        commission settings.
+        Default commission.
+        This can later be connected
+        to commission settings.
     */
 
-    const commissionRate =
-        20;
+
+    const commissionRate = 20;
 
 
     const adminCommission =
-        totalRevenue *
+
+        revenue *
         commissionRate /
         100;
 
 
     const riderEarnings =
-        totalRevenue -
+
+        revenue -
         adminCommission;
 
 
     commissionEl.textContent =
-        money(adminCommission);
+        money(
+            adminCommission
+        );
 
 
     riderEarnEl.textContent =
-        money(riderEarnings);
+        money(
+            riderEarnings
+        );
 
 }
 
 
-/*
-    IMPORTANT SECURITY:
 
-    Dashboard cannot be used without
-    Firebase authenticated admin account.
+/* =========================================================
+   AUTHENTICATION
+========================================================= */
+
+
+/*
+    IMPORTANT:
+
+    Do NOT redirect immediately when auth
+    is initially null.
+
+    Firebase may still be restoring the
+    existing session.
+
+    onAuthStateChanged gives the final state.
 */
 
-onAuthStateChanged(
-    auth,
-    async (user) => {
 
-        /*
-            No login
-        */
-
-        if(!user){
-
-            window.location.replace(
-                "login.html"
-            );
-
-            return;
-
-        }
+let authCheckFinished = false;
 
 
-        loading.textContent =
-            "Verifying admin account...";
+const unsubscribe =
+    onAuthStateChanged(
+        auth,
+        async user => {
 
+            if(authCheckFinished){
 
-        try{
+                return;
+
+            }
+
 
             /*
-                Get current user's
-                Firestore document.
+                No user = not logged in.
             */
 
-            const adminRef =
-                doc(
-                    db,
-                    "users",
-                    user.uid
+
+            if(!user){
+
+                authCheckFinished =
+                    true;
+
+
+                setStatus(
+                    "Admin login required."
                 );
 
 
-            const adminSnap =
-                await getDoc(adminRef);
+                /*
+                    Small delay prevents
+                    Firebase initialization
+                    race conditions.
+                */
 
-
-            if(!adminSnap.exists()){
-
-                hideLoading();
-
-                showError(
-                    "Admin profile not found for this Firebase UID."
-                );
-
-                await signOut(auth);
 
                 setTimeout(
                     () => {
@@ -1084,115 +1568,232 @@ onAuthStateChanged(
                         );
 
                     },
-                    1500
+                    300
                 );
+
 
                 return;
 
             }
 
 
-            const adminData =
-                adminSnap.data();
-
 
             /*
-                Admin role
+                USER FOUND
             */
 
-            if(!isAdmin(adminData)){
 
-                hideLoading();
+            setStatus(
+                "Verifying admin account..."
+            );
 
-                showError(
-                    "Access denied. This Firebase account is not an admin."
-                );
 
-                await signOut(auth);
+            try{
 
-                setTimeout(
-                    () => {
+                /*
+                    Check users/{uid}
+                */
 
-                        window.location.replace(
-                            "login.html"
+
+                const adminRef =
+                    doc(
+                        db,
+                        "users",
+                        user.uid
+                    );
+
+
+                const adminSnap =
+                    await getDoc(
+                        adminRef
+                    );
+
+
+
+                /*
+                    PROFILE NOT FOUND
+                */
+
+
+                if(
+                    !adminSnap.exists()
+                ){
+
+                    authCheckFinished =
+                        true;
+
+
+                    setStatus(
+                        "Admin profile not found.",
+                        "error"
+                    );
+
+
+                    showError(
+
+                        "Admin profile nahi mila. Firebase Firestore ke users collection me is logged-in account ke UID ka document hona chahiye aur usme role = admin hona chahiye."
+
+                    );
+
+
+                    /*
+                        Do not keep loading.
+                    */
+
+
+                    return;
+
+                }
+
+
+
+                const adminData =
+                    adminSnap.data();
+
+
+
+                /*
+                    ADMIN CHECK
+                */
+
+
+                if(
+                    !isAdmin(
+                        adminData
+                    )
+                ){
+
+                    authCheckFinished =
+                        true;
+
+
+                    setStatus(
+                        "Access denied.",
+                        "error"
+                    );
+
+
+                    showError(
+
+                        "Access denied. Is account ke users document me role field ka value exactly admin hona chahiye."
+
+                    );
+
+
+                    try{
+
+                        await signOut(
+                            auth
                         );
 
-                    },
-                    1500
+                    }catch(e){
+
+                        console.warn(
+                            e
+                        );
+
+                    }
+
+
+                    setTimeout(
+                        () => {
+
+                            window.location.replace(
+                                "login.html"
+                            );
+
+                        },
+                        1500
+                    );
+
+
+                    return;
+
+                }
+
+
+
+                /*
+                    ADMIN VERIFIED
+                */
+
+
+                authCheckFinished =
+                    true;
+
+
+                setStatus(
+                    "Admin verified • Dashboard ready",
+                    "success"
                 );
 
-                return;
+
+                hideError();
+
+
+
+                /*
+                    Statistics should NEVER
+                    prevent dashboard opening.
+                */
+
+
+                try{
+
+                    await loadStatistics();
+
+                }catch(statError){
+
+                    console.error(
+                        "Statistics error:",
+                        statError
+                    );
+
+
+                    showError(
+
+                        "Dashboard open ho gaya hai. Kuch statistics Firebase Firestore rules ya collection structure ki wajah se load nahi ho paayi."
+
+                    );
+
+                }
+
+
+            }catch(error){
+
+                console.error(
+                    "Admin verification error:",
+                    error
+                );
+
+
+                authCheckFinished =
+                    true;
+
+
+                setStatus(
+                    "Admin verification failed.",
+                    "error"
+                );
+
+
+                showError(
+
+                    "Firebase se admin verify nahi ho pa raha. firebase-config.js aur Firestore rules check karein."
+
+                );
 
             }
 
-
-            /*
-                Admin verified
-            */
-
-            showSuccess(
-                "Admin access verified."
-            );
-
-
-            loading.textContent =
-                "Loading dashboard data...";
-
-
-            /*
-                Maximum protection against
-                permanent loading.
-
-                Statistics are independent
-                from authentication.
-            */
-
-            await loadStatistics();
-
-
-            hideLoading();
-
-
-            /*
-                Hide success message after
-                a short time.
-            */
-
-            setTimeout(
-                () => {
-
-                    successBox.style.display =
-                        "none";
-
-                },
-                2500
-            );
-
-
-        }catch(error){
-
-            console.error(
-                "Admin Dashboard Error:",
-                error
-            );
-
-
-            hideLoading();
-
-
-            showError(
-                "Dashboard verification failed. Check Firebase configuration and Firestore rules."
-            );
-
         }
-
-    }
-);
+    );
 
 
-/*
-    Page navigation
-*/
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
 
 window.openPage =
 function(page){
@@ -1203,9 +1804,11 @@ function(page){
 };
 
 
-/*
-    Logout
-*/
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
 
 logoutBtn.addEventListener(
     "click",
@@ -1226,11 +1829,15 @@ logoutBtn.addEventListener(
 
         try{
 
-            await signOut(auth);
+            await signOut(
+                auth
+            );
+
 
             window.location.replace(
                 "login.html"
             );
+
 
         }catch(error){
 
@@ -1238,6 +1845,7 @@ logoutBtn.addEventListener(
                 "Logout error:",
                 error
             );
+
 
             alert(
                 "Logout failed. Please try again."
@@ -1249,6 +1857,7 @@ logoutBtn.addEventListener(
 );
 
 </script>
+
 
 </body>
 
