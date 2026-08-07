@@ -1,149 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
-  
-<head>
 
+<head>
 
 <meta charset="UTF-8">
 
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 
 <title>RiderX Login</title>
 
 
-<link rel="icon" href="../assets/logo.png">
+<link rel="stylesheet" href="../assets/app.css">
 
 
-<link rel="stylesheet" href="../css/Style.css">
+<style>
 
-<link rel="stylesheet" href="../css/Auth.css">
+*{
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
 
-<link rel="stylesheet" href="../css/Responsive.css">
 
-<link rel="stylesheet" href="../css/Animation.css">
+body{
 
+margin:0;
+height:100vh;
+background:#000;
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+
+
+
+.login-box{
+
+width:90%;
+max-width:420px;
+background:#111;
+padding:30px;
+border-radius:25px;
+border:1px solid #333;
+box-shadow:0 0 30px rgba(255,214,0,.15);
+
+}
+
+
+
+.logo{
+
+text-align:center;
+font-size:40px;
+font-weight:900;
+margin-bottom:10px;
+
+}
+
+
+.logo span{
+
+color:#FFD600;
+
+}
+
+
+
+.role{
+
+text-align:center;
+color:#FFD600;
+font-size:18px;
+margin-bottom:25px;
+
+}
+
+
+
+.input{
+
+width:100%;
+padding:15px;
+margin:10px 0;
+border-radius:12px;
+border:1px solid #333;
+background:#000;
+color:white;
+font-size:16px;
+
+}
+
+
+
+.btn{
+
+width:100%;
+padding:15px;
+border-radius:12px;
+border:none;
+margin-top:15px;
+font-size:17px;
+font-weight:bold;
+cursor:pointer;
+
+}
+
+
+
+.login-btn{
+
+background:#FFD600;
+color:#000;
+
+}
+
+
+
+.register-btn{
+
+background:#222;
+color:#FFD600;
+border:1px solid #FFD600;
+
+}
+
+
+
+.otp-btn{
+
+background:#111;
+color:white;
+border:1px solid #555;
+
+}
+
+
+
+.forgot{
+
+text-align:right;
+margin-top:10px;
+font-size:14px;
+color:#aaa;
+cursor:pointer;
+
+}
+
+
+
+.back{
+
+text-align:center;
+margin-top:25px;
+color:#888;
+cursor:pointer;
+
+}
+
+
+</style>
 
 </head>
+
 
 
 <body>
 
 
-<div class="auth-page">
+
+<div class="login-box">
 
 
-<div class="auth-container fade-in">
+<div class="logo">
 
-
-
-<div class="auth-logo">
-
-
-<img src="../assets/logo.png" alt="RiderX Logo">
-
-
-<h1>RiderX</h1>
-
-
-<p>Welcome Back</p>
-
+RID<span>ERX</span>
 
 </div>
 
 
 
-
-
-<h2>Login</h2>
-
-
-
-
-
-<form id="loginForm">
-
-
-
-
-
-<div class="auth-input">
-
-
-<label>Email</label>
-
-
-<input
-
-type="email"
-
-id="email"
-
-placeholder="Enter email"
-
-required>
-
-
-</div>
-
-
-
-
-
-
-<div class="auth-input">
-
-
-<label>Password</label>
-
-
-<input
-
-type="password"
-
-id="password"
-
-placeholder="Enter password"
-
-required>
-
-
-</div>
-
-
-
-
-
-<div class="auth-input">
-
-
-<label>
-
-<input type="checkbox">
-
-Remember Me
-
-</label>
-
-
-</div>
-
-
-
-
-
-
-
-<button
-
-type="submit"
-
-class="auth-btn btn-animation">
-
+<div class="role" id="roleText">
 
 Login
 
+</div>
+
+
+
+
+<input 
+id="email"
+class="input"
+type="email"
+placeholder="Email Address">
+
+
+
+
+
+<input 
+id="password"
+class="input"
+type="password"
+placeholder="Password">
+
+
+
+
+
+<div class="forgot">
+
+Forgot Password?
+
+</div>
+
+
+
+
+
+<button class="btn login-btn" id="loginBtn">
+
+Login
 
 </button>
 
@@ -151,31 +229,32 @@ Login
 
 
 
-<p id="message"></p>
+<button class="btn otp-btn" id="otpBtn">
+
+📱 Login With Phone OTP
+
+</button>
 
 
 
 
 
-</form>
+<button class="btn register-btn" id="registerBtn">
+
+Create New Account
+
+</button>
 
 
 
 
 
+<div class="back" onclick="goBack()">
 
+← Back
 
-<div class="auth-switch">
+</div>
 
-
-Don't have an account?
-
-
-<a href="register.html">
-
-Register
-
-</a>
 
 
 </div>
@@ -185,17 +264,122 @@ Register
 
 
 
-</div>
+<script>
 
 
-</div>
+// Role detect from URL
+
+
+const params = new URLSearchParams(window.location.search);
+
+const role = params.get("role") || "customer";
+
+
+
+if(role==="rider"){
+
+document.getElementById("roleText").innerHTML=
+"Rider Login";
+
+}
+
+else{
+
+document.getElementById("roleText").innerHTML=
+"Customer Login";
+
+}
 
 
 
 
 
 
-<script type="module" src="../js/Login.js"></script>
+// Login button
+
+
+document.getElementById("loginBtn").onclick=function(){
+
+
+let email=document.getElementById("email").value;
+
+let password=document.getElementById("password").value;
+
+
+
+if(email==="" || password===""){
+
+alert("Please enter email and password");
+
+return;
+
+}
+
+
+// Firebase Auth yaha connect hoga
+
+
+if(role==="rider"){
+
+window.location.href="../rider/home.html";
+
+}
+
+else{
+
+window.location.href="../customer/home.html";
+
+}
+
+
+};
+
+
+
+
+
+
+// Register
+
+
+document.getElementById("registerBtn").onclick=function(){
+
+
+window.location.href=
+"register.html?role="+role;
+
+
+};
+
+
+
+
+
+
+// OTP
+
+
+document.getElementById("otpBtn").onclick=function(){
+
+
+alert("OTP Login Firebase Phone Auth se connect hoga");
+
+
+};
+
+
+
+
+
+function goBack(){
+
+window.location.href="../index.html";
+
+}
+
+
+
+</script>
 
 
 
