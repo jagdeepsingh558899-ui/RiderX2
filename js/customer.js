@@ -280,21 +280,21 @@ document
 
 window.openHistory=function(){
 
-window.location.href="History.html";
+window.location.href="history.html";
 
 }
 
 
 window.openWallet=function(){
 
-window.location.href="Wallet.html";
+window.location.href="wallet.html";
 
 }
 
 
 window.openProfile=function(){
 
-window.location.href="Profile.html";
+window.location.href="profile.html";
 
 }
 
@@ -309,19 +309,19 @@ if(bottom.length>=4){
 
 
 bottom[0].onclick=
-()=>window.location.href="Home.html";
+()=>window.location.href="home.html";
 
 
 bottom[1].onclick=
-()=>openHistory();
+()=>openhistory();
 
 
 bottom[2].onclick=
-()=>openWallet();
+()=>openwallet();
 
 
 bottom[3].onclick=
-()=>openProfile();
+()=>openprofile();
 
 
 }
