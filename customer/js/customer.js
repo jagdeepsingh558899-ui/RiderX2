@@ -1,6 +1,6 @@
 // ======================================
 // RiderX Customer Dashboard
-// Firebase Ride System
+// Firebase Ride System Final
 // ======================================
 
 
@@ -19,7 +19,9 @@ import {
 
 collection,
 addDoc,
-serverTimestamp
+serverTimestamp,
+doc,
+onSnapshot
 
 }
 from
@@ -27,6 +29,10 @@ from
 
 
 
+
+// ===============================
+// Variables
+// ===============================
 
 
 let map;
@@ -41,14 +47,16 @@ let selectedService = "bike";
 
 let currentLocation = null;
 
+let currentRideId = null;
 
+let rideListener = null;
 
 
 
 
 
 // ===============================
-// Auth Check
+// Auth
 // ===============================
 
 
@@ -59,10 +67,11 @@ auth,
 
 if(user){
 
-currentUser = user;
+currentUser=user;
+
 
 console.log(
-"Customer:",
+"Customer Login:",
 user.uid
 );
 
@@ -73,17 +82,14 @@ else{
 
 
 console.log(
-"User not login"
+"No User Login"
 );
 
 
 }
 
 
-
 });
-
-
 
 
 
@@ -120,7 +126,6 @@ setupBookRide();
 
 
 
-
 // ===============================
 // Map
 // ===============================
@@ -140,7 +145,9 @@ L.map("map")
 
 
 L.tileLayer(
+
 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
 {
 maxZoom:19
 }
@@ -167,10 +174,11 @@ e.latlng.lng
 
 
 
-getLocation();
+getCurrentLocation();
 
 
 }
+
 
 
 
@@ -184,7 +192,7 @@ getLocation();
 // ===============================
 
 
-function getLocation(){
+function getCurrentLocation(){
 
 
 
@@ -223,6 +231,12 @@ map.setView(
 
 
 
+if(userMarker)
+map.removeLayer(userMarker);
+
+
+
+
 userMarker =
 L.marker(
 [lat,lng]
@@ -236,6 +250,7 @@ L.marker(
 
 
 
+
 setPickup(
 lat,
 lng
@@ -243,10 +258,20 @@ lng
 
 
 
+},
+
+(error)=>{
+
+
+console.log(
+"GPS Error",
+error
+);
+
+
 }
 
 );
-
 
 
 }
@@ -271,8 +296,13 @@ lng
 
 
 
-if(pickupMarker)
-map.removeLayer(pickupMarker);
+if(pickupMarker){
+
+map.removeLayer(
+pickupMarker
+);
+
+}
 
 
 
@@ -283,9 +313,9 @@ L.marker(
 )
 .addTo(map)
 .bindPopup(
-"Pickup"
-)
-.openPopup();
+"Pickup Location"
+);
+
 
 
 
@@ -293,6 +323,7 @@ L.marker(
 document
 .getElementById("pickup")
 .value =
+
 lat.toFixed(5)
 +
 ", "
@@ -316,7 +347,7 @@ calculateFare();
 
 
 // ===============================
-// Service
+// Services
 // ===============================
 
 
@@ -327,27 +358,27 @@ function setupServices(){
 document
 .querySelectorAll(".service")
 .forEach(
-(item)=>{
+(service)=>{
 
 
-item.onclick=()=>{
+service.onclick=()=>{
 
 
 document
 .querySelectorAll(".service")
 .forEach(
-(x)=>
-x.classList.remove("active")
+(s)=>
+s.classList.remove("active")
 );
 
 
 
-item.classList.add("active");
+service.classList.add("active");
 
 
 
 selectedService =
-item.dataset.service;
+service.dataset.service;
 
 
 
@@ -384,7 +415,6 @@ function calculateFare(){
 let distance = 5;
 
 
-
 let hour =
 new Date()
 .getHours();
@@ -400,6 +430,9 @@ if(hour>=22 || hour<6){
 rate=11;
 
 }
+
+
+
 
 
 
@@ -424,6 +457,7 @@ extra=20;
 
 let total =
 (distance*rate)+extra;
+
 
 
 
@@ -453,16 +487,23 @@ function setupBookRide(){
 
 
 
+const btn =
 document
-.getElementById("bookRide")
-.onclick =
-async ()=>{
+.getElementById("bookRide");
+
+
+
+btn.onclick =
+async()=>{
+
 
 
 let drop =
 document
 .getElementById("drop")
-.value;
+.value.trim();
+
+
 
 
 
@@ -470,7 +511,7 @@ if(!drop){
 
 
 alert(
-"Please enter drop location"
+"Enter Drop Location"
 );
 
 
@@ -478,6 +519,8 @@ return;
 
 
 }
+
+
 
 
 
@@ -486,7 +529,7 @@ if(!currentUser){
 
 
 alert(
-"Please login first"
+"Please Login First"
 );
 
 
@@ -494,6 +537,8 @@ return;
 
 
 }
+
+
 
 
 
@@ -549,22 +594,28 @@ serverTimestamp()
 
 
 
-
-
 try{
 
 
 const rideRef =
 await addDoc(
+
 collection(db,"rides"),
+
 rideData
+
 );
 
 
 
-console.log(
-"Ride Created:",
-rideRef.id
+currentRideId =
+rideRef.id;
+
+
+
+
+listenRideStatus(
+currentRideId
 );
 
 
@@ -579,15 +630,17 @@ alert(
 
 }
 
-
 catch(error){
 
 
-console.log(error);
+console.log(
+error
+);
+
 
 
 alert(
-"Ride failed"
+"Ride booking failed"
 );
 
 
@@ -601,3 +654,94 @@ alert(
 
 
 }
+
+
+
+
+
+
+
+
+
+// ===============================
+// Realtime Ride Status
+// ===============================
+
+
+function listenRideStatus(
+rideId
+){
+
+
+
+const rideRef =
+doc(
+db,
+"rides",
+rideId
+);
+
+
+
+rideListener =
+onSnapshot(
+
+rideRef,
+
+(snapshot)=>{
+
+
+if(!snapshot.exists())
+return;
+
+
+
+let data =
+snapshot.data();
+
+
+
+
+
+if(data.status==="accepted"){
+
+
+alert(
+"🎉 Rider Accepted Your Ride"
+);
+
+
+console.log(
+"Rider:",
+data.riderId
+);
+
+
+
+}
+
+
+
+
+if(data.status==="completed"){
+
+
+alert(
+"Ride Completed"
+);
+
+
+
+}
+
+
+
+}
+
+
+
+);
+
+
+
+  }
