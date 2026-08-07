@@ -1,446 +1,357 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiderX Captain | Profile & Account Management</title>
-    
-    <!-- CSS & Frameworks -->
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#090A0F',
-                            dark: '#12141C',
-                            card: '#1A1D29',
-                            yellow: '#FFE500',
-                            yellowDark: '#CCA800',
-                            gray: '#8A8F9E',
-                            border: '#2A2E3D',
-                            emerald: '#10B981',
-                            rose: '#F43F5E',
-                            amber: '#F59E0B',
-                            blue: '#3B82F6'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            background-color: #090A0F;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8">
 
-        .glass-card {
-            background: linear-gradient(135deg, rgba(26, 29, 41, 0.92) 0%, rgba(18, 20, 28, 0.98) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.12);
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #12141C;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #2A2E3D;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
+<title>RiderX Rider Profile</title>
 
-        @keyframes skeletonShimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .skeleton {
-            background: linear-gradient(90deg, #12141C 25%, #2A2E3D 50%, #12141C 75%);
-            background-size: 200% 100%;
-            animation: skeletonShimmer 1.5s infinite;
-        }
 
-        .modal-backdrop {
-            background-color: rgba(9, 10, 15, 0.85);
-            backdrop-filter: blur(8px);
-        }
-    </style>
+<link rel="stylesheet" href="../css/Style.css">
+
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+<style>
+
+body{
+background:#090A0F;
+color:white;
+font-family:Arial,sans-serif;
+}
+
+
+.card{
+
+background:#12141C;
+border:1px solid #2A2E3D;
+border-radius:20px;
+
+}
+
+
+.yellow{
+
+color:#FFE500;
+
+}
+
+
+.btn{
+
+background:#FFE500;
+color:#000;
+font-weight:bold;
+border-radius:12px;
+
+}
+
+
+.input{
+
+width:100%;
+background:#090A0F;
+border:1px solid #2A2E3D;
+padding:12px;
+border-radius:12px;
+color:white;
+
+}
+
+</style>
+
 </head>
-<body class="min-h-screen pb-28 lg:pb-12 flex flex-col custom-scrollbar">
 
-    <!-- Premium Header -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3.5">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="./Home.html" class="flex items-center gap-2">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX+Captain'">
-                </a>
-                <span class="text-[10px] bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-bold border border-brand-yellow/20 hidden sm:inline-block uppercase tracking-wider">CAPTAIN ACCOUNT PORTAL</span>
-            </div>
 
-            <div class="flex items-center gap-4">
-                <button onclick="handleLogout()" class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-xs font-bold text-rose-400 transition">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span class="hidden sm:inline">Logout</span>
-                </button>
-            </div>
-        </div>
-    </header>
+<body class="pb-24">
 
-    <!-- Main Content Container -->
-    <main class="flex-grow max-w-4xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
 
-        <!-- Skeleton Loader -->
-        <div id="profileSkeleton" class="space-y-6">
-            <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6">
-                <div class="w-24 h-24 rounded-full skeleton"></div>
-                <div class="space-y-2 flex-1 w-full text-center sm:text-left">
-                    <div class="h-6 w-48 skeleton rounded mx-auto sm:mx-0"></div>
-                    <div class="h-4 w-32 skeleton rounded mx-auto sm:mx-0"></div>
-                </div>
-            </div>
-            <div class="glass-card p-6 rounded-2xl space-y-4">
-                <div class="h-5 w-40 skeleton rounded"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="h-10 skeleton rounded-xl"></div>
-                    <div class="h-10 skeleton rounded-xl"></div>
-                    <div class="h-10 skeleton rounded-xl"></div>
-                    <div class="h-10 skeleton rounded-xl"></div>
-                </div>
-            </div>
-        </div>
+<header class="p-4 border-b border-gray-800 flex justify-between items-center">
 
-        <!-- Dynamic Profile Content (Initially Hidden) -->
-        <div id="profileContent" class="hidden space-y-6">
 
-            <!-- Rider Profile Photo & Key Info Card -->
-            <div class="glass-card p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
-                <div class="relative group">
-                    <img id="avatarImage" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" class="w-28 h-28 rounded-full object-cover border-4 border-brand-yellow shadow-xl" alt="Rider Profile Photo">
-                    <label for="photoFileInput" class="absolute bottom-0 right-0 w-9 h-9 bg-brand-yellow text-brand-black rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:scale-110 transition border-2 border-brand-black" title="Change Profile Photo">
-                        <i class="fa-solid fa-camera text-sm"></i>
-                    </label>
-                    <input type="file" id="photoFileInput" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
-                </div>
+<h1 class="text-2xl font-bold">
 
-                <div class="text-center sm:text-left space-y-1.5 flex-1">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                            <h2 id="headerFullName" class="text-xl font-extrabold text-white">Captain Rider</h2>
-                            <p id="headerRiderId" class="text-xs text-brand-gray font-mono">ID: RX-CAP-000000</p>
-                        </div>
-                        <span id="approvalBadge" class="self-center sm:self-auto px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                            VERIFIED CAPTAIN
-                        </span>
-                    </div>
+RID<span class="yellow">ERX</span>
 
-                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs pt-2">
-                        <span class="flex items-center gap-1.5 text-brand-gray">
-                            <i class="fa-solid fa-shield-halved text-brand-yellow"></i>
-                            <span id="headerVehicleType" class="text-white font-bold uppercase">CAB COMFORT</span>
-                        </span>
-                        <span class="flex items-center gap-1 text-amber-400 font-bold">
-                            <i class="fa-solid fa-star"></i>
-                            <span id="headerRating">4.92</span>
-                        </span>
-                        <span class="flex items-center gap-1.5 text-emerald-400 font-bold">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <span id="headerTripsCount">0 Rides</span>
-                        </span>
-                    </div>
-                </div>
-            </div>
+</h1>
 
-            <!-- Profile Form Panel -->
-            <form id="profileForm" onsubmit="handleProfileUpdate(event)" class="glass-card p-6 rounded-2xl space-y-6">
-                
-                <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
-                    <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-user text-brand-yellow"></i> Personal Information
-                    </h3>
-                    <span class="text-[10px] text-brand-gray">Update your personal account metrics</span>
-                </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    
-                    <!-- Full Name -->
-                    <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-brand-gray uppercase tracking-wider">Full Name</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                            <input type="text" id="inputFullName" required class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow transition" placeholder="John Doe">
-                        </div>
-                    </div>
+<button onclick="handleLogout()"
+class="text-red-400">
 
-                    <!-- Mobile Number (Read-only/Disabled for security) -->
-                    <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-brand-gray uppercase tracking-wider">Mobile Number (Verified)</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                            <input type="text" id="inputPhone" disabled class="w-full bg-brand-dark/50 border border-brand-border/50 rounded-xl pl-9 pr-4 py-2.5 text-xs text-brand-gray cursor-not-allowed" placeholder="+91 0000000000">
-                        </div>
-                    </div>
+<i class="fa-solid fa-right-from-bracket"></i>
 
-                    <!-- Email -->
-                    <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-brand-gray uppercase tracking-wider">Email Address</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                            <input type="email" id="inputEmail" required class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow transition" placeholder="captain@riderx.com">
-                        </div>
-                    </div>
+</button>
 
-                    <!-- Date of Birth -->
-                    <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-brand-gray uppercase tracking-wider">Date of Birth</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-calendar-days absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                            <input type="date" id="inputDOB" class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow transition">
-                        </div>
-                    </div>
 
-                    <!-- Gender -->
-                    <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-brand-gray uppercase tracking-wider">Gender</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-venus-mars absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                            <select id="inputGender" class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow transition">
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                    </div>
+</header>
 
-                    <!-- Service Vehicle Category -->
-                    <div class="space-y-1.5">
-                        <label class="text-[11px] font-bold text-brand-gray uppercase tracking-wider">Registered Vehicle Type</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-taxi absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                            <input type="text" id="inputVehicleType" disabled class="w-full bg-brand-dark/50 border border-brand-border/50 rounded-xl pl-9 pr-4 py-2.5 text-xs text-brand-gray cursor-not-allowed font-bold uppercase" placeholder="CAB">
-                        </div>
-                    </div>
 
-                </div>
 
-                <!-- Residential Address -->
-                <div class="space-y-1.5">
-                    <label class="text-[11px] font-bold text-brand-gray uppercase tracking-wider">Residential Address</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-location-dot absolute left-3.5 top-3 text-brand-gray text-xs"></i>
-                        <textarea id="inputAddress" rows="3" class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow transition resize-none" placeholder="Flat No, Building, Street, City, Pincode..."></textarea>
-                    </div>
-                </div>
 
-                <!-- Alert Feedback Box -->
-                <div id="statusToast" class="hidden p-3 rounded-xl text-xs font-bold flex items-center gap-2"></div>
 
-                <!-- Submit Button -->
-                <div class="flex items-center justify-end gap-3 pt-2">
-                    <button type="submit" id="saveBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition flex items-center justify-center gap-2 uppercase tracking-wider shadow-lg">
-                        <i class="fa-solid fa-floppy-disk"></i> Save Profile Details
-                    </button>
-                </div>
+<main class="p-4 max-w-3xl mx-auto">
 
-            </form>
 
-        </div>
+<div id="profileSkeleton"
+class="card p-6">
 
-    </main>
+Loading Profile...
 
-    <!-- Mobile Navigation Bar -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 border-t border-brand-border backdrop-blur-lg px-6 py-2.5">
-        <div class="flex items-center justify-between max-w-md mx-auto">
-            <a href="./Home.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-gauge-high text-base"></i>
-                <span class="text-[10px]">Dashboard</span>
-            </a>
-            <a href="./Rides.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-route text-base"></i>
-                <span class="text-[10px]">Active</span>
-            </a>
-            <a href="./History.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-clock-rotate-left text-base"></i>
-                <span class="text-[10px]">History</span>
-            </a>
-            <a href="./Earnings.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-chart-line text-base"></i>
-                <span class="text-[10px]">Earnings</span>
-            </a>
-            <a href="./Profile.html" class="flex flex-col items-center gap-1 text-brand-yellow font-bold">
-                <i class="fa-solid fa-user-gear text-base"></i>
-                <span class="text-[10px]">Account</span>
-            </a>
-        </div>
-    </nav>
+</div>
 
-    <!-- Firebase & Application Modules -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/App.js"></script>
 
-    <!-- Profile Management Script -->
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        let currentUserId = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    window.location.href = '../auth/rider-login.html';
-                    return;
-                }
 
-                currentUserId = user.uid;
-                await loadRiderProfile(user.uid);
-            });
-        });
+<div id="profileContent"
+class="hidden">
 
-        async function loadRiderProfile(uid) {
-            try {
-                const docRef = doc(db, "riders", uid);
-                const docSnap = await getDoc(docRef);
 
-                if (!docSnap.exists()) {
-                    window.location.href = '../auth/rider-login.html';
-                    return;
-                }
+<div class="card p-6 mb-5 text-center">
 
-                const data = docSnap.data();
 
-                if (data.adminApproved === false) {
-                    window.location.href = 'pending.html';
-                    return;
-                }
+<div class="relative inline-block">
 
-                // Populate UI Elements
-                document.getElementById('headerFullName').innerText = data.fullName || 'Captain Rider';
-                document.getElementById('headerRiderId').innerText = `ID: RX-CAP-${uid.substring(0, 6).toUpperCase()}`;
-                document.getElementById('headerVehicleType').innerText = data.vehicleType || 'CAB';
-                document.getElementById('headerRating').innerText = data.rating || '4.92';
-                document.getElementById('headerTripsCount').innerText = `${data.totalTrips || 0} Rides`;
 
-                if (data.photoURL) {
-                    document.getElementById('avatarImage').src = data.photoURL;
-                } else {
-                    document.getElementById('avatarImage').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.fullName || 'Captain')}&background=FFE500&color=090A0F`;
-                }
+<img id="avatarImage"
+src="https://ui-avatars.com/api/?name=Rider"
+class="w-28 h-28 rounded-full border-4 border-yellow-400 object-cover">
 
-                // Populate Form Input Fields
-                document.getElementById('inputFullName').value = data.fullName || '';
-                document.getElementById('inputPhone').value = data.phone || data.mobileNumber || auth.currentUser.phoneNumber || 'N/A';
-                document.getElementById('inputEmail').value = data.email || auth.currentUser.email || '';
-                document.getElementById('inputDOB').value = data.dob || '';
-                document.getElementById('inputGender').value = data.gender || 'Male';
-                document.getElementById('inputVehicleType').value = data.vehicleType || 'CAB';
-                document.getElementById('inputAddress').value = data.address || '';
 
-                // Show Content
-                document.getElementById('profileSkeleton').classList.add('hidden');
-                document.getElementById('profileContent').classList.remove('hidden');
+<label for="photoFileInput"
+class="absolute bottom-0 right-0 bg-yellow-400 text-black p-3 rounded-full cursor-pointer">
 
-            } catch (error) {
-                console.error("Error loading rider profile:", error);
-                showToast("Failed to load profile parameters.", "error");
-            }
-        }
 
-        window.handleProfileUpdate = async function(e) {
-            e.preventDefault();
-            if (!currentUserId) return;
+<i class="fa-solid fa-camera"></i>
 
-            const saveBtn = document.getElementById('saveBtn');
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...`;
 
-            const updatedData = {
-                fullName: document.getElementById('inputFullName').value.trim(),
-                email: document.getElementById('inputEmail').value.trim(),
-                dob: document.getElementById('inputDOB').value,
-                gender: document.getElementById('inputGender').value,
-                address: document.getElementById('inputAddress').value.trim(),
-                updatedAt: new Date()
-            };
+</label>
 
-            try {
-                const docRef = doc(db, "riders", currentUserId);
-                await updateDoc(docRef, updatedData);
 
-                document.getElementById('headerFullName').innerText = updatedData.fullName;
-                showToast("Profile details updated successfully!", "success");
-            } catch (error) {
-                console.error("Profile update failed:", error);
-                showToast("Error updating profile. Try again.", "error");
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Profile Details`;
-            }
-        };
+<input id="photoFileInput"
+type="file"
+accept="image/*"
+class="hidden"
+onchange="handlePhotoUpload(event)">
 
-        window.handlePhotoUpload = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const base64Image = e.target.result;
-                document.getElementById('avatarImage').src = base64Image;
+</div>
 
-                try {
-                    const docRef = doc(db, "riders", currentUserId);
-                    await updateDoc(docRef, { photoURL: base64Image });
-                    showToast("Profile avatar updated successfully!", "success");
-                } catch (err) {
-                    console.error("Avatar update error:", err);
-                    showToast("Failed to update avatar picture.", "error");
-                }
-            };
-            reader.readAsDataURL(file);
-        };
 
-        window.handleLogout = async function() {
-            if (confirm("Are you sure you want to log out of RiderX Captain?")) {
-                await signOut(auth);
-                window.location.href = '../auth/rider-login.html';
-            }
-        };
 
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('statusToast');
-            toast.classList.remove('hidden', 'bg-emerald-500/10', 'text-emerald-400', 'border-emerald-500/30', 'bg-rose-500/10', 'text-rose-400', 'border-rose-500/30');
+<h2 id="headerFullName"
+class="text-xl font-bold mt-3">
 
-            if (type === 'success') {
-                toast.classList.add('bg-emerald-500/10', 'text-emerald-400', 'border', 'border-emerald-500/30');
-                toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> ${message}`;
-            } else {
-                toast.classList.add('bg-rose-500/10', 'text-rose-400', 'border', 'border-rose-500/30');
-                toast.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${message}`;
-            }
+Rider
 
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 4000);
-        }
-    </script>
+</h2>
+
+
+<p id="headerRiderId"
+class="text-gray-400 text-sm">
+
+ID:-
+
+</p>
+
+
+<div class="mt-3">
+
+
+<span id="headerVehicleType"
+class="yellow font-bold">
+
+BIKE
+
+</span>
+
+
+<span class="mx-2">
+
+|
+
+</span>
+
+
+⭐
+<span id="headerRating">
+
+5.0
+
+</span>
+
+
+</div>
+
+
+<p id="headerTripsCount"
+class="text-gray-400 mt-2">
+
+0 Rides
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+<form id="profileForm"
+onsubmit="handleProfileUpdate(event)"
+class="card p-6 space-y-4">
+
+
+<h3 class="yellow font-bold text-lg">
+
+Personal Information
+
+</h3>
+
+
+
+<input id="inputFullName"
+class="input"
+placeholder="Full Name">
+
+
+
+<input id="inputPhone"
+class="input"
+placeholder="Phone"
+disabled>
+
+
+
+<input id="inputEmail"
+class="input"
+placeholder="Email">
+
+
+
+<input id="inputDOB"
+type="date"
+class="input">
+
+
+
+<select id="inputGender"
+class="input">
+
+
+<option>Male</option>
+
+<option>Female</option>
+
+<option>Other</option>
+
+
+</select>
+
+
+
+<input id="inputVehicleType"
+class="input"
+placeholder="Vehicle Type"
+disabled>
+
+
+
+<textarea id="inputAddress"
+class="input"
+placeholder="Address"></textarea>
+
+
+
+<button class="btn w-full p-3">
+
+<i class="fa-solid fa-save"></i>
+
+Save Profile
+
+</button>
+
+
+</form>
+<!-- Bottom Navigation -->
+
+<nav class="fixed bottom-0 left-0 right-0 bg-[#12141C] border-t border-gray-800 p-3">
+
+<div class="flex justify-around text-xs text-gray-400">
+
+
+<a href="./Home.html" class="text-center">
+
+<i class="fa-solid fa-house text-lg"></i>
+
+<br>
+
+Home
+
+</a>
+
+
+
+<a href="./Rides.html" class="text-center">
+
+<i class="fa-solid fa-route text-lg"></i>
+
+<br>
+
+Rides
+
+</a>
+
+
+
+
+<a href="./Wallet.html" class="text-center">
+
+<i class="fa-solid fa-wallet text-lg"></i>
+
+<br>
+
+Wallet
+
+</a>
+
+
+
+
+<a href="./Profile.html" class="text-center text-yellow-400">
+
+<i class="fa-solid fa-user text-lg"></i>
+
+<br>
+
+Profile
+
+</a>
+
+
+</div>
+
+</nav>
+
+
+
+
+<!-- Firebase Profile JS -->
+
+<script type="module" src="js/profile.js"></script>
+
+
 </body>
+
 </html>
