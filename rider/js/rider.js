@@ -1,12 +1,11 @@
 // ======================================
-// RiderX Rider Dashboard JS
-// Firebase Ride System
+// RiderX Rider Dashboard
+// Complete Ride System
 // ======================================
 
 
-import { auth, db, realtimeDB } 
+import { auth, db, realtimeDB }
 from "../../firebase/firebase-config.js";
-
 
 
 import {
@@ -14,11 +13,8 @@ import {
 onAuthStateChanged
 
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
 
 
 import {
@@ -33,11 +29,8 @@ onSnapshot,
 limit
 
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
 
 
 import {
@@ -46,20 +39,22 @@ ref,
 set
 
 }
-
 from
-
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 
 
 
 
-let riderId = null;
+let riderId=null;
 
-let online = false;
+let currentRideId=null;
 
-let currentRideId = null;
+let online=false;
+
+let rideOTP=null;
+
+let earning=0;
 
 
 
@@ -67,7 +62,7 @@ let currentRideId = null;
 
 
 // ===============================
-// Auth Check
+// Auth
 // ===============================
 
 
@@ -78,17 +73,9 @@ async(user)=>{
 
 if(!user){
 
-
-alert(
-"Please login first"
-);
-
-
 window.location.href="../auth/login.html";
 
-
 return;
-
 
 }
 
@@ -97,9 +84,7 @@ return;
 riderId=user.uid;
 
 
-
 checkRider();
-
 
 
 });
@@ -111,42 +96,33 @@ checkRider();
 
 
 
+
 // ===============================
-// Rider Approval Check
+// Check Rider
 // ===============================
 
 
 async function checkRider(){
 
 
-
-const riderRef =
-doc(db,"users",riderId);
-
-
-
-const riderSnap =
-await getDoc(riderRef);
+const snap=
+await getDoc(
+doc(db,"users",riderId)
+);
 
 
 
-if(riderSnap.exists()){
+if(snap.exists()){
 
 
-const data =
-riderSnap.data();
+let data=snap.data();
 
 
 
 if(data.role!=="rider"){
 
 
-alert(
-"Only Rider account allowed"
-);
-
-
-return;
+alert("Only rider account allowed");
 
 
 }
@@ -156,9 +132,7 @@ return;
 if(data.approved===false){
 
 
-alert(
-"Admin approval pending"
-);
+alert("Admin approval pending");
 
 
 }
@@ -166,7 +140,6 @@ alert(
 
 
 }
-
 
 
 }
@@ -189,7 +162,6 @@ document
 .onclick=()=>{
 
 
-
 online=!online;
 
 
@@ -203,10 +175,9 @@ document
 "🔴 Go Offline";
 
 
-setRiderOnline(true);
+setOnline(true);
 
-
-listenForRides();
+listenRides();
 
 
 
@@ -221,8 +192,7 @@ document
 "🟢 Go Online";
 
 
-setRiderOnline(false);
-
+setOnline(false);
 
 
 }
@@ -238,13 +208,13 @@ setRiderOnline(false);
 
 
 
+
 // ===============================
 // Rider Online Status
 // ===============================
 
 
-function setRiderOnline(status){
-
+function setOnline(status){
 
 
 if(!riderId)
@@ -252,26 +222,18 @@ return;
 
 
 
-const riderStatusRef =
+set(
+
 ref(
 realtimeDB,
 "onlineRiders/"+riderId
-);
+),
 
-
-
-set(
-riderStatusRef,
 {
-
 
 online:status,
 
-
-updatedAt:
-Date.now()
-
-
+updatedAt:Date.now()
 
 }
 
@@ -290,16 +252,15 @@ Date.now()
 
 
 // ===============================
-// Listen Ride Request
+// Listen Ride
 // ===============================
 
 
-function listenForRides(){
+function listenRides(){
 
 
 
-const q =
-query(
+let q=query(
 
 collection(db,"rides"),
 
@@ -323,12 +284,12 @@ q,
 
 
 snapshot.forEach(
-(docSnap)=>{
+(item)=>{
 
 
 showRide(
-docSnap.id,
-docSnap.data()
+item.id,
+item.data()
 );
 
 
@@ -365,7 +326,7 @@ currentRideId=id;
 document
 .getElementById("customerName")
 .innerHTML=
-"Customer ID: "
+"Customer: "
 +
 data.customerId;
 
@@ -419,20 +380,21 @@ document
 async()=>{
 
 
-if(!currentRideId)
-{
+if(!currentRideId){
 
-
-alert(
-"No ride available"
-);
-
+alert("No ride found");
 
 return;
 
-
 }
 
+
+
+rideOTP =
+Math.floor(
+1000+
+Math.random()*9000
+);
 
 
 
@@ -449,14 +411,9 @@ currentRideId
 
 status:"accepted",
 
-
 riderId:riderId,
 
-
-acceptedAt:
-new Date()
-
-
+otp:rideOTP
 
 }
 
@@ -465,14 +422,17 @@ new Date()
 
 
 
+document
+.getElementById("otpInput")
+.value=
+"OTP: "+rideOTP;
+
+
 
 document
-.getElementById("otpCode")
+.getElementById("rideStatus")
 .innerHTML=
-Math.floor(
-1000+
-Math.random()*9000
-);
+"Ride Accepted";
 
 
 
@@ -499,15 +459,186 @@ alert(
 
 document
 .getElementById("rejectRide")
-.onclick=()=>{
+.onclick=
+async()=>{
+
+
+if(!currentRideId)
+return;
+
+
+
+await updateDoc(
+
+doc(
+db,
+"rides",
+currentRideId
+),
+
+{
+
+status:"rejected"
+
+}
+
+);
+
 
 
 currentRideId=null;
 
 
+};
+
+
+
+
+
+
+
+
+
+// ===============================
+// Start Ride OTP Verify
+// ===============================
+
+
+document
+.getElementById("startRide")
+.onclick=
+async()=>{
+
+
+let entered =
+document
+.getElementById("otpInput")
+.value;
+
+
+
+entered =
+entered.replace(
+"OTP:",
+""
+)
+.trim();
+
+
+
+
+
+if(
+entered != rideOTP
+){
+
+
 alert(
-"Ride Rejected"
+"Wrong OTP"
 );
+
+
+return;
+
+}
+
+
+
+
+await updateDoc(
+
+doc(
+db,
+"rides",
+currentRideId
+),
+
+{
+
+
+status:"started"
+
+}
+
+
+);
+
+
+
+document
+.getElementById("rideStatus")
+.innerHTML=
+"Ride Started 🚀";
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// ===============================
+// Complete Ride
+// ===============================
+
+
+document
+.getElementById("completeRide")
+.onclick=
+async()=>{
+
+
+if(!currentRideId)
+return;
+
+
+
+await updateDoc(
+
+doc(
+db,
+"rides",
+currentRideId
+),
+
+{
+
+
+status:"completed"
+
+
+}
+
+);
+
+
+
+
+
+earning += 100;
+
+
+
+document
+.getElementById("earningAmount")
+.innerHTML=
+"₹"+earning;
+
+
+
+document
+.getElementById("rideStatus")
+.innerHTML=
+"Ride Completed ✅";
+
+
+
+currentRideId=null;
 
 
 
