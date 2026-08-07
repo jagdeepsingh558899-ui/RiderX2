@@ -1,783 +1,494 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiderX Captain Dashboard | Premium Rider Hub</title>
-    
-    <!-- CSS & Fonts -->
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#090A0F',
-                            dark: '#12141C',
-                            card: '#1A1D29',
-                            yellow: '#FFE500',
-                            yellowDark: '#CCA800',
-                            gray: '#8A8F9E',
-                            border: '#2A2E3D',
-                            emerald: '#10B981',
-                            rose: '#F43F5E'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
-    <style>
-        body {
-            background-color: #090A0F;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8">
 
-        .glass-card {
-            background: linear-gradient(135deg, rgba(26, 29, 41, 0.90) 0%, rgba(18, 20, 28, 0.96) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.12);
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .glass-card-interactive {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+<title>RiderX Rider Dashboard</title>
 
-        .glass-card-interactive:hover {
-            border-color: rgba(255, 229, 0, 0.4);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(255, 229, 0, 0.15);
-        }
 
-        /* Pulse Animations for Live Online Indicator */
-        @keyframes onlinePulse {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
+<link rel="stylesheet" href="../assets/app.css">
 
-        .online-glow {
-            animation: onlinePulse 2s infinite;
-        }
 
-        /* Incoming Request Radar Ping */
-        @keyframes pingSlow {
-            0% { transform: scale(0.95); opacity: 0.8; }
-            50% { transform: scale(1.05); opacity: 1; }
-            100% { transform: scale(0.95); opacity: 0.8; }
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-        .request-card-glow {
-            animation: pingSlow 1.8s infinite ease-in-out;
-            border-color: #FFE500 !important;
-            box-shadow: 0 0 35px rgba(255, 229, 0, 0.25);
-        }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #12141C;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #2A2E3D;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
+<style>
 
-        /* Leaflet Dark Map Custom Styling */
-        .leaflet-container {
-            background-color: #090A0F !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .leaflet-tile {
-            filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
-        }
-        .leaflet-control-zoom {
-            border: 1px solid rgba(255, 229, 0, 0.2) !important;
-            border-radius: 12px !important;
-            overflow: hidden;
-        }
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-            background-color: #12141C !important;
-            color: #FFE500 !important;
-            border-bottom: 1px solid #2A2E3D !important;
-        }
 
-        /* Toggle Switch Styling */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 32px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #2A2E3D;
-            transition: .4s;
-            border-radius: 34px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 24px;
-            width: 24px;
-            left: 3px;
-            bottom: 3px;
-            background-color: #8A8F9E;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #10B981;
-            border-color: #10B981;
-        }
-        input:checked + .slider:before {
-            transform: translateX(28px);
-            background-color: #FFFFFF;
-        }
-    </style>
+body{
+
+margin:0;
+background:#000;
+color:white;
+font-family:Arial,sans-serif;
+
+}
+
+
+
+.header{
+
+height:70px;
+background:#111;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+
+}
+
+
+
+.logo{
+
+font-size:30px;
+font-weight:900;
+
+}
+
+
+.logo span{
+
+color:#FFD600;
+
+}
+
+
+
+.status{
+
+padding:20px;
+
+}
+
+
+
+.online-btn{
+
+width:100%;
+padding:16px;
+border-radius:15px;
+border:none;
+font-size:18px;
+font-weight:bold;
+background:#FFD600;
+color:#000;
+
+}
+
+
+
+.card{
+
+background:#111;
+margin:15px;
+padding:20px;
+border-radius:20px;
+border:1px solid #333;
+
+}
+
+
+
+.card h3{
+
+color:#FFD600;
+
+}
+
+
+
+.ride-buttons{
+
+display:flex;
+gap:10px;
+
+}
+
+
+
+.accept{
+
+flex:1;
+background:#FFD600;
+color:#000;
+padding:14px;
+border:none;
+border-radius:12px;
+font-weight:bold;
+
+}
+
+
+
+.reject{
+
+flex:1;
+background:#222;
+color:white;
+border:1px solid #555;
+border-radius:12px;
+
+}
+
+
+
+.earning{
+
+display:flex;
+justify-content:space-between;
+background:#111;
+margin:15px;
+padding:20px;
+border-radius:20px;
+
+}
+
+
+
+.amount{
+
+color:#FFD600;
+font-size:25px;
+font-weight:bold;
+
+}
+
+
+
+.bottom{
+
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:#111;
+display:flex;
+justify-content:space-around;
+padding:12px 0;
+
+}
+
+
+
+.bottom div{
+
+text-align:center;
+font-size:12px;
+color:#aaa;
+
+}
+
+
+
+</style>
+
+
 </head>
-<body class="min-h-screen pb-24 lg:pb-8 flex flex-col custom-scrollbar">
-
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            
-            <!-- Brand Logo & Badge -->
-            <div class="flex items-center gap-3">
-                <a href="./Home.html" class="flex items-center gap-2">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX+Captain'">
-                </a>
-                <span class="text-[10px] bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-bold tracking-wider border border-brand-yellow/20 hidden sm:inline-block">CAPTAIN PRO</span>
-            </div>
-
-            <!-- Online / Offline Toggle & Quick Status -->
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-3 bg-brand-dark/90 px-4 py-1.5 rounded-full border border-brand-border">
-                    <div class="flex items-center gap-2">
-                        <span id="statusIndicator" class="w-3 h-3 rounded-full bg-red-500"></span>
-                        <span id="statusText" class="text-xs font-bold text-red-400 uppercase tracking-wide">OFFLINE</span>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="toggleOnline" onchange="toggleDutyStatus(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <!-- Notifications Button -->
-                <button onclick="toggleNotificationDrawer()" class="relative p-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow/50 text-white transition">
-                    <i class="fa-solid fa-bell text-sm"></i>
-                    <span id="notifBadge" class="absolute -top-1 -right-1 w-4 h-4 bg-brand-yellow text-brand-black text-[9px] font-extrabold rounded-full flex items-center justify-center">3</span>
-                </button>
-
-                <!-- Profile Quick Avatar -->
-                <a href="./Profile.html" class="flex items-center gap-2 pl-2 border-l border-brand-border/60">
-                    <img id="navRiderPhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" class="w-9 h-9 rounded-full object-cover border border-brand-yellow" alt="Rider Profile">
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Grid -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
-
-        <!-- Top Overview Bar: Rider Profile Hero + Live Stats -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Rider Profile & Level Summary Card -->
-            <div class="glass-card rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-brand-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
-
-                <div class="flex items-start justify-between relative z-10">
-                    <div class="flex items-center gap-4">
-                        <div class="relative">
-                            <img id="riderProfilePhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" class="w-16 h-16 rounded-2xl object-cover border-2 border-brand-yellow shadow-lg" alt="Captain Avatar">
-                            <span class="absolute -bottom-1 -right-1 bg-brand-yellow text-brand-black text-[10px] font-black px-1.5 py-0.5 rounded-md border border-brand-black">PRO</span>
-                        </div>
-                        <div>
-                            <h2 id="riderName" class="text-lg font-extrabold text-white">Captain Loading...</h2>
-                            <p id="riderVehicle" class="text-xs text-brand-gray font-medium">Royal Enfield Classic 350 • MH 02 EX 9988</p>
-                            
-                            <!-- Rating & Level -->
-                            <div class="flex items-center gap-3 mt-1.5">
-                                <span class="flex items-center gap-1 text-xs font-bold text-brand-yellow bg-brand-yellow/10 px-2 py-0.5 rounded-lg border border-brand-yellow/20">
-                                    <i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
-                                    <span id="riderRating">4.92</span>
-                                </span>
-                                <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-lg border border-emerald-500/20" id="riderLevel">
-                                    <i class="fa-solid fa-crown text-[10px] mr-1"></i> Diamond Level
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Incentive Progress Bar -->
-                <div class="mt-4 pt-4 border-t border-brand-border/60 relative z-10">
-                    <div class="flex items-center justify-between text-xs mb-1.5">
-                        <span class="text-brand-gray font-semibold">Daily Bonus Goal (8/12 Trips)</span>
-                        <span class="text-brand-yellow font-extrabold">₹350 Reward</span>
-                    </div>
-                    <div class="w-full bg-brand-dark rounded-full h-2.5 overflow-hidden border border-brand-border">
-                        <div class="bg-gradient-to-r from-brand-yellowDark to-brand-yellow h-2.5 rounded-full transition-all duration-500" style="width: 66%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Earnings Quick Metrics Grid (2 Cols span) -->
-            <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
-                
-                <!-- Today's Earnings -->
-                <div class="glass-card glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-brand-gray mb-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wider">Today's Pay</span>
-                        <div class="w-7 h-7 rounded-lg bg-brand-yellow/10 text-brand-yellow flex items-center justify-center">
-                            <i class="fa-solid fa-indian-rupee-sign text-xs"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 id="statTodayEarnings" class="text-xl font-extrabold text-brand-yellow">₹1,840.50</h3>
-                        <p class="text-[10px] text-emerald-400 font-semibold mt-0.5"><i class="fa-solid fa-arrow-trend-up"></i> +18% vs yesterday</p>
-                    </div>
-                </div>
-
-                <!-- Weekly Earnings -->
-                <div class="glass-card glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-brand-gray mb-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wider">This Week</span>
-                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                            <i class="fa-solid fa-calendar-week text-xs"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 id="statWeeklyEarnings" class="text-xl font-extrabold text-white">₹12,450.00</h3>
-                        <p class="text-[10px] text-brand-gray font-semibold mt-0.5">42 Trips completed</p>
-                    </div>
-                </div>
-
-                <!-- Monthly Earnings -->
-                <div class="glass-card glass-card-interactive rounded-2xl p-4 flex flex-col justify-between">
-                    <div class="flex items-center justify-between text-brand-gray mb-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wider">This Month</span>
-                        <div class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                            <i class="fa-solid fa-chart-line text-xs"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 id="statMonthlyEarnings" class="text-xl font-extrabold text-white">₹48,920.00</h3>
-                        <p class="text-[10px] text-emerald-400 font-semibold mt-0.5">Target 85% reached</p>
-                    </div>
-                </div>
-
-                <!-- Wallet Balance -->
-                <div class="glass-card glass-card-interactive rounded-2xl p-4 flex flex-col justify-between border-brand-yellow/30">
-                    <div class="flex items-center justify-between text-brand-gray mb-2">
-                        <span class="text-[11px] font-bold uppercase tracking-wider">Wallet Cash</span>
-                        <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                            <i class="fa-solid fa-wallet text-xs"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 id="statWalletBalance" class="text-xl font-extrabold text-emerald-400">₹3,120.00</h3>
-                        <a href="./Wallet.html" class="text-[10px] text-brand-yellow font-bold underline mt-0.5 inline-block">Instant Cashout &rarr;</a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Middle Section: Performance KPIs + Active Incoming Ride Overlay + Interactive Live Map -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-            <!-- Left Sidebar KPIs & Bonus Card (4 Cols) -->
-            <div class="lg:col-span-4 space-y-6">
-
-                <!-- Performance Metrics Grid -->
-                <div class="glass-card rounded-2xl p-5 space-y-4">
-                    <h3 class="text-xs font-bold text-white uppercase tracking-wider border-b border-brand-border/60 pb-3 flex items-center justify-between">
-                        <span>Captain Performance Score</span>
-                        <i class="fa-solid fa-gauge-high text-brand-yellow"></i>
-                    </h3>
-
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-brand-dark/70 p-3 rounded-xl border border-brand-border">
-                            <p class="text-[10px] text-brand-gray font-semibold">Acceptance</p>
-                            <p id="kpiAcceptance" class="text-base font-extrabold text-emerald-400 mt-1">96%</p>
-                        </div>
-                        <div class="bg-brand-dark/70 p-3 rounded-xl border border-brand-border">
-                            <p class="text-[10px] text-brand-gray font-semibold">Cancellation</p>
-                            <p id="kpiCancellation" class="text-base font-extrabold text-rose-400 mt-1">1.2%</p>
-                        </div>
-                        <div class="bg-brand-dark/70 p-3 rounded-xl border border-brand-border">
-                            <p class="text-[10px] text-brand-gray font-semibold">Total Rides</p>
-                            <p id="kpiTotalTrips" class="text-base font-extrabold text-white mt-1">1,248</p>
-                        </div>
-                    </div>
-
-                    <!-- Customer Feedback Summary -->
-                    <div class="bg-brand-dark/50 p-3.5 rounded-xl border border-brand-border/80 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-amber-400/10 text-amber-400 flex items-center justify-center">
-                                <i class="fa-solid fa-thumbs-up text-xs"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-white">Customer Rating</p>
-                                <p class="text-[10px] text-brand-gray">Based on last 500 reviews</p>
-                            </div>
-                        </div>
-                        <span class="text-sm font-extrabold text-brand-yellow">4.92 / 5</span>
-                    </div>
-                </div>
-
-                <!-- Incentive & Bonus Card -->
-                <div class="glass-card rounded-2xl p-5 border-brand-yellow/40 bg-gradient-to-br from-brand-card via-brand-dark to-brand-black relative overflow-hidden">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-brand-yellow text-brand-black uppercase">PEAK HOUR EXTRA</span>
-                        <span class="text-xs font-bold text-brand-yellow"><i class="fa-solid fa-fire mr-1"></i> 1.5x Surge</span>
-                    </div>
-                    <h4 class="text-sm font-extrabold text-white">Weekend Super Rider Bonus</h4>
-                    <p class="text-xs text-brand-gray mt-1">Complete 15 rides in South Mumbai today to unlock a flat ₹500 extra bonus!</p>
-                    
-                    <div class="mt-4 flex items-center justify-between">
-                        <div class="text-xs font-bold text-white">
-                            Status: <span class="text-emerald-400">Active</span>
-                        </div>
-                        <button onclick="claimIncentiveDetails()" class="px-3.5 py-1.5 rounded-xl bg-brand-yellow/10 border border-brand-yellow/30 text-brand-yellow text-xs font-bold hover:bg-brand-yellow hover:text-brand-black transition">
-                            View Terms
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Heat Map Zone Guide -->
-                <div class="glass-card rounded-2xl p-5 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-map-location-dot text-brand-yellow"></i> High Demand Surge Heatmap
-                        </h4>
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    </div>
-                    <p class="text-[11px] text-brand-gray">Position yourself near these locations for back-to-back instant ride requests:</p>
-                    
-                    <div class="space-y-2 pt-1 text-xs">
-                        <div class="flex items-center justify-between bg-brand-dark p-2.5 rounded-xl border border-brand-border">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                                <span class="font-bold text-white">Bandra Kurla Complex (BKC)</span>
-                            </div>
-                            <span class="font-mono font-bold text-brand-yellow">2.2x Surge</span>
-                        </div>
-                        <div class="flex items-center justify-between bg-brand-dark p-2.5 rounded-xl border border-brand-border">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-orange-500"></span>
-                                <span class="font-bold text-white">Airport Terminal 2</span>
-                            </div>
-                            <span class="font-mono font-bold text-brand-yellow">1.8x Surge</span>
-                        </div>
-                        <div class="flex items-center justify-between bg-brand-dark p-2.5 rounded-xl border border-brand-border">
-                            <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                                <span class="font-bold text-white">Lower Parel Phoenix</span>
-                            </div>
-                            <span class="font-mono font-bold text-brand-yellow">1.4x Surge</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Right Column: Live GPS Map + Ride Dispatch Card (8 Cols) -->
-            <div class="lg:col-span-8 flex flex-col space-y-6">
-
-                <!-- INCOMING RIDE REQUEST POPUP CARD (Dynamic Overlay) -->
-                <div id="incomingRequestCard" class="glass-card rounded-2xl p-6 border-2 border-brand-yellow request-card-glow hidden relative transition-all duration-300">
-                    <div class="flex items-center justify-between border-b border-brand-border/80 pb-4 mb-4">
-                        <div class="flex items-center gap-3">
-                            <span class="px-3 py-1 rounded-full bg-brand-yellow text-brand-black text-xs font-black uppercase tracking-wider animate-pulse">
-                                INCOMING RIDE REQUEST
-                            </span>
-                            <span class="text-xs text-brand-gray font-mono" id="requestTimer">Auto-Reject in <strong class="text-brand-yellow font-bold" id="secondsLeft">15</strong>s</span>
-                        </div>
-                        <span class="text-2xl font-black text-brand-yellow font-mono" id="reqFare">₹245.00</span>
-                    </div>
-
-                    <!-- Customer Profile & Pickup/Destination -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        
-                        <!-- Customer Info -->
-                        <div class="flex items-center gap-3 bg-brand-dark p-3 rounded-xl border border-brand-border">
-                            <img id="reqCustomerPhoto" src="https://ui-avatars.com/api/?name=Ananya+Sharma&background=2A2E3D&color=FFF" class="w-12 h-12 rounded-xl object-cover border border-brand-border" alt="Customer Photo">
-                            <div>
-                                <h4 id="reqCustomerName" class="text-sm font-extrabold text-white">Ananya Sharma</h4>
-                                <div class="flex items-center gap-2 text-xs text-brand-gray mt-0.5">
-                                    <span class="text-amber-400 font-bold"><i class="fa-solid fa-star"></i> 4.88</span>
-                                    <span>•</span>
-                                    <span>Payment: <strong class="text-emerald-400">RiderX Wallet</strong></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Distance & Time -->
-                        <div class="flex items-center justify-around bg-brand-dark p-3 rounded-xl border border-brand-border text-center">
-                            <div>
-                                <p class="text-[10px] text-brand-gray font-semibold uppercase">Pickup Dist</p>
-                                <p id="reqPickupDist" class="text-sm font-extrabold text-white">1.2 km</p>
-                            </div>
-                            <div class="w-px h-8 bg-brand-border"></div>
-                            <div>
-                                <p class="text-[10px] text-brand-gray font-semibold uppercase">Est. Trip</p>
-                                <p id="reqTripDist" class="text-sm font-extrabold text-white">8.4 km (22 mins)</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Location Route -->
-                    <div class="mt-4 space-y-3 bg-brand-dark/60 p-4 rounded-xl border border-brand-border/60 text-xs">
-                        <div class="flex items-start gap-3">
-                            <div class="flex flex-col items-center mt-1">
-                                <i class="fa-solid fa-circle text-emerald-400 text-[10px]"></i>
-                                <div class="w-0.5 h-6 bg-brand-border"></div>
-                                <i class="fa-solid fa-location-dot text-brand-yellow text-[12px]"></i>
-                            </div>
-                            <div class="space-y-2 flex-grow">
-                                <div>
-                                    <p class="text-[10px] text-brand-gray uppercase font-bold">PICKUP LOCATION</p>
-                                    <p id="reqPickupAddress" class="font-bold text-white">Terminal 2 Departure Gate 4, Chhatrapati Shivaji Airport</p>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-brand-gray uppercase font-bold">DROP DESTINATION</p>
-                                    <p id="reqDropAddress" class="font-bold text-white">One BKC, G Block, Bandra Kurla Complex, Mumbai</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="mt-5 grid grid-cols-2 gap-4">
-                        <button onclick="declineRideRequest()" class="py-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 font-extrabold text-xs hover:bg-red-500 hover:text-white transition uppercase tracking-wider">
-                            Decline Ride
-                        </button>
-                        <button onclick="acceptRideRequest()" class="py-3.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition shadow-lg shadow-brand-yellow/20 uppercase tracking-wider flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-circle-check text-sm"></i> Accept Ride Pass
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Live Map GPS Container -->
-                <div class="glass-card rounded-2xl p-4 flex-grow flex flex-col relative min-h-[460px] overflow-hidden">
-                    
-                    <!-- Map Controls Bar -->
-                    <div class="flex items-center justify-between mb-3 z-10 relative">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-brand-yellow animate-ping"></span>
-                            <h3 class="text-xs font-bold text-white uppercase tracking-wider">Live GPS Fleet Radar</h3>
-                        </div>
-
-                        <div class="flex items-center gap-2">
-                            <button onclick="recenterMap()" class="px-3 py-1.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-crosshairs text-brand-yellow"></i> Recenter GPS
-                            </button>
-                            <button onclick="simulateSearchNearbyRides()" class="px-3 py-1.5 rounded-xl bg-brand-yellow text-brand-black font-bold text-xs hover:bg-yellow-300 transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-radar text-sm"></i> Scan Nearby
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Leaflet OpenStreetMap Container -->
-                    <div id="riderMap" class="w-full h-full min-h-[380px] rounded-xl z-0 border border-brand-border/60"></div>
-
-                    <!-- Floating Navigation Controls Overlay -->
-                    <div class="absolute bottom-6 right-6 z-10 flex flex-col gap-2">
-                        <button onclick="openExternalNavigation()" class="px-4 py-2.5 rounded-xl bg-brand-black/90 text-brand-yellow border border-brand-yellow/40 font-bold text-xs hover:bg-brand-yellow hover:text-brand-black transition shadow-xl flex items-center gap-2">
-                            <i class="fa-solid fa-diamond-turn-right text-sm"></i> Start Turn-by-Turn GPS
-                        </button>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </main>
-
-    <!-- Mobile Navigation Drawer / Bar -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 border-t border-brand-border backdrop-blur-lg px-6 py-2.5">
-        <div class="flex items-center justify-between max-w-md mx-auto">
-            <a href="./Home.html" class="flex flex-col items-center gap-1 text-brand-yellow font-bold">
-                <i class="fa-solid fa-gauge-high text-base"></i>
-                <span class="text-[10px]">Dashboard</span>
-            </a>
-            <a href="./Earnings.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-chart-line text-base"></i>
-                <span class="text-[10px]">Earnings</span>
-            </a>
-            <a href="./Wallet.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-wallet text-base"></i>
-                <span class="text-[10px]">Wallet</span>
-            </a>
-            <a href="./Profile.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-user-gear text-base"></i>
-                <span class="text-[10px]">Account</span>
-            </a>
-        </div>
-    </nav>
-
-    <!-- App Dynamic Scripts -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/App.js"></script>
-    <script type="module" src="../js/Map.js"></script>
-    <script type="module" src="../js/Notification.js"></script>
-
-    <!-- Rider Dashboard Live Controller Script -->
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        let currentRider = null;
-        let map = null;
-        let riderMarker = null;
-        let currentPos = { lat: 19.0760, lng: 72.8777 }; // Default Mumbai Coordinates
-        let countdownInterval = null;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            initMap();
-            
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    // Redirect if unauthenticated
-                    window.location.href = '../auth/rider-login.html';
-                    return;
-                }
-                currentRider = user;
-                loadRiderProfile(user.uid);
-                listenToRideRequests(user.uid);
-            });
-        });
-
-        // Initialize Dark-themed Leaflet OpenStreetMap
-        function initMap() {
-            map = L.map('riderMap', {
-                zoomControl: true,
-                attributionControl: false
-            }).setView([currentPos.lat, currentPos.lng], 14);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
-            }).addTo(map);
-
-            // Custom Rider Bike/Car Marker Icon
-            const captainIcon = L.divIcon({
-                className: 'custom-captain-icon',
-                html: `<div class="w-10 h-10 rounded-full bg-brand-yellow text-brand-black flex items-center justify-center border-2 border-brand-black shadow-2xl text-lg font-black"><i class="fa-solid fa-motorcycle"></i></div>`,
-                iconSize: [40, 40],
-                iconAnchor: [20, 20]
-            });
-
-            riderMarker = L.marker([currentPos.lat, currentPos.lng], { icon: captainIcon }).addTo(map);
-
-            // Fetch Real Geolocation if available
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        currentPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                        map.setView([currentPos.lat, currentPos.lng], 15);
-                        riderMarker.setLatLng([currentPos.lat, currentPos.lng]);
-                    },
-                    (err) => console.log("GPS Location fallback used:", err),
-                    { enableHighAccuracy: true }
-                );
-            }
-        }
-
-        // Load Rider Profile Data from Firestore
-        async function loadRiderProfile(uid) {
-            try {
-                const riderRef = doc(db, "riders", uid);
-                const docSnap = await getDoc(riderRef);
-
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    document.getElementById('riderName').innerText = data.fullName || 'Captain Rider';
-                    document.getElementById('riderVehicle').innerText = `${data.vehicleModel || 'Vehicle'} • ${data.vehicleNumber || 'MH--'}`;
-                    document.getElementById('riderRating').innerText = data.rating || '4.95';
-                    
-                    if (data.photoURL) {
-                        document.getElementById('riderProfilePhoto').src = data.photoURL;
-                        document.getElementById('navRiderPhoto').src = data.photoURL;
-                    }
-
-                    // Set Duty Status
-                    const isOnline = data.isOnline || false;
-                    document.getElementById('toggleOnline').checked = isOnline;
-                    updateDutyUI(isOnline);
-                } else {
-                    document.getElementById('riderName').innerText = currentRider.displayName || 'Captain Pro';
-                }
-            } catch (err) {
-                console.error("Error loading rider profile:", err);
-            }
-        }
-
-        // Toggle Duty Status Online / Offline
-        window.toggleDutyStatus = async function(isOnline) {
-            updateDutyUI(isOnline);
-            if (!currentRider) return;
-
-            try {
-                await updateDoc(doc(db, "riders", currentRider.uid), {
-                    isOnline: isOnline,
-                    lastLocation: currentPos,
-                    updatedAt: new Date()
-                });
-            } catch (e) {
-                console.error("Duty status update error:", e);
-            }
-        };
-
-        function updateDutyUI(isOnline) {
-            const indicator = document.getElementById('statusIndicator');
-            const text = document.getElementById('statusText');
-
-            if (isOnline) {
-                indicator.className = "w-3 h-3 rounded-full bg-emerald-400 online-glow";
-                text.className = "text-xs font-bold text-emerald-400 uppercase tracking-wide";
-                text.innerText = "ONLINE";
-            } else {
-                indicator.className = "w-3 h-3 rounded-full bg-red-500";
-                text.className = "text-xs font-bold text-red-400 uppercase tracking-wide";
-                text.innerText = "OFFLINE";
-                hideIncomingRequest();
-            }
-        }
-
-        // Listen for Incoming Real-Time Ride Requests
-        function listenToRideRequests(riderId) {
-            const q = query(
-                collection(db, "bookings"),
-                where("status", "==", "SEARCHING")
-            );
-
-            onSnapshot(q, (snapshot) => {
-                const isOnline = document.getElementById('toggleOnline').checked;
-                if (!isOnline) return;
-
-                snapshot.docChanges().forEach((change) => {
-                    if (change.type === "added") {
-                        const ride = change.doc.data();
-                        showIncomingRequest(ride, change.doc.id);
-                    }
-                });
-            });
-        }
-
-        // Render Incoming Ride Request Card Overlay
-        function showIncomingRequest(ride, bookingId) {
-            const card = document.getElementById('incomingRequestCard');
-            card.classList.remove('hidden');
-
-            document.getElementById('reqFare').innerText = `₹${ride.fareAmount || '245.00'}`;
-            document.getElementById('reqCustomerName').innerText = ride.customerName || 'Ananya Sharma';
-            document.getElementById('reqPickupDist').innerText = `${ride.pickupDistance || '1.2'} km`;
-            document.getElementById('reqTripDist').innerText = `${ride.tripDistance || '8.4'} km (${ride.duration || '22 mins'})`;
-            document.getElementById('reqPickupAddress').innerText = ride.pickupAddress || 'Chhatrapati Shivaji Maharaj International Airport (T2)';
-            document.getElementById('reqDropAddress').innerText = ride.dropAddress || 'One BKC, Bandra Kurla Complex, Mumbai';
-
-            // Start 15-second countdown timer
-            let seconds = 15;
-            document.getElementById('secondsLeft').innerText = seconds;
-            
-            clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                seconds--;
-                document.getElementById('secondsLeft').innerText = seconds;
-                if (seconds <= 0) {
-                    clearInterval(countdownInterval);
-                    declineRideRequest();
-                }
-            }, 1000);
-        }
-
-        window.acceptRideRequest = function() {
-            clearInterval(countdownInterval);
-            alert("Ride Accepted! Navigating to Pickup Point...");
-            hideIncomingRequest();
-            // Redirect to active ride execution screen if applicable
-            window.location.href = './ActiveRide.html';
-        };
-
-        window.declineRideRequest = function() {
-            clearInterval(countdownInterval);
-            hideIncomingRequest();
-        };
-
-        function hideIncomingRequest() {
-            document.getElementById('incomingRequestCard').classList.add('hidden');
-        }
-
-        // Helper Actions
-        window.recenterMap = function() {
-            if (map && riderMarker) {
-                map.setView([currentPos.lat, currentPos.lng], 16);
-            }
-        };
-
-        window.simulateSearchNearbyRides = function() {
-            const isOnline = document.getElementById('toggleOnline').checked;
-            if (!isOnline) {
-                alert("Please go ONLINE first to scan for nearby rides!");
-                return;
-            }
-            showIncomingRequest({
-                fareAmount: "310.50",
-                customerName: "Rahul Verma",
-                pickupDistance: "0.8",
-                tripDistance: "11.2",
-                duration: "28 mins",
-                pickupAddress: "Phoenix Palladium, Lower Parel, Mumbai",
-                dropAddress: "Terminal 1 Domestic Airport, Vile Parle"
-            }, "MOCK_BOOKING_123");
-        };
-
-        window.openExternalNavigation = function() {
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentPos.lat},${currentPos.lng}`, '_blank');
-        };
-
-        window.claimIncentiveDetails = function() {
-            alert("Weekend Incentive Active: Complete 15 rides before 11:59 PM today to earn an instant ₹500 payout directly to your wallet.");
-        };
-
-        window.toggleNotificationDrawer = function() {
-            alert("Notifications:\n1. Surge Alert: BKC 2.2x Active\n2. Incentive Update: 4 rides away from ₹350\n3. System: Account Verified");
-        };
-    </script>
+
+
+
+<body>
+
+
+
+<header class="header">
+
+
+<div class="logo">
+
+RID<span>ERX</span>
+
+</div>
+
+
+<i class="fa-solid fa-user"></i>
+
+
+</header>
+
+
+
+
+
+
+
+<div class="status">
+
+
+<button id="onlineBtn" class="online-btn">
+
+🟢 Go Online
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="earning">
+
+
+<div>
+
+Today's Earning
+
+</div>
+
+
+<div class="amount">
+
+₹0
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+New Ride Request
+
+</h3>
+
+
+<p>
+
+Customer: Waiting...
+
+</p>
+
+
+<p>
+
+Pickup: Chandigarh
+
+</p>
+
+
+<p>
+
+Drop: Destination
+
+</p>
+
+
+<p>
+
+Fare: ₹120
+
+</p>
+
+
+
+
+<div class="ride-buttons">
+
+
+<button class="accept" id="acceptRide">
+
+Accept
+
+</button>
+
+
+<button class="reject">
+
+Reject
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+Ride OTP
+
+</h3>
+
+
+<p>
+
+Customer OTP:
+
+<strong>
+
+0000
+
+</strong>
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="bottom">
+
+
+<div>
+
+<i class="fa-solid fa-house"></i>
+
+<br>
+
+Home
+
+</div>
+
+
+
+<div>
+
+<i class="fa-solid fa-clock"></i>
+
+<br>
+
+Rides
+
+</div>
+
+
+
+
+<div>
+
+<i class="fa-solid fa-wallet"></i>
+
+<br>
+
+Wallet
+
+</div>
+
+
+
+
+<div>
+
+<i class="fa-solid fa-user"></i>
+
+<br>
+
+Profile
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+let online=false;
+
+
+
+document
+.getElementById("onlineBtn")
+.onclick=function(){
+
+
+online=!online;
+
+
+
+if(online){
+
+
+this.innerHTML="🔴 Go Offline";
+
+alert(
+"You are Online. Waiting for rides..."
+);
+
+
+}
+
+else{
+
+
+this.innerHTML="🟢 Go Online";
+
+
+}
+
+
+
+};
+
+
+
+
+
+document
+.getElementById("acceptRide")
+.onclick=function(){
+
+
+alert(
+"Ride Accepted. Start OTP verification."
+);
+
+
+};
+
+
+
+
+
+</script>
+
+
+
+
 </body>
+
 </html>
