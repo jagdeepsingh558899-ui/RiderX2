@@ -4,17 +4,14 @@
 // Firebase v10 Compatible
 // =====================================
 
-
 import {
     auth,
     db
 } from "../firebase/firebase-config.js";
 
-
 import {
     signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
 
 import {
     doc,
@@ -23,16 +20,21 @@ import {
 
 
 
+const loginForm = document.getElementById("login-form");
+const message = document.getElementById("error-message");
 
 
-const loginForm =
-document.getElementById("login-form");
 
+function showMessage(text){
 
-const message =
-document.getElementById("error-message");
+    if(message){
 
+        message.style.display = "block";
+        message.innerHTML = text;
 
+    }
+
+}
 
 
 
@@ -41,14 +43,12 @@ document.getElementById("error-message");
 if(loginForm){
 
 
-
 loginForm.addEventListener(
 "submit",
 async(e)=>{
 
 
 e.preventDefault();
-
 
 
 
@@ -65,39 +65,28 @@ document.getElementById("password")
 
 
 
+if(!email || !password){
+
+showMessage("Please enter email and password");
+return;
+
+}
 
 
 
 try{
 
 
-
-if(message){
-
-message.style.display="block";
-
-message.innerHTML =
-"Logging in...";
-
-}
-
-
+showMessage("Logging in...");
 
 
 
 const result =
-
 await signInWithEmailAndPassword(
-
 auth,
-
 email,
-
 password
-
 );
-
-
 
 
 
@@ -107,33 +96,28 @@ result.user;
 
 
 
-
-const snap =
-
+const userSnap =
 await getDoc(
-
 doc(
 db,
 "users",
 user.uid
 )
-
 );
 
 
 
 
 
+if(!userSnap.exists()){
 
-if(!snap.exists()){
 
-
-message.innerHTML =
-"Profile not found";
+showMessage(
+"User profile not found"
+);
 
 
 return;
-
 
 }
 
@@ -142,18 +126,20 @@ return;
 
 
 const data =
-snap.data();
+userSnap.data();
+
+
+// Debug check
+console.log(
+"RiderX User Data:",
+data
+);
 
 
 
-
-
-
-message.innerHTML =
-"Login Successful";
-
-
-
+showMessage(
+"Login Successful"
+);
 
 
 
@@ -163,15 +149,12 @@ setTimeout(()=>{
 
 
 
-
-
-
 // ADMIN
 
-if(data.role==="admin"){
+if(data.role === "admin"){
 
 
-location.href =
+window.location.href =
 "../admin/dashboard.html";
 
 
@@ -179,24 +162,19 @@ location.href =
 
 
 
-
-
-
-
 // RIDER
 
-else if(data.role==="rider"){
+else if(data.role === "rider"){
 
 
 
 if(
-data.approved===true &&
-data.status==="active"
-
+data.approved === true &&
+data.status === "active"
 ){
 
 
-location.href =
+window.location.href =
 "../rider/home.html";
 
 
@@ -205,7 +183,7 @@ location.href =
 else{
 
 
-location.href =
+window.location.href =
 "../rider/pending.html";
 
 
@@ -217,23 +195,16 @@ location.href =
 
 
 
-
-
-
-
-
 // CUSTOMER
 
 else{
 
 
-location.href =
+window.location.href =
 "../customer/home.html";
 
 
 }
-
-
 
 
 
@@ -247,23 +218,19 @@ location.href =
 
 }
 
-
-
 catch(error){
 
 
-
-if(message){
-
-
-message.style.display="block";
-
-
-message.innerHTML =
-error.message;
+console.error(
+"Login Error:",
+error
+);
 
 
-}
+
+showMessage(
+error.message
+);
 
 
 
@@ -272,7 +239,6 @@ error.message;
 
 
 });
-
 
 
 }
