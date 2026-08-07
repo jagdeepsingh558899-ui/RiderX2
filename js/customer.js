@@ -313,15 +313,15 @@ bottom[0].onclick=
 
 
 bottom[1].onclick=
-()=>openhistory();
+()=>openHistory();
 
 
 bottom[2].onclick=
-()=>openwallet();
+()=>openWallet();
 
 
 bottom[3].onclick=
-()=>openprofile();
+()=>openProfile();
 
 
 }
