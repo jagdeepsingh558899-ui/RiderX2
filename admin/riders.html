@@ -4,11 +4,9 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>RiderX Admin Riders</title>
-
+<title>RiderX Manage Riders</title>
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -16,25 +14,35 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 <style>
 
+:root{
+--yellow:#FFE500;
+--black:#050505;
+--card:#111;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
+
 
 body{
-
-margin:0;
-background:#050505;
+background:var(--black);
 color:white;
-font-family:Arial;
-
+padding-bottom:50px;
 }
+
 
 
 .header{
 
+height:70px;
 background:#111;
-padding:20px;
 display:flex;
-justify-content:space-between;
 align-items:center;
-
+padding:0 20px;
 }
 
 
@@ -48,7 +56,7 @@ font-weight:900;
 
 .logo span{
 
-color:#FFE500;
+color:var(--yellow);
 
 }
 
@@ -62,31 +70,38 @@ padding:20px;
 
 
 
-.card{
+.title{
 
-background:#111;
+font-size:24px;
+font-weight:bold;
+margin-bottom:20px;
+
+}
+
+
+
+.rider-card{
+
+background:var(--card);
 border:1px solid #333;
-border-radius:20px;
-padding:20px;
+border-radius:18px;
+padding:18px;
 margin-bottom:15px;
 
 }
 
 
 
-.name{
+.row{
 
-font-size:20px;
-font-weight:bold;
+margin-bottom:8px;
 
 }
 
 
+.label{
 
-.info{
-
-color:#aaa;
-margin:8px 0;
+color:#999;
 
 }
 
@@ -94,34 +109,28 @@ margin:8px 0;
 
 .status{
 
-color:#FFE500;
+margin-top:10px;
 font-weight:bold;
 
 }
 
 
 
-.btn{
+button{
 
+width:100%;
 padding:12px;
-border:0;
+margin-top:10px;
+border:none;
 border-radius:12px;
+background:var(--yellow);
 font-weight:bold;
-margin:5px;
 
 }
 
 
 
-.approve{
-
-background:#FFE500;
-color:#000;
-
-}
-
-
-.reject{
+.block{
 
 background:#ff3333;
 color:white;
@@ -130,23 +139,27 @@ color:white;
 
 
 
-a{
+.back{
 
-color:#FFE500;
+margin-bottom:20px;
+background:#222;
+color:white;
 
 }
 
 
-
 </style>
 
+
 </head>
+
 
 
 <body>
 
 
-<div class="header">
+
+<header class="header">
 
 
 <div class="logo">
@@ -156,14 +169,8 @@ RID<span>ERX</span>
 </div>
 
 
-<a href="dashboard.html">
+</header>
 
-<i class="fa-solid fa-arrow-left"></i>
-
-</a>
-
-
-</div>
 
 
 
@@ -171,297 +178,41 @@ RID<span>ERX</span>
 <div class="container">
 
 
-<h2>
 
-Rider Management
+<button class="back"
+onclick="history.back()">
 
-</h2>
+← Back
+
+</button>
+
+
+
+
+<div class="title">
+
+Manage Riders
+
+</div>
+
 
 
 <div id="riderList">
 
-
-Loading...
-
-</div>
-
+Loading Riders...
 
 </div>
 
 
-
-
-
-
-
-
-<script type="module">
-
-
-import {
-
-db
-
-}
-
-from "../firebase/firebase-config.js";
-
-
-
-import {
-
-collection,
-getDocs,
-doc,
-updateDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-
-
-
-
-const riderList =
-document.getElementById("riderList");
-
-
-
-
-
-async function loadRiders(){
-
-
-riderList.innerHTML="";
-
-
-
-const snap =
-await getDocs(
-collection(db,"users")
-);
-
-
-
-snap.forEach((item)=>{
-
-
-const rider =
-item.data();
-
-
-
-if(rider.role==="rider"){
-
-
-
-let box =
-document.createElement("div");
-
-
-
-box.className="card";
-
-
-
-box.innerHTML=`
-
-<div class="name">
-
-${rider.fullName || "Rider"}
-
-</div>
-
-
-<div class="info">
-
-Phone:
-${rider.phone || "-"}
-
-</div>
-
-
-
-<div class="info">
-
-Vehicle:
-${rider.vehicleType || "-"}
-
-</div>
-
-
-
-<div class="info">
-
-Number:
-${rider.vehicleNumber || "-"}
 
 </div>
 
 
 
 
-<div class="status">
+<script type="module"
+src="./js/riders.js"></script>
 
-Status:
-${rider.status || "pending"}
-
-</div>
-
-
-
-
-<br>
-
-
-<a target="_blank"
-href="${rider.rc || '#'}">
-
-View RC
-
-</a>
-
-
-&nbsp;
-
-
-<a target="_blank"
-href="${rider.license || '#'}">
-
-View License
-
-</a>
-
-
-<br><br>
-
-
-
-<button class="btn approve">
-
-Approve
-
-</button>
-
-
-<button class="btn reject">
-
-Reject
-
-</button>
-
-
-
-`;
-
-
-
-
-
-box.querySelector(".approve")
-.onclick=()=>approveRider(item.id);
-
-
-
-box.querySelector(".reject")
-.onclick=()=>rejectRider(item.id);
-
-
-
-
-riderList.appendChild(box);
-
-
-
-}
-
-
-
-});
-
-
-}
-
-
-
-
-
-async function approveRider(id){
-
-
-await updateDoc(
-
-doc(db,"users",id),
-
-{
-
-
-approved:true,
-
-status:"active"
-
-
-}
-
-);
-
-
-
-alert("Rider Approved");
-
-
-loadRiders();
-
-
-}
-
-
-
-
-
-
-async function rejectRider(id){
-
-
-await updateDoc(
-
-doc(db,"users",id),
-
-{
-
-
-approved:false,
-
-status:"rejected"
-
-
-}
-
-);
-
-
-
-alert("Rider Rejected");
-
-
-loadRiders();
-
-
-}
-
-
-
-
-
-
-
-loadRiders();
-
-
-
-</script>
 
 
 </body>
