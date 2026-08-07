@@ -1,109 +1,204 @@
-// RiderX Authentication Guard
+// =====================================
+// RiderX Authentication System
+// Customer + Rider + Admin Redirect
 // Firebase v10 Compatible
+// =====================================
+
 
 import {
+
 auth,
-db,
-signOut,
+db
+
+} from "../firebase/firebase-config.js";
+
+
+import {
+
 onAuthStateChanged,
+signOut
+
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+
+import {
+
 doc,
 getDoc
-}
-from "../firebase/firebase-config.js";
+
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-// ===============================
+
+
+// =====================================
 // ROLE REDIRECT
-// ===============================
+// =====================================
+
 
 async function redirectByRole(uid){
 
+
 try{
 
-const snap = await getDoc(
-doc(db,"users",uid)
+
+const userSnap = await getDoc(
+
+doc(
+db,
+"users",
+uid
+)
+
 );
 
 
-if(!snap.exists()){
 
-console.log("User profile missing");
+
+
+if(!userSnap.exists()){
+
+
+console.log(
+"User data not found"
+);
+
+
 return;
+
 
 }
 
 
-const user = snap.data();
 
+
+
+const user = userSnap.data();
+
+
+
+
+
+// ADMIN
 
 if(user.role==="admin"){
 
-window.location.href="../admin/dashboard.html";
+
+window.location.href =
+"../admin/dashboard.html";
+
+
+return;
+
 
 }
 
 
-else if(user.role==="rider"){
 
 
-if(user.approved===true){
 
-window.location.href="../rider/home.html";
+
+
+// RIDER
+
+if(user.role==="rider"){
+
+
+
+if(
+user.approved===true &&
+user.status==="active"
+
+){
+
+
+window.location.href =
+"../rider/home.html";
+
 
 }
 
 else{
 
-window.location.href="../rider/pending.html";
 
-}
-
-
-}
-
-
-else{
-
-
-window.location.href="../customer/home.html";
+window.location.href =
+"../rider/pending.html";
 
 
 }
 
 
 
+return;
+
+
 }
+
+
+
+
+
+
+
+// CUSTOMER
+
+
+window.location.href =
+"../customer/home.html";
+
+
+
+
+
+}
+
 
 catch(error){
+
 
 console.error(
 "Redirect Error:",
 error
 );
 
-}
-
 
 }
 
 
 
+}
 
 
-// ===============================
+
+
+
+
+
+
+// =====================================
 // AUTH CHECK
-// ===============================
+// =====================================
+
 
 onAuthStateChanged(
+
 auth,
+
 (user)=>{
 
 
-if(!user){
+if(user){
 
-return;
+
+redirectByRole(
+user.uid
+);
+
+
 
 }
+
+else{
 
 
 const path =
@@ -111,10 +206,21 @@ window.location.pathname;
 
 
 
-if(path.includes("/auth/")){
+if(
+
+path.includes("/customer/") ||
+path.includes("/rider/") ||
+path.includes("/admin/")
+
+){
 
 
-redirectByRole(user.uid);
+window.location.href =
+"../auth/login.html";
+
+
+}
+
 
 
 }
@@ -128,27 +234,37 @@ redirectByRole(user.uid);
 
 
 
-// ===============================
+
+
+
+// =====================================
 // LOGOUT
-// ===============================
+// =====================================
+
 
 export async function logoutUser(){
 
 
 try{
 
+
 await signOut(auth);
 
-window.location.href="../auth/login.html";
+
+window.location.href =
+"../auth/login.html";
 
 
 }
 
 catch(error){
 
-console.error(error);
+
+console.log(error);
+
 
 }
+
 
 
 }
