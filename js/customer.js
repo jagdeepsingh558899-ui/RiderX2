@@ -1,36 +1,25 @@
-// RiderX Customer Engine
-// Map + GPS + Fare + Ride Booking
-// Firebase v10 Modular SDK
+// RiderX Customer Dashboard Engine
+// Map + GPS + Fare + Firebase Ride Booking
 
 
 import {
-
 auth,
 db,
-doc,
-addDoc,
 collection,
+addDoc,
 serverTimestamp
-
 }
-
 from "../firebase/firebase-config.js";
 
 
-
-
-
-let map;
-let userMarker;
-
 let selectedService = "bike";
 
+let map;
+let marker;
 
 
 
-
-
-const fares = {
+const fareRates = {
 
 bike:{
 base:20,
@@ -57,32 +46,31 @@ perKm:9
 
 
 
-
-
-
-// ===============================
-// INIT MAP
-// ===============================
+// ================= MAP =================
 
 
 function initMap(){
 
 
-if(!document.getElementById("map"))
-return;
+const mapBox=document.getElementById("map");
+
+
+if(!mapBox) return;
 
 
 
-map = L.map("map").setView(
+map=L.map("map")
+.setView(
 [30.7333,76.7794],
-14
+13
 );
 
 
 
-
 L.tileLayer(
+
 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
 {
 
 maxZoom:19,
@@ -95,62 +83,17 @@ attribution:"© OpenStreetMap"
 
 
 
-startGPS();
+if(navigator.geolocation){
 
 
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// GPS
-// ===============================
-
-
-function startGPS(){
-
-
-
-if(!navigator.geolocation){
-
-alert("GPS not supported");
-
-return;
-
-}
-
-
-
-
-navigator.geolocation.watchPosition(
+navigator.geolocation.getCurrentPosition(
 
 (position)=>{
 
 
-const lat =
-position.coords.latitude;
+let lat=position.coords.latitude;
+let lng=position.coords.longitude;
 
-
-const lng =
-position.coords.longitude;
-
-
-
-
-if(!userMarker){
-
-
-userMarker =
-L.marker([lat,lng])
-.addTo(map)
-.bindPopup("You are here")
-.openPopup();
 
 
 map.setView(
@@ -160,42 +103,24 @@ map.setView(
 
 
 
-}
-
-else{
-
-
-userMarker.setLatLng(
+marker=L.marker(
 [lat,lng]
-);
+)
+.addTo(map)
+.bindPopup(
+"Your Location"
+)
+.openPopup();
+
 
 
 }
 
-
-
-},
-
-
-(error)=>{
-
-console.log(
-"GPS Error",
-error
 );
 
-},
 
-
-{
-
-enableHighAccuracy:true
 
 }
-
-
-
-);
 
 
 }
@@ -203,67 +128,16 @@ enableHighAccuracy:true
 
 
 
+// ================= SERVICE =================
 
-
-
-
-
-// ===============================
-// FARE
-// ===============================
-
-
-function calculateFare(){
-
-
-
-const distance = 5;
-
-
-
-const fareData =
-fares[selectedService];
-
-
-
-const total =
-fareData.base +
-(
-fareData.perKm *
-distance
-);
-
-
-
-document.getElementById("fare")
-.innerText =
-"₹"+Math.round(total);
-
-
-
-return Math.round(total);
-
-
-}
-
-
-
-
-
-
-
-
-// ===============================
-// SERVICE SELECT
-// ===============================
 
 
 document
 .querySelectorAll(".service")
-.forEach((item)=>{
+.forEach(item=>{
 
 
-item.onclick = ()=>{
+item.onclick=()=>{
 
 
 document
@@ -277,13 +151,13 @@ x.classList.remove("active")
 item.classList.add("active");
 
 
-
-selectedService =
-item.dataset.service;
+selectedService=
+item.dataset.type;
 
 
 
 calculateFare();
+
 
 
 };
@@ -295,30 +169,54 @@ calculateFare();
 
 
 
+// ================= FARE =================
+
+
+
+function calculateFare(){
+
+
+let distance=5;
+
+
+let data=
+fareRates[selectedService];
+
+
+let total=
+data.base+
+(data.perKm*distance);
+
+
+
+document
+.getElementById("fare")
+.innerText=
+"₹"+total;
+
+
+
+return total;
+
+
+}
 
 
 
 
-// ===============================
-// BOOK RIDE
-// ===============================
 
 
-const bookBtn =
-document.getElementById("bookRide");
+// ================= BOOK RIDE =================
 
 
 
-if(bookBtn){
+document
+.getElementById("bookRide")
+.onclick=async()=>{
 
 
 
-bookBtn.onclick =
-async ()=>{
-
-
-
-const user =
+const user=
 auth.currentUser;
 
 
@@ -327,40 +225,35 @@ if(!user){
 
 
 alert(
-"Please login first"
+"Please Login First"
 );
 
 
-window.location.href =
+location.href=
 "../auth/login.html";
 
 
 return;
 
+
 }
 
 
 
-
-
-const pickup =
-document
-.getElementById("pickupLocation")
-.value;
+let pickup=
+document.getElementById("pickup").value;
 
 
 
-const drop =
-document
-.getElementById("dropoffLocation")
-.value;
+let drop=
+document.getElementById("drop").value;
 
 
 
-const payment =
-document
-.getElementById("paymentMethod")
-.value;
+let payment=
+document.getElementById("payment").value;
+
+
 
 
 
@@ -368,7 +261,7 @@ if(!pickup || !drop){
 
 
 alert(
-"Enter pickup and drop location"
+"Pickup and Drop required"
 );
 
 
@@ -379,12 +272,10 @@ return;
 
 
 
-
-
 try{
 
 
-const ride = {
+let rideData={
 
 
 customerId:user.uid,
@@ -408,9 +299,7 @@ fare:calculateFare(),
 status:"REQUESTED",
 
 
-createdAt:
-serverTimestamp()
-
+createdAt:serverTimestamp()
 
 
 };
@@ -419,49 +308,21 @@ serverTimestamp()
 
 
 
-const ref =
 await addDoc(
+
 collection(db,"rides"),
-ride
+
+rideData
+
 );
 
 
 
 
 
-document.getElementById(
-"bookingStatus"
-).innerHTML =
-
-
-`
-<div style="
-background:#111;
-padding:15px;
-border-radius:15px;
-margin-top:15px;
-border:1px solid #FFD600">
-
-<h3 style="color:#FFD600">
-
-Ride Requested
-
-</h3>
-
-
-<p>
-Ride ID:
-${ref.id}
-</p>
-
-
-<p>
-Searching RiderX Rider...
-</p>
-
-
-</div>
-`;
+document.getElementById("status")
+.innerHTML=
+"Searching RiderX Rider...";
 
 
 
@@ -485,18 +346,14 @@ error.message
 
 
 
-}
 
 
 
-
-
-
-
-// Start
 
 document.addEventListener(
+
 "DOMContentLoaded",
+
 ()=>{
 
 
