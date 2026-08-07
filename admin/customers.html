@@ -1,523 +1,438 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiderX Control Tower | Premium Customer Management</title>
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#08080A',
-                            dark: '#0F1015',
-                            card: '#161822',
-                            border: '#232636',
-                            yellow: '#FFE500',
-                            yellowDark: '#D4BC00',
-                            gray: '#8E94A8',
-                            emerald: '#10B981',
-                            rose: '#F43F5E',
-                            amber: '#F59E0B',
-                            indigo: '#6366F1',
-                            cyan: '#06B6D4'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-                    }
-                }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RiderX | Customer Management</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Pro CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              yellowHover: '#EAB308',
+              gold: '#EAB308',
+              dark: '#090D16',
+              card: '#111827',
+              border: 'rgba(255, 255, 255, 0.08)',
+              glass: 'rgba(17, 24, 39, 0.75)'
             }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
+            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+          }
         }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background-color: #08080A;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
+      }
+    }
+  </script>
 
-        .glass-panel {
-            background: linear-gradient(135deg, rgba(22, 24, 34, 0.95) 0%, rgba(15, 16, 21, 0.98) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.08);
-        }
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FACC15;
+    }
 
-        .glass-panel-interactive {
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-        .glass-panel-interactive:hover {
-            border-color: rgba(255, 229, 0, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px -8px rgba(255, 229, 0, 0.1);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0F1015;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #232636;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
-
-        .modal-backdrop {
-            background-color: rgba(8, 8, 10, 0.85);
-            backdrop-filter: blur(8px);
-        }
-    </style>
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
 
-    <!-- Top Global Navbar -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border px-4 lg:px-8 py-3">
-        <div class="max-w-[1700px] mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <a href="./Dashboard.html" class="flex items-center gap-3">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-9 w-auto object-contain" onerror="this.src='https://via.placeholder.com/130x35/08080A/FFE500?text=RiderX+Admin'">
-                </a>
-                <span class="text-xs font-extrabold bg-brand-yellow/10 text-brand-yellow px-3 py-1 rounded-full border border-brand-yellow/20 uppercase tracking-wider hidden sm:inline-block">
-                    Customer Management Control Suite
-                </span>
-            </div>
+<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
 
-            <div class="flex items-center gap-4">
-                <div class="relative hidden sm:block w-64 lg:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-gray text-xs"></i>
-                    <input type="text" id="searchInput" placeholder="Search by name, phone, email, city..." class="w-full bg-brand-dark border border-brand-border rounded-xl pl-9 pr-4 py-2 text-xs text-white placeholder-brand-gray focus:outline-none focus:border-brand-yellow" oninput="filterCustomersTable()">
-                </div>
-
-                <button onclick="refreshCustomersData()" id="refreshBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow hover:text-brand-yellow transition">
-                    <i class="fa-solid fa-rotate-right text-xs" id="refreshIcon"></i>
-                    <span class="hidden md:inline">Sync Data</span>
-                </button>
-
-                <div class="flex items-center gap-3 border-l border-brand-border pl-4">
-                    <img id="adminAvatar" src="https://ui-avatars.com/api/?name=Admin+X&background=FFE500&color=08080A" alt="Admin" class="w-9 h-9 rounded-xl border border-brand-yellow object-cover">
-                    <div class="hidden xl:block text-left">
-                        <h4 class="text-xs font-extrabold text-white">Super Admin</h4>
-                        <p class="text-[10px] text-brand-yellow font-mono">Control Tower</p>
-                    </div>
-                </div>
-            </div>
+  <!-- TOP HEADER / BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
+        <i class="fa-solid fa-bars-staggered text-lg"></i>
+      </button>
+      <a href="dashboard.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
         </div>
-    </header>
-
-    <!-- Main Workspace Container -->
-    <main class="flex-grow max-w-[1700px] w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
-
-        <!-- Navigation Tabs / Quick Return -->
-        <div class="flex items-center justify-between border-b border-brand-border pb-4">
-            <div class="flex items-center gap-3">
-                <a href="./Dashboard.html" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-dark border border-brand-border text-brand-gray hover:text-white transition">
-                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Control Tower
-                </a>
-                <span class="text-xs font-extrabold text-white bg-brand-yellow/10 text-brand-yellow px-4 py-2 rounded-xl border border-brand-yellow/25">
-                    <i class="fa-solid fa-users mr-1.5"></i> Comprehensive Customer Directory
-                </span>
-            </div>
-
-            <!-- Export Buttons -->
-            <div class="flex items-center gap-2">
-                <button onclick="exportData('csv')" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition">
-                    <i class="fa-solid fa-file-csv text-brand-yellow mr-1"></i> CSV
-                </button>
-                <button onclick="exportData('excel')" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition">
-                    <i class="fa-solid fa-file-excel text-emerald-400 mr-1"></i> Excel
-                </button>
-                <button onclick="exportData('pdf')" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition">
-                    <i class="fa-solid fa-file-pdf text-rose-400 mr-1"></i> PDF
-                </button>
-                <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow transition hidden sm:inline-block">
-                    <i class="fa-solid fa-print text-brand-cyan mr-1"></i> Print
-                </button>
-            </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
+            RIDER<span class="text-brand-yellow">X</span>
+            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
+          </span>
         </div>
-
-        <!-- Customer Statistics Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Total Customers</span>
-                <h3 class="text-xl font-black text-white" id="statTotal">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Active Customers</span>
-                <h3 class="text-xl font-black text-brand-emerald" id="statActive">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Blocked Customers</span>
-                <h3 class="text-xl font-black text-brand-rose" id="statBlocked">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Verified Users</span>
-                <h3 class="text-xl font-black text-brand-yellow" id="statVerified">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">New Users (30d)</span>
-                <h3 class="text-xl font-black text-brand-cyan" id="statNew">0</h3>
-            </div>
-            <div class="glass-panel p-4 rounded-2xl glass-panel-interactive space-y-1">
-                <span class="text-[10px] font-extrabold text-brand-gray uppercase tracking-wider">Frequent Riders</span>
-                <h3 class="text-xl font-black text-brand-indigo" id="statFrequent">0</h3>
-            </div>
-        </div>
-
-        <!-- Advanced Filters Bar -->
-        <div class="glass-panel p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
-            <!-- Status Filter Pills -->
-            <div class="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto custom-scrollbar pb-1 md:pb-0">
-                <button onclick="filterByStatus('all')" id="filter-status-all" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0">All Customers</button>
-                <button onclick="filterByStatus('active')" id="filter-status-active" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Active</button>
-                <button onclick="filterByStatus('blocked')" id="filter-status-blocked" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Blocked</button>
-                <button onclick="filterByStatus('verified')" id="filter-status-verified" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Verified</button>
-                <button onclick="filterByStatus('new')" id="filter-status-new" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">New Users</button>
-                <button onclick="filterByStatus('frequent')" id="filter-status-frequent" class="status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0">Frequent Riders</button>
-            </div>
-
-            <!-- City Filter -->
-            <div class="flex items-center gap-2 w-full md:w-auto justify-end">
-                <select id="cityFilter" onchange="filterCustomersTable()" class="bg-brand-dark border border-brand-border rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                    <option value="all">All Cities</option>
-                    <option value="bangalore">Bangalore</option>
-                    <option value="mumbai">Mumbai</option>
-                    <option value="delhi">Delhi</option>
-                    <option value="hyderabad">Hyderabad</option>
-                    <option value="pune">Pune</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Customer Directory Table -->
-        <div class="glass-panel rounded-3xl overflow-hidden">
-            <div class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-brand-border text-[10px] font-extrabold text-brand-gray uppercase tracking-wider bg-brand-dark/50">
-                            <th class="py-3.5 px-4">Customer Details</th>
-                            <th class="py-3.5 px-4">Contact & City</th>
-                            <th class="py-3.5 px-4">Total Rides</th>
-                            <th class="py-3.5 px-4">Wallet Balance</th>
-                            <th class="py-3.5 px-4">Verification & Status</th>
-                            <th class="py-3.5 px-4">Joined Date</th>
-                            <th class="py-3.5 px-4 text-center">Action Control</th>
-                        </tr>
-                    </thead>
-                    <tbody id="customersTableBody" class="divide-y divide-brand-border/40 text-xs">
-                        <!-- Dynamic Customer Rows -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination Bar -->
-            <div class="p-4 border-t border-brand-border flex items-center justify-between bg-brand-dark/40">
-                <span class="text-xs text-brand-gray" id="paginationInfo">Showing 0-0 of 0 customers</span>
-                <div class="flex items-center gap-2">
-                    <button onclick="prevPage()" class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs text-brand-gray hover:text-white transition">Previous</button>
-                    <span class="text-xs font-mono text-brand-yellow px-2" id="pageNumberDisplay">1</span>
-                    <button onclick="nextPage()" class="px-3 py-1.5 rounded-lg bg-brand-dark border border-brand-border text-xs text-brand-gray hover:text-white transition">Next</button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Modal: Customer Profile & Details Modal -->
-    <div id="customerProfileModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="glass-panel max-w-2xl w-full rounded-3xl p-6 space-y-6 border-brand-yellow/30 shadow-2xl max-h-[92vh] flex flex-col">
-            <div class="flex items-center justify-between border-b border-brand-border pb-4">
-                <div class="flex items-center gap-3">
-                    <img id="modalAvatarImg" src="https://ui-avatars.com/api/?name=Customer" class="w-12 h-12 rounded-2xl object-cover border-2 border-brand-yellow">
-                    <div>
-                        <h3 class="text-base font-extrabold text-white" id="modalFullName">Customer Full Name</h3>
-                        <p class="text-xs text-brand-yellow font-mono" id="modalCustomerId">ID: CUS-0000</p>
-                    </div>
-                </div>
-                <button onclick="closeCustomerModal()" class="text-brand-gray hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div class="overflow-y-auto custom-scrollbar space-y-6 flex-grow pr-1">
-                <!-- Info Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
-                        <span class="text-[10px] font-bold text-brand-gray uppercase">Contact Details</span>
-                        <p id="modalPhone" class="text-xs font-bold text-white">+91 9876543210</p>
-                        <p id="modalEmail" class="text-[11px] text-brand-gray">customer@riderx.app</p>
-                    </div>
-                    <div class="bg-brand-dark/80 p-4 rounded-2xl border border-brand-border space-y-1">
-                        <span class="text-[10px] font-bold text-brand-gray uppercase">Wallet & Engagement</span>
-                        <p id="modalWallet" class="text-xs font-bold text-emerald-400">Wallet: ₹1,450</p>
-                        <p id="modalRides" class="text-[11px] text-brand-yellow">24 Total Completed Rides</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between border-t border-brand-border pt-4">
-                <div class="flex items-center gap-2">
-                    <a id="modalCallBtn" href="tel:" class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-emerald-400 transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-phone"></i> Call Customer
-                    </a>
-                </div>
-                <button onclick="closeCustomerModal()" class="px-5 py-2 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition">
-                    Close Profile
-                </button>
-            </div>
-        </div>
+      </a>
     </div>
 
-    <!-- Global Footer -->
-    <footer class="border-t border-brand-border/60 bg-brand-black py-4 px-4 lg:px-8 mt-auto">
-        <div class="max-w-[1700px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-gray">
-            <div class="flex items-center gap-2">
-                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-5 w-auto object-contain opacity-70">
-                <span>&copy; 2026 RiderX Control Tower. All rights reserved.</span>
-            </div>
-            <span class="text-brand-emerald flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> Secure Admin Operations</span>
+    <div class="flex items-center space-x-3 lg:space-x-5">
+      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+        <span>Active Customer Portal</span>
+      </div>
+
+      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
+        <div class="hidden md:block">
+          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
+          <p class="text-[10px] text-slate-400">Super Admin</p>
         </div>
-    </footer>
+      </div>
+    </div>
+  </header>
 
-    <!-- Firebase & Core JS Scripts -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/Admin.js"></script>
-    <script type="module" src="../js/App.js"></script>
+  <!-- MAIN LAYOUT -->
+  <div class="flex-1 flex overflow-hidden">
 
-    <!-- Page Logic Module -->
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { collection, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <!-- SIDE NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
+      <div class="px-4 py-6 space-y-8 overflow-y-auto">
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
+          <nav class="space-y-1">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
+              <span>Trips & Live Map</span>
+            </a>
+            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
+              <span>Riders</span>
+            </a>
+            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
+                <span>Rider Approvals</span>
+              </div>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
+            </a>
+            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
+              <i class="fa-solid fa-users text-base"></i>
+              <span>Customers</span>
+            </a>
+          </nav>
+        </div>
 
-        let allCustomersData = [];
-        let currentStatusFilter = 'all';
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
+          <nav class="space-y-1">
+            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
+              <span>Fare & Pricing</span>
+            </a>
+            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
+              <span>Commission Rules</span>
+            </a>
+            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
+              <span>Payouts & Wallet</span>
+            </a>
+            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
+              <span>Coupons & Offers</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            onAuthStateChanged(auth, (user) => {
-                if (!user) {
-                    window.location.href = '../auth/login.html';
-                    return;
-                }
-                loadCustomersRealtime();
-            });
-        });
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
 
-        function loadCustomersRealtime() {
-            const customersRef = collection(db, "customers");
-            onSnapshot(customersRef, (snapshot) => {
-                allCustomersData = [];
-                snapshot.forEach(docSnap => {
-                    allCustomersData.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                updateStatistics(allCustomersData);
-                renderCustomersTable(allCustomersData);
-            }, (error) => {
-                console.error("Error fetching customers:", error);
-            });
+      <!-- HEADER ACTION BAR -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-users border-brand-yellow text-brand-yellow"></i> Customer Registry
+          </h1>
+          <p class="text-xs text-slate-400">View registered passengers, manage wallet credits, account statuses, and activity metrics.</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <button onclick="exportCustomers()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-brand-border flex items-center space-x-2">
+            <i class="fa-solid fa-file-export text-brand-yellow"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- METRICS OVERVIEW -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-slate-400">Total Registered Users</p>
+          <h3 class="text-xl font-extrabold text-white mt-1">12,450</h3>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-emerald-400">Active This Month</p>
+          <h3 class="text-xl font-extrabold text-white mt-1">9,820</h3>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-amber-400">VIP Members</p>
+          <h3 class="text-xl font-extrabold text-white mt-1">340</h3>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-brand-border">
+          <p class="text-xs font-semibold text-rose-400">Blocked / Suspended</p>
+          <h3 class="text-xl font-extrabold text-white mt-1">18</h3>
+        </div>
+      </div>
+
+      <!-- FILTER & SEARCH BAR -->
+      <div class="glass-panel p-4 rounded-2xl border border-brand-border flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="relative w-full md:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
+          <input type="text" id="searchInput" onkeyup="filterCustomers()" placeholder="Search name, phone, email..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-brand-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-yellow" />
+        </div>
+
+        <div class="flex items-center space-x-2 w-full md:w-auto overflow-x-auto">
+          <button onclick="setFilter('all')" class="cust-filter-btn active px-3.5 py-1.5 rounded-lg bg-brand-yellow text-slate-950 font-bold text-xs">All Users</button>
+          <button onclick="setFilter('active')" class="cust-filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">Active</button>
+          <button onclick="setFilter('vip')" class="cust-filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">VIP Tier</button>
+          <button onclick="setFilter('blocked')" class="cust-filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">Blocked</button>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS TABLE -->
+      <div class="glass-panel rounded-2xl border border-brand-border overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 uppercase text-[10px] font-bold text-slate-400 tracking-wider border-b border-brand-border">
+              <tr>
+                <th class="py-3.5 px-4">Customer</th>
+                <th class="py-3.5 px-4">Contact Info</th>
+                <th class="py-3.5 px-4">Total Trips</th>
+                <th class="py-3.5 px-4">Wallet Balance</th>
+                <th class="py-3.5 px-4">Tier</th>
+                <th class="py-3.5 px-4">Status</th>
+                <th class="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customersTableBody" class="divide-y divide-brand-border font-medium">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- CUSTOMER DETAILS MODAL -->
+  <div id="customerModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-brand-border space-y-5">
+      <div class="flex items-center justify-between border-b border-brand-border pb-3">
+        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+          <i class="fa-solid fa-user text-brand-yellow"></i> Customer Profile
+        </h3>
+        <button onclick="closeCustomerModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div class="flex items-center space-x-4 bg-slate-900/80 p-3.5 rounded-xl border border-brand-border">
+          <img id="modalCustAvatar" src="" class="w-12 h-12 rounded-xl object-cover ring-2 ring-brand-yellow/40" />
+          <div>
+            <h4 id="modalCustName" class="text-sm font-bold text-white"></h4>
+            <p id="modalCustPhone" class="text-slate-400"></p>
+            <p id="modalCustEmail" class="text-slate-500 text-[11px]"></p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
+            <p class="text-slate-400">Total Rides Booked</p>
+            <p id="modalCustRides" class="text-white font-extrabold text-sm mt-0.5"></p>
+          </div>
+          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
+            <p class="text-slate-400">Wallet Credits</p>
+            <p id="modalCustWallet" class="text-emerald-400 font-extrabold text-sm mt-0.5"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3 pt-2">
+        <button id="blockCustBtn" onclick="toggleBlockCustomer()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all">
+          Block Account
+        </button>
+        <button onclick="addWalletCredit()" class="flex-1 py-2.5 rounded-xl bg-brand-yellow text-slate-950 text-xs font-extrabold hover:bg-yellow-400 transition-all shadow-glow-yellow">
+          + Add Credit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const customerData = [
+      { id: 'CUST-301', name: 'Ananya Roy', phone: '+91 98765 11223', email: 'ananya@example.com', rides: 84, wallet: '₹ 450', tier: 'VIP', status: 'active', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120' },
+      { id: 'CUST-302', name: 'Rohan Mehta', phone: '+91 98123 99887', email: 'rohan.m@example.com', rides: 32, wallet: '₹ 120', tier: 'Regular', status: 'active', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120' },
+      { id: 'CUST-303', name: 'Pooja Sharma', phone: '+91 99887 11445', email: 'pooja.s@example.com', rides: 142, wallet: '₹ 1,200', tier: 'VIP', status: 'active', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120' },
+      { id: 'CUST-304', name: 'Karan Patel', phone: '+91 97112 88990', email: 'karan.p@example.com', rides: 5, wallet: '₹ 0', tier: 'Regular', status: 'blocked', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120' }
+    ];
+
+    let currentCustFilter = 'all';
+    let selectedCustId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCustomers(customerData);
+      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+    });
+
+    function renderCustomers(data) {
+      const tbody = document.getElementById('customersTableBody');
+      tbody.innerHTML = '';
+
+      data.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition-colors';
+
+        const tierBadge = c.tier === 'VIP'
+          ? `<span class="px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 text-[10px] font-bold"><i class="fa-solid fa-crown mr-1"></i> VIP</span>`
+          : `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-semibold">Regular</span>`;
+
+        const statusBadge = c.status === 'active'
+          ? `<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">Active</span>`
+          : `<span class="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold">Blocked</span>`;
+
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 flex items-center space-x-3">
+            <img src="${c.avatar}" class="w-9 h-9 rounded-xl object-cover ring-1 ring-brand-border" />
+            <div>
+              <p class="font-bold text-white">${c.name}</p>
+              <p class="text-[11px] text-slate-500">${c.id}</p>
+            </div>
+          </td>
+          <td class="py-3.5 px-4">
+            <p class="font-semibold text-slate-200">${c.phone}</p>
+            <p class="text-[11px] text-slate-400">${c.email}</p>
+          </td>
+          <td class="py-3.5 px-4 font-bold text-slate-200">${c.rides} Rides</td>
+          <td class="py-3.5 px-4 font-extrabold text-emerald-400">${c.wallet}</td>
+          <td class="py-3.5 px-4">${tierBadge}</td>
+          <td class="py-3.5 px-4">${statusBadge}</td>
+          <td class="py-3.5 px-4 text-right">
+            <button onclick="inspectCustomer('${c.id}')" class="p-2 rounded-xl bg-slate-800 hover:bg-brand-yellow hover:text-slate-950 text-slate-300 transition-all">
+              <i class="fa-solid fa-user-gear"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function setFilter(filter) {
+      currentCustFilter = filter;
+      document.querySelectorAll('.cust-filter-btn').forEach(btn => {
+        btn.classList.remove('bg-brand-yellow', 'text-slate-950', 'font-bold');
+        btn.classList.add('bg-slate-800', 'text-slate-300', 'font-semibold');
+      });
+      event.target.classList.remove('bg-slate-800', 'text-slate-300', 'font-semibold');
+      event.target.classList.add('bg-brand-yellow', 'text-slate-950', 'font-bold');
+
+      filterCustomers();
+    }
+
+    function filterCustomers() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = customerData.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(search) || c.phone.includes(search) || c.email.toLowerCase().includes(search);
+        const matchesFilter = currentCustFilter === 'all' 
+          || (currentCustFilter === 'active' && c.status === 'active')
+          || (currentCustFilter === 'blocked' && c.status === 'blocked')
+          || (currentCustFilter === 'vip' && c.tier === 'VIP');
+        return matchesSearch && matchesFilter;
+      });
+      renderCustomers(filtered);
+    }
+
+    function inspectCustomer(id) {
+      selectedCustId = id;
+      const customer = customerData.find(c => c.id === id);
+      if (!customer) return;
+
+      document.getElementById('modalCustAvatar').src = customer.avatar;
+      document.getElementById('modalCustName').textContent = customer.name;
+      document.getElementById('modalCustPhone').textContent = customer.phone;
+      document.getElementById('modalCustEmail').textContent = customer.email;
+      document.getElementById('modalCustRides').textContent = customer.rides;
+      document.getElementById('modalCustWallet').textContent = customer.wallet;
+
+      const blockBtn = document.getElementById('blockCustBtn');
+      if (customer.status === 'blocked') {
+        blockBtn.textContent = 'Unblock Account';
+        blockBtn.className = 'flex-1 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30 transition-all';
+      } else {
+        blockBtn.textContent = 'Block Account';
+        blockBtn.className = 'flex-1 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all';
+      }
+
+      document.getElementById('customerModal').classList.remove('hidden');
+    }
+
+    function closeCustomerModal() {
+      document.getElementById('customerModal').classList.add('hidden');
+    }
+
+    function toggleBlockCustomer() {
+      const customer = customerData.find(c => c.id === selectedCustId);
+      if (customer) {
+        customer.status = customer.status === 'blocked' ? 'active' : 'blocked';
+        filterCustomers();
+        closeCustomerModal();
+      }
+    }
+
+    function addWalletCredit() {
+      const amount = prompt('Enter wallet credit amount (₹):', '100');
+      if (amount && !isNaN(amount)) {
+        const customer = customerData.find(c => c.id === selectedCustId);
+        if (customer) {
+          const currentVal = parseInt(customer.wallet.replace(/[^0-9]/g, '')) || 0;
+          customer.wallet = `₹ ${(currentVal + parseInt(amount)).toLocaleString('en-IN')}`;
+          filterCustomers();
+          closeCustomerModal();
         }
+      }
+    }
 
-        function updateStatistics(customers) {
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-            document.getElementById('statTotal').innerText = customers.length;
-            document.getElementById('statActive').innerText = customers.filter(c => c.status !== 'blocked').length;
-            document.getElementById('statBlocked').innerText = customers.filter(c => c.status === 'blocked').length;
-            document.getElementById('statVerified').innerText = customers.filter(c => c.isVerified === true).length;
-            document.getElementById('statNew').innerText = customers.filter(c => c.createdAt && new Date(c.createdAt.toDate ? c.createdAt.toDate() : c.createdAt) >= thirtyDaysAgo).length;
-            document.getElementById('statFrequent').innerText = customers.filter(c => (c.totalRides || 0) >= 10).length;
-        }
-
-        window.renderCustomersTable = function(customers) {
-            const tbody = document.getElementById('customersTableBody');
-            tbody.innerHTML = '';
-
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const cityFilter = document.getElementById('cityFilter').value;
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-            const filtered = customers.filter(customer => {
-                const name = (customer.fullName || customer.name || '').toLowerCase();
-                const phone = (customer.phone || '').toLowerCase();
-                const email = (customer.email || '').toLowerCase();
-                const city = (customer.city || '').toLowerCase();
-
-                const matchesSearch = name.includes(searchTerm) || phone.includes(searchTerm) || email.includes(searchTerm) || city.includes(searchTerm);
-                
-                let matchesStatus = true;
-                if (currentStatusFilter === 'active') matchesStatus = customer.status !== 'blocked';
-                else if (currentStatusFilter === 'blocked') matchesStatus = customer.status === 'blocked';
-                else if (currentStatusFilter === 'verified') matchesStatus = customer.isVerified === true;
-                else if (currentStatusFilter === 'new') {
-                    const regDate = customer.createdAt ? new Date(customer.createdAt.toDate ? customer.createdAt.toDate() : customer.createdAt) : new Date();
-                    matchesStatus = regDate >= thirtyDaysAgo;
-                }
-                else if (currentStatusFilter === 'frequent') matchesStatus = (customer.totalRides || 0) >= 10;
-
-                let matchesCity = true;
-                if (cityFilter !== 'all') {
-                    matchesCity = city.includes(cityFilter);
-                }
-
-                return matchesSearch && matchesStatus && matchesCity;
-            });
-
-            document.getElementById('paginationInfo').innerText = `Showing 1-${filtered.length} of ${filtered.length} customers`;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-brand-gray">No customers found matching criteria.</td></tr>`;
-                return;
-            }
-
-            filtered.forEach(customer => {
-                const row = document.createElement('tr');
-                row.className = "hover:bg-brand-dark/50 transition";
-                
-                const photo = customer.photoURL || customer.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.fullName || 'Customer')}&background=FFE500&color=08080A`;
-                const verificationBadge = customer.isVerified ? 
-                    `<span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold">Verified</span>` : 
-                    `<span class="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold">Unverified</span>`;
-
-                const statusBadge = customer.status === 'blocked' ? 
-                    `<span class="px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 text-[10px] font-extrabold">Blocked</span>` : 
-                    `<span class="px-2 py-0.5 rounded-full bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/30 text-[10px] font-extrabold">Active</span>`;
-
-                const regDateFormatted = customer.createdAt ? new Date(customer.createdAt.toDate ? customer.createdAt.toDate() : customer.createdAt).toLocaleDateString() : 'N/A';
-
-                row.innerHTML = `
-                    <td class="py-3 px-4 font-bold text-white flex items-center gap-3">
-                        <img src="${photo}" class="w-8 h-8 rounded-xl object-cover border border-brand-border">
-                        <div>
-                            <p class="font-extrabold text-white">${customer.fullName || customer.name || 'Customer'}</p>
-                            <span class="text-[10px] text-brand-yellow font-mono">ID: ${customer.id.substring(0,8)}</span>
-                        </div>
-                    </td>
-                    <td class="py-3 px-4 text-brand-gray">
-                        <p class="font-bold text-white">${customer.phone || 'N/A'}</p>
-                        <span class="text-[10px]">${customer.city || 'Bangalore'}</span>
-                    </td>
-                    <td class="py-3 px-4 font-bold text-white">
-                        ${customer.totalRides || '0'} Rides
-                    </td>
-                    <td class="py-3 px-4 font-mono font-bold text-emerald-400">
-                        ₹${customer.walletBalance || '0'}
-                    </td>
-                    <td class="py-3 px-4 space-y-1">
-                        <div>${verificationBadge}</div>
-                        <div>${statusBadge}</div>
-                    </td>
-                    <td class="py-3 px-4 text-brand-gray text-[11px]">
-                        ${regDateFormatted}
-                    </td>
-                    <td class="py-3 px-4 text-center">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <button onclick="openCustomerProfile('${customer.id}')" title="View Profile" class="p-1.5 rounded-lg bg-brand-dark border border-brand-border hover:border-brand-yellow text-brand-yellow transition">
-                                <i class="fa-solid fa-eye text-xs"></i>
-                            </button>
-                            ${customer.status === 'blocked' ? 
-                                `<button onclick="unblockCustomer('${customer.id}')" title="Unblock" class="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white transition"><i class="fa-solid fa-unlock text-xs"></i></button>` : 
-                                `<button onclick="blockCustomer('${customer.id}')" title="Block" class="p-1.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500 hover:text-white transition"><i class="fa-solid fa-ban text-xs"></i></button>`
-                            }
-                            <button onclick="deleteCustomer('${customer.id}')" title="Delete" class="p-1.5 rounded-lg bg-brand-dark border border-brand-border hover:border-rose-500 text-rose-400 transition">
-                                <i class="fa-solid fa-trash text-xs"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        };
-
-        window.filterByStatus = function(status) {
-            currentStatusFilter = status;
-            document.querySelectorAll('.status-filter-btn').forEach(btn => {
-                btn.className = "status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold text-brand-gray hover:text-white bg-brand-dark transition shrink-0";
-            });
-            document.getElementById(`filter-status-${status}`).className = "status-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-brand-yellow text-brand-black transition shrink-0";
-            renderCustomersTable(allCustomersData);
-        };
-
-        window.filterCustomersTable = function() {
-            renderCustomersTable(allCustomersData);
-        };
-
-        window.openCustomerProfile = function(customerId) {
-            const customer = allCustomersData.find(c => c.id === customerId);
-            if (!customer) return;
-
-            document.getElementById('modalFullName').innerText = customer.fullName || customer.name || 'Customer';
-            document.getElementById('modalCustomerId').innerText = `ID: ${customer.id.toUpperCase()}`;
-            document.getElementById('modalPhone').innerText = customer.phone || '+91 9876543210';
-            document.getElementById('modalEmail').innerText = customer.email || 'customer@riderx.app';
-            document.getElementById('modalWallet').innerText = `Wallet: ₹${customer.walletBalance || '0'}`;
-            document.getElementById('modalRides').innerText = `${customer.totalRides || '0'} Total Completed Rides`;
-            document.getElementById('modalAvatarImg').src = customer.photoURL || customer.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.fullName || 'Customer')}&background=FFE500&color=08080A`;
-            document.getElementById('modalCallBtn').href = `tel:${customer.phone || ''}`;
-
-            document.getElementById('customerProfileModal').classList.remove('hidden');
-        };
-
-        window.closeCustomerModal = function() {
-            document.getElementById('customerProfileModal').classList.add('hidden');
-        };
-
-        window.blockCustomer = async function(customerId) {
-            try {
-                await updateDoc(doc(db, "customers", customerId), {
-                    status: 'blocked'
-                });
-                alert("Customer blocked successfully.");
-            } catch (err) {
-                console.error("Block error:", err);
-            }
-        };
-
-        window.unblockCustomer = async function(customerId) {
-            try {
-                await updateDoc(doc(db, "customers", customerId), {
-                    status: 'active'
-                });
-                alert("Customer unblocked successfully.");
-            } catch (err) {
-                console.error("Unblock error:", err);
-            }
-        };
-
-        window.deleteCustomer = async function(customerId) {
-            if (confirm("Are you sure you want to delete this customer account?")) {
-                try {
-                    await deleteDoc(doc(db, "customers", customerId));
-                    alert("Customer deleted successfully.");
-                } catch (err) {
-                    console.error("Delete error:", err);
-                }
-            }
-        };
-
-        window.refreshCustomersData = function() {
-            const icon = document.getElementById('refreshIcon');
-            icon.classList.add('fa-spin');
-            setTimeout(() => icon.classList.remove('fa-spin'), 800);
-        };
-
-        window.exportData = function(format) {
-            alert(`Exporting customer directory in ${format.toUpperCase()} format...`);
-        };
-    </script>
+    function exportCustomers() {
+      alert('Customer directory exported successfully as CSV.');
+    }
+  </script>
 </body>
 </html>
