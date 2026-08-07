@@ -1,199 +1,232 @@
 // ======================================
-// RiderX Rider Dashboard
-// Complete Ride System
+// RiderX Rider Profile System
+// Final Firebase Version
 // ======================================
 
-
-import { auth, db, realtimeDB }
+import { auth, db, storage } 
 from "../../firebase/firebase-config.js";
 
+import {
+    onAuthStateChanged,
+    signOut
+} 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
-
-onAuthStateChanged
-
+    doc,
+    getDoc,
+    updateDoc,
+    serverTimestamp
 }
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-
-doc,
-getDoc,
-updateDoc,
-collection,
-query,
-where,
-onSnapshot,
-limit
-
+    ref,
+    uploadBytes,
+    getDownloadURL
 }
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 
-import {
-
-ref,
-set
-
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+let riderId = null;
 
 
+// ================================
+// AUTH CHECK
+// ================================
+
+onAuthStateChanged(auth, async(user)=>{
+
+    if(!user){
+
+        window.location.href="../auth/rider-login.html";
+        return;
+
+    }
 
 
+    riderId = user.uid;
 
-let riderId=null;
-
-let currentRideId=null;
-
-let online=false;
-
-let rideOTP=null;
-
-let earning=0;
-
-
-
-
-
-
-// ===============================
-// Auth
-// ===============================
-
-
-onAuthStateChanged(
-auth,
-async(user)=>{
-
-
-if(!user){
-
-window.location.href="../auth/login.html";
-
-return;
-
-}
-
-
-
-riderId=user.uid;
-
-
-checkRider();
-
+    loadProfile();
 
 });
 
 
 
 
+// ================================
+// LOAD PROFILE
+// ================================
+
+async function loadProfile(){
+
+try{
+
+
+const riderRef = doc(db,"riders",riderId);
+
+const snap = await getDoc(riderRef);
+
+
+
+if(!snap.exists()){
+
+alert("Rider profile not found");
+return;
+
+}
+
+
+
+const data = snap.data();
+
+
+
+document.getElementById("headerFullName").innerText =
+data.fullName || "RiderX Captain";
+
+
+document.getElementById("headerRiderId").innerText =
+"ID: RX-"+riderId.substring(0,6).toUpperCase();
+
+
+document.getElementById("headerVehicleType").innerText =
+data.vehicleType || "BIKE";
+
+
+document.getElementById("headerRating").innerText =
+data.rating || "5.0";
+
+
+document.getElementById("headerTripsCount").innerText =
+(data.totalTrips || 0)+" Rides";
+
+
+
+document.getElementById("inputFullName").value =
+data.fullName || "";
+
+
+
+document.getElementById("inputPhone").value =
+data.phone || "";
+
+
+
+document.getElementById("inputEmail").value =
+data.email || "";
+
+
+
+document.getElementById("inputDOB").value =
+data.dob || "";
+
+
+
+document.getElementById("inputGender").value =
+data.gender || "Male";
+
+
+
+document.getElementById("inputVehicleType").value =
+data.vehicleType || "BIKE";
+
+
+document.getElementById("inputAddress").value =
+data.address || "";
+
+
+
+if(data.photoURL){
+
+document.getElementById("avatarImage").src =
+data.photoURL;
+
+}
+
+
+
+document
+.getElementById("profileSkeleton")
+.classList.add("hidden");
+
+
+document
+.getElementById("profileContent")
+.classList.remove("hidden");
+
+
+
+}
+catch(error){
+
+console.log(error);
+
+}
+
+
+
+}
 
 
 
 
+// ================================
+// UPDATE PROFILE
+// ================================
 
-// ===============================
-// Check Rider
-// ===============================
+window.handleProfileUpdate = async function(e){
+
+e.preventDefault();
 
 
-async function checkRider(){
+try{
 
 
-const snap=
-await getDoc(
-doc(db,"users",riderId)
+await updateDoc(
+doc(db,"riders",riderId),
+{
+
+
+fullName:
+document.getElementById("inputFullName").value,
+
+
+dob:
+document.getElementById("inputDOB").value,
+
+
+gender:
+document.getElementById("inputGender").value,
+
+
+address:
+document.getElementById("inputAddress").value,
+
+
+updatedAt:
+serverTimestamp()
+
+
+}
+
 );
 
 
 
-if(snap.exists()){
+alert("Profile Updated Successfully");
 
 
-let data=snap.data();
-
-
-
-if(data.role!=="rider"){
-
-
-alert("Only rider account allowed");
-
-
-}
-
-
-
-if(data.approved===false){
-
-
-alert("Admin approval pending");
-
-
-}
+loadProfile();
 
 
 
 }
+catch(error){
 
+console.log(error);
 
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Online Button
-// ===============================
-
-
-document
-.getElementById("onlineBtn")
-.onclick=()=>{
-
-
-online=!online;
-
-
-
-if(online){
-
-
-document
-.getElementById("onlineBtn")
-.innerHTML=
-"🔴 Go Offline";
-
-
-setOnline(true);
-
-listenRides();
-
-
-
-}
-
-else{
-
-
-document
-.getElementById("onlineBtn")
-.innerHTML=
-"🟢 Go Online";
-
-
-setOnline(false);
-
+alert("Update Failed");
 
 }
 
@@ -204,241 +237,71 @@ setOnline(false);
 
 
 
+// ================================
+// PHOTO UPLOAD
+// ================================
+
+window.handlePhotoUpload = async function(event){
+
+
+const file =
+event.target.files[0];
+
+
+if(!file)return;
 
 
 
+try{
 
 
-// ===============================
-// Rider Online Status
-// ===============================
-
-
-function setOnline(status){
-
-
-if(!riderId)
-return;
-
-
-
-set(
-
+const storageRef =
 ref(
-realtimeDB,
-"onlineRiders/"+riderId
-),
-
-{
-
-online:status,
-
-updatedAt:Date.now()
-
-}
-
+storage,
+"riderProfile/"+riderId
 );
 
 
 
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Listen Ride
-// ===============================
-
-
-function listenRides(){
-
-
-
-let q=query(
-
-collection(db,"rides"),
-
-where(
-"status",
-"==",
-"searching"
-),
-
-limit(1)
-
+await uploadBytes(
+storageRef,
+file
 );
 
 
 
-
-
-onSnapshot(
-q,
-(snapshot)=>{
-
-
-snapshot.forEach(
-(item)=>{
-
-
-showRide(
-item.id,
-item.data()
-);
-
-
-});
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Show Ride
-// ===============================
-
-
-function showRide(id,data){
-
-
-
-currentRideId=id;
-
-
-
-document
-.getElementById("customerName")
-.innerHTML=
-"Customer: "
-+
-data.customerId;
-
-
-
-document
-.getElementById("pickupText")
-.innerHTML=
-"Pickup: "
-+
-data.pickup;
-
-
-
-document
-.getElementById("dropText")
-.innerHTML=
-"Drop: "
-+
-data.drop;
-
-
-
-document
-.getElementById("fareText")
-.innerHTML=
-"Fare: "
-+
-data.fare;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-// ===============================
-// Accept Ride
-// ===============================
-
-
-document
-.getElementById("acceptRide")
-.onclick=
-async()=>{
-
-
-if(!currentRideId){
-
-alert("No ride found");
-
-return;
-
-}
-
-
-
-rideOTP =
-Math.floor(
-1000+
-Math.random()*9000
-);
+const url =
+await getDownloadURL(storageRef);
 
 
 
 await updateDoc(
-
-doc(
-db,
-"rides",
-currentRideId
-),
-
+doc(db,"riders",riderId),
 {
 
-
-status:"accepted",
-
-riderId:riderId,
-
-otp:rideOTP
+photoURL:url
 
 }
 
-
 );
 
 
 
-document
-.getElementById("otpInput")
-.value=
-"OTP: "+rideOTP;
+document.getElementById("avatarImage").src=url;
 
 
 
-document
-.getElementById("rideStatus")
-.innerHTML=
-"Ride Accepted";
+alert("Photo Updated");
 
 
+}
+catch(error){
 
-alert(
-"Ride Accepted"
-);
+console.log(error);
+
+alert("Photo Upload Failed");
+
+}
 
 
 
@@ -447,199 +310,18 @@ alert(
 
 
 
+// ================================
+// LOGOUT
+// ================================
 
+window.handleLogout = async function(){
 
 
+await signOut(auth);
 
 
-// ===============================
-// Reject Ride
-// ===============================
-
-
-document
-.getElementById("rejectRide")
-.onclick=
-async()=>{
-
-
-if(!currentRideId)
-return;
-
-
-
-await updateDoc(
-
-doc(
-db,
-"rides",
-currentRideId
-),
-
-{
-
-status:"rejected"
-
-}
-
-);
-
-
-
-currentRideId=null;
-
-
-};
-
-
-
-
-
-
-
-
-
-// ===============================
-// Start Ride OTP Verify
-// ===============================
-
-
-document
-.getElementById("startRide")
-.onclick=
-async()=>{
-
-
-let entered =
-document
-.getElementById("otpInput")
-.value;
-
-
-
-entered =
-entered.replace(
-"OTP:",
-""
-)
-.trim();
-
-
-
-
-
-if(
-entered != rideOTP
-){
-
-
-alert(
-"Wrong OTP"
-);
-
-
-return;
-
-}
-
-
-
-
-await updateDoc(
-
-doc(
-db,
-"rides",
-currentRideId
-),
-
-{
-
-
-status:"started"
-
-}
-
-
-);
-
-
-
-document
-.getElementById("rideStatus")
-.innerHTML=
-"Ride Started 🚀";
-
-
-
-};
-
-
-
-
-
-
-
-
-
-// ===============================
-// Complete Ride
-// ===============================
-
-
-document
-.getElementById("completeRide")
-.onclick=
-async()=>{
-
-
-if(!currentRideId)
-return;
-
-
-
-await updateDoc(
-
-doc(
-db,
-"rides",
-currentRideId
-),
-
-{
-
-
-status:"completed"
-
-
-}
-
-);
-
-
-
-
-
-earning += 100;
-
-
-
-document
-.getElementById("earningAmount")
-.innerHTML=
-"₹"+earning;
-
-
-
-document
-.getElementById("rideStatus")
-.innerHTML=
-"Ride Completed ✅";
-
-
-
-currentRideId=null;
-
+window.location.href=
+"../auth/rider-login.html";
 
 
 };
