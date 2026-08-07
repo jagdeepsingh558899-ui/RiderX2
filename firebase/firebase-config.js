@@ -1,101 +1,27 @@
-// ======================================
-// RiderX Firebase Configuration
-// ======================================
-
-
-// Firebase SDK
-
-import { initializeApp } from 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
-
-import { getAuth } from 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-
-import { getFirestore } from 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-import { getStorage } from 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-
-import { getDatabase } from 
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-
-
-
-
-// Firebase Config
+/**
+ * RiderX - Firebase Centralized Configuration & Initialization
+ */
 
 const firebaseConfig = {
-
-apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
-
-authDomain: "riderx-1.firebaseapp.com",
-
-databaseURL:
-"https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
-
-projectId: "riderx-1",
-
-storageBucket:
-"riderx-1.firebasestorage.app",
-
-messagingSenderId:
-"261640190671",
-
-appId:
-"1:261640190671:web:701b3ce5dcb6135fd955ba",
-
-measurementId:
-"G-SM8KLBVPWN"
-
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
+// Initialize Firebase App if not already initialized
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
+const auth = firebase.auth();
+const db = firebase.firestore();
+const rtdb = firebase.database ? firebase.database() : null;
+const storage = firebase.storage ? firebase.storage() : null;
 
+// Enable Firestore Persistent Cache for offline capabilities
+db.settings({ timestampsInSnapshots: true });
 
-
-// Initialize Firebase
-
-const app = initializeApp(firebaseConfig);
-
-
-
-
-
-// Firebase Services
-
-const auth = getAuth(app);
-
-
-const db = getFirestore(app);
-
-
-const storage = getStorage(app);
-
-
-const realtimeDB = getDatabase(app);
-
-
-
-
-
-// Export
-
-export {
-
-app,
-
-auth,
-
-db,
-
-storage,
-
-realtimeDB
-
-};
+console.log("RiderX Firebase Core System Online.");
