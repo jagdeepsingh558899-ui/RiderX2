@@ -7,30 +7,24 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Customer</title>
+<title>RiderX Customer Dashboard</title>
 
 
 <link rel="stylesheet" href="../assets/app.css">
 
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 
 <style>
 
-
 body{
-
 margin:0;
 background:#000;
 color:white;
 font-family:Arial,sans-serif;
-
 }
-
 
 
 .header{
@@ -43,7 +37,6 @@ justify-content:space-between;
 padding:0 20px;
 
 }
-
 
 
 .logo{
@@ -61,10 +54,9 @@ color:#FFD600;
 }
 
 
-
 #map{
 
-height:40vh;
+height:42vh;
 width:100%;
 
 }
@@ -97,10 +89,11 @@ gap:10px;
 
 background:#000;
 padding:12px 5px;
-text-align:center;
 border-radius:15px;
-border:1px solid #333;
+text-align:center;
 font-size:12px;
+border:1px solid #333;
+cursor:pointer;
 
 }
 
@@ -118,11 +111,12 @@ color:#000;
 .input{
 
 width:100%;
+box-sizing:border-box;
 padding:14px;
 margin:8px 0;
-border-radius:12px;
 background:#000;
-border:1px solid #333;
+border:1px solid #444;
+border-radius:12px;
 color:white;
 
 }
@@ -158,13 +152,14 @@ width:100%;
 padding:16px;
 margin-top:15px;
 background:#FFD600;
-color:#000;
 border:none;
 border-radius:15px;
-font-weight:bold;
 font-size:17px;
+font-weight:bold;
+cursor:pointer;
 
 }
+
 
 
 
@@ -178,6 +173,7 @@ background:#111;
 display:flex;
 justify-content:space-around;
 padding:12px 0;
+z-index:999;
 
 }
 
@@ -192,14 +188,14 @@ color:#aaa;
 }
 
 
+
 .bottom i{
 
-display:block;
 font-size:20px;
+display:block;
 margin-bottom:5px;
 
 }
-
 
 
 </style>
@@ -216,7 +212,9 @@ margin-bottom:5px;
 
 
 <div class="logo">
+
 RID<span>ERX</span>
+
 </div>
 
 
@@ -224,7 +222,6 @@ RID<span>ERX</span>
 
 
 </header>
-
 
 
 
@@ -239,37 +236,58 @@ RID<span>ERX</span>
 
 
 
-
-
 <div class="services">
 
 
-<div class="service active">
+<div class="service active" data-service="bike">
+
 <i class="fa-solid fa-motorcycle"></i>
+
 <br>
+
 Bike
+
 </div>
 
 
-<div class="service">
+
+
+<div class="service" data-service="cab">
+
 <i class="fa-solid fa-car"></i>
+
 <br>
+
 Cab
+
 </div>
 
 
-<div class="service">
+
+
+<div class="service" data-service="parcel">
+
 <i class="fa-solid fa-box"></i>
+
 <br>
+
 Parcel
+
 </div>
 
 
-<div class="service">
+
+
+<div class="service" data-service="food">
+
 <i class="fa-solid fa-utensils"></i>
+
 <br>
+
 Food
+
 </div>
+
 
 
 </div>
@@ -279,18 +297,18 @@ Food
 
 
 <input 
-class="input"
 id="pickup"
+class="input"
 placeholder="Pickup Location"
-value="Current Location">
+value="Select Pickup Location">
 
 
 
 
 
 <input 
-class="input"
 id="drop"
+class="input"
 placeholder="Where to go?">
 
 
@@ -302,7 +320,7 @@ placeholder="Where to go?">
 
 <div>
 
-Small Ride Estimate
+Estimated Fare
 
 </div>
 
@@ -321,21 +339,27 @@ Small Ride Estimate
 
 
 
-<select class="input" id="payment">
+<select id="payment" class="input">
 
 
-<option>
+<option value="cash">
+
 💵 Cash
+
 </option>
 
 
-<option>
+<option value="online">
+
 📱 UPI / Online
+
 </option>
 
 
-<option>
+<option value="wallet">
+
 💳 RiderX Wallet
+
 </option>
 
 
@@ -346,7 +370,7 @@ Small Ride Estimate
 
 
 
-<button class="btn" id="bookRide">
+<button id="bookRide" class="btn">
 
 <i class="fa-solid fa-paper-plane"></i>
 
@@ -356,47 +380,57 @@ Book Ride
 
 
 
-
 </div>
 
 
 
 
-
-
-
-<!-- Bottom Menu -->
 
 
 <div class="bottom">
 
 
 <div>
+
 <i class="fa-solid fa-house"></i>
+
 Home
+
 </div>
 
 
+
 <div>
+
 <i class="fa-solid fa-clock"></i>
+
 History
+
 </div>
 
 
+
 <div>
+
 <i class="fa-solid fa-wallet"></i>
+
 Wallet
+
 </div>
+
 
 
 <div>
+
 <i class="fa-solid fa-user"></i>
+
 Profile
-</div>
-
 
 </div>
 
+
+
+</div>
 
 
 
@@ -406,47 +440,7 @@ Profile
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
-
-<script>
-
-
-// Chandigarh Map
-
-
-const map =
-L.map('map').setView(
-[30.7333,76.7794],
-13
-);
-
-
-
-L.tileLayer(
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-).addTo(map);
-
-
-
-
-
-let fare = 0;
-
-
-
-document.getElementById("bookRide").onclick=function(){
-
-
-alert(
-"Searching nearby RiderX riders..."
-);
-
-
-};
-
-
-
-
-</script>
+<script type="module" src="js/customer.js"></script>
 
 
 
