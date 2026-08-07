@@ -46,7 +46,6 @@ font-weight:900;
 
 }
 
-
 .logo span{
 
 color:#FFD600;
@@ -68,8 +67,6 @@ width:100%;
 background:#111;
 border-radius:25px 25px 0 0;
 padding:20px;
-margin-top:-20px;
-position:relative;
 
 }
 
@@ -127,7 +124,6 @@ color:white;
 
 display:flex;
 justify-content:space-between;
-align-items:center;
 background:#000;
 padding:15px;
 border-radius:15px;
@@ -156,7 +152,6 @@ border:none;
 border-radius:15px;
 font-size:17px;
 font-weight:bold;
-cursor:pointer;
 
 }
 
@@ -173,7 +168,6 @@ background:#111;
 display:flex;
 justify-content:space-around;
 padding:12px 0;
-z-index:999;
 
 }
 
@@ -183,7 +177,6 @@ z-index:999;
 
 text-align:center;
 font-size:12px;
-color:#aaa;
 
 }
 
@@ -191,17 +184,90 @@ color:#aaa;
 
 .bottom i{
 
-font-size:20px;
 display:block;
-margin-bottom:5px;
+font-size:20px;
 
 }
 
 
+
+/* Ride Tracking Modal */
+
+
+.modal{
+
+display:none;
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:rgba(0,0,0,.8);
+
+z-index:2000;
+
+align-items:center;
+
+justify-content:center;
+
+}
+
+
+
+.modal-box{
+
+width:85%;
+
+background:#111;
+
+border-radius:25px;
+
+padding:25px;
+
+text-align:center;
+
+border:1px solid #333;
+
+}
+
+
+
+.yellow{
+
+color:#FFD600;
+
+}
+
+
+
+.cancel{
+
+width:100%;
+
+padding:14px;
+
+margin-top:15px;
+
+background:#222;
+
+color:white;
+
+border:1px solid #555;
+
+border-radius:15px;
+
+}
+
+
+
 </style>
 
-
 </head>
+
 
 
 <body>
@@ -226,6 +292,7 @@ RID<span>ERX</span>
 
 
 
+
 <div id="map"></div>
 
 
@@ -242,48 +309,37 @@ RID<span>ERX</span>
 <div class="service active" data-service="bike">
 
 <i class="fa-solid fa-motorcycle"></i>
-
 <br>
-
 Bike
 
 </div>
 
 
 
-
 <div class="service" data-service="cab">
 
 <i class="fa-solid fa-car"></i>
-
 <br>
-
 Cab
 
 </div>
 
 
 
-
 <div class="service" data-service="parcel">
 
 <i class="fa-solid fa-box"></i>
-
 <br>
-
 Parcel
 
 </div>
 
 
 
-
 <div class="service" data-service="food">
 
 <i class="fa-solid fa-utensils"></i>
-
 <br>
-
 Food
 
 </div>
@@ -296,18 +352,13 @@ Food
 
 
 
-<input 
-id="pickup"
+<input id="pickup"
 class="input"
-placeholder="Pickup Location"
-value="Select Pickup Location">
+placeholder="Pickup Location">
 
 
 
-
-
-<input 
-id="drop"
+<input id="drop"
 class="input"
 placeholder="Where to go?">
 
@@ -317,20 +368,13 @@ placeholder="Where to go?">
 
 <div class="fare">
 
-
 <div>
-
 Estimated Fare
-
 </div>
-
 
 <div id="fare">
-
 ₹0
-
 </div>
-
 
 </div>
 
@@ -343,23 +387,17 @@ Estimated Fare
 
 
 <option value="cash">
-
 💵 Cash
-
 </option>
 
 
 <option value="online">
-
 📱 UPI / Online
-
 </option>
 
 
 <option value="wallet">
-
 💳 RiderX Wallet
-
 </option>
 
 
@@ -380,7 +418,99 @@ Book Ride
 
 
 
+
 </div>
+
+
+
+
+
+
+
+<!-- Ride Status Modal -->
+
+
+<div id="rideModal" class="modal">
+
+
+<div class="modal-box">
+
+
+<i class="fa-solid fa-spinner fa-spin yellow"
+style="font-size:40px;"></i>
+
+
+<h2 id="rideStatus">
+
+Searching RiderX Riders...
+
+</h2>
+
+
+<p id="rideInfo">
+
+Connecting nearby rider
+
+</p>
+
+
+
+<div id="riderDetails" style="display:none;">
+
+
+<h3 class="yellow">
+
+Rider Found
+
+</h3>
+
+
+<p id="riderName">
+
+Name: -
+
+</p>
+
+
+<p id="vehicle">
+
+Vehicle: -
+
+</p>
+
+
+<h2 class="yellow">
+
+OTP:
+<span id="rideOtp">
+
+----
+
+</span>
+
+</h2>
+
+
+</div>
+
+
+
+
+<button id="cancelRide" class="cancel">
+
+Cancel Ride
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+
 
 
 
@@ -437,11 +567,11 @@ Profile
 
 
 
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
 <script type="module" src="js/customer.js"></script>
-
 
 
 </body>
