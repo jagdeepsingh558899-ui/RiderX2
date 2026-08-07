@@ -1,21 +1,14 @@
 // RiderX Customer Dashboard Engine
-// Map + GPS + Pickup Drop + Fare + Firebase Booking
+// Map + Pickup Drop + Fare + Firebase Ride Booking
 
 
-import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
-
+import { auth, db } from "../firebase/firebase-config.js";
 
 import {
     collection,
     addDoc,
     serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-console.log("RiderX Customer JS Loaded");
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
@@ -33,47 +26,34 @@ let dropCoords = null;
 
 const fareRates = {
 
-    bike: {
-        base:20
-    },
-
-    cab:{
-        base:50
-    },
-
-    parcel:{
-        base:30
-    },
-
-    food:{
-        base:25
-    }
+    bike: 20,
+    cab: 50,
+    parcel: 30,
+    food: 25
 
 };
 
 
 
+// ================= MAP =================
 
-// MAP START
 
 function initMap(){
 
 
-    const mapBox =
-    document.getElementById("map");
+    const mapElement = document.getElementById("map");
 
 
-    if(!mapBox){
+    if(!mapElement){
 
-        console.log("Map box not found");
+        console.log("Map not found");
         return;
 
     }
 
 
 
-    map = L.map("map")
-    .setView(
+    map = L.map("map").setView(
         [30.7333,76.7794],
         13
     );
@@ -90,80 +70,76 @@ function initMap(){
 
 
 
-    console.log("Map Started");
+    console.log("RiderX Map Loaded");
 
 
 
 
-
-    // MAP CLICK
-
-
-    map.on("click", async function(e){
+    map.on("click",function(e){
 
 
         let lat = e.latlng.lat;
         let lng = e.latlng.lng;
 
 
-        let address =
-        await getAddress(lat,lng);
+
+        let locationText =
+        lat.toFixed(5)+", "+
+        lng.toFixed(5);
 
 
+
+
+        // FIRST CLICK PICKUP
 
         if(!pickupCoords){
 
 
             pickupCoords={
-                lat,
-                lng
+                lat:lat,
+                lng:lng
             };
 
 
             pickupMarker =
-            L.marker(
-                [lat,lng]
-            )
+            L.marker([lat,lng])
             .addTo(map)
-            .bindPopup("Pickup")
+            .bindPopup("Pickup Location")
             .openPopup();
 
 
 
-            document
-            .getElementById("pickup")
-            .value =
-            address;
+            document.getElementById("pickup").value =
+            locationText;
 
 
 
         }
 
+
+
+        // SECOND CLICK DROP
+
         else if(!dropCoords){
 
 
-
             dropCoords={
-                lat,
-                lng
+                lat:lat,
+                lng:lng
             };
 
 
 
             dropMarker =
-            L.marker(
-                [lat,lng]
-            )
+            L.marker([lat,lng])
             .addTo(map)
-            .bindPopup("Drop")
+            .bindPopup("Drop Location")
             .openPopup();
 
 
 
-            document
-            .getElementById("drop")
-            .value =
-            address;
+            document.getElementById("drop").value =
+            locationText;
 
 
 
@@ -173,48 +149,10 @@ function initMap(){
         }
 
 
+
     });
 
 
-}
-
-
-
-
-
-// GET ADDRESS
-
-
-async function getAddress(lat,lng){
-
-
-    try{
-
-
-        let response =
-        await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-        );
-
-
-        let data =
-        await response.json();
-
-
-
-        return data.display_name ||
-        `${lat},${lng}`;
-
-
-    }
-
-    catch(error){
-
-
-        return `${lat},${lng}`;
-
-    }
-
 
 }
 
@@ -223,10 +161,10 @@ async function getAddress(lat,lng){
 
 
 
-// DISTANCE
+// ================= DISTANCE =================
 
 
-function distanceKm(
+function calculateDistance(
 lat1,
 lon1,
 lat2,
@@ -234,34 +172,38 @@ lon2
 ){
 
 
-let R=6371;
+let R = 6371;
 
 
 let dLat =
-(lat2-lat1)
-*
+(lat2-lat1) *
 Math.PI/180;
 
 
 let dLon =
-(lon2-lon1)
-*
+(lon2-lon1) *
 Math.PI/180;
 
 
 
 let a =
-Math.sin(dLat/2)**2 +
+Math.sin(dLat/2) *
+Math.sin(dLat/2)
+
++
 
 Math.cos(lat1*Math.PI/180) *
-Math.cos(lat2*Math.PI/180) *
+Math.cos(lat2*Math.PI/180)
 
-Math.sin(dLon/2)**2;
+*
+
+Math.sin(dLon/2) *
+Math.sin(dLon/2);
 
 
 
 let c =
-2*
+2 *
 Math.atan2(
 Math.sqrt(a),
 Math.sqrt(1-a)
@@ -279,7 +221,8 @@ return R*c;
 
 
 
-// FARE
+
+// ================= FARE =================
 
 
 function calculateFare(){
@@ -289,8 +232,7 @@ function calculateFare(){
 if(!pickupCoords || !dropCoords){
 
 
-document.getElementById("fare")
-.innerText="₹0";
+document.getElementById("fare").innerText="₹0";
 
 
 return 0;
@@ -300,8 +242,9 @@ return 0;
 
 
 
+
 let km =
-distanceKm(
+calculateDistance(
 
 pickupCoords.lat,
 pickupCoords.lng,
@@ -313,48 +256,54 @@ dropCoords.lng
 
 
 
-let rate=8;
-
-
 let hour =
-new Date()
-.getHours();
+new Date().getHours();
 
 
 
-if(hour>=22 || hour<6){
+let perKm = 8;
 
-rate=11;
 
-}
 
-else if(km>10){
+if(hour >=22 || hour <6){
 
-rate=9;
+perKm = 11;
 
 }
 
+else if(km > 10){
+
+perKm = 9;
+
+}
 
 
-let fare =
 
-fareRates[selectedService].base
+
+
+let total =
+
+fareRates[selectedService]
+
 +
-(km*rate);
+
+(km * perKm);
 
 
 
-fare=Math.round(fare);
+
+
+total =
+Math.round(total);
 
 
 
-document.getElementById("fare")
-.innerText =
-"₹"+fare;
+document.getElementById("fare").innerText =
+"₹"+total;
 
 
 
-return fare;
+return total;
 
 
 }
@@ -364,18 +313,22 @@ return fare;
 
 
 
-// SERVICE BUTTONS
 
 
-function serviceSetup(){
+// ================= SERVICE =================
+
+
+function loadServices(){
 
 
 document
 .querySelectorAll(".service")
-.forEach(item=>{
+.forEach(service=>{
 
 
-item.onclick=function(){
+service.addEventListener(
+"click",
+()=>{
 
 
 document
@@ -386,20 +339,20 @@ x.classList.remove("active")
 
 
 
-item.classList.add("active");
+service.classList.add("active");
 
 
 
 selectedService =
-item.dataset.type;
+service.dataset.type;
 
 
 
 calculateFare();
 
 
-};
 
+});
 
 
 });
@@ -413,24 +366,25 @@ calculateFare();
 
 
 
-// BOOK BUTTON
+// ================= BOOK =================
 
 
-function bookingSetup(){
+function loadBooking(){
 
 
-
-let btn =
+const button =
 document.getElementById("bookRide");
 
 
 
-if(!btn) return;
+if(!button)
+return;
 
 
 
-btn.onclick =
-async function(){
+button.addEventListener(
+"click",
+async()=>{
 
 
 
@@ -442,14 +396,14 @@ auth.currentUser;
 if(!user){
 
 
-alert("Please Login First");
+alert("Login required");
 
-location.href="../auth/login.html";
+location.href =
+"../auth/login.html";
 
 return;
 
 }
-
 
 
 
@@ -483,16 +437,15 @@ collection(db,"rides"),
 
 {
 
-
 customerId:user.uid,
 
 pickupLocation:pickup,
 
 dropLocation:drop,
 
-pickupCoords,
+pickupCoords:pickupCoords,
 
-dropCoords,
+dropCoords:dropCoords,
 
 serviceType:selectedService,
 
@@ -507,7 +460,6 @@ status:"REQUESTED",
 createdAt:
 serverTimestamp()
 
-
 }
 
 );
@@ -515,8 +467,7 @@ serverTimestamp()
 
 
 
-document.getElementById("status")
-.innerText =
+document.getElementById("status").innerText =
 "Searching RiderX Rider...";
 
 
@@ -533,8 +484,7 @@ alert(error.message);
 
 
 
-};
-
+});
 
 
 }
@@ -545,21 +495,22 @@ alert(error.message);
 
 
 
-// START
+// ================= START =================
 
 
-window.addEventListener(
-"load",
+document.addEventListener(
+"DOMContentLoaded",
 ()=>{
+
+
+console.log("RiderX Customer Started");
 
 
 initMap();
 
-serviceSetup();
+loadServices();
 
-bookingSetup();
-
-calculateFare();
+loadBooking();
 
 
 });
