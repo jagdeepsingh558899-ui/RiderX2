@@ -6,21 +6,141 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Rides</title>
+<title>RiderX Manage Rides</title>
 
-<link rel="stylesheet" href="../css/style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 
 <style>
 
-.card{
+:root{
 
-background:#111;
-padding:20px;
-border-radius:18px;
-margin:15px 0;
-border:1px solid #333;
+--yellow:#FFE500;
+--black:#050505;
+--card:#111;
 
 }
+
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+
+}
+
+
+
+body{
+
+background:var(--black);
+color:white;
+padding-bottom:50px;
+
+}
+
+
+
+.header{
+
+height:70px;
+background:#111;
+display:flex;
+align-items:center;
+padding:0 20px;
+
+}
+
+
+
+.logo{
+
+font-size:28px;
+font-weight:900;
+
+}
+
+
+
+.logo span{
+
+color:var(--yellow);
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.back{
+
+width:100%;
+padding:12px;
+border:none;
+border-radius:12px;
+background:#222;
+color:white;
+margin-bottom:20px;
+
+}
+
+
+
+.title{
+
+font-size:24px;
+font-weight:bold;
+margin-bottom:20px;
+
+}
+
+
+
+.ride-card{
+
+background:var(--card);
+border:1px solid #333;
+border-radius:18px;
+padding:18px;
+margin-bottom:15px;
+
+}
+
+
+
+.row{
+
+margin-bottom:8px;
+
+}
+
+
+
+.label{
+
+color:#999;
+
+}
+
+
+
+.status{
+
+font-weight:bold;
+color:var(--yellow);
+
+}
+
 
 
 button{
@@ -28,20 +148,22 @@ button{
 width:100%;
 padding:12px;
 margin-top:10px;
-background:#FFD600;
 border:none;
 border-radius:12px;
+background:var(--yellow);
 font-weight:bold;
 
 }
 
 
-.status{
 
-color:#FFD600;
-font-weight:bold;
+.cancel{
+
+background:#ff3333;
+color:white;
 
 }
+
 
 
 </style>
@@ -49,252 +171,66 @@ font-weight:bold;
 </head>
 
 
+
 <body>
 
 
-<div class="header">
 
-🚕 RiderX Manage Rides
+<header class="header">
+
+
+<div class="logo">
+
+RID<span>ERX</span>
 
 </div>
+
+
+</header>
+
 
 
 
 <div class="container">
 
 
-<div id="rides">
 
-Loading...
+<button class="back"
+onclick="history.back()">
 
-</div>
-
-
-</div>
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-collection,
-getDocs,
-doc,
-updateDoc,
-orderBy,
-query
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-async function loadRides(){
-
-
-let box=document.getElementById("rides");
-
-
-box.innerHTML="Loading...";
-
-
-
-const q=query(
-
-collection(db,"rides"),
-
-orderBy("createdAt","desc")
-
-);
-
-
-
-const snap=await getDocs(q);
-
-
-
-box.innerHTML="";
-
-
-
-if(snap.empty){
-
-box.innerHTML="<p>No rides found</p>";
-
-return;
-
-}
-
-
-
-
-snap.forEach((ride)=>{
-
-
-let data=ride.data();
-
-
-
-box.innerHTML += `
-
-
-<div class="card">
-
-
-<h3>
-
-🏍 ${data.service || "Ride"}
-
-</h3>
-
-
-
-<p>
-
-📍 Pickup:
-
-<br>
-
-${data.pickup || "-"}
-
-</p>
-
-
-
-<p>
-
-🏁 Drop:
-
-<br>
-
-${data.drop || "-"}
-
-</p>
-
-
-
-
-<p>
-
-📏 Distance:
-
-${data.distance || 0} KM
-
-</p>
-
-
-
-<p>
-
-💰 Fare:
-
-₹${data.fare || 0}
-
-</p>
-
-
-
-<p class="status">
-
-Status:
-
-${data.status || "Pending"}
-
-</p>
-
-
-
-<p>
-
-Customer:
-
-${data.customerId || "-"}
-
-</p>
-
-
-
-<p>
-
-Rider:
-
-${data.riderId || "Not Assigned"}
-
-</p>
-
-
-
-
-<button onclick="cancelRide('${ride.id}')">
-
-❌ Cancel Ride
+← Back
 
 </button>
 
 
+
+
+<div class="title">
+
+Manage Rides
+
 </div>
 
 
-`;
 
 
+<div id="rideList">
 
-});
+Loading Rides...
 
-
-
-}
-
-
+</div>
 
 
 
 
-window.cancelRide=async(id)=>{
-
-
-await updateDoc(
-
-doc(db,"rides",id),
-
-{
-
-
-status:"Cancelled"
-
-}
-
-);
-
-
-
-alert("Ride Cancelled ❌");
-
-
-
-loadRides();
-
-
-};
+</div>
 
 
 
 
-loadRides();
+<script type="module"
+src="./js/rides.js"></script>
 
-
-
-</script>
 
 
 </body>
