@@ -4,29 +4,47 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>RiderX Admin Dashboard</title>
 
+
 <link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 
 <style>
 
+:root{
+
+--yellow:#FFE500;
+--black:#050505;
+--card:#111;
+--gray:#999;
+
+}
+
+
 *{
+
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,sans-serif;
+font-family:Arial;
+
 }
+
 
 
 body{
-background:#050505;
+
+background:var(--black);
 color:white;
-padding-bottom:30px;
+padding-bottom:80px;
+
 }
+
 
 
 .header{
@@ -37,35 +55,34 @@ display:flex;
 justify-content:space-between;
 align-items:center;
 padding:0 20px;
-border-bottom:1px solid #333;
 
 }
+
 
 
 .logo{
 
-font-size:26px;
+font-size:28px;
 font-weight:900;
 
 }
 
+
 .logo span{
 
-color:#FFD600;
+color:var(--yellow);
 
 }
 
 
 .logout{
 
-background:#ff3333;
-color:white;
-border:0;
-padding:10px 16px;
-border-radius:12px;
-font-weight:bold;
+color:#ff4444;
+font-size:22px;
 
 }
+
+
 
 
 
@@ -77,14 +94,12 @@ padding:20px;
 
 
 
-.title{
+.welcome{
 
-font-size:26px;
-font-weight:800;
+font-size:22px;
 margin-bottom:20px;
 
 }
-
 
 
 
@@ -98,12 +113,13 @@ gap:15px;
 
 
 
+
 .card{
 
-background:#151515;
-border:1px solid #292929;
+background:var(--card);
+border:1px solid #222;
 border-radius:20px;
-padding:18px;
+padding:20px;
 
 }
 
@@ -112,57 +128,26 @@ padding:18px;
 .card i{
 
 font-size:28px;
-color:#FFD600;
+color:var(--yellow);
 
 }
 
 
 
-.value{
+.number{
 
 font-size:30px;
-font-weight:800;
-margin-top:12px;
-
-}
-
-
-.name{
-
-color:#aaa;
-margin-top:5px;
+font-weight:bold;
+margin-top:10px;
 
 }
 
 
 
+.title{
 
-
-.revenue{
-
-margin-top:20px;
-background:#151515;
-border-radius:20px;
-padding:20px;
-border:1px solid #292929;
-
-}
-
-
-
-.revenue h3{
-
-color:#FFD600;
-margin-bottom:15px;
-
-}
-
-
-
-.money{
-
-font-size:35px;
-font-weight:900;
+color:var(--gray);
+font-size:14px;
 
 }
 
@@ -170,83 +155,36 @@ font-weight:900;
 
 
 
-.quick{
-
-margin-top:20px;
-
-}
-
-
-.quick h3{
-
-margin-bottom:15px;
-
-}
-
-
-.action{
-
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:12px;
-
-}
-
-
-
-.action a{
-
-background:#151515;
-border:1px solid #333;
-padding:16px;
-border-radius:15px;
-text-decoration:none;
-color:white;
-
-}
-
-
-
-.action i{
-
-color:#FFD600;
-margin-right:8px;
-
-}
-
-
-
-
-
-.live{
+.menu{
 
 margin-top:25px;
-background:#151515;
-padding:20px;
-border-radius:20px;
+
+}
+
+
+
+.menu button{
+
+width:100%;
+padding:16px;
+margin-bottom:12px;
+background:#111;
 border:1px solid #333;
+border-radius:15px;
+color:white;
+text-align:left;
+font-size:16px;
 
 }
 
 
-.live h3{
 
-color:#FFD600;
+.menu i{
 
-}
-
-
-.status{
-
-margin-top:15px;
-padding:15px;
-background:#000;
-border-radius:12px;
-color:#aaa;
+color:var(--yellow);
+width:35px;
 
 }
-
-
 
 
 
@@ -258,22 +196,19 @@ color:#aaa;
 <body>
 
 
+
 <header class="header">
 
 
 <div class="logo">
 
-RID<span>ERX</span> ADMIN
+RID<span>ERX</span>
 
 </div>
 
 
-<button class="logout"
-onclick="logoutAdmin()">
-
-Logout
-
-</button>
+<i onclick="logout()"
+class="fa-solid fa-right-from-bracket logout"></i>
 
 
 </header>
@@ -282,17 +217,14 @@ Logout
 
 
 
-
 <div class="container">
 
 
-<div class="title">
+<div class="welcome">
 
-Dashboard Overview
+Admin Dashboard
 
 </div>
-
-
 
 
 
@@ -304,13 +236,14 @@ Dashboard Overview
 
 <i class="fa-solid fa-users"></i>
 
-<div class="value" id="customers">
+<div id="customers"
+class="number">
 
 0
 
 </div>
 
-<div class="name">
+<div class="title">
 
 Customers
 
@@ -325,13 +258,14 @@ Customers
 
 <i class="fa-solid fa-motorcycle"></i>
 
-<div class="value" id="riders">
+<div id="riders"
+class="number">
 
 0
 
 </div>
 
-<div class="name">
+<div class="title">
 
 Total Riders
 
@@ -345,37 +279,16 @@ Total Riders
 
 <div class="card">
 
-<i class="fa-solid fa-circle-check"></i>
-
-<div class="value" id="onlineRiders">
-
-0
-
-</div>
-
-<div class="name">
-
-Online Riders
-
-</div>
-
-</div>
-
-
-
-
-
-<div class="card">
-
 <i class="fa-solid fa-user-clock"></i>
 
-<div class="value" id="pending">
+<div id="pending"
+class="number">
 
 0
 
 </div>
 
-<div class="name">
+<div class="title">
 
 Pending Approval
 
@@ -386,17 +299,19 @@ Pending Approval
 
 
 
+
 <div class="card">
 
 <i class="fa-solid fa-route"></i>
 
-<div class="value" id="rides">
+<div id="rides"
+class="number">
 
 0
 
 </div>
 
-<div class="name">
+<div class="title">
 
 Total Rides
 
@@ -407,50 +322,48 @@ Total Rides
 
 
 
+
 <div class="card">
 
-<i class="fa-solid fa-car-side"></i>
+<i class="fa-solid fa-indian-rupee-sign"></i>
 
-<div class="value" id="activeRides">
-
-0
-
-</div>
-
-<div class="name">
-
-Active Rides
-
-</div>
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-<div class="revenue">
-
-
-<h3>
-
-Revenue
-
-</h3>
-
-
-<div class="money"
-id="revenue">
+<div id="revenue"
+class="number">
 
 ₹0
 
 </div>
 
+<div class="title">
+
+Revenue
+
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<i class="fa-solid fa-signal"></i>
+
+<div id="online"
+class="number">
+
+0
+
+</div>
+
+<div class="title">
+
+Riders Online
+
+</div>
+
+</div>
+
+
 
 </div>
 
@@ -459,81 +372,62 @@ id="revenue">
 
 
 
-<div class="quick">
+
+<div class="menu">
 
 
-<h3>
+<button onclick="openPage('riders.html')">
 
-Quick Actions
+<i class="fa-solid fa-motorcycle"></i>
 
-</h3>
+Manage Riders
 
-
-<div class="action">
-
-
-<a href="riders.html">
-
-<i class="fa-solid fa-user-check"></i>
-
-Approve Riders
-
-</a>
+</button>
 
 
 
-<a href="fare.html">
+<button onclick="openPage('customers.html')">
 
-<i class="fa-solid fa-indian-rupee-sign"></i>
+<i class="fa-solid fa-users"></i>
 
-Manage Fare
+Manage Customers
 
-</a>
-
-
-
-
-<a href="coupons.html">
-
-<i class="fa-solid fa-ticket"></i>
-
-Coupons
-
-</a>
+</button>
 
 
 
-<a href="settings.html">
+<button onclick="openPage('rides.html')">
+
+<i class="fa-solid fa-route"></i>
+
+Manage Rides
+
+</button>
+
+
+
+<button onclick="openPage('fare.html')">
+
+<i class="fa-solid fa-money-bill"></i>
+
+Fare Settings
+
+</button>
+
+
+
+<button onclick="openPage('settings.html')">
 
 <i class="fa-solid fa-gear"></i>
 
 App Settings
 
-</a>
-
-
-
-<a href="customers.html">
-
-<i class="fa-solid fa-users"></i>
-
-Customers
-
-</a>
-
-
-
-<a href="notifications.html">
-
-<i class="fa-solid fa-bell"></i>
-
-Notifications
-
-</a>
+</button>
 
 
 
 </div>
+
 
 
 </div>
@@ -544,39 +438,145 @@ Notifications
 
 
 
-
-<div class="live">
-
-
-<h3>
-
-Live Ride Monitoring
-
-</h3>
+<script type="module">
 
 
-<div class="status"
-id="liveStatus">
+import {
 
-No Active Ride
+auth,
+db
 
-</div>
+}
 
-
-</div>
+from "../firebase/firebase-config.js";
 
 
 
+import {
+
+onAuthStateChanged,
+signOut
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 
-</div>
+
+import {
+
+collection,
+getDocs
+
+}
+
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
 
 
-<script type="module"
-src="../js/admin.js"></script>
+
+
+onAuthStateChanged(auth,async(user)=>{
+
+
+if(!user){
+
+location.href="../auth/login.html";
+
+return;
+
+}
+
+
+
+const snap =
+await getDocs(
+collection(db,"users")
+);
+
+
+
+let customers=0;
+let riders=0;
+
+
+
+snap.forEach(doc=>{
+
+
+let data=doc.data();
+
+
+
+if(data.role==="customer")
+customers++;
+
+
+if(data.role==="rider")
+riders++;
+
+
+
+});
+
+
+
+document.getElementById("customers").innerText=customers;
+
+document.getElementById("riders").innerText=riders;
+
+
+
+
+const rideSnap =
+await getDocs(
+collection(db,"rides")
+);
+
+
+
+document.getElementById("rides").innerText=
+rideSnap.size;
+
+
+
+});
+
+
+
+
+
+
+
+
+window.logout=async()=>{
+
+
+await signOut(auth);
+
+location.href="../auth/login.html";
+
+
+}
+
+
+
+
+
+window.openPage=(page)=>{
+
+
+location.href=page;
+
+
+}
+
+
+
+</script>
+
 
 
 </body>
