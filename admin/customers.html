@@ -1,438 +1,226 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>RiderX | Customer Management</title>
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- FontAwesome 6 Pro CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<title>RiderX Manage Customers</title>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              yellow: '#FACC15',
-              yellowHover: '#EAB308',
-              gold: '#EAB308',
-              dark: '#090D16',
-              card: '#111827',
-              border: 'rgba(255, 255, 255, 0.08)',
-              glass: 'rgba(17, 24, 39, 0.75)'
-            }
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-          },
-          boxShadow: {
-            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
-            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
-          }
-        }
-      }
-    }
-  </script>
 
-  <style>
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #090D16;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1F2937;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #FACC15;
-    }
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    .glass-panel {
-      background: rgba(17, 24, 39, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
 
-    .glass-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-  </style>
+<style>
+
+:root{
+
+--yellow:#FFE500;
+--black:#050505;
+--card:#111;
+
+}
+
+
+*{
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+
+}
+
+
+
+body{
+
+background:var(--black);
+color:white;
+padding-bottom:50px;
+
+}
+
+
+
+.header{
+
+height:70px;
+background:#111;
+display:flex;
+align-items:center;
+padding:0 20px;
+
+}
+
+
+
+.logo{
+
+font-size:28px;
+font-weight:900;
+
+}
+
+
+.logo span{
+
+color:var(--yellow);
+
+}
+
+
+
+.container{
+
+padding:20px;
+
+}
+
+
+
+.back{
+
+width:100%;
+padding:12px;
+background:#222;
+color:white;
+border:none;
+border-radius:12px;
+margin-bottom:20px;
+
+}
+
+
+
+.title{
+
+font-size:24px;
+font-weight:bold;
+margin-bottom:20px;
+
+}
+
+
+
+.customer-card{
+
+background:var(--card);
+border:1px solid #333;
+border-radius:18px;
+padding:18px;
+margin-bottom:15px;
+
+}
+
+
+
+.row{
+
+margin-bottom:8px;
+
+}
+
+
+
+.label{
+
+color:#999;
+
+}
+
+
+
+button{
+
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:12px;
+background:var(--yellow);
+font-weight:bold;
+
+}
+
+
+
+.block{
+
+background:#ff3333;
+color:white;
+
+}
+
+
+
+</style>
+
+
 </head>
 
-<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
 
-  <!-- TOP HEADER / BAR -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
-    <div class="flex items-center space-x-4">
-      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
-        <i class="fa-solid fa-bars-staggered text-lg"></i>
-      </button>
-      <a href="dashboard.html" class="flex items-center space-x-3 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
-          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
-        </div>
-        <div>
-          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-            RIDER<span class="text-brand-yellow">X</span>
-            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
-          </span>
-        </div>
-      </a>
-    </div>
 
-    <div class="flex items-center space-x-3 lg:space-x-5">
-      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
-        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
-        <span>Active Customer Portal</span>
-      </div>
+<body>
 
-      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
-        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
-        <div class="hidden md:block">
-          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
-          <p class="text-[10px] text-slate-400">Super Admin</p>
-        </div>
-      </div>
-    </div>
-  </header>
 
-  <!-- MAIN LAYOUT -->
-  <div class="flex-1 flex overflow-hidden">
+<header class="header">
 
-    <!-- SIDE NAVIGATION -->
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
-      <div class="px-4 py-6 space-y-8 overflow-y-auto">
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
-          <nav class="space-y-1">
-            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
-              <span>Dashboard</span>
-            </a>
-            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
-              <span>Trips & Live Map</span>
-            </a>
-            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
-              <span>Riders</span>
-            </a>
-            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
-                <span>Rider Approvals</span>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
-            </a>
-            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
-              <i class="fa-solid fa-users text-base"></i>
-              <span>Customers</span>
-            </a>
-          </nav>
-        </div>
 
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
-          <nav class="space-y-1">
-            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
-              <span>Fare & Pricing</span>
-            </a>
-            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
-              <span>Commission Rules</span>
-            </a>
-            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
-              <span>Payouts & Wallet</span>
-            </a>
-            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
-              <span>Coupons & Offers</span>
-            </a>
-          </nav>
-        </div>
-      </div>
-    </aside>
+<div class="logo">
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+RID<span>ERX</span>
 
-      <!-- HEADER ACTION BAR -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            <i class="fa-solid fa-users border-brand-yellow text-brand-yellow"></i> Customer Registry
-          </h1>
-          <p class="text-xs text-slate-400">View registered passengers, manage wallet credits, account statuses, and activity metrics.</p>
-        </div>
+</div>
 
-        <div class="flex items-center space-x-3">
-          <button onclick="exportCustomers()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-brand-border flex items-center space-x-2">
-            <i class="fa-solid fa-file-export text-brand-yellow"></i>
-            <span>Export CSV</span>
-          </button>
-        </div>
-      </div>
 
-      <!-- METRICS OVERVIEW -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="glass-card p-4 rounded-xl border border-brand-border">
-          <p class="text-xs font-semibold text-slate-400">Total Registered Users</p>
-          <h3 class="text-xl font-extrabold text-white mt-1">12,450</h3>
-        </div>
-        <div class="glass-card p-4 rounded-xl border border-brand-border">
-          <p class="text-xs font-semibold text-emerald-400">Active This Month</p>
-          <h3 class="text-xl font-extrabold text-white mt-1">9,820</h3>
-        </div>
-        <div class="glass-card p-4 rounded-xl border border-brand-border">
-          <p class="text-xs font-semibold text-amber-400">VIP Members</p>
-          <h3 class="text-xl font-extrabold text-white mt-1">340</h3>
-        </div>
-        <div class="glass-card p-4 rounded-xl border border-brand-border">
-          <p class="text-xs font-semibold text-rose-400">Blocked / Suspended</p>
-          <h3 class="text-xl font-extrabold text-white mt-1">18</h3>
-        </div>
-      </div>
+</header>
 
-      <!-- FILTER & SEARCH BAR -->
-      <div class="glass-panel p-4 rounded-2xl border border-brand-border flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="relative w-full md:w-80">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
-          <input type="text" id="searchInput" onkeyup="filterCustomers()" placeholder="Search name, phone, email..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-brand-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-yellow" />
-        </div>
 
-        <div class="flex items-center space-x-2 w-full md:w-auto overflow-x-auto">
-          <button onclick="setFilter('all')" class="cust-filter-btn active px-3.5 py-1.5 rounded-lg bg-brand-yellow text-slate-950 font-bold text-xs">All Users</button>
-          <button onclick="setFilter('active')" class="cust-filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">Active</button>
-          <button onclick="setFilter('vip')" class="cust-filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">VIP Tier</button>
-          <button onclick="setFilter('blocked')" class="cust-filter-btn px-3.5 py-1.5 rounded-lg bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700">Blocked</button>
-        </div>
-      </div>
 
-      <!-- CUSTOMERS TABLE -->
-      <div class="glass-panel rounded-2xl border border-brand-border overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-900/90 uppercase text-[10px] font-bold text-slate-400 tracking-wider border-b border-brand-border">
-              <tr>
-                <th class="py-3.5 px-4">Customer</th>
-                <th class="py-3.5 px-4">Contact Info</th>
-                <th class="py-3.5 px-4">Total Trips</th>
-                <th class="py-3.5 px-4">Wallet Balance</th>
-                <th class="py-3.5 px-4">Tier</th>
-                <th class="py-3.5 px-4">Status</th>
-                <th class="py-3.5 px-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="customersTableBody" class="divide-y divide-brand-border font-medium">
-              <!-- Dynamically rendered -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div class="container">
 
-    </main>
-  </div>
 
-  <!-- CUSTOMER DETAILS MODAL -->
-  <div id="customerModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
-    <div class="glass-panel w-full max-w-md rounded-2xl p-6 border border-brand-border space-y-5">
-      <div class="flex items-center justify-between border-b border-brand-border pb-3">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-          <i class="fa-solid fa-user text-brand-yellow"></i> Customer Profile
-        </h3>
-        <button onclick="closeCustomerModal()" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
 
-      <div class="space-y-4 text-xs">
-        <div class="flex items-center space-x-4 bg-slate-900/80 p-3.5 rounded-xl border border-brand-border">
-          <img id="modalCustAvatar" src="" class="w-12 h-12 rounded-xl object-cover ring-2 ring-brand-yellow/40" />
-          <div>
-            <h4 id="modalCustName" class="text-sm font-bold text-white"></h4>
-            <p id="modalCustPhone" class="text-slate-400"></p>
-            <p id="modalCustEmail" class="text-slate-500 text-[11px]"></p>
-          </div>
-        </div>
+<button class="back"
+onclick="history.back()">
 
-        <div class="grid grid-cols-2 gap-3">
-          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
-            <p class="text-slate-400">Total Rides Booked</p>
-            <p id="modalCustRides" class="text-white font-extrabold text-sm mt-0.5"></p>
-          </div>
-          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
-            <p class="text-slate-400">Wallet Credits</p>
-            <p id="modalCustWallet" class="text-emerald-400 font-extrabold text-sm mt-0.5"></p>
-          </div>
-        </div>
-      </div>
+← Back
 
-      <div class="flex items-center space-x-3 pt-2">
-        <button id="blockCustBtn" onclick="toggleBlockCustomer()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all">
-          Block Account
-        </button>
-        <button onclick="addWalletCredit()" class="flex-1 py-2.5 rounded-xl bg-brand-yellow text-slate-950 text-xs font-extrabold hover:bg-yellow-400 transition-all shadow-glow-yellow">
-          + Add Credit
-        </button>
-      </div>
-    </div>
-  </div>
+</button>
 
-  <script>
-    const customerData = [
-      { id: 'CUST-301', name: 'Ananya Roy', phone: '+91 98765 11223', email: 'ananya@example.com', rides: 84, wallet: '₹ 450', tier: 'VIP', status: 'active', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120' },
-      { id: 'CUST-302', name: 'Rohan Mehta', phone: '+91 98123 99887', email: 'rohan.m@example.com', rides: 32, wallet: '₹ 120', tier: 'Regular', status: 'active', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120' },
-      { id: 'CUST-303', name: 'Pooja Sharma', phone: '+91 99887 11445', email: 'pooja.s@example.com', rides: 142, wallet: '₹ 1,200', tier: 'VIP', status: 'active', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120' },
-      { id: 'CUST-304', name: 'Karan Patel', phone: '+91 97112 88990', email: 'karan.p@example.com', rides: 5, wallet: '₹ 0', tier: 'Regular', status: 'blocked', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120' }
-    ];
 
-    let currentCustFilter = 'all';
-    let selectedCustId = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      renderCustomers(customerData);
-      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
-      });
-    });
 
-    function renderCustomers(data) {
-      const tbody = document.getElementById('customersTableBody');
-      tbody.innerHTML = '';
+<div class="title">
 
-      data.forEach(c => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-800/40 transition-colors';
+Manage Customers
 
-        const tierBadge = c.tier === 'VIP'
-          ? `<span class="px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 text-[10px] font-bold"><i class="fa-solid fa-crown mr-1"></i> VIP</span>`
-          : `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[10px] font-semibold">Regular</span>`;
+</div>
 
-        const statusBadge = c.status === 'active'
-          ? `<span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold">Active</span>`
-          : `<span class="px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[10px] font-bold">Blocked</span>`;
 
-        tr.innerHTML = `
-          <td class="py-3.5 px-4 flex items-center space-x-3">
-            <img src="${c.avatar}" class="w-9 h-9 rounded-xl object-cover ring-1 ring-brand-border" />
-            <div>
-              <p class="font-bold text-white">${c.name}</p>
-              <p class="text-[11px] text-slate-500">${c.id}</p>
-            </div>
-          </td>
-          <td class="py-3.5 px-4">
-            <p class="font-semibold text-slate-200">${c.phone}</p>
-            <p class="text-[11px] text-slate-400">${c.email}</p>
-          </td>
-          <td class="py-3.5 px-4 font-bold text-slate-200">${c.rides} Rides</td>
-          <td class="py-3.5 px-4 font-extrabold text-emerald-400">${c.wallet}</td>
-          <td class="py-3.5 px-4">${tierBadge}</td>
-          <td class="py-3.5 px-4">${statusBadge}</td>
-          <td class="py-3.5 px-4 text-right">
-            <button onclick="inspectCustomer('${c.id}')" class="p-2 rounded-xl bg-slate-800 hover:bg-brand-yellow hover:text-slate-950 text-slate-300 transition-all">
-              <i class="fa-solid fa-user-gear"></i>
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
 
-    function setFilter(filter) {
-      currentCustFilter = filter;
-      document.querySelectorAll('.cust-filter-btn').forEach(btn => {
-        btn.classList.remove('bg-brand-yellow', 'text-slate-950', 'font-bold');
-        btn.classList.add('bg-slate-800', 'text-slate-300', 'font-semibold');
-      });
-      event.target.classList.remove('bg-slate-800', 'text-slate-300', 'font-semibold');
-      event.target.classList.add('bg-brand-yellow', 'text-slate-950', 'font-bold');
+<div id="customerList">
 
-      filterCustomers();
-    }
+Loading Customers...
 
-    function filterCustomers() {
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      const filtered = customerData.filter(c => {
-        const matchesSearch = c.name.toLowerCase().includes(search) || c.phone.includes(search) || c.email.toLowerCase().includes(search);
-        const matchesFilter = currentCustFilter === 'all' 
-          || (currentCustFilter === 'active' && c.status === 'active')
-          || (currentCustFilter === 'blocked' && c.status === 'blocked')
-          || (currentCustFilter === 'vip' && c.tier === 'VIP');
-        return matchesSearch && matchesFilter;
-      });
-      renderCustomers(filtered);
-    }
+</div>
 
-    function inspectCustomer(id) {
-      selectedCustId = id;
-      const customer = customerData.find(c => c.id === id);
-      if (!customer) return;
 
-      document.getElementById('modalCustAvatar').src = customer.avatar;
-      document.getElementById('modalCustName').textContent = customer.name;
-      document.getElementById('modalCustPhone').textContent = customer.phone;
-      document.getElementById('modalCustEmail').textContent = customer.email;
-      document.getElementById('modalCustRides').textContent = customer.rides;
-      document.getElementById('modalCustWallet').textContent = customer.wallet;
 
-      const blockBtn = document.getElementById('blockCustBtn');
-      if (customer.status === 'blocked') {
-        blockBtn.textContent = 'Unblock Account';
-        blockBtn.className = 'flex-1 py-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold hover:bg-emerald-500/30 transition-all';
-      } else {
-        blockBtn.textContent = 'Block Account';
-        blockBtn.className = 'flex-1 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all';
-      }
+</div>
 
-      document.getElementById('customerModal').classList.remove('hidden');
-    }
 
-    function closeCustomerModal() {
-      document.getElementById('customerModal').classList.add('hidden');
-    }
 
-    function toggleBlockCustomer() {
-      const customer = customerData.find(c => c.id === selectedCustId);
-      if (customer) {
-        customer.status = customer.status === 'blocked' ? 'active' : 'blocked';
-        filterCustomers();
-        closeCustomerModal();
-      }
-    }
 
-    function addWalletCredit() {
-      const amount = prompt('Enter wallet credit amount (₹):', '100');
-      if (amount && !isNaN(amount)) {
-        const customer = customerData.find(c => c.id === selectedCustId);
-        if (customer) {
-          const currentVal = parseInt(customer.wallet.replace(/[^0-9]/g, '')) || 0;
-          customer.wallet = `₹ ${(currentVal + parseInt(amount)).toLocaleString('en-IN')}`;
-          filterCustomers();
-          closeCustomerModal();
-        }
-      }
-    }
 
-    function exportCustomers() {
-      alert('Customer directory exported successfully as CSV.');
-    }
-  </script>
+<script type="module"
+src="./js/customers.js"></script>
+
+
+
 </body>
+
 </html>
