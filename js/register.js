@@ -1,18 +1,18 @@
 // =====================================
 // RiderX Register System
 // Customer + Rider
+// Firebase v10/v12 Compatible
 // =====================================
 
 
 import {
 
 auth,
-
 db
 
 }
 
-from "../firebase/config.js";
+from "../firebase/firebase-config.js";
 
 
 
@@ -31,7 +31,6 @@ from
 import {
 
 doc,
-
 setDoc
 
 }
@@ -48,23 +47,17 @@ from
 // =====================================
 
 
-let selectedRole="customer";
+let selectedRole = "customer";
 
 
 
 const customerRole =
-
-document.getElementById(
-"customerRole"
-);
+document.getElementById("customerRole");
 
 
 
 const riderRole =
-
-document.getElementById(
-"riderRole"
-);
+document.getElementById("riderRole");
 
 
 
@@ -73,26 +66,26 @@ document.getElementById(
 if(customerRole){
 
 
-customerRole.onclick=()=>{
+customerRole.onclick = ()=>{
 
 
-selectedRole="customer";
+selectedRole = "customer";
 
 
-customerRole.classList.add(
-"active"
-);
+customerRole.classList.add("active");
 
+if(riderRole){
 
-riderRole.classList.remove(
-"active"
-);
+riderRole.classList.remove("active");
+
+}
 
 
 };
 
 
 }
+
 
 
 
@@ -100,28 +93,26 @@ riderRole.classList.remove(
 if(riderRole){
 
 
-riderRole.onclick=()=>{
+riderRole.onclick = ()=>{
 
 
-selectedRole="rider";
+selectedRole = "rider";
 
 
-riderRole.classList.add(
-"active"
-);
+riderRole.classList.add("active");
 
 
-customerRole.classList.remove(
-"active"
-);
+if(customerRole){
+
+customerRole.classList.remove("active");
+
+}
 
 
 };
 
 
 }
-
-
 
 
 
@@ -134,10 +125,7 @@ customerRole.classList.remove(
 
 
 const registerBtn =
-
-document.getElementById(
-"registerBtn"
-);
+document.getElementById("registerBtn");
 
 
 
@@ -147,38 +135,27 @@ if(registerBtn){
 
 
 
-registerBtn.onclick=async()=>{
+registerBtn.onclick = async ()=>{
+
 
 
 const name =
-
-document.getElementById(
-"name"
-).value;
+document.getElementById("name").value.trim();
 
 
 
 const phone =
-
-document.getElementById(
-"phone"
-).value;
+document.getElementById("phone").value.trim();
 
 
 
 const email =
-
-document.getElementById(
-"email"
-).value;
+document.getElementById("email").value.trim();
 
 
 
 const password =
-
-document.getElementById(
-"password"
-).value;
+document.getElementById("password").value.trim();
 
 
 
@@ -193,10 +170,7 @@ if(
 ){
 
 
-alert(
-"Please fill all details"
-);
-
+alert("Please fill all details");
 
 return;
 
@@ -209,6 +183,7 @@ return;
 try{
 
 
+// Create Firebase Account
 
 const userCredential =
 
@@ -224,14 +199,13 @@ password
 
 
 
-const user =
-
-userCredential.user;
+const user = userCredential.user;
 
 
 
 
 
+// Save User Data
 
 await setDoc(
 
@@ -260,15 +234,40 @@ email:email,
 role:selectedRole,
 
 
-createdAt:
-new Date()
 
+// Rider approval system
+
+approved:
+
+selectedRole === "rider"
+?
+false
+:
+true,
+
+
+
+status:
+
+selectedRole === "rider"
+?
+"pending"
+:
+"active",
+
+
+
+wallet:0,
+
+
+createdAt:new Date()
 
 
 }
 
 
 );
+
 
 
 
@@ -283,14 +282,16 @@ alert(
 
 
 
-if(selectedRole==="rider"){
 
+
+// Redirect
+
+if(selectedRole === "rider"){
 
 
 window.location.href =
 
-"../rider/home.html";
-
+"../rider/pending.html";
 
 
 }
@@ -298,24 +299,24 @@ window.location.href =
 else{
 
 
-
 window.location.href =
 
 "../customer/home.html";
 
 
-
 }
 
 
 
 
+
 }
-
-
 
 catch(error){
 
+
+
+console.error(error);
 
 
 alert(
