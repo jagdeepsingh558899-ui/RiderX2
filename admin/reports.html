@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RiderX | Analytics & Financial Reports</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome 6 Pro CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              yellowHover: '#EAB308',
+              gold: '#EAB308',
+              dark: '#090D16',
+              card: '#111827',
+              border: 'rgba(255, 255, 255, 0.08)',
+              glass: 'rgba(17, 24, 39, 0.75)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
+            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FACC15;
+    }
+
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
+</head>
+
+<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- TOP HEADER / BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
+        <i class="fa-solid fa-bars-staggered text-lg"></i>
+      </button>
+      <a href="dashboard.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
+            RIDER<span class="text-brand-yellow">X</span>
+            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <div class="flex items-center space-x-3 lg:space-x-5">
+      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <span>Analytics Engine Active</span>
+      </div>
+
+      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
+        <div class="hidden md:block">
+          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
+          <p class="text-[10px] text-slate-400">Super Admin</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- SIDE NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
+      <div class="px-4 py-6 space-y-8 overflow-y-auto">
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
+          <nav class="space-y-1">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
+              <span>Trips & Live Map</span>
+            </a>
+            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
+              <span>Riders</span>
+            </a>
+            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
+                <span>Rider Approvals</span>
+              </div>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
+            </a>
+            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
+              <span>Customers</span>
+            </a>
+          </nav>
+        </div>
+
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
+          <nav class="space-y-1">
+            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
+              <span>Fare & Pricing</span>
+            </a>
+            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
+              <span>Commission Rules</span>
+            </a>
+            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
+              <span>Payouts & Wallet</span>
+            </a>
+            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
+              <span>Coupons & Offers</span>
+            </a>
+            <a href="reports.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
+              <i class="fa-solid fa-file-invoice-dollar text-base"></i>
+              <span>Financial Reports</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+
+      <!-- HEADER ACTION BAR -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-chart-line text-brand-yellow"></i> Financial Reports & Business Intelligence
+          </h1>
+          <p class="text-xs text-slate-400">Generate statements, analyze gross booking volumes, and track platform profits.</p>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <select id="timeRange" onchange="updateReports()" class="bg-slate-900 border border-brand-border text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-brand-yellow font-bold">
+            <option value="this_month">This Month (August 2026)</option>
+            <option value="last_month">Last Month (July 2026)</option>
+            <option value="q2">Q2 2026 Summary</option>
+          </select>
+          <button onclick="exportCSV()" class="px-4 py-2 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-slate-950 text-xs font-extrabold transition-all shadow-glow-yellow flex items-center space-x-2">
+            <i class="fa-solid fa-download"></i>
+            <span>Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- METRICS GRID -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
+          <p class="text-xs text-slate-400 font-semibold">Gross Booking Volume (GBV)</p>
+          <p id="gbvValue" class="text-2xl font-extrabold text-white">₹ 42,85,900</p>
+          <p class="text-[10px] text-emerald-400 flex items-center gap-1 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +14.2% vs last period</p>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
+          <p class="text-xs text-slate-400 font-semibold">Platform Net Revenue (18%)</p>
+          <p id="netRevenueValue" class="text-2xl font-extrabold text-brand-yellow">₹ 7,71,462</p>
+          <p class="text-[10px] text-emerald-400 flex items-center gap-1 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +12.8% vs last period</p>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
+          <p class="text-xs text-slate-400 font-semibold">Total Driver Disbursements</p>
+          <p id="disbursementValue" class="text-2xl font-extrabold text-emerald-400">₹ 35,14,438</p>
+          <p class="text-[10px] text-slate-400 font-bold">82% of GBV Paid Out</p>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
+          <p class="text-xs text-slate-400 font-semibold">Promotional Subsidies</p>
+          <p id="promoValue" class="text-2xl font-extrabold text-rose-400">₹ 1,84,300</p>
+          <p class="text-[10px] text-rose-400 flex items-center gap-1 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> 4.3% of GBV</p>
+        </div>
+      </div>
+
+      <!-- BREAKDOWN BY CATEGORY -->
+      <div class="glass-panel rounded-2xl border border-brand-border overflow-hidden">
+        <div class="p-4 lg:p-6 border-b border-brand-border flex items-center justify-between">
+          <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-brand-yellow"></i> Revenue Performance by Service Category
+          </h2>
+          <span class="text-[11px] text-slate-400 font-medium">Real-time ledger audit</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/80 uppercase text-[10px] font-bold text-slate-400 tracking-wider border-b border-brand-border">
+              <tr>
+                <th class="py-3.5 px-4">Service Category</th>
+                <th class="py-3.5 px-4">Total Trips</th>
+                <th class="py-3.5 px-4">Gross Revenue (GBV)</th>
+                <th class="py-3.5 px-4">Avg. Trip Fare</th>
+                <th class="py-3.5 px-4">Admin Commission</th>
+                <th class="py-3.5 px-4 text-right">Net Income</th>
+              </tr>
+            </thead>
+            <tbody id="reportsTableBody" class="divide-y divide-brand-border">
+              <!-- DYNAMIC ROWS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const reportData = {
+      this_month: {
+        gbv: '₹ 42,85,900',
+        net: '₹ 7,71,462',
+        disbursed: '₹ 35,14,438',
+        promo: '₹ 1,84,300',
+        rows: [
+          { category: 'Bike Taxi', trips: '18,420', gbv: '₹ 14,73,600', avgFare: '₹ 80', comm: '15%', net: '₹ 2,21,040' },
+          { category: 'Sedan Cab', trips: '8,900', gbv: '₹ 19,58,000', avgFare: '₹ 220', comm: '20%', net: '₹ 3,91,600' },
+          { category: 'Parcel Express', trips: '6,100', gbv: '₹ 8,54,300', avgFare: '₹ 140', comm: '18%', net: '₹ 1,53,774' },
+        ]
+      },
+      last_month: {
+        gbv: '₹ 37,50,000',
+        net: '₹ 6,75,000',
+        disbursed: '₹ 30,75,000',
+        promo: '₹ 1,50,000',
+        rows: [
+          { category: 'Bike Taxi', trips: '16,200', gbv: '₹ 12,96,000', avgFare: '₹ 80', comm: '15%', net: '₹ 1,94,400' },
+          { category: 'Sedan Cab', trips: '7,800', gbv: '₹ 17,16,000', avgFare: '₹ 220', comm: '20%', net: '₹ 3,43,200' },
+          { category: 'Parcel Express', trips: '5,200', gbv: '₹ 7,38,000', avgFare: '₹ 142', comm: '18%', net: '₹ 1,32,840' },
+        ]
+      },
+      q2: {
+        gbv: '₹ 1,12,00,000',
+        net: '₹ 20,16,000',
+        disbursed: '₹ 91,84,000',
+        promo: '₹ 4,50,000',
+        rows: [
+          { category: 'Bike Taxi', trips: '48,000', gbv: '₹ 38,40,000', avgFare: '₹ 80', comm: '15%', net: '₹ 5,76,000' },
+          { category: 'Sedan Cab', trips: '23,500', gbv: '₹ 51,70,000', avgFare: '₹ 220', comm: '20%', net: '₹ 10,34,000' },
+          { category: 'Parcel Express', trips: '15,600', gbv: '₹ 21,90,000', avgFare: '₹ 140', comm: '18%', net: '₹ 3,94,200' },
+        ]
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+      updateReports();
+    });
+
+    function updateReports() {
+      const selectedKey = document.getElementById('timeRange').value;
+      const data = reportData[selectedKey];
+
+      document.getElementById('gbvValue').innerText = data.gbv;
+      document.getElementById('netRevenueValue').innerText = data.net;
+      document.getElementById('disbursementValue').innerText = data.disbursed;
+      document.getElementById('promoValue').innerText = data.promo;
+
+      const tbody = document.getElementById('reportsTableBody');
+      tbody.innerHTML = '';
+
+      data.rows.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-800/40 transition-colors";
+        tr.innerHTML = `
+          <td class="py-3.5 px-4 font-bold text-white">${r.category}</td>
+          <td class="py-3.5 px-4 font-mono">${r.trips}</td>
+          <td class="py-3.5 px-4 font-bold text-white">${r.gbv}</td>
+          <td class="py-3.5 px-4 font-mono text-slate-400">${r.avgFare}</td>
+          <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20">${r.comm}</span></td>
+          <td class="py-3.5 px-4 font-extrabold text-emerald-400 text-right">${r.net}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportCSV() {
+      alert("Downloading financial statement CSV for selected date range...");
+    }
+  </script>
+</body>
+</html>
