@@ -1,61 +1,62 @@
-// =====================================
-// RiderX Customer Dashboard JS
-// =====================================
-
-
-// Service Selection
-
-let selectedService = "bike";
-
-
-const services = document.querySelectorAll(".service");
-
-
-services.forEach(service=>{
-
-
-service.addEventListener("click",()=>{
-
-
-services.forEach(s=>s.classList.remove("active"));
-
-
-service.classList.add("active");
-
-
-selectedService =
-service.innerText.toLowerCase();
-
-
-
-calculateFare();
-
-
-
-});
-
-
-});
-
-
-
-
-// =====================================
-// MAP
-// =====================================
+// ======================================
+// RiderX Customer Dashboard
+// Final Fixed JS
+// ======================================
 
 
 let map;
 
-
 let userMarker;
 
+let pickupMarker;
+
+let selectedService = "bike";
+
+let currentLocation = null;
+
+
+
+
+
+// ===============================
+// Start App
+// ===============================
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+initMap();
+
+
+setupServices();
+
+
+setupBookButton();
+
+
+});
+
+
+
+
+
+
+
+
+// ===============================
+// Map Setup
+// ===============================
 
 
 function initMap(){
 
 
-map = L.map('map').setView(
+
+map = L.map("map")
+.setView(
 [30.7333,76.7794],
 13
 );
@@ -63,13 +64,53 @@ map = L.map('map').setView(
 
 
 L.tileLayer(
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+maxZoom:19
+}
+
 )
 .addTo(map);
 
 
 
+
+
+// Map click pickup select
+
+
+map.on(
+"click",
+function(e){
+
+
+
+let lat =
+e.latlng.lat;
+
+
+let lng =
+e.latlng.lng;
+
+
+
+setPickupLocation(
+lat,
+lng
+);
+
+
+
+}
+
+);
+
+
+
+
+
 getCurrentLocation();
+
 
 
 }
@@ -78,19 +119,29 @@ getCurrentLocation();
 
 
 
-// =====================================
-// Current Location
-// =====================================
+
+
+
+
+// ===============================
+// Current GPS Location
+// ===============================
 
 
 function getCurrentLocation(){
 
 
 
-if(navigator.geolocation){
+if(!navigator.geolocation){
+
+return;
+
+}
+
 
 
 navigator.geolocation.getCurrentPosition(
+
 (position)=>{
 
 
@@ -103,10 +154,28 @@ position.coords.longitude;
 
 
 
+currentLocation={
+lat:lat,
+lng:lng
+};
+
+
+
+
 map.setView(
 [lat,lng],
 15
 );
+
+
+
+
+
+if(userMarker){
+
+map.removeLayer(userMarker);
+
+}
 
 
 
@@ -122,8 +191,20 @@ L.marker(
 
 
 
+
+
+setPickupLocation(
+lat,
+lng
+);
+
+
+
 },
-()=>{
+
+
+
+(error)=>{
 
 
 console.log(
@@ -131,6 +212,7 @@ console.log(
 );
 
 
+
 }
 
 );
@@ -141,29 +223,144 @@ console.log(
 
 
 
+
+
+
+
+
+
+// ===============================
+// Pickup Select
+// ===============================
+
+
+function setPickupLocation(lat,lng){
+
+
+
+if(pickupMarker){
+
+map.removeLayer(pickupMarker);
+
+}
+
+
+
+pickupMarker =
+L.marker(
+[lat,lng]
+)
+.addTo(map)
+.bindPopup(
+"Pickup Location"
+)
+.openPopup();
+
+
+
+
+
+document
+.getElementById("pickup")
+.value =
+lat.toFixed(5)
++
+", "
++
+lng.toFixed(5);
+
+
+
+calculateFare();
+
+
+
 }
 
 
 
 
 
-// =====================================
-// Distance & Fare
-// =====================================
+
+
+
+
+// ===============================
+// Service Selection
+// ===============================
+
+
+function setupServices(){
+
+
+
+const services =
+document.querySelectorAll(".service");
+
+
+
+services.forEach(
+(service)=>{
+
+
+service.onclick=function(){
+
+
+
+services.forEach(
+(s)=>
+s.classList.remove("active")
+);
+
+
+
+service.classList.add("active");
+
+
+
+selectedService =
+service.dataset.service;
+
+
+
+calculateFare();
+
+
+
+};
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// Fare Calculation
+// ===============================
 
 
 function calculateFare(){
 
 
 
-let distance = 5; 
-// temporary distance
-// later Google/OSM routing se aayega
+let distance = 5;
 
 
 
 let hour =
-new Date().getHours();
+new Date()
+.getHours();
 
 
 
@@ -173,56 +370,58 @@ let rate = 8;
 
 if(hour >=22 || hour <6){
 
-
-rate = 11;
-
+rate=11;
 
 }
 
-else if(distance > 10){
+else if(distance >10){
 
-
-rate = 9;
-
+rate=9;
 
 }
 
 
 
 
-let serviceCharge = 0;
+
+let extra=0;
 
 
 
-if(selectedService.includes("cab")){
+if(selectedService==="cab"){
 
-serviceCharge = 50;
-
-}
-
-
-if(selectedService.includes("parcel")){
-
-serviceCharge = 30;
+extra=50;
 
 }
 
 
-if(selectedService.includes("food")){
 
-serviceCharge = 20;
+if(selectedService==="parcel"){
+
+extra=30;
 
 }
+
+
+
+if(selectedService==="food"){
+
+extra=20;
+
+}
+
 
 
 
 let total =
-(distance * rate)+serviceCharge;
+(distance*rate)+extra;
 
 
 
-document.getElementById("fare").innerHTML =
-"₹"+total.toFixed(0);
+document
+.getElementById("fare")
+.innerText =
+"₹"+total;
 
 
 
@@ -232,40 +431,47 @@ document.getElementById("fare").innerHTML =
 
 
 
-// =====================================
+
+
+
+
+// ===============================
 // Book Ride
-// =====================================
+// ===============================
+
+
+function setupBookButton(){
+
 
 
 document
 .getElementById("bookRide")
-.addEventListener(
-"click",
-()=>{
+.onclick=function(){
 
 
 
 let pickup =
-document.getElementById("pickup").value;
+document
+.getElementById("pickup")
+.value;
 
 
 
 let drop =
-document.getElementById("drop").value;
+document
+.getElementById("drop")
+.value;
 
 
 
 
-if(drop===""){
-
+if(!drop){
 
 alert(
-"Please enter destination"
+"Please enter drop location"
 );
 
-
 return;
-
 
 }
 
@@ -273,7 +479,7 @@ return;
 
 
 
-let rideData = {
+let ride={
 
 
 service:selectedService,
@@ -286,11 +492,15 @@ drop:drop,
 
 
 payment:
-document.getElementById("payment").value,
+document
+.getElementById("payment")
+.value,
 
 
 fare:
-document.getElementById("fare").innerText,
+document
+.getElementById("fare")
+.innerText,
 
 
 status:"searching",
@@ -299,8 +509,6 @@ status:"searching",
 createdAt:
 new Date()
 
-
-
 };
 
 
@@ -308,8 +516,8 @@ new Date()
 
 
 console.log(
-"Ride Created",
-rideData
+"RiderX Ride:",
+ride
 );
 
 
@@ -324,30 +532,13 @@ alert(
 
 
 
-// Firebase Firestore yaha connect hoga
-// riders ko notification jayega
+// Next step:
+// Firestore ride create
 
-
-
-});
-
-
-
-
-
-
-
-
-// Start
-
-window.onload=function(){
-
-
-initMap();
-
-
-calculateFare();
 
 
 };
-<script type="module" src="js/customer.js"></script>
+
+
+
+}
