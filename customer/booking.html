@@ -1,910 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX | Book Ride</title>
-
- 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-
-
-<style>
-
-:root{
-
---yellow:#FFE500;
---black:#080808;
---card:#151515;
---gray:#999;
-
-}
-
-
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Poppins,sans-serif;
-
-}
-
-
-
-body{
-
-background:var(--black);
-color:white;
-padding-bottom:80px;
-
-}
-
-
-
-/* Header */
-
-
-.header{
-
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:20px;
-
-}
-
-
-
-.logo{
-
-font-size:28px;
-font-weight:800;
-
-}
-
-
-.logo span{
-
-color:var(--yellow);
-
-}
-
-
-
-.back{
-
-color:var(--yellow);
-font-size:22px;
-
-}
-
-
-
-
-.container{
-
-padding:15px;
-
-}
-
-
-
-
-.card{
-
-background:var(--card);
-
-border-radius:20px;
-
-padding:20px;
-
-margin-bottom:15px;
-
-border:1px solid rgba(255,229,0,.2);
-
-}
-
-
-
-
-
-h2{
-
-margin-bottom:15px;
-
-}
-
-
-
-
-
-/* Ride Type */
-
-
-.ride-types{
-
-display:grid;
-
-grid-template-columns:repeat(2,1fr);
-
-gap:12px;
-
-}
-
-
-
-.type{
-
-background:#222;
-
-padding:15px;
-
-border-radius:15px;
-
-text-align:center;
-
-cursor:pointer;
-
-}
-
-
-
-.type i{
-
-font-size:25px;
-
-color:var(--yellow);
-
-margin-bottom:8px;
-
-}
-
-
-
-.type.active{
-
-background:var(--yellow);
-
-color:black;
-
-}
-
-
-
-.type.active i{
-
-color:black;
-
-}
-
-
-
-
-
-/* Inputs */
-
-
-.input-box{
-
-margin-top:15px;
-
-}
-
-
-
-.input-box input{
-
-width:100%;
-
-padding:14px;
-
-background:#222;
-
-border:none;
-
-outline:none;
-
-border-radius:12px;
-
-color:white;
-
-font-size:15px;
-
-}
-
-
-
-.input-box input:focus{
-
-border:1px solid var(--yellow);
-
-}
-
-
-
-
-
-/* Map */
-
-
-#map{
-
-height:300px;
-
-border-radius:18px;
-
-margin-top:15px;
-
-z-index:1;
-
-}
-
-
-
-
-
-/* Fare */
-
-
-.fare-box{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-margin-top:15px;
-
-font-size:18px;
-
-}
-
-
-
-.fare{
-
-color:var(--yellow);
-
-font-weight:800;
-
-}
-
-
-
-
-
-.book-btn{
-
-width:100%;
-
-padding:16px;
-
-background:var(--yellow);
-
-color:black;
-
-border:none;
-
-border-radius:15px;
-
-font-size:17px;
-
-font-weight:700;
-
-margin-top:20px;
-
-cursor:pointer;
-
-}
-
-
-
-
-
-.bottom-nav{
-
-position:fixed;
-
-bottom:0;
-
-left:0;
-
-right:0;
-
-height:70px;
-
-background:#111;
-
-display:flex;
-
-justify-content:space-around;
-
-align-items:center;
-
-border-top:1px solid #222;
-
-}
-
-
-
-.bottom-nav a{
-
-text-decoration:none;
-
-color:#777;
-
-font-size:12px;
-
-text-align:center;
-
-}
-
-
-
-.bottom-nav i{
-
-display:block;
-
-font-size:20px;
-
-margin-bottom:5px;
-
-}
-
-
-
-.active{
-
-color:var(--yellow)!important;
-
-}
-
-
-
-
-</style>
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RiderX - Book Your Ride</title>
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../css/app.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="../firebase/firebase-config.js"></script>
+  <script src="../js/fare-calculator.js"></script>
+  
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    #map {
+      flex: 1;
+      width: 100%;
+      z-index: 1;
+    }
+    .booking-panel {
+      background: #1E1E1E;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+    .service-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .service-card {
+      background: #2A2A2A;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .service-card.active {
+      border-color: #FFC107;
+      background: #332B00;
+    }
+    .input-group {
+      margin-bottom: 12px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #2A2A2A;
+      color: #FFF;
+      box-sizing: border-box;
+    }
+    .btn-action {
+      width: 100%;
+      padding: 14px;
+      background-color: #FFC107;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .fare-display {
+      font-size: 18px;
+      font-weight: bold;
+      color: #FFC107;
+      margin: 10px 0;
+      text-align: center;
+    }
+  </style>
 </head>
-
-
-
 <body>
 
-
-
-<div class="header">
-
-
-<a href="home.html" class="back">
-
-<i class="fa-solid fa-arrow-left"></i>
-
-</a>
-
-
-
-<div class="logo">
-
-RIDER<span>X</span>
-
-</div>
-
-
-
-<div></div>
-
-
-
-</div>
-
-
-
-
-
-<div class="container">
-
-
-
-<div class="card">
-
-
-<h2>
-<i class="fa-solid fa-location-dot" style="color:#FFE500"></i>
-Book Your Ride
-</h2>
-
-
-
-
-<div class="ride-types">
-
-
-<div class="type active" onclick="selectRide(this,'Bike Taxi')">
-
-<i class="fa-solid fa-motorcycle"></i>
-
-<p>Bike Taxi</p>
-
-</div>
-
-
-
-
-<div class="type" onclick="selectRide(this,'Cab')">
-
-<i class="fa-solid fa-car"></i>
-
-<p>Cab</p>
-
-</div>
-
-
-
-
-<div class="type" onclick="selectRide(this,'Parcel')">
-
-<i class="fa-solid fa-box"></i>
-
-<p>Parcel</p>
-
-</div>
-
-
-
-
-<div class="type" onclick="selectRide(this,'Food')">
-
-<i class="fa-solid fa-utensils"></i>
-
-<p>Food</p>
-
-</div>
-
-
-</div>
-
-
-<input type="hidden" id="rideType" value="Bike Taxi">
-
-
-<div class="input-box">
-
-<input id="pickup" placeholder="Pickup location">
-
-</div>
-
-
-
-<div class="input-box">
-
-<input id="drop" placeholder="Drop location">
-
-</div>
-
-
-<div id="map"></div>
- 
-<div class="fare-box">
-
-<div>
-Estimated Fare
-</div>
-
-<div class="fare" id="fare">
-₹0
-</div>
-
-</div>
-
-
-
-<button class="book-btn" onclick="bookRide()">
-
-<i class="fa-solid fa-bolt"></i>
-Book Ride
-
-</button>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<!-- Bottom Navigation -->
-
-<div class="bottom-nav">
-
-
-<a href="home.html">
-
-<i class="fa-solid fa-house"></i>
-
-Home
-
-</a>
-
-
-
-<a href="booking.html" class="active">
-
-<i class="fa-solid fa-motorcycle"></i>
-
-Booking
-
-</a>
-
-
-
-<a href="history.html">
-
-<i class="fa-solid fa-clock"></i>
-
-History
-
-</a>
-
-
-
-<a href="wallet.html">
-
-<i class="fa-solid fa-wallet"></i>
-
-Wallet
-
-</a>
-
-
-
-<a href="profile.html">
-
-<i class="fa-solid fa-user"></i>
-
-Profile
-
-</a>
-
-
-
-</div>
-
-
-
-
-
-
-<!-- Leaflet JS -->
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-
-<!-- Firebase -->
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
-
-<script src="../firebase/firebase-config.js"></script>
-
-
-
-<script>
-
-
-let selectedRide = "Bike Taxi";
-
-
-let map;
-
-let userLocation = null;
-
-
-
-
-// Select Ride Type
-
-function selectRide(element,type){
-
-
-document.querySelectorAll(".type")
-.forEach(item=>{
-
-item.classList.remove("active");
-
-});
-
-
-element.classList.add("active");
-
-
-selectedRide = type;
-
-
-document.getElementById("rideType").value = type;
-
-
-calculateFare();
-
-
-}
-
-
-
-
-
-// Map Setup
-
-function loadMap(){
-
-
-map = L.map('map')
-.setView(
-[30.7333,76.7794],
-13
-);
-
-
-// Chandigarh default
-
-
-L.tileLayer(
-'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
-
-maxZoom:19
-
-})
-.addTo(map);
-
-
-
-if(navigator.geolocation){
-
-
-navigator.geolocation.getCurrentPosition(
-
-(position)=>{
-
-
-let lat =
-position.coords.latitude;
-
-
-let lng =
-position.coords.longitude;
-
-
-
-userLocation = {
-
-lat,
-lng
-
-};
-
-
-
-map.setView(
-[lat,lng],
-15
-);
-
-
-
-L.marker([lat,lng])
-.addTo(map)
-.bindPopup("Your Location")
-.openPopup();
-
-
-
-}
-
-
-);
-
-
-
-}
-
-
-}
-
-
-
-
-
-// Fare Calculation
-
-function calculateFare(){
-
-
-let distance = 5;
-
-
-// Default 5 km
-
-
-let fare = 0;
-
-
-
-if(distance <=10){
-
-fare = distance * 8;
-
-}
-
-else{
-
-fare = (10*8)+((distance-10)*9);
-
-}
-
-
-
-let hour = new Date()
-.getHours();
-
-
-
-if(hour>=22 || hour<6){
-
-fare = distance*11;
-
-}
-
-
-
-document.getElementById("fare")
-.innerHTML =
-"₹"+fare;
-
-
-
-}
-
-
-
-
-
-// Book Ride
-
-
-async function bookRide(){
-
-
-
-let user =
-firebase.auth().currentUser;
-
-
-
-if(!user){
-
-alert("Please login first");
-
-window.location.href="../auth/login.html";
-
-return;
-
-}
-
-
-
-let pickup =
-document.getElementById("pickup").value;
-
-
-
-let drop =
-document.getElementById("drop").value;
-
-
-
-
-if(!pickup || !drop){
-
-alert("Please enter pickup and drop location");
-
-return;
-
-}
-
-
-
-
-try{
-
-
-await firebase.firestore()
-.collection("rides")
-.add({
-
-customerId:user.uid,
-
-rideType:selectedRide,
-
-pickup:pickup,
-
-drop:drop,
-
-
-status:"Searching Rider",
-
-
-fare:
-document.getElementById("fare")
-.innerText,
-
-
-createdAt:
-firebase.firestore.FieldValue.serverTimestamp()
-
-
-});
-
-
-
-alert("Ride Booked Successfully");
-
-
-window.location.href="searching.html";
-
-
-
-}
-
-catch(error){
-
-
-alert(error.message);
-
-
-}
-
-
-
-}
-
-
-
-
-
-window.onload=function(){
-
-loadMap();
-
-calculateFare();
-
-};
-
-
-
-</script>
-
-
-
+  <div id="map"></div>
+
+  <div class="booking-panel">
+    <h3>Select Service</h3>
+    <div class="service-grid">
+      <div class="service-card active" onclick="selectService('bike', this)">
+        <div>🏍️</div>
+        <small>Bike</small>
+      </div>
+      <div class="service-card" onclick="selectService('cab', this)">
+        <div>🚗</div>
+        <small>Cab</small>
+      </div>
+      <div class="service-card" onclick="selectService('parcel', this)">
+        <div>📦</div>
+        <small>Parcel</small>
+      </div>
+      <div class="service-card" onclick="selectService('food', this)">
+        <div>🍔</div>
+        <small>Food</small>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="pickup" placeholder="Pickup Location (e.g., Connaught Place)" value="Connaught Place">
+    </div>
+    <div class="input-group">
+      <input type="text" id="drop" placeholder="Drop Location (e.g., Cyber Hub)" value="Cyber Hub">
+    </div>
+
+    <div class="fare-display" id="fareAmount">Estimated Fare: ₹0</div>
+
+    <button class="btn-action" onclick="requestRide()">Book Ride Now</button>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let selectedService = 'bike';
+    let map, pickupMarker, dropMarker;
+    let pickupCoords = [28.6139, 77.2090]; // Default Delhi Lat/Lng
+    let dropCoords = [28.4595, 77.0266];   // Default Gurgaon Lat/Lng
+
+    // Initialize Leaflet Map
+    document.addEventListener("DOMContentLoaded", () => {
+      map = L.map('map').setView(pickupCoords, 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
+
+      pickupMarker = L.marker(pickupCoords).addTo(map).bindPopup("Pickup").openPopup();
+      dropMarker = L.marker(dropCoords).addTo(map).bindPopup("Drop");
+
+      calculateFare();
+    });
+
+    function selectService(service, element) {
+      selectedService = service;
+      document.querySelectorAll('.service-card').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+      calculateFare();
+    }
+
+    function calculateFare() {
+      const distance = FareCalculator.calculateDistance(
+        pickupCoords[0], pickupCoords[1],
+        dropCoords[0], dropCoords[1]
+      );
+      const fareDetails = FareCalculator.calculateFare(selectedService, distance);
+      document.getElementById('fareAmount').innerText = `Estimated Fare: ₹${fareDetails.fare} (${distance} km)`;
+    }
+
+    function requestRide() {
+      const user = auth.currentUser;
+      if (!user) {
+        alert("Please login first to book a ride.");
+        window.location.href = "../auth/login.html";
+        return;
+      }
+
+      const distance = FareCalculator.calculateDistance(
+        pickupCoords[0], pickupCoords[1],
+        dropCoords[0], dropCoords[1]
+      );
+      const fareDetails = FareCalculator.calculateFare(selectedService, distance);
+
+      db.collection('rides').add({
+        customerId: user.uid,
+        customerName: user.displayName || "Customer",
+        serviceType: selectedService,
+        pickup: {
+          address: document.getElementById('pickup').value,
+          lat: pickupCoords[0],
+          lng: pickupCoords[1]
+        },
+        drop: {
+          address: document.getElementById('drop').value,
+          lat: dropCoords[0],
+          lng: dropCoords[1]
+        },
+        fare: fareDetails.fare,
+        distanceKm: distance,
+        status: 'SEARCHING',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      }).then((docRef) => {
+        alert("Ride Requested Successfully! Searching for nearby riders...");
+      }).catch((error) => {
+        console.error("Booking Error: ", error);
+        alert("Booking failed. Please try again.");
+      });
+    }
+  </script>
 </body>
-
 </html>
