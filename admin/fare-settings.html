@@ -4,56 +4,53 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Fare Settings</title>
+<title>RiderX Fare Settings</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 
 :root{
---yellow:#FFD600;
+
+--yellow:#FFE500;
 --black:#050505;
 --card:#111;
---border:#333;
+
 }
 
+
 *{
+
 margin:0;
 padding:0;
 box-sizing:border-box;
-font-family:Arial,sans-serif;
+font-family:Arial;
+
 }
+
+
 
 body{
 
 background:var(--black);
 color:white;
-padding-bottom:40px;
-
-}
-
-
-.header{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
 padding:20px;
 
-background:#111;
-border-bottom:1px solid #222;
-
 }
+
 
 
 .logo{
 
-font-size:30px;
+font-size:28px;
 font-weight:900;
+margin-bottom:25px;
 
 }
+
+
 
 .logo span{
 
@@ -63,127 +60,74 @@ color:var(--yellow);
 
 
 
-.container{
-
-padding:20px;
-
-}
-
-
 .card{
 
 background:var(--card);
-border:1px solid var(--border);
+border:1px solid #333;
 border-radius:20px;
 padding:20px;
-margin-bottom:20px;
 
 }
 
-
-
-.card h2{
-
-color:var(--yellow);
-margin-bottom:15px;
-
-}
-
-
-
-.grid{
-
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
-
-}
-
-
-
-.input-box{
-
-display:flex;
-flex-direction:column;
-gap:6px;
-
-}
 
 
 label{
 
-color:#aaa;
-font-size:14px;
+display:block;
+margin-top:15px;
+margin-bottom:8px;
+color:#999;
 
 }
 
 
 
-input,select{
+select,
+input{
 
-padding:13px;
-background:#000;
+width:100%;
+padding:14px;
+background:#222;
 color:white;
 border:1px solid #444;
 border-radius:12px;
-outline:none;
+font-size:16px;
 
 }
 
 
 
-input:focus{
-
-border-color:var(--yellow);
-
-}
-
-
-
-.service-title{
-
-font-size:20px;
-font-weight:bold;
-margin-bottom:15px;
-
-}
-
-
-
-.save-btn{
+button{
 
 width:100%;
-padding:16px;
+padding:15px;
+margin-top:20px;
 border:none;
-border-radius:15px;
+border-radius:12px;
 background:var(--yellow);
-font-size:17px;
 font-weight:bold;
-cursor:pointer;
 
 }
 
 
 
-.status{
+.back{
+
+background:#222;
+color:white;
+
+}
+
+
+
+#status{
 
 margin-top:15px;
 text-align:center;
-color:var(--yellow);
+color:#00ff66;
 
 }
 
-
-
-@media(max-width:600px){
-
-.grid{
-
-grid-template-columns:1fr;
-
-}
-
-}
 
 
 </style>
@@ -191,10 +135,9 @@ grid-template-columns:1fr;
 </head>
 
 
+
 <body>
 
-
-<header class="header">
 
 
 <div class="logo">
@@ -204,15 +147,16 @@ RID<span>ERX</span>
 </div>
 
 
-<i class="fa-solid fa-gear"></i>
 
 
-</header>
+<button class="back"
+onclick="history.back()">
+
+← Back
+
+</button>
 
 
-
-
-<div class="container">
 
 
 
@@ -220,140 +164,138 @@ RID<span>ERX</span>
 
 
 <h2>
-<i class="fa-solid fa-money-bill"></i>
+
 Fare Settings
+
 </h2>
 
 
-<div class="grid">
 
 
-<div class="input-box">
+<label>
 
-<label>Service</label>
+Service Type
+
+</label>
+
 
 <select id="service">
 
+
 <option value="bike">
+
 Bike Taxi
+
 </option>
+
 
 <option value="cab">
+
 Cab
+
 </option>
+
+
+<option value="auto">
+
+Auto
+
+</option>
+
 
 <option value="parcel">
+
 Parcel
+
 </option>
 
+
 <option value="food">
-Food
+
+Food Delivery
+
 </option>
+
 
 </select>
 
 
-</div>
-
-
-</div>
-
-
-</div>
 
 
 
 
+<label>
 
+Base Fare ₹
 
-<div class="card">
+</label>
 
-
-<div class="service-title">
-
-Fare Configuration
-
-</div>
-
-
-
-<div class="grid">
-
-
-<div class="input-box">
-
-<label>Base Fare ₹</label>
 
 <input id="baseFare"
 type="number"
-placeholder="20">
-
-</div>
+placeholder="Base Fare">
 
 
 
 
-<div class="input-box">
 
-<label>Day Per KM ₹ (8AM - 10PM)</label>
+<label>
+
+Day Rate ₹ / KM
+
+</label>
+
 
 <input id="dayRate"
 type="number"
-placeholder="8">
-
-</div>
+placeholder="Day Per KM">
 
 
 
 
-<div class="input-box">
 
-<label>After 10 KM Per KM ₹</label>
+<label>
+
+Extra KM Rate ₹ / KM
+
+</label>
+
 
 <input id="extraRate"
 type="number"
-placeholder="9">
-
-</div>
+placeholder="After 10 KM">
 
 
 
 
-<div class="input-box">
 
-<label>Night Per KM ₹ (10PM - 6AM)</label>
+
+<label>
+
+Night Rate ₹ / KM
+
+</label>
+
 
 <input id="nightRate"
 type="number"
-placeholder="11">
-
-</div>
-
-
-
-</div>
-
-
-</div>
+placeholder="Night Rate">
 
 
 
 
 
 
+<button id="saveFare">
 
-<button class="save-btn" id="saveFare">
-
-<i class="fa-solid fa-save"></i>
-
-Save Fare Settings
+Save Fare
 
 </button>
 
 
 
-<div class="status" id="status"></div>
 
+<div id="status"></div>
 
 
 
@@ -363,7 +305,10 @@ Save Fare Settings
 
 
 
-<script type="module" src="../js/admin-fare.js"></script>
+
+<script type="module"
+src="./js/fare-settings.js"></script>
+
 
 
 </body>
