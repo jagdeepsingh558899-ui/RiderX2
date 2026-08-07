@@ -1,5 +1,5 @@
 // =====================================
-// RiderX Admin Manage Riders
+// RiderX Admin Commission Settings
 // Firebase v10
 // =====================================
 
@@ -25,11 +25,9 @@ from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 import {
 
-collection,
-getDocs,
 doc,
 getDoc,
-updateDoc
+setDoc
 
 }
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -38,8 +36,18 @@ from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
-const riderList =
-document.getElementById("riderList");
+
+const percentInput =
+document.getElementById("percent");
+
+
+const saveBtn =
+document.getElementById("save");
+
+
+const status =
+document.getElementById("status");
+
 
 
 
@@ -52,7 +60,9 @@ document.getElementById("riderList");
 
 
 onAuthStateChanged(
+
 auth,
+
 async(user)=>{
 
 
@@ -68,14 +78,26 @@ return;
 
 const adminSnap =
 await getDoc(
-doc(db,"users",user.uid)
+
+doc(
+db,
+"users",
+user.uid
+
+)
+
 );
 
 
 
 if(
-!adminSnap.exists() ||
+
+!adminSnap.exists()
+
+||
+
 adminSnap.data().role !== "admin"
+
 ){
 
 
@@ -91,7 +113,7 @@ return;
 
 
 
-loadRiders();
+loadCommission();
 
 
 });
@@ -103,127 +125,46 @@ loadRiders();
 
 
 
+
 // ===============================
-// LOAD RIDERS
+// LOAD COMMISSION
 // ===============================
 
 
-async function loadRiders(){
+async function loadCommission(){
 
 
 try{
 
 
 const snap =
-await getDocs(
-collection(db,"users")
+await getDoc(
+
+doc(
+db,
+"settings",
+"commission"
+
+)
+
 );
 
 
 
-riderList.innerHTML="";
+if(snap.exists()){
 
 
+percentInput.value =
 
-let found=false;
-
-
-
-snap.forEach((item)=>{
-
-
-const data =
-item.data();
-
-
-
-if(data.role==="rider"){
-
-
-found=true;
-
-
-
-const id =
-item.id;
-
-
-
-riderList.innerHTML += `
-
-<div class="rider-card">
-
-
-<div class="row">
-<span class="label">Name:</span>
-${data.name || "No Name"}
-</div>
-
-
-<div class="row">
-<span class="label">Phone:</span>
-${data.phone || "No Phone"}
-</div>
-
-
-
-<div class="row">
-<span class="label">Vehicle:</span>
-${data.vehicle || "Not Added"}
-</div>
-
-
-
-<div class="row">
-<span class="label">Status:</span>
-${data.status || "pending"}
-</div>
-
-
-
-<div class="row">
-<span class="label">Online:</span>
-${data.online ? "Online":"Offline"}
-</div>
-
-
-
-<button onclick="approveRider('${id}')">
-
-Approve Rider
-
-</button>
-
-
-
-<button class="block"
-onclick="blockRider('${id}')">
-
-Block Rider
-
-</button>
-
-
-
-</div>
-
-`;
-
+snap.data().percent || 20;
 
 
 }
 
+else{
 
 
-});
-
-
-
-
-if(!found){
-
-riderList.innerHTML=
-"No Riders Found";
+percentInput.value = 20;
 
 
 }
@@ -238,10 +179,6 @@ catch(error){
 console.log(error);
 
 
-riderList.innerHTML =
-"Error: "+error.message;
-
-
 }
 
 
@@ -256,85 +193,84 @@ riderList.innerHTML =
 
 
 // ===============================
-// APPROVE RIDER
+// SAVE COMMISSION
 // ===============================
 
 
-window.approveRider =
-async(id)=>{
+saveBtn.onclick =
+async()=>{
 
 
-await updateDoc(
+try{
+
+
+const percent =
+Number(
+percentInput.value
+);
+
+
+
+if(percent < 0 || percent > 100){
+
+
+status.innerHTML =
+"Enter 0 to 100 only";
+
+
+return;
+
+
+}
+
+
+
+await setDoc(
 
 doc(
 db,
-"users",
-id
+"settings",
+"commission"
+
 ),
 
 {
 
 
-status:"approved"
+percent:percent
+
 
 }
 
-
 );
 
 
-alert(
-"Rider Approved"
-);
 
-
-loadRiders();
-
-
-};
+status.innerHTML =
+"✅ Commission Updated";
 
 
 
+setTimeout(()=>{
 
 
+status.innerHTML="";
 
 
-
-// ===============================
-// BLOCK RIDER
-// ===============================
+},3000);
 
 
-window.blockRider =
-async(id)=>{
-
-
-await updateDoc(
-
-doc(
-db,
-"users",
-id
-),
-
-{
-
-
-status:"blocked"
 
 }
 
-
-);
-
+catch(error){
 
 
-alert(
-"Rider Blocked"
-);
+status.innerHTML =
+error.message;
 
 
-loadRiders();
+}
 
 
 
