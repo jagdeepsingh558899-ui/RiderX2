@@ -15,24 +15,16 @@
 
 <style>
 
-*{
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-
 body{
-
 margin:0;
 height:100vh;
 background:#000;
-color:#fff;
+color:white;
 display:flex;
 align-items:center;
 justify-content:center;
-
+font-family:Arial,sans-serif;
 }
-
 
 
 .login-box{
@@ -43,10 +35,8 @@ background:#111;
 padding:30px;
 border-radius:25px;
 border:1px solid #333;
-box-shadow:0 0 30px rgba(255,214,0,.15);
 
 }
-
 
 
 .logo{
@@ -54,7 +44,6 @@ box-shadow:0 0 30px rgba(255,214,0,.15);
 text-align:center;
 font-size:40px;
 font-weight:900;
-margin-bottom:10px;
 
 }
 
@@ -66,40 +55,35 @@ color:#FFD600;
 }
 
 
-
 .role{
 
 text-align:center;
 color:#FFD600;
-font-size:18px;
-margin-bottom:25px;
+margin:15px;
 
 }
-
 
 
 .input{
 
 width:100%;
-padding:15px;
+padding:14px;
 margin:10px 0;
-border-radius:12px;
-border:1px solid #333;
 background:#000;
 color:white;
-font-size:16px;
+border:1px solid #444;
+border-radius:12px;
 
 }
-
 
 
 .btn{
 
 width:100%;
 padding:15px;
+margin-top:12px;
 border-radius:12px;
 border:none;
-margin-top:15px;
 font-size:17px;
 font-weight:bold;
 cursor:pointer;
@@ -107,8 +91,7 @@ cursor:pointer;
 }
 
 
-
-.login-btn{
+.login{
 
 background:#FFD600;
 color:#000;
@@ -116,8 +99,7 @@ color:#000;
 }
 
 
-
-.register-btn{
+.register{
 
 background:#222;
 color:#FFD600;
@@ -126,35 +108,11 @@ border:1px solid #FFD600;
 }
 
 
-
-.otp-btn{
-
-background:#111;
-color:white;
-border:1px solid #555;
-
-}
-
-
-
-.forgot{
-
-text-align:right;
-margin-top:10px;
-font-size:14px;
-color:#aaa;
-cursor:pointer;
-
-}
-
-
-
 .back{
 
 text-align:center;
-margin-top:25px;
-color:#888;
-cursor:pointer;
+margin-top:20px;
+color:#999;
 
 }
 
@@ -173,19 +131,13 @@ cursor:pointer;
 
 
 <div class="logo">
-
 RID<span>ERX</span>
-
 </div>
-
 
 
 <div class="role" id="roleText">
-
-Login
-
+Customer Login
 </div>
-
 
 
 
@@ -197,8 +149,6 @@ placeholder="Email Address">
 
 
 
-
-
 <input 
 id="password"
 class="input"
@@ -207,19 +157,7 @@ placeholder="Password">
 
 
 
-
-
-<div class="forgot">
-
-Forgot Password?
-
-</div>
-
-
-
-
-
-<button class="btn login-btn" id="loginBtn">
+<button id="loginBtn" class="btn login">
 
 Login
 
@@ -228,35 +166,21 @@ Login
 
 
 
+<button id="registerBtn" class="btn register">
 
-<button class="btn otp-btn" id="otpBtn">
-
-📱 Login With Phone OTP
-
-</button>
-
-
-
-
-
-<button class="btn register-btn" id="registerBtn">
-
-Create New Account
+Create Account
 
 </button>
 
 
 
-
-
-<div class="back" onclick="goBack()">
+<div class="back" onclick="history.back()">
 
 ← Back
 
 </div>
 
 
-
 </div>
 
 
@@ -264,15 +188,45 @@ Create New Account
 
 
 
-<script>
 
 
-// Role detect from URL
+<script type="module">
 
 
-const params = new URLSearchParams(window.location.search);
+import { auth, db } from "../firebase/firebase-config.js";
 
-const role = params.get("role") || "customer";
+
+import {
+
+signInWithEmailAndPassword
+
+} from 
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+
+import {
+
+doc,
+getDoc
+
+} from
+
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+
+
+
+// Role Check
+
+
+const params =
+new URLSearchParams(window.location.search);
+
+
+const role =
+params.get("role") || "customer";
 
 
 
@@ -283,53 +237,123 @@ document.getElementById("roleText").innerHTML=
 
 }
 
-else{
-
-document.getElementById("roleText").innerHTML=
-"Customer Login";
-
-}
 
 
 
 
 
-
-// Login button
-
-
-document.getElementById("loginBtn").onclick=function(){
+// Login
 
 
-let email=document.getElementById("email").value;
+document
+.getElementById("loginBtn")
+.onclick = async ()=>{
 
-let password=document.getElementById("password").value;
+
+let email =
+document.getElementById("email").value;
+
+
+let password =
+document.getElementById("password").value;
 
 
 
-if(email==="" || password===""){
 
-alert("Please enter email and password");
+if(!email || !password){
+
+alert("Enter email and password");
 
 return;
 
 }
 
 
-// Firebase Auth yaha connect hoga
 
 
-if(role==="rider"){
+try{
 
-window.location.href="../rider/home.html";
+
+const result =
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+
+
+const uid =
+result.user.uid;
+
+
+
+
+
+const userSnap =
+await getDoc(
+doc(db,"users",uid)
+);
+
+
+
+if(userSnap.exists()){
+
+
+const user =
+userSnap.data();
+
+
+
+
+if(user.role==="rider"){
+
+
+window.location.href=
+"../rider/home.html";
+
 
 }
 
 else{
 
-window.location.href="../customer/home.html";
+
+window.location.href=
+"../customer/home.html";
+
 
 }
+
+
+
+}
+
+else{
+
+
+alert(
+"User profile not found"
+);
+
+
+}
+
+
+
+
+
+}
+
+catch(error){
+
+
+alert(
+"Login Failed: "+error.message
+);
+
+
+}
+
 
 
 };
@@ -342,7 +366,9 @@ window.location.href="../customer/home.html";
 // Register
 
 
-document.getElementById("registerBtn").onclick=function(){
+document
+.getElementById("registerBtn")
+.onclick=function(){
 
 
 window.location.href=
@@ -350,32 +376,6 @@ window.location.href=
 
 
 };
-
-
-
-
-
-
-// OTP
-
-
-document.getElementById("otpBtn").onclick=function(){
-
-
-alert("OTP Login Firebase Phone Auth se connect hoga");
-
-
-};
-
-
-
-
-
-function goBack(){
-
-window.location.href="../index.html";
-
-}
 
 
 
