@@ -1,5 +1,8 @@
+// =====================================
 // RiderX Login System
-// Firebase v10.8.0 Compatible
+// Customer + Rider + Admin
+// Firebase v10 Compatible
+// =====================================
 
 
 import {
@@ -21,12 +24,15 @@ import {
 
 
 
+
 const loginForm =
-document.getElementById("loginForm");
+document.getElementById("login-form");
 
 
 const message =
-document.getElementById("message");
+document.getElementById("error-message");
+
+
 
 
 
@@ -35,12 +41,14 @@ document.getElementById("message");
 if(loginForm){
 
 
+
 loginForm.addEventListener(
 "submit",
 async(e)=>{
 
 
 e.preventDefault();
+
 
 
 
@@ -57,10 +65,16 @@ document.getElementById("password")
 
 
 
+
+
+
 try{
 
 
+
 if(message){
+
+message.style.display="block";
 
 message.innerHTML =
 "Logging in...";
@@ -69,12 +83,21 @@ message.innerHTML =
 
 
 
+
+
 const result =
+
 await signInWithEmailAndPassword(
+
 auth,
+
 email,
+
 password
+
 );
+
+
 
 
 
@@ -84,23 +107,30 @@ result.user;
 
 
 
-const userSnap =
+
+const snap =
+
 await getDoc(
-doc(db,"users",user.uid)
+
+doc(
+db,
+"users",
+user.uid
+)
+
 );
 
 
 
 
-if(!userSnap.exists()){
 
 
-if(message){
+if(!snap.exists()){
+
 
 message.innerHTML =
-"User profile not found";
+"Profile not found";
 
-}
 
 return;
 
@@ -110,18 +140,20 @@ return;
 
 
 
+
 const data =
-userSnap.data();
+snap.data();
 
 
 
 
-if(message){
+
 
 message.innerHTML =
 "Login Successful";
 
-}
+
+
 
 
 
@@ -130,6 +162,11 @@ message.innerHTML =
 setTimeout(()=>{
 
 
+
+
+
+
+// ADMIN
 
 if(data.role==="admin"){
 
@@ -140,7 +177,23 @@ location.href =
 
 }
 
+
+
+
+
+
+
+// RIDER
+
 else if(data.role==="rider"){
+
+
+
+if(
+data.approved===true &&
+data.status==="active"
+
+){
 
 
 location.href =
@@ -153,10 +206,35 @@ else{
 
 
 location.href =
+"../rider/pending.html";
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// CUSTOMER
+
+else{
+
+
+location.href =
 "../customer/home.html";
 
 
 }
+
+
+
 
 
 
@@ -165,7 +243,11 @@ location.href =
 
 
 
+
+
 }
+
+
 
 catch(error){
 
@@ -173,10 +255,16 @@ catch(error){
 
 if(message){
 
+
+message.style.display="block";
+
+
 message.innerHTML =
 error.message;
 
+
 }
+
 
 
 }
@@ -184,6 +272,7 @@ error.message;
 
 
 });
+
 
 
 }
