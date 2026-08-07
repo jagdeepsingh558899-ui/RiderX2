@@ -1,24 +1,17 @@
-// =======================================
-// RiderX Admin Commission Settings
+// =====================================
+// RiderX Admin Manage Riders
 // Firebase v10
-// =======================================
+// =====================================
 
 
 import {
+
 auth,
 db
+
 }
 from "../../firebase/firebase-config.js";
 
-
-import {
-
-doc,
-getDoc,
-setDoc
-
-}
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 import {
@@ -30,36 +23,32 @@ from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 
 
+import {
 
+collection,
+getDocs,
+doc,
+getDoc,
+updateDoc
 
-const input =
-document.getElementById(
-"commissionPercent"
-);
-
-
-const saveBtn =
-document.getElementById(
-"saveCommission"
-);
-
-
-const status =
-document.getElementById(
-"status"
-);
-
-
-
-let adminUID=null;
+}
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
 
 
-// ==========================
+const riderList =
+document.getElementById("riderList");
+
+
+
+
+
+
+// ===============================
 // ADMIN CHECK
-// ==========================
+// ===============================
 
 
 onAuthStateChanged(
@@ -77,7 +66,6 @@ return;
 
 
 
-
 const adminSnap =
 await getDoc(
 doc(db,"users",user.uid)
@@ -87,7 +75,7 @@ doc(db,"users",user.uid)
 
 if(
 !adminSnap.exists() ||
-adminSnap.data().role!=="admin"
+adminSnap.data().role !== "admin"
 ){
 
 
@@ -103,10 +91,7 @@ return;
 
 
 
-adminUID=user.uid;
-
-
-loadCommission();
+loadRiders();
 
 
 });
@@ -117,36 +102,128 @@ loadCommission();
 
 
 
-// ==========================
-// LOAD
-// ==========================
+
+// ===============================
+// LOAD RIDERS
+// ===============================
 
 
-async function loadCommission(){
+async function loadRiders(){
 
 
 try{
 
 
 const snap =
-await getDoc(
-doc(db,"settings","commission")
+await getDocs(
+collection(db,"users")
 );
 
 
 
-if(snap.exists()){
+riderList.innerHTML="";
 
 
-input.value =
-snap.data().percent || 20;
+
+let found=false;
+
+
+
+snap.forEach((item)=>{
+
+
+const data =
+item.data();
+
+
+
+if(data.role==="rider"){
+
+
+found=true;
+
+
+
+const id =
+item.id;
+
+
+
+riderList.innerHTML += `
+
+<div class="rider-card">
+
+
+<div class="row">
+<span class="label">Name:</span>
+${data.name || "No Name"}
+</div>
+
+
+<div class="row">
+<span class="label">Phone:</span>
+${data.phone || "No Phone"}
+</div>
+
+
+
+<div class="row">
+<span class="label">Vehicle:</span>
+${data.vehicle || "Not Added"}
+</div>
+
+
+
+<div class="row">
+<span class="label">Status:</span>
+${data.status || "pending"}
+</div>
+
+
+
+<div class="row">
+<span class="label">Online:</span>
+${data.online ? "Online":"Offline"}
+</div>
+
+
+
+<button onclick="approveRider('${id}')">
+
+Approve Rider
+
+</button>
+
+
+
+<button class="block"
+onclick="blockRider('${id}')">
+
+Block Rider
+
+</button>
+
+
+
+</div>
+
+`;
+
 
 
 }
-else{
 
 
-input.value=20;
+
+});
+
+
+
+
+if(!found){
+
+riderList.innerHTML=
+"No Riders Found";
 
 
 }
@@ -157,72 +234,93 @@ input.value=20;
 
 catch(error){
 
+
 console.log(error);
 
-}
+
+riderList.innerHTML =
+"Error: "+error.message;
 
 
 }
 
 
 
-
-
-
-
-// ==========================
-// SAVE
-// ==========================
-
-
-saveBtn.onclick =
-async()=>{
-
-
-try{
-
-
-let value =
-Number(input.value);
-
-
-
-if(
-value < 0 ||
-value > 100
-){
-
-
-status.innerHTML=
-"❌ Commission 0-100% ke beech honi chahiye";
-
-
-return;
-
 }
 
 
 
 
-await setDoc(
+
+
+
+
+// ===============================
+// APPROVE RIDER
+// ===============================
+
+
+window.approveRider =
+async(id)=>{
+
+
+await updateDoc(
 
 doc(
 db,
-"settings",
-"commission"
+"users",
+id
 ),
 
 {
 
 
-percent:value,
+status:"approved"
+
+}
 
 
-updatedBy:adminUID,
+);
 
 
-updatedAt:new Date()
+alert(
+"Rider Approved"
+);
 
+
+loadRiders();
+
+
+};
+
+
+
+
+
+
+
+
+// ===============================
+// BLOCK RIDER
+// ===============================
+
+
+window.blockRider =
+async(id)=>{
+
+
+await updateDoc(
+
+doc(
+db,
+"users",
+id
+),
+
+{
+
+
+status:"blocked"
 
 }
 
@@ -231,31 +329,13 @@ updatedAt:new Date()
 
 
 
+alert(
+"Rider Blocked"
+);
 
 
-status.innerHTML=
-"✅ Commission Updated";
+loadRiders();
 
-
-
-setTimeout(()=>{
-
-status.innerHTML="";
-
-},3000);
-
-
-
-}
-
-catch(error){
-
-
-status.innerHTML=
-"❌ "+error.message;
-
-
-}
 
 
 };
