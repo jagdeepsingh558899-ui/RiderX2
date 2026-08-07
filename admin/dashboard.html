@@ -9,7 +9,6 @@
 
 <title>RiderX Admin Dashboard</title>
 
-
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -23,7 +22,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 --border:#222;
 --gray:#999;
 }
-
 
 *{
 margin:0;
@@ -43,125 +41,93 @@ padding-bottom:80px;
 
 
 .header{
-
 height:70px;
 background:#111;
 display:flex;
 align-items:center;
 justify-content:space-between;
 padding:0 20px;
-
 }
-
 
 
 .logo{
-
 font-size:28px;
 font-weight:900;
-
 }
-
 
 .logo span{
-
 color:var(--yellow);
-
 }
-
 
 
 .logout{
-
 font-size:22px;
 color:#ff4444;
 cursor:pointer;
-
 }
-
 
 
 .container{
-
 padding:20px;
-
 }
-
 
 
 .welcome{
-
 font-size:24px;
 font-weight:bold;
 margin-bottom:20px;
-
 }
 
 
-
 .loading{
-
 text-align:center;
 color:var(--yellow);
 margin-bottom:20px;
-
 }
 
 
 
 .grid{
-
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:15px;
-
 }
 
 
 
 .card{
-
 background:var(--card);
 border:1px solid var(--border);
 border-radius:20px;
 padding:18px;
-
 }
 
 
 
 .card i{
-
 font-size:28px;
 color:var(--yellow);
-
 }
 
 
 
 .number{
-
 font-size:30px;
 font-weight:bold;
 margin-top:10px;
-
 }
 
 
 
 .title{
-
 font-size:14px;
 color:var(--gray);
-
 }
 
 
 
 .menu{
-
 margin-top:25px;
-
 }
 
 
@@ -184,20 +150,8 @@ cursor:pointer;
 
 
 .menu i{
-
 width:35px;
 color:var(--yellow);
-
-}
-
-
-
-.error{
-
-text-align:center;
-color:red;
-margin-top:15px;
-
 }
 
 
@@ -205,9 +159,15 @@ margin-top:15px;
 @media(max-width:600px){
 
 .grid{
-
 grid-template-columns:repeat(2,1fr);
+}
 
+.card{
+padding:15px;
+}
+
+.number{
+font-size:24px;
 }
 
 }
@@ -223,9 +183,7 @@ grid-template-columns:repeat(2,1fr);
 <header class="header">
 
 <div class="logo">
-
 RID<span>ERX</span>
-
 </div>
 
 
@@ -236,29 +194,17 @@ class="fa-solid fa-right-from-bracket logout"></i>
 </header>
 
 
-
 <div class="container">
 
 
 <div class="welcome">
-
 Admin Dashboard
-
 </div>
 
 
-<div id="loading"
-class="loading">
-
+<div id="loading" class="loading">
 Loading Dashboard...
-
 </div>
-
-
-
-<div id="error"
-class="error"></div>
-
 
 
 <div class="grid">
@@ -328,6 +274,13 @@ class="error"></div>
 
 
 <div class="card">
+<i class="fa-solid fa-calendar-day"></i>
+<div id="todayRevenue" class="number">₹0</div>
+<div class="title">Today Revenue</div>
+</div>
+
+
+<div class="card">
 <i class="fa-solid fa-percent"></i>
 <div id="commission" class="number">₹0</div>
 <div class="title">Admin Commission</div>
@@ -342,8 +295,6 @@ class="error"></div>
 
 
 </div>
-
-
 <div class="menu">
 
 
@@ -387,99 +338,59 @@ App Settings
 
 
 </div>
+
+
+
 <script type="module">
 
 
 import {
-
 auth,
 db
-
 }
-
 from "../firebase/firebase-config.js";
 
 
-
 import {
-
 onAuthStateChanged,
 signOut
-
 }
-
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 
-
 import {
-
 collection,
 getDocs,
 doc,
 getDoc
-
 }
-
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
+const customersEl=document.getElementById("customers");
+const ridersEl=document.getElementById("riders");
+const pendingEl=document.getElementById("pending");
+const onlineEl=document.getElementById("online");
 
+const ridesEl=document.getElementById("rides");
+const activeEl=document.getElementById("active");
+const completedEl=document.getElementById("completed");
+const cancelledEl=document.getElementById("cancelled");
 
-const customersEl =
-document.getElementById("customers");
+const revenueEl=document.getElementById("revenue");
+const todayRevenueEl=document.getElementById("todayRevenue");
 
-const ridersEl =
-document.getElementById("riders");
+const commissionEl=document.getElementById("commission");
+const riderEarnEl=document.getElementById("riderEarn");
 
-const pendingEl =
-document.getElementById("pending");
-
-const onlineEl =
-document.getElementById("online");
-
-const ridesEl =
-document.getElementById("rides");
-
-const activeEl =
-document.getElementById("active");
-
-const completedEl =
-document.getElementById("completed");
-
-const cancelledEl =
-document.getElementById("cancelled");
-
-const revenueEl =
-document.getElementById("revenue");
-
-const commissionEl =
-document.getElementById("commission");
-
-const riderEarnEl =
-document.getElementById("riderEarn");
-
-const loading =
-document.getElementById("loading");
-
-const errorBox =
-document.getElementById("error");
+const loading=document.getElementById("loading");
 
 
 
 
 
-// ===============================
-// ADMIN AUTH
-// ===============================
-
-
-onAuthStateChanged(
-
-auth,
-
-async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 
 try{
@@ -488,7 +399,6 @@ try{
 if(!user){
 
 location.href="../auth/login.html";
-
 return;
 
 }
@@ -497,444 +407,4 @@ return;
 
 const adminSnap =
 await getDoc(
-
-doc(
-db,
-"users",
-user.uid
-
-)
-
-);
-
-
-
-if(
-
-!adminSnap.exists()
-
-||
-
-adminSnap.data().role !== "admin"
-
-){
-
-
-alert("Admin Access Denied");
-
-
-location.href="../customer/home.html";
-
-
-return;
-
-}
-
-
-
-loadDashboard();
-
-
-
-setInterval(
-
-loadDashboard,
-
-30000
-
-);
-
-
-
-}
-
-catch(error){
-
-
-showError(error.message);
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-// ===============================
-// DASHBOARD LOAD
-// ===============================
-
-
-async function loadDashboard(){
-
-
-try{
-
-
-errorBox.innerHTML="";
-
-
-
-
-// USERS
-
-
-const usersSnap =
-await getDocs(
-
-collection(
-db,
-"users"
-
-)
-
-);
-
-
-
-let customers=0;
-let riders=0;
-let pending=0;
-let online=0;
-
-
-
-usersSnap.forEach((u)=>{
-
-
-const data=u.data();
-
-
-
-if(data.role==="customer"){
-
-customers++;
-
-}
-
-
-
-if(data.role==="rider"){
-
-
-riders++;
-
-
-
-if(data.status==="pending"){
-
-pending++;
-
-}
-
-
-
-if(data.online===true){
-
-online++;
-
-}
-
-
-
-}
-
-
-
-});
-
-
-
-
-customersEl.innerText=customers;
-
-ridersEl.innerText=riders;
-
-pendingEl.innerText=pending;
-
-onlineEl.innerText=online;
-
-
-
-
-
-
-
-// RIDES
-
-
-const ridesSnap =
-await getDocs(
-
-collection(
-db,
-"rides"
-
-)
-
-);
-
-
-
-let active=0;
-let completed=0;
-let cancelled=0;
-
-let revenue=0;
-
-
-
-
-ridesSnap.forEach((r)=>{
-
-
-const ride=r.data();
-
-
-
-if(
-
-[
-"searching",
-"accepted",
-"arriving",
-"started"
-
-].includes(
-ride.status
-
-)
-
-){
-
-active++;
-
-}
-
-
-
-
-if(
-ride.status==="completed"
-
-){
-
-
-completed++;
-
-
-revenue +=
-
-Number(
-ride.fare || 0
-
-);
-
-
-
-}
-
-
-
-if(
-ride.status==="cancelled"
-
-){
-
-cancelled++;
-
-}
-
-
-
-});
-
-
-
-
-
-
-ridesEl.innerText =
-ridesSnap.size;
-
-
-activeEl.innerText =
-active;
-
-
-completedEl.innerText =
-completed;
-
-
-cancelledEl.innerText =
-cancelled;
-
-
-revenueEl.innerText =
-"₹"+revenue;
-
-
-
-
-
-
-
-// COMMISSION
-
-
-let percent=20;
-
-
-
-const commissionSnap =
-await getDoc(
-
-doc(
-db,
-"settings",
-"commission"
-
-)
-
-);
-
-
-
-if(
-commissionSnap.exists()
-
-){
-
-
-percent =
-
-Number(
-
-commissionSnap.data().percent || 20
-
-);
-
-
-}
-
-
-
-const adminMoney =
-
-(revenue * percent)/100;
-
-
-
-const riderMoney =
-
-revenue-adminMoney;
-
-
-
-
-commissionEl.innerText =
-
-"₹"+adminMoney.toFixed(0);
-
-
-
-riderEarnEl.innerText =
-
-"₹"+riderMoney.toFixed(0);
-
-
-
-
-
-loading.style.display="none";
-
-
-
-}
-
-catch(error){
-
-
-showError(error.message);
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-
-
-function showError(msg){
-
-
-loading.innerHTML =
-"Dashboard Error";
-
-
-errorBox.innerHTML =
-"❌ "+msg;
-
-
-console.log(msg);
-
-
-}
-
-
-
-
-
-
-
-// ===============================
-// LOGOUT
-// ===============================
-
-
-window.logout =
-async()=>{
-
-
-await signOut(auth);
-
-
-location.href="../auth/login.html";
-
-
-};
-
-
-
-
-
-
-window.openPage =
-(page)=>{
-
-
-location.href=page;
-
-
-};
-
-
-
-</script>
-
-
-</body>
-
-</html>
+doc(db,"users
