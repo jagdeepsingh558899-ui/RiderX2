@@ -1,11 +1,11 @@
 // ======================================
 // RiderX Customer Dashboard
-// Final Ride Tracking System
+// FINAL FIXED CUSTOMER JS
 // ======================================
 
 
 import { auth, db }
-from "../../firebase/firebase-config.js";
+from "../firebase/firebase-config.js";
 
 
 import {
@@ -19,16 +19,14 @@ import {
 
 collection,
 addDoc,
-serverTimestamp,
 doc,
 onSnapshot,
-updateDoc
+updateDoc,
+serverTimestamp
 
 }
 from
 "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
 
 
 
@@ -47,9 +45,8 @@ let currentRideId=null;
 
 
 
-
 // ===============================
-// Auth
+// AUTH
 // ===============================
 
 
@@ -57,11 +54,29 @@ onAuthStateChanged(
 auth,
 (user)=>{
 
+
 if(user){
 
 currentUser=user;
 
+console.log(
+"Customer Login:",
+user.uid
+);
+
+
 }
+
+else{
+
+
+console.log(
+"Not Login"
+);
+
+
+}
+
 
 });
 
@@ -71,6 +86,10 @@ currentUser=user;
 
 
 
+// ===============================
+// START
+// ===============================
+
 
 document.addEventListener(
 "DOMContentLoaded",
@@ -79,9 +98,12 @@ document.addEventListener(
 
 initMap();
 
+
 setupServices();
 
+
 setupBookRide();
+
 
 setupCancelRide();
 
@@ -95,8 +117,9 @@ setupCancelRide();
 
 
 
+
 // ===============================
-// Map
+// MAP
 // ===============================
 
 
@@ -113,7 +136,13 @@ L.map("map")
 
 
 L.tileLayer(
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+maxZoom:19
+}
+
 )
 .addTo(map);
 
@@ -133,6 +162,7 @@ e.latlng.lng
 });
 
 
+
 getLocation();
 
 
@@ -144,16 +174,32 @@ getLocation();
 
 
 
+
+
+// ===============================
+// LOCATION
+// ===============================
+
+
 function getLocation(){
 
 
+if(!navigator.geolocation)
+return;
+
+
+
 navigator.geolocation.getCurrentPosition(
-(pos)=>{
+
+(position)=>{
 
 
-let lat=pos.coords.latitude;
+let lat =
+position.coords.latitude;
 
-let lng=pos.coords.longitude;
+
+let lng =
+position.coords.longitude;
 
 
 
@@ -168,7 +214,12 @@ userMarker =
 L.marker(
 [lat,lng]
 )
-.addTo(map);
+.addTo(map)
+.bindPopup(
+"Your Location"
+)
+.openPopup();
+
 
 
 
@@ -179,6 +230,18 @@ lng
 
 
 
+},
+
+
+(error)=>{
+
+
+console.log(
+"Location Error",
+error
+);
+
+
 }
 
 );
@@ -193,11 +256,22 @@ lng
 
 
 
+
+// ===============================
+// PICKUP
+// ===============================
+
+
 function setPickup(lat,lng){
 
 
-if(pickupMarker)
-map.removeLayer(pickupMarker);
+if(pickupMarker){
+
+map.removeLayer(
+pickupMarker
+);
+
+}
 
 
 
@@ -209,9 +283,15 @@ L.marker(
 
 
 
-document.getElementById("pickup").value=
+document
+.getElementById("pickup")
+.value =
 
-lat.toFixed(5)+", "+lng.toFixed(5);
+lat.toFixed(5)
++
+", "
++
+lng.toFixed(5);
 
 
 
@@ -230,7 +310,7 @@ calculateFare();
 
 
 // ===============================
-// Services
+// SERVICE
 // ===============================
 
 
@@ -249,20 +329,22 @@ service.onclick=()=>{
 document
 .querySelectorAll(".service")
 .forEach(
-(s)=>s.classList.remove("active")
+(s)=>
+s.classList.remove("active")
 );
+
 
 
 service.classList.add("active");
 
 
-selectedService=
+
+selectedService =
 service.dataset.service;
 
 
 
 calculateFare();
-
 
 
 };
@@ -272,7 +354,6 @@ calculateFare();
 });
 
 
-
 }
 
 
@@ -284,20 +365,24 @@ calculateFare();
 
 
 // ===============================
-// Fare
+// FARE
 // ===============================
 
 
 function calculateFare(){
 
 
+
 let distance=5;
 
 
+let hour =
+new Date()
+.getHours();
+
+
+
 let rate=8;
-
-
-let hour=new Date().getHours();
 
 
 
@@ -306,6 +391,13 @@ if(hour>=22 || hour<6){
 rate=11;
 
 }
+
+else if(distance>10){
+
+rate=9;
+
+}
+
 
 
 
@@ -326,10 +418,15 @@ extra=20;
 
 
 
+let total =
+(distance*rate)+extra;
 
-document.getElementById("fare").innerText=
 
-"₹"+((distance*rate)+extra);
+
+document
+.getElementById("fare")
+.innerText =
+"₹"+total;
 
 
 
@@ -344,38 +441,25 @@ document.getElementById("fare").innerText=
 
 
 // ===============================
-// Book Ride
+// BOOK RIDE
 // ===============================
 
 
 function setupBookRide(){
 
 
+
 document
 .getElementById("bookRide")
-.onclick=
-async()=>{
-
-
-let drop=
-document.getElementById("drop").value;
-
-
-
-if(!drop){
-
-alert("Enter drop location");
-
-return;
-
-}
-
+.onclick = async()=>{
 
 
 
 if(!currentUser){
 
-alert("Login required");
+alert(
+"Please login first"
+);
 
 return;
 
@@ -383,15 +467,32 @@ return;
 
 
 
+let drop =
+document
+.getElementById("drop")
+.value.trim();
 
 
-openRideModal();
+
+if(drop===""){
+
+
+alert(
+"Enter destination"
+);
+
+
+return;
+
+
+}
 
 
 
 
 
-let ride={
+let rideData={
+
 
 
 customerId:
@@ -403,28 +504,38 @@ selectedService,
 
 
 pickup:
-document.getElementById("pickup").value,
+document
+.getElementById("pickup")
+.value,
 
 
 drop:drop,
 
 
 fare:
-document.getElementById("fare").innerText,
+document
+.getElementById("fare")
+.innerText,
 
 
 payment:
-document.getElementById("payment").value,
+document
+.getElementById("payment")
+.value,
 
 
-status:"searching",
+status:
+"searching",
 
 
 riderId:null,
 
 
 otp:
-Math.floor(1000+Math.random()*9000),
+Math.floor(
+1000+
+Math.random()*9000
+),
 
 
 createdAt:
@@ -436,24 +547,59 @@ serverTimestamp()
 
 
 
+try{
 
-let ref =
+
+let rideRef =
 await addDoc(
 collection(db,"rides"),
-ride
+rideData
 );
 
 
 
-currentRideId=ref.id;
+currentRideId =
+rideRef.id;
 
+
+
+openRideModal();
 
 
 listenRide();
 
 
 
+console.log(
+"Ride Created",
+rideRef.id
+);
+
+
+
+}
+
+
+catch(error){
+
+
+console.log(
+error
+);
+
+
+alert(
+"Ride booking failed"
+);
+
+
+
+}
+
+
+
 };
+
 
 
 }
@@ -465,15 +611,17 @@ listenRide();
 
 
 
+
 // ===============================
-// Ride Listener
+// TRACK RIDE
 // ===============================
 
 
 function listenRide(){
 
 
-const rideRef=
+
+const rideRef =
 doc(
 db,
 "rides",
@@ -487,40 +635,71 @@ rideRef,
 (snapshot)=>{
 
 
+
 if(!snapshot.exists())
 return;
 
 
-let data=snapshot.data();
+
+let data =
+snapshot.data();
+
 
 
 
 if(data.status==="accepted"){
 
 
-document.getElementById("rideStatus")
-.innerText=
+
+document
+.getElementById("rideStatus")
+.innerText =
 "Rider Accepted";
 
 
-document.getElementById("rideInfo")
-.innerText=
+
+document
+.getElementById("rideInfo")
+.innerText =
 "Your Rider is coming";
 
 
-document.getElementById("riderDetails").style.display="block";
+
+document
+.getElementById("riderDetails")
+.style.display =
+"block";
 
 
-document.getElementById("riderName")
-.innerText=
-"Rider ID: "+data.riderId;
+
+document
+.getElementById("riderName")
+.innerText =
+"Rider ID: "
++
+data.riderId;
 
 
 
-document.getElementById("rideOtp")
-.innerText=
-data.otp || "----";
+document
+.getElementById("rideOtp")
+.innerText =
+data.otp;
 
+
+
+}
+
+
+
+if(data.status==="cancelled"){
+
+
+
+document
+.getElementById("rideStatus")
+.innerText =
+"Ride Cancelled";
 
 
 }
@@ -530,7 +709,6 @@ data.otp || "----";
 });
 
 
-
 }
 
 
@@ -542,15 +720,17 @@ data.otp || "----";
 
 
 // ===============================
-// Modal
+// MODAL
 // ===============================
 
 
 function openRideModal(){
 
 
-document.getElementById("rideModal")
-.style.display="flex";
+document
+.getElementById("rideModal")
+.style.display =
+"flex";
 
 
 }
@@ -559,23 +739,37 @@ document.getElementById("rideModal")
 
 
 
+
+
+
+
+// ===============================
+// CANCEL
+// ===============================
+
+
 function setupCancelRide(){
 
 
-let btn =
-document.getElementById("cancelRide");
 
-
-
-btn.onclick=
+document
+.getElementById("cancelRide")
+.onclick =
 async()=>{
+
 
 
 if(currentRideId){
 
 
 await updateDoc(
-doc(db,"rides",currentRideId),
+
+doc(
+db,
+"rides",
+currentRideId
+),
+
 {
 
 status:"cancelled"
@@ -589,8 +783,11 @@ status:"cancelled"
 
 
 
-document.getElementById("rideModal")
-.style.display="none";
+document
+.getElementById("rideModal")
+.style.display =
+"none";
+
 
 
 };
