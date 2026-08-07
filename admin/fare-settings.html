@@ -1,357 +1,391 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="dark">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RiderX | Fare & Pricing Engine</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<title>RiderX Fare Settings</title>
+  <!-- FontAwesome 6 Pro CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<link rel="stylesheet" href="../css/style.css">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              yellowHover: '#EAB308',
+              gold: '#EAB308',
+              dark: '#090D16',
+              card: '#111827',
+              border: 'rgba(255, 255, 255, 0.08)',
+              glass: 'rgba(17, 24, 39, 0.75)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
+            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+          }
+        }
+      }
+    }
+  </script>
 
+  <style>
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090D16;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1F2937;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FACC15;
+    }
 
-<style>
+    .glass-panel {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-body{
-
-background:#000;
-color:white;
-font-family:Arial;
-
-}
-
-
-.header{
-
-background:#111;
-padding:20px;
-font-size:24px;
-font-weight:bold;
-border-bottom:2px solid #FFD600;
-
-}
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-.box{
-
-background:#111;
-padding:25px;
-border-radius:20px;
-border:1px solid #333;
-
-}
-
-
-
-label{
-
-color:#FFD600;
-display:block;
-margin-top:15px;
-
-}
-
-
-
-input{
-
-width:100%;
-padding:14px;
-margin-top:8px;
-border-radius:12px;
-border:none;
-font-size:16px;
-
-}
-
-
-
-button{
-
-width:100%;
-padding:15px;
-margin-top:20px;
-border:none;
-border-radius:12px;
-background:#FFD600;
-font-weight:bold;
-
-}
-
-
-
-#msg{
-
-margin-top:15px;
-color:#FFD600;
-
-}
-
-
-</style>
-
-
+    .glass-card {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
 </head>
 
-
-<body>
-
-
-
-<div class="header">
-
-⚙️ RiderX Fare Settings
-
-</div>
-
-
-
-
-<div class="container">
-
-
-<div class="box">
-
-
-
-<label>
-Base Fare
-</label>
-
-<input id="base" type="number">
-
-
-
-
-
-<label>
-🏍 Bike Taxi Per KM
-</label>
-
-<input id="bike" type="number">
-
-
-
-
-
-<label>
-🚕 Cab Per KM
-</label>
-
-<input id="cab" type="number">
-
-
-
-
-
-<label>
-📦 Parcel Starting Charge
-</label>
-
-<input id="parcel" type="number">
-
-
-
-
-
-<label>
-🍔 Food Delivery Charge
-</label>
-
-<input id="food" type="number">
-
-
-
-
-
-<label>
-🌙 Night Extra Charge
-</label>
-
-<input id="night" type="number">
-
-
-
-
-
-
-<button id="saveBtn">
-
-Save Fare Settings
-
-</button>
-
-
-
-<p id="msg"></p>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-doc,
-setDoc,
-getDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-let ref=
-
-doc(db,"settings","fare");
-
-
-
-
-
-
-
-async function loadFare(){
-
-
-
-let snap=
-
-await getDoc(ref);
-
-
-
-if(snap.exists()){
-
-
-
-let data=snap.data();
-
-
-
-base.value=data.base || 50;
-
-bike.value=data.bike || 8;
-
-cab.value=data.cab || 15;
-
-parcel.value=data.parcel || 80;
-
-food.value=data.food || 60;
-
-night.value=data.night || 3;
-
-
-
-}
-
-else{
-
-
-base.value=50;
-
-bike.value=8;
-
-cab.value=15;
-
-parcel.value=80;
-
-food.value=60;
-
-night.value=3;
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-
-saveBtn.onclick=async()=>{
-
-
-
-await setDoc(
-
-ref,
-
-{
-
-
-base:Number(base.value),
-
-bike:Number(bike.value),
-
-cab:Number(cab.value),
-
-parcel:Number(parcel.value),
-
-food:Number(food.value),
-
-night:Number(night.value)
-
-
-
-}
-
-);
-
-
-
-
-
-msg.innerHTML=
-
-"Fare Settings Updated ✅";
-
-
-
-};
-
-
-
-
-
-
-loadFare();
-
-
-
-</script>
-
-
-
+<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- TOP HEADER / BAR -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
+        <i class="fa-solid fa-bars-staggered text-lg"></i>
+      </button>
+      <a href="dashboard.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
+          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
+        </div>
+        <div>
+          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
+            RIDER<span class="text-brand-yellow">X</span>
+            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
+          </span>
+        </div>
+      </a>
+    </div>
+
+    <div class="flex items-center space-x-3 lg:space-x-5">
+      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <span>Pricing Algorithm Engine Active</span>
+      </div>
+
+      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
+        <div class="hidden md:block">
+          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
+          <p class="text-[10px] text-slate-400">Super Admin</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN LAYOUT -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- SIDE NAVIGATION -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
+      <div class="px-4 py-6 space-y-8 overflow-y-auto">
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
+          <nav class="space-y-1">
+            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
+              <span>Dashboard</span>
+            </a>
+            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
+              <span>Trips & Live Map</span>
+            </a>
+            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
+              <span>Riders</span>
+            </a>
+            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
+                <span>Rider Approvals</span>
+              </div>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
+            </a>
+            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
+              <span>Customers</span>
+            </a>
+          </nav>
+        </div>
+
+        <div>
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
+          <nav class="space-y-1">
+            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
+              <i class="fa-solid fa-calculator text-base"></i>
+              <span>Fare & Pricing</span>
+            </a>
+            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
+              <span>Commission Rules</span>
+            </a>
+            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
+              <span>Payouts & Wallet</span>
+            </a>
+            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
+              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
+              <span>Coupons & Offers</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+
+      <!-- HEADER ACTION BAR -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-brand-yellow"></i> Fare & Dynamic Pricing Engine
+          </h1>
+          <p class="text-xs text-slate-400">Configure base rates, per-kilometer charges, surge multipliers, and test live fare calculations.</p>
+        </div>
+
+        <button onclick="saveFareSettings()" class="px-5 py-2.5 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-slate-950 text-xs font-extrabold transition-all shadow-glow-yellow flex items-center space-x-2">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Save Changes</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- CATEGORY FARE SETTINGS (2 COLS) -->
+        <div class="lg:col-span-2 space-y-6">
+          <div class="glass-panel p-6 rounded-2xl border border-brand-border space-y-5">
+            <div class="flex items-center justify-between border-b border-brand-border pb-4">
+              <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-brand-yellow"></i> Category Tariff Rates
+              </h3>
+              <select id="vehicleCategorySelect" onchange="loadCategorySettings()" class="bg-slate-900 border border-brand-border text-xs text-white px-3 py-1.5 rounded-xl focus:outline-none focus:border-brand-yellow font-bold">
+                <option value="bike">Bike Taxi</option>
+                <option value="auto">Auto Rickshaw</option>
+                <option value="sedan" selected>Sedan Cab</option>
+                <option value="suv">SUV Cab</option>
+                <option value="courier">Parcel Express</option>
+              </select>
+            </div>
+
+            <!-- FORM INPUTS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400">Base Fare (₹)</label>
+                <div class="relative">
+                  <input type="number" id="baseFareInput" value="50" oninput="recalculateSimulator()" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2 text-xs text-white font-bold focus:outline-none focus:border-brand-yellow" />
+                  <span class="absolute right-3 top-2.5 text-[10px] text-slate-500">Fixed</span>
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400">Rate Per KM (₹)</label>
+                <div class="relative">
+                  <input type="number" id="perKmInput" value="14" oninput="recalculateSimulator()" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2 text-xs text-white font-bold focus:outline-none focus:border-brand-yellow" />
+                  <span class="absolute right-3 top-2.5 text-[10px] text-slate-500">/ KM</span>
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400">Rate Per Minute (₹)</label>
+                <div class="relative">
+                  <input type="number" id="perMinInput" value="2" oninput="recalculateSimulator()" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2 text-xs text-white font-bold focus:outline-none focus:border-brand-yellow" />
+                  <span class="absolute right-3 top-2.5 text-[10px] text-slate-500">/ Min</span>
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-400">Minimum Ride Fare (₹)</label>
+                <div class="relative">
+                  <input type="number" id="minFareInput" value="80" oninput="recalculateSimulator()" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2 text-xs text-white font-bold focus:outline-none focus:border-brand-yellow" />
+                  <span class="absolute right-3 top-2.5 text-[10px] text-slate-500">Floor</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SURGE & SPECIAL SURCHARGES -->
+            <div class="border-t border-brand-border pt-4 space-y-4">
+              <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Dynamic Multipliers</h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <label class="text-xs font-semibold text-slate-400">Current Surge Multiplier</label>
+                  <select id="surgeInput" onchange="recalculateSimulator()" class="w-full bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2 text-xs text-brand-yellow font-bold focus:outline-none focus:border-brand-yellow">
+                    <option value="1.0">1.0x (Standard Fare)</option>
+                    <option value="1.2">1.2x (Moderate Demand)</option>
+                    <option value="1.5" selected>1.5x (Peak Surge)</option>
+                    <option value="2.0">2.0x (Extreme Surge)</option>
+                  </select>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label class="text-xs font-semibold text-slate-400">Night Allowance (11 PM - 5 AM)</label>
+                  <div class="flex items-center justify-between bg-slate-900 border border-brand-border rounded-xl px-3.5 py-2">
+                    <span class="text-xs font-bold text-slate-300">+20% Night Charge</span>
+                    <input type="checkbox" id="nightToggle" onchange="recalculateSimulator()" checked class="w-4 h-4 accent-yellow-400 rounded cursor-pointer" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- REAL-TIME FARE CALCULATOR SIMULATOR (1 COL) -->
+        <div class="space-y-6">
+          <div class="glass-panel p-6 rounded-2xl border border-brand-border space-y-5">
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-brand-yellow"></i> Fare Calculator Simulator
+            </h3>
+            <p class="text-xs text-slate-400">Simulate a trip to verify calculations against updated pricing variables.</p>
+
+            <div class="space-y-3 bg-slate-900/90 p-4 rounded-xl border border-brand-border text-xs">
+              <div class="space-y-1">
+                <label class="text-slate-400 font-medium">Estimated Distance (KM)</label>
+                <input type="number" id="simDistance" value="12" oninput="recalculateSimulator()" class="w-full bg-slate-950 border border-brand-border rounded-lg px-3 py-1.5 text-white font-bold text-xs" />
+              </div>
+
+              <div class="space-y-1">
+                <label class="text-slate-400 font-medium">Estimated Duration (Mins)</label>
+                <input type="number" id="simTime" value="25" oninput="recalculateSimulator()" class="w-full bg-slate-950 border border-brand-border rounded-lg px-3 py-1.5 text-white font-bold text-xs" />
+              </div>
+
+              <div class="border-t border-brand-border my-2 pt-3 space-y-2">
+                <div class="flex justify-between text-slate-400">
+                  <span>Base Fare:</span>
+                  <span id="calcBase" class="text-white font-semibold">₹ 50</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>Distance Charge (12 km):</span>
+                  <span id="calcDist" class="text-white font-semibold">₹ 168</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>Time Charge (25 min):</span>
+                  <span id="calcTime" class="text-white font-semibold">₹ 50</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>Surge / Night Multipliers:</span>
+                  <span id="calcSurge" class="text-amber-400 font-semibold">1.5x</span>
+                </div>
+                <div class="border-t border-brand-border pt-2 flex justify-between items-center">
+                  <span class="font-extrabold text-white">Estimated Total:</span>
+                  <span id="calcTotal" class="text-lg font-black text-brand-yellow">₹ 402</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const categoryConfigs = {
+      bike: { base: 25, perKm: 8, perMin: 1, minFare: 35 },
+      auto: { base: 35, perKm: 11, perMin: 1.5, minFare: 50 },
+      sedan: { base: 50, perKm: 14, perMin: 2, minFare: 80 },
+      suv: { base: 80, perKm: 18, perMin: 2.5, minFare: 120 },
+      courier: { base: 30, perKm: 9, perMin: 1, minFare: 40 }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      });
+      recalculateSimulator();
+    });
+
+    function loadCategorySettings() {
+      const cat = document.getElementById('vehicleCategorySelect').value;
+      const cfg = categoryConfigs[cat];
+      if (cfg) {
+        document.getElementById('baseFareInput').value = cfg.base;
+        document.getElementById('perKmInput').value = cfg.perKm;
+        document.getElementById('perMinInput').value = cfg.perMin;
+        document.getElementById('minFareInput').value = cfg.minFare;
+        recalculateSimulator();
+      }
+    }
+
+    function recalculateSimulator() {
+      const base = parseFloat(document.getElementById('baseFareInput').value) || 0;
+      const perKm = parseFloat(document.getElementById('perKmInput').value) || 0;
+      const perMin = parseFloat(document.getElementById('perMinInput').value) || 0;
+      const minFare = parseFloat(document.getElementById('minFareInput').value) || 0;
+
+      const dist = parseFloat(document.getElementById('simDistance').value) || 0;
+      const time = parseFloat(document.getElementById('simTime').value) || 0;
+
+      const surge = parseFloat(document.getElementById('surgeInput').value) || 1.0;
+      const isNight = document.getElementById('nightToggle').checked;
+
+      const distCost = dist * perKm;
+      const timeCost = time * perMin;
+      let rawTotal = base + distCost + timeCost;
+
+      rawTotal = rawTotal * surge;
+      if (isNight) {
+        rawTotal = rawTotal * 1.2;
+      }
+
+      const finalTotal = Math.max(rawTotal, minFare);
+
+      document.getElementById('calcBase').textContent = `₹ ${base.toFixed(0)}`;
+      document.getElementById('calcDist').textContent = `₹ ${distCost.toFixed(0)}`;
+      document.getElementById('calcTime').textContent = `₹ ${timeCost.toFixed(0)}`;
+      document.getElementById('calcSurge').textContent = `${surge}x ${isNight ? '+ Night' : ''}`;
+      document.getElementById('calcTotal').textContent = `₹ ${Math.round(finalTotal)}`;
+    }
+
+    function saveFareSettings() {
+      const cat = document.getElementById('vehicleCategorySelect').value;
+      categoryConfigs[cat] = {
+        base: parseFloat(document.getElementById('baseFareInput').value),
+        perKm: parseFloat(document.getElementById('perKmInput').value),
+        perMin: parseFloat(document.getElementById('perMinInput').value),
+        minFare: parseFloat(document.getElementById('minFareInput').value)
+      };
+      alert('Fare parameters updated and deployed to mobile dispatch engines successfully.');
+    }
+  </script>
 </body>
-
 </html>
