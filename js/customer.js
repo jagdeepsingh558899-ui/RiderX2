@@ -7,12 +7,16 @@ import {
     db
 } from "../firebase/firebase-config.js";
 
+
 import {
-    console.log("RiderX Customer JS Loaded");
     collection,
     addDoc,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+console.log("RiderX Customer JS Loaded");
+
 
 
 let selectedService = "bike";
@@ -30,19 +34,19 @@ let dropCoords = null;
 const fareRates = {
 
     bike: {
-        base: 20
+        base:20
     },
 
-    cab: {
-        base: 50
+    cab:{
+        base:50
     },
 
-    parcel: {
-        base: 30
+    parcel:{
+        base:30
     },
 
-    food: {
-        base: 25
+    food:{
+        base:25
     }
 
 };
@@ -50,20 +54,26 @@ const fareRates = {
 
 
 
-// ================= MAP INIT =================
-
+// MAP START
 
 function initMap(){
 
 
-    const mapBox = document.getElementById("map");
+    const mapBox =
+    document.getElementById("map");
 
 
-    if(!mapBox) return;
+    if(!mapBox){
+
+        console.log("Map box not found");
+        return;
+
+    }
 
 
 
-    map = L.map("map").setView(
+    map = L.map("map")
+    .setView(
         [30.7333,76.7794],
         13
     );
@@ -80,53 +90,24 @@ function initMap(){
 
 
 
-
-    // GPS
-
-    if(navigator.geolocation){
-
-
-        navigator.geolocation.getCurrentPosition((pos)=>{
-
-
-            let lat = pos.coords.latitude;
-            let lng = pos.coords.longitude;
-
-
-            map.setView(
-                [lat,lng],
-                16
-            );
-
-
-            L.marker([lat,lng])
-            .addTo(map)
-            .bindPopup("Your Location")
-            .openPopup();
-
-
-
-        });
-
-
-    }
+    console.log("Map Started");
 
 
 
 
 
-    // MAP CLICK PICKUP DROP
+    // MAP CLICK
 
 
-    map.on("click",async(e)=>{
+    map.on("click", async function(e){
 
 
-        let lat=e.latlng.lat;
-        let lng=e.latlng.lng;
+        let lat = e.latlng.lat;
+        let lng = e.latlng.lng;
 
 
-
-        let address = await getAddress(lat,lng);
+        let address =
+        await getAddress(lat,lng);
 
 
 
@@ -139,12 +120,8 @@ function initMap(){
             };
 
 
-            if(pickupMarker)
-                map.removeLayer(pickupMarker);
-
-
-
-            pickupMarker=L.marker(
+            pickupMarker =
+            L.marker(
                 [lat,lng]
             )
             .addTo(map)
@@ -153,13 +130,14 @@ function initMap(){
 
 
 
-            document.getElementById("pickup").value =
+            document
+            .getElementById("pickup")
+            .value =
             address;
 
 
 
         }
-
 
         else if(!dropCoords){
 
@@ -172,12 +150,8 @@ function initMap(){
 
 
 
-            if(dropMarker)
-                map.removeLayer(dropMarker);
-
-
-
-            dropMarker=L.marker(
+            dropMarker =
+            L.marker(
                 [lat,lng]
             )
             .addTo(map)
@@ -186,7 +160,9 @@ function initMap(){
 
 
 
-            document.getElementById("drop").value =
+            document
+            .getElementById("drop")
+            .value =
             address;
 
 
@@ -194,13 +170,10 @@ function initMap(){
             calculateFare();
 
 
-
         }
 
 
-
     });
-
 
 
 }
@@ -209,8 +182,7 @@ function initMap(){
 
 
 
-// ================= ADDRESS SEARCH =================
-
+// GET ADDRESS
 
 
 async function getAddress(lat,lng){
@@ -219,23 +191,25 @@ async function getAddress(lat,lng){
     try{
 
 
-        let res = await fetch(
-
+        let response =
+        await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
-
         );
 
 
-        let data = await res.json();
+        let data =
+        await response.json();
 
 
-        return data.display_name || 
+
+        return data.display_name ||
         `${lat},${lng}`;
 
 
     }
 
-    catch{
+    catch(error){
+
 
         return `${lat},${lng}`;
 
@@ -249,23 +223,29 @@ async function getAddress(lat,lng){
 
 
 
-// ================= DISTANCE =================
+// DISTANCE
 
 
-
-function getDistance(lat1,lon1,lat2,lon2){
+function distanceKm(
+lat1,
+lon1,
+lat2,
+lon2
+){
 
 
 let R=6371;
 
 
 let dLat =
-(lat2-lat1) *
+(lat2-lat1)
+*
 Math.PI/180;
 
 
 let dLon =
-(lon2-lon1) *
+(lon2-lon1)
+*
 Math.PI/180;
 
 
@@ -281,7 +261,7 @@ Math.sin(dLon/2)**2;
 
 
 let c =
-2 *
+2*
 Math.atan2(
 Math.sqrt(a),
 Math.sqrt(1-a)
@@ -298,100 +278,131 @@ return R*c;
 
 
 
-// ================= FARE =================
+
+// FARE
 
 
 function calculateFare(){
 
 
-    if(!pickupCoords || !dropCoords){
+
+if(!pickupCoords || !dropCoords){
 
 
-        document.getElementById("fare")
-        .innerText="₹0";
+document.getElementById("fare")
+.innerText="₹0";
 
 
-        return 0;
-
-    }
+return 0;
 
 
-
-    let distance =
-    getDistance(
-
-    pickupCoords.lat,
-    pickupCoords.lng,
-
-    dropCoords.lat,
-    dropCoords.lng
-
-    );
+}
 
 
 
+let km =
+distanceKm(
 
-    let rate;
+pickupCoords.lat,
+pickupCoords.lng,
 
+dropCoords.lat,
+dropCoords.lng
 
-
-    let hour =
-    new Date().getHours();
-
-
-
-
-    if(hour >=22 || hour <6){
-
-
-        rate = 11;
-
-
-    }
-
-    else if(distance > 10){
-
-
-        rate = 9;
-
-
-    }
-
-    else{
-
-
-        rate = 8;
-
-
-    }
+);
 
 
 
+let rate=8;
 
 
-    let total =
-
-    fareRates[selectedService].base +
-
-    (distance * rate);
-
+let hour =
+new Date()
+.getHours();
 
 
 
-    total =
-    Math.round(total);
+if(hour>=22 || hour<6){
+
+rate=11;
+
+}
+
+else if(km>10){
+
+rate=9;
+
+}
+
+
+
+let fare =
+
+fareRates[selectedService].base
++
+(km*rate);
+
+
+
+fare=Math.round(fare);
+
+
+
+document.getElementById("fare")
+.innerText =
+"₹"+fare;
+
+
+
+return fare;
+
+
+}
 
 
 
 
-    document
-    .getElementById("fare")
-    .innerText =
-    "₹"+total;
+
+
+// SERVICE BUTTONS
+
+
+function serviceSetup(){
+
+
+document
+.querySelectorAll(".service")
+.forEach(item=>{
+
+
+item.onclick=function(){
+
+
+document
+.querySelectorAll(".service")
+.forEach(x=>
+x.classList.remove("active")
+);
 
 
 
-    return total;
+item.classList.add("active");
+
+
+
+selectedService =
+item.dataset.type;
+
+
+
+calculateFare();
+
+
+};
+
+
+
+});
 
 
 }
@@ -402,153 +413,123 @@ function calculateFare(){
 
 
 
-// ================= SERVICE =================
+// BOOK BUTTON
 
 
+function bookingSetup(){
 
-document
-.querySelectorAll(".service")
-.forEach(item=>{
 
 
-    item.onclick=()=>{
+let btn =
+document.getElementById("bookRide");
 
 
-        document
-        .querySelectorAll(".service")
-        .forEach(x=>
-        x.classList.remove("active"));
 
+if(!btn) return;
 
 
-        item.classList.add("active");
 
+btn.onclick =
+async function(){
 
 
-        selectedService =
-        item.dataset.type;
 
+let user =
+auth.currentUser;
 
 
-        calculateFare();
 
+if(!user){
 
-    };
 
+alert("Please Login First");
 
-});
+location.href="../auth/login.html";
 
+return;
 
+}
 
 
 
 
+let pickup =
+document.getElementById("pickup").value;
 
-// ================= BOOK RIDE =================
 
+let drop =
+document.getElementById("drop").value;
 
 
-document
-.getElementById("bookRide")
-.onclick = async()=>{
 
+if(!pickup || !drop){
 
-    let user =
-    auth.currentUser;
 
+alert("Pickup and Drop select kare");
 
+return;
 
-    if(!user){
+}
 
 
-        alert("Please Login First");
 
-        location.href="../auth/login.html";
 
-        return;
+try{
 
-    }
 
+await addDoc(
 
+collection(db,"rides"),
 
+{
 
 
-    let pickup =
-    document.getElementById("pickup").value;
+customerId:user.uid,
 
+pickupLocation:pickup,
 
-    let drop =
-    document.getElementById("drop").value;
+dropLocation:drop,
 
+pickupCoords,
 
+dropCoords,
 
-    if(!pickup || !drop){
+serviceType:selectedService,
 
+paymentMethod:
+document.getElementById("payment").value,
 
-        alert(
-        "Please select Pickup and Drop"
-        );
+fare:
+calculateFare(),
 
+status:"REQUESTED",
 
-        return;
+createdAt:
+serverTimestamp()
 
-    }
 
+}
 
+);
 
 
-    try{
 
 
-        await addDoc(
+document.getElementById("status")
+.innerText =
+"Searching RiderX Rider...";
 
-        collection(db,"rides"),
 
-        {
 
-        customerId:user.uid,
+}
 
-        pickupLocation:pickup,
+catch(error){
 
-        dropLocation:drop,
 
-        pickupCoords,
+alert(error.message);
 
-        dropCoords,
 
-        serviceType:selectedService,
-
-        paymentMethod:
-        document.getElementById("payment").value,
-
-        fare:
-        calculateFare(),
-
-        status:"REQUESTED",
-
-        createdAt:
-        serverTimestamp()
-
-
-        });
-
-
-
-        document.getElementById("status")
-        .innerText=
-        "Searching RiderX Rider...";
-
-
-    }
-
-
-    catch(error){
-
-
-        alert(error.message);
-
-
-    }
+}
 
 
 
@@ -556,15 +537,29 @@ document
 
 
 
+}
 
 
 
-document.addEventListener(
-"DOMContentLoaded",
+
+
+
+
+// START
+
+
+window.addEventListener(
+"load",
 ()=>{
 
 
-    initMap();
+initMap();
+
+serviceSetup();
+
+bookingSetup();
+
+calculateFare();
 
 
 });
