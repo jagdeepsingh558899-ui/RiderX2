@@ -5,13 +5,9 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Settings</title>
-
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<title>RiderX App Settings</title>
 
 
 <style>
@@ -19,38 +15,29 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 :root{
 
 --yellow:#FFE500;
---bg:#050505;
+--black:#050505;
 --card:#111;
 
 }
 
 
+
 *{
 
+margin:0;
+padding:0;
 box-sizing:border-box;
 font-family:Arial;
 
 }
 
 
+
 body{
 
-margin:0;
-background:var(--bg);
+background:var(--black);
 color:white;
-
-}
-
-
-
-.header{
-
-height:70px;
-background:#111;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 20px;
+padding:20px;
 
 }
 
@@ -60,6 +47,7 @@ padding:0 20px;
 
 font-size:28px;
 font-weight:900;
+margin-bottom:25px;
 
 }
 
@@ -67,14 +55,6 @@ font-weight:900;
 .logo span{
 
 color:var(--yellow);
-
-}
-
-
-
-.container{
-
-padding:20px;
 
 }
 
@@ -91,34 +71,25 @@ padding:20px;
 
 
 
-.group{
-
-margin-bottom:15px;
-
-}
-
-
-
 label{
 
 display:block;
-color:#aaa;
+margin-top:15px;
 margin-bottom:7px;
+color:#999;
 
 }
 
 
 
-input,
-select{
+input{
 
 width:100%;
 padding:14px;
-background:#000;
-color:white;
-border:1px solid #444;
 border-radius:12px;
-font-size:15px;
+border:1px solid #444;
+background:#222;
+color:white;
 
 }
 
@@ -129,9 +100,19 @@ font-size:15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-background:#000;
-padding:15px;
+background:#222;
+padding:12px;
 border-radius:12px;
+margin-top:10px;
+
+}
+
+
+
+input[type="checkbox"]{
+
+width:25px;
+height:25px;
 
 }
 
@@ -141,36 +122,43 @@ button{
 
 width:100%;
 padding:15px;
-background:#FFE500;
-color:#000;
-border:0;
-border-radius:15px;
+margin-top:20px;
+border:none;
+border-radius:12px;
+background:var(--yellow);
 font-weight:bold;
-font-size:16px;
 
 }
 
 
 
-#msg{
+.back{
 
-text-align:center;
+background:#222;
+color:white;
+
+}
+
+
+
+#status{
+
 margin-top:15px;
-color:#FFE500;
+text-align:center;
+color:#00ff66;
 
 }
-
 
 
 </style>
 
+
 </head>
+
 
 
 <body>
 
-
-<header class="header">
 
 
 <div class="logo">
@@ -181,22 +169,17 @@ RID<span>ERX</span>
 
 
 
-<a href="dashboard.html"
-style="color:#FFE500;font-size:22px">
+<button class="back"
+onclick="history.back()">
 
-<i class="fa-solid fa-arrow-left"></i>
+← Back
 
-</a>
-
-
-
-</header>
+</button>
 
 
 
 
-
-<div class="container">
+<div class="card">
 
 
 <h2>
@@ -207,122 +190,44 @@ App Settings
 
 
 
-<div class="card">
-
-
-
-<div class="group">
-
 <label>
+
 App Name
+
 </label>
 
-<input id="appName">
 
-</div>
-
-
+<input id="appName"
+placeholder="RiderX">
 
 
-<div class="group">
+
+
 
 <label>
-Logo URL
-</label>
 
-<input id="logo">
-
-</div>
-
-
-
-
-<div class="group">
-
-<label>
-Theme Color
-</label>
-
-<input id="themeColor"
-placeholder="#FFE500">
-
-</div>
-
-
-
-
-
-<div class="group">
-
-<label>
 Support Number
+
 </label>
 
-<input id="supportNumber"
-type="tel">
 
-</div>
-
+<input id="support"
+placeholder="Support Number">
 
 
 
 
-<div class="group">
 
 <label>
-Support Email
-</label>
 
-<input id="supportEmail"
-type="email">
-
-</div>
-
-
-
-
-
-<div class="group">
-
-<label>
-App Version
-
-</label>
-
-<input id="version">
-
-</div>
-
-
-
-
-
-
-<div class="group">
-
-<label>
-Default Language
+Referral Bonus
 
 </label>
 
 
-<select id="language">
-
-
-<option value="en">
-English
-</option>
-
-
-<option value="hi">
-Hindi
-</option>
-
-
-</select>
-
-
-</div>
+<input id="referral"
+type="number"
+placeholder="Referral Amount">
 
 
 
@@ -331,30 +236,61 @@ Hindi
 
 <div class="switch">
 
+Bike Taxi
 
-<span>
+<input id="bike"
+type="checkbox">
+
+</div>
+
+
+
+<div class="switch">
+
+Cab Service
+
+<input id="cab"
+type="checkbox">
+
+</div>
+
+
+
+<div class="switch">
+
+Parcel Service
+
+<input id="parcel"
+type="checkbox">
+
+</div>
+
+
+
+<div class="switch">
+
+Food Delivery
+
+<input id="food"
+type="checkbox">
+
+</div>
+
+
+
+<div class="switch">
+
 Maintenance Mode
-</span>
-
 
 <input id="maintenance"
 type="checkbox">
-
 
 </div>
 
 
 
 
-
-
-<br>
-
-
-
-<button id="saveBtn">
-
-<i class="fa-solid fa-save"></i>
+<button id="save">
 
 Save Settings
 
@@ -362,12 +298,7 @@ Save Settings
 
 
 
-<div id="msg"></div>
-
-
-
-
-</div>
+<div id="status"></div>
 
 
 
@@ -378,137 +309,9 @@ Save Settings
 
 
 
+<script type="module"
+src="./js/settings.js"></script>
 
-<script type="module">
-
-
-import {
-
-db
-
-}
-
-from "../firebase/firebase-config.js";
-
-
-import {
-
-doc,
-getDoc,
-setDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-
-
-
-const settingsRef =
-doc(
-db,
-"settings",
-"app"
-);
-
-
-
-
-
-
-
-async function loadSettings(){
-
-
-const snap =
-await getDoc(settingsRef);
-
-
-
-if(snap.exists()){
-
-
-let data=snap.data();
-
-
-
-appName.value=data.appName || "RiderX";
-
-logo.value=data.logo || "";
-
-themeColor.value=data.themeColor || "#FFE500";
-
-supportNumber.value=data.supportNumber || "";
-
-supportEmail.value=data.supportEmail || "";
-
-version.value=data.version || "1.0.0";
-
-language.value=data.language || "en";
-
-maintenance.checked=data.maintenance || false;
-
-
-}
-
-
-}
-
-
-
-
-saveBtn.onclick=async()=>{
-
-
-await setDoc(
-
-settingsRef,
-
-{
-
-
-appName:appName.value,
-
-logo:logo.value,
-
-themeColor:themeColor.value,
-
-supportNumber:supportNumber.value,
-
-supportEmail:supportEmail.value,
-
-version:version.value,
-
-language:language.value,
-
-maintenance:maintenance.checked,
-
-
-updatedAt:new Date()
-
-
-}
-
-);
-
-
-
-msg.innerHTML=
-"✅ Settings Saved Successfully";
-
-
-};
-
-
-
-
-
-loadSettings();
-
-
-
-</script>
 
 
 </body>
