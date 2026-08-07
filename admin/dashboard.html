@@ -28,27 +28,33 @@ box-sizing:border-box;
 font-family:Arial;
 }
 
+
 body{
 background:var(--black);
 color:white;
-padding-bottom:80px;
+padding-bottom:70px;
 }
 
 
 .header{
+
 height:70px;
 background:#111;
 display:flex;
 justify-content:space-between;
 align-items:center;
 padding:0 20px;
+
 }
 
 
 .logo{
+
 font-size:28px;
 font-weight:900;
+
 }
+
 
 .logo span{
 color:var(--yellow);
@@ -56,58 +62,79 @@ color:var(--yellow);
 
 
 .logout{
+
 color:#ff4444;
 font-size:22px;
+cursor:pointer;
+
 }
 
 
 .container{
+
 padding:20px;
+
 }
 
 
 .welcome{
+
 font-size:22px;
+font-weight:bold;
 margin-bottom:20px;
+
 }
 
 
 .grid{
+
 display:grid;
 grid-template-columns:repeat(2,1fr);
 gap:15px;
+
 }
 
 
 .card{
+
 background:var(--card);
 border:1px solid #222;
 border-radius:20px;
-padding:20px;
+padding:18px;
+
 }
 
 
 .card i{
-font-size:28px;
+
+font-size:27px;
 color:var(--yellow);
+
 }
 
 
 .number{
+
 font-size:28px;
 font-weight:bold;
 margin-top:10px;
+
 }
 
 
 .title{
+
 color:var(--gray);
 font-size:14px;
+
 }
 
 
+
 .menu{
+
 margin-top:25px;
+
 }
 
 
@@ -120,19 +147,33 @@ background:#111;
 border:1px solid #333;
 border-radius:15px;
 color:white;
-text-align:left;
 font-size:16px;
+text-align:left;
 
 }
 
 
 .menu i{
+
 color:var(--yellow);
 width:35px;
+
 }
 
 
+
+@media(max-width:600px){
+
+.grid{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
 </style>
+
 
 </head>
 
@@ -154,12 +195,15 @@ class="fa-solid fa-right-from-bracket logout"></i>
 </header>
 
 
+
+
 <div class="container">
 
 
 <div class="welcome">
 Admin Dashboard
 </div>
+
 
 
 <div class="grid">
@@ -172,25 +216,29 @@ Admin Dashboard
 </div>
 
 
+
 <div class="card">
 <i class="fa-solid fa-motorcycle"></i>
 <div id="riders" class="number">0</div>
-<div class="title">Total Riders</div>
+<div class="title">Riders</div>
 </div>
+
 
 
 <div class="card">
-<i class="fa-solid fa-user-clock"></i>
+<i class="fa-solid fa-clock"></i>
 <div id="pending" class="number">0</div>
-<div class="title">Pending Approval</div>
+<div class="title">Pending Riders</div>
 </div>
+
 
 
 <div class="card">
 <i class="fa-solid fa-signal"></i>
 <div id="online" class="number">0</div>
-<div class="title">Riders Online</div>
+<div class="title">Online Riders</div>
 </div>
+
 
 
 <div class="card">
@@ -200,11 +248,13 @@ Admin Dashboard
 </div>
 
 
+
 <div class="card">
 <i class="fa-solid fa-spinner"></i>
 <div id="active" class="number">0</div>
 <div class="title">Active Rides</div>
 </div>
+
 
 
 <div class="card">
@@ -214,11 +264,13 @@ Admin Dashboard
 </div>
 
 
+
 <div class="card">
 <i class="fa-solid fa-xmark"></i>
 <div id="cancelled" class="number">0</div>
 <div class="title">Cancelled</div>
 </div>
+
 
 
 <div class="card">
@@ -228,11 +280,21 @@ Admin Dashboard
 </div>
 
 
+
+<div class="card">
+<i class="fa-solid fa-calendar-day"></i>
+<div id="todayRevenue" class="number">₹0</div>
+<div class="title">Today Revenue</div>
+</div>
+
+
+
 <div class="card">
 <i class="fa-solid fa-percent"></i>
 <div id="commission" class="number">₹0</div>
-<div class="title">Admin Commission</div>
+<div class="title">Commission</div>
 </div>
+
 
 
 <div class="card">
@@ -243,69 +305,52 @@ Admin Dashboard
 
 
 </div>
+
+
+
+
+
 <div class="menu">
 
 
 <button onclick="openPage('riders.html')">
-
 <i class="fa-solid fa-motorcycle"></i>
-
 Manage Riders
-
 </button>
-
 
 
 <button onclick="openPage('customers.html')">
-
 <i class="fa-solid fa-users"></i>
-
 Manage Customers
-
 </button>
-
 
 
 <button onclick="openPage('rides.html')">
-
 <i class="fa-solid fa-route"></i>
-
 Manage Rides
-
 </button>
-
 
 
 <button onclick="openPage('fare-settings.html')">
-
 <i class="fa-solid fa-money-bill"></i>
-
 Fare Settings
-
 </button>
-
 
 
 <button onclick="openPage('commission.html')">
-
 <i class="fa-solid fa-percent"></i>
-
 Commission Settings
-
 </button>
 
 
-
 <button onclick="openPage('settings.html')">
-
 <i class="fa-solid fa-gear"></i>
-
 App Settings
-
 </button>
 
 
 </div>
+
 
 
 </div>
@@ -325,7 +370,6 @@ db
 from "../firebase/firebase-config.js";
 
 
-
 import {
 
 onAuthStateChanged,
@@ -333,7 +377,6 @@ signOut
 
 }
 from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
 
 
 import {
@@ -360,38 +403,27 @@ try{
 if(!user){
 
 location.href="../auth/login.html";
-
 return;
 
 }
 
 
 
-
-
-// =========================
 // ADMIN CHECK
-// =========================
 
-
-const adminSnap =
+const admin =
 await getDoc(
 doc(db,"users",user.uid)
 );
 
 
 
-if(
-!adminSnap.exists() ||
-adminSnap.data().role !== "admin"
-){
-
+if(!admin.exists() ||
+admin.data().role!=="admin"){
 
 alert("Access Denied");
 
-
 location.href="../customer/home.html";
-
 
 return;
 
@@ -400,15 +432,9 @@ return;
 
 
 
+// USERS
 
-
-
-// =========================
-// USERS DATA
-// =========================
-
-
-const usersSnap =
+const users =
 await getDocs(
 collection(db,"users")
 );
@@ -422,18 +448,15 @@ let online=0;
 
 
 
-usersSnap.forEach((u)=>{
+users.forEach((u)=>{
 
 
-const data=u.data();
+let data=u.data();
 
 
 
-if(data.role==="customer"){
-
+if(data.role==="customer")
 customers++;
-
-}
 
 
 
@@ -443,18 +466,12 @@ if(data.role==="rider"){
 riders++;
 
 
-if(data.status==="pending"){
-
+if(data.status==="pending")
 pending++;
 
-}
 
-
-if(data.online===true){
-
+if(data.online===true)
 online++;
-
-}
 
 
 }
@@ -464,22 +481,10 @@ online++;
 
 
 
-
-
-document.getElementById("customers").innerText =
-customers;
-
-
-document.getElementById("riders").innerText =
-riders;
-
-
-document.getElementById("pending").innerText =
-pending;
-
-
-document.getElementById("online").innerText =
-online;
+customersEl.innerText=customers;
+ridersEl.innerText=riders;
+pendingEl.innerText=pending;
+onlineEl.innerText=online;
 
 
 
@@ -487,14 +492,10 @@ online;
 
 
 
+// RIDES
 
 
-// =========================
-// RIDES DATA
-// =========================
-
-
-const rideSnap =
+const rides =
 await getDocs(
 collection(db,"rides")
 );
@@ -505,50 +506,70 @@ let active=0;
 let completed=0;
 let cancelled=0;
 let revenue=0;
+let today=0;
 
 
 
-rideSnap.forEach((r)=>{
+let date =
+new Date();
+
+date.setHours(0,0,0,0);
 
 
-const ride=r.data();
+
+
+
+rides.forEach((r)=>{
+
+
+let data=r.data();
 
 
 
 if(
-ride.status==="searching" ||
-ride.status==="accepted" ||
-ride.status==="arriving" ||
-ride.status==="started"
-){
+data.status==="searching" ||
+data.status==="accepted" ||
+data.status==="arriving" ||
+data.status==="started"
+)
 
 active++;
 
-}
 
 
 
-if(ride.status==="completed"){
+if(data.status==="completed"){
 
 
 completed++;
 
 
-revenue +=
-Number(ride.fare || 0);
+let fare =
+Number(data.fare || 0);
+
+
+revenue += fare;
+
+
+
+if(
+data.createdAt &&
+data.createdAt.toDate() >= date
+){
+
+today += fare;
+
+}
 
 
 }
 
 
 
-if(ride.status==="cancelled"){
 
-
+if(data.status==="cancelled")
 cancelled++;
 
-
-}
 
 
 });
@@ -556,83 +577,60 @@ cancelled++;
 
 
 
+ridesEl.innerText=rides.size;
+activeEl.innerText=active;
+completedEl.innerText=completed;
+cancelledEl.innerText=cancelled;
 
+revenueEl.innerText="₹"+revenue;
 
-document.getElementById("rides").innerText =
-rideSnap.size;
-
-
-
-document.getElementById("active").innerText =
-active;
-
-
-
-document.getElementById("completed").innerText =
-completed;
-
-
-
-document.getElementById("cancelled").innerText =
-cancelled;
-
-
-
-document.getElementById("revenue").innerText =
-"₹"+revenue;
+todayRevenueEl.innerText="₹"+today;
 
 
 
 
 
 
-
-// =========================
 // COMMISSION
-// =========================
 
 
-let commissionPercent = 20;
+let percent=20;
 
 
 
-const commissionSnap =
+const commission =
 await getDoc(
 doc(db,"settings","commission")
 );
 
 
 
-if(commissionSnap.exists()){
+if(commission.exists()){
 
-
-commissionPercent =
-commissionSnap.data().percent || 20;
-
+percent =
+commission.data().percent || 20;
 
 }
 
 
 
-const adminCommission =
-(revenue * commissionPercent) / 100;
+
+let adminMoney =
+(revenue*percent)/100;
+
+
+let riderMoney =
+revenue-adminMoney;
 
 
 
-const riderMoney =
-revenue - adminCommission;
+commissionEl.innerText =
+"₹"+adminMoney.toFixed(0);
 
 
 
-
-document.getElementById("commission").innerText =
-"₹"+adminCommission.toFixed(0);
-
-
-
-document.getElementById("riderEarn").innerText =
+riderEarnEl.innerText =
 "₹"+riderMoney.toFixed(0);
-
 
 
 
@@ -641,12 +639,7 @@ document.getElementById("riderEarn").innerText =
 
 catch(error){
 
-
-console.log(
-"Admin Dashboard Error:",
-error
-);
-
+console.log(error);
 
 }
 
@@ -658,51 +651,43 @@ error
 
 
 
+const customersEl=document.getElementById("customers");
+const ridersEl=document.getElementById("riders");
+const pendingEl=document.getElementById("pending");
+const onlineEl=document.getElementById("online");
+
+const ridesEl=document.getElementById("rides");
+const activeEl=document.getElementById("active");
+const completedEl=document.getElementById("completed");
+const cancelledEl=document.getElementById("cancelled");
+
+const revenueEl=document.getElementById("revenue");
+const todayRevenueEl=document.getElementById("todayRevenue");
+
+const commissionEl=document.getElementById("commission");
+const riderEarnEl=document.getElementById("riderEarn");
 
 
-// =========================
-// LOGOUT
-// =========================
 
-
-window.logout =
-async()=>{
-
+window.logout=async()=>{
 
 await signOut(auth);
 
-
 location.href="../auth/login.html";
-
 
 };
 
 
 
-
-
-
-
-// =========================
-// PAGE NAVIGATION
-// =========================
-
-
-window.openPage =
-(page)=>{
-
+window.openPage=(page)=>{
 
 location.href=page;
 
-
 };
-
 
 
 </script>
 
 
-
 </body>
-
 </html>
