@@ -1,187 +1,319 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <title>RiderX - Premium Ride Hailing</title>
+<meta charset="UTF-8">
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="assets/app.css">
+<title>RiderX - Move Faster</title>
 
-  <!-- Leaflet Map -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="manifest" href="manifest.json">
 
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<meta name="theme-color" content="#000000">
+
+
+<link rel="stylesheet" href="assets/app.css">
+
+<link rel="stylesheet" href="assets/animation.css">
+
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
+
+
+body{
+
+background:#000;
+color:white;
+height:100vh;
+overflow:hidden;
+
+}
+
+
+
+.splash{
+
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100vh;
+background:#000;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+
+animation:hideSplash 3s forwards;
+
+}
+
+
+
+.logo-animation{
+
+font-size:45px;
+font-weight:900;
+letter-spacing:3px;
+animation:logoZoom 2s infinite;
+
+}
+
+
+.logo-animation span{
+
+color:#FFD600;
+
+}
+
+
+
+@keyframes logoZoom{
+
+0%{
+transform:scale(.7);
+opacity:0;
+}
+
+50%{
+transform:scale(1.1);
+opacity:1;
+}
+
+100%{
+transform:scale(1);
+}
+
+}
+
+
+
+@keyframes hideSplash{
+
+0%,80%{
+opacity:1;
+}
+
+100%{
+opacity:0;
+visibility:hidden;
+}
+
+}
+
+
+
+
+
+.main{
+
+height:100vh;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+padding:25px;
+
+}
+
+
+
+.brand{
+
+font-size:42px;
+font-weight:900;
+
+}
+
+
+.brand span{
+
+color:#FFD600;
+
+}
+
+
+
+.tagline{
+
+margin-top:15px;
+color:#aaa;
+text-align:center;
+
+}
+
+
+
+.buttons{
+
+width:100%;
+margin-top:50px;
+
+}
+
+
+
+.btn{
+
+width:100%;
+padding:17px;
+margin:12px 0;
+border-radius:15px;
+border:none;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+
+}
+
+
+
+.customer{
+
+background:#FFD600;
+color:#000;
+
+}
+
+
+
+.rider{
+
+background:#111;
+border:2px solid #FFD600;
+color:#FFD600;
+
+}
+
+
+
+.lang{
+
+position:absolute;
+top:25px;
+right:20px;
+
+}
+
+
+
+.lang button{
+
+background:#FFD600;
+border:none;
+padding:8px 15px;
+border-radius:20px;
+font-weight:bold;
+
+}
+
+
+.footer{
+
+position:absolute;
+bottom:30px;
+color:#777;
+font-size:13px;
+
+}
+
+
+</style>
 
 </head>
 
+
+
 <body>
 
-<div class="app-viewport">
 
-<!-- HEADER -->
-<header class="rx-header">
 
-<div class="brand-logo">
-<i class="fa-solid fa-bolt"></i>
-RIDER<span>X</span>
+<!-- SPLASH -->
+
+
+<div class="splash">
+
+
+<div class="logo-animation">
+
+RID<span>ERX</span>
+
 </div>
 
 
-<div class="header-actions">
+</div>
 
-<button id="langToggleBtn" class="btn-yellow">
+
+
+
+
+
+<!-- HOME -->
+
+
+<div class="main">
+
+
+
+<div class="lang">
+
+<button id="languageBtn">
+
 HI / EN
+
 </button>
 
+</div>
 
-<button id="userAuthBtn" class="rx-badge">
+
+
+
+<div class="brand">
+
+RID<span>ERX</span>
+
+</div>
+
+
+
+<p class="tagline">
+
+India's Premium Bike Taxi, Cab, Parcel & Food Platform
+
+</p>
+
+
+
+
+
+<div class="buttons">
+
+
+<button class="btn customer" onclick="joinCustomer()">
+
 <i class="fa-solid fa-user"></i>
-Login
+
+Join as Customer
+
 </button>
 
-</div>
-
-</header>
 
 
 
-<!-- MAP -->
+<button class="btn rider" onclick="joinRider()">
 
-<div id="map"></div>
-
-
-
-<!-- BOOKING PANEL -->
-
-<div class="bottom-sheet">
-
-
-<div class="service-grid">
-
-
-<div class="service-card active" data-service="bike">
 <i class="fa-solid fa-motorcycle"></i>
-<span id="txtBike">Bike Taxi</span>
-</div>
 
-
-<div class="service-card" data-service="cab">
-<i class="fa-solid fa-car"></i>
-<span id="txtCab">Cab Ride</span>
-</div>
-
-
-<div class="service-card" data-service="parcel">
-<i class="fa-solid fa-box"></i>
-<span id="txtParcel">Parcel</span>
-</div>
-
-
-<div class="service-card" data-service="food">
-<i class="fa-solid fa-utensils"></i>
-<span id="txtFood">Food</span>
-</div>
-
-
-</div>
-
-
-
-
-<div class="location-inputs">
-
-
-<div class="input-group">
-
-<i class="fa-solid fa-circle-dot"></i>
-
-<input 
-id="pickupInput"
-class="rx-input"
-type="text"
-placeholder="Pickup Location"
-value="Chandigarh">
-
-</div>
-
-
-
-<div class="input-group">
-
-<i class="fa-solid fa-location-dot"></i>
-
-<input 
-id="dropInput"
-class="rx-input"
-type="text"
-placeholder="Where to go?">
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="fare-box">
-
-
-<div>
-
-<p id="txtFareEst">
-Estimated Fare
-</p>
-
-
-<h3 id="fareDisplay">
-₹ 0.00
-</h3>
-
-
-</div>
-
-
-
-<select id="paymentMethod" class="rx-input">
-
-<option value="cash">
-💵 Cash
-</option>
-
-<option value="wallet">
-💳 RiderX Wallet
-</option>
-
-
-<option value="online">
-📱 UPI / Online
-</option>
-
-
-</select>
-
-
-</div>
-
-
-
-
-
-
-<button id="bookRideBtn" class="btn-yellow pulse-yellow">
-
-<i class="fa-solid fa-paper-plane"></i>
-
-<span id="txtBookNow">
-Book Ride Now
-</span>
+Join as Rider
 
 </button>
 
@@ -189,118 +321,16 @@ Book Ride Now
 
 </div>
 
-</div>
 
 
 
 
 
-<!-- LOGIN MODAL -->
+<div class="footer">
 
-
-<div id="authModal" class="modal-overlay">
-
-
-<div class="modal-card">
-
-
-<h2 id="txtAuthTitle">
-Login to RiderX
-</h2>
-
-
-
-<input 
-id="authEmail"
-class="rx-input"
-type="email"
-placeholder="Email Address">
-
-
-
-<input 
-id="authPassword"
-class="rx-input"
-type="password"
-placeholder="Password">
-
-
-
-<button id="loginSubmitBtn" class="btn-yellow">
-Login
-</button>
-
-
-
-<button id="registerSubmitBtn" class="btn-yellow btn-secondary">
-Create Account
-</button>
-
-
-
-<button id="closeAuthBtn" class="close-btn">
-Cancel
-</button>
-
-
+Fast • Safe • Reliable
 
 </div>
-
-</div>
-
-
-
-
-
-
-
-<!-- RIDE TRACKING -->
-
-
-<div id="trackingModal" class="modal-overlay">
-
-
-<div class="modal-card tracking-card">
-
-
-<i class="fa-solid fa-spinner fa-spin loader"></i>
-
-
-
-<h3 id="rideStatusText">
-Searching Nearby Riders...
-</h3>
-
-
-
-<p id="rideSubText">
-Connecting you to nearest rider.
-</p>
-
-
-
-
-<div id="driverDetails" class="driver-box">
-
-
-<h4 id="driverName">
-Driver Name
-</h4>
-
-
-
-<p id="driverVehicle">
-Vehicle Details
-</p>
-
-
-
-<p>
-Start OTP:
-<strong id="otpCode">
-0000
-</strong>
-</p>
 
 
 
@@ -309,53 +339,57 @@ Start OTP:
 
 
 
-
-<button id="cancelRideBtn" class="btn-yellow btn-secondary">
-Cancel Ride
-</button>
-
-
-
-
-</div>
-
-</div>
-
-
-
-
-
-<!-- SCRIPTS -->
-
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
-<script type="module" src="customer/js/customer.js"></script>
 
 
 
 <script>
 
-if("serviceWorker" in navigator){
 
-window.addEventListener("load",()=>{
+function joinCustomer(){
 
-navigator.serviceWorker.register("./sw.js")
-.then(()=>{
-console.log("RiderX App Ready");
-})
-.catch(err=>{
-console.log("SW Error",err);
-});
-
-});
+window.location.href="auth/login.html?role=customer";
 
 }
+
+
+
+function joinRider(){
+
+window.location.href="auth/login.html?role=rider";
+
+}
+
+
+
+
+document.getElementById("languageBtn").onclick=function(){
+
+alert("Language Changed / भाषा बदली गई");
+
+}
+
+
+
+</script>
+
+
+
+
+
+<script>
+
+
+if("serviceWorker" in navigator){
+
+navigator.serviceWorker.register("sw.js");
+
+}
+
 
 </script>
 
 
 
 </body>
+
 </html>
