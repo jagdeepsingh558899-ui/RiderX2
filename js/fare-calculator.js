@@ -1,56 +1,352 @@
-/**
- * RiderX - Dynamic Fare Calculation Engine
- */
+// =====================================
+// RiderX Admin Fare Settings
+// Firebase v10
+// =====================================
 
-const FareCalculator = {
-  // Base rates per service type
-  rates: {
-    bike: { baseFare: 20, perKm: 8, perMin: 1.5, minFare: 30 },
-    cab: { baseFare: 50, perKm: 15, perMin: 2.5, minFare: 80 },
-    parcel: { baseFare: 30, perKm: 10, perMin: 2.0, minFare: 40 },
-    food: { baseFare: 25, perKm: 9, perMin: 1.5, minFare: 35 }
-  },
 
-  /**
-   * Calculate distance using Haversine Formula (KM)
-   */
-  calculateDistance: function (lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of Earth in KM
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) *
-        Math.cos(lat2 * (Math.PI / 180)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return parseFloat((R * c).toFixed(2));
-  },
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
-  /**
-   * Estimate ride duration in minutes based on average speed (30 km/h)
-   */
-  estimateTimeMinutes: function (distanceKm) {
-    const avgSpeedKmH = 30;
-    return Math.max(Math.ceil((distanceKm / avgSpeedKmH) * 60), 5);
-  },
 
-  /**
-   * Calculate total fare for a selected service
-   */
-  calculateFare: function (serviceType, distanceKm, timeMin = null) {
-    const service = this.rates[serviceType] || this.rates.bike;
-    const duration = timeMin || this.estimateTimeMinutes(distanceKm);
+import {
+    doc,
+    getDoc,
+    setDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    let calculated = service.baseFare + (distanceKm * service.perKm) + (duration * service.perMin);
-    let finalFare = Math.max(calculated, service.minFare);
 
-    return {
-      serviceType: serviceType,
-      distanceKm: distanceKm,
-      durationMin: duration,
-      fare: Math.round(finalFare)
-    };
-  }
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+
+
+const service =
+document.getElementById("service");
+
+
+const baseFare =
+document.getElementById("baseFare");
+
+
+const dayRate =
+document.getElementById("dayRate");
+
+
+const extraRate =
+document.getElementById("extraRate");
+
+
+const nightRate =
+document.getElementById("nightRate");
+
+
+const saveBtn =
+document.getElementById("saveFare");
+
+
+const status =
+document.getElementById("status");
+
+
+
+
+
+let currentAdmin = null;
+
+
+
+
+// ===============================
+// ADMIN CHECK
+// ===============================
+
+
+onAuthStateChanged(
+auth,
+async(user)=>{
+
+
+if(!user){
+
+location.href="../auth/login.html";
+
+return;
+
+}
+
+
+
+const snap =
+await getDoc(
+doc(db,"users",user.uid)
+);
+
+
+
+if(!snap.exists()){
+
+location.href="../index.html";
+
+return;
+
+}
+
+
+
+const data =
+snap.data();
+
+
+
+if(data.role!=="admin"){
+
+
+alert("Access Denied");
+
+
+location.href="../customer/home.html";
+
+
+return;
+
+
+}
+
+
+
+currentAdmin=user.uid;
+
+
+
+loadFare();
+
+
+
+});
+
+
+
+
+
+
+
+
+
+// ===============================
+// LOAD FARE
+// ===============================
+
+
+async function loadFare(){
+
+
+try{
+
+
+const fareSnap =
+await getDoc(
+doc(
+db,
+"settings",
+"fare"
+)
+);
+
+
+
+if(fareSnap.exists()){
+
+
+const data =
+fareSnap.data();
+
+
+
+updateFields(
+data[service.value]
+);
+
+
+}
+
+
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+service.addEventListener(
+"change",
+()=>{
+
+loadFare();
+
+});
+
+
+
+
+
+
+
+
+
+function updateFields(data){
+
+
+if(!data)
+return;
+
+
+baseFare.value =
+data.baseFare || 0;
+
+
+dayRate.value =
+data.dayRate || 0;
+
+
+extraRate.value =
+data.extraRate || 0;
+
+
+nightRate.value =
+data.nightRate || 0;
+
+
+}
+
+
+
+
+
+
+
+
+
+// ===============================
+// SAVE FARE
+// ===============================
+
+
+saveBtn.onclick =
+async()=>{
+
+
+try{
+
+
+const serviceName =
+service.value;
+
+
+
+const fareData = {
+
+
+
+baseFare:
+Number(baseFare.value),
+
+
+
+dayRate:
+Number(dayRate.value),
+
+
+
+extraRate:
+Number(extraRate.value),
+
+
+
+nightRate:
+Number(nightRate.value)
+
+
+
+};
+
+
+
+
+
+await setDoc(
+
+doc(
+db,
+"settings",
+"fare"
+),
+
+{
+
+
+[serviceName]:
+
+fareData
+
+
+},
+
+
+{
+
+merge:true
+
+}
+
+
+
+);
+
+
+
+
+
+status.innerHTML =
+"✅ Fare Updated Successfully";
+
+
+
+setTimeout(()=>{
+
+status.innerHTML="";
+
+},3000);
+
+
+
+}
+
+
+catch(error){
+
+
+status.innerHTML =
+error.message;
+
+
+}
+
+
+
 };
