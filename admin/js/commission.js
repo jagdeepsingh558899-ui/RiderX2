@@ -37,17 +37,16 @@ from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 
-const percentInput =
+const percent =
 document.getElementById("percent");
 
 
-const saveBtn =
+const save =
 document.getElementById("save");
 
 
 const status =
 document.getElementById("status");
-
 
 
 
@@ -76,7 +75,9 @@ return;
 
 
 
-const adminSnap =
+
+
+const admin =
 await getDoc(
 
 doc(
@@ -90,24 +91,30 @@ user.uid
 
 
 
+
+
 if(
 
-!adminSnap.exists()
+!admin.exists()
 
 ||
 
-adminSnap.data().role !== "admin"
+admin.data().role!=="admin"
 
 ){
 
 
-alert("Access Denied");
+alert(
+"Access Denied"
+);
+
 
 
 location.href="../customer/home.html";
 
 
 return;
+
 
 }
 
@@ -116,8 +123,8 @@ return;
 loadCommission();
 
 
-});
 
+});
 
 
 
@@ -154,9 +161,10 @@ db,
 if(snap.exists()){
 
 
-percentInput.value =
+percent.value =
 
 snap.data().percent || 20;
+
 
 
 }
@@ -164,7 +172,7 @@ snap.data().percent || 20;
 else{
 
 
-percentInput.value = 20;
+percent.value=20;
 
 
 }
@@ -192,36 +200,42 @@ console.log(error);
 
 
 
+
 // ===============================
 // SAVE COMMISSION
 // ===============================
 
 
-saveBtn.onclick =
+save.onclick =
 async()=>{
 
 
 try{
 
 
-const percent =
+let value =
 Number(
-percentInput.value
+percent.value
 );
 
 
 
-if(percent < 0 || percent > 100){
+if(value < 0 || value > 100){
 
 
-status.innerHTML =
-"Enter 0 to 100 only";
+alert(
+"Commission 0-100 ke beech hona chahiye"
+);
 
 
 return;
 
 
 }
+
+
+
+
 
 
 
@@ -237,12 +251,20 @@ db,
 {
 
 
-percent:percent
+percent:value,
+
+
+updatedAt:
+
+new Date()
+
 
 
 }
 
 );
+
+
 
 
 
