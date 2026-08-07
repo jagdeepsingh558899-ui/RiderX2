@@ -1,1154 +1,1250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
 <title>RiderX | Book Ride</title>
 
 <link rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet">
+rel="stylesheet">
+
 
 <style>
+
 :root{
-  --yellow:#ffe500;
-  --black:#050505;
-  --card:#191919;
-  --text:#fff;
-  --muted:#999;
-  --green:#22c55e;
-  --red:#ef4444;
+
+--yellow:#ffe500;
+--black:#050505;
+--card:#151515;
+--green:#22c55e;
+--text:#fff;
+--muted:#999;
+
 }
+
 
 *{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:Poppins,sans-serif;
+
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins,sans-serif;
+
 }
+
 
 html,body{
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#050505;
-  color:#fff;
+
+width:100%;
+height:100%;
+overflow:hidden;
+background:#000;
+color:white;
+
 }
 
-body{
-  position:relative;
-}
 
 #map{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  z-index:1;
-  background:#111;
+
+position:absolute;
+inset:0;
+z-index:1;
+
 }
 
-.leaflet-container{
-  font-family:Poppins,sans-serif;
-}
-
-.leaflet-control-zoom{
-  margin-top:80px!important;
-}
 
 .leaflet-control-zoom a{
-  background:#111!important;
-  color:var(--yellow)!important;
-  border-color:#333!important;
+
+background:#111!important;
+color:#ffe500!important;
+
 }
+
 
 /* TOP BAR */
 
+
 .topbar{
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  z-index:1000;
-  padding:max(14px,env(safe-area-inset-top)) 15px 12px;
-  pointer-events:none;
+
+position:absolute;
+top:0;
+left:0;
+right:0;
+z-index:1000;
+padding:15px;
+
 }
+
 
 .topbar-inner{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  pointer-events:auto;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
 }
 
-.back-btn,
-.location-btn{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(10,10,10,.92);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 5px 20px rgba(0,0,0,.35);
-  text-decoration:none;
-  cursor:pointer;
+
+.icon-btn{
+
+height:44px;
+width:44px;
+border-radius:50%;
+border:none;
+background:#111;
+color:white;
+font-size:18px;
+
 }
 
-.back-btn:active,
-.location-btn:active{
-  transform:scale(.94);
-}
 
 .logo{
-  background:rgba(10,10,10,.92);
-  border:1px solid rgba(255,229,0,.25);
-  padding:8px 15px;
-  border-radius:14px;
-  font-weight:800;
-  letter-spacing:-.5px;
-  box-shadow:0 5px 20px rgba(0,0,0,.35);
+
+background:#111;
+padding:8px 16px;
+border-radius:15px;
+font-weight:800;
+
 }
 
+
 .logo span{
-  color:var(--yellow);
+
+color:#ffe500;
+
 }
+
+
+
+/* CENTER PIN */
+
+
+.center-marker{
+
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-100%);
+z-index:500;
+
+display:block;
+
+}
+
+
+.pin{
+
+width:45px;
+height:45px;
+
+background:#ffe500;
+color:black;
+
+border-radius:50% 50% 50% 0;
+
+transform:rotate(-45deg);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+
+
+.pin i{
+
+transform:rotate(45deg);
+
+}
+
+
 
 /* STATUS */
 
-.map-status{
-  position:absolute;
-  top:70px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:900;
-  background:rgba(10,10,10,.92);
-  border:1px solid rgba(255,255,255,.1);
-  padding:8px 14px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:600;
-  white-space:nowrap;
-  box-shadow:0 5px 20px rgba(0,0,0,.3);
+
+.status{
+
+position:absolute;
+top:70px;
+left:50%;
+transform:translateX(-50%);
+
+z-index:900;
+
+background:#111;
+padding:8px 15px;
+border-radius:30px;
+
+font-size:11px;
+
 }
 
-.status-dot{
-  width:7px;
-  height:7px;
-  display:inline-block;
-  border-radius:50%;
-  background:var(--yellow);
-  margin-right:6px;
-}
 
-/* CENTER MARKER */
+/* SHEET */
 
-.center-marker{
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-100%);
-  z-index:500;
-  pointer-events:none;
-  display:none;
-}
-
-.center-marker-inner{
-  width:42px;
-  height:42px;
-  background:var(--yellow);
-  color:#000;
-  border-radius:50% 50% 50% 0;
-  transform:rotate(-45deg);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 5px 20px rgba(0,0,0,.4),
-             0 0 25px rgba(255,229,0,.35);
-}
-
-.center-marker-inner i{
-  transform:rotate(45deg);
-}
-
-/* BOTTOM SHEET */
 
 .booking-sheet{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:1000;
-  background:linear-gradient(180deg,rgba(22,22,22,.97),rgba(8,8,8,.99));
-  border-radius:25px 25px 0 0;
-  border-top:1px solid rgba(255,255,255,.1);
-  box-shadow:0 -10px 40px rgba(0,0,0,.55);
-  padding:10px 15px max(15px,env(safe-area-inset-bottom));
-  max-height:60vh;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+
+position:absolute;
+bottom:0;
+left:0;
+right:0;
+
+z-index:1000;
+
+background:#090909;
+
+border-radius:25px 25px 0 0;
+
+padding:15px;
+
+max-height:58vh;
+
+overflow-y:auto;
+
 }
+
 
 .handle{
-  width:42px;
-  height:4px;
-  background:#555;
-  border-radius:99px;
-  margin:0 auto 12px;
+
+height:5px;
+width:45px;
+
+background:#555;
+
+border-radius:10px;
+
+margin:auto auto 15px;
+
 }
 
-.sheet-title{
-  font-size:17px;
-  font-weight:800;
-  margin-bottom:12px;
+
+.title{
+
+font-size:18px;
+font-weight:800;
+margin-bottom:15px;
+
 }
+
+
 
 /* LOCATION */
 
-.location-card{
-  background:var(--card);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:15px;
-  overflow:hidden;
-  margin-bottom:13px;
+
+.location-box{
+
+background:#151515;
+border-radius:15px;
+overflow:hidden;
+
 }
 
-.location-row{
-  display:flex;
-  align-items:center;
-  min-height:55px;
-  padding:8px 12px;
-  gap:10px;
+
+.row{
+
+display:flex;
+align-items:center;
+gap:10px;
+
+padding:12px;
+
 }
 
-.location-row+.location-row{
-  border-top:1px solid #292929;
+
+.row+ .row{
+
+border-top:1px solid #333;
+
 }
 
-.location-icon{
-  width:27px;
-  height:27px;
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
-  font-size:12px;
+
+.dot{
+
+height:25px;
+width:25px;
+border-radius:50%;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:10px;
+
 }
 
-.pickup-icon{
-  background:rgba(34,197,94,.12);
-  color:var(--green);
+
+.pick{
+
+background:#12351f;
+color:#22c55e;
+
 }
 
-.drop-icon{
-  background:rgba(255,229,0,.12);
-  color:var(--yellow);
+
+.drop{
+
+background:#3b3500;
+color:#ffe500;
+
 }
 
-.location-input-wrap{
-  flex:1;
-  min-width:0;
+
+input{
+
+flex:1;
+
+background:none;
+border:none;
+outline:none;
+
+color:white;
+
+font-size:13px;
+
 }
 
-.location-label{
-  display:block;
-  font-size:9px;
-  color:var(--muted);
-  margin-bottom:2px;
-  text-transform:uppercase;
-  letter-spacing:.5px;
+
+input::placeholder{
+
+color:#777;
+
 }
 
-.location-input{
-  width:100%;
-  border:none;
-  outline:none;
-  background:transparent;
-  color:#fff;
-  font-size:13px;
-  font-weight:500;
-  padding:0;
-  text-overflow:ellipsis;
+
+
+.action{
+
+height:35px;
+width:35px;
+
+border-radius:50%;
+border:none;
+
+background:#222;
+color:#ffe500;
+
 }
 
-.location-input::placeholder{
-  color:#666;
-}
 
-.loc-action{
-  width:34px;
-  height:34px;
-  flex-shrink:0;
-  border-radius:50%;
-  border:none;
-  background:#252525;
-  color:#aaa;
-  cursor:pointer;
-}
-
-.loc-action:active{
-  transform:scale(.94);
-}
-
-/* SEARCH */
-
-.search-results{
-  display:none;
-  position:absolute;
-  left:15px;
-  right:15px;
-  bottom:calc(100% - 70px);
-  z-index:1200;
-  background:#171717;
-  border:1px solid #333;
-  border-radius:15px;
-  overflow:hidden;
-  max-height:220px;
-  box-shadow:0 10px 35px rgba(0,0,0,.6);
-}
-
-.search-result{
-  padding:12px 14px;
-  border-bottom:1px solid #292929;
-  cursor:pointer;
-}
-
-.search-result:last-child{
-  border-bottom:none;
-}
-
-.search-result:active{
-  background:#262626;
-}
-
-.result-title{
-  font-size:12px;
-  font-weight:600;
-  color:#fff;
-}
-
-.result-subtitle{
-  font-size:10px;
-  color:#888;
-  margin-top:2px;
-}
 
 /* SERVICES */
 
-.service-title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
+
+.services{
+
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:8px;
+
+margin-top:15px;
+
 }
 
-.service-title span:first-child{
-  font-size:12px;
-  font-weight:700;
+
+.service{
+
+background:#171717;
+
+border:1px solid #333;
+
+border-radius:14px;
+
+padding:12px 5px;
+
+text-align:center;
+
+color:#aaa;
+
 }
 
-.service-title span:last-child{
-  color:#777;
-  font-size:10px;
+
+.service i{
+
+font-size:18px;
+
 }
 
-.service-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  margin-bottom:13px;
+
+.service span{
+
+display:block;
+font-size:10px;
+
 }
 
-.service-card{
-  border:1px solid #303030;
-  background:#1b1b1b;
-  border-radius:13px;
-  padding:10px 5px;
-  text-align:center;
-  cursor:pointer;
-  transition:.18s;
-  color:#aaa;
+
+.service.active{
+
+background:#ffe500;
+color:black;
+
 }
 
-.service-card i{
-  display:block;
-  font-size:19px;
-  margin-bottom:5px;
-}
 
-.service-card span{
-  display:block;
-  font-size:9px;
-  font-weight:600;
-}
-
-.service-card.active{
-  background:var(--yellow);
-  border-color:var(--yellow);
-  color:#000;
-  transform:translateY(-1px);
-  box-shadow:0 5px 15px rgba(255,229,0,.18);
-}
-
-.service-card.active i,
-.service-card.active span{
-  color:#000;
-}
 
 /* FARE */
 
-.fare-card{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#191919;
-  border:1px solid #292929;
-  border-radius:14px;
-  padding:12px 14px;
-  margin-bottom:12px;
+
+.fare{
+
+margin-top:15px;
+
+background:#151515;
+
+border-radius:15px;
+
+padding:14px;
+
+display:flex;
+justify-content:space-between;
+
 }
 
-.fare-left small{
-  color:#777;
-  display:block;
-  font-size:9px;
+
+.price{
+
+font-size:22px;
+font-weight:800;
+color:#ffe500;
+
 }
 
-.fare-left strong{
-  display:block;
-  margin-top:2px;
-  font-size:13px;
-}
 
-.fare-right{
-  text-align:right;
-}
 
-.fare-amount{
-  font-size:20px;
-  font-weight:800;
-  color:var(--yellow);
-}
+/* BUTTON */
 
-.fare-distance{
-  color:#777;
-  font-size:9px;
-}
-
-/* BOOK */
 
 .book-btn{
-  width:100%;
-  border:none;
-  background:var(--yellow);
-  color:#000;
-  border-radius:14px;
-  padding:15px;
-  font-size:15px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:0 8px 25px rgba(255,229,0,.18);
-  transition:.18s;
+
+width:100%;
+
+margin-top:15px;
+
+padding:15px;
+
+border:none;
+
+border-radius:15px;
+
+background:#ffe500;
+
+font-size:16px;
+
+font-weight:800;
+
 }
 
-.book-btn:active{
-  transform:scale(.98);
-}
 
 .book-btn:disabled{
-  background:#555;
-  color:#999;
-  cursor:not-allowed;
-  box-shadow:none;
+
+background:#555;
+color:#999;
+
 }
 
-/* LOADING */
 
-.loading-overlay{
-  position:fixed;
-  inset:0;
-  z-index:3000;
-  background:rgba(0,0,0,.75);
-  backdrop-filter:blur(6px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-}
-
-.loading-box{
-  width:220px;
-  background:#171717;
-  border:1px solid #333;
-  border-radius:20px;
-  padding:25px;
-  text-align:center;
-}
-
-.spinner{
-  width:40px;
-  height:40px;
-  border:3px solid #333;
-  border-top-color:var(--yellow);
-  border-radius:50%;
-  animation:spin .8s linear infinite;
-  margin:0 auto 15px;
-}
-
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-
-.loading-box p{
-  font-size:12px;
-  color:#ccc;
-}
-
-/* TOAST */
-
-.toast{
-  position:fixed;
-  top:80px;
-  left:50%;
-  transform:translateX(-50%) translateY(-20px);
-  z-index:4000;
-  min-width:250px;
-  max-width:calc(100% - 30px);
-  background:#191919;
-  border:1px solid #333;
-  border-radius:13px;
-  padding:12px 15px;
-  display:none;
-  font-size:11px;
-  box-shadow:0 10px 30px rgba(0,0,0,.5);
-  text-align:center;
-}
-
-.toast.show{
-  display:block;
-  animation:toastIn .2s ease forwards;
-}
-
-@keyframes toastIn{
-  to{
-    transform:translateX(-50%) translateY(0);
-  }
-}
-
-.toast.success{
-  border-color:rgba(34,197,94,.5);
-}
-
-.toast.error{
-  border-color:rgba(239,68,68,.5);
-}
-
-/* DESKTOP */
-
-@media(min-width:768px){
-  .booking-sheet{
-    left:20px;
-    bottom:20px;
-    width:430px;
-    max-height:calc(100vh - 40px);
-    border-radius:24px;
-    padding:18px;
-  }
-
-  .topbar{
-    padding:18px;
-  }
-
-  .map-status{
-    top:20px;
-  }
-}
 </style>
 </head>
 
+
 <body>
+
 
 <div id="map"></div>
 
+
 <div class="topbar">
-  <div class="topbar-inner">
 
-    <a href="home.html"
-       class="back-btn"
-       aria-label="Back">
-      <i class="fa-solid fa-arrow-left"></i>
-    </a>
+<div class="topbar-inner">
 
-    <div class="logo">
-      RIDER<span>X</span>
-    </div>
+<button class="icon-btn" onclick="history.back()">
+<i class="fa-solid fa-arrow-left"></i>
+</button>
 
-    <button class="location-btn"
-            id="currentLocationBtn"
-            aria-label="Current location"
-            type="button">
-      <i class="fa-solid fa-crosshairs"></i>
-    </button>
 
-  </div>
+<div class="logo">
+RIDER<span>X</span>
 </div>
 
-<div class="map-status" id="mapStatus">
-  <span class="status-dot"></span>
-  <span id="statusText">Getting your location...</span>
-</div>
 
-<div class="center-marker" id="centerMarker">
-  <div class="center-marker-inner">
-    <i class="fa-solid fa-location-dot"></i>
-  </div>
-</div>
+<button class="icon-btn" id="myLocation">
+<i class="fa-solid fa-location-crosshairs"></i>
+</button>
 
-<section class="booking-sheet">
-
-  <div class="handle"></div>
-
-  <h2 class="sheet-title">
-    Where are you going?
-  </h2>
-
-  <div class="location-card">
-
-    <div class="location-row">
-
-      <div class="location-icon pickup-icon">
-        <i class="fa-solid fa-circle"></i>
-      </div>
-
-      <div class="location-input-wrap">
-
-        <span class="location-label">
-          Pickup
-        </span>
-
-        <input
-          type="text"
-          id="pickup"
-          class="location-input"
-          placeholder="Choose pickup location"
-          autocomplete="off">
-
-      </div>
-
-      <button
-        class="loc-action"
-        id="pickupMapBtn"
-        title="Select pickup on map"
-        type="button">
-
-        <i class="fa-solid fa-map-location-dot"></i>
-
-      </button>
-
-    </div>
-
-    <div class="location-row">
-
-      <div class="location-icon drop-icon">
-        <i class="fa-solid fa-location-dot"></i>
-      </div>
-
-      <div class="location-input-wrap">
-
-        <span class="location-label">
-          Drop
-        </span>
-
-        <input
-          type="text"
-          id="drop"
-          class="location-input"
-          placeholder="Choose destination"
-          autocomplete="off">
-
-      </div>
-
-      <button
-        class="loc-action"
-        id="dropMapBtn"
-        title="Select drop on map"
-        type="button">
-
-        <i class="fa-solid fa-map-location-dot"></i>
-
-      </button>
-
-    </div>
-
-  </div>
-
-  <div class="search-results" id="searchResults"></div>
-
-  <div class="service-title">
-
-    <span>Choose your service</span>
-
-    <span>RiderX</span>
-
-  </div>
-
-  <div class="service-grid">
-
-    <button
-      class="service-card active"
-      data-service="bike"
-      type="button">
-
-      <i class="fa-solid fa-motorcycle"></i>
-      <span>Bike Taxi</span>
-
-    </button>
-
-    <button
-      class="service-card"
-      data-service="cab"
-      type="button">
-
-      <i class="fa-solid fa-car"></i>
-      <span>Cab</span>
-
-    </button>
-
-    <button
-      class="service-card"
-      data-service="parcel"
-      type="button">
-
-      <i class="fa-solid fa-box"></i>
-      <span>Parcel</span>
-
-    </button>
-
-    <button
-      class="service-card"
-      data-service="food"
-      type="button">
-
-      <i class="fa-solid fa-utensils"></i>
-      <span>Food</span>
-
-    </button>
-
-  </div>
-
-  <div class="fare-card">
-
-    <div class="fare-left">
-
-      <small>Estimated trip</small>
-
-      <strong id="fareInfo">
-        Select pickup & drop
-      </strong>
-
-    </div>
-
-    <div class="fare-right">
-
-      <div class="fare-amount"
-           id="fareAmount">
-        ₹0
-      </div>
-
-      <div class="fare-distance"
-           id="distanceText">
-        0 km
-      </div>
-
-    </div>
-
-  </div>
-
-  <button
-    class="book-btn"
-    id="bookRideBtn"
-    disabled
-    type="button">
-
-    <i class="fa-solid fa-bolt"></i>
-    Book Ride
-
-  </button>
-
-</section>
-
-<div class="loading-overlay"
-     id="loadingOverlay">
-
-  <div class="loading-box">
-
-    <div class="spinner"></div>
-
-    <p id="loadingText">
-      Please wait...
-    </p>
-
-  </div>
 
 </div>
 
-<div class="toast"
-     id="toast"></div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script type="module">
-
-/*
-========================================================
-RIDERX BOOKING PAGE
-customer/booking.html
-========================================================
-*/
-
-import {
-  auth,
-  db,
-  collection,
-  addDoc,
-  serverTimestamp,
-  onAuthStateChanged
-} from "../firebase/firebase-config.js";
+</div>
 
 
-/* ======================================================
-   RIDERX SETTINGS
-====================================================== */
+<div class="status" id="status">
+Select pickup location
+</div>
 
-const RIDERX = {
 
-  defaultLocation: [30.7333, 76.7794],
+<div class="center-marker">
 
-  cityName: "Chandigarh",
+<div class="pin">
 
-  dayRateFirst10Km: 8,
+<i class="fa-solid fa-location-dot"></i>
 
-  dayRateAfter10Km: 9,
+</div>
 
-  nightRate: 11,
+</div>
+// PART 2 START
 
-  nightStart: 22,
+const serviceCards =
+document.querySelectorAll(".service-card");
 
-  nightEnd: 6
+const currentLocationBtn =
+document.getElementById("currentLocationBtn");
+
+const pickupMapBtn =
+document.getElementById("pickupMapBtn");
+
+const dropMapBtn =
+document.getElementById("dropMapBtn");
+
+
+// SERVICE SELECT
+
+serviceCards.forEach(card=>{
+
+card.addEventListener("click",()=>{
+
+serviceCards.forEach(c=>{
+c.classList.remove("active");
+});
+
+card.classList.add("active");
+
+selectedService =
+card.dataset.service;
+
+calculateFare();
+
+});
+
+});
+
+
+// PICKUP / DROP MAP MODE
+
+pickupMapBtn.onclick=()=>{
+
+selectingMode="pickup";
+
+centerMarker.style.display="block";
+
+statusText.textContent=
+"Move map to select pickup";
+
+showToast(
+"Pickup select karein"
+);
 
 };
 
 
-/* ======================================================
-   STATE
-====================================================== */
+dropMapBtn.onclick=()=>{
 
-let map = null;
+selectingMode="drop";
 
-let pickupMarker = null;
+centerMarker.style.display="block";
 
-let dropMarker = null;
+statusText.textContent=
+"Move map to select destination";
 
-let pickupCoords = null;
+showToast(
+"Drop select karein"
+);
 
-let dropCoords = null;
-
-let selectedService = "bike";
-
-let selectingMode = "pickup";
-
-let currentUser = null;
-
-let routeLayer = null;
-
-let routeDistanceKm = 0;
-
-let routeDurationMin = 0;
-
-let searchTimer = null;
-
-let isSelectingFromMap = false;
+};
 
 
-/* ======================================================
-   DOM
-====================================================== */
+// CURRENT LOCATION
 
-const pickupInput =
-  document.getElementById("pickup");
-
-const dropInput =
-  document.getElementById("drop");
-
-const fareAmount =
-  document.getElementById("fareAmount");
-
-const distanceText =
-  document.getElementById("distanceText");
-
-const fareInfo =
-  document.getElementById("fareInfo");
-
-const bookRideBtn =
-  document.getElementById("bookRideBtn");
-
-const statusText =
-  document.getElementById("statusText");
-
-const centerMarker =
-  document.getElementById("centerMarker");
-
-const loadingOverlay =
-  document.getElementById("loadingOverlay");
-
-const loadingText =
-  document.getElementById("loadingText");
-
-const toast =
-  document.getElementById("toast");
-
-const searchResults =
-  document.getElementById("searchResults");
+currentLocationBtn.onclick=
+useCurrentLocation;
 
 
-/* ======================================================
-   TOAST
-====================================================== */
 
-function showToast(message, type = "") {
+// DISTANCE CALCULATION
 
-  toast.textContent = message;
+function calculateDistance(
+lat1,
+lon1,
+lat2,
+lon2
+){
 
-  toast.className =
-    "toast show " + type;
+const R = 6371;
 
-  setTimeout(() => {
+const dLat =
+(lat2-lat1) *
+Math.PI/180;
 
-    toast.className = "toast";
+const dLon =
+(lon2-lon1) *
+Math.PI/180;
 
-  }, 3000);
+
+const a =
+Math.sin(dLat/2) *
+Math.sin(dLat/2)
++
+Math.cos(lat1*Math.PI/180)
+*
+Math.cos(lat2*Math.PI/180)
+*
+Math.sin(dLon/2)
+*
+Math.sin(dLon/2);
+
+
+const c =
+2 *
+Math.atan2(
+Math.sqrt(a),
+Math.sqrt(1-a)
+);
+
+
+return R*c;
+
 }
 
 
-/* ======================================================
-   LOADING
-====================================================== */
 
-function showLoading(message) {
+// ROUTE
 
-  loadingText.textContent = message;
+async function calculateRoute(){
 
-  loadingOverlay.style.display = "flex";
+if(!pickupCoords || !dropCoords)
+return;
+
+
+routeDistanceKm =
+calculateDistance(
+pickupCoords.lat,
+pickupCoords.lng,
+dropCoords.lat,
+dropCoords.lng
+);
+
+
+distanceText.innerText =
+routeDistanceKm.toFixed(1)
++
+" km";
+
+
+calculateFare();
+
+
+bookRideBtn.disabled=false;
+
+
 }
 
 
-function hideLoading() {
+// FARE
 
-  loadingOverlay.style.display = "none";
+function calculateFare(){
+
+if(routeDistanceKm<=0)
+return;
+
+
+let fare=0;
+
+
+const hour =
+new Date().getHours();
+
+
+if(
+hour>=22 ||
+hour<6
+){
+
+fare =
+routeDistanceKm *
+RIDERX.nightRate;
+
+}
+
+else{
+
+
+if(routeDistanceKm<=10){
+
+fare =
+routeDistanceKm *
+RIDERX.dayRateFirst10Km;
+
+}
+
+else{
+
+fare =
+(10 *
+RIDERX.dayRateFirst10Km)
++
+(
+(routeDistanceKm-10)
+*
+RIDERX.dayRateAfter10Km
+);
+
+}
+
 }
 
 
-/* ======================================================
-   ESCAPE HTML
-====================================================== */
+fare =
+Math.max(
+50,
+Math.round(fare)
+);
 
-function escapeHtml(value) {
 
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+fareAmount.innerText =
+"₹"+fare;
+
+
+fareInfo.innerText =
+selectedService.toUpperCase()
++
+" Ride";
+
+
 }
 
 
-/* ======================================================
-   MAP INITIALIZATION
-====================================================== */
 
-function initMap() {
+// SEARCH INPUT
 
-  map = L.map("map", {
+pickupInput.addEventListener(
+"input",
+(e)=>{
 
-    zoomControl: true,
+searchLocation(
+e.target.value,
+"pickup"
+);
 
-    attributionControl: true
-
-  }).setView(
-    RIDERX.defaultLocation,
-    13
-  );
+});
 
 
-  L.tileLayer(
-    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
+dropInput.addEventListener(
+"input",
+(e)=>{
 
-      maxZoom: 19,
+searchLocation(
+e.target.value,
+"drop"
+);
 
-      attribution:
-        "&copy; OpenStreetMap contributors"
+});
 
+
+
+// BOOK RIDE
+
+bookRideBtn.onclick=
+async()=>{
+
+
+if(!pickupCoords ||
+!dropCoords){
+
+showToast(
+"Pickup aur drop select karein",
+"error"
+);
+
+return;
+
+}
+
+
+showLoading(
+"Searching Rider..."
+);
+
+
+try{
+
+
+const rideData={
+
+customerId:
+currentUser ?
+currentUser.uid :
+"guest",
+
+pickup:{
+address:
+pickupInput.value,
+lat:
+pickupCoords.lat,
+lng:
+pickupCoords.lng
+},
+
+
+drop:{
+address:
+dropInput.value,
+lat:
+dropCoords.lat,
+lng:
+dropCoords.lng
+},
+
+
+service:
+selectedService,
+
+
+distance:
+routeDistanceKm,
+
+
+status:
+"searching",
+
+
+createdAt:
+serverTimestamp()
+
+};
+
+
+
+await addDoc(
+collection(db,"rides"),
+rideData
+);
+
+
+
+hideLoading();
+
+
+showToast(
+"Ride request sent",
+"success"
+);
+
+
+
+setTimeout(()=>{
+
+window.location.href=
+"history.html";
+
+
+},1500);
+
+
+
+}
+
+catch(error){
+
+hideLoading();
+
+console.log(error);
+
+
+showToast(
+"Ride create failed",
+"error"
+);
+
+
+}
+
+
+};
+
+
+
+// AUTH
+
+onAuthStateChanged(
+auth,
+(user)=>{
+
+currentUser=user;
+
+});
+
+
+
+// INIT
+
+window.onload=()=>{
+
+initMap();
+
+};
+
+
+// ESCAPE HTML
+
+function escapeHtml(text){
+
+return text
+.replace(
+/</g,
+"&lt;"
+)
+.replace(
+/>/g,
+"&gt;"
+);
+
+}
+// ===============================
+// PART 3 START
+// FINAL EVENTS + RIDE BOOKING
+// ===============================
+
+
+// Reset locations
+
+function resetLocations(){
+
+    pickupCoords = null;
+    dropCoords = null;
+
+    pickupInput.value = "";
+    dropInput.value = "";
+
+    routeDistanceKm = 0;
+
+    distanceText.innerText = "0 km";
+    fareAmount.innerText = "₹0";
+    fareInfo.innerText = "Select pickup & drop";
+
+    bookRideBtn.disabled = true;
+
+
+    if(pickupMarker){
+        map.removeLayer(pickupMarker);
+        pickupMarker=null;
     }
-  ).addTo(map);
 
 
-  map.on("movestart", () => {
-
-    if (isSelectingFromMap) {
-
-      centerMarker.style.display =
-        "block";
-
+    if(dropMarker){
+        map.removeLayer(dropMarker);
+        dropMarker=null;
     }
 
-  });
 
-
-  map.on("moveend", async () => {
-
-    if (!isSelectingFromMap) {
-      return;
+    if(routeLayer){
+        map.removeLayer(routeLayer);
+        routeLayer=null;
     }
 
-    await updateMapSelection();
-
-  });
-
-
-  setTimeout(() => {
-
-    map.invalidateSize();
-
-  }, 500);
 }
 
 
-/* ======================================================
-   UPDATE MAP CENTER
-====================================================== */
 
-async function updateMapSelection() {
+// Change pickup button
 
-  if (!map || !isSelectingFromMap) {
+pickupMapBtn.addEventListener(
+"click",
+()=>{
+
+    selectingMode="pickup";
+
+    centerMarker.style.display="block";
+
+    statusText.innerText =
+    "Move map for pickup";
+
+
+});
+
+
+
+
+// Change drop button
+
+dropMapBtn.addEventListener(
+"click",
+()=>{
+
+    selectingMode="drop";
+
+    centerMarker.style.display="block";
+
+    statusText.innerText =
+    "Move map for destination";
+
+
+});
+
+
+
+
+
+// Draw route
+
+async function drawRoute(){
+
+    if(!pickupCoords || !dropCoords)
     return;
-  }
 
 
-  const center =
-    map.getCenter();
+    if(routeLayer){
 
-
-  const lat =
-    center.lat;
-
-  const lng =
-    center.lng;
-
-
-  statusText.textContent =
-    selectingMode === "pickup"
-      ? "Selecting pickup..."
-      : "Selecting destination...";
-
-
-  try {
-
-    const address =
-      await reverseGeocode(
-        lat,
-        lng
-      );
-
-
-    if (selectingMode === "pickup") {
-
-      pickupCoords = {
-        lat,
-        lng
-      };
-
-      pickupInput.value =
-        address;
-
-      setPickupMarker(
-        lat,
-        lng,
-        address
-      );
-
-
-      selectingMode = "drop";
-
-      isSelectingFromMap = false;
-
-      centerMarker.style.display =
-        "none";
-
-      statusText.textContent =
-        "Pickup selected. Choose destination.";
-
-
-      showToast(
-        "Pickup selected. Now select your destination.",
-        "success"
-      );
-
-    } else {
-
-      dropCoords = {
-        lat,
-        lng
-      };
-
-      dropInput.value =
-        address;
-
-      setDropMarker(
-        lat,
-        lng,
-        address
-      );
-
-
-      isSelectingFromMap = false;
-
-      centerMarker.style.display =
-        "none";
-
-      statusText.textContent =
-        "Destination selected";
-
-      await calculateRoute();
+        map.removeLayer(routeLayer);
 
     }
 
-  } catch (error) {
 
-    console.error(
-      "Map selection error:",
-      error
+    routeLayer =
+    L.polyline(
+        [
+            [
+                pickupCoords.lat,
+                pickupCoords.lng
+            ],
+
+            [
+                dropCoords.lat,
+                dropCoords.lng
+            ]
+
+        ],
+        {
+
+        weight:5
+
+        }
+
+    ).addTo(map);
+
+
+
+    map.fitBounds(
+        routeLayer.getBounds(),
+        {
+            padding:[50,50]
+        }
     );
 
-    showToast(
-      "Location address nahi mil paaya.",
-      "error"
-    );
-  }
+
 }
 
 
-/* ======================================================
-   PICKUP MARKER
-====================================================== */
 
-function setPickup
+
+
+
+
+// Update after locations ready
+
+async function updateRide(){
+
+    await drawRoute();
+
+    await calculateRoute();
+
+
+}
+
+
+
+
+// Book Ride final
+
+
+bookRideBtn.addEventListener(
+"click",
+async()=>{
+
+
+if(!currentUser){
+
+showToast(
+"Please login first",
+"error"
+);
+
+return;
+
+}
+
+
+
+if(!pickupCoords || !dropCoords){
+
+showToast(
+"Select pickup and drop",
+"error"
+);
+
+return;
+
+}
+
+
+
+showLoading(
+"Finding Rider..."
+);
+
+
+
+try{
+
+
+const fare =
+fareAmount.innerText.replace(
+"₹",
+""
+);
+
+
+
+await addDoc(
+collection(db,"rides"),
+{
+
+
+customerId:
+currentUser.uid,
+
+
+service:
+selectedService,
+
+
+pickup:
+{
+
+name:
+pickupInput.value,
+
+lat:
+pickupCoords.lat,
+
+lng:
+pickupCoords.lng
+
+},
+
+
+drop:
+{
+
+name:
+dropInput.value,
+
+lat:
+dropCoords.lat,
+
+lng:
+dropCoords.lng
+
+},
+
+
+distance:
+routeDistanceKm,
+
+
+fare:
+Number(fare),
+
+
+status:
+"searching",
+
+
+createdAt:
+serverTimestamp()
+
+
+}
+
+);
+
+
+
+hideLoading();
+
+
+
+showToast(
+"Ride booked successfully",
+"success"
+);
+
+
+
+setTimeout(
+()=>{
+
+window.location.href=
+"history.html";
+
+
+},
+1200
+);
+
+
+
+}
+
+catch(error){
+
+
+hideLoading();
+
+
+console.log(error);
+
+
+showToast(
+"Booking failed",
+"error"
+);
+
+
+}
+
+
+
+});
+
+
+
+
+
+// Start app
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+initMap();
+
+}
