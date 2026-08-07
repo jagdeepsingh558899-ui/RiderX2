@@ -8,31 +8,37 @@
 import { auth, db } from "../firebase/firebase-config.js";
 
 import {
- onAuthStateChanged
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 import {
- collection,
- addDoc,
- Timestamp
+    collection,
+    addDoc,
+    Timestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 
-// State
+// ===============================
+// Global State
+// ===============================
+
 let selectedService = "bike";
 let currentUser = null;
 
 
-// Firebase User Check
-onAuthStateChanged(auth,(user)=>{
+// ===============================
+// Firebase Auth Check
+// ===============================
+
+onAuthStateChanged(auth, (user) => {
 
     if(user){
 
         currentUser = user;
 
         console.log(
-        "Customer Login:",
-        user.email
+            "Customer Login:",
+            user.email
         );
 
     }
@@ -40,79 +46,94 @@ onAuthStateChanged(auth,(user)=>{
 });
 
 
+
+// ===============================
 // Service Selection
+// ===============================
 
-document.querySelectorAll(".service")
-.forEach(service=>{
-
-
-service.addEventListener("click",()=>{
+const services = document.querySelectorAll(".service");
 
 
-document.querySelectorAll(".service")
-.forEach(s=>s.classList.remove("active"));
+services.forEach(service => {
 
 
-service.classList.add("active");
+    service.addEventListener("click",()=>{
 
 
-selectedService =
-service.dataset.service;
+        services.forEach(item=>{
+            item.classList.remove("active");
+        });
 
 
-calculateFare();
+        service.classList.add("active");
+
+
+        selectedService =
+        service.dataset.service;
+
+
+        calculateFare();
+
+
+    });
 
 
 });
 
 
-});
 
 
-
+// ===============================
 // Fare Calculation
+// ===============================
 
 function calculateFare(){
 
 
-let distance = 5; // temporary
+    let distance = 5;
 
 
-let fare = 0;
+    let fare = 0;
 
 
-if(selectedService==="bike"){
 
-fare = distance * 8;
-
-}
+    switch(selectedService){
 
 
-if(selectedService==="cab"){
-
-fare = distance * 14;
-
-}
+        case "bike":
+            fare = distance * 8;
+            break;
 
 
-if(selectedService==="parcel"){
-
-fare = distance * 10;
-
-}
+        case "cab":
+            fare = distance * 14;
+            break;
 
 
-if(selectedService==="food"){
-
-fare = distance * 40;
-
-}
+        case "parcel":
+            fare = distance * 10;
+            break;
 
 
-document.getElementById("fare")
-.innerText =
-"₹"+fare;
+        case "food":
+            fare = distance * 40;
+            break;
 
+
+    }
+
+
+
+    const fareBox =
+    document.getElementById("fare");
+
+
+    if(fareBox){
+
+        fareBox.innerText =
+        "₹" + fare;
+
+    }
 
 
 }
@@ -123,20 +144,31 @@ calculateFare();
 
 
 
+
+// ===============================
 // Book Ride
+// ===============================
 
 
-document
-.getElementById("bookRide")
-.addEventListener("click",async()=>{
+const bookBtn =
+document.getElementById("bookRide");
 
 
-let pickup =
-document.getElementById("pickup").value;
+
+if(bookBtn){
 
 
-let drop =
-document.getElementById("drop").value;
+bookBtn.addEventListener(
+"click",
+async()=>{
+
+
+const pickup =
+document.getElementById("pickup").value.trim();
+
+
+const drop =
+document.getElementById("drop").value.trim();
 
 
 
@@ -155,11 +187,23 @@ return;
 try{
 
 
-let rideData={
+const fare =
+Number(
+document
+.getElementById("fare")
+.innerText
+.replace("₹","")
+);
+
+
+
+const rideData = {
 
 
 customerId:
-currentUser ? currentUser.uid : "guest",
+currentUser ?
+currentUser.uid :
+"guest",
 
 
 serviceType:
@@ -180,11 +224,7 @@ payment:
 document.getElementById("payment").value,
 
 
-fare:
-Number(
-document.getElementById("fare")
-.innerText.replace("₹","")
-),
+fare:fare,
 
 
 status:
@@ -193,7 +233,6 @@ status:
 
 createdAt:
 Timestamp.now()
-
 
 
 };
@@ -221,7 +260,10 @@ alert(
 catch(error){
 
 
-console.error(error);
+console.error(
+"Ride Error:",
+error
+);
 
 
 alert(
@@ -233,19 +275,25 @@ alert(
 }
 
 
+
 });
 
 
+}
 
 
 
+
+
+// ===============================
 // Ride Modal
+// ===============================
 
 
 function openRideModal(){
 
 
-let modal =
+const modal =
 document.getElementById("rideModal");
 
 
@@ -256,78 +304,131 @@ modal.style.display="flex";
 }
 
 
+
 }
 
 
 
-document
-.getElementById("cancelRide")
-.addEventListener("click",()=>{
+const cancelBtn =
+document.getElementById("cancelRide");
 
 
-document
-.getElementById("rideModal")
-.style.display="none";
+
+if(cancelBtn){
+
+
+cancelBtn.addEventListener(
+"click",
+()=>{
+
+
+const modal =
+document.getElementById("rideModal");
+
+
+if(modal){
+
+modal.style.display="none";
+
+}
 
 
 });
 
 
+}
 
 
-// Bottom Navigation
 
 
-window.openHistory=function(){
+// ===============================
+// Navigation
+// ===============================
 
-window.location.href="history.html";
+
+window.openHistory = function(){
+
+window.location.href =
+"history.html";
 
 }
 
 
-window.openWallet=function(){
 
-window.location.href="wallet.html";
+window.openWallet = function(){
 
-}
-
-
-window.openProfile=function(){
-
-window.location.href="profile.html";
+window.location.href =
+"wallet.html";
 
 }
 
 
-// Bottom buttons auto attach
 
-let bottom =
+window.openProfile = function(){
+
+window.location.href =
+"profile.html";
+
+}
+
+
+
+
+// ===============================
+// Bottom Menu
+// ===============================
+
+
+const bottom =
 document.querySelectorAll(".bottom div");
 
 
-if(bottom.length>=4){
+
+if(bottom.length >= 4){
 
 
-bottom[0].onclick=
-()=>window.location.href="home.html";
+bottom[0].onclick =
+()=>{
+
+window.location.href =
+"home.html";
+
+};
 
 
-bottom[1].onclick=
-()=>openHistory();
+
+bottom[1].onclick =
+()=>{
+
+openHistory();
+
+};
 
 
-bottom[2].onclick=
-()=>openWallet();
+
+bottom[2].onclick =
+()=>{
+
+openWallet();
+
+};
 
 
-bottom[3].onclick=
-()=>openProfile();
+
+bottom[3].onclick =
+()=>{
+
+openProfile();
+
+};
+
 
 
 }
+
 
 
 
 console.log(
-"RiderX Customer JS Loaded"
+"RiderX Customer JS Loaded Successfully"
 );
