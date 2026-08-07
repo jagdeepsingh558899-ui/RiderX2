@@ -1,13 +1,13 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>RiderX Admin Dashboard</title><link rel="stylesheet"
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>RiderX Admin Dashboard</title><link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
-    
+
 :root{
     --yellow:#FFE500;
     --black:#050505;
     --card:#111;
     --border:#252525;
     --gray:#999;
-    --green:#19d36b;
     --red:#ff4444;
 }
 
@@ -41,7 +41,6 @@ body{
 .logo{
     font-size:28px;
     font-weight:900;
-    letter-spacing:-1px;
 }
 
 .logo span{
@@ -67,10 +66,6 @@ body{
     font-size:22px;
     color:var(--red);
     cursor:pointer;
-}
-
-.logout:active{
-    transform:scale(.9);
 }
 
 .container{
@@ -132,7 +127,6 @@ body{
     font-size:29px;
     font-weight:bold;
     margin-top:12px;
-    word-break:break-word;
 }
 
 .title{
@@ -167,16 +161,11 @@ body{
     font-size:16px;
     text-align:left;
     cursor:pointer;
-    transition:.2s;
 }
 
 .menu button:hover{
     border-color:var(--yellow);
     background:#171717;
-}
-
-.menu button:active{
-    transform:scale(.98);
 }
 
 .menu i{
@@ -249,8 +238,8 @@ body{
     </div>
 
     <i
-        onclick="logout()"
         class="fa-solid fa-right-from-bracket logout"
+        id="logoutBtn"
         title="Logout">
     </i>
 
@@ -265,7 +254,7 @@ body{
 </div>
 
 <div id="loading" class="loading">
-    Loading Dashboard...
+    Checking admin access...
 </div>
 
 <div id="error" class="error"></div>
@@ -279,13 +268,11 @@ body{
         <div class="title">Customers</div>
     </div>
 
-
     <div class="card">
         <i class="fa-solid fa-motorcycle"></i>
         <div id="riders" class="number">0</div>
         <div class="title">Riders</div>
     </div>
-
 
     <div class="card">
         <i class="fa-solid fa-clock"></i>
@@ -293,13 +280,11 @@ body{
         <div class="title">Pending Riders</div>
     </div>
 
-
     <div class="card">
         <i class="fa-solid fa-signal"></i>
         <div id="online" class="number">0</div>
         <div class="title">Online Riders</div>
     </div>
-
 
     <div class="card">
         <i class="fa-solid fa-route"></i>
@@ -307,13 +292,11 @@ body{
         <div class="title">Total Rides</div>
     </div>
 
-
     <div class="card">
         <i class="fa-solid fa-spinner"></i>
         <div id="active" class="number">0</div>
         <div class="title">Active Rides</div>
     </div>
-
 
     <div class="card">
         <i class="fa-solid fa-circle-check"></i>
@@ -321,13 +304,11 @@ body{
         <div class="title">Completed</div>
     </div>
 
-
     <div class="card">
         <i class="fa-solid fa-xmark"></i>
         <div id="cancelled" class="number">0</div>
         <div class="title">Cancelled</div>
     </div>
-
 
     <div class="card">
         <i class="fa-solid fa-indian-rupee-sign"></i>
@@ -335,20 +316,17 @@ body{
         <div class="title">Revenue</div>
     </div>
 
-
     <div class="card">
         <i class="fa-solid fa-calendar-day"></i>
         <div id="todayRevenue" class="number">₹0</div>
         <div class="title">Today Revenue</div>
     </div>
 
-
     <div class="card">
         <i class="fa-solid fa-percent"></i>
         <div id="commission" class="number">₹0</div>
         <div class="title">Admin Commission</div>
     </div>
-
 
     <div class="card">
         <i class="fa-solid fa-wallet"></i>
@@ -372,30 +350,25 @@ body{
             Manage Riders
         </button>
 
-
         <button onclick="openPage('customers.html')">
             <i class="fa-solid fa-users"></i>
             Manage Customers
         </button>
-
 
         <button onclick="openPage('rides.html')">
             <i class="fa-solid fa-route"></i>
             Manage Rides
         </button>
 
-
         <button onclick="openPage('fare-settings.html')">
             <i class="fa-solid fa-money-bill"></i>
             Fare Settings
         </button>
 
-
         <button onclick="openPage('commission.html')">
             <i class="fa-solid fa-percent"></i>
             Commission Settings
         </button>
-
 
         <button onclick="openPage('settings.html')">
             <i class="fa-solid fa-gear"></i>
@@ -433,44 +406,63 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-const customersEl = document.getElementById("customers");
-const ridersEl = document.getElementById("riders");
-const pendingEl = document.getElementById("pending");
-const onlineEl = document.getElementById("online");
+const loading =
+    document.getElementById("loading");
 
-const ridesEl = document.getElementById("rides");
-const activeEl = document.getElementById("active");
-const completedEl = document.getElementById("completed");
-const cancelledEl = document.getElementById("cancelled");
-
-const revenueEl = document.getElementById("revenue");
-const todayRevenueEl = document.getElementById("todayRevenue");
-
-const commissionEl = document.getElementById("commission");
-const riderEarnEl = document.getElementById("riderEarn");
-
-const loading = document.getElementById("loading");
-const errorBox = document.getElementById("error");
+const errorBox =
+    document.getElementById("error");
 
 
-function showError(message){
+const customersEl =
+    document.getElementById("customers");
 
-    errorBox.style.display = "block";
-    errorBox.textContent = message;
+const ridersEl =
+    document.getElementById("riders");
 
-}
+const pendingEl =
+    document.getElementById("pending");
+
+const onlineEl =
+    document.getElementById("online");
+
+const ridesEl =
+    document.getElementById("rides");
+
+const activeEl =
+    document.getElementById("active");
+
+const completedEl =
+    document.getElementById("completed");
+
+const cancelledEl =
+    document.getElementById("cancelled");
+
+const revenueEl =
+    document.getElementById("revenue");
+
+const todayRevenueEl =
+    document.getElementById("todayRevenue");
+
+const commissionEl =
+    document.getElementById("commission");
+
+const riderEarnEl =
+    document.getElementById("riderEarn");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
 
 
 function money(value){
 
-    const number = Number(value) || 0;
-
-    return "₹" + number.toLocaleString("en-IN");
+    return "₹" +
+        (Number(value) || 0)
+        .toLocaleString("en-IN");
 
 }
 
 
-function getRole(data){
+function roleOf(data){
 
     return String(
         data?.role ||
@@ -484,36 +476,56 @@ function getRole(data){
 
 function isAdmin(data){
 
-    const role = getRole(data);
-
     return (
-        role === "admin" ||
-        role === "administrator" ||
+        roleOf(data) === "admin" ||
+        roleOf(data) === "administrator" ||
         data?.isAdmin === true
     );
 
 }
 
 
-async function getCollectionData(name){
+function showError(message){
+
+    errorBox.style.display = "block";
+
+    errorBox.textContent = message;
+
+}
+
+
+function hideLoading(){
+
+    loading.style.display = "none";
+
+}
+
+
+/*
+    Important:
+    Collection error hone par dashboard rukega nahi.
+*/
+
+async function safeGetCollection(name){
 
     try{
 
-        const snapshot = await getDocs(
-            collection(db,name)
-        );
+        const result =
+            await getDocs(
+                collection(db,name)
+            );
 
-        return snapshot.docs.map(
-            item => ({
-                id:item.id,
-                ...item.data()
+        return result.docs.map(
+            d => ({
+                id:d.id,
+                ...d.data()
             })
         );
 
     }catch(error){
 
         console.warn(
-            "Collection error:",
+            "Cannot read collection:",
             name,
             error
         );
@@ -525,91 +537,45 @@ async function getCollectionData(name){
 }
 
 
-function getRideStatus(ride){
+function statusOf(data){
 
     return String(
-        ride?.status ||
-        ride?.rideStatus ||
+        data?.status ||
+        data?.rideStatus ||
         ""
     ).toLowerCase();
 
 }
 
 
-function getAmount(ride){
+function amountOf(data){
 
     return Number(
-        ride?.fare ??
-        ride?.amount ??
-        ride?.price ??
-        ride?.totalFare ??
-        ride?.totalAmount ??
+        data?.fare ??
+        data?.amount ??
+        data?.price ??
+        data?.totalFare ??
+        data?.totalAmount ??
         0
     ) || 0;
 
 }
 
 
-function isCompleted(status){
-
-    return [
-        "completed",
-        "complete",
-        "finished",
-        "success"
-    ].includes(status);
-
-}
-
-
-function isCancelled(status){
-
-    return [
-        "cancelled",
-        "canceled",
-        "rejected"
-    ].includes(status);
-
-}
-
-
-function isActive(status){
-
-    return [
-        "accepted",
-        "ongoing",
-        "started",
-        "arriving",
-        "in_progress",
-        "in-progress",
-        "active"
-    ].includes(status);
-
-}
-
-
-function isPending(status){
-
-    return [
-        "pending",
-        "requested",
-        "searching"
-    ].includes(status);
-
-}
-
-
-function isToday(ride){
+function isToday(data){
 
     const value =
-        ride?.createdAt ||
-        ride?.timestamp ||
-        ride?.date ||
-        ride?.createdDate;
+        data?.createdAt ||
+        data?.timestamp ||
+        data?.date;
 
-    if(!value) return false;
+    if(!value){
 
-    let date;
+        return false;
+
+    }
+
+    let date = null;
 
     try{
 
@@ -621,16 +587,19 @@ function isToday(ride){
             date = value.toDate();
 
         }else if(
-            value?.seconds
+            typeof value === "object" &&
+            value.seconds
         ){
 
-            date = new Date(
-                value.seconds * 1000
-            );
+            date =
+                new Date(
+                    value.seconds * 1000
+                );
 
         }else{
 
-            date = new Date(value);
+            date =
+                new Date(value);
 
         }
 
@@ -649,7 +618,8 @@ function isToday(ride){
 
     }
 
-    const now = new Date();
+    const now =
+        new Date();
 
     return (
         date.getDate() === now.getDate() &&
@@ -660,84 +630,104 @@ function isToday(ride){
 }
 
 
-async function loadDashboard(){
+async function loadStatistics(){
 
-    loading.style.display = "block";
-    errorBox.style.display = "none";
+    /*
+        Default values are already 0.
+        So even if Firestore rules deny
+        a collection, dashboard will open.
+    */
 
-    try{
+    const users =
+        await safeGetCollection("users");
 
-        const users = await getCollectionData("users");
 
-        let customers = 0;
-        let riders = 0;
-        let pendingRiders = 0;
-        let onlineRiders = 0;
+    let customers = 0;
+    let riders = 0;
+    let pending = 0;
+    let online = 0;
 
-        users.forEach(user => {
 
-            const role = getRole(user);
+    users.forEach(user => {
 
-            if(
-                role === "customer" ||
-                role === "user"
-            ){
+        const role =
+            roleOf(user);
 
-                customers++;
 
-            }
+        if(
+            role === "customer" ||
+            role === "user"
+        ){
 
-            if(role === "rider"){
+            customers++;
 
-                riders++;
+        }
 
-                const status = String(
+
+        if(role === "rider"){
+
+            riders++;
+
+
+            const status =
+                String(
                     user.status ||
                     user.riderStatus ||
                     ""
                 ).toLowerCase();
 
-                if(
-                    status === "pending" ||
-                    status === "pending_approval" ||
-                    status === "pending-approval"
-                ){
 
-                    pendingRiders++;
+            if(
+                status === "pending" ||
+                status === "pending_approval" ||
+                status === "pending-approval"
+            ){
 
-                }
-
-                if(
-                    user.online === true ||
-                    user.isOnline === true ||
-                    status === "online"
-                ){
-
-                    onlineRiders++;
-
-                }
+                pending++;
 
             }
 
-        });
+
+            if(
+                user.online === true ||
+                user.isOnline === true ||
+                status === "online"
+            ){
+
+                online++;
+
+            }
+
+        }
+
+    });
 
 
-        const riderCollection =
-            await getCollectionData("riders");
+    /*
+        If separate riders collection exists,
+        use it for rider statistics.
+    */
+
+    const riderData =
+        await safeGetCollection("riders");
 
 
-        if(riderCollection.length > 0){
+    if(riderData.length > 0){
 
-            riders = riderCollection.length;
+        riders =
+            riderData.length;
 
-            pendingRiders =
-                riderCollection.filter(r => {
 
-                    const status = String(
-                        r.status ||
-                        r.approvalStatus ||
-                        ""
-                    ).toLowerCase();
+        pending =
+            riderData.filter(
+                rider => {
+
+                    const status =
+                        String(
+                            rider.status ||
+                            rider.approvalStatus ||
+                            ""
+                        ).toLowerCase();
 
                     return (
                         status === "pending" ||
@@ -745,192 +735,283 @@ async function loadDashboard(){
                         status === "pending-approval"
                     );
 
-                }).length;
+                }
+            ).length;
 
 
-            onlineRiders =
-                riderCollection.filter(r => {
+        online =
+            riderData.filter(
+                rider => {
+
+                    const status =
+                        String(
+                            rider.status || ""
+                        ).toLowerCase();
 
                     return (
-                        r.online === true ||
-                        r.isOnline === true ||
-                        String(r.status || "").toLowerCase()
-                        === "online"
+                        rider.online === true ||
+                        rider.isOnline === true ||
+                        status === "online"
                     );
 
-                }).length;
+                }
+            ).length;
+
+    }
+
+
+    customersEl.textContent =
+        customers.toLocaleString("en-IN");
+
+    ridersEl.textContent =
+        riders.toLocaleString("en-IN");
+
+    pendingEl.textContent =
+        pending.toLocaleString("en-IN");
+
+    onlineEl.textContent =
+        online.toLocaleString("en-IN");
+
+
+    /*
+        Rides
+    */
+
+    const rides =
+        await safeGetCollection("rides");
+
+
+    let active = 0;
+    let completed = 0;
+    let cancelled = 0;
+
+    let revenue = 0;
+    let todayRevenue = 0;
+
+
+    rides.forEach(ride => {
+
+        const status =
+            statusOf(ride);
+
+        const amount =
+            amountOf(ride);
+
+
+        if(
+            [
+                "accepted",
+                "ongoing",
+                "started",
+                "arriving",
+                "in_progress",
+                "in-progress",
+                "active"
+            ].includes(status)
+        ){
+
+            active++;
 
         }
 
 
-        const rides =
-            await getCollectionData("rides");
+        if(
+            [
+                "completed",
+                "complete",
+                "finished",
+                "success"
+            ].includes(status)
+        ){
+
+            completed++;
+
+            revenue += amount;
 
 
-        let active = 0;
-        let completed = 0;
-        let cancelled = 0;
-        let revenue = 0;
-        let todayRevenue = 0;
+            if(isToday(ride)){
 
-        rides.forEach(ride => {
-
-            const status =
-                getRideStatus(ride);
-
-            const amount =
-                getAmount(ride);
-
-
-            if(isActive(status)){
-                active++;
-            }
-
-
-            if(isCompleted(status)){
-
-                completed++;
-
-                revenue += amount;
-
-                if(isToday(ride)){
-                    todayRevenue += amount;
-                }
+                todayRevenue += amount;
 
             }
 
-
-            if(isCancelled(status)){
-                cancelled++;
-            }
-
-        });
+        }
 
 
-        const commissionRate = 20;
+        if(
+            [
+                "cancelled",
+                "canceled",
+                "rejected"
+            ].includes(status)
+        ){
 
-        const adminCommission =
-            revenue * commissionRate / 100;
+            cancelled++;
 
-        const riderEarnings =
-            revenue - adminCommission;
+        }
 
-
-        customersEl.textContent =
-            customers.toLocaleString("en-IN");
-
-        ridersEl.textContent =
-            riders.toLocaleString("en-IN");
-
-        pendingEl.textContent =
-            pendingRiders.toLocaleString("en-IN");
-
-        onlineEl.textContent =
-            onlineRiders.toLocaleString("en-IN");
-
-        ridesEl.textContent =
-            rides.length.toLocaleString("en-IN");
-
-        activeEl.textContent =
-            active.toLocaleString("en-IN");
-
-        completedEl.textContent =
-            completed.toLocaleString("en-IN");
-
-        cancelledEl.textContent =
-            cancelled.toLocaleString("en-IN");
-
-        revenueEl.textContent =
-            money(revenue);
-
-        todayRevenueEl.textContent =
-            money(todayRevenue);
-
-        commissionEl.textContent =
-            money(adminCommission);
-
-        riderEarnEl.textContent =
-            money(riderEarnings);
+    });
 
 
-        loading.style.display = "none";
+    ridesEl.textContent =
+        rides.length.toLocaleString("en-IN");
+
+    activeEl.textContent =
+        active.toLocaleString("en-IN");
+
+    completedEl.textContent =
+        completed.toLocaleString("en-IN");
+
+    cancelledEl.textContent =
+        cancelled.toLocaleString("en-IN");
 
 
-    }catch(error){
+    revenueEl.textContent =
+        money(revenue);
 
-        console.error(
-            "Dashboard error:",
-            error
-        );
 
-        loading.textContent =
-            "Dashboard loaded with limited data.";
+    todayRevenueEl.textContent =
+        money(todayRevenue);
 
-        showError(
-            "Dashboard data load nahi ho paaya. Firebase connection aur Firestore rules check karein."
-        );
 
-    }
+    /*
+        Temporary default commission.
+        Later we will connect this to
+        admin commission settings.
+    */
+
+    const commissionRate = 20;
+
+    const adminCommission =
+        revenue *
+        commissionRate /
+        100;
+
+
+    const riderEarnings =
+        revenue -
+        adminCommission;
+
+
+    commissionEl.textContent =
+        money(adminCommission);
+
+    riderEarnEl.textContent =
+        money(riderEarnings);
 
 }
 
 
+/*
+    Admin authentication
+*/
+
 onAuthStateChanged(
     auth,
-    async (user) => {
+    async user => {
 
         if(!user){
 
             window.location.href =
-                "./login.html";
+                "login.html";
 
             return;
 
         }
 
 
+        loading.textContent =
+            "Verifying admin account...";
+
+
         try{
 
-            const adminRef =
-                doc(db,"users",user.uid);
-
-            const adminSnap =
-                await getDoc(adminRef);
-
-
-            if(!adminSnap.exists()){
-
-                await signOut(auth);
-
-                window.location.href =
-                    "./login.html";
-
-                return;
-
-            }
-
-
-            const adminData =
-                adminSnap.data();
-
-
-            if(!isAdmin(adminData)){
-
-                await signOut(auth);
-
-                alert(
-                    "Access denied. Admin account required."
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    user.uid
                 );
 
-                window.location.href =
-                    "./login.html";
+
+            const userSnap =
+                await getDoc(userRef);
+
+
+            /*
+                Firebase Firestore security
+                error should NOT leave infinite
+                loading.
+            */
+
+            if(!userSnap.exists()){
+
+                hideLoading();
+
+                showError(
+                    "Admin profile nahi mila. Firestore users collection me is UID ka document banayein aur role = admin rakhein."
+                );
 
                 return;
 
             }
 
 
-            await loadDashboard();
+            const data =
+                userSnap.data();
+
+
+            if(!isAdmin(data)){
+
+                hideLoading();
+
+                showError(
+                    "Access denied. Is account ke users document me role = admin hona chahiye."
+                );
+
+                await signOut(auth);
+
+                setTimeout(
+                    () => {
+                        window.location.href =
+                            "login.html";
+                    },
+                    1800
+                );
+
+                return;
+
+            }
+
+
+            loading.textContent =
+                "Loading dashboard data...";
+
+
+            /*
+                Dashboard statistics ko separate
+                error handling ke saath load karo.
+            */
+
+            try{
+
+                await loadStatistics();
+
+            }catch(statError){
+
+                console.error(
+                    "Statistics error:",
+                    statError
+                );
+
+                showError(
+                    "Admin dashboard open ho gaya hai, lekin kuch statistics Firebase rules ki wajah se load nahi ho paayi."
+                );
+
+            }
+
+
+            hideLoading();
 
 
         }catch(error){
@@ -940,12 +1021,13 @@ onAuthStateChanged(
                 error
             );
 
-            showError(
-                "Admin verification failed. Firebase configuration check karein."
-            );
 
-            loading.textContent =
-                "Unable to verify admin.";
+            hideLoading();
+
+
+            showError(
+                "Firebase se admin verify nahi ho pa raha. Firestore rules aur firebase-config.js check karein."
+            );
 
         }
 
@@ -953,42 +1035,61 @@ onAuthStateChanged(
 );
 
 
-window.openPage = function(page){
+/*
+    Navigation
+*/
 
-    window.location.href = page;
+window.openPage =
+function(page){
 
-};
-
-
-window.logout = async function(){
-
-    const confirmLogout =
-        confirm("Are you sure you want to logout?");
-
-    if(!confirmLogout){
-        return;
-    }
-
-    try{
-
-        await signOut(auth);
-
-        window.location.href =
-            "./login.html";
-
-    }catch(error){
-
-        console.error(
-            "Logout error:",
-            error
-        );
-
-        alert(
-            "Logout failed. Please try again."
-        );
-
-    }
+    window.location.href =
+        page;
 
 };
+
+
+/*
+    Logout
+*/
+
+logoutBtn.addEventListener(
+    "click",
+    async () => {
+
+        const ok =
+            confirm(
+                "Are you sure you want to logout?"
+            );
+
+
+        if(!ok){
+
+            return;
+
+        }
+
+
+        try{
+
+            await signOut(auth);
+
+            window.location.href =
+                "login.html";
+
+        }catch(error){
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+            alert(
+                "Logout failed. Please try again."
+            );
+
+        }
+
+    }
+);
 
 </script></body></html>
