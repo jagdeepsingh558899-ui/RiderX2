@@ -2,206 +2,2877 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RiderX - Book Your Ride</title>
-  
-  <!-- CSS Stylesheets -->
-  <link rel="stylesheet" href="../css/app.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <!-- Firebase Scripts -->
+  <title>RiderX | Book Ride</title>
+
+  <!-- Existing RiderX CSS -->
+  <link rel="stylesheet" href="../assets/app.css">
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <!-- Google Font -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Existing Firebase Config -->
   <script src="../firebase/firebase-config.js"></script>
+
+  <!-- Existing Fare Calculator -->
   <script src="../js/fare-calculator.js"></script>
-  
+
   <style>
+    :root {
+      --yellow: #ffd600;
+      --yellow-dark: #e5bd00;
+      --black: #070707;
+      --panel: #111111;
+      --panel-2: #181818;
+      --border: rgba(255,255,255,.10);
+      --muted: #9ca3af;
+      --green: #22c55e;
+      --red: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
     body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #121212;
-      color: #FFFFFF;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    #map {
-      flex: 1;
       width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: Poppins, Arial, sans-serif;
+      background: var(--black);
+      color: #fff;
+    }
+
+    body {
+      position: relative;
+    }
+
+    /* MAP */
+
+    #map {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       z-index: 1;
+      background: #151515;
     }
+
+    .leaflet-container {
+      font-family: Poppins, Arial, sans-serif;
+      background: #202020;
+    }
+
+    .leaflet-control-zoom {
+      margin-top: 80px !important;
+      margin-right: 12px !important;
+      border: 0 !important;
+    }
+
+    .leaflet-control-zoom a {
+      background: #111 !important;
+      color: var(--yellow) !important;
+      border: 1px solid #333 !important;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 9px !important;
+    }
+
+    /* TOP BAR */
+
+    .topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 14px;
+      pointer-events: none;
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .top-button {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(10,10,10,.90);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      text-decoration: none;
+      box-shadow: 0 8px 30px rgba(0,0,0,.35);
+      pointer-events: auto;
+    }
+
+    .top-button:active {
+      transform: scale(.95);
+    }
+
+    .brand {
+      background: rgba(10,10,10,.90);
+      padding: 8px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+
+    .brand span {
+      color: var(--yellow);
+    }
+
+    /* LOCATE BUTTON */
+
+    .locate-button {
+      position: absolute;
+      right: 14px;
+      bottom: 360px;
+      z-index: 900;
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: rgba(15,15,15,.95);
+      color: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+      cursor: pointer;
+    }
+
+    .locate-button:active {
+      transform: scale(.94);
+    }
+
+    /* PICK MODE */
+
+    .map-mode {
+      position: absolute;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 900;
+      width: max-content;
+      max-width: calc(100% - 30px);
+      background: rgba(10,10,10,.93);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 9px 15px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #ddd;
+      box-shadow: 0 8px 30px rgba(0,0,0,.4);
+      display: none;
+    }
+
+    .map-mode.show {
+      display: block;
+    }
+
+    .map-mode strong {
+      color: var(--yellow);
+    }
+
+    /* BOOKING PANEL */
+
     .booking-panel {
-      background: #1E1E1E;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-      z-index: 10;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1000;
+      background:
+        linear-gradient(
+          180deg,
+          rgba(20,20,20,.96),
+          rgba(8,8,8,.99)
+        );
+      border-top: 1px solid rgba(255,255,255,.10);
+      border-radius: 26px 26px 0 0;
+      box-shadow: 0 -15px 50px rgba(0,0,0,.55);
+      padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+      max-height: 62vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
+
+    .drag-handle {
+      width: 42px;
+      height: 4px;
+      border-radius: 999px;
+      background: #444;
+      margin: 0 auto 13px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 13px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .panel-title small {
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    /* SERVICE GRID */
+
     .service-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 8px;
+      margin-bottom: 13px;
     }
+
     .service-card {
-      background: #2A2A2A;
-      border: 2px solid transparent;
-      border-radius: 10px;
-      padding: 10px;
+      min-width: 0;
+      background: #191919;
+      border: 1px solid #292929;
+      border-radius: 15px;
+      padding: 10px 5px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: .18s ease;
     }
+
+    .service-card:active {
+      transform: scale(.96);
+    }
+
     .service-card.active {
-      border-color: #FFC107;
-      background: #332B00;
+      background: rgba(255,214,0,.12);
+      border-color: var(--yellow);
+      box-shadow: 0 0 20px rgba(255,214,0,.08);
     }
-    .input-group {
+
+    .service-icon {
+      width: 38px;
+      height: 38px;
+      margin: 0 auto 5px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #242424;
+      color: #ddd;
+      font-size: 18px;
+    }
+
+    .service-card.active .service-icon {
+      background: var(--yellow);
+      color: #000;
+    }
+
+    .service-name {
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* LOCATION BOX */
+
+    .location-box {
+      position: relative;
+      background: #171717;
+      border: 1px solid #292929;
+      border-radius: 17px;
+      overflow: hidden;
+      margin-bottom: 11px;
+    }
+
+    .location-row {
+      display: flex;
+      align-items: center;
+      min-height: 56px;
+      padding: 8px 11px;
+      gap: 10px;
+    }
+
+    .location-row + .location-row {
+      border-top: 1px solid #292929;
+    }
+
+    .location-dot {
+      width: 11px;
+      height: 11px;
+      flex: 0 0 11px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(34,197,94,.10);
+    }
+
+    .location-dot.drop {
+      border-radius: 3px;
+      background: var(--yellow);
+      box-shadow: 0 0 0 4px rgba(255,214,0,.10);
+    }
+
+    .location-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .location-label {
+      display: block;
+      font-size: 9px;
+      color: #888;
+      margin-bottom: 2px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    .location-input {
+      width: 100%;
+      background: transparent;
+      border: 0;
+      outline: 0;
+      color: #fff;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 0;
+      text-overflow: ellipsis;
+    }
+
+    .location-input::placeholder {
+      color: #666;
+    }
+
+    .map-select-btn {
+      flex: 0 0 auto;
+      width: 35px;
+      height: 35px;
+      border-radius: 11px;
+      border: 1px solid #333;
+      background: #242424;
+      color: var(--yellow);
+      cursor: pointer;
+    }
+
+    .map-select-btn.active {
+      background: var(--yellow);
+      color: #000;
+      border-color: var(--yellow);
+    }
+
+    /* INFO */
+
+    .ride-info {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
       margin-bottom: 12px;
     }
-    .input-group input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      background: #2A2A2A;
-      color: #FFF;
-      box-sizing: border-box;
-    }
-    .btn-action {
-      width: 100%;
-      padding: 14px;
-      background-color: #FFC107;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .fare-display {
-      font-size: 18px;
-      font-weight: bold;
-      color: #FFC107;
-      margin: 10px 0;
+
+    .info-card {
+      background: #171717;
+      border: 1px solid #292929;
+      border-radius: 13px;
+      padding: 9px 6px;
       text-align: center;
+    }
+
+    .info-card i {
+      color: var(--yellow);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .info-card strong {
+      display: block;
+      font-size: 12px;
+      color: #fff;
+    }
+
+    .info-card span {
+      display: block;
+      color: #777;
+      font-size: 8px;
+      margin-top: 1px;
+    }
+
+    /* FARE */
+
+    .fare-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 3px 9px;
+    }
+
+    .fare-label {
+      color: #aaa;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .fare-value {
+      color: var(--yellow);
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    /* BOOK BUTTON */
+
+    .book-button {
+      width: 100%;
+      height: 52px;
+      border: 0;
+      border-radius: 16px;
+      background: var(--yellow);
+      color: #000;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(255,214,0,.15);
+      transition: .18s ease;
+    }
+
+    .book-button:active {
+      transform: scale(.985);
+    }
+
+    .book-button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .book-button i {
+      margin-right: 7px;
+    }
+
+    /* STATUS */
+
+    .status-message {
+      display: none;
+      padding: 9px 11px;
+      margin-bottom: 10px;
+      border-radius: 11px;
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(255,214,0,.08);
+      color: var(--yellow);
+      border: 1px solid rgba(255,214,0,.18);
+    }
+
+    .status-message.show {
+      display: block;
+    }
+
+    .status-message.error {
+      background: rgba(239,68,68,.10);
+      border-color: rgba(239,68,68,.20);
+      color: #fca5a5;
+    }
+
+    /* LOADING */
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0,0,0,.25);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 7px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* MOBILE */
+
+    @media (max-width: 380px) {
+      .booking-panel {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .service-grid {
+        gap: 5px;
+      }
+
+      .service-card {
+        padding-left: 2px;
+        padding-right: 2px;
+      }
+
+      .ride-info {
+        gap: 5px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .booking-panel {
+        width: 470px;
+        right: 20px;
+        left: auto;
+        bottom: 20px;
+        border-radius: 24px;
+        max-height: calc(100vh - 40px);
+      }
+
+      .locate-button {
+        right: 510px;
+        bottom: 35px;
+      }
     }
   </style>
 </head>
+
 <body>
 
+  <!-- MAP -->
   <div id="map"></div>
 
-  <div class="booking-panel">
-    <h3>Select Service</h3>
-    <div class="service-grid">
-      <div class="service-card active" onclick="selectService('bike', this)">
-        <div>🏍️</div>
-        <small>Bike</small>
-      </div>
-      <div class="service-card" onclick="selectService('cab', this)">
-        <div>🚗</div>
-        <small>Cab</small>
-      </div>
-      <div class="service-card" onclick="selectService('parcel', this)">
-        <div>📦</div>
-        <small>Parcel</small>
-      </div>
-      <div class="service-card" onclick="selectService('food', this)">
-        <div>🍔</div>
-        <small>Food</small>
-      </div>
-    </div>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-inner">
 
-    <div class="input-group">
-      <input type="text" id="pickup" placeholder="Pickup Location (e.g., Connaught Place)" value="Connaught Place">
-    </div>
-    <div class="input-group">
-      <input type="text" id="drop" placeholder="Drop Location (e.g., Cyber Hub)" value="Cyber Hub">
-    </div>
+      <a
+        href="home.html"
+        class="top-button"
+        aria-label="Back"
+      >
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
 
-    <div class="fare-display" id="fareAmount">Estimated Fare: ₹0</div>
+      <div class="brand">
+        RIDER<span>X</span>
+      </div>
 
-    <button class="btn-action" onclick="requestRide()">Book Ride Now</button>
+      <button
+        type="button"
+        class="top-button"
+        onclick="useCurrentLocation()"
+        aria-label="My Location"
+      >
+        <i class="fa-solid fa-location-crosshairs"></i>
+      </button>
+
+    </div>
   </div>
 
+  <!-- MAP MODE -->
+  <div id="mapMode" class="map-mode">
+    Tap on map to select <strong id="mapModeText">pickup</strong>
+  </div>
+
+  <!-- LOCATE -->
+  <button
+    type="button"
+    class="locate-button"
+    onclick="useCurrentLocation()"
+    aria-label="Use current location"
+  >
+    <i class="fa-solid fa-crosshairs"></i>
+  </button>
+
+  <!-- BOOKING PANEL -->
+  <section class="booking-panel">
+
+    <div class="drag-handle"></div>
+
+    <div class="panel-title">
+      <h2>Book your ride</h2>
+      <small>Chandigarh</small>
+    </div>
+
+    <!-- SERVICES -->
+    <div class="service-grid">
+
+      <button
+        type="button"
+        class="service-card active"
+        data-service="bike"
+        onclick="selectService('bike', this)"
+      >
+        <div class="service-icon">
+          <i class="fa-solid fa-motorcycle"></i>
+        </div>
+        <div class="service-name">Bike Taxi</div>
+      </button>
+
+      <button
+        type="button"
+        class="service-card"
+        data-service="cab"
+        onclick="selectService('cab', this)"
+      >
+        <div class="service-icon">
+          <i class="fa-solid fa-car"></i>
+        </div>
+        <div class="service-name">Cab</div>
+      </button>
+
+      <button
+        type="button"
+        class="service-card"
+        data-service="parcel"
+        onclick="selectService('parcel', this)"
+      >
+        <div class="service-icon">
+          <i class="fa-solid fa-box"></i>
+        </div>
+        <div class="service-name">Parcel</div>
+      </button>
+
+      <button
+        type="button"
+        class="service-card"
+        data-service="food"
+        onclick="selectService('food', this)"
+      >
+        <div class="service-icon">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <div class="service-name">Food</div>
+      </button>
+
+    </div>
+
+    <!-- LOCATION -->
+    <div class="location-box">
+
+      <!-- PICKUP -->
+      <div class="location-row">
+
+        <div class="location-dot"></div>
+
+        <div class="location-content">
+          <span class="location-label">Pickup</span>
+
+          <input
+            id="pickup"
+            class="location-input"
+            type="text"
+            placeholder="Choose pickup location"
+            autocomplete="off"
+          >
+        </div>
+
+        <button
+          id="pickupMapBtn"
+          type="button"
+          class="map-select-btn"
+          onclick="selectMapMode('pickup')"
+          title="Select pickup on map"
+        >
+          <i class="fa-solid fa-map-pin"></i>
+        </button>
+
+      </div>
+
+      <!-- DROP -->
+      <div class="location-row">
+
+        <div class="location-dot drop"></div>
+
+        <div class="location-content">
+          <span class="location-label">Drop</span>
+
+          <input
+            id="drop"
+            class="location-input"
+            type="text"
+            placeholder="Choose destination"
+            autocomplete="off"
+          >
+        </div>
+
+        <button
+          id="dropMapBtn"
+          type="button"
+          class="map-select-btn"
+          onclick="selectMapMode('drop')"
+          title="Select drop on map"
+        >
+          <i class="fa-solid fa-location-dot"></i>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- STATUS -->
+    <div id="statusMessage" class="status-message"></div>
+
+    <!-- RIDE INFO -->
+    <div class="ride-info">
+
+      <div class="info-card">
+        <i class="fa-solid fa-route"></i>
+        <strong id="distanceValue">0 km</strong>
+        <span>DISTANCE</span>
+      </div>
+
+      <div class="info-card">
+        <i class="fa-regular fa-clock"></i>
+        <strong id="etaValue">-- min</strong>
+        <span>ETA</span>
+      </div>
+
+      <div class="info-card">
+        <i class="fa-solid fa-location-dot"></i>
+        <strong id="locationStatus">Map</strong>
+        <span>LOCATION</span>
+      </div>
+
+    </div>
+
+    <!-- FARE -->
+    <div class="fare-row">
+
+      <span class="fare-label">
+        Estimated fare
+      </span>
+
+      <span
+        id="fareAmount"
+        class="fare-value"
+      >
+        ₹0
+      </span>
+
+    </div>
+
+    <!-- BOOK -->
+    <button
+      id="bookButton"
+      type="button"
+      class="book-button"
+      onclick="requestRide()"
+    >
+      <i class="fa-solid fa-bolt"></i>
+      Book Ride
+    </button>
+
+  </section>
+
+  <!-- LEAFLET -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script>
-    let selectedService = 'bike';
-    let map, pickupMarker, dropMarker;
-    let pickupCoords = [28.6139, 77.2090]; // Default Delhi Lat/Lng
-    let dropCoords = [28.4595, 77.0266];   // Default Gurgaon Lat/Lng
+    /*
+      ==========================================================
+      RiderX Customer Booking
+      Complete replacement file
+      ==========================================================
+    */
 
-    // Initialize Leaflet Map
-    document.addEventListener("DOMContentLoaded", () => {
-      map = L.map('map').setView(pickupCoords, 12);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
+    let selectedService = "bike";
 
-      pickupMarker = L.marker(pickupCoords).addTo(map).bindPopup("Pickup").openPopup();
-      dropMarker = L.marker(dropCoords).addTo(map).bindPopup("Drop");
+    let map = null;
 
-      calculateFare();
-    });
+    let pickupMarker = null;
+    let dropMarker = null;
 
-    function selectService(service, element) {
-      selectedService = service;
-      document.querySelectorAll('.service-card').forEach(el => el.classList.remove('active'));
-      element.classList.add('active');
-      calculateFare();
-    }
+    let routeLayer = null;
 
-    function calculateFare() {
-      const distance = FareCalculator.calculateDistance(
-        pickupCoords[0], pickupCoords[1],
-        dropCoords[0], dropCoords[1]
-      );
-      const fareDetails = FareCalculator.calculateFare(selectedService, distance);
-      document.getElementById('fareAmount').innerText = `Estimated Fare: ₹${fareDetails.fare} (${distance} km)`;
-    }
+    let userLocationMarker = null;
 
-    function requestRide() {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Please login first to book a ride.");
-        window.location.href = "../auth/login.html";
-        return;
+    let pickupCoords = null;
+    let dropCoords = null;
+
+    let mapSelectionMode = null;
+
+    let routeRequestId = 0;
+
+    /*
+      Chandigarh default location.
+    */
+
+    const CHANDIGARH = {
+      lat: 30.7333,
+      lng: 76.7794
+    };
+
+    /*
+      Firebase references.
+      Your existing firebase-config.js normally
+      creates auth/db variables.
+    */
+
+    let firebaseAuth = null;
+    let firestoreDb = null;
+
+    /*
+      ----------------------------------------------------------
+      Helpers
+      ----------------------------------------------------------
+    */
+
+    function getAuthInstance() {
+      try {
+
+        if (typeof auth !== "undefined" && auth) {
+          return auth;
+        }
+
+        if (
+          typeof firebase !== "undefined" &&
+          firebase.auth
+        ) {
+          return firebase.auth();
+        }
+
+      } catch (error) {
+        console.error("Auth initialization error:", error);
       }
 
-      const distance = FareCalculator.calculateDistance(
-        pickupCoords[0], pickupCoords[1],
-        dropCoords[0], dropCoords[1]
-      );
-      const fareDetails = FareCalculator.calculateFare(selectedService, distance);
-
-      db.collection('rides').add({
-        customerId: user.uid,
-        customerName: user.displayName || "Customer",
-        serviceType: selectedService,
-        pickup: {
-          address: document.getElementById('pickup').value,
-          lat: pickupCoords[0],
-          lng: pickupCoords[1]
-        },
-        drop: {
-          address: document.getElementById('drop').value,
-          lat: dropCoords[0],
-          lng: dropCoords[1]
-        },
-        fare: fareDetails.fare,
-        distanceKm: distance,
-        status: 'SEARCHING',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then((docRef) => {
-        alert("Ride Requested Successfully! Searching for nearby riders...");
-      }).catch((error) => {
-        console.error("Booking Error: ", error);
-        alert("Booking failed. Please try again.");
-      });
+      return null;
     }
+
+
+    function getFirestoreInstance() {
+      try {
+
+        if (typeof db !== "undefined" && db) {
+          return db;
+        }
+
+        if (
+          typeof firebase !== "undefined" &&
+          firebase.firestore
+        ) {
+          return firebase.firestore();
+        }
+
+      } catch (error) {
+        console.error("Firestore initialization error:", error);
+      }
+
+      return null;
+    }
+
+
+    function showStatus(message, isError = false) {
+
+      const element =
+        document.getElementById("statusMessage");
+
+      if (!element) return;
+
+      element.textContent = message;
+
+      element.classList.add("show");
+
+      if (isError) {
+        element.classList.add("error");
+      } else {
+        element.classList.remove("error");
+      }
+    }
+
+
+    function hideStatus() {
+
+      const element =
+        document.getElementById("statusMessage");
+
+      if (!element) return;
+
+      element.classList.remove("show");
+      element.classList.remove("error");
+      element.textContent = "";
+    }
+
+
+    function formatNumber(number) {
+
+      return new Intl.NumberFormat("en-IN", {
+        maximumFractionDigits: 0
+      }).format(number);
+
+    }
+
+
+    function updateLocationStatus(text) {
+
+      const element =
+        document.getElementById("locationStatus");
+
+      if (element) {
+        element.textContent = text;
+      }
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Distance fallback
+      ----------------------------------------------------------
+    */
+
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+
+      const R = 6371;
+
+      const dLat =
+        (lat2 - lat1) * Math.PI / 180;
+
+      const dLon =
+        (lon2 - lon1) * Math.PI / 180;
+
+      const a =
+        Math.sin(dLat / 2) *
+        Math.sin(dLat / 2) +
+
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
+
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+
+      const c =
+        2 *
+        Math.atan2(
+          Math.sqrt(a),
+          Math.sqrt(1 - a)
+        );
+
+      return R * c;
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Fare
+      ----------------------------------------------------------
+
+      Uses existing RiderX FareCalculator if available.
+
+      Otherwise:
+      Day 06:00 - 22:00
+      First 10 km = ₹8/km
+      Above 10 km = ₹9/km
+      Night 22:00 - 06:00 = ₹11/km
+
+      Service multipliers are kept reasonable.
+    */
+
+    function calculateRiderXFare(distanceKm) {
+
+      const distance =
+        Math.max(0, Number(distanceKm) || 0);
+
+      /*
+        Existing project fare calculator.
+      */
+
+      try {
+
+        if (
+          typeof FareCalculator !== "undefined" &&
+          typeof FareCalculator.calculateFare === "function"
+        ) {
+
+          const result =
+            FareCalculator.calculateFare(
+              selectedService,
+              distance
+            );
+
+          if (
+            result &&
+            typeof result.fare !== "undefined"
+          ) {
+
+            return Math.max(
+              0,
+              Math.round(Number(result.fare))
+            );
+
+          }
+
+        }
+
+      } catch (error) {
+
+        console.warn(
+          "Existing FareCalculator failed. Using RiderX fallback.",
+          error
+        );
+
+      }
+
+      /*
+        RiderX fallback pricing.
+      */
+
+      const hour =
+        new Date().getHours();
+
+      let fare = 0;
+
+      if (hour >= 22 || hour < 6) {
+
+        fare =
+          distance * 11;
+
+      } else {
+
+        if (distance <= 10) {
+
+          fare =
+            distance * 8;
+
+        } else {
+
+          fare =
+            (10 * 8) +
+            ((distance - 10) * 9);
+
+        }
+
+      }
+
+      /*
+        Service adjustment.
+      */
+
+      if (selectedService === "cab") {
+        fare *= 1.6;
+      }
+
+      if (selectedService === "parcel") {
+        fare *= 1.15;
+      }
+
+      if (selectedService === "food") {
+        fare *= 1.10;
+      }
+
+      /*
+        Minimum fares.
+      */
+
+      const minimumFare = {
+
+        bike: 40,
+
+        cab: 80,
+
+        parcel: 50,
+
+        food: 45
+
+      };
+
+      fare =
+        Math.max(
+          fare,
+          minimumFare[selectedService] || 40
+        );
+
+      return Math.round(fare);
+
+    }
+
+
+    function updateFare(distanceKm) {
+
+      const fare =
+        calculateRiderXFare(distanceKm);
+
+      const fareElement =
+        document.getElementById("fareAmount");
+
+      if (fareElement) {
+
+        fareElement.textContent =
+          "₹" + formatNumber(fare);
+
+      }
+
+      return fare;
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Service selection
+      ----------------------------------------------------------
+    */
+
+    function selectService(service, element) {
+
+      selectedService = service;
+
+      document
+        .querySelectorAll(".service-card")
+        .forEach(card => {
+          card.classList.remove("active");
+        });
+
+      if (element) {
+        element.classList.add("active");
+      }
+
+      if (pickupCoords && dropCoords) {
+
+        requestRoute();
+
+      }
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Map initialization
+      ----------------------------------------------------------
+    */
+
+    function initializeMap() {
+
+      if (map) return;
+
+      map =
+        L.map("map", {
+          zoomControl: true,
+          attributionControl: true
+        }).setView(
+          [
+            CHANDIGARH.lat,
+            CHANDIGARH.lng
+          ],
+          13
+        );
+
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+          attribution:
+            '&copy; OpenStreetMap contributors'
+        }
+      ).addTo(map);
+
+
+      /*
+        Map click selection.
+      */
+
+      map.on("click", function(event) {
+
+        if (!mapSelectionMode) {
+
+          /*
+            If no mode selected:
+            first click sets pickup,
+            second click sets drop.
+          */
+
+          if (!pickupCoords) {
+
+            selectLocationFromMap(
+              "pickup",
+              event.latlng.lat,
+              event.latlng.lng
+            );
+
+            return;
+
+          }
+
+          if (!dropCoords) {
+
+            selectLocationFromMap(
+              "drop",
+              event.latlng.lat,
+              event.latlng.lng
+            );
+
+            return;
+
+          }
+
+          return;
+        }
+
+
+        selectLocationFromMap(
+          mapSelectionMode,
+          event.latlng.lat,
+          event.latlng.lng
+        );
+
+      });
+
+
+      /*
+        Default pickup.
+      */
+
+      setPickup(
+        CHANDIGARH.lat,
+        CHANDIGARH.lng,
+        "Chandigarh"
+      );
+
+      /*
+        Do not force an unrealistic Gurgaon destination.
+        Give customer a nearby default destination so
+        map is immediately visible.
+      */
+
+      setDrop(
+        30.7046,
+        76.7179,
+        "Mohali"
+      );
+
+      requestRoute();
+
+      setTimeout(() => {
+
+        map.invalidateSize();
+
+      }, 300);
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Custom marker icons
+      ----------------------------------------------------------
+    */
+
+    function createPickupIcon() {
+
+      return L.divIcon({
+
+        className: "riderx-pickup-marker",
+
+        html:
+          '<div style="' +
+          'width:32px;' +
+          'height:32px;' +
+          'border-radius:50%;' +
+          'background:#22c55e;' +
+          'border:4px solid white;' +
+          'box-shadow:0 4px 15px rgba(0,0,0,.45);' +
+          '"></div>',
+
+        iconSize: [32, 32],
+
+        iconAnchor: [16, 16]
+
+      });
+
+    }
+
+
+    function createDropIcon() {
+
+      return L.divIcon({
+
+        className: "riderx-drop-marker",
+
+        html:
+          '<div style="' +
+          'width:32px;' +
+          'height:32px;' +
+          'border-radius:8px;' +
+          'background:#ffd600;' +
+          'border:4px solid white;' +
+          'box-shadow:0 4px 15px rgba(0,0,0,.45);' +
+          'transform:rotate(45deg);' +
+          '"></div>',
+
+        iconSize: [32, 32],
+
+        iconAnchor: [16, 16]
+
+      });
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Set pickup
+      ----------------------------------------------------------
+    */
+
+    function setPickup(lat, lng, address) {
+
+      pickupCoords = {
+        lat: Number(lat),
+        lng: Number(lng)
+      };
+
+
+      if (pickupMarker) {
+
+        pickupMarker.setLatLng([
+          pickupCoords.lat,
+          pickupCoords.lng
+        ]);
+
+      } else {
+
+        pickupMarker =
+          L.marker(
+            [
+              pickupCoords.lat,
+              pickupCoords.lng
+            ],
+            {
+              icon: createPickupIcon(),
+              draggable: true
+            }
+          )
+          .addTo(map)
+          .bindPopup("Pickup");
+
+
+        pickupMarker.on(
+          "dragend",
+          function(event) {
+
+            const position =
+              event.target.getLatLng();
+
+            setPickup(
+              position.lat,
+              position.lng,
+              "Selected location"
+            );
+
+            reverseGeocode(
+              position.lat,
+              position.lng,
+              "pickup"
+            );
+
+          }
+        );
+
+      }
+
+
+      if (address) {
+
+        document.getElementById(
+          "pickup"
+        ).value = address;
+
+      }
+
+
+      updateLocationStatus("Ready");
+
+      requestRoute();
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Set drop
+      ----------------------------------------------------------
+    */
+
+    function setDrop(lat, lng, address) {
+
+      dropCoords = {
+        lat: Number(lat),
+        lng: Number(lng)
+      };
+
+
+      if (dropMarker) {
+
+        dropMarker.setLatLng([
+          dropCoords.lat,
+          dropCoords.lng
+        ]);
+
+      } else {
+
+        dropMarker =
+          L.marker(
+            [
+              dropCoords.lat,
+              dropCoords.lng
+            ],
+            {
+              icon: createDropIcon(),
+              draggable: true
+            }
+          )
+          .addTo(map)
+          .bindPopup("Drop");
+
+
+        dropMarker.on(
+          "dragend",
+          function(event) {
+
+            const position =
+              event.target.getLatLng();
+
+            setDrop(
+              position.lat,
+              position.lng,
+              "Selected destination"
+            );
+
+            reverseGeocode(
+              position.lat,
+              position.lng,
+              "drop"
+            );
+
+          }
+        );
+
+      }
+
+
+      if (address) {
+
+        document.getElementById(
+          "drop"
+        ).value = address;
+
+      }
+
+      updateLocationStatus("Ready");
+
+      requestRoute();
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Map mode
+      ----------------------------------------------------------
+    */
+
+    function selectMapMode(mode) {
+
+      mapSelectionMode = mode;
+
+      const mapMode =
+        document.getElementById("mapMode");
+
+      const mapModeText =
+        document.getElementById("mapModeText");
+
+      const pickupButton =
+        document.getElementById("pickupMapBtn");
+
+      const dropButton =
+        document.getElementById("dropMapBtn");
+
+
+      if (mode === "pickup") {
+
+        mapModeText.textContent =
+          "pickup";
+
+        pickupButton.classList.add("active");
+        dropButton.classList.remove("active");
+
+      } else {
+
+        mapModeText.textContent =
+          "drop";
+
+        dropButton.classList.add("active");
+        pickupButton.classList.remove("active");
+
+      }
+
+
+      mapMode.classList.add("show");
+
+      showStatus(
+        "Map par tap karke " +
+        (mode === "pickup"
+          ? "pickup"
+          : "drop") +
+        locationText()
+      );
+
+    }
+
+
+    function locationText() {
+
+      return " location select karein.";
+
+    }
+
+
+    function selectLocationFromMap(
+      mode,
+      lat,
+      lng
+    ) {
+
+      if (mode === "pickup") {
+
+        setPickup(
+          lat,
+          lng,
+          "Getting address..."
+        );
+
+        reverseGeocode(
+          lat,
+          lng,
+          "pickup"
+        );
+
+      } else {
+
+        setDrop(
+          lat,
+          lng,
+          "Getting address..."
+        );
+
+        reverseGeocode(
+          lat,
+          lng,
+          "drop"
+        );
+
+      }
+
+
+      mapSelectionMode = null;
+
+      document
+        .getElementById("mapMode")
+        .classList.remove("show");
+
+      document
+        .getElementById("pickupMapBtn")
+        .classList.remove("active");
+
+      document
+        .getElementById("dropMapBtn")
+        .classList.remove("active");
+
+      hideStatus();
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Reverse Geocoding
+      ----------------------------------------------------------
+    */
+
+    async function reverseGeocode(
+      lat,
+      lng,
+      type
+    ) {
+
+      try {
+
+        const url =
+          "https://nominatim.openstreetmap.org/reverse" +
+          "?format=jsonv2" +
+          "&lat=" + encodeURIComponent(lat) +
+          "&lon=" + encodeURIComponent(lng) +
+          "&zoom=18" +
+          "&addressdetails=1";
+
+
+        const response =
+          await fetch(url, {
+            headers: {
+              "Accept": "application/json"
+            }
+          });
+
+
+        if (!response.ok) {
+          throw new Error("Address lookup failed");
+        }
+
+
+        const data =
+          await response.json();
+
+
+        let address =
+          data.display_name ||
+          "Selected location";
+
+
+        /*
+          Keep address shorter on mobile.
+        */
+
+        const parts =
+          address
+            .split(",")
+            .map(item => item.trim())
+            .filter(Boolean);
+
+
+        if (parts.length > 4) {
+
+          address =
+            parts
+              .slice(0, 4)
+              .join(", ");
+
+        }
+
+
+        if (type === "pickup") {
+
+          document.getElementById(
+            "pickup"
+          ).value = address;
+
+        } else {
+
+          document.getElementById(
+            "drop"
+          ).value = address;
+
+        }
+
+
+        hideStatus();
+
+      } catch (error) {
+
+        console.warn(
+          "Reverse geocoding error:",
+          error
+        );
+
+        if (type === "pickup") {
+
+          document.getElementById(
+            "pickup"
+          ).value =
+            "Selected pickup";
+
+        } else {
+
+          document.getElementById(
+            "drop"
+          ).value =
+            "Selected destination";
+
+        }
+
+      }
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Search typed location
+      ----------------------------------------------------------
+    */
+
+    async function geocodeAddress(
+      address,
+      type
+    ) {
+
+      const cleanAddress =
+        String(address || "").trim();
+
+      if (!cleanAddress) return;
+
+
+      try {
+
+        const query =
+          cleanAddress +
+          ", Chandigarh, India";
+
+
+        const url =
+          "https://nominatim.openstreetmap.org/search" +
+          "?format=jsonv2" +
+          "&limit=1" +
+          "&q=" +
+          encodeURIComponent(query);
+
+
+        const response =
+          await fetch(url, {
+            headers: {
+              "Accept": "application/json"
+            }
+          });
+
+
+        if (!response.ok) {
+          throw new Error("Location search failed");
+        }
+
+
+        const results =
+          await response.json();
+
+
+        if (!results.length) {
+
+          showStatus(
+            "Location nahi mili. Map par location select karein.",
+            true
+          );
+
+          return;
+
+        }
+
+
+        const result =
+          results[0];
+
+
+        const lat =
+          Number(result.lat);
+
+        const lng =
+          Number(result.lon);
+
+
+        if (type === "pickup") {
+
+          setPickup(
+            lat,
+            lng,
+            result.display_name
+          );
+
+        } else {
+
+          setDrop(
+            lat,
+            lng,
+            result.display_name
+          );
+
+        }
+
+
+        map.setView(
+          [lat, lng],
+          15,
+          {
+            animate: true
+          }
+        );
+
+
+        requestRoute();
+
+      } catch (error) {
+
+        console.error(
+          "Geocoding error:",
+          error
+        );
+
+        showStatus(
+          "Location search failed. Map se location select karein.",
+          true
+        );
+
+      }
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Route using OSRM
+      ----------------------------------------------------------
+    */
+
+    async function requestRoute() {
+
+      if (!map) return;
+
+      if (!pickupCoords || !dropCoords) return;
+
+
+      const currentRequest =
+        ++routeRequestId;
+
+
+      const start =
+        pickupCoords;
+
+      const end =
+        dropCoords;
+
+
+      /*
+        Remove previous route.
+      */
+
+      if (routeLayer) {
+
+        map.removeLayer(routeLayer);
+
+        routeLayer = null;
+
+      }
+
+
+      try {
+
+        const url =
+          "https://router.project-osrm.org/route/v1/driving/" +
+          start.lng +
+          "," +
+          start.lat +
+          ";" +
+          end.lng +
+          "," +
+          end.lat +
+          "?overview=full&geometries=geojson";
+
+
+        const response =
+          await fetch(url);
+
+
+        if (!response.ok) {
+          throw new Error("Route service unavailable");
+        }
+
+
+        const data =
+          await response.json();
+
+
+        if (currentRequest !== routeRequestId) {
+          return;
+        }
+
+
+        if (
+          !data.routes ||
+          !data.routes.length
+        ) {
+
+          throw new Error("No route found");
+
+        }
+
+
+        const route =
+          data.routes[0];
+
+
+        const distanceKm =
+          route.distance / 1000;
+
+
+        const durationMin =
+          Math.max(
+            1,
+            Math.round(
+              route.duration / 60
+            )
+          );
+
+
+        routeLayer =
+          L.geoJSON(
+            route.geometry,
+            {
+              style: {
+                color: "#FFD600",
+                weight: 5,
+                opacity: .9
+              }
+            }
+          ).addTo(map);
+
+
+        document.getElementById(
+          "distanceValue"
+        ).textContent =
+          distanceKm.toFixed(1) +
+          " km";
+
+
+        document.getElementById(
+          "etaValue"
+        ).textContent =
+          durationMin +
+          " min";
+
+
+        updateFare(distanceKm);
+
+
+        const bounds =
+          routeLayer.getBounds();
+
+
+        if (bounds.isValid()) {
+
+          map.fitBounds(
+            bounds,
+            {
+              paddingTopLeft: [30, 100],
+              paddingBottomRight: [30, 380],
+              maxZoom: 15
+            }
+          );
+
+        }
+
+
+        updateLocationStatus("Ready");
+
+
+      } catch (error) {
+
+        console.warn(
+          "Routing error:",
+          error
+        );
+
+
+        /*
+          Fallback distance.
+        */
+
+        const distanceKm =
+          haversineDistance(
+            start.lat,
+            start.lng,
+            end.lat,
+            end.lng
+          );
+
+
+        const estimatedMinutes =
+          Math.max(
+            1,
+            Math.round(
+              distanceKm / 0.45
+            )
+          );
+
+
+        document.getElementById(
+          "distanceValue"
+        ).textContent =
+          distanceKm.toFixed(1) +
+          " km";
+
+
+        document.getElementById(
+          "etaValue"
+        ).textContent =
+          estimatedMinutes +
+          " min";
+
+
+        updateFare(distanceKm);
+
+
+        /*
+          Draw straight fallback line.
+        */
+
+        routeLayer =
+          L.polyline(
+            [
+              [
+                start.lat,
+                start.lng
+              ],
+              [
+                end.lat,
+                end.lng
+              ]
+            ],
+            {
+              color: "#FFD600",
+              weight: 4,
+              dashArray: "8 8"
+            }
+          ).addTo(map);
+
+      }
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Current GPS location
+      ----------------------------------------------------------
+    */
+
+    function useCurrentLocation() {
+
+      if (!navigator.geolocation) {
+
+        showStatus(
+          "Aapke device me GPS available nahi hai.",
+          true
+        );
+
+        return;
+
+      }
+
+
+      showStatus(
+        "Current location find ho rahi hai..."
+      );
+
+
+      navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+          const lat =
+            position.coords.latitude;
+
+          const lng =
+            position.coords.longitude;
+
+
+          /*
+            Set pickup to current location.
+          */
+
+          setPickup(
+            lat,
+            lng,
+            "Current Location"
+          );
+
+
+          map.setView(
+            [lat, lng],
+            16,
+            {
+              animate: true
+            }
+          );
+
+
+          /*
+            User location marker.
+          */
+
+          if (userLocationMarker) {
+
+            userLocationMarker.setLatLng([
+              lat,
+              lng
+            ]);
+
+          } else {
+
+            userLocationMarker =
+              L.circleMarker(
+                [lat, lng],
+                {
+                  radius: 8,
+                  color: "#fff",
+                  weight: 3,
+                  fillColor: "#3b82f6",
+                  fillOpacity: 1
+                }
+              )
+              .addTo(map)
+              .bindPopup(
+                "Your current location"
+              );
+
+          }
+
+
+          reverseGeocode(
+            lat,
+            lng,
+            "pickup"
+          );
+
+
+          hideStatus();
+
+        },
+
+        function(error) {
+
+          console.error(
+            "GPS error:",
+            error
+          );
+
+
+          let message =
+            "Location permission allow karein.";
+
+          if (
+            error.code ===
+            error.POSITION_UNAVAILABLE
+          ) {
+
+            message =
+              "Current location available nahi hai.";
+
+          }
+
+          if (
+            error.code ===
+            error.TIMEOUT
+          ) {
+
+            message =
+              "Location request timeout ho gaya.";
+
+          }
+
+
+          showStatus(
+            message,
+            true
+          );
+
+        },
+
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 30000
+        }
+
+      );
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Input handling
+      ----------------------------------------------------------
+    */
+
+    function setupLocationInputs() {
+
+      const pickupInput =
+        document.getElementById("pickup");
+
+      const dropInput =
+        document.getElementById("drop");
+
+
+      pickupInput.addEventListener(
+        "change",
+        function() {
+
+          geocodeAddress(
+            this.value,
+            "pickup"
+          );
+
+        }
+      );
+
+
+      dropInput.addEventListener(
+        "change",
+        function() {
+
+          geocodeAddress(
+            this.value,
+            "drop"
+          );
+
+        }
+      );
+
+
+      pickupInput.addEventListener(
+        "keydown",
+        function(event) {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            geocodeAddress(
+              this.value,
+              "pickup"
+            );
+
+            this.blur();
+
+          }
+
+        }
+      );
+
+
+      dropInput.addEventListener(
+        "keydown",
+        function(event) {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            geocodeAddress(
+              this.value,
+              "drop"
+            );
+
+            this.blur();
+
+          }
+
+        }
+      );
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Booking
+      ----------------------------------------------------------
+    */
+
+    async function requestRide() {
+
+      const button =
+        document.getElementById(
+          "bookButton"
+        );
+
+
+      firebaseAuth =
+        getAuthInstance();
+
+      firestoreDb =
+        getFirestoreInstance();
+
+
+      /*
+        Check login.
+      */
+
+      let currentUser = null;
+
+
+      try {
+
+        currentUser =
+          firebaseAuth
+            ? firebaseAuth.currentUser
+            : null;
+
+      } catch (error) {
+
+        console.error(
+          "Auth check error:",
+          error
+        );
+
+      }
+
+
+      if (!currentUser) {
+
+        showStatus(
+          "Ride book karne ke liye pehle login karein.",
+          true
+        );
+
+
+        setTimeout(() => {
+
+          window.location.href =
+            "../auth/login.html";
+
+        }, 900);
+
+
+        return;
+
+      }
+
+
+      if (!pickupCoords || !dropCoords) {
+
+        showStatus(
+          "Pickup aur drop location select karein.",
+          true
+        );
+
+        return;
+
+      }
+
+
+      const pickupAddress =
+        document
+          .getElementById("pickup")
+          .value
+          .trim();
+
+
+      const dropAddress =
+        document
+          .getElementById("drop")
+          .value
+          .trim();
+
+
+      if (!pickupAddress) {
+
+        showStatus(
+          "Pickup location select karein.",
+          true
+        );
+
+        return;
+
+      }
+
+
+      if (!dropAddress) {
+
+        showStatus(
+          "Drop location select karein.",
+          true
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Calculate actual route distance.
+      */
+
+      const distanceKm =
+        haversineDistance(
+          pickupCoords.lat,
+          pickupCoords.lng,
+          dropCoords.lat,
+          dropCoords.lng
+        );
+
+
+      /*
+        Fare.
+      */
+
+      const fare =
+        calculateRiderXFare(
+          distanceKm
+        );
+
+
+      /*
+        Prevent accidental zero-distance booking.
+      */
+
+      if (distanceKm < 0.05) {
+
+        showStatus(
+          "Pickup aur drop bahut paas hain. Different destination select karein.",
+          true
+        );
+
+        return;
+
+      }
+
+
+      /*
+        Button loading.
+      */
+
+      button.disabled = true;
+
+      button.innerHTML =
+        '<span class="loading"></span>' +
+        'Booking...';
+
+
+      try {
+
+        if (!firestoreDb) {
+
+          throw new Error(
+            "Firebase Firestore initialize nahi hua."
+          );
+
+        }
+
+
+        /*
+          Customer information.
+        */
+
+        const customerName =
+          currentUser.displayName ||
+          currentUser.email ||
+          "Customer";
+
+
+        const rideData = {
+
+          /*
+            Main identifiers.
+          */
+
+          customerId:
+            currentUser.uid,
+
+          customerName:
+            customerName,
+
+          customerEmail:
+            currentUser.email || "",
+
+
+          /*
+            Service.
+          */
+
+          serviceType:
+            selectedService,
+
+          service:
+            selectedService,
+
+
+          /*
+            Pickup.
+          */
+
+          pickup: {
+
+            address:
+              pickupAddress,
+
+            lat:
+              pickupCoords.lat,
+
+            lng:
+              pickupCoords.lng
+
+          },
+
+
+          /*
+            Drop.
+          */
+
+          drop: {
+
+            address:
+              dropAddress,
+
+            lat:
+              dropCoords.lat,
+
+            lng:
+              dropCoords.lng
+
+          },
+
+
+          /*
+            Fare.
+          */
+
+          fare:
+            fare,
+
+          currency:
+            "INR",
+
+          distanceKm:
+            Number(
+              distanceKm.toFixed(2)
+            ),
+
+
+          /*
+            Status.
+          */
+
+          status:
+            "SEARCHING",
+
+          paymentMethod:
+            "CASH",
+
+          paymentStatus:
+            "PENDING",
+
+
+          /*
+            Rider fields.
+          */
+
+          riderId:
+            null,
+
+          riderName:
+            null,
+
+          riderPhone:
+            null,
+
+
+          /*
+            Ride lifecycle.
+          */
+
+          otp:
+            null,
+
+          startedAt:
+            null,
+
+          completedAt:
+            null,
+
+
+          /*
+            Timestamp.
+          */
+
+          createdAt:
+            firebase.firestore.FieldValue.serverTimestamp(),
+
+          updatedAt:
+            firebase.firestore.FieldValue.serverTimestamp()
+
+        };
+
+
+        const rideRef =
+          await firestoreDb
+            .collection("rides")
+            .add(rideData);
+
+
+        /*
+          Save ride ID locally.
+        */
+
+        try {
+
+          localStorage.setItem(
+            "riderx_active_ride_id",
+            rideRef.id
+          );
+
+        } catch (storageError) {
+
+          console.warn(
+            "Local storage unavailable:",
+            storageError
+          );
+
+        }
+
+
+        /*
+          Success.
+        */
+
+        button.innerHTML =
+          '<i class="fa-solid fa-check"></i>' +
+          ' Ride Requested';
+
+
+        showStatus(
+          "Ride request sent. Nearby rider search ho rahi hai."
+        );
+
+
+        /*
+          Try common searching pages.
+          searching.html is preferred if present.
+        */
+
+        setTimeout(() => {
+
+          window.location.href =
+            "searching.html";
+
+        }, 700);
+
+
+      } catch (error) {
+
+        console.error(
+          "RiderX Booking Error:",
+          error
+        );
+
+
+        button.disabled = false;
+
+        button.innerHTML =
+          '<i class="fa-solid fa-bolt"></i>' +
+          ' Book Ride';
+
+
+        showStatus(
+          "Booking failed: " +
+          (
+            error.message ||
+            "Please try again."
+          ),
+          true
+        );
+
+      }
+
+    }
+
+
+    /*
+      ----------------------------------------------------------
+      Initial load
+      ----------------------------------------------------------
+    */
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      function() {
+
+        /*
+          Firebase references.
+        */
+
+        firebaseAuth =
+          getAuthInstance();
+
+        firestoreDb =
+          getFirestoreInstance();
+
+
+        /*
+          Map.
+        */
+
+        initializeMap();
+
+
+        /*
+          Inputs.
+        */
+
+        setupLocationInputs();
+
+
+        /*
+          Try GPS automatically.
+        */
+
+        if (
+          navigator.geolocation
+        ) {
+
+          navigator.geolocation.getCurrentPosition(
+
+            function(position) {
+
+              const lat =
+                position.coords.latitude;
+
+              const lng =
+                position.coords.longitude;
+
+
+              /*
+                Only use GPS automatically
+                when it looks like a valid India
+                location. Otherwise Chandigarh
+                remains the default.
+              */
+
+              setPickup(
+                lat,
+                lng,
+                "Current Location"
+              );
+
+
+              if (userLocationMarker) {
+
+                userLocationMarker
+                  .setLatLng([
+                    lat,
+                    lng
+                  ]);
+
+              } else {
+
+                userLocationMarker =
+                  L.circleMarker(
+                    [lat, lng],
+                    {
+                      radius: 8,
+                      color: "#fff",
+                      weight: 3,
+                      fillColor: "#3b82f6",
+                      fillOpacity: 1
+                    }
+                  )
+                  .addTo(map);
+
+              }
+
+
+              reverseGeocode(
+                lat,
+                lng,
+                "pickup"
+              );
+
+
+              map.setView(
+                [lat, lng],
+                15
+              );
+
+            },
+
+            function(error) {
+
+              console.warn(
+                "Automatic GPS unavailable:",
+                error.message
+              );
+
+            },
+
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 60000
+            }
+
+          );
+
+        }
+
+      }
+    );
+
+
+    /*
+      ----------------------------------------------------------
+      Prevent accidental page zoom/scroll behavior
+      ----------------------------------------------------------
+    */
+
+    document.addEventListener(
+      "touchmove",
+      function(event) {
+
+        /*
+          Allow normal scrolling inside booking panel.
+        */
+
+        if (
+          event.target.closest(".booking-panel")
+        ) {
+
+          return;
+
+        }
+
+      },
+      {
+        passive: true
+      }
+    );
+
   </script>
+
 </body>
-</html>
+            </html>
