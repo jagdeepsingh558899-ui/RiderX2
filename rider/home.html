@@ -26,51 +26,36 @@ font-family:Arial,sans-serif;
 
 
 .header{
-
 height:70px;
 background:#111;
 display:flex;
 align-items:center;
 justify-content:space-between;
 padding:0 20px;
-
 }
 
 
 .logo{
-
 font-size:30px;
 font-weight:900;
-
 }
-
 
 .logo span{
-
 color:#FFD600;
-
-}
-
-
-
-.status{
-
-padding:20px;
-
 }
 
 
 
 .online-btn{
 
-width:100%;
+width:90%;
+margin:20px 5%;
 padding:16px;
+background:#FFD600;
 border:none;
 border-radius:15px;
-background:#FFD600;
 font-size:18px;
 font-weight:bold;
-cursor:pointer;
 
 }
 
@@ -85,7 +70,6 @@ border-radius:20px;
 border:1px solid #333;
 
 }
-
 
 
 .card h3{
@@ -105,11 +89,19 @@ gap:10px;
 
 
 
+button{
+
+cursor:pointer;
+
+}
+
+
+
 .accept{
 
 flex:1;
-background:#FFD600;
 padding:14px;
+background:#FFD600;
 border:none;
 border-radius:12px;
 font-weight:bold;
@@ -117,14 +109,57 @@ font-weight:bold;
 }
 
 
-
 .reject{
 
 flex:1;
+padding:14px;
 background:#222;
 color:white;
 border:1px solid #555;
 border-radius:12px;
+
+}
+
+
+
+.input{
+
+width:100%;
+padding:14px;
+background:#000;
+color:white;
+border:1px solid #555;
+border-radius:12px;
+margin-top:10px;
+
+}
+
+
+
+.start{
+
+width:100%;
+padding:15px;
+background:#FFD600;
+border:none;
+border-radius:15px;
+font-weight:bold;
+margin-top:10px;
+
+}
+
+
+
+.complete{
+
+width:100%;
+padding:15px;
+background:#00c853;
+color:white;
+border:none;
+border-radius:15px;
+font-weight:bold;
+margin-top:10px;
 
 }
 
@@ -140,7 +175,6 @@ padding:20px;
 border-radius:20px;
 
 }
-
 
 
 .amount{
@@ -185,9 +219,7 @@ color:#aaa;
 <body>
 
 
-
 <header class="header">
-
 
 <div class="logo">
 
@@ -198,15 +230,10 @@ RID<span>ERX</span>
 
 <i class="fa-solid fa-user"></i>
 
-
 </header>
 
 
 
-
-
-
-<div class="status">
 
 
 <button id="onlineBtn" class="online-btn">
@@ -216,16 +243,12 @@ RID<span>ERX</span>
 </button>
 
 
-</div>
-
-
 
 
 
 
 
 <div class="earning">
-
 
 <div>
 
@@ -234,7 +257,7 @@ Today's Earning
 </div>
 
 
-<div class="amount" id="earningAmount">
+<div id="earningAmount" class="amount">
 
 ₹0
 
@@ -250,7 +273,7 @@ Today's Earning
 
 
 
-<div class="card" id="rideCard">
+<div class="card">
 
 
 <h3>
@@ -262,31 +285,30 @@ New Ride Request
 
 <p id="customerName">
 
-Waiting for ride...
+Customer: Waiting...
 
 </p>
 
 
 <p id="pickupText">
 
-Pickup: -
+Pickup:-
 
 </p>
 
 
 <p id="dropText">
 
-Drop: -
+Drop:-
 
 </p>
 
 
 <p id="fareText">
 
-Fare: ₹0
+Fare:-
 
 </p>
-
 
 
 
@@ -311,8 +333,8 @@ Reject
 </div>
 
 
-
 </div>
+
 
 
 
@@ -325,25 +347,71 @@ Reject
 
 <h3>
 
-Ride OTP
+OTP Verification
 
 </h3>
 
 
 <p>
 
-Customer OTP:
-
-<strong id="otpCode">
-
-----
-
-</strong>
+Customer OTP
 
 </p>
 
 
+<input 
+id="otpInput"
+class="input"
+placeholder="Enter OTP">
+
+
+<button 
+id="startRide"
+class="start">
+
+Start Ride
+
+</button>
+
+
 </div>
+
+
+
+
+
+
+
+
+<div class="card">
+
+
+<h3>
+
+Ride Status
+
+</h3>
+
+
+<h2 id="rideStatus">
+
+Waiting
+
+</h2>
+
+
+
+<button 
+id="completeRide"
+class="complete">
+
+Complete Ride
+
+</button>
+
+
+</div>
+
 
 
 
@@ -365,7 +433,6 @@ Home
 </div>
 
 
-
 <div>
 
 <i class="fa-solid fa-clock"></i>
@@ -375,8 +442,6 @@ Home
 Rides
 
 </div>
-
-
 
 
 <div>
@@ -390,8 +455,6 @@ Wallet
 </div>
 
 
-
-
 <div>
 
 <i class="fa-solid fa-user"></i>
@@ -403,7 +466,6 @@ Profile
 </div>
 
 
-
 </div>
 
 
@@ -411,8 +473,8 @@ Profile
 
 
 
-<script type="module" src="js/rider.js"></script>
 
+<script type="module" src="js/rider.js"></script>
 
 
 </body>
