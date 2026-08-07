@@ -9,14 +9,11 @@
 
 <title>RiderX Register</title>
 
-
 <link rel="stylesheet" href="../assets/app.css">
-
 
 <style>
 
 body{
-
 margin:0;
 min-height:100vh;
 background:#000;
@@ -26,51 +23,34 @@ align-items:center;
 justify-content:center;
 font-family:Arial,sans-serif;
 padding:20px;
-
 }
 
-
 .box{
-
 width:100%;
 max-width:430px;
 background:#111;
 padding:25px;
 border-radius:25px;
 border:1px solid #333;
-
 }
 
-
 .logo{
-
 text-align:center;
 font-size:38px;
 font-weight:900;
-
 }
-
 
 .logo span{
-
 color:#FFD600;
-
 }
 
-
-
 .role{
-
 text-align:center;
 color:#FFD600;
 margin:15px;
-
 }
 
-
-
 .input{
-
 width:100%;
 padding:14px;
 margin:8px 0;
@@ -78,25 +58,18 @@ background:#000;
 color:white;
 border:1px solid #444;
 border-radius:12px;
-
+box-sizing:border-box;
 }
 
-
-
 .upload{
-
 background:#000;
 padding:12px;
 border-radius:12px;
 border:1px dashed #FFD600;
 margin:10px 0;
-
 }
 
-
-
 .btn{
-
 width:100%;
 padding:15px;
 border:none;
@@ -106,29 +79,20 @@ color:#000;
 font-weight:bold;
 font-size:17px;
 margin-top:15px;
-
 }
-
-
 
 #riderBox{
-
 display:none;
-
 }
 
-
-
 .back{
-
 text-align:center;
 color:#aaa;
 margin-top:20px;
-
+cursor:pointer;
 }
 
 </style>
-
 
 </head>
 
@@ -136,29 +100,21 @@ margin-top:20px;
 <body>
 
 
-
 <div class="box">
 
 
-
 <div class="logo">
-
 RID<span>ERX</span>
-
 </div>
-
 
 
 <div class="role" id="roleText">
-
 Customer Registration
-
 </div>
 
 
 
-
-<input id="name"
+<input id="fullName"
 class="input"
 placeholder="Full Name">
 
@@ -189,24 +145,19 @@ placeholder="Password">
 <div id="riderBox">
 
 
-<select id="vehicle"
-class="input">
-
+<select id="vehicleType" class="input">
 
 <option value="">
 Select Vehicle
 </option>
 
-
-<option>
+<option value="bike">
 Bike
 </option>
 
-
-<option>
+<option value="cab">
 Cab
 </option>
-
 
 </select>
 
@@ -216,8 +167,6 @@ Cab
 <input id="vehicleNumber"
 class="input"
 placeholder="Vehicle Number">
-
-
 
 
 
@@ -235,8 +184,6 @@ accept="image/*,.pdf">
 
 
 
-
-
 <div class="upload">
 
 Driving License Upload
@@ -250,9 +197,7 @@ accept="image/*,.pdf">
 </div>
 
 
-
 </div>
-
 
 
 
@@ -273,10 +218,7 @@ Create Account
 </div>
 
 
-
 </div>
-
-
 
 
 
@@ -286,34 +228,19 @@ Create Account
 <script type="module">
 
 
-import {auth,db,storage}
+import {
+
+auth,
+db,
+storage,
+createUserWithEmailAndPassword,
+doc,
+setDoc,
+serverTimestamp
+
+}
 
 from "../firebase/firebase-config.js";
-
-
-
-import {
-
-createUserWithEmailAndPassword
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-
-
-import {
-
-doc,
-setDoc
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
 
@@ -325,9 +252,7 @@ getDownloadURL
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 
 
@@ -344,18 +269,18 @@ params.get("role") || "customer";
 
 
 
+
 if(role==="rider"){
 
-
-document.getElementById("roleText").innerHTML=
+document.getElementById("roleText").innerText =
 "Rider Registration";
 
-
-document.getElementById("riderBox").style.display=
+document.getElementById("riderBox").style.display =
 "block";
 
-
 }
+
+
 
 
 
@@ -363,25 +288,18 @@ document.getElementById("riderBox").style.display=
 
 async function uploadFile(file,path){
 
-
 if(!file)
 return "";
-
 
 const fileRef =
 ref(storage,path);
 
-
-await uploadBytes(
-fileRef,
-file
-);
-
+await uploadBytes(fileRef,file);
 
 return await getDownloadURL(fileRef);
 
-
 }
+
 
 
 
@@ -396,20 +314,21 @@ document
 try{
 
 
-const name =
-document.getElementById("name").value;
+const fullName =
+document.getElementById("fullName").value.trim();
 
 
 const phone =
-document.getElementById("phone").value;
+document.getElementById("phone").value.trim();
 
 
 const email =
-document.getElementById("email").value;
+document.getElementById("email").value.trim();
 
 
 const password =
 document.getElementById("password").value;
+
 
 
 
@@ -430,10 +349,12 @@ userCredential.user.uid;
 
 
 
-let data={
+let userData={
 
 
-name:name,
+uid:uid,
+
+fullName:fullName,
 
 phone:phone,
 
@@ -441,9 +362,11 @@ email:email,
 
 role:role,
 
-createdAt:new Date()
+status: role==="rider"
+? "pending"
+: "active",
 
-
+createdAt:serverTimestamp()
 
 };
 
@@ -451,8 +374,8 @@ createdAt:new Date()
 
 
 
-if(role==="rider"){
 
+if(role==="rider"){
 
 
 const rcURL =
@@ -472,27 +395,54 @@ document.getElementById("license").files[0],
 
 
 
-data.vehicle =
-document.getElementById("vehicle").value;
+userData.vehicleType =
+document.getElementById("vehicleType").value;
 
 
-data.vehicleNumber =
+userData.vehicleNumber =
 document.getElementById("vehicleNumber").value;
 
 
-data.rc=rcURL;
+userData.rc =
+rcURL;
 
 
-data.license=licenseURL;
+userData.license =
+licenseURL;
 
 
-data.approved=false;
+userData.approved =
+false;
 
 
-data.status="pending";
+
+await setDoc(
+doc(db,"drivers",uid),
+{
+
+driverId:uid,
+
+fullName:fullName,
+
+isOnline:false,
+
+approved:false,
+
+status:"pending",
+
+location:{
+lat:0,
+lng:0
+}
+
+}
+
+);
 
 
 }
+
+
 
 
 
@@ -500,16 +450,15 @@ data.status="pending";
 
 await setDoc(
 doc(db,"users",uid),
-data
+userData
 );
 
 
 
 
 
-alert(
-"Account Created Successfully"
-);
+
+alert("RiderX Account Created Successfully");
 
 
 
@@ -517,22 +466,14 @@ alert(
 
 if(role==="rider"){
 
-
-window.location.href=
-"../rider/home.html";
-
+window.location.href="../rider/pending.html";
 
 }
-
 else{
 
-
-window.location.href=
-"../customer/home.html";
-
+window.location.href="../customer/home.html";
 
 }
-
 
 
 
@@ -540,14 +481,9 @@ window.location.href=
 
 catch(error){
 
-
-alert(
-error.message
-);
-
+alert(error.message);
 
 }
-
 
 
 };
@@ -555,7 +491,6 @@ error.message
 
 
 </script>
-
 
 
 </body>
