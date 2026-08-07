@@ -1,1037 +1,413 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-   <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RiderX | Create Account</title>
-    <!-- Font Awesome CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Main Style CSS -->
-    <link rel="stylesheet" href="../css/Style.css">
-    
-    <style>
-        :root {
-            --bg-black: #0a0a0c;
-            --card-bg: rgba(18, 18, 22, 0.75);
-            --electric-yellow: #FFE500;
-            --electric-yellow-hover: #e6ce00;
-            --text-white: #ffffff;
-            --text-muted: #9a9aA2;
-            --border-color: rgba(255, 229, 0, 0.2);
-            --input-bg: rgba(255, 255, 255, 0.05);
-            --error-red: #ff4d4d;
-            --success-green: #00e676;
-        }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+<meta charset="UTF-8">
 
-        body {
-            background-color: var(--bg-black);
-            color: var(--text-white);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            background-image: 
-                radial-gradient(circle at 15% 15%, rgba(255, 229, 0, 0.08) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(255, 229, 0, 0.05) 0%, transparent 45%);
-            background-attachment: fixed;
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* Top Bar / Header */
-        .header-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 5%;
-            width: 100%;
-        }
+<title>RiderX Register</title>
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
+<link rel="stylesheet" href="../assets/app.css">
 
-        .logo-container img {
-            height: 42px;
-            width: auto;
-        }
 
-        .logo-text {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--text-white);
-            letter-spacing: 1px;
-        }
+<style>
 
-        .logo-text span {
-            color: var(--electric-yellow);
-        }
+*{
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+}
 
-        .lang-selector {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-white);
-            padding: 8px 14px;
-            border-radius: 8px;
-            outline: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
+body{
 
-        .lang-selector:hover {
-            border-color: var(--electric-yellow);
-        }
+margin:0;
+min-height:100vh;
+background:#000;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:20px;
 
-        .lang-selector option {
-            background: #121216;
-            color: #fff;
-        }
+}
 
-        /* Container & Card */
-        .main-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            flex: 1;
-        }
 
-        .register-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 650px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 229, 0, 0.1);
-            animation: fadeIn 0.5s ease-in-out;
-        }
+.register-box{
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+width:100%;
+max-width:430px;
+background:#111;
+padding:25px;
+border-radius:25px;
+border:1px solid #333;
 
-        .card-title {
-            text-align: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
+}
 
-        .card-subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 25px;
-        }
 
-        /* Role Switcher Tabs */
-        .role-tabs {
-            display: flex;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 5px;
-            margin-bottom: 30px;
-        }
 
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+.logo{
 
-        .tab-btn.active {
-            background: var(--electric-yellow);
-            color: #000;
-            box-shadow: 0 4px 15px rgba(255, 229, 0, 0.3);
-        }
+text-align:center;
+font-size:38px;
+font-weight:900;
+}
 
-        /* Form Grid & Inputs */
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-        }
 
-        .full-width {
-            grid-column: span 2;
-        }
+.logo span{
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            position: relative;
-        }
+color:#FFD600;
 
-        .input-group label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: var(--text-muted);
-        }
+}
 
-        .input-field-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
 
-        .input-field-wrapper i.input-icon {
-            position: absolute;
-            left: 14px;
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
 
-        .input-field-wrapper input,
-        .input-field-wrapper select {
-            width: 100%;
-            padding: 12px 14px 12px 42px;
-            background: var(--input-bg);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 10px;
-            color: var(--text-white);
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
+.role-title{
 
-        .input-field-wrapper select option {
-            background-color: #121216;
-            color: var(--text-white);
-        }
+text-align:center;
+color:#FFD600;
+margin:15px 0 20px;
+font-size:20px;
 
-        .input-field-wrapper input:focus,
-        .input-field-wrapper select:focus {
-            border-color: var(--electric-yellow);
-            box-shadow: 0 0 10px rgba(255, 229, 0, 0.2);
-            background: rgba(255, 255, 255, 0.08);
-        }
+}
 
-        .toggle-password {
-            position: absolute;
-            right: 14px;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: color 0.3s;
-        }
 
-        .toggle-password:hover {
-            color: var(--electric-yellow);
-        }
 
-        /* File Upload Inputs */
-        .file-upload-box {
-            border: 2px dashed rgba(255, 229, 0, 0.3);
-            background: rgba(255, 229, 0, 0.02);
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
+.input{
 
-        .file-upload-box:hover {
-            border-color: var(--electric-yellow);
-            background: rgba(255, 229, 0, 0.05);
-        }
+width:100%;
+padding:14px;
+margin:8px 0;
+background:#000;
+border:1px solid #333;
+border-radius:12px;
+color:white;
 
-        .file-upload-box input[type="file"] {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
+}
 
-        .file-upload-box i {
-            font-size: 1.5rem;
-            color: var(--electric-yellow);
-            margin-bottom: 6px;
-        }
 
-        .file-upload-box p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
 
-        .file-name-preview {
-            font-size: 0.75rem;
-            color: var(--electric-yellow);
-            margin-top: 4px;
-            word-break: break-all;
-        }
+select.input{
 
-        /* Password Strength Meter */
-        .strength-meter {
-            height: 4px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            margin-top: 4px;
-            overflow: hidden;
-        }
+color:white;
 
-        .strength-bar {
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease, background-color 0.3s ease;
-        }
+}
 
-        /* Checkbox Terms */
-        .terms-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
 
-        .terms-group input[type="checkbox"] {
-            accent-color: var(--electric-yellow);
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
 
-        .terms-group a {
-            color: var(--electric-yellow);
-            text-decoration: none;
-        }
+.upload{
 
-        .terms-group a:hover {
-            text-decoration: underline;
-        }
+background:#000;
+border:1px dashed #FFD600;
+padding:12px;
+border-radius:12px;
+margin:10px 0;
 
-        /* Buttons */
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--electric-yellow);
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
+}
 
-        .submit-btn:hover {
-            background: var(--electric-yellow-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 229, 0, 0.4);
-        }
 
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 25px 0;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
 
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
+.btn{
 
-        .divider span {
-            padding: 0 10px;
-        }
+width:100%;
+padding:15px;
+border-radius:12px;
+border:none;
+margin-top:15px;
+font-size:17px;
+font-weight:bold;
+cursor:pointer;
 
-        .social-btns {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
+}
 
-        .social-btn {
-            padding: 11px;
-            background: var(--input-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: var(--text-white);
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-        }
 
-        .social-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--electric-yellow);
-        }
 
-        .login-link {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
+.create{
 
-        .login-link a {
-            color: var(--electric-yellow);
-            text-decoration: none;
-            font-weight: 600;
-        }
+background:#FFD600;
+color:#000;
 
-        .login-link a:hover {
-            text-decoration: underline;
-        }
+}
 
-        /* Status Alerts */
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
 
-        .alert-error {
-            background: rgba(255, 77, 77, 0.15);
-            border: 1px solid var(--error-red);
-            color: #ff8080;
-        }
 
-        .alert-success {
-            background: rgba(0, 230, 118, 0.15);
-            border: 1px solid var(--success-green);
-            color: #66ffa6;
-        }
+.back{
 
-        /* Phone OTP Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+text-align:center;
+margin-top:20px;
+color:#999;
 
-        .modal-card {
-            background: #121216;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-        }
+}
 
-        .close-modal {
-            position: absolute;
-            right: 15px; top: 15px;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
 
-        /* Responsive Breakpoints */
-        @media (max-width: 600px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            .full-width {
-                grid-column: span 1;
-            }
-            .social-btns {
-                grid-template-columns: 1fr;
-            }
-            .register-card {
-                padding: 25px 20px;
-            }
-        }
-    </style>
+#riderFields{
+
+display:none;
+
+}
+
+
+</style>
+
 </head>
+
+
 <body>
 
-    <!-- Header Navigation -->
-    <header class="header-bar">
-        <a href="../index.html" class="logo-container">
-            <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" onerror="this.src='https://via.placeholder.com/40x40/FFE500/000000?text=RX'">
-            <div class="logo-text">RIDER<span>X</span></div>
-        </a>
-        <select class="lang-selector" id="languageSelect">
-            <option value="en">English (US)</option>
-            <option value="hi">हिंदी (Hindi)</option>
-            <option value="ta">தமிழ் (Tamil)</option>
-            <option value="te">తెలుగు (Telugu)</option>
-        </select>
-    </header>
-
-    <!-- Main Content Form -->
-    <main class="main-wrapper">
-        <div class="register-card">
-            <h1 class="card-title">Get Started with RiderX</h1>
-            <p class="card-subtitle">Choose your registration type and fill in your details</p>
-
-            <!-- Status Alert Box -->
-            <div id="alertBox" class="alert">
-                <i class="fa-solid fa-circle-exclamation" id="alertIcon"></i>
-                <span id="alertMsg">System notification message</span>
-            </div>
-
-            <!-- Role Selector Tabs -->
-            <div class="role-tabs">
-                <button type="button" class="tab-btn active" id="tabCustomer" onclick="switchRole('customer')">
-                    <i class="fa-solid fa-user"></i> Join as Customer
-                </button>
-                <button type="button" class="tab-btn" id="tabRider" onclick="switchRole('rider')">
-                    <i class="fa-solid fa-motorcycle"></i> Join as Rider
-                </button>
-            </div>
-
-            <!-- Unified Form -->
-            <form id="registerForm" onsubmit="handleRegistration(event)">
-                <input type="hidden" id="userRole" value="customer">
-
-                <div class="form-grid">
-                    <!-- Common Fields -->
-                    <div class="input-group full-width">
-                        <label for="fullName">Full Name</label>
-                        <div class="input-field-wrapper">
-                            <i class="fa-solid fa-id-card input-icon"></i>
-                            <input type="text" id="fullName" placeholder="John Doe" required>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="mobileNumber">Mobile Number</label>
-                        <div class="input-field-wrapper">
-                            <i class="fa-solid fa-phone input-icon"></i>
-                            <input type="tel" id="mobileNumber" placeholder="+91 98765 43210" required>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="email">Email Address</label>
-                        <div class="input-field-wrapper">
-                            <i class="fa-solid fa-envelope input-icon"></i>
-                            <input type="email" id="email" placeholder="name@example.com" required>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="password">Password</label>
-                        <div class="input-field-wrapper">
-                            <i class="fa-solid fa-lock input-icon"></i>
-                            <input type="password" id="password" placeholder="••••••••" oninput="checkPasswordStrength(this.value)" required>
-                            <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('password', this)"></i>
-                        </div>
-                        <div class="strength-meter"><div class="strength-bar" id="strengthBar"></div></div>
-                    </div>
-
-                    <div class="input-group">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <div class="input-field-wrapper">
-                            <i class="fa-solid fa-shield-halved input-icon"></i>
-                            <input type="password" id="confirmPassword" placeholder="••••••••" required>
-                            <i class="fa-solid fa-eye toggle-password" onclick="togglePasswordVisibility('confirmPassword', this)"></i>
-                        </div>
-                    </div>
-
-                    <!-- Rider Specific Fields Container -->
-                    <div id="riderFields" class="full-width form-grid" style="display: none; padding-top: 10px;">
-                        
-                        <div class="input-group">
-                            <label for="aadhaarNumber">Aadhaar Number</label>
-                            <div class="input-field-wrapper">
-                                <i class="fa-solid fa-fingerprint input-icon"></i>
-                                <input type="text" id="aadhaarNumber" placeholder="12 Digit Aadhaar Number" maxlength="12" pattern="\d{12}">
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="drivingLicense">Driving License Number</label>
-                            <div class="input-field-wrapper">
-                                <i class="fa-solid fa-address-card input-icon"></i>
-                                <input type="text" id="drivingLicense" placeholder="DL-1420110012345">
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="vehicleType">Vehicle Type</label>
-                            <div class="input-field-wrapper">
-                                <i class="fa-solid fa-taxi input-icon"></i>
-                                <select id="vehicleType">
-                                    <option value="" disabled selected>Select Vehicle</option>
-                                    <option value="Bike">Motorcycle / Scooter</option>
-                                    <option value="Auto">Auto Rickshaw</option>
-                                    <option value="Cab">Cab / Car</option>
-                                    <option value="EV">Electric Scooter/Bike</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="vehicleNumber">Bike/Cab Registration Number</label>
-                            <div class="input-field-wrapper">
-                                <i class="fa-solid fa-hashtag input-icon"></i>
-                                <input type="text" id="vehicleNumber" placeholder="MH 02 BP 1234">
-                            </div>
-                        </div>
-
-                        <!-- Upload Documents Section -->
-                        <div class="input-group full-width">
-                            <label>Required Documents Upload</label>
-                        </div>
-
-                        <div class="input-group">
-                            <div class="file-upload-box">
-                                <i class="fa-solid fa-file-contract"></i>
-                                <p>Upload RC Document</p>
-                                <div class="file-name-preview" id="rcFileName">JPEG, PNG or PDF</div>
-                                <input type="file" id="rcUpload" accept="image/*,.pdf" onchange="updateFileName(this, 'rcFileName')">
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <div class="file-upload-box">
-                                <i class="fa-solid fa-id-badge"></i>
-                                <p>Upload Driving License</p>
-                                <div class="file-name-preview" id="dlFileName">JPEG, PNG or PDF</div>
-                                <input type="file" id="dlUpload" accept="image/*,.pdf" onchange="updateFileName(this, 'dlFileName')">
-                            </div>
-                        </div>
-
-                        <div class="input-group full-width">
-                            <div class="file-upload-box">
-                                <i class="fa-solid fa-user-gear"></i>
-                                <p>Upload Profile Photo</p>
-                                <div class="file-name-preview" id="profileFileName">Clear front face image</div>
-                                <input type="file" id="profilePhoto" accept="image/*" onchange="updateFileName(this, 'profileFileName')">
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- Terms & Privacy -->
-                    <div class="input-group full-width">
-                        <div class="terms-group">
-                            <input type="checkbox" id="termsCheck" required>
-                            <label for="termsCheck">I agree to the <a href="../terms.html" target="_blank">Terms & Conditions</a> and <a href="../privacy.html" target="_blank">Privacy Policy</a>.</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    <span id="btnText">Create Account</span>
-                    <i class="fa-solid fa-arrow-right" id="btnIcon"></i>
-                    <i class="fa-solid fa-circle-notch fa-spin" id="btnSpinner" style="display: none;"></i>
-                </button>
-            </form>
-
-            <div class="divider">
-                <span>OR SIGN UP WITH</span>
-            </div>
-
-            <!-- Social Registrations -->
-            <div class="social-btns">
-                <button type="button" class="social-btn" onclick="handleGoogleSignUp()">
-                    <i class="fa-brands fa-google" style="color: #ea4335;"></i> Google
-                </button>
-                <button type="button" class="social-btn" onclick="openPhoneOTPModal()">
-                    <i class="fa-solid fa-mobile-screen-button" style="color: var(--electric-yellow);"></i> Phone OTP
-                </button>
-            </div>
-
-            <div class="login-link">
-                Already have an account? <a href="../auth/login.html">Login</a>
-            </div>
-        </div>
-    </main>
-
-    <!-- Phone OTP Verification Modal -->
-    <div class="modal-overlay" id="otpModal">
-        <div class="modal-card">
-            <i class="fa-solid fa-xmark close-modal" onclick="closePhoneOTPModal()"></i>
-            <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-mobile-retro" style="color: var(--electric-yellow);"></i> Phone Verification</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Enter your mobile number to receive a one-time verification code.</p>
-            
-            <div class="input-group" style="margin-bottom: 15px;">
-                <label>Mobile Number</label>
-                <div class="input-field-wrapper">
-                    <i class="fa-solid fa-phone input-icon"></i>
-                    <input type="tel" id="otpPhoneNumber" placeholder="+91 98765 43210">
-                </div>
-            </div>
-
-            <div id="recaptcha-container"></div>
-
-            <div id="otpInputGroup" class="input-group" style="display: none; margin-bottom: 15px;">
-                <label>Verification Code (OTP)</label>
-                <div class="input-field-wrapper">
-                    <i class="fa-solid fa-key input-icon"></i>
-                    <input type="text" id="otpCode" placeholder="6-Digit OTP" maxlength="6">
-                </div>
-            </div>
-
-            <button type="button" class="submit-btn" id="sendOtpBtn" onclick="requestOTP()" style="margin-top: 10px;">Send OTP</button>
-            <button type="button" class="submit-btn" id="verifyOtpBtn" onclick="verifyOTP()" style="margin-top: 10px; display: none;">Verify & Proceed</button>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 RiderX Technologies Inc. All rights reserved. | Electric Mobility & Fast Rides</p>
-    </footer>
-
-    <!-- Firebase SDK Compat & Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js"></script>
-
-    <!-- App Scripts -->
-    <script src="../firebase/firebase-config.js"></script>
-    <script src="../js/auth.js"></script>
-
-    <script>
-        // Tab Role Switch Logic
-        function switchRole(role) {
-            const customerTab = document.getElementById('tabCustomer');
-            const riderTab = document.getElementById('tabRider');
-            const riderFields = document.getElementById('riderFields');
-            const userRoleInput = document.getElementById('userRole');
-
-            userRoleInput.value = role;
-
-            if (role === 'rider') {
-                riderTab.classList.add('active');
-                customerTab.classList.remove('active');
-                riderFields.style.display = 'grid';
-                
-                // Add required attributes for Rider fields
-                document.getElementById('aadhaarNumber').setAttribute('required', 'true');
-                document.getElementById('drivingLicense').setAttribute('required', 'true');
-                document.getElementById('vehicleType').setAttribute('required', 'true');
-                document.getElementById('vehicleNumber').setAttribute('required', 'true');
-            } else {
-                customerTab.classList.add('active');
-                riderTab.classList.remove('active');
-                riderFields.style.display = 'none';
-
-                // Remove required attributes for Customer
-                document.getElementById('aadhaarNumber').removeAttribute('required');
-                document.getElementById('drivingLicense').removeAttribute('required');
-                document.getElementById('vehicleType').removeAttribute('required');
-                document.getElementById('vehicleNumber').removeAttribute('required');
-            }
-        }
-
-        // Toggle Password Field
-        function togglePasswordVisibility(fieldId, iconElem) {
-            const field = document.getElementById(fieldId);
-            if (field.type === 'password') {
-                field.type = 'text';
-                iconElem.classList.remove('fa-eye');
-                iconElem.classList.add('fa-eye-slash');
-            } else {
-                field.type = 'password';
-                iconElem.classList.remove('fa-eye-slash');
-                iconElem.classList.add('fa-eye');
-            }
-        }
-
-        // Password Strength Indicator
-        function checkPasswordStrength(password) {
-            const bar = document.getElementById('strengthBar');
-            let strength = 0;
-            if (password.length >= 6) strength += 25;
-            if (password.match(/[A-Z]/)) strength += 25;
-            if (password.match(/[0-9]/)) strength += 25;
-            if (password.match(/[^A-Za-z0-9]/)) strength += 25;
-
-            bar.style.width = strength + '%';
-            if (strength <= 25) bar.style.backgroundColor = '#ff4d4d';
-            else if (strength <= 50) bar.style.backgroundColor = '#ffa500';
-            else if (strength <= 75) bar.style.backgroundColor = '#ffeb3b';
-            else bar.style.backgroundColor = '#00e676';
-        }
-
-        // Update File Name Display
-        function updateFileName(input, targetId) {
-            const target = document.getElementById(targetId);
-            if (input.files && input.files[0]) {
-                target.innerText = input.files[0].name;
-                target.style.color = '#FFE500';
-            }
-        }
-
-        // Display Alerts
-        function showAlert(message, type = 'error') {
-            const alertBox = document.getElementById('alertBox');
-            const alertMsg = document.getElementById('alertMsg');
-            const alertIcon = document.getElementById('alertIcon');
-
-            alertMsg.innerText = message;
-            alertBox.className = 'alert ' + (type === 'error' ? 'alert-error' : 'alert-success');
-            alertIcon.className = type === 'error' ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-circle-check';
-            alertBox.style.display = 'flex';
-
-            window.scrollTo({ top: alertBox.offsetTop - 100, behavior: 'smooth' });
-        }
-
-        // Show/Hide Loading Spinner
-        function setSubmittingState(isLoading) {
-            const btnText = document.getElementById('btnText');
-            const btnIcon = document.getElementById('btnIcon');
-            const btnSpinner = document.getElementById('btnSpinner');
-            const submitBtn = document.getElementById('submitBtn');
-
-            if (isLoading) {
-                btnText.innerText = 'Processing...';
-                btnIcon.style.display = 'none';
-                btnSpinner.style.display = 'inline-block';
-                submitBtn.disabled = true;
-                submitBtn.style.opacity = '0.7';
-            } else {
-                btnText.innerText = 'Create Account';
-                btnIcon.style.display = 'inline-block';
-                btnSpinner.style.display = 'none';
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-            }
-        }
-
-        // Main Registration Form Handler
-        async function handleRegistration(e) {
-            e.preventDefault();
-            const role = document.getElementById('userRole').value;
-            const fullName = document.getElementById('fullName').value.trim();
-            const mobileNumber = document.getElementById('mobileNumber').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (password !== confirmPassword) {
-                showAlert('Passwords do not match.', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showAlert('Password must be at least 6 characters long.', 'error');
-                return;
-            }
-
-            setSubmittingState(true);
-
-            try {
-                // If custom handler exists in auth.js, delegate; otherwise standard Firebase flow
-                if (typeof registerUserAccount === 'function') {
-                    await registerUserAccount({
-                        role, fullName, mobileNumber, email, password
-                    });
-                    return;
-                }
-
-                // Default Firebase Auth Flow
-                const auth = firebase.auth();
-                const db = firebase.firestore();
-
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-
-                await user.updateProfile({ displayName: fullName });
-
-                if (role === 'customer') {
-                    await db.collection('customers').doc(user.uid).set({
-                        uid: user.uid,
-                        fullName: fullName,
-                        mobileNumber: mobileNumber,
-                        email: email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    showAlert('Registration Successful! Redirecting...', 'success');
-                    setTimeout(() => {
-                        window.location.href = '../customer/Home.html';
-                    }, 1500);
-
-                } else if (role === 'rider') {
-                    const aadhaarNumber = document.getElementById('aadhaarNumber').value.trim();
-                    const drivingLicense = document.getElementById('drivingLicense').value.trim();
-                    const vehicleType = document.getElementById('vehicleType').value;
-                    const vehicleNumber = document.getElementById('vehicleNumber').value.trim();
-
-                    await db.collection('riders').doc(user.uid).set({
-                        uid: user.uid,
-                        fullName: fullName,
-                        mobileNumber: mobileNumber,
-                        email: email,
-                        aadhaarNumber: aadhaarNumber,
-                        drivingLicenseNumber: drivingLicense,
-                        vehicleType: vehicleType,
-                        vehicleNumber: vehicleNumber,
-                        adminApproved: false,
-                        status: 'Pending',
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    showAlert('Rider Application Submitted! Pending Approval...', 'success');
-                    setTimeout(() => {
-                        window.location.href = '../rider/pending.html';
-                    }, 1500);
-                }
-
-            } catch (error) {
-                console.error("Registration Error: ", error);
-                showAlert(error.message || 'Failed to complete registration.', 'error');
-            } finally {
-                setSubmittingState(false);
-            }
-        }
-
-        // Google Sign Up Handler
-        async function handleGoogleSignUp() {
-            try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await firebase.auth().signInWithPopup(provider);
-                const user = result.user;
-                const db = firebase.firestore();
-                const role = document.getElementById('userRole').value;
-
-                if (role === 'customer') {
-                    const docRef = db.collection('customers').doc(user.uid);
-                    const doc = await docRef.get();
-                    if (!doc.exists) {
-                        await docRef.set({
-                            uid: user.uid,
-                            fullName: user.displayName || 'Customer',
-                            email: user.email,
-                            mobileNumber: user.phoneNumber || '',
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                    window.location.href = '../customer/Home.html';
-                } else {
-                    const docRef = db.collection('riders').doc(user.uid);
-                    const doc = await docRef.get();
-                    if (!doc.exists) {
-                        await docRef.set({
-                            uid: user.uid,
-                            fullName: user.displayName || 'Rider',
-                            email: user.email,
-                            mobileNumber: user.phoneNumber || '',
-                            adminApproved: false,
-                            status: 'Pending',
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    }
-                    window.location.href = '../rider/pending.html';
-                }
-            } catch (error) {
-                showAlert(error.message || 'Google Sign-Up failed.', 'error');
-            }
-        }
-
-        // OTP Modal Controls
-        function openPhoneOTPModal() {
-            document.getElementById('otpModal').style.display = 'flex';
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                    'size': 'invisible'
-                });
-            }
-        }
-
-        function closePhoneOTPModal() {
-            document.getElementById('otpModal').style.display = 'none';
-        }
-
-        async function requestOTP() {
-            const phone = document.getElementById('otpPhoneNumber').value.trim();
-            if (!phone) {
-                alert('Please enter a valid phone number');
-                return;
-            }
-            try {
-                const appVerifier = window.recaptchaVerifier;
-                window.confirmationResult = await firebase.auth().signInWithPhoneNumber(phone, appVerifier);
-                document.getElementById('otpInputGroup').style.display = 'block';
-                document.getElementById('sendOtpBtn').style.display = 'none';
-                document.getElementById('verifyOtpBtn').style.display = 'block';
-                alert('OTP sent successfully!');
-            } catch (error) {
-                alert('Error sending OTP: ' + error.message);
-            }
-        }
-
-        async function verifyOTP() {
-            const code = document.getElementById('otpCode').value.trim();
-            try {
-                const result = await window.confirmationResult.confirm(code);
-                const user = result.user;
-                const role = document.getElementById('userRole').value;
-                closePhoneOTPModal();
-
-                if (role === 'customer') {
-                    window.location.href = '../customer/Home.html';
-                } else {
-                    window.location.href = '../rider/pending.html';
-                }
-            } catch (error) {
-                alert('Invalid OTP code.');
-            }
-        }
-    </script>
+
+<div class="register-box">
+
+
+<div class="logo">
+RID<span>ERX</span>
+</div>
+
+
+
+<div class="role-title" id="roleTitle">
+Create Account
+</div>
+
+
+
+<input 
+class="input"
+id="name"
+placeholder="Full Name">
+
+
+
+<input 
+class="input"
+id="phone"
+placeholder="Phone Number">
+
+
+
+<input 
+class="input"
+id="email"
+type="email"
+placeholder="Email Address">
+
+
+
+<input 
+class="input"
+id="password"
+type="password"
+placeholder="Password">
+
+
+
+
+
+<!-- Rider Extra Details -->
+
+<div id="riderFields">
+
+
+<select class="input" id="vehicleType">
+
+<option value="">
+Select Vehicle Type
+</option>
+
+<option>
+Bike
+</option>
+
+<option>
+Cab
+</option>
+
+</select>
+
+
+
+<input 
+class="input"
+id="vehicleNumber"
+placeholder="Vehicle Number">
+
+
+
+
+
+<div class="upload">
+
+<label>
+Upload RC
+</label>
+
+<input 
+type="file"
+id="rcUpload"
+accept="image/*,.pdf">
+
+</div>
+
+
+
+
+
+<div class="upload">
+
+<label>
+Upload Driving License
+</label>
+
+<input 
+type="file"
+id="licenseUpload"
+accept="image/*,.pdf">
+
+</div>
+
+
+</div>
+
+
+
+
+
+<button class="btn create" id="createBtn">
+
+Create Account
+
+</button>
+
+
+
+
+
+<div class="back" onclick="goBack()">
+
+← Back To Login
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+<script>
+
+
+const params =
+new URLSearchParams(window.location.search);
+
+
+const role =
+params.get("role") || "customer";
+
+
+
+
+if(role==="rider"){
+
+
+document.getElementById("roleTitle").innerHTML=
+"Rider Registration";
+
+
+document.getElementById("riderFields").style.display=
+"block";
+
+
+}
+
+else{
+
+
+document.getElementById("roleTitle").innerHTML=
+"Customer Registration";
+
+
+}
+
+
+
+
+
+document.getElementById("createBtn").onclick=function(){
+
+
+let name =
+document.getElementById("name").value;
+
+
+let phone =
+document.getElementById("phone").value;
+
+
+let email =
+document.getElementById("email").value;
+
+
+
+if(name==="" || phone==="" || email===""){
+
+alert("Please fill all required details");
+
+return;
+
+}
+
+
+
+
+if(role==="rider"){
+
+
+alert("Rider account created. Waiting for Admin Approval");
+
+
+window.location.href="../rider/home.html";
+
+
+}
+
+else{
+
+
+alert("Customer account created");
+
+
+window.location.href="../customer/home.html";
+
+
+}
+
+
+
+};
+
+
+
+
+
+
+function goBack(){
+
+window.location.href=
+"login.html?role="+role;
+
+}
+
+
+
+</script>
+
+
+
 </body>
-                              </html>
+
+</html>
