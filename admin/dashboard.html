@@ -1,6 +1,17 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>RiderX Admin Dashboard</title><link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Admin Dashboard</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
 
 :root{
     --yellow:#FFE500;
@@ -9,6 +20,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     --border:#252525;
     --gray:#999;
     --red:#ff4444;
+    --green:#19d36b;
 }
 
 *{
@@ -98,6 +110,17 @@ body{
     background:#210d0d;
     border:1px solid #662222;
     color:#ff7777;
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:18px;
+    font-size:14px;
+}
+
+.success{
+    display:none;
+    background:#0d2115;
+    border:1px solid #205c34;
+    color:#55e889;
     padding:14px;
     border-radius:12px;
     margin-bottom:18px;
@@ -226,165 +249,201 @@ body{
 
 }
 
-</style></head><body><header class="header"><div class="logo">
-    RID<span>ERX</span>
-</div>
+</style>
 
-<div class="header-right">
+</head>
 
-    <div class="admin-badge">
-        <i class="fa-solid fa-shield-halved"></i>
-        ADMIN
+<body>
+
+<header class="header">
+
+    <div class="logo">
+        RID<span>ERX</span>
     </div>
 
-    <i
-        class="fa-solid fa-right-from-bracket logout"
-        id="logoutBtn"
-        title="Logout">
-    </i>
+    <div class="header-right">
 
-</div>
+        <div class="admin-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            ADMIN
+        </div>
 
-</header><div class="container"><div class="welcome">
-    Admin Dashboard
-</div>
+        <i
+            class="fa-solid fa-right-from-bracket logout"
+            id="logoutBtn"
+            title="Logout">
+        </i>
 
-<div class="subtitle">
-    RiderX management & statistics
-</div>
-
-<div id="loading" class="loading">
-    Checking admin access...
-</div>
-
-<div id="error" class="error"></div>
-
-
-<div class="grid">
-
-    <div class="card">
-        <i class="fa-solid fa-users"></i>
-        <div id="customers" class="number">0</div>
-        <div class="title">Customers</div>
     </div>
 
-    <div class="card">
-        <i class="fa-solid fa-motorcycle"></i>
-        <div id="riders" class="number">0</div>
-        <div class="title">Riders</div>
+</header>
+
+
+<div class="container">
+
+    <div class="welcome">
+        Admin Dashboard
     </div>
 
-    <div class="card">
-        <i class="fa-solid fa-clock"></i>
-        <div id="pending" class="number">0</div>
-        <div class="title">Pending Riders</div>
+    <div class="subtitle">
+        RiderX management & statistics
     </div>
 
-    <div class="card">
-        <i class="fa-solid fa-signal"></i>
-        <div id="online" class="number">0</div>
-        <div class="title">Online Riders</div>
+
+    <div id="loading" class="loading">
+        Checking admin access...
     </div>
 
-    <div class="card">
-        <i class="fa-solid fa-route"></i>
-        <div id="rides" class="number">0</div>
-        <div class="title">Total Rides</div>
-    </div>
+    <div id="error" class="error"></div>
 
-    <div class="card">
-        <i class="fa-solid fa-spinner"></i>
-        <div id="active" class="number">0</div>
-        <div class="title">Active Rides</div>
-    </div>
-
-    <div class="card">
-        <i class="fa-solid fa-circle-check"></i>
-        <div id="completed" class="number">0</div>
-        <div class="title">Completed</div>
-    </div>
-
-    <div class="card">
-        <i class="fa-solid fa-xmark"></i>
-        <div id="cancelled" class="number">0</div>
-        <div class="title">Cancelled</div>
-    </div>
-
-    <div class="card">
-        <i class="fa-solid fa-indian-rupee-sign"></i>
-        <div id="revenue" class="number">₹0</div>
-        <div class="title">Revenue</div>
-    </div>
-
-    <div class="card">
-        <i class="fa-solid fa-calendar-day"></i>
-        <div id="todayRevenue" class="number">₹0</div>
-        <div class="title">Today Revenue</div>
-    </div>
-
-    <div class="card">
-        <i class="fa-solid fa-percent"></i>
-        <div id="commission" class="number">₹0</div>
-        <div class="title">Admin Commission</div>
-    </div>
-
-    <div class="card">
-        <i class="fa-solid fa-wallet"></i>
-        <div id="riderEarn" class="number">₹0</div>
-        <div class="title">Rider Earnings</div>
-    </div>
-
-</div>
+    <div id="success" class="success"></div>
 
 
-<div class="menu">
+    <div class="grid">
 
-    <div class="menu-title">
-        Management
-    </div>
-
-    <div class="menu-grid">
-
-        <button onclick="openPage('riders.html')">
-            <i class="fa-solid fa-motorcycle"></i>
-            Manage Riders
-        </button>
-
-        <button onclick="openPage('customers.html')">
+        <div class="card">
             <i class="fa-solid fa-users"></i>
-            Manage Customers
-        </button>
+            <div id="customers" class="number">0</div>
+            <div class="title">Customers</div>
+        </div>
 
-        <button onclick="openPage('rides.html')">
+
+        <div class="card">
+            <i class="fa-solid fa-motorcycle"></i>
+            <div id="riders" class="number">0</div>
+            <div class="title">Riders</div>
+        </div>
+
+
+        <div class="card">
+            <i class="fa-solid fa-clock"></i>
+            <div id="pending" class="number">0</div>
+            <div class="title">Pending Riders</div>
+        </div>
+
+
+        <div class="card">
+            <i class="fa-solid fa-signal"></i>
+            <div id="online" class="number">0</div>
+            <div class="title">Online Riders</div>
+        </div>
+
+
+        <div class="card">
             <i class="fa-solid fa-route"></i>
-            Manage Rides
-        </button>
+            <div id="rides" class="number">0</div>
+            <div class="title">Total Rides</div>
+        </div>
 
-        <button onclick="openPage('fare-settings.html')">
-            <i class="fa-solid fa-money-bill"></i>
-            Fare Settings
-        </button>
 
-        <button onclick="openPage('commission.html')">
+        <div class="card">
+            <i class="fa-solid fa-spinner"></i>
+            <div id="active" class="number">0</div>
+            <div class="title">Active Rides</div>
+        </div>
+
+
+        <div class="card">
+            <i class="fa-solid fa-circle-check"></i>
+            <div id="completed" class="number">0</div>
+            <div class="title">Completed</div>
+        </div>
+
+
+        <div class="card">
+            <i class="fa-solid fa-xmark"></i>
+            <div id="cancelled" class="number">0</div>
+            <div class="title">Cancelled</div>
+        </div>
+
+
+        <div class="card">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+            <div id="revenue" class="number">₹0</div>
+            <div class="title">Revenue</div>
+        </div>
+
+
+        <div class="card">
+            <i class="fa-solid fa-calendar-day"></i>
+            <div id="todayRevenue" class="number">₹0</div>
+            <div class="title">Today Revenue</div>
+        </div>
+
+
+        <div class="card">
             <i class="fa-solid fa-percent"></i>
-            Commission Settings
-        </button>
+            <div id="commission" class="number">₹0</div>
+            <div class="title">Admin Commission</div>
+        </div>
 
-        <button onclick="openPage('settings.html')">
-            <i class="fa-solid fa-gear"></i>
-            App Settings
-        </button>
 
+        <div class="card">
+            <i class="fa-solid fa-wallet"></i>
+            <div id="riderEarn" class="number">₹0</div>
+            <div class="title">Rider Earnings</div>
+        </div>
+
+    </div>
+
+
+    <div class="menu">
+
+        <div class="menu-title">
+            Management
+        </div>
+
+
+        <div class="menu-grid">
+
+            <button onclick="openPage('riders.html')">
+                <i class="fa-solid fa-motorcycle"></i>
+                Manage Riders
+            </button>
+
+
+            <button onclick="openPage('customers.html')">
+                <i class="fa-solid fa-users"></i>
+                Manage Customers
+            </button>
+
+
+            <button onclick="openPage('rides.html')">
+                <i class="fa-solid fa-route"></i>
+                Manage Rides
+            </button>
+
+
+            <button onclick="openPage('fare-settings.html')">
+                <i class="fa-solid fa-money-bill"></i>
+                Fare Settings
+            </button>
+
+
+            <button onclick="openPage('commission.html')">
+                <i class="fa-solid fa-percent"></i>
+                Commission Settings
+            </button>
+
+
+            <button onclick="openPage('settings.html')">
+                <i class="fa-solid fa-gear"></i>
+                App Settings
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+        RiderX Admin Panel
     </div>
 
 </div>
 
 
-<div class="footer">
-    RiderX Admin Panel
-</div>
-
-</div><script type="module">
+<script type="module">
 
 import {
     auth,
@@ -411,6 +470,9 @@ const loading =
 
 const errorBox =
     document.getElementById("error");
+
+const successBox =
+    document.getElementById("success");
 
 
 const customersEl =
@@ -455,21 +517,23 @@ const logoutBtn =
 
 function money(value){
 
+    const n =
+        Number(value) || 0;
+
     return "₹" +
-        (Number(value) || 0)
-        .toLocaleString("en-IN");
+        n.toLocaleString("en-IN");
 
 }
 
 
-function roleOf(data){
+function getRole(data){
 
     return String(
         data?.role ||
         data?.userType ||
         data?.type ||
         ""
-    ).toLowerCase();
+    ).trim().toLowerCase();
 
 }
 
@@ -477,19 +541,10 @@ function roleOf(data){
 function isAdmin(data){
 
     return (
-        roleOf(data) === "admin" ||
-        roleOf(data) === "administrator" ||
+        getRole(data) === "admin" ||
+        getRole(data) === "administrator" ||
         data?.isAdmin === true
     );
-
-}
-
-
-function showError(message){
-
-    errorBox.style.display = "block";
-
-    errorBox.textContent = message;
 
 }
 
@@ -501,38 +556,20 @@ function hideLoading(){
 }
 
 
-/*
-    Important:
-    Collection error hone par dashboard rukega nahi.
-*/
+function showError(text){
 
-async function safeGetCollection(name){
+    errorBox.textContent = text;
 
-    try{
+    errorBox.style.display = "block";
 
-        const result =
-            await getDocs(
-                collection(db,name)
-            );
+}
 
-        return result.docs.map(
-            d => ({
-                id:d.id,
-                ...d.data()
-            })
-        );
 
-    }catch(error){
+function showSuccess(text){
 
-        console.warn(
-            "Cannot read collection:",
-            name,
-            error
-        );
+    successBox.textContent = text;
 
-        return [];
-
-    }
+    successBox.style.display = "block";
 
 }
 
@@ -543,7 +580,7 @@ function statusOf(data){
         data?.status ||
         data?.rideStatus ||
         ""
-    ).toLowerCase();
+    ).trim().toLowerCase();
 
 }
 
@@ -567,7 +604,9 @@ function isToday(data){
     const value =
         data?.createdAt ||
         data?.timestamp ||
-        data?.date;
+        data?.date ||
+        data?.createdDate;
+
 
     if(!value){
 
@@ -575,7 +614,9 @@ function isToday(data){
 
     }
 
-    let date = null;
+
+    let date;
+
 
     try{
 
@@ -584,7 +625,8 @@ function isToday(data){
             typeof value.toDate === "function"
         ){
 
-            date = value.toDate();
+            date =
+                value.toDate();
 
         }else if(
             typeof value === "object" &&
@@ -609,6 +651,7 @@ function isToday(data){
 
     }
 
+
     if(
         !date ||
         Number.isNaN(date.getTime())
@@ -618,8 +661,10 @@ function isToday(data){
 
     }
 
+
     const now =
         new Date();
+
 
     return (
         date.getDate() === now.getDate() &&
@@ -630,28 +675,79 @@ function isToday(data){
 }
 
 
+/*
+    Firestore collection reader.
+
+    If a collection cannot be read,
+    dashboard will continue instead of
+    remaining on loading forever.
+*/
+
+async function readCollection(name){
+
+    try{
+
+        const snap =
+            await getDocs(
+                collection(db,name)
+            );
+
+        return snap.docs.map(
+            item => ({
+                id:item.id,
+                ...item.data()
+            })
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Firestore collection failed:",
+            name,
+            error
+        );
+
+        return [];
+
+    }
+
+}
+
+
+/*
+    Load dashboard statistics
+*/
+
 async function loadStatistics(){
 
+    let users = [];
+
+    let ridersData = [];
+
+    let rides = [];
+
+
     /*
-        Default values are already 0.
-        So even if Firestore rules deny
-        a collection, dashboard will open.
+        Users
     */
 
-    const users =
-        await safeGetCollection("users");
+    users =
+        await readCollection("users");
 
 
-    let customers = 0;
-    let riders = 0;
-    let pending = 0;
-    let online = 0;
+    let customerCount = 0;
+
+    let riderCount = 0;
+
+    let pendingCount = 0;
+
+    let onlineCount = 0;
 
 
     users.forEach(user => {
 
         const role =
-            roleOf(user);
+            getRole(user);
 
 
         if(
@@ -659,14 +755,14 @@ async function loadStatistics(){
             role === "user"
         ){
 
-            customers++;
+            customerCount++;
 
         }
 
 
         if(role === "rider"){
 
-            riders++;
+            riderCount++;
 
 
             const status =
@@ -683,7 +779,7 @@ async function loadStatistics(){
                 status === "pending-approval"
             ){
 
-                pending++;
+                pendingCount++;
 
             }
 
@@ -694,7 +790,7 @@ async function loadStatistics(){
                 status === "online"
             ){
 
-                online++;
+                onlineCount++;
 
             }
 
@@ -704,22 +800,21 @@ async function loadStatistics(){
 
 
     /*
-        If separate riders collection exists,
-        use it for rider statistics.
+        Separate riders collection
     */
 
-    const riderData =
-        await safeGetCollection("riders");
+    ridersData =
+        await readCollection("riders");
 
 
-    if(riderData.length > 0){
+    if(ridersData.length > 0){
 
-        riders =
-            riderData.length;
+        riderCount =
+            ridersData.length;
 
 
-        pending =
-            riderData.filter(
+        pendingCount =
+            ridersData.filter(
                 rider => {
 
                     const status =
@@ -728,6 +823,7 @@ async function loadStatistics(){
                             rider.approvalStatus ||
                             ""
                         ).toLowerCase();
+
 
                     return (
                         status === "pending" ||
@@ -739,14 +835,16 @@ async function loadStatistics(){
             ).length;
 
 
-        online =
-            riderData.filter(
+        onlineCount =
+            ridersData.filter(
                 rider => {
 
                     const status =
                         String(
-                            rider.status || ""
+                            rider.status ||
+                            ""
                         ).toLowerCase();
+
 
                     return (
                         rider.online === true ||
@@ -760,39 +858,30 @@ async function loadStatistics(){
     }
 
 
-    customersEl.textContent =
-        customers.toLocaleString("en-IN");
-
-    ridersEl.textContent =
-        riders.toLocaleString("en-IN");
-
-    pendingEl.textContent =
-        pending.toLocaleString("en-IN");
-
-    onlineEl.textContent =
-        online.toLocaleString("en-IN");
-
-
     /*
         Rides
     */
 
-    const rides =
-        await safeGetCollection("rides");
+    rides =
+        await readCollection("rides");
 
 
-    let active = 0;
-    let completed = 0;
-    let cancelled = 0;
+    let activeCount = 0;
 
-    let revenue = 0;
-    let todayRevenue = 0;
+    let completedCount = 0;
+
+    let cancelledCount = 0;
+
+    let totalRevenue = 0;
+
+    let todayTotal = 0;
 
 
     rides.forEach(ride => {
 
         const status =
             statusOf(ride);
+
 
         const amount =
             amountOf(ride);
@@ -810,7 +899,7 @@ async function loadStatistics(){
             ].includes(status)
         ){
 
-            active++;
+            activeCount++;
 
         }
 
@@ -824,14 +913,14 @@ async function loadStatistics(){
             ].includes(status)
         ){
 
-            completed++;
+            completedCount++;
 
-            revenue += amount;
+            totalRevenue += amount;
 
 
             if(isToday(ride)){
 
-                todayRevenue += amount;
+                todayTotal += amount;
 
             }
 
@@ -846,55 +935,81 @@ async function loadStatistics(){
             ].includes(status)
         ){
 
-            cancelled++;
+            cancelledCount++;
 
         }
 
     });
 
 
+    /*
+        Update UI
+    */
+
+    customersEl.textContent =
+        customerCount.toLocaleString("en-IN");
+
+
+    ridersEl.textContent =
+        riderCount.toLocaleString("en-IN");
+
+
+    pendingEl.textContent =
+        pendingCount.toLocaleString("en-IN");
+
+
+    onlineEl.textContent =
+        onlineCount.toLocaleString("en-IN");
+
+
     ridesEl.textContent =
         rides.length.toLocaleString("en-IN");
 
+
     activeEl.textContent =
-        active.toLocaleString("en-IN");
+        activeCount.toLocaleString("en-IN");
+
 
     completedEl.textContent =
-        completed.toLocaleString("en-IN");
+        completedCount.toLocaleString("en-IN");
+
 
     cancelledEl.textContent =
-        cancelled.toLocaleString("en-IN");
+        cancelledCount.toLocaleString("en-IN");
 
 
     revenueEl.textContent =
-        money(revenue);
+        money(totalRevenue);
 
 
     todayRevenueEl.textContent =
-        money(todayRevenue);
+        money(todayTotal);
 
 
     /*
-        Temporary default commission.
-        Later we will connect this to
-        admin commission settings.
+        Default commission 20%.
+        Can later be connected to
+        commission settings.
     */
 
-    const commissionRate = 20;
+    const commissionRate =
+        20;
+
 
     const adminCommission =
-        revenue *
+        totalRevenue *
         commissionRate /
         100;
 
 
     const riderEarnings =
-        revenue -
+        totalRevenue -
         adminCommission;
 
 
     commissionEl.textContent =
         money(adminCommission);
+
 
     riderEarnEl.textContent =
         money(riderEarnings);
@@ -903,17 +1018,25 @@ async function loadStatistics(){
 
 
 /*
-    Admin authentication
+    IMPORTANT SECURITY:
+
+    Dashboard cannot be used without
+    Firebase authenticated admin account.
 */
 
 onAuthStateChanged(
     auth,
-    async user => {
+    async (user) => {
+
+        /*
+            No login
+        */
 
         if(!user){
 
-            window.location.href =
-                "login.html";
+            window.location.replace(
+                "login.html"
+            );
 
             return;
 
@@ -926,7 +1049,12 @@ onAuthStateChanged(
 
         try{
 
-            const userRef =
+            /*
+                Get current user's
+                Firestore document.
+            */
+
+            const adminRef =
                 doc(
                     db,
                     "users",
@@ -934,54 +1062,77 @@ onAuthStateChanged(
                 );
 
 
-            const userSnap =
-                await getDoc(userRef);
+            const adminSnap =
+                await getDoc(adminRef);
 
 
-            /*
-                Firebase Firestore security
-                error should NOT leave infinite
-                loading.
-            */
-
-            if(!userSnap.exists()){
+            if(!adminSnap.exists()){
 
                 hideLoading();
 
                 showError(
-                    "Admin profile nahi mila. Firestore users collection me is UID ka document banayein aur role = admin rakhein."
-                );
-
-                return;
-
-            }
-
-
-            const data =
-                userSnap.data();
-
-
-            if(!isAdmin(data)){
-
-                hideLoading();
-
-                showError(
-                    "Access denied. Is account ke users document me role = admin hona chahiye."
+                    "Admin profile not found for this Firebase UID."
                 );
 
                 await signOut(auth);
 
                 setTimeout(
                     () => {
-                        window.location.href =
-                            "login.html";
+
+                        window.location.replace(
+                            "login.html"
+                        );
+
                     },
-                    1800
+                    1500
                 );
 
                 return;
 
             }
+
+
+            const adminData =
+                adminSnap.data();
+
+
+            /*
+                Admin role
+            */
+
+            if(!isAdmin(adminData)){
+
+                hideLoading();
+
+                showError(
+                    "Access denied. This Firebase account is not an admin."
+                );
+
+                await signOut(auth);
+
+                setTimeout(
+                    () => {
+
+                        window.location.replace(
+                            "login.html"
+                        );
+
+                    },
+                    1500
+                );
+
+                return;
+
+            }
+
+
+            /*
+                Admin verified
+            */
+
+            showSuccess(
+                "Admin access verified."
+            );
 
 
             loading.textContent =
@@ -989,35 +1140,39 @@ onAuthStateChanged(
 
 
             /*
-                Dashboard statistics ko separate
-                error handling ke saath load karo.
+                Maximum protection against
+                permanent loading.
+
+                Statistics are independent
+                from authentication.
             */
 
-            try{
-
-                await loadStatistics();
-
-            }catch(statError){
-
-                console.error(
-                    "Statistics error:",
-                    statError
-                );
-
-                showError(
-                    "Admin dashboard open ho gaya hai, lekin kuch statistics Firebase rules ki wajah se load nahi ho paayi."
-                );
-
-            }
+            await loadStatistics();
 
 
             hideLoading();
 
 
+            /*
+                Hide success message after
+                a short time.
+            */
+
+            setTimeout(
+                () => {
+
+                    successBox.style.display =
+                        "none";
+
+                },
+                2500
+            );
+
+
         }catch(error){
 
             console.error(
-                "Admin verification error:",
+                "Admin Dashboard Error:",
                 error
             );
 
@@ -1026,7 +1181,7 @@ onAuthStateChanged(
 
 
             showError(
-                "Firebase se admin verify nahi ho pa raha. Firestore rules aur firebase-config.js check karein."
+                "Dashboard verification failed. Check Firebase configuration and Firestore rules."
             );
 
         }
@@ -1036,7 +1191,7 @@ onAuthStateChanged(
 
 
 /*
-    Navigation
+    Page navigation
 */
 
 window.openPage =
@@ -1056,13 +1211,13 @@ logoutBtn.addEventListener(
     "click",
     async () => {
 
-        const ok =
+        const confirmLogout =
             confirm(
                 "Are you sure you want to logout?"
             );
 
 
-        if(!ok){
+        if(!confirmLogout){
 
             return;
 
@@ -1073,8 +1228,9 @@ logoutBtn.addEventListener(
 
             await signOut(auth);
 
-            window.location.href =
-                "login.html";
+            window.location.replace(
+                "login.html"
+            );
 
         }catch(error){
 
@@ -1092,4 +1248,8 @@ logoutBtn.addEventListener(
     }
 );
 
-</script></body></html>
+</script>
+
+</body>
+
+</html>
