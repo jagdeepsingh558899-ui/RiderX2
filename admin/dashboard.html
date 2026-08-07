@@ -1,410 +1,994 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX Admin Dashboard</title>
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-
-<style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>RiderX Admin Dashboard</title><link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
 
 :root{
---yellow:#FFE500;
---black:#050505;
---card:#111;
---border:#222;
---gray:#999;
+    --yellow:#FFE500;
+    --black:#050505;
+    --card:#111;
+    --border:#252525;
+    --gray:#999;
+    --green:#19d36b;
+    --red:#ff4444;
 }
 
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
-
 
 body{
-background:var(--black);
-color:white;
-min-height:100vh;
-padding-bottom:80px;
+    background:var(--black);
+    color:white;
+    min-height:100vh;
+    padding-bottom:50px;
 }
-
-
 
 .header{
-height:70px;
-background:#111;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 20px;
+    height:70px;
+    background:#111;
+    border-bottom:1px solid #222;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    position:sticky;
+    top:0;
+    z-index:100;
 }
 
-
 .logo{
-font-size:28px;
-font-weight:900;
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:-1px;
 }
 
 .logo span{
-color:var(--yellow);
+    color:var(--yellow);
 }
 
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.admin-badge{
+    font-size:12px;
+    background:#1c1c1c;
+    border:1px solid #333;
+    padding:7px 10px;
+    border-radius:20px;
+    color:var(--yellow);
+}
 
 .logout{
-font-size:22px;
-color:#ff4444;
-cursor:pointer;
+    font-size:22px;
+    color:var(--red);
+    cursor:pointer;
 }
 
+.logout:active{
+    transform:scale(.9);
+}
 
 .container{
-padding:20px;
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
 }
-
 
 .welcome{
-font-size:24px;
-font-weight:bold;
-margin-bottom:20px;
+    font-size:25px;
+    font-weight:bold;
+    margin-bottom:6px;
 }
 
+.subtitle{
+    color:var(--gray);
+    font-size:14px;
+    margin-bottom:20px;
+}
 
 .loading{
-text-align:center;
-color:var(--yellow);
-margin-bottom:20px;
+    text-align:center;
+    color:var(--yellow);
+    margin:15px 0;
+    font-size:14px;
 }
 
-
+.error{
+    display:none;
+    background:#210d0d;
+    border:1px solid #662222;
+    color:#ff7777;
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:18px;
+    font-size:14px;
+}
 
 .grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
 }
-
-
 
 .card{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:20px;
-padding:18px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:18px;
+    min-height:125px;
 }
-
-
 
 .card i{
-font-size:28px;
-color:var(--yellow);
+    font-size:25px;
+    color:var(--yellow);
 }
-
-
 
 .number{
-font-size:30px;
-font-weight:bold;
-margin-top:10px;
+    font-size:29px;
+    font-weight:bold;
+    margin-top:12px;
+    word-break:break-word;
 }
-
-
 
 .title{
-font-size:14px;
-color:var(--gray);
+    font-size:13px;
+    color:var(--gray);
+    margin-top:4px;
 }
-
-
 
 .menu{
-margin-top:25px;
+    margin-top:25px;
 }
 
+.menu-title{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
 
+.menu-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
 
 .menu button{
-
-width:100%;
-padding:16px;
-margin-bottom:12px;
-background:#111;
-border:1px solid #333;
-border-radius:15px;
-color:white;
-font-size:16px;
-text-align:left;
-cursor:pointer;
-
+    width:100%;
+    padding:16px;
+    background:#111;
+    border:1px solid #333;
+    border-radius:15px;
+    color:white;
+    font-size:16px;
+    text-align:left;
+    cursor:pointer;
+    transition:.2s;
 }
 
+.menu button:hover{
+    border-color:var(--yellow);
+    background:#171717;
+}
 
+.menu button:active{
+    transform:scale(.98);
+}
 
 .menu i{
-width:35px;
-color:var(--yellow);
+    width:35px;
+    color:var(--yellow);
 }
 
-
-
-@media(max-width:600px){
-
-.grid{
-grid-template-columns:repeat(2,1fr);
+.footer{
+    text-align:center;
+    color:#666;
+    font-size:12px;
+    margin-top:30px;
 }
 
-.card{
-padding:15px;
-}
+@media(max-width:900px){
 
-.number{
-font-size:24px;
-}
+    .grid{
+        grid-template-columns:repeat(3,1fr);
+    }
 
 }
 
-</style>
+@media(max-width:650px){
 
-</head>
+    .header{
+        padding:0 15px;
+    }
 
+    .logo{
+        font-size:24px;
+    }
 
-<body>
+    .admin-badge{
+        display:none;
+    }
 
+    .container{
+        padding:15px;
+    }
 
-<header class="header">
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+    }
 
-<div class="logo">
-RID<span>ERX</span>
+    .card{
+        padding:15px;
+        min-height:110px;
+    }
+
+    .number{
+        font-size:24px;
+    }
+
+    .menu-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style></head><body><header class="header"><div class="logo">
+    RID<span>ERX</span>
 </div>
 
+<div class="header-right">
 
-<i onclick="logout()"
-class="fa-solid fa-right-from-bracket logout"></i>
+    <div class="admin-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        ADMIN
+    </div>
 
+    <i
+        onclick="logout()"
+        class="fa-solid fa-right-from-bracket logout"
+        title="Logout">
+    </i>
 
-</header>
-
-
-<div class="container">
-
-
-<div class="welcome">
-Admin Dashboard
 </div>
 
+</header><div class="container"><div class="welcome">
+    Admin Dashboard
+</div>
+
+<div class="subtitle">
+    RiderX management & statistics
+</div>
 
 <div id="loading" class="loading">
-Loading Dashboard...
+    Loading Dashboard...
 </div>
+
+<div id="error" class="error"></div>
 
 
 <div class="grid">
 
-
-<div class="card">
-<i class="fa-solid fa-users"></i>
-<div id="customers" class="number">0</div>
-<div class="title">Customers</div>
-</div>
-
-
-<div class="card">
-<i class="fa-solid fa-motorcycle"></i>
-<div id="riders" class="number">0</div>
-<div class="title">Riders</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-users"></i>
+        <div id="customers" class="number">0</div>
+        <div class="title">Customers</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-clock"></i>
-<div id="pending" class="number">0</div>
-<div class="title">Pending Riders</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-motorcycle"></i>
+        <div id="riders" class="number">0</div>
+        <div class="title">Riders</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-signal"></i>
-<div id="online" class="number">0</div>
-<div class="title">Online Riders</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-clock"></i>
+        <div id="pending" class="number">0</div>
+        <div class="title">Pending Riders</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-route"></i>
-<div id="rides" class="number">0</div>
-<div class="title">Total Rides</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-signal"></i>
+        <div id="online" class="number">0</div>
+        <div class="title">Online Riders</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-spinner"></i>
-<div id="active" class="number">0</div>
-<div class="title">Active Rides</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-route"></i>
+        <div id="rides" class="number">0</div>
+        <div class="title">Total Rides</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-circle-check"></i>
-<div id="completed" class="number">0</div>
-<div class="title">Completed</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-spinner"></i>
+        <div id="active" class="number">0</div>
+        <div class="title">Active Rides</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-xmark"></i>
-<div id="cancelled" class="number">0</div>
-<div class="title">Cancelled</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-circle-check"></i>
+        <div id="completed" class="number">0</div>
+        <div class="title">Completed</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-indian-rupee-sign"></i>
-<div id="revenue" class="number">₹0</div>
-<div class="title">Revenue</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-xmark"></i>
+        <div id="cancelled" class="number">0</div>
+        <div class="title">Cancelled</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-calendar-day"></i>
-<div id="todayRevenue" class="number">₹0</div>
-<div class="title">Today Revenue</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-indian-rupee-sign"></i>
+        <div id="revenue" class="number">₹0</div>
+        <div class="title">Revenue</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-percent"></i>
-<div id="commission" class="number">₹0</div>
-<div class="title">Admin Commission</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-calendar-day"></i>
+        <div id="todayRevenue" class="number">₹0</div>
+        <div class="title">Today Revenue</div>
+    </div>
 
 
-<div class="card">
-<i class="fa-solid fa-wallet"></i>
-<div id="riderEarn" class="number">₹0</div>
-<div class="title">Rider Earnings</div>
-</div>
+    <div class="card">
+        <i class="fa-solid fa-percent"></i>
+        <div id="commission" class="number">₹0</div>
+        <div class="title">Admin Commission</div>
+    </div>
 
+
+    <div class="card">
+        <i class="fa-solid fa-wallet"></i>
+        <div id="riderEarn" class="number">₹0</div>
+        <div class="title">Rider Earnings</div>
+    </div>
 
 </div>
+
+
 <div class="menu">
 
+    <div class="menu-title">
+        Management
+    </div>
 
-<button onclick="openPage('riders.html')">
-<i class="fa-solid fa-motorcycle"></i>
-Manage Riders
-</button>
+    <div class="menu-grid">
 
-
-<button onclick="openPage('customers.html')">
-<i class="fa-solid fa-users"></i>
-Manage Customers
-</button>
-
-
-<button onclick="openPage('rides.html')">
-<i class="fa-solid fa-route"></i>
-Manage Rides
-</button>
+        <button onclick="openPage('riders.html')">
+            <i class="fa-solid fa-motorcycle"></i>
+            Manage Riders
+        </button>
 
 
-<button onclick="openPage('fare-settings.html')">
-<i class="fa-solid fa-money-bill"></i>
-Fare Settings
-</button>
+        <button onclick="openPage('customers.html')">
+            <i class="fa-solid fa-users"></i>
+            Manage Customers
+        </button>
 
 
-<button onclick="openPage('commission.html')">
-<i class="fa-solid fa-percent"></i>
-Commission Settings
-</button>
+        <button onclick="openPage('rides.html')">
+            <i class="fa-solid fa-route"></i>
+            Manage Rides
+        </button>
 
 
-<button onclick="openPage('settings.html')">
-<i class="fa-solid fa-gear"></i>
-App Settings
-</button>
+        <button onclick="openPage('fare-settings.html')">
+            <i class="fa-solid fa-money-bill"></i>
+            Fare Settings
+        </button>
 
+
+        <button onclick="openPage('commission.html')">
+            <i class="fa-solid fa-percent"></i>
+            Commission Settings
+        </button>
+
+
+        <button onclick="openPage('settings.html')">
+            <i class="fa-solid fa-gear"></i>
+            App Settings
+        </button>
+
+    </div>
 
 </div>
 
 
+<div class="footer">
+    RiderX Admin Panel
 </div>
 
+</div><script type="module">
 
-
-<script type="module">
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
 
 import {
-auth,
-db
-}
-from "../firebase/firebase-config.js";
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 
 import {
-onAuthStateChanged,
-signOut
-}
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    collection,
+    getDocs,
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-import {
-collection,
-getDocs,
-doc,
-getDoc
-}
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+const customersEl = document.getElementById("customers");
+const ridersEl = document.getElementById("riders");
+const pendingEl = document.getElementById("pending");
+const onlineEl = document.getElementById("online");
+
+const ridesEl = document.getElementById("rides");
+const activeEl = document.getElementById("active");
+const completedEl = document.getElementById("completed");
+const cancelledEl = document.getElementById("cancelled");
+
+const revenueEl = document.getElementById("revenue");
+const todayRevenueEl = document.getElementById("todayRevenue");
+
+const commissionEl = document.getElementById("commission");
+const riderEarnEl = document.getElementById("riderEarn");
+
+const loading = document.getElementById("loading");
+const errorBox = document.getElementById("error");
 
 
+function showError(message){
 
-const customersEl=document.getElementById("customers");
-const ridersEl=document.getElementById("riders");
-const pendingEl=document.getElementById("pending");
-const onlineEl=document.getElementById("online");
-
-const ridesEl=document.getElementById("rides");
-const activeEl=document.getElementById("active");
-const completedEl=document.getElementById("completed");
-const cancelledEl=document.getElementById("cancelled");
-
-const revenueEl=document.getElementById("revenue");
-const todayRevenueEl=document.getElementById("todayRevenue");
-
-const commissionEl=document.getElementById("commission");
-const riderEarnEl=document.getElementById("riderEarn");
-
-const loading=document.getElementById("loading");
-
-
-
-
-
-onAuthStateChanged(auth,async(user)=>{
-
-
-try{
-
-
-if(!user){
-
-location.href="../auth/login.html";
-return;
+    errorBox.style.display = "block";
+    errorBox.textContent = message;
 
 }
 
 
+function money(value){
 
-const adminSnap =
-await getDoc(
-doc(db,"users
+    const number = Number(value) || 0;
+
+    return "₹" + number.toLocaleString("en-IN");
+
+}
+
+
+function getRole(data){
+
+    return String(
+        data?.role ||
+        data?.userType ||
+        data?.type ||
+        ""
+    ).toLowerCase();
+
+}
+
+
+function isAdmin(data){
+
+    const role = getRole(data);
+
+    return (
+        role === "admin" ||
+        role === "administrator" ||
+        data?.isAdmin === true
+    );
+
+}
+
+
+async function getCollectionData(name){
+
+    try{
+
+        const snapshot = await getDocs(
+            collection(db,name)
+        );
+
+        return snapshot.docs.map(
+            item => ({
+                id:item.id,
+                ...item.data()
+            })
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Collection error:",
+            name,
+            error
+        );
+
+        return [];
+
+    }
+
+}
+
+
+function getRideStatus(ride){
+
+    return String(
+        ride?.status ||
+        ride?.rideStatus ||
+        ""
+    ).toLowerCase();
+
+}
+
+
+function getAmount(ride){
+
+    return Number(
+        ride?.fare ??
+        ride?.amount ??
+        ride?.price ??
+        ride?.totalFare ??
+        ride?.totalAmount ??
+        0
+    ) || 0;
+
+}
+
+
+function isCompleted(status){
+
+    return [
+        "completed",
+        "complete",
+        "finished",
+        "success"
+    ].includes(status);
+
+}
+
+
+function isCancelled(status){
+
+    return [
+        "cancelled",
+        "canceled",
+        "rejected"
+    ].includes(status);
+
+}
+
+
+function isActive(status){
+
+    return [
+        "accepted",
+        "ongoing",
+        "started",
+        "arriving",
+        "in_progress",
+        "in-progress",
+        "active"
+    ].includes(status);
+
+}
+
+
+function isPending(status){
+
+    return [
+        "pending",
+        "requested",
+        "searching"
+    ].includes(status);
+
+}
+
+
+function isToday(ride){
+
+    const value =
+        ride?.createdAt ||
+        ride?.timestamp ||
+        ride?.date ||
+        ride?.createdDate;
+
+    if(!value) return false;
+
+    let date;
+
+    try{
+
+        if(
+            typeof value === "object" &&
+            typeof value.toDate === "function"
+        ){
+
+            date = value.toDate();
+
+        }else if(
+            value?.seconds
+        ){
+
+            date = new Date(
+                value.seconds * 1000
+            );
+
+        }else{
+
+            date = new Date(value);
+
+        }
+
+    }catch(e){
+
+        return false;
+
+    }
+
+    if(
+        !date ||
+        Number.isNaN(date.getTime())
+    ){
+
+        return false;
+
+    }
+
+    const now = new Date();
+
+    return (
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+    );
+
+}
+
+
+async function loadDashboard(){
+
+    loading.style.display = "block";
+    errorBox.style.display = "none";
+
+    try{
+
+        const users = await getCollectionData("users");
+
+        let customers = 0;
+        let riders = 0;
+        let pendingRiders = 0;
+        let onlineRiders = 0;
+
+        users.forEach(user => {
+
+            const role = getRole(user);
+
+            if(
+                role === "customer" ||
+                role === "user"
+            ){
+
+                customers++;
+
+            }
+
+            if(role === "rider"){
+
+                riders++;
+
+                const status = String(
+                    user.status ||
+                    user.riderStatus ||
+                    ""
+                ).toLowerCase();
+
+                if(
+                    status === "pending" ||
+                    status === "pending_approval" ||
+                    status === "pending-approval"
+                ){
+
+                    pendingRiders++;
+
+                }
+
+                if(
+                    user.online === true ||
+                    user.isOnline === true ||
+                    status === "online"
+                ){
+
+                    onlineRiders++;
+
+                }
+
+            }
+
+        });
+
+
+        const riderCollection =
+            await getCollectionData("riders");
+
+
+        if(riderCollection.length > 0){
+
+            riders = riderCollection.length;
+
+            pendingRiders =
+                riderCollection.filter(r => {
+
+                    const status = String(
+                        r.status ||
+                        r.approvalStatus ||
+                        ""
+                    ).toLowerCase();
+
+                    return (
+                        status === "pending" ||
+                        status === "pending_approval" ||
+                        status === "pending-approval"
+                    );
+
+                }).length;
+
+
+            onlineRiders =
+                riderCollection.filter(r => {
+
+                    return (
+                        r.online === true ||
+                        r.isOnline === true ||
+                        String(r.status || "").toLowerCase()
+                        === "online"
+                    );
+
+                }).length;
+
+        }
+
+
+        const rides =
+            await getCollectionData("rides");
+
+
+        let active = 0;
+        let completed = 0;
+        let cancelled = 0;
+        let revenue = 0;
+        let todayRevenue = 0;
+
+        rides.forEach(ride => {
+
+            const status =
+                getRideStatus(ride);
+
+            const amount =
+                getAmount(ride);
+
+
+            if(isActive(status)){
+                active++;
+            }
+
+
+            if(isCompleted(status)){
+
+                completed++;
+
+                revenue += amount;
+
+                if(isToday(ride)){
+                    todayRevenue += amount;
+                }
+
+            }
+
+
+            if(isCancelled(status)){
+                cancelled++;
+            }
+
+        });
+
+
+        const commissionRate = 20;
+
+        const adminCommission =
+            revenue * commissionRate / 100;
+
+        const riderEarnings =
+            revenue - adminCommission;
+
+
+        customersEl.textContent =
+            customers.toLocaleString("en-IN");
+
+        ridersEl.textContent =
+            riders.toLocaleString("en-IN");
+
+        pendingEl.textContent =
+            pendingRiders.toLocaleString("en-IN");
+
+        onlineEl.textContent =
+            onlineRiders.toLocaleString("en-IN");
+
+        ridesEl.textContent =
+            rides.length.toLocaleString("en-IN");
+
+        activeEl.textContent =
+            active.toLocaleString("en-IN");
+
+        completedEl.textContent =
+            completed.toLocaleString("en-IN");
+
+        cancelledEl.textContent =
+            cancelled.toLocaleString("en-IN");
+
+        revenueEl.textContent =
+            money(revenue);
+
+        todayRevenueEl.textContent =
+            money(todayRevenue);
+
+        commissionEl.textContent =
+            money(adminCommission);
+
+        riderEarnEl.textContent =
+            money(riderEarnings);
+
+
+        loading.style.display = "none";
+
+
+    }catch(error){
+
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
+        loading.textContent =
+            "Dashboard loaded with limited data.";
+
+        showError(
+            "Dashboard data load nahi ho paaya. Firebase connection aur Firestore rules check karein."
+        );
+
+    }
+
+}
+
+
+onAuthStateChanged(
+    auth,
+    async (user) => {
+
+        if(!user){
+
+            window.location.href =
+                "./login.html";
+
+            return;
+
+        }
+
+
+        try{
+
+            const adminRef =
+                doc(db,"users",user.uid);
+
+            const adminSnap =
+                await getDoc(adminRef);
+
+
+            if(!adminSnap.exists()){
+
+                await signOut(auth);
+
+                window.location.href =
+                    "./login.html";
+
+                return;
+
+            }
+
+
+            const adminData =
+                adminSnap.data();
+
+
+            if(!isAdmin(adminData)){
+
+                await signOut(auth);
+
+                alert(
+                    "Access denied. Admin account required."
+                );
+
+                window.location.href =
+                    "./login.html";
+
+                return;
+
+            }
+
+
+            await loadDashboard();
+
+
+        }catch(error){
+
+            console.error(
+                "Admin verification error:",
+                error
+            );
+
+            showError(
+                "Admin verification failed. Firebase configuration check karein."
+            );
+
+            loading.textContent =
+                "Unable to verify admin.";
+
+        }
+
+    }
+);
+
+
+window.openPage = function(page){
+
+    window.location.href = page;
+
+};
+
+
+window.logout = async function(){
+
+    const confirmLogout =
+        confirm("Are you sure you want to logout?");
+
+    if(!confirmLogout){
+        return;
+    }
+
+    try{
+
+        await signOut(auth);
+
+        window.location.href =
+            "./login.html";
+
+    }catch(error){
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+        alert(
+            "Logout failed. Please try again."
+        );
+
+    }
+
+};
+
+</script></body></html>
