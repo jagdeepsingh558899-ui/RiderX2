@@ -1,1200 +1,1949 @@
-/**
- * ============================================================
- * RiderX Rider Location Service
- * ============================================================
- *
- * IMPORTANT:
- *
- * This file DOES NOT create its own GPS watcher.
- *
- * GPS owner:
- *      js/map.js
- *
- * Tracking service:
- *      js/tracking.js
- *
- * Active ride:
- *      js/live-tracking.js
- *
- * This prevents:
- *      - duplicate GPS watchers
- *      - duplicate Firebase writes
- *      - battery drain
- *      - conflicting rider locations
- * ============================================================
- */
-
-import {
-    auth,
-    db,
-    doc,
-    setDoc,
-    updateDoc,
-    serverTimestamp
-} from "../firebase/firebase-config.js";
-
-
 /* ============================================================
-   STATE
-============================================================ */
+   RIDERX - RIDER LOCATION
+   File: js/rider-location.js
 
-const RiderLocationState =
-    window.RiderXRiderLocationState ||
-    {
+   Handles:
+   - Rider live GPS
+   - Firebase location sync
+   - Accuracy
+   - Heading
+   - Speed
+   - Location watch
+   - Online/offline location status
+   - Customer live tracking support
+   - Map integration
+   ============================================================ */
+
+(function () {
+
+    "use strict";
+
+    window.RiderX = window.RiderX || {};
+
+    const RX = window.RiderX;
+
+    const Location = RX.riderLocation =
+        RX.riderLocation || {};
+
+
+    /* ========================================================
+       CONFIG
+       ======================================================== */
+
+    Location.config = {
+
+        ridersPath:
+            "riders",
+
+        locationsPath:
+            "riderLocations",
+
+        updateInterval:
+            5000,
+
+        minimumDistance:
+            5,
+
+        highAccuracy:
+            true,
+
+        timeout:
+            15000,
+
+        maximumAge:
+            3000
+    };
+
+
+    /* ========================================================
+       STATE
+       ======================================================== */
+
+    Location.state = {
 
         initialized:
+            false,
+
+        watching:
+            false,
+
+        online:
             false,
 
         riderId:
             null,
 
-        online:
-            false,
-
-        activeRideId:
+        watchId:
             null,
 
-        locationListener:
+        lastPosition:
             null,
 
-        lastLocation:
+        lastSentPosition:
             null,
 
-        lastUpdate:
+        lastSentAt:
             0,
 
-        updateInterval:
-            3000
+        error:
+            null,
 
+        permission:
+            "unknown"
     };
 
 
-window.RiderXRiderLocationState =
-    RiderLocationState;
+    /* ========================================================
+       FIREBASE
+       ======================================================== */
 
+    Location.getDatabase =
+        function () {
 
-/* ============================================================
-   GET RIDER ID
-============================================================ */
+            try {
 
-function getRiderId() {
+                if (
+                    RX.firebase &&
+                    RX.firebase.database
+                ) {
 
-    if (
-        RiderLocationState.riderId
-    ) {
+                    return RX.firebase.database;
+                }
 
-        return RiderLocationState.riderId;
+            } catch (error) {}
 
-    }
 
+            try {
 
-    const user =
-        auth.currentUser;
+                if (
+                    window.firebase &&
+                    typeof firebase.database ===
+                    "function"
+                ) {
 
+                    return firebase.database();
+                }
 
-    if (
-        user
-    ) {
+            } catch (error) {}
 
-        return user.uid;
 
-    }
-
-
-    try {
-
-        return (
-            localStorage.getItem(
-                "riderx_rider_id"
-            ) ||
-            localStorage.getItem(
-                "riderId"
-            )
-        );
-
-    } catch (error) {
-
-        return null;
-
-    }
-
-}
-
-
-/* ============================================================
-   SET RIDER ID
-============================================================ */
-
-export function setRiderId(
-    riderId
-) {
-
-    if (
-        !riderId
-    ) {
-
-        return;
-
-    }
-
-
-    RiderLocationState.riderId =
-        String(
-            riderId
-        );
-
-
-    try {
-
-        localStorage.setItem(
-            "riderx_rider_id",
-            RiderLocationState.riderId
-        );
-
-    } catch (error) {}
-
-}
-
-
-/* ============================================================
-   SET ACTIVE RIDE
-============================================================ */
-
-export function setActiveRide(
-    rideId
-) {
-
-    RiderLocationState.activeRideId =
-        rideId
-            ? String(
-                rideId
-            )
-            : null;
-
-
-    try {
-
-        if (
-            RiderLocationState.activeRideId
-        ) {
-
-            localStorage.setItem(
-                "riderx_active_ride_id",
-                RiderLocationState.activeRideId
-            );
-
-        } else {
-
-            localStorage.removeItem(
-                "riderx_active_ride_id"
-            );
-
-        }
-
-    } catch (error) {}
-
-}
-
-
-/* ============================================================
-   GET ACTIVE RIDE
-============================================================ */
-
-function getActiveRide() {
-
-    if (
-        RiderLocationState.activeRideId
-    ) {
-
-        return RiderLocationState.activeRideId;
-
-    }
-
-
-    try {
-
-        return localStorage.getItem(
-            "riderx_active_ride_id"
-        );
-
-    } catch (error) {
-
-        return null;
-
-    }
-
-}
-
-
-/* ============================================================
-   START RIDER LOCATION
-============================================================ */
-
-export function startLocationTracking(
-    riderId = null
-) {
-
-    /*
-     * Get rider ID.
-     */
-
-    const id =
-        riderId ||
-        getRiderId();
-
-
-    if (
-        id
-    ) {
-
-        setRiderId(
-            id
-        );
-
-    }
-
-
-    if (
-        !RiderLocationState.riderId
-    ) {
-
-        console.warn(
-            "RiderX: rider ID not available."
-        );
-
-        return false;
-
-    }
-
-
-    /*
-     * Prevent duplicate listeners.
-     */
-
-    if (
-        RiderLocationState.initialized
-    ) {
-
-        return true;
-
-    }
-
-
-    RiderLocationState.initialized =
-        true;
-
-
-    RiderLocationState.online =
-        true;
-
-
-    /*
-     * IMPORTANT:
-     *
-     * map.js owns the only GPS watcher.
-     */
-
-    const mapEngine =
-        window.RiderXMap;
-
-
-    if (
-        !mapEngine
-    ) {
-
-        console.warn(
-            "RiderX: map.js is not loaded yet."
-        );
-
-
-        RiderLocationState.initialized =
-            false;
-
-
-        return false;
-
-    }
-
-
-    /*
-     * Start central GPS engine.
-     */
-
-    mapEngine.initLiveGPS();
-
-
-    /*
-     * Listen to central GPS stream.
-     */
-
-    RiderLocationState.locationListener =
-        mapEngine.onLocationChange(
-            location => {
-
-                handleLocation(
-                    location
-                );
-
-            }
-        );
-
-
-    /*
-     * Mark rider online immediately.
-     */
-
-    updateOnlineStatus(
-        true
-    );
-
-
-    return true;
-
-}
-
-
-/* ============================================================
-   HANDLE LOCATION
-============================================================ */
-
-async function handleLocation(
-    location
-) {
-
-    if (
-        !location
-    ) {
-
-        return;
-
-    }
-
-
-    const lat =
-        Number(
-            location.lat
-        );
-
-
-    const lng =
-        Number(
-            location.lng
-        );
-
-
-    if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
-    ) {
-
-        return;
-
-    }
-
-
-    RiderLocationState.lastLocation =
-        {
-
-            lat,
-
-            lng,
-
-            accuracy:
-                location.accuracy ??
-                null,
-
-            heading:
-                location.heading ??
-                null,
-
-            speed:
-                location.speed ??
-                null,
-
-            timestamp:
-                Date.now()
-
+            return null;
         };
 
 
-    /*
-     * Prevent excessive Firebase writes.
-     */
+    /* ========================================================
+       USER
+       ======================================================== */
 
-    const now =
-        Date.now();
+    Location.getUser =
+        function () {
 
-
-    if (
-        now -
-        RiderLocationState.lastUpdate
-        <
-        RiderLocationState.updateInterval
-    ) {
-
-        return;
-
-    }
-
-
-    RiderLocationState.lastUpdate =
-        now;
-
-
-    await writeRiderLocation(
-        RiderLocationState.lastLocation
-    );
-
-}
-
-
-/* ============================================================
-   WRITE RIDER LOCATION
-============================================================ */
-
-async function writeRiderLocation(
-    location
-) {
-
-    const riderId =
-        RiderLocationState.riderId ||
-        getRiderId();
-
-
-    if (
-        !riderId
-    ) {
-
-        return false;
-
-    }
-
-
-    try {
-
-        /*
-         * Primary location document.
-         */
-
-        const locationRef =
-            doc(
-                db,
-                "locations",
-                String(
-                    riderId
-                )
-            );
-
-
-        await setDoc(
-
-            locationRef,
-
-            {
-
-                riderId:
-                    String(
-                        riderId
-                    ),
-
-                lat:
-                    location.lat,
-
-                lng:
-                    location.lng,
-
-                latitude:
-                    location.lat,
-
-                longitude:
-                    location.lng,
-
-                accuracy:
-                    location.accuracy,
-
-                heading:
-                    location.heading,
-
-                speed:
-                    location.speed,
-
-                online:
-                    RiderLocationState.online,
-
-                updatedAt:
-                    serverTimestamp()
-
-            },
-
-            {
-                merge:
-                    true
-            }
-
-        );
-
-
-        /*
-         * Rider profile location.
-         */
-
-        const riderRef =
-            doc(
-                db,
-                "riders",
-                String(
-                    riderId
-                )
-            );
-
-
-        await setDoc(
-
-            riderRef,
-
-            {
-
-                location:
-                    {
-
-                        lat:
-                            location.lat,
-
-                        lng:
-                            location.lng,
-
-                        accuracy:
-                            location.accuracy,
-
-                        heading:
-                            location.heading,
-
-                        speed:
-                            location.speed
-
-                    },
-
-                latitude:
-                    location.lat,
-
-                longitude:
-                    location.lng,
-
-                online:
-                    RiderLocationState.online,
-
-                lastLocationUpdate:
-                    serverTimestamp()
-
-            },
-
-            {
-                merge:
-                    true
-            }
-
-        );
-
-
-        /*
-         * Active ride location.
-         */
-
-        const rideId =
-            getActiveRide();
-
-
-        if (
-            rideId
-        ) {
-
-            await updateActiveRideLocation(
-                rideId,
-                location
-            );
-
-        }
-
-
-        /*
-         * Notify the rest of RiderX.
-         */
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx:rider-location-updated",
-                {
-
-                    detail:
-                        {
-
-                            riderId:
-                                String(
-                                    riderId
-                                ),
-
-                            location
-
-                        }
-
-                }
-            )
-        );
-
-
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "RiderX rider location write failed:",
-            error
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/* ============================================================
-   UPDATE ACTIVE RIDE LOCATION
-============================================================ */
-
-async function updateActiveRideLocation(
-    rideId,
-    location
-) {
-
-    if (
-        !rideId
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        const rideRef =
-            doc(
-                db,
-                "rides",
-                String(
-                    rideId
-                )
-            );
-
-
-        await updateDoc(
-
-            rideRef,
-
-            {
-
-                riderLocation:
-                    {
-
-                        lat:
-                            location.lat,
-
-                        lng:
-                            location.lng,
-
-                        accuracy:
-                            location.accuracy,
-
-                        heading:
-                            location.heading,
-
-                        speed:
-                            location.speed,
-
-                        updatedAt:
-                            serverTimestamp()
-
-                    },
-
-                lastRiderLocationUpdate:
-                    serverTimestamp()
-
-            }
-
-        );
-
-    } catch (error) {
-
-        /*
-         * Ride document may not exist yet.
-         * Do not stop rider GPS because of it.
-         */
-
-        console.warn(
-            "RiderX active ride location update:",
-            error.message
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   SET ONLINE
-============================================================ */
-
-export async function setOnline() {
-
-    RiderLocationState.online =
-        true;
-
-
-    const riderId =
-        RiderLocationState.riderId ||
-        getRiderId();
-
-
-    if (
-        !riderId
-    ) {
-
-        return false;
-
-    }
-
-
-    try {
-
-        const riderRef =
-            doc(
-                db,
-                "riders",
-                String(
-                    riderId
-                )
-            );
-
-
-        await setDoc(
-
-            riderRef,
-
-            {
-
-                online:
-                    true,
-
-                availability:
-                    "online",
-
-                lastOnlineAt:
-                    serverTimestamp()
-
-            },
-
-            {
-                merge:
-                    true
-            }
-
-        );
-
-
-        const locationRef =
-            doc(
-                db,
-                "locations",
-                String(
-                    riderId
-                )
-            );
-
-
-        await setDoc(
-
-            locationRef,
-
-            {
-
-                online:
-                    true,
-
-                availability:
-                    "online",
-
-                updatedAt:
-                    serverTimestamp()
-
-            },
-
-            {
-                merge:
-                    true
-            }
-
-        );
-
-
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "RiderX set online failed:",
-            error
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/* ============================================================
-   SET OFFLINE
-============================================================ */
-
-export async function setOffline() {
-
-    RiderLocationState.online =
-        false;
-
-
-    const riderId =
-        RiderLocationState.riderId ||
-        getRiderId();
-
-
-    if (
-        !riderId
-    ) {
-
-        return false;
-
-    }
-
-
-    try {
-
-        const riderRef =
-            doc(
-                db,
-                "riders",
-                String(
-                    riderId
-                )
-            );
-
-
-        await setDoc(
-
-            riderRef,
-
-            {
-
-                online:
-                    false,
-
-                availability:
-                    "offline",
-
-                lastOfflineAt:
-                    serverTimestamp()
-
-            },
-
-            {
-                merge:
-                    true
-            }
-
-        );
-
-
-        const locationRef =
-            doc(
-                db,
-                "locations",
-                String(
-                    riderId
-                )
-            );
-
-
-        await setDoc(
-
-            locationRef,
-
-            {
-
-                online:
-                    false,
-
-                availability:
-                    "offline",
-
-                updatedAt:
-                    serverTimestamp()
-
-            },
-
-            {
-                merge:
-                    true
-            }
-
-        );
-
-
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "RiderX set offline failed:",
-            error
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/* ============================================================
-   STOP LOCATION TRACKING
-============================================================ */
-
-export function stopLocationTracking() {
-
-    /*
-     * Remove our event listener only.
-     *
-     * We do NOT stop map.js GPS here because
-     * another RiderX module may still need it.
-     */
-
-    if (
-        RiderLocationState.locationListener
-    ) {
-
-        try {
-
-            RiderLocationState
-                .locationListener();
-
-        } catch (error) {}
-
-    }
-
-
-    RiderLocationState.locationListener =
-        null;
-
-
-    RiderLocationState.initialized =
-        false;
-
-
-    /*
-     * Mark rider offline.
-     */
-
-    setOffline();
-
-}
-
-
-/* ============================================================
-   GET LAST LOCATION
-============================================================ */
-
-export function getLastLocation() {
-
-    return (
-        RiderLocationState.lastLocation ||
-        null
-    );
-
-}
-
-
-/* ============================================================
-   GET STATE
-============================================================ */
-
-export function getLocationState() {
-
-    return {
-        ...RiderLocationState
-    };
-
-}
-
-
-/* ============================================================
-   AUTO RIDER ID
-============================================================ */
-
-function autoSetRiderId() {
-
-    const user =
-        auth.currentUser;
-
-
-    if (
-        user
-    ) {
-
-        setRiderId(
-            user.uid
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   GLOBAL API
-============================================================ */
-
-window.RiderXRiderLocation = {
-
-    start:
-        startLocationTracking,
-
-    stop:
-        stopLocationTracking,
-
-    setOnline,
-
-    setOffline,
-
-    setRiderId,
-
-    setActiveRide,
-
-    getLastLocation,
-
-    getState:
-        getLocationState
-
-};
-
-
-/* ============================================================
-   AUTH READY
-============================================================ */
-
-if (
-    auth
-) {
-
-    /*
-     * Firebase Auth observer is intentionally
-     * used only when available.
-     */
-
-    try {
-
-        auth.onAuthStateChanged(
-            user => {
+            try {
 
                 if (
-                    user
+                    RX.firebase &&
+                    RX.firebase.auth
                 ) {
 
-                    setRiderId(
-                        user.uid
-                    );
-
+                    return RX.firebase.auth.currentUser;
                 }
 
+            } catch (error) {}
+
+
+            try {
+
+                if (
+                    window.firebase &&
+                    typeof firebase.auth ===
+                    "function"
+                ) {
+
+                    return firebase.auth().currentUser;
+                }
+
+            } catch (error) {}
+
+
+            try {
+
+                const saved =
+                    localStorage.getItem(
+                        "riderx_user"
+                    );
+
+
+                if (
+                    saved
+                ) {
+
+                    return JSON.parse(
+                        saved
+                    );
+                }
+
+            } catch (error) {}
+
+
+            return null;
+        };
+
+
+    /* ========================================================
+       RIDER ID
+       ======================================================== */
+
+    Location.getRiderId =
+        function () {
+
+            if (
+                Location.state.riderId
+            ) {
+
+                return Location.state.riderId;
             }
-        );
-
-    } catch (error) {
-
-        /*
-         * Some Firebase versions expose
-         * onAuthStateChanged differently.
-         * Other modules can still explicitly
-         * call startLocationTracking().
-         */
-
-    }
-
-}
 
 
-/* ============================================================
-   EVENT BRIDGE
-============================================================ */
-
-window.addEventListener(
-    "riderx:ride-started",
-    event => {
-
-        const rideId =
-            event.detail?.rideId;
+            const user =
+                Location.getUser() ||
+                {};
 
 
-        if (
-            rideId
+            const riderId =
+                user.uid ||
+                user.id ||
+                user.riderId ||
+                user.driverId ||
+                localStorage.getItem(
+                    "riderx_uid"
+                );
+
+
+            if (
+                riderId
+            ) {
+
+                Location.state.riderId =
+                    riderId;
+            }
+
+
+            return riderId || null;
+        };
+
+
+    /* ========================================================
+       GEOLOCATION SUPPORT
+       ======================================================== */
+
+    Location.isSupported =
+        function () {
+
+            return (
+                "geolocation" in
+                navigator
+            );
+        };
+
+
+    /* ========================================================
+       REQUEST PERMISSION
+       ======================================================== */
+
+    Location.requestPermission =
+        async function () {
+
+            if (
+                !Location.isSupported()
+            ) {
+
+                Location.state.permission =
+                    "unsupported";
+
+                return false;
+            }
+
+
+            /*
+             * Browser does not expose a
+             * universal permission request.
+             *
+             * getCurrentPosition triggers it.
+             */
+
+            return new Promise(
+                function (
+                    resolve
+                ) {
+
+                    navigator
+                        .geolocation
+                        .getCurrentPosition(
+                            function (
+                                position
+                            ) {
+
+                                Location.state.permission =
+                                    "granted";
+
+
+                                Location.state
+                                    .lastPosition =
+                                    Location
+                                        .normalizePosition(
+                                            position
+                                        );
+
+
+                                resolve(
+                                    true
+                                );
+                            },
+
+                            function (
+                                error
+                            ) {
+
+                                Location.handleError(
+                                    error
+                                );
+
+
+                                resolve(
+                                    false
+                                );
+                            },
+
+                            Location.getOptions()
+                        );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       OPTIONS
+       ======================================================== */
+
+    Location.getOptions =
+        function () {
+
+            return {
+
+                enableHighAccuracy:
+                    Location.config
+                        .highAccuracy,
+
+                timeout:
+                    Location.config
+                        .timeout,
+
+                maximumAge:
+                    Location.config
+                        .maximumAge
+            };
+        };
+
+
+    /* ========================================================
+       GET CURRENT LOCATION
+       ======================================================== */
+
+    Location.getCurrent =
+        function () {
+
+            if (
+                !Location.isSupported()
+            ) {
+
+                return Promise.reject(
+                    new Error(
+                        "Geolocation is not supported."
+                    )
+                );
+            }
+
+
+            return new Promise(
+                function (
+                    resolve,
+                    reject
+                ) {
+
+                    navigator
+                        .geolocation
+                        .getCurrentPosition(
+                            function (
+                                position
+                            ) {
+
+                                const normalized =
+                                    Location
+                                        .normalizePosition(
+                                            position
+                                        );
+
+
+                                Location.state
+                                    .lastPosition =
+                                    normalized;
+
+
+                                Location.state.permission =
+                                    "granted";
+
+
+                                Location.emit(
+                                    "updated",
+                                    normalized
+                                );
+
+
+                                resolve(
+                                    normalized
+                                );
+                            },
+
+                            function (
+                                error
+                            ) {
+
+                                Location.handleError(
+                                    error
+                                );
+
+
+                                reject(
+                                    error
+                                );
+                            },
+
+                            Location.getOptions()
+                        );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       START WATCHING
+       ======================================================== */
+
+    Location.start =
+        async function (
+            options
         ) {
 
-            setActiveRide(
-                rideId
+            if (
+                !Location.isSupported()
+            ) {
+
+                Location.showError(
+                    "Location is not supported on this device."
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "unsupported"
+                };
+            }
+
+
+            const riderId =
+                Location.getRiderId();
+
+
+            if (
+                !riderId
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Rider login required."
+                };
+            }
+
+
+            /*
+             * Stop an existing watcher first.
+             */
+
+            if (
+                Location.state.watching
+            ) {
+
+                Location.stop();
+            }
+
+
+            const settings =
+                {
+
+                    ...Location.getOptions(),
+
+                    ...(options || {})
+                };
+
+
+            try {
+
+                await Location
+                    .requestPermission();
+
+            } catch (error) {}
+
+
+            Location.state.watching =
+                true;
+
+
+            Location.state.error =
+                null;
+
+
+            Location.state.online =
+                true;
+
+
+            Location.state.watchId =
+                navigator
+                    .geolocation
+                    .watchPosition(
+                        function (
+                            position
+                        ) {
+
+                            Location
+                                .handlePosition(
+                                    position
+                                );
+                        },
+
+                        function (
+                            error
+                        ) {
+
+                            Location
+                                .handleError(
+                                    error
+                                );
+                        },
+
+                        settings
+                    );
+
+
+            Location.emit(
+                "started",
+                {
+
+                    riderId:
+                        riderId
+                }
             );
 
-        }
 
-    }
-);
+            return {
+
+                success:
+                    true,
+
+                watchId:
+                    Location.state.watchId
+            };
+        };
 
 
-window.addEventListener(
-    "riderx:ride-completed",
-    () => {
+    /* ========================================================
+       STOP WATCHING
+       ======================================================== */
 
-        setActiveRide(
-            null
+    Location.stop =
+        async function () {
+
+            if (
+                Location.state.watchId !==
+                null
+            ) {
+
+                try {
+
+                    navigator
+                        .geolocation
+                        .clearWatch(
+                            Location.state
+                                .watchId
+                        );
+
+                } catch (error) {}
+            }
+
+
+            Location.state.watchId =
+                null;
+
+
+            Location.state.watching =
+                false;
+
+
+            Location.state.online =
+                false;
+
+
+            await Location.setOffline();
+
+
+            Location.emit(
+                "stopped"
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       HANDLE POSITION
+       ======================================================== */
+
+    Location.handlePosition =
+        async function (
+            position
+        ) {
+
+            const normalized =
+                Location.normalizePosition(
+                    position
+                );
+
+
+            Location.state.lastPosition =
+                normalized;
+
+
+            Location.state.permission =
+                "granted";
+
+
+            Location.state.error =
+                null;
+
+
+            Location.emit(
+                "updated",
+                normalized
+            );
+
+
+            /*
+             * Update local UI immediately.
+             */
+
+            Location.updateUI(
+                normalized
+            );
+
+
+            /*
+             * Don't send every GPS event.
+             * Use distance + time throttling.
+             */
+
+            if (
+                !Location.shouldSend(
+                    normalized
+                )
+            ) {
+
+                return normalized;
+            }
+
+
+            try {
+
+                await Location
+                    .syncToFirebase(
+                        normalized
+                    );
+
+            } catch (error) {
+
+                console.warn(
+                    "Rider location sync failed:",
+                    error
+                );
+            }
+
+
+            return normalized;
+        };
+
+
+    /* ========================================================
+       NORMALIZE POSITION
+       ======================================================== */
+
+    Location.normalizePosition =
+        function (
+            position
+        ) {
+
+            const coords =
+                position.coords;
+
+
+            return {
+
+                latitude:
+                    Number(
+                        coords.latitude
+                    ),
+
+                longitude:
+                    Number(
+                        coords.longitude
+                    ),
+
+                accuracy:
+                    Number(
+                        coords.accuracy ||
+                        0
+                    ),
+
+                altitude:
+                    coords.altitude ===
+                    null
+                        ? null
+                        : Number(
+                            coords.altitude
+                        ),
+
+                heading:
+                    coords.heading ===
+                    null
+                        ? null
+                        : Number(
+                            coords.heading
+                        ),
+
+                speed:
+                    coords.speed ===
+                    null
+                        ? null
+                        : Number(
+                            coords.speed
+                        ),
+
+                timestamp:
+                    position.timestamp ||
+                    Date.now()
+            };
+        };
+
+
+    /* ========================================================
+       SHOULD SEND
+       ======================================================== */
+
+    Location.shouldSend =
+        function (
+            position
+        ) {
+
+            const now =
+                Date.now();
+
+
+            if (
+                !Location.state
+                    .lastSentPosition
+            ) {
+
+                return true;
+            }
+
+
+            const elapsed =
+                now -
+                Location.state.lastSentAt;
+
+
+            if (
+                elapsed >=
+                Location.config
+                    .updateInterval
+            ) {
+
+                return true;
+            }
+
+
+            const distance =
+                Location.distanceBetween(
+                    Location.state
+                        .lastSentPosition
+                        .latitude,
+
+                    Location.state
+                        .lastSentPosition
+                        .longitude,
+
+                    position.latitude,
+
+                    position.longitude
+                );
+
+
+            return (
+                distance >=
+                Location.config
+                    .minimumDistance
+            );
+        };
+
+
+    /* ========================================================
+       SYNC FIREBASE
+       ======================================================== */
+
+    Location.syncToFirebase =
+        async function (
+            position
+        ) {
+
+            const database =
+                Location.getDatabase();
+
+
+            const riderId =
+                Location.getRiderId();
+
+
+            if (
+                !database ||
+                !riderId
+            ) {
+
+                Location.cacheLocation(
+                    position
+                );
+
+
+                return false;
+            }
+
+
+            const locationData =
+                {
+
+                    latitude:
+                        position.latitude,
+
+                    longitude:
+                        position.longitude,
+
+                    accuracy:
+                        position.accuracy,
+
+                    altitude:
+                        position.altitude,
+
+                    heading:
+                        position.heading,
+
+                    speed:
+                        position.speed,
+
+                    updatedAt:
+                        Date.now(),
+
+                    online:
+                        Location.state.online,
+
+                    isOnline:
+                        Location.state.online
+                };
+
+
+            /*
+             * Main rider profile.
+             */
+
+            await database
+                .ref(
+                    Location.config
+                        .ridersPath +
+                    "/" +
+                    riderId
+                )
+                .update(
+                    {
+
+                        latitude:
+                            position.latitude,
+
+                        longitude:
+                            position.longitude,
+
+                        location:
+                            {
+
+                                latitude:
+                                    position.latitude,
+
+                                longitude:
+                                    position.longitude
+                            },
+
+                        accuracy:
+                            position.accuracy,
+
+                        heading:
+                            position.heading,
+
+                        speed:
+                            position.speed,
+
+                        online:
+                            Location.state.online,
+
+                        isOnline:
+                            Location.state.online,
+
+                        lastLocationAt:
+                            Date.now(),
+
+                        updatedAt:
+                            Date.now()
+                    }
+                );
+
+
+            /*
+             * Dedicated live-location node.
+             */
+
+            await database
+                .ref(
+                    Location.config
+                        .locationsPath +
+                    "/" +
+                    riderId
+                )
+                .set(
+                    locationData
+                );
+
+
+            Location.state
+                .lastSentPosition =
+                position;
+
+
+            Location.state.lastSentAt =
+                Date.now();
+
+
+            Location.cacheLocation(
+                position
+            );
+
+
+            Location.emit(
+                "synced",
+                locationData
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       CACHE LOCATION
+       ======================================================== */
+
+    Location.cacheLocation =
+        function (
+            position
+        ) {
+
+            try {
+
+                localStorage.setItem(
+                    "riderx_last_location",
+                    JSON.stringify(
+                        position
+                    )
+                );
+
+            } catch (error) {}
+        };
+
+
+    /* ========================================================
+       READ CACHED LOCATION
+       ======================================================== */
+
+    Location.getCachedLocation =
+        function () {
+
+            try {
+
+                const saved =
+                    localStorage.getItem(
+                        "riderx_last_location"
+                    );
+
+
+                if (
+                    saved
+                ) {
+
+                    return JSON.parse(
+                        saved
+                    );
+                }
+
+            } catch (error) {}
+
+
+            return null;
+        };
+
+
+    /* ========================================================
+       SET OFFLINE
+       ======================================================== */
+
+    Location.setOffline =
+        async function () {
+
+            const riderId =
+                Location.getRiderId();
+
+
+            const database =
+                Location.getDatabase();
+
+
+            if (
+                !riderId
+            ) {
+
+                return false;
+            }
+
+
+            Location.state.online =
+                false;
+
+
+            try {
+
+                localStorage.setItem(
+                    "riderx_online",
+                    "false"
+                );
+
+            } catch (error) {}
+
+
+            if (
+                !database
+            ) {
+
+                Location.updateOnlineUI(
+                    false
+                );
+
+
+                return false;
+            }
+
+
+            try {
+
+                await database
+                    .ref(
+                        Location.config
+                            .ridersPath +
+                        "/" +
+                        riderId
+                    )
+                    .update(
+                        {
+
+                            online:
+                                false,
+
+                            isOnline:
+                                false,
+
+                            availability:
+                                "offline",
+
+                            updatedAt:
+                                Date.now()
+                        }
+                    );
+
+
+                await database
+                    .ref(
+                        Location.config
+                            .locationsPath +
+                        "/" +
+                        riderId
+                    )
+                    .update(
+                        {
+
+                            online:
+                                false,
+
+                            isOnline:
+                                false,
+
+                            updatedAt:
+                                Date.now()
+                        }
+                    );
+
+
+                Location.updateOnlineUI(
+                    false
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "Failed to set rider offline:",
+                    error
+                );
+
+
+                return false;
+            }
+        };
+
+
+    /* ========================================================
+       ONLINE
+       ======================================================== */
+
+    Location.setOnline =
+        async function () {
+
+            const riderId =
+                Location.getRiderId();
+
+
+            if (
+                !riderId
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Rider login required."
+                };
+            }
+
+
+            const position =
+                await Location
+                    .getCurrent();
+
+
+            Location.state.online =
+                true;
+
+
+            try {
+
+                localStorage.setItem(
+                    "riderx_online",
+                    "true"
+                );
+
+            } catch (error) {}
+
+
+            await Location.syncToFirebase(
+                position
+            );
+
+
+            if (
+                !Location.state.watching
+            ) {
+
+                await Location.start();
+            }
+
+
+            Location.updateOnlineUI(
+                true
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                location:
+                    position
+            };
+        };
+
+
+    /* ========================================================
+       DISTANCE
+       ======================================================== */
+
+    Location.distanceBetween =
+        function (
+            lat1,
+            lon1,
+            lat2,
+            lon2
+        ) {
+
+            const earthRadius =
+                6371000;
+
+
+            const dLat =
+                (
+                    lat2 -
+                    lat1
+                ) *
+                Math.PI /
+                180;
+
+
+            const dLon =
+                (
+                    lon2 -
+                    lon1
+                ) *
+                Math.PI /
+                180;
+
+
+            const a =
+                Math.sin(
+                    dLat / 2
+                ) ** 2 +
+
+                Math.cos(
+                    lat1 *
+                    Math.PI /
+                    180
+                ) *
+
+                Math.cos(
+                    lat2 *
+                    Math.PI /
+                    180
+                ) *
+
+                Math.sin(
+                    dLon / 2
+                ) ** 2;
+
+
+            const c =
+                2 *
+                Math.atan2(
+                    Math.sqrt(a),
+                    Math.sqrt(
+                        1 - a
+                    )
+                );
+
+
+            return (
+                earthRadius *
+                c
+            );
+        };
+
+
+    /* ========================================================
+       UPDATE UI
+       ======================================================== */
+
+    Location.updateUI =
+        function (
+            position
+        ) {
+
+            if (
+                !position
+            ) {
+
+                return;
+            }
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-latitude]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            position.latitude
+                                .toFixed(
+                                    6
+                                );
+
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-longitude]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            position.longitude
+                                .toFixed(
+                                    6
+                                );
+
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-accuracy]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            Math.round(
+                                position.accuracy ||
+                                0
+                            ) +
+                            " m";
+
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-speed]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        const speed =
+                            position.speed;
+
+
+                        element.textContent =
+                            speed === null ||
+                            speed === undefined
+                                ? "—"
+                                :
+                                (
+                                    speed *
+                                    3.6
+                                ).toFixed(
+                                    1
+                                ) +
+                                " km/h";
+
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-heading]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            position.heading ===
+                            null
+                                ? "—"
+                                :
+                                Math.round(
+                                    position.heading
+                                ) +
+                                "°";
+
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       ONLINE UI
+       ======================================================== */
+
+    Location.updateOnlineUI =
+        function (
+            online
+        ) {
+
+            document
+                .querySelectorAll(
+                    "[data-rider-online]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            online
+                                ? "Online"
+                                : "Offline";
+
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-online-indicator]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.classList.toggle(
+                            "online",
+                            online
+                        );
+
+                        element.classList.toggle(
+                            "offline",
+                            !online
+                        );
+
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       ERROR HANDLER
+       ======================================================== */
+
+    Location.handleError =
+        function (
+            error
+        ) {
+
+            Location.state.error =
+                error;
+
+
+            if (
+                error &&
+                error.code ===
+                1
+            ) {
+
+                Location.state.permission =
+                    "denied";
+
+            } else if (
+                error &&
+                error.code ===
+                2
+            ) {
+
+                Location.state.permission =
+                    "unavailable";
+
+            } else if (
+                error &&
+                error.code ===
+                3
+            ) {
+
+                Location.state.permission =
+                    "timeout";
+            }
+
+
+            Location.emit(
+                "error",
+                {
+
+                    error:
+                        error,
+
+                    permission:
+                        Location.state.permission
+                }
+            );
+
+
+            Location.showError(
+                Location.errorMessage(
+                    error
+                )
+            );
+        };
+
+
+    /* ========================================================
+       ERROR MESSAGE
+       ======================================================== */
+
+    Location.errorMessage =
+        function (
+            error
+        ) {
+
+            if (
+                !error
+            ) {
+
+                return "Unable to get your location.";
+            }
+
+
+            switch (
+                error.code
+            ) {
+
+                case 1:
+
+                    return "Location permission is required. Please allow location access.";
+
+                case 2:
+
+                    return "Your current location could not be determined.";
+
+                case 3:
+
+                    return "Location request timed out. Please try again.";
+
+                default:
+
+                    return (
+                        error.message ||
+                        "Unable to get your location."
+                    );
+            }
+        };
+
+
+    /* ========================================================
+       SHOW ERROR
+       ======================================================== */
+
+    Location.showError =
+        function (
+            message
+        ) {
+
+            try {
+
+                if (
+                    RX.toast &&
+                    typeof RX.toast ===
+                    "function"
+                ) {
+
+                    RX.toast(
+                        message
+                    );
+
+                    return;
+                }
+
+            } catch (error) {}
+
+
+            document
+                .querySelectorAll(
+                    "[data-location-error]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            message;
+
+                        element.hidden =
+                            false;
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       MAP INTEGRATION
+       ======================================================== */
+
+    Location.updateMap =
+        function (
+            position
+        ) {
+
+            if (
+                !position
+            ) {
+
+                return;
+            }
+
+
+            try {
+
+                if (
+                    RX.map &&
+                    typeof RX.map
+                        .setRiderLocation ===
+                    "function"
+                ) {
+
+                    RX.map
+                        .setRiderLocation(
+                            position.latitude,
+                            position.longitude,
+                            position.heading
+                        );
+
+                    return;
+                }
+
+            } catch (error) {}
+
+
+            try {
+
+                if (
+                    RX.riderMap &&
+                    typeof RX.riderMap
+                        .updateLocation ===
+                    "function"
+                ) {
+
+                    RX.riderMap
+                        .updateLocation(
+                            position
+                        );
+                }
+
+            } catch (error) {}
+        };
+
+
+    /* ========================================================
+       EVENTS
+       ======================================================== */
+
+    Location.emit =
+        function (
+            name,
+            data
+        ) {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-location-" +
+                    name,
+                    {
+
+                        detail:
+                            data || {}
+                    }
+                )
+            );
+        };
+
+
+    /* ========================================================
+       BIND EVENTS
+       ======================================================== */
+
+    Location.bindEvents =
+        function () {
+
+            window.addEventListener(
+                "riderx-dashboard-online",
+                function (
+                    event
+                ) {
+
+                    const online =
+                        event.detail?.online;
+
+
+                    if (
+                        online
+                    ) {
+
+                        Location.setOnline()
+                            .catch(
+                                console.warn
+                            );
+
+                    } else {
+
+                        Location.stop();
+                    }
+                }
+            );
+
+
+            window.addEventListener(
+                "beforeunload",
+                function () {
+
+                    /*
+                     * Best-effort only.
+                     * Browser may terminate the page
+                     * before async Firebase completes.
+                     */
+
+                    try {
+
+                        const riderId =
+                            Location
+                                .getRiderId();
+
+
+                        const database =
+                            Location
+                                .getDatabase();
+
+
+                        if (
+                            riderId &&
+                            database
+                        ) {
+
+                            database
+                                .ref(
+                                    Location.config
+                                        .ridersPath +
+                                    "/" +
+                                    riderId
+                                )
+                                .update(
+                                    {
+
+                                        online:
+                                            false,
+
+                                        isOnline:
+                                            false,
+
+                                        updatedAt:
+                                            Date.now()
+                                    }
+                                );
+                        }
+
+                    } catch (error) {}
+                }
+            );
+
+
+            /*
+             * Page visibility.
+             */
+
+            document.addEventListener(
+                "visibilitychange",
+                function () {
+
+                    if (
+                        document.visibilityState ===
+                        "visible" &&
+                        Location.state.online &&
+                        !Location.state.watching
+                    ) {
+
+                        Location.start();
+
+                    }
+
+                }
+            );
+
+
+            /*
+             * GPS update -> map.
+             */
+
+            window.addEventListener(
+                "riderx-location-updated",
+                function (
+                    event
+                ) {
+
+                    Location.updateMap(
+                        event.detail
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       GLOBAL API
+       ======================================================== */
+
+    RX.getRiderLocation =
+        function () {
+
+            return Location.state
+                .lastPosition;
+        };
+
+
+    RX.startRiderLocation =
+        Location.start;
+
+
+    RX.stopRiderLocation =
+        Location.stop;
+
+
+    RX.syncRiderLocation =
+        Location.syncToFirebase;
+
+
+    RX.setRiderOnlineLocation =
+        Location.setOnline;
+
+
+    RX.setRiderOfflineLocation =
+        Location.setOffline;
+
+
+    /* ========================================================
+       INIT
+       ======================================================== */
+
+    Location.init =
+        function () {
+
+            if (
+                Location.state.initialized
+            ) {
+
+                return;
+            }
+
+
+            Location.state.initialized =
+                true;
+
+
+            Location.bindEvents();
+
+
+            /*
+             * Restore online state only.
+             * Do not automatically request GPS
+             * permission on page load.
+             */
+
+            try {
+
+                Location.state.online =
+                    localStorage.getItem(
+                        "riderx_online"
+                    ) === "true";
+
+            } catch (error) {
+
+                Location.state.online =
+                    false;
+            }
+
+
+            const cached =
+                Location.getCachedLocation();
+
+
+            if (
+                cached
+            ) {
+
+                Location.state
+                    .lastPosition =
+                    cached;
+
+
+                Location.updateUI(
+                    cached
+                );
+            }
+
+
+            console.log(
+                "RiderX rider-location.js loaded."
+            );
+        };
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            Location.init
         );
 
+    } else {
+
+        Location.init();
+
     }
-);
 
-
-/* ============================================================
-   EXPORT COMPATIBILITY
-============================================================ */
-
-export default {
-
-    startLocationTracking,
-
-    stopLocationTracking,
-
-    updateRiderLocation,
-
-    setOnline,
-
-    setOffline,
-
-    setRiderId,
-
-    setActiveRide,
-
-    getLastLocation,
-
-    getLocationState
-
-};
+})();
