@@ -1,379 +1,574 @@
-// ============================================================
-// RiderX 2.0
-// Firebase Configuration
-// File: firebase/Firebase-config.js
-// ============================================================
+/* ============================================================
+   RIDERX - FIREBASE CONFIGURATION
+   File: firebase/firebase-config.js
 
-import {
-    initializeApp,
-    getApps,
-    getApp
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+   Firebase Project:
+   riderx-1
 
-import {
-    getAuth,
-    setPersistence,
-    browserLocalPersistence
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+   Services used by RiderX:
+   - Firebase Authentication
+   - Realtime Database
+   - Cloud Firestore
+   - Cloud Storage
+   - Firebase Cloud Messaging
+   - Firebase Analytics (optional)
 
-import {
-    getFirestore
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+   IMPORTANT:
+   Firebase Web API keys are project/app identifiers.
+   Database, Firestore and Storage security MUST be handled
+   through Firebase Security Rules and App Check.
+   ============================================================ */
 
-import {
-    getDatabase
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+(function (window) {
 
-import {
-    getStorage
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
+    "use strict";
 
 
-// ============================================================
-// FIREBASE CONFIGURATION
-// ============================================================
+    /* ========================================================
+       FIREBASE CONFIG
+       ======================================================== */
 
-const firebaseConfig = {
+    const firebaseConfig = {
 
-    apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
+        apiKey:
+            "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
 
-    authDomain: "riderx-1.firebaseapp.com",
+        authDomain:
+            "riderx-1.firebaseapp.com",
 
-    databaseURL:
-        "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
+        databaseURL:
+            "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-    projectId: "riderx-1",
+        projectId:
+            "riderx-1",
 
-    storageBucket:
-        "riderx-1.firebasestorage.app",
+        storageBucket:
+            "riderx-1.firebasestorage.app",
 
-    messagingSenderId: "261640190671",
+        messagingSenderId:
+            "261640190671",
 
-    appId:
-        "1:261640190671:web:701b3ce5dcb6135fd955ba",
+        appId:
+            "1:261640190671:web:701b3ce5dcb6135fd955ba",
 
-    measurementId: "G-SM8KLBVPWN"
-
-};
-
-
-// ============================================================
-// INITIALIZE FIREBASE APP
-// ============================================================
-
-const app = getApps().length
-    ? getApp()
-    : initializeApp(firebaseConfig);
+        measurementId:
+            "G-SM8KLBVPWN"
+    };
 
 
-// ============================================================
-// FIREBASE AUTHENTICATION
-// ============================================================
+    /* ========================================================
+       RIDERX FIREBASE NAMESPACE
+       ======================================================== */
 
-const auth = getAuth(app);
+    window.RiderX =
+        window.RiderX || {};
 
 
-// Keep authentication session persistent.
-try {
+    window.RiderX.firebase =
+        window.RiderX.firebase || {};
 
-    await setPersistence(
-        auth,
-        browserLocalPersistence
+
+    window.RiderX.firebase.config =
+        firebaseConfig;
+
+
+    /* ========================================================
+       FIREBASE AVAILABILITY CHECK
+       ======================================================== */
+
+    if (
+        typeof firebase ===
+        "undefined"
+    ) {
+
+        console.error(
+            "RiderX Firebase: Firebase SDK is not loaded."
+        );
+
+        window.RiderX.firebase.ready =
+            false;
+
+        return;
+    }
+
+
+    /* ========================================================
+       INITIALIZE FIREBASE
+       ======================================================== */
+
+    let app = null;
+
+
+    try {
+
+        if (
+            firebase.apps &&
+            firebase.apps.length > 0
+        ) {
+
+            app =
+                firebase.apps[0];
+
+        } else {
+
+            app =
+                firebase.initializeApp(
+                    firebaseConfig
+                );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "RiderX Firebase initialization failed:",
+            error
+        );
+
+        window.RiderX.firebase.ready =
+            false;
+
+        window.RiderX.firebase.error =
+            error;
+
+        return;
+    }
+
+
+    window.RiderX.firebase.app =
+        app;
+
+
+    /* ========================================================
+       AUTHENTICATION
+       ======================================================== */
+
+    try {
+
+        if (
+            typeof firebase.auth ===
+            "function"
+        ) {
+
+            window.RiderX.firebase.auth =
+                firebase.auth();
+
+        } else {
+
+            window.RiderX.firebase.auth =
+                null;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firebase Auth unavailable:",
+            error
+        );
+
+        window.RiderX.firebase.auth =
+            null;
+    }
+
+
+    /* ========================================================
+       REALTIME DATABASE
+       ======================================================== */
+
+    try {
+
+        if (
+            typeof firebase.database ===
+            "function"
+        ) {
+
+            window.RiderX.firebase.database =
+                firebase.database();
+
+        } else {
+
+            window.RiderX.firebase.database =
+                null;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Realtime Database unavailable:",
+            error
+        );
+
+        window.RiderX.firebase.database =
+            null;
+    }
+
+
+    /* ========================================================
+       CLOUD FIRESTORE
+       ======================================================== */
+
+    try {
+
+        if (
+            typeof firebase.firestore ===
+            "function"
+        ) {
+
+            window.RiderX.firebase.firestore =
+                firebase.firestore();
+
+        } else {
+
+            window.RiderX.firebase.firestore =
+                null;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firestore unavailable:",
+            error
+        );
+
+        window.RiderX.firebase.firestore =
+            null;
+    }
+
+
+    /* ========================================================
+       CLOUD STORAGE
+       ======================================================== */
+
+    try {
+
+        if (
+            typeof firebase.storage ===
+            "function"
+        ) {
+
+            window.RiderX.firebase.storage =
+                firebase.storage();
+
+        } else {
+
+            window.RiderX.firebase.storage =
+                null;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firebase Storage unavailable:",
+            error
+        );
+
+        window.RiderX.firebase.storage =
+            null;
+    }
+
+
+    /* ========================================================
+       FIREBASE MESSAGING
+       ======================================================== */
+
+    try {
+
+        if (
+            typeof firebase.messaging ===
+            "function"
+        ) {
+
+            window.RiderX.firebase.messaging =
+                firebase.messaging();
+
+        } else {
+
+            window.RiderX.firebase.messaging =
+                null;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firebase Messaging unavailable:",
+            error
+        );
+
+        window.RiderX.firebase.messaging =
+            null;
+    }
+
+
+    /* ========================================================
+       ANALYTICS
+       ======================================================== */
+
+    try {
+
+        if (
+            typeof firebase.analytics ===
+            "function"
+        ) {
+
+            window.RiderX.firebase.analytics =
+                firebase.analytics();
+
+        } else {
+
+            window.RiderX.firebase.analytics =
+                null;
+        }
+
+    } catch (error) {
+
+        /*
+         * Analytics should never prevent
+         * RiderX from loading.
+         */
+
+        console.warn(
+            "RiderX Analytics unavailable:",
+            error
+        );
+
+        window.RiderX.firebase.analytics =
+            null;
+    }
+
+
+    /* ========================================================
+       FIREBASE SERVICE STATUS
+       ======================================================== */
+
+    window.RiderX.firebase.services = {
+
+        auth:
+            Boolean(
+                window.RiderX.firebase.auth
+            ),
+
+        realtimeDatabase:
+            Boolean(
+                window.RiderX.firebase.database
+            ),
+
+        firestore:
+            Boolean(
+                window.RiderX.firebase.firestore
+            ),
+
+        storage:
+            Boolean(
+                window.RiderX.firebase.storage
+            ),
+
+        messaging:
+            Boolean(
+                window.RiderX.firebase.messaging
+            ),
+
+        analytics:
+            Boolean(
+                window.RiderX.firebase.analytics
+            )
+    };
+
+
+    /* ========================================================
+       READY FLAG
+       ======================================================== */
+
+    window.RiderX.firebase.ready =
+        true;
+
+
+    /* ========================================================
+       HELPER FUNCTIONS
+       ======================================================== */
+
+    window.RiderX.firebase.getUser =
+        function () {
+
+            try {
+
+                if (
+                    window.RiderX.firebase.auth
+                ) {
+
+                    return window.RiderX.firebase.auth
+                        .currentUser;
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Unable to get Firebase user:",
+                    error
+                );
+            }
+
+            return null;
+        };
+
+
+    window.RiderX.firebase.isLoggedIn =
+        function () {
+
+            return Boolean(
+                window.RiderX.firebase.getUser()
+            );
+        };
+
+
+    window.RiderX.firebase.getUid =
+        function () {
+
+            const user =
+                window.RiderX.firebase
+                    .getUser();
+
+
+            return user
+                ? user.uid
+                : null;
+        };
+
+
+    /* ========================================================
+       DATABASE HELPERS
+       ======================================================== */
+
+    window.RiderX.firebase.ref =
+        function (
+            path
+        ) {
+
+            if (
+                !window.RiderX.firebase.database
+            ) {
+
+                throw new Error(
+                    "Firebase Realtime Database is unavailable."
+                );
+            }
+
+
+            return window.RiderX.firebase
+                .database
+                .ref(
+                    path
+                );
+        };
+
+
+    window.RiderX.firebase.firestoreCollection =
+        function (
+            collection
+        ) {
+
+            if (
+                !window.RiderX.firebase.firestore
+            ) {
+
+                throw new Error(
+                    "Cloud Firestore is unavailable."
+                );
+            }
+
+
+            return window.RiderX.firebase
+                .firestore
+                .collection(
+                    collection
+                );
+        };
+
+
+    /* ========================================================
+       AUTH STATE LISTENER HELPER
+       ======================================================== */
+
+    window.RiderX.firebase.onAuthStateChanged =
+        function (
+            callback
+        ) {
+
+            if (
+                typeof callback !==
+                "function"
+            ) {
+
+                return null;
+            }
+
+
+            if (
+                !window.RiderX.firebase.auth
+            ) {
+
+                return null;
+            }
+
+
+            return window.RiderX.firebase
+                .auth
+                .onAuthStateChanged(
+                    callback
+                );
+        };
+
+
+    /* ========================================================
+       GLOBAL ALIAS
+       ========================================================
+
+       Existing RiderX files may use:
+       - firebaseConfig
+       - RiderX.firebase
+       - firebase.app()
+       - firebase.auth()
+       - firebase.database()
+       - firebase.firestore()
+
+       We preserve Firebase's normal global SDK API while
+       also exposing the organized RiderX namespace.
+       ======================================================== */
+
+    window.firebaseConfig =
+        firebaseConfig;
+
+
+    /* ========================================================
+       LOG
+       ======================================================== */
+
+    console.log(
+        "RiderX Firebase initialized:",
+        {
+
+            projectId:
+                firebaseConfig.projectId,
+
+            auth:
+                window.RiderX.firebase.services
+                    .auth,
+
+            realtimeDatabase:
+                window.RiderX.firebase.services
+                    .realtimeDatabase,
+
+            firestore:
+                window.RiderX.firebase.services
+                    .firestore,
+
+            storage:
+                window.RiderX.firebase.services
+                    .storage,
+
+            messaging:
+                window.RiderX.firebase.services
+                    .messaging
+        }
     );
 
-} catch (error) {
 
-    console.warn(
-        "RiderX Auth Persistence Error:",
-        error
-    );
-
-}
-
-
-// ============================================================
-// FIRESTORE
-// ============================================================
-
-const db = getFirestore(app);
-
-
-// ============================================================
-// REALTIME DATABASE
-// ============================================================
-//
-// Used for real-time features:
-//
-// • Rider online/offline
-// • Live rider location
-// • Customer live location
-// • Active ride tracking
-// • Ride request status
-// • Driver movement
-// • Real-time ride updates
-//
-// ============================================================
-
-const realtimeDb = getDatabase(app);
-
-
-// ============================================================
-// FIREBASE STORAGE
-// ============================================================
-//
-// Used for:
-//
-// • Profile photos
-// • Rider documents
-// • Driving licence
-// • Vehicle documents
-// • Verification files
-//
-// ============================================================
-
-const storage = getStorage(app);
-
-
-// ============================================================
-// RIDERX COLLECTIONS
-// ============================================================
-
-const COLLECTIONS = {
-
-    USERS: "users",
-
-    CUSTOMERS: "customers",
-
-    RIDERS: "riders",
-
-    ADMINS: "admins",
-
-    RIDES: "rides",
-
-    RIDE_REQUESTS: "rideRequests",
-
-    VEHICLES: "vehicles",
-
-    PAYMENTS: "payments",
-
-    TRANSACTIONS: "transactions",
-
-    WALLETS: "wallets",
-
-    NOTIFICATIONS: "notifications",
-
-    MESSAGES: "messages",
-
-    RATINGS: "ratings",
-
-    SUPPORT: "support",
-
-    PROMOS: "promos",
-
-    REFERRALS: "referrals",
-
-    DOCUMENTS: "documents",
-
-    SETTINGS: "settings"
-
-};
-
-
-// ============================================================
-// USER ROLES
-// ============================================================
-
-const USER_ROLES = {
-
-    CUSTOMER: "customer",
-
-    RIDER: "rider",
-
-    ADMIN: "admin"
-
-};
-
-
-// ============================================================
-// SERVICE TYPES
-// ============================================================
-
-const SERVICE_TYPES = {
-
-    BIKE: "bike",
-
-    AUTO: "auto",
-
-    CAB: "cab",
-
-    PARCEL: "parcel",
-
-    FOOD: "food"
-
-};
-
-
-// ============================================================
-// RIDE STATUS
-// ============================================================
-
-const RIDE_STATUS = {
-
-    SEARCHING: "searching",
-
-    ACCEPTED: "accepted",
-
-    DRIVER_ARRIVING: "driver_arriving",
-
-    DRIVER_ARRIVED: "driver_arrived",
-
-    OTP_PENDING: "otp_pending",
-
-    STARTED: "started",
-
-    COMPLETED: "completed",
-
-    CANCELLED: "cancelled"
-
-};
-
-
-// ============================================================
-// RIDER STATUS
-// ============================================================
-
-const RIDER_STATUS = {
-
-    OFFLINE: "offline",
-
-    ONLINE: "online",
-
-    BUSY: "busy",
-
-    SUSPENDED: "suspended"
-
-};
-
-
-// ============================================================
-// PAYMENT METHODS
-// ============================================================
-
-const PAYMENT_METHODS = {
-
-    CASH: "cash",
-
-    ONLINE: "online",
-
-    WALLET: "wallet"
-
-};
-
-
-// ============================================================
-// RIDERX CITY
-// ============================================================
-
-const RIDERX_CITY = {
-
-    name: "Chandigarh",
-
-    state: "Chandigarh",
-
-    country: "India"
-
-};
-
-
-// ============================================================
-// INITIAL FARE CONFIGURATION
-// ============================================================
-
-const FARE_CONFIG = {
-
-    // Day: 08:00 AM → 10:00 PM
-    dayStart: 8,
-
-    dayEnd: 22,
-
-    // Up to 10 KM
-    dayRate: 8,
-
-    // More than 10 KM
-    longDistanceRate: 9,
-
-    // Night: 10:00 PM → 06:00 AM
-    nightRate: 11,
-
-    longDistanceThreshold: 10
-
-};
-
-
-// ============================================================
-// RIDERX APP CONFIGURATION
-// ============================================================
-
-const APP_CONFIG = {
-
-    name: "RiderX",
-
-    version: "2.0.0",
-
-    city: "Chandigarh",
-
-    country: "India",
-
-    currency: "INR",
-
-    currencySymbol: "₹",
-
-    defaultLanguage: "en",
-
-    supportedLanguages: [
-        "en",
-        "hi"
-    ],
-
-    emergencyNumber: "112"
-
-};
-
-
-// ============================================================
-// EXPORTS
-// ============================================================
-
-export {
-
-    app,
-
-    auth,
-
-    db,
-
-    realtimeDb,
-
-    storage,
-
-    firebaseConfig,
-
-    COLLECTIONS,
-
-    USER_ROLES,
-
-    SERVICE_TYPES,
-
-    RIDE_STATUS,
-
-    RIDER_STATUS,
-
-    PAYMENT_METHODS,
-
-    RIDERX_CITY,
-
-    FARE_CONFIG,
-
-    APP_CONFIG
-
-};
+})(window);
