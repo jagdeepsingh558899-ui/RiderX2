@@ -1,656 +1,1209 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Register</title>
-
-<link rel="stylesheet" href="../assets/app.css">
-
+<title>RiderX Registration</title>
 
 <style>
+:root{
+    --yellow:#FFE500;
+    --black:#050505;
+    --card:#111;
+    --border:#292929;
+    --gray:#999;
+    --red:#ff5555;
+    --green:#20d66b;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
 
 body{
-margin:0;
-min-height:100vh;
-background:#000;
-color:#fff;
-display:flex;
-align-items:center;
-justify-content:center;
-font-family:Arial,sans-serif;
-padding:20px;
+    min-height:100vh;
+    background:#050505;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
 }
-
 
 .box{
-
-width:100%;
-max-width:430px;
-background:#111;
-padding:25px;
-border-radius:25px;
-border:1px solid #333;
-
+    width:100%;
+    max-width:440px;
+    background:#111;
+    border:1px solid #292929;
+    border-radius:24px;
+    padding:28px 24px;
+    box-shadow:0 20px 70px rgba(0,0,0,.55);
 }
-
 
 .logo{
-
-text-align:center;
-font-size:38px;
-font-weight:900;
-
+    text-align:center;
+    font-size:38px;
+    font-weight:900;
+    letter-spacing:-1px;
 }
-
 
 .logo span{
-
-color:#FFD600;
-
+    color:var(--yellow);
 }
-
 
 .role{
-
-text-align:center;
-color:#FFD600;
-margin:15px;
-
+    text-align:center;
+    color:var(--yellow);
+    font-size:15px;
+    font-weight:bold;
+    margin:10px 0 25px;
 }
-
 
 .input{
-
-width:100%;
-padding:14px;
-margin:8px 0;
-background:#000;
-color:white;
-border:1px solid #444;
-border-radius:12px;
-box-sizing:border-box;
-
+    width:100%;
+    padding:14px;
+    margin:7px 0;
+    background:#050505;
+    color:#fff;
+    border:1px solid #383838;
+    border-radius:12px;
+    outline:none;
+    font-size:15px;
 }
 
+.input:focus{
+    border-color:var(--yellow);
+}
+
+select.input{
+    color:#fff;
+}
+
+select.input option{
+    background:#111;
+    color:#fff;
+}
+
+.section{
+    margin-top:18px;
+    margin-bottom:8px;
+    color:#ddd;
+    font-size:14px;
+    font-weight:bold;
+}
 
 .upload{
-
-background:#000;
-padding:12px;
-border-radius:12px;
-border:1px dashed #FFD600;
-margin:10px 0;
-
+    background:#050505;
+    border:1px dashed #6b6000;
+    border-radius:12px;
+    padding:13px;
+    margin:10px 0;
 }
 
+.upload-title{
+    color:#ddd;
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.upload input{
+    width:100%;
+    color:#aaa;
+    font-size:12px;
+}
 
 .btn{
-
-width:100%;
-padding:15px;
-border:none;
-border-radius:12px;
-background:#FFD600;
-color:#000;
-font-weight:bold;
-font-size:17px;
-margin-top:15px;
-
+    width:100%;
+    padding:16px;
+    margin-top:18px;
+    border:0;
+    border-radius:12px;
+    background:var(--yellow);
+    color:#000;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-
-#riderBox{
-
-display:none;
-
+.btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
 }
 
+.loading{
+    display:none;
+    text-align:center;
+    color:var(--yellow);
+    font-size:13px;
+    margin-top:14px;
+}
+
+.message{
+    min-height:22px;
+    text-align:center;
+    font-size:13px;
+    line-height:1.5;
+    margin-top:14px;
+}
+
+.success{
+    color:var(--green);
+}
+
+.error{
+    color:#ff7777;
+}
 
 .back{
-
-text-align:center;
-color:#aaa;
-margin-top:20px;
-
+    text-align:center;
+    color:#888;
+    margin-top:20px;
+    font-size:14px;
+    cursor:pointer;
 }
 
+.back:hover{
+    color:#fff;
+}
 
+.note{
+    text-align:center;
+    color:#666;
+    font-size:11px;
+    line-height:1.5;
+    margin-top:18px;
+}
 
+#riderBox{
+    display:none;
+}
+
+@media(max-width:480px){
+
+    body{
+        padding:12px;
+    }
+
+    .box{
+        padding:24px 18px;
+        border-radius:20px;
+    }
+
+    .logo{
+        font-size:34px;
+    }
+}
 </style>
-
 
 </head>
 
-
 <body>
-
 
 <div class="box">
 
+    <div class="logo">
+        RID<span>ERX</span>
+    </div>
 
-<div class="logo">
+    <div id="roleText" class="role">
+        Customer Registration
+    </div>
 
-RID<span>ERX</span>
+
+    <!-- BASIC DETAILS -->
+
+    <input
+        id="fullName"
+        class="input"
+        type="text"
+        placeholder="Full Name"
+        autocomplete="name"
+    >
+
+    <input
+        id="phone"
+        class="input"
+        type="tel"
+        placeholder="Phone Number"
+        inputmode="numeric"
+        autocomplete="tel"
+    >
+
+    <input
+        id="email"
+        class="input"
+        type="email"
+        placeholder="Email Address"
+        autocomplete="email"
+    >
+
+    <input
+        id="password"
+        class="input"
+        type="password"
+        placeholder="Password (minimum 6 characters)"
+        autocomplete="new-password"
+    >
+
+
+    <!-- RIDER DETAILS -->
+
+    <div id="riderBox">
+
+        <div class="section">
+            Rider / Vehicle Details
+        </div>
+
+        <select
+            id="vehicleType"
+            class="input"
+        >
+            <option value="">Select Vehicle Type</option>
+            <option value="bike">Bike</option>
+            <option value="cab">Cab</option>
+        </select>
+
+        <input
+            id="vehicleNumber"
+            class="input"
+            type="text"
+            placeholder="Vehicle Number"
+            autocomplete="off"
+        >
+
+        <input
+            id="licenseNumber"
+            class="input"
+            type="text"
+            placeholder="Driving License Number"
+            autocomplete="off"
+        >
+
+
+        <div class="upload">
+
+            <div class="upload-title">
+                RC Document
+            </div>
+
+            <input
+                id="rc"
+                type="file"
+                accept="image/*,.pdf"
+            >
+
+        </div>
+
+
+        <div class="upload">
+
+            <div class="upload-title">
+                Driving License
+            </div>
+
+            <input
+                id="license"
+                type="file"
+                accept="image/*,.pdf"
+            >
+
+        </div>
+
+    </div>
+
+
+    <button
+        id="registerBtn"
+        class="btn"
+        type="button"
+    >
+        Create Account
+    </button>
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+        Creating account...
+    </div>
+
+
+    <div
+        id="message"
+        class="message"
+    ></div>
+
+
+    <div
+        class="back"
+        id="backBtn"
+    >
+        ← Back
+    </div>
+
+
+    <div class="note">
+        Rider registrations are reviewed by RiderX Admin before activation.
+    </div>
 
 </div>
-
-
-
-<div class="role" id="roleText">
-
-Customer Registration
-
-</div>
-
-
-
-
-
-<input id="fullName"
-class="input"
-placeholder="Full Name">
-
-
-
-<input id="phone"
-class="input"
-placeholder="Phone Number">
-
-
-
-<input id="email"
-class="input"
-type="email"
-placeholder="Email">
-
-
-
-<input id="password"
-class="input"
-type="password"
-placeholder="Password">
-
-
-
-
-
-
-<div id="riderBox">
-
-
-
-<select id="vehicleType" class="input">
-
-
-<option value="">
-
-Select Vehicle
-
-</option>
-
-
-<option value="bike">
-
-Bike
-
-</option>
-
-
-<option value="cab">
-
-Cab
-
-</option>
-
-
-</select>
-
-
-
-
-
-<input id="vehicleNumber"
-class="input"
-placeholder="Vehicle Number">
-
-
-
-
-
-<div class="upload">
-
-RC Upload
-
-<br>
-
-<input id="rc"
-type="file"
-accept="image/*,.pdf">
-
-</div>
-
-
-
-
-
-<div class="upload">
-
-Driving License Upload
-
-<br>
-
-<input id="license"
-type="file"
-accept="image/*,.pdf">
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<button id="registerBtn" class="btn">
-
-Create Account
-
-</button>
-
-
-
-
-<div class="back" onclick="history.back()">
-
-← Back
-
-</div>
-
-
-
-</div>
-
-
-
-
 
 
 <script type="module">
 
-
 import {
-
-auth,
-db,
-storage
-
-}
-
-from "../firebase/firebase-config.js";
-
-
-
-import {
-
-createUserWithEmailAndPassword
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    auth,
+    db,
+    storage,
+    createUserWithEmailAndPassword,
+    signOut,
+    doc,
+    setDoc,
+    updateDoc,
+    serverTimestamp,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "../firebase/firebase-config.js";
 
 
+/* ============================================================
+   ELEMENTS
+============================================================ */
 
-import {
+const fullNameInput =
+    document.getElementById("fullName");
 
-doc,
-setDoc,
-serverTimestamp
+const phoneInput =
+    document.getElementById("phone");
 
-}
+const emailInput =
+    document.getElementById("email");
 
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+const passwordInput =
+    document.getElementById("password");
+
+const vehicleTypeInput =
+    document.getElementById("vehicleType");
+
+const vehicleNumberInput =
+    document.getElementById("vehicleNumber");
+
+const licenseNumberInput =
+    document.getElementById("licenseNumber");
+
+const rcInput =
+    document.getElementById("rc");
+
+const licenseInput =
+    document.getElementById("license");
+
+const riderBox =
+    document.getElementById("riderBox");
+
+const roleText =
+    document.getElementById("roleText");
+
+const registerBtn =
+    document.getElementById("registerBtn");
+
+const loading =
+    document.getElementById("loading");
+
+const message =
+    document.getElementById("message");
+
+const backBtn =
+    document.getElementById("backBtn");
 
 
-
-import {
-
-ref,
-uploadBytes,
-getDownloadURL
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-
-
-
-
-
+/* ============================================================
+   ROLE
+============================================================ */
 
 const params =
-new URLSearchParams(
-window.location.search
-);
+    new URLSearchParams(window.location.search);
+
+let role =
+    String(params.get("role") || "customer")
+        .trim()
+        .toLowerCase();
 
 
+/*
+    SECURITY:
+    Only customer and rider registration are allowed.
+    ?role=admin etc. will automatically become customer.
+*/
 
-const role =
-params.get("role") || "customer";
-
-
-
-
-
-
-if(role==="rider"){
-
-
-document.getElementById("roleText").innerText =
-"Rider Registration";
-
-
-document.getElementById("riderBox").style.display =
-"block";
-
-
+if(role !== "rider" && role !== "customer"){
+    role = "customer";
 }
 
 
+if(role === "rider"){
+
+    roleText.textContent =
+        "Rider Registration";
+
+    riderBox.style.display =
+        "block";
+
+}else{
+
+    roleText.textContent =
+        "Customer Registration";
+
+    riderBox.style.display =
+        "none";
+}
 
 
+/* ============================================================
+   MESSAGE
+============================================================ */
+
+function showMessage(text,type=""){
+
+    message.className =
+        "message " + type;
+
+    message.textContent =
+        text;
+}
 
 
+/* ============================================================
+   LOADING
+============================================================ */
+
+function setLoading(active,text){
+
+    if(active){
+
+        loading.style.display =
+            "block";
+
+        loading.textContent =
+            text || "Creating account...";
+
+        registerBtn.disabled =
+            true;
+
+    }else{
+
+        loading.style.display =
+            "none";
+
+        registerBtn.disabled =
+            false;
+    }
+}
+
+
+/* ============================================================
+   FILE UPLOAD
+============================================================ */
 
 async function uploadFile(file,path){
 
+    if(!file){
+        return "";
+    }
 
-if(!file)
-return "";
+    /*
+        10 MB maximum
+    */
 
+    if(file.size > 10 * 1024 * 1024){
 
-const fileRef =
-ref(storage,path);
-
-
-await uploadBytes(
-fileRef,
-file
-);
-
-
-return await getDownloadURL(fileRef);
+        throw new Error(
+            "File too large. Maximum file size is 10 MB."
+        );
+    }
 
 
+    const fileRef =
+        ref(storage,path);
+
+
+    await uploadBytes(
+        fileRef,
+        file
+    );
+
+
+    return await getDownloadURL(
+        fileRef
+    );
 }
 
 
+/* ============================================================
+   VALIDATION
+============================================================ */
+
+function validate(){
+
+    const fullName =
+        fullNameInput.value.trim();
+
+    const phone =
+        phoneInput.value.trim();
+
+    const email =
+        emailInput.value.trim();
+
+    const password =
+        passwordInput.value;
 
 
+    if(!fullName){
+
+        showMessage(
+            "❌ Please enter your full name.",
+            "error"
+        );
+
+        fullNameInput.focus();
+
+        return false;
+    }
 
 
+    if(!phone){
 
-document
-.getElementById("registerBtn")
-.onclick = async()=>{
+        showMessage(
+            "❌ Please enter your phone number.",
+            "error"
+        );
 
+        phoneInput.focus();
 
-try{
-
-
-const fullName =
-document.getElementById("fullName").value.trim();
-
-
-
-const phone =
-document.getElementById("phone").value.trim();
+        return false;
+    }
 
 
+    if(phone.replace(/\D/g,"").length < 10){
 
-const email =
-document.getElementById("email").value.trim();
+        showMessage(
+            "❌ Please enter a valid phone number.",
+            "error"
+        );
 
+        phoneInput.focus();
 
-
-const password =
-document.getElementById("password").value;
-
-
-
-
-
-
-if(!fullName || !phone || !email || !password){
+        return false;
+    }
 
 
-alert("Please fill all details");
+    if(!email){
 
-return;
+        showMessage(
+            "❌ Please enter your email address.",
+            "error"
+        );
 
+        emailInput.focus();
+
+        return false;
+    }
+
+
+    if(password.length < 6){
+
+        showMessage(
+            "❌ Password must be at least 6 characters.",
+            "error"
+        );
+
+        passwordInput.focus();
+
+        return false;
+    }
+
+
+    if(role === "rider"){
+
+        if(!vehicleTypeInput.value){
+
+            showMessage(
+                "❌ Please select vehicle type.",
+                "error"
+            );
+
+            vehicleTypeInput.focus();
+
+            return false;
+        }
+
+
+        if(!vehicleNumberInput.value.trim()){
+
+            showMessage(
+                "❌ Please enter vehicle number.",
+                "error"
+            );
+
+            vehicleNumberInput.focus();
+
+            return false;
+        }
+
+
+        if(!licenseNumberInput.value.trim()){
+
+            showMessage(
+                "❌ Please enter driving license number.",
+                "error"
+            );
+
+            licenseNumberInput.focus();
+
+            return false;
+        }
+
+
+        if(!rcInput.files.length){
+
+            showMessage(
+                "❌ Please upload RC document.",
+                "error"
+            );
+
+            return false;
+        }
+
+
+        if(!licenseInput.files.length){
+
+            showMessage(
+                "❌ Please upload driving license.",
+                "error"
+            );
+
+            return false;
+        }
+    }
+
+
+    return true;
 }
 
 
+/* ============================================================
+   REGISTER
+============================================================ */
 
+async function registerAccount(){
 
+    if(registerBtn.disabled){
+        return;
+    }
 
-const result =
-await createUserWithEmailAndPassword(
 
-auth,
+    showMessage("");
 
-email,
+    if(!validate()){
+        return;
+    }
 
-password
 
-);
+    const fullName =
+        fullNameInput.value.trim();
 
+    const phone =
+        phoneInput.value.trim();
 
+    const email =
+        emailInput.value.trim()
+        .toLowerCase();
 
+    const password =
+        passwordInput.value;
 
-const uid =
-result.user.uid;
 
+    setLoading(
+        true,
+        "Creating Firebase account..."
+    );
 
 
+    let firebaseUser = null;
 
 
-let userData={
+    try{
 
+        /*
+            CREATE AUTH ACCOUNT
+        */
 
-uid:uid,
+        const result =
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-fullName:fullName,
 
-phone:phone,
+        firebaseUser =
+            result.user;
 
-email:email,
 
-role:role,
+        const uid =
+            firebaseUser.uid;
 
-status:
-role==="rider"
-?
-"pending"
-:
-"active",
 
+        /* ====================================================
+           CUSTOMER
+        ==================================================== */
 
-approved:
-role==="rider"
-?
-false
-:
-true,
+        if(role === "customer"){
 
+            setLoading(
+                true,
+                "Saving customer profile..."
+            );
 
-createdAt:
-serverTimestamp()
 
+            const customerData = {
 
+                uid: uid,
 
-};
+                fullName: fullName,
 
+                name: fullName,
 
+                phone: phone,
 
+                email: email,
 
+                role: "customer",
 
+                userType: "customer",
 
+                status: "active",
 
+                approved: true,
 
-if(role==="rider"){
+                isApproved: true,
 
+                online: false,
 
+                isOnline: false,
 
-const rcURL =
-await uploadFile(
+                createdAt:
+                    serverTimestamp()
 
-document.getElementById("rc").files[0],
+            };
 
-"riders/"+uid+"/rc"
 
-);
+            await setDoc(
+                doc(db,"users",uid),
+                customerData
+            );
 
 
+            /*
+                Also keep customer profile
+                compatible with RiderX.
+            */
 
+            await setDoc(
+                doc(db,"customers",uid),
+                customerData
+            );
 
 
-const licenseURL =
-await uploadFile(
+            showMessage(
+                "✅ Account created successfully. Opening RiderX...",
+                "success"
+            );
 
-document.getElementById("license").files[0],
 
-"riders/"+uid+"/license"
+            setLoading(
+                true,
+                "Opening customer account..."
+            );
 
-);
 
+            setTimeout(
+                () => {
+                    window.location.replace(
+                        "../customer/home.html"
+                    );
+                },
+                500
+            );
 
 
+            return;
+        }
 
 
-userData.vehicleType =
-document.getElementById("vehicleType").value;
+        /* ====================================================
+           RIDER
+        ==================================================== */
 
+        setLoading(
+            true,
+            "Creating rider application..."
+        );
 
 
-userData.vehicleNumber =
-document.getElementById("vehicleNumber").value;
+        const uid =
+            firebaseUser.uid;
 
 
+        /*
+            FIRST create user profile.
 
-userData.rc =
-rcURL;
+            This prevents the old problem where:
+            Firebase Auth account exists but users document
+            does not exist if Storage upload fails.
+        */
 
+        const riderData = {
 
+            uid: uid,
 
-userData.license =
-licenseURL;
+            fullName: fullName,
 
+            name: fullName,
 
+            phone: phone,
 
+            email: email,
 
+            role: "rider",
 
+            userType: "rider",
 
-await setDoc(
+            status: "pending",
 
-doc(
-db,
-"riders",
-uid
-),
+            approvalStatus: "pending",
 
-userData
+            riderStatus: "pending",
 
-);
+            verificationStatus: "pending",
 
+            approved: false,
 
+            isApproved: false,
 
+            online: false,
+
+            isOnline: false,
+
+            accountStatus: "pending",
+
+            vehicleType:
+                vehicleTypeInput.value,
+
+            vehicleNumber:
+                vehicleNumberInput.value
+                    .trim()
+                    .toUpperCase(),
+
+            licenseNumber:
+                licenseNumberInput.value
+                    .trim()
+                    .toUpperCase(),
+
+            applicationSubmitted: true,
+
+            registrationCompleted: true,
+
+            documentsSubmitted: false,
+
+            createdAt:
+                serverTimestamp()
+
+        };
+
+
+        await setDoc(
+            doc(db,"users",uid),
+            riderData
+        );
+
+
+        /*
+            Create separate rider document.
+        */
+
+        await setDoc(
+            doc(db,"riders",uid),
+            riderData
+        );
+
+
+        /* ====================================================
+           UPLOAD DOCUMENTS
+        ==================================================== */
+
+        setLoading(
+            true,
+            "Uploading RC document..."
+        );
+
+
+        const rcURL =
+            await uploadFile(
+                rcInput.files[0],
+                "riders/" +
+                uid +
+                "/documents/rc"
+            );
+
+
+        setLoading(
+            true,
+            "Uploading driving license..."
+        );
+
+
+        const licenseURL =
+            await uploadFile(
+                licenseInput.files[0],
+                "riders/" +
+                uid +
+                "/documents/license"
+            );
+
+
+        /*
+            Update both documents with URLs.
+        */
+
+        const documentUpdate = {
+
+            rc: rcURL,
+
+            rcUrl: rcURL,
+
+            license: licenseURL,
+
+            licenseUrl: licenseURL,
+
+            documentsUploaded: true,
+
+            documentsSubmitted: true,
+
+            updatedAt:
+                serverTimestamp()
+
+        };
+
+
+        await updateDoc(
+            doc(db,"users",uid),
+            documentUpdate
+        );
+
+
+        await updateDoc(
+            doc(db,"riders",uid),
+            documentUpdate
+        );
+
+
+        /* ====================================================
+           SUCCESS
+        ==================================================== */
+
+        showMessage(
+            "✅ Rider application submitted. Admin approval required.",
+            "success"
+        );
+
+
+        setLoading(
+            true,
+            "Opening rider application status..."
+        );
+
+
+        /*
+            Rider should NOT go directly to rider home.
+            Admin approval is required first.
+        */
+
+        setTimeout(
+            () => {
+
+                window.location.replace(
+                    "../rider/pending.html"
+                );
+
+            },
+            700
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "RiderX Registration Error:",
+            error
+        );
+
+
+        let text =
+            "❌ Registration failed.";
+
+
+        switch(error.code){
+
+            case "auth/email-already-in-use":
+
+                text =
+                    "❌ This email is already registered.";
+
+                break;
+
+
+            case "auth/invalid-email":
+
+                text =
+                    "❌ Invalid email address.";
+
+                break;
+
+
+            case "auth/weak-password":
+
+                text =
+                    "❌ Password is too weak. Use at least 6 characters.";
+
+                break;
+
+
+            case "auth/network-request-failed":
+
+                text =
+                    "❌ Network error. Check your internet connection.";
+
+                break;
+
+
+            case "storage/unauthorized":
+
+                text =
+                    "❌ Document upload permission denied. Firebase Storage Rules check karein.";
+
+                break;
+
+
+            case "storage/unknown":
+
+                text =
+                    "❌ Firebase Storage upload failed.";
+
+                break;
+
+
+            default:
+
+                if(
+                    error.message &&
+                    error.message.includes(
+                        "Missing or insufficient permissions"
+                    )
+                ){
+
+                    text =
+                        "❌ Firestore permission denied. Firestore Rules check karein.";
+
+                }else{
+
+                    text =
+                        "❌ " +
+                        (
+                            error.message ||
+                            "Registration failed."
+                        );
+                }
+        }
+
+
+        setLoading(false);
+
+        showMessage(
+            text,
+            "error"
+        );
+    }
 }
 
 
+/* ============================================================
+   BUTTON
+============================================================ */
 
-
-
-
-
-
-await setDoc(
-
-doc(
-db,
-"users",
-uid
-),
-
-userData
-
+registerBtn.addEventListener(
+    "click",
+    registerAccount
 );
 
 
+/* ============================================================
+   ENTER KEY
+============================================================ */
+
+[
+    fullNameInput,
+    phoneInput,
+    emailInput,
+    passwordInput,
+    vehicleNumberInput,
+    licenseNumberInput
+].forEach(input => {
+
+    input.addEventListener(
+        "keydown",
+        event => {
+
+            if(event.key === "Enter"){
+
+                event.preventDefault();
+
+                registerAccount();
+            }
+        }
+    );
+
+});
 
 
+/* ============================================================
+   BACK
+============================================================ */
 
+backBtn.addEventListener(
+    "click",
+    () => {
 
+        if(history.length > 1){
 
+            history.back();
 
-alert(
-"RiderX Account Created Successfully"
+        }else{
+
+            window.location.replace(
+                "../index.html"
+            );
+        }
+    }
 );
-
-
-
-
-
-
-
-if(role==="rider"){
-
-
-location.href="../rider/pending.html";
-
-
-}
-
-else{
-
-
-location.href="../customer/home.html";
-
-
-}
-
-
-
-
-
-}
-
-
-
-catch(error){
-
-
-alert(error.message);
-
-
-}
-
-
-
-};
-
-
 
 </script>
 
-
 </body>
-
 </html>
