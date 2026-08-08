@@ -1,32 +1,1050 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+>
+
 <title>RiderX | Book Ride</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+>
+
 <style>
-:root{--y:#ffe500;--bg:#050505;--c:#111;--l:#303030;--m:#888;--g:#22c55e}*{box-sizing:border-box;margin:0;padding:0;font-family:Poppins,Arial,sans-serif}html,body{height:100%;overflow:hidden;background:#000;color:#fff}#map{position:absolute;inset:0;z-index:1}.leaflet-control-zoom{margin-top:78px!important}.leaflet-control-zoom a{background:#111!important;color:var(--y)!important;border-color:#333!important}.topbar{position:absolute;top:0;left:0;right:0;z-index:1000;padding:14px}.topbar-inner{display:flex;align-items:center;justify-content:space-between}.icon-btn,.logo{background:#111;border:1px solid #333;box-shadow:0 5px 20px #0008}.icon-btn{width:44px;height:44px;border-radius:50%;color:#fff;display:grid;place-items:center}.logo{padding:8px 17px;border-radius:15px;font-size:18px;font-weight:800}.logo span{color:var(--y)}.status{position:absolute;top:70px;left:50%;transform:translateX(-50%);z-index:900;background:#111;border:1px solid #333;padding:8px 15px;border-radius:30px;font-size:11px;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}.center-marker{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:500;pointer-events:none}.pin{width:44px;height:44px;background:var(--y);color:#000;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center}.pin i{transform:rotate(45deg)}.sheet{position:absolute;left:0;right:0;bottom:0;z-index:1000;background:#090909f5;border-top:1px solid #292929;border-radius:27px 27px 0 0;padding:13px 15px 18px;max-height:64vh;overflow:auto;box-shadow:0 -10px 40px #0009}.handle{width:45px;height:5px;background:#555;border-radius:20px;margin:0 auto 14px}.title{font-size:18px;font-weight:800}.sub{font-size:11px;color:#777;margin:2px 0 13px}.loc{background:#151515;border:1px solid #292929;border-radius:16px;overflow:visible}.row{display:flex;align-items:center;gap:9px;padding:10px}.row+.row{border-top:1px solid #292929}.dot{width:26px;height:26px;min-width:26px;border-radius:50%;display:grid;place-items:center;font-size:9px}.pick{background:#12351f;color:var(--g)}.drop{background:#3b3500;color:var(--y)}input{flex:1;min-width:0;background:none;border:0;outline:0;color:#fff;font-size:12px}input::placeholder{color:#777}.action{width:35px;height:35px;border:0;border-radius:50%;background:#222;color:var(--y)}.results{display:none;max-height:150px;overflow:auto;background:#101010;border:1px solid #333;border-radius:12px;margin:5px 10px;position:relative;z-index:3000}.result{padding:10px;font-size:11px;border-bottom:1px solid #222;color:#ddd}.services{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.service{background:#171717;border:1px solid #333;border-radius:14px;padding:11px 3px;text-align:center;color:#aaa}.service i{font-size:18px}.service span{display:block;font-size:10px;margin-top:4px}.service.active{background:var(--y);border-color:var(--y);color:#000}.estimate{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.info,.fare{background:#151515;border:1px solid #292929;border-radius:14px;padding:11px}.label{font-size:10px;color:#777}.value{font-size:14px;font-weight:700}.fare{margin-top:8px;display:flex;justify-content:space-between;align-items:center}.price{font-size:23px;font-weight:800;color:var(--y)}.pay{display:flex;gap:8px;margin-top:10px}.payment-option{flex:1;background:#151515;border:1px solid #333;border-radius:13px;padding:10px 3px;color:#aaa;font-size:10px}.payment-option i{display:block;font-size:16px;margin-bottom:3px}.payment-option.active{border-color:var(--y);background:#211f00;color:var(--y)}.book{width:100%;margin-top:13px;padding:15px;border:0;border-radius:15px;background:var(--y);color:#000;font-size:16px;font-weight:800}.book:disabled{background:#444;color:#888}.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,120px);z-index:6000;background:#111;border:1px solid #333;padding:11px 16px;border-radius:13px;font-size:12px;transition:.25s}.toast.show{transform:translate(-50%,0)}.searching{display:none;position:fixed;inset:0;z-index:5000;background:#000b;place-items:center}.searching.show{display:grid}.box{width:calc(100% - 40px);max-width:360px;background:#111;border:1px solid #333;border-radius:22px;padding:28px 20px;text-align:center}.loader{width:45px;height:45px;border:4px solid #333;border-top-color:var(--y);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 15px}@keyframes spin{to{transform:rotate(360deg)}}
+
+:root{
+    --yellow:#ffe500;
+    --bg:#050505;
+    --card:#111;
+    --line:#303030;
+    --muted:#888;
+    --green:#22c55e;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Poppins,Arial,sans-serif;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    color:#fff;
+}
+
+button,
+input,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+/* MAP */
+
+#map{
+    position:absolute;
+    inset:0;
+    z-index:1;
+}
+
+.leaflet-control-zoom{
+    margin-top:78px!important;
+}
+
+.leaflet-control-zoom a{
+    background:#111!important;
+    color:var(--yellow)!important;
+    border-color:#333!important;
+}
+
+
+/* TOP BAR */
+
+.topbar{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+    padding:14px;
+}
+
+.topbar-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.icon-btn{
+    width:44px;
+    height:44px;
+    border:none;
+    border-radius:50%;
+    background:#111;
+    color:#fff;
+    border:1px solid #333;
+    display:grid;
+    place-items:center;
+    box-shadow:0 5px 20px #0008;
+}
+
+.icon-btn:active{
+    transform:scale(.94);
+}
+
+.logo{
+    padding:8px 17px;
+    border-radius:15px;
+    background:#111;
+    border:1px solid #333;
+    box-shadow:0 5px 20px #0008;
+    font-size:18px;
+    font-weight:800;
+}
+
+.logo span{
+    color:var(--yellow);
+}
+
+
+/* STATUS */
+
+.status{
+    position:absolute;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:900;
+
+    background:#111;
+    border:1px solid #333;
+
+    padding:8px 15px;
+    border-radius:30px;
+
+    font-size:11px;
+
+    white-space:nowrap;
+    max-width:90%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+    box-shadow:0 5px 20px #0008;
+}
+
+
+/* CENTER PIN */
+
+.center-marker{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-100%);
+    z-index:500;
+    pointer-events:none;
+}
+
+.pin{
+    width:44px;
+    height:44px;
+
+    background:var(--yellow);
+    color:#000;
+
+    border-radius:50% 50% 50% 0;
+
+    transform:rotate(-45deg);
+
+    display:grid;
+    place-items:center;
+
+    box-shadow:0 6px 20px #0008;
+}
+
+.pin i{
+    transform:rotate(45deg);
+}
+
+
+/* BOOKING SHEET */
+
+.sheet{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+
+    z-index:1000;
+
+    background:#090909f5;
+
+    border-top:1px solid #292929;
+    border-radius:27px 27px 0 0;
+
+    padding:13px 15px 18px;
+
+    max-height:64vh;
+
+    overflow:auto;
+
+    box-shadow:0 -10px 40px #0009;
+}
+
+.handle{
+    width:45px;
+    height:5px;
+
+    background:#555;
+
+    border-radius:20px;
+
+    margin:0 auto 14px;
+}
+
+.title{
+    font-size:18px;
+    font-weight:800;
+}
+
+.sub{
+    font-size:11px;
+    color:#777;
+    margin:2px 0 13px;
+}
+
+
+/* LOCATIONS */
+
+.loc{
+    background:#151515;
+    border:1px solid #292929;
+    border-radius:16px;
+    overflow:visible;
+}
+
+.row{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:10px;
+}
+
+.row + .row{
+    border-top:1px solid #292929;
+}
+
+.dot{
+    width:26px;
+    height:26px;
+    min-width:26px;
+
+    border-radius:50%;
+
+    display:grid;
+    place-items:center;
+
+    font-size:9px;
+}
+
+.pick{
+    background:#12351f;
+    color:var(--green);
+}
+
+.drop{
+    background:#3b3500;
+    color:var(--yellow);
+}
+
+input{
+    flex:1;
+    min-width:0;
+
+    background:none;
+    border:0;
+    outline:0;
+
+    color:#fff;
+
+    font-size:12px;
+}
+
+input::placeholder{
+    color:#777;
+}
+
+.action{
+    width:35px;
+    height:35px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#222;
+    color:var(--yellow);
+}
+
+.action:active{
+    transform:scale(.94);
+}
+
+
+/* SEARCH RESULTS */
+
+.results{
+    display:none;
+
+    max-height:150px;
+    overflow:auto;
+
+    background:#101010;
+    border:1px solid #333;
+
+    border-radius:12px;
+
+    margin:5px 10px;
+
+    position:relative;
+    z-index:3000;
+}
+
+.result{
+    padding:10px;
+
+    font-size:11px;
+
+    border-bottom:1px solid #222;
+
+    color:#ddd;
+}
+
+.result:last-child{
+    border-bottom:none;
+}
+
+.result:active{
+    background:#222;
+}
+
+
+/* SERVICES */
+
+.services{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+
+    margin-top:13px;
+}
+
+.service{
+    background:#171717;
+
+    border:1px solid #333;
+
+    border-radius:14px;
+
+    padding:11px 3px;
+
+    text-align:center;
+
+    color:#aaa;
+}
+
+.service i{
+    font-size:18px;
+}
+
+.service span{
+    display:block;
+
+    font-size:10px;
+
+    margin-top:4px;
+}
+
+.service.active{
+    background:var(--yellow);
+    border-color:var(--yellow);
+    color:#000;
+}
+
+
+/* ESTIMATE */
+
+.estimate{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+
+    gap:8px;
+
+    margin-top:12px;
+}
+
+.info{
+    background:#151515;
+
+    border:1px solid #292929;
+
+    border-radius:14px;
+
+    padding:11px;
+}
+
+.label{
+    font-size:10px;
+    color:#777;
+}
+
+.value{
+    font-size:14px;
+    font-weight:700;
+}
+
+
+/* FARE */
+
+.fare{
+    margin-top:8px;
+
+    background:#151515;
+
+    border:1px solid #292929;
+
+    border-radius:14px;
+
+    padding:11px;
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+}
+
+.price{
+    font-size:23px;
+    font-weight:800;
+    color:var(--yellow);
+}
+
+
+/* PAYMENT */
+
+.pay{
+    display:flex;
+    gap:8px;
+
+    margin-top:10px;
+}
+
+.payment-option{
+    flex:1;
+
+    background:#151515;
+
+    border:1px solid #333;
+
+    border-radius:13px;
+
+    padding:10px 3px;
+
+    color:#aaa;
+
+    font-size:10px;
+}
+
+.payment-option i{
+    display:block;
+
+    font-size:16px;
+
+    margin-bottom:3px;
+}
+
+.payment-option.active{
+    border-color:var(--yellow);
+
+    background:#211f00;
+
+    color:var(--yellow);
+}
+
+
+/* BOOK */
+
+.book{
+    width:100%;
+
+    margin-top:13px;
+
+    padding:15px;
+
+    border:0;
+
+    border-radius:15px;
+
+    background:var(--yellow);
+
+    color:#000;
+
+    font-size:16px;
+
+    font-weight:800;
+}
+
+.book:active{
+    transform:scale(.98);
+}
+
+.book:disabled{
+    background:#444;
+    color:#888;
+}
+
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    transform:translate(-50%,120px);
+
+    z-index:6000;
+
+    background:#111;
+
+    border:1px solid #333;
+
+    padding:11px 16px;
+
+    border-radius:13px;
+
+    font-size:12px;
+
+    transition:.25s;
+}
+
+.toast.show{
+    transform:translate(-50%,0);
+}
+
+
+/* SEARCHING */
+
+.searching{
+    display:none;
+
+    position:fixed;
+    inset:0;
+
+    z-index:5000;
+
+    background:#000b;
+
+    place-items:center;
+}
+
+.searching.show{
+    display:grid;
+}
+
+.search-box{
+    width:calc(100% - 40px);
+
+    max-width:360px;
+
+    background:#111;
+
+    border:1px solid #333;
+
+    border-radius:22px;
+
+    padding:28px 20px;
+
+    text-align:center;
+}
+
+.loader{
+    width:45px;
+    height:45px;
+
+    border:4px solid #333;
+
+    border-top-color:var(--yellow);
+
+    border-radius:50%;
+
+    animation:spin 1s linear infinite;
+
+    margin:0 auto 15px;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+
+/* MOBILE */
+
+@media(max-width:380px){
+
+    .sheet{
+        padding:12px 12px 16px;
+    }
+
+    .service{
+        padding:10px 2px;
+    }
+
+    .title{
+        font-size:16px;
+    }
+
+}
+
 </style>
+
 </head>
+
 <body>
+
+
+<!-- MAP -->
+
 <div id="map"></div>
-<div class="topbar"><div class="topbar-inner"><button class="icon-btn" id="backBtn"><i class="fa-solid fa-arrow-left"></i></button><div class="logo">RIDER<span>X</span></div><button class="icon-btn" id="myLocation"><i class="fa-solid fa-location-crosshairs"></i></button></div></div>
-<div class="status" id="status">Getting your location...</div>
-<div class="center-marker" id="centerMarker" style="display:none"><div class="pin"><i class="fa-solid fa-location-dot"></i></div></div>
-<div class="sheet"><div class="handle"></div><div class="title">Where are you going?</div><div class="sub">Choose pickup and destination</div>
-<div class="loc">
-<div class="row"><div class="dot pick"><i class="fa-solid fa-circle"></i></div><input id="pickupInput" placeholder="Pickup location" autocomplete="off"><button class="action" id="pickupMapBtn"><i class="fa-solid fa-location-crosshairs"></i></button></div><div id="pickupResults" class="results"></div>
-<div class="row"><div class="dot drop"><i class="fa-solid fa-location-dot"></i></div><input id="dropInput" placeholder="Where to?" autocomplete="off"><button class="action" id="dropMapBtn"><i class="fa-solid fa-map-pin"></i></button></div><div id="dropResults" class="results"></div>
+
+
+<!-- TOP BAR -->
+
+<div class="topbar">
+
+    <div class="topbar-inner">
+
+        <button
+            class="icon-btn"
+            id="backBtn"
+            type="button"
+            aria-label="Back">
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+        </button>
+
+
+        <div class="logo">
+
+            RIDER<span>X</span>
+
+        </div>
+
+
+        <button
+            class="icon-btn"
+            id="myLocation"
+            type="button"
+            aria-label="My location">
+
+            <i class="fa-solid fa-location-crosshairs"></i>
+
+        </button>
+
+    </div>
+
 </div>
-<div class="services"><button class="service active" data-service="bike"><i class="fa-solid fa-motorcycle"></i><span>Bike</span></button><button class="service" data-service="cab"><i class="fa-solid fa-car"></i><span>Cab</span></button><button class="service" data-service="parcel"><i class="fa-solid fa-box"></i><span>Parcel</span></button><button class="service" data-service="food"><i class="fa-solid fa-utensils"></i><span>Food</span></button></div>
-<div class="estimate"><div class="info"><div class="label">Distance</div><div id="distanceDisplay" class="value">0 km</div></div><div class="info"><div class="label">Estimated time</div><div id="durationDisplay" class="value">0 min</div></div></div>
-<div class="fare"><span class="label">Estimated Fare</span><span id="fareDisplay" class="price">₹0</span></div>
-<div class="pay"><button class="payment-option active" data-payment="cash"><i class="fa-solid fa-money-bill-wave"></i>Cash</button><button class="payment-option" data-payment="upi"><i class="fa-solid fa-qrcode"></i>UPI</button><button class="payment-option" data-payment="wallet"><i class="fa-solid fa-wallet"></i>Wallet</button></div>
-<button id="bookRideBtn" class="book" disabled><i class="fa-solid fa-car-side"></i> Confirm Ride</button>
+
+
+<!-- STATUS -->
+
+<div
+    class="status"
+    id="status">
+
+    Getting your location...
+
 </div>
-<div id="searchingOverlay" class="searching"><div class="box"><div class="loader"></div><b style="font-size:17px">Finding your Rider</b><div id="searchingText" style="font-size:11px;color:#888;margin-top:6px">Looking for nearby riders...</div></div></div>
-<div id="toast" class="toast"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script type="module" src="../js/customer.js"></script>
-</body></html>
+
+
+<!-- CENTER PIN -->
+
+<div
+    class="center-marker"
+    id="centerMarker"
+    style="display:none">
+
+    <div class="pin">
+
+        <i class="fa-solid fa-location-dot"></i>
+
+    </div>
+
+</div>
+
+
+<!-- BOOKING SHEET -->
+
+<div class="sheet">
+
+    <div class="handle"></div>
+
+
+    <div class="title">
+
+        Where are you going?
+
+    </div>
+
+
+    <div class="sub">
+
+        Choose pickup and destination
+
+    </div>
+
+
+    <!-- LOCATION -->
+
+    <div class="loc">
+
+
+        <!-- PICKUP -->
+
+        <div class="row">
+
+            <div class="dot pick">
+
+                <i class="fa-solid fa-circle"></i>
+
+            </div>
+
+
+            <input
+                id="pickupInput"
+                type="text"
+                placeholder="Pickup location"
+                autocomplete="off"
+            >
+
+
+            <button
+                class="action"
+                id="pickupMapBtn"
+                type="button">
+
+                <i class="fa-solid fa-location-crosshairs"></i>
+
+            </button>
+
+        </div>
+
+
+        <div
+            id="pickupResults"
+            class="results">
+        </div>
+
+
+        <!-- DROP -->
+
+        <div class="row">
+
+            <div class="dot drop">
+
+                <i class="fa-solid fa-location-dot"></i>
+
+            </div>
+
+
+            <input
+                id="dropInput"
+                type="text"
+                placeholder="Where to?"
+                autocomplete="off"
+            >
+
+
+            <button
+                class="action"
+                id="dropMapBtn"
+                type="button">
+
+                <i class="fa-solid fa-map-pin"></i>
+
+            </button>
+
+        </div>
+
+
+        <div
+            id="dropResults"
+            class="results">
+        </div>
+
+    </div>
+
+
+    <!-- SERVICES -->
+
+    <div class="services">
+
+        <button
+            class="service active"
+            data-service="bike"
+            type="button">
+
+            <i class="fa-solid fa-motorcycle"></i>
+
+            <span>Bike</span>
+
+        </button>
+
+
+        <button
+            class="service"
+            data-service="cab"
+            type="button">
+
+            <i class="fa-solid fa-car"></i>
+
+            <span>Cab</span>
+
+        </button>
+
+
+        <button
+            class="service"
+            data-service="parcel"
+            type="button">
+
+            <i class="fa-solid fa-box"></i>
+
+            <span>Parcel</span>
+
+        </button>
+
+
+        <button
+            class="service"
+            data-service="food"
+            type="button">
+
+            <i class="fa-solid fa-utensils"></i>
+
+            <span>Food</span>
+
+        </button>
+
+    </div>
+
+
+    <!-- DISTANCE + ETA -->
+
+    <div class="estimate">
+
+        <div class="info">
+
+            <div class="label">
+                Distance
+            </div>
+
+            <div
+                id="distanceDisplay"
+                class="value">
+
+                0 km
+
+            </div>
+
+        </div>
+
+
+        <div class="info">
+
+            <div class="label">
+                Estimated time
+            </div>
+
+            <div
+                id="durationDisplay"
+                class="value">
+
+                0 min
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- FARE -->
+
+    <div class="fare">
+
+        <span class="label">
+
+            Estimated Fare
+
+        </span>
+
+
+        <span
+            id="fareDisplay"
+            class="price">
+
+            ₹0
+
+        </span>
+
+    </div>
+
+
+    <!-- PAYMENT -->
+
+    <div class="pay">
+
+        <button
+            class="payment-option active"
+            data-payment="cash"
+            type="button">
+
+            <i class="fa-solid fa-money-bill-wave"></i>
+
+            Cash
+
+        </button>
+
+
+        <button
+            class="payment-option"
+            data-payment="upi"
+            type="button">
+
+            <i class="fa-solid fa-qrcode"></i>
+
+            UPI
+
+        </button>
+
+
+        <button
+            class="payment-option"
+            data-payment="wallet"
+            type="button">
+
+            <i class="fa-solid fa-wallet"></i>
+
+            Wallet
+
+        </button>
+
+    </div>
+
+
+    <!-- BOOK -->
+
+    <button
+        id="bookRideBtn"
+        class="book"
+        type="button"
+        disabled>
+
+        <i class="fa-solid fa-car-side"></i>
+
+        Confirm Ride
+
+    </button>
+
+</div>
+
+
+<!-- SEARCHING OVERLAY -->
+
+<div
+    id="searchingOverlay"
+    class="searching">
+
+    <div class="search-box">
+
+        <div class="loader"></div>
+
+
+        <b style="font-size:17px">
+
+            Finding your Rider
+
+        </b>
+
+
+        <div
+            id="searchingText"
+            style="
+                font-size:11px;
+                color:#888;
+                margin-top:6px;
+            ">
+
+            Looking for nearby riders...
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+    id="toast"
+    class="toast">
+
+</div>
+
+
+<!-- LEAFLET -->
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<!-- RIDERX CUSTOMER ENGINE -->
+
+<script
+    type="module"
+    src="../js/customer.js">
+</script>
+
+
+</body>
+
+</html>
