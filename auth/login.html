@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX Login</title>
-
-<link rel="manifest" href="../manifest.json">
-<meta name="theme-color" content="#000000">
+<title>RiderX Login</title><link rel="stylesheet"
+      href="../assets/app.css"><link rel="manifest"
+      href="../manifest.json"><meta name="theme-color"
+content="#000000">
 
 <style>
 
@@ -36,7 +31,7 @@ body{
     padding:30px;
     border-radius:25px;
     border:1px solid #333;
-    box-shadow:0 20px 60px rgba(0,0,0,.5);
+    box-shadow:0 20px 60px rgba(0,0,0,.55);
 }
 
 .logo{
@@ -44,21 +39,23 @@ body{
     font-size:38px;
     font-weight:900;
     margin-bottom:10px;
+    letter-spacing:-1px;
 }
 
 .logo span{
     color:#FFD600;
 }
 
-.role-title{
+.login-type{
     text-align:center;
     color:#FFD600;
+    font-size:14px;
+    font-weight:bold;
     margin-bottom:25px;
-    font-size:20px;
 }
 
 .input-box{
-    margin-bottom:16px;
+    margin-bottom:17px;
 }
 
 label{
@@ -70,7 +67,7 @@ label{
 
 input{
     width:100%;
-    padding:14px;
+    padding:15px;
     background:#000;
     border:1px solid #444;
     border-radius:12px;
@@ -81,57 +78,90 @@ input{
 
 input:focus{
     border-color:#FFD600;
+    box-shadow:0 0 0 2px rgba(255,214,0,.08);
+}
+
+input::placeholder{
+    color:#666;
+}
+
+.password-wrap{
+    position:relative;
+}
+
+.password-wrap input{
+    padding-right:52px;
+}
+
+.toggle-password{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    background:transparent;
+    border:0;
+    color:#777;
+    cursor:pointer;
+    font-size:18px;
+    padding:8px;
+}
+
+.toggle-password:hover{
+    color:#FFD600;
 }
 
 .btn{
     width:100%;
-    padding:15px;
+    padding:16px;
     background:#FFD600;
+    color:#000;
     border:none;
     border-radius:12px;
     font-weight:bold;
     font-size:17px;
     cursor:pointer;
+    transition:.2s;
+}
+
+.btn:hover{
+    filter:brightness(1.06);
+}
+
+.btn:active{
+    transform:scale(.99);
 }
 
 .btn:disabled{
-    opacity:.5;
+    opacity:.55;
     cursor:not-allowed;
 }
 
-.message{
-    display:none;
-    margin-bottom:16px;
-    padding:11px;
-    border-radius:10px;
+.status{
+    min-height:22px;
+    margin-top:16px;
+    text-align:center;
     font-size:14px;
-    line-height:1.4;
+    line-height:1.5;
+    word-break:break-word;
 }
 
-.message.error{
-    display:block;
-    background:rgba(255,60,60,.1);
-    color:#ff6666;
+.status.error{
+    color:#ff5555;
 }
 
-.message.success{
-    display:block;
-    background:rgba(34,214,107,.1);
+.status.success{
     color:#22d66b;
 }
 
-.loading{
-    display:none;
-    text-align:center;
+.status.info{
     color:#FFD600;
-    margin-top:15px;
-    font-size:13px;
 }
 
 .auth-links{
     text-align:center;
-    margin-top:20px;
+    margin-top:22px;
     color:#aaa;
+    font-size:14px;
 }
 
 .auth-links a{
@@ -140,153 +170,196 @@ input:focus{
     font-weight:bold;
 }
 
-.back{
+.back-link{
     display:block;
     text-align:center;
     margin-top:18px;
-    color:#777;
-    font-size:13px;
+    color:#666;
     text-decoration:none;
+    font-size:13px;
 }
 
-</style>
+.back-link:hover{
+    color:#FFD600;
+}
 
-</head>
+.security{
+    text-align:center;
+    color:#666;
+    font-size:11px;
+    margin-top:24px;
+}
 
-<body>
+@media(max-width:420px){
 
-<div class="auth-card">
+    .auth-card{
+        padding:25px 20px;
+        border-radius:22px;
+    }
 
-    <div class="logo">
-        RID<span>ERX</span>
+    .logo{
+        font-size:34px;
+    }
+
+}
+
+</style></head><body><div class="auth-card"><div class="logo">
+
+    RID<span>ERX</span>
+
+</div>
+
+
+<div
+    id="loginType"
+    class="login-type">
+
+    Login
+
+</div>
+
+
+<div
+    id="status"
+    class="status">
+
+</div>
+
+
+<form id="login-form">
+
+
+    <div class="input-box">
+
+        <label for="email">
+            Email
+        </label>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Email Address"
+            autocomplete="username"
+            inputmode="email"
+            required>
+
     </div>
 
-    <div
-        class="role-title"
-        id="roleTitle">
 
-        Login
+    <div class="input-box">
 
-    </div>
-
-
-    <div
-        id="error-message"
-        class="message">
-    </div>
+        <label for="password">
+            Password
+        </label>
 
 
-    <form id="login-form">
-
-        <div class="input-box">
-
-            <label for="email">
-                Email
-            </label>
-
-            <input
-                id="email"
-                type="email"
-                required
-                autocomplete="username"
-                placeholder="Email Address">
-
-        </div>
-
-
-        <div class="input-box">
-
-            <label for="password">
-                Password
-            </label>
+        <div class="password-wrap">
 
             <input
                 id="password"
                 type="password"
-                required
+                placeholder="Password"
                 autocomplete="current-password"
-                placeholder="Password">
+                required>
+
+
+            <button
+                type="button"
+                id="togglePassword"
+                class="toggle-password"
+                aria-label="Show password">
+
+                👁
+
+            </button>
 
         </div>
 
-
-        <button
-            class="btn"
-            id="login-btn"
-            type="submit">
-
-            Login
-
-        </button>
-
-    </form>
-
-
-    <div
-        id="loading"
-        class="loading">
-
-        Signing in...
-
     </div>
 
 
-    <div class="auth-links">
+    <button
+        id="login-btn"
+        class="btn"
+        type="submit">
 
-        Don't have an account?
+        Login
 
-        <a
-            id="registerLink"
-            href="register.html">
+    </button>
 
-            Register
 
-        </a>
+</form>
 
-    </div>
 
+<div
+    id="registerArea"
+    class="auth-links">
+
+    Don't have an account?
 
     <a
-        class="back"
-        href="../index.html">
+        id="registerLink"
+        href="register.html">
 
-        ← Back to RiderX
+        Register
 
     </a>
 
 </div>
 
 
-<script>
+<a
+    class="back-link"
+    href="../index.html">
+
+    ← Back to RiderX
+
+</a>
+
+
+<div class="security">
+
+    🔒 Secure RiderX Authentication
+
+</div>
+
+</div><script>
+
+/* =========================================
+   READ LOGIN ROLE
+========================================= */
 
 const params =
     new URLSearchParams(
         window.location.search
     );
 
-const role =
-    params.get("role");
+const requestedRole =
+    String(
+        params.get("role") || ""
+    )
+    .trim()
+    .toLowerCase();
 
-const roleTitle =
-    document.getElementById("roleTitle");
+
+const loginType =
+    document.getElementById(
+        "loginType"
+    );
 
 const registerLink =
-    document.getElementById("registerLink");
+    document.getElementById(
+        "registerLink"
+    );
 
 
-if(role === "rider"){
+/* =========================================
+   CUSTOMER LOGIN
+========================================= */
 
-    roleTitle.textContent =
-        "Rider Login";
+if(requestedRole === "customer"){
 
-    registerLink.href =
-        "register.html?role=rider";
-
-}
-
-else{
-
-    roleTitle.textContent =
+    loginType.textContent =
         "Customer Login";
 
     registerLink.href =
@@ -294,357 +367,84 @@ else{
 
 }
 
-</script>
+
+/* =========================================
+   RIDER LOGIN
+========================================= */
+
+else if(requestedRole === "rider"){
+
+    loginType.textContent =
+        "Rider Login";
+
+    registerLink.href =
+        "register.html?role=rider";
+
+}
 
 
-<script type="module">
+/* =========================================
+   NORMAL LOGIN
+========================================= */
 
-import {
+else{
 
-    auth,
-    db
+    loginType.textContent =
+        "RiderX Login";
 
-} from "../firebase/firebase-config.js";
+    registerLink.href =
+        "register.html";
 
-
-import {
-
-    signInWithEmailAndPassword,
-    signOut
-
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+}
 
 
-import {
-
-    doc,
-    getDoc
-
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-const form =
-    document.getElementById("login-form");
-
-const emailInput =
-    document.getElementById("email");
+/* =========================================
+   PASSWORD TOGGLE
+========================================= */
 
 const passwordInput =
-    document.getElementById("password");
+    document.getElementById(
+        "password"
+    );
 
-const button =
-    document.getElementById("login-btn");
-
-const message =
-    document.getElementById("error-message");
-
-const loading =
-    document.getElementById("loading");
+const togglePassword =
+    document.getElementById(
+        "togglePassword"
+    );
 
 
-function showMessage(text,type){
+togglePassword.addEventListener(
+    "click",
+    () => {
 
-    message.textContent =
-        text || "";
+        if(
+            passwordInput.type ===
+            "password"
+        ){
 
-    message.className =
-        "message " + (type || "");
+            passwordInput.type =
+                "text";
 
-}
+            togglePassword.textContent =
+                "🙈";
 
-
-function setLoading(active){
-
-    button.disabled =
-        active;
-
-    emailInput.disabled =
-        active;
-
-    passwordInput.disabled =
-        active;
-
-    loading.style.display =
-        active ? "block" : "none";
-
-}
-
-
-form.addEventListener(
-    "submit",
-    async function(event){
-
-        event.preventDefault();
-
-        const email =
-            emailInput.value
-                .trim()
-                .toLowerCase();
-
-        const password =
-            passwordInput.value;
-
-
-        if(!email || !password){
-
-            showMessage(
-                "Please enter email and password.",
-                "error"
+            togglePassword.setAttribute(
+                "aria-label",
+                "Hide password"
             );
-
-            return;
 
         }
+        else{
 
+            passwordInput.type =
+                "password";
 
-        setLoading(true);
+            togglePassword.textContent =
+                "👁";
 
-        showMessage("");
-
-
-        try{
-
-            const result =
-                await signInWithEmailAndPassword(
-                    auth,
-                    email,
-                    password
-                );
-
-
-            const user =
-                result.user;
-
-
-            const snap =
-                await getDoc(
-                    doc(
-                        db,
-                        "users",
-                        user.uid
-                    )
-                );
-
-
-            if(!snap.exists()){
-
-                await signOut(auth);
-
-                throw new Error(
-                    "User profile not found in Firestore."
-                );
-
-            }
-
-
-            const data =
-                snap.data();
-
-
-            const userRole =
-                String(
-                    data.role ||
-                    ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            /*
-             * IMPORTANT:
-             * Never use the URL role as the actual
-             * authorization role.
-             *
-             * Firebase Firestore role is authoritative.
-             */
-
-
-            if(
-                role === "rider" &&
-                userRole !== "rider"
-            ){
-
-                await signOut(auth);
-
-                throw new Error(
-                    "This account is not registered as a rider."
-                );
-
-            }
-
-
-            if(
-                role === "customer" &&
-                userRole === "rider"
-            ){
-
-                await signOut(auth);
-
-                throw new Error(
-                    "Please use Rider Login for this rider account."
-                );
-
-            }
-
-
-            if(userRole === "admin"){
-
-                /*
-                 * Normal customer/rider login page
-                 * does not automatically open admin.
-                 * Admin must use admin/login.html.
-                 */
-
-                await signOut(auth);
-
-                throw new Error(
-                    "Admin account detected. Please use the Admin Login page."
-                );
-
-            }
-
-
-            showMessage(
-                "Login successful. Opening your account...",
-                "success"
-            );
-
-
-            setLoading(true);
-
-
-            setTimeout(
-                function(){
-
-                    if(userRole === "rider"){
-
-                        if(
-                            data.approved === true &&
-                            data.status === "active"
-                        ){
-
-                            window.location.replace(
-                                "../rider/home.html"
-                            );
-
-                        }
-                        else{
-
-                            window.location.replace(
-                                "../rider/pending.html"
-                            );
-
-                        }
-
-                    }
-
-                    else if(userRole === "customer"){
-
-                        window.location.replace(
-                            "../customer/home.html"
-                        );
-
-                    }
-
-                    else{
-
-                        signOut(auth);
-
-                        showMessage(
-                            "Account role is missing or invalid.",
-                            "error"
-                        );
-
-                        setLoading(false);
-
-                    }
-
-                },
-                400
-            );
-
-
-        }
-        catch(error){
-
-            console.error(
-                "RiderX Login Error:",
-                error
-            );
-
-
-            let msg =
-                "Login failed.";
-
-
-            switch(error.code){
-
-                case "auth/invalid-credential":
-
-                    msg =
-                        "Email or password is incorrect.";
-
-                    break;
-
-                case "auth/user-not-found":
-
-                    msg =
-                        "Account not found.";
-
-                    break;
-
-                case "auth/wrong-password":
-
-                    msg =
-                        "Wrong password.";
-
-                    break;
-
-                case "auth/invalid-email":
-
-                    msg =
-                        "Invalid email address.";
-
-                    break;
-
-                case "auth/user-disabled":
-
-                    msg =
-                        "This account has been disabled.";
-
-                    break;
-
-                case "auth/too-many-requests":
-
-                    msg =
-                        "Too many attempts. Please try again later.";
-
-                    break;
-
-                case "auth/network-request-failed":
-
-                    msg =
-                        "Network error. Check your internet connection.";
-
-                    break;
-
-                default:
-
-                    if(error.message){
-
-                        msg =
-                            error.message;
-
-                    }
-
-            }
-
-
-            setLoading(false);
-
-            showMessage(
-                "❌ " + msg,
-                "error"
+            togglePassword.setAttribute(
+                "aria-label",
+                "Show password"
             );
 
         }
@@ -652,8 +452,7 @@ form.addEventListener(
     }
 );
 
-</script>
-
-</body>
-
-</html>
+</script><script
+    type="module"
+    src="../js/login.js">
+</script></body></html>
