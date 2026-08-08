@@ -3,22 +3,20 @@
    WALLET ENGINE
    File: js/wallet.js
 
-   Features:
+   Supports:
    - Customer wallet
-   - Rider earnings wallet
+   - Rider wallet
    - Balance
    - Add money
+   - Deduct money
    - Ride payment
-   - Cash / online payment tracking
-   - Refunds
-   - Referral bonus
-   - Promo bonus
-   - Withdraw request
-   - Transaction history
+   - Refund
+   - Earnings
+   - Transactions
    - Firebase Realtime Database
-   - Firestore fallback
-   - Local cache
-   - Wallet UI auto update
+   - Local fallback
+   - Wallet notifications
+   - Transaction history
    ============================================================ */
 
 (function () {
@@ -40,29 +38,26 @@
 
     WALLET.config = {
 
-        localKey:
-            "riderx_wallet",
-
-        transactionsKey:
-            "riderx_wallet_transactions",
-
-        rtdbPath:
-            "wallets",
-
-        transactionsPath:
-            "walletTransactions",
-
-        firestoreWallets:
-            "wallets",
-
-        firestoreTransactions:
-            "walletTransactions",
-
         currency:
             "₹",
 
-        maxTransactions:
-            100
+        storagePrefix:
+            "riderx_wallet_",
+
+        transactionLimit:
+            200,
+
+        minimumAddMoney:
+            10,
+
+        maximumAddMoney:
+            50000,
+
+        minimumWithdrawal:
+            100,
+
+        maximumWithdrawal:
+            50000
     };
 
 
@@ -71,6 +66,9 @@
        ======================================================== */
 
     WALLET.state = {
+
+        user:
+            null,
 
         userId:
             null,
@@ -81,29 +79,20 @@
         balance:
             0,
 
-        totalAdded:
-            0,
-
-        totalSpent:
-            0,
-
-        totalEarned:
-            0,
-
-        totalRefunded:
-            0,
-
-        pendingWithdraw:
-            0,
-
         transactions:
             [],
+
+        loading:
+            false,
 
         initialized:
             false,
 
-        loading:
-            false
+        firebaseReference:
+            null,
+
+        firebaseListener:
+            null
     };
 
 
@@ -111,7 +100,164 @@
        HELPERS
        ======================================================== */
 
-    WALLET.createId =
+    WALLET.getUser =
+        function () {
+
+            if (
+                WALLET.state.user
+            ) {
+
+                return WALLET.state.user;
+            }
+
+
+            try {
+
+                if (
+                    window.firebase &&
+                    firebase.auth
+                ) {
+
+                    const user =
+                        firebase.auth()
+                            .currentUser;
+
+
+                    if (user) {
+
+                        WALLET.state.user =
+                            user;
+
+                        return user;
+                    }
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Wallet auth error:",
+                    error
+                );
+            }
+
+
+            try {
+
+                const localUser =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "riderx_user"
+                        ) ||
+                        "null"
+                    );
+
+
+                if (localUser) {
+
+                    WALLET.state.user =
+                        localUser;
+
+                    return localUser;
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Wallet local user error:",
+                    error
+                );
+            }
+
+
+            return null;
+        };
+
+
+    WALLET.getUserId =
+        function () {
+
+            const user =
+                WALLET.getUser();
+
+
+            if (!user) {
+
+                return null;
+            }
+
+
+            return (
+                user.uid ||
+                user.userId ||
+                user.id ||
+                null
+            );
+        };
+
+
+    WALLET.getRole =
+        function () {
+
+            const user =
+                WALLET.getUser();
+
+
+            return (
+                user &&
+                (
+                    user.role ||
+                    user.userRole
+                )
+            ) ||
+            localStorage.getItem(
+                "riderx_role"
+            ) ||
+            null;
+        };
+
+
+    WALLET.round =
+        function (
+            amount
+        ) {
+
+            return Math.round(
+                (
+                    Number(amount) ||
+                    0
+                ) * 100
+            ) / 100;
+        };
+
+
+    WALLET.formatMoney =
+        function (
+            amount
+        ) {
+
+            const value =
+                WALLET.round(
+                    amount
+                );
+
+
+            return (
+                WALLET.config.currency +
+                value.toLocaleString(
+                    "en-IN",
+                    {
+                        minimumFractionDigits:
+                            2,
+
+                        maximumFractionDigits:
+                            2
+                    }
+                )
+            );
+        };
+
+
+    WALLET.generateId =
         function () {
 
             return (
@@ -125,48 +271,6 @@
         };
 
 
-    WALLET.number =
-        function (value) {
-
-            const number =
-                Number(value);
-
-            return Number.isFinite(number)
-                ? number
-                : 0;
-        };
-
-
-    WALLET.round =
-        function (value) {
-
-            return Math.round(
-                WALLET.number(value) *
-                100
-            ) / 100;
-        };
-
-
-    WALLET.format =
-        function (value) {
-
-            return (
-                WALLET.config.currency +
-                WALLET.round(value)
-                    .toLocaleString(
-                        "en-IN",
-                        {
-                            minimumFractionDigits:
-                                0,
-
-                            maximumFractionDigits:
-                                2
-                        }
-                    )
-            );
-        };
-
-
     WALLET.now =
         function () {
 
@@ -174,25 +278,37 @@
         };
 
 
-    WALLET.escape =
-        function (value) {
+    /* ========================================================
+       STORAGE KEY
+       ======================================================== */
 
-            const div =
-                document.createElement(
-                    "div"
+    WALLET.getStorageKey =
+        function () {
+
+            const userId =
+                WALLET.getUserId();
+
+
+            if (!userId) {
+
+                return (
+                    WALLET.config
+                        .storagePrefix +
+                    "guest"
                 );
+            }
 
-            div.textContent =
-                String(
-                    value ?? ""
-                );
 
-            return div.innerHTML;
+            return (
+                WALLET.config
+                    .storagePrefix +
+                userId
+            );
         };
 
 
     /* ========================================================
-       LOCAL STORAGE
+       LOCAL LOAD
        ======================================================== */
 
     WALLET.loadLocal =
@@ -200,85 +316,62 @@
 
             try {
 
-                const wallet =
-                    localStorage.getItem(
-                        WALLET.config.localKey
+                const saved =
+                    JSON.parse(
+                        localStorage.getItem(
+                            WALLET
+                                .getStorageKey()
+                        ) ||
+                        "null"
                     );
 
-                if (wallet) {
 
-                    const data =
-                        JSON.parse(wallet);
+                if (
+                    saved &&
+                    typeof saved ===
+                    "object"
+                ) {
 
                     WALLET.state.balance =
-                        WALLET.number(
-                            data.balance
-                        );
-
-                    WALLET.state.totalAdded =
-                        WALLET.number(
-                            data.totalAdded
-                        );
-
-                    WALLET.state.totalSpent =
-                        WALLET.number(
-                            data.totalSpent
-                        );
-
-                    WALLET.state.totalEarned =
-                        WALLET.number(
-                            data.totalEarned
-                        );
-
-                    WALLET.state.totalRefunded =
-                        WALLET.number(
-                            data.totalRefunded
-                        );
-
-                    WALLET.state.pendingWithdraw =
-                        WALLET.number(
-                            data.pendingWithdraw
-                        );
-                }
-
-
-                const transactions =
-                    localStorage.getItem(
-                        WALLET.config
-                            .transactionsKey
-                    );
-
-
-                if (transactions) {
-
-                    const data =
-                        JSON.parse(
-                            transactions
+                        WALLET.round(
+                            saved.balance
                         );
 
 
-                    if (
-                        Array.isArray(data)
-                    ) {
-
-                        WALLET.state
-                            .transactions =
-                            data;
-                    }
+                    WALLET.state
+                        .transactions =
+                        Array.isArray(
+                            saved.transactions
+                        )
+                            ? saved
+                                .transactions
+                            : [];
                 }
 
             } catch (error) {
 
                 console.warn(
-                    "Wallet local load failed:",
+                    "Wallet local load error:",
                     error
                 );
+
+
+                WALLET.state.balance =
+                    0;
+
+                WALLET.state
+                    .transactions =
+                    [];
             }
 
 
-            WALLET.updateUI();
+            WALLET.render();
         };
 
+
+    /* ========================================================
+       LOCAL SAVE
+       ======================================================== */
 
     WALLET.saveLocal =
         function () {
@@ -286,50 +379,30 @@
             try {
 
                 localStorage.setItem(
-                    WALLET.config.localKey,
+                    WALLET
+                        .getStorageKey(),
+
                     JSON.stringify({
 
                         balance:
-                            WALLET.state.balance,
-
-                        totalAdded:
-                            WALLET.state.totalAdded,
-
-                        totalSpent:
-                            WALLET.state.totalSpent,
-
-                        totalEarned:
-                            WALLET.state.totalEarned,
-
-                        totalRefunded:
-                            WALLET.state.totalRefunded,
-
-                        pendingWithdraw:
                             WALLET.state
-                                .pendingWithdraw
+                                .balance,
+
+                        transactions:
+                            WALLET.state
+                                .transactions
+                                .slice(
+                                    0,
+                                    WALLET.config
+                                        .transactionLimit
+                                )
                     })
-                );
-
-
-                localStorage.setItem(
-                    WALLET.config
-                        .transactionsKey,
-
-                    JSON.stringify(
-                        WALLET.state
-                            .transactions
-                            .slice(
-                                0,
-                                WALLET.config
-                                    .maxTransactions
-                            )
-                    )
                 );
 
             } catch (error) {
 
                 console.warn(
-                    "Wallet local save failed:",
+                    "Wallet local save error:",
                     error
                 );
             }
@@ -337,40 +410,28 @@
 
 
     /* ========================================================
-       AUTH USER
+       FIREBASE DATABASE
        ======================================================== */
 
-    WALLET.getCurrentUser =
+    WALLET.getDatabase =
         function () {
 
-            if (
-                WALLET.state.userId
-            ) {
+            try {
 
-                return {
-                    uid:
-                        WALLET.state.userId,
+                if (
+                    window.firebase &&
+                    firebase.database
+                ) {
 
-                    role:
-                        WALLET.state.role
-                };
-            }
+                    return firebase.database();
+                }
 
+            } catch (error) {
 
-            if (
-                RX.firebase &&
-                RX.firebase.auth &&
-                RX.firebase.auth.currentUser
-            ) {
-
-                return {
-                    uid:
-                        RX.firebase.auth
-                            .currentUser.uid,
-
-                    role:
-                        WALLET.state.role
-                };
+                console.warn(
+                    "Firebase database unavailable:",
+                    error
+                );
             }
 
 
@@ -379,504 +440,81 @@
 
 
     /* ========================================================
-       INITIAL WALLET
+       FIREBASE WALLET REF
        ======================================================== */
 
-    WALLET.defaultWallet =
-        function (
-            userId,
-            role
-        ) {
+    WALLET.getFirebaseReference =
+        function () {
 
-            return {
+            const database =
+                WALLET.getDatabase();
 
-                userId:
-                    userId,
-
-                role:
-                    role || "customer",
-
-                balance:
-                    0,
-
-                totalAdded:
-                    0,
-
-                totalSpent:
-                    0,
-
-                totalEarned:
-                    0,
-
-                totalRefunded:
-                    0,
-
-                pendingWithdraw:
-                    0,
-
-                updatedAt:
-                    WALLET.now(),
-
-                createdAt:
-                    WALLET.now()
-            };
-        };
+            const userId =
+                WALLET.getUserId();
 
 
-    /* ========================================================
-       LOAD FROM FIREBASE
-       ======================================================== */
-
-    WALLET.loadFromFirebase =
-        async function (
-            userId
-        ) {
-
-            if (!userId) {
+            if (
+                !database ||
+                !userId
+            ) {
 
                 return null;
             }
 
 
-            /*
-             * Firestore first.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    const doc =
-                        await RX.firebase
-                            .db
-                            .collection(
-                                WALLET.config
-                                    .firestoreWallets
-                            )
-                            .doc(
-                                userId
-                            )
-                            .get();
-
-
-                    if (
-                        doc.exists
-                    ) {
-
-                        const data =
-                            doc.data();
-
-
-                        WALLET.applyWallet(
-                            data
-                        );
-
-
-                        await WALLET
-                            .loadTransactionsFromFirestore(
-                                userId
-                            );
-
-
-                        return data;
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "Firestore wallet load failed:",
-                        error
-                    );
-                }
-            }
-
-
-            /*
-             * Realtime Database fallback.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb
-            ) {
-
-                try {
-
-                    const snapshot =
-                        await RX.firebase
-                            .rtdb
-                            .ref(
-                                WALLET.config
-                                    .rtdbPath +
-                                "/" +
-                                userId
-                            )
-                            .once(
-                                "value"
-                            );
-
-
-                    const data =
-                        snapshot.val();
-
-
-                    if (
-                        data
-                    ) {
-
-                        WALLET.applyWallet(
-                            data
-                        );
-
-                        return data;
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "RTDB wallet load failed:",
-                        error
-                    );
-                }
-            }
-
-
-            return null;
+            return database.ref(
+                "wallets/" +
+                userId
+            );
         };
 
 
     /* ========================================================
-       APPLY WALLET
+       TRANSACTION CREATOR
        ======================================================== */
 
-    WALLET.applyWallet =
+    WALLET.createTransaction =
         function (
             data
         ) {
 
-            if (!data) {
-                return;
-            }
-
-
-            WALLET.state.balance =
-                WALLET.number(
-                    data.balance
+            const amount =
+                WALLET.round(
+                    data.amount
                 );
 
 
-            WALLET.state.totalAdded =
-                WALLET.number(
-                    data.totalAdded
-                );
-
-
-            WALLET.state.totalSpent =
-                WALLET.number(
-                    data.totalSpent
-                );
-
-
-            WALLET.state.totalEarned =
-                WALLET.number(
-                    data.totalEarned
-                );
-
-
-            WALLET.state.totalRefunded =
-                WALLET.number(
-                    data.totalRefunded
-                );
-
-
-            WALLET.state.pendingWithdraw =
-                WALLET.number(
-                    data.pendingWithdraw
-                );
-
-
-            WALLET.saveLocal();
-
-            WALLET.updateUI();
-        };
-
-
-    /* ========================================================
-       CREATE WALLET
-       ======================================================== */
-
-    WALLET.create =
-        async function (
-            userId,
-            role
-        ) {
-
-            if (!userId) {
-
-                return false;
-            }
-
-
-            const wallet =
-                WALLET.defaultWallet(
-                    userId,
-                    role
-                );
-
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .db
-                        .collection(
-                            WALLET.config
-                                .firestoreWallets
-                        )
-                        .doc(
-                            userId
-                        )
-                        .set(
-                            wallet,
-                            {
-                                merge:
-                                    true
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Wallet creation failed:",
-                        error
-                    );
-                }
-            }
-
-
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .rtdb
-                        .ref(
-                            WALLET.config
-                                .rtdbPath +
-                            "/" +
-                            userId
-                        )
-                        .update(
-                            wallet
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "RTDB wallet creation failed:",
-                        error
-                    );
-                }
-            }
-
-
-            WALLET.applyWallet(
-                wallet
-            );
-
-
-            return wallet;
-        };
-
-
-    /* ========================================================
-       SAVE WALLET
-       ======================================================== */
-
-    WALLET.save =
-        async function () {
-
-            const user =
-                WALLET.getCurrentUser();
-
-
-            if (!user) {
-
-                WALLET.saveLocal();
-
-                return false;
-            }
-
-
-            const data = {
-
-                userId:
-                    user.uid,
-
-                role:
-                    WALLET.state.role ||
-                    user.role ||
-                    "customer",
-
-                balance:
-                    WALLET.round(
-                        WALLET.state.balance
-                    ),
-
-                totalAdded:
-                    WALLET.round(
-                        WALLET.state.totalAdded
-                    ),
-
-                totalSpent:
-                    WALLET.round(
-                        WALLET.state.totalSpent
-                    ),
-
-                totalEarned:
-                    WALLET.round(
-                        WALLET.state.totalEarned
-                    ),
-
-                totalRefunded:
-                    WALLET.round(
-                        WALLET.state.totalRefunded
-                    ),
-
-                pendingWithdraw:
-                    WALLET.round(
-                        WALLET.state
-                            .pendingWithdraw
-                    ),
-
-                updatedAt:
-                    WALLET.now()
-            };
-
-
-            WALLET.saveLocal();
-
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .db
-                        .collection(
-                            WALLET.config
-                                .firestoreWallets
-                        )
-                        .doc(
-                            user.uid
-                        )
-                        .set(
-                            data,
-                            {
-                                merge:
-                                    true
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Firestore wallet save failed:",
-                        error
-                    );
-                }
-            }
-
-
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .rtdb
-                        .ref(
-                            WALLET.config
-                                .rtdbPath +
-                            "/" +
-                            user.uid
-                        )
-                        .update(
-                            data
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "RTDB wallet save failed:",
-                        error
-                    );
-                }
-            }
-
-
-            WALLET.updateUI();
-
-            return true;
-        };
-
-
-    /* ========================================================
-       ADD TRANSACTION
-       ======================================================== */
-
-    WALLET.addTransaction =
-        async function (
-            data
-        ) {
-
-            data =
-                data || {};
-
-
-            const transaction = {
+            return {
 
                 id:
                     data.id ||
-                    WALLET.createId(),
-
-                userId:
-                    data.userId ||
-                    WALLET.state.userId ||
-                    null,
+                    WALLET.generateId(),
 
                 type:
                     data.type ||
                     "general",
 
-                amount:
-                    WALLET.round(
-                        data.amount
-                    ),
-
                 direction:
                     data.direction ||
                     (
-                        WALLET.number(
-                            data.amount
-                        ) >= 0
+                        amount >= 0
                             ? "credit"
                             : "debit"
+                    ),
+
+                amount:
+                    Math.abs(
+                        amount
+                    ),
+
+                balanceAfter:
+                    WALLET.round(
+                        data.balanceAfter !==
+                        undefined
+                            ? data
+                                .balanceAfter
+                            : WALLET.state
+                                .balance
                     ),
 
                 title:
@@ -891,6 +529,10 @@
                     data.rideId ||
                     null,
 
+                bookingId:
+                    data.bookingId ||
+                    null,
+
                 paymentId:
                     data.paymentId ||
                     null,
@@ -899,17 +541,62 @@
                     data.status ||
                     "completed",
 
+                method:
+                    data.method ||
+                    "wallet",
+
                 timestamp:
                     data.timestamp ||
+                    WALLET.now(),
+
+                createdAt:
+                    data.createdAt ||
                     WALLET.now()
             };
+        };
 
 
-            WALLET.state
-                .transactions
-                .unshift(
-                    transaction
+    /* ========================================================
+       ADD TRANSACTION
+       ======================================================== */
+
+    WALLET.addTransaction =
+        function (
+            data
+        ) {
+
+            const transaction =
+                WALLET.createTransaction(
+                    data
                 );
+
+
+            const exists =
+                WALLET.state
+                    .transactions
+                    .some(
+                        function (
+                            item
+                        ) {
+
+                            return (
+                                item.id ===
+                                transaction.id
+                            );
+                        }
+                    );
+
+
+            if (
+                !exists
+            ) {
+
+                WALLET.state
+                    .transactions
+                    .unshift(
+                        transaction
+                    );
+            }
 
 
             WALLET.state
@@ -919,7 +606,7 @@
                     .slice(
                         0,
                         WALLET.config
-                            .maxTransactions
+                            .transactionLimit
                     );
 
 
@@ -928,396 +615,81 @@
             WALLET.renderTransactions();
 
 
-            /*
-             * Firestore.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .db
-                        .collection(
-                            WALLET.config
-                                .firestoreTransactions
-                        )
-                        .doc(
-                            transaction.id
-                        )
-                        .set(
-                            transaction
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Transaction Firestore save failed:",
-                        error
-                    );
-                }
-            }
-
-
-            /*
-             * RTDB.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb &&
-                transaction.userId
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .rtdb
-                        .ref(
-                            WALLET.config
-                                .transactionsPath +
-                            "/" +
-                            transaction.userId +
-                            "/" +
-                            transaction.id
-                        )
-                        .set(
-                            transaction
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Transaction RTDB save failed:",
-                        error
-                    );
-                }
-            }
-
-
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-wallet-transaction",
-                    {
-                        detail:
-                            transaction
-                    }
-                )
-            );
-
-
             return transaction;
         };
 
 
     /* ========================================================
-       LOAD FIRESTORE TRANSACTIONS
+       SET BALANCE
        ======================================================== */
 
-    WALLET.loadTransactionsFromFirestore =
+    WALLET.setBalance =
         async function (
-            userId
+            balance,
+            saveFirebase = true
         ) {
 
+            const newBalance =
+                WALLET.round(
+                    balance
+                );
+
+
             if (
-                !RX.firebase ||
-                !RX.firebase.db ||
-                !userId
+                newBalance < 0
             ) {
 
-                return [];
+                throw new Error(
+                    "Wallet balance cannot be negative."
+                );
             }
 
 
-            try {
-
-                const snapshot =
-                    await RX.firebase
-                        .db
-                        .collection(
-                            WALLET.config
-                                .firestoreTransactions
-                        )
-                        .where(
-                            "userId",
-                            "==",
-                            userId
-                        )
-                        .orderBy(
-                            "timestamp",
-                            "desc"
-                        )
-                        .limit(
-                            WALLET.config
-                                .maxTransactions
-                        )
-                        .get();
+            WALLET.state.balance =
+                newBalance;
 
 
-                const transactions =
-                    [];
+            WALLET.saveLocal();
+
+            WALLET.renderBalance();
 
 
-                snapshot.forEach(
-                    function (
-                        doc
-                    ) {
+            if (
+                saveFirebase
+            ) {
 
-                        const data =
-                            doc.data();
+                await WALLET
+                    .saveFirebase();
+            }
 
 
-                        transactions.push(
-                            {
-                                ...data,
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-wallet-updated",
+                    {
+                        detail: {
 
-                                id:
-                                    data.id ||
-                                    doc.id
-                            }
-                        );
+                            balance:
+                                newBalance
+                        }
                     }
-                );
-
-
-                WALLET.state
-                    .transactions =
-                    transactions;
-
-
-                WALLET.saveLocal();
-
-                WALLET.renderTransactions();
-
-
-                return transactions;
-
-            } catch (error) {
-
-                console.warn(
-                    "Transaction load failed:",
-                    error
-                );
-
-
-                return [];
-            }
-        };
-
-
-    /* ========================================================
-       CREDIT
-       ======================================================== */
-
-    WALLET.credit =
-        async function (
-            amount,
-            options
-        ) {
-
-            amount =
-                WALLET.round(
-                    amount
-                );
-
-
-            if (
-                amount <= 0
-            ) {
-
-                throw new Error(
-                    "Invalid credit amount"
-                );
-            }
-
-
-            options =
-                options || {};
-
-
-            WALLET.state.balance =
-                WALLET.round(
-                    WALLET.state.balance +
-                    amount
-                );
-
-
-            if (
-                options.type ===
-                "earning"
-            ) {
-
-                WALLET.state.totalEarned =
-                    WALLET.round(
-                        WALLET.state
-                            .totalEarned +
-                        amount
-                    );
-
-            } else if (
-                options.type ===
-                "refund"
-            ) {
-
-                WALLET.state.totalRefunded =
-                    WALLET.round(
-                        WALLET.state
-                            .totalRefunded +
-                        amount
-                    );
-
-            } else {
-
-                WALLET.state.totalAdded =
-                    WALLET.round(
-                        WALLET.state
-                            .totalAdded +
-                        amount
-                    );
-            }
-
-
-            await WALLET.save();
-
-
-            return WALLET.addTransaction(
-                {
-
-                    userId:
-                        WALLET.state.userId,
-
-                    type:
-                        options.type ||
-                        "credit",
-
-                    amount:
-                        amount,
-
-                    direction:
-                        "credit",
-
-                    title:
-                        options.title ||
-                        "Money Added",
-
-                    description:
-                        options.description ||
-                        "Wallet credited.",
-
-                    rideId:
-                        options.rideId ||
-                        null,
-
-                    paymentId:
-                        options.paymentId ||
-                        null,
-
-                    status:
-                        options.status ||
-                        "completed"
-                }
+                )
             );
+
+
+            return newBalance;
         };
 
 
     /* ========================================================
-       DEBIT
+       GET BALANCE
        ======================================================== */
 
-    WALLET.debit =
-        async function (
-            amount,
-            options
-        ) {
+    WALLET.getBalance =
+        function () {
 
-            amount =
-                WALLET.round(
-                    amount
-                );
-
-
-            if (
-                amount <= 0
-            ) {
-
-                throw new Error(
-                    "Invalid debit amount"
-                );
-            }
-
-
-            options =
-                options || {};
-
-
-            if (
-                WALLET.state.balance <
-                amount
-            ) {
-
-                throw new Error(
-                    "Insufficient wallet balance"
-                );
-            }
-
-
-            WALLET.state.balance =
-                WALLET.round(
-                    WALLET.state.balance -
-                    amount
-                );
-
-
-            WALLET.state.totalSpent =
-                WALLET.round(
-                    WALLET.state
-                        .totalSpent +
-                    amount
-                );
-
-
-            await WALLET.save();
-
-
-            return WALLET.addTransaction(
-                {
-
-                    userId:
-                        WALLET.state.userId,
-
-                    type:
-                        options.type ||
-                        "debit",
-
-                    amount:
-                        amount,
-
-                    direction:
-                        "debit",
-
-                    title:
-                        options.title ||
-                        "Wallet Payment",
-
-                    description:
-                        options.description ||
-                        "Wallet debited.",
-
-                    rideId:
-                        options.rideId ||
-                        null,
-
-                    paymentId:
-                        options.paymentId ||
-                        null,
-
-                    status:
-                        options.status ||
-                        "completed"
-                }
+            return WALLET.round(
+                WALLET.state.balance
             );
         };
 
@@ -1329,7 +701,7 @@
     WALLET.addMoney =
         async function (
             amount,
-            paymentData
+            options = {}
         ) {
 
             amount =
@@ -1339,51 +711,252 @@
 
 
             if (
-                amount < 10
+                !Number.isFinite(
+                    amount
+                ) ||
+                amount <= 0
             ) {
 
                 throw new Error(
-                    "Minimum wallet amount is ₹10"
+                    "Enter a valid amount."
                 );
             }
 
 
-            paymentData =
-                paymentData ||
-                {};
+            if (
+                amount <
+                WALLET.config
+                    .minimumAddMoney
+            ) {
+
+                throw new Error(
+                    "Minimum wallet recharge is " +
+                    WALLET.formatMoney(
+                        WALLET.config
+                            .minimumAddMoney
+                    )
+                );
+            }
 
 
-            /*
-             * IMPORTANT:
-             * Real payment gateway verification
-             * must happen on a secure backend.
-             *
-             * This function records the
-             * successfully verified payment.
-             */
+            if (
+                amount >
+                WALLET.config
+                    .maximumAddMoney
+            ) {
 
-            return WALLET.credit(
-                amount,
-                {
+                throw new Error(
+                    "Maximum wallet recharge is " +
+                    WALLET.formatMoney(
+                        WALLET.config
+                            .maximumAddMoney
+                    )
+                );
+            }
+
+
+            const oldBalance =
+                WALLET.state.balance;
+
+
+            const newBalance =
+                WALLET.round(
+                    oldBalance +
+                    amount
+                );
+
+
+            WALLET.state.balance =
+                newBalance;
+
+
+            const transaction =
+                WALLET.addTransaction({
 
                     type:
-                        "add_money",
+                        "recharge",
+
+                    direction:
+                        "credit",
+
+                    amount:
+                        amount,
+
+                    balanceAfter:
+                        newBalance,
 
                     title:
-                        "Money Added",
+                        "Wallet Recharge",
 
                     description:
-                        "Wallet recharge completed.",
+                        options.description ||
+                        "Money added to RiderX wallet.",
+
+                    method:
+                        options.method ||
+                        "online",
 
                     paymentId:
-                        paymentData.paymentId ||
+                        options.paymentId ||
                         null,
 
                     status:
-                        paymentData.status ||
+                        options.status ||
                         "completed"
-                }
+                });
+
+
+            await WALLET.saveFirebase();
+
+
+            WALLET.notify(
+                "wallet_credit",
+                amount,
+                transaction
             );
+
+
+            WALLET.render();
+
+
+            return {
+
+                success:
+                    true,
+
+                balance:
+                    newBalance,
+
+                transaction:
+                    transaction
+            };
+        };
+
+
+    /* ========================================================
+       DEDUCT MONEY
+       ======================================================== */
+
+    WALLET.deductMoney =
+        async function (
+            amount,
+            options = {}
+        ) {
+
+            amount =
+                WALLET.round(
+                    amount
+                );
+
+
+            if (
+                !Number.isFinite(
+                    amount
+                ) ||
+                amount <= 0
+            ) {
+
+                throw new Error(
+                    "Enter a valid amount."
+                );
+            }
+
+
+            const currentBalance =
+                WALLET.state.balance;
+
+
+            if (
+                currentBalance <
+                amount
+            ) {
+
+                throw new Error(
+                    "Insufficient wallet balance."
+                );
+            }
+
+
+            const newBalance =
+                WALLET.round(
+                    currentBalance -
+                    amount
+                );
+
+
+            WALLET.state.balance =
+                newBalance;
+
+
+            const transaction =
+                WALLET.addTransaction({
+
+                    type:
+                        options.type ||
+                        "payment",
+
+                    direction:
+                        "debit",
+
+                    amount:
+                        amount,
+
+                    balanceAfter:
+                        newBalance,
+
+                    title:
+                        options.title ||
+                        "Wallet Payment",
+
+                    description:
+                        options.description ||
+                        "Payment made from RiderX wallet.",
+
+                    rideId:
+                        options.rideId ||
+                        null,
+
+                    bookingId:
+                        options.bookingId ||
+                        null,
+
+                    paymentId:
+                        options.paymentId ||
+                        null,
+
+                    method:
+                        "wallet",
+
+                    status:
+                        options.status ||
+                        "completed"
+                });
+
+
+            await WALLET.saveFirebase();
+
+
+            WALLET.notify(
+                "wallet_debit",
+                amount,
+                transaction
+            );
+
+
+            WALLET.render();
+
+
+            return {
+
+                success:
+                    true,
+
+                balance:
+                    newBalance,
+
+                transaction:
+                    transaction
+            };
         };
 
 
@@ -1394,105 +967,36 @@
     WALLET.payRide =
         async function (
             amount,
-            rideId,
-            paymentMethod
+            ride = {}
         ) {
 
-            amount =
-                WALLET.round(
-                    amount
-                );
+            return WALLET.deductMoney(
+                amount,
+                {
 
+                    type:
+                        "ride_payment",
 
-            paymentMethod =
-                paymentMethod ||
-                "wallet";
+                    title:
+                        "Ride Payment",
 
+                    description:
+                        "Payment for RiderX ride.",
 
-            if (
-                paymentMethod !==
-                "wallet"
-            ) {
+                    rideId:
+                        ride.rideId ||
+                        ride.id ||
+                        null,
 
-                return {
+                    bookingId:
+                        ride.bookingId ||
+                        null,
 
-                    success:
-                        false,
-
-                    external:
-                        true,
-
-                    message:
-                        "External payment method selected."
-                };
-            }
-
-
-            if (
-                WALLET.state.balance <
-                amount
-            ) {
-
-                return {
-
-                    success:
-                        false,
-
-                    message:
-                        "Insufficient wallet balance."
-                };
-            }
-
-
-            const transaction =
-                await WALLET.debit(
-                    amount,
-                    {
-
-                        type:
-                            "ride_payment",
-
-                        title:
-                            "Ride Payment",
-
-                        description:
-                            "Payment for RiderX ride.",
-
-                        rideId:
-                            rideId,
-
-                        status:
-                            "completed"
-                    }
-                );
-
-
-            if (
-                RX.notification &&
-                RX.notification
-                    .paymentSuccess
-            ) {
-
-                RX.notification
-                    .paymentSuccess(
-                        rideId,
-                        amount
-                    );
-            }
-
-
-            return {
-
-                success:
-                    true,
-
-                transaction:
-                    transaction,
-
-                balance:
-                    WALLET.state
-                        .balance
-            };
+                    paymentId:
+                        ride.paymentId ||
+                        null
+                }
+            );
         };
 
 
@@ -1503,8 +1007,7 @@
     WALLET.refund =
         async function (
             amount,
-            rideId,
-            reason
+            options = {}
         ) {
 
             amount =
@@ -1514,47 +1017,103 @@
 
 
             if (
+                !Number.isFinite(
+                    amount
+                ) ||
                 amount <= 0
             ) {
 
                 throw new Error(
-                    "Invalid refund amount"
+                    "Invalid refund amount."
                 );
             }
 
 
-            return WALLET.credit(
-                amount,
-                {
+            const newBalance =
+                WALLET.round(
+                    WALLET.state.balance +
+                    amount
+                );
+
+
+            WALLET.state.balance =
+                newBalance;
+
+
+            const transaction =
+                WALLET.addTransaction({
 
                     type:
                         "refund",
+
+                    direction:
+                        "credit",
+
+                    amount:
+                        amount,
+
+                    balanceAfter:
+                        newBalance,
 
                     title:
                         "Ride Refund",
 
                     description:
-                        reason ||
-                        "Ride payment refunded.",
+                        options.description ||
+                        "Refund credited to RiderX wallet.",
 
                     rideId:
-                        rideId,
+                        options.rideId ||
+                        null,
 
-                    status:
-                        "completed"
-                }
+                    bookingId:
+                        options.bookingId ||
+                        null,
+
+                    paymentId:
+                        options.paymentId ||
+                        null,
+
+                    method:
+                        "refund"
+                });
+
+
+            await WALLET.saveFirebase();
+
+
+            WALLET.notify(
+                "wallet_credit",
+                amount,
+                transaction
             );
+
+
+            WALLET.render();
+
+
+            return {
+
+                success:
+                    true,
+
+                balance:
+                    newBalance,
+
+                transaction:
+                    transaction
+            };
         };
 
 
     /* ========================================================
-       RIDER EARNING
+       RIDER EARNINGS
        ======================================================== */
 
     WALLET.addEarning =
         async function (
             amount,
-            rideId
+            ride = {}
         ) {
 
             amount =
@@ -1568,140 +1127,128 @@
             ) {
 
                 throw new Error(
-                    "Invalid earning amount"
+                    "Invalid earning amount."
                 );
             }
 
 
-            return WALLET.credit(
-                amount,
-                {
+            const newBalance =
+                WALLET.round(
+                    WALLET.state.balance +
+                    amount
+                );
+
+
+            WALLET.state.balance =
+                newBalance;
+
+
+            const transaction =
+                WALLET.addTransaction({
 
                     type:
                         "earning",
 
+                    direction:
+                        "credit",
+
+                    amount:
+                        amount,
+
+                    balanceAfter:
+                        newBalance,
+
                     title:
-                        "Ride Earning",
+                        "Ride Earnings",
 
                     description:
-                        "Earning received from completed ride.",
+                        "Earnings from completed RiderX ride.",
 
                     rideId:
-                        rideId,
+                        ride.rideId ||
+                        ride.id ||
+                        null,
 
-                    status:
-                        "completed"
-                }
-            );
-        };
+                    bookingId:
+                        ride.bookingId ||
+                        null,
 
-
-    /* ========================================================
-       REFERRAL BONUS
-       ======================================================== */
-
-    WALLET.addReferralBonus =
-        async function (
-            amount,
-            referralCode
-        ) {
-
-            amount =
-                WALLET.round(
-                    amount
-                );
+                    method:
+                        "ride_earning"
+                });
 
 
-            return WALLET.credit(
+            await WALLET.saveFirebase();
+
+
+            WALLET.notify(
+                "wallet_credit",
                 amount,
-                {
-
-                    type:
-                        "referral",
-
-                    title:
-                        "Referral Bonus",
-
-                    description:
-                        referralCode
-                            ? "Referral bonus for code " +
-                              referralCode
-                            : "Referral bonus credited.",
-
-                    status:
-                        "completed"
-                }
+                transaction
             );
+
+
+            WALLET.render();
+
+
+            return {
+
+                success:
+                    true,
+
+                balance:
+                    newBalance,
+
+                transaction:
+                    transaction
+            };
         };
 
 
     /* ========================================================
-       PROMO BONUS
+       WITHDRAWAL REQUEST
        ======================================================== */
 
-    WALLET.addPromoBonus =
+    WALLET.requestWithdrawal =
         async function (
             amount,
-            promoCode
+            options = {}
         ) {
 
             amount =
                 WALLET.round(
                     amount
                 );
-
-
-            return WALLET.credit(
-                amount,
-                {
-
-                    type:
-                        "promo",
-
-                    title:
-                        "Promo Bonus",
-
-                    description:
-                        promoCode
-                            ? "Promo code " +
-                              promoCode +
-                              " bonus."
-                            : "Promotional bonus credited.",
-
-                    status:
-                        "completed"
-                }
-            );
-        };
-
-
-    /* ========================================================
-       WITHDRAW REQUEST
-       ======================================================== */
-
-    WALLET.requestWithdraw =
-        async function (
-            amount,
-            payoutData
-        ) {
-
-            amount =
-                WALLET.round(
-                    amount
-                );
-
-
-            payoutData =
-                payoutData ||
-                {};
 
 
             if (
-                amount <= 0
+                amount <
+                WALLET.config
+                    .minimumWithdrawal
             ) {
 
                 throw new Error(
-                    "Invalid withdrawal amount"
+                    "Minimum withdrawal is " +
+                    WALLET.formatMoney(
+                        WALLET.config
+                            .minimumWithdrawal
+                    )
+                );
+            }
+
+
+            if (
+                amount >
+                WALLET.config
+                    .maximumWithdrawal
+            ) {
+
+                throw new Error(
+                    "Maximum withdrawal is " +
+                    WALLET.formatMoney(
+                        WALLET.config
+                            .maximumWithdrawal
+                    )
                 );
             }
 
@@ -1712,449 +1259,482 @@
             ) {
 
                 throw new Error(
-                    "Insufficient wallet balance"
+                    "Insufficient wallet balance."
                 );
             }
 
 
             /*
-             * Do not instantly deduct
-             * until admin approves.
+             * Withdrawal is marked pending.
+             * Balance is reserved/deducted.
              */
 
-            WALLET.state.pendingWithdraw =
+            const newBalance =
                 WALLET.round(
-                    WALLET.state
-                        .pendingWithdraw +
+                    WALLET.state.balance -
                     amount
                 );
 
 
-            await WALLET.save();
+            WALLET.state.balance =
+                newBalance;
 
 
             const transaction =
-                await WALLET.addTransaction(
-                    {
+                WALLET.addTransaction({
 
-                        userId:
-                            WALLET.state.userId,
+                    type:
+                        "withdrawal",
 
-                        type:
-                            "withdraw",
+                    direction:
+                        "debit",
 
-                        amount:
-                            amount,
+                    amount:
+                        amount,
 
-                        direction:
-                            "debit",
+                    balanceAfter:
+                        newBalance,
 
-                        title:
-                            "Withdrawal Requested",
+                    title:
+                        "Withdrawal Request",
 
-                        description:
-                            "Withdrawal request submitted for admin approval.",
+                    description:
+                        options.description ||
+                        "Wallet withdrawal request submitted.",
 
-                        status:
-                            "pending"
-                    }
+                    method:
+                        options.method ||
+                        "bank",
+
+                    status:
+                        "pending"
+                });
+
+
+            await WALLET.saveFirebase();
+
+
+            WALLET.render();
+
+
+            return {
+
+                success:
+                    true,
+
+                status:
+                    "pending",
+
+                balance:
+                    newBalance,
+
+                transaction:
+                    transaction
+            };
+        };
+
+
+    /* ========================================================
+       FIREBASE SAVE
+       ======================================================== */
+
+    WALLET.saveFirebase =
+        async function () {
+
+            const reference =
+                WALLET.getFirebaseReference();
+
+
+            if (!reference) {
+
+                return false;
+            }
+
+
+            try {
+
+                await reference.update({
+
+                    balance:
+                        WALLET.state
+                            .balance,
+
+                    updatedAt:
+                        WALLET.now(),
+
+                    role:
+                        WALLET.getRole() ||
+                        null
+                });
+
+
+                await reference
+                    .child(
+                        "transactions"
+                    )
+                    .set(
+                        WALLET.state
+                            .transactions
+                            .slice(
+                                0,
+                                WALLET.config
+                                    .transactionLimit
+                            )
+                    );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "Firebase wallet save failed:",
+                    error
                 );
 
 
-            /*
-             * Store withdrawal request.
-             */
+                return false;
+            }
+        };
+
+
+    /* ========================================================
+       FIREBASE LOAD
+       ======================================================== */
+
+    WALLET.loadFirebase =
+        async function () {
+
+            const reference =
+                WALLET.getFirebaseReference();
+
+
+            if (!reference) {
+
+                return false;
+            }
+
+
+            try {
+
+                const snapshot =
+                    await reference.once(
+                        "value"
+                    );
+
+
+                const data =
+                    snapshot.val();
+
+
+                if (!data) {
+
+                    await reference.set({
+
+                        balance:
+                            0,
+
+                        role:
+                            WALLET.getRole() ||
+                            null,
+
+                        createdAt:
+                            WALLET.now(),
+
+                        updatedAt:
+                            WALLET.now()
+                    });
+
+
+                    return true;
+                }
+
+
+                if (
+                    data.balance !==
+                    undefined
+                ) {
+
+                    WALLET.state.balance =
+                        WALLET.round(
+                            data.balance
+                        );
+                }
+
+
+                if (
+                    data.transactions
+                ) {
+
+                    if (
+                        Array.isArray(
+                            data.transactions
+                        )
+                    ) {
+
+                        WALLET.state
+                            .transactions =
+                            data.transactions;
+
+                    } else {
+
+                        WALLET.state
+                            .transactions =
+                            Object.values(
+                                data.transactions
+                            );
+                    }
+                }
+
+
+                WALLET.saveLocal();
+
+                WALLET.render();
+
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "Firebase wallet load failed:",
+                    error
+                );
+
+
+                return false;
+            }
+        };
+
+
+    /* ========================================================
+       REALTIME LISTENER
+       ======================================================== */
+
+    WALLET.startListener =
+        function () {
+
+            WALLET.stopListener();
+
+
+            const reference =
+                WALLET.getFirebaseReference();
+
+
+            if (!reference) {
+
+                return false;
+            }
+
+
+            const listener =
+                function (
+                    snapshot
+                ) {
+
+                    const data =
+                        snapshot.val();
+
+
+                    if (!data) {
+                        return;
+                    }
+
+
+                    if (
+                        data.balance !==
+                        undefined
+                    ) {
+
+                        WALLET.state.balance =
+                            WALLET.round(
+                                data.balance
+                            );
+                    }
+
+
+                    if (
+                        data.transactions
+                    ) {
+
+                        WALLET.state
+                            .transactions =
+                            Array.isArray(
+                                data.transactions
+                            )
+                                ? data
+                                    .transactions
+                                : Object.values(
+                                    data.transactions
+                                );
+                    }
+
+
+                    WALLET.saveLocal();
+
+                    WALLET.render();
+                };
+
+
+            reference.on(
+                "value",
+                listener
+            );
+
+
+            WALLET.state
+                .firebaseReference =
+                reference;
+
+
+            WALLET.state
+                .firebaseListener =
+                listener;
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       STOP LISTENER
+       ======================================================== */
+
+    WALLET.stopListener =
+        function () {
 
             if (
-                RX.firebase &&
-                RX.firebase.db
+                WALLET.state
+                    .firebaseReference &&
+                WALLET.state
+                    .firebaseListener
             ) {
 
                 try {
 
-                    const request = {
-
-                        id:
-                            transaction.id,
-
-                        userId:
-                            WALLET.state.userId,
-
-                        role:
-                            WALLET.state.role,
-
-                        amount:
-                            amount,
-
-                        status:
-                            "pending",
-
-                        payout:
-                            payoutData,
-
-                        createdAt:
-                            WALLET.now()
-                    };
-
-
-                    await RX.firebase
-                        .db
-                        .collection(
-                            "withdrawRequests"
-                        )
-                        .doc(
-                            transaction.id
-                        )
-                        .set(
-                            request
+                    WALLET.state
+                        .firebaseReference
+                        .off(
+                            "value",
+                            WALLET.state
+                                .firebaseListener
                         );
 
                 } catch (error) {
 
                     console.warn(
-                        "Withdraw request failed:",
+                        "Wallet listener stop error:",
                         error
                     );
                 }
             }
 
 
-            return transaction;
+            WALLET.state
+                .firebaseReference =
+                null;
+
+
+            WALLET.state
+                .firebaseListener =
+                null;
         };
 
 
     /* ========================================================
-       CHECK BALANCE
+       NOTIFICATION
        ======================================================== */
 
-    WALLET.getBalance =
-        function () {
-
-            return WALLET.state
-                .balance;
-        };
-
-
-    WALLET.hasBalance =
+    WALLET.notify =
         function (
-            amount
+            type,
+            amount,
+            transaction
         ) {
 
-            return (
-                WALLET.state.balance >=
-                WALLET.number(amount)
-            );
-        };
+            try {
 
-
-    /* ========================================================
-       GET TRANSACTIONS
-       ======================================================== */
-
-    WALLET.getTransactions =
-        function (
-            limit
-        ) {
-
-            const transactions =
-                WALLET.state
-                    .transactions;
-
-
-            if (
-                !limit
-            ) {
-
-                return [
-                    ...transactions
-                ];
-            }
-
-
-            return transactions.slice(
-                0,
-                Number(limit)
-            );
-        };
-
-
-    /* ========================================================
-       FILTER TRANSACTIONS
-       ======================================================== */
-
-    WALLET.filterTransactions =
-        function (
-            type
-        ) {
-
-            if (
-                !type ||
-                type ===
-                "all"
-            ) {
-
-                return WALLET
-                    .getTransactions();
-            }
-
-
-            return WALLET.state
-                .transactions
-                .filter(
-                    function (
-                        transaction
-                    ) {
-
-                        return (
-                            transaction.type ===
-                            type
-                        );
-                    }
-                );
-        };
-
-
-    /* ========================================================
-       TRANSACTION ICON
-       ======================================================== */
-
-    WALLET.transactionIcon =
-        function (
-            type
-        ) {
-
-            const icons = {
-
-                add_money:
-                    "＋",
-
-                earning:
-                    "₹",
-
-                ride_payment:
-                    "🚕",
-
-                refund:
-                    "↩",
-
-                referral:
-                    "🎁",
-
-                promo:
-                    "🎉",
-
-                withdraw:
-                    "↗",
-
-                credit:
-                    "+",
-
-                debit:
-                    "−",
-
-                general:
-                    "₹"
-            };
-
-
-            return (
-                icons[type] ||
-                icons.general
-            );
-        };
-
-
-    /* ========================================================
-       TRANSACTION TIME
-       ======================================================== */
-
-    WALLET.formatDate =
-        function (
-            timestamp
-        ) {
-
-            if (!timestamp) {
-
-                return "";
-            }
-
-
-            const date =
-                new Date(
-                    timestamp
-                );
-
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-
-                return "";
-            }
-
-
-            return date.toLocaleString(
-                "en-IN",
-                {
-
-                    day:
-                        "2-digit",
-
-                    month:
-                        "short",
-
-                    year:
-                        "numeric",
-
-                    hour:
-                        "2-digit",
-
-                    minute:
-                        "2-digit"
-                }
-            );
-        };
-
-
-    /* ========================================================
-       RENDER TRANSACTIONS
-       ======================================================== */
-
-    WALLET.renderTransactions =
-        function (
-            container
-        ) {
-
-            if (!container) {
-
-                container =
-                    document.querySelector(
-                        "[data-wallet-transactions]"
-                    );
-            }
-
-
-            if (!container) {
-                return;
-            }
-
-
-            const transactions =
-                WALLET.state
-                    .transactions;
-
-
-            if (
-                !transactions.length
-            ) {
-
-                container.innerHTML =
-                    '<div class="wallet-empty">' +
-                    '<div class="wallet-empty-icon">₹</div>' +
-                    '<div class="wallet-empty-title">No transactions yet</div>' +
-                    '<div class="wallet-empty-text">Your wallet activity will appear here.</div>' +
-                    "</div>";
-
-                return;
-            }
-
-
-            container.innerHTML =
-                "";
-
-
-            transactions.forEach(
-                function (
-                    transaction
+                if (
+                    RX.notifications
                 ) {
 
-                    const row =
-                        document.createElement(
-                            "div"
-                        );
+                    if (
+                        type ===
+                        "wallet_credit"
+                    ) {
 
+                        RX.notifications
+                            .walletCredit(
+                                amount
+                            );
 
-                    row.className =
-                        "wallet-transaction";
+                    } else {
 
+                        RX.notifications
+                            .walletDebit(
+                                amount
+                            );
+                    }
 
-                    const credit =
-                        transaction.direction ===
-                        "credit";
-
-
-                    row.classList.add(
-                        credit
-                            ? "credit"
-                            : "debit"
-                    );
-
-
-                    row.innerHTML =
-
-                        '<div class="wallet-transaction-icon">' +
-                        WALLET.transactionIcon(
-                            transaction.type
-                        ) +
-                        "</div>" +
-
-                        '<div class="wallet-transaction-info">' +
-
-                        '<div class="wallet-transaction-title">' +
-                        WALLET.escape(
-                            transaction.title
-                        ) +
-                        "</div>" +
-
-                        '<div class="wallet-transaction-description">' +
-                        WALLET.escape(
-                            transaction.description
-                        ) +
-                        "</div>" +
-
-                        '<div class="wallet-transaction-date">' +
-                        WALLET.escape(
-                            WALLET.formatDate(
-                                transaction.timestamp
-                            )
-                        ) +
-                        "</div>" +
-
-                        "</div>" +
-
-                        '<div class="wallet-transaction-amount">' +
-                        (
-                            credit
-                                ? "+"
-                                : "-"
-                        ) +
-                        WALLET.format(
-                            transaction.amount
-                        ) +
-                        "</div>";
-
-
-                    container.appendChild(
-                        row
-                    );
+                    return;
                 }
-            );
+
+
+                if (
+                    RX.notify
+                ) {
+
+                    RX.notify({
+
+                        type:
+                            type,
+
+                        title:
+                            type ===
+                            "wallet_credit"
+                                ? "Wallet Credited"
+                                : "Wallet Payment",
+
+                        body:
+                            WALLET.formatMoney(
+                                amount
+                            ) +
+                            (
+                                type ===
+                                "wallet_credit"
+                                    ? " added to your wallet."
+                                    : " deducted from your wallet."
+                            ),
+
+                        data: {
+
+                            transactionId:
+                                transaction &&
+                                transaction.id
+                        }
+                    });
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Wallet notification error:",
+                    error
+                );
+            }
         };
 
 
     /* ========================================================
-       UPDATE BALANCE UI
+       UI BALANCE RENDER
        ======================================================== */
 
-    WALLET.updateUI =
+    WALLET.renderBalance =
         function () {
 
             const balance =
-                WALLET.format(
-                    WALLET.state
-                        .balance
+                WALLET.formatMoney(
+                    WALLET.state.balance
                 );
 
 
@@ -2175,7 +1755,7 @@
 
             document
                 .querySelectorAll(
-                    "[data-wallet-total-added]"
+                    ".wallet-balance"
                 )
                 .forEach(
                     function (
@@ -2183,17 +1763,14 @@
                     ) {
 
                         element.textContent =
-                            WALLET.format(
-                                WALLET.state
-                                    .totalAdded
-                            );
+                            balance;
                     }
                 );
 
 
             document
                 .querySelectorAll(
-                    "[data-wallet-total-spent]"
+                    "[data-wallet-amount]"
                 )
                 .forEach(
                     function (
@@ -2201,364 +1778,464 @@
                     ) {
 
                         element.textContent =
-                            WALLET.format(
-                                WALLET.state
-                                    .totalSpent
-                            );
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-wallet-total-earned]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            WALLET.format(
-                                WALLET.state
-                                    .totalEarned
-                            );
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-wallet-refunded]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            WALLET.format(
-                                WALLET.state
-                                    .totalRefunded
-                            );
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-wallet-pending-withdraw]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            WALLET.format(
-                                WALLET.state
-                                    .pendingWithdraw
-                            );
-                    }
-                );
-
-
-            WALLET.updateWithdrawButton();
-        };
-
-
-    /* ========================================================
-       WITHDRAW BUTTON
-       ======================================================== */
-
-    WALLET.updateWithdrawButton =
-        function () {
-
-            document
-                .querySelectorAll(
-                    "[data-wallet-withdraw]"
-                )
-                .forEach(
-                    function (
-                        button
-                    ) {
-
-                        const disabled =
-                            WALLET.state
-                                .balance <= 0;
-
-
-                        button.disabled =
-                            disabled;
-
-                        button.classList.toggle(
-                            "disabled",
-                            disabled
-                        );
+                            balance;
                     }
                 );
         };
 
 
     /* ========================================================
-       BIND UI
+       TRANSACTION RENDER
        ======================================================== */
 
-    WALLET.bind =
+    WALLET.renderTransactions =
         function () {
 
-            /*
-             * Add money buttons.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-wallet-add]"
-                )
-                .forEach(
-                    function (
-                        button
-                    ) {
-
-                        if (
-                            button.dataset
-                                .walletBound ===
-                            "true"
-                        ) {
-
-                            return;
-                        }
-
-
-                        button.dataset
-                            .walletBound =
-                            "true";
-
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                const amount =
-                                    Number(
-                                        button.dataset
-                                            .amount ||
-                                        0
-                                    );
-
-
-                                window.dispatchEvent(
-                                    new CustomEvent(
-                                        "riderx-wallet-add-money",
-                                        {
-                                            detail: {
-                                                amount:
-                                                    amount
-                                            }
-                                        }
-                                    )
-                                );
-                            }
-                        );
-                    }
+            const containers =
+                document.querySelectorAll(
+                    "[data-wallet-transactions]"
                 );
 
-
-            /*
-             * Withdraw buttons.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-wallet-withdraw]"
-                )
-                .forEach(
-                    function (
-                        button
-                    ) {
-
-                        if (
-                            button.dataset
-                                .walletBound ===
-                            "true"
-                        ) {
-
-                            return;
-                        }
-
-
-                        button.dataset
-                            .walletBound =
-                            "true";
-
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                window.dispatchEvent(
-                                    new CustomEvent(
-                                        "riderx-wallet-withdraw",
-                                        {
-                                            detail: {
-                                                balance:
-                                                    WALLET.state
-                                                        .balance
-                                            }
-                                        }
-                                    )
-                                );
-                            }
-                        );
-                    }
-                );
-
-
-            /*
-             * Transaction filters.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-wallet-filter]"
-                )
-                .forEach(
-                    function (
-                        button
-                    ) {
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                const type =
-                                    button.dataset
-                                        .walletFilter;
-
-
-                                const container =
-                                    document.querySelector(
-                                        "[data-wallet-transactions]"
-                                    );
-
-
-                                if (
-                                    container
-                                ) {
-
-                                    const old =
-                                        WALLET.state
-                                            .transactions;
-
-
-                                    WALLET.state
-                                        .transactions =
-                                        WALLET
-                                            .filterTransactions(
-                                                type
-                                            );
-
-
-                                    WALLET
-                                        .renderTransactions(
-                                            container
-                                        );
-
-
-                                    WALLET.state
-                                        .transactions =
-                                        old;
-                                }
-                            }
-                        );
-                    }
-                );
-        };
-
-
-    /* ========================================================
-       AUTH LISTENER
-       ======================================================== */
-
-    WALLET.listenToAuth =
-        function () {
 
             if (
-                !RX.firebase ||
-                !RX.firebase.auth
+                !containers.length
             ) {
 
                 return;
             }
 
 
-            RX.firebase.auth
-                .onAuthStateChanged(
-                    async function (
-                        user
+            containers.forEach(
+                function (
+                    container
+                ) {
+
+                    if (
+                        !WALLET.state
+                            .transactions
+                            .length
                     ) {
 
-                        if (!user) {
+                        container.innerHTML =
+                            `
+                            <div class="wallet-empty">
+                                <div>💳</div>
+                                <h3>No transactions yet</h3>
+                                <p>Your wallet activity will appear here.</p>
+                            </div>
+                            `;
 
-                            WALLET.state
-                                .userId =
-                                null;
-
-                            WALLET.state
-                                .role =
-                                null;
-
-                            return;
-                        }
-
-
-                        WALLET.state
-                            .userId =
-                            user.uid;
-
-
-                        WALLET.state
-                            .role =
-                            user.role ||
-                            localStorage.getItem(
-                                "riderx_role"
-                            ) ||
-                            "customer";
-
-
-                        WALLET.loadLocal();
-
-
-                        const data =
-                            await WALLET
-                                .loadFromFirebase(
-                                    user.uid
-                                );
-
-
-                        if (!data) {
-
-                            await WALLET.create(
-                                user.uid,
-                                WALLET.state.role
-                            );
-                        }
-
-
-                        WALLET.updateUI();
-
-                        WALLET.renderTransactions();
+                        return;
                     }
-                );
+
+
+                    container.innerHTML =
+                        WALLET.state
+                            .transactions
+                            .map(
+                                function (
+                                    transaction
+                                ) {
+
+                                    const credit =
+                                        transaction
+                                            .direction ===
+                                        "credit";
+
+
+                                    const sign =
+                                        credit
+                                            ? "+"
+                                            : "-";
+
+
+                                    const date =
+                                        new Date(
+                                            transaction
+                                                .timestamp
+                                        );
+
+
+                                    return `
+                                    <div
+                                        class="wallet-transaction ${
+                                            credit
+                                                ? "credit"
+                                                : "debit"
+                                        }"
+                                        data-transaction-id="${transaction.id}"
+                                    >
+
+                                        <div class="wallet-transaction-icon">
+                                            ${
+                                                credit
+                                                    ? "↗"
+                                                    : "↙"
+                                            }
+                                        </div>
+
+                                        <div class="wallet-transaction-info">
+
+                                            <strong>
+                                                ${WALLET.escape(
+                                                    transaction.title
+                                                )}
+                                            </strong>
+
+                                            <span>
+                                                ${WALLET.escape(
+                                                    transaction.description
+                                                )}
+                                            </span>
+
+                                            <small>
+                                                ${date.toLocaleString(
+                                                    "en-IN",
+                                                    {
+                                                        day:
+                                                            "2-digit",
+
+                                                        month:
+                                                            "short",
+
+                                                        year:
+                                                            "numeric",
+
+                                                        hour:
+                                                            "2-digit",
+
+                                                        minute:
+                                                            "2-digit"
+                                                    }
+                                                )}
+                                            </small>
+
+                                        </div>
+
+                                        <div class="wallet-transaction-amount">
+
+                                            <strong>
+                                                ${sign}
+                                                ${WALLET.formatMoney(
+                                                    transaction.amount
+                                                )}
+                                            </strong>
+
+                                            <small>
+                                                ${WALLET.escape(
+                                                    transaction.status
+                                                )}
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+                                    `;
+                                }
+                            )
+                            .join("");
+                }
+            );
         };
 
 
     /* ========================================================
-       INIT
+       ESCAPE HTML
+       ======================================================== */
+
+    WALLET.escape =
+        function (
+            value
+        ) {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+            div.textContent =
+                String(
+                    value ?? ""
+                );
+
+            return div.innerHTML;
+        };
+
+
+    /* ========================================================
+       FULL RENDER
+       ======================================================== */
+
+    WALLET.render =
+        function () {
+
+            WALLET.renderBalance();
+
+            WALLET.renderTransactions();
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-wallet-rendered",
+                    {
+                        detail: {
+
+                            balance:
+                                WALLET.state
+                                    .balance,
+
+                            transactions:
+                                WALLET.state
+                                    .transactions
+                        }
+                    }
+                )
+            );
+        };
+
+
+    /* ========================================================
+       UI EVENTS
+       ======================================================== */
+
+    WALLET.bindEvents =
+        function () {
+
+            document.addEventListener(
+                "click",
+                async function (
+                    event
+                ) {
+
+                    const addButton =
+                        event.target.closest(
+                            "[data-wallet-add]"
+                        );
+
+
+                    if (
+                        addButton
+                    ) {
+
+                        event.preventDefault();
+
+
+                        const input =
+                            document.querySelector(
+                                "[data-wallet-add-amount]"
+                            );
+
+
+                        const amount =
+                            input
+                                ? Number(
+                                    input.value
+                                )
+                                : 0;
+
+
+                        try {
+
+                            await WALLET
+                                .addMoney(
+                                    amount,
+                                    {
+                                        method:
+                                            "online"
+                                    }
+                                );
+
+
+                            if (input) {
+                                input.value = "";
+                            }
+
+
+                            WALLET.showMessage(
+                                "Money added to wallet."
+                            );
+
+                        } catch (error) {
+
+                            WALLET.showMessage(
+                                error.message,
+                                true
+                            );
+                        }
+                    }
+
+
+                    const refreshButton =
+                        event.target.closest(
+                            "[data-wallet-refresh]"
+                        );
+
+
+                    if (
+                        refreshButton
+                    ) {
+
+                        event.preventDefault();
+
+                        await WALLET
+                            .loadFirebase();
+                    }
+                }
+            );
+        };
+
+
+    /* ========================================================
+       UI MESSAGE
+       ======================================================== */
+
+    WALLET.showMessage =
+        function (
+            message,
+            error = false
+        ) {
+
+            const existing =
+                document.querySelector(
+                    ".riderx-wallet-message"
+                );
+
+
+            if (existing) {
+                existing.remove();
+            }
+
+
+            const element =
+                document.createElement(
+                    "div"
+                );
+
+
+            element.className =
+                "riderx-wallet-message" +
+                (
+                    error
+                        ? " error"
+                        : " success"
+                );
+
+
+            element.textContent =
+                message;
+
+
+            document.body.appendChild(
+                element
+            );
+
+
+            setTimeout(
+                function () {
+
+                    element.classList.add(
+                        "hide"
+                    );
+
+
+                    setTimeout(
+                        function () {
+
+                            element.remove();
+
+                        },
+                        300
+                    );
+
+                },
+                2500
+            );
+        };
+
+
+    /* ========================================================
+       AUTH STATE
+       ======================================================== */
+
+    WALLET.bindAuth =
+        function () {
+
+            try {
+
+                if (
+                    window.firebase &&
+                    firebase.auth
+                ) {
+
+                    firebase.auth()
+                        .onAuthStateChanged(
+                            async function (
+                                user
+                            ) {
+
+                                WALLET.stopListener();
+
+
+                                WALLET.state.user =
+                                    user;
+
+
+                                if (!user) {
+
+                                    WALLET.state
+                                        .userId =
+                                        null;
+
+                                    WALLET.state
+                                        .balance =
+                                        0;
+
+                                    WALLET.state
+                                        .transactions =
+                                        [];
+
+                                    WALLET.render();
+
+                                    return;
+                                }
+
+
+                                WALLET.state
+                                    .userId =
+                                    user.uid;
+
+
+                                WALLET.state
+                                    .role =
+                                    WALLET.getRole();
+
+
+                                WALLET.loadLocal();
+
+                                await WALLET
+                                    .loadFirebase();
+
+                                WALLET
+                                    .startListener();
+                            }
+                        );
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Wallet auth binding error:",
+                    error
+                );
+            }
+        };
+
+
+    /* ========================================================
+       INITIALIZE
        ======================================================== */
 
     WALLET.init =
-        function () {
+        async function () {
 
             if (
                 WALLET.state.initialized
@@ -2568,73 +2245,108 @@
             }
 
 
-            WALLET.state.initialized =
-                true;
+            WALLET.state.user =
+                WALLET.getUser();
+
+
+            WALLET.state.userId =
+                WALLET.getUserId();
+
+
+            WALLET.state.role =
+                WALLET.getRole();
 
 
             WALLET.loadLocal();
 
-            WALLET.bind();
+            WALLET.bindEvents();
 
-            WALLET.listenToAuth();
-
-            WALLET.updateUI();
-
-            WALLET.renderTransactions();
+            WALLET.bindAuth();
 
 
-            console.log(
-                "RiderX Wallet Engine loaded."
+            if (
+                WALLET.state.userId
+            ) {
+
+                await WALLET
+                    .loadFirebase();
+
+                WALLET
+                    .startListener();
+            }
+
+
+            WALLET.render();
+
+
+            WALLET.state.initialized =
+                true;
+
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-wallet-ready"
+                )
             );
         };
 
 
     /* ========================================================
-       EXTERNAL RIDE EVENTS
+       PUBLIC API
        ======================================================== */
 
-    window.addEventListener(
-        "riderx-ride-completed",
-        async function (
-            event
+    RX.getWalletBalance =
+        function () {
+
+            return WALLET
+                .getBalance();
+        };
+
+
+    RX.addWalletMoney =
+        function (
+            amount,
+            options
         ) {
 
-            const data =
-                event.detail ||
-                {};
+            return WALLET
+                .addMoney(
+                    amount,
+                    options
+                );
+        };
 
 
-            /*
-             * Rider earnings are added
-             * only when explicitly supplied.
-             */
+    RX.payFromWallet =
+        function (
+            amount,
+            options
+        ) {
 
-            if (
-                WALLET.state.role ===
-                "rider" &&
-                data.earning
-            ) {
+            return WALLET
+                .deductMoney(
+                    amount,
+                    options
+                );
+        };
 
-                try {
 
-                    await WALLET.addEarning(
-                        data.earning,
-                        data.rideId
-                    );
+    RX.refundWallet =
+        function (
+            amount,
+            options
+        ) {
 
-                } catch (error) {
-
-                    console.warn(
-                        error
-                    );
-                }
-            }
-        }
-    );
+            return WALLET
+                .refund(
+                    amount,
+                    options
+                );
+        };
 
 
     /* ========================================================
-       DOM READY
+       AUTO INIT
        ======================================================== */
 
     if (
@@ -2644,7 +2356,10 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            WALLET.init
+            function () {
+
+                WALLET.init();
+            }
         );
 
     } else {
@@ -2652,5 +2367,9 @@
         WALLET.init();
     }
 
+
+    console.log(
+        "RiderX Wallet Engine loaded."
+    );
 
 })();
