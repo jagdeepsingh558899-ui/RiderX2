@@ -1,738 +1,1081 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 
-  <title>RiderX | Finding Rider</title>
+«»
 
-  <link rel="stylesheet" href="../css/style.css">
+<title>RiderX - Finding Rider</title><style>
 
-  <style>
-    :root {
-      --yellow: #ffe500;
-      --black: #070707;
-      --card: #121212;
-      --gray: #999;
-      --green: #22c55e;
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+
+    margin:0;
+    padding:0;
+
+    width:100%;
+    min-height:100%;
+
+    background:#000;
+
+    color:#fff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+body{
+
+    min-height:100vh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:20px;
+
+}
+
+.container{
+
+    width:100%;
+    max-width:460px;
+
+    text-align:center;
+
+}
+
+.logo{
+
+    font-size:30px;
+    font-weight:900;
+
+    margin-bottom:30px;
+
+}
+
+.logo span{
+
+    color:#FFD600;
+
+}
+
+.loader-wrap{
+
+    position:relative;
+
+    width:170px;
+    height:170px;
+
+    margin:0 auto 30px;
+
+}
+
+.loader{
+
+    position:absolute;
+
+    inset:0;
+
+    border-radius:50%;
+
+    border:
+        4px solid
+        #222;
+
+    border-top-color:#FFD600;
+
+    animation:
+        spin 1s linear infinite;
+
+}
+
+.loader-inner{
+
+    position:absolute;
+
+    inset:25px;
+
+    border-radius:50%;
+
+    border:
+        2px solid
+        #333;
+
+    border-bottom-color:#FFD600;
+
+    animation:
+        spinReverse 1.5s linear infinite;
+
+}
+
+.bike{
+
+    position:absolute;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:48px;
+
+}
+
+@keyframes spin{
+
+    to{
+        transform:rotate(360deg);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
+}
+
+@keyframes spinReverse{
+
+    to{
+        transform:rotate(-360deg);
     }
 
-    body {
-      min-height: 100vh;
-      background: var(--black);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+}
 
-    .search-container {
-      width: 100%;
-      max-width: 430px;
-      text-align: center;
-    }
+.title{
 
-    .logo-box {
-      width: 88px;
-      height: 88px;
-      margin: 0 auto 22px;
-      border-radius: 26px;
-      background: var(--yellow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 45px rgba(255, 229, 0, .22);
-    }
+    font-size:24px;
+    font-weight:900;
 
-    .logo-box span {
-      color: #000;
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing: -1px;
-    }
+    margin-bottom:10px;
 
-    h1 {
-      font-size: 28px;
-      font-weight: 800;
-      margin-bottom: 8px;
-    }
+}
 
-    h1 span {
-      color: var(--yellow);
-    }
+.subtitle{
 
-    .subtitle {
-      color: var(--gray);
-      font-size: 14px;
-      margin-bottom: 30px;
-    }
+    color:#888;
 
-    .search-card {
-      background: var(--card);
-      border: 1px solid rgba(255,229,0,.15);
-      border-radius: 24px;
-      padding: 28px 20px;
-    }
+    font-size:14px;
 
-    .loader {
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 25px;
-      border: 5px solid #292929;
-      border-top-color: var(--yellow);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+    line-height:1.5;
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+    margin-bottom:25px;
 
-    .status-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
+}
 
-    #status {
-      color: var(--gray);
-      font-size: 14px;
-      min-height: 22px;
-    }
+.status{
 
-    .dots {
-      display: inline-flex;
-      gap: 4px;
-      margin-left: 4px;
-    }
+    display:inline-flex;
 
-    .dots span {
-      width: 5px;
-      height: 5px;
-      background: var(--yellow);
-      border-radius: 50%;
-      animation: blink 1.2s infinite;
-    }
+    align-items:center;
 
-    .dots span:nth-child(2) {
-      animation-delay: .2s;
-    }
+    gap:8px;
 
-    .dots span:nth-child(3) {
-      animation-delay: .4s;
-    }
+    padding:9px 15px;
 
-    @keyframes blink {
-      0%, 80%, 100% {
-        opacity: .2;
-      }
-      40% {
-        opacity: 1;
-      }
-    }
+    border-radius:30px;
 
-    .ride-info {
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid #252525;
-      text-align: left;
-    }
+    background:#151515;
 
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      margin-bottom: 13px;
-      font-size: 13px;
-    }
+    border:
+        1px solid
+        #292929;
 
-    .info-row .label {
-      color: var(--gray);
-    }
+    color:#FFD600;
 
-    .info-row .value {
-      color: white;
-      font-weight: 600;
-      text-align: right;
-    }
+    font-size:12px;
+    font-weight:900;
 
-    .cancel-btn {
-      width: 100%;
-      margin-top: 22px;
-      padding: 14px;
-      border-radius: 14px;
-      border: 1px solid #333;
-      background: #1b1b1b;
-      color: #fff;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+}
 
-    .cancel-btn:active {
-      transform: scale(.98);
-    }
+.status-dot{
 
-    .error {
-      color: #ef4444 !important;
-    }
+    width:8px;
+    height:8px;
 
-    .success {
-      color: var(--green) !important;
-    }
-  </style>
-</head>
+    border-radius:50%;
 
-<body>
+    background:#FFD600;
 
-  <main class="search-container">
+    box-shadow:
+        0 0 10px
+        rgba(255,214,0,.7);
 
-    <div class="logo-box">
-      <span>RX</span>
+}
+
+.info{
+
+    margin-top:30px;
+
+    padding:18px;
+
+    border-radius:18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #171717,
+            #0d0d0d
+        );
+
+    border:
+        1px solid
+        #252525;
+
+    text-align:left;
+
+}
+
+.info-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    gap:15px;
+
+    padding:10px 0;
+
+    border-bottom:
+        1px solid
+        #242424;
+
+    font-size:13px;
+
+}
+
+.info-row:last-child{
+
+    border-bottom:0;
+
+}
+
+.label{
+
+    color:#777;
+
+}
+
+.value{
+
+    font-weight:800;
+
+    text-align:right;
+
+}
+
+.cancel{
+
+    width:100%;
+
+    min-height:50px;
+
+    margin-top:18px;
+
+    border-radius:14px;
+
+    border:
+        1px solid
+        rgba(255,80,80,.3);
+
+    background:#171717;
+
+    color:#ff7070;
+
+    font-size:14px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+}
+
+.cancel:disabled{
+
+    opacity:.5;
+
+}
+
+.error{
+
+    display:none;
+
+    margin-top:20px;
+
+    padding:15px;
+
+    border-radius:15px;
+
+    background:
+        rgba(255,70,70,.08);
+
+    border:
+        1px solid
+        rgba(255,70,70,.2);
+
+    color:#ff7777;
+
+    font-size:12px;
+
+    line-height:1.5;
+
+}
+
+</style></head><body><div class="container"><div class="logo">
+
+    Rider<span>X</span>
+
+</div>
+
+
+<div class="loader-wrap">
+
+    <div class="loader"></div>
+
+    <div class="loader-inner"></div>
+
+    <div class="bike">
+        🏍️
     </div>
 
-    <h1>RIDER<span>X</span></h1>
+</div>
 
-    <p class="subtitle">
-      Your ride is being connected with a nearby rider
-    </p>
 
-    <section class="search-card">
+<div class="title">
 
-      <div class="loader" id="loader"></div>
+    Finding your rider
 
-      <div class="status-title" id="statusTitle">
-        Finding your rider
-      </div>
+</div>
 
-      <div id="status">
-        Searching nearby riders
-        <span class="dots">
-          <span></span>
-          <span></span>
-          <span></span>
+
+<div class="subtitle">
+
+    We're looking for the nearest
+    available RiderX partner.
+
+    <br>
+
+    Please keep this screen open.
+
+</div>
+
+
+<div class="status">
+
+    <span class="status-dot"></span>
+
+    SEARCHING FOR RIDER
+
+</div>
+
+
+<div
+    id="rideInfo"
+    class="info"
+    style="display:none;"
+>
+
+    <div class="info-row">
+
+        <span class="label">
+            Ride ID
         </span>
-      </div>
 
-      <div class="ride-info">
+        <span
+            id="rideIdText"
+            class="value"
+        >
+            —
+        </span>
 
-        <div class="info-row">
-          <span class="label">Ride ID</span>
-          <span class="value" id="rideId">—</span>
-        </div>
+    </div>
 
-        <div class="info-row">
-          <span class="label">Service</span>
-          <span class="value" id="serviceType">—</span>
-        </div>
 
-        <div class="info-row">
-          <span class="label">Fare</span>
-          <span class="value" id="fare">—</span>
-        </div>
+    <div class="info-row">
 
-        <div class="info-row">
-          <span class="label">Status</span>
-          <span class="value" id="rideStatus">SEARCHING</span>
-        </div>
+        <span class="label">
+            Service
+        </span>
 
-      </div>
+        <span
+            id="serviceText"
+            class="value"
+        >
+            —
+        </span>
 
-      <button
-        class="cancel-btn"
-        id="cancelBtn"
-        type="button"
-        onclick="cancelRide()"
-      >
-        Cancel Ride
-      </button>
+    </div>
 
-    </section>
 
-  </main>
+    <div class="info-row">
 
+        <span class="label">
+            Fare
+        </span>
 
-  <!-- Firebase -->
-  <script type="module">
+        <span
+            id="fareText"
+            class="value"
+        >
+            —
+        </span>
 
-    import {
-      auth,
-      db,
-      doc,
-      getDoc,
-      updateDoc,
-      onSnapshot
-    } from "../firebase/firebase-config.js";
+    </div>
 
-    let rideId = null;
-    let unsubscribeRide = null;
-    let cancelling = false;
+</div>
 
 
-    function getRideId() {
+<button
+    id="cancelBtn"
+    class="cancel"
+>
+    Cancel Ride
+</button>
 
-      const params = new URLSearchParams(window.location.search);
 
-      return (
-        params.get("rideId") ||
-        localStorage.getItem("riderx_active_ride") ||
-        sessionStorage.getItem("riderx_active_ride")
-      );
-    }
+<div
+    id="errorBox"
+    class="error"
+></div>
 
+</div><script type="module">
 
-    function setStatus(title, message, type = "") {
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
-      document.getElementById("statusTitle").textContent = title;
 
-      const status = document.getElementById("status");
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-      status.textContent = message;
 
-      status.className = type;
-    }
+import {
+    doc,
+    onSnapshot,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-    function updateRideUI(data) {
+// =========================================================
+// STATE
+// =========================================================
 
-      document.getElementById("rideId").textContent =
-        rideId ? "#" + rideId.substring(0, 8).toUpperCase() : "—";
+let currentUser = null;
 
-      document.getElementById("serviceType").textContent =
-        data.serviceType ||
-        data.rideType ||
-        "Bike Taxi";
+let rideId = null;
 
-      if (data.fare !== undefined && data.fare !== null) {
+let unsubscribeRide = null;
 
-        const fare =
-          typeof data.fare === "number"
-            ? `₹${data.fare}`
-            : data.fare;
+let cancelling = false;
 
-        document.getElementById("fare").textContent = fare;
 
-      }
+// =========================================================
+// DOM
+// =========================================================
 
-      const status =
-        String(data.status || "SEARCHING").toUpperCase();
+const rideInfo =
+    document.getElementById(
+        "rideInfo"
+    );
 
-      document.getElementById("rideStatus").textContent = status;
-
-
-      /*
-       * Rider accepted
-       */
-      if (
-        status === "ACCEPTED" ||
-        status === "RIDER_ACCEPTED" ||
-        status === "DRIVER_ACCEPTED"
-      ) {
-
-        document.getElementById("loader").style.display = "none";
-
-        setStatus(
-          "Rider Found!",
-          "Your rider has accepted the trip.",
-          "success"
-        );
-
-        document.getElementById("cancelBtn").style.display = "none";
-
-        setTimeout(() => {
-
-          window.location.href =
-            "ride.html?rideId=" +
-            encodeURIComponent(rideId);
-
-        }, 700);
-
-        return;
-      }
-
-
-      /*
-       * Rider arrived
-       */
-      if (
-        status === "ARRIVED" ||
-        status === "RIDER_ARRIVED"
-      ) {
-
-        document.getElementById("loader").style.display = "none";
-
-        setStatus(
-          "Rider has arrived",
-          "Please meet your rider.",
-          "success"
-        );
-
-        return;
-      }
-
-
-      /*
-       * Trip started
-       */
-      if (
-        status === "STARTED" ||
-        status === "IN_PROGRESS" ||
-        status === "ONGOING"
-      ) {
-
-        document.getElementById("loader").style.display = "none";
-
-        setStatus(
-          "Ride Started",
-          "Your trip is now in progress.",
-          "success"
-        );
-
-        setTimeout(() => {
-
-          window.location.href =
-            "ride.html?rideId=" +
-            encodeURIComponent(rideId);
-
-        }, 700);
-
-        return;
-      }
-
-
-      /*
-       * Completed
-       */
-      if (
-        status === "COMPLETED" ||
-        status === "COMPLETE"
-      ) {
-
-        document.getElementById("loader").style.display = "none";
-
-        setStatus(
-          "Ride Completed",
-          "Your trip has been completed.",
-          "success"
-        );
-
-        setTimeout(() => {
-
-          window.location.href =
-            "history.html";
-
-        }, 800);
-
-        return;
-      }
-
-
-      /*
-       * Cancelled
-       */
-      if (
-        status === "CANCELLED" ||
-        status === "CANCELED"
-      ) {
-
-        document.getElementById("loader").style.display = "none";
-
-        setStatus(
-          "Ride Cancelled",
-          "This ride has been cancelled.",
-          "error"
-        );
-
-        document.getElementById("cancelBtn").style.display = "none";
-
-        setTimeout(() => {
-
-          window.location.href =
-            "home.html";
-
-        }, 1200);
-
-        return;
-      }
-
-
-      /*
-       * Searching
-       */
-      document.getElementById("loader").style.display = "block";
-
-      setStatus(
-        "Finding your rider",
-        "Searching nearby riders"
-      );
-
-    }
-
-
-    async function initializeRide() {
-
-      try {
-
-        /*
-         * Wait for Firebase authentication
-         */
-        const user = await new Promise((resolve) => {
-
-          const unsubscribe =
-            auth.onAuthStateChanged((currentUser) => {
-
-              unsubscribe();
-              resolve(currentUser);
-
-            });
-
-        });
-
-
-        if (!user) {
-
-          window.location.href =
-            "../auth/login.html";
-
-          return;
-
-        }
-
-
-        rideId = getRideId();
-
-
-        if (!rideId) {
-
-          setStatus(
-            "Ride not found",
-            "No active ride request was found.",
-            "error"
-          );
-
-          document.getElementById("loader").style.display = "none";
-          document.getElementById("cancelBtn").style.display = "none";
-
-          return;
-
-        }
-
-
-        const rideRef =
-          doc(db, "rides", rideId);
-
-
-        /*
-         * Check ride ownership before listening
-         */
-        const rideSnapshot =
-          await getDoc(rideRef);
-
-
-        if (!rideSnapshot.exists()) {
-
-          setStatus(
-            "Ride not found",
-            "This ride request no longer exists.",
-            "error"
-          );
-
-          document.getElementById("loader").style.display = "none";
-          document.getElementById("cancelBtn").style.display = "none";
-
-          return;
-
-        }
-
-
-        const rideData =
-          rideSnapshot.data();
-
-
-        if (
-          rideData.customerId &&
-          rideData.customerId !== user.uid
-        ) {
-
-          setStatus(
-            "Access denied",
-            "This ride does not belong to your account.",
-            "error"
-          );
-
-          document.getElementById("loader").style.display = "none";
-          document.getElementById("cancelBtn").style.display = "none";
-
-          return;
-
-        }
-
-
-        updateRideUI(rideData);
-
-
-        /*
-         * REAL-TIME FIRESTORE LISTENER
-         *
-         * Rider accepts the ride →
-         * Firestore changes →
-         * customer gets update instantly.
-         */
-        unsubscribeRide =
-          onSnapshot(
-            rideRef,
-            (snapshot) => {
-
-              if (!snapshot.exists()) {
-                return;
-              }
-
-              updateRideUI(snapshot.data());
-
-            },
-            (error) => {
-
-              console.error(
-                "Ride listener error:",
-                error
-              );
-
-              setStatus(
-                "Connection problem",
-                "Unable to receive live ride updates.",
-                "error"
-              );
-
-            }
-          );
-
-      } catch (error) {
-
-        console.error(
-          "Searching ride initialization error:",
-          error
-        );
-
-        setStatus(
-          "Something went wrong",
-          error.message || "Please try again.",
-          "error"
-        );
-
-        document.getElementById("loader").style.display = "none";
-
-      }
-
-    }
-
-
-    window.cancelRide = async function () {
-
-      if (cancelling || !rideId) {
-        return;
-      }
-
-      const confirmed =
-        confirm(
-          "Are you sure you want to cancel this ride?"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      cancelling = true;
-
-      const button =
-        document.getElementById("cancelBtn");
-
-      button.disabled = true;
-      button.textContent = "Cancelling...";
-
-
-      try {
-
-        await updateDoc(
-          doc(db, "rides", rideId),
-          {
-            status: "CANCELLED",
-            cancelledBy: "customer",
-            cancelledAt: new Date()
-          }
-        );
-
-
-        localStorage.removeItem(
-          "riderx_active_ride"
-        );
-
-        sessionStorage.removeItem(
-          "riderx_active_ride"
-        );
-
-
-        setStatus(
-          "Ride Cancelled",
-          "Your ride has been cancelled.",
-          "error"
-        );
-
-
-        setTimeout(() => {
-
-          window.location.href =
-            "home.html";
-
-        }, 800);
-
-      } catch (error) {
-
-        console.error(
-          "Cancel ride error:",
-          error
-        );
-
-        button.disabled = false;
-        button.textContent = "Cancel Ride";
-
-        alert(
-          "Unable to cancel ride. Please try again."
-        );
-
-      } finally {
-
-        cancelling = false;
-
-      }
-
-    };
-
-
-    window.addEventListener(
-      "beforeunload",
-      () => {
-
-        if (unsubscribeRide) {
-          unsubscribeRide();
-        }
-
-      }
+const rideIdText =
+    document.getElementById(
+        "rideIdText"
+    );
+
+const serviceText =
+    document.getElementById(
+        "serviceText"
+    );
+
+const fareText =
+    document.getElementById(
+        "fareText"
+    );
+
+const cancelBtn =
+    document.getElementById(
+        "cancelBtn"
+    );
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
     );
 
 
-    initializeRide();
+// =========================================================
+// GET RIDE ID
+// =========================================================
 
-  </script>
+function getRideId(){
 
-</body>
-</html>
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const fromUrl =
+        params.get(
+            "rideId"
+        );
+
+
+    if(fromUrl){
+
+        return fromUrl;
+
+    }
+
+
+    const keys = [
+        "activeRideId",
+        "rideId",
+        "riderx_active_ride"
+    ];
+
+
+    for(
+        const key of keys
+    ){
+
+        const value =
+            localStorage.getItem(
+                key
+            );
+
+
+        if(value){
+
+            return value;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+// =========================================================
+// SHOW ERROR
+// =========================================================
+
+function showError(
+    message
+){
+
+    errorBox.style.display =
+        "block";
+
+    errorBox.innerText =
+        message;
+
+}
+
+
+// =========================================================
+// CLEAR RIDE STORAGE
+// =========================================================
+
+function clearRideStorage(){
+
+    [
+        "activeRideId",
+        "rideId",
+        "riderx_active_ride"
+    ]
+    .forEach(
+        key => {
+
+            localStorage.removeItem(
+                key
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// SAVE ACTIVE RIDE
+// =========================================================
+
+function saveActiveRide(
+    id
+){
+
+    localStorage.setItem(
+        "activeRideId",
+        id
+    );
+
+    localStorage.setItem(
+        "rideId",
+        id
+    );
+
+    localStorage.setItem(
+        "riderx_active_ride",
+        id
+    );
+
+}
+
+
+// =========================================================
+// OPEN RIDE STATUS
+// =========================================================
+
+function openRideStatus(
+    id
+){
+
+    saveActiveRide(
+        id
+    );
+
+
+    window.location.replace(
+        "ride-status.html?rideId=" +
+        encodeURIComponent(
+            id
+        )
+    );
+
+}
+
+
+// =========================================================
+// STATUS NORMALIZER
+// =========================================================
+
+function normalizedStatus(
+    value
+){
+
+    return String(
+        value || ""
+    )
+    .trim()
+    .toUpperCase();
+
+}
+
+
+// =========================================================
+// HANDLE RIDE SNAPSHOT
+// =========================================================
+
+function handleRide(
+    snapshot
+){
+
+    if(!snapshot.exists()){
+
+        showError(
+            "Ride not found. Please book the ride again."
+        );
+
+        cancelBtn.disabled =
+            true;
+
+        return;
+
+    }
+
+
+    const ride =
+        snapshot.data();
+
+
+    // Security check:
+    // customer can only monitor own ride.
+
+    if(
+        ride.customerId &&
+        ride.customerId !==
+        currentUser.uid
+    ){
+
+        showError(
+            "This ride does not belong to your account."
+        );
+
+        cancelBtn.disabled =
+            true;
+
+        return;
+
+    }
+
+
+    const status =
+        normalizedStatus(
+            ride.status
+        );
+
+
+    rideInfo.style.display =
+        "block";
+
+
+    rideIdText.innerText =
+        rideId.substring(
+            0,
+            12
+        );
+
+
+    serviceText.innerText =
+        ride.serviceType ||
+        ride.service ||
+        ride.rideType ||
+        "Bike Taxi";
+
+
+    fareText.innerText =
+        "₹" +
+        Number(
+            ride.fare || 0
+        );
+
+
+    // -------------------------------------------------------
+    // RIDER ACCEPTED
+    // -------------------------------------------------------
+
+    if(
+        status ===
+        "ACCEPTED"
+    ){
+
+        cancelBtn.disabled =
+            true;
+
+
+        openRideStatus(
+            rideId
+        );
+
+        return;
+
+    }
+
+
+    // -------------------------------------------------------
+    // RIDER ARRIVING / ON TRIP
+    // -------------------------------------------------------
+
+    if(
+        status ===
+        "ARRIVING" ||
+
+        status ===
+        "DRIVER_ARRIVING" ||
+
+        status ===
+        "RIDER_ARRIVING" ||
+
+        status ===
+        "ARRIVED" ||
+
+        status ===
+        "STARTED" ||
+
+        status ===
+        "ON_TRIP" ||
+
+        status ===
+        "COMPLETED"
+    ){
+
+        cancelBtn.disabled =
+            true;
+
+
+        openRideStatus(
+            rideId
+        );
+
+        return;
+
+    }
+
+
+    // -------------------------------------------------------
+    // CANCELLED
+    // -------------------------------------------------------
+
+    if(
+        status ===
+        "CANCELLED" ||
+
+        status ===
+        "CANCELED" ||
+
+        status ===
+        "REJECTED"
+    ){
+
+        clearRideStorage();
+
+        showError(
+            "This ride is no longer active."
+        );
+
+        cancelBtn.disabled =
+            true;
+
+        setTimeout(
+            () => {
+
+                window.location.replace(
+                    "home.html"
+                );
+
+            },
+            1800
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// START RIDE LISTENER
+// =========================================================
+
+function startRideListener(){
+
+    if(
+        !rideId ||
+        !currentUser
+    ){
+
+        return;
+
+    }
+
+
+    if(unsubscribeRide){
+
+        unsubscribeRide();
+
+    }
+
+
+    const rideRef =
+        doc(
+            db,
+            "rides",
+            rideId
+        );
+
+
+    unsubscribeRide =
+        onSnapshot(
+
+            rideRef,
+
+            snapshot => {
+
+                handleRide(
+                    snapshot
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "Ride listener:",
+                    error
+                );
+
+
+                showError(
+                    "Unable to track your ride: " +
+                    error.message
+                );
+
+            }
+
+        );
+
+}
+
+
+// =========================================================
+// CANCEL RIDE
+// =========================================================
+
+cancelBtn.addEventListener(
+    "click",
+    async () => {
+
+        if(
+            cancelling ||
+            !rideId ||
+            !currentUser
+        ){
+
+            return;
+
+        }
+
+
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to cancel this ride?"
+            );
+
+
+        if(!confirmed){
+
+            return;
+
+        }
+
+
+        cancelling = true;
+
+        cancelBtn.disabled =
+            true;
+
+        cancelBtn.innerText =
+            "Cancelling...";
+
+
+        try{
+
+            const rideRef =
+                doc(
+                    db,
+                    "rides",
+                    rideId
+                );
+
+
+            await updateDoc(
+                rideRef,
+                {
+
+                    status:
+                        "CANCELLED",
+
+                    cancelledBy:
+                        currentUser.uid,
+
+                    cancelledAt:
+                        serverTimestamp()
+
+                }
+            );
+
+
+            clearRideStorage();
+
+
+            window.location.replace(
+                "home.html"
+            );
+
+
+        }catch(error){
+
+            console.error(
+                "Cancel ride:",
+                error
+            );
+
+
+            cancelling =
+                false;
+
+
+            cancelBtn.disabled =
+                false;
+
+
+            cancelBtn.innerText =
+                "Cancel Ride";
+
+
+            showError(
+                "Ride cancel nahi hui: " +
+                error.message
+            );
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// AUTH
+// =========================================================
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(!user){
+
+            showError(
+                "Please login first."
+            );
+
+            cancelBtn.disabled =
+                true;
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        rideId =
+            getRideId();
+
+
+        if(!rideId){
+
+            showError(
+                "Active ride nahi mili. Please book a new ride."
+            );
+
+            cancelBtn.disabled =
+                true;
+
+            return;
+
+        }
+
+
+        startRideListener();
+
+    }
+);
+
+</script></body></html>
