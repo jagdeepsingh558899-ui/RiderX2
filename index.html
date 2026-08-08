@@ -1,26 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-    
-<head>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 
-<meta charset="UTF-8">
+«»
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>RiderX - Move Faster</title>
-
-<link
+<title>RiderX - Move Faster</title><!-- PWA --><link
     rel="manifest"
-    href="manifest.json"
->
+    href="./manifest.json"
+><meta
+name="theme-color"
+content="#FFD600"
+
+«»
 
 <meta
-    name="theme-color"
-    content="#000000"
->
+name="mobile-web-app-capable"
+content="yes"
+
+«»
+
+<meta
+name="apple-mobile-web-app-capable"
+content="yes"
+
+«»
+
+<meta
+name="apple-mobile-web-app-status-bar-style"
+content="black-translucent"
+
+«»
+
+<meta
+name="apple-mobile-web-app-title"
+content="RiderX"
+
+«»
 
 <style>
 
@@ -31,28 +46,39 @@
     font-family:Arial,sans-serif;
 }
 
+html,
 body{
+    width:100%;
+    min-height:100%;
     background:#000;
     color:#fff;
-    min-height:100vh;
-    overflow:hidden;
 }
-    
 
-/* ==============================
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+}
+
+
+/* =========================================
    SPLASH
-============================== */
+========================================= */
 
 .splash{
     position:fixed;
     inset:0;
     width:100%;
     height:100vh;
+    height:100dvh;
+
     background:#000;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     z-index:9999;
+
     animation:splashOut .5s ease 1.3s forwards;
 }
 
@@ -60,11 +86,11 @@ body{
     font-size:45px;
     font-weight:900;
     letter-spacing:3px;
+
     animation:logoPulse 1.2s ease;
 }
 
-.logo-animation span,
-.brand span{
+.logo-animation span{
     color:#FFD600;
 }
 
@@ -93,61 +119,85 @@ body{
 }
 
 
-/* ==============================
+/* =========================================
    MAIN
-============================== */
+========================================= */
 
 .main{
     min-height:100vh;
+    min-height:100dvh;
+
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
+
     padding:25px;
+
     text-align:center;
 }
 
 .brand{
     font-size:42px;
     font-weight:900;
+    letter-spacing:-1px;
+}
+
+.brand span{
+    color:#FFD600;
 }
 
 .tagline{
     margin-top:15px;
+
     color:#aaa;
+
     max-width:500px;
+
     line-height:1.5;
+
+    font-size:15px;
 }
 
 
-/* ==============================
+/* =========================================
    BUTTONS
-============================== */
+========================================= */
 
 .buttons{
     width:100%;
     max-width:390px;
-    margin-top:45px;
+
+    margin-top:35px;
 }
 
 .btn{
     width:100%;
+
     padding:17px;
-    margin:10px 0;
+
+    margin:9px 0;
+
     border-radius:15px;
+
     font-size:18px;
     font-weight:bold;
+
     cursor:pointer;
+
     transition:.2s;
+
+    -webkit-tap-highlight-color:transparent;
 }
 
 .btn:active{
-    transform:scale(.98);
+    transform:scale(.97);
 }
 
 .customer{
     background:#FFD600;
     color:#000;
+
     border:2px solid #FFD600;
 }
 
@@ -157,7 +207,9 @@ body{
 
 .rider{
     background:#111;
+
     border:2px solid #FFD600;
+
     color:#FFD600;
 }
 
@@ -166,18 +218,91 @@ body{
 }
 
 
-/* ==============================
-   ADMIN LINK
-============================== */
+/* =========================================
+   INSTALL APP
+========================================= */
+
+.install-btn{
+
+    display:none;
+
+    width:100%;
+
+    padding:15px;
+
+    margin-top:12px;
+
+    border-radius:15px;
+
+    background:#171717;
+
+    border:1px solid #FFD600;
+
+    color:#FFD600;
+
+    font-size:16px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+    -webkit-tap-highlight-color:transparent;
+}
+
+.install-btn.show{
+    display:block;
+}
+
+.install-btn:active{
+    transform:scale(.97);
+}
+
+
+/* =========================================
+   INSTALL MESSAGE
+========================================= */
+
+.install-message{
+
+    display:none;
+
+    margin-top:12px;
+
+    color:#888;
+
+    font-size:12px;
+
+    line-height:1.5;
+
+    max-width:350px;
+}
+
+.install-message.show{
+    display:block;
+}
+
+
+/* =========================================
+   ADMIN
+========================================= */
 
 .admin-link{
+
     position:fixed;
+
     bottom:58px;
+
     left:50%;
+
     transform:translateX(-50%);
+
     color:#555;
+
     font-size:11px;
+
     text-decoration:none;
+
+    padding:8px 15px;
 }
 
 .admin-link:hover{
@@ -185,21 +310,30 @@ body{
 }
 
 
-/* ==============================
+/* =========================================
    FOOTER
-============================== */
+========================================= */
 
 .footer{
-    position:absolute;
-    bottom:25px;
+
+    position:fixed;
+
+    bottom:20px;
+
+    left:0;
+    right:0;
+
+    text-align:center;
+
     color:#666;
+
     font-size:13px;
 }
 
 
-/* ==============================
+/* =========================================
    MOBILE
-============================== */
+========================================= */
 
 @media(max-width:420px){
 
@@ -215,125 +349,139 @@ body{
         font-size:14px;
     }
 
+    .buttons{
+        margin-top:30px;
+    }
+
+    .btn{
+        font-size:17px;
+        padding:16px;
+    }
+
 }
 
-</style>
 
-</head>
+/* =========================================
+   STANDALONE APP
+========================================= */
 
+@media(display-mode:standalone){
 
-<body>
+    .admin-link{
+        bottom:65px;
+    }
 
+}
 
-<!-- ==============================
+</style></head><body><!-- =========================================
      SPLASH
-============================== -->
-
-<div
+========================================= --><div
     id="splash"
-    class="splash">
+    class="splash"><div class="logo-animation">
 
-    <div class="logo-animation">
-
-        RID<span>ERX</span>
-
-    </div>
+    RID<span>ERX</span>
 
 </div>
 
-
-<!-- ==============================
+</div><!-- =========================================
      MAIN
-============================== -->
+========================================= --><main class="main"><div class="brand">
 
-<div class="main">
+    RID<span>ERX</span>
 
-    <div class="brand">
-
-        RID<span>ERX</span>
-
-    </div>
+</div>
 
 
-    <p class="tagline">
+<p class="tagline">
 
-        India's Premium Bike Taxi, Cab, Parcel & Food Platform
+    India's Premium Bike Taxi, Cab, Parcel & Food Platform
 
-    </p>
-
-
-    <div class="buttons">
-
-        <button
-            id="customerBtn"
-            class="btn customer"
-            type="button">
-
-            Join as Customer
-
-        </button>
+</p>
 
 
-        <button
-            id="riderBtn"
-            class="btn rider"
-            type="button">
+<div class="buttons">
 
-            Join as Rider
+    <!-- CUSTOMER -->
 
-        </button>
+    <button
+        id="customerBtn"
+        class="btn customer"
+        type="button">
+
+        Join as Customer
+
+    </button>
+
+
+    <!-- RIDER -->
+
+    <button
+        id="riderBtn"
+        class="btn rider"
+        type="button">
+
+        Join as Rider
+
+    </button>
+
+
+    <!-- INSTALL -->
+
+    <button
+        id="installBtn"
+        class="install-btn"
+        type="button">
+
+        📲 Install RiderX App
+
+    </button>
+
+
+    <div
+        id="installMessage"
+        class="install-message">
 
     </div>
 
 </div>
 
+</main><!-- =========================================
+     ADMIN
+========================================= --><a
+href="admin/login.html"
+class="admin-link">
 
-<!-- ==============================
-     ADMIN LOGIN
-============================== -->
+Admin
 
-<a
-    href="admin/login.html"
-    class="admin-link">
+</a><!-- =========================================
+     FOOTER
+========================================= --><div class="footer">Fast • Safe • Reliable
 
-    Admin
-
-</a>
-
-
-<div class="footer">
-
-    Fast • Safe • Reliable
-
-</div>
-
-
-<script>
+</div><script>
 
 /*
 ===========================================================
-RIDERX ROOT PAGE
+RIDERX ROOT / PWA
+===========================================================
 
-IMPORTANT:
+This page:
 
-This page NEVER checks Firebase authentication.
-
-It NEVER redirects to:
-
-admin/dashboard.html
-admin/login.html
-customer/home.html
-rider/home.html
-
-The root URL must always remain the RiderX landing page.
-
+✓ Customer login
+✓ Rider login
+✓ PWA manifest
+✓ Service Worker registration
+✓ Install App button
+✓ Android/Chrome install prompt
+✓ iPhone/iPad installation instructions
+✓ Does NOT redirect automatically
+✓ Does NOT unregister Service Worker
 ===========================================================
 */
 
 
-/* ==============================
+/* =========================================
    CUSTOMER
-============================== */
+========================================= */
 
 document
     .getElementById("customerBtn")
@@ -342,15 +490,15 @@ document
         function(){
 
             window.location.href =
-                "auth/login.html?role=customer";
+                "./auth/login.html?role=customer";
 
         }
     );
 
 
-/* ==============================
+/* =========================================
    RIDER
-============================== */
+========================================= */
 
 document
     .getElementById("riderBtn")
@@ -359,21 +507,226 @@ document
         function(){
 
             window.location.href =
-                "auth/login.html?role=rider";
+                "./auth/login.html?role=rider";
 
         }
     );
 
 
-/* ==============================
-   SERVICE WORKER CLEANUP
+/* =========================================
+   PWA INSTALL
+========================================= */
 
-   This removes an old Service Worker
-   that may be incorrectly serving the
-   Admin Dashboard for the "/" URL.
-============================== */
+let deferredInstallPrompt = null;
 
-if("serviceWorker" in navigator){
+const installBtn =
+    document.getElementById("installBtn");
+
+const installMessage =
+    document.getElementById("installMessage");
+
+
+/*
+-----------------------------------------------------------
+ANDROID / CHROME INSTALL PROMPT
+-----------------------------------------------------------
+*/
+
+window.addEventListener(
+    "beforeinstallprompt",
+    function(event){
+
+        console.log(
+            "RiderX install prompt available."
+        );
+
+
+        event.preventDefault();
+
+
+        deferredInstallPrompt =
+            event;
+
+
+        installBtn.classList.add(
+            "show"
+        );
+
+
+        installMessage.classList.remove(
+            "show"
+        );
+
+    }
+);
+
+
+/*
+-----------------------------------------------------------
+INSTALL BUTTON
+-----------------------------------------------------------
+*/
+
+installBtn.addEventListener(
+    "click",
+    async function(){
+
+        /*
+        Android / Chrome
+        */
+
+        if(deferredInstallPrompt){
+
+            try{
+
+                deferredInstallPrompt.prompt();
+
+
+                const result =
+                    await deferredInstallPrompt.userChoice;
+
+
+                console.log(
+                    "RiderX install result:",
+                    result.outcome
+                );
+
+
+                deferredInstallPrompt =
+                    null;
+
+
+                installBtn.classList.remove(
+                    "show"
+                );
+
+
+            }
+            catch(error){
+
+                console.error(
+                    "Install error:",
+                    error
+                );
+
+            }
+
+            return;
+        }
+
+
+        /*
+        ---------------------------------------------------
+        ALREADY INSTALLED
+        ---------------------------------------------------
+        */
+
+        if(
+            window.matchMedia(
+                "(display-mode: standalone)"
+            ).matches
+        ){
+
+            installMessage.textContent =
+                "RiderX App is already installed.";
+
+            installMessage.classList.add(
+                "show"
+            );
+
+            return;
+        }
+
+
+        /*
+        ---------------------------------------------------
+        IPHONE / SAFARI
+        ---------------------------------------------------
+        */
+
+        const isIOS =
+            /iphone|ipad|ipod/i.test(
+                navigator.userAgent
+            );
+
+
+        if(isIOS){
+
+            installMessage.innerHTML =
+                "iPhone/iPad par Share button tap karein aur " +
+                "<b>Add to Home Screen</b> select karein.";
+
+            installMessage.classList.add(
+                "show"
+            );
+
+            return;
+        }
+
+
+        /*
+        ---------------------------------------------------
+        OTHER BROWSERS
+        ---------------------------------------------------
+        */
+
+        installMessage.textContent =
+            "Browser ke menu me jaakar " +
+            "'Install app' ya 'Add to Home screen' " +
+            "select karein.";
+
+        installMessage.classList.add(
+            "show"
+        );
+
+    }
+);
+
+
+/*
+-----------------------------------------------------------
+AFTER APP INSTALLED
+-----------------------------------------------------------
+*/
+
+window.addEventListener(
+    "appinstalled",
+    function(){
+
+        console.log(
+            "RiderX App installed successfully."
+        );
+
+
+        deferredInstallPrompt =
+            null;
+
+
+        installBtn.classList.remove(
+            "show"
+        );
+
+
+        installMessage.textContent =
+            "RiderX App installed successfully.";
+
+        installMessage.classList.add(
+            "show"
+        );
+
+    }
+);
+
+
+/*
+===========================================================
+SERVICE WORKER
+===========================================================
+*/
+
+if(
+    "serviceWorker" in navigator
+){
 
     window.addEventListener(
         "load",
@@ -381,52 +734,28 @@ if("serviceWorker" in navigator){
 
             try{
 
-                const registrations =
+                const registration =
                     await navigator
                         .serviceWorker
-                        .getRegistrations();
-
-                for(
-                    const registration
-                    of registrations
-                ){
-
-                    await registration.unregister();
-
-                    console.log(
-                        "Old RiderX Service Worker removed."
-                    );
-
-                }
-
-
-                if("caches" in window){
-
-                    const cacheNames =
-                        await caches.keys();
-
-                    for(
-                        const cacheName
-                        of cacheNames
-                    ){
-
-                        await caches.delete(
-                            cacheName
+                        .register(
+                            "./sw.js",
+                            {
+                                scope:"./"
+                            }
                         );
 
-                    }
 
-                    console.log(
-                        "Old RiderX caches cleared."
-                    );
+                console.log(
+                    "RiderX Service Worker registered:",
+                    registration.scope
+                );
 
-                }
 
             }
             catch(error){
 
-                console.warn(
-                    "Cache cleanup failed:",
+                console.error(
+                    "RiderX Service Worker registration failed:",
                     error
                 );
 
@@ -437,9 +766,32 @@ if("serviceWorker" in navigator){
 
 }
 
-</script>
+
+/*
+===========================================================
+PWA STATUS
+===========================================================
+*/
+
+window.addEventListener(
+    "load",
+    function(){
+
+        const standalone =
+            window.matchMedia(
+                "(display-mode: standalone)"
+            ).matches;
 
 
-</body>
+        if(standalone){
 
-</html>
+            console.log(
+                "RiderX running as installed app."
+            );
+
+        }
+
+    }
+);
+
+</script></body></html>
