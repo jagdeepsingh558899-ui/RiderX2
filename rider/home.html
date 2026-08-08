@@ -5,213 +5,269 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>RiderX Rider Dashboard</title>
 
+<link
+    rel="stylesheet"
+    href="../assets/app.css"
+>
 
-<link rel="stylesheet" href="../assets/app.css">
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+>
 
 <style>
 
 body{
-margin:0;
-background:#000;
-color:white;
-font-family:Arial,sans-serif;
+    margin:0;
+    background:#000;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    min-height:100vh;
+    padding-bottom:80px;
 }
-
 
 .header{
-height:70px;
-background:#111;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 20px;
+    height:70px;
+    background:#111;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    border-bottom:1px solid #222;
 }
 
-
 .logo{
-font-size:30px;
-font-weight:900;
+    font-size:30px;
+    font-weight:900;
 }
 
 .logo span{
-color:#FFD600;
+    color:#FFD600;
 }
 
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
 
+.profile-btn,
+.logout-btn{
+    color:#fff;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.logout-btn{
+    color:#ff5555;
+}
 
 .online-btn{
-
-width:90%;
-margin:20px 5%;
-padding:16px;
-background:#FFD600;
-border:none;
-border-radius:15px;
-font-size:18px;
-font-weight:bold;
-
+    width:90%;
+    margin:20px 5%;
+    padding:16px;
+    background:#FFD600;
+    border:none;
+    border-radius:15px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-
+.online-btn.offline{
+    background:#222;
+    color:#fff;
+    border:1px solid #555;
+}
 
 .card{
-
-background:#111;
-margin:15px;
-padding:20px;
-border-radius:20px;
-border:1px solid #333;
-
+    background:#111;
+    margin:15px;
+    padding:20px;
+    border-radius:20px;
+    border:1px solid #333;
 }
-
 
 .card h3{
-
-color:#FFD600;
-
+    color:#FFD600;
 }
-
-
 
 .ride-buttons{
-
-display:flex;
-gap:10px;
-
+    display:flex;
+    gap:10px;
 }
-
-
 
 button{
-
-cursor:pointer;
-
+    cursor:pointer;
 }
-
-
 
 .accept{
-
-flex:1;
-padding:14px;
-background:#FFD600;
-border:none;
-border-radius:12px;
-font-weight:bold;
-
+    flex:1;
+    padding:14px;
+    background:#FFD600;
+    border:none;
+    border-radius:12px;
+    font-weight:bold;
 }
-
 
 .reject{
-
-flex:1;
-padding:14px;
-background:#222;
-color:white;
-border:1px solid #555;
-border-radius:12px;
-
+    flex:1;
+    padding:14px;
+    background:#222;
+    color:white;
+    border:1px solid #555;
+    border-radius:12px;
 }
-
-
 
 .input{
-
-width:100%;
-padding:14px;
-background:#000;
-color:white;
-border:1px solid #555;
-border-radius:12px;
-margin-top:10px;
-
+    width:100%;
+    padding:14px;
+    background:#000;
+    color:white;
+    border:1px solid #555;
+    border-radius:12px;
+    margin-top:10px;
+    box-sizing:border-box;
 }
-
-
 
 .start{
-
-width:100%;
-padding:15px;
-background:#FFD600;
-border:none;
-border-radius:15px;
-font-weight:bold;
-margin-top:10px;
-
+    width:100%;
+    padding:15px;
+    background:#FFD600;
+    border:none;
+    border-radius:15px;
+    font-weight:bold;
+    margin-top:10px;
 }
-
-
 
 .complete{
-
-width:100%;
-padding:15px;
-background:#00c853;
-color:white;
-border:none;
-border-radius:15px;
-font-weight:bold;
-margin-top:10px;
-
+    width:100%;
+    padding:15px;
+    background:#00c853;
+    color:white;
+    border:none;
+    border-radius:15px;
+    font-weight:bold;
+    margin-top:10px;
 }
-
-
 
 .earning{
-
-display:flex;
-justify-content:space-between;
-background:#111;
-margin:15px;
-padding:20px;
-border-radius:20px;
-
+    display:flex;
+    justify-content:space-between;
+    background:#111;
+    margin:15px;
+    padding:20px;
+    border-radius:20px;
+    border:1px solid #222;
 }
-
 
 .amount{
-
-color:#FFD600;
-font-size:25px;
-font-weight:bold;
-
+    color:#FFD600;
+    font-size:25px;
+    font-weight:bold;
 }
 
+.status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#aaa;
+    font-size:13px;
+    margin:0 15px 15px;
+}
 
+.dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:#20d66b;
+}
 
 .bottom{
-
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:#111;
-display:flex;
-justify-content:space-around;
-padding:12px 0;
-
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    background:#111;
+    display:flex;
+    justify-content:space-around;
+    padding:12px 0;
+    border-top:1px solid #292929;
+    z-index:100;
 }
 
-
-
 .bottom div{
+    text-align:center;
+    font-size:12px;
+    color:#aaa;
+    cursor:pointer;
+}
 
-text-align:center;
-font-size:12px;
-color:#aaa;
+.bottom i{
+    font-size:18px;
+    margin-bottom:4px;
+}
 
+.loading-screen{
+    position:fixed;
+    inset:0;
+    background:#050505;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.loading-card{
+    background:#111;
+    border:1px solid #292929;
+    border-radius:20px;
+    padding:30px;
+    width:min(350px,85%);
+}
+
+.loading-logo{
+    font-size:34px;
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.loading-logo span{
+    color:#FFD600;
+}
+
+.loading-icon{
+    color:#FFD600;
+    font-size:28px;
+    margin-bottom:15px;
+}
+
+.loading-text{
+    color:#aaa;
+    font-size:14px;
+}
+
+.error-box{
+    display:none;
+    margin:15px;
+    padding:15px;
+    border-radius:12px;
+    background:#210d0d;
+    border:1px solid #662222;
+    color:#ff7777;
+    line-height:1.5;
+    font-size:13px;
 }
 
 </style>
-
 
 </head>
 
@@ -219,263 +275,683 @@ color:#aaa;
 <body>
 
 
-<header class="header">
+<!-- ============================================================
+     AUTH / RIDER SECURITY
+============================================================ -->
 
-<div class="logo">
+<div
+    id="loadingScreen"
+    class="loading-screen"
+>
 
-RID<span>ERX</span>
+    <div class="loading-card">
+
+        <div class="loading-logo">
+            RID<span>ERX</span>
+        </div>
+
+        <div class="loading-icon">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+        </div>
+
+        <div
+            id="loadingText"
+            class="loading-text"
+        >
+            Checking rider account...
+        </div>
+
+    </div>
 
 </div>
 
 
-<i class="fa-solid fa-user"></i>
+<header class="header">
+
+    <div class="logo">
+        RID<span>ERX</span>
+    </div>
+
+    <div class="header-right">
+
+        <i
+            id="profileBtn"
+            class="fa-solid fa-user profile-btn"
+        ></i>
+
+        <i
+            id="logoutBtn"
+            class="fa-solid fa-right-from-bracket logout-btn"
+        ></i>
+
+    </div>
 
 </header>
 
 
-
-
-
-<button id="onlineBtn" class="online-btn">
-
-🟢 Go Online
-
+<button
+    id="onlineBtn"
+    class="online-btn"
+>
+    🟢 Go Online
 </button>
 
 
+<div
+    id="statusLine"
+    class="status"
+>
+
+    <span class="dot"></span>
+
+    <span id="statusText">
+        Rider account active
+    </span>
+
+</div>
 
 
-
+<div
+    id="errorBox"
+    class="error-box"
+></div>
 
 
 <div class="earning">
 
-<div>
+    <div>
+        Today's Earning
+    </div>
 
-Today's Earning
-
-</div>
-
-
-<div id="earningAmount" class="amount">
-
-₹0
-
-</div>
-
+    <div
+        id="earningAmount"
+        class="amount"
+    >
+        ₹0
+    </div>
 
 </div>
-
-
-
-
-
-
 
 
 <div class="card">
 
+    <h3>
+        New Ride Request
+    </h3>
 
-<h3>
+    <p id="customerName">
+        Customer: Waiting...
+    </p>
 
-New Ride Request
+    <p id="pickupText">
+        Pickup: -
+    </p>
 
-</h3>
+    <p id="dropText">
+        Drop: -
+    </p>
 
+    <p id="fareText">
+        Fare: -
+    </p>
 
-<p id="customerName">
+    <div class="ride-buttons">
 
-Customer: Waiting...
+        <button
+            id="acceptRide"
+            class="accept"
+        >
+            Accept
+        </button>
 
-</p>
+        <button
+            id="rejectRide"
+            class="reject"
+        >
+            Reject
+        </button>
 
-
-<p id="pickupText">
-
-Pickup:-
-
-</p>
-
-
-<p id="dropText">
-
-Drop:-
-
-</p>
-
-
-<p id="fareText">
-
-Fare:-
-
-</p>
-
-
-
-
-<div class="ride-buttons">
-
-
-<button id="acceptRide" class="accept">
-
-Accept
-
-</button>
-
-
-<button id="rejectRide" class="reject">
-
-Reject
-
-</button>
-
+    </div>
 
 </div>
-
-
-</div>
-
-
-
-
-
-
 
 
 <div class="card">
 
+    <h3>
+        OTP Verification
+    </h3>
 
-<h3>
+    <p>
+        Customer OTP
+    </p>
 
-OTP Verification
+    <input
+        id="otpInput"
+        class="input"
+        placeholder="Enter OTP"
+        inputmode="numeric"
+    >
 
-</h3>
-
-
-<p>
-
-Customer OTP
-
-</p>
-
-
-<input 
-id="otpInput"
-class="input"
-placeholder="Enter OTP">
-
-
-<button 
-id="startRide"
-class="start">
-
-Start Ride
-
-</button>
-
+    <button
+        id="startRide"
+        class="start"
+    >
+        Start Ride
+    </button>
 
 </div>
-
-
-
-
-
-
 
 
 <div class="card">
 
+    <h3>
+        Ride Status
+    </h3>
 
-<h3>
+    <h2 id="rideStatus">
+        Waiting
+    </h2>
 
-Ride Status
-
-</h3>
-
-
-<h2 id="rideStatus">
-
-Waiting
-
-</h2>
-
-
-
-<button 
-id="completeRide"
-class="complete">
-
-Complete Ride
-
-</button>
-
+    <button
+        id="completeRide"
+        class="complete"
+    >
+        Complete Ride
+    </button>
 
 </div>
-
-
-
-
-
-
 
 
 <div class="bottom">
 
+    <div
+        onclick="goTo('Home.html')"
+    >
+        <i class="fa-solid fa-house"></i>
+        <br>
+        Home
+    </div>
 
-<div>
+    <div
+        onclick="goTo('Rides.html')"
+    >
+        <i class="fa-solid fa-clock"></i>
+        <br>
+        Rides
+    </div>
 
-<i class="fa-solid fa-house"></i>
+    <div
+        onclick="goTo('Wallet.html')"
+    >
+        <i class="fa-solid fa-wallet"></i>
+        <br>
+        Wallet
+    </div>
 
-<br>
-
-Home
-
-</div>
-
-
-<div>
-
-<i class="fa-solid fa-clock"></i>
-
-<br>
-
-Rides
-
-</div>
-
-
-<div>
-
-<i class="fa-solid fa-wallet"></i>
-
-<br>
-
-Wallet
-
-</div>
-
-
-<div>
-
-<i class="fa-solid fa-user"></i>
-
-<br>
-
-Profile
+    <div
+        onclick="goTo('Profile.html')"
+    >
+        <i class="fa-solid fa-user"></i>
+        <br>
+        Profile
+    </div>
 
 </div>
 
 
-</div>
+<script type="module">
+
+import {
+    auth,
+    db,
+    doc,
+    getDoc,
+    signOut,
+    onAuthStateChanged
+} from "../firebase/firebase-config.js";
 
 
+const loadingScreen =
+    document.getElementById(
+        "loadingScreen"
+    );
+
+const loadingText =
+    document.getElementById(
+        "loadingText"
+    );
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
+
+const statusText =
+    document.getElementById(
+        "statusText"
+    );
+
+const onlineBtn =
+    document.getElementById(
+        "onlineBtn"
+    );
 
 
+let riderVerified = false;
+
+let currentUser = null;
 
 
+/* ============================================================
+   ERROR
+============================================================ */
 
-<script type="module" src="js/rider.js"></script>
+function showError(text){
 
+    errorBox.style.display =
+        "block";
+
+    errorBox.textContent =
+        text;
+
+}
+
+
+/* ============================================================
+   HIDE LOADING
+============================================================ */
+
+function hideLoading(){
+
+    loadingScreen.style.display =
+        "none";
+
+}
+
+
+/* ============================================================
+   ROLE
+============================================================ */
+
+function getRole(data){
+
+    return String(
+        data?.role ??
+        data?.userType ??
+        data?.type ??
+        ""
+    )
+    .trim()
+    .toLowerCase();
+
+}
+
+
+/* ============================================================
+   RIDER APPROVAL
+============================================================ */
+
+function isApproved(data){
+
+    const status =
+        String(
+            data?.status ??
+            data?.approvalStatus ??
+            data?.riderStatus ??
+            data?.verificationStatus ??
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+    return (
+        data?.approved === true ||
+        data?.isApproved === true ||
+        [
+            "approved",
+            "active",
+            "verified"
+        ].includes(status)
+    );
+
+}
+
+
+/* ============================================================
+   AUTH CHECK
+============================================================ */
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(!user){
+
+            loadingText.textContent =
+                "Login required...";
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        try{
+
+            loadingText.textContent =
+                "Checking rider profile...";
+
+
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    user.uid
+                );
+
+
+            const userSnap =
+                await getDoc(
+                    userRef
+                );
+
+
+            if(
+                !userSnap.exists()
+            ){
+
+                showError(
+                    "Rider profile not found."
+                );
+
+                loadingText.textContent =
+                    "Rider profile not found.";
+
+                await signOut(auth);
+
+                setTimeout(
+                    () => {
+
+                        window.location.replace(
+                            "../auth/login.html"
+                        );
+
+                    },
+                    1200
+                );
+
+                return;
+
+            }
+
+
+            const userData =
+                userSnap.data();
+
+
+            if(
+                getRole(userData) !==
+                "rider"
+            ){
+
+                showError(
+                    "This account is not registered as a Rider."
+                );
+
+                await signOut(auth);
+
+                setTimeout(
+                    () => {
+
+                        window.location.replace(
+                            "../auth/login.html"
+                        );
+
+                    },
+                    1200
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------------
+            CHECK APPROVAL
+            ----------------------------------------------------
+            */
+
+            if(
+                !isApproved(userData)
+            ){
+
+                loadingText.textContent =
+                    "Rider approval pending...";
+
+                window.location.replace(
+                    "./pending.html"
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------------
+            RIDER VERIFIED
+            ----------------------------------------------------
+            */
+
+            riderVerified =
+                true;
+
+
+            statusText.textContent =
+                "Rider account approved and active";
+
+            hideLoading();
+
+
+            /*
+            ----------------------------------------------------
+            LOAD RIDER JS
+            IMPORTANT PATH FIX
+            ----------------------------------------------------
+            */
+
+            try{
+
+                await import(
+                    "../js/rider.js"
+                );
+
+            }catch(error){
+
+                console.warn(
+                    "Rider JS could not be loaded:",
+                    error
+                );
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "Rider verification error:",
+                error
+            );
+
+            showError(
+                error.message ||
+                "Unable to verify rider account."
+            );
+
+            loadingText.textContent =
+                "Rider verification failed.";
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   ONLINE BUTTON
+============================================================ */
+
+onlineBtn.addEventListener(
+    "click",
+    async () => {
+
+        if(!riderVerified || !currentUser){
+
+            return;
+
+        }
+
+
+        try{
+
+            const snap =
+                await getDoc(
+                    doc(
+                        db,
+                        "users",
+                        currentUser.uid
+                    )
+                );
+
+
+            if(
+                !snap.exists()
+            ){
+
+                return;
+
+            }
+
+
+            const data =
+                snap.data();
+
+
+            if(
+                !isApproved(data)
+            ){
+
+                alert(
+                    "Your rider account is not approved yet."
+                );
+
+                return;
+
+            }
+
+
+            alert(
+                "Online system will connect with RiderX ride service."
+            );
+
+        }catch(error){
+
+            console.error(error);
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+document
+.getElementById(
+    "logoutBtn"
+)
+.addEventListener(
+    "click",
+    async () => {
+
+        try{
+
+            await signOut(auth);
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+        }catch(error){
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   PROFILE
+============================================================ */
+
+document
+.getElementById(
+    "profileBtn"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        if(!riderVerified){
+
+            return;
+
+        }
+
+        window.location.href =
+            "./Profile.html";
+
+    }
+);
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+window.goTo =
+    function(page){
+
+        if(!riderVerified){
+
+            return;
+
+        }
+
+        window.location.href =
+            page;
+
+    };
+
+
+</script>
 
 </body>
 
