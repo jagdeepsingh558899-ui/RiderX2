@@ -6,7 +6,8 @@
 
 import {
     auth,
-    db
+    db,
+    onAuthStateChanged
 } from "../firebase/firebase-config.js";
 
 import {
@@ -46,9 +47,11 @@ let rideUnsubscribe = null;
 
 let fareSettings = null;
 
+let bookingInProgress = false;
+
 
 // ============================================================
-// DEFAULT RIDERX FARE
+// RIDERX DEFAULT FARE
 // ============================================================
 
 const DEFAULT_FARE = {
@@ -85,38 +88,79 @@ const DEFAULT_FARE = {
 
 
 // ============================================================
-// DOM
+// DOM HELPER
 // ============================================================
 
-const $ = (id) => document.getElementById(id);
+const $ = (id) => {
+
+    return document.getElementById(id);
+
+};
 
 
 // ============================================================
-// AUTH
+// STATUS
 // ============================================================
 
-auth.onAuthStateChanged((user) => {
+function setStatus(message) {
 
-    currentUser = user;
+    const status = $("status");
 
-    if (!user) {
+    const bookingStatus =
+        $("bookingStatus");
 
-        setStatus("Please login first");
 
-        const button = $("bookRide");
+    if (status) {
 
-        if (button) {
-            button.disabled = true;
-        }
+        status.innerText = message;
 
-        return;
     }
 
-    setStatus("Select pickup location");
 
-    updateBookButton();
+    if (bookingStatus) {
 
-});
+        bookingStatus.innerText =
+            message;
+
+    }
+
+}
+
+
+// ============================================================
+// AUTH STATE
+// ============================================================
+
+onAuthStateChanged(
+    auth,
+    (user) => {
+
+        currentUser = user;
+
+
+        if (!user) {
+
+            setStatus(
+                "Please login first"
+            );
+
+
+            updateBookButton();
+
+            return;
+
+        }
+
+
+        setStatus(
+            "Select pickup location"
+        );
+
+
+        updateBookButton();
+
+    }
+);
 
 
 // ============================================================
@@ -125,42 +169,90 @@ auth.onAuthStateChanged((user) => {
 
 function initMap() {
 
-    const mapElement = $("map");
+    const mapElement =
+        $("map");
+
 
     if (!mapElement) {
+
+        console.error(
+            "RiderX: #map not found"
+        );
+
         return;
+
     }
+
+
+    if (typeof L === "undefined") {
+
+        console.error(
+            "Leaflet is not loaded"
+        );
+
+        setStatus(
+            "Map failed to load"
+        );
+
+        return;
+
+    }
+
 
     if (map) {
+
         return;
+
     }
 
-    map = L.map("map", {
-        zoomControl: true
-    }).setView(
+
+    map = L.map(
+        "map",
+        {
+            zoomControl: true
+        }
+    ).setView(
         [30.7333, 76.7794],
         13
     );
 
 
     L.tileLayer(
+
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+
         {
             maxZoom: 19,
-            attribution: "&copy; OpenStreetMap"
+            attribution:
+                "&copy; OpenStreetMap contributors"
         }
+
     ).addTo(map);
 
 
-    map.on("click", handleMapClick);
+    map.on(
+        "click",
+        handleMapClick
+    );
 
 
-    setTimeout(() => {
-        map.invalidateSize();
-    }, 300);
+    setTimeout(
+        () => {
+
+            if (map) {
+
+                map.invalidateSize();
+
+            }
+
+        },
+        500
+    );
 
 
-    setStatus("Select pickup location");
+    setStatus(
+        "Select pickup location"
+    );
 
 }
 
@@ -171,42 +263,63 @@ function initMap() {
 
 function handleMapClick(event) {
 
-    const lat = Number(
-        event.latlng.lat.toFixed(6)
-    );
-
-    const lng = Number(
-        event.latlng.lng.toFixed(6)
-    );
+    const lat =
+        Number(
+            event.latlng.lat.toFixed(6)
+        );
 
 
-    if (selectingMode === "pickup") {
+    const lng =
+        Number(
+            event.latlng.lng.toFixed(6)
+        );
+
+
+    const address =
+        `${lat}, ${lng}`;
+
+
+    if (
+        selectingMode ===
+        "pickup"
+    ) {
 
         setPickup(
             lat,
             lng,
-            `${lat}, ${lng}`
+            address
         );
 
-        selectingMode = "drop";
+
+        selectingMode =
+            "drop";
+
 
         setStatus(
             "Now select destination"
         );
 
+
         return;
+
     }
 
 
-    if (selectingMode === "drop") {
+    if (
+        selectingMode ===
+        "drop"
+    ) {
 
         setDrop(
             lat,
             lng,
-            `${lat}, ${lng}`
+            address
         );
 
-        selectingMode = "pickup";
+
+        selectingMode =
+            "pickup";
+
 
         setStatus(
             "Pickup & destination selected"
@@ -218,7 +331,7 @@ function handleMapClick(event) {
 
 
 // ============================================================
-// PICKUP
+// SET PICKUP
 // ============================================================
 
 function setPickup(
@@ -227,9 +340,21 @@ function setPickup(
     address = ""
 ) {
 
+    if (!map) {
+
+        return;
+
+    }
+
+
     pickupCoords = {
-        lat,
-        lng
+
+        lat:
+            Number(lat),
+
+        lng:
+            Number(lng)
+
     };
 
 
@@ -242,9 +367,13 @@ function setPickup(
     }
 
 
-    pickupMarker = L.marker(
-        [lat, lng]
-    )
+    pickupMarker =
+        L.marker(
+            [
+                pickupCoords.lat,
+                pickupCoords.lng
+            ]
+        )
         .addTo(map)
         .bindPopup(
             "Pickup location"
@@ -253,6 +382,7 @@ function setPickup(
 
     const input =
         $("pickupLocation");
+
 
     if (input) {
 
@@ -263,13 +393,13 @@ function setPickup(
     }
 
 
-    updateRideData();
+    updateRide();
 
 }
 
 
 // ============================================================
-// DROP
+// SET DROP
 // ============================================================
 
 function setDrop(
@@ -278,9 +408,21 @@ function setDrop(
     address = ""
 ) {
 
+    if (!map) {
+
+        return;
+
+    }
+
+
     dropCoords = {
-        lat,
-        lng
+
+        lat:
+            Number(lat),
+
+        lng:
+            Number(lng)
+
     };
 
 
@@ -293,9 +435,13 @@ function setDrop(
     }
 
 
-    dropMarker = L.marker(
-        [lat, lng]
-    )
+    dropMarker =
+        L.marker(
+            [
+                dropCoords.lat,
+                dropCoords.lng
+            ]
+        )
         .addTo(map)
         .bindPopup(
             "Destination"
@@ -304,6 +450,7 @@ function setDrop(
 
     const input =
         $("dropoffLocation");
+
 
     if (input) {
 
@@ -314,7 +461,7 @@ function setDrop(
     }
 
 
-    updateRideData();
+    updateRide();
 
 }
 
@@ -334,11 +481,12 @@ function useCurrentLocation() {
         );
 
         return;
+
     }
 
 
     setStatus(
-        "Getting your location..."
+        "Getting your current location..."
     );
 
 
@@ -347,16 +495,26 @@ function useCurrentLocation() {
         (position) => {
 
             const lat =
-                position.coords.latitude;
+                Number(
+                    position.coords.latitude
+                        .toFixed(6)
+                );
+
 
             const lng =
-                position.coords.longitude;
+                Number(
+                    position.coords.longitude
+                        .toFixed(6)
+                );
 
 
             if (map) {
 
                 map.setView(
-                    [lat, lng],
+                    [
+                        lat,
+                        lng
+                    ],
                     16
                 );
 
@@ -370,7 +528,8 @@ function useCurrentLocation() {
             );
 
 
-            selectingMode = "drop";
+            selectingMode =
+                "drop";
 
 
             setStatus(
@@ -379,23 +538,62 @@ function useCurrentLocation() {
 
         },
 
+
         (error) => {
 
             console.error(
-                "Location error:",
+                "RiderX location error:",
                 error
             );
 
 
+            let message =
+                "Unable to get location";
+
+
+            if (
+                error.code ===
+                1
+            ) {
+
+                message =
+                    "Location permission denied";
+
+            }
+
+
+            if (
+                error.code ===
+                2
+            ) {
+
+                message =
+                    "Location unavailable";
+
+            }
+
+
+            if (
+                error.code ===
+                3
+            ) {
+
+                message =
+                    "Location request timed out";
+
+            }
+
+
             setStatus(
-                "Unable to get location"
+                message
             );
 
         },
 
+
         {
             enableHighAccuracy: true,
-            timeout: 10000,
+            timeout: 15000,
             maximumAge: 5000
         }
 
@@ -405,7 +603,7 @@ function useCurrentLocation() {
 
 
 // ============================================================
-// DISTANCE
+// DISTANCE CALCULATION
 // ============================================================
 
 function calculateDistance(
@@ -415,24 +613,31 @@ function calculateDistance(
     lng2
 ) {
 
-    const R = 6371;
+    const R =
+        6371;
 
 
     const dLat =
-        (lat2 - lat1) *
+        (
+            lat2 - lat1
+        ) *
         Math.PI /
         180;
 
 
     const dLng =
-        (lng2 - lng1) *
+        (
+            lng2 - lng1
+        ) *
         Math.PI /
         180;
 
 
     const a =
 
-        Math.sin(dLat / 2) ** 2
+        Math.sin(
+            dLat / 2
+        ) ** 2
 
         +
 
@@ -448,7 +653,9 @@ function calculateDistance(
 
         *
 
-        Math.sin(dLng / 2) ** 2;
+        Math.sin(
+            dLng / 2
+        ) ** 2;
 
 
     const c =
@@ -465,7 +672,7 @@ function calculateDistance(
 
 
 // ============================================================
-// FARE SETTINGS
+// LOAD ADMIN FARE SETTINGS
 // ============================================================
 
 async function loadFareSettings() {
@@ -493,8 +700,9 @@ async function loadFareSettings() {
             fareSettings =
                 snapshot.data();
 
+
             console.log(
-                "RiderX fare settings loaded",
+                "RiderX fare settings loaded:",
                 fareSettings
             );
 
@@ -503,8 +711,9 @@ async function loadFareSettings() {
             fareSettings =
                 DEFAULT_FARE;
 
+
             console.log(
-                "Using default RiderX fare"
+                "RiderX default fare active"
             );
 
         }
@@ -512,9 +721,10 @@ async function loadFareSettings() {
     } catch (error) {
 
         console.error(
-            "Fare settings error:",
+            "RiderX fare settings error:",
             error
         );
+
 
         fareSettings =
             DEFAULT_FARE;
@@ -525,38 +735,45 @@ async function loadFareSettings() {
 
 
 // ============================================================
-// SERVICE FARE
+// GET SERVICE FARE
 // ============================================================
 
 function getServiceFare() {
 
-    const service =
-        selectedService;
+    const serviceFare =
+        DEFAULT_FARE[
+            selectedService
+        ] ||
+        DEFAULT_FARE.bike;
 
 
     if (
         fareSettings &&
-        fareSettings[service]
+        fareSettings[
+            selectedService
+        ]
     ) {
 
         return {
-            ...DEFAULT_FARE[service],
-            ...fareSettings[service]
+
+            ...serviceFare,
+
+            ...fareSettings[
+                selectedService
+            ]
+
         };
 
     }
 
 
-    return (
-        DEFAULT_FARE[service] ||
-        DEFAULT_FARE.bike
-    );
+    return serviceFare;
 
 }
 
 
 // ============================================================
-// CALCULATE FARE
+// FARE CALCULATION
 // ============================================================
 
 function calculateFare() {
@@ -566,10 +783,15 @@ function calculateFare() {
         !dropCoords
     ) {
 
+        routeDistanceKm =
+            0;
+
+
         updateFareUI(
             0,
             0
         );
+
 
         return 0;
 
@@ -594,7 +816,7 @@ function calculateFare() {
         );
 
 
-    const fare =
+    const serviceFare =
         getServiceFare();
 
 
@@ -605,6 +827,11 @@ function calculateFare() {
     let rate;
 
 
+    /*
+     * RIDERX:
+     * 10 PM - 6 AM = NIGHT RATE
+     */
+
     if (
         hour >= 22 ||
         hour < 6
@@ -612,7 +839,7 @@ function calculateFare() {
 
         rate =
             Number(
-                fare.nightRate ??
+                serviceFare.nightRate ??
                 11
             );
 
@@ -620,7 +847,7 @@ function calculateFare() {
 
         rate =
             Number(
-                fare.dayRate ??
+                serviceFare.dayRate ??
                 8
             );
 
@@ -629,33 +856,46 @@ function calculateFare() {
 
     const extraRate =
         Number(
-            fare.extraRate ??
+            serviceFare.extraRate ??
             9
         );
 
 
-    const base =
+    const baseFare =
         Number(
-            fare.baseFare ??
+            serviceFare.baseFare ??
             30
         );
 
 
     let total =
-        base;
+        baseFare;
 
+
+    /*
+     * FIRST 10 KM
+     */
 
     if (
         distance <= 10
     ) {
 
         total +=
-            distance * rate;
+            distance *
+            rate;
 
-    } else {
+    }
+
+
+    /*
+     * ABOVE 10 KM
+     */
+
+    else {
 
         total +=
-            10 * rate;
+            10 *
+            rate;
 
 
         total +=
@@ -666,6 +906,10 @@ function calculateFare() {
 
     }
 
+
+    /*
+     * MINIMUM RIDERX FARE
+     */
 
     total =
         Math.max(
@@ -686,7 +930,7 @@ function calculateFare() {
 
 
 // ============================================================
-// FARE UI
+// UPDATE FARE UI
 // ============================================================
 
 function updateFareUI(
@@ -697,10 +941,12 @@ function updateFareUI(
     const fareElement =
         $("fare");
 
+
     if (fareElement) {
 
         fareElement.innerText =
-            "₹" + fare;
+            "₹" +
+            Math.round(fare);
 
     }
 
@@ -708,29 +954,33 @@ function updateFareUI(
     const distanceElement =
         $("estimated-distance-display");
 
+
     if (distanceElement) {
 
         distanceElement.innerText =
             distance > 0
+
                 ? `${distance.toFixed(1)} KM`
+
                 : "0 KM";
 
     }
 
 
-    const info =
+    const fareInfo =
         $("fareInfo");
 
-    if (info) {
+
+    if (fareInfo) {
 
         if (distance > 0) {
 
-            info.innerText =
+            fareInfo.innerText =
                 `${selectedService.toUpperCase()} • ${distance.toFixed(1)} km`;
 
         } else {
 
-            info.innerText =
+            fareInfo.innerText =
                 "Select pickup & drop";
 
         }
@@ -770,6 +1020,7 @@ function drawRoute() {
         L.polyline(
 
             [
+
                 [
                     pickupCoords.lat,
                     pickupCoords.lng
@@ -779,10 +1030,12 @@ function drawRoute() {
                     dropCoords.lat,
                     dropCoords.lng
                 ]
+
             ],
 
             {
-                weight: 5
+                weight: 5,
+                opacity: 0.9
             }
 
         )
@@ -790,20 +1043,26 @@ function drawRoute() {
 
 
     map.fitBounds(
+
         routeLayer.getBounds(),
+
         {
-            padding: [70, 120]
+            padding: [
+                80,
+                100
+            ]
         }
+
     );
 
 }
 
 
 // ============================================================
-// UPDATE RIDE DATA
+// UPDATE RIDE
 // ============================================================
 
-function updateRideData() {
+function updateRide() {
 
     calculateFare();
 
@@ -815,7 +1074,7 @@ function updateRideData() {
 
 
 // ============================================================
-// BOOK BUTTON
+// BOOK BUTTON STATE
 // ============================================================
 
 function updateBookButton() {
@@ -825,7 +1084,19 @@ function updateBookButton() {
 
 
     if (!button) {
+
         return;
+
+    }
+
+
+    if (bookingInProgress) {
+
+        button.disabled =
+            true;
+
+        return;
+
     }
 
 
@@ -838,28 +1109,33 @@ function updateBookButton() {
 
 
 // ============================================================
-// SERVICE SELECTOR
+// SERVICE SELECTORS
 // ============================================================
 
 function setupServices() {
 
-    document
-        .querySelectorAll(".service")
-        .forEach((service) => {
+    const services =
+        document.querySelectorAll(
+            ".service"
+        );
+
+
+    services.forEach(
+        (service) => {
 
             service.addEventListener(
                 "click",
                 () => {
 
-                    document
-                        .querySelectorAll(".service")
-                        .forEach((item) => {
+                    services.forEach(
+                        (item) => {
 
                             item.classList.remove(
                                 "active"
                             );
 
-                        });
+                        }
+                    );
 
 
                     service.classList.add(
@@ -870,897 +1146,4 @@ function setupServices() {
                     selectedService =
                         String(
                             service.dataset.service ||
-                            "bike"
-                        )
-                            .trim()
-                            .toLowerCase();
-
-
-                    calculateFare();
-
-                }
-            );
-
-        });
-
-}
-
-
-// ============================================================
-// PICKUP BUTTON
-// ============================================================
-
-function setupPickupButton() {
-
-    const button =
-        $("pickupMapBtn");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            selectingMode =
-                "pickup";
-
-
-            setStatus(
-                "Move map and select pickup"
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================================
-// DROP BUTTON
-// ============================================================
-
-function setupDropButton() {
-
-    const button =
-        $("dropMapBtn");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            selectingMode =
-                "drop";
-
-
-            setStatus(
-                "Move map and select destination"
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================================
-// LOCATION BUTTON
-// ============================================================
-
-function setupLocationButton() {
-
-    const button =
-        $("myLocation");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        "click",
-        useCurrentLocation
-    );
-
-}
-
-
-// ============================================================
-// INPUTS
-// ============================================================
-
-function setupInputs() {
-
-    const pickup =
-        $("pickupLocation");
-
-    const drop =
-        $("dropoffLocation");
-
-
-    if (pickup) {
-
-        pickup.addEventListener(
-            "focus",
-            () => {
-
-                selectingMode =
-                    "pickup";
-
-                setStatus(
-                    "Select pickup on map"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (drop) {
-
-        drop.addEventListener(
-            "focus",
-            () => {
-
-                selectingMode =
-                    "drop";
-
-                setStatus(
-                    "Select destination on map"
-                );
-
-            }
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// BOOK RIDE
-// ============================================================
-
-async function bookRide() {
-
-    if (!currentUser) {
-
-        alert(
-            "Please login first."
-        );
-
-
-        window.location.href =
-            "../auth/login.html?role=customer";
-
-
-        return;
-
-    }
-
-
-    if (
-        !pickupCoords ||
-        !dropCoords
-    ) {
-
-        setStatus(
-            "Please select pickup and destination"
-        );
-
-        return;
-
-    }
-
-
-    const button =
-        $("bookRide");
-
-
-    if (button) {
-
-        button.disabled = true;
-
-        button.innerHTML =
-            '<i class="fa-solid fa-spinner fa-spin"></i> Finding Rider...';
-
-    }
-
-
-    try {
-
-        const fare =
-            calculateFare();
-
-
-        const pickupAddress =
-            $("pickupLocation")?.value ||
-            "Pickup location";
-
-
-        const dropAddress =
-            $("dropoffLocation")?.value ||
-            "Destination";
-
-
-        const payment =
-            $("paymentMethod")?.value ||
-            "cash";
-
-
-        const now =
-            serverTimestamp();
-
-
-        const rideData = {
-
-            customerId:
-                currentUser.uid,
-
-
-            customerName:
-                currentUser.displayName ||
-                currentUser.email ||
-                "RiderX Customer",
-
-
-            serviceType:
-                selectedService,
-
-
-            service:
-                selectedService,
-
-
-            pickup: {
-
-                lat:
-                    pickupCoords.lat,
-
-                lng:
-                    pickupCoords.lng,
-
-                address:
-                    pickupAddress,
-
-                name:
-                    pickupAddress
-
-            },
-
-
-            drop: {
-
-                lat:
-                    dropCoords.lat,
-
-                lng:
-                    dropCoords.lng,
-
-                address:
-                    dropAddress,
-
-                name:
-                    dropAddress
-
-            },
-
-
-            distance:
-                Number(
-                    routeDistanceKm.toFixed(2)
-                ),
-
-
-            fare:
-                Number(fare),
-
-
-            paymentMethod:
-                payment,
-
-
-            status:
-                "REQUESTED",
-
-
-            riderId:
-                null,
-
-
-            driverId:
-                null,
-
-
-            createdAt:
-                now,
-
-
-            requestedAt:
-                now
-
-        };
-
-
-        const rideRef =
-            await addDoc(
-                collection(
-                    db,
-                    "rides"
-                ),
-                rideData
-            );
-
-
-        currentRideId =
-            rideRef.id;
-
-
-        window.RiderXCurrentRideId =
-            rideRef.id;
-
-
-        setStatus(
-            "Finding a nearby RiderX rider..."
-        );
-
-
-        console.log(
-            "RiderX ride created:",
-            rideRef.id
-        );
-
-
-        startRideListener(
-            rideRef.id
-        );
-
-
-        window.dispatchEvent(
-
-            new CustomEvent(
-                "riderx:ride-created",
-                {
-                    detail: {
-                        rideId:
-                            rideRef.id,
-
-                        ride:
-                            rideData
-                    }
-                }
-            )
-
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "RiderX booking error:",
-            error
-        );
-
-
-        if (
-            error.code ===
-            "permission-denied"
-        ) {
-
-            setStatus(
-                "Booking permission denied. Check Firestore Rules."
-            );
-
-        } else {
-
-            setStatus(
-                "Ride booking failed. Please try again."
-            );
-
-        }
-
-
-        if (button) {
-
-            button.disabled = false;
-
-            button.innerHTML =
-                '<i class="fa-solid fa-paper-plane"></i> Book Ride';
-
-        }
-
-    }
-
-}
-
-
-// ============================================================
-// RIDE STATUS LISTENER
-// ============================================================
-
-function startRideListener(
-    rideId
-) {
-
-    if (
-        typeof rideUnsubscribe ===
-        "function"
-    ) {
-
-        rideUnsubscribe();
-
-        rideUnsubscribe =
-            null;
-
-    }
-
-
-    const rideRef =
-        doc(
-            db,
-            "rides",
-            rideId
-        );
-
-
-    rideUnsubscribe =
-        onSnapshot(
-
-            rideRef,
-
-            (snapshot) => {
-
-                if (
-                    !snapshot.exists()
-                ) {
-
-                    setStatus(
-                        "Ride request no longer exists"
-                    );
-
-                    return;
-
-                }
-
-
-                const ride =
-                    snapshot.data();
-
-
-                const status =
-                    String(
-                        ride.status ||
-                        "REQUESTED"
-                    ).toUpperCase();
-
-
-                console.log(
-                    "RiderX ride status:",
-                    status
-                );
-
-
-                window.dispatchEvent(
-
-                    new CustomEvent(
-                        "riderx:ride-status",
-                        {
-                            detail: {
-
-                                rideId,
-
-                                ride,
-
-                                status
-
-                            }
-                        }
-                    )
-
-                );
-
-
-                // REQUESTED
-
-                if (
-                    status ===
-                    "REQUESTED"
-                ) {
-
-                    setStatus(
-                        "Searching nearby RiderX riders..."
-                    );
-
-                }
-
-
-                // ACCEPTED
-
-                else if (
-                    status ===
-                    "ACCEPTED"
-                ) {
-
-                    setStatus(
-                        "Rider accepted your ride"
-                    );
-
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-accepted",
-                            {
-                                detail: {
-                                    rideId,
-                                    ride
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-
-                // ARRIVING
-
-                else if (
-                    status ===
-                    "ARRIVING"
-                ) {
-
-                    setStatus(
-                        "Your RiderX rider is arriving"
-                    );
-
-                }
-
-
-                // STARTED
-
-                else if (
-                    status ===
-                    "STARTED"
-                ) {
-
-                    setStatus(
-                        "Ride started"
-                    );
-
-                }
-
-
-                // COMPLETED
-
-                else if (
-                    status ===
-                    "COMPLETED"
-                ) {
-
-                    setStatus(
-                        "Ride completed"
-                    );
-
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-completed",
-                            {
-                                detail: {
-                                    rideId,
-                                    ride
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-
-                // CANCELLED
-
-                else if (
-                    status ===
-                    "CANCELLED"
-                ) {
-
-                    setStatus(
-                        "Ride cancelled"
-                    );
-
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-cancelled",
-                            {
-                                detail: {
-                                    rideId,
-                                    ride
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-            },
-
-            (error) => {
-
-                console.error(
-                    "Ride listener error:",
-                    error
-                );
-
-
-                setStatus(
-                    "Unable to track ride"
-                );
-
-            }
-
-        );
-
-}
-
-
-// ============================================================
-// STATUS
-// ============================================================
-
-function setStatus(
-    text
-) {
-
-    const element =
-        $("status");
-
-
-    if (element) {
-
-        element.innerText =
-            text;
-
-    }
-
-
-    const bookingStatus =
-        $("bookingStatus");
-
-
-    if (bookingStatus) {
-
-        bookingStatus.innerText =
-            text;
-
-    }
-
-}
-
-
-// ============================================================
-// RESET
-// ============================================================
-
-function resetBooking() {
-
-    pickupCoords = null;
-    dropCoords = null;
-
-    routeDistanceKm = 0;
-
-    currentRideId = null;
-
-
-    if (
-        typeof rideUnsubscribe ===
-        "function"
-    ) {
-
-        rideUnsubscribe();
-
-        rideUnsubscribe =
-            null;
-
-    }
-
-
-    if (pickupMarker && map) {
-
-        map.removeLayer(
-            pickupMarker
-        );
-
-        pickupMarker =
-            null;
-
-    }
-
-
-    if (dropMarker && map) {
-
-        map.removeLayer(
-            dropMarker
-        );
-
-        dropMarker =
-            null;
-
-    }
-
-
-    if (routeLayer && map) {
-
-        map.removeLayer(
-            routeLayer
-        );
-
-        routeLayer =
-            null;
-
-    }
-
-
-    const pickup =
-        $("pickupLocation");
-
-    const drop =
-        $("dropoffLocation");
-
-
-    if (pickup) {
-        pickup.value = "";
-    }
-
-
-    if (drop) {
-        drop.value = "";
-    }
-
-
-    updateFareUI(
-        0,
-        0
-    );
-
-
-    selectingMode =
-        "pickup";
-
-
-    updateBookButton();
-
-}
-
-
-// ============================================================
-// GLOBAL RIDERX API
-// ============================================================
-
-window.RiderXCustomer = {
-
-    init:
-        init,
-
-    setPickup:
-        setPickup,
-
-    setDrop:
-        setDrop,
-
-    calculateFare:
-        calculateFare,
-
-    bookRide:
-        bookRide,
-
-    reset:
-        resetBooking,
-
-    getRideId:
-        () => currentRideId
-
-};
-
-
-// ============================================================
-// INIT
-// ============================================================
-
-async function init() {
-
-    console.log(
-        "RiderX Customer Engine Started"
-    );
-
-
-    initMap();
-
-    setupServices();
-
-    setupPickupButton();
-
-    setupDropButton();
-
-    setupLocationButton();
-
-    setupInputs();
-
-
-    await loadFareSettings();
-
-
-    calculateFare();
-
-    updateBookButton();
-
-}
-
-
-// ============================================================
-// START
-// ============================================================
-
-if (
-    document.readyState ===
-    "loading"
-) {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        init,
-        {
-            once: true
-        }
-    );
-
-} else {
-
-    init();
-
-}
-
-
-// ============================================================
-// EXPOSE BOOKING BUTTON
-// ============================================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        const button =
-            $("bookRide");
-
-
-        if (!button) {
-            return;
-        }
-
-
-        button.addEventListener(
-            "click",
-            bookRide
-        );
-
-    },
-    {
-        once: true
-    }
-);
+                           
