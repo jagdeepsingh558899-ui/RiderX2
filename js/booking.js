@@ -1,33 +1,36 @@
-// ============================================================
-// RiderX Super App
-// Booking & Ride Dispatch Controller
-// Firebase v10 Modular SDK
-// FINAL VERSION
-// ============================================================
+/* ============================================================
+   RIDERX — CUSTOMER BOOKING ENGINE
+   Uber-style ride request / fare / realtime ride state
+   Firebase v10 Modular SDK
+   ============================================================ */
 
 import {
     auth,
-    db
-} from "../firebase/firebase-config.js";
-
-import {
-    collection,
-    addDoc,
+    db,
     doc,
     getDoc,
+    collection,
+    addDoc,
     updateDoc,
     onSnapshot,
     Timestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+} from "../firebase/firebase-config.js";
 
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// ============================================================
-// GLOBAL STATE
-// ============================================================
+/* ============================================================
+   STATE
+   ============================================================ */
 
-window.RiderXBookingState = {
+const state = window.RiderXBookingState = {
 
-    activeService: "bike",
+    activeService:
+        localStorage.getItem("riderx_service") || "bike",
+
+    paymentMethod:
+        localStorage.getItem("riderx_payment_method") || "cash",
 
     pickupLocation: null,
 
@@ -39,216 +42,120 @@ window.RiderXBookingState = {
 
     estimatedDuration: 0,
 
-    currentRideId: null,
+    currentRideId:
+        localStorage.getItem("riderx_current_ride_id") || null,
 
     rideListener: null,
 
-    fareSettings: null
+    fareSettings: null,
+
+    initialized: false,
+
+    creatingRide: false
 
 };
 
+/* ============================================================
+   DEFAULT FARES
+   ============================================================ */
 
-// ============================================================
-// INIT
-// ============================================================
+const DEFAULT_FARES = {
 
-export async function initBookingModule() {
+    bike: {
+        baseFare: 30,
+        dayRate: 8,
+        extraRate: 9,
+        nightRate: 11
+    },
 
-    console.log("RiderX Booking Started");
+    cab: {
+        baseFare: 50,
+        dayRate: 12,
+        extraRate: 14,
+        nightRate: 16
+    },
 
-    await loadFareSettings();
+    parcel: {
+        baseFare: 40,
+        dayRate: 10,
+        extraRate: 12,
+        nightRate: 14
+    },
 
-    setupServiceSelectors();
+    food: {
+        baseFare: 30,
+        dayRate: 8,
+        extraRate: 10,
+        nightRate: 12
+    }
 
-    updateFareUI();
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+function clean(value) {
+    return String(value || "").trim();
+}
+
+function number(value, fallback = 0) {
+
+    const n = Number(value);
+
+    return Number.isFinite(n) ? n : fallback;
 
 }
 
+function showMessage(message, type = "info") {
 
-// ============================================================
-// LOAD ADMIN FARE SETTINGS
-// ============================================================
+    console.log(`[RiderX ${type}]`, message);
 
-async function loadFareSettings() {
+    const toast = $("toast");
 
-    try {
+    if (!toast) {
 
-        const fareRef =
-            doc(
-                db,
-                "settings",
-                "fare"
-            );
-
-        const snap =
-            await getDoc(fareRef);
-
-
-        if (snap.exists()) {
-
-            window.RiderXBookingState.fareSettings =
-                snap.data();
-
-            console.log(
-                "RiderX Fare Settings Loaded:",
-                snap.data()
-            );
-
-        } else {
-
-            console.log(
-                "No admin fare settings found. Using default fare."
-            );
-
-            window.RiderXBookingState.fareSettings = null;
+        if (type === "error") {
+            alert(message);
         }
 
-
-    } catch (error) {
-
-        console.error(
-            "RiderX Fare Load Error:",
-            error
-        );
+        return;
 
     }
 
-}
+    toast.textContent = message;
 
+    toast.className = "toast show " + type;
 
-// ============================================================
-// SERVICE SELECTORS
-// ============================================================
+    clearTimeout(window.__riderxToastTimer);
 
-function setupServiceSelectors() {
+    window.__riderxToastTimer = setTimeout(() => {
 
-    const buttons =
-        document.querySelectorAll(
-            ".service-select-btn, .service"
-        );
+        toast.classList.remove("show");
 
-
-    buttons.forEach((btn) => {
-
-        btn.addEventListener(
-            "click",
-            () => {
-
-                buttons.forEach((button) => {
-
-                    button.classList.remove(
-                        "active"
-                    );
-
-                });
-
-
-                btn.classList.add(
-                    "active"
-                );
-
-
-                const service =
-                    btn.dataset.service;
-
-
-                if (service) {
-
-                    window.RiderXBookingState.activeService =
-                        String(service)
-                            .trim()
-                            .toLowerCase();
-
-                }
-
-
-                calculateFareEstimate();
-
-            }
-        );
-
-    });
+    }, 3000);
 
 }
 
+/* ============================================================
+   DISTANCE
+   ============================================================ */
 
-// ============================================================
-// SET PICKUP
-// ============================================================
-
-export function setPickupLocation(
-    lat,
-    lng,
-    address = ""
-) {
-
-    window.RiderXBookingState.pickupLocation = {
-
-        lat: Number(lat),
-
-        lng: Number(lng),
-
-        address: String(address || "")
-
-    };
-
-
-    calculateFareEstimate();
-
-}
-
-
-// ============================================================
-// SET DROP
-// ============================================================
-
-export function setDropLocation(
-    lat,
-    lng,
-    address = ""
-) {
-
-    window.RiderXBookingState.dropLocation = {
-
-        lat: Number(lat),
-
-        lng: Number(lng),
-
-        address: String(address || "")
-
-    };
-
-
-    calculateFareEstimate();
-
-}
-
-
-// ============================================================
-// DISTANCE CALCULATION
-// ============================================================
-
-function calculateDistance(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-) {
+function distanceKm(lat1, lng1, lat2, lng2) {
 
     const R = 6371;
 
-
     const dLat =
         (lat2 - lat1) *
-        Math.PI /
-        180;
+        Math.PI / 180;
 
-
-    const dLon =
-        (lon2 - lon1) *
-        Math.PI /
-        180;
-
+    const dLng =
+        (lng2 - lng1) *
+        Math.PI / 180;
 
     const a =
 
@@ -257,21 +164,11 @@ function calculateDistance(
 
         +
 
-        Math.cos(
-            lat1 * Math.PI / 180
-        )
+        Math.cos(lat1 * Math.PI / 180) *
+        Math.cos(lat2 * Math.PI / 180) *
 
-        *
-
-        Math.cos(
-            lat2 * Math.PI / 180
-        )
-
-        *
-
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
 
     const c =
         2 *
@@ -280,65 +177,271 @@ function calculateDistance(
             Math.sqrt(1 - a)
         );
 
-
     return R * c;
 
 }
 
+/* ============================================================
+   FARE SETTINGS
+   ============================================================ */
 
-// ============================================================
-// GET SERVICE FARE
-// ============================================================
+async function loadFareSettings() {
 
-function getServiceFare(
-    service
-) {
+    try {
 
-    const settings =
-        window.RiderXBookingState.fareSettings;
+        const ref = doc(
+            db,
+            "settings",
+            "fare"
+        );
 
+        const snap = await getDoc(ref);
 
-    if (
-        settings &&
-        settings[service]
-    ) {
+        if (snap.exists()) {
 
-        return settings[service];
+            state.fareSettings =
+                snap.data();
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX fare settings unavailable:",
+            error
+        );
+
+        state.fareSettings = null;
 
     }
 
+}
 
-    // Default RiderX fare
+/* ============================================================
+   GET SERVICE FARE
+   ============================================================ */
 
-    return {
+function getServiceFare(service) {
 
-        baseFare: 30,
+    const admin =
+        state.fareSettings;
 
-        dayRate: 8,
+    if (
+        admin &&
+        admin[service]
+    ) {
 
-        extraRate: 9,
+        return {
 
-        nightRate: 11
+            baseFare:
+                number(
+                    admin[service].baseFare,
+                    DEFAULT_FARES[service]?.baseFare || 30
+                ),
 
-    };
+            dayRate:
+                number(
+                    admin[service].dayRate,
+                    DEFAULT_FARES[service]?.dayRate || 8
+                ),
+
+            extraRate:
+                number(
+                    admin[service].extraRate,
+                    DEFAULT_FARES[service]?.extraRate || 9
+                ),
+
+            nightRate:
+                number(
+                    admin[service].nightRate,
+                    DEFAULT_FARES[service]?.nightRate || 11
+                )
+
+        };
+
+    }
+
+    return (
+        DEFAULT_FARES[service] ||
+        DEFAULT_FARES.bike
+    );
 
 }
 
+/* ============================================================
+   SET SERVICE
+   ============================================================ */
 
-// ============================================================
-// FARE CALCULATION
-// ============================================================
+export function setService(service) {
+
+    service =
+        clean(service).toLowerCase();
+
+    if (!DEFAULT_FARES[service]) {
+        service = "bike";
+    }
+
+    state.activeService = service;
+
+    localStorage.setItem(
+        "riderx_service",
+        service
+    );
+
+    document
+        .querySelectorAll(
+            ".service, .service-select-btn"
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                String(
+                    button.dataset.service || ""
+                ).toLowerCase() === service
+            );
+
+        });
+
+    calculateFareEstimate();
+
+}
+
+/* ============================================================
+   SET PAYMENT
+   ============================================================ */
+
+export function setPaymentMethod(method) {
+
+    method =
+        clean(method).toLowerCase();
+
+    if (
+        ![
+            "cash",
+            "upi",
+            "wallet"
+        ].includes(method)
+    ) {
+
+        method = "cash";
+
+    }
+
+    state.paymentMethod = method;
+
+    localStorage.setItem(
+        "riderx_payment_method",
+        method
+    );
+
+    document
+        .querySelectorAll(
+            ".payment-option, .payment-method"
+        )
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                String(
+                    button.dataset.payment || ""
+                ).toLowerCase() === method
+            );
+
+        });
+
+}
+
+/* ============================================================
+   SET PICKUP
+   ============================================================ */
+
+export function setPickupLocation(
+    lat,
+    lng,
+    address = ""
+) {
+
+    state.pickupLocation = {
+
+        lat: number(lat),
+        lng: number(lng),
+
+        address:
+            clean(address)
+
+    };
+
+    const input =
+        $("pickupInput");
+
+    if (
+        input &&
+        address
+    ) {
+
+        input.value =
+            address;
+
+    }
+
+    calculateFareEstimate();
+
+}
+
+/* ============================================================
+   SET DROP
+   ============================================================ */
+
+export function setDropLocation(
+    lat,
+    lng,
+    address = ""
+) {
+
+    state.dropLocation = {
+
+        lat: number(lat),
+        lng: number(lng),
+
+        address:
+            clean(address)
+
+    };
+
+    const input =
+        $("dropInput");
+
+    if (
+        input &&
+        address
+    ) {
+
+        input.value =
+            address;
+
+    }
+
+    calculateFareEstimate();
+
+}
+
+/* ============================================================
+   FARE
+   ============================================================ */
 
 export function calculateFareEstimate() {
-
-    const state =
-        window.RiderXBookingState;
-
 
     if (
         !state.pickupLocation ||
         !state.dropLocation
     ) {
+
+        state.estimatedDistance = 0;
+
+        state.estimatedDuration = 0;
+
+        state.estimatedFare = 0;
 
         updateFareUI();
 
@@ -346,405 +449,404 @@ export function calculateFareEstimate() {
 
     }
 
-
     const distance =
-        calculateDistance(
+        distanceKm(
 
             state.pickupLocation.lat,
-
             state.pickupLocation.lng,
 
             state.dropLocation.lat,
-
             state.dropLocation.lng
 
         );
-
 
     state.estimatedDistance =
         Number(
             distance.toFixed(2)
         );
 
+    /*
+       Approximate city travel time.
+       Later this can be replaced by
+       a routing API without changing
+       booking structure.
+    */
 
     state.estimatedDuration =
         Math.max(
             1,
             Math.round(
-                distance * 3
+                distance * 3.2
             )
         );
 
-
-    const serviceFare =
+    const fare =
         getServiceFare(
             state.activeService
         );
 
-
     const hour =
         new Date().getHours();
 
-
-    let perKm;
-
-
-    // ========================================================
-    // NIGHT RATE
-    // 10 PM - 6 AM
-    // ========================================================
-
-    if (
+    const night =
         hour >= 22 ||
-        hour < 6
-    ) {
+        hour < 6;
 
-        perKm =
-            Number(
-                serviceFare.nightRate ?? 11
-            );
+    const perKm =
+        night
+            ? fare.nightRate
+            : fare.dayRate;
 
-    }
-
-    // ========================================================
-    // DAY RATE
-    // ========================================================
-
-    else {
-
-        perKm =
-            Number(
-                serviceFare.dayRate ?? 8
-            );
-
-    }
-
-
-    const baseFare =
-        Number(
-            serviceFare.baseFare ?? 30
-        );
-
-
-    const extraRate =
-        Number(
-            serviceFare.extraRate ??
-            perKm
-        );
-
-
-    let fare =
-        baseFare;
-
-
-    // ========================================================
-    // FIRST 10 KM
-    // ========================================================
+    let total =
+        fare.baseFare;
 
     if (
         state.estimatedDistance <= 10
     ) {
 
-        fare +=
+        total +=
             state.estimatedDistance *
             perKm;
 
-    }
+    } else {
 
-    // ========================================================
-    // ABOVE 10 KM
-    // ========================================================
+        total +=
+            10 * perKm;
 
-    else {
-
-        fare +=
-            10 *
-            perKm;
-
-
-        fare +=
+        total +=
             (
-                state.estimatedDistance - 10
+                state.estimatedDistance -
+                10
             ) *
-            extraRate;
+            fare.extraRate;
 
     }
-
 
     state.estimatedFare =
         Math.max(
-            30,
-            Math.round(fare)
+            fare.baseFare,
+            Math.round(total)
         );
 
-
     updateFareUI();
-
 
     return state.estimatedFare;
 
 }
 
-
-// ============================================================
-// UPDATE FARE UI
-// ============================================================
+/* ============================================================
+   UPDATE UI
+   ============================================================ */
 
 function updateFareUI() {
 
-    const state =
-        window.RiderXBookingState;
+    const distance =
+        $("distanceDisplay");
 
+    const duration =
+        $("durationDisplay");
 
-    const fareElement =
-        document.getElementById(
-            "estimated-fare-display"
-        );
+    const fare =
+        $("fareDisplay");
 
+    const genericFare =
+        $("fare");
 
-    if (fareElement) {
+    const genericDistance =
+        $("estimated-distance-display");
 
-        fareElement.innerText =
-            "₹" +
-            state.estimatedFare;
+    const genericTime =
+        $("estimated-time-display");
 
-    }
+    if (distance) {
 
-
-    // Compatibility with customer home
-
-    const fareElement2 =
-        document.getElementById(
-            "fare"
-        );
-
-
-    if (fareElement2) {
-
-        fareElement2.innerText =
-            "₹" +
-            state.estimatedFare;
+        distance.textContent =
+            state.estimatedDistance > 0
+                ? `${state.estimatedDistance} km`
+                : "0 km";
 
     }
 
+    if (duration) {
 
-    const distanceElement =
-        document.getElementById(
-            "estimated-distance-display"
-        );
-
-
-    if (distanceElement) {
-
-        distanceElement.innerText =
-            state.estimatedDistance +
-            " KM";
+        duration.textContent =
+            state.estimatedDuration > 0
+                ? `${state.estimatedDuration} min`
+                : "0 min";
 
     }
 
+    if (fare) {
 
-    const timeElement =
-        document.getElementById(
-            "estimated-time-display"
+        fare.textContent =
+            `₹${state.estimatedFare}`;
+
+    }
+
+    if (genericFare) {
+
+        genericFare.textContent =
+            `₹${state.estimatedFare}`;
+
+    }
+
+    if (genericDistance) {
+
+        genericDistance.textContent =
+            `${state.estimatedDistance} KM`;
+
+    }
+
+    if (genericTime) {
+
+        genericTime.textContent =
+            `${state.estimatedDuration} mins`;
+
+    }
+
+    const book =
+        $("bookRideBtn");
+
+    if (book) {
+
+        book.disabled = !(
+            auth.currentUser &&
+            state.pickupLocation &&
+            state.dropLocation &&
+            state.estimatedDistance > 0 &&
+            !state.creatingRide
         );
-
-
-    if (timeElement) {
-
-        timeElement.innerText =
-            state.estimatedDuration +
-            " mins";
 
     }
 
 }
 
-
-// ============================================================
-// CREATE RIDE REQUEST
-// ============================================================
+/* ============================================================
+   CREATE RIDE
+   ============================================================ */
 
 export async function createRideRequest(
-    paymentMethod = "cash"
+    paymentMethod =
+        state.paymentMethod
 ) {
 
-    const state =
-        window.RiderXBookingState;
-
+    if (state.creatingRide) {
+        return null;
+    }
 
     const user =
         auth.currentUser;
 
-
-    // ========================================================
-    // AUTH CHECK
-    // ========================================================
-
     if (!user) {
 
-        alert(
-            "Please login first."
+        showMessage(
+            "Please login first.",
+            "error"
         );
-
 
         window.location.href =
             "../auth/login.html?role=customer";
 
-
         return null;
 
     }
-
-
-    // ========================================================
-    // LOCATION CHECK
-    // ========================================================
 
     if (
         !state.pickupLocation ||
         !state.dropLocation
     ) {
 
-        alert(
-            "Please select pickup and drop location."
+        showMessage(
+            "Pickup and destination select karein.",
+            "error"
         );
-
 
         return null;
 
     }
 
-
-    // ========================================================
-    // RECALCULATE FARE
-    // ========================================================
-
     calculateFareEstimate();
 
+    if (
+        state.estimatedDistance <= 0
+    ) {
+
+        showMessage(
+            "Route calculate nahi ho paya.",
+            "error"
+        );
+
+        return null;
+
+    }
+
+    state.creatingRide = true;
+
+    updateFareUI();
+
+    const overlay =
+        $("searchingOverlay");
+
+    const searchingText =
+        $("searchingText");
+
+    if (overlay) {
+        overlay.style.display =
+            "flex";
+    }
+
+    if (searchingText) {
+
+        searchingText.textContent =
+            "Creating your ride request...";
+
+    }
+
+    const now =
+        Timestamp.now();
+
+    const pickup =
+        state.pickupLocation;
+
+    const drop =
+        state.dropLocation;
+
+    const payment =
+        clean(
+            paymentMethod ||
+            state.paymentMethod ||
+            "cash"
+        ).toLowerCase();
 
     try {
-
-        // ====================================================
-        // RIDE DATA
-        //
-        // IMPORTANT:
-        // status = REQUESTED
-        //
-        // Rider engine listens for REQUESTED.
-        // ====================================================
 
         const ride = {
 
             customerId:
                 user.uid,
 
-
             customerName:
                 user.displayName ||
                 user.email ||
                 "RiderX Customer",
 
+            customerEmail:
+                user.email || "",
 
             serviceType:
                 state.activeService,
 
-
-            // Compatibility
-
             service:
                 state.activeService,
-
 
             pickup: {
 
                 lat:
-                    state.pickupLocation.lat,
+                    number(pickup.lat),
 
                 lng:
-                    state.pickupLocation.lng,
+                    number(pickup.lng),
 
                 address:
-                    state.pickupLocation.address,
+                    pickup.address ||
+                    "Pickup location",
 
                 name:
-                    state.pickupLocation.address
+                    pickup.address ||
+                    "Pickup location"
 
             },
-
 
             drop: {
 
                 lat:
-                    state.dropLocation.lat,
+                    number(drop.lat),
 
                 lng:
-                    state.dropLocation.lng,
+                    number(drop.lng),
 
                 address:
-                    state.dropLocation.address,
+                    drop.address ||
+                    "Destination",
 
                 name:
-                    state.dropLocation.address
+                    drop.address ||
+                    "Destination"
 
             },
 
-
-            fare:
-                Number(
-                    state.estimatedFare
-                ),
-
-
             distance:
-                Number(
+                number(
                     state.estimatedDistance
                 ),
 
-
             duration:
-                Number(
+                number(
                     state.estimatedDuration
                 ),
 
+            fare:
+                number(
+                    state.estimatedFare
+                ),
+
+            estimatedFare:
+                number(
+                    state.estimatedFare
+                ),
 
             paymentMethod:
-                String(
-                    paymentMethod ||
-                    "cash"
-                )
-                    .trim()
-                    .toLowerCase(),
+                payment,
 
-
-            // =================================================
-            // IMPORTANT STATUS
-            // =================================================
+            paymentStatus:
+                payment === "cash"
+                    ? "pending"
+                    : "pending",
 
             status:
                 "REQUESTED",
 
-
             riderId:
                 null,
-
 
             driverId:
                 null,
 
+            riderName:
+                null,
+
+            riderPhone:
+                null,
+
+            riderPhoto:
+                null,
+
+            otp:
+                String(
+                    Math.floor(
+                        1000 +
+                        Math.random() *
+                        9000
+                    )
+                ),
 
             createdAt:
-                Timestamp.now(),
-
+                now,
 
             requestedAt:
-                Timestamp.now()
+                now,
+
+            updatedAt:
+                now
 
         };
 
+        if (searchingText) {
 
-        // ====================================================
-        // CREATE FIRESTORE RIDE
-        // ====================================================
+            searchingText.textContent =
+                "Sending request to nearby riders...";
+
+        }
 
         const rideRef =
             await addDoc(
@@ -755,100 +857,99 @@ export async function createRideRequest(
                 ride
             );
 
-
         state.currentRideId =
             rideRef.id;
 
-
-        console.log(
-            "RiderX Ride Created:",
-            rideRef.id,
-            ride
+        localStorage.setItem(
+            "riderx_current_ride_id",
+            rideRef.id
         );
 
+        localStorage.setItem(
+            "riderx_active_ride_id",
+            rideRef.id
+        );
 
-        // ====================================================
-        // START LISTENER
-        // ====================================================
+        showMessage(
+            "Ride request sent.",
+            "success"
+        );
 
         startRideStatusListener(
             rideRef.id
         );
 
-
-        // ====================================================
-        // EVENT
-        // ====================================================
-
         window.dispatchEvent(
-
             new CustomEvent(
                 "riderx:ride-created",
                 {
                     detail: {
-
                         rideId:
                             rideRef.id,
 
-                        ride:
-                            ride
-
+                        ride
                     }
                 }
             )
-
         );
 
-
         return rideRef.id;
-
 
     } catch (error) {
 
         console.error(
-            "RiderX Ride Booking Error:",
+            "RiderX booking error:",
             error
         );
 
-
-        let message =
-            "Ride booking failed.";
-
+        if (overlay) {
+            overlay.style.display =
+                "none";
+        }
 
         if (
             error.code ===
             "permission-denied"
         ) {
 
-            message =
-                "Missing or insufficient permissions. Please check Firestore rules.";
+            showMessage(
+                "Firestore permission denied. Firestore rules check karein.",
+                "error"
+            );
+
+        } else {
+
+            showMessage(
+                error.message ||
+                "Ride booking failed.",
+                "error"
+            );
 
         }
 
+        return null;
 
-        alert(message);
+    } finally {
 
+        state.creatingRide = false;
 
-        throw error;
+        updateFareUI();
 
     }
 
 }
 
+/* ============================================================
+   REALTIME RIDE STATUS
+   ============================================================ */
 
-// ============================================================
-// RIDE STATUS LISTENER
-// ============================================================
-
-function startRideStatusListener(
+export function startRideStatusListener(
     rideId
 ) {
 
-    const state =
-        window.RiderXBookingState;
-
-
-    // Remove previous listener
+    if (!rideId) {
+        return;
+    }
 
     if (
         typeof state.rideListener ===
@@ -862,28 +963,23 @@ function startRideStatusListener(
 
     }
 
-
-    const rideRef =
-        doc(
-            db,
-            "rides",
-            rideId
-        );
-
-
     state.rideListener =
         onSnapshot(
 
-            rideRef,
+            doc(
+                db,
+                "rides",
+                rideId
+            ),
 
-            (snapshot) => {
+            snapshot => {
 
                 if (
                     !snapshot.exists()
                 ) {
 
                     console.warn(
-                        "Ride document no longer exists:",
+                        "Ride no longer exists:",
                         rideId
                     );
 
@@ -891,138 +987,40 @@ function startRideStatusListener(
 
                 }
 
-
-                const data =
+                const ride =
                     snapshot.data();
 
-
-                console.log(
-                    "RiderX Ride Status:",
-                    data.status
-                );
-
+                const status =
+                    String(
+                        ride.status ||
+                        "REQUESTED"
+                    ).toUpperCase();
 
                 window.dispatchEvent(
-
                     new CustomEvent(
                         "riderx:ride-status",
                         {
                             detail: {
-
-                                rideId:
-                                    rideId,
-
-                                ride:
-                                    data,
-
-                                status:
-                                    data.status
-
+                                rideId,
+                                ride,
+                                status
                             }
                         }
                     )
-
                 );
 
-
-                // =================================================
-                // RIDER ACCEPTED
-                // =================================================
-
-                if (
-                    data.status ===
-                    "ACCEPTED"
-                ) {
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-accepted",
-                            {
-                                detail: {
-
-                                    rideId:
-                                        rideId,
-
-                                    ride:
-                                        data
-
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-
-                // =================================================
-                // COMPLETED
-                // =================================================
-
-                if (
-                    data.status ===
-                    "COMPLETED"
-                ) {
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-completed",
-                            {
-                                detail: {
-
-                                    rideId:
-                                        rideId,
-
-                                    ride:
-                                        data
-
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-
-                // =================================================
-                // CANCELLED
-                // =================================================
-
-                if (
-                    data.status ===
-                    "CANCELLED"
-                ) {
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-cancelled",
-                            {
-                                detail: {
-
-                                    rideId:
-                                        rideId,
-
-                                    ride:
-                                        data
-
-                                }
-                            }
-                        )
-
-                    );
-
-                }
+                handleRideStatus(
+                    rideId,
+                    ride,
+                    status
+                );
 
             },
 
-            (error) => {
+            error => {
 
                 console.error(
-                    "RiderX Ride Listener Error:",
+                    "Ride listener error:",
                     error
                 );
 
@@ -1032,123 +1030,223 @@ function startRideStatusListener(
 
 }
 
+/* ============================================================
+   STATUS HANDLER
+   ============================================================ */
 
-// ============================================================
-// CANCEL RIDE
-// ============================================================
-
-export async function cancelRide(
-    rideId
+function handleRideStatus(
+    rideId,
+    ride,
+    status
 ) {
 
-    if (!rideId) {
+    const overlay =
+        $("searchingOverlay");
 
-        return;
+    const text =
+        $("searchingText");
 
-    }
+    switch (status) {
 
+        case "REQUESTED":
 
-    const user =
-        auth.currentUser;
+        case "SEARCHING":
 
+            if (overlay) {
 
-    if (!user) {
-
-        throw new Error(
-            "Login required."
-        );
-
-    }
-
-
-    try {
-
-        await updateDoc(
-
-            doc(
-                db,
-                "rides",
-                rideId
-            ),
-
-            {
-
-                status:
-                    "CANCELLED",
-
-                cancelledBy:
-                    "customer",
-
-                cancelledAt:
-                    Timestamp.now()
+                overlay.style.display =
+                    "flex";
 
             }
 
-        );
+            if (text) {
 
+                text.textContent =
+                    "Looking for a nearby rider...";
 
-        console.log(
-            "Ride cancelled:",
-            rideId
-        );
+            }
 
+            break;
 
-    } catch (error) {
+        case "ACCEPTED":
 
-        console.error(
-            "Cancel Ride Error:",
-            error
-        );
+            if (overlay) {
 
+                overlay.style.display =
+                    "none";
 
-        throw error;
+            }
+
+            localStorage.setItem(
+                "riderx_active_ride_id",
+                rideId
+            );
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx:ride-accepted",
+                    {
+                        detail: {
+                            rideId,
+                            ride
+                        }
+                    }
+                )
+            );
+
+            /*
+               If a dedicated ride-status page
+               exists, go there instead of history.
+            */
+
+            if (
+                window.location.pathname
+                    .includes("/customer/booking")
+            ) {
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        "ride-status.html";
+
+                }, 500);
+
+            }
+
+            break;
+
+        case "ARRIVING":
+
+        case "ARRIVED":
+
+        case "STARTED":
+
+        case "IN_PROGRESS":
+
+        case "COMPLETED":
+
+        case "CANCELLED":
+
+            if (overlay) {
+
+                overlay.style.display =
+                    "none";
+
+            }
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx:ride-status-changed",
+                    {
+                        detail: {
+                            rideId,
+                            ride,
+                            status
+                        }
+                    }
+                )
+            );
+
+            break;
+
+        default:
+
+            break;
 
     }
 
 }
 
+/* ============================================================
+   CANCEL RIDE
+   ============================================================ */
 
-// ============================================================
-// GET CURRENT RIDE
-// ============================================================
+export async function cancelRide(
+    rideId =
+        state.currentRideId
+) {
+
+    if (!rideId) {
+        return false;
+    }
+
+    const user =
+        auth.currentUser;
+
+    if (!user) {
+        throw new Error(
+            "Login required."
+        );
+    }
+
+    await updateDoc(
+
+        doc(
+            db,
+            "rides",
+            rideId
+        ),
+
+        {
+
+            status:
+                "CANCELLED",
+
+            cancelledBy:
+                "customer",
+
+            cancelledAt:
+                Timestamp.now(),
+
+            updatedAt:
+                Timestamp.now()
+
+        }
+
+    );
+
+    localStorage.removeItem(
+        "riderx_current_ride_id"
+    );
+
+    localStorage.removeItem(
+        "riderx_active_ride_id"
+    );
+
+    return true;
+
+}
+
+/* ============================================================
+   GET CURRENT RIDE
+   ============================================================ */
 
 export async function getCurrentRide() {
 
-    const state =
-        window.RiderXBookingState;
+    const rideId =
+        state.currentRideId ||
+        localStorage.getItem(
+            "riderx_current_ride_id"
+        );
 
-
-    if (
-        !state.currentRideId
-    ) {
-
+    if (!rideId) {
         return null;
-
     }
-
 
     try {
 
         const snap =
             await getDoc(
-
                 doc(
                     db,
                     "rides",
-                    state.currentRideId
+                    rideId
                 )
-
             );
 
-
-        if (
-            !snap.exists()
-        ) {
-
+        if (!snap.exists()) {
             return null;
-
         }
-
 
         return {
 
@@ -1159,14 +1257,12 @@ export async function getCurrentRide() {
 
         };
 
-
     } catch (error) {
 
         console.error(
-            "Get Current Ride Error:",
+            "Get current ride error:",
             error
         );
-
 
         return null;
 
@@ -1174,16 +1270,11 @@ export async function getCurrentRide() {
 
 }
 
-
-// ============================================================
-// RESET BOOKING
-// ============================================================
+/* ============================================================
+   RESET
+   ============================================================ */
 
 export function resetBookingState() {
-
-    const state =
-        window.RiderXBookingState;
-
 
     if (
         typeof state.rideListener ===
@@ -1194,50 +1285,166 @@ export function resetBookingState() {
 
     }
 
+    state.pickupLocation = null;
 
-    window.RiderXBookingState = {
+    state.dropLocation = null;
 
-        activeService: "bike",
+    state.estimatedFare = 0;
 
-        pickupLocation: null,
+    state.estimatedDistance = 0;
 
-        dropLocation: null,
+    state.estimatedDuration = 0;
 
-        estimatedFare: 0,
+    state.currentRideId = null;
 
-        estimatedDistance: 0,
+    state.rideListener = null;
 
-        estimatedDuration: 0,
+    state.creatingRide = false;
 
-        currentRideId: null,
+    localStorage.removeItem(
+        "riderx_current_ride_id"
+    );
 
-        rideListener: null,
-
-        fareSettings:
-            state.fareSettings || null
-
-    };
-
+    localStorage.removeItem(
+        "riderx_active_ride_id"
+    );
 
     updateFareUI();
 
 }
 
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
 
-// ============================================================
-// GLOBAL COMPATIBILITY
-// ============================================================
+function setupUI() {
+
+    document
+        .querySelectorAll(
+            ".service, .service-select-btn"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    setService(
+                        button.dataset.service
+                    );
+
+                }
+            );
+
+        });
+
+    document
+        .querySelectorAll(
+            ".payment-option, .payment-method"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    setPaymentMethod(
+                        button.dataset.payment
+                    );
+
+                }
+            );
+
+        });
+
+    const book =
+        $("bookRideBtn");
+
+    if (book) {
+
+        book.addEventListener(
+            "click",
+            async () => {
+
+                await createRideRequest(
+                    state.paymentMethod
+                );
+
+            }
+        );
+
+    }
+
+    const back =
+        $("backBtn");
+
+    if (back) {
+
+        back.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    window.history.length > 1
+                ) {
+
+                    window.history.back();
+
+                } else {
+
+                    window.location.href =
+                        "home.html";
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+
+function setupAuth() {
+
+    onAuthStateChanged(
+        auth,
+        user => {
+
+            updateFareUI();
+
+            if (
+                user &&
+                state.currentRideId
+            ) {
+
+                startRideStatusListener(
+                    state.currentRideId
+                );
+
+            }
+
+        }
+    );
+
+}
+
+/* ============================================================
+   PUBLIC API
+   ============================================================ */
 
 window.RiderXBooking = {
 
-    init:
-        initBookingModule,
+    setPickupLocation,
 
-    setPickupLocation:
-        setPickupLocation,
+    setDropLocation,
 
-    setDropLocation:
-        setDropLocation,
+    setService,
+
+    setPaymentMethod,
 
     calculateFare:
         calculateFareEstimate,
@@ -1245,21 +1452,66 @@ window.RiderXBooking = {
     createRide:
         createRideRequest,
 
-    cancelRide:
-        cancelRide,
+    cancelRide,
 
-    getCurrentRide:
-        getCurrentRide,
+    getCurrentRide,
+
+    startRideStatusListener,
 
     reset:
-        resetBookingState
+        resetBookingState,
+
+    state
 
 };
 
+/* ============================================================
+   INIT
+   ============================================================ */
 
-// ============================================================
-// AUTO INIT
-// ============================================================
+export async function initBookingModule() {
+
+    if (state.initialized) {
+        return;
+    }
+
+    state.initialized = true;
+
+    setupUI();
+
+    setupAuth();
+
+    setService(
+        state.activeService
+    );
+
+    setPaymentMethod(
+        state.paymentMethod
+    );
+
+    await loadFareSettings();
+
+    updateFareUI();
+
+    if (
+        state.currentRideId
+    ) {
+
+        startRideStatusListener(
+            state.currentRideId
+        );
+
+    }
+
+    console.log(
+        "RiderX Booking Engine ready."
+    );
+
+}
+
+/* ============================================================
+   AUTO INIT
+   ============================================================ */
 
 if (
     document.readyState ===
@@ -1268,15 +1520,11 @@ if (
 
     document.addEventListener(
         "DOMContentLoaded",
-        () => {
-
-            initBookingModule();
-
-        }
+        initBookingModule
     );
 
 } else {
 
     initBookingModule();
 
-}
+    }
