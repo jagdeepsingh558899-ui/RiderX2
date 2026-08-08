@@ -1,1139 +1,1102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#050505">
 <title>RiderX Admin Dashboard</title>
 
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-
 :root{
-    --yellow:#FFE500;
-    --black:#050505;
-    --card:#111;
-    --border:#292929;
-    --gray:#999;
-    --green:#19d36b;
-    --red:#ff4444;
+  --yellow:#FFE500;
+  --black:#050505;
+  --card:#111;
+  --card2:#181818;
+  --border:#292929;
+  --gray:#9b9b9b;
+  --green:#19d36b;
+  --red:#ff4d4d;
 }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 
 body{
-    background:var(--black);
-    color:white;
-    min-height:100vh;
-    padding-bottom:50px;
+  background:var(--black);
+  color:#fff;
+  min-height:100vh;
+  padding-bottom:40px;
 }
 
-/* HEADER */
+button{font:inherit}
 
 .header{
-    height:70px;
-    background:#111;
-    border-bottom:1px solid #222;
-
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:0 20px;
-
-    position:sticky;
-    top:0;
-    z-index:100;
+  height:70px;
+  background:#111;
+  border-bottom:1px solid #242424;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  position:sticky;
+  top:0;
+  z-index:50;
 }
 
-.logo{
-    font-size:28px;
-    font-weight:900;
-}
+.logo{font-size:28px;font-weight:900;letter-spacing:-1px}
+.logo span{color:var(--yellow)}
 
-.logo span{
-    color:var(--yellow);
-}
-
-.header-right{
-    display:flex;
-    align-items:center;
-    gap:18px;
-}
+.header-right{display:flex;align-items:center;gap:14px}
 
 .admin-badge{
-    font-size:12px;
-    background:#1c1c1c;
-    border:1px solid #333;
-    padding:7px 10px;
-    border-radius:20px;
-    color:var(--yellow);
+  font-size:12px;
+  background:#1c1c1c;
+  border:1px solid #333;
+  padding:7px 11px;
+  border-radius:20px;
+  color:var(--yellow);
 }
 
 .logout{
-    font-size:22px;
-    color:var(--red);
-    cursor:pointer;
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:12px;
+  background:#1b1010;
+  color:var(--red);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
 }
 
-/* CONTAINER */
+.container{max-width:1200px;margin:auto;padding:20px}
 
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:20px;
-}
-
-.welcome{
-    font-size:28px;
-    font-weight:bold;
-    margin-bottom:6px;
-}
-
-.subtitle{
-    color:var(--gray);
-    font-size:14px;
-    margin-bottom:20px;
-}
-
-/* STATUS */
+.welcome{font-size:28px;font-weight:800;margin-bottom:6px}
+.subtitle{color:var(--gray);font-size:14px;margin-bottom:18px}
 
 .status{
-    background:#101010;
-    border:1px solid #252525;
-    border-radius:14px;
-    padding:12px 15px;
-    margin-bottom:20px;
-
-    display:flex;
-    align-items:center;
-    gap:10px;
+  background:#101010;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px 15px;
+  margin-bottom:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
 .status-dot{
-    width:9px;
-    height:9px;
-    border-radius:50%;
-    background:var(--yellow);
+  width:9px;height:9px;border-radius:50%;
+  background:var(--yellow);flex:none;
 }
 
-.status.success .status-dot{
-    background:var(--green);
-}
-
-.status.error .status-dot{
-    background:var(--red);
-}
-
-.status-text{
-    color:#ccc;
-}
-
-/* ERROR */
+.status.success .status-dot{background:var(--green)}
+.status.error .status-dot{background:var(--red)}
+.status-text{color:#ccc;font-size:14px}
 
 .error{
-    display:none;
-    background:#210d0d;
-    border:1px solid #662222;
-    color:#ff7777;
-    padding:14px;
-    border-radius:12px;
-    margin-bottom:18px;
-    font-size:14px;
-    line-height:1.5;
+  display:none;
+  background:#210d0d;
+  border:1px solid #662222;
+  color:#ff8585;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:18px;
+  font-size:14px;
+  line-height:1.5;
 }
 
-/* STATISTICS */
+.refresh-row{
+  display:flex;
+  justify-content:flex-end;
+  margin:-4px 0 14px;
+}
+
+.refresh-btn{
+  border:1px solid #333;
+  background:#111;
+  color:#fff;
+  border-radius:11px;
+  padding:9px 13px;
+  cursor:pointer;
+}
+
+.refresh-btn i{color:var(--yellow);margin-right:6px}
 
 .grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
 }
 
 .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:18px;
-    min-height:125px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:17px;
+  min-height:120px;
 }
 
-.card i{
-    font-size:24px;
-    color:var(--yellow);
-}
+.card i{font-size:23px;color:var(--yellow)}
+.number{font-size:28px;font-weight:800;margin-top:12px;word-break:break-word}
+.title{font-size:13px;color:var(--gray);margin-top:5px}
 
-.number{
-    font-size:29px;
-    font-weight:bold;
-    margin-top:12px;
-}
-
-.title{
-    font-size:13px;
-    color:var(--gray);
-    margin-top:5px;
-}
-
-/* MANAGEMENT */
-
-.menu{
-    margin-top:30px;
-}
-
-.menu-title{
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:12px;
-}
+.section{margin-top:30px}
+.section-title{font-size:20px;font-weight:800;margin-bottom:12px}
 
 .menu-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
 
-.menu button{
-    width:100%;
-    padding:17px;
-
-    background:#111;
-    border:1px solid #333;
-    border-radius:15px;
-
-    color:white;
-    font-size:16px;
-    text-align:left;
-
-    cursor:pointer;
+.menu-grid button{
+  width:100%;
+  padding:16px;
+  background:#111;
+  border:1px solid #333;
+  border-radius:15px;
+  color:#fff;
+  font-size:16px;
+  text-align:left;
+  cursor:pointer;
 }
 
-.menu button:hover{
-    border-color:var(--yellow);
+.menu-grid button:hover{border-color:var(--yellow);background:#171717}
+.menu-grid button:active{transform:scale(.985)}
+.menu-grid i{width:34px;color:var(--yellow)}
+
+.transactions{
+  overflow-x:auto;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#111;
 }
 
-.menu i{
-    width:35px;
-    color:var(--yellow);
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{padding:13px 14px;text-align:left;border-bottom:1px solid #292929}
+th{background:#242424;color:var(--yellow);font-size:14px}
+td{font-size:14px;color:#ddd}
+tr:last-child td{border-bottom:0}
+
+.badge{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:20px;
+  font-size:12px;
+  background:#2a2a2a;
+  color:#ddd;
 }
 
-/* FOOTER */
+.badge.success{background:#0e3522;color:#57e991}
+.badge.warning{background:#3b3208;color:#ffe45a}
+.badge.danger{background:#3a1010;color:#ff7777}
 
-.footer{
-    text-align:center;
-    color:#666;
-    font-size:12px;
-    margin-top:35px;
+.empty{text-align:center;color:#888;padding:20px}
+
+.footer{text-align:center;color:#666;font-size:12px;margin-top:30px}
+
+@media(max-width:1000px){
+  .grid{grid-template-columns:repeat(3,1fr)}
 }
 
-/* MOBILE */
-
-@media(max-width:900px){
-
-    .grid{
-        grid-template-columns:repeat(2,1fr);
-    }
-
+@media(max-width:700px){
+  .header{padding:0 14px}
+  .logo{font-size:24px}
+  .admin-badge{display:none}
+  .container{padding:15px}
+  .welcome{font-size:25px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .card{padding:15px;min-height:108px}
+  .number{font-size:23px}
+  .menu-grid{grid-template-columns:1fr}
 }
 
-@media(max-width:600px){
-
-    .header{
-        padding:0 15px;
-    }
-
-    .logo{
-        font-size:24px;
-    }
-
-    .admin-badge{
-        display:none;
-    }
-
-    .container{
-        padding:15px;
-    }
-
-    .welcome{
-        font-size:25px;
-    }
-
-    .grid{
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-    }
-
-    .card{
-        padding:15px;
-        min-height:110px;
-    }
-
-    .number{
-        font-size:23px;
-    }
-
-    .menu-grid{
-        grid-template-columns:1fr;
-    }
-
+@media(max-width:360px){
+  .number{font-size:21px}
+  .title{font-size:12px}
 }
-
 </style>
-
 </head>
 
 <body>
 
 <header class="header">
+  <div class="logo">RID<span>ERX</span></div>
 
-    <div class="logo">
-        RID<span>ERX</span>
+  <div class="header-right">
+    <div class="admin-badge">
+      <i class="fa-solid fa-shield-halved"></i> ADMIN
     </div>
-
-    <div class="header-right">
-
-        <div class="admin-badge">
-            <i class="fa-solid fa-shield-halved"></i>
-            ADMIN
-        </div>
-
-        <i
-            id="logoutBtn"
-            class="fa-solid fa-right-from-bracket logout"
-            title="Logout">
-        </i>
-
-    </div>
-
+    <button id="logoutBtn" class="logout" type="button" aria-label="Logout" title="Logout">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+  </div>
 </header>
 
+<main class="container">
 
-<div class="container">
+  <div class="welcome">Admin Dashboard</div>
+  <div class="subtitle">RiderX management & statistics</div>
 
-    <div class="welcome">
-        Admin Dashboard
+  <div id="statusBox" class="status">
+    <div class="status-dot"></div>
+    <div id="statusText" class="status-text">Checking admin access...</div>
+  </div>
+
+  <div id="errorBox" class="error"></div>
+
+  <div class="refresh-row">
+    <button id="refreshBtn" class="refresh-btn" type="button">
+      <i class="fa-solid fa-rotate"></i> Refresh
+    </button>
+  </div>
+
+  <section class="grid">
+
+    <div class="card">
+      <i class="fa-solid fa-users"></i>
+      <div id="customers" class="number">0</div>
+      <div class="title">Customers</div>
     </div>
 
-    <div class="subtitle">
-        RiderX management & statistics
+    <div class="card">
+      <i class="fa-solid fa-motorcycle"></i>
+      <div id="riders" class="number">0</div>
+      <div class="title">Riders</div>
     </div>
 
-
-    <!-- STATUS -->
-
-    <div id="statusBox" class="status">
-
-        <div class="status-dot"></div>
-
-        <div id="statusText" class="status-text">
-            Checking admin access...
-        </div>
-
+    <div class="card">
+      <i class="fa-solid fa-clock"></i>
+      <div id="pending" class="number">0</div>
+      <div class="title">Pending Riders</div>
     </div>
 
-
-    <!-- ERROR -->
-
-    <div id="errorBox" class="error"></div>
-
-
-    <!-- STATISTICS -->
-
-    <div class="grid">
-
-        <div class="card">
-            <i class="fa-solid fa-users"></i>
-            <div id="customers" class="number">0</div>
-            <div class="title">Customers</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-motorcycle"></i>
-            <div id="riders" class="number">0</div>
-            <div class="title">Riders</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-clock"></i>
-            <div id="pending" class="number">0</div>
-            <div class="title">Pending Riders</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-signal"></i>
-            <div id="online" class="number">0</div>
-            <div class="title">Online Riders</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-route"></i>
-            <div id="rides" class="number">0</div>
-            <div class="title">Total Rides</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-spinner"></i>
-            <div id="active" class="number">0</div>
-            <div class="title">Active Rides</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-circle-check"></i>
-            <div id="completed" class="number">0</div>
-            <div class="title">Completed</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-xmark"></i>
-            <div id="cancelled" class="number">0</div>
-            <div class="title">Cancelled</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-indian-rupee-sign"></i>
-            <div id="revenue" class="number">₹0</div>
-            <div class="title">Revenue</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-calendar-day"></i>
-            <div id="todayRevenue" class="number">₹0</div>
-            <div class="title">Today Revenue</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-percent"></i>
-            <div id="commission" class="number">₹0</div>
-            <div class="title">Admin Commission</div>
-        </div>
-
-        <div class="card">
-            <i class="fa-solid fa-wallet"></i>
-            <div id="riderEarn" class="number">₹0</div>
-            <div class="title">Rider Earnings</div>
-        </div>
-
+    <div class="card">
+      <i class="fa-solid fa-signal"></i>
+      <div id="online" class="number">0</div>
+      <div class="title">Online Riders</div>
     </div>
 
-
-    <!-- MANAGEMENT -->
-
-    <div class="menu">
-
-        <div class="menu-title">
-            Management
-        </div>
-
-        <div class="menu-grid">
-
-            <button onclick="openPage('riders.html')">
-                <i class="fa-solid fa-motorcycle"></i>
-                Manage Riders
-            </button>
-
-            <button onclick="openPage('customers.html')">
-                <i class="fa-solid fa-users"></i>
-                Manage Customers
-            </button>
-
-            <button onclick="openPage('rides.html')">
-                <i class="fa-solid fa-route"></i>
-                Manage Rides
-            </button>
-
-            <button onclick="openPage('fare-settings.html')">
-                <i class="fa-solid fa-money-bill"></i>
-                Fare Settings
-            </button>
-
-            <button onclick="openPage('commission.html')">
-                <i class="fa-solid fa-percent"></i>
-                Commission Settings
-            </button>
-
-            <button onclick="openPage('settings.html')">
-                <i class="fa-solid fa-gear"></i>
-                App Settings
-            </button>
-
-            <button onclick="openPage('rider-approval.html')">
-                <i class="fa-solid fa-user-check"></i>
-                Rider Approval
-            </button>
-
-            <button onclick="openPage('supports.html')">
-                <i class="fa-solid fa-headset"></i>
-                Support
-            </button>
-
-        </div>
-
+    <div class="card">
+      <i class="fa-solid fa-route"></i>
+      <div id="rides" class="number">0</div>
+      <div class="title">Total Rides</div>
     </div>
 
-
-    <div class="footer">
-        RiderX Admin Panel
+    <div class="card">
+      <i class="fa-solid fa-spinner"></i>
+      <div id="active" class="number">0</div>
+      <div class="title">Active Rides</div>
     </div>
 
-</div>
+    <div class="card">
+      <i class="fa-solid fa-circle-check"></i>
+      <div id="completed" class="number">0</div>
+      <div class="title">Completed</div>
+    </div>
 
+    <div class="card">
+      <i class="fa-solid fa-xmark"></i>
+      <div id="cancelled" class="number">0</div>
+      <div class="title">Cancelled</div>
+    </div>
+
+    <div class="card">
+      <i class="fa-solid fa-indian-rupee-sign"></i>
+      <div id="revenue" class="number">₹0</div>
+      <div class="title">Revenue</div>
+    </div>
+
+    <div class="card">
+      <i class="fa-solid fa-calendar-day"></i>
+      <div id="todayRevenue" class="number">₹0</div>
+      <div class="title">Today Revenue</div>
+    </div>
+
+    <div class="card">
+      <i class="fa-solid fa-percent"></i>
+      <div id="commission" class="number">₹0</div>
+      <div class="title">Admin Commission</div>
+    </div>
+
+    <div class="card">
+      <i class="fa-solid fa-wallet"></i>
+      <div id="riderEarn" class="number">₹0</div>
+      <div class="title">Rider Earnings</div>
+    </div>
+
+  </section>
+
+  <section class="section">
+    <div class="section-title">Management</div>
+
+    <div class="menu-grid">
+
+      <button type="button" onclick="openPage('riders.html')">
+        <i class="fa-solid fa-motorcycle"></i> Manage Riders
+      </button>
+
+      <button type="button" onclick="openPage('customers.html')">
+        <i class="fa-solid fa-users"></i> Manage Customers
+      </button>
+
+      <button type="button" onclick="openPage('rides.html')">
+        <i class="fa-solid fa-route"></i> Manage Rides
+      </button>
+
+      <button type="button" onclick="openPage('fare-settings.html')">
+        <i class="fa-solid fa-money-bill"></i> Fare Settings
+      </button>
+
+      <button type="button" onclick="openPage('commission.html')">
+        <i class="fa-solid fa-percent"></i> Commission Settings
+      </button>
+
+      <button type="button" onclick="openPage('settings.html')">
+        <i class="fa-solid fa-gear"></i> App Settings
+      </button>
+
+      <button type="button" onclick="openPage('rider-approval.html')">
+        <i class="fa-solid fa-user-check"></i> Rider Approval
+      </button>
+
+      <button type="button" onclick="openPage('supports.html')">
+        <i class="fa-solid fa-headset"></i> Support
+      </button>
+
+      <button type="button" onclick="openPage('reports.html')">
+        <i class="fa-solid fa-chart-column"></i> Reports
+      </button>
+
+      <button type="button" onclick="openPage('payments.html')">
+        <i class="fa-solid fa-credit-card"></i> Payments
+      </button>
+
+      <button type="button" onclick="openPage('offers.html')">
+        <i class="fa-solid fa-tags"></i> Offers
+      </button>
+
+      <button type="button" onclick="openPage('coupons.html')">
+        <i class="fa-solid fa-ticket"></i> Coupons
+      </button>
+
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title">Recent Transactions</div>
+
+    <div class="transactions">
+      <table>
+        <thead>
+          <tr>
+            <th>Ride ID</th>
+            <th>Service</th>
+            <th>Fare</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="ridesTableBody">
+          <tr><td colspan="5" class="empty">Loading system data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="footer">RiderX Admin Panel</div>
+
+</main>
 
 <script type="module">
 
-import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
+import { auth, db } from "../firebase/firebase-config.js";
 
 import {
-    onAuthStateChanged,
-    signOut
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 import {
-    collection,
-    getDocs,
-    doc,
-    getDoc
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  limit,
+  orderBy,
+  query
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-const statusBox =
-    document.getElementById("statusBox");
+const $ = id => document.getElementById(id);
 
-const statusText =
-    document.getElementById("statusText");
-
-const errorBox =
-    document.getElementById("errorBox");
-
-const logoutBtn =
-    document.getElementById("logoutBtn");
+const statusBox = $("statusBox");
+const statusText = $("statusText");
+const errorBox = $("errorBox");
+const ridesTableBody = $("ridesTableBody");
 
 
-const customersEl =
-    document.getElementById("customers");
-
-const ridersEl =
-    document.getElementById("riders");
-
-const pendingEl =
-    document.getElementById("pending");
-
-const onlineEl =
-    document.getElementById("online");
-
-const ridesEl =
-    document.getElementById("rides");
-
-const activeEl =
-    document.getElementById("active");
-
-const completedEl =
-    document.getElementById("completed");
-
-const cancelledEl =
-    document.getElementById("cancelled");
-
-const revenueEl =
-    document.getElementById("revenue");
-
-const todayRevenueEl =
-    document.getElementById("todayRevenue");
-
-const commissionEl =
-    document.getElementById("commission");
-
-const riderEarnEl =
-    document.getElementById("riderEarn");
-
-
-function setStatus(text,type=""){
-
-    statusText.textContent = text;
-
-    statusBox.className =
-        "status " + type;
+function setStatus(text, type = ""){
+  statusText.textContent = text;
+  statusBox.className = "status " + type;
 }
 
 
 function showError(text){
-
-    errorBox.style.display = "block";
-
-    errorBox.textContent = text;
+  errorBox.style.display = "block";
+  errorBox.textContent = text;
 }
 
 
 function hideError(){
-
-    errorBox.style.display = "none";
+  errorBox.style.display = "none";
 }
 
 
 function money(value){
-
-    return "₹" +
-        (Number(value) || 0)
-        .toLocaleString("en-IN");
+  return "₹" + (Number(value) || 0).toLocaleString("en-IN");
 }
 
 
 function roleOf(data){
-
-    return String(
-        data?.role ??
-        data?.userType ??
-        data?.type ??
-        ""
-    ).trim().toLowerCase();
+  return String(
+    data?.role ??
+    data?.userType ??
+    data?.type ??
+    ""
+  ).trim().toLowerCase();
 }
 
 
-function isAdmin(data){
+function isAdminProfile(data){
+  if(!data) return false;
 
-    return (
-        roleOf(data) === "admin" ||
-        roleOf(data) === "administrator" ||
-        data?.isAdmin === true
-    );
+  const role = roleOf(data);
+
+  return (
+    role === "admin" ||
+    role === "administrator" ||
+    data.isAdmin === true ||
+    data.admin === true
+  );
 }
 
 
-function statusOf(data){
+async function hasAdminAccess(user){
 
-    return String(
-        data?.status ??
-        data?.rideStatus ??
-        ""
-    ).trim().toLowerCase();
-}
+  /*
+    Supports all of these common RiderX admin setups:
+    1. users/{uid} with role: "admin"
+    2. admins/{uid}
+    3. Firebase custom claim admin: true
+  */
+
+  try{
+    const token = await user.getIdTokenResult();
+    const claims = token.claims || {};
+
+    if(
+      claims.admin === true ||
+      claims.isAdmin === true ||
+      String(claims.role || "").toLowerCase() === "admin"
+    ){
+      return true;
+    }
+  }catch(error){
+    console.warn("Custom claims check failed:", error);
+  }
 
 
-function amountOf(data){
+  try{
+    const userSnap = await getDoc(doc(db, "users", user.uid));
 
-    return Number(
-        data?.fare ??
-        data?.amount ??
-        data?.price ??
-        data?.totalFare ??
-        data?.totalAmount ??
-        0
-    ) || 0;
+    if(userSnap.exists() && isAdminProfile(userSnap.data())){
+      return true;
+    }
+  }catch(error){
+    console.warn("users admin check failed:", error);
+  }
+
+
+  try{
+    const adminSnap = await getDoc(doc(db, "admins", user.uid));
+
+    if(adminSnap.exists()){
+      const data = adminSnap.data();
+
+      if(
+        Object.keys(data).length === 0 ||
+        isAdminProfile(data) ||
+        data.active !== false
+      ){
+        return true;
+      }
+    }
+  }catch(error){
+    console.warn("admins collection check failed:", error);
+  }
+
+
+  return false;
 }
 
 
 function convertDate(value){
 
-    if(!value){
-        return null;
+  if(!value) return null;
+
+  try{
+    if(
+      typeof value === "object" &&
+      typeof value.toDate === "function"
+    ){
+      return value.toDate();
     }
 
-    try{
-
-        if(
-            typeof value === "object" &&
-            typeof value.toDate === "function"
-        ){
-
-            return value.toDate();
-        }
-
-        if(
-            typeof value === "object" &&
-            typeof value.seconds === "number"
-        ){
-
-            return new Date(
-                value.seconds * 1000
-            );
-        }
-
-        const date = new Date(value);
-
-        if(Number.isNaN(date.getTime())){
-            return null;
-        }
-
-        return date;
-
-    }catch(error){
-
-        return null;
+    if(
+      typeof value === "object" &&
+      typeof value.seconds === "number"
+    ){
+      return new Date(value.seconds * 1000);
     }
+
+    const date = new Date(value);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+
+  }catch(error){
+    return null;
+  }
+}
+
+
+function dateValue(data){
+  return (
+    data?.createdAt ??
+    data?.timestamp ??
+    data?.date ??
+    data?.createdDate ??
+    data?.updatedAt ??
+    null
+  );
+}
+
+
+function formatDate(data){
+  const date = convertDate(dateValue(data));
+
+  if(!date) return "—";
+
+  return date.toLocaleDateString("en-IN", {
+    day:"2-digit",
+    month:"short",
+    year:"numeric"
+  });
 }
 
 
 function isToday(data){
 
-    const value =
-        data?.createdAt ??
-        data?.timestamp ??
-        data?.date ??
-        data?.createdDate ??
-        null;
+  const date = convertDate(dateValue(data));
 
-    const date =
-        convertDate(value);
+  if(!date) return false;
 
-    if(!date){
-        return false;
-    }
+  const now = new Date();
 
-    const now =
-        new Date();
-
-    return (
-        date.getDate() === now.getDate() &&
-        date.getMonth() === now.getMonth() &&
-        date.getFullYear() === now.getFullYear()
-    );
+  return (
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  );
 }
 
 
-async function safeCollection(name){
+function statusOf(data){
+  return String(
+    data?.status ??
+    data?.rideStatus ??
+    ""
+  ).trim().toLowerCase();
+}
+
+
+function amountOf(data){
+
+  const value =
+    data?.fare ??
+    data?.amount ??
+    data?.price ??
+    data?.totalFare ??
+    data?.totalAmount ??
+    data?.estimatedFare ??
+    0;
+
+  return Number(value) || 0;
+}
+
+
+function serviceOf(data){
+  return (
+    data?.serviceType ??
+    data?.service ??
+    data?.rideType ??
+    data?.type ??
+    "Bike Taxi"
+  );
+}
+
+
+function statusClass(status){
+
+  if([
+    "completed",
+    "complete",
+    "finished",
+    "success",
+    "accepted"
+  ].includes(status)){
+    return "success";
+  }
+
+  if([
+    "cancelled",
+    "canceled",
+    "rejected",
+    "failed"
+  ].includes(status)){
+    return "danger";
+  }
+
+  return "warning";
+}
+
+
+async function safeGetDocs(name){
+
+  try{
+    const snap = await getDocs(collection(db, name));
+
+    return snap.docs.map(item => ({
+      id:item.id,
+      ...item.data()
+    }));
+
+  }catch(error){
+    console.warn("Could not read collection:", name, error);
+    return [];
+  }
+}
+
+
+async function getRecentRides(){
+
+  try{
+    const q = query(
+      collection(db, "rides"),
+      orderBy("createdAt", "desc"),
+      limit(10)
+    );
+
+    const snap = await getDocs(q);
+
+    return snap.docs.map(item => ({
+      id:item.id,
+      ...item.data()
+    }));
+
+  }catch(error){
+    console.warn("Ordered rides query failed, using normal query:", error);
 
     try{
+      const snap = await getDocs(
+        query(collection(db, "rides"), limit(10))
+      );
 
-        const snapshot =
-            await getDocs(
-                collection(db,name)
-            );
+      return snap.docs.map(item => ({
+        id:item.id,
+        ...item.data()
+      }));
 
-        return snapshot.docs.map(
-            item => ({
-                id:item.id,
-                ...item.data()
-            })
-        );
-
-    }catch(error){
-
-        console.warn(
-            "Collection error:",
-            name,
-            error
-        );
-
-        return [];
+    }catch(secondError){
+      console.warn("Rides query failed:", secondError);
+      return [];
     }
+  }
+}
+
+
+function renderRecentRides(rides){
+
+  if(!rides.length){
+    ridesTableBody.innerHTML =
+      '<tr><td colspan="5" class="empty">No rides found.</td></tr>';
+    return;
+  }
+
+  ridesTableBody.innerHTML = rides.map(ride => {
+
+    const status = statusOf(ride) || "pending";
+    const safeStatus = status.replace(/</g, "&lt;");
+
+    return `
+      <tr>
+        <td>${String(ride.id).replace(/</g, "&lt;")}</td>
+        <td>${String(serviceOf(ride)).replace(/</g, "&lt;")}</td>
+        <td>${money(amountOf(ride))}</td>
+        <td>
+          <span class="badge ${statusClass(status)}">
+            ${safeStatus.toUpperCase()}
+          </span>
+        </td>
+        <td>${formatDate(ride)}</td>
+      </tr>
+    `;
+
+  }).join("");
 }
 
 
 async function loadStatistics(){
 
-    const users =
-        await safeCollection("users");
+  setStatus("Loading RiderX statistics...");
 
-    const ridersData =
-        await safeCollection("riders");
-
-    const rides =
-        await safeCollection("rides");
-
-
-    let customers = 0;
-    let riders = 0;
-    let pending = 0;
-    let online = 0;
+  const [users, ridersData, rides, recentRides] =
+    await Promise.all([
+      safeGetDocs("users"),
+      safeGetDocs("riders"),
+      safeGetDocs("rides"),
+      getRecentRides()
+    ]);
 
 
-    users.forEach(user => {
-
-        const role =
-            roleOf(user);
-
-        if(
-            role === "customer" ||
-            role === "user"
-        ){
-
-            customers++;
-        }
-
-        if(role === "rider"){
-
-            riders++;
-
-            const status =
-                String(
-                    user.status ??
-                    user.riderStatus ??
-                    ""
-                ).toLowerCase();
-
-            if(
-                status === "pending" ||
-                status === "pending_approval" ||
-                status === "pending-approval"
-            ){
-
-                pending++;
-            }
-
-            if(
-                user.online === true ||
-                user.isOnline === true ||
-                status === "online"
-            ){
-
-                online++;
-            }
-        }
-
-    });
+  let customers = 0;
+  let riders = 0;
+  let pending = 0;
+  let online = 0;
 
 
-    if(ridersData.length > 0){
+  users.forEach(user => {
 
-        riders =
-            ridersData.length;
+    const role = roleOf(user);
 
-        pending =
-            ridersData.filter(rider => {
+    if(role === "customer" || role === "user"){
+      customers++;
+    }
 
-                const status =
-                    String(
-                        rider.status ??
-                        rider.approvalStatus ??
-                        ""
-                    ).toLowerCase();
+    if(role === "rider"){
 
-                return (
-                    status === "pending" ||
-                    status === "pending_approval" ||
-                    status === "pending-approval"
-                );
+      riders++;
 
-            }).length;
+      const status = String(
+        user.status ??
+        user.riderStatus ??
+        user.approvalStatus ??
+        ""
+      ).toLowerCase();
+
+      if([
+        "pending",
+        "pending_approval",
+        "pending-approval"
+      ].includes(status)){
+        pending++;
+      }
+
+      if(
+        user.online === true ||
+        user.isOnline === true ||
+        status === "online"
+      ){
+        online++;
+      }
+    }
+  });
 
 
-        online =
-            ridersData.filter(rider => {
+  if(ridersData.length > 0){
 
-                const status =
-                    String(
-                        rider.status ?? ""
-                    ).toLowerCase();
+    riders = ridersData.length;
 
-                return (
-                    rider.online === true ||
-                    rider.isOnline === true ||
-                    status === "online"
-                );
+    pending = ridersData.filter(rider => {
 
-            }).length;
+      const status = String(
+        rider.status ??
+        rider.approvalStatus ??
+        ""
+      ).toLowerCase();
 
+      return [
+        "pending",
+        "pending_approval",
+        "pending-approval"
+      ].includes(status);
+
+    }).length;
+
+
+    online = ridersData.filter(rider => {
+
+      const status =
+        String(rider.status ?? "").toLowerCase();
+
+      return (
+        rider.online === true ||
+        rider.isOnline === true ||
+        status === "online"
+      );
+
+    }).length;
+  }
+
+
+  let active = 0;
+  let completed = 0;
+  let cancelled = 0;
+  let revenue = 0;
+  let todayRevenue = 0;
+
+
+  rides.forEach(ride => {
+
+    const status = statusOf(ride);
+    const amount = amountOf(ride);
+
+
+    if([
+      "accepted",
+      "ongoing",
+      "started",
+      "arriving",
+      "in_progress",
+      "in-progress",
+      "active",
+      "driver_arriving",
+      "rider_arriving"
+    ].includes(status)){
+      active++;
     }
 
 
-    let active = 0;
-    let completed = 0;
-    let cancelled = 0;
-    let revenue = 0;
-    let todayRevenue = 0;
+    if([
+      "completed",
+      "complete",
+      "finished",
+      "success"
+    ].includes(status)){
+
+      completed++;
+      revenue += amount;
+
+      if(isToday(ride)){
+        todayRevenue += amount;
+      }
+    }
 
 
-    rides.forEach(ride => {
-
-        const status =
-            statusOf(ride);
-
-        const amount =
-            amountOf(ride);
-
-
-        if([
-            "accepted",
-            "ongoing",
-            "started",
-            "arriving",
-            "in_progress",
-            "in-progress",
-            "active"
-        ].includes(status)){
-
-            active++;
-        }
+    if([
+      "cancelled",
+      "canceled",
+      "rejected",
+      "failed"
+    ].includes(status)){
+      cancelled++;
+    }
+  });
 
 
-        if([
-            "completed",
-            "complete",
-            "finished",
-            "success"
-        ].includes(status)){
+  $("customers").textContent =
+    customers.toLocaleString("en-IN");
 
-            completed++;
+  $("riders").textContent =
+    riders.toLocaleString("en-IN");
 
-            revenue += amount;
+  $("pending").textContent =
+    pending.toLocaleString("en-IN");
 
-            if(isToday(ride)){
+  $("online").textContent =
+    online.toLocaleString("en-IN");
 
-                todayRevenue += amount;
-            }
-        }
+  $("rides").textContent =
+    rides.length.toLocaleString("en-IN");
 
+  $("active").textContent =
+    active.toLocaleString("en-IN");
 
-        if([
-            "cancelled",
-            "canceled",
-            "rejected"
-        ].includes(status)){
+  $("completed").textContent =
+    completed.toLocaleString("en-IN");
 
-            cancelled++;
-        }
+  $("cancelled").textContent =
+    cancelled.toLocaleString("en-IN");
 
-    });
+  $("revenue").textContent =
+    money(revenue);
 
-
-    customersEl.textContent =
-        customers.toLocaleString("en-IN");
-
-    ridersEl.textContent =
-        riders.toLocaleString("en-IN");
-
-    pendingEl.textContent =
-        pending.toLocaleString("en-IN");
-
-    onlineEl.textContent =
-        online.toLocaleString("en-IN");
-
-    ridesEl.textContent =
-        rides.length.toLocaleString("en-IN");
-
-    activeEl.textContent =
-        active.toLocaleString("en-IN");
-
-    completedEl.textContent =
-        completed.toLocaleString("en-IN");
-
-    cancelledEl.textContent =
-        cancelled.toLocaleString("en-IN");
-
-    revenueEl.textContent =
-        money(revenue);
-
-    todayRevenueEl.textContent =
-        money(todayRevenue);
+  $("todayRevenue").textContent =
+    money(todayRevenue);
 
 
-    const commissionRate = 20;
+  /*
+    Default RiderX commission.
+    Change this later in the commission settings page.
+  */
+  const commissionRate = 20;
 
-    const adminCommission =
-        revenue * commissionRate / 100;
+  const adminCommission =
+    revenue * commissionRate / 100;
 
-    const riderEarnings =
-        revenue - adminCommission;
+  const riderEarnings =
+    revenue - adminCommission;
 
-    commissionEl.textContent =
-        money(adminCommission);
+  $("commission").textContent =
+    money(adminCommission);
 
-    riderEarnEl.textContent =
-        money(riderEarnings);
+  $("riderEarn").textContent =
+    money(riderEarnings);
 
+
+  renderRecentRides(recentRides);
+
+  setStatus(
+    "Admin verified • Dashboard ready",
+    "success"
+  );
 }
 
 
-let authCheckFinished = false;
+async function startDashboard(user){
+
+  hideError();
+
+  setStatus("Verifying admin account...");
 
 
-onAuthStateChanged(
-    auth,
-    async user => {
-
-        if(authCheckFinished){
-            return;
-        }
+  const allowed =
+    await hasAdminAccess(user);
 
 
-        if(!user){
+  if(!allowed){
 
-            authCheckFinished = true;
+    setStatus(
+      "Access denied.",
+      "error"
+    );
 
-            setStatus(
-                "Admin login required.",
-                "error"
-            );
+    showError(
+      "Is Firebase account ko admin access nahi mila. users/{UID} me role = admin, ya admins/{UID} document, ya Firebase custom claim admin = true hona chahiye."
+    );
 
-            setTimeout(() => {
-
-                window.location.replace(
-                    "login.html"
-                );
-
-            },500);
-
-            return;
-        }
+    return;
+  }
 
 
-        setStatus(
-            "Verifying admin account..."
-        );
+  try{
+
+    await loadStatistics();
+
+  }catch(error){
+
+    console.error("Dashboard load error:", error);
+
+    /*
+      Important:
+      Admin dashboard remains usable even if a Firestore
+      collection is blocked by security rules.
+    */
+
+    setStatus(
+      "Admin verified • Some data unavailable",
+      "success"
+    );
+
+    showError(
+      "Admin login successful hai, lekin kuch Firestore collections read nahi ho pa rahi hain. Firestore rules/collection permissions check karein."
+    );
+  }
+}
 
 
-        try{
+let authResolved = false;
 
-            const adminRef =
-                doc(
-                    db,
-                    "users",
-                    user.uid
-                );
+onAuthStateChanged(auth, async user => {
 
-            const adminSnap =
-                await getDoc(adminRef);
+  if(authResolved) return;
 
-
-            if(!adminSnap.exists()){
-
-                authCheckFinished = true;
-
-                setStatus(
-                    "Admin profile not found.",
-                    "error"
-                );
-
-                showError(
-                    "Firebase users collection me is account ke UID ka document nahi mila."
-                );
-
-                return;
-            }
+  /*
+    Firebase session is now resolved.
+  */
+  authResolved = true;
 
 
-            const adminData =
-                adminSnap.data();
+  if(!user){
+
+    setStatus(
+      "Admin login required.",
+      "error"
+    );
+
+    setTimeout(() => {
+      window.location.replace("login.html");
+    }, 700);
+
+    return;
+  }
 
 
-            if(!isAdmin(adminData)){
-
-                authCheckFinished = true;
-
-                setStatus(
-                    "Access denied.",
-                    "error"
-                );
-
-                showError(
-                    "Is account ke users document me role = admin hona chahiye."
-                );
-
-                await signOut(auth);
-
-                setTimeout(() => {
-
-                    window.location.replace(
-                        "login.html"
-                    );
-
-                },1500);
-
-                return;
-            }
+  await startDashboard(user);
+});
 
 
-            authCheckFinished = true;
+$("refreshBtn").addEventListener("click", async () => {
 
-            setStatus(
-                "Admin verified • Dashboard ready",
-                "success"
-            );
+  try{
 
-            hideError();
+    const user = auth.currentUser;
 
-
-            try{
-
-                await loadStatistics();
-
-            }catch(error){
-
-                console.error(error);
-
-                showError(
-                    "Dashboard open ho gaya hai, lekin Firebase statistics load nahi ho paayi."
-                );
-            }
-
-
-        }catch(error){
-
-            console.error(
-                "Admin verification error:",
-                error
-            );
-
-            authCheckFinished = true;
-
-            setStatus(
-                "Admin verification failed.",
-                "error"
-            );
-
-            showError(
-                "Firebase admin verification failed. firebase-config.js aur Firestore rules check karein."
-            );
-
-        }
-
+    if(!user){
+      window.location.replace("login.html");
+      return;
     }
-);
+
+    await startDashboard(user);
+
+  }catch(error){
+
+    console.error(error);
+
+    showError(
+      "Refresh failed. Please try again."
+    );
+  }
+});
 
 
-window.openPage =
-function(page){
+$("logoutBtn").addEventListener("click", async () => {
 
-    window.location.href =
-        page;
+  if(!confirm("Are you sure you want to logout?")){
+    return;
+  }
 
+  try{
+
+    await signOut(auth);
+
+    window.location.replace("login.html");
+
+  }catch(error){
+
+    console.error("Logout error:", error);
+
+    alert("Logout failed. Please try again.");
+  }
+});
+
+
+window.openPage = function(page){
+  window.location.href = page;
 };
-
-
-logoutBtn.addEventListener(
-    "click",
-    async () => {
-
-        if(
-            !confirm(
-                "Are you sure you want to logout?"
-            )
-        ){
-
-            return;
-        }
-
-        try{
-
-            await signOut(auth);
-
-            window.location.replace(
-                "login.html"
-            );
-
-        }catch(error){
-
-            console.error(error);
-
-            alert(
-                "Logout failed. Please try again."
-            );
-        }
-
-    }
-);
 
 </script>
 
