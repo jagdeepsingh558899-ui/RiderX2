@@ -1,225 +1,1225 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  >
 
-<meta charset="UTF-8">
+  <meta name="theme-color" content="#FFD000">
+  <title>RiderX - Rider Menu</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/Style.css">
+  <link rel="stylesheet" href="../css/Responsive.css">
 
-<title>RiderX Menu</title>
+  <style>
+    :root {
+      --yellow: #ffd000;
+      --yellow-dark: #e6b900;
+      --black: #080808;
+      --dark: #111111;
+      --card: #171717;
+      --card2: #202020;
+      --text: #ffffff;
+      --muted: #9b9b9b;
+      --border: rgba(255,255,255,.08);
+      --danger: #ff4d4d;
+      --green: #31d158;
+    }
 
-<link rel="stylesheet" href="../css/style.css">
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      background: var(--black);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
 
-<style>
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-body{
+    button,
+    a {
+      font: inherit;
+    }
 
-background:#000;
-color:white;
-font-family:Arial;
+    button {
+      border: 0;
+      outline: 0;
+    }
 
-}
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
+    .page {
+      width: 100%;
+      min-height: 100vh;
+      padding-bottom: 30px;
+      background:
+        radial-gradient(circle at 90% 0%, rgba(255,208,0,.12), transparent 28%),
+        var(--black);
+    }
 
-.header{
+    /* HEADER */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 68px;
+      padding: 12px 16px;
+      background: rgba(8,8,8,.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+    }
 
-background:#111;
-padding:20px;
-text-align:center;
-font-size:26px;
-font-weight:bold;
-border-bottom:2px solid #FFD600;
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-}
+    .back-btn {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--card);
+      color: #fff;
+      cursor: pointer;
+      font-size: 22px;
+    }
 
+    .back-btn:active {
+      transform: scale(.94);
+    }
 
-.container{
+    .header-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
 
-padding:20px;
+    .header-subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+    }
 
-}
+    .brand {
+      color: var(--yellow);
+      font-weight: 900;
+      letter-spacing: .5px;
+    }
 
+    /* PROFILE */
+    .profile-card {
+      margin: 18px 16px 12px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background:
+        linear-gradient(145deg, rgba(255,208,0,.12), transparent 55%),
+        var(--card);
+      box-shadow: 0 10px 35px rgba(0,0,0,.25);
+    }
 
+    .profile-main {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
 
-.menu-card{
+    .avatar {
+      width: 64px;
+      height: 64px;
+      flex: 0 0 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--yellow);
+      color: #000;
+      font-size: 25px;
+      font-weight: 900;
+      border: 3px solid rgba(255,255,255,.12);
+    }
 
-background:#111;
-padding:18px;
-margin-top:15px;
-border-radius:15px;
-border-left:4px solid #FFD600;
-font-size:18px;
-cursor:pointer;
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
 
-}
+    .profile-info {
+      min-width: 0;
+      flex: 1;
+    }
 
+    .profile-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 18px;
+      font-weight: 800;
+    }
 
+    .profile-phone {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }
 
-.menu-card:hover{
+    .verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 5px 9px;
+      border-radius: 20px;
+      background: rgba(49,209,88,.12);
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 700;
+    }
 
-background:#222;
+    .profile-arrow {
+      color: var(--muted);
+      font-size: 23px;
+    }
 
-}
+    /* ONLINE STATUS */
+    .status-card {
+      margin: 12px 16px;
+      padding: 15px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card);
+    }
 
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
 
+    .status-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #777;
+      box-shadow: 0 0 0 5px rgba(255,255,255,.04);
+    }
 
-.logout{
+    .status-dot.online {
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(49,209,88,.10);
+    }
 
-background:#ff3333;
+    .status-title {
+      font-size: 14px;
+      font-weight: 800;
+    }
 
-}
+    .status-text {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
 
+    .status-btn {
+      min-width: 82px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      background: var(--yellow);
+      color: #000;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
 
+    .status-btn.offline {
+      background: var(--card2);
+      color: #fff;
+      border: 1px solid var(--border);
+    }
 
-.logo{
+    /* SECTION */
+    .section {
+      margin: 22px 16px 0;
+    }
 
-color:#FFD600;
+    .section-title {
+      margin-bottom: 10px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+    }
 
-}
+    /* MENU */
+    .menu-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card);
+    }
 
-</style>
+    .menu-item {
+      width: 100%;
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 11px 15px;
+      background: transparent;
+      color: #fff;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      text-align: left;
+    }
 
+    .menu-item:last-child {
+      border-bottom: 0;
+    }
 
+    .menu-item:active {
+      background: rgba(255,255,255,.05);
+    }
+
+    .menu-icon {
+      width: 39px;
+      height: 39px;
+      flex: 0 0 39px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: #242424;
+      font-size: 18px;
+    }
+
+    .menu-content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .menu-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .menu-description {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .menu-arrow {
+      color: #777;
+      font-size: 21px;
+    }
+
+    .badge {
+      min-width: 21px;
+      height: 21px;
+      padding: 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      background: var(--yellow);
+      color: #000;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    /* EARNINGS */
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .quick-card {
+      min-height: 94px;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: var(--card);
+    }
+
+    .quick-icon {
+      font-size: 19px;
+    }
+
+    .quick-label {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .quick-value {
+      margin-top: 4px;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    /* LOGOUT */
+    .logout-btn {
+      width: 100%;
+      min-height: 55px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid rgba(255,77,77,.22);
+      border-radius: 16px;
+      background: rgba(255,77,77,.07);
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .logout-btn:active {
+      transform: scale(.985);
+    }
+
+    .version {
+      padding: 24px 0 8px;
+      text-align: center;
+      color: #555;
+      font-size: 10px;
+    }
+
+    /* LOADING */
+    .loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(5px);
+    }
+
+    .loading-box {
+      width: 110px;
+      padding: 20px 12px;
+      border-radius: 18px;
+      background: #171717;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 30px;
+      height: 30px;
+      margin: 0 auto 10px;
+      border: 3px solid rgba(255,255,255,.15);
+      border-top-color: var(--yellow);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    .loading-text {
+      color: #aaa;
+      font-size: 11px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 20px;
+      z-index: 10000;
+      padding: 14px 16px;
+      display: none;
+      border-radius: 14px;
+      background: #242424;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    @media (min-width: 700px) {
+      .page {
+        max-width: 600px;
+        margin: 0 auto;
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+      }
+    }
+  </style>
 </head>
-
 
 <body>
 
+<div class="page">
 
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <button class="back-btn" id="backBtn" aria-label="Back">‹</button>
 
-<div class="header">
+      <div>
+        <div class="header-title">Rider Menu</div>
+        <div class="header-subtitle">
+          <span class="brand">RiderX</span> Rider Account
+        </div>
+      </div>
+    </div>
+  </header>
 
-<span class="logo">RIDER</span>X Menu
+  <!-- PROFILE -->
+  <a class="profile-card" href="profile.html">
+
+    <div class="profile-main">
+
+      <div class="avatar" id="avatar">
+        <img id="avatarImage" alt="Profile">
+        <span id="avatarText">R</span>
+      </div>
+
+      <div class="profile-info">
+        <div class="profile-name" id="riderName">
+          Rider
+        </div>
+
+        <div class="profile-phone" id="riderPhone">
+          Loading...
+        </div>
+
+        <div class="verified">
+          ✓ Rider Account
+        </div>
+      </div>
+
+      <div class="profile-arrow">›</div>
+
+    </div>
+
+  </a>
+
+  <!-- ONLINE STATUS -->
+  <div class="status-card">
+
+    <div class="status-left">
+      <div class="status-dot" id="statusDot"></div>
+
+      <div>
+        <div class="status-title" id="statusTitle">
+          You're Offline
+        </div>
+
+        <div class="status-text" id="statusText">
+          Go online to receive ride requests
+        </div>
+      </div>
+    </div>
+
+    <button class="status-btn" id="statusBtn">
+      Go Online
+    </button>
+
+  </div>
+
+  <!-- QUICK STATS -->
+  <section class="section">
+
+    <div class="section-title">
+      Overview
+    </div>
+
+    <div class="quick-grid">
+
+      <a class="quick-card" href="earnings.html">
+        <div class="quick-icon">₹</div>
+        <div class="quick-label">Today's Earnings</div>
+        <div class="quick-value" id="todayEarnings">₹0</div>
+      </a>
+
+      <a class="quick-card" href="rides.html">
+        <div class="quick-icon">🚕</div>
+        <div class="quick-label">Today's Rides</div>
+        <div class="quick-value" id="todayRides">0</div>
+      </a>
+
+    </div>
+
+  </section>
+
+  <!-- RIDES -->
+  <section class="section">
+
+    <div class="section-title">
+      Rides
+    </div>
+
+    <div class="menu-card">
+
+      <button class="menu-item" data-page="home.html">
+        <div class="menu-icon">⌂</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Rider Home</div>
+          <div class="menu-description">
+            Go back to your rider dashboard
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+      <button class="menu-item" data-page="rides.html">
+        <div class="menu-icon">🚕</div>
+
+        <div class="menu-content">
+          <div class="menu-title">My Rides</div>
+          <div class="menu-description">
+            View current and completed rides
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+      <button class="menu-item" data-page="history.html">
+        <div class="menu-icon">🕘</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Ride History</div>
+          <div class="menu-description">
+            Check your previous ride records
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- MONEY -->
+  <section class="section">
+
+    <div class="section-title">
+      Money
+    </div>
+
+    <div class="menu-card">
+
+      <button class="menu-item" data-page="wallet.html">
+        <div class="menu-icon">💳</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Wallet</div>
+          <div class="menu-description">
+            Balance, transactions and wallet activity
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+      <button class="menu-item" data-page="earnings.html">
+        <div class="menu-icon">₹</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Earnings</div>
+          <div class="menu-description">
+            Daily, weekly and monthly earnings
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- ACCOUNT -->
+  <section class="section">
+
+    <div class="section-title">
+      Account
+    </div>
+
+    <div class="menu-card">
+
+      <button class="menu-item" data-page="profile.html">
+        <div class="menu-icon">👤</div>
+
+        <div class="menu-content">
+          <div class="menu-title">My Profile</div>
+          <div class="menu-description">
+            Edit your rider profile and personal details
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+      <button class="menu-item" data-page="settings.html">
+        <div class="menu-icon">⚙️</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Settings</div>
+          <div class="menu-description">
+            Notifications, language and app preferences
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+      <button class="menu-item" data-page="notifications.html">
+        <div class="menu-icon">🔔</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Notifications</div>
+          <div class="menu-description">
+            Ride updates and important alerts
+          </div>
+        </div>
+
+        <div class="badge" id="notificationBadge" style="display:none;">
+          0
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- SUPPORT -->
+  <section class="section">
+
+    <div class="section-title">
+      Help & Support
+    </div>
+
+    <div class="menu-card">
+
+      <button class="menu-item" id="supportBtn">
+        <div class="menu-icon">❓</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Help & Support</div>
+          <div class="menu-description">
+            Get help with rides, payments or your account
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+      <button class="menu-item" id="termsBtn">
+        <div class="menu-icon">📄</div>
+
+        <div class="menu-content">
+          <div class="menu-title">Terms & Conditions</div>
+          <div class="menu-description">
+            RiderX terms and service information
+          </div>
+        </div>
+
+        <div class="menu-arrow">›</div>
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- LOGOUT -->
+  <section class="section">
+
+    <button class="logout-btn" id="logoutBtn">
+      <span>↪</span>
+      <span>Logout</span>
+    </button>
+
+    <div class="version">
+      RiderX Rider • Version 1.0.0
+    </div>
+
+  </section>
 
 </div>
 
-
-
-
-<div class="container">
-
-
-
-<div class="menu-card" onclick="go('dashboard.html')">
-
-🏍 Dashboard
-
+<!-- LOADING -->
+<div class="loading" id="loading" style="display:none;">
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div class="loading-text">Please wait...</div>
+  </div>
 </div>
 
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-
-<div class="menu-card" onclick="go('requests.html')">
-
-📩 Ride Requests
-
-</div>
-
-
-
-<div class="menu-card" onclick="go('trip.html')">
-
-🚕 Current Trip
-
-</div>
-
-
-
-<div class="menu-card" onclick="go('earnings.html')">
-
-💰 Earnings
-
-</div>
-
-
-
-<div class="menu-card" onclick="go('wallet.html')">
-
-💳 Wallet
-
-</div>
-
-
-
-<div class="menu-card" onclick="go('profile.html')">
-
-👤 Profile
-
-</div>
-
-
-
-<div class="menu-card" onclick="go('notifications.html')">
-
-🔔 Notifications
-
-</div>
-
-
-
-<div class="menu-card logout" onclick="logout()">
-
-🚪 Logout
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
+<!-- Firebase -->
 <script type="module">
 
+  import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import {auth} from "../firebase/config.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    collection,
+    query,
+    where,
+    getDocs,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+  import { app } from "../firebase/Firebase-config.js";
 
-import {
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-signOut
+  const $ = (id) => document.getElementById(id);
 
-}
+  let currentUser = null;
+  let riderData = null;
 
-from
+  /* -----------------------------------------
+     HELPERS
+  ----------------------------------------- */
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+  function showLoading(show = true) {
+    $("loading").style.display = show ? "flex" : "none";
+  }
 
+  function showToast(message) {
+    const toast = $("toast");
 
+    toast.textContent = message;
+    toast.style.display = "block";
 
+    clearTimeout(window.__toastTimer);
 
+    window.__toastTimer = setTimeout(() => {
+      toast.style.display = "none";
+    }, 2600);
+  }
 
-window.go=function(page){
+  function safeText(value, fallback = "") {
+    if (value === undefined || value === null || value === "") {
+      return fallback;
+    }
 
-location.href=page;
+    return String(value);
+  }
 
-};
+  function getRiderName(data, user) {
+    return (
+      data?.name ||
+      data?.fullName ||
+      data?.displayName ||
+      user?.displayName ||
+      "Rider"
+    );
+  }
 
+  function getRiderPhone(data, user) {
+    return (
+      data?.phone ||
+      data?.mobile ||
+      user?.phoneNumber ||
+      "Phone not available"
+    );
+  }
 
+  function updateProfileUI(data = {}) {
 
+    const name = getRiderName(data, currentUser);
+    const phone = getRiderPhone(data, currentUser);
 
+    $("riderName").textContent = name;
+    $("riderPhone").textContent = phone;
 
-window.logout=async function(){
+    const firstLetter =
+      name.trim().charAt(0).toUpperCase() || "R";
 
+    $("avatarText").textContent = firstLetter;
 
-await signOut(auth);
+    const photo =
+      data.photoURL ||
+      data.photo ||
+      data.profileImage ||
+      currentUser?.photoURL ||
+      "";
 
+    if (photo) {
+      $("avatarImage").src = photo;
+      $("avatarImage").style.display = "block";
+      $("avatarText").style.display = "none";
+    } else {
+      $("avatarImage").style.display = "none";
+      $("avatarText").style.display = "block";
+    }
+  }
 
-location.href="../auth/login.html";
+  /* -----------------------------------------
+     LOAD RIDER PROFILE
+  ----------------------------------------- */
 
+  async function loadRiderProfile(user) {
 
-};
+    if (!user) return;
 
+    currentUser = user;
 
+    let data = {};
+
+    try {
+
+      const riderRef = doc(db, "riders", user.uid);
+      const riderSnap = await getDoc(riderRef);
+
+      if (riderSnap.exists()) {
+        data = riderSnap.data();
+      } else {
+
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          data = userSnap.data();
+        }
+      }
+
+    } catch (error) {
+      console.error("Profile load error:", error);
+    }
+
+    riderData = data;
+
+    updateProfileUI(data);
+
+    updateOnlineStatus(
+      data.online === true ||
+      data.isOnline === true ||
+      data.status === "online"
+    );
+
+    await loadTodayStats();
+  }
+
+  /* -----------------------------------------
+     ONLINE STATUS
+  ----------------------------------------- */
+
+  function updateOnlineStatus(isOnline) {
+
+    const dot = $("statusDot");
+    const title = $("statusTitle");
+    const text = $("statusText");
+    const button = $("statusBtn");
+
+    if (isOnline) {
+
+      dot.classList.add("online");
+
+      title.textContent = "You're Online";
+
+      text.textContent =
+        "You can receive new ride requests";
+
+      button.textContent = "Go Offline";
+
+      button.classList.add("offline");
+
+    } else {
+
+      dot.classList.remove("online");
+
+      title.textContent = "You're Offline";
+
+      text.textContent =
+        "Go online to receive ride requests";
+
+      button.textContent = "Go Online";
+
+      button.classList.remove("offline");
+    }
+
+    button.dataset.online = isOnline ? "true" : "false";
+  }
+
+  /* -----------------------------------------
+     ONLINE BUTTON
+  ----------------------------------------- */
+
+  async function toggleOnlineStatus() {
+
+    if (!currentUser) {
+      showToast("Please login again.");
+      return;
+    }
+
+    /*
+      Actual online/offline switching is normally
+      handled by rider/home.js or rider online
+      controller so ride listeners remain centralized.
+
+      This menu only redirects the rider to Home.
+    */
+
+    window.location.href = "home.html";
+  }
+
+  /* -----------------------------------------
+     TODAY'S STATS
+  ----------------------------------------- */
+
+  async function loadTodayStats() {
+
+    if (!currentUser) return;
+
+    try {
+
+      const today = new Date();
+
+      today.setHours(0, 0, 0, 0);
+
+      const ridesRef = collection(db, "rides");
+
+      const q = query(
+        ridesRef,
+        where("riderId", "==", currentUser.uid)
+      );
+
+      const snapshot = await getDocs(q);
+
+      let rideCount = 0;
+      let earnings = 0;
+
+      snapshot.forEach((item) => {
+
+        const ride = item.data();
+
+        let dateValue =
+          ride.completedAt ||
+          ride.updatedAt ||
+          ride.createdAt;
+
+        let rideDate = null;
+
+        if (dateValue?.toDate) {
+          rideDate = dateValue.toDate();
+        } else if (dateValue) {
+          rideDate = new Date(dateValue);
+        }
+
+        if (!rideDate || isNaN(rideDate.getTime())) {
+          return;
+        }
+
+        rideDate.setHours(0, 0, 0, 0);
+
+        if (rideDate.getTime() !== today.getTime()) {
+          return;
+        }
+
+        const status =
+          String(ride.status || "").toLowerCase();
+
+        if (
+          status === "completed" ||
+          status === "complete" ||
+          status === "finished"
+        ) {
+
+          rideCount++;
+
+          const amount =
+            Number(
+              ride.riderEarning ??
+              ride.riderEarnings ??
+              ride.earnings ??
+              ride.fare ??
+              ride.amount ??
+              0
+            );
+
+          earnings += isNaN(amount) ? 0 : amount;
+        }
+
+      });
+
+      $("todayRides").textContent = rideCount;
+
+      $("todayEarnings").textContent =
+        "₹" + Math.round(earnings).toLocaleString("en-IN");
+
+    } catch (error) {
+
+      console.error("Stats error:", error);
+
+      $("todayRides").textContent = "0";
+      $("todayEarnings").textContent = "₹0";
+    }
+  }
+
+  /* -----------------------------------------
+     NAVIGATION
+  ----------------------------------------- */
+
+  document.querySelectorAll("[data-page]").forEach((item) => {
+
+    item.addEventListener("click", () => {
+
+      const page = item.dataset.page;
+
+      if (!page) return;
+
+      window.location.href = page;
+    });
+
+  });
+
+  /* -----------------------------------------
+     BACK
+  ----------------------------------------- */
+
+  $("backBtn").addEventListener("click", () => {
+
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = "home.html";
+    }
+
+  });
+
+  /* -----------------------------------------
+     ONLINE
+  ----------------------------------------- */
+
+  $("statusBtn").addEventListener(
+    "click",
+    toggleOnlineStatus
+  );
+
+  /* -----------------------------------------
+     SUPPORT
+  ----------------------------------------- */
+
+  $("supportBtn").addEventListener("click", () => {
+
+    /*
+      Supports page will be connected when the
+      rider-side support module is finalized.
+    */
+
+    window.location.href = "../index.html#support";
+  });
+
+  $("termsBtn").addEventListener("click", () => {
+
+    window.location.href = "../index.html#terms";
+  });
+
+  /* -----------------------------------------
+     LOGOUT
+  ----------------------------------------- */
+
+  $("logoutBtn").addEventListener("click", async () => {
+
+    const confirmLogout = confirm(
+      "Are you sure you want to logout?"
+    );
+
+    if (!confirmLogout) return;
+
+    try {
+
+      showLoading(true);
+
+      await signOut(auth);
+
+      window.location.replace(
+        "../auth/login.html"
+      );
+
+    } catch (error) {
+
+      console.error("Logout error:", error);
+
+      showLoading(false);
+
+      showToast(
+        "Logout failed. Please try again."
+      );
+    }
+
+  });
+
+  /* -----------------------------------------
+     AUTH
+  ----------------------------------------- */
+
+  onAuthStateChanged(auth, async (user) => {
+
+    if (!user) {
+
+      window.location.replace(
+        "../auth/login.html"
+      );
+
+      return;
+    }
+
+    await loadRiderProfile(user);
+
+  });
 
 </script>
 
-
 </body>
-
 </html>
