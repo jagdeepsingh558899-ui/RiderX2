@@ -4,173 +4,469 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
 
+    /* =====================================================
+       HELPER FUNCTIONS
+    ===================================================== */
 
-    function loggedIn(){
+    function loggedIn() {
       return request.auth != null;
     }
 
 
-    function userData(){
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    function isOwner(uid) {
+      return loggedIn()
+        && request.auth.uid == uid;
     }
 
 
-    function admin(){
-      return loggedIn() && userData().role == "admin";
+    function userExists() {
+      return loggedIn()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        );
     }
 
 
-    function rider(){
-      return loggedIn() && userData().role == "rider";
+    function userData() {
+      return get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      ).data;
     }
 
 
+    function admin() {
+      return loggedIn()
+        && userExists()
+        && (
+          userData().role == "admin"
+          ||
+          userData().isAdmin == true
+        );
+    }
 
-    // USERS
+
+    function rider() {
+      return loggedIn()
+        && userExists()
+        && userData().role == "rider";
+    }
+
+
+    function customer() {
+      return loggedIn()
+        && userExists()
+        && (
+          userData().role == "customer"
+          ||
+          userData().role == "user"
+        );
+    }
+
+
+    /* =====================================================
+       USERS
+    ===================================================== */
 
     match /users/{uid} {
 
-      allow read: if loggedIn();
+      /*
+        Users can read their own profile.
+        Admin can read all users.
+      */
+
+      allow read:
+        if isOwner(uid)
+        || admin();
+
+
+      /*
+        User can create own profile.
+        Admin can create users.
+      */
 
       allow create:
-      if loggedIn()
-      && request.auth.uid == uid;
+        if isOwner(uid)
+        || admin();
 
+
+      /*
+        User can update own profile.
+        Admin can update any profile.
+      */
 
       allow update:
-      if loggedIn()
-      && (request.auth.uid == uid || admin());
+        if isOwner(uid)
+        || admin();
 
+
+      /*
+        Only admin can delete users.
+      */
 
       allow delete:
-      if admin();
+        if admin();
     }
 
 
+    /* =====================================================
+       RIDERS
+    ===================================================== */
+
+    match /riders/{uid} {
+
+      /*
+        Logged-in users can read rider information.
+        Admin has full access.
+      */
+
+      allow read:
+        if loggedIn();
 
 
-    // RIDER DOCUMENTS
+      /*
+        Rider can create/update own rider document.
+        Admin can create/update any rider document.
+      */
+
+      allow create:
+        if isOwner(uid)
+        || admin();
+
+
+      allow update:
+        if isOwner(uid)
+        || admin();
+
+
+      /*
+        Only admin can delete rider records.
+      */
+
+      allow delete:
+        if admin();
+    }
+
+
+    /* =====================================================
+       DRIVERS
+       Kept for compatibility with older RiderX data.
+    ===================================================== */
 
     match /drivers/{uid} {
 
       allow read:
-      if loggedIn();
+        if loggedIn();
 
 
       allow create, update:
-      if loggedIn()
-      && request.auth.uid == uid;
+        if isOwner(uid)
+        || admin();
 
 
       allow delete:
-      if admin();
+        if admin();
     }
 
 
-
-
-    // RIDES SYSTEM
+    /* =====================================================
+       RIDES
+    ===================================================== */
 
     match /rides/{rideId} {
 
+      /*
+        Customer can create own ride.
+      */
 
       allow create:
-      if loggedIn()
-      && request.resource.data.customerId == request.auth.uid;
+        if loggedIn()
+        && request.resource.data.customerId
+           == request.auth.uid;
 
 
+      /*
+        Logged-in users can read rides.
+        Admin has full access.
+      */
 
       allow read:
-      if loggedIn();
+        if loggedIn();
 
 
+      /*
+        Customer can update own ride.
+        Assigned rider can update ride.
+        Admin can update anything.
+      */
 
       allow update:
-      if loggedIn()
-      && (
+        if loggedIn()
+        && (
 
-        // Customer update own ride
-        resource.data.customerId == request.auth.uid
+          resource.data.customerId
+            == request.auth.uid
 
-        ||
+          ||
 
-        // Rider accept assigned ride
-        request.resource.data.driverId == request.auth.uid
+          resource.data.riderId
+            == request.auth.uid
 
-        ||
+          ||
 
-        // Admin control
-        admin()
+          resource.data.driverId
+            == request.auth.uid
 
-      );
+          ||
+
+          request.resource.data.riderId
+            == request.auth.uid
+
+          ||
+
+          request.resource.data.driverId
+            == request.auth.uid
+
+          ||
+
+          admin()
+
+        );
 
 
+      /*
+        Only admin can delete rides.
+      */
 
       allow delete:
-      if admin();
-
+        if admin();
     }
 
 
-
-
-    // CHAT
+    /* =====================================================
+       CHATS
+    ===================================================== */
 
     match /chats/{chatId} {
 
       allow read, write:
-      if loggedIn();
-
+        if loggedIn();
     }
 
 
-
-
-    // WALLET
+    /* =====================================================
+       WALLETS
+    ===================================================== */
 
     match /wallets/{uid} {
 
-      allow read:
-      if loggedIn()
-      && request.auth.uid == uid;
+      /*
+        Owner can read own wallet.
+        Admin can read all wallets.
+      */
 
+      allow read:
+        if isOwner(uid)
+        || admin();
+
+
+      /*
+        Only admin can directly modify wallets.
+      */
 
       allow write:
-      if admin();
-
+        if admin();
     }
 
 
-
-
-    // NOTIFICATIONS
+    /* =====================================================
+       NOTIFICATIONS
+    ===================================================== */
 
     match /notifications/{uid}/items/{id} {
 
+      /*
+        Owner can read notifications.
+      */
+
       allow read:
-      if loggedIn()
-      && request.auth.uid == uid;
+        if isOwner(uid)
+        || admin();
 
 
-      allow write:
-      if loggedIn();
+      /*
+        Logged-in system/users can create notifications.
+        Admin has full access.
+      */
 
+      allow create, update:
+        if loggedIn();
+
+
+      allow delete:
+        if isOwner(uid)
+        || admin();
     }
 
 
-
-
-    // ADMIN SETTINGS
+    /* =====================================================
+       SETTINGS
+    ===================================================== */
 
     match /settings/{id} {
 
+      /*
+        Logged-in users can read settings.
+      */
+
       allow read:
-      if loggedIn();
+        if loggedIn();
+
+
+      /*
+        Only admin can change settings.
+      */
+
+      allow create, update, delete:
+        if admin();
+    }
+
+
+    /* =====================================================
+       ADMIN / APP CONFIG
+    ===================================================== */
+
+    match /admin/{id} {
+
+      allow read:
+        if admin();
 
 
       allow write:
-      if admin();
+        if admin();
+    }
 
+
+    /* =====================================================
+       FARE / PRICING
+    ===================================================== */
+
+    match /pricing/{id} {
+
+      allow read:
+        if loggedIn();
+
+
+      allow write:
+        if admin();
+    }
+
+
+    match /fareSettings/{id} {
+
+      allow read:
+        if loggedIn();
+
+
+      allow write:
+        if admin();
+    }
+
+
+    /* =====================================================
+       COMMISSION
+    ===================================================== */
+
+    match /commission/{id} {
+
+      allow read:
+        if loggedIn();
+
+
+      allow write:
+        if admin();
+    }
+
+
+    /* =====================================================
+       COUPONS
+    ===================================================== */
+
+    match /coupons/{id} {
+
+      allow read:
+        if loggedIn();
+
+
+      allow create, update, delete:
+        if admin();
+    }
+
+
+    /* =====================================================
+       OFFERS
+    ===================================================== */
+
+    match /offers/{id} {
+
+      allow read:
+        if loggedIn();
+
+
+      allow create, update, delete:
+        if admin();
+    }
+
+
+    /* =====================================================
+       SUPPORT
+    ===================================================== */
+
+    match /supports/{id} {
+
+      allow create:
+        if loggedIn();
+
+
+      allow read:
+        if loggedIn();
+
+
+      allow update, delete:
+        if admin();
+    }
+
+
+    /* =====================================================
+       PAYMENTS
+    ===================================================== */
+
+    match /payments/{paymentId} {
+
+      allow read:
+        if loggedIn();
+
+
+      allow create:
+        if loggedIn();
+
+
+      allow update, delete:
+        if admin();
+    }
+
+
+    /* =====================================================
+       REPORTS
+    ===================================================== */
+
+    match /reports/{id} {
+
+      allow read:
+        if admin();
+
+
+      allow write:
+        if admin();
     }
 
   }
