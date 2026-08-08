@@ -4,44 +4,32 @@
    File: js/notification.js
 
    Features:
-   - Firebase Realtime Database notifications
-   - Firestore fallback
-   - Browser notifications
-   - Notification permission
-   - Unread count
-   - Notification center
-   - Ride notifications
+   - Customer notifications
    - Rider notifications
-   - Payment notifications
-   - Chat notifications
-   - Cancellation notifications
-   - Mark read
-   - Mark all read
-   - Delete notification
+   - Ride request alerts
+   - Ride accepted / arrived / started / completed
+   - Browser notifications
+   - In-app notification center
+   - Unread badge
    - Notification sound
-   - Cross-page events
+   - Firebase Realtime Database support
+   - Firestore support when available
+   - Local fallback
+   - Mark read / mark all read
+   - Notification history
    ============================================================ */
 
 (function () {
 
     "use strict";
 
+    window.RiderX = window.RiderX || {};
 
-    /* ========================================================
-       GLOBAL
-       ======================================================== */
+    const RX = window.RiderX;
 
-    window.RiderX =
-        window.RiderX || {};
+    RX.notification = RX.notification || {};
 
-    const RX =
-        window.RiderX;
-
-    RX.notification =
-        RX.notification || {};
-
-    const NOTIFY =
-        RX.notification;
+    const NOTIFY = RX.notification;
 
 
     /* ========================================================
@@ -50,29 +38,29 @@
 
     NOTIFY.config = {
 
+        maxNotifications:
+            100,
+
         storageKey:
             "riderx_notifications",
 
-        maxLocalNotifications:
-            100,
-
-        maxVisibleNotifications:
-            50,
-
-        soundEnabledKey:
+        soundStorageKey:
             "riderx_notification_sound",
 
-        browserNotificationKey:
-            "riderx_browser_notifications",
+        permissionStorageKey:
+            "riderx_notification_permission",
 
-        rtdbPath:
-            "notifications",
+        defaultTitle:
+            "RiderX",
 
-        firestoreCollection:
-            "notifications",
+        defaultIcon:
+            "/assets/logo/logo.png",
 
         soundUrl:
-            "../assets/sounds/notification.mp3"
+            "/assets/sounds/notification.mp3",
+
+        rideRequestSoundUrl:
+            "/assets/sounds/ride-request.mp3"
     };
 
 
@@ -82,35 +70,32 @@
 
     NOTIFY.state = {
 
-        userId:
-            null,
-
-        role:
-            null,
-
         notifications:
             [],
 
-        unread:
+        unreadCount:
             0,
-
-        initialized:
-            false,
-
-        listener:
-            null,
-
-        firestoreUnsubscribe:
-            null,
 
         permission:
             "default",
 
-        soundEnabled:
-            true,
+        currentUser:
+            null,
 
-        browserEnabled:
-            true
+        listening:
+            false,
+
+        initialized:
+            false,
+
+        audio:
+            null,
+
+        rideRequestAudio:
+            null,
+
+        firebaseListeners:
+            []
     };
 
 
@@ -118,7 +103,7 @@
        HELPERS
        ======================================================== */
 
-    NOTIFY.createId =
+    NOTIFY.generateId =
         function () {
 
             return (
@@ -142,68 +127,301 @@
 
             div.textContent =
                 String(
-                    value ??
-                    ""
+                    value ?? ""
                 );
 
             return div.innerHTML;
         };
 
 
-    NOTIFY.now =
-        function () {
+    NOTIFY.timeAgo =
+        function (
+            timestamp
+        ) {
 
-            return Date.now();
+            const date =
+                new Date(
+                    timestamp
+                );
+
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return "";
+            }
+
+
+            const seconds =
+                Math.floor(
+                    (
+                        Date.now() -
+                        date.getTime()
+                    ) / 1000
+                );
+
+
+            if (
+                seconds < 10
+            ) {
+
+                return "Just now";
+            }
+
+
+            if (
+                seconds < 60
+            ) {
+
+                return (
+                    seconds +
+                    " sec ago"
+                );
+            }
+
+
+            const minutes =
+                Math.floor(
+                    seconds / 60
+                );
+
+
+            if (
+                minutes < 60
+            ) {
+
+                return (
+                    minutes +
+                    " min ago"
+                );
+            }
+
+
+            const hours =
+                Math.floor(
+                    minutes / 60
+                );
+
+
+            if (
+                hours < 24
+            ) {
+
+                return (
+                    hours +
+                    " hr ago"
+                );
+            }
+
+
+            const days =
+                Math.floor(
+                    hours / 24
+                );
+
+
+            if (
+                days < 7
+            ) {
+
+                return (
+                    days +
+                    " day" +
+                    (
+                        days > 1
+                            ? "s"
+                            : ""
+                    ) +
+                    " ago"
+                );
+            }
+
+
+            return date.toLocaleDateString(
+                "en-IN",
+                {
+
+                    day:
+                        "numeric",
+
+                    month:
+                        "short",
+
+                    year:
+                        "numeric"
+                }
+            );
         };
 
 
-    /* ========================================================
-       LOCAL STORAGE
-       ======================================================== */
-
-    NOTIFY.loadLocal =
+    NOTIFY.getUser =
         function () {
+
+            if (
+                NOTIFY.state.currentUser
+            ) {
+
+                return NOTIFY.state
+                    .currentUser;
+            }
+
+
+            /*
+             * Firebase Auth.
+             */
 
             try {
 
-                const raw =
-                    localStorage.getItem(
-                        NOTIFY.config
-                            .storageKey
-                    );
-
-
-                if (!raw) {
-
-                    NOTIFY.state
-                        .notifications =
-                        [];
-
-                    return [];
-                }
-
-
-                const data =
-                    JSON.parse(
-                        raw
-                    );
-
-
                 if (
-                    Array.isArray(data)
+                    window.firebase &&
+                    firebase.auth
                 ) {
 
-                    NOTIFY.state
-                        .notifications =
-                        data;
+                    const user =
+                        firebase.auth()
+                            .currentUser;
+
+
+                    if (user) {
+
+                        NOTIFY.state
+                            .currentUser =
+                            user;
+
+                        return user;
+                    }
                 }
 
             } catch (error) {
 
                 console.warn(
-                    "Unable to load notifications:",
+                    "Firebase auth unavailable:",
                     error
                 );
+            }
+
+
+            /*
+             * Local session fallback.
+             */
+
+            try {
+
+                const session =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "riderx_user"
+                        ) ||
+                        "null"
+                    );
+
+
+                if (session) {
+
+                    NOTIFY.state
+                        .currentUser =
+                        session;
+
+                    return session;
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Session read error:",
+                    error
+                );
+            }
+
+
+            return null;
+        };
+
+
+    NOTIFY.getUserId =
+        function () {
+
+            const user =
+                NOTIFY.getUser();
+
+
+            if (!user) {
+                return null;
+            }
+
+
+            return (
+                user.uid ||
+                user.id ||
+                user.userId ||
+                null
+            );
+        };
+
+
+    NOTIFY.getRole =
+        function () {
+
+            const user =
+                NOTIFY.getUser();
+
+
+            if (!user) {
+                return null;
+            }
+
+
+            return (
+                user.role ||
+                user.userRole ||
+                localStorage.getItem(
+                    "riderx_role"
+                ) ||
+                null
+            );
+        };
+
+
+    /* ========================================================
+       STORAGE
+       ======================================================== */
+
+    NOTIFY.load =
+        function () {
+
+            try {
+
+                const saved =
+                    JSON.parse(
+                        localStorage.getItem(
+                            NOTIFY.config
+                                .storageKey
+                        ) ||
+                        "[]"
+                    );
+
+
+                if (
+                    Array.isArray(
+                        saved
+                    )
+                ) {
+
+                    NOTIFY.state
+                        .notifications =
+                        saved;
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Notification storage error:",
+                    error
+                );
+
 
                 NOTIFY.state
                     .notifications =
@@ -211,14 +429,14 @@
             }
 
 
-            NOTIFY.calculateUnread();
+            NOTIFY.recalculateUnread();
 
             return NOTIFY.state
                 .notifications;
         };
 
 
-    NOTIFY.saveLocal =
+    NOTIFY.save =
         function () {
 
             try {
@@ -229,7 +447,7 @@
                         .slice(
                             0,
                             NOTIFY.config
-                                .maxLocalNotifications
+                                .maxNotifications
                         );
 
 
@@ -244,232 +462,75 @@
             } catch (error) {
 
                 console.warn(
-                    "Unable to save notifications:",
+                    "Notification save error:",
                     error
                 );
             }
         };
 
 
-    /* ========================================================
-       SOUND SETTINGS
-       ======================================================== */
-
-    NOTIFY.loadSettings =
+    NOTIFY.recalculateUnread =
         function () {
 
-            try {
-
-                const sound =
-                    localStorage.getItem(
-                        NOTIFY.config
-                            .soundEnabledKey
-                    );
-
-
-                if (
-                    sound ===
-                    "false"
-                ) {
-
-                    NOTIFY.state
-                        .soundEnabled =
-                        false;
-
-                } else {
-
-                    NOTIFY.state
-                        .soundEnabled =
-                        true;
-                }
-
-
-                const browser =
-                    localStorage.getItem(
-                        NOTIFY.config
-                            .browserNotificationKey
-                    );
-
-
-                if (
-                    browser ===
-                    "false"
-                ) {
-
-                    NOTIFY.state
-                        .browserEnabled =
-                        false;
-
-                } else {
-
-                    NOTIFY.state
-                        .browserEnabled =
-                        true;
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    error
-                );
-            }
-        };
-
-
-    NOTIFY.setSoundEnabled =
-        function (
-            enabled
-        ) {
-
-            enabled =
-                Boolean(
-                    enabled
-                );
-
-
             NOTIFY.state
-                .soundEnabled =
-                enabled;
+                .unreadCount =
+                NOTIFY.state
+                    .notifications
+                    .filter(
+                        function (
+                            notification
+                        ) {
 
-
-            try {
-
-                localStorage.setItem(
-                    NOTIFY.config
-                        .soundEnabledKey,
-                    String(
-                        enabled
-                    )
-                );
-
-            } catch (error) {
-
-                console.warn(
-                    error
-                );
-            }
-
-
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-notification-settings",
-                    {
-                        detail: {
-                            sound:
-                                enabled
+                            return (
+                                !notification
+                                    .read
+                            );
                         }
-                    }
-                )
-            );
-        };
-
-
-    NOTIFY.setBrowserEnabled =
-        function (
-            enabled
-        ) {
-
-            enabled =
-                Boolean(
-                    enabled
-                );
-
-
-            NOTIFY.state
-                .browserEnabled =
-                enabled;
-
-
-            try {
-
-                localStorage.setItem(
-                    NOTIFY.config
-                        .browserNotificationKey,
-                    String(
-                        enabled
                     )
-                );
+                    .length;
 
-            } catch (error) {
 
-                console.warn(
-                    error
-                );
-            }
+            NOTIFY.updateBadges();
         };
 
 
     /* ========================================================
-       SOUND
-       ======================================================== */
-
-    NOTIFY.playSound =
-        function () {
-
-            if (
-                !NOTIFY.state
-                    .soundEnabled
-            ) {
-
-                return;
-            }
-
-
-            try {
-
-                const audio =
-                    new Audio(
-                        NOTIFY.config
-                            .soundUrl
-                    );
-
-
-                audio.volume =
-                    0.7;
-
-
-                const promise =
-                    audio.play();
-
-
-                if (
-                    promise &&
-                    typeof promise.catch ===
-                    "function"
-                ) {
-
-                    promise.catch(
-                        function () {
-                            /*
-                             * Browser may block
-                             * autoplay.
-                             */
-                        }
-                    );
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Notification sound failed:",
-                    error
-                );
-            }
-        };
-
-
-    /* ========================================================
-       BROWSER PERMISSION
+       PERMISSION
        ======================================================== */
 
     NOTIFY.requestPermission =
         async function () {
 
             if (
-                !("Notification" in window)
+                typeof Notification ===
+                "undefined"
             ) {
 
                 return "unsupported";
+            }
+
+
+            if (
+                Notification.permission ===
+                "granted"
+            ) {
+
+                NOTIFY.state.permission =
+                    "granted";
+
+                return "granted";
+            }
+
+
+            if (
+                Notification.permission ===
+                "denied"
+            ) {
+
+                NOTIFY.state.permission =
+                    "denied";
+
+                return "denied";
             }
 
 
@@ -484,6 +545,13 @@
                     permission;
 
 
+                localStorage.setItem(
+                    NOTIFY.config
+                        .permissionStorageKey,
+                    permission
+                );
+
+
                 return permission;
 
             } catch (error) {
@@ -492,6 +560,7 @@
                     "Notification permission error:",
                     error
                 );
+
 
                 return "default";
             }
@@ -503,24 +572,16 @@
        ======================================================== */
 
     NOTIFY.showBrowser =
-        function (
+        async function (
             notification
         ) {
 
             if (
-                !NOTIFY.state
-                    .browserEnabled
+                typeof Notification ===
+                "undefined"
             ) {
 
-                return;
-            }
-
-
-            if (
-                !("Notification" in window)
-            ) {
-
-                return;
+                return false;
             }
 
 
@@ -529,50 +590,75 @@
                 "granted"
             ) {
 
-                return;
+                return false;
             }
 
 
             try {
 
+                const options = {
+
+                    body:
+                        notification.body ||
+                        notification.message ||
+                        "",
+
+                    icon:
+                        notification.icon ||
+                        NOTIFY.config
+                            .defaultIcon,
+
+                    badge:
+                        notification.icon ||
+                        NOTIFY.config
+                            .defaultIcon,
+
+                    tag:
+                        notification.type ||
+                        notification.id,
+
+                    renotify:
+                        true,
+
+                    data:
+                        notification.data ||
+                        {},
+
+                    requireInteraction:
+                        notification
+                            .requireInteraction ||
+                        false
+                };
+
+
                 const browserNotification =
                     new Notification(
                         notification.title ||
-                        "RiderX",
-                        {
-
-                            body:
-                                notification.body ||
-                                "",
-
-                            tag:
-                                notification.id ||
-                                "riderx",
-
-                            icon:
-                                "/assets/images/icon-192.png",
-
-                            badge:
-                                "/assets/images/icon-192.png"
-                        }
+                        NOTIFY.config
+                            .defaultTitle,
+                        options
                     );
 
 
-                browserNotification.onclick =
+                browserNotification
+                    .onclick =
                     function () {
 
                         window.focus();
 
 
-                        window.dispatchEvent(
-                            new CustomEvent(
-                                "riderx-notification-click",
-                                {
-                                    detail:
-                                        notification
-                                }
-                            )
-                        );
+                        if (
+                            notification
+                                .data &&
+                            notification
+                                .data.url
+                        ) {
+
+                            window.location.href =
+                                notification
+                                    .data
+                                    .url;
+                        }
 
 
                         browserNotification
@@ -580,119 +666,197 @@
                     };
 
 
+                return true;
+
             } catch (error) {
 
                 console.warn(
-                    "Browser notification failed:",
+                    "Browser notification error:",
                     error
                 );
+
+
+                return false;
             }
         };
 
 
     /* ========================================================
-       CALCULATE UNREAD
+       SOUND
        ======================================================== */
 
-    NOTIFY.calculateUnread =
-        function () {
+    NOTIFY.createAudio =
+        function (
+            type
+        ) {
 
-            NOTIFY.state.unread =
-                NOTIFY.state
-                    .notifications
-                    .filter(
-                        function (
-                            item
-                        ) {
+            let source =
+                NOTIFY.config
+                    .soundUrl;
 
-                            return (
-                                item.read !==
-                                true
+
+            if (
+                type ===
+                "ride_request"
+            ) {
+
+                source =
+                    NOTIFY.config
+                        .rideRequestSoundUrl;
+            }
+
+
+            try {
+
+                const audio =
+                    new Audio(
+                        source
+                    );
+
+
+                audio.preload =
+                    "auto";
+
+
+                audio.volume =
+                    type ===
+                    "ride_request"
+                        ? 1
+                        : 0.75;
+
+
+                return audio;
+
+            } catch (error) {
+
+                return null;
+            }
+        };
+
+
+    NOTIFY.playSound =
+        function (
+            type = "default"
+        ) {
+
+            try {
+
+                let audio;
+
+
+                if (
+                    type ===
+                    "ride_request"
+                ) {
+
+                    if (
+                        !NOTIFY.state
+                            .rideRequestAudio
+                    ) {
+
+                        NOTIFY.state
+                            .rideRequestAudio =
+                            NOTIFY.createAudio(
+                                "ride_request"
                             );
+                    }
+
+
+                    audio =
+                        NOTIFY.state
+                            .rideRequestAudio;
+
+                } else {
+
+                    if (
+                        !NOTIFY.state
+                            .audio
+                    ) {
+
+                        NOTIFY.state
+                            .audio =
+                            NOTIFY.createAudio(
+                                "default"
+                            );
+                    }
+
+
+                    audio =
+                        NOTIFY.state.audio;
+                }
+
+
+                if (!audio) {
+                    return false;
+                }
+
+
+                audio.currentTime =
+                    0;
+
+
+                const promise =
+                    audio.play();
+
+
+                if (
+                    promise &&
+                    typeof promise.catch ===
+                    "function"
+                ) {
+
+                    promise.catch(
+                        function () {
+
+                            /*
+                             * Browser may block
+                             * audio until user
+                             * interaction.
+                             */
                         }
-                    )
-                    .length;
+                    );
+                }
 
 
-            NOTIFY.updateBadges();
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "Notification sound error:",
+                    error
+                );
 
 
-            return NOTIFY.state
-                .unread;
+                return false;
+            }
         };
 
 
     /* ========================================================
-       UPDATE BADGES
+       VIBRATION
        ======================================================== */
 
-    NOTIFY.updateBadges =
-        function () {
+    NOTIFY.vibrate =
+        function (
+            pattern
+        ) {
 
-            const count =
-                NOTIFY.state.unread;
+            if (
+                navigator.vibrate
+            ) {
 
+                try {
 
-            document
-                .querySelectorAll(
-                    "[data-notification-count]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
+                    navigator.vibrate(
+                        pattern ||
+                        [200, 100, 200]
+                    );
 
-                        element.textContent =
-                            count > 99
-                                ? "99+"
-                                : String(
-                                    count
-                                );
-
-
-                        element.style.display =
-                            count > 0
-                                ? ""
-                                : "none";
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    ".notification-badge"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            count > 99
-                                ? "99+"
-                                : String(
-                                    count
-                                );
-
-
-                        element.classList.toggle(
-                            "show",
-                            count > 0
-                        );
-                    }
-                );
-
-
-            document.title =
-                count > 0
-                    ? "(" +
-                      (
-                          count > 99
-                              ? "99+"
-                              : count
-                      ) +
-                      ") RiderX"
-                    : "RiderX";
+                } catch (error) {
+                    /* Ignore */
+                }
+            }
         };
 
 
@@ -702,22 +866,14 @@
 
     NOTIFY.add =
         async function (
-            data,
-            options
+            data = {}
         ) {
-
-            data =
-                data || {};
-
-            options =
-                options || {};
-
 
             const notification = {
 
                 id:
                     data.id ||
-                    NOTIFY.createId(),
+                    NOTIFY.generateId(),
 
                 type:
                     data.type ||
@@ -725,10 +881,12 @@
 
                 title:
                     data.title ||
-                    "RiderX",
+                    NOTIFY.config
+                        .defaultTitle,
 
                 body:
                     data.body ||
+                    data.message ||
                     "",
 
                 message:
@@ -736,39 +894,49 @@
                     data.body ||
                     "",
 
+                icon:
+                    data.icon ||
+                    NOTIFY.config
+                        .defaultIcon,
+
                 read:
-                    data.read === true,
+                    Boolean(
+                        data.read
+                    ),
 
                 timestamp:
                     data.timestamp ||
-                    NOTIFY.now(),
+                    Date.now(),
 
                 createdAt:
                     data.createdAt ||
-                    NOTIFY.now(),
+                    Date.now(),
+
+                requireInteraction:
+                    Boolean(
+                        data.requireInteraction
+                    ),
+
+                data:
+                    data.data ||
+                    {},
 
                 rideId:
                     data.rideId ||
                     null,
 
+                bookingId:
+                    data.bookingId ||
+                    null,
+
                 userId:
                     data.userId ||
-                    NOTIFY.state.userId ||
-                    null,
-
-                role:
-                    data.role ||
-                    NOTIFY.state.role ||
-                    null,
-
-                data:
-                    data.data ||
-                    {}
+                    null
             };
 
 
             /*
-             * Avoid duplicates.
+             * Avoid duplicate notification.
              */
 
             const exists =
@@ -807,29 +975,56 @@
                     .slice(
                         0,
                         NOTIFY.config
-                            .maxLocalNotifications
+                            .maxNotifications
                     );
 
 
-            NOTIFY.calculateUnread();
+            NOTIFY.save();
 
-            NOTIFY.saveLocal();
+            NOTIFY.recalculateUnread();
 
             NOTIFY.render();
 
+            /*
+             * Sound.
+             */
 
             if (
-                options.sound !==
-                false
+                data.sound !== false
             ) {
 
-                NOTIFY.playSound();
+                NOTIFY.playSound(
+                    data.soundType ||
+                    (
+                        data.type ===
+                        "ride_request"
+                            ? "ride_request"
+                            : "default"
+                    )
+                );
             }
 
 
+            /*
+             * Vibration.
+             */
+
             if (
-                options.browser !==
-                false
+                data.vibrate !== false
+            ) {
+
+                NOTIFY.vibrate(
+                    data.vibration
+                );
+            }
+
+
+            /*
+             * Browser notification.
+             */
+
+            if (
+                data.browser !== false
             ) {
 
                 NOTIFY.showBrowser(
@@ -837,6 +1032,10 @@
                 );
             }
 
+
+            /*
+             * Dispatch event.
+             */
 
             window.dispatchEvent(
                 new CustomEvent(
@@ -854,588 +1053,11 @@
 
 
     /* ========================================================
-       SAVE TO FIREBASE
-       ======================================================== */
-
-    NOTIFY.saveToFirebase =
-        async function (
-            data
-        ) {
-
-            if (
-                !data
-            ) {
-                return false;
-            }
-
-
-            /*
-             * Realtime Database
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb
-            ) {
-
-                try {
-
-                    const ref =
-                        RX.firebase
-                            .rtdb
-                            .ref(
-                                NOTIFY.config
-                                    .rtdbPath
-                            )
-                            .push();
-
-
-                    const id =
-                        data.id ||
-                        ref.key;
-
-
-                    await ref.set(
-                        {
-                            ...data,
-                            id:
-                                id
-                        }
-                    );
-
-
-                    return id;
-
-                } catch (error) {
-
-                    console.warn(
-                        "RTDB notification write failed:",
-                        error
-                    );
-                }
-            }
-
-
-            /*
-             * Firestore fallback.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    const collection =
-                        RX.firebase
-                            .db
-                            .collection(
-                                NOTIFY.config
-                                    .firestoreCollection
-                            );
-
-
-                    const doc =
-                        data.id
-                            ? collection.doc(
-                                data.id
-                            )
-                            : collection.doc();
-
-
-                    const id =
-                        data.id ||
-                        doc.id;
-
-
-                    await doc.set(
-                        {
-                            ...data,
-                            id:
-                                id
-                        },
-                        {
-                            merge:
-                                true
-                        }
-                    );
-
-
-                    return id;
-
-                } catch (error) {
-
-                    console.warn(
-                        "Firestore notification write failed:",
-                        error
-                    );
-                }
-            }
-
-
-            return false;
-        };
-
-
-    /* ========================================================
-       SEND NOTIFICATION
-       ======================================================== */
-
-    NOTIFY.send =
-        async function (
-            userId,
-            data
-        ) {
-
-            if (
-                !userId
-            ) {
-
-                return false;
-            }
-
-
-            const notification = {
-
-                ...data,
-
-                userId:
-                    userId,
-
-                timestamp:
-                    data.timestamp ||
-                    NOTIFY.now(),
-
-                createdAt:
-                    data.createdAt ||
-                    NOTIFY.now(),
-
-                read:
-                    false
-            };
-
-
-            return NOTIFY.saveToFirebase(
-                notification
-            );
-        };
-
-
-    /* ========================================================
-       RIDE NOTIFICATION HELPERS
-       ======================================================== */
-
-    NOTIFY.rideRequested =
-        function (
-            rideId,
-            options
-        ) {
-
-            options =
-                options || {};
-
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "ride_requested_" +
-                        rideId,
-
-                    type:
-                        "ride_requested",
-
-                    title:
-                        options.title ||
-                        "New Ride Request",
-
-                    body:
-                        options.body ||
-                        "A new ride request is available.",
-
-                    rideId:
-                        rideId,
-
-                    data:
-                        options.data ||
-                        {}
-                }
-            );
-        };
-
-
-    NOTIFY.rideAccepted =
-        function (
-            rideId,
-            riderName
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "ride_accepted_" +
-                        rideId,
-
-                    type:
-                        "ride_accepted",
-
-                    title:
-                        "Rider Accepted",
-
-                    body:
-                        riderName
-                            ? riderName +
-                              " accepted your ride."
-                            : "Your ride has been accepted.",
-
-                    rideId:
-                        rideId
-                }
-            );
-        };
-
-
-    NOTIFY.riderArriving =
-        function (
-            rideId
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "rider_arriving_" +
-                        rideId,
-
-                    type:
-                        "rider_arriving",
-
-                    title:
-                        "Rider Is Arriving",
-
-                    body:
-                        "Your rider is on the way.",
-
-                    rideId:
-                        rideId
-                }
-            );
-        };
-
-
-    NOTIFY.riderArrived =
-        function (
-            rideId
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "rider_arrived_" +
-                        rideId,
-
-                    type:
-                        "rider_arrived",
-
-                    title:
-                        "Rider Arrived",
-
-                    body:
-                        "Your rider has reached the pickup location.",
-
-                    rideId:
-                        rideId
-                }
-            );
-        };
-
-
-    NOTIFY.rideStarted =
-        function (
-            rideId
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "ride_started_" +
-                        rideId,
-
-                    type:
-                        "ride_started",
-
-                    title:
-                        "Ride Started",
-
-                    body:
-                        "Your ride has started.",
-
-                    rideId:
-                        rideId
-                }
-            );
-        };
-
-
-    NOTIFY.rideCompleted =
-        function (
-            rideId,
-            fare
-        ) {
-
-            const body =
-                fare !==
-                undefined
-                    ? "Ride completed. Total fare: ₹" +
-                      Number(
-                          fare
-                      ).toFixed(0)
-                    : "Your ride has been completed.";
-
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "ride_completed_" +
-                        rideId,
-
-                    type:
-                        "ride_completed",
-
-                    title:
-                        "Ride Completed",
-
-                    body:
-                        body,
-
-                    rideId:
-                        rideId,
-
-                    data: {
-                        fare:
-                            fare
-                    }
-                }
-            );
-        };
-
-
-    NOTIFY.rideCancelled =
-        function (
-            rideId,
-            reason
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "ride_cancelled_" +
-                        rideId,
-
-                    type:
-                        "ride_cancelled",
-
-                    title:
-                        "Ride Cancelled",
-
-                    body:
-                        reason
-                            ? "Ride cancelled: " +
-                              reason
-                            : "Your ride has been cancelled.",
-
-                    rideId:
-                        rideId,
-
-                    data: {
-                        reason:
-                            reason || ""
-                    }
-                }
-            );
-        };
-
-
-    NOTIFY.otp =
-        function (
-            rideId,
-            otp
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "ride_otp_" +
-                        rideId,
-
-                    type:
-                        "otp",
-
-                    title:
-                        "Ride OTP",
-
-                    body:
-                        "Your ride OTP is " +
-                        String(
-                            otp
-                        ),
-
-                    rideId:
-                        rideId,
-
-                    data: {
-                        otp:
-                            String(
-                                otp
-                            )
-                    }
-                }
-            );
-        };
-
-
-    NOTIFY.paymentSuccess =
-        function (
-            rideId,
-            amount
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "payment_success_" +
-                        rideId,
-
-                    type:
-                        "payment_success",
-
-                    title:
-                        "Payment Successful",
-
-                    body:
-                        "Payment of ₹" +
-                        Number(
-                            amount
-                        ).toFixed(0) +
-                        " was successful.",
-
-                    rideId:
-                        rideId,
-
-                    data: {
-                        amount:
-                            amount
-                    }
-                }
-            );
-        };
-
-
-    NOTIFY.paymentFailed =
-        function (
-            rideId
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        "payment_failed_" +
-                        rideId,
-
-                    type:
-                        "payment_failed",
-
-                    title:
-                        "Payment Failed",
-
-                    body:
-                        "Your payment could not be completed.",
-
-                    rideId:
-                        rideId
-                }
-            );
-        };
-
-
-    NOTIFY.chat =
-        function (
-            rideId,
-            senderName,
-            message
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        NOTIFY.createId(),
-
-                    type:
-                        "chat",
-
-                    title:
-                        senderName ||
-                        "New Message",
-
-                    body:
-                        message ||
-                        "You have a new message.",
-
-                    rideId:
-                        rideId,
-
-                    data: {
-                        sender:
-                            senderName || ""
-                    }
-                }
-            );
-        };
-
-
-    NOTIFY.support =
-        function (
-            title,
-            body
-        ) {
-
-            return NOTIFY.add(
-                {
-
-                    id:
-                        NOTIFY.createId(),
-
-                    type:
-                        "support",
-
-                    title:
-                        title ||
-                        "Support",
-
-                    body:
-                        body ||
-                        "You have a new support update."
-                }
-            );
-        };
-
-
-    /* ========================================================
        MARK READ
        ======================================================== */
 
     NOTIFY.markRead =
-        async function (
+        function (
             id
         ) {
 
@@ -1467,81 +1089,11 @@
                 true;
 
 
-            NOTIFY.calculateUnread();
+            NOTIFY.save();
 
-            NOTIFY.saveLocal();
+            NOTIFY.recalculateUnread();
 
             NOTIFY.render();
-
-
-            /*
-             * Firebase update.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .rtdb
-                        .ref(
-                            NOTIFY.config
-                                .rtdbPath +
-                            "/" +
-                            id +
-                            "/read"
-                        )
-                        .set(
-                            true
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        error
-                    );
-                }
-            }
-
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .db
-                        .collection(
-                            NOTIFY.config
-                                .firestoreCollection
-                        )
-                        .doc(
-                            id
-                        )
-                        .set(
-                            {
-                                read:
-                                    true
-                            },
-                            {
-                                merge:
-                                    true
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        error
-                    );
-                }
-            }
-
 
             return true;
         };
@@ -1552,99 +1104,42 @@
        ======================================================== */
 
     NOTIFY.markAllRead =
-        async function () {
+        function () {
 
-            const notifications =
-                NOTIFY.state
-                    .notifications;
+            NOTIFY.state
+                .notifications
+                .forEach(
+                    function (
+                        notification
+                    ) {
 
-
-            notifications.forEach(
-                function (
-                    notification
-                ) {
-
-                    notification.read =
-                        true;
-                }
-            );
+                        notification.read =
+                            true;
+                    }
+                );
 
 
-            NOTIFY.calculateUnread();
+            NOTIFY.save();
 
-            NOTIFY.saveLocal();
+            NOTIFY.recalculateUnread();
 
             NOTIFY.render();
 
 
-            /*
-             * Firestore batch.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    const batch =
-                        RX.firebase
-                            .db
-                            .batch();
-
-
-                    notifications
-                        .forEach(
-                            function (
-                                notification
-                            ) {
-
-                                const ref =
-                                    RX.firebase
-                                        .db
-                                        .collection(
-                                            NOTIFY.config
-                                                .firestoreCollection
-                                        )
-                                        .doc(
-                                            notification.id
-                                        );
-
-
-                                batch.update(
-                                    ref,
-                                    {
-                                        read:
-                                            true
-                                    }
-                                );
-                            }
-                        );
-
-
-                    await batch.commit();
-
-                } catch (error) {
-
-                    console.warn(
-                        "Unable to mark all read:",
-                        error
-                    );
-                }
-            }
-
-
-            return true;
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-notifications-read"
+                )
+            );
         };
 
 
     /* ========================================================
-       DELETE NOTIFICATION
+       DELETE
        ======================================================== */
 
     NOTIFY.remove =
-        async function (
+        function (
             id
         ) {
 
@@ -1665,42 +1160,11 @@
                     );
 
 
-            NOTIFY.calculateUnread();
+            NOTIFY.save();
 
-            NOTIFY.saveLocal();
+            NOTIFY.recalculateUnread();
 
             NOTIFY.render();
-
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    await RX.firebase
-                        .db
-                        .collection(
-                            NOTIFY.config
-                                .firestoreCollection
-                        )
-                        .doc(
-                            id
-                        )
-                        .delete();
-
-                } catch (error) {
-
-                    console.warn(
-                        "Delete notification failed:",
-                        error
-                    );
-                }
-            }
-
-
-            return true;
         };
 
 
@@ -1709,29 +1173,23 @@
        ======================================================== */
 
     NOTIFY.clear =
-        async function () {
+        function () {
 
             NOTIFY.state
                 .notifications =
                 [];
 
 
-            NOTIFY.state.unread =
-                0;
+            NOTIFY.save();
 
-
-            NOTIFY.saveLocal();
+            NOTIFY.recalculateUnread();
 
             NOTIFY.render();
-
-            NOTIFY.updateBadges();
-
-            return true;
         };
 
 
     /* ========================================================
-       GET ALL
+       GET NOTIFICATIONS
        ======================================================== */
 
     NOTIFY.getAll =
@@ -1744,10 +1202,6 @@
         };
 
 
-    /* ========================================================
-       GET UNREAD
-       ======================================================== */
-
     NOTIFY.getUnread =
         function () {
 
@@ -1755,758 +1209,351 @@
                 .notifications
                 .filter(
                     function (
-                        item
+                        notification
                     ) {
 
-                        return (
-                            item.read !==
-                            true
-                        );
+                        return !notification
+                            .read;
                     }
                 );
         };
 
 
     /* ========================================================
-       FIND BY RIDE
+       BADGES
        ======================================================== */
 
-    NOTIFY.getByRide =
-        function (
-            rideId
-        ) {
+    NOTIFY.updateBadges =
+        function () {
 
-            return NOTIFY.state
-                .notifications
-                .filter(
+            const count =
+                NOTIFY.state
+                    .unreadCount;
+
+
+            document
+                .querySelectorAll(
+                    "[data-notification-badge]"
+                )
+                .forEach(
                     function (
-                        item
+                        badge
                     ) {
 
-                        return (
-                            item.rideId ===
-                            rideId
-                        );
+                        badge.textContent =
+                            count > 99
+                                ? "99+"
+                                : String(
+                                    count
+                                );
+
+
+                        badge.hidden =
+                            count === 0;
                     }
                 );
+
+
+            document
+                .querySelectorAll(
+                    ".notification-badge"
+                )
+                .forEach(
+                    function (
+                        badge
+                    ) {
+
+                        badge.textContent =
+                            count > 99
+                                ? "99+"
+                                : String(
+                                    count
+                                );
+
+
+                        badge.style.display =
+                            count === 0
+                                ? "none"
+                                : "";
+                    }
+                );
+
+
+            /*
+             * Browser tab title.
+             */
+
+            const baseTitle =
+                document
+                    .title
+                    .replace(
+                        /^\(\d+\)\s*/,
+                        ""
+                    );
+
+
+            document.title =
+                count > 0
+                    ? "(" +
+                      count +
+                      ") " +
+                      baseTitle
+                    : baseTitle;
         };
 
 
     /* ========================================================
-       RENDER NOTIFICATION LIST
+       RENDER NOTIFICATION CENTER
        ======================================================== */
 
     NOTIFY.render =
-        function (
-            container
-        ) {
+        function () {
 
-            if (!container) {
-
-                container =
-                    document.querySelector(
-                        "[data-notification-list]"
-                    );
-            }
+            const containers =
+                document.querySelectorAll(
+                    "[data-notification-list]"
+                );
 
 
-            if (!container) {
+            if (
+                !containers.length
+            ) {
+
+                NOTIFY.updateBadges();
+
                 return;
             }
 
 
             const notifications =
                 NOTIFY.state
-                    .notifications
-                    .slice(
-                        0,
-                        NOTIFY.config
-                            .maxVisibleNotifications
-                    );
+                    .notifications;
 
 
-            if (
-                !notifications.length
-            ) {
-
-                container.innerHTML =
-                    '<div class="notification-empty">' +
-                    '<div class="notification-empty-icon">🔔</div>' +
-                    '<div class="notification-empty-title">' +
-                    'No notifications' +
-                    "</div>" +
-                    '<div class="notification-empty-text">' +
-                    "You're all caught up." +
-                    "</div>" +
-                    "</div>";
-
-                return;
-            }
-
-
-            container.innerHTML =
-                "";
-
-
-            notifications.forEach(
+            containers.forEach(
                 function (
-                    notification
+                    container
                 ) {
 
-                    const item =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    item.className =
-                        "notification-item";
-
-
                     if (
-                        !notification.read
+                        !notifications.length
                     ) {
 
-                        item.classList.add(
-                            "unread"
-                        );
+                        container.innerHTML =
+                            `
+                            <div class="notification-empty">
+                                <div class="notification-empty-icon">
+                                    🔔
+                                </div>
+
+                                <h3>No notifications</h3>
+
+                                <p>
+                                    You're all caught up.
+                                </p>
+                            </div>
+                            `;
+
+                        return;
                     }
 
 
-                    item.dataset
-                        .notificationId =
-                        notification.id;
-
-
-                    const time =
-                        NOTIFY.formatTime(
-                            notification.timestamp
-                        );
-
-
-                    item.innerHTML =
-                        '<div class="notification-icon">' +
-                        NOTIFY.icon(
-                            notification.type
-                        ) +
-                        "</div>" +
-
-                        '<div class="notification-content">' +
-
-                        '<div class="notification-title">' +
-                        NOTIFY.escape(
-                            notification.title
-                        ) +
-                        "</div>" +
-
-                        '<div class="notification-body">' +
-                        NOTIFY.escape(
-                            notification.body ||
-                            notification.message
-                        ) +
-                        "</div>" +
-
-                        '<div class="notification-time">' +
-                        NOTIFY.escape(
-                            time
-                        ) +
-                        "</div>" +
-
-                        "</div>" +
-
-                        '<button type="button" class="notification-delete" aria-label="Delete">' +
-                        "×" +
-                        "</button>";
-
-
-                    item.addEventListener(
-                        "click",
-                        function () {
-
-                            NOTIFY.markRead(
-                                notification.id
-                            );
-
-
-                            window.dispatchEvent(
-                                new CustomEvent(
-                                    "riderx-notification-click",
-                                    {
-                                        detail:
-                                            notification
-                                    }
-                                )
-                            );
-                        }
-                    );
-
-
-                    const deleteButton =
-                        item.querySelector(
-                            ".notification-delete"
-                        );
-
-
-                    if (
-                        deleteButton
-                    ) {
-
-                        deleteButton.addEventListener(
-                            "click",
-                            function (
-                                event
-                            ) {
-
-                                event
-                                    .stopPropagation();
-
-
-                                NOTIFY.remove(
-                                    notification.id
-                                );
-                            }
-                        );
-                    }
-
-
-                    container.appendChild(
-                        item
-                    );
-                }
-            );
-        };
-
-
-    /* ========================================================
-       ICON
-       ======================================================== */
-
-    NOTIFY.icon =
-        function (
-            type
-        ) {
-
-            const icons = {
-
-                ride_requested:
-                    "🚕",
-
-                ride_accepted:
-                    "✅",
-
-                rider_arriving:
-                    "🏍️",
-
-                rider_arrived:
-                    "📍",
-
-                ride_started:
-                    "🚀",
-
-                ride_completed:
-                    "🏁",
-
-                ride_cancelled:
-                    "❌",
-
-                otp:
-                    "🔐",
-
-                payment_success:
-                    "💳",
-
-                payment_failed:
-                    "⚠️",
-
-                chat:
-                    "💬",
-
-                support:
-                    "🎧",
-
-                wallet:
-                    "💰",
-
-                referral:
-                    "🎁",
-
-                promotion:
-                    "🎉",
-
-                safety:
-                    "🛡️",
-
-                general:
-                    "🔔"
-            };
-
-
-            return (
-                icons[type] ||
-                icons.general
-            );
-        };
-
-
-    /* ========================================================
-       FORMAT TIME
-       ======================================================== */
-
-    NOTIFY.formatTime =
-        function (
-            timestamp
-        ) {
-
-            if (
-                !timestamp
-            ) {
-
-                return "";
-            }
-
-
-            const date =
-                new Date(
-                    timestamp
-                );
-
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-
-                return "";
-            }
-
-
-            const now =
-                new Date();
-
-
-            const diff =
-                now.getTime() -
-                date.getTime();
-
-
-            const minute =
-                60 * 1000;
-
-            const hour =
-                60 * minute;
-
-            const day =
-                24 * hour;
-
-
-            if (
-                diff < minute
-            ) {
-
-                return "Just now";
-            }
-
-
-            if (
-                diff < hour
-            ) {
-
-                return (
-                    Math.floor(
-                        diff / minute
-                    ) +
-                    " min ago"
-                );
-            }
-
-
-            if (
-                diff < day
-            ) {
-
-                return (
-                    Math.floor(
-                        diff / hour
-                    ) +
-                    " hr ago"
-                );
-            }
-
-
-            if (
-                diff < 7 * day
-            ) {
-
-                return (
-                    Math.floor(
-                        diff / day
-                    ) +
-                    " days ago"
-                );
-            }
-
-
-            return date.toLocaleDateString(
-                "en-IN",
-                {
-                    day:
-                        "2-digit",
-
-                    month:
-                        "short",
-
-                    year:
-                        "numeric"
-                }
-            );
-        };
-
-
-    /* ========================================================
-       FIREBASE LISTENER
-       ======================================================== */
-
-    NOTIFY.startListener =
-        function (
-            userId,
-            role
-        ) {
-
-            NOTIFY.stopListener();
-
-
-            if (
-                !userId
-            ) {
-
-                return false;
-            }
-
-
-            NOTIFY.state.userId =
-                userId;
-
-
-            NOTIFY.state.role =
-                role ||
-                null;
-
-
-            /*
-             * Realtime Database
-             *
-             * notifications/{notificationId}
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb
-            ) {
-
-                const ref =
-                    RX.firebase
-                        .rtdb
-                        .ref(
-                            NOTIFY.config
-                                .rtdbPath
-                        );
-
-
-                NOTIFY.state.listener =
-                    function (
-                        snapshot
-                    ) {
-
-                        const data =
-                            snapshot.val();
-
-
-                        if (
-                            !data
-                        ) {
-                            return;
-                        }
-
-
-                        const notification = {
-
-                            ...data,
-
-                            id:
-                                data.id ||
-                                snapshot.key
-                        };
-
-
-                        /*
-                         * Only receive
-                         * notifications for
-                         * this user or
-                         * broadcast messages.
-                         */
-
-                        if (
-                            notification.userId &&
-                            notification.userId !==
-                            userId
-                        ) {
-
-                            return;
-                        }
-
-
-                        if (
-                            notification.role &&
-                            role &&
-                            notification.role !==
-                            role
-                        ) {
-
-                            return;
-                        }
-
-
-                        NOTIFY.add(
-                            notification
-                        );
-                    };
-
-
-                ref.on(
-                    "child_added",
-                    NOTIFY.state.listener
-                );
-
-
-                return true;
-            }
-
-
-            /*
-             * Firestore fallback.
-             */
-
-            if (
-                RX.firebase &&
-                RX.firebase.db
-            ) {
-
-                try {
-
-                    let query =
-                        RX.firebase
-                            .db
-                            .collection(
-                                NOTIFY.config
-                                    .firestoreCollection
-                            )
-                            .where(
-                                "userId",
-                                "==",
-                                userId
-                            )
-                            .orderBy(
-                                "timestamp",
-                                "desc"
-                            )
-                            .limit(
-                                NOTIFY.config
-                                    .maxVisibleNotifications
-                            );
-
-
-                    NOTIFY.state
-                        .firestoreUnsubscribe =
-                        query.onSnapshot(
-                            function (
-                                snapshot
-                            ) {
-
-                                snapshot.docChanges()
-                                    .forEach(
-                                        function (
-                                            change
-                                        ) {
-
-                                            if (
-                                                change.type !==
-                                                "added"
-                                            ) {
-
-                                                return;
+                    container.innerHTML =
+                        notifications
+                            .map(
+                                function (
+                                    notification
+                                ) {
+
+                                    return `
+                                    <div
+                                        class="notification-item ${
+                                            notification.read
+                                                ? "is-read"
+                                                : "is-unread"
+                                        }"
+                                        data-notification-id="${NOTIFY.escape(notification.id)}"
+                                    >
+
+                                        <div class="notification-icon">
+                                            ${
+                                                notification.type ===
+                                                "ride_request"
+                                                    ? "🏍️"
+                                                    : notification.type ===
+                                                      "ride_accepted"
+                                                        ? "✓"
+                                                        : notification.type ===
+                                                          "ride_completed"
+                                                            ? "★"
+                                                            : "🔔"
                                             }
+                                        </div>
 
+                                        <div class="notification-content">
 
-                                            const data =
-                                                change.doc.data();
+                                            <div class="notification-title">
+                                                ${NOTIFY.escape(
+                                                    notification.title
+                                                )}
+                                            </div>
 
+                                            <div class="notification-message">
+                                                ${NOTIFY.escape(
+                                                    notification.body
+                                                )}
+                                            </div>
 
-                                            NOTIFY.add(
-                                                {
-                                                    ...data,
+                                            <div class="notification-time">
+                                                ${NOTIFY.timeAgo(
+                                                    notification.timestamp
+                                                )}
+                                            </div>
 
-                                                    id:
-                                                        data.id ||
-                                                        change.doc.id
-                                                },
-                                                {
-                                                    sound:
-                                                        false,
+                                        </div>
 
-                                                    browser:
-                                                        false
-                                                }
-                                            );
+                                        ${
+                                            !notification.read
+                                                ? `
+                                                <span class="notification-dot"></span>
+                                                `
+                                                : ""
                                         }
-                                    );
-                            },
-                            function (
-                                error
-                            ) {
 
-                                console.warn(
-                                    "Notification listener error:",
-                                    error
-                                );
-                            }
-                        );
-
-
-                    return true;
-
-                } catch (error) {
-
-                    console.warn(
-                        "Unable to start notification listener:",
-                        error
-                    );
+                                    </div>
+                                    `;
+                                }
+                            )
+                            .join("");
                 }
-            }
+            );
 
 
-            return false;
+            NOTIFY.updateBadges();
         };
 
 
     /* ========================================================
-       STOP LISTENER
+       CLICK EVENTS
        ======================================================== */
 
-    NOTIFY.stopListener =
+    NOTIFY.bindEvents =
         function () {
 
-            if (
-                RX.firebase &&
-                RX.firebase.rtdb &&
-                NOTIFY.state.listener
-            ) {
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
 
-                try {
-
-                    RX.firebase
-                        .rtdb
-                        .ref(
-                            NOTIFY.config
-                                .rtdbPath
-                        )
-                        .off(
-                            "child_added",
-                            NOTIFY.state.listener
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        error
-                    );
-                }
-            }
-
-
-            if (
-                typeof NOTIFY.state
-                    .firestoreUnsubscribe ===
-                "function"
-            ) {
-
-                try {
-
-                    NOTIFY.state
-                        .firestoreUnsubscribe();
-
-                } catch (error) {
-
-                    console.warn(
-                        error
-                    );
-                }
-            }
-
-
-            NOTIFY.state.listener =
-                null;
-
-            NOTIFY.state
-                .firestoreUnsubscribe =
-                null;
-        };
-
-
-    /* ========================================================
-       AUTO AUTH LISTENER
-       ======================================================== */
-
-    NOTIFY.listenToAuth =
-        function () {
-
-            if (
-                !RX.firebase ||
-                !RX.firebase.auth
-            ) {
-
-                return;
-            }
-
-
-            RX.firebase.auth
-                .onAuthStateChanged(
-                    function (
-                        user
-                    ) {
-
-                        if (
-                            user
-                        ) {
-
-                            NOTIFY.startListener(
-                                user.uid,
-                                user.role ||
-                                null
+                    const button =
+                        event.target
+                            .closest(
+                                "[data-notifications]"
                             );
 
-                        } else {
 
-                            NOTIFY.stopListener();
+                    if (button) {
 
+                        event.preventDefault();
+
+                        NOTIFY.togglePanel();
+
+                        return;
+                    }
+
+
+                    const markAll =
+                        event.target
+                            .closest(
+                                "[data-notifications-mark-all]"
+                            );
+
+
+                    if (markAll) {
+
+                        event.preventDefault();
+
+                        NOTIFY.markAllRead();
+
+                        return;
+                    }
+
+
+                    const clear =
+                        event.target
+                            .closest(
+                                "[data-notifications-clear]"
+                            );
+
+
+                    if (clear) {
+
+                        event.preventDefault();
+
+                        NOTIFY.clear();
+
+                        return;
+                    }
+
+
+                    const item =
+                        event.target
+                            .closest(
+                                "[data-notification-id]"
+                            );
+
+
+                    if (item) {
+
+                        const id =
+                            item.dataset
+                                .notificationId;
+
+
+                        NOTIFY.markRead(
+                            id
+                        );
+
+
+                        const notification =
                             NOTIFY.state
-                                .userId =
-                                null;
+                                .notifications
+                                .find(
+                                    function (
+                                        entry
+                                    ) {
 
-                            NOTIFY.state
-                                .role =
-                                null;
+                                        return (
+                                            entry.id ===
+                                            id
+                                        );
+                                    }
+                                );
+
+
+                        if (
+                            notification &&
+                            notification.data &&
+                            notification.data.url
+                        ) {
+
+                            window.location.href =
+                                notification
+                                    .data
+                                    .url;
                         }
                     }
-                );
+                }
+            );
         };
 
 
     /* ========================================================
-       OPEN NOTIFICATION PANEL
+       PANEL
        ======================================================== */
 
-    NOTIFY.openPanel =
+    NOTIFY.togglePanel =
         function () {
 
             const panel =
@@ -2516,34 +1563,28 @@
 
 
             if (!panel) {
+
+                /*
+                 * If no custom panel exists,
+                 * create one.
+                 */
+
+                NOTIFY.createPanel();
+
                 return;
             }
 
 
-            panel.classList.add(
+            panel.classList.toggle(
+                "active"
+            );
+
+
+            panel.classList.toggle(
                 "open"
-            );
-
-
-            document.body.classList.add(
-                "notification-panel-open"
-            );
-
-
-            NOTIFY.render();
-
-
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-notification-panel-open"
-                )
             );
         };
 
-
-    /* ========================================================
-       CLOSE PANEL
-       ======================================================== */
 
     NOTIFY.closePanel =
         function () {
@@ -2560,199 +1601,900 @@
 
 
             panel.classList.remove(
-                "open"
+                "active"
             );
 
 
-            document.body.classList.remove(
-                "notification-panel-open"
+            panel.classList.remove(
+                "open"
             );
         };
 
 
     /* ========================================================
-       BIND UI
+       CREATE PANEL
        ======================================================== */
 
-    NOTIFY.bind =
+    NOTIFY.createPanel =
         function () {
 
-            document
-                .querySelectorAll(
-                    "[data-open-notifications]"
+            if (
+                document.querySelector(
+                    "[data-notification-panel]"
                 )
-                .forEach(
-                    function (
-                        button
-                    ) {
+            ) {
 
-                        if (
-                            button.dataset
-                                .notificationBound ===
-                            "true"
-                        ) {
+                NOTIFY.render();
 
-                            return;
-                        }
+                return;
+            }
 
 
-                        button.dataset
-                            .notificationBound =
-                            "true";
-
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                NOTIFY.openPanel();
-                            }
-                        );
-                    }
+            const panel =
+                document.createElement(
+                    "div"
                 );
 
 
-            document
+            panel.className =
+                "riderx-notification-panel";
+
+
+            panel.setAttribute(
+                "data-notification-panel",
+                ""
+            );
+
+
+            panel.innerHTML =
+                `
+                <div class="notification-panel-backdrop"
+                     data-notification-close></div>
+
+                <section class="notification-panel-card">
+
+                    <header class="notification-panel-header">
+
+                        <div>
+                            <h2>Notifications</h2>
+                            <p>RiderX updates</p>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="notification-close"
+                            data-notification-close
+                            aria-label="Close notifications"
+                        >
+                            ×
+                        </button>
+
+                    </header>
+
+
+                    <div class="notification-actions">
+
+                        <button
+                            type="button"
+                            data-notifications-mark-all
+                        >
+                            Mark all read
+                        </button>
+
+                        <button
+                            type="button"
+                            data-notifications-clear
+                        >
+                            Clear
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="notification-list"
+                        data-notification-list
+                    ></div>
+
+                </section>
+                `;
+
+
+            document.body.appendChild(
+                panel
+            );
+
+
+            panel
                 .querySelectorAll(
-                    "[data-close-notifications]"
+                    "[data-notification-close]"
                 )
                 .forEach(
                     function (
-                        button
+                        element
                     ) {
 
-                        if (
-                            button.dataset
-                                .notificationBound ===
-                            "true"
-                        ) {
-
-                            return;
-                        }
-
-
-                        button.dataset
-                            .notificationBound =
-                            "true";
-
-
-                        button.addEventListener(
+                        element.addEventListener(
                             "click",
-                            function () {
-
-                                NOTIFY.closePanel();
-                            }
-                        );
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-mark-all-notifications]"
-                )
-                .forEach(
-                    function (
-                        button
-                    ) {
-
-                        if (
-                            button.dataset
-                                .notificationBound ===
-                            "true"
-                        ) {
-
-                            return;
-                        }
-
-
-                        button.dataset
-                            .notificationBound =
-                            "true";
-
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                NOTIFY.markAllRead();
-                            }
-                        );
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-clear-notifications]"
-                )
-                .forEach(
-                    function (
-                        button
-                    ) {
-
-                        if (
-                            button.dataset
-                                .notificationBound ===
-                            "true"
-                        ) {
-
-                            return;
-                        }
-
-
-                        button.dataset
-                            .notificationBound =
-                            "true";
-
-
-                        button.addEventListener(
-                            "click",
-                            function () {
-
-                                NOTIFY.clear();
-                            }
-                        );
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-notification-sound]"
-                )
-                .forEach(
-                    function (
-                        control
-                    ) {
-
-                        control.checked =
-                            NOTIFY.state
-                                .soundEnabled;
-
-
-                        control.addEventListener(
-                            "change",
                             function () {
 
                                 NOTIFY
-                                    .setSoundEnabled(
-                                        control
-                                            .checked
-                                    );
+                                    .closePanel();
                             }
                         );
                     }
                 );
+
+
+            panel.classList.add(
+                "active"
+            );
+
+
+            NOTIFY.render();
         };
 
 
     /* ========================================================
-       INIT
+       FIREBASE DATABASE
+       ======================================================== */
+
+    NOTIFY.getDatabase =
+        function () {
+
+            try {
+
+                if (
+                    window.firebase &&
+                    firebase.database
+                ) {
+
+                    return firebase.database();
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Firebase RTDB unavailable:",
+                    error
+                );
+            }
+
+
+            return null;
+        };
+
+
+    /* ========================================================
+       FIREBASE LISTENER
+       ======================================================== */
+
+    NOTIFY.startFirebaseListener =
+        function () {
+
+            if (
+                NOTIFY.state.listening
+            ) {
+
+                return;
+            }
+
+
+            const userId =
+                NOTIFY.getUserId();
+
+
+            if (!userId) {
+
+                return;
+            }
+
+
+            const database =
+                NOTIFY.getDatabase();
+
+
+            if (!database) {
+
+                return;
+            }
+
+
+            const role =
+                NOTIFY.getRole() ||
+                "customer";
+
+
+            const paths = [
+
+                "notifications/" +
+                userId,
+
+                "notifications/" +
+                role +
+                "/" +
+                userId
+            ];
+
+
+            paths.forEach(
+                function (
+                    path
+                ) {
+
+                    try {
+
+                        const reference =
+                            database.ref(
+                                path
+                            );
+
+
+                        const handler =
+                            function (
+                                snapshot
+                            ) {
+
+                                const value =
+                                    snapshot.val();
+
+
+                                if (
+                                    !value
+                                ) {
+
+                                    return;
+                                }
+
+
+                                const data = {
+
+                                    ...value,
+
+                                    id:
+                                        value.id ||
+                                        snapshot.key,
+
+                                    userId:
+                                        value.userId ||
+                                        userId
+                                };
+
+
+                                NOTIFY.add(
+                                    data
+                                );
+                            };
+
+
+                        reference.on(
+                            "child_added",
+                            handler
+                        );
+
+
+                        NOTIFY.state
+                            .firebaseListeners
+                            .push(
+                                {
+                                    reference:
+                                        reference,
+
+                                    event:
+                                        "child_added",
+
+                                    handler:
+                                        handler
+                                }
+                            );
+
+                    } catch (error) {
+
+                        console.warn(
+                            "Firebase notification listener error:",
+                            error
+                        );
+                    }
+                }
+            );
+
+
+            NOTIFY.state.listening =
+                true;
+        };
+
+
+    /* ========================================================
+       STOP FIREBASE LISTENER
+       ======================================================== */
+
+    NOTIFY.stopFirebaseListener =
+        function () {
+
+            NOTIFY.state
+                .firebaseListeners
+                .forEach(
+                    function (
+                        listener
+                    ) {
+
+                        try {
+
+                            listener.reference
+                                .off(
+                                    listener.event,
+                                    listener.handler
+                                );
+
+                        } catch (error) {
+                            /* Ignore */
+                        }
+                    }
+                );
+
+
+            NOTIFY.state
+                .firebaseListeners =
+                [];
+
+
+            NOTIFY.state.listening =
+                false;
+        };
+
+
+    /* ========================================================
+       FIREBASE SEND
+       ======================================================== */
+
+    NOTIFY.sendToUser =
+        async function (
+            userId,
+            data
+        ) {
+
+            const database =
+                NOTIFY.getDatabase();
+
+
+            if (
+                !database ||
+                !userId
+            ) {
+
+                return false;
+            }
+
+
+            try {
+
+                const id =
+                    data.id ||
+                    NOTIFY.generateId();
+
+
+                await database
+                    .ref(
+                        "notifications/" +
+                        userId +
+                        "/" +
+                        id
+                    )
+                    .set(
+                        {
+
+                            ...data,
+
+                            id:
+                                id,
+
+                            userId:
+                                userId,
+
+                            timestamp:
+                                data.timestamp ||
+                                Date.now()
+                        }
+                    );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "Notification send failed:",
+                    error
+                );
+
+
+                return false;
+            }
+        };
+
+
+    /* ========================================================
+       RIDE NOTIFICATIONS
+       ======================================================== */
+
+    NOTIFY.rideRequest =
+        function (
+            ride
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "ride_request",
+
+                title:
+                    "New Ride Request",
+
+                body:
+                    ride &&
+                    ride.pickupAddress
+                        ? "New ride request from " +
+                          ride.pickupAddress
+                        : "You have a new ride request.",
+
+                rideId:
+                    ride &&
+                    (
+                        ride.rideId ||
+                        ride.id
+                    ),
+
+                bookingId:
+                    ride &&
+                    ride.bookingId,
+
+                requireInteraction:
+                    true,
+
+                soundType:
+                    "ride_request",
+
+                vibration:
+                    [300, 150, 300, 150, 500],
+
+                data: {
+
+                    rideId:
+                        ride &&
+                        (
+                            ride.rideId ||
+                            ride.id
+                        ),
+
+                    url:
+                        "/rider/rides.html"
+                }
+            });
+        };
+
+
+    NOTIFY.rideAccepted =
+        function (
+            ride
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "ride_accepted",
+
+                title:
+                    "Ride Accepted",
+
+                body:
+                    "Your RiderX ride has been accepted.",
+
+                rideId:
+                    ride &&
+                    (
+                        ride.rideId ||
+                        ride.id
+                    ),
+
+                data: {
+
+                    rideId:
+                        ride &&
+                        (
+                            ride.rideId ||
+                            ride.id
+                        ),
+
+                    url:
+                        "/customer/booking.html"
+                }
+            });
+        };
+
+
+    NOTIFY.riderArriving =
+        function (
+            ride
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "rider_arriving",
+
+                title:
+                    "Rider Is On The Way",
+
+                body:
+                    "Your Rider is coming to your pickup location.",
+
+                rideId:
+                    ride &&
+                    (
+                        ride.rideId ||
+                        ride.id
+                    ),
+
+                data: {
+
+                    rideId:
+                        ride &&
+                        (
+                            ride.rideId ||
+                            ride.id
+                        ),
+
+                    url:
+                        "/customer/booking.html"
+                }
+            });
+        };
+
+
+    NOTIFY.riderArrived =
+        function (
+            ride
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "rider_arrived",
+
+                title:
+                    "Rider Has Arrived",
+
+                body:
+                    "Your Rider has arrived at the pickup location.",
+
+                rideId:
+                    ride &&
+                    (
+                        ride.rideId ||
+                        ride.id
+                    ),
+
+                requireInteraction:
+                    true,
+
+                data: {
+
+                    rideId:
+                        ride &&
+                        (
+                            ride.rideId ||
+                            ride.id
+                        ),
+
+                    url:
+                        "/customer/booking.html"
+                }
+            });
+        };
+
+
+    NOTIFY.rideStarted =
+        function (
+            ride
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "ride_started",
+
+                title:
+                    "Ride Started",
+
+                body:
+                    "Your RiderX trip has started.",
+
+                rideId:
+                    ride &&
+                    (
+                        ride.rideId ||
+                        ride.id
+                    ),
+
+                data: {
+
+                    rideId:
+                        ride &&
+                        (
+                            ride.rideId ||
+                            ride.id
+                        ),
+
+                    url:
+                        "/customer/booking.html"
+                }
+            });
+        };
+
+
+    NOTIFY.rideCompleted =
+        function (
+            ride
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "ride_completed",
+
+                title:
+                    "Ride Completed",
+
+                body:
+                    "Your RiderX trip has been completed.",
+
+                rideId:
+                    ride &&
+                    (
+                        ride.rideId ||
+                        ride.id
+                    ),
+
+                data: {
+
+                    rideId:
+                        ride &&
+                        (
+                            ride.rideId ||
+                            ride.id
+                        ),
+
+                    url:
+                        "/customer/history.html"
+                }
+            });
+        };
+
+
+    NOTIFY.rideCancelled =
+        function (
+            ride,
+            reason
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "ride_cancelled",
+
+                title:
+                    "Ride Cancelled",
+
+                body:
+                    reason ||
+                    "This ride has been cancelled.",
+
+                rideId:
+                    ride &&
+                    (
+                        ride.rideId ||
+                        ride.id
+                    )
+            });
+        };
+
+
+    /* ========================================================
+       PAYMENT NOTIFICATIONS
+       ======================================================== */
+
+    NOTIFY.paymentSuccess =
+        function (
+            amount
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "payment_success",
+
+                title:
+                    "Payment Successful",
+
+                body:
+                    amount
+                        ? "Payment of ₹" +
+                          amount +
+                          " was successful."
+                        : "Your payment was successful."
+            });
+        };
+
+
+    NOTIFY.paymentFailed =
+        function (
+            message
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "payment_failed",
+
+                title:
+                    "Payment Failed",
+
+                body:
+                    message ||
+                    "We could not process your payment."
+            });
+        };
+
+
+    /* ========================================================
+       WALLET NOTIFICATIONS
+       ======================================================== */
+
+    NOTIFY.walletCredit =
+        function (
+            amount
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "wallet_credit",
+
+                title:
+                    "Wallet Credited",
+
+                body:
+                    "₹" +
+                    amount +
+                    " has been added to your RiderX wallet."
+            });
+        };
+
+
+    NOTIFY.walletDebit =
+        function (
+            amount
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "wallet_debit",
+
+                title:
+                    "Wallet Used",
+
+                body:
+                    "₹" +
+                    amount +
+                    " was deducted from your RiderX wallet."
+            });
+        };
+
+
+    /* ========================================================
+       SUPPORT NOTIFICATION
+       ======================================================== */
+
+    NOTIFY.support =
+        function (
+            message
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "support",
+
+                title:
+                    "RiderX Support",
+
+                body:
+                    message ||
+                    "You have a new support update."
+            });
+        };
+
+
+    /* ========================================================
+       SYSTEM NOTIFICATION
+       ======================================================== */
+
+    NOTIFY.system =
+        function (
+            title,
+            message
+        ) {
+
+            return NOTIFY.add({
+
+                type:
+                    "system",
+
+                title:
+                    title ||
+                    "RiderX",
+
+                body:
+                    message ||
+                    ""
+            });
+        };
+
+
+    /* ========================================================
+       AUTH LISTENER
+       ======================================================== */
+
+    NOTIFY.bindAuth =
+        function () {
+
+            try {
+
+                if (
+                    window.firebase &&
+                    firebase.auth
+                ) {
+
+                    firebase.auth()
+                        .onAuthStateChanged(
+                            function (
+                                user
+                            ) {
+
+                                NOTIFY.stopFirebaseListener();
+
+
+                                NOTIFY.state
+                                    .currentUser =
+                                    user;
+
+
+                                if (user) {
+
+                                    NOTIFY
+                                        .startFirebaseListener();
+                                }
+                            }
+                        );
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Auth notification binding failed:",
+                    error
+                );
+            }
+        };
+
+
+    /* ========================================================
+       INITIALIZE
        ======================================================== */
 
     NOTIFY.init =
-        function () {
+        async function () {
 
             if (
                 NOTIFY.state.initialized
@@ -2762,236 +2504,73 @@
             }
 
 
+            NOTIFY.load();
+
+            NOTIFY.bindEvents();
+
+            NOTIFY.render();
+
+            NOTIFY.bindAuth();
+
+
+            /*
+             * Don't automatically ask
+             * permission immediately on
+             * every page load.
+             */
+
+            if (
+                typeof Notification !==
+                "undefined"
+            ) {
+
+                NOTIFY.state.permission =
+                    Notification.permission;
+            }
+
+
             NOTIFY.state.initialized =
                 true;
 
 
-            NOTIFY.loadSettings();
-
-            NOTIFY.loadLocal();
-
-            NOTIFY.bind();
-
-            NOTIFY.updateBadges();
-
-            NOTIFY.render();
-
-            NOTIFY.listenToAuth();
-
-
-            /*
-             * Browser permission is requested
-             * only after user interaction in
-             * supported browsers.
-             */
-
-            document.addEventListener(
-                "click",
-                function () {
-
-                    if (
-                        NOTIFY.state
-                            .permission ===
-                        "default"
-                    ) {
-
-                        if (
-                            "Notification" in
-                            window
-                        ) {
-
-                            NOTIFY.state
-                                .permission =
-                                Notification
-                                    .permission;
-                        }
-                    }
-
-                },
-                {
-                    once:
-                        true
-                }
-            );
-
-
-            console.log(
-                "RiderX Notification Engine loaded."
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-notification-ready"
+                )
             );
         };
 
 
     /* ========================================================
-       GLOBAL EVENTS
+       PUBLIC API
        ======================================================== */
 
-    window.addEventListener(
-        "riderx-ride-accepted",
-        function (
-            event
-        ) {
-
-            const data =
-                event.detail ||
-                {};
+    RX.notify =
+        NOTIFY.add;
 
 
-            if (
-                data.rideId
-            ) {
-
-                NOTIFY.rideAccepted(
-                    data.rideId,
-                    data.riderName
-                );
-            }
-        }
-    );
+    RX.notifications =
+        NOTIFY;
 
 
-    window.addEventListener(
-        "riderx-rider-arriving",
-        function (
-            event
-        ) {
-
-            const data =
-                event.detail ||
-                {};
+    RX.requestNotificationPermission =
+        NOTIFY.requestPermission;
 
 
-            if (
-                data.rideId
-            ) {
-
-                NOTIFY.riderArriving(
-                    data.rideId
-                );
-            }
-        }
-    );
+    RX.markNotificationRead =
+        NOTIFY.markRead;
 
 
-    window.addEventListener(
-        "riderx-rider-arrived",
-        function (
-            event
-        ) {
-
-            const data =
-                event.detail ||
-                {};
+    RX.markAllNotificationsRead =
+        NOTIFY.markAllRead;
 
 
-            if (
-                data.rideId
-            ) {
-
-                NOTIFY.riderArrived(
-                    data.rideId
-                );
-            }
-        }
-    );
-
-
-    window.addEventListener(
-        "riderx-ride-started",
-        function (
-            event
-        ) {
-
-            const data =
-                event.detail ||
-                {};
-
-
-            if (
-                data.rideId
-            ) {
-
-                NOTIFY.rideStarted(
-                    data.rideId
-                );
-            }
-        }
-    );
-
-
-    window.addEventListener(
-        "riderx-ride-completed",
-        function (
-            event
-        ) {
-
-            const data =
-                event.detail ||
-                {};
-
-
-            if (
-                data.rideId
-            ) {
-
-                NOTIFY.rideCompleted(
-                    data.rideId,
-                    data.fare
-                );
-            }
-        }
-    );
-
-
-    window.addEventListener(
-        "riderx-ride-cancelled",
-        function (
-            event
-        ) {
-
-            const data =
-                event.detail ||
-                {};
-
-
-            if (
-                data.rideId
-            ) {
-
-                NOTIFY.rideCancelled(
-                    data.rideId,
-                    data.reason
-                );
-            }
-        }
-    );
-
-
-    window.addEventListener(
-        "riderx-payment-success",
-        function (
-            event
-        ) {
-
-            const data =
-                event.detail ||
-                {};
-
-
-            if (
-                data.rideId
-            ) {
-
-                NOTIFY.paymentSuccess(
-                    data.rideId,
-                    data.amount
-                );
-            }
-        }
-    );
+    RX.playNotificationSound =
+        NOTIFY.playSound;
 
 
     /* ========================================================
-       DOM READY
+       AUTO INIT
        ======================================================== */
 
     if (
@@ -3001,7 +2580,10 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            NOTIFY.init
+            function () {
+
+                NOTIFY.init();
+            }
         );
 
     } else {
@@ -3009,5 +2591,9 @@
         NOTIFY.init();
     }
 
+
+    console.log(
+        "RiderX Notification Engine loaded."
+    );
 
 })();
