@@ -15,6 +15,10 @@
 
 <style>
 
+/* =========================================================
+   RESET
+========================================================= */
+
 *{
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
@@ -32,7 +36,7 @@ body{
 
 body{
     padding-bottom:
-        calc(25px + env(safe-area-inset-bottom));
+        calc(30px + env(safe-area-inset-bottom));
 }
 
 button{
@@ -40,17 +44,27 @@ button{
     cursor:pointer;
 }
 
+button:disabled{
+    cursor:not-allowed;
+    opacity:.45;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
 .header{
     position:sticky;
     top:0;
     z-index:1000;
 
     padding:
-        calc(12px + env(safe-area-inset-top))
+        calc(10px + env(safe-area-inset-top))
         14px
-        12px;
+        10px;
 
-    background:rgba(5,5,5,.95);
+    background:rgba(5,5,5,.96);
     backdrop-filter:blur(18px);
 
     border-bottom:
@@ -61,12 +75,14 @@ button{
 .header-row{
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:9px;
 }
 
 .back{
     width:42px;
     height:42px;
+
+    flex:0 0 42px;
 
     border:0;
     border-radius:13px;
@@ -79,11 +95,15 @@ button{
 
 .logo{
     flex:1;
+    min-width:0;
 }
 
 .logo strong{
     display:block;
+
     font-size:20px;
+    line-height:1;
+
     font-weight:900;
 }
 
@@ -93,13 +113,76 @@ button{
 
 .logo small{
     display:block;
-    margin-top:2px;
+
+    margin-top:4px;
 
     color:#777;
+
     font-size:8px;
     font-weight:800;
 
     text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+
+/* =========================================================
+   HEADER ACTIONS
+========================================================= */
+
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.icon-btn{
+    position:relative;
+
+    width:40px;
+    height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:0;
+    border-radius:12px;
+
+    background:#1a1a1a;
+    color:#fff;
+
+    font-size:18px;
+}
+
+.icon-btn:active{
+    transform:scale(.95);
+}
+
+.notification-badge{
+    position:absolute;
+
+    top:4px;
+    right:4px;
+
+    min-width:15px;
+    height:15px;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    padding:0 4px;
+
+    border-radius:20px;
+
+    background:#FFD600;
+    color:#000;
+
+    font-size:8px;
+    font-weight:900;
+
+    border:2px solid #1a1a1a;
 }
 
 .online{
@@ -107,7 +190,8 @@ button{
     align-items:center;
     gap:6px;
 
-    padding:8px 10px;
+    padding:8px 9px;
+
     border-radius:20px;
 
     background:rgba(54,220,117,.10);
@@ -120,6 +204,9 @@ button{
 .online-dot{
     width:7px;
     height:7px;
+
+    flex:0 0 7px;
+
     border-radius:50%;
     background:#36dc75;
 
@@ -128,12 +215,24 @@ button{
         rgba(54,220,117,.8);
 }
 
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
 .container{
     width:100%;
     max-width:680px;
-    margin:auto;
+
+    margin:0 auto;
+
     padding:14px;
 }
+
+
+/* =========================================================
+   LOADING
+========================================================= */
 
 .loading{
     min-height:500px;
@@ -144,8 +243,11 @@ button{
     flex-direction:column;
 
     color:#777;
+
     font-size:10px;
     font-weight:800;
+
+    text-align:center;
 }
 
 .spinner{
@@ -159,7 +261,8 @@ button{
 
     border-radius:50%;
 
-    animation:spin .8s linear infinite;
+    animation:
+        spin .8s linear infinite;
 }
 
 @keyframes spin{
@@ -168,10 +271,15 @@ button{
     }
 }
 
+
+/* =========================================================
+   ERROR
+========================================================= */
+
 .error{
     display:none;
 
-    margin:14px;
+    margin:14px 0;
 
     padding:14px;
 
@@ -188,6 +296,11 @@ button{
     font-size:10px;
     line-height:1.5;
 }
+
+
+/* =========================================================
+   REQUEST BANNER
+========================================================= */
 
 .request-banner{
     display:flex;
@@ -215,6 +328,8 @@ button{
     width:42px;
     height:42px;
 
+    flex:0 0 42px;
+
     display:flex;
     align-items:center;
     justify-content:center;
@@ -229,6 +344,7 @@ button{
 
 .request-banner-text{
     flex:1;
+    min-width:0;
 }
 
 .request-banner-title{
@@ -238,12 +354,16 @@ button{
 
 .request-banner-sub{
     margin-top:3px;
+
     color:#999;
+
     font-size:8px;
+    line-height:1.35;
 }
 
 .timer{
     min-width:45px;
+
     text-align:center;
 
     padding:8px 6px;
@@ -257,6 +377,11 @@ button{
     font-size:11px;
     font-weight:900;
 }
+
+
+/* =========================================================
+   MAIN CARD
+========================================================= */
 
 .card{
     padding:17px;
@@ -274,6 +399,11 @@ button{
         rgba(0,0,0,.30);
 }
 
+
+/* =========================================================
+   SERVICE
+========================================================= */
+
 .service{
     display:flex;
     align-items:center;
@@ -290,6 +420,8 @@ button{
     width:55px;
     height:55px;
 
+    flex:0 0 55px;
+
     display:flex;
     align-items:center;
     justify-content:center;
@@ -303,6 +435,7 @@ button{
 
 .service-info{
     flex:1;
+    min-width:0;
 }
 
 .service-info strong{
@@ -340,6 +473,11 @@ button{
     font-size:8px;
 }
 
+
+/* =========================================================
+   ROUTE
+========================================================= */
+
 .route{
     position:relative;
 
@@ -363,6 +501,7 @@ button{
 
 .location{
     position:relative;
+
     min-height:75px;
 }
 
@@ -406,7 +545,14 @@ button{
 
     font-size:13px;
     line-height:1.45;
+
+    word-break:break-word;
 }
+
+
+/* =========================================================
+   INFO GRID
+========================================================= */
 
 .info-grid{
     display:grid;
@@ -446,7 +592,14 @@ button{
     color:#eee;
 
     font-size:12px;
+
+    word-break:break-word;
 }
+
+
+/* =========================================================
+   CUSTOMER
+========================================================= */
 
 .customer{
     margin-top:10px;
@@ -468,6 +621,8 @@ button{
     width:46px;
     height:46px;
 
+    flex:0 0 46px;
+
     display:flex;
     align-items:center;
     justify-content:center;
@@ -481,6 +636,7 @@ button{
 
 .customer-info{
     flex:1;
+    min-width:0;
 }
 
 .customer-label{
@@ -497,6 +653,10 @@ button{
 
     font-size:14px;
     font-weight:900;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .customer-phone{
@@ -511,6 +671,8 @@ button{
     width:40px;
     height:40px;
 
+    flex:0 0 40px;
+
     border:0;
     border-radius:12px;
 
@@ -520,6 +682,11 @@ button{
 
     font-size:18px;
 }
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
 
 .actions{
     display:grid;
@@ -547,15 +714,23 @@ button{
     color:#fff;
 }
 
+.reject:active{
+    background:#292929;
+}
+
 .accept{
     background:#FFD600;
     color:#000;
 }
 
-.btn:disabled{
-    opacity:.45;
-    cursor:not-allowed;
+.accept:active{
+    background:#e8c200;
 }
+
+
+/* =========================================================
+   NOTE
+========================================================= */
 
 .note{
     margin-top:11px;
@@ -574,6 +749,15 @@ button{
 
     text-align:center;
 }
+
+.note strong{
+    color:#aaa;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:fixed;
@@ -605,6 +789,59 @@ button{
 
     font-size:10px;
     font-weight:900;
+
+    box-shadow:
+        0 15px 40px
+        rgba(0,0,0,.45);
+}
+
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media(min-width:700px){
+
+    .container{
+        padding-top:20px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL PHONES
+========================================================= */
+
+@media(max-width:370px){
+
+    .online{
+        display:none;
+    }
+
+    .header-actions{
+        gap:5px;
+    }
+
+    .icon-btn{
+        width:38px;
+        height:38px;
+    }
+
+    .service-icon{
+        width:50px;
+        height:50px;
+        flex-basis:50px;
+    }
+
+    .service-info strong{
+        font-size:16px;
+    }
+
+    .fare strong{
+        font-size:21px;
+    }
+
 }
 
 </style>
@@ -612,6 +849,11 @@ button{
 </head>
 
 <body>
+
+
+<!-- =======================================================
+     HEADER
+======================================================= -->
 
 <header class="header">
 
@@ -621,9 +863,11 @@ button{
             id="backBtn"
             class="back"
             type="button"
+            aria-label="Back"
         >
             ‹
         </button>
+
 
         <div class="logo">
 
@@ -637,11 +881,49 @@ button{
 
         </div>
 
-        <div class="online">
 
-            <span class="online-dot"></span>
+        <div class="header-actions">
 
-            ONLINE
+            <!-- Notification -->
+
+            <button
+                id="notificationBtn"
+                class="icon-btn"
+                type="button"
+                aria-label="Notifications"
+            >
+
+                🔔
+
+                <span
+                    id="notificationBadge"
+                    class="notification-badge"
+                >
+                    0
+                </span>
+
+            </button>
+
+
+            <!-- Profile -->
+
+            <button
+                id="profileBtn"
+                class="icon-btn"
+                type="button"
+                aria-label="Profile"
+            >
+                👤
+            </button>
+
+
+            <div class="online">
+
+                <span class="online-dot"></span>
+
+                ONLINE
+
+            </div>
 
         </div>
 
@@ -650,7 +932,12 @@ button{
 </header>
 
 
+<!-- =======================================================
+     MAIN
+======================================================= -->
+
 <main class="container">
+
 
     <div
         id="loading"
@@ -674,6 +961,9 @@ button{
         id="content"
         style="display:none;"
     >
+
+
+        <!-- REQUEST BANNER -->
 
         <div class="request-banner">
 
@@ -703,7 +993,12 @@ button{
         </div>
 
 
+        <!-- REQUEST CARD -->
+
         <div class="card">
+
+
+            <!-- SERVICE -->
 
             <div class="service">
 
@@ -745,6 +1040,8 @@ button{
             </div>
 
 
+            <!-- ROUTE -->
+
             <div class="route">
 
                 <div class="location">
@@ -784,6 +1081,8 @@ button{
 
             </div>
 
+
+            <!-- RIDE INFO -->
 
             <div class="info-grid">
 
@@ -849,6 +1148,8 @@ button{
             </div>
 
 
+            <!-- CUSTOMER -->
+
             <div class="customer">
 
                 <div class="customer-row">
@@ -883,6 +1184,7 @@ button{
                         id="callBtn"
                         class="call-btn"
                         type="button"
+                        aria-label="Call customer"
                     >
                         📞
                     </button>
@@ -891,6 +1193,8 @@ button{
 
             </div>
 
+
+            <!-- ACTIONS -->
 
             <div class="actions">
 
@@ -922,12 +1226,17 @@ button{
 
             </div>
 
+
         </div>
 
     </section>
 
 </main>
 
+
+<!-- =======================================================
+     TOAST
+======================================================= -->
 
 <div
     id="toast"
@@ -936,6 +1245,10 @@ button{
 
 
 <script type="module">
+
+/* =========================================================
+   FIREBASE
+========================================================= */
 
 import {
     auth,
@@ -951,9 +1264,18 @@ import {
     getDoc,
     updateDoc,
     serverTimestamp,
-    runTransaction
+    runTransaction,
+    onSnapshot,
+    collection,
+    query,
+    where,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let currentUser = null;
 
@@ -967,12 +1289,17 @@ let timerSeconds = 30;
 
 let timerInterval = null;
 
+let rideUnsubscribe = null;
+
+
+/* =========================================================
+   URL / LOCAL STORAGE
+========================================================= */
 
 const params =
     new URLSearchParams(
         window.location.search
     );
-
 
 rideId =
     params.get("rideId")
@@ -985,6 +1312,10 @@ rideId =
     ||
     localStorage.getItem("rideId");
 
+
+/* =========================================================
+   DOM
+========================================================= */
 
 const loading =
     document.getElementById("loading");
@@ -1004,6 +1335,15 @@ const rejectBtn =
 const timer =
     document.getElementById("timer");
 
+const notificationBadge =
+    document.getElementById(
+        "notificationBadge"
+    );
+
+
+/* =========================================================
+   TOAST
+========================================================= */
 
 function toast(message){
 
@@ -1034,6 +1374,10 @@ function toast(message){
 }
 
 
+/* =========================================================
+   ERROR
+========================================================= */
+
 function showError(message){
 
     loading.style.display =
@@ -1051,6 +1395,10 @@ function showError(message){
 }
 
 
+/* =========================================================
+   STATUS
+========================================================= */
+
 function normalizeStatus(status){
 
     return String(
@@ -1062,14 +1410,17 @@ function normalizeStatus(status){
 }
 
 
+/* =========================================================
+   LOCATION TEXT
+========================================================= */
+
 function locationText(
     value,
     fallback
 ){
 
     if(
-        typeof value ===
-        "string"
+        typeof value === "string"
     ){
 
         return value;
@@ -1078,8 +1429,7 @@ function locationText(
 
     if(
         value &&
-        typeof value ===
-        "object"
+        typeof value === "object"
     ){
 
         return (
@@ -1090,15 +1440,18 @@ function locationText(
             value.label
             ||
             (
-                value.lat !== undefined
-                &&
+                value.lat !== undefined &&
                 value.lng !== undefined
                 ?
-                Number(value.lat).toFixed(5)
+                Number(
+                    value.lat
+                ).toFixed(5)
                 +
                 ", "
                 +
-                Number(value.lng).toFixed(5)
+                Number(
+                    value.lng
+                ).toFixed(5)
                 :
                 fallback
             )
@@ -1111,59 +1464,93 @@ function locationText(
 }
 
 
+/* =========================================================
+   PICKUP
+========================================================= */
+
 function pickupText(ride){
 
     return (
+
         locationText(
             ride.pickupAddress,
             ""
         )
+
         ||
+
         locationText(
             ride.pickupLocation,
             ""
         )
+
         ||
+
         locationText(
             ride.pickup,
             ""
         )
+
         ||
+
         ride.pickupText
+
         ||
+
         "Pickup location"
+
     );
 
 }
 
+
+/* =========================================================
+   DROP
+========================================================= */
 
 function dropText(ride){
 
     return (
+
         locationText(
             ride.dropAddress,
             ""
         )
+
         ||
+
         locationText(
             ride.dropLocation,
             ""
         )
+
         ||
+
         locationText(
             ride.drop,
             ""
         )
+
         ||
+
         ride.destination
+
         ||
+
         ride.dropText
+
         ||
+
         "Destination"
+
     );
 
 }
 
+
+/* =========================================================
+   SERVICE ICON
+========================================================= */
 
 function serviceIcon(service){
 
@@ -1175,19 +1562,25 @@ function serviceIcon(service){
     if(
         value.includes("cab")
     ){
+
         return "🚕";
+
     }
 
     if(
         value.includes("parcel")
     ){
+
         return "📦";
+
     }
 
     if(
         value.includes("food")
     ){
+
         return "🍔";
+
     }
 
     return "🏍️";
@@ -1195,10 +1588,33 @@ function serviceIcon(service){
 }
 
 
+/* =========================================================
+   SAFE NUMBER
+========================================================= */
+
+function safeNumber(value){
+
+    const number =
+        Number(value);
+
+    return Number.isFinite(number)
+        ?
+        number
+        :
+        0;
+
+}
+
+
+/* =========================================================
+   RENDER RIDE
+========================================================= */
+
 function renderRide(ride){
 
     rideData =
         ride;
+
 
     const service =
         ride.serviceType
@@ -1209,53 +1625,61 @@ function renderRide(ride){
         ||
         "Bike Taxi";
 
+
     const fare =
-        Number(
+        safeNumber(
             ride.fare
             ??
             ride.estimatedFare
             ??
             ride.amount
-            ??
-            0
         );
+
 
     document.getElementById(
         "serviceIcon"
     ).innerText =
-        serviceIcon(service);
+        serviceIcon(
+            service
+        );
+
 
     document.getElementById(
         "serviceName"
     ).innerText =
         service;
 
+
     document.getElementById(
         "rideType"
     ).innerText =
         service;
 
+
     document.getElementById(
         "fare"
     ).innerText =
         "₹" +
-        (
-            Number.isFinite(fare)
-            ?
-            Math.round(fare)
-            :
-            0
+        Math.round(
+            fare
         );
+
 
     document.getElementById(
         "pickup"
     ).innerText =
-        pickupText(ride);
+        pickupText(
+            ride
+        );
+
 
     document.getElementById(
         "drop"
     ).innerText =
-        dropText(ride);
+        dropText(
+            ride
+        );
+
 
     document.getElementById(
         "payment"
@@ -1266,24 +1690,58 @@ function renderRide(ride){
         ||
         "Cash";
 
-    document.getElementById(
-        "distance"
-    ).innerText =
+
+    const distance =
         ride.distance
-        ?
-        String(ride.distance)
-        :
-        (
-            ride.distanceKm
-            ?
-            Number(
-                ride.distanceKm
-            ).toFixed(1)
-            +
-            " km"
-            :
-            "—"
-        );
+        ??
+        ride.distanceKm
+        ??
+        ride.estimatedDistance
+        ??
+        "";
+
+
+    if(
+        distance !== ""
+    ){
+
+        const numericDistance =
+            Number(distance);
+
+
+        if(
+            Number.isFinite(
+                numericDistance
+            )
+        ){
+
+            document.getElementById(
+                "distance"
+            ).innerText =
+                numericDistance.toFixed(1)
+                +
+                " km";
+
+        }else{
+
+            document.getElementById(
+                "distance"
+            ).innerText =
+                String(
+                    distance
+                );
+
+        }
+
+    }else{
+
+        document.getElementById(
+            "distance"
+        ).innerText =
+            "—";
+
+    }
+
 
     document.getElementById(
         "customerName"
@@ -1292,7 +1750,10 @@ function renderRide(ride){
         ||
         ride.customer?.name
         ||
+        ride.userName
+        ||
         "Customer";
+
 
     document.getElementById(
         "customerPhone"
@@ -1303,46 +1764,50 @@ function renderRide(ride){
         ||
         ride.phone
         ||
+        ride.customer?.phone
+        ||
         "Phone unavailable";
+
 
     document.getElementById(
         "rideIdDisplay"
     ).innerText =
         rideId
         ?
-        rideId.substring(0,10)
+        rideId.substring(
+            0,
+            10
+        )
         :
         "—";
+
 
     const status =
         normalizeStatus(
             ride.status
         );
 
+
     if(
-        status !== "REQUESTED"
-        &&
-        status !== "PENDING"
-        &&
-        status !== "SEARCHING"
+        status === "ACCEPTED"
+        ||
+        status === "ASSIGNED"
     ){
 
         acceptBtn.disabled =
             true;
 
         acceptBtn.innerText =
-            status === "ACCEPTED"
-            ||
-            status === "ASSIGNED"
-            ?
-            "✓ Already Accepted"
-            :
-            "Ride Unavailable";
+            "✓ Already Accepted";
 
     }
 
 }
 
+
+/* =========================================================
+   LOAD RIDE
+========================================================= */
 
 async function loadRide(){
 
@@ -1357,6 +1822,7 @@ async function loadRide(){
         return;
 
     }
+
 
     localStorage.setItem(
         "pendingRideId",
@@ -1373,10 +1839,12 @@ async function loadRide(){
                 rideId
             );
 
+
         const snapshot =
             await getDoc(
                 rideRef
             );
+
 
         if(
             !snapshot.exists()
@@ -1390,13 +1858,16 @@ async function loadRide(){
 
         }
 
+
         const data =
             snapshot.data();
+
 
         const status =
             normalizeStatus(
                 data.status
             );
+
 
         if(
             status !== "REQUESTED"
@@ -1406,6 +1877,8 @@ async function loadRide(){
             status !== "SEARCHING"
             &&
             status !== "ASSIGNED"
+            &&
+            status !== "ACCEPTED"
         ){
 
             showError(
@@ -1416,21 +1889,42 @@ async function loadRide(){
 
         }
 
-        renderRide(data);
+
+        renderRide(
+            data
+        );
+
 
         loading.style.display =
             "none";
 
+
         content.style.display =
             "block";
 
-        startTimer();
+
+        if(
+            status === "REQUESTED"
+            ||
+            status === "PENDING"
+            ||
+            status === "SEARCHING"
+        ){
+
+            startTimer();
+
+        }
+
+
+        startRideListener();
 
     }catch(error){
 
         console.error(
+            "Load ride error:",
             error
         );
+
 
         showError(
             "Ride request load nahi hui: "
@@ -1443,13 +1937,236 @@ async function loadRide(){
 }
 
 
+/* =========================================================
+   REALTIME RIDE LISTENER
+========================================================= */
+
+function startRideListener(){
+
+    if(
+        !rideId
+    ){
+
+        return;
+
+    }
+
+
+    if(
+        rideUnsubscribe
+    ){
+
+        rideUnsubscribe();
+
+    }
+
+
+    const rideRef =
+        doc(
+            db,
+            "rides",
+            rideId
+        );
+
+
+    rideUnsubscribe =
+        onSnapshot(
+
+            rideRef,
+
+            snapshot => {
+
+                if(
+                    !snapshot.exists()
+                ){
+
+                    showError(
+                        "Ride request remove ho gayi."
+                    );
+
+                    return;
+
+                }
+
+
+                const data =
+                    snapshot.data();
+
+
+                rideData =
+                    data;
+
+
+                const status =
+                    normalizeStatus(
+                        data.status
+                    );
+
+
+                /*
+                 * Another rider accepted it.
+                 */
+
+                if(
+                    status === "ACCEPTED"
+                    ||
+                    status === "ASSIGNED"
+                ){
+
+                    if(
+                        data.riderId
+                        &&
+                        currentUser
+                        &&
+                        data.riderId !==
+                        currentUser.uid
+                    ){
+
+                        clearInterval(
+                            timerInterval
+                        );
+
+
+                        acceptBtn.disabled =
+                            true;
+
+                        rejectBtn.disabled =
+                            true;
+
+                        acceptBtn.innerText =
+                            "Ride Taken";
+
+
+                        toast(
+                            "Ye ride kisi aur rider ne accept kar li."
+                        );
+
+
+                        setTimeout(
+                            () => {
+
+                                window.location.href =
+                                    "home.html";
+
+                            },
+                            1000
+                        );
+
+                        return;
+
+                    }
+
+                }
+
+
+                /*
+                 * Customer cancelled request.
+                 */
+
+                if(
+                    status === "CANCELLED"
+                    ||
+                    status === "CANCELED"
+                ){
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    acceptBtn.disabled =
+                        true;
+
+                    rejectBtn.disabled =
+                        true;
+
+                    acceptBtn.innerText =
+                        "Ride Cancelled";
+
+
+                    toast(
+                        "Customer ne ride cancel kar di."
+                    );
+
+
+                    setTimeout(
+                        () => {
+
+                            window.location.href =
+                                "home.html";
+
+                        },
+                        1000
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * Request expired.
+                 */
+
+                if(
+                    status === "EXPIRED"
+                ){
+
+                    clearInterval(
+                        timerInterval
+                    );
+
+
+                    acceptBtn.disabled =
+                        true;
+
+                    rejectBtn.disabled =
+                        true;
+
+                    acceptBtn.innerText =
+                        "Request Expired";
+
+                }
+
+
+                /*
+                 * Update visible information.
+                 */
+
+                renderRide(
+                    data
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "Ride realtime listener:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
+/* =========================================================
+   ACCEPT RIDE
+========================================================= */
+
 async function acceptRide(){
 
     if(
         accepting
     ){
+
         return;
+
     }
+
 
     if(
         !currentUser
@@ -1462,6 +2179,7 @@ async function acceptRide(){
         return;
 
     }
+
 
     if(
         !rideId
@@ -1479,11 +2197,13 @@ async function acceptRide(){
     accepting =
         true;
 
+
     acceptBtn.disabled =
         true;
 
     rejectBtn.disabled =
         true;
+
 
     acceptBtn.innerText =
         "Accepting...";
@@ -1499,14 +2219,24 @@ async function acceptRide(){
             );
 
 
+        /*
+         * Transaction is important.
+         *
+         * It prevents two riders from accepting
+         * the same ride at the same time.
+         */
+
         await runTransaction(
+
             db,
+
             async transaction => {
 
                 const snapshot =
                     await transaction.get(
                         rideRef
                     );
+
 
                 if(
                     !snapshot.exists()
@@ -1521,6 +2251,7 @@ async function acceptRide(){
 
                 const ride =
                     snapshot.data();
+
 
                 const status =
                     normalizeStatus(
@@ -1537,7 +2268,21 @@ async function acceptRide(){
                 ){
 
                     throw new Error(
-                        "Ride already accepted by another rider."
+                        "Ride already accepted or unavailable."
+                    );
+
+                }
+
+
+                if(
+                    ride.riderId
+                    &&
+                    ride.riderId !==
+                    currentUser.uid
+                ){
+
+                    throw new Error(
+                        "Ride kisi aur rider ko assign ho chuki hai."
                     );
 
                 }
@@ -1579,8 +2324,13 @@ async function acceptRide(){
                 );
 
             }
+
         );
 
+
+        /*
+         * Save active ride.
+         */
 
         localStorage.setItem(
             "activeRideId",
@@ -1592,8 +2342,18 @@ async function acceptRide(){
             rideId
         );
 
+        localStorage.setItem(
+            "riderx_active_ride",
+            rideId
+        );
+
         localStorage.removeItem(
             "pendingRideId"
+        );
+
+
+        clearInterval(
+            timerInterval
         );
 
 
@@ -1601,6 +2361,15 @@ async function acceptRide(){
             "Ride accepted successfully."
         );
 
+
+        /*
+         * IMPORTANT:
+         *
+         * Only one map should be shown.
+         *
+         * Request page has NO map.
+         * After acceptance rider goes to live.html.
+         */
 
         setTimeout(
             () => {
@@ -1620,12 +2389,14 @@ async function acceptRide(){
     }catch(error){
 
         console.error(
-            "Accept ride:",
+            "Accept ride error:",
             error
         );
 
+
         accepting =
             false;
+
 
         acceptBtn.disabled =
             false;
@@ -1633,11 +2404,15 @@ async function acceptRide(){
         rejectBtn.disabled =
             false;
 
+
         acceptBtn.innerText =
             "✓ Accept Ride";
 
+
         toast(
             error.message
+            ||
+            "Ride accept nahi hui."
         );
 
     }
@@ -1645,11 +2420,39 @@ async function acceptRide(){
 }
 
 
+/* =========================================================
+   DECLINE RIDE
+========================================================= */
+
 function rejectRide(){
+
+    if(
+        accepting
+    ){
+
+        return;
+
+    }
+
+
+    clearInterval(
+        timerInterval
+    );
+
 
     localStorage.removeItem(
         "pendingRideId"
     );
+
+
+    /*
+     * IMPORTANT:
+     *
+     * Decline karne par global ride ko CANCELLED
+     * nahi karna hai.
+     *
+     * Dusre nearby riders ko request milni chahiye.
+     */
 
     window.location.href =
         "home.html";
@@ -1657,14 +2460,20 @@ function rejectRide(){
 }
 
 
+/* =========================================================
+   TIMER
+========================================================= */
+
 function startTimer(){
 
     clearInterval(
         timerInterval
     );
 
+
     timerSeconds =
         30;
+
 
     timer.innerText =
         "30s";
@@ -1672,14 +2481,16 @@ function startTimer(){
 
     timerInterval =
         setInterval(
+
             () => {
 
                 timerSeconds--;
 
+
                 timer.innerText =
-                    timerSeconds
-                    +
+                    timerSeconds +
                     "s";
+
 
                 if(
                     timerSeconds <= 0
@@ -1689,6 +2500,7 @@ function startTimer(){
                         timerInterval
                     );
 
+
                     if(
                         !accepting
                     ){
@@ -1696,8 +2508,10 @@ function startTimer(){
                         acceptBtn.disabled =
                             true;
 
+
                         acceptBtn.innerText =
                             "Request Expired";
+
 
                         toast(
                             "Ride request expired."
@@ -1708,11 +2522,146 @@ function startTimer(){
                 }
 
             },
+
             1000
+
         );
 
 }
 
+
+/* =========================================================
+   NOTIFICATION COUNT
+========================================================= */
+
+async function loadNotificationCount(){
+
+    if(
+        !currentUser
+    ){
+
+        return;
+
+    }
+
+
+    try{
+
+        /*
+         * Supports common notification schemas:
+         *
+         * userId
+         * uid
+         *
+         * unread
+         * read
+         */
+
+        const notificationRef =
+            collection(
+                db,
+                "notifications"
+            );
+
+
+        const q =
+            query(
+                notificationRef,
+                where(
+                    "userId",
+                    "==",
+                    currentUser.uid
+                )
+            );
+
+
+        const snapshot =
+            await getDocs(
+                q
+            );
+
+
+        let unread =
+            0;
+
+
+        snapshot.forEach(
+            item => {
+
+                const data =
+                    item.data();
+
+
+                if(
+                    data.read === true
+                    ||
+                    data.isRead === true
+                ){
+
+                    return;
+
+                }
+
+
+                if(
+                    data.unread === false
+                ){
+
+                    return;
+
+                }
+
+
+                unread++;
+
+            }
+        );
+
+
+        if(
+            unread > 0
+        ){
+
+            notificationBadge.style.display =
+                "flex";
+
+
+            notificationBadge.innerText =
+                unread > 99
+                ?
+                "99+"
+                :
+                String(
+                    unread
+                );
+
+        }else{
+
+            notificationBadge.style.display =
+                "none";
+
+        }
+
+    }catch(error){
+
+        /*
+         * Notifications should never break
+         * the ride request page.
+         */
+
+        console.warn(
+            "Notification count:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
 document
     .getElementById("backBtn")
@@ -1727,6 +2676,44 @@ document
     );
 
 
+/*
+ * Rider notification page
+ */
+
+document
+    .getElementById("notificationBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "notifications.html";
+
+        }
+    );
+
+
+/*
+ * Rider profile page
+ */
+
+document
+    .getElementById("profileBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "profile.html";
+
+        }
+    );
+
+
+/* =========================================================
+   BUTTON EVENTS
+========================================================= */
+
 acceptBtn.addEventListener(
     "click",
     acceptRide
@@ -1738,6 +2725,10 @@ rejectBtn.addEventListener(
     rejectRide
 );
 
+
+/* =========================================================
+   CALL CUSTOMER
+========================================================= */
 
 document
     .getElementById("callBtn")
@@ -1752,7 +2743,10 @@ document
                 ||
                 rideData?.phone
                 ||
+                rideData?.customer?.phone
+                ||
                 "";
+
 
             if(
                 phone
@@ -1774,9 +2768,15 @@ document
     );
 
 
+/* =========================================================
+   AUTH
+========================================================= */
+
 onAuthStateChanged(
+
     auth,
-    user => {
+
+    async user => {
 
         if(
             !user
@@ -1790,14 +2790,32 @@ onAuthStateChanged(
 
         }
 
+
         currentUser =
             user;
+
+
+        /*
+         * Load notification badge independently.
+         */
+
+        loadNotificationCount();
+
+
+        /*
+         * Load requested ride.
+         */
 
         loadRide();
 
     }
+
 );
 
+
+/* =========================================================
+   CLEANUP
+========================================================= */
 
 window.addEventListener(
     "beforeunload",
@@ -1806,6 +2824,15 @@ window.addEventListener(
         clearInterval(
             timerInterval
         );
+
+
+        if(
+            rideUnsubscribe
+        ){
+
+            rideUnsubscribe();
+
+        }
 
     }
 );
