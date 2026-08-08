@@ -2,613 +2,901 @@ rules_version = '2';
 
 service cloud.firestore {
 
-match /databases/{database}/documents {
+  match /databases/{database}/documents {
 
-// =========================================================
-// COMMON FUNCTIONS
-// =========================================================
+    // =========================================================
+    // COMMON HELPERS
+    // =========================================================
 
-function signedIn() {
-  return request.auth != null;
-}
-
-
-function userExists() {
-  return signedIn()
-    && exists(
-      /databases/$(database)/documents/users/$(request.auth.uid)
-    );
-}
+    function signedIn() {
+      return request.auth != null;
+    }
 
 
-function isAdmin() {
-  return signedIn()
-    && userExists()
-    && (
-      get(
+    function userExists() {
+      return signedIn()
+        && exists(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        );
+    }
+
+
+    function currentUser() {
+      return get(
         /databases/$(database)/documents/users/$(request.auth.uid)
-      ).data.role == "admin"
-
-      ||
-
-      get(
-        /databases/$(database)/documents/users/$(request.auth.uid)
-      ).data.isAdmin == true
-    );
-}
+      );
+    }
 
 
-function isRider() {
-  return signedIn()
-    && userExists()
-    && get(
-      /databases/$(database)/documents/users/$(request.auth.uid)
-    ).data.role == "rider";
-}
+    function isAdmin() {
+      return signedIn()
+        && userExists()
+        && (
+          currentUser().data.role == "admin"
+          ||
+          currentUser().data.isAdmin == true
+        );
+    }
 
 
-function isCustomer() {
-  return signedIn()
-    && userExists()
-    && get(
-      /databases/$(database)/documents/users/$(request.auth.uid)
-    ).data.role == "customer";
-}
+    function isRider() {
+      return signedIn()
+        && userExists()
+        && currentUser().data.role == "rider";
+    }
 
 
-// =========================================================
-// USERS
-// =========================================================
-
-match /users/{userId} {
-
-  allow read: if signedIn()
-    && (
-      request.auth.uid == userId
-      || isAdmin()
-    );
+    function isCustomer() {
+      return signedIn()
+        && userExists()
+        && currentUser().data.role == "customer";
+    }
 
 
-  allow create: if signedIn()
-    && request.auth.uid == userId;
+    function isOwner(userId) {
+      return signedIn()
+        && request.auth.uid == userId;
+    }
 
 
-  allow update: if signedIn()
-    && (
-      request.auth.uid == userId
-      || isAdmin()
-    );
+    function rideBelongsToCustomer() {
+      return signedIn()
+        && resource.data.customerId == request.auth.uid;
+    }
 
 
-  allow delete: if isAdmin();
-}
+    function rideBelongsToRider() {
+      return signedIn()
+        && resource.data.riderId == request.auth.uid;
+    }
 
 
-// =========================================================
-// RIDERS
-// =========================================================
-
-match /riders/{riderId} {
-
-  allow read: if signedIn()
-    && (
-      request.auth.uid == riderId
-      || isAdmin()
-    );
-
-
-  allow create: if signedIn()
-    && request.auth.uid == riderId;
+    function rideIsAvailable() {
+      return resource.data.status in [
+        "searching",
+        "SEARCHING",
+        "requested",
+        "REQUESTED",
+        "pending",
+        "PENDING"
+      ];
+    }
 
 
-  allow update: if signedIn()
-    && (
-      request.auth.uid == riderId
-      || isAdmin()
-    );
+    // =========================================================
+    // USERS
+    // =========================================================
+
+    match /users/{userId} {
+
+      allow read: if signedIn()
+        && (
+          request.auth.uid == userId
+          || isAdmin()
+        );
 
 
-  allow delete: if isAdmin();
-}
+      allow create: if signedIn()
+        && request.auth.uid == userId;
 
 
-// =========================================================
-// CUSTOMERS
-// =========================================================
+      /*
+       * User can update own profile.
+       * Admin can update everything.
+       *
+       * A normal user cannot change their own role/admin flag.
+       */
 
-match /customers/{customerId} {
+      allow update: if signedIn()
+        && (
+          isAdmin()
 
-  allow read: if signedIn()
-    && (
-      request.auth.uid == customerId
-      || isAdmin()
-    );
+          ||
 
+          (
+            request.auth.uid == userId
 
-  allow create: if signedIn()
-    && request.auth.uid == customerId;
+            &&
 
+            request.resource.data.role ==
+            resource.data.role
 
-  allow update: if signedIn()
-    && (
-      request.auth.uid == customerId
-      || isAdmin()
-    );
+            &&
 
-
-  allow delete: if isAdmin();
-}
-
-
-// =========================================================
-// RIDES
-// =========================================================
-
-match /rides/{rideId} {
+            request.resource.data.isAdmin ==
+            resource.data.isAdmin
+          )
+        );
 
 
-  // -------------------------------------------------------
-  // CREATE
-  // -------------------------------------------------------
-
-  allow create: if signedIn()
-    && (
-      request.resource.data.customerId ==
-      request.auth.uid
-    );
+      allow delete: if isAdmin();
+    }
 
 
-  // -------------------------------------------------------
-  // READ
-  // -------------------------------------------------------
+    // =========================================================
+    // RIDERS
+    // =========================================================
 
-  allow read: if signedIn()
-    && (
+    match /riders/{riderId} {
 
-      // Customer's own ride
-      resource.data.customerId ==
-      request.auth.uid
+      allow read: if signedIn()
+        && (
+          request.auth.uid == riderId
+          || isAdmin()
+        );
 
-      ||
 
-      // Assigned rider's ride
-      resource.data.riderId ==
-      request.auth.uid
+      allow create: if signedIn()
+        && (
+          request.auth.uid == riderId
+          || isAdmin()
+        );
 
-      ||
 
-      // Rider can see new ride requests
-      (
-        isRider()
+      /*
+       * Rider can update own profile/location/status.
+       * Admin can update everything.
+       */
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+
+          ||
+
+          request.auth.uid == riderId
+        );
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // CUSTOMERS
+    // =========================================================
+
+    match /customers/{customerId} {
+
+      allow read: if signedIn()
+        && (
+          request.auth.uid == customerId
+          || isAdmin()
+        );
+
+
+      allow create: if signedIn()
+        && (
+          request.auth.uid == customerId
+          || isAdmin()
+        );
+
+
+      allow update: if signedIn()
+        && (
+          request.auth.uid == customerId
+          || isAdmin()
+        );
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // RIDES
+    // =========================================================
+
+    match /rides/{rideId} {
+
+      // -------------------------------------------------------
+      // CUSTOMER CREATES RIDE
+      // -------------------------------------------------------
+
+      allow create: if signedIn()
+        && (
+          isCustomer()
+          || isAdmin()
+        )
+        && (
+          isAdmin()
+          ||
+          request.resource.data.customerId ==
+          request.auth.uid
+        );
+
+
+      // -------------------------------------------------------
+      // READ RIDE
+      // -------------------------------------------------------
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+
+          ||
+
+          resource.data.customerId ==
+          request.auth.uid
+
+          ||
+
+          resource.data.riderId ==
+          request.auth.uid
+
+          ||
+
+          (
+            isRider()
+            && rideIsAvailable()
+            && (
+              !("riderId" in resource.data)
+              ||
+              resource.data.riderId == null
+              ||
+              resource.data.riderId == ""
+              ||
+              resource.data.riderId == request.auth.uid
+            )
+          )
+        );
+
+
+      // -------------------------------------------------------
+      // CUSTOMER UPDATE
+      // -------------------------------------------------------
+
+      /*
+       * Customer may update their own ride.
+       * Rider assignment fields cannot be changed by customer.
+       */
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+
+          ||
+
+          (
+            isCustomer()
+            &&
+            resource.data.customerId ==
+            request.auth.uid
+
+            &&
+
+            request.resource.data.customerId ==
+            resource.data.customerId
+
+            &&
+
+            request.resource.data.riderId ==
+            resource.data.riderId
+          )
+
+          ||
+
+          (
+            isRider()
+            &&
+            resource.data.riderId ==
+            request.auth.uid
+          )
+
+          ||
+
+          (
+            isRider()
+            &&
+            rideIsAvailable()
+
+            &&
+
+            (
+              !("riderId" in resource.data)
+              ||
+              resource.data.riderId == null
+              ||
+              resource.data.riderId == ""
+            )
+
+            &&
+
+            request.resource.data.riderId ==
+            request.auth.uid
+
+            &&
+
+            request.resource.data.customerId ==
+            resource.data.customerId
+          )
+        );
+
+
+      // -------------------------------------------------------
+      // DELETE
+      // -------------------------------------------------------
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // RIDER LIVE LOCATIONS
+    // =========================================================
+
+    match /riderLocations/{riderId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+
+          ||
+
+          request.auth.uid == riderId
+
+          ||
+
+          (
+            isCustomer()
+            &&
+            resource.data.rideId != null
+            &&
+            exists(
+              /databases/$(database)/documents/rides/$(resource.data.rideId)
+            )
+            &&
+            get(
+              /databases/$(database)/documents/rides/$(resource.data.rideId)
+            ).data.customerId ==
+            request.auth.uid
+          )
+        );
+
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.auth.uid == riderId
+        );
+
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.auth.uid == riderId
+        );
+
+
+      allow delete: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.auth.uid == riderId
+        );
+    }
+
+
+    // =========================================================
+    // WALLETS
+    // =========================================================
+
+    match /wallets/{walletId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.auth.uid == walletId
+        );
+
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.auth.uid == walletId
+        );
+
+
+      /*
+       * Normal users can update wallet documents only for
+       * their own wallet.
+       *
+       * For production payment systems, balance changes
+       * should ideally be performed by trusted backend/
+       * Cloud Functions rather than directly by the client.
+       */
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.auth.uid == walletId
+        );
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // WALLET TRANSACTIONS
+    // =========================================================
+
+    match /walletTransactions/{transactionId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId == request.auth.uid
+        );
+
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.resource.data.userId ==
+          request.auth.uid
+        );
+
+
+      allow update: if isAdmin();
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // PAYMENTS
+    // =========================================================
+
+    match /payments/{paymentId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId ==
+          request.auth.uid
+
+          ||
+
+          resource.data.customerId ==
+          request.auth.uid
+
+          ||
+
+          resource.data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.resource.data.userId ==
+          request.auth.uid
+
+          ||
+
+          request.resource.data.customerId ==
+          request.auth.uid
+        );
+
+
+      allow update: if isAdmin();
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // SUPPORT
+    // =========================================================
+
+    match /support/{supportId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId ==
+          request.auth.uid
+        );
+
+
+      allow create: if signedIn()
+        && (
+          request.resource.data.userId ==
+          request.auth.uid
+          ||
+          isAdmin()
+        );
+
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId ==
+          request.auth.uid
+        );
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // SETTINGS
+    // =========================================================
+
+    match /settings/{settingId} {
+
+      allow read: if signedIn();
+
+
+      allow write: if isAdmin();
+    }
+
+
+    // =========================================================
+    // NOTIFICATIONS
+    // =========================================================
+
+    match /notifications/{notificationId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId ==
+          request.auth.uid
+          ||
+          resource.data.recipientId ==
+          request.auth.uid
+        );
+
+
+      /*
+       * Client-side notification creation is allowed for
+       * authenticated users, but recipient must be explicit.
+       */
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.resource.data.senderId ==
+          request.auth.uid
+          ||
+          request.resource.data.userId ==
+          request.auth.uid
+        );
+
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId ==
+          request.auth.uid
+          ||
+          resource.data.recipientId ==
+          request.auth.uid
+        );
+
+
+      allow delete: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId ==
+          request.auth.uid
+          ||
+          resource.data.recipientId ==
+          request.auth.uid
+        );
+    }
+
+
+    // =========================================================
+    // CHATS
+    // =========================================================
+
+    match /chats/{chatId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.customerId ==
+          request.auth.uid
+          ||
+          resource.data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.resource.data.customerId ==
+          request.auth.uid
+          ||
+          request.resource.data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.customerId ==
+          request.auth.uid
+          ||
+          resource.data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // CHAT MESSAGES
+    // =========================================================
+
+    match /chats/{chatId}/messages/{messageId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+
+          ||
+
+          get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data.customerId ==
+          request.auth.uid
+
+          ||
+
+          get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+
+          ||
+
+          get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data.customerId ==
+          request.auth.uid
+
+          ||
+
+          get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+
+          ||
+
+          get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data.customerId ==
+          request.auth.uid
+
+          ||
+
+          get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // RATINGS
+    // =========================================================
+
+    match /ratings/{ratingId} {
+
+      allow read: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.customerId ==
+          request.auth.uid
+          ||
+          resource.data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow create: if signedIn()
+        && (
+          isAdmin()
+          ||
+          request.resource.data.customerId ==
+          request.auth.uid
+        );
+
+
+      allow update: if isAdmin();
+
+
+      allow delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // OFFERS
+    // =========================================================
+
+    match /offers/{offerId} {
+
+      allow read: if signedIn();
+
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // COUPONS
+    // =========================================================
+
+    match /coupons/{couponId} {
+
+      allow read: if signedIn();
+
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // PRICING
+    // =========================================================
+
+    match /pricing/{pricingId} {
+
+      allow read: if signedIn();
+
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // FARE SETTINGS
+    // =========================================================
+
+    match /fareSettings/{settingId} {
+
+      allow read: if signedIn();
+
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // SERVICE SETTINGS
+    // =========================================================
+
+    match /serviceSettings/{settingId} {
+
+      allow read: if signedIn();
+
+
+      allow create, update, delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // REPORTS
+    // =========================================================
+
+    match /reports/{reportId} {
+
+      allow read: if isAdmin();
+
+
+      allow create: if signedIn();
+
+
+      allow update, delete: if isAdmin();
+    }
+
+
+    // =========================================================
+    // ADMIN / RIDER APPROVAL
+    // =========================================================
+
+    match /riderApprovals/{approvalId} {
+
+      allow read: if isAdmin()
+        ||
+        (
+          signedIn()
+          &&
+          resource.data.riderId ==
+          request.auth.uid
+        );
+
+
+      allow create: if signedIn()
         &&
         (
-          resource.data.status == "searching"
+          isAdmin()
           ||
-          resource.data.status == "SEARCHING"
-          ||
-          resource.data.status == "REQUESTED"
-          ||
-          resource.data.status == "PENDING"
-        )
-      )
-
-      ||
-
-      // Admin
-      isAdmin()
-    );
+          request.resource.data.riderId ==
+          request.auth.uid
+        );
 
 
-  // -------------------------------------------------------
-  // UPDATE
-  // -------------------------------------------------------
-
-  allow update: if signedIn()
-    && (
-
-      // Admin
-      isAdmin()
+      allow update, delete: if isAdmin();
+    }
 
 
-      ||
+    // =========================================================
+    // DEFAULT DENY
+    // =========================================================
 
+    match /{document=**} {
 
-      // Customer's own ride
-      (
-        resource.data.customerId ==
-        request.auth.uid
-      )
+      allow read, write: if false;
+    }
 
-
-      ||
-
-
-      // Already assigned rider
-      (
-        resource.data.riderId ==
-        request.auth.uid
-      )
-
-
-      ||
-
-
-      // Rider accepts searching/requested ride
-      (
-        isRider()
-
-        &&
-
-        (
-          resource.data.status ==
-          "searching"
-
-          ||
-
-          resource.data.status ==
-          "SEARCHING"
-
-          ||
-
-          resource.data.status ==
-          "REQUESTED"
-
-          ||
-
-          resource.data.status ==
-          "PENDING"
-        )
-
-        &&
-
-        (
-          !("riderId" in resource.data)
-
-          ||
-
-          resource.data.riderId == null
-
-          ||
-
-          resource.data.riderId == ""
-        )
-
-        &&
-
-        request.resource.data.riderId ==
-        request.auth.uid
-      )
-    );
-
-
-  // -------------------------------------------------------
-  // DELETE
-  // -------------------------------------------------------
-
-  allow delete: if isAdmin();
-}
-
-
-// =========================================================
-// RIDER LIVE LOCATIONS
-// =========================================================
-
-/*
-  Document:
-
-  riderLocations/{riderId}
-
-  Example:
-
-  {
-    lat: 30.7333,
-    lng: 76.7794,
-    rideId: "ABC123",
-    online: true,
-    updatedAt: timestamp
   }
-*/
-
-
-match /riderLocations/{riderId} {
-
-
-  // -------------------------------------------------------
-  // RIDER CAN READ OWN LOCATION
-  // ADMIN CAN READ ALL
-  // -------------------------------------------------------
-
-  allow read: if signedIn()
-    && (
-      request.auth.uid == riderId
-      || isAdmin()
-      || (
-        isCustomer()
-        &&
-        resource.data.rideId != null
-        &&
-        exists(
-          /databases/$(database)/documents/rides/$(resource.data.rideId)
-        )
-        &&
-        get(
-          /databases/$(database)/documents/rides/$(resource.data.rideId)
-        ).data.customerId ==
-        request.auth.uid
-      )
-    );
-
-
-  // -------------------------------------------------------
-  // RIDER CREATES OWN LOCATION
-  // -------------------------------------------------------
-
-  allow create: if signedIn()
-    && (
-      request.auth.uid == riderId
-      || isAdmin()
-    );
-
-
-  // -------------------------------------------------------
-  // RIDER UPDATES OWN LOCATION
-  // CUSTOMER CANNOT MODIFY LOCATION
-  // -------------------------------------------------------
-
-  allow update: if signedIn()
-    && (
-      request.auth.uid == riderId
-      || isAdmin()
-    );
-
-
-  // -------------------------------------------------------
-  // DELETE
-  // -------------------------------------------------------
-
-  allow delete: if signedIn()
-    && (
-      request.auth.uid == riderId
-      || isAdmin()
-    );
-}
-
-
-// =========================================================
-// WALLET
-// =========================================================
-
-match /wallets/{walletId} {
-
-  allow read: if signedIn()
-    && (
-      request.auth.uid == walletId
-      || isAdmin()
-    );
-
-
-  allow create: if signedIn()
-    && (
-      request.auth.uid == walletId
-      || isAdmin()
-    );
-
-
-  allow update: if signedIn()
-    && (
-      request.auth.uid == walletId
-      || isAdmin()
-    );
-
-
-  allow delete: if isAdmin();
-}
-
-
-// =========================================================
-// SUPPORT
-// =========================================================
-
-match /support/{supportId} {
-
-  allow read: if signedIn();
-
-
-  allow create: if signedIn();
-
-
-  allow update: if signedIn()
-    && (
-      isAdmin()
-
-      ||
-
-      resource.data.userId ==
-      request.auth.uid
-    );
-
-
-  allow delete: if isAdmin();
-}
-
-
-// =========================================================
-// SETTINGS
-// =========================================================
-
-match /settings/{settingId} {
-
-  allow read: if signedIn();
-
-
-  allow write: if isAdmin();
-}
-
-
-// =========================================================
-// NOTIFICATIONS
-// =========================================================
-
-match /notifications/{notificationId} {
-
-  allow read: if signedIn()
-    && (
-      resource.data.userId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-
-
-  allow create: if signedIn();
-
-
-  allow update: if signedIn()
-    && (
-      resource.data.userId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-
-
-  allow delete: if signedIn()
-    && (
-      resource.data.userId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-}
-
-
-// =========================================================
-// CHAT
-// =========================================================
-
-match /chats/{chatId} {
-
-  allow read: if signedIn()
-    && (
-      resource.data.customerId ==
-      request.auth.uid
-
-      ||
-
-      resource.data.riderId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-
-
-  allow create: if signedIn();
-
-
-  allow update: if signedIn()
-    && (
-      resource.data.customerId ==
-      request.auth.uid
-
-      ||
-
-      resource.data.riderId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-}
-
-
-// =========================================================
-// CHAT MESSAGES
-// =========================================================
-
-match /chats/{chatId}/messages/{messageId} {
-
-  allow read: if signedIn()
-    && (
-      get(
-        /databases/$(database)/documents/chats/$(chatId)
-      ).data.customerId ==
-      request.auth.uid
-
-      ||
-
-      get(
-        /databases/$(database)/documents/chats/$(chatId)
-      ).data.riderId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-
-
-  allow create: if signedIn()
-    && (
-      get(
-        /databases/$(database)/documents/chats/$(chatId)
-      ).data.customerId ==
-      request.auth.uid
-
-      ||
-
-      get(
-        /databases/$(database)/documents/chats/$(chatId)
-      ).data.riderId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-
-
-  allow update: if signedIn()
-    && (
-      get(
-        /databases/$(database)/documents/chats/$(chatId)
-      ).data.customerId ==
-      request.auth.uid
-
-      ||
-
-      get(
-        /databases/$(database)/documents/chats/$(chatId)
-      ).data.riderId ==
-      request.auth.uid
-
-      ||
-
-      isAdmin()
-    );
-
-
-  allow delete: if isAdmin();
-}
-
-
-// =========================================================
-// DEFAULT DENY
-// =========================================================
-
-match /{document=**} {
-
-  allow read, write: if false;
-
-}
-
-}
 }
