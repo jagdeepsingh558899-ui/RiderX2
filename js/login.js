@@ -1,913 +1,475 @@
-/* ============================================================
-RiderX Login System
-Customer + Rider + Admin
-Firebase v10 Modular SDK
-============================================================ */
+// ============================================================
+// RiderX Login System
+// Customer + Rider + Admin
+// Firebase v10 Modular SDK
+// ============================================================
 
 import {
-auth,
-db
+    auth,
+    db
 } from "../firebase/firebase-config.js";
 
 import {
-signInWithEmailAndPassword,
-signOut
+    signInWithEmailAndPassword,
+    signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 import {
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-import {
-doc,
-getDoc
+    doc,
+    getDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-/* ============================================================
-ELEMENTS
-============================================================ */
 
-const loginForm =
-document.getElementById("login-form");
+// ============================================================
+// ELEMENTS
+// ============================================================
 
-const emailInput =
-document.getElementById("email");
+const loginForm = document.getElementById("login-form");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const message = document.getElementById("error-message");
+const loginBtn = document.getElementById("login-btn");
 
-const passwordInput =
-document.getElementById("password");
 
-const loginButton =
-document.getElementById("login-btn");
+// ============================================================
+// GET ROLE FROM URL
+// ============================================================
 
-const statusBox =
-document.getElementById("status") ||
-document.getElementById("error-message");
-
-/* ============================================================
-URL ROLE
-============================================================ */
-
-const params =
-new URLSearchParams(
-window.location.search
-);
+const params = new URLSearchParams(window.location.search);
 
 const requestedRole =
-String(
-params.get("role") || ""
-)
-.trim()
-.toLowerCase();
+    (params.get("role") || "").trim().toLowerCase();
 
-/* ============================================================
-STATE
-============================================================ */
 
-let loginInProgress = false;
+// ============================================================
+// MESSAGE
+// ============================================================
 
-/* ============================================================
-MESSAGE
-============================================================ */
+function showMessage(text, type = "error") {
 
-function showMessage(
-text,
-type = "error"
-){
+    if (!message) return;
 
-if(!statusBox){
-    return;
-}
+    message.style.display = "block";
+    message.textContent = text;
 
-statusBox.textContent =
-    text || "";
-
-statusBox.className =
-    "status " + type;
-
-}
-
-/* ============================================================
-BUTTON STATE
-============================================================ */
-
-function setLoading(
-loading
-){
-
-if(!loginButton){
-    return;
-}
-
-loginButton.disabled =
-    loading;
-
-if(loading){
-
-    loginButton.dataset.oldText =
-        loginButton.textContent;
-
-    loginButton.textContent =
-        "Signing in...";
-
-}
-else{
-
-    loginButton.textContent =
-        loginButton.dataset.oldText ||
-        "Login";
-
-}
-
-}
-
-/* ============================================================
-GET USER PROFILE
-============================================================ */
-
-async function getUserProfile(
-uid
-){
-
-const userRef =
-    doc(
-        db,
-        "users",
-        uid
-    );
-
-const userSnap =
-    await getDoc(
-        userRef
-    );
-
-if(!userSnap.exists()){
-
-    return null;
-
-}
-
-return userSnap.data();
-
-}
-
-/* ============================================================
-NORMALIZE ROLE
-============================================================ */
-
-function getRole(
-data
-){
-
-if(!data){
-    return "";
-}
-
-const role =
-    String(
-        data.role ||
-        data.userType ||
-        data.type ||
-        ""
-    )
-    .trim()
-    .toLowerCase();
-
-if(
-    role === "administrator"
-){
-
-    return "admin";
-
-}
-
-if(
-    role === "admin"
-){
-
-    return "admin";
-
-}
-
-if(
-    role === "rider" ||
-    role === "driver"
-){
-
-    return "rider";
-
-}
-
-if(
-    role === "customer" ||
-    role === "user"
-){
-
-    return "customer";
-
-}
-
-return role;
-
-}
-
-/* ============================================================
-REDIRECT BY ROLE
-============================================================ */
-
-function redirectByRole(
-role,
-data
-){
-
-/* ========================================================
-   ADMIN
-======================================================== */
-
-if(role === "admin"){
-
-    window.location.replace(
-        "../admin/dashboard.html"
-    );
-
-    return true;
-
+    if (type === "success") {
+        message.style.color = "#22d66b";
+    } else {
+        message.style.color = "#ff4444";
+    }
 }
 
 
-/* ========================================================
-   RIDER
-======================================================== */
+// ============================================================
+// BUTTON STATE
+// ============================================================
 
-if(role === "rider"){
+function setLoading(loading) {
 
-    const approved =
-        data.approved === true;
+    if (!loginBtn) return;
 
-    const status =
+    loginBtn.disabled = loading;
+
+    loginBtn.textContent =
+        loading ? "Logging in..." : "Login";
+}
+
+
+// ============================================================
+// ROLE REDIRECT
+// ============================================================
+
+function redirectUser(data) {
+
+    const role =
         String(
-            data.status || ""
+            data?.role ||
+            data?.userType ||
+            data?.type ||
+            ""
         )
         .trim()
         .toLowerCase();
 
 
-    if(
-        approved &&
-        status === "active"
-    ){
+    // ========================================================
+    // ADMIN
+    // ========================================================
+
+    if (
+        role === "admin" ||
+        role === "administrator" ||
+        data?.isAdmin === true
+    ) {
 
         window.location.replace(
-            "../rider/home.html"
+            "../admin/dashboard.html"
         );
 
-    }
-    else{
-
-        window.location.replace(
-            "../rider/pending.html"
-        );
-
+        return;
     }
 
-    return true;
 
-}
+    // ========================================================
+    // RIDER
+    // ========================================================
+
+    if (role === "rider") {
+
+        const approved =
+            data?.approved === true;
+
+        const active =
+            String(data?.status || "")
+                .trim()
+                .toLowerCase() === "active";
 
 
-/* ========================================================
-   CUSTOMER
-======================================================== */
+        if (approved && active) {
 
-if(role === "customer"){
+            window.location.replace(
+                "../rider/home.html"
+            );
+
+        } else {
+
+            window.location.replace(
+                "../rider/pending.html"
+            );
+        }
+
+        return;
+    }
+
+
+    // ========================================================
+    // CUSTOMER
+    // ========================================================
 
     window.location.replace(
         "../customer/home.html"
     );
-
-    return true;
-
 }
 
 
-return false;
+// ============================================================
+// LOGIN
+// ============================================================
 
-}
+async function loginUser(event) {
 
-/* ============================================================
-LOGIN
-============================================================ */
-
-async function loginUser(){
-
-if(loginInProgress){
-    return;
-}
+    event.preventDefault();
 
 
-const email =
-    emailInput
-        ? emailInput.value
+    if (!emailInput || !passwordInput) {
+        return;
+    }
+
+
+    const email =
+        emailInput.value
             .trim()
-            .toLowerCase()
-        : "";
+            .toLowerCase();
+
+    const password =
+        passwordInput.value;
 
 
-const password =
-    passwordInput
-        ? passwordInput.value
-        : "";
+    // ========================================================
+    // VALIDATION
+    // ========================================================
 
+    if (!email) {
 
-/* ========================================================
-   VALIDATION
-======================================================== */
+        showMessage(
+            "Please enter your email address."
+        );
 
-if(!email){
-
-    showMessage(
-        "Please enter your email address.",
-        "error"
-    );
-
-    if(emailInput){
         emailInput.focus();
+
+        return;
     }
 
-    return;
 
-}
+    if (!password) {
 
+        showMessage(
+            "Please enter your password."
+        );
 
-if(!email.includes("@")){
-
-    showMessage(
-        "Please enter a valid email address.",
-        "error"
-    );
-
-    if(emailInput){
-        emailInput.focus();
-    }
-
-    return;
-
-}
-
-
-if(!password){
-
-    showMessage(
-        "Please enter your password.",
-        "error"
-    );
-
-    if(passwordInput){
         passwordInput.focus();
+
+        return;
     }
-
-    return;
-
-}
-
-
-/* ========================================================
-   START LOGIN
-======================================================== */
-
-loginInProgress =
-    true;
-
-setLoading(true);
-
-showMessage(
-    "Signing in...",
-    "info"
-);
-
-
-try{
-
-    /* ====================================================
-       FIREBASE AUTH
-    ==================================================== */
-
-    const result =
-        await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
-
-
-    const firebaseUser =
-        result.user;
-
-
-    if(!firebaseUser){
-
-        throw new Error(
-            "Firebase authentication failed."
-        );
-
-    }
-
-
-    /* ====================================================
-       FIRESTORE PROFILE
-    ==================================================== */
-
-    showMessage(
-        "Checking account role...",
-        "info"
-    );
-
-
-    const data =
-        await getUserProfile(
-            firebaseUser.uid
-        );
-
-
-    /* ====================================================
-       NO PROFILE
-    ==================================================== */
-
-    if(!data){
-
-        await signOut(auth);
-
-        throw new Error(
-            "User profile not found. Firebase Auth account ke UID ke naam se users collection me profile nahi mili."
-        );
-
-    }
-
-
-    console.log(
-        "RiderX Login User:",
-        {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            data: data
-        }
-    );
-
-
-    /* ====================================================
-       ROLE
-    ==================================================== */
-
-    const role =
-        getRole(data);
-
-
-    console.log(
-        "RiderX Detected Role:",
-        role
-    );
-
-
-    /* ====================================================
-       ROLE NOT FOUND
-    ==================================================== */
-
-    if(!role){
-
-        await signOut(auth);
-
-        throw new Error(
-            "Account role not found. users document me role field missing hai."
-        );
-
-    }
-
-
-    /* ====================================================
-       REQUESTED ROLE CHECK
-    ====================================================
-
-       If user opened:
-
-       login.html?role=rider
-
-       and account is customer, don't silently
-       send customer somewhere unexpected.
-
-    */
-
-    if(
-        requestedRole === "rider" &&
-        role !== "rider"
-    ){
-
-        await signOut(auth);
-
-        throw new Error(
-            "This account is not registered as a Rider."
-        );
-
-    }
-
-
-    if(
-        requestedRole === "customer" &&
-        role !== "customer"
-    ){
-
-        /*
-         * Admin is allowed to use normal login,
-         * but not customer-specific login.
-         */
-
-        await signOut(auth);
-
-        throw new Error(
-            "This account is not registered as a Customer."
-        );
-
-    }
-
-
-    /* ====================================================
-       SUCCESS
-    ==================================================== */
-
-    showMessage(
-        "Login successful. Opening your dashboard...",
-        "success"
-    );
 
 
     setLoading(true);
 
+    showMessage("Checking account...", "success");
 
-    /*
-     * Small delay so Firebase auth state settles
-     * before navigation.
-     */
 
-    setTimeout(
-        () => {
+    try {
 
-            const redirected =
-                redirectByRole(
-                    role,
-                    data
-                );
+        // ====================================================
+        // FIREBASE LOGIN
+        // ====================================================
 
+        const result =
+            await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
 
-            if(!redirected){
 
-                /*
-                 * Unknown role protection.
-                 */
+        const user =
+            result.user;
 
-                signOut(auth);
 
-                setLoading(false);
+        if (!user) {
 
-                loginInProgress =
-                    false;
-
-                showMessage(
-                    "Access denied. Invalid account role.",
-                    "error"
-                );
-
-            }
-
-        },
-        250
-    );
-
-
-}
-catch(error){
-
-    console.error(
-        "RiderX Login Error:",
-        error
-    );
-
-
-    let message =
-        "Login failed. Please try again.";
-
-
-    switch(
-        error.code
-    ){
-
-        case "auth/invalid-credential":
-
-            message =
-                "Email or password is incorrect.";
-
-            break;
-
-
-        case "auth/invalid-email":
-
-            message =
-                "Invalid email address.";
-
-            break;
-
-
-        case "auth/user-not-found":
-
-            message =
-                "Account not found.";
-
-            break;
-
-
-        case "auth/wrong-password":
-
-            message =
-                "Wrong password.";
-
-            break;
-
-
-        case "auth/user-disabled":
-
-            message =
-                "This account has been disabled.";
-
-            break;
-
-
-        case "auth/too-many-requests":
-
-            message =
-                "Too many login attempts. Please try again later.";
-
-            break;
-
-
-        case "auth/network-request-failed":
-
-            message =
-                "Network error. Please check your internet connection.";
-
-            break;
-
-
-        default:
-
-            if(
-                error.message
-            ){
-
-                message =
-                    error.message;
-
-            }
-
-            break;
-
-    }
-
-
-    setLoading(false);
-
-    loginInProgress =
-        false;
-
-
-    showMessage(
-        "❌ " + message,
-        "error"
-    );
-
-}
-
-}
-
-/* ============================================================
-FORM SUBMIT
-============================================================ */
-
-if(loginForm){
-
-loginForm.addEventListener(
-    "submit",
-    event => {
-
-        event.preventDefault();
-
-        loginUser();
-
-    }
-);
-
-}
-
-/* ============================================================
-ENTER KEY FALLBACK
-============================================================ */
-
-if(emailInput){
-
-emailInput.addEventListener(
-    "keydown",
-    event => {
-
-        if(
-            event.key === "Enter"
-        ){
-
-            event.preventDefault();
-
-            loginUser();
-
+            throw new Error(
+                "Firebase user was not returned."
+            );
         }
 
-    }
-);
 
-}
+        // ====================================================
+        // GET USER PROFILE
+        // ====================================================
 
-if(passwordInput){
-
-passwordInput.addEventListener(
-    "keydown",
-    event => {
-
-        if(
-            event.key === "Enter"
-        ){
-
-            event.preventDefault();
-
-            loginUser();
-
-        }
-
-    }
-);
-
-}
-
-/* ============================================================
-EXISTING SESSION CHECK
-
-IMPORTANT:
-
-Login page should NOT automatically redirect a normal
-logged-in customer/rider when opened from a login link.
-
-However, if there is already an authenticated user,
-we verify their role before redirecting.
-
-============================================================ */
-
-let initialAuthCheck = true;
-
-onAuthStateChanged(
-auth,
-async user => {
-
-    /*
-     * Don't interfere with the login operation.
-     */
-
-    if(loginInProgress){
-
-        initialAuthCheck =
-            false;
-
-        return;
-
-    }
-
-
-    if(!user){
-
-        initialAuthCheck =
-            false;
-
-        return;
-
-    }
-
-
-    try{
-
-        /*
-         * Existing authenticated session.
-         */
-
-        const data =
-            await getUserProfile(
+        const userRef =
+            doc(
+                db,
+                "users",
                 user.uid
             );
 
 
-        if(!data){
+        const userSnap =
+            await getDoc(userRef);
+
+
+        // ====================================================
+        // USER PROFILE MISSING
+        // ====================================================
+
+        if (!userSnap.exists()) {
 
             await signOut(auth);
 
-            initialAuthCheck =
-                false;
-
-            return;
-
+            throw new Error(
+                "Your account profile was not found. Please register again."
+            );
         }
 
 
-        const role =
-            getRole(data);
+        const data =
+            userSnap.data();
 
 
         console.log(
-            "Existing RiderX Session:",
-            role
+            "RiderX logged-in user:",
+            {
+                uid: user.uid,
+                email: user.email,
+                role: data.role,
+                status: data.status,
+                approved: data.approved
+            }
         );
 
 
+        const role =
+            String(
+                data.role ||
+                data.userType ||
+                data.type ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        // ====================================================
+        // REQUESTED ROLE CHECK
+        // ====================================================
+
         /*
-         * Only redirect known valid roles.
-         */
+           If login page was opened with:
 
-        if(
-            role === "admin" ||
-            role === "rider" ||
-            role === "customer"
-        ){
+           ?role=rider
 
-            /*
-             * If this is a role-specific login URL,
-             * don't redirect to the wrong role.
-             */
+           then a customer/admin account cannot
+           accidentally enter the rider login flow.
+        */
 
-            if(
-                requestedRole === "rider" &&
-                role !== "rider"
-            ){
+        if (
+            requestedRole === "rider" &&
+            role !== "rider"
+        ) {
 
-                await signOut(auth);
+            await signOut(auth);
 
-                initialAuthCheck =
-                    false;
-
-                return;
-
-            }
-
-
-            if(
-                requestedRole === "customer" &&
-                role !== "customer"
-            ){
-
-                await signOut(auth);
-
-                initialAuthCheck =
-                    false;
-
-                return;
-
-            }
-
-
-            /*
-             * Existing valid session.
-             */
-
-            redirectByRole(
-                role,
-                data
+            throw new Error(
+                "This account is not registered as a Rider."
             );
-
         }
 
-    }
-    catch(error){
 
-        console.warn(
-            "Existing session check failed:",
+        if (
+            requestedRole === "customer" &&
+            role !== "customer" &&
+            role !== ""
+        ) {
+
+            await signOut(auth);
+
+            throw new Error(
+                "This account is not registered as a Customer."
+            );
+        }
+
+
+        // ====================================================
+        // SUCCESS
+        // ====================================================
+
+        showMessage(
+            "Login successful. Opening your account...",
+            "success"
+        );
+
+
+        setTimeout(
+            () => {
+                redirectUser(data);
+            },
+            250
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "RiderX Login Error:",
             error
         );
 
+
+        let text =
+            "Login failed.";
+
+
+        switch (error.code) {
+
+            case "auth/invalid-credential":
+
+                text =
+                    "Email or password is incorrect.";
+
+                break;
+
+
+            case "auth/user-not-found":
+
+                text =
+                    "Account not found.";
+
+                break;
+
+
+            case "auth/wrong-password":
+
+                text =
+                    "Incorrect password.";
+
+                break;
+
+
+            case "auth/invalid-email":
+
+                text =
+                    "Please enter a valid email address.";
+
+                break;
+
+
+            case "auth/user-disabled":
+
+                text =
+                    "This account has been disabled.";
+
+                break;
+
+
+            case "auth/too-many-requests":
+
+                text =
+                    "Too many login attempts. Please try again later.";
+
+                break;
+
+
+            case "auth/network-request-failed":
+
+                text =
+                    "Network error. Please check your internet connection.";
+
+                break;
+
+
+            case "permission-denied":
+
+                text =
+                    "Firestore permission denied.";
+
+                break;
+
+
+            default:
+
+                if (error.message) {
+
+                    text =
+                        error.message;
+                }
+        }
+
+
+        setLoading(false);
+
+        showMessage(
+            "❌ " + text,
+            "error"
+        );
     }
-
-
-    initialAuthCheck =
-        false;
-
 }
 
-);
 
-/* ============================================================
-EXPORT
-============================================================ */
+// ============================================================
+// FORM EVENT
+// ============================================================
 
-export {
-loginUser,
-getUserProfile,
-getRole,
-redirectByRole
-};
+if (loginForm) {
+
+    loginForm.addEventListener(
+        "submit",
+        loginUser
+    );
+}
+
+
+// ============================================================
+// AUTO FOCUS
+// ============================================================
+
+if (emailInput) {
+
+    setTimeout(
+        () => {
+            emailInput.focus();
+        },
+        200
+    );
+}
