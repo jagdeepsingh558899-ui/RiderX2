@@ -12,13 +12,11 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-
     function userDoc() {
       return get(
         /databases/$(database)/documents/users/$(request.auth.uid)
       );
     }
-
 
     function isAdmin() {
       return signedIn()
@@ -29,12 +27,10 @@ service cloud.firestore {
         );
     }
 
-
     function isRider() {
       return signedIn()
         && userDoc().data.role == "rider";
     }
-
 
     function isCustomer() {
       return signedIn()
@@ -54,17 +50,14 @@ service cloud.firestore {
           || isAdmin()
         );
 
-
       allow create: if signedIn()
         && request.auth.uid == userId;
-
 
       allow update: if signedIn()
         && (
           request.auth.uid == userId
           || isAdmin()
         );
-
 
       allow delete: if isAdmin();
     }
@@ -82,17 +75,14 @@ service cloud.firestore {
           || isAdmin()
         );
 
-
       allow create: if signedIn()
         && request.auth.uid == riderId;
-
 
       allow update: if signedIn()
         && (
           request.auth.uid == riderId
           || isAdmin()
         );
-
 
       allow delete: if isAdmin();
     }
@@ -110,20 +100,17 @@ service cloud.firestore {
           || isAdmin()
         );
 
-
       allow create: if signedIn()
         && (
           request.auth.uid == customerId
           || isAdmin()
         );
 
-
       allow update: if signedIn()
         && (
           request.auth.uid == customerId
           || isAdmin()
         );
-
 
       allow delete: if isAdmin();
     }
@@ -136,8 +123,7 @@ service cloud.firestore {
     match /rides/{rideId} {
 
       // -------------------------------------------------------
-      // CREATE RIDE
-      // Customer can create only his own ride.
+      // CUSTOMER CREATE
       // -------------------------------------------------------
 
       allow create: if signedIn()
@@ -153,32 +139,25 @@ service cloud.firestore {
 
 
       // -------------------------------------------------------
-      // READ RIDE
-      //
-      // Customer:
-      //   - Own rides
-      //
-      // Rider:
-      //   - Own accepted/active rides
-      //   - Searching rides
-      //   - REQUESTED rides
-      //
-      // Admin:
-      //   - Everything
+      // RIDE READ
       // -------------------------------------------------------
 
       allow read: if signedIn()
         && (
+
+          // Customer's own rides
           resource.data.customerId ==
             request.auth.uid
 
           ||
 
+          // Rider's assigned rides
           resource.data.riderId ==
             request.auth.uid
 
           ||
 
+          // Online/approved riders can see available requests
           (
             isRider()
             &&
@@ -191,24 +170,24 @@ service cloud.firestore {
 
           ||
 
+          // Admin
           isAdmin()
         );
 
 
       // -------------------------------------------------------
-      // UPDATE RIDE
+      // RIDE UPDATE
       // -------------------------------------------------------
 
       allow update: if signedIn()
         && (
 
-          // Admin can update anything
+          // Admin
           isAdmin()
-
 
           ||
 
-          // Customer can update/cancel his own ride
+          // Customer's own ride
           (
             isCustomer()
             &&
@@ -216,10 +195,9 @@ service cloud.firestore {
               request.auth.uid
           )
 
-
           ||
 
-          // Rider can update a ride already assigned to him
+          // Rider's already assigned ride
           (
             isRider()
             &&
@@ -227,15 +205,9 @@ service cloud.firestore {
               request.auth.uid
           )
 
-
           ||
 
-          // IMPORTANT:
-          // Rider can ACCEPT a searching/REQUESTED ride.
-          //
-          // Before acceptance riderId is normally empty/null.
-          // After update riderId must become current rider UID.
-          //
+          // Rider accepts an available ride
           (
             isRider()
             &&
@@ -258,7 +230,7 @@ service cloud.firestore {
 
 
       // -------------------------------------------------------
-      // DELETE
+      // RIDE DELETE
       // -------------------------------------------------------
 
       allow delete: if isAdmin();
@@ -277,20 +249,17 @@ service cloud.firestore {
           || isAdmin()
         );
 
-
       allow create: if signedIn()
         && (
           request.auth.uid == walletId
           || isAdmin()
         );
 
-
       allow update: if signedIn()
         && (
           request.auth.uid == walletId
           || isAdmin()
         );
-
 
       allow delete: if isAdmin();
     }
@@ -304,9 +273,7 @@ service cloud.firestore {
 
       allow read: if signedIn();
 
-
       allow create: if signedIn();
-
 
       allow update: if signedIn()
         && (
@@ -315,7 +282,6 @@ service cloud.firestore {
           resource.data.userId ==
             request.auth.uid
         );
-
 
       allow delete: if isAdmin();
     }
@@ -327,11 +293,11 @@ service cloud.firestore {
 
     match /settings/{settingId} {
 
-      // Customer/Rider/Admin can read settings
+      // Fare and other app settings can be read
+      // by authenticated users.
       allow read: if signedIn();
 
-
-      // Only Admin can change settings
+      // Only admin can change settings.
       allow write: if isAdmin();
     }
 
@@ -350,9 +316,7 @@ service cloud.firestore {
           isAdmin()
         );
 
-
       allow create: if signedIn();
-
 
       allow update: if signedIn()
         && (
@@ -361,7 +325,6 @@ service cloud.firestore {
           ||
           isAdmin()
         );
-
 
       allow delete: if signedIn()
         && (
@@ -378,9 +341,7 @@ service cloud.firestore {
     // =========================================================
 
     match /{document=**} {
-
       allow read, write: if false;
-
     }
 
   }
