@@ -4,34 +4,12 @@
 <head>
 
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RiderX - Move Faster</title>
 
-<link
-    rel="manifest"
-    href="manifest.json"
->
-
-<meta
-    name="theme-color"
-    content="#000000"
->
-
-<link
-    rel="stylesheet"
-    href="assets/app.css"
->
-
-<link
-    rel="stylesheet"
-    href="assets/animation.css"
->
-
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
 
 <style>
 
@@ -45,28 +23,20 @@
 body{
     background:#000;
     color:#fff;
-    height:100vh;
+    min-height:100vh;
     overflow:hidden;
 }
 
-
-/* =====================================
-   SPLASH
-===================================== */
-
 .splash{
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100vh;
+    inset:0;
     background:#000;
     display:flex;
     align-items:center;
     justify-content:center;
     z-index:9999;
+    animation:hideSplash .7s ease 1.2s forwards;
 }
-
 
 .logo-animation{
     font-size:45px;
@@ -74,19 +44,12 @@ body{
     letter-spacing:3px;
 }
 
-
-.logo-animation span,
-.brand span{
+.logo-animation span{
     color:#FFD600;
 }
 
-
-/* =====================================
-   MAIN
-===================================== */
-
 .main{
-    height:100vh;
+    min-height:100vh;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -94,26 +57,28 @@ body{
     padding:25px;
 }
 
-
 .brand{
     font-size:42px;
     font-weight:900;
 }
 
+.brand span{
+    color:#FFD600;
+}
 
 .tagline{
     margin-top:15px;
     color:#aaa;
     text-align:center;
+    line-height:1.5;
+    max-width:500px;
 }
-
 
 .buttons{
     width:100%;
-    max-width:420px;
+    max-width:400px;
     margin-top:50px;
 }
-
 
 .btn{
     width:100%;
@@ -126,12 +91,10 @@ body{
     cursor:pointer;
 }
 
-
 .customer{
     background:#FFD600;
     color:#000;
 }
-
 
 .rider{
     background:#111;
@@ -139,79 +102,28 @@ body{
     color:#FFD600;
 }
 
+.btn:active{
+    transform:scale(.98);
+}
 
 .footer{
     position:absolute;
     bottom:30px;
     color:#777;
+    font-size:13px;
 }
 
-
-/* =====================================
-   SESSION CHECK
-===================================== */
-
-.session-loading{
-    position:fixed;
-    inset:0;
-    background:#000;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    z-index:10000;
-}
-
-
-.session-loading.show{
-    display:flex;
-}
-
-
-.session-logo{
-    font-size:36px;
-    font-weight:900;
-}
-
-
-.session-logo span{
-    color:#FFD600;
-}
-
-
-.session-text{
-    margin-top:18px;
-    color:#aaa;
-    font-size:14px;
-    text-align:center;
-}
-
-
-.spinner{
-    width:32px;
-    height:32px;
-    border:3px solid #333;
-    border-top-color:#FFD600;
-    border-radius:50%;
-    animation:spin .8s linear infinite;
-    margin-top:20px;
-}
-
-
-@keyframes spin{
+@keyframes hideSplash{
 
     to{
-        transform:rotate(360deg);
+        opacity:0;
+        visibility:hidden;
+        pointer-events:none;
     }
 
 }
 
-
-/* =====================================
-   MOBILE
-===================================== */
-
-@media(max-width:500px){
+@media(max-width:420px){
 
     .brand{
         font-size:36px;
@@ -221,99 +133,40 @@ body{
         font-size:40px;
     }
 
-    .tagline{
-        font-size:14px;
-    }
-
 }
 
 </style>
 
 </head>
 
-
 <body>
 
-
-<!-- =====================================
-     SPLASH
-===================================== -->
-
-<div
-    id="splash"
-    class="splash"
->
+<div class="splash">
 
     <div class="logo-animation">
-
         RID<span>ERX</span>
-
     </div>
 
 </div>
 
-
-<!-- =====================================
-     SESSION LOADING
-===================================== -->
-
-<div
-    id="sessionLoading"
-    class="session-loading"
->
-
-    <div class="session-logo">
-
-        RID<span>ERX</span>
-
-    </div>
-
-
-    <div class="spinner"></div>
-
-
-    <div
-        id="sessionText"
-        class="session-text"
-    >
-
-        Checking your account...
-
-    </div>
-
-</div>
-
-
-<!-- =====================================
-     MAIN LANDING PAGE
-===================================== -->
 
 <div class="main">
 
-
     <div class="brand">
-
         RID<span>ERX</span>
-
     </div>
 
-
     <p class="tagline">
-
-        India's Premium Bike Taxi, Cab,
-        Parcel & Food Platform
-
+        India's Premium Bike Taxi, Cab, Parcel & Food Platform
     </p>
 
 
     <div class="buttons">
 
-
         <button
             class="btn customer"
-            type="button"
-            onclick="joinCustomer()"
-        >
+            id="customerBtn"
+            type="button">
 
             Join as Customer
 
@@ -322,439 +175,73 @@ body{
 
         <button
             class="btn rider"
-            type="button"
-            onclick="joinRider()"
-        >
+            id="riderBtn"
+            type="button">
 
             Join as Rider
 
         </button>
 
-
     </div>
 
 
     <div class="footer">
-
         Fast • Safe • Reliable
-
     </div>
 
 </div>
 
 
-<!-- =====================================
-     FIREBASE SESSION
-===================================== -->
+<script>
 
-<script type="module">
+document.getElementById("customerBtn")
+.addEventListener("click", function(){
 
-import {
-    auth,
-    db,
-    onAuthStateChanged,
-    doc,
-    getDoc
-} from "./firebase/firebase-config.js";
+    window.location.href =
+        "auth/login.html?role=customer";
+
+});
 
 
-const splash =
-    document.getElementById(
-        "splash"
-    );
+document.getElementById("riderBtn")
+.addEventListener("click", function(){
 
+    window.location.href =
+        "auth/login.html?role=rider";
 
-const sessionLoading =
-    document.getElementById(
-        "sessionLoading"
-    );
-
-
-const sessionText =
-    document.getElementById(
-        "sessionText"
-    );
+});
 
 
 /*
- * Hide splash after a short delay.
- */
+ IMPORTANT:
+ Root page does NOT automatically redirect
+ based on Firebase session.
 
-setTimeout(
-    () => {
+ This prevents an old/stale Firebase session
+ from sending the user directly to rider/customer
+ pages when the main website opens.
+*/
 
-        if (splash) {
 
-            splash.style.display =
-                "none";
+if("serviceWorker" in navigator){
 
-        }
+    window.addEventListener("load", function(){
 
-    },
-    1000
-);
-
-
-/*
- * Firebase authentication state.
- */
-
-onAuthStateChanged(
-    auth,
-    async (user) => {
-
-        /*
-         * No logged-in user:
-         * stay on landing page.
-         */
-
-        if (!user) {
-
-            if (sessionLoading) {
-
-                sessionLoading.classList.remove(
-                    "show"
-                );
-
-            }
-
-            return;
-
-        }
-
-
-        /*
-         * Show account checking.
-         */
-
-        if (sessionLoading) {
-
-            sessionLoading.classList.add(
-                "show"
-            );
-
-        }
-
-
-        if (sessionText) {
-
-            sessionText.textContent =
-                "Checking your RiderX account...";
-
-        }
-
-
-        try {
-
-            const userRef =
-                doc(
-                    db,
-                    "users",
-                    user.uid
-                );
-
-
-            const snap =
-                await getDoc(
-                    userRef
-                );
-
-
-            /*
-             * IMPORTANT:
-             *
-             * Do NOT send missing/unknown
-             * accounts to Customer.
-             */
-
-            if (!snap.exists()) {
-
-                console.warn(
-                    "RiderX: User profile not found."
-                );
-
-
-                if (sessionText) {
-
-                    sessionText.textContent =
-                        "Account profile not found.";
-
-                }
-
-
-                setTimeout(
-                    () => {
-
-                        if (sessionLoading) {
-
-                            sessionLoading.classList.remove(
-                                "show"
-                            );
-
-                        }
-
-                    },
-                    1000
-                );
-
-
-                return;
-
-            }
-
-
-            const data =
-                snap.data();
-
-
-            const role =
-                String(
-                    data.role ||
-                    data.userType ||
-                    data.type ||
-                    ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            console.log(
-                "RiderX Root Account Role:",
-                role
-            );
-
-
-            /* =========================
-               ADMIN
-            ========================= */
-
-            if (role === "admin") {
-
-                if (sessionText) {
-
-                    sessionText.textContent =
-                        "Admin account detected. Opening Admin Panel...";
-
-                }
-
-
-                window.location.replace(
-                    "admin/dashboard.html"
-                );
-
-                return;
-
-            }
-
-
-            /* =========================
-               RIDER
-            ========================= */
-
-            if (role === "rider") {
-
-                const approved =
-                    data.approved === true ||
-                    data.isApproved === true;
-
-
-                const status =
-                    String(
-                        data.status ||
-                        data.accountStatus ||
-                        ""
-                    )
-                    .trim()
-                    .toLowerCase();
-
-
-                if (sessionText) {
-
-                    sessionText.textContent =
-                        "Opening Rider Panel...";
-
-                }
-
-
-                if (
-                    approved &&
-                    (
-                        status === "active" ||
-                        status === "approved"
-                    )
-                ) {
-
-                    window.location.replace(
-                        "rider/home.html"
-                    );
-
-                } else {
-
-                    window.location.replace(
-                        "rider/pending.html"
-                    );
-
-                }
-
-
-                return;
-
-            }
-
-
-            /* =========================
-               CUSTOMER
-            ========================= */
-
-            if (
-                role === "customer" ||
-                role === "user"
-            ) {
-
-                if (sessionText) {
-
-                    sessionText.textContent =
-                        "Opening Customer App...";
-
-                }
-
-
-                window.location.replace(
-                    "customer/home.html"
-                );
-
-                return;
-
-            }
-
-
-            /* =========================
-               UNKNOWN ROLE
-            ========================= */
+        navigator.serviceWorker.register("sw.js")
+        .catch(function(error){
 
             console.warn(
-                "RiderX: Unknown account role:",
-                role
-            );
-
-
-            if (sessionText) {
-
-                sessionText.textContent =
-                    "Account role is not configured.";
-
-            }
-
-
-            setTimeout(
-                () => {
-
-                    if (sessionLoading) {
-
-                        sessionLoading.classList.remove(
-                            "show"
-                        );
-
-                    }
-
-                },
-                1200
-            );
-
-        }
-        catch (error) {
-
-            console.error(
-                "RiderX Root Authentication Error:",
+                "Service Worker registration failed:",
                 error
             );
 
+        });
 
-            if (sessionText) {
-
-                sessionText.textContent =
-                    "Unable to verify account.";
-
-            }
-
-
-            setTimeout(
-                () => {
-
-                    if (sessionLoading) {
-
-                        sessionLoading.classList.remove(
-                            "show"
-                        );
-
-                    }
-
-                },
-                1200
-            );
-
-        }
-
-    }
-);
-
-
-/* =====================================
-   CUSTOMER BUTTON
-===================================== */
-
-window.joinCustomer =
-    function(){
-
-        window.location.href =
-            "auth/login.html?role=customer";
-
-    };
-
-
-/* =====================================
-   RIDER BUTTON
-===================================== */
-
-window.joinRider =
-    function(){
-
-        window.location.href =
-            "auth/login.html?role=rider";
-
-    };
-
-</script>
-
-
-<!-- =====================================
-     SERVICE WORKER
-===================================== -->
-
-<script>
-
-if (
-    "serviceWorker" in navigator
-) {
-
-    navigator.serviceWorker
-        .register("sw.js")
-        .catch(
-            error => {
-
-                console.warn(
-                    "RiderX Service Worker Error:",
-                    error
-                );
-
-            }
-        );
+    });
 
 }
 
 </script>
 
-
 </body>
-
 </html>
