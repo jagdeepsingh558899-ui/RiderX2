@@ -1,12 +1,28 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
 
-<title>RiderX - Move Faster</title><link rel="manifest"
-      href="manifest.json"><meta name="theme-color"
-content="#000000">
+<head>
 
-<link rel="stylesheet"
-      href="assets/app.css"><style>
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>RiderX - Move Faster</title>
+
+<link
+    rel="manifest"
+    href="manifest.json"
+>
+
+<meta
+    name="theme-color"
+    content="#000000"
+>
+
+<style>
 
 *{
     margin:0;
@@ -16,50 +32,78 @@ content="#000000">
 }
 
 body{
+
     background:#000;
+
     color:#fff;
+
     min-height:100vh;
+
     overflow:hidden;
 }
 
-/* ================================
+
+/* =========================================================
    SPLASH
-================================ */
+========================================================= */
 
 .splash{
+
     position:fixed;
+
     inset:0;
+
+    width:100%;
+
+    height:100vh;
+
     background:#000;
+
     display:flex;
+
     align-items:center;
+
     justify-content:center;
+
     z-index:9999;
-    animation:hideSplash .8s ease 1.4s forwards;
+
+    animation:
+        splashOut .5s ease 1.3s forwards;
 }
 
-.splash-logo{
+.logo-animation{
+
     font-size:45px;
+
     font-weight:900;
+
     letter-spacing:3px;
-    animation:logoPulse 1.2s ease infinite alternate;
+
+    animation:
+        logoPulse 1.2s ease;
 }
 
-.splash-logo span{
+.logo-animation span,
+.brand span{
+
     color:#FFD600;
 }
 
 @keyframes logoPulse{
-    from{
-        transform:scale(.95);
-        opacity:.7;
+
+    0%{
+        opacity:0;
+        transform:scale(.8);
     }
-    to{
-        transform:scale(1.05);
+
+    100%{
         opacity:1;
+        transform:scale(1);
     }
 }
 
-@keyframes hideSplash{
+@keyframes splashOut{
+
     to{
         opacity:0;
         visibility:hidden;
@@ -67,168 +111,246 @@ body{
     }
 }
 
-/* ================================
+
+/* =========================================================
    MAIN
-================================ */
+========================================================= */
 
 .main{
+
     min-height:100vh;
+
     display:flex;
+
     flex-direction:column;
+
     align-items:center;
+
     justify-content:center;
+
     padding:25px;
+
     text-align:center;
 }
 
 .brand{
-    font-size:44px;
-    font-weight:900;
-    letter-spacing:-2px;
-}
 
-.brand span{
-    color:#FFD600;
+    font-size:42px;
+
+    font-weight:900;
 }
 
 .tagline{
-    margin-top:14px;
+
+    margin-top:15px;
+
     color:#aaa;
-    max-width:450px;
+
+    max-width:500px;
+
     line-height:1.5;
 }
 
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
 .buttons{
+
     width:100%;
+
     max-width:390px;
-    margin-top:42px;
+
+    margin-top:45px;
 }
 
 .btn{
+
     width:100%;
+
     padding:17px;
-    margin:9px 0;
+
+    margin:10px 0;
+
     border-radius:15px;
-    border:none;
-    font-size:17px;
+
+    font-size:18px;
+
     font-weight:bold;
+
     cursor:pointer;
+
     transition:.2s;
 }
 
 .btn:active{
+
     transform:scale(.98);
 }
 
 .customer{
+
     background:#FFD600;
+
     color:#000;
+
+    border:2px solid #FFD600;
+}
+
+.customer:hover{
+
+    filter:brightness(1.05);
 }
 
 .rider{
+
     background:#111;
+
     border:2px solid #FFD600;
+
     color:#FFD600;
 }
 
-.btn:hover{
-    filter:brightness(1.08);
+.rider:hover{
+
+    background:#191900;
 }
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
 
 .footer{
+
     position:absolute;
+
     bottom:30px;
-    color:#777;
+
+    color:#666;
+
     font-size:13px;
 }
 
-/* ================================
-   SESSION MESSAGE
-================================ */
 
-.session-message{
+/* =========================================================
+   SESSION MESSAGE
+========================================================= */
+
+.session-box{
+
     position:fixed;
-    top:20px;
+
     left:50%;
+
+    bottom:75px;
+
     transform:translateX(-50%);
+
     background:#111;
+
     border:1px solid #333;
-    color:#FFD600;
-    padding:12px 18px;
+
     border-radius:12px;
-    font-size:13px;
+
+    padding:12px 18px;
+
+    color:#aaa;
+
+    font-size:12px;
+
     display:none;
+
     z-index:10000;
 }
+
 
 @media(max-width:420px){
 
     .brand{
-        font-size:38px;
+        font-size:36px;
     }
 
-    .splash-logo{
-        font-size:40px;
+    .logo-animation{
+        font-size:38px;
     }
 
     .tagline{
         font-size:14px;
     }
-
 }
 
-</style></head><body><!-- ================================
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =======================================================
      SPLASH
-================================ --><div class="splash"
-     id="splash"><div class="splash-logo">
+======================================================== -->
 
-    RID<span>ERX</span>
+<div
+    id="splash"
+    class="splash">
 
-</div>
+    <div class="logo-animation">
 
-</div><!-- ================================
-     SESSION MESSAGE
-================================ --><div id="sessionMessage"
-     class="session-message">Checking session...
+        RID<span>ERX</span>
 
-</div><!-- ================================
-     MAIN PAGE
-================================ --><main class="main"><div class="brand">
-
-    RID<span>ERX</span>
+    </div>
 
 </div>
 
 
-<p class="tagline">
+<!-- =======================================================
+     MAIN
+======================================================== -->
 
-    India's Premium Bike Taxi, Cab,
-    Parcel & Food Platform
-
-</p>
-
-
-<div class="buttons">
+<div class="main">
 
 
-    <button
-        type="button"
-        class="btn customer"
-        id="customerBtn">
+    <div class="brand">
 
-        Join as Customer
+        RID<span>ERX</span>
 
-    </button>
+    </div>
 
 
-    <button
-        type="button"
-        class="btn rider"
-        id="riderBtn">
+    <p class="tagline">
 
-        Join as Rider
+        India's Premium Bike Taxi, Cab, Parcel & Food Platform
 
-    </button>
+    </p>
+
+
+    <div class="buttons">
+
+
+        <button
+            id="customerBtn"
+            class="btn customer"
+            type="button">
+
+            Join as Customer
+
+        </button>
+
+
+        <button
+            id="riderBtn"
+            class="btn rider"
+            type="button">
+
+            Join as Rider
+
+        </button>
+
+
+    </div>
 
 
 </div>
@@ -240,25 +362,34 @@ body{
 
 </div>
 
-</main><!-- ================================
+
+<div
+    id="sessionBox"
+    class="session-box">
+
+    Checking session...
+
+</div>
+
+
+<!-- =======================================================
      FIREBASE SESSION CHECK
-================================ --><script type="module">
+======================================================== -->
+
+<script type="module">
 
 import {
-    auth,
-    db
+    auth
 } from "./firebase/firebase-config.js";
 
 import {
-    onAuthStateChanged,
-    signOut
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-import {
-    doc,
-    getDoc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// ==========================================================
+// BUTTONS
+// ==========================================================
 
 const customerBtn =
     document.getElementById("customerBtn");
@@ -266,16 +397,10 @@ const customerBtn =
 const riderBtn =
     document.getElementById("riderBtn");
 
-const sessionMessage =
-    document.getElementById("sessionMessage");
 
-
-let checkingSession = true;
-
-
-/* =================================
-   PUBLIC LOGIN BUTTONS
-================================= */
+// ==========================================================
+// CUSTOMER
+// ==========================================================
 
 customerBtn.addEventListener(
     "click",
@@ -288,6 +413,10 @@ customerBtn.addEventListener(
 );
 
 
+// ==========================================================
+// RIDER
+// ==========================================================
+
 riderBtn.addEventListener(
     "click",
     () => {
@@ -299,229 +428,60 @@ riderBtn.addEventListener(
 );
 
 
-/* =================================
-   SHOW SESSION MESSAGE
-================================= */
-
-function showSessionMessage(text){
-
-    sessionMessage.textContent =
-        text;
-
-    sessionMessage.style.display =
-        "block";
-
-}
-
-
-/* =================================
-   GET USER ROLE
-================================= */
-
-async function getUserRole(uid){
-
-    const userRef =
-        doc(
-            db,
-            "users",
-            uid
-        );
-
-    const userSnap =
-        await getDoc(userRef);
-
-    if(!userSnap.exists()){
-
-        return null;
-
-    }
-
-    return userSnap.data();
-
-}
-
-
-/* =================================
-   AUTH SESSION
-================================ */
+// ==========================================================
+// IMPORTANT
+//
+// ROOT PAGE DOES NOT REDIRECT LOGGED-IN USERS.
+//
+// This prevents:
+//
+// Rider session
+//      ↓
+// index.html
+//      ↓
+// rider/home.html
+//      ↓
+// book ride page
+//
+// Admin session also remains here until the
+// user intentionally opens the admin login/dashboard.
+//
+// ==========================================================
 
 onAuthStateChanged(
     auth,
-    async (user) => {
+    (user) => {
 
-        checkingSession = false;
+        if (user) {
 
-
-        /*
-         * IMPORTANT:
-         *
-         * No user = stay on public
-         * landing page.
-         *
-         * We NEVER redirect a logged-out
-         * visitor to customer/rider pages.
-         */
-
-        if(!user){
-
-            return;
-
-        }
-
-
-        try{
-
-            showSessionMessage(
-                "Checking your RiderX account..."
+            console.log(
+                "RiderX Firebase session detected:",
+                user.email
             );
 
-
-            const data =
-                await getUserRole(
-                    user.uid
-                );
-
-
             /*
-             * Firebase account exists but
-             * user profile does not exist.
+             * DO NOT REDIRECT HERE.
              *
-             * Sign out and stay public.
+             * Role-based redirects are handled by
+             * login.js and protected dashboard pages.
              */
 
-            if(!data){
+        } else {
 
-                await signOut(auth);
-
-                sessionMessage.style.display =
-                    "none";
-
-                return;
-
-            }
-
-
-            const role =
-                String(
-                    data.role ||
-                    ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            /* =========================
-               ADMIN
-            ========================= */
-
-            if(role === "admin"){
-
-                showSessionMessage(
-                    "Admin session found..."
-                );
-
-                window.location.replace(
-                    "admin/dashboard.html"
-                );
-
-                return;
-
-            }
-
-
-            /* =========================
-               RIDER
-            ========================= */
-
-            if(role === "rider"){
-
-                if(
-                    data.approved === true &&
-                    String(
-                        data.status || ""
-                    )
-                    .toLowerCase() === "active"
-                ){
-
-                    window.location.replace(
-                        "rider/home.html"
-                    );
-
-                }else{
-
-                    window.location.replace(
-                        "rider/pending.html"
-                    );
-
-                }
-
-                return;
-
-            }
-
-
-            /* =========================
-               CUSTOMER
-            ========================= */
-
-            if(role === "customer"){
-
-                window.location.replace(
-                    "customer/home.html"
-                );
-
-                return;
-
-            }
-
-
-            /*
-             * Unknown role:
-             * Don't send the user into
-             * Book Ride or another page.
-             */
-
-            console.warn(
-                "Unknown RiderX role:",
-                role
+            console.log(
+                "RiderX: No active Firebase session."
             );
-
-            await signOut(auth);
-
-            sessionMessage.style.display =
-                "none";
-
-        }
-        catch(error){
-
-            console.error(
-                "RiderX session error:",
-                error
-            );
-
-            /*
-             * IMPORTANT:
-             *
-             * If Firestore check fails,
-             * do NOT redirect to Book Ride.
-             */
-
-            sessionMessage.style.display =
-                "none";
-
         }
 
     }
 );
 
 
-/* =================================
-   SERVICE WORKER
-================================= */
+// ==========================================================
+// SERVICE WORKER
+// ==========================================================
 
-if(
-    "serviceWorker" in navigator
-){
+if ("serviceWorker" in navigator) {
 
     window.addEventListener(
         "load",
@@ -529,11 +489,21 @@ if(
 
             navigator.serviceWorker
                 .register("./sw.js")
+                .then(
+                    registration => {
+
+                        console.log(
+                            "RiderX Service Worker registered:",
+                            registration.scope
+                        );
+
+                    }
+                )
                 .catch(
                     error => {
 
                         console.warn(
-                            "Service Worker:",
+                            "Service Worker registration failed:",
                             error
                         );
 
@@ -542,7 +512,10 @@ if(
 
         }
     );
-
 }
 
-</script></body></html>
+</script>
+
+</body>
+
+</html>
