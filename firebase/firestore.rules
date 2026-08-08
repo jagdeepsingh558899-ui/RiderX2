@@ -4,469 +4,383 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
 
-    /* =====================================================
-       HELPER FUNCTIONS
-    ===================================================== */
+    // =========================================================
+    // COMMON FUNCTIONS
+    // =========================================================
 
-    function loggedIn() {
+    function signedIn() {
       return request.auth != null;
     }
 
 
-    function isOwner(uid) {
-      return loggedIn()
-        && request.auth.uid == uid;
-    }
-
-
-    function userExists() {
-      return loggedIn()
-        && exists(
-          /databases/$(database)/documents/users/$(request.auth.uid)
-        );
-    }
-
-
-    function userData() {
+    function userDoc() {
       return get(
         /databases/$(database)/documents/users/$(request.auth.uid)
-      ).data;
+      );
     }
 
 
-    function admin() {
-      return loggedIn()
-        && userExists()
+    function isAdmin() {
+      return signedIn()
         && (
-          userData().role == "admin"
-          ||
-          userData().isAdmin == true
+          userDoc().data.role == "admin"
+          || userDoc().data.role == "administrator"
+          || userDoc().data.isAdmin == true
         );
     }
 
 
-    function rider() {
-      return loggedIn()
-        && userExists()
-        && userData().role == "rider";
+    function isRider() {
+      return signedIn()
+        && userDoc().data.role == "rider";
     }
 
 
-    function customer() {
-      return loggedIn()
-        && userExists()
+    function isCustomer() {
+      return signedIn()
+        && userDoc().data.role == "customer";
+    }
+
+
+    // =========================================================
+    // USERS
+    // =========================================================
+
+    match /users/{userId} {
+
+      allow read: if signedIn()
         && (
-          userData().role == "customer"
-          ||
-          userData().role == "user"
+          request.auth.uid == userId
+          || isAdmin()
         );
+
+
+      allow create: if signedIn()
+        && request.auth.uid == userId;
+
+
+      allow update: if signedIn()
+        && (
+          request.auth.uid == userId
+          || isAdmin()
+        );
+
+
+      allow delete: if isAdmin();
     }
 
 
-    /* =====================================================
-       USERS
-    ===================================================== */
+    // =========================================================
+    // RIDERS
+    // =========================================================
 
-    match /users/{uid} {
+    match /riders/{riderId} {
 
-      /*
-        Users can read their own profile.
-        Admin can read all users.
-      */
-
-      allow read:
-        if isOwner(uid)
-        || admin();
+      allow read: if signedIn()
+        && (
+          request.auth.uid == riderId
+          || isAdmin()
+        );
 
 
-      /*
-        User can create own profile.
-        Admin can create users.
-      */
-
-      allow create:
-        if isOwner(uid)
-        || admin();
+      allow create: if signedIn()
+        && request.auth.uid == riderId;
 
 
-      /*
-        User can update own profile.
-        Admin can update any profile.
-      */
-
-      allow update:
-        if isOwner(uid)
-        || admin();
+      allow update: if signedIn()
+        && (
+          request.auth.uid == riderId
+          || isAdmin()
+        );
 
 
-      /*
-        Only admin can delete users.
-      */
-
-      allow delete:
-        if admin();
+      allow delete: if isAdmin();
     }
 
 
-    /* =====================================================
-       RIDERS
-    ===================================================== */
+    // =========================================================
+    // CUSTOMERS
+    // =========================================================
 
-    match /riders/{uid} {
+    match /customers/{customerId} {
 
-      /*
-        Logged-in users can read rider information.
-        Admin has full access.
-      */
-
-      allow read:
-        if loggedIn();
+      allow read: if signedIn()
+        && (
+          request.auth.uid == customerId
+          || isAdmin()
+        );
 
 
-      /*
-        Rider can create/update own rider document.
-        Admin can create/update any rider document.
-      */
-
-      allow create:
-        if isOwner(uid)
-        || admin();
+      allow create: if signedIn()
+        && (
+          request.auth.uid == customerId
+          || isAdmin()
+        );
 
 
-      allow update:
-        if isOwner(uid)
-        || admin();
+      allow update: if signedIn()
+        && (
+          request.auth.uid == customerId
+          || isAdmin()
+        );
 
 
-      /*
-        Only admin can delete rider records.
-      */
-
-      allow delete:
-        if admin();
+      allow delete: if isAdmin();
     }
 
 
-    /* =====================================================
-       DRIVERS
-       Kept for compatibility with older RiderX data.
-    ===================================================== */
-
-    match /drivers/{uid} {
-
-      allow read:
-        if loggedIn();
-
-
-      allow create, update:
-        if isOwner(uid)
-        || admin();
-
-
-      allow delete:
-        if admin();
-    }
-
-
-    /* =====================================================
-       RIDES
-    ===================================================== */
+    // =========================================================
+    // RIDES
+    // =========================================================
 
     match /rides/{rideId} {
 
-      /*
-        Customer can create own ride.
-      */
+      // -------------------------------------------------------
+      // CREATE RIDE
+      // Customer can create only his own ride.
+      // -------------------------------------------------------
 
-      allow create:
-        if loggedIn()
-        && request.resource.data.customerId
-           == request.auth.uid;
-
-
-      /*
-        Logged-in users can read rides.
-        Admin has full access.
-      */
-
-      allow read:
-        if loggedIn();
-
-
-      /*
-        Customer can update own ride.
-        Assigned rider can update ride.
-        Admin can update anything.
-      */
-
-      allow update:
-        if loggedIn()
+      allow create: if signedIn()
         && (
-
-          resource.data.customerId
-            == request.auth.uid
-
+          (
+            isCustomer()
+            && request.resource.data.customerId ==
+               request.auth.uid
+          )
           ||
-
-          resource.data.riderId
-            == request.auth.uid
-
-          ||
-
-          resource.data.driverId
-            == request.auth.uid
-
-          ||
-
-          request.resource.data.riderId
-            == request.auth.uid
-
-          ||
-
-          request.resource.data.driverId
-            == request.auth.uid
-
-          ||
-
-          admin()
-
+          isAdmin()
         );
 
 
-      /*
-        Only admin can delete rides.
-      */
+      // -------------------------------------------------------
+      // READ RIDE
+      //
+      // Customer:
+      //   - Own rides
+      //
+      // Rider:
+      //   - Own accepted/active rides
+      //   - Searching rides
+      //   - REQUESTED rides
+      //
+      // Admin:
+      //   - Everything
+      // -------------------------------------------------------
 
-      allow delete:
-        if admin();
+      allow read: if signedIn()
+        && (
+          resource.data.customerId ==
+            request.auth.uid
+
+          ||
+
+          resource.data.riderId ==
+            request.auth.uid
+
+          ||
+
+          (
+            isRider()
+            &&
+            (
+              resource.data.status == "searching"
+              ||
+              resource.data.status == "REQUESTED"
+            )
+          )
+
+          ||
+
+          isAdmin()
+        );
+
+
+      // -------------------------------------------------------
+      // UPDATE RIDE
+      // -------------------------------------------------------
+
+      allow update: if signedIn()
+        && (
+
+          // Admin can update anything
+          isAdmin()
+
+
+          ||
+
+          // Customer can update/cancel his own ride
+          (
+            isCustomer()
+            &&
+            resource.data.customerId ==
+              request.auth.uid
+          )
+
+
+          ||
+
+          // Rider can update a ride already assigned to him
+          (
+            isRider()
+            &&
+            resource.data.riderId ==
+              request.auth.uid
+          )
+
+
+          ||
+
+          // IMPORTANT:
+          // Rider can ACCEPT a searching/REQUESTED ride.
+          //
+          // Before acceptance riderId is normally empty/null.
+          // After update riderId must become current rider UID.
+          //
+          (
+            isRider()
+            &&
+            (
+              resource.data.status == "searching"
+              ||
+              resource.data.status == "REQUESTED"
+            )
+            &&
+            request.resource.data.riderId ==
+              request.auth.uid
+            &&
+            (
+              request.resource.data.status == "ACCEPTED"
+              ||
+              request.resource.data.status == "accepted"
+            )
+          )
+        );
+
+
+      // -------------------------------------------------------
+      // DELETE
+      // -------------------------------------------------------
+
+      allow delete: if isAdmin();
     }
 
 
-    /* =====================================================
-       CHATS
-    ===================================================== */
+    // =========================================================
+    // WALLETS
+    // =========================================================
 
-    match /chats/{chatId} {
+    match /wallets/{walletId} {
 
-      allow read, write:
-        if loggedIn();
+      allow read: if signedIn()
+        && (
+          request.auth.uid == walletId
+          || isAdmin()
+        );
+
+
+      allow create: if signedIn()
+        && (
+          request.auth.uid == walletId
+          || isAdmin()
+        );
+
+
+      allow update: if signedIn()
+        && (
+          request.auth.uid == walletId
+          || isAdmin()
+        );
+
+
+      allow delete: if isAdmin();
     }
 
 
-    /* =====================================================
-       WALLETS
-    ===================================================== */
+    // =========================================================
+    // SUPPORT
+    // =========================================================
 
-    match /wallets/{uid} {
+    match /support/{supportId} {
 
-      /*
-        Owner can read own wallet.
-        Admin can read all wallets.
-      */
-
-      allow read:
-        if isOwner(uid)
-        || admin();
+      allow read: if signedIn();
 
 
-      /*
-        Only admin can directly modify wallets.
-      */
+      allow create: if signedIn();
 
-      allow write:
-        if admin();
+
+      allow update: if signedIn()
+        && (
+          isAdmin()
+          ||
+          resource.data.userId ==
+            request.auth.uid
+        );
+
+
+      allow delete: if isAdmin();
     }
 
 
-    /* =====================================================
-       NOTIFICATIONS
-    ===================================================== */
+    // =========================================================
+    // SETTINGS
+    // =========================================================
 
-    match /notifications/{uid}/items/{id} {
+    match /settings/{settingId} {
 
-      /*
-        Owner can read notifications.
-      */
-
-      allow read:
-        if isOwner(uid)
-        || admin();
+      // Customer/Rider/Admin can read settings
+      allow read: if signedIn();
 
 
-      /*
-        Logged-in system/users can create notifications.
-        Admin has full access.
-      */
-
-      allow create, update:
-        if loggedIn();
-
-
-      allow delete:
-        if isOwner(uid)
-        || admin();
+      // Only Admin can change settings
+      allow write: if isAdmin();
     }
 
 
-    /* =====================================================
-       SETTINGS
-    ===================================================== */
+    // =========================================================
+    // NOTIFICATIONS
+    // =========================================================
 
-    match /settings/{id} {
+    match /notifications/{notificationId} {
 
-      /*
-        Logged-in users can read settings.
-      */
+      allow read: if signedIn()
+        && (
+          resource.data.userId ==
+            request.auth.uid
+          ||
+          isAdmin()
+        );
 
-      allow read:
-        if loggedIn();
+
+      allow create: if signedIn();
 
 
-      /*
-        Only admin can change settings.
-      */
+      allow update: if signedIn()
+        && (
+          resource.data.userId ==
+            request.auth.uid
+          ||
+          isAdmin()
+        );
 
-      allow create, update, delete:
-        if admin();
+
+      allow delete: if signedIn()
+        && (
+          resource.data.userId ==
+            request.auth.uid
+          ||
+          isAdmin()
+        );
     }
 
 
-    /* =====================================================
-       ADMIN / APP CONFIG
-    ===================================================== */
+    // =========================================================
+    // DEFAULT DENY
+    // =========================================================
 
-    match /admin/{id} {
+    match /{document=**} {
 
-      allow read:
-        if admin();
+      allow read, write: if false;
 
-
-      allow write:
-        if admin();
-    }
-
-
-    /* =====================================================
-       FARE / PRICING
-    ===================================================== */
-
-    match /pricing/{id} {
-
-      allow read:
-        if loggedIn();
-
-
-      allow write:
-        if admin();
-    }
-
-
-    match /fareSettings/{id} {
-
-      allow read:
-        if loggedIn();
-
-
-      allow write:
-        if admin();
-    }
-
-
-    /* =====================================================
-       COMMISSION
-    ===================================================== */
-
-    match /commission/{id} {
-
-      allow read:
-        if loggedIn();
-
-
-      allow write:
-        if admin();
-    }
-
-
-    /* =====================================================
-       COUPONS
-    ===================================================== */
-
-    match /coupons/{id} {
-
-      allow read:
-        if loggedIn();
-
-
-      allow create, update, delete:
-        if admin();
-    }
-
-
-    /* =====================================================
-       OFFERS
-    ===================================================== */
-
-    match /offers/{id} {
-
-      allow read:
-        if loggedIn();
-
-
-      allow create, update, delete:
-        if admin();
-    }
-
-
-    /* =====================================================
-       SUPPORT
-    ===================================================== */
-
-    match /supports/{id} {
-
-      allow create:
-        if loggedIn();
-
-
-      allow read:
-        if loggedIn();
-
-
-      allow update, delete:
-        if admin();
-    }
-
-
-    /* =====================================================
-       PAYMENTS
-    ===================================================== */
-
-    match /payments/{paymentId} {
-
-      allow read:
-        if loggedIn();
-
-
-      allow create:
-        if loggedIn();
-
-
-      allow update, delete:
-        if admin();
-    }
-
-
-    /* =====================================================
-       REPORTS
-    ===================================================== */
-
-    match /reports/{id} {
-
-      allow read:
-        if admin();
-
-
-      allow write:
-        if admin();
     }
 
   }
