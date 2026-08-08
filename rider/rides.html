@@ -1,461 +1,1514 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
+<!DOCTYPE html><html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RiderX Captain | Active Ride Dispatch & Navigation</title>
-    
-    <!-- CSS & Frameworks -->
-    <link rel="stylesheet" href="../css/Style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            black: '#090A0F',
-                            dark: '#12141C',
-                            card: '#1A1D29',
-                            yellow: '#FFE500',
-                            yellowDark: '#CCA800',
-                            gray: '#8A8F9E',
-                            border: '#2A2E3D',
-                            emerald: '#10B981',
-                            rose: '#F43F5E',
-                            amber: '#F59E0B'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#090A0F">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<title>RiderX Captain | Active Ride</title>
+
+<link rel="stylesheet" href="../css/Style.css">
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    brand: {
+                        black: "#090A0F",
+                        dark: "#12141C",
+                        card: "#1A1D29",
+                        yellow: "#FFE500",
+                        gray: "#8A8F9E",
+                        border: "#2A2E3D",
+                        emerald: "#10B981",
+                        rose: "#F43F5E",
+                        blue: "#3B82F6"
                     }
                 }
             }
         }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Leaflet CSS & JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    };
+</script>
 
-    <style>
-        body {
-            background-color: #090A0F;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
-        }
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
 
-        .glass-card {
-            background: linear-gradient(135deg, rgba(26, 29, 41, 0.92) 0%, rgba(18, 20, 28, 0.98) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.12);
-        }
+<link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+>
 
-        .glass-card-interactive {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
 
-        .glass-card-interactive:hover {
-            border-color: rgba(255, 229, 0, 0.4);
-            box-shadow: 0 10px 25px -5px rgba(255, 229, 0, 0.15);
-        }
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
-        @keyframes onlinePulse {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        .online-glow {
-            animation: onlinePulse 2s infinite;
-        }
+<style>
 
-        @keyframes pingSlow {
-            0% { transform: scale(0.98); opacity: 0.9; }
-            50% { transform: scale(1.02); opacity: 1; }
-            100% { transform: scale(0.98); opacity: 0.9; }
-        }
-        .request-glow {
-            animation: pingSlow 1.8s infinite ease-in-out;
-            border-color: #FFE500 !important;
-            box-shadow: 0 0 35px rgba(255, 229, 0, 0.25);
-        }
+    :root{
+        --rx-yellow:#FFE500;
+        --rx-black:#090A0F;
+        --rx-dark:#12141C;
+        --rx-card:#1A1D29;
+        --rx-border:#2A2E3D;
+        --rx-gray:#8A8F9E;
+        --rx-green:#10B981;
+        --rx-red:#F43F5E;
+        --rx-blue:#3B82F6;
+    }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #12141C;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #2A2E3D;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
-        }
+    *{
+        box-sizing:border-box;
+        -webkit-tap-highlight-color:transparent;
+    }
 
-        .leaflet-container {
-            background-color: #090A0F !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-        .leaflet-tile {
-            filter: brightness(0.65) invert(1) contrast(2.8) hue-rotate(200deg) saturate(0.3) brightness(0.7);
-        }
-        .leaflet-control-zoom {
-            border: 1px solid rgba(255, 229, 0, 0.2) !important;
-            border-radius: 12px !important;
-            overflow: hidden;
-        }
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-            background-color: #12141C !important;
-            color: #FFE500 !important;
-            border-bottom: 1px solid #2A2E3D !important;
-        }
+    html,
+    body{
+        margin:0;
+        padding:0;
+        width:100%;
+        min-height:100%;
+        background:var(--rx-black);
+        color:#fff;
+        font-family:"Plus Jakarta Sans",Arial,sans-serif;
+    }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 54px;
-            height: 28px;
-        }
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #2A2E3D;
-            transition: .4s;
-            border-radius: 34px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: #8A8F9E;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: #10B981;
-            border-color: #10B981;
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-            background-color: #FFFFFF;
+    body{
+        overflow-x:hidden;
+        padding-bottom:90px;
+    }
+
+    button,
+    a,
+    input{
+        -webkit-tap-highlight-color:transparent;
+    }
+
+    button{
+        cursor:pointer;
+    }
+
+    .glass-card{
+        background:
+            linear-gradient(
+                135deg,
+                rgba(26,29,41,.96),
+                rgba(18,20,28,.98)
+            );
+
+        border:1px solid rgba(255,229,0,.10);
+
+        box-shadow:
+            0 15px 40px rgba(0,0,0,.20);
+
+        backdrop-filter:blur(16px);
+        -webkit-backdrop-filter:blur(16px);
+    }
+
+    .top-header{
+        position:sticky;
+        top:0;
+        z-index:1000;
+
+        background:rgba(9,10,15,.94);
+
+        border-bottom:
+            1px solid
+            rgba(42,46,61,.8);
+
+        backdrop-filter:blur(18px);
+        -webkit-backdrop-filter:blur(18px);
+    }
+
+    .status-online{
+        color:#34d399!important;
+    }
+
+    .status-offline{
+        color:#fb7185!important;
+    }
+
+    .online-dot{
+        box-shadow:
+            0 0 0 0
+            rgba(16,185,129,.65);
+
+        animation:
+            onlinePulse 2s infinite;
+    }
+
+    @keyframes onlinePulse{
+        0%{
+            box-shadow:
+                0 0 0 0
+                rgba(16,185,129,.65);
         }
 
-        .otp-input::-webkit-outer-spin-button,
-        .otp-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        70%{
+            box-shadow:
+                0 0 0 9px
+                rgba(16,185,129,0);
         }
-        .otp-input[type=number] {
-            -moz-appearance: textfield;
+
+        100%{
+            box-shadow:
+                0 0 0 0
+                rgba(16,185,129,0);
         }
-    </style>
-</head>
-<body class="min-h-screen pb-24 lg:pb-8 flex flex-col custom-scrollbar">
+    }
 
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="./Home.html" class="flex items-center gap-2">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX+Captain'">
-                </a>
-                <span class="text-[10px] bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-bold border border-brand-yellow/20 hidden sm:inline-block">RIDE DISPATCH HUB</span>
-            </div>
+    .map-shell{
+        position:relative;
+        width:100%;
+        min-height:520px;
+        overflow:hidden;
+        border-radius:18px;
+        border:1px solid var(--rx-border);
+        background:#111;
+    }
 
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2.5 bg-brand-dark/90 px-3.5 py-1.5 rounded-full border border-brand-border">
-                    <span id="statusIndicator" class="w-3 h-3 rounded-full bg-red-500"></span>
-                    <span id="statusText" class="text-xs font-bold text-red-400 uppercase tracking-wide">OFFLINE</span>
-                    <label class="switch ml-1">
-                        <input type="checkbox" id="toggleOnline" onchange="toggleDutyStatus(this.checked)">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+    #dispatchMap{
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        min-height:520px;
+        z-index:1;
+    }
 
-                <a href="./Profile.html" class="flex items-center gap-2 pl-2 border-l border-brand-border/60">
-                    <img id="navRiderPhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" class="w-8 h-8 rounded-full object-cover border border-brand-yellow" alt="Rider Profile">
-                    <div class="hidden md:block text-left">
-                        <p id="navRiderName" class="text-xs font-bold text-white leading-tight">Captain Loading</p>
-                        <p class="text-[10px] text-brand-gray"><i class="fa-solid fa-star text-amber-400 text-[9px]"></i> <span id="navRiderRating">4.92</span></p>
-                    </div>
-                </a>
-            </div>
+    .map-overlay{
+        position:absolute;
+        z-index:20;
+        left:12px;
+        right:12px;
+        top:12px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:8px;
+        pointer-events:none;
+    }
+
+    .map-pill{
+        pointer-events:auto;
+        display:flex;
+        align-items:center;
+        gap:7px;
+        min-height:38px;
+        padding:8px 11px;
+        border-radius:12px;
+        background:rgba(9,10,15,.90);
+        border:1px solid rgba(255,229,0,.20);
+        backdrop-filter:blur(12px);
+        font-size:10px;
+        font-weight:800;
+    }
+
+    .map-actions{
+        display:flex;
+        gap:7px;
+    }
+
+    .map-action{
+        pointer-events:auto;
+        width:38px;
+        height:38px;
+        border:1px solid var(--rx-border);
+        border-radius:12px;
+        background:rgba(9,10,15,.92);
+        color:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .map-action.yellow{
+        background:var(--rx-yellow);
+        color:#000;
+        border-color:var(--rx-yellow);
+    }
+
+    .nav-banner{
+        position:absolute;
+        left:12px;
+        right:12px;
+        bottom:12px;
+        z-index:20;
+
+        display:flex;
+        align-items:center;
+        gap:10px;
+
+        padding:12px;
+
+        border-radius:15px;
+
+        background:rgba(9,10,15,.94);
+
+        border:
+            1px solid
+            rgba(255,229,0,.35);
+
+        backdrop-filter:blur(15px);
+        -webkit-backdrop-filter:blur(15px);
+    }
+
+    .nav-icon{
+        width:42px;
+        min-width:42px;
+        height:42px;
+        border-radius:12px;
+        background:var(--rx-yellow);
+        color:#000;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:17px;
+    }
+
+    .nav-text{
+        flex:1;
+        min-width:0;
+    }
+
+    .nav-title{
+        font-size:11px;
+        font-weight:800;
+        color:#fff;
+        line-height:1.35;
+    }
+
+    .nav-sub{
+        margin-top:2px;
+        color:var(--rx-gray);
+        font-size:9px;
+        line-height:1.4;
+    }
+
+    .nav-distance{
+        color:var(--rx-yellow);
+        font-size:13px;
+        font-weight:800;
+        white-space:nowrap;
+    }
+
+    .pipeline{
+        overflow-x:auto;
+        scrollbar-width:none;
+    }
+
+    .pipeline::-webkit-scrollbar{
+        display:none;
+    }
+
+    .step{
+        flex-shrink:0;
+        display:flex;
+        align-items:center;
+        gap:7px;
+        color:var(--rx-gray);
+        font-size:9px;
+        font-weight:700;
+        white-space:nowrap;
+    }
+
+    .step-number{
+        width:26px;
+        height:26px;
+        border-radius:50%;
+        background:var(--rx-border);
+        color:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:10px;
+        font-weight:800;
+    }
+
+    .step.active{
+        color:var(--rx-yellow);
+    }
+
+    .step.active .step-number{
+        background:var(--rx-yellow);
+        color:#000;
+    }
+
+    .step.done{
+        color:#34d399;
+    }
+
+    .step.done .step-number{
+        background:var(--rx-green);
+        color:#000;
+    }
+
+    .request-card{
+        border:
+            1px solid
+            rgba(255,229,0,.45);
+
+        box-shadow:
+            0 0 35px
+            rgba(255,229,0,.08);
+    }
+
+    .pulse-request{
+        animation:requestPulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes requestPulse{
+        0%{
+            transform:scale(1);
+        }
+
+        50%{
+            transform:scale(1.01);
+        }
+
+        100%{
+            transform:scale(1);
+        }
+    }
+
+    .otp-input{
+        width:52px;
+        height:52px;
+        text-align:center;
+        font-size:20px;
+        font-weight:800;
+        color:var(--rx-yellow);
+        background:#090A0F;
+        border:1px solid var(--rx-border);
+        border-radius:13px;
+        outline:none;
+    }
+
+    .otp-input:focus{
+        border-color:var(--rx-yellow);
+        box-shadow:
+            0 0 0 2px
+            rgba(255,229,0,.08);
+    }
+
+    .bottom-nav{
+        position:fixed;
+        left:0;
+        right:0;
+        bottom:0;
+        z-index:2000;
+
+        padding:
+            9px
+            15px
+            max(10px,env(safe-area-inset-bottom));
+
+        background:
+            rgba(9,10,15,.97);
+
+        border-top:
+            1px solid
+            var(--rx-border);
+
+        backdrop-filter:blur(18px);
+        -webkit-backdrop-filter:blur(18px);
+    }
+
+    .bottom-nav-inner{
+        max-width:480px;
+        margin:auto;
+        display:grid;
+        grid-template-columns:repeat(4,1fr);
+        gap:5px;
+    }
+
+    .bottom-item{
+        min-height:49px;
+        color:var(--rx-gray);
+        text-decoration:none;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        gap:4px;
+        border-radius:12px;
+        font-size:9px;
+        font-weight:700;
+    }
+
+    .bottom-item i{
+        font-size:15px;
+    }
+
+    .bottom-item.active{
+        color:var(--rx-yellow);
+        background:rgba(255,229,0,.07);
+    }
+
+    .hide{
+        display:none!important;
+    }
+
+    .action-btn{
+        width:100%;
+        min-height:50px;
+        border:0;
+        border-radius:14px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        font-size:11px;
+        font-weight:800;
+        transition:
+            transform .15s ease,
+            opacity .15s ease;
+    }
+
+    .action-btn:active{
+        transform:scale(.985);
+    }
+
+    .yellow-btn{
+        background:var(--rx-yellow);
+        color:#000;
+    }
+
+    .blue-btn{
+        background:var(--rx-blue);
+        color:#fff;
+    }
+
+    .green-btn{
+        background:var(--rx-green);
+        color:#000;
+    }
+
+    .red-btn{
+        background:rgba(244,63,94,.10);
+        color:#fb7185;
+        border:1px solid rgba(244,63,94,.28);
+    }
+
+    .dark-btn{
+        background:#12141C;
+        color:#fff;
+        border:1px solid var(--rx-border);
+    }
+
+    .metric{
+        padding:11px 6px;
+        border-radius:12px;
+        background:#12141C;
+        border:1px solid var(--rx-border);
+        text-align:center;
+    }
+
+    .metric-label{
+        color:var(--rx-gray);
+        font-size:8px;
+        font-weight:700;
+        text-transform:uppercase;
+    }
+
+    .metric-value{
+        margin-top:3px;
+        color:#fff;
+        font-size:13px;
+        font-weight:800;
+    }
+
+    .metric-value.yellow{
+        color:var(--rx-yellow);
+    }
+
+    .metric-value.green{
+        color:#34d399;
+    }
+
+    .location-line{
+        display:flex;
+        align-items:flex-start;
+        gap:10px;
+    }
+
+    .location-icon{
+        width:27px;
+        min-width:27px;
+        height:27px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:9px;
+    }
+
+    .pickup-icon{
+        color:#34d399;
+        background:rgba(16,185,129,.12);
+    }
+
+    .drop-icon{
+        color:var(--rx-yellow);
+        background:rgba(255,229,0,.10);
+    }
+
+    .location-label{
+        color:var(--rx-gray);
+        font-size:8px;
+        font-weight:800;
+        text-transform:uppercase;
+    }
+
+    .location-value{
+        margin-top:2px;
+        color:#fff;
+        font-size:11px;
+        font-weight:700;
+        line-height:1.4;
+    }
+
+    .safe-area{
+        padding-bottom:
+            max(100px,calc(80px + env(safe-area-inset-bottom)));
+    }
+
+    @media(max-width:640px){
+
+        body{
+            padding-bottom:85px;
+        }
+
+        .map-shell{
+            min-height:430px;
+        }
+
+        #dispatchMap{
+            min-height:430px;
+        }
+
+        .otp-input{
+            width:48px;
+            height:48px;
+        }
+
+        .map-pill span{
+            max-width:130px;
+            overflow:hidden;
+            white-space:nowrap;
+            text-overflow:ellipsis;
+        }
+    }
+
+</style>
+
+</head><body><!-- ======================================================
+     HEADER
+====================================================== --><header class="top-header px-3 sm:px-5 py-3"><div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+
+    <div class="flex items-center gap-2">
+
+        <a href="./Home.html"
+           class="flex items-center gap-2">
+
+            <img
+                src="../assets/Logo/RiderX-logo.png"
+                alt="RiderX"
+                class="h-8 w-auto object-contain"
+                onerror="this.style.display='none'"
+            >
+
+            <span class="font-extrabold text-white tracking-tight">
+                RIDER<span class="text-brand-yellow">X</span>
+            </span>
+
+        </a>
+
+        <span class="hidden sm:inline-block text-[9px]
+                     bg-brand-yellow/10
+                     text-brand-yellow
+                     border border-brand-yellow/20
+                     rounded-full
+                     px-2.5 py-1
+                     font-bold">
+            ACTIVE RIDE
+        </span>
+
+    </div>
+
+
+    <div class="flex items-center gap-2">
+
+        <div class="flex items-center gap-2
+                    bg-brand-dark
+                    border border-brand-border
+                    rounded-full
+                    px-2.5 py-1.5">
+
+            <span
+                id="statusIndicator"
+                class="w-2.5 h-2.5 rounded-full bg-red-500">
+            </span>
+
+            <span
+                id="statusText"
+                class="text-[9px] font-extrabold text-red-400">
+                OFFLINE
+            </span>
+
+            <label class="relative inline-flex
+                          items-center cursor-pointer">
+
+                <input
+                    type="checkbox"
+                    id="toggleOnline"
+                    class="sr-only peer"
+                    onchange="toggleDutyStatus(this.checked)"
+                >
+
+                <div class="
+                    w-9 h-5
+                    bg-brand-border
+                    peer-focus:outline-none
+                    rounded-full
+                    peer
+                    peer-checked:bg-emerald-500
+                    after:content-['']
+                    after:absolute
+                    after:top-[2px]
+                    after:left-[2px]
+                    after:bg-white
+                    after:rounded-full
+                    after:h-4
+                    after:w-4
+                    after:transition-all
+                    peer-checked:after:translate-x-4
+                "></div>
+
+            </label>
+
         </div>
-    </header>
 
-    <!-- Main Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
 
-        <!-- Top Ride Status Pipeline Bar -->
-        <div class="glass-card rounded-2xl p-4">
-            <div class="flex items-center justify-between text-xs font-bold overflow-x-auto custom-scrollbar gap-4 pb-1">
-                <div id="stepSearching" class="flex items-center gap-2 text-brand-yellow shrink-0">
-                    <span class="w-6 h-6 rounded-full bg-brand-yellow text-brand-black flex items-center justify-center font-extrabold text-[11px]">1</span>
-                    <span>Queue / Scan</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-brand-gray text-[10px]"></i>
-                <div id="stepAccepted" class="flex items-center gap-2 text-brand-gray shrink-0">
-                    <span class="w-6 h-6 rounded-full bg-brand-border text-white flex items-center justify-center font-extrabold text-[11px]">2</span>
-                    <span>Accepted</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-brand-gray text-[10px]"></i>
-                <div id="stepArrived" class="flex items-center gap-2 text-brand-gray shrink-0">
-                    <span class="w-6 h-6 rounded-full bg-brand-border text-white flex items-center justify-center font-extrabold text-[11px]">3</span>
-                    <span>Arrived At Pickup</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-brand-gray text-[10px]"></i>
-                <div id="stepInProgress" class="flex items-center gap-2 text-brand-gray shrink-0">
-                    <span class="w-6 h-6 rounded-full bg-brand-border text-white flex items-center justify-center font-extrabold text-[11px]">4</span>
-                    <span>Trip In Progress</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-brand-gray text-[10px]"></i>
-                <div id="stepCompleted" class="flex items-center gap-2 text-brand-gray shrink-0">
-                    <span class="w-6 h-6 rounded-full bg-brand-border text-white flex items-center justify-center font-extrabold text-[11px]">5</span>
-                    <span>Completed</span>
-                </div>
+        <a href="./Profile.html"
+           class="flex items-center">
+
+            <img
+                id="navRiderPhoto"
+                src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F"
+                alt="Rider"
+                class="w-9 h-9 rounded-full object-cover border border-brand-yellow"
+            >
+
+        </a>
+
+    </div>
+
+</div>
+
+</header><!-- ======================================================
+     MAIN
+====================================================== --><main class="max-w-7xl mx-auto w-full px-3 sm:px-5 py-4 safe-area"><!-- RIDER INFO -->
+
+<div class="glass-card rounded-2xl p-4 mb-4">
+
+    <div class="flex items-center justify-between gap-3">
+
+        <div class="flex items-center gap-3">
+
+            <img
+                id="riderProfilePhoto"
+                src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F"
+                class="w-12 h-12 rounded-2xl object-cover border border-brand-yellow"
+                alt="Rider"
+            >
+
+            <div>
+
+                <h1
+                    id="navRiderName"
+                    class="text-sm font-extrabold text-white">
+                    Captain Rider
+                </h1>
+
+                <p class="text-[10px] text-brand-gray mt-1">
+                    <i class="fa-solid fa-star text-amber-400"></i>
+                    <span id="navRiderRating">4.92</span>
+                    <span class="mx-1">•</span>
+                    Chandigarh Captain
+                </p>
+
             </div>
+
         </div>
 
-        <!-- Dispatch Workspace Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            <!-- Left Console: Queue & Active Ride Control Card (5 Cols) -->
-            <div class="lg:col-span-5 space-y-6">
+        <div class="text-right">
 
-                <!-- NO ACTIVE RIDE / QUEUE STATE -->
-                <div id="panelQueue" class="glass-card rounded-2xl p-6 space-y-5">
-                    <div class="flex items-center justify-between border-b border-brand-border/60 pb-3">
-                        <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-layer-group text-brand-yellow"></i> Dispatch Queue
-                        </h2>
-                        <span id="queueCountBadge" class="px-2.5 py-0.5 rounded-full bg-brand-yellow/10 text-brand-yellow text-xs font-mono font-bold">1 Available</span>
-                    </div>
+            <p class="text-[8px] text-brand-gray uppercase font-bold">
+                Today's Status
+            </p>
 
-                    <div id="emptyQueueNotice" class="hidden text-center py-10 space-y-3">
-                        <div class="w-14 h-14 mx-auto rounded-full bg-brand-dark flex items-center justify-center border border-brand-border text-brand-gray text-2xl">
-                            <i class="fa-solid fa-radar animate-spin"></i>
-                        </div>
-                        <h3 class="text-sm font-bold text-white">Scanning for Nearby Passengers...</h3>
-                        <p class="text-xs text-brand-gray max-w-xs mx-auto">Make sure you are Online and positioned in high surge heat zones to receive ride passes.</p>
-                    </div>
+            <p
+                id="rideStateLabel"
+                class="text-xs font-extrabold text-brand-yellow mt-1">
+                Searching
+            </p>
 
-                    <!-- Dispatch Queue Card Item -->
-                    <div id="queueCard" class="bg-brand-dark p-4 rounded-xl border border-brand-yellow/40 space-y-3 hover:border-brand-yellow transition">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-center gap-3">
-                                <img id="qCustomerPhoto" src="https://ui-avatars.com/api/?name=Ananya+Sharma&background=FFE500&color=090A0F" class="w-11 h-11 rounded-xl object-cover border border-brand-yellow" alt="Customer Avatar">
-                                <div>
-                                    <h4 id="qCustomerName" class="text-xs font-bold text-white">Ananya Sharma</h4>
-                                    <p class="text-[10px] text-amber-400 font-bold"><i class="fa-solid fa-star"></i> <span id="qCustomerRating">4.88</span> • Premium Ride</p>
-                                </div>
-                            </div>
-                            <span id="qFare" class="text-lg font-extrabold text-brand-yellow font-mono">₹285.00</span>
-                        </div>
+        </div>
 
-                        <div class="space-y-1.5 text-xs bg-brand-black/60 p-3 rounded-lg border border-brand-border/60">
-                            <div class="flex items-center gap-2 text-emerald-400 font-semibold truncate">
-                                <i class="fa-solid fa-circle text-[8px] shrink-0"></i>
-                                <span id="qPickupAddr" class="truncate">Terminal 2 Gate 4, Mumbai Airport</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-brand-yellow font-semibold truncate">
-                                <i class="fa-solid fa-location-dot text-[10px] shrink-0"></i>
-                                <span id="qDropAddr" class="truncate">One BKC, Bandra Kurla Complex</span>
-                            </div>
-                        </div>
+    </div>
 
-                        <div class="grid grid-cols-2 gap-2 text-[11px] font-semibold text-brand-gray pt-1">
-                            <div><i class="fa-solid fa-route text-brand-yellow mr-1"></i> Pickup: <strong class="text-white" id="qPickupDist">1.2 km</strong></div>
-                            <div><i class="fa-solid fa-clock text-brand-yellow mr-1"></i> Trip: <strong class="text-white" id="qTripDist">8.4 km (22m)</strong></div>
-                        </div>
+</div>
 
-                        <button onclick="acceptIncomingRide()" class="w-full py-3 rounded-xl bg-brand-yellow text-brand-black font-black text-xs hover:bg-yellow-300 transition shadow-lg shadow-brand-yellow/10 flex items-center justify-center gap-2 uppercase tracking-wider">
-                            <i class="fa-solid fa-circle-check text-sm"></i> Accept Ride Request
-                        </button>
-                    </div>
+
+<!-- ==================================================
+     PIPELINE
+================================================== -->
+
+<div class="glass-card rounded-2xl p-3 mb-4">
+
+    <div class="pipeline flex items-center gap-4">
+
+        <div id="stepSearching" class="step active">
+            <span class="step-number">1</span>
+            <span>Searching</span>
+        </div>
+
+        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
+
+        <div id="stepAccepted" class="step">
+            <span class="step-number">2</span>
+            <span>Accepted</span>
+        </div>
+
+        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
+
+        <div id="stepArrived" class="step">
+            <span class="step-number">3</span>
+            <span>Arrived</span>
+        </div>
+
+        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
+
+        <div id="stepInProgress" class="step">
+            <span class="step-number">4</span>
+            <span>Trip</span>
+        </div>
+
+        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
+
+        <div id="stepCompleted" class="step">
+            <span class="step-number">5</span>
+            <span>Done</span>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==================================================
+     WORKSPACE
+================================================== -->
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+
+    <!-- ==============================================
+         LEFT / CONTROL
+    =============================================== -->
+
+    <section class="lg:col-span-5 space-y-4">
+
+
+        <!-- QUEUE -->
+
+        <div
+            id="panelQueue"
+            class="glass-card rounded-2xl p-4"
+        >
+
+            <div class="flex items-center justify-between pb-3 border-b border-brand-border">
+
+                <div>
+
+                    <h2 class="text-sm font-extrabold">
+                        Ride Requests
+                    </h2>
+
+                    <p class="text-[9px] text-brand-gray mt-1">
+                        Nearby customer requests
+                    </p>
+
                 </div>
 
-                <!-- ACTIVE RIDE MANAGEMENT CARD -->
-                <div id="panelActiveRide" class="glass-card rounded-2xl p-6 space-y-5 hidden border-brand-yellow/30">
-                    
-                    <!-- Customer Header -->
-                    <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="relative">
-                                <img id="activeCustPhoto" src="https://ui-avatars.com/api/?name=Ananya+Sharma&background=FFE500&color=090A0F" class="w-12 h-12 rounded-2xl object-cover border-2 border-brand-yellow" alt="Customer">
-                                <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-brand-black"></span>
-                            </div>
-                            <div>
-                                <h3 id="activeCustName" class="text-sm font-extrabold text-white">Ananya Sharma</h3>
-                                <p class="text-[11px] text-brand-gray"><i class="fa-solid fa-star text-amber-400"></i> <span id="activeCustRating">4.88</span> Customer Rating</p>
-                            </div>
+                <span
+                    id="queueCountBadge"
+                    class="text-[9px] font-bold
+                           text-brand-yellow
+                           bg-brand-yellow/10
+                           border border-brand-yellow/20
+                           rounded-full
+                           px-2.5 py-1">
+                    0 Available
+                </span>
+
+            </div>
+
+
+            <div
+                id="emptyQueueNotice"
+                class="py-10 text-center"
+            >
+
+                <div class="w-14 h-14 mx-auto
+                            rounded-full
+                            bg-brand-dark
+                            border border-brand-border
+                            flex items-center justify-center">
+
+                    <i class="fa-solid fa-radar
+                              text-brand-yellow
+                              text-xl">
+                    </i>
+
+                </div>
+
+                <h3 class="mt-3 text-xs font-bold">
+                    Searching for rides
+                </h3>
+
+                <p class="mt-1 text-[9px] text-brand-gray">
+                    Go online to receive nearby ride requests.
+                </p>
+
+            </div>
+
+
+            <!-- REQUEST CARD -->
+
+            <div
+                id="queueCard"
+                class="request-card pulse-request
+                       bg-brand-dark
+                       rounded-2xl
+                       p-4
+                       mt-3
+                       hidden"
+            >
+
+                <div class="flex items-start justify-between gap-3">
+
+                    <div class="flex items-center gap-3">
+
+                        <img
+                            id="qCustomerPhoto"
+                            src="https://ui-avatars.com/api/?name=Customer&background=FFE500&color=090A0F"
+                            class="w-11 h-11 rounded-xl object-cover border border-brand-yellow"
+                            alt="Customer"
+                        >
+
+                        <div>
+
+                            <h3
+                                id="qCustomerName"
+                                class="text-xs font-extrabold">
+                                Customer
+                            </h3>
+
+                            <p class="text-[9px] text-brand-gray mt-1">
+
+                                <i class="fa-solid fa-star text-amber-400"></i>
+
+                                <span id="qCustomerRating">
+                                    5.0
+                                </span>
+
+                            </p>
+
                         </div>
-                        <a id="btnCallCustomer" href="tel:+919876543210" class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-sm font-bold hover:bg-emerald-500 hover:text-brand-black transition">
-                            <i class="fa-solid fa-phone"></i>
-                        </a>
+
                     </div>
 
-                    <!-- Pickup & Drop Timeline -->
-                    <div class="bg-brand-dark p-3.5 rounded-xl border border-brand-border space-y-3 text-xs">
-                        <div class="flex items-start gap-3">
-                            <i class="fa-solid fa-circle text-emerald-400 text-[10px] mt-1 shrink-0"></i>
-                            <div>
-                                <p class="text-[10px] text-brand-gray uppercase font-bold">PICKUP ADDRESS</p>
-                                <p id="activePickupText" class="font-bold text-white mt-0.5">Terminal 2 Gate 4, Mumbai Airport</p>
-                            </div>
-                        </div>
-                        <div class="w-0.5 h-3 bg-brand-border ml-1"></div>
-                        <div class="flex items-start gap-3">
-                            <i class="fa-solid fa-location-dot text-brand-yellow text-[12px] mt-0.5 shrink-0"></i>
-                            <div>
-                                <p class="text-[10px] text-brand-gray uppercase font-bold">DROP DESTINATION</p>
-                                <p id="activeDropText" class="font-bold text-white mt-0.5">One BKC, Bandra Kurla Complex, Mumbai</p>
-                            </div>
-                        </div>
+
+                    <div
+                        id="qFare"
+                        class="text-lg font-extrabold text-brand-yellow">
+                        ₹0
                     </div>
 
-                    <!-- Live Metrics Strip -->
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="bg-brand-dark p-2.5 rounded-xl border border-brand-border">
-                            <p class="text-[9px] text-brand-gray uppercase font-bold">Est. Fare</p>
-                            <p id="activeFareText" class="text-sm font-extrabold text-brand-yellow font-mono">₹285.00</p>
+                </div>
+
+
+                <div class="mt-4
+                            bg-brand-black
+                            border border-brand-border
+                            rounded-xl
+                            p-3
+                            space-y-3">
+
+                    <div class="location-line">
+
+                        <div class="location-icon pickup-icon">
+                            <i class="fa-solid fa-circle"></i>
                         </div>
-                        <div class="bg-brand-dark p-2.5 rounded-xl border border-brand-border">
-                            <p class="text-[9px] text-brand-gray uppercase font-bold">Distance</p>
-                            <p id="activeDistText" class="text-sm font-extrabold text-white">8.4 km</p>
+
+                        <div class="min-w-0">
+
+                            <p class="location-label">
+                                Pickup
+                            </p>
+
+                            <p
+                                id="qPickupAddr"
+                                class="location-value truncate">
+                                Pickup location
+                            </p>
+
                         </div>
-                        <div class="bg-brand-dark p-2.5 rounded-xl border border-brand-border">
-                            <p class="text-[9px] text-brand-gray uppercase font-bold">ETA</p>
-                            <p id="activeETAText" class="text-sm font-extrabold text-emerald-400">18 mins</p>
-                        </div>
+
                     </div>
 
-                    <!-- Fare Adjustment & Toll Calculator Accordion -->
-                    <div class="bg-brand-dark/60 p-3 rounded-xl border border-brand-border space-y-2 text-xs">
-                        <div class="flex items-center justify-between text-brand-gray">
-                            <span>Base Fare</span>
-                            <span id="fareBase" class="font-mono text-white">₹220.00</span>
-                        </div>
-                        <div class="flex items-center justify-between text-brand-gray">
-                            <span>Surge Multiplier (1.2x)</span>
-                            <span id="fareSurge" class="font-mono text-white">+₹40.00</span>
-                        </div>
-                        <div class="flex items-center justify-between text-brand-gray">
-                            <span>Toll / Extra Charges</span>
-                            <div class="flex items-center gap-1">
-                                <span class="text-brand-gray">₹</span>
-                                <input type="number" id="inputTollCharge" value="25" onchange="recalculateFare()" class="w-16 bg-brand-black border border-brand-border rounded px-2 py-0.5 text-right font-mono text-brand-yellow focus:outline-none focus:border-brand-yellow">
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between text-brand-gray">
-                            <span>Waiting Fee (3 min)</span>
-                            <span id="fareWaiting" class="font-mono text-white">+₹0.00</span>
-                        </div>
+
+                    <div class="border-l
+                                border-dashed
+                                border-brand-border
+                                h-3
+                                ml-3">
                     </div>
 
-                    <!-- OTP Verification Box (Appears when Arrived At Pickup) -->
-                    <div id="boxOTPVerification" class="hidden bg-brand-dark p-4 rounded-xl border border-brand-yellow/50 space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-extrabold text-brand-yellow uppercase tracking-wider flex items-center gap-1.5">
-                                <i class="fa-solid fa-key"></i> Enter Customer 4-Digit OTP
+
+                    <div class="location-line">
+
+                        <div class="location-icon drop-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+
+                        <div class="min-w-0">
+
+                            <p class="location-label">
+                                Destination
+                            </p>
+
+                            <p
+                                id="qDropAddr"
+                                class="location-value truncate">
+                                Destination
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="grid grid-cols-2 gap-2 mt-3">
+
+                    <div class="metric">
+
+                        <p class="metric-label">
+                            Pickup
+                        </p>
+
+                        <p
+                            id="qPickupDist"
+                            class="metric-value">
+                            --
+                        </p>
+
+                    </div>
+
+                    <div class="metric">
+
+                        <p class="metric-label">
+                            Trip
+                        </p>
+
+                        <p
+                            id="qTripDist"
+                            class="metric-value">
+                            --
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    onclick="acceptIncomingRide()"
+                    class="action-btn yellow-btn mt-3"
+                >
+
+                    <i class="fa-solid fa-check"></i>
+
+                    Accept Ride Request
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             ACTIVE RIDE
+        =================================================== -->
+
+        <div
+            id="panelActiveRide"
+            class="glass-card rounded-2xl p-4 hidden"
+        >
+
+            <!-- CUSTOMER -->
+
+            <div class="flex items-center justify-between pb-4 border-b border-brand-border">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="relative">
+
+                        <img
+                            id="activeCustPhoto"
+                            src="https://ui-avatars.com/api/?name=Customer&background=FFE500&color=090A0F"
+                            class="w-12 h-12 rounded-2xl object-cover border-2 border-brand-yellow"
+                            alt="Customer"
+                        >
+
+                        <span class="absolute
+                                     -bottom-1
+                                     -right-1
+                                     w-4
+                                     h-4
+                                     rounded-full
+                                     bg-emerald-500
+                                     border-2
+                                     border-brand-black">
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3
+                            id="activeCustName"
+                            class="text-sm font-extrabold">
+                            Customer
+                        </h3>
+
+                        <p class="text-[9px] text-brand-gray mt-1">
+
+                            <i class="fa-solid fa-star text-amber-400"></i>
+
+                            <span id="activeCustRating">
+                                5.0
                             </span>
-                            <span class="text-[10px] text-brand-gray">Ask passenger for PIN</span>
-                        </div>
-                        <div class="flex items-center justify-center gap-2">
-                            <input type="number" maxlength="1" class="otp-input w-12 h-12 bg-brand-black border border-brand-border rounded-xl text-center text-lg font-extrabold text-brand-yellow focus:outline-none focus:border-brand-yellow" onkeyup="moveOTPFocus(this, 1)">
-                            <input type="number" maxlength="1" class="otp-input w-12 h-12 bg-brand-black border border-brand-border rounded-xl text-center text-lg font-extrabold text-brand-yellow focus:outline-none focus:border-brand-yellow" onkeyup="moveOTPFocus(this, 2)">
-                            <input type="number" maxlength="1" class="otp-input w-12 h-12 bg-brand-black border border-brand-border rounded-xl text-center text-lg font-extrabold text-brand-yellow focus:outline-none focus:border-brand-yellow" onkeyup="moveOTPFocus(this, 3)">
-                            <input type="number" maxlength="1" class="otp-input w-12 h-12 bg-brand-black border border-brand-border rounded-xl text-center text-lg font-extrabold text-brand-yellow focus:outline-none focus:border-brand-yellow" onkeyup="moveOTPFocus(this, 4)">
-                        </div>
+
+                        </p>
+
                     </div>
 
-                    <!-- Dynamic Lifecycle Action Buttons -->
-                    <div class="space-y-3 pt-2">
-                        <!-- Step A: Mark Arrived -->
-                        <button id="btnArrivedPickup" onclick="actionArrivedAtPickup()" class="w-full py-3.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-extrabold text-xs transition shadow-lg flex items-center justify-center gap-2 uppercase tracking-wider">
-                            <i class="fa-solid fa-location-crosshairs text-sm"></i> Arrived At Pickup Location
-                        </button>
+                </div>
 
-                        <!-- Step B: Verify OTP & Start Ride -->
-                        <button id="btnStartRide" onclick="actionStartRide()" class="hidden w-full py-3.5 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition shadow-lg shadow-brand-yellow/20 flex items-center justify-center gap-2 uppercase tracking-wider">
-                            <i class="fa-solid fa-play text-sm"></i> Verify PIN & Start Ride
-                        </button>
 
-                        <!-- Step C: Complete Ride -->
-                        <button id="btnCompleteRide" onclick="actionCompleteRide()" class="hidden w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-brand-black font-extrabold text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 uppercase tracking-wider">
-                            <i class="fa-solid fa-flag-checkered text-sm"></i> Complete Trip & Collect Cash/UPI
-                        </button>
+                <div class="flex gap-2">
 
-                        <!-- Emergency / Cancel Button -->
-                        <div class="flex items-center gap-3">
-                            <button onclick="cancelActiveRide()" class="flex-1 py-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 font-bold text-xs hover:bg-red-500 hover:text-white transition">
-                                Cancel Trip
-                            </button>
-                            <button onclick="triggerSOSAlert()" class="px-4 py-2.5 rounded-xl bg-red-600 text-white font-black text-xs hover:bg-red-700 transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-shield-cat"></i> SOS
-                            </button>
-                        </div>
+                    <a
+                        id="btnCallCustomer"
+                        href="#"
+                        class="w-10 h-10
+                               rounded-xl
+                               bg-emerald-500/10
+                               border border-emerald-500/20
+                               text-emerald-400
+                               flex items-center justify-center"
+                    >
+
+                        <i class="fa-solid fa-phone"></i>
+
+                    </a>
+
+                    <button
+                        type="button"
+                        onclick="openCustomerChat()"
+                        class="w-10 h-10
+                               rounded-xl
+                               bg-brand-yellow/10
+                               border border-brand-yellow/20
+                               text-brand-yellow
+                               flex items-center justify-center"
+                    >
+
+                        <i class="fa-solid fa-message"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- LOCATIONS -->
+
+            <div class="mt-4
+                        bg-brand-dark
+                        border border-brand-border
+                        rounded-xl
+                        p-3
+                        space-y-3">
+
+                <div class="location-line">
+
+                    <div class="location-icon pickup-icon">
+                        <i class="fa-solid fa-circle"></i>
+                    </div>
+
+                    <div>
+
+                        <p class="location-label">
+                            Pickup
+                        </p>
+
+                        <p
+                            id="activePickupText"
+                            class="location-value">
+                            Pickup location
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="border-l
+                            border-dashed
+                            border-brand-border
+                            h-3
+                            ml-3">
+                </div>
+
+
+                <div class="location-line">
+
+                    <div class="location-icon drop-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+
+                    <div>
+
+                        <p class="location-label">
+                            Destination
+                        </p>
+
+                        <p
+                            id="activeDropText"
+                            class="location-value">
+                            Destination
+                        </p>
+
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- Right Workspace: Interactive Live Navigation Map (7 Cols) -->
-            <div class="lg:col-span-7 flex flex-col space-y-4">
-                
-                <div class="glass-card rounded-2xl p-4 flex-grow flex flex-col relative min-h-[500px] overflow-hidden">
-                    
-                    <!-- Floating Map Top Info Header -->
-                    <div class="flex items-center justify-between mb-3 z-10 relative">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <h3 id="mapNavTitle" class="text-xs font-bold text-white uppercase tracking-wider">GPS Turn-By-Turn Navigation</h3>
-                        </div>
 
-                        <div class="flex items-center gap-2">
-                            <button onclick="recenterMap()" class="px-3 py-1.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-crosshairs text-brand-yellow"></i> Recenter
-                            </button>
-                            <button onclick="launchGoogleMapsExternal()" class="px-3 py-1.5 rounded-xl bg-brand-yellow text-brand-black font-bold text-xs hover:bg-yellow-300 transition flex items-center gap-1.5">
-                                <i class="fa-solid fa-diamond-turn-right text-sm"></i> Google Maps
-                            </button>
-                        </div>
+            <!-- METRICS -->
+
+            <div class="grid grid-cols-3 gap-2 mt-3">
+
+                <div class="metric">
+
+                    <p class="metric-label">
+                        Fare
+                    </p>
+
+                    <p
+                        id="activeFareText"
+                        class="metric-value yellow">
+                        ₹0
+                    </p>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <p class="metric-label">
+                        Distance
+                    </p>
+
+                    <p
+                        id="activeDistText"
+                        class="metric-value">
+                        --
+                    </p>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <p class="metric-label">
+                        ETA
+                    </p>
+
+                    <p
+                        id="activeETAText"
+                        class="metric-value green">
+                        --
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- FARE -->
+
+            <div
+                class="mt-3
+                       bg-brand-dark
+                       border border-brand-border
+                       rounded-xl
+                       p-3
+                       space-y-2"
+            >
+
+                <div class="flex justify-between text-[10px]">
+
+                    <span class="text-brand-gray">
+                        Base Fare
+                    </span>
+
+                    <span
+                        id="fareBase"
+                        class="font-bold">
+                        ₹0
+                    </span>
+
+                </div>
+
+
+                <div class="flex justify-between text-[10px]">
+
+                    <span class="text-brand-gray">
+                        Surge
+                    </span>
+
+                    <span
+                        id="fareSurge"
+                        class="font-bold">
+                        ₹0
+                    </span>
+
+                </div>
+
+
+                <div class="flex justify-between items-center text-[10px]">
+
+                    <span class="text-brand-gray">
+                        Toll / Extra
+                    </span>
+
+                    <div class="flex items-center gap-1">
+
+                        <span class="text-brand-gray">
+                            ₹
+                        </span>
+
+                        <input
+                            id="inputTollCharge"
+                            type="number"
+                            min="0"
+                            value="0"
+                            onchange="recalculateFare()"
+                            class="w-16
+                                   bg-brand-black
+                                   border border-brand-border
+                                   rounded-lg
+                                   px-2 py-1
+                                   text-right
+                                   text-brand-yellow
+                                   outline-none"
+                        >
+
                     </div>
 
-                    <!-- Leaflet OpenStreetMap Container -->
-                    <div id="dispatchMap" class="w-full h-full min-h-[420px] rounded-xl z-0 border border-brand-border/60"></div>
+                </div>
 
-                    <!-- Turn-by-Turn Instruction Banner Overlay -->
-                    <div id="navInstructionBanner" class="absolute bottom-6 left-6 right-6 z-10 bg-brand-black/90 backdrop-blur-md p-3.5 rounded-xl border border-brand-yellow/40 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-lg bg-brand-yellow text-brand-black flex items-center justify-center text-lg font-black shrink-0">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            </div>
-                            <div>
-                                <p id="navStepTitle" class="text-xs font-extrabold text-white">In 300 meters, turn right onto Western Express Hwy</p>
-                                <p id="navStepSub" class="text-[10px] text-brand-gray">Stay on the middle lane towards South Mumbai</p>
-                            </div>
-                        </div>
-                        <span id="navStepDist" class="text-sm font-extrabold text-brand-yellow font-mono">300m</span>
-                    </div>
+
+                <div class="flex justify-between text-[10px]">
+
+                    <span class="text-brand-gray">
+                        Waiting
+                    </span>
+
+                    <span
+                        id="fareWaiting"
+                        class="font-bold">
+                        ₹0
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- OTP -->
+
+            <div
+                id="boxOTPVerification"
+                class="hidden
+                       mt-3
+                       bg-brand-dark
+                       border border-brand-yellow/30
+                       rounded-xl
+                       p-4"
+            >
+
+                <div class="flex items-center justify-between">
+
+                    <p class="text-[10px]
+                              font-extrabold
+                              text-brand-yellow
+                              uppercase">
+
+                        <i class="fa-solid fa-key mr-1"></i>
+                        Customer OTP
+
+                    </p>
+
+                    <span class="text-[8px] text-brand-gray">
+                        Ask passenger
+                    </span>
+
+                </div>
+
+
+                <div class="flex justify-center gap-2 mt-4">
+
+                    <input
+                        type="number"
+                        maxlength="1"
+                        inputmode="numeric"
+                        class="otp-input"
+                        onkeyup="moveOTPFocus(this,1)"
+                    >
+
+                    <input
+                        type="number"
+                        maxlength="1"
+                        inputmode="numeric"
+                        class="otp-input"
+                        onkeyup="moveOTPFocus(this,2)"
+                    >
+
+                    <input
+                        type="number"
+                        maxlength="1"
+                        inputmode="numeric"
+                        class="otp-input"
+                        onkeyup="moveOTPFocus(this,3)"
+                    >
+
+                    <input
+                        type="number"
+                        maxlength="1"
+                        inputmode="numeric"
+                        class="otp-input"
+                        onkeyup="moveOTPFocus(this,4)"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="mt-4 space-y-2.5">
+
+                <button
+                    id="btnArrivedPickup"
+                    onclick="actionArrivedAtPickup()"
+                    class="action-btn blue-btn"
+                >
+
+                    <i class="fa-solid fa-location-crosshairs"></i>
+
+                    Arrived At Pickup
+
+                </button>
+
+
+                <button
+                    id="btnStartRide"
+                    onclick="actionStartRide()"
+                    class="action-btn yellow-btn hidden"
+                >
+
+                    <i class="fa-solid fa-play"></i>
+
+                    Verify OTP & Start Ride
+
+                </button>
+
+
+                <button
+                    id="btnCompleteRide"
+                    onclick="actionCompleteRide()"
+                    class="action-btn green-btn hidden"
+                >
+
+                    <i class="fa-solid fa-flag-checkered"></i>
+
+                    Complete Trip
+
+                </button>
+
+
+                <div class="grid grid-cols-2 gap-2">
+
+                    <button
+                        onclick="cancelActiveRide()"
+                        class="action-btn red-btn"
+                    >
+
+                        <i class="fa-solid fa-xmark"></i>
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        onclick="triggerSOSAlert()"
+                        class="action-btn"
+                        style="
+                            background:#dc2626;
+                            color:#fff;
+                        "
+                    >
+
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        SOS
+
+                    </button>
 
                 </div>
 
@@ -463,266 +1516,1654 @@
 
         </div>
 
-    </main>
+    </section>
 
-    <!-- Mobile Navigation Bar -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-brand-black/95 border-t border-brand-border backdrop-blur-lg px-6 py-2.5">
-        <div class="flex items-center justify-between max-w-md mx-auto">
-            <a href="./Home.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-gauge-high text-base"></i>
-                <span class="text-[10px]">Dashboard</span>
-            </a>
-            <a href="./Rides.html" class="flex flex-col items-center gap-1 text-brand-yellow font-bold">
-                <i class="fa-solid fa-route text-base"></i>
-                <span class="text-[10px]">Active Ride</span>
-            </a>
-            <a href="./Earnings.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-chart-line text-base"></i>
-                <span class="text-[10px]">Earnings</span>
-            </a>
-            <a href="./Profile.html" class="flex flex-col items-center gap-1 text-brand-gray hover:text-white">
-                <i class="fa-solid fa-user-gear text-base"></i>
-                <span class="text-[10px]">Account</span>
-            </a>
+
+    <!-- ==============================================
+         MAP
+    =============================================== -->
+
+    <section class="lg:col-span-7">
+
+        <div class="glass-card rounded-2xl p-3">
+
+            <div class="map-shell">
+
+                <div class="map-overlay">
+
+                    <div class="map-pill">
+
+                        <span
+                            class="w-2.5 h-2.5
+                                   rounded-full
+                                   bg-emerald-400
+                                   animate-pulse">
+                        </span>
+
+                        <span>
+                            Live RiderX Navigation
+                        </span>
+
+                    </div>
+
+
+                    <div class="map-actions">
+
+                        <button
+                            onclick="recenterMap()"
+                            class="map-action"
+                            title="Recenter"
+                        >
+
+                            <i class="fa-solid fa-crosshairs
+                                      text-brand-yellow">
+                            </i>
+
+                        </button>
+
+
+                        <button
+                            onclick="launchGoogleMapsExternal()"
+                            class="map-action yellow"
+                            title="Google Maps"
+                        >
+
+                            <i class="fa-solid fa-diamond-turn-right"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div id="dispatchMap"></div>
+
+
+                <div
+                    id="navInstructionBanner"
+                    class="nav-banner"
+                >
+
+                    <div class="nav-icon">
+
+                        <i class="fa-solid fa-location-arrow"></i>
+
+                    </div>
+
+                    <div class="nav-text">
+
+                        <p
+                            id="navStepTitle"
+                            class="nav-title">
+                            Waiting for a ride request
+                        </p>
+
+                        <p
+                            id="navStepSub"
+                            class="nav-sub">
+                            Your live location will appear here.
+                        </p>
+
+                    </div>
+
+                    <span
+                        id="navStepDist"
+                        class="nav-distance">
+                        --
+                    </span>
+
+                </div>
+
+            </div>
+
         </div>
-    </nav>
 
-    <!-- Firebase & Modules -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/App.js"></script>
-    <script type="module" src="../js/Map.js"></script>
-    <script type="module" src="../js/Notification.js"></script>
+    </section>
 
-    <!-- Controller Execution Script -->
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc, updateDoc, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+</div>
 
-        let currentRider = null;
-        let map = null;
-        let riderMarker = null;
-        let routePolyline = null;
+</main><!-- ======================================================
+     MOBILE NAVIGATION
+====================================================== --><nav class="bottom-nav"><div class="bottom-nav-inner">
 
-        // Mock Mumbai Coordinates for Live Route Simulation
-        let riderPos = [19.0880, 72.8680]; // Near Airport
-        let pickupPos = [19.0895, 72.8656]; // T2 Departure Gate
-        let dropPos = [19.0652, 72.8682]; // One BKC
+    <a
+        href="./Home.html"
+        class="bottom-item"
+    >
 
-        let currentRideState = "SEARCHING"; // SEARCHING -> ACCEPTED -> ARRIVED -> IN_PROGRESS -> COMPLETED
+        <i class="fa-solid fa-house"></i>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initLeafletMap();
+        <span>
+            Home
+        </span>
 
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    window.location.href = '../auth/rider-login.html';
+    </a>
+
+
+    <a
+        href="./Rides.html"
+        class="bottom-item active"
+    >
+
+        <i class="fa-solid fa-route"></i>
+
+        <span>
+            Ride
+        </span>
+
+    </a>
+
+
+    <a
+        href="./Earnings.html"
+        class="bottom-item"
+    >
+
+        <i class="fa-solid fa-wallet"></i>
+
+        <span>
+            Earnings
+        </span>
+
+    </a>
+
+
+    <a
+        href="./Profile.html"
+        class="bottom-item"
+    >
+
+        <i class="fa-solid fa-user"></i>
+
+        <span>
+            Profile
+        </span>
+
+    </a>
+
+</div>
+
+</nav><!-- ======================================================
+     FIREBASE / RIDER MODULES
+====================================================== --><script type="module" src="../firebase/firebase-config.js"></script><script type="module" src="../js/App.js"></script><script type="module" src="../js/Map.js"></script><script type="module" src="../js/Notification.js"></script><!-- ======================================================
+     RIDER RIDE CONTROLLER
+====================================================== --><script type="module">
+
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+    doc,
+    getDoc,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+let currentRider = null;
+
+let map = null;
+let riderMarker = null;
+let pickupMarker = null;
+let dropMarker = null;
+let routePolyline = null;
+
+let riderPosition = null;
+
+let pickupPosition = null;
+let dropPosition = null;
+
+let currentRideState = "SEARCHING";
+
+let currentRideId = null;
+
+
+/* ======================================================
+   CHANDIGARH DEFAULT
+====================================================== */
+
+const CHANDIGARH_CENTER = [
+    30.7333,
+    76.7794
+];
+
+
+/* ======================================================
+   INITIALIZATION
+====================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        initMap();
+
+        onAuthStateChanged(
+            auth,
+            async user => {
+
+                if(!user){
+
+                    window.location.href =
+                        "../auth/rider-login.html";
+
                     return;
                 }
+
                 currentRider = user;
-                loadRiderDetails(user.uid);
-            });
+
+                await loadRiderDetails(
+                    user.uid
+                );
+
+                startLiveLocation();
+
+            }
+        );
+
+    }
+);
+
+
+/* ======================================================
+   MAP
+====================================================== */
+
+function initMap(){
+
+    const mapElement =
+        document.getElementById("dispatchMap");
+
+    if(!mapElement){
+        return;
+    }
+
+    map =
+        L.map(
+            "dispatchMap",
+            {
+                zoomControl:false,
+                attributionControl:true
+            }
+        ).setView(
+            CHANDIGARH_CENTER,
+            13
+        );
+
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom:19,
+            attribution:"© OpenStreetMap contributors"
+        }
+    ).addTo(map);
+
+
+    L.control.zoom({
+        position:"bottomright"
+    }).addTo(map);
+
+
+    const riderIcon =
+        L.divIcon({
+
+            className:"rider-marker",
+
+            html:`
+                <div style="
+                    width:40px;
+                    height:40px;
+                    border-radius:50%;
+                    background:#FFE500;
+                    color:#000;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    border:3px solid #090A0F;
+                    box-shadow:0 5px 20px rgba(0,0,0,.45);
+                    font-size:17px;
+                ">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+            `,
+
+            iconSize:[40,40],
+            iconAnchor:[20,20]
+
         });
 
-        function initLeafletMap() {
-            map = L.map('dispatchMap', {
-                zoomControl: true,
-                attributionControl: false
-            }).setView(riderPos, 14);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19
-            }).addTo(map);
+    riderMarker =
+        L.marker(
+            CHANDIGARH_CENTER,
+            {
+                icon:riderIcon
+            }
+        ).addTo(map);
 
-            const riderIcon = L.divIcon({
-                className: 'custom-rider-icon',
-                html: `<div class="w-9 h-9 rounded-full bg-brand-yellow text-brand-black flex items-center justify-center border-2 border-brand-black shadow-xl font-black text-sm"><i class="fa-solid fa-motorcycle"></i></div>`,
-                iconSize: [36, 36],
-                iconAnchor: [18, 18]
-            });
 
-            riderMarker = L.marker(riderPos, { icon: riderIcon }).addTo(map);
+    riderPosition =
+        CHANDIGARH_CENTER;
+
+
+    setTimeout(
+        () => map.invalidateSize(),
+        400
+    );
+
+}
+
+
+/* ======================================================
+   RIDER DETAILS
+====================================================== */
+
+async function loadRiderDetails(uid){
+
+    try{
+
+        const riderRef =
+            doc(
+                db,
+                "riders",
+                uid
+            );
+
+        const snapshot =
+            await getDoc(
+                riderRef
+            );
+
+
+        if(!snapshot.exists()){
+            return;
         }
 
-        async function loadRiderDetails(uid) {
-            try {
-                const docRef = doc(db, "riders", uid);
-                const docSnap = await getDoc(docRef);
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    document.getElementById('navRiderName').innerText = data.fullName || 'Captain Rider';
-                    document.getElementById('navRiderRating').innerText = data.rating || '4.92';
-                    if (data.photoURL) document.getElementById('navRiderPhoto').src = data.photoURL;
+        const data =
+            snapshot.data();
 
-                    const isOnline = data.isOnline || true;
-                    document.getElementById('toggleOnline').checked = isOnline;
-                    updateDutyUI(isOnline);
+
+        const name =
+            data.fullName ||
+            data.name ||
+            "Captain Rider";
+
+
+        const rating =
+            data.rating ||
+            "4.92";
+
+
+        document.getElementById(
+            "navRiderName"
+        ).textContent =
+            name;
+
+
+        document.getElementById(
+            "navRiderRating"
+        ).textContent =
+            rating;
+
+
+        const photo =
+            data.photoURL ||
+            data.profilePhoto;
+
+
+        if(photo){
+
+            document.getElementById(
+                "navRiderPhoto"
+            ).src = photo;
+
+
+            document.getElementById(
+                "riderProfilePhoto"
+            ).src = photo;
+
+        }
+
+
+        const online =
+            data.isOnline === true;
+
+
+        document.getElementById(
+            "toggleOnline"
+        ).checked =
+            online;
+
+
+        updateDutyUI(
+            online
+        );
+
+    }catch(error){
+
+        console.error(
+            "Rider details:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ======================================================
+   ONLINE / OFFLINE
+====================================================== */
+
+window.toggleDutyStatus =
+    async function(isOnline){
+
+        updateDutyUI(
+            isOnline
+        );
+
+
+        if(!currentRider){
+            return;
+        }
+
+
+        try{
+
+            await updateDoc(
+                doc(
+                    db,
+                    "riders",
+                    currentRider.uid
+                ),
+                {
+                    isOnline:
+                        isOnline,
+
+                    updatedAt:
+                        serverTimestamp()
                 }
-            } catch (e) {
-                console.error("Profile load error:", e);
-            }
+            );
+
+        }catch(error){
+
+            console.error(
+                "Duty status:",
+                error
+            );
+
         }
 
-        window.toggleDutyStatus = function(isOnline) {
-            updateDutyUI(isOnline);
-        };
+    };
 
-        function updateDutyUI(isOnline) {
-            const ind = document.getElementById('statusIndicator');
-            const txt = document.getElementById('statusText');
-            if (isOnline) {
-                ind.className = "w-3 h-3 rounded-full bg-emerald-400 online-glow";
-                txt.className = "text-xs font-bold text-emerald-400 uppercase tracking-wide";
-                txt.innerText = "ONLINE";
-            } else {
-                ind.className = "w-3 h-3 rounded-full bg-red-500";
-                txt.className = "text-xs font-bold text-red-400 uppercase tracking-wide";
-                txt.innerText = "OFFLINE";
+
+function updateDutyUI(
+    isOnline
+){
+
+    const indicator =
+        document.getElementById(
+            "statusIndicator"
+        );
+
+    const text =
+        document.getElementById(
+            "statusText"
+        );
+
+
+    if(isOnline){
+
+        indicator.className =
+            "w-2.5 h-2.5 rounded-full bg-emerald-400 online-dot";
+
+        text.className =
+            "text-[9px] font-extrabold text-emerald-400";
+
+        text.textContent =
+            "ONLINE";
+
+    }else{
+
+        indicator.className =
+            "w-2.5 h-2.5 rounded-full bg-red-500";
+
+        text.className =
+            "text-[9px] font-extrabold text-red-400";
+
+        text.textContent =
+            "OFFLINE";
+
+    }
+
+}
+
+
+/* ======================================================
+   LIVE LOCATION
+====================================================== */
+
+function startLiveLocation(){
+
+    if(!navigator.geolocation){
+
+        return;
+    }
+
+
+    navigator.geolocation.watchPosition(
+
+        async position => {
+
+            const lat =
+                position.coords.latitude;
+
+            const lng =
+                position.coords.longitude;
+
+
+            riderPosition =
+                [lat,lng];
+
+
+            if(riderMarker){
+
+                riderMarker.setLatLng(
+                    riderPosition
+                );
+
             }
+
+
+            if(
+                currentRideState ===
+                "SEARCHING"
+            ){
+
+                map.setView(
+                    riderPosition,
+                    15,
+                    {
+                        animate:true
+                    }
+                );
+
+            }
+
+
+            if(currentRider){
+
+                try{
+
+                    await updateDoc(
+                        doc(
+                            db,
+                            "riders",
+                            currentRider.uid
+                        ),
+                        {
+                            latitude:lat,
+                            longitude:lng,
+                            updatedAt:
+                                serverTimestamp()
+                        }
+                    );
+
+                }catch(error){
+
+                    console.warn(
+                        "Location update:",
+                        error
+                    );
+
+                }
+
+            }
+
+        },
+
+        error => {
+
+            console.warn(
+                "GPS:",
+                error
+            );
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            maximumAge:5000,
+            timeout:15000
         }
 
-        // Cycle through Lifecycle States
-        window.acceptIncomingRide = function() {
-            currentRideState = "ACCEPTED";
-            updatePipelineStep(2);
+    );
 
-            document.getElementById('panelQueue').classList.add('hidden');
-            document.getElementById('panelActiveRide').classList.remove('hidden');
+}
 
-            document.getElementById('btnArrivedPickup').classList.remove('hidden');
-            document.getElementById('btnStartRide').classList.add('hidden');
-            document.getElementById('btnCompleteRide').classList.add('hidden');
-            document.getElementById('boxOTPVerification').classList.add('hidden');
 
-            // Draw route on map
-            drawRouteOnMap(riderPos, pickupPos, '#10B981');
-            document.getElementById('navStepTitle').innerText = "Head to Pickup: Terminal 2 Gate 4";
-            document.getElementById('navStepSub').innerText = "Follow green route line to passenger location";
-        };
+/* ======================================================
+   ACCEPT RIDE
+====================================================== */
 
-        window.actionArrivedAtPickup = function() {
-            currentRideState = "ARRIVED";
-            updatePipelineStep(3);
+window.acceptIncomingRide =
+    async function(){
 
-            document.getElementById('btnArrivedPickup').classList.add('hidden');
-            document.getElementById('btnStartRide').classList.remove('hidden');
-            document.getElementById('boxOTPVerification').classList.remove('hidden');
+        currentRideState =
+            "ACCEPTED";
 
-            alert("Passenger notified: 'Captain has arrived at pickup point'. Ask for 4-Digit OTP.");
-            document.getElementById('navStepTitle').innerText = "Waiting at Pickup Location";
-            document.getElementById('navStepSub').innerText = "Ask passenger for OTP to start trip";
-        };
 
-        window.actionStartRide = function() {
-            // Collect OTP inputs
-            const inputs = document.querySelectorAll('.otp-input');
-            let otp = '';
-            inputs.forEach(i => otp += i.value);
+        currentRideId =
+            currentRideId ||
+            null;
 
-            if (otp.length < 4) {
-                alert("Please enter the complete 4-Digit Customer OTP to start the ride.");
+
+        document.getElementById(
+            "panelQueue"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "panelActiveRide"
+        ).classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "rideStateLabel"
+        ).textContent =
+            "Accepted";
+
+
+        updatePipelineStep(
+            2
+        );
+
+
+        document.getElementById(
+            "navStepTitle"
+        ).textContent =
+            "Head to pickup";
+
+
+        document.getElementById(
+            "navStepSub"
+        ).textContent =
+            "Navigate to the customer pickup point.";
+
+
+        if(
+            riderPosition &&
+            pickupPosition
+        ){
+
+            drawRouteOnMap(
+                riderPosition,
+                pickupPosition,
+                "#10B981"
+            );
+
+        }
+
+    };
+
+
+/* ======================================================
+   ARRIVED
+====================================================== */
+
+window.actionArrivedAtPickup =
+    function(){
+
+        currentRideState =
+            "ARRIVED";
+
+
+        updatePipelineStep(
+            3
+        );
+
+
+        document.getElementById(
+            "rideStateLabel"
+        ).textContent =
+            "Arrived";
+
+
+        document.getElementById(
+            "btnArrivedPickup"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "btnStartRide"
+        ).classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "boxOTPVerification"
+        ).classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "navStepTitle"
+        ).textContent =
+            "Waiting for customer";
+
+
+        document.getElementById(
+            "navStepSub"
+        ).textContent =
+            "Ask the customer for the 4-digit OTP.";
+
+
+        document.getElementById(
+            "navStepDist"
+        ).textContent =
+            "OTP";
+
+
+        const firstOTP =
+            document.querySelector(
+                ".otp-input"
+            );
+
+
+        firstOTP?.focus();
+
+    };
+
+
+/* ======================================================
+   START RIDE
+====================================================== */
+
+window.actionStartRide =
+    function(){
+
+        const inputs =
+            document.querySelectorAll(
+                ".otp-input"
+            );
+
+
+        let otp = "";
+
+
+        inputs.forEach(
+            input => {
+                otp +=
+                    input.value
+                    .trim();
+            }
+        );
+
+
+        if(otp.length !== 4){
+
+            alert(
+                "Please enter the complete 4-digit customer OTP."
+            );
+
+            return;
+        }
+
+
+        currentRideState =
+            "IN_PROGRESS";
+
+
+        updatePipelineStep(
+            4
+        );
+
+
+        document.getElementById(
+            "rideStateLabel"
+        ).textContent =
+            "Trip In Progress";
+
+
+        document.getElementById(
+            "boxOTPVerification"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "btnStartRide"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "btnCompleteRide"
+        ).classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "navStepTitle"
+        ).textContent =
+            "Trip in progress";
+
+
+        document.getElementById(
+            "navStepSub"
+        ).textContent =
+            "Follow the route to the customer's destination.";
+
+
+        if(
+            pickupPosition &&
+            dropPosition
+        ){
+
+            drawRouteOnMap(
+                pickupPosition,
+                dropPosition,
+                "#FFE500"
+            );
+
+        }
+
+    };
+
+
+/* ======================================================
+   COMPLETE
+====================================================== */
+
+window.actionCompleteRide =
+    function(){
+
+        currentRideState =
+            "COMPLETED";
+
+
+        updatePipelineStep(
+            5
+        );
+
+
+        document.getElementById(
+            "rideStateLabel"
+        ).textContent =
+            "Completed";
+
+
+        const fare =
+            document.getElementById(
+                "activeFareText"
+            ).textContent;
+
+
+        document.getElementById(
+            "btnCompleteRide"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "navStepTitle"
+        ).textContent =
+            "Ride completed";
+
+
+        document.getElementById(
+            "navStepSub"
+        ).textContent =
+            "Payment and ride completion recorded.";
+
+
+        document.getElementById(
+            "navStepDist"
+        ).textContent =
+            "DONE";
+
+
+        setTimeout(
+            () => {
+
+                document.getElementById(
+                    "panelActiveRide"
+                ).classList.add(
+                    "hidden"
+                );
+
+
+                document.getElementById(
+                    "panelQueue"
+                ).classList.remove(
+                    "hidden"
+                );
+
+
+                document.getElementById(
+                    "emptyQueueNotice"
+                ).classList.remove(
+                    "hidden"
+                );
+
+
+                document.getElementById(
+                    "queueCard"
+                ).classList.add(
+                    "hidden"
+                );
+
+
+                currentRideState =
+                    "SEARCHING";
+
+
+                updatePipelineStep(
+                    1
+                );
+
+
+                document.getElementById(
+                    "rideStateLabel"
+                ).textContent =
+                    "Searching";
+
+
+                if(routePolyline){
+
+                    map.removeLayer(
+                        routePolyline
+                    );
+
+                    routePolyline =
+                        null;
+
+                }
+
+            },
+            900
+        );
+
+    };
+
+
+/* ======================================================
+   CANCEL
+====================================================== */
+
+window.cancelActiveRide =
+    function(){
+
+        const ok =
+            confirm(
+                "Are you sure you want to cancel this ride?"
+            );
+
+
+        if(!ok){
+            return;
+        }
+
+
+        currentRideState =
+            "SEARCHING";
+
+
+        document.getElementById(
+            "panelActiveRide"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "panelQueue"
+        ).classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "emptyQueueNotice"
+        ).classList.remove(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "queueCard"
+        ).classList.add(
+            "hidden"
+        );
+
+
+        document.getElementById(
+            "rideStateLabel"
+        ).textContent =
+            "Searching";
+
+
+        document.getElementById(
+            "navStepTitle"
+        ).textContent =
+            "Searching for rides";
+
+
+        document.getElementById(
+            "navStepSub"
+        ).textContent =
+            "You are ready to receive another request.";
+
+
+        document.getElementById(
+            "navStepDist"
+        ).textContent =
+            "--";
+
+
+        updatePipelineStep(
+            1
+        );
+
+
+        if(routePolyline){
+
+            map.removeLayer(
+                routePolyline
+            );
+
+            routePolyline =
+                null;
+
+        }
+
+    };
+
+
+/* ======================================================
+   FARE
+====================================================== */
+
+window.recalculateFare =
+    function(){
+
+        const base =
+            parseFloat(
+                document.getElementById(
+                    "fareBase"
+                ).textContent
+                .replace(/[^\d.]/g,"")
+            ) || 0;
+
+
+        const surge =
+            parseFloat(
+                document.getElementById(
+                    "fareSurge"
+                ).textContent
+                .replace(/[^\d.]/g,"")
+            ) || 0;
+
+
+        const toll =
+            parseFloat(
+                document.getElementById(
+                    "inputTollCharge"
+                ).value
+            ) || 0;
+
+
+        const waiting =
+            parseFloat(
+                document.getElementById(
+                    "fareWaiting"
+                ).textContent
+                .replace(/[^\d.]/g,"")
+            ) || 0;
+
+
+        const total =
+            base +
+            surge +
+            toll +
+            waiting;
+
+
+        document.getElementById(
+            "activeFareText"
+        ).textContent =
+            `₹${total.toFixed(2)}`;
+
+    };
+
+
+/* ======================================================
+   OTP
+====================================================== */
+
+window.moveOTPFocus =
+    function(
+        element,
+        index
+    ){
+
+        element.value =
+            element.value
+                .replace(/\D/g,"")
+                .slice(0,1);
+
+
+        if(
+            element.value &&
+            index < 4
+        ){
+
+            const inputs =
+                document.querySelectorAll(
+                    ".otp-input"
+                );
+
+
+            inputs[index]?.focus();
+
+        }
+
+    };
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key !==
+            "Backspace"
+        ){
+            return;
+        }
+
+
+        const active =
+            document.activeElement;
+
+
+        if(
+            !active.classList.contains(
+                "otp-input"
+            )
+        ){
+            return;
+        }
+
+
+        if(
+            active.value === ""
+        ){
+
+            const inputs =
+                [
+                    ...document.querySelectorAll(
+                        ".otp-input"
+                    )
+                ];
+
+
+            const index =
+                inputs.indexOf(
+                    active
+                );
+
+
+            if(index > 0){
+
+                inputs[
+                    index - 1
+                ].focus();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* ======================================================
+   PIPELINE
+====================================================== */
+
+function updatePipelineStep(
+    stepNumber
+){
+
+    const ids = [
+        "stepSearching",
+        "stepAccepted",
+        "stepArrived",
+        "stepInProgress",
+        "stepCompleted"
+    ];
+
+
+    ids.forEach(
+        (
+            id,
+            index
+        ) => {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if(!element){
                 return;
             }
 
-            currentRideState = "IN_PROGRESS";
-            updatePipelineStep(4);
 
-            document.getElementById('boxOTPVerification').classList.add('hidden');
-            document.getElementById('btnStartRide').classList.add('hidden');
-            document.getElementById('btnCompleteRide').classList.remove('hidden');
+            const number =
+                index + 1;
 
-            drawRouteOnMap(pickupPos, dropPos, '#FFE500');
-            document.getElementById('navStepTitle').innerText = "Trip In Progress: Heading to One BKC";
-            document.getElementById('navStepSub').innerText = "Distance remaining: 8.4 km • Est ETA: 18 mins";
-        };
 
-        window.actionCompleteRide = function() {
-            currentRideState = "COMPLETED";
-            updatePipelineStep(5);
+            element.classList.remove(
+                "active",
+                "done"
+            );
 
-            const totalFare = document.getElementById('activeFareText').innerText;
-            alert(`Trip Completed Successfully!\nCollect Total Payment: ${totalFare}\nCredited to Wallet!`);
 
-            // Reset back to queue
-            document.getElementById('panelActiveRide').classList.add('hidden');
-            document.getElementById('panelQueue').classList.remove('hidden');
-            document.getElementById('emptyQueueNotice').classList.remove('hidden');
-            document.getElementById('queueCard').classList.add('hidden');
+            if(
+                number ===
+                stepNumber
+            ){
 
-            if (routePolyline) map.removeLayer(routePolyline);
-        };
+                element.classList.add(
+                    "active"
+                );
 
-        window.cancelActiveRide = function() {
-            if (confirm("Are you sure you want to cancel this active ride? It may impact your Captain acceptance rating.")) {
-                document.getElementById('panelActiveRide').classList.add('hidden');
-                document.getElementById('panelQueue').classList.remove('hidden');
-                if (routePolyline) map.removeLayer(routePolyline);
+            }else if(
+                number <
+                stepNumber
+            ){
+
+                element.classList.add(
+                    "done"
+                );
+
             }
-        };
 
-        window.recalculateFare = function() {
-            const toll = parseFloat(document.getElementById('inputTollCharge').value) || 0;
-            const base = 220.00;
-            const surge = 40.00;
-            const total = base + surge + toll;
-            document.getElementById('activeFareText').innerText = `₹${total.toFixed(2)}`;
-        };
+        }
+    );
 
-        window.moveOTPFocus = function(elem, idx) {
-            if (elem.value.length >= 1 && idx < 4) {
-                const next = document.querySelectorAll('.otp-input')[idx];
-                if (next) next.focus();
+}
+
+
+/* ======================================================
+   ROUTE
+====================================================== */
+
+function drawRouteOnMap(
+    start,
+    end,
+    color
+){
+
+    if(!map){
+        return;
+    }
+
+
+    if(routePolyline){
+
+        map.removeLayer(
+            routePolyline
+        );
+
+    }
+
+
+    const midLat =
+        (
+            start[0] +
+            end[0]
+        ) / 2;
+
+
+    const midLng =
+        (
+            start[1] +
+            end[1]
+        ) / 2;
+
+
+    const points = [
+
+        start,
+
+        [
+            midLat + 0.006,
+            midLng - 0.004
+        ],
+
+        [
+            midLat - 0.002,
+            midLng + 0.005
+        ],
+
+        end
+
+    ];
+
+
+    routePolyline =
+        L.polyline(
+            points,
+            {
+                color:color,
+                weight:5,
+                opacity:.9,
+                lineCap:"round",
+                lineJoin:"round",
+                dashArray:"10 8"
             }
-        };
+        ).addTo(map);
 
-        function drawRouteOnMap(start, end, colorHex) {
-            if (routePolyline) map.removeLayer(routePolyline);
 
-            const latlngs = [
-                start,
-                [ (start[0] + end[0]) / 2 + 0.005, (start[1] + end[1]) / 2 - 0.003 ],
-                end
-            ];
+    map.fitBounds(
+        routePolyline.getBounds(),
+        {
+            padding:[
+                60,
+                60
+            ]
+        }
+    );
 
-            routePolyline = L.polyline(latlngs, {
-                color: colorHex,
-                weight: 5,
-                opacity: 0.9,
-                dashArray: '8, 8'
-            }).addTo(map);
+}
 
-            map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+
+/* ======================================================
+   RECENTER
+====================================================== */
+
+window.recenterMap =
+    function(){
+
+        if(
+            !map ||
+            !riderPosition
+        ){
+            return;
         }
 
-        function updatePipelineStep(stepNum) {
-            const steps = ['stepSearching', 'stepAccepted', 'stepArrived', 'stepInProgress', 'stepCompleted'];
-            steps.forEach((sId, index) => {
-                const el = document.getElementById(sId);
-                if (index + 1 === stepNum) {
-                    el.className = "flex items-center gap-2 text-brand-yellow shrink-0 font-bold";
-                    el.querySelector('span').className = "w-6 h-6 rounded-full bg-brand-yellow text-brand-black flex items-center justify-center font-extrabold text-[11px]";
-                } else if (index + 1 < stepNum) {
-                    el.className = "flex items-center gap-2 text-emerald-400 shrink-0 font-bold";
-                    el.querySelector('span').className = "w-6 h-6 rounded-full bg-emerald-500 text-brand-black flex items-center justify-center font-extrabold text-[11px]";
-                } else {
-                    el.className = "flex items-center gap-2 text-brand-gray shrink-0 font-normal";
-                    el.querySelector('span').className = "w-6 h-6 rounded-full bg-brand-border text-white flex items-center justify-center font-extrabold text-[11px]";
+
+        map.setView(
+            riderPosition,
+            16,
+            {
+                animate:true
+            }
+        );
+
+    };
+
+
+/* ======================================================
+   GOOGLE MAPS
+====================================================== */
+
+window.launchGoogleMapsExternal =
+    function(){
+
+        const destination =
+            dropPosition ||
+            pickupPosition;
+
+
+        if(!destination){
+
+            alert(
+                "Ride destination is not available yet."
+            );
+
+            return;
+        }
+
+
+        const url =
+            "https://www.google.com/maps/dir/?api=1" +
+            "&destination=" +
+            encodeURIComponent(
+                `${destination[0]},${destination[1]}`
+            );
+
+
+        window.open(
+            url,
+            "_blank"
+        );
+
+    };
+
+
+/* ======================================================
+   CHAT
+====================================================== */
+
+window.openCustomerChat =
+    function(){
+
+        if(currentRideId){
+
+            window.location.href =
+                `../customer/Chat.html?rideId=${encodeURIComponent(currentRideId)}`;
+
+            return;
+
+        }
+
+
+        alert(
+            "Customer chat will be available after the ride is connected."
+        );
+
+    };
+
+
+/* ======================================================
+   SOS
+====================================================== */
+
+window.triggerSOSAlert =
+    function(){
+
+        const confirmed =
+            confirm(
+                "Activate RiderX SOS? Your current location will be used for emergency assistance."
+            );
+
+
+        if(!confirmed){
+            return;
+        }
+
+
+        const phone =
+            "112";
+
+
+        window.location.href =
+            `tel:${phone}`;
+
+    };
+
+
+/* ======================================================
+   DEMO / REQUEST HELPER
+   Existing Firebase logic can populate these IDs.
+====================================================== */
+
+window.RiderXRides =
+    {
+
+        setRideData(data = {}){
+
+            currentRideId =
+                data.id ||
+                null;
+
+
+            if(data.pickup){
+
+                document.getElementById(
+                    "qPickupAddr"
+                ).textContent =
+                    data.pickup.address ||
+                    data.pickupAddress ||
+                    "Pickup location";
+
+
+                if(
+                    data.pickup.lat != null &&
+                    data.pickup.lng != null
+                ){
+
+                    pickupPosition = [
+                        Number(data.pickup.lat),
+                        Number(data.pickup.lng)
+                    ];
+
                 }
-            });
+
+            }
+
+
+            if(data.drop){
+
+                document.getElementById(
+                    "qDropAddr"
+                ).textContent =
+                    data.drop.address ||
+                    data.dropAddress ||
+                    "Destination";
+
+
+                if(
+                    data.drop.lat != null &&
+                    data.drop.lng != null
+                ){
+
+                    dropPosition = [
+                        Number(data.drop.lat),
+                        Number(data.drop.lng)
+                    ];
+
+                }
+
+            }
+
+
+            const customer =
+                data.customer ||
+                {};
+
+
+            document.getElementById(
+                "qCustomerName"
+            ).textContent =
+                customer.name ||
+                data.customerName ||
+                "Customer";
+
+
+            document.getElementById(
+                "activeCustName"
+            ).textContent =
+                customer.name ||
+                data.customerName ||
+                "Customer";
+
+
+            const fare =
+                Number(
+                    data.fare ||
+                    data.estimatedFare ||
+                    0
+                );
+
+
+            document.getElementById(
+                "qFare"
+            ).textContent =
+                `₹${fare.toFixed(0)}`;
+
+
+            document.getElementById(
+                "activeFareText"
+            ).textContent =
+                `₹${fare.toFixed(2)}`;
+
+
+            document.getElementById(
+                "activeDistText"
+            ).textContent =
+                data.distance
+                    ? `${data.distance} km`
+                    : "--";
+
+
+            document.getElementById(
+                "qTripDist"
+            ).textContent =
+                data.distance
+                    ? `${data.distance} km`
+                    : "--";
+
+
+            document.getElementById(
+                "queueCard"
+            ).classList.remove(
+                "hidden"
+            );
+
+
+            document.getElementById(
+                "emptyQueueNotice"
+            ).classList.add(
+                "hidden"
+            );
+
+
+            document.getElementById(
+                "queueCountBadge"
+            ).textContent =
+                "1 Available";
+
         }
 
-        window.recenterMap = function() {
-            if (map) map.setView(riderPos, 15);
-        };
+    };
 
-        window.launchGoogleMapsExternal = function() {
-            window.open(`https://www.google.com/maps/dir/?api=1&destination=${dropPos[0]},${dropPos[1]}`, '_blank');
-        };
 
-        window.triggerSOSAlert = function() {
-            alert("EMERGENCY SOS ACTIVATED: RiderX Control Room & Local Police notified with your live GPS location.");
-        };
-    </script>
-</body>
-</html>
+</script></body>
+    </html>
