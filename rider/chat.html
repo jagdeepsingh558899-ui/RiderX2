@@ -1,119 +1,1032 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 
-<head>
+«»
 
-<meta charset="UTF-8">
+<meta name="theme-color" content="#000000"><title>RiderX | Chat</title><link
+    rel="stylesheet"
+    href="../css/style.css"
+><link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+><link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+><style>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+:root{
+    --yellow:#ffe500;
+    --black:#000;
+    --dark:#090909;
+    --card:#151515;
+    --card2:#202020;
+    --line:#292929;
+    --white:#fff;
+    --muted:#858585;
+    --green:#22c55e;
+    --red:#ef4444;
+}
 
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Poppins,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
 
-<title>RiderX Chat</title>
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:var(--black);
+    color:var(--white);
+}
 
+body{
+    display:flex;
+    flex-direction:column;
+}
 
-<link rel="stylesheet" href="../css/style.css">
+/* ================================
+   HEADER
+================================ */
 
+.chat-header{
 
-</head>
+    flex-shrink:0;
 
+    min-height:
+        calc(
+            64px +
+            env(safe-area-inset-top)
+        );
 
+    padding:
+        env(safe-area-inset-top)
+        14px
+        0;
 
-<body>
+    background:#090909;
 
+    border-bottom:
+        1px solid
+        var(--line);
 
+    display:flex;
+    align-items:center;
+    gap:12px;
 
-<div class="topbar">
+    z-index:20;
+}
 
+.back-btn{
 
-<h2>
+    width:42px;
+    height:42px;
 
-💬 Chat with Customer
+    border:0;
+    border-radius:50%;
 
-</h2>
+    background:#191919;
+    color:#fff;
 
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-</div>
+    font-size:17px;
 
+    flex-shrink:0;
+}
 
+.back-btn:active{
+    transform:scale(.92);
+}
 
+.customer-avatar{
 
+    width:43px;
+    height:43px;
 
+    border-radius:50%;
 
-<div class="container">
+    background:var(--yellow);
+    color:#000;
 
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
+    font-size:17px;
+    font-weight:800;
 
+    flex-shrink:0;
+}
 
+.customer-info{
+    min-width:0;
+    flex:1;
+}
 
-<div class="card" id="chatBox" style="height:400px; overflow-y:auto;">
+.customer-name{
 
+    font-size:14px;
+    font-weight:700;
 
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
 
-<p>
+.customer-status{
 
-Loading messages...
+    margin-top:2px;
 
-</p>
+    display:flex;
+    align-items:center;
+    gap:5px;
 
+    color:var(--green);
 
+    font-size:10px;
+}
 
-</div>
+.online-dot{
 
+    width:7px;
+    height:7px;
 
+    border-radius:50%;
 
+    background:var(--green);
+}
 
+.header-action{
 
+    width:40px;
+    height:40px;
 
+    border:0;
+    border-radius:50%;
 
+    background:#191919;
+    color:#fff;
 
-<div class="card">
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
+    font-size:15px;
+}
 
+.header-action:active{
+    transform:scale(.92);
+}
 
-<input
+/* ================================
+   CHAT AREA
+================================ */
 
-id="messageInput"
+.chat-wrapper{
 
-class="input"
+    flex:1;
 
-placeholder="Type message..."
+    min-height:0;
 
+    position:relative;
+
+    display:flex;
+    flex-direction:column;
+
+    background:
+        radial-gradient(
+            circle at top,
+            #171717 0%,
+            #090909 55%,
+            #050505 100%
+        );
+}
+
+.chat-box{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    padding:
+        18px
+        14px
+        18px;
+
+    scroll-behavior:smooth;
+
+    overscroll-behavior:contain;
+
+    -webkit-overflow-scrolling:touch;
+}
+
+/* scrollbar */
+
+.chat-box::-webkit-scrollbar{
+    width:3px;
+}
+
+.chat-box::-webkit-scrollbar-thumb{
+    background:#3b3b3b;
+    border-radius:10px;
+}
+
+/* ================================
+   DATE DIVIDER
+================================ */
+
+.date-divider{
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    margin:
+        5px
+        0
+        16px;
+}
+
+.date-divider span{
+
+    padding:
+        5px
+        10px;
+
+    border-radius:20px;
+
+    background:#1b1b1b;
+
+    color:#777;
+
+    font-size:9px;
+}
+
+/* ================================
+   MESSAGE
+================================ */
+
+.message{
+
+    display:flex;
+
+    margin-bottom:10px;
+
+    width:100%;
+}
+
+.message.customer{
+    justify-content:flex-start;
+}
+
+.message.rider{
+    justify-content:flex-end;
+}
+
+.message-content{
+
+    max-width:78%;
+
+    padding:
+        10px
+        12px;
+
+    border-radius:17px;
+
+    font-size:12px;
+
+    line-height:1.45;
+
+    word-break:break-word;
+}
+
+.message.customer
+.message-content{
+
+    background:#202020;
+
+    color:#fff;
+
+    border-bottom-left-radius:5px;
+}
+
+.message.rider
+.message-content{
+
+    background:var(--yellow);
+
+    color:#000;
+
+    border-bottom-right-radius:5px;
+}
+
+.message-time{
+
+    margin-top:4px;
+
+    text-align:right;
+
+    font-size:8px;
+
+    opacity:.55;
+}
+
+/* ================================
+   SYSTEM MESSAGE
+================================ */
+
+.system-message{
+
+    display:flex;
+    justify-content:center;
+
+    margin:
+        10px
+        0;
+}
+
+.system-message span{
+
+    max-width:85%;
+
+    padding:
+        7px
+        12px;
+
+    border-radius:15px;
+
+    background:#151515;
+
+    color:#777;
+
+    font-size:9px;
+
+    text-align:center;
+}
+
+/* ================================
+   LOADING
+================================ */
+
+.chat-loading{
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+    color:#777;
+
+    gap:10px;
+
+    font-size:11px;
+}
+
+.chat-loading i{
+
+    color:var(--yellow);
+
+    font-size:20px;
+}
+
+/* ================================
+   EMPTY
+================================ */
+
+.chat-empty{
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    color:#777;
+}
+
+.chat-empty i{
+
+    width:55px;
+    height:55px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#191919;
+
+    color:var(--yellow);
+
+    font-size:21px;
+
+    margin-bottom:12px;
+}
+
+.chat-empty strong{
+
+    color:#fff;
+
+    font-size:13px;
+}
+
+.chat-empty p{
+
+    margin-top:4px;
+
+    font-size:10px;
+
+    max-width:230px;
+}
+
+/* ================================
+   INPUT AREA
+================================ */
+
+.composer{
+
+    flex-shrink:0;
+
+    padding:
+        9px
+        10px
+        max(
+            10px,
+            env(safe-area-inset-bottom)
+        );
+
+    background:#090909;
+
+    border-top:
+        1px solid
+        var(--line);
+
+    display:flex;
+
+    align-items:flex-end;
+
+    gap:8px;
+}
+
+.attach-btn{
+
+    width:43px;
+    height:43px;
+
+    min-width:43px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#191919;
+
+    color:#aaa;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.attach-btn:active{
+    transform:scale(.92);
+}
+
+.input-container{
+
+    flex:1;
+
+    min-width:0;
+
+    display:flex;
+
+    align-items:center;
+
+    min-height:43px;
+
+    padding:
+        0
+        7px
+        0
+        14px;
+
+    background:#191919;
+
+    border:
+        1px solid
+        #252525;
+
+    border-radius:24px;
+}
+
+#messageInput{
+
+    flex:1;
+
+    min-width:0;
+
+    min-height:41px;
+
+    border:0;
+    outline:0;
+
+    resize:none;
+
+    background:transparent;
+
+    color:#fff;
+
+    font-size:12px;
+
+    line-height:1.4;
+
+    padding:
+        10px
+        0;
+}
+
+#messageInput::placeholder{
+    color:#666;
+}
+
+.send-btn{
+
+    width:36px;
+    height:36px;
+
+    min-width:36px;
+
+    border:0;
+    border-radius:50%;
+
+    background:var(--yellow);
+
+    color:#000;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+
+    transition:
+        transform .15s ease,
+        opacity .2s ease;
+}
+
+.send-btn:active{
+    transform:scale(.9);
+}
+
+.send-btn:disabled{
+    opacity:.35;
+}
+
+/* ================================
+   RIDE QUICK ACTIONS
+================================ */
+
+.quick-actions{
+
+    display:flex;
+
+    gap:7px;
+
+    padding:
+        0
+        12px
+        8px;
+
+    overflow-x:auto;
+
+    background:#090909;
+}
+
+.quick-actions::-webkit-scrollbar{
+    display:none;
+}
+
+.quick-btn{
+
+    flex-shrink:0;
+
+    border:
+        1px solid
+        #292929;
+
+    border-radius:18px;
+
+    padding:
+        7px
+        11px;
+
+    background:#151515;
+
+    color:#bbb;
+
+    font-size:9px;
+}
+
+.quick-btn i{
+    margin-right:4px;
+    color:var(--yellow);
+}
+
+.quick-btn:active{
+    transform:scale(.96);
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media(min-width:700px){
+
+    .chat-wrapper{
+        width:600px;
+        margin:auto;
+
+        border-left:
+            1px solid
+            #1d1d1d;
+
+        border-right:
+            1px solid
+            #1d1d1d;
+    }
+
+}
+
+</style></head><body><!-- =================================
+     HEADER
+================================= --><header class="chat-header"><button
+    id="backButton"
+    class="back-btn"
+    type="button"
+    aria-label="Back"
 >
-
-
-
-
-<button
-
-id="sendBtn"
-
-class="btn">
-
-Send Message
-
+    <i class="fa-solid fa-arrow-left"></i>
 </button>
 
 
+<div
+    id="customerAvatar"
+    class="customer-avatar"
+>
+    <i class="fa-solid fa-user"></i>
+</div>
+
+
+<div class="customer-info">
+
+    <div
+        id="customerName"
+        class="customer-name"
+    >
+        Customer
+    </div>
+
+    <div
+        id="customerStatus"
+        class="customer-status"
+    >
+        <span class="online-dot"></span>
+        Ride chat
+    </div>
 
 </div>
 
 
+<button
+    id="callButton"
+    class="header-action"
+    type="button"
+    aria-label="Call customer"
+>
+    <i class="fa-solid fa-phone"></i>
+</button>
 
+</header><!-- =================================
+     CHAT
+================================= --><main class="chat-wrapper"><div
+    id="chatBox"
+    class="chat-box"
+    aria-live="polite"
+    aria-label="Chat messages"
+>
 
+    <div class="chat-loading">
+
+        <i class="fa-solid fa-spinner fa-spin"></i>
+
+        <span>
+            Loading messages...
+        </span>
+
+    </div>
 
 </div>
 
 
+<!-- QUICK ACTIONS -->
+
+<div class="quick-actions">
+
+    <button
+        class="quick-btn"
+        type="button"
+        data-message="I'm on my way."
+    >
+        <i class="fa-solid fa-motorcycle"></i>
+        On my way
+    </button>
+
+    <button
+        class="quick-btn"
+        type="button"
+        data-message="Please share your exact pickup location."
+    >
+        <i class="fa-solid fa-location-dot"></i>
+        Pickup location
+    </button>
+
+    <button
+        class="quick-btn"
+        type="button"
+        data-message="I have arrived at the pickup location."
+    >
+        <i class="fa-solid fa-flag-checkered"></i>
+        I've arrived
+    </button>
+
+</div>
 
 
+<!-- MESSAGE COMPOSER -->
+
+<div class="composer">
+
+    <button
+        id="attachButton"
+        class="attach-btn"
+        type="button"
+        aria-label="Attachment"
+    >
+        <i class="fa-solid fa-plus"></i>
+    </button>
 
 
+    <div class="input-container">
 
-<script type="module" src="../js/Chat.js"></script>
+        <input
+            id="messageInput"
+            type="text"
+            autocomplete="off"
+            maxlength="500"
+            placeholder="Type a message..."
+            aria-label="Message"
+        >
 
 
+        <button
+            id="sendBtn"
+            class="send-btn"
+            type="button"
+            aria-label="Send message"
+        >
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
 
-</body>
+    </div>
+
+</div>
+
+</main><!-- =================================
+     PAGE CONTROLLER
+================================= --><script type="module">
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        /* ============================
+           BACK
+        ============================ */
+
+        const backButton =
+            document.getElementById(
+                "backButton"
+            );
+
+        backButton?.addEventListener(
+            "click",
+            () => {
+
+                if(
+                    window.history.length > 1
+                ){
+
+                    window.history.back();
+
+                }else{
+
+                    window.location.href =
+                        "./home.html";
+
+                }
+
+            }
+        );
 
 
+        /* ============================
+           QUICK MESSAGES
+        ============================ */
+
+        const input =
+            document.getElementById(
+                "messageInput"
+            );
+
+        const sendButton =
+            document.getElementById(
+                "sendBtn"
+            );
+
+
+        document
+            .querySelectorAll(
+                ".quick-btn"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            const message =
+                                button.dataset.message;
+
+                            if(!message){
+                                return;
+                            }
+
+                            input.value =
+                                message;
+
+                            input.focus();
+
+                        }
+                    );
+
+                }
+            );
+
+
+        /* ============================
+           ENTER TO SEND
+        ============================ */
+
+        input?.addEventListener(
+            "keydown",
+            event => {
+
+                if(
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ){
+
+                    event.preventDefault();
+
+                    sendButton?.click();
+
+                }
+
+            }
+        );
+
+
+        /* ============================
+           CALL
+        ============================ */
+
+        document
+            .getElementById(
+                "callButton"
+            )
+            ?.addEventListener(
+                "click",
+                () => {
+
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "riderx:call-customer"
+                        )
+                    );
+
+                }
+            );
+
+
+        /* ============================
+           ATTACHMENT
+        ============================ */
+
+        document
+            .getElementById(
+                "attachButton"
+            )
+            ?.addEventListener(
+                "click",
+                () => {
+
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "riderx:chat-attachment"
+                        )
+                    );
+
+                }
+            );
+
+
+        /* ============================
+           AUTO SCROLL
+        ============================ */
+
+        const chatBox =
+            document.getElementById(
+                "chatBox"
+            );
+
+        function scrollBottom(){
+
+            if(!chatBox){
+                return;
+            }
+
+            requestAnimationFrame(
+                () => {
+
+                    chatBox.scrollTop =
+                        chatBox.scrollHeight;
+
+                }
+            );
+
+        }
+
+
+        window.addEventListener(
+            "riderx:chat-updated",
+            scrollBottom
+        );
+
+
+        /*
+         * Give Chat.js time to render
+         * existing messages.
+         */
+
+        setTimeout(
+            scrollBottom,
+            300
+        );
+
+        setTimeout(
+            scrollBottom,
+            900
+        );
+
+    }
+);
+
+</script><!-- =================================
+     RIDERX CHAT ENGINE
+================================= --><script
+    type="module"
+    src="../js/Chat.js"
+></script></body>
 </html>
