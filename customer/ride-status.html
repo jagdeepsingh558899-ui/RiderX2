@@ -1,1735 +1,3206 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 
-<head>
+«»
 
-    <meta charset="UTF-8">
+<title>RiderX - Live Ride</title><link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/><style>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+*{
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+
+    margin:0;
+    padding:0;
+
+    width:100%;
+    height:100%;
+
+    background:#000;
+
+    color:#fff;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+body{
+    overflow:hidden;
+}
+
+
+/* =========================================================
+   MAP
+   ========================================================= */
+
+#map{
+
+    position:fixed;
+
+    inset:0;
+
+    width:100%;
+    height:100%;
+
+    z-index:1;
+
+    background:#111;
+
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar{
+
+    position:fixed;
+
+    top:0;
+    left:0;
+    right:0;
+
+    z-index:1000;
+
+    padding:
+        calc(12px + env(safe-area-inset-top))
+        14px
+        12px;
+
+    pointer-events:none;
+
+}
+
+.top-card{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    padding:11px 13px;
+
+    border-radius:17px;
+
+    background:
+        rgba(0,0,0,.88);
+
+    backdrop-filter:
+        blur(15px);
+
+    border:
+        1px solid
+        rgba(255,214,0,.18);
+
+    box-shadow:
+        0 8px 30px
+        rgba(0,0,0,.35);
+
+    pointer-events:auto;
+
+}
+
+.back{
+
+    width:40px;
+    height:40px;
+
+    flex:0 0 40px;
+
+    border:none;
+
+    border-radius:13px;
+
+    background:#1d1d1d;
+
+    color:#fff;
+
+    font-size:20px;
+
+    cursor:pointer;
+
+}
+
+.top-title{
+
+    flex:1;
+
+    min-width:0;
+
+}
+
+.top-title strong{
+
+    display:block;
+
+    font-size:15px;
+
+    font-weight:900;
+
+}
+
+.top-title span{
+
+    display:block;
+
+    margin-top:3px;
+
+    color:#888;
+
+    font-size:10px;
+
+    font-weight:700;
+
+}
+
+.live-pill{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:8px 10px;
+
+    border-radius:20px;
+
+    background:
+        rgba(32,214,107,.10);
+
+    color:#39df7a;
+
+    font-size:9px;
+
+    font-weight:900;
+
+    white-space:nowrap;
+
+}
+
+.live-dot{
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#39df7a;
+
+    box-shadow:
+        0 0 9px
+        rgba(57,223,122,.8);
+
+}
+
+
+/* =========================================================
+   STATUS PANEL
+   ========================================================= */
+
+.status-wrap{
+
+    position:fixed;
+
+    left:12px;
+    right:12px;
+
+    bottom:
+        calc(12px + env(safe-area-inset-bottom));
+
+    z-index:1000;
+
+    max-width:650px;
+
+    margin:auto;
+
+}
+
+.status-card{
+
+    background:
+        rgba(9,9,9,.95);
+
+    backdrop-filter:
+        blur(18px);
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    border-radius:24px;
+
+    box-shadow:
+        0 15px 45px
+        rgba(0,0,0,.55);
+
+    overflow:hidden;
+
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.status-head{
+
+    padding:17px 17px 12px;
+
+}
+
+.status-row{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+}
+
+.status-main{
+
+    font-size:20px;
+
+    font-weight:900;
+
+}
+
+.status-sub{
+
+    margin-top:5px;
+
+    color:#888;
+
+    font-size:11px;
+
+    line-height:1.4;
+
+}
+
+.status-badge{
+
+    padding:8px 10px;
+
+    border-radius:12px;
+
+    background:#FFD600;
+
+    color:#000;
+
+    font-size:9px;
+
+    font-weight:900;
+
+    white-space:nowrap;
+
+}
+
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
+
+.progress{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(5,1fr);
+
+    gap:5px;
+
+    padding:
+        4px
+        17px
+        15px;
+
+}
+
+.progress-item{
+
+    text-align:center;
+
+}
+
+.progress-line{
+
+    height:4px;
+
+    border-radius:5px;
+
+    background:#292929;
+
+    margin-bottom:6px;
+
+}
+
+.progress-item.active
+.progress-line{
+
+    background:#FFD600;
+
+}
+
+.progress-item.done
+.progress-line{
+
+    background:#FFD600;
+
+}
+
+.progress-label{
+
+    color:#666;
+
+    font-size:7px;
+
+    font-weight:900;
+
+    text-transform:uppercase;
+
+}
+
+.progress-item.active
+.progress-label,
+.progress-item.done
+.progress-label{
+
+    color:#FFD600;
+
+}
+
+
+/* =========================================================
+   RIDER
+   ========================================================= */
+
+.rider-section{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:
+        13px 17px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.07);
+
+}
+
+.rider-avatar{
+
+    width:52px;
+    height:52px;
+
+    flex:0 0 52px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            #292929,
+            #111
+        );
+
+    border:
+        1px solid
+        rgba(255,214,0,.3);
+
+    font-size:25px;
+
+    overflow:hidden;
+
+}
+
+.rider-avatar img{
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+
+}
+
+.rider-info{
+
+    flex:1;
+
+    min-width:0;
+
+}
+
+.rider-name{
+
+    font-size:15px;
+
+    font-weight:900;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+}
+
+.rider-vehicle{
+
+    margin-top:4px;
+
+    color:#888;
+
+    font-size:10px;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
+
+}
+
+.rating{
+
+    margin-top:4px;
+
+    color:#FFD600;
+
+    font-size:10px;
+
+    font-weight:900;
+
+}
+
+.rider-actions{
+
+    display:flex;
+
+    gap:7px;
+
+}
+
+.circle-btn{
+
+    width:42px;
+    height:42px;
+
+    border:none;
+
+    border-radius:13px;
+
+    background:#202020;
+
+    color:#fff;
+
+    font-size:17px;
+
+    cursor:pointer;
+
+}
+
+.circle-btn.call{
+
+    background:#193d27;
+
+    color:#40df7c;
+
+}
+
+.circle-btn.chat{
+
+    background:#202020;
+
+    color:#FFD600;
+
+}
+
+
+/* =========================================================
+   DETAILS
+   ========================================================= */
+
+.details{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr
+        1fr;
+
+    gap:7px;
+
+    padding:
+        0 17px
+        13px;
+
+}
+
+.detail{
+
+    padding:9px;
+
+    text-align:center;
+
+    border-radius:12px;
+
+    background:#171717;
+
+}
+
+.detail-label{
+
+    color:#666;
+
+    font-size:7px;
+
+    font-weight:900;
+
+    text-transform:uppercase;
+
+}
+
+.detail-value{
+
+    margin-top:4px;
+
+    color:#fff;
+
+    font-size:12px;
+
+    font-weight:900;
+
+}
+
+
+/* =========================================================
+   OTP
+   ========================================================= */
+
+.otp{
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    margin:
+        0 17px
+        13px;
+
+    padding:
+        12px 13px;
+
+    border-radius:14px;
+
+    background:
+        rgba(255,214,0,.08);
+
+    border:
+        1px solid
+        rgba(255,214,0,.18);
+
+}
+
+.otp.show{
+
+    display:flex;
+
+}
+
+.otp-label{
+
+    color:#aaa;
+
+    font-size:10px;
+
+    font-weight:700;
+
+}
+
+.otp-code{
+
+    letter-spacing:5px;
+
+    color:#FFD600;
+
+    font-size:19px;
+
+    font-weight:900;
+
+}
+
+
+/* =========================================================
+   BOTTOM ACTIONS
+   ========================================================= */
+
+.actions{
+
+    display:grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap:8px;
+
+    padding:
+        0 17px
+        17px;
+
+}
+
+.action-btn{
+
+    min-height:46px;
+
+    border:none;
+
+    border-radius:13px;
+
+    font-size:12px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+}
+
+.cancel{
+
+    background:#1d1d1d;
+
+    color:#ff7070;
+
+    border:
+        1px solid
+        rgba(255,112,112,.2);
+
+}
+
+.done{
+
+    display:none;
+
+    background:#FFD600;
+
+    color:#000;
+
+}
+
+.action-btn:disabled{
+
+    opacity:.45;
+
+    cursor:not-allowed;
+
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.loading{
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:3000;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    flex-direction:column;
+
+    gap:12px;
+
+    background:#000;
+
+}
+
+.loading-logo{
+
+    font-size:30px;
+
+    font-weight:900;
+
+}
+
+.loading-logo span{
+
+    color:#FFD600;
+
+}
+
+.loading-text{
+
+    color:#888;
+
+    font-size:12px;
+
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.error-box{
+
+    display:none;
+
+    position:fixed;
+
+    left:15px;
+    right:15px;
+
+    top:50%;
+
+    transform:
+        translateY(-50%);
+
+    z-index:4000;
+
+    padding:22px;
+
+    border-radius:20px;
+
+    background:#111;
+
+    border:
+        1px solid
+        rgba(255,80,80,.3);
+
+    text-align:center;
+
+    box-shadow:
+        0 20px 50px
+        rgba(0,0,0,.7);
+
+}
+
+.error-title{
+
+    color:#ff6868;
+
+    font-size:18px;
+
+    font-weight:900;
+
+    margin-bottom:8px;
+
+}
+
+.error-text{
+
+    color:#999;
+
+    font-size:12px;
+
+    line-height:1.5;
+
+}
+
+.error-btn{
+
+    width:100%;
+
+    min-height:45px;
+
+    margin-top:15px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#FFD600;
+
+    color:#000;
+
+    font-weight:900;
+
+}
+
+
+/* =========================================================
+   LEAFLET
+   ========================================================= */
+
+.leaflet-control-zoom a{
+
+    background:#111 !important;
+
+    color:#fff !important;
+
+    border-color:#333 !important;
+
+}
+
+.leaflet-control-attribution{
+
+    background:
+        rgba(0,0,0,.7) !important;
+
+    color:#888 !important;
+
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip{
+
+    background:#111;
+
+    color:#fff;
+
+}
+
+.leaflet-popup-content{
+
+    font-size:11px;
+
+    font-weight:700;
+
+}
+
+.rider-marker{
+
+    width:48px;
+    height:48px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#FFD600;
+
+    border:
+        4px solid
+        #000;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(255,214,0,.35),
+        0 8px 20px
+        rgba(0,0,0,.45);
+
+    font-size:23px;
+
+}
+
+.pickup-marker{
+
+    width:34px;
+    height:34px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    border:
+        4px solid
+        #000;
+
+    box-shadow:
+        0 5px 15px
+        rgba(0,0,0,.5);
+
+    font-size:15px;
+
+}
+
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media(min-width:800px){
+
+    .status-wrap{
+
+        bottom:25px;
+
+    }
+
+    .topbar{
+
+        left:20px;
+        right:20px;
+
+    }
+
+}
+
+</style></head><body><div id="map"></div><!-- =======================================================
+     TOP
+======================================================= --><div class="topbar"><div class="top-card">
+
+    <button
+        id="backBtn"
+        class="back"
     >
+        ‹
+    </button>
 
-    <title>RiderX - Ride Status</title>
 
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
+    <div class="top-title">
 
-    <style>
+        <strong>
+            RiderX
+        </strong>
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        <span id="topSubtitle">
+            Live ride tracking
+        </span>
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
+    </div>
 
-            width: 100%;
-            height: 100%;
 
-            background: #000;
-            color: #fff;
+    <div class="live-pill">
 
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-        }
+        <span class="live-dot"></span>
 
-        body {
-            overflow-x: hidden;
-        }
+        LIVE
 
-        #map {
-            width: 100%;
-            height: 55vh;
+    </div>
 
-            min-height: 360px;
+</div>
 
-            background: #111;
-        }
+</div><!-- =======================================================
+     STATUS CARD
+======================================================= --><div class="status-wrap"><div class="status-card">
 
-        .topbar {
 
-            position: sticky;
+    <div class="status-head">
 
-            top: 0;
+        <div class="status-row">
 
-            z-index: 1000;
+            <div>
 
-            height: 62px;
+                <div
+                    id="statusMain"
+                    class="status-main"
+                >
+                    Finding Rider
+                </div>
 
-            display: flex;
+                <div
+                    id="statusSub"
+                    class="status-sub"
+                >
+                    Looking for a nearby RiderX partner
+                </div>
 
-            align-items: center;
+            </div>
 
-            justify-content: space-between;
-
-            padding: 0 16px;
-
-            background:
-                rgba(
-                    0,
-                    0,
-                    0,
-                    0.95
-                );
-
-            backdrop-filter:
-                blur(14px);
-
-            border-bottom:
-                1px solid
-                rgba(
-                    255,
-                    214,
-                    0,
-                    0.30
-                );
-
-        }
-
-        .brand {
-
-            font-size: 21px;
-
-            font-weight: 900;
-
-        }
-
-        .brand span {
-
-            color: #FFD600;
-
-        }
-
-        .live-status {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 7px;
-
-            font-size: 11px;
-
-            font-weight: 900;
-
-        }
-
-        .dot {
-
-            width: 9px;
-
-            height: 9px;
-
-            border-radius: 50%;
-
-            background: #777;
-
-        }
-
-        .dot.active {
-
-            background: #20d66b;
-
-            box-shadow:
-                0 0 12px
-                rgba(
-                    32,
-                    214,
-                    107,
-                    0.8
-                );
-
-        }
-
-        .panel {
-
-            background: #000;
-
-            padding: 14px 12px 30px;
-
-        }
-
-        .status-card {
-
-            background:
-                linear-gradient(
-                    145deg,
-                    #171717,
-                    #0c0c0c
-                );
-
-            border:
-                1px solid
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.08
-                );
-
-            border-radius: 22px;
-
-            padding: 18px;
-
-            margin-bottom: 12px;
-
-            box-shadow:
-                0 10px 30px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    0.35
-                );
-
-        }
-
-        .status-row {
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: space-between;
-
-            gap: 10px;
-
-        }
-
-        .status-title {
-
-            font-size: 20px;
-
-            font-weight: 900;
-
-        }
-
-        .status-badge {
-
-            padding: 8px 12px;
-
-            border-radius: 999px;
-
-            background:
-                rgba(
-                    255,
-                    214,
-                    0,
-                    0.12
-                );
-
-            color: #FFD600;
-
-            border:
-                1px solid
-                rgba(
-                    255,
-                    214,
-                    0,
-                    0.25
-                );
-
-            font-size: 10px;
-
-            font-weight: 900;
-
-        }
-
-        .sub {
-
-            margin-top: 7px;
-
-            color: #888;
-
-            font-size: 12px;
-
-            line-height: 1.4;
-
-        }
-
-        .rider-card {
-
-            display: none;
-
-            background: #171717;
-
-            border-radius: 20px;
-
-            padding: 15px;
-
-            margin-bottom: 12px;
-
-            border:
-                1px solid
-                rgba(
-                    255,
-                    255,
-                    255,
-                    0.08
-                );
-
-        }
-
-        .rider-main {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 12px;
-
-        }
-
-        .avatar {
-
-            width: 52px;
-
-            height: 52px;
-
-            border-radius: 50%;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background: #FFD600;
-
-            color: #000;
-
-            font-size: 22px;
-
-            font-weight: 900;
-
-        }
-
-        .rider-name {
-
-            font-size: 16px;
-
-            font-weight: 900;
-
-        }
-
-        .rider-id {
-
-            margin-top: 4px;
-
-            color: #888;
-
-            font-size: 11px;
-
-        }
-
-        .ride-details {
-
-            background: #171717;
-
-            border-radius: 20px;
-
-            padding: 16px;
-
-            margin-bottom: 12px;
-
-        }
-
-        .detail-row {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            gap: 15px;
-
-            padding: 11px 0;
-
-            border-bottom:
-                1px solid
-                #292929;
-
-        }
-
-        .detail-row:last-child {
-
-            border-bottom: none;
-
-        }
-
-        .detail-label {
-
-            color: #888;
-
-            font-size: 12px;
-
-        }
-
-        .detail-value {
-
-            text-align: right;
-
-            font-size: 13px;
-
-            font-weight: 800;
-
-            max-width: 65%;
-
-        }
-
-        .otp-card {
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #FFD600,
-                    #ffea69
-                );
-
-            color: #000;
-
-            border-radius: 20px;
-
-            padding: 17px;
-
-            margin-bottom: 12px;
-
-            text-align: center;
-
-        }
-
-        .otp-label {
-
-            font-size: 11px;
-
-            font-weight: 900;
-
-            text-transform: uppercase;
-
-        }
-
-        .otp {
-
-            margin-top: 5px;
-
-            font-size: 40px;
-
-            letter-spacing: 9px;
-
-            font-weight: 900;
-
-        }
-
-        .buttons {
-
-            display: grid;
-
-            grid-template-columns:
-                1fr
-                1fr;
-
-            gap: 10px;
-
-        }
-
-        button {
-
-            min-height: 50px;
-
-            border: none;
-
-            border-radius: 14px;
-
-            font-size: 13px;
-
-            font-weight: 900;
-
-            cursor: pointer;
-
-        }
-
-        .primary {
-
-            background: #FFD600;
-
-            color: #000;
-
-        }
-
-        .secondary {
-
-            background: #202020;
-
-            color: #fff;
-
-            border:
-                1px solid
-                #3a3a3a;
-
-        }
-
-        .cancel {
-
-            width: 100%;
-
-            margin-top: 10px;
-
-            background: #1c1c1c;
-
-            color: #ff6262;
-
-            border:
-                1px solid
-                rgba(
-                    255,
-                    98,
-                    98,
-                    0.25
-                );
-
-        }
-
-        .message {
-
-            padding: 10px;
-
-            text-align: center;
-
-            color: #777;
-
-            font-size: 11px;
-
-            line-height: 1.5;
-
-        }
-
-        .leaflet-control-zoom a {
-
-            background: #111 !important;
-
-            color: #fff !important;
-
-            border-color: #333 !important;
-
-        }
-
-        .rider-marker {
-
-            width: 48px;
-
-            height: 48px;
-
-            border-radius: 50%;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            background: #FFD600;
-
-            border: 4px solid #000;
-
-            font-size: 24px;
-
-            box-shadow:
-                0 5px 20px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    0.55
-                );
-
-        }
-
-        @media (min-width: 800px) {
-
-            #map {
-                height: 62vh;
-            }
-
-            .panel {
-                max-width: 700px;
-                margin: auto;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    <div class="topbar">
-
-        <div class="brand">
-            Rider<span>X</span>
-        </div>
-
-        <div class="live-status">
 
             <div
-                id="liveDot"
-                class="dot"
-            ></div>
-
-            <span id="liveText">
-                WAITING
-            </span>
+                id="statusBadge"
+                class="status-badge"
+            >
+                SEARCHING
+            </div>
 
         </div>
 
     </div>
 
 
-    <div id="map"></div>
+    <!-- PROGRESS -->
 
+    <div
+        id="progress"
+        class="progress"
+    >
 
-    <div class="panel">
+        <div
+            class="progress-item"
+            data-step="searching"
+        >
 
+            <div class="progress-line"></div>
 
-        <div class="status-card">
-
-            <div class="status-row">
-
-                <div
-                    id="statusTitle"
-                    class="status-title"
-                >
-                    Finding your rider
-                </div>
-
-                <div
-                    id="statusBadge"
-                    class="status-badge"
-                >
-                    SEARCHING
-                </div>
-
-            </div>
-
-            <div
-                id="statusMessage"
-                class="sub"
-            >
-                We're looking for a RiderX rider near you.
+            <div class="progress-label">
+                Searching
             </div>
 
         </div>
 
 
         <div
-            id="riderCard"
-            class="rider-card"
+            class="progress-item"
+            data-step="accepted"
         >
 
-            <div class="rider-main">
+            <div class="progress-line"></div>
 
-                <div class="avatar">
-                    🏍️
-                </div>
-
-                <div>
-
-                    <div
-                        id="riderName"
-                        class="rider-name"
-                    >
-                        RiderX Rider
-                    </div>
-
-                    <div
-                        id="riderId"
-                        class="rider-id"
-                    >
-                        Connecting...
-                    </div>
-
-                </div>
-
+            <div class="progress-label">
+                Accepted
             </div>
 
         </div>
 
 
-        <div class="ride-details">
+        <div
+            class="progress-item"
+            data-step="arriving"
+        >
 
-            <div class="detail-row">
+            <div class="progress-line"></div>
 
-                <div class="detail-label">
-                    Service
-                </div>
-
-                <div
-                    id="service"
-                    class="detail-value"
-                >
-                    Bike Taxi
-                </div>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <div class="detail-label">
-                    Pickup
-                </div>
-
-                <div
-                    id="pickup"
-                    class="detail-value"
-                >
-                    Loading...
-                </div>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <div class="detail-label">
-                    Drop
-                </div>
-
-                <div
-                    id="drop"
-                    class="detail-value"
-                >
-                    Loading...
-                </div>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <div class="detail-label">
-                    Fare
-                </div>
-
-                <div
-                    id="fare"
-                    class="detail-value"
-                >
-                    ₹0
-                </div>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <div class="detail-label">
-                    Distance
-                </div>
-
-                <div
-                    id="distance"
-                    class="detail-value"
-                >
-                    0 KM
-                </div>
-
-            </div>
-
-
-            <div class="detail-row">
-
-                <div class="detail-label">
-                    Ride ID
-                </div>
-
-                <div
-                    id="rideIdDisplay"
-                    class="detail-value"
-                >
-                    ----
-                </div>
-
+            <div class="progress-label">
+                Arriving
             </div>
 
         </div>
 
 
-        <div class="otp-card">
+        <div
+            class="progress-item"
+            data-step="trip"
+        >
 
-            <div class="otp-label">
-                Pickup OTP
+            <div class="progress-line"></div>
+
+            <div class="progress-label">
+                On Trip
+            </div>
+
+        </div>
+
+
+        <div
+            class="progress-item"
+            data-step="completed"
+        >
+
+            <div class="progress-line"></div>
+
+            <div class="progress-label">
+                Done
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RIDER -->
+
+    <div
+        id="riderSection"
+        class="rider-section"
+        style="display:none;"
+    >
+
+        <div
+            id="riderAvatar"
+            class="rider-avatar"
+        >
+            🏍️
+        </div>
+
+
+        <div class="rider-info">
+
+            <div
+                id="riderName"
+                class="rider-name"
+            >
+                RiderX Rider
+            </div>
+
+
+            <div
+                id="riderVehicle"
+                class="rider-vehicle"
+            >
+                Motorcycle
+            </div>
+
+
+            <div
+                id="riderRating"
+                class="rating"
+            >
+                ★ 5.0
+            </div>
+
+        </div>
+
+
+        <div class="rider-actions">
+
+            <button
+                id="callBtn"
+                class="circle-btn call"
+                title="Call Rider"
+            >
+                ☎
+            </button>
+
+
+            <button
+                id="chatBtn"
+                class="circle-btn chat"
+                title="Chat"
+            >
+                💬
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- DETAILS -->
+
+    <div class="details">
+
+        <div class="detail">
+
+            <div class="detail-label">
+                Fare
             </div>
 
             <div
-                id="otp"
-                class="otp"
+                id="fareValue"
+                class="detail-value"
             >
-                ----
+                ₹0
             </div>
 
         </div>
 
 
-        <div class="buttons">
+        <div class="detail">
 
-            <button
-                id="centerBtn"
-                class="primary"
-            >
-                📍 Rider Location
-            </button>
+            <div class="detail-label">
+                Distance
+            </div>
 
-            <button
-                id="refreshBtn"
-                class="secondary"
+            <div
+                id="distanceValue"
+                class="detail-value"
             >
-                🔄 Refresh
-            </button>
+                0 KM
+            </div>
 
         </div>
 
 
+        <div class="detail">
+
+            <div class="detail-label">
+                Payment
+            </div>
+
+            <div
+                id="paymentValue"
+                class="detail-value"
+            >
+                Cash
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- OTP -->
+
+    <div
+        id="otpBox"
+        class="otp"
+    >
+
+        <div>
+
+            <div class="otp-label">
+                Ride OTP
+            </div>
+
+            <div class="otp-label">
+                Share with rider
+            </div>
+
+        </div>
+
+
+        <div
+            id="otpCode"
+            class="otp-code"
+        >
+            ----
+        </div>
+
+    </div>
+
+
+    <!-- ACTIONS -->
+
+    <div class="actions">
+
         <button
             id="cancelBtn"
-            class="cancel"
+            class="action-btn cancel"
         >
             Cancel Ride
         </button>
 
 
-        <div
-            id="message"
-            class="message"
+        <button
+            id="doneBtn"
+            class="action-btn done"
         >
-            Connecting to RiderX...
-        </div>
-
+            ✓ Ride Completed
+        </button>
 
     </div>
 
+</div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</div><!-- =======================================================
+     LOADING
+======================================================= --><div
+    id="loading"
+    class="loading"
+><div class="loading-logo">
+
+    Rider<span>X</span>
+
+</div>
+
+<div class="loading-text">
+
+    Connecting to your ride...
+
+</div>
+
+</div><!-- =======================================================
+     ERROR
+======================================================= --><div
+    id="errorBox"
+    class="error-box"
+><div class="error-title">
+    Ride Error
+</div>
+
+<div
+    id="errorText"
+    class="error-text"
+>
+    Unable to load ride.
+</div>
+
+<button
+    id="errorBtn"
+    class="error-btn"
+>
+    Go Home
+</button>
+
+</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script type="module">
+
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
 
-    <script type="module">
-
-        import {
-            auth,
-            db
-        } from "../firebase/firebase-config.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 
-        import {
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+    doc,
+    onSnapshot,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-        import {
-            doc,
-            getDoc,
-            onSnapshot,
-            updateDoc,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// =========================================================
+// STATE
+// =========================================================
+
+let currentUser = null;
+
+let rideId = null;
+
+let rideData = null;
+
+let rideUnsubscribe = null;
+
+let locationUnsubscribe = null;
+
+let map = null;
+
+let riderMarker = null;
+
+let pickupMarker = null;
+
+let dropMarker = null;
+
+let customerMarker = null;
+
+let currentRiderLocation = null;
+
+let mapFitted = false;
+
+let cancelling = false;
 
 
-        // =====================================================
-        // STATE
-        // =====================================================
+// =========================================================
+// DOM
+// =========================================================
 
-        let map = null;
+const loading =
+    document.getElementById(
+        "loading"
+    );
 
-        let riderMarker = null;
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
 
-        let pickupMarker = null;
+const errorText =
+    document.getElementById(
+        "errorText"
+    );
 
-        let dropMarker = null;
+const statusMain =
+    document.getElementById(
+        "statusMain"
+    );
 
-        let rideId = null;
+const statusSub =
+    document.getElementById(
+        "statusSub"
+    );
 
-        let rideData = null;
+const statusBadge =
+    document.getElementById(
+        "statusBadge"
+    );
 
-        let lastRiderLocation = null;
+const riderSection =
+    document.getElementById(
+        "riderSection"
+    );
+
+const riderAvatar =
+    document.getElementById(
+        "riderAvatar"
+    );
+
+const riderName =
+    document.getElementById(
+        "riderName"
+    );
+
+const riderVehicle =
+    document.getElementById(
+        "riderVehicle"
+    );
+
+const riderRating =
+    document.getElementById(
+        "riderRating"
+    );
+
+const fareValue =
+    document.getElementById(
+        "fareValue"
+    );
+
+const distanceValue =
+    document.getElementById(
+        "distanceValue"
+    );
+
+const paymentValue =
+    document.getElementById(
+        "paymentValue"
+    );
+
+const otpBox =
+    document.getElementById(
+        "otpBox"
+    );
+
+const otpCode =
+    document.getElementById(
+        "otpCode"
+    );
+
+const cancelBtn =
+    document.getElementById(
+        "cancelBtn"
+    );
+
+const doneBtn =
+    document.getElementById(
+        "doneBtn"
+    );
+
+const callBtn =
+    document.getElementById(
+        "callBtn"
+    );
+
+const chatBtn =
+    document.getElementById(
+        "chatBtn"
+    );
+
+const backBtn =
+    document.getElementById(
+        "backBtn"
+    );
 
 
-        // =====================================================
-        // DOM
-        // =====================================================
+// =========================================================
+// GET RIDE ID
+// =========================================================
 
-        const statusTitle =
-            document.getElementById(
-                "statusTitle"
+function getRideId(){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const urlId =
+        params.get(
+            "rideId"
+        );
+
+
+    if(urlId){
+
+        return urlId;
+
+    }
+
+
+    const keys = [
+
+        "activeRideId",
+
+        "rideId",
+
+        "riderx_active_ride"
+
+    ];
+
+
+    for(
+        const key of keys
+    ){
+
+        const value =
+            localStorage.getItem(
+                key
             );
 
-        const statusBadge =
-            document.getElementById(
-                "statusBadge"
-            );
 
-        const statusMessage =
-            document.getElementById(
-                "statusMessage"
-            );
+        if(value){
 
-        const riderCard =
-            document.getElementById(
-                "riderCard"
-            );
-
-        const liveDot =
-            document.getElementById(
-                "liveDot"
-            );
-
-        const liveText =
-            document.getElementById(
-                "liveText"
-            );
-
-        const message =
-            document.getElementById(
-                "message"
-            );
-
-
-        // =====================================================
-        // GET RIDE ID
-        // =====================================================
-
-        function getRideId() {
-
-            const params =
-                new URLSearchParams(
-                    window.location.search
-                );
-
-            return (
-                params.get("rideId") ||
-                localStorage.getItem(
-                    "rideId"
-                ) ||
-                localStorage.getItem(
-                    "activeRideId"
-                )
-            );
+            return value;
 
         }
 
-
-        // =====================================================
-        // MAP
-        // =====================================================
-
-        function initMap() {
-
-            map =
-                L.map("map").setView(
-                    [30.7333, 76.7794],
-                    13
-                );
+    }
 
 
-            L.tileLayer(
-                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    return null;
+
+}
+
+
+// =========================================================
+// MAP INIT
+// =========================================================
+
+function initMap(){
+
+    map =
+        L.map(
+            "map",
+            {
+                zoomControl:false
+            }
+        )
+        .setView(
+            [30.7333,76.7794],
+            13
+        );
+
+
+    L.control.zoom({
+        position:"bottomright"
+    }).addTo(map);
+
+
+    L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom:19,
+
+            attribution:
+                "&copy; OpenStreetMap"
+        }
+    ).addTo(map);
+
+}
+
+
+// =========================================================
+// ICONS
+// =========================================================
+
+const riderIcon =
+    L.divIcon({
+
+        className:"",
+
+        html:
+            '<div class="rider-marker">🏍️</div>',
+
+        iconSize:
+            [48,48],
+
+        iconAnchor:
+            [24,24]
+
+    });
+
+
+const pickupIcon =
+    L.divIcon({
+
+        className:"",
+
+        html:
+            '<div class="pickup-marker">📍</div>',
+
+        iconSize:
+            [34,34],
+
+        iconAnchor:
+            [17,17]
+
+    });
+
+
+const dropIcon =
+    L.divIcon({
+
+        className:"",
+
+        html:
+            '<div class="pickup-marker">🏁</div>',
+
+        iconSize:
+            [34,34],
+
+        iconAnchor:
+            [17,17]
+
+    });
+
+
+// =========================================================
+// LOCATION PARSER
+// =========================================================
+
+function getCoordinates(
+    value
+){
+
+    if(
+        !value ||
+        typeof value !== "object"
+    ){
+
+        return null;
+
+    }
+
+
+    const lat =
+        Number(
+            value.lat ??
+            value.latitude
+        );
+
+
+    const lng =
+        Number(
+            value.lng ??
+            value.longitude
+        );
+
+
+    if(
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng)
+    ){
+
+        return null;
+
+    }
+
+
+    return {
+        lat,
+        lng
+    };
+
+}
+
+
+// =========================================================
+// RIDE COORDINATES
+// =========================================================
+
+function pickupCoordinates(){
+
+    return (
+
+        getCoordinates(
+            rideData?.pickupCoords
+        )
+
+        ||
+
+        getCoordinates(
+            rideData?.pickup
+        )
+
+        ||
+
+        getCoordinates(
+            rideData?.pickupLocation
+        )
+
+    );
+
+}
+
+
+function dropCoordinates(){
+
+    return (
+
+        getCoordinates(
+            rideData?.dropCoords
+        )
+
+        ||
+
+        getCoordinates(
+            rideData?.drop
+        )
+
+        ||
+
+        getCoordinates(
+            rideData?.dropLocation
+        )
+
+    );
+
+}
+
+
+// =========================================================
+// DRAW PICKUP/DROP
+// =========================================================
+
+function drawRideLocations(){
+
+    if(!map){
+
+        return;
+
+    }
+
+
+    const pickup =
+        pickupCoordinates();
+
+
+    const drop =
+        dropCoordinates();
+
+
+    if(
+        pickup &&
+        !pickupMarker
+    ){
+
+        pickupMarker =
+            L.marker(
+                [
+                    pickup.lat,
+                    pickup.lng
+                ],
                 {
-                    maxZoom: 19,
-                    attribution:
-                        "&copy; OpenStreetMap"
+                    icon:pickupIcon
                 }
-            ).addTo(map);
-
-        }
-
-
-        // =====================================================
-        // RIDER ICON
-        // =====================================================
-
-        function createRiderIcon() {
-
-            return L.divIcon({
-
-                className: "",
-
-                html:
-                    '<div class="rider-marker">🏍️</div>',
-
-                iconSize:
-                    [48, 48],
-
-                iconAnchor:
-                    [24, 24]
-
-            });
-
-        }
-
-
-        // =====================================================
-        // FORMAT LOCATION
-        // =====================================================
-
-        function formatLocation(
-            value
-        ) {
-
-            if (!value) {
-
-                return "Not available";
-
-            }
-
-
-            if (
-                typeof value ===
-                "string"
-            ) {
-
-                return value;
-
-            }
-
-
-            if (
-                typeof value ===
-                "object"
-            ) {
-
-                return (
-                    value.address ||
-                    value.name ||
-                    (
-                        value.lat !==
-                            undefined &&
-                        value.lng !==
-                            undefined
-                    )
-                        ?
-                        `${value.lat}, ${value.lng}`
-                        :
-                        "Location"
-                );
-
-            }
-
-
-            return "Location";
-
-        }
-
-
-        // =====================================================
-        // ADD PICKUP / DROP
-        // =====================================================
-
-        function updateRouteMarkers(
-            data
-        ) {
-
-            const pickup =
-                data.pickup;
-
-            const drop =
-                data.drop;
-
-
-            if (
-                pickup &&
-                typeof pickup ===
-                "object" &&
-                pickup.lat !==
-                undefined
-            ) {
-
-                if (!pickupMarker) {
-
-                    pickupMarker =
-                        L.marker(
-                            [
-                                pickup.lat,
-                                pickup.lng
-                            ]
-                        )
-                        .addTo(map)
-                        .bindPopup(
-                            "Pickup"
-                        );
-
-                } else {
-
-                    pickupMarker.setLatLng(
-                        [
-                            pickup.lat,
-                            pickup.lng
-                        ]
-                    );
-
-                }
-
-            }
-
-
-            if (
-                drop &&
-                typeof drop ===
-                "object" &&
-                drop.lat !==
-                undefined
-            ) {
-
-                if (!dropMarker) {
-
-                    dropMarker =
-                        L.marker(
-                            [
-                                drop.lat,
-                                drop.lng
-                            ]
-                        )
-                        .addTo(map)
-                        .bindPopup(
-                            "Drop"
-                        );
-
-                } else {
-
-                    dropMarker.setLatLng(
-                        [
-                            drop.lat,
-                            drop.lng
-                        ]
-                    );
-
-                }
-
-            }
-
-        }
-
-
-        // =====================================================
-        // UPDATE RIDER MARKER
-        // =====================================================
-
-        function updateRiderLocation(
-            location
-        ) {
-
-            if (!location) {
-
-                return;
-
-            }
-
-
-            const lat =
-                Number(
-                    location.lat ??
-                    location.latitude
-                );
-
-            const lng =
-                Number(
-                    location.lng ??
-                    location.longitude
-                );
-
-
-            if (
-                !Number.isFinite(lat) ||
-                !Number.isFinite(lng)
-            ) {
-
-                return;
-
-            }
-
-
-            lastRiderLocation = {
-                lat,
-                lng
-            };
-
-
-            if (!riderMarker) {
-
-                riderMarker =
-                    L.marker(
-                        [
-                            lat,
-                            lng
-                        ],
-                        {
-                            icon:
-                                createRiderIcon()
-                        }
-                    )
-                    .addTo(map)
-                    .bindPopup(
-                        "RiderX Rider"
-                    );
-
-            } else {
-
-                riderMarker.setLatLng(
-                    [
-                        lat,
-                        lng
-                    ]
-                );
-
-            }
-
-
-            liveDot.classList.add(
-                "active"
+            )
+            .addTo(map)
+            .bindPopup(
+                "📍 Pickup"
             );
 
-            liveText.innerText =
-                "RIDER LIVE";
-
-
-            message.innerText =
-                "Rider ki live location update ho rahi hai.";
-
-        }
-
-
-        // =====================================================
-        // FIT MAP
-        // =====================================================
-
-        function centerMap() {
-
-            if (
-                lastRiderLocation
-            ) {
-
-                map.setView(
-                    [
-                        lastRiderLocation.lat,
-                        lastRiderLocation.lng
-                    ],
-                    16
-                );
-
-                return;
-
-            }
-
-
-            const points = [];
-
-
-            if (
-                pickupMarker
-            ) {
-
-                points.push(
-                    pickupMarker.getLatLng()
-                );
-
-            }
-
-
-            if (
-                dropMarker
-            ) {
-
-                points.push(
-                    dropMarker.getLatLng()
-                );
-
-            }
-
-
-            if (
-                points.length
-            ) {
-
-                map.fitBounds(
-                    L.latLngBounds(
-                        points
-                    ),
-                    {
-                        padding:
-                            [40, 40]
-                    }
-                );
-
-            }
-
-        }
-
-
-        // =====================================================
-        // UPDATE RIDE UI
-        // =====================================================
-
-        function updateRideUI(
-            data
-        ) {
-
-            document.getElementById(
-                "service"
-            ).innerText =
-                data.serviceType ||
-                data.service ||
-                "Bike Taxi";
-
-
-            document.getElementById(
-                "pickup"
-            ).innerText =
-                formatLocation(
-                    data.pickup
-                );
-
-
-            document.getElementById(
-                "drop"
-            ).innerText =
-                formatLocation(
-                    data.drop
-                );
-
-
-            document.getElementById(
-                "fare"
-            ).innerText =
-                "₹" +
-                Number(
-                    data.fare || 0
-                );
-
-
-            document.getElementById(
-                "distance"
-            ).innerText =
-                Number(
-                    data.distance || 0
-                ).toFixed(1) +
-                " KM";
-
-
-            document.getElementById(
-                "rideIdDisplay"
-            ).innerText =
-                rideId
-                    ? rideId.slice(
-                        0,
-                        10
-                    )
-                    : "----";
-
-
-            if (data.otp) {
-
-                document.getElementById(
-                    "otp"
-                ).innerText =
-                    String(
-                        data.otp
-                    );
-
-            }
-
-
-            const riderId =
-                data.riderId ||
-                data.driverId;
-
-
-            if (riderId) {
-
-                riderCard.style.display =
-                    "block";
-
-
-                document.getElementById(
-                    "riderName"
-                ).innerText =
-                    data.riderName ||
-                    data.driverName ||
-                    "RiderX Rider";
-
-
-                document.getElementById(
-                    "riderId"
-                ).innerText =
-                    "Rider ID: " +
-                    String(
-                        riderId
-                    ).slice(
-                        0,
-                        12
-                    );
-
-            }
-
-
-            const status =
-                String(
-                    data.status ||
-                    "REQUESTED"
-                ).toUpperCase();
-
-
-            switch (
-                status
-            ) {
-
-                case "REQUESTED":
-
-                case "PENDING":
-
-                    statusTitle.innerText =
-                        "Finding your rider";
-
-                    statusBadge.innerText =
-                        "SEARCHING";
-
-                    statusMessage.innerText =
-                        "We're looking for a RiderX rider near you.";
-
-                    break;
-
-
-                case "ACCEPTED":
-
-                    statusTitle.innerText =
-                        "Your rider is coming";
-
-                    statusBadge.innerText =
-                        "ACCEPTED";
-
-                    statusMessage.innerText =
-                        "Rider ne ride accept kar li hai.";
-
-                    break;
-
-
-                case "STARTED":
-
-                case "IN_PROGRESS":
-
-                    statusTitle.innerText =
-                        "You're on your way";
-
-                    statusBadge.innerText =
-                        "ON TRIP";
-
-                    statusMessage.innerText =
-                        "Your ride is currently in progress.";
-
-                    break;
-
-
-                case "COMPLETED":
-
-                    statusTitle.innerText =
-                        "Ride completed";
-
-                    statusBadge.innerText =
-                        "COMPLETED";
-
-                    statusMessage.innerText =
-                        "Thanks for riding with RiderX.";
-
-                    liveText.innerText =
-                        "TRIP END";
-
-                    break;
-
-
-                case "CANCELLED":
-
-                case "CANCELED":
-
-                    statusTitle.innerText =
-                        "Ride cancelled";
-
-                    statusBadge.innerText =
-                        "CANCELLED";
-
-                    statusMessage.innerText =
-                        "This ride has been cancelled.";
-
-                    break;
-
-
-                default:
-
-                    statusTitle.innerText =
-                        "Ride update";
-
-                    statusBadge.innerText =
-                        status;
-
-            }
-
-
-            updateRouteMarkers(
-                data
+    }
+
+
+    if(
+        drop &&
+        !dropMarker
+    ){
+
+        dropMarker =
+            L.marker(
+                [
+                    drop.lat,
+                    drop.lng
+                ],
+                {
+                    icon:dropIcon
+                }
+            )
+            .addTo(map)
+            .bindPopup(
+                "🏁 Destination"
             );
 
+    }
 
-            if (
-                data.riderLocation
-            ) {
 
-                updateRiderLocation(
-                    data.riderLocation
-                );
+    fitMap();
 
+}
+
+
+// =========================================================
+// FIT MAP
+// =========================================================
+
+function fitMap(){
+
+    if(
+        !map ||
+        mapFitted
+    ){
+
+        return;
+
+    }
+
+
+    const points = [];
+
+
+    const pickup =
+        pickupCoordinates();
+
+
+    const drop =
+        dropCoordinates();
+
+
+    if(pickup){
+
+        points.push(
+            [
+                pickup.lat,
+                pickup.lng
+            ]
+        );
+
+    }
+
+
+    if(drop){
+
+        points.push(
+            [
+                drop.lat,
+                drop.lng
+            ]
+        );
+
+    }
+
+
+    if(currentRiderLocation){
+
+        points.push(
+            [
+                currentRiderLocation.lat,
+                currentRiderLocation.lng
+            ]
+        );
+
+    }
+
+
+    if(
+        points.length >= 2
+    ){
+
+        map.fitBounds(
+            points,
+            {
+                padding:
+                    [55,55]
             }
+        );
 
-        }
+        mapFitted = true;
 
+    }
+    else if(
+        points.length === 1
+    ){
 
-        // =====================================================
-        // LISTEN TO RIDE
-        // =====================================================
+        map.setView(
+            points[0],
+            15
+        );
 
-        function listenToRide() {
+        mapFitted = true;
 
-            if (!rideId) {
+    }
 
-                statusTitle.innerText =
-                    "Ride not found";
-
-                statusBadge.innerText =
-                    "NO RIDE";
-
-                message.innerText =
-                    "Ride ID nahi mila.";
-
-                return;
-
-            }
+}
 
 
-            const rideRef =
-                doc(
-                    db,
-                    "rides",
-                    rideId
-                );
+// =========================================================
+// UPDATE RIDER MARKER
+// =========================================================
+
+function updateRiderMarker(
+    location
+){
+
+    if(
+        !location ||
+        !map
+    ){
+
+        return;
+
+    }
 
 
-            onSnapshot(
-
-                rideRef,
-
-                (snap) => {
-
-                    if (
-                        !snap.exists()
-                    ) {
-
-                        statusTitle.innerText =
-                            "Ride not found";
-
-                        statusBadge.innerText =
-                            "NOT FOUND";
-
-                        return;
-
-                    }
+    currentRiderLocation =
+        location;
 
 
-                    rideData =
-                        snap.data();
+    const latlng = [
+        location.lat,
+        location.lng
+    ];
 
 
-                    updateRideUI(
-                        rideData
-                    );
+    if(!riderMarker){
 
-                },
-
-                (error) => {
-
-                    console.error(
-                        "Ride Listener Error:",
-                        error
-                    );
-
-
-                    message.innerText =
-                        "Ride connection error: " +
-                        error.message;
-
+        riderMarker =
+            L.marker(
+                latlng,
+                {
+                    icon:riderIcon,
+                    zIndexOffset:1000
                 }
-
+            )
+            .addTo(map)
+            .bindPopup(
+                "🏍️ Rider is here"
             );
 
-        }
+    }else{
+
+        riderMarker.setLatLng(
+            latlng
+        );
+
+    }
 
 
-        // =====================================================
-        // CANCEL RIDE
-        // =====================================================
+    if(!mapFitted){
 
-        document.getElementById(
-            "cancelBtn"
-        ).onclick =
-            async function () {
+        fitMap();
 
-                if (!rideId) {
+    }
 
-                    return;
-
-                }
+}
 
 
-                const ok =
-                    confirm(
-                        "Kya aap ride cancel karna chahte ho?"
-                    );
+// =========================================================
+// STATUS
+// =========================================================
+
+function normalizeStatus(
+    value
+){
+
+    return String(
+        value || ""
+    )
+    .trim()
+    .toUpperCase();
+
+}
 
 
-                if (!ok) return;
+function statusInfo(
+    status
+){
 
+    switch(status){
 
-                try {
+        case "SEARCHING":
 
-                    await updateDoc(
-                        doc(
-                            db,
-                            "rides",
-                            rideId
-                        ),
-                        {
+        case "REQUESTED":
 
-                            status:
-                                "CANCELLED",
+        case "PENDING":
 
-                            cancelledBy:
-                                "customer",
+            return {
 
-                            cancelledAt:
-                                serverTimestamp()
+                title:
+                    "Finding Rider",
 
-                        }
-                    );
+                sub:
+                    "Looking for a nearby RiderX partner",
 
+                badge:
+                    "SEARCHING",
 
-                    message.innerText =
-                        "Ride cancelled.";
-
-                } catch (error) {
-
-                    console.error(
-                        error
-                    );
-
-                    alert(
-                        "Ride cancel nahi hui: " +
-                        error.message
-                    );
-
-                }
+                step:
+                    "searching"
 
             };
 
 
-        // =====================================================
-        // CENTER BUTTON
-        // =====================================================
+        case "ACCEPTED":
 
-        document.getElementById(
-            "centerBtn"
-        ).onclick =
-            function () {
+            return {
 
-                centerMap();
+                title:
+                    "Rider Accepted",
 
-            };
+                sub:
+                    "Your rider is preparing to pick you up",
 
+                badge:
+                    "ACCEPTED",
 
-        // =====================================================
-        // REFRESH
-        // =====================================================
-
-        document.getElementById(
-            "refreshBtn"
-        ).onclick =
-            function () {
-
-                window.location.reload();
+                step:
+                    "accepted"
 
             };
 
 
-        // =====================================================
-        // AUTH
-        // =====================================================
+        case "ARRIVING":
 
-        onAuthStateChanged(
-            auth,
-            async (user) => {
+        case "DRIVER_ARRIVING":
 
-                if (!user) {
+        case "RIDER_ARRIVING":
 
-                    statusTitle.innerText =
-                        "Login required";
+            return {
 
-                    statusBadge.innerText =
-                        "LOGIN";
+                title:
+                    "Rider is Coming",
 
-                    message.innerText =
-                        "Customer login required.";
+                sub:
+                    "Your rider is on the way to pickup",
 
-                    return;
+                badge:
+                    "ARRIVING",
+
+                step:
+                    "arriving"
+
+            };
+
+
+        case "ARRIVED":
+
+            return {
+
+                title:
+                    "Rider Has Arrived",
+
+                sub:
+                    "Meet your rider at the pickup point",
+
+                badge:
+                    "ARRIVED",
+
+                step:
+                    "arriving"
+
+            };
+
+
+        case "STARTED":
+
+        case "ON_TRIP":
+
+        case "ONGOING":
+
+            return {
+
+                title:
+                    "You're On the Way",
+
+                sub:
+                    "Enjoy your RiderX trip",
+
+                badge:
+                    "ON TRIP",
+
+                step:
+                    "trip"
+
+            };
+
+
+        case "COMPLETED":
+
+        case "COMPLETE":
+
+            return {
+
+                title:
+                    "Ride Completed",
+
+                sub:
+                    "Thanks for riding with RiderX",
+
+                badge:
+                    "COMPLETED",
+
+                step:
+                    "completed"
+
+            };
+
+
+        case "CANCELLED":
+
+        case "CANCELED":
+
+        case "REJECTED":
+
+            return {
+
+                title:
+                    "Ride Cancelled",
+
+                sub:
+                    "This ride is no longer active",
+
+                badge:
+                    "CANCELLED",
+
+                step:
+                    "searching"
+
+            };
+
+
+        default:
+
+            return {
+
+                title:
+                    "Your Ride",
+
+                sub:
+                    "Connecting to your ride",
+
+                badge:
+                    status || "LIVE",
+
+                step:
+                    "accepted"
+
+            };
+
+    }
+
+}
+
+
+// =========================================================
+// UPDATE STATUS UI
+// =========================================================
+
+function updateStatusUI(
+    status
+){
+
+    const info =
+        statusInfo(
+            status
+        );
+
+
+    statusMain.innerText =
+        info.title;
+
+
+    statusSub.innerText =
+        info.sub;
+
+
+    statusBadge.innerText =
+        info.badge;
+
+
+    const steps = [
+        "searching",
+        "accepted",
+        "arriving",
+        "trip",
+        "completed"
+    ];
+
+
+    const currentIndex =
+        steps.indexOf(
+            info.step
+        );
+
+
+    document
+        .querySelectorAll(
+            ".progress-item"
+        )
+        .forEach(
+            item => {
+
+                const step =
+                    item.dataset.step;
+
+
+                const index =
+                    steps.indexOf(
+                        step
+                    );
+
+
+                item.classList.remove(
+                    "active",
+                    "done"
+                );
+
+
+                if(
+                    index <
+                    currentIndex
+                ){
+
+                    item.classList.add(
+                        "done"
+                    );
 
                 }
 
 
-                rideId =
-                    getRideId();
+                if(
+                    index ===
+                    currentIndex
+                ){
 
-
-                if (!rideId) {
-
-                    statusTitle.innerText =
-                        "No active ride";
-
-                    statusBadge.innerText =
-                        "NO RIDE";
-
-                    message.innerText =
-                        "Booking ke baad ride-status page open karo.";
-
-                    return;
+                    item.classList.add(
+                        "active"
+                    );
 
                 }
-
-
-                listenToRide();
 
             }
         );
 
 
-        // =====================================================
-        // INIT
-        // =====================================================
+    if(
+        status ===
+        "COMPLETED"
+        ||
+        status ===
+        "COMPLETE"
+    ){
+
+        cancelBtn.style.display =
+            "none";
+
+        doneBtn.style.display =
+            "block";
+
+    }
+
+
+    if(
+        status ===
+        "CANCELLED"
+        ||
+        status ===
+        "CANCELED"
+        ||
+        status ===
+        "REJECTED"
+    ){
+
+        cancelBtn.disabled =
+            true;
+
+        doneBtn.style.display =
+            "none";
+
+    }
+
+
+    if(
+        status ===
+        "ACCEPTED"
+        ||
+        status ===
+        "ARRIVING"
+        ||
+        status ===
+        "DRIVER_ARRIVING"
+        ||
+        status ===
+        "RIDER_ARRIVING"
+        ||
+        status ===
+        "ARRIVED"
+        ||
+        status ===
+        "STARTED"
+        ||
+        status ===
+        "ON_TRIP"
+        ||
+        status ===
+        "ONGOING"
+    ){
+
+        riderSection.style.display =
+            "flex";
+
+    }
+
+}
+
+
+// =========================================================
+// RIDER DATA
+// =========================================================
+
+function updateRiderUI(){
+
+    const rider =
+        rideData || {};
+
+
+    const name =
+        rider.riderName
+        ||
+        rider.driverName
+        ||
+        "RiderX Rider";
+
+
+    const vehicle =
+        rider.vehicleNumber
+        ||
+        rider.vehicleNo
+        ||
+        rider.vehicleName
+        ||
+        rider.vehicleModel
+        ||
+        "RiderX Bike";
+
+
+    const rating =
+        rider.riderRating
+        ||
+        rider.driverRating
+        ||
+        "5.0";
+
+
+    riderName.innerText =
+        name;
+
+
+    riderVehicle.innerText =
+        vehicle;
+
+
+    riderRating.innerText =
+        "★ " +
+        rating;
+
+
+    if(
+        rider.riderPhoto
+        ||
+        rider.driverPhoto
+        ||
+        rider.photoURL
+    ){
+
+        const photo =
+            rider.riderPhoto
+            ||
+            rider.driverPhoto
+            ||
+            rider.photoURL;
+
+
+        riderAvatar.innerHTML =
+            `<img src="${escapeAttribute(photo)}" alt="Rider">`;
+
+    }
+
+
+    const phone =
+        rider.riderPhone
+        ||
+        rider.driverPhone
+        ||
+        rider.phone
+        ||
+        "";
+
+
+    callBtn.dataset.phone =
+        phone;
+
+
+    const riderId =
+        rider.riderId
+        ||
+        "";
+
+
+    chatBtn.dataset.riderId =
+        riderId;
+
+}
+
+
+// =========================================================
+// RIDE DETAILS
+// =========================================================
+
+function updateRideDetails(){
+
+    const fare =
+        Number(
+            rideData?.fare || 0
+        );
+
+
+    const distance =
+        Number(
+            rideData?.distance || 0
+        );
+
+
+    fareValue.innerText =
+        "₹" +
+        fare;
+
+
+    distanceValue.innerText =
+        distance
+            ? distance.toFixed(1) +
+              " KM"
+            :
+              "—";
+
+
+    paymentValue.innerText =
+        rideData?.paymentMethod
+        ||
+        rideData?.payment
+        ||
+        "Cash";
+
+
+    const otp =
+        rideData?.otp
+        ||
+        rideData?.rideOtp
+        ||
+        rideData?.OTP
+        ||
+        "";
+
+
+    if(otp){
+
+        otpBox.classList.add(
+            "show"
+        );
+
+        otpCode.innerText =
+            String(
+                otp
+            );
+
+    }
+
+}
+
+
+// =========================================================
+// ESCAPE ATTRIBUTE
+// =========================================================
+
+function escapeAttribute(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    );
+
+}
+
+
+// =========================================================
+// RIDE SNAPSHOT
+// =========================================================
+
+function handleRideSnapshot(
+    snapshot
+){
+
+    if(
+        !snapshot.exists()
+    ){
+
+        showError(
+            "Ride not found. Please book a new ride."
+        );
+
+        return;
+
+    }
+
+
+    const data =
+        snapshot.data();
+
+
+    if(
+        data.customerId
+        &&
+        data.customerId !==
+        currentUser.uid
+    ){
+
+        showError(
+            "This ride does not belong to your account."
+        );
+
+        return;
+
+    }
+
+
+    rideData =
+        data;
+
+
+    const status =
+        normalizeStatus(
+            data.status
+        );
+
+
+    updateStatusUI(
+        status
+    );
+
+
+    updateRideDetails();
+
+
+    updateRiderUI();
+
+
+    drawRideLocations();
+
+
+    // -------------------------------------------------------
+    // RIDER LOCATION LISTENER
+    // -------------------------------------------------------
+
+    if(
+        data.riderId
+    ){
+
+        startRiderLocationListener(
+            data.riderId
+        );
+
+    }
+
+
+    // -------------------------------------------------------
+    // COMPLETED
+    // -------------------------------------------------------
+
+    if(
+        status ===
+        "COMPLETED"
+        ||
+        status ===
+        "COMPLETE"
+    ){
+
+        cancelBtn.style.display =
+            "none";
+
+        doneBtn.style.display =
+            "block";
+
+    }
+
+
+    // -------------------------------------------------------
+    // CANCELLED
+    // -------------------------------------------------------
+
+    if(
+        status ===
+        "CANCELLED"
+        ||
+        status ===
+        "CANCELED"
+        ||
+        status ===
+        "REJECTED"
+    ){
+
+        setTimeout(
+            () => {
+
+                clearRideStorage();
+
+            },
+            1500
+        );
+
+    }
+
+}
+
+
+// =========================================================
+// RIDE LISTENER
+// =========================================================
+
+function startRideListener(){
+
+    if(
+        !rideId ||
+        !currentUser
+    ){
+
+        return;
+
+    }
+
+
+    const rideRef =
+        doc(
+            db,
+            "rides",
+            rideId
+        );
+
+
+    rideUnsubscribe =
+        onSnapshot(
+
+            rideRef,
+
+            snapshot => {
+
+                loading.style.display =
+                    "none";
+
+
+                handleRideSnapshot(
+                    snapshot
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "Ride listener:",
+                    error
+                );
+
+
+                loading.style.display =
+                    "none";
+
+
+                showError(
+                    "Unable to connect to ride: " +
+                    error.message
+                );
+
+            }
+
+        );
+
+}
+
+
+// =========================================================
+// RIDER LOCATION LISTENER
+// =========================================================
+
+function startRiderLocationListener(
+    riderId
+){
+
+    if(
+        locationUnsubscribe
+    ){
+
+        locationUnsubscribe();
+
+        locationUnsubscribe =
+            null;
+
+    }
+
+
+    const locationRef =
+        doc(
+            db,
+            "riderLocations",
+            riderId
+        );
+
+
+    locationUnsubscribe =
+        onSnapshot(
+
+            locationRef,
+
+            snapshot => {
+
+                if(
+                    !snapshot.exists()
+                ){
+
+                    return;
+
+                }
+
+
+                const data =
+                    snapshot.data();
+
+
+                const location =
+                    getCoordinates(
+                        data
+                    );
+
+
+                if(location){
+
+                    updateRiderMarker(
+                        location
+                    );
+
+                }
+
+            },
+
+            error => {
+
+                console.error(
+                    "Rider location:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
+// =========================================================
+// CANCEL RIDE
+// =========================================================
+
+cancelBtn.addEventListener(
+    "click",
+    async () => {
+
+        if(
+            cancelling ||
+            !rideId ||
+            !currentUser
+        ){
+
+            return;
+
+        }
+
+
+        const status =
+            normalizeStatus(
+                rideData?.status
+            );
+
+
+        if(
+            status !==
+            "SEARCHING"
+            &&
+            status !==
+            "REQUESTED"
+            &&
+            status !==
+            "PENDING"
+            &&
+            status !==
+            "ACCEPTED"
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !confirm(
+                "Are you sure you want to cancel this ride?"
+            )
+        ){
+
+            return;
+
+        }
+
+
+        cancelling = true;
+
+        cancelBtn.disabled =
+            true;
+
+        cancelBtn.innerText =
+            "Cancelling...";
+
+
+        try{
+
+            await updateDoc(
+
+                doc(
+                    db,
+                    "rides",
+                    rideId
+                ),
+
+                {
+
+                    status:
+                        "CANCELLED",
+
+                    cancelledBy:
+                        currentUser.uid,
+
+                    cancelledAt:
+                        serverTimestamp()
+
+                }
+
+            );
+
+
+            clearRideStorage();
+
+
+            window.location.replace(
+                "home.html"
+            );
+
+
+        }catch(error){
+
+            console.error(
+                "Cancel:",
+                error
+            );
+
+
+            cancelling =
+                false;
+
+
+            cancelBtn.disabled =
+                false;
+
+            cancelBtn.innerText =
+                "Cancel Ride";
+
+
+            showError(
+                "Ride cancel nahi hui: " +
+                error.message
+            );
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// CALL RIDER
+// =========================================================
+
+callBtn.addEventListener(
+    "click",
+    () => {
+
+        const phone =
+            callBtn.dataset.phone;
+
+
+        if(!phone){
+
+            alert(
+                "Rider phone number available nahi hai."
+            );
+
+            return;
+
+        }
+
+
+        window.location.href =
+            "tel:" +
+            phone;
+
+    }
+);
+
+
+// =========================================================
+// CHAT RIDER
+// =========================================================
+
+chatBtn.addEventListener(
+    "click",
+    () => {
+
+        const riderId =
+            chatBtn.dataset.riderId
+            ||
+            "";
+
+
+        window.location.href =
+            "chat.html?rideId=" +
+            encodeURIComponent(
+                rideId
+            )
+            +
+            "&riderId=" +
+            encodeURIComponent(
+                riderId
+            );
+
+    }
+);
+
+
+// =========================================================
+// BACK
+// =========================================================
+
+backBtn.addEventListener(
+    "click",
+    () => {
+
+        const status =
+            normalizeStatus(
+                rideData?.status
+            );
+
+
+        if(
+            status ===
+            "COMPLETED"
+            ||
+            status ===
+            "CANCELLED"
+            ||
+            status ===
+            "CANCELED"
+        ){
+
+            window.location.replace(
+                "home.html"
+            );
+
+            return;
+
+        }
+
+
+        if(
+            confirm(
+                "Ride tracking se bahar jana hai? Ride background me active rahegi."
+            )
+        ){
+
+            window.location.replace(
+                "home.html"
+            );
+
+        }
+
+    }
+);
+
+
+// =========================================================
+// DONE
+// =========================================================
+
+doneBtn.addEventListener(
+    "click",
+    () => {
+
+        clearRideStorage();
+
+        window.location.replace(
+            "home.html"
+        );
+
+    }
+);
+
+
+// =========================================================
+// CLEAR STORAGE
+// =========================================================
+
+function clearRideStorage(){
+
+    [
+        "activeRideId",
+        "rideId",
+        "riderx_active_ride"
+    ]
+    .forEach(
+        key => {
+
+            localStorage.removeItem(
+                key
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// ERROR
+// =========================================================
+
+function showError(
+    message
+){
+
+    loading.style.display =
+        "none";
+
+
+    errorBox.style.display =
+        "block";
+
+
+    errorText.innerText =
+        message;
+
+}
+
+
+document
+    .getElementById(
+        "errorBtn"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.replace(
+                "home.html"
+            );
+
+        }
+    );
+
+
+// =========================================================
+// AUTH
+// =========================================================
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(!user){
+
+            showError(
+                "Please login to view your ride."
+            );
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        rideId =
+            getRideId();
+
+
+        if(!rideId){
+
+            showError(
+                "Active ride nahi mili. Please book a new ride."
+            );
+
+            return;
+
+        }
+
 
         initMap();
 
-    </script>
+        startRideListener();
 
-</body>
+    }
+);
 
-</html>
+
+// =========================================================
+// CLEANUP
+// =========================================================
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if(rideUnsubscribe){
+
+            rideUnsubscribe();
+
+        }
+
+
+        if(locationUnsubscribe){
+
+            locationUnsubscribe();
+
+        }
+
+    }
+);
+
+</script></body></html>
