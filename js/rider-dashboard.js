@@ -2,17 +2,14 @@
    RIDERX - RIDER DASHBOARD
    File: js/rider-dashboard.js
 
-   Rider dashboard controller.
-
    Handles:
-   - Online / Offline
+   - Rider dashboard
+   - Online / Offline status
    - Today's earnings
    - Today's rides
-   - Rating
-   - Completed rides
    - Active ride
-   - Incoming requests count
-   - Rider profile data
+   - Available requests
+   - Rider statistics
    - Firebase synchronization
    - Dashboard UI
    ============================================================ */
@@ -25,8 +22,9 @@
 
     const RX = window.RiderX;
 
-    const Dashboard = RX.riderDashboard =
-        RX.riderDashboard || {};
+    const Dashboard =
+        RX.riderDashboard ||
+        (RX.riderDashboard = {});
 
 
     /* ========================================================
@@ -41,20 +39,14 @@
         ridesPath:
             "rides",
 
-        earningsPath:
-            "riderEarnings",
+        riderStatusPath:
+            "status",
 
-        requestsPath:
-            "rideRequests",
+        cacheKey:
+            "riderx_rider_dashboard",
 
-        activeRideKey:
-            "riderx_active_ride",
-
-        onlineKey:
-            "riderx_online",
-
-        statsKey:
-            "riderx_rider_stats"
+        refreshInterval:
+            20000
     };
 
 
@@ -67,48 +59,53 @@
         initialized:
             false,
 
+        loading:
+            false,
+
         riderId:
+            null,
+
+        rider:
             null,
 
         online:
             false,
 
-        loading:
-            false,
+        earningsToday:
+            0,
 
-        stats:
-            {
+        ridesToday:
+            0,
 
-                todayEarnings:
-                    0,
+        completedToday:
+            0,
 
-                todayRides:
-                    0,
-
-                totalEarnings:
-                    0,
-
-                totalRides:
-                    0,
-
-                rating:
-                    5,
-
-                completedRides:
-                    0
-            },
-
-        rider:
-            null,
+        cancelledToday:
+            0,
 
         activeRide:
             null,
 
-        requests:
+        availableRides:
             0,
 
-        listeners:
-            []
+        totalDistanceToday:
+            0,
+
+        totalDurationToday:
+            0,
+
+        rating:
+            5,
+
+        refreshTimer:
+            null,
+
+        statusChanging:
+            false,
+
+        listener:
+            null
     };
 
 
@@ -151,63 +148,6 @@
 
 
     /* ========================================================
-       USER
-       ======================================================== */
-
-    Dashboard.getUser =
-        function () {
-
-            try {
-
-                if (
-                    RX.firebase &&
-                    RX.firebase.auth
-                ) {
-
-                    return RX.firebase.auth.currentUser;
-                }
-
-            } catch (error) {}
-
-
-            try {
-
-                if (
-                    window.firebase &&
-                    typeof firebase.auth ===
-                    "function"
-                ) {
-
-                    return firebase.auth().currentUser;
-                }
-
-            } catch (error) {}
-
-
-            try {
-
-                const saved =
-                    localStorage.getItem(
-                        "riderx_user"
-                    );
-
-                if (
-                    saved
-                ) {
-
-                    return JSON.parse(
-                        saved
-                    );
-                }
-
-            } catch (error) {}
-
-
-            return null;
-        };
-
-
-    /* ========================================================
        RIDER ID
        ======================================================== */
 
@@ -222,31 +162,83 @@
             }
 
 
-            const user =
-                Dashboard.getUser() ||
-                {};
+            try {
+
+                if (
+                    RX.getRiderProfile
+                ) {
+
+                    const profile =
+                        RX.getRiderProfile();
 
 
-            const riderId =
-                user.uid ||
-                user.id ||
-                user.riderId ||
-                user.driverId ||
-                localStorage.getItem(
-                    "riderx_uid"
-                );
+                    if (
+                        profile &&
+                        (
+                            profile.uid ||
+                            profile.id
+                        )
+                    ) {
+
+                        Dashboard.state.riderId =
+                            profile.uid ||
+                            profile.id;
+
+                        return Dashboard.state.riderId;
+                    }
+                }
+
+            } catch (error) {}
 
 
-            if (
-                riderId
-            ) {
+            try {
 
-                Dashboard.state.riderId =
-                    riderId;
-            }
+                const uid =
+                    localStorage.getItem(
+                        "riderx_uid"
+                    );
 
 
-            return riderId || null;
+                if (
+                    uid
+                ) {
+
+                    Dashboard.state.riderId =
+                        uid;
+
+                    return uid;
+                }
+
+            } catch (error) {}
+
+
+            try {
+
+                if (
+                    window.firebase &&
+                    firebase.auth
+                ) {
+
+                    const user =
+                        firebase.auth()
+                            .currentUser;
+
+
+                    if (
+                        user
+                    ) {
+
+                        Dashboard.state.riderId =
+                            user.uid;
+
+                        return user.uid;
+                    }
+                }
+
+            } catch (error) {}
+
+
+            return null;
         };
 
 
@@ -274,85 +266,480 @@
 
 
             if (
-                database
+                !database
             ) {
 
-                try {
-
-                    const snapshot =
-                        await database
-                            .ref(
-                                Dashboard.config
-                                    .ridersPath +
-                                "/" +
-                                riderId
-                            )
-                            .once(
-                                "value"
-                            );
+                return Dashboard.state.rider;
+            }
 
 
-                    const rider =
-                        snapshot.val();
+            try {
 
-
-                    if (
-                        rider
-                    ) {
-
-                        Dashboard.state.rider =
-                            rider;
-
-
-                        Dashboard.updateProfileUI(
-                            rider
+                const snapshot =
+                    await database
+                        .ref(
+                            Dashboard.config
+                                .ridersPath +
+                            "/" +
+                            riderId
+                        )
+                        .once(
+                            "value"
                         );
 
 
-                        return rider;
+                const rider =
+                    snapshot.val();
+
+
+                if (
+                    rider
+                ) {
+
+                    Dashboard.state.rider =
+                        {
+
+                            ...rider,
+
+                            id:
+                                rider.id ||
+                                rider.uid ||
+                                riderId,
+
+                            uid:
+                                rider.uid ||
+                                riderId,
+
+                            online:
+                                rider.online ===
+                                true,
+
+                            isOnline:
+                                rider.isOnline ===
+                                true
+                        };
+
+
+                    Dashboard.state.online =
+                        Dashboard.state.rider.online ||
+                        Dashboard.state.rider.isOnline;
+
+
+                    if (
+                        rider.rating !==
+                        undefined
+                    ) {
+
+                        Dashboard.state.rating =
+                            Number(
+                                rider.rating
+                            );
                     }
 
-                } catch (error) {
 
-                    console.warn(
-                        "Rider profile load failed:",
-                        error
-                    );
+                    Dashboard.renderProfile();
+                    Dashboard.renderStatus();
                 }
-            }
 
 
-            /*
-             * Local fallback.
-             */
+                return Dashboard.state.rider;
 
-            const user =
-                Dashboard.getUser();
+            } catch (error) {
 
-
-            if (
-                user
-            ) {
-
-                Dashboard.state.rider =
-                    user;
-
-
-                Dashboard.updateProfileUI(
-                    user
+                console.error(
+                    "Rider profile load failed:",
+                    error
                 );
 
-
-                return user;
+                return null;
             }
-
-
-            return null;
         };
 
 
     /* ========================================================
-       UPDATE RIDER ONLINE
+       LOAD DASHBOARD STATS
+       ======================================================== */
+
+    Dashboard.loadStats =
+        async function () {
+
+            const database =
+                Dashboard.getDatabase();
+
+
+            const riderId =
+                Dashboard.getRiderId();
+
+
+            if (
+                !database ||
+                !riderId
+            ) {
+
+                Dashboard.loadCache();
+
+                Dashboard.render();
+
+                return Dashboard.getStats();
+            }
+
+
+            Dashboard.state.loading =
+                true;
+
+
+            try {
+
+                const snapshot =
+                    await database
+                        .ref(
+                            Dashboard.config
+                                .ridesPath
+                        )
+                        .orderByChild(
+                            "riderId"
+                        )
+                        .equalTo(
+                            riderId
+                        )
+                        .once(
+                            "value"
+                        );
+
+
+                const data =
+                    snapshot.val() ||
+                    {};
+
+
+                const rides =
+                    Object.entries(
+                        data
+                    )
+                    .map(
+                        function (
+                            [
+                                id,
+                                ride
+                            ]
+                        ) {
+
+                            return {
+
+                                ...ride,
+
+                                id:
+                                    ride.id ||
+                                    ride.rideId ||
+                                    id,
+
+                                status:
+                                    String(
+                                        ride.status ||
+                                        ""
+                                    ).toLowerCase(),
+
+                                fare:
+                                    Number(
+                                        ride.finalFare ??
+                                        ride.fare ??
+                                        ride.estimatedFare ??
+                                        0
+                                    ),
+
+                                distance:
+                                    Number(
+                                        ride.distance ??
+                                        ride.distanceKm ??
+                                        0
+                                    ),
+
+                                duration:
+                                    Number(
+                                        ride.duration ??
+                                        ride.durationMinutes ??
+                                        0
+                                    ),
+
+                                createdAt:
+                                    ride.createdAt ||
+                                    0,
+
+                                completedAt:
+                                    ride.completedAt ||
+                                    0
+                            };
+
+                        }
+                    );
+
+
+                const start =
+                    Dashboard.startOfToday();
+
+
+                const end =
+                    Dashboard.endOfToday();
+
+
+                let earnings =
+                    0;
+
+                let ridesToday =
+                    0;
+
+                let completedToday =
+                    0;
+
+                let cancelledToday =
+                    0;
+
+                let distance =
+                    0;
+
+                let duration =
+                    0;
+
+                let activeRide =
+                    null;
+
+
+                rides.forEach(
+                    function (
+                        ride
+                    ) {
+
+                        const timestamp =
+                            Number(
+                                ride.completedAt ||
+                                ride.createdAt ||
+                                0
+                            );
+
+
+                        if (
+                            Dashboard.isActiveRide(
+                                ride
+                            )
+                        ) {
+
+                            if (
+                                !activeRide ||
+                                timestamp >
+                                Number(
+                                    activeRide.createdAt ||
+                                    0
+                                )
+                            ) {
+
+                                activeRide =
+                                    ride;
+                            }
+                        }
+
+
+                        if (
+                            timestamp <
+                            start ||
+                            timestamp >
+                            end
+                        ) {
+
+                            return;
+                        }
+
+
+                        ridesToday++;
+
+
+                        if (
+                            ride.status ===
+                            "completed"
+                        ) {
+
+                            completedToday++;
+
+                            earnings +=
+                                Number(
+                                    ride.fare ||
+                                    0
+                                );
+
+                            distance +=
+                                Number(
+                                    ride.distance ||
+                                    0
+                                );
+
+                            duration +=
+                                Number(
+                                    ride.duration ||
+                                    0
+                                );
+                        }
+
+
+                        if (
+                            ride.status ===
+                            "cancelled"
+                        ) {
+
+                            cancelledToday++;
+                        }
+
+                    }
+                );
+
+
+                Dashboard.state.earningsToday =
+                    earnings;
+
+
+                Dashboard.state.ridesToday =
+                    ridesToday;
+
+
+                Dashboard.state.completedToday =
+                    completedToday;
+
+
+                Dashboard.state.cancelledToday =
+                    cancelledToday;
+
+
+                Dashboard.state.totalDistanceToday =
+                    distance;
+
+
+                Dashboard.state.totalDurationToday =
+                    duration;
+
+
+                Dashboard.state.activeRide =
+                    activeRide;
+
+
+                await Dashboard.loadAvailableCount();
+
+
+                Dashboard.saveCache();
+
+                Dashboard.render();
+
+
+                return Dashboard.getStats();
+
+            } catch (error) {
+
+                console.error(
+                    "Dashboard stats failed:",
+                    error
+                );
+
+
+                Dashboard.loadCache();
+
+                Dashboard.render();
+
+
+                return Dashboard.getStats();
+
+            } finally {
+
+                Dashboard.state.loading =
+                    false;
+            }
+        };
+
+
+    /* ========================================================
+       AVAILABLE RIDES COUNT
+       ======================================================== */
+
+    Dashboard.loadAvailableCount =
+        async function () {
+
+            const database =
+                Dashboard.getDatabase();
+
+
+            if (
+                !database
+            ) {
+
+                return 0;
+            }
+
+
+            try {
+
+                const snapshot =
+                    await database
+                        .ref(
+                            Dashboard.config
+                                .ridesPath
+                        )
+                        .once(
+                            "value"
+                        );
+
+
+                const data =
+                    snapshot.val() ||
+                    {};
+
+
+                let count =
+                    0;
+
+
+                Object.values(
+                    data
+                )
+                .forEach(
+                    function (
+                        ride
+                    ) {
+
+                        const status =
+                            String(
+                                ride.status ||
+                                ""
+                            ).toLowerCase();
+
+
+                        if (
+                            (
+                                status ===
+                                "requested" ||
+                                status ===
+                                "searching"
+                            ) &&
+                            !ride.riderId
+                        ) {
+
+                            count++;
+                        }
+
+                    }
+                );
+
+
+                Dashboard.state.availableRides =
+                    count;
+
+
+                return count;
+
+            } catch (error) {
+
+                return 0;
+            }
+        };
+
+
+    /* ========================================================
+       ONLINE / OFFLINE
        ======================================================== */
 
     Dashboard.setOnline =
@@ -360,10 +747,19 @@
             online
         ) {
 
-            online =
-                Boolean(
-                    online
-                );
+            if (
+                Dashboard.state.statusChanging
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Please wait."
+                };
+            }
 
 
             const riderId =
@@ -385,32 +781,25 @@
             }
 
 
-            Dashboard.state.online =
-                online;
-
-
-            try {
-
-                localStorage.setItem(
-                    Dashboard.config
-                        .onlineKey,
-                    String(
-                        online
-                    )
-                );
-
-            } catch (error) {}
-
-
             const database =
                 Dashboard.getDatabase();
 
 
-            if (
-                database
-            ) {
+            Dashboard.state.statusChanging =
+                true;
 
-                try {
+
+            try {
+
+                const value =
+                    Boolean(
+                        online
+                    );
+
+
+                if (
+                    database
+                ) {
 
                     await database
                         .ref(
@@ -423,100 +812,126 @@
                             {
 
                                 online:
-                                    online,
+                                    value,
 
                                 isOnline:
-                                    online,
+                                    value,
 
-                                availability:
-                                    online
+                                status:
+                                    value
                                         ? "online"
                                         : "offline",
+
+                                lastStatusChange:
+                                    Date.now(),
 
                                 updatedAt:
                                     Date.now()
                             }
                         );
 
-                } catch (error) {
 
-                    console.error(
-                        "Online status update failed:",
-                        error
-                    );
+                    /*
+                     * Keep a separate online status
+                     * node for fast rider matching.
+                     */
 
+                    await database
+                        .ref(
+                            Dashboard.config
+                                .riderStatusPath +
+                            "/" +
+                            riderId
+                        )
+                        .set(
+                            {
 
-                    return {
+                                online:
+                                    value,
 
-                        success:
-                            false,
-
-                        error:
-                            error.message
-                    };
+                                updatedAt:
+                                    Date.now()
+                            }
+                        );
                 }
-            }
 
 
-            /*
-             * Start/stop incoming requests.
-             */
+                Dashboard.state.online =
+                    value;
 
-            try {
 
                 if (
-                    RX.rideAccept
+                    Dashboard.state.rider
                 ) {
 
-                    if (
-                        online &&
-                        typeof RX.rideAccept
-                            .startListening ===
-                        "function"
-                    ) {
+                    Dashboard.state.rider.online =
+                        value;
 
-                        RX.rideAccept
-                            .startListening();
-
-                    } else if (
-                        !online &&
-                        typeof RX.rideAccept
-                            .stopListening ===
-                        "function"
-                    ) {
-
-                        RX.rideAccept
-                            .stopListening();
-                    }
-
+                    Dashboard.state.rider.isOnline =
+                        value;
                 }
 
-            } catch (error) {}
+
+                Dashboard.renderStatus();
 
 
-            Dashboard.updateOnlineUI(
-                online
-            );
+                Dashboard.emit(
+                    value
+                        ? "online"
+                        : "offline",
+                    {
+
+                        riderId:
+                            riderId
+                    }
+                );
 
 
-            Dashboard.emit(
-                "online",
-                {
+                Dashboard.showMessage(
+                    value
+                        ? "You are now online."
+                        : "You are now offline.",
+                    "success"
+                );
+
+
+                return {
+
+                    success:
+                        true,
 
                     online:
-                        online
-                }
-            );
+                        value
+                };
+
+            } catch (error) {
+
+                console.error(
+                    "Rider status update failed:",
+                    error
+                );
 
 
-            return {
+                Dashboard.showMessage(
+                    "Unable to change online status.",
+                    "error"
+                );
 
-                success:
-                    true,
 
-                online:
-                    online
-            };
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        error.message
+                };
+
+            } finally {
+
+                Dashboard.state.statusChanging =
+                    false;
+            }
         };
 
 
@@ -525,7 +940,7 @@
        ======================================================== */
 
     Dashboard.toggleOnline =
-        async function () {
+        function () {
 
             return Dashboard.setOnline(
                 !Dashboard.state.online
@@ -534,767 +949,357 @@
 
 
     /* ========================================================
-       LOAD STATS
+       ACTIVE RIDE
        ======================================================== */
 
-    Dashboard.loadStats =
-        async function () {
-
-            const riderId =
-                Dashboard.getRiderId();
-
+    Dashboard.isActiveRide =
+        function (
+            ride
+        ) {
 
             if (
-                !riderId
+                !ride
             ) {
 
-                return Dashboard.state.stats;
+                return false;
             }
 
 
-            const database =
-                Dashboard.getDatabase();
+            return [
 
+                "accepted",
+                "arriving",
+                "arrived",
+                "started",
+                "in_progress"
 
-            if (
-                database
-            ) {
-
-                try {
-
-                    await Dashboard
-                        .loadStatsFromFirebase(
-                            database,
-                            riderId
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Stats load failed:",
-                        error
-                    );
-                }
-            }
-
-
-            Dashboard.loadLocalStats();
-
-
-            Dashboard.updateStatsUI();
-
-
-            return Dashboard.state.stats;
+            ].includes(
+                String(
+                    ride.status ||
+                    ""
+                ).toLowerCase()
+            );
         };
 
 
-    /* ========================================================
-       FIREBASE STATS
-       ======================================================== */
+    Dashboard.openActiveRide =
+        function () {
 
-    Dashboard.loadStatsFromFirebase =
-        async function (
-            database,
-            riderId
-        ) {
+            const ride =
+                Dashboard.state.activeRide;
 
-            const today =
-                Dashboard.getDayKey(
-                    Date.now()
+
+            if (
+                !ride
+            ) {
+
+                Dashboard.showMessage(
+                    "No active ride.",
+                    "info"
                 );
 
-
-            const earningsRef =
-                database.ref(
-                    Dashboard.config
-                        .earningsPath +
-                    "/" +
-                    riderId
-                );
+                return;
+            }
 
 
-            const snapshot =
-                await earningsRef.once(
-                    "value"
-                );
+            Dashboard.emit(
+                "active-ride",
+                {
 
-
-            const data =
-                snapshot.val() ||
-                {};
-
-
-            let todayEarnings =
-                0;
-
-            let todayRides =
-                0;
-
-            let totalEarnings =
-                0;
-
-            let totalRides =
-                0;
-
-
-            Object.values(
-                data
-            )
-            .forEach(
-                function (
-                    item
-                ) {
-
-                    if (
-                        !item
-                    ) {
-
-                        return;
-                    }
-
-
-                    const earning =
-                        Number(
-                            item.earning ??
-                            item.amount ??
-                            0
-                        ) || 0;
-
-
-                    totalEarnings +=
-                        earning;
-
-
-                    totalRides++;
-
-
-                    const itemDate =
-                        item.completedAt ||
-                        item.createdAt ||
-                        item.date;
-
-
-                    if (
-                        itemDate &&
-                        Dashboard.getDayKey(
-                            itemDate
-                        ) ===
-                        today
-                    ) {
-
-                        todayEarnings +=
-                            earning;
-
-                        todayRides++;
-                    }
-
+                    ride:
+                        ride
                 }
             );
 
 
-            Dashboard.state.stats
-                .todayEarnings =
-                Number(
-                    todayEarnings.toFixed(
-                        2
-                    )
+            /*
+             * Use existing rider ride module
+             * if available.
+             */
+
+            if (
+                RX.riderRide &&
+                RX.riderRide.setCurrent
+            ) {
+
+                RX.riderRide.setCurrent(
+                    ride
+                );
+            }
+
+
+            const target =
+                document.querySelector(
+                    "[data-active-ride-link]"
                 );
 
 
-            Dashboard.state.stats
-                .todayRides =
-                todayRides;
+            if (
+                target &&
+                target.href
+            ) {
+
+                window.location.href =
+                    target.href;
+
+                return;
+            }
 
 
-            Dashboard.state.stats
-                .totalEarnings =
-                Number(
-                    totalEarnings.toFixed(
-                        2
+            /*
+             * Fallback to rider ride page.
+             */
+
+            if (
+                window.location.pathname
+                    .includes(
+                        "/rider/"
                     )
-                );
+            ) {
 
-
-            Dashboard.state.stats
-                .totalRides =
-                totalRides;
-
-
-            return Dashboard.state.stats;
+                window.location.href =
+                    "ride-details.html?id=" +
+                    encodeURIComponent(
+                        ride.id
+                    );
+            }
         };
 
 
     /* ========================================================
-       LOCAL STATS
+       CACHE
        ======================================================== */
 
-    Dashboard.loadLocalStats =
+    Dashboard.saveCache =
+        function () {
+
+            try {
+
+                localStorage.setItem(
+                    Dashboard.config.cacheKey,
+                    JSON.stringify(
+                        {
+
+                            earningsToday:
+                                Dashboard.state
+                                    .earningsToday,
+
+                            ridesToday:
+                                Dashboard.state
+                                    .ridesToday,
+
+                            completedToday:
+                                Dashboard.state
+                                    .completedToday,
+
+                            cancelledToday:
+                                Dashboard.state
+                                    .cancelledToday,
+
+                            totalDistanceToday:
+                                Dashboard.state
+                                    .totalDistanceToday,
+
+                            totalDurationToday:
+                                Dashboard.state
+                                    .totalDurationToday,
+
+                            availableRides:
+                                Dashboard.state
+                                    .availableRides,
+
+                            rating:
+                                Dashboard.state
+                                    .rating,
+
+                            online:
+                                Dashboard.state
+                                    .online
+
+                        }
+                    )
+                );
+
+            } catch (error) {}
+        };
+
+
+    Dashboard.loadCache =
         function () {
 
             try {
 
                 const saved =
                     localStorage.getItem(
-                        Dashboard.config
-                            .statsKey
+                        Dashboard.config.cacheKey
                     );
 
 
                 if (
-                    saved
+                    !saved
                 ) {
 
-                    const stats =
-                        JSON.parse(
-                            saved
-                        );
-
-
-                    Dashboard.state.stats =
-                        {
-
-                            ...Dashboard.state.stats,
-                            ...stats
-                        };
+                    return;
                 }
 
-            } catch (error) {}
 
+                const data =
+                    JSON.parse(
+                        saved
+                    );
 
-            return Dashboard.state.stats;
-        };
 
-
-    Dashboard.saveLocalStats =
-        function () {
-
-            try {
-
-                localStorage.setItem(
-                    Dashboard.config
-                        .statsKey,
-                    JSON.stringify(
-                        Dashboard.state.stats
-                    )
-                );
-
-            } catch (error) {}
-        };
-
-
-    /* ========================================================
-       RATING
-       ======================================================== */
-
-    Dashboard.loadRating =
-        async function () {
-
-            const riderId =
-                Dashboard.getRiderId();
-
-
-            if (
-                !riderId
-            ) {
-
-                return 5;
-            }
-
-
-            const database =
-                Dashboard.getDatabase();
-
-
-            if (
-                database
-            ) {
-
-                try {
-
-                    const snapshot =
-                        await database
-                            .ref(
-                                Dashboard.config
-                                    .ridersPath +
-                                "/" +
-                                riderId
-                            )
-                            .once(
-                                "value"
-                            );
-
-
-                    const rider =
-                        snapshot.val() ||
-                        {};
-
-
-                    const rating =
-                        Number(
-                            rider.rating ??
-                            rider.averageRating ??
-                            5
-                        );
-
-
-                    Dashboard.state.stats
-                        .rating =
-                        Number(
-                            rating.toFixed(
-                                2
-                            )
-                        );
-
-
-                } catch (error) {}
-            }
-
-
-            Dashboard.updateStatsUI();
-
-
-            return Dashboard.state.stats
-                .rating;
-        };
-
-
-    /* ========================================================
-       ACTIVE RIDE
-       ======================================================== */
-
-    Dashboard.loadActiveRide =
-        async function () {
-
-            const rideId =
-                localStorage.getItem(
-                    Dashboard.config
-                        .activeRideKey
-                );
-
-
-            if (
-                !rideId
-            ) {
-
-                try {
-
-                    const saved =
-                        localStorage.getItem(
-                            Dashboard.config
-                                .activeRideKey
-                        );
-
-
-                    if (
-                        saved &&
-                        saved.startsWith(
-                            "{"
-                        )
-                    ) {
-
-                        Dashboard.state.activeRide =
-                            JSON.parse(
-                                saved
-                            );
-
-                        return Dashboard.state
-                            .activeRide;
-                    }
-
-                } catch (error) {}
-
-
-                Dashboard.state.activeRide =
-                    null;
-
-
-                Dashboard.updateActiveRideUI();
-
-
-                return null;
-            }
-
-
-            const database =
-                Dashboard.getDatabase();
-
-
-            if (
-                database
-            ) {
-
-                try {
-
-                    const snapshot =
-                        await database
-                            .ref(
-                                Dashboard.config
-                                    .ridesPath +
-                                "/" +
-                                rideId
-                            )
-                            .once(
-                                "value"
-                            );
-
-
-                    const ride =
-                        snapshot.val();
-
-
-                    if (
-                        ride
-                    ) {
-
-                        Dashboard.state
-                            .activeRide =
-                            {
-
-                                ...ride,
-
-                                rideId:
-                                    ride.rideId ||
-                                    rideId
-                            };
-
-
-                        Dashboard.updateActiveRideUI();
-
-
-                        return Dashboard.state
-                            .activeRide;
-                    }
-
-                } catch (error) {}
-            }
-
-
-            return null;
-        };
-
-
-    /* ========================================================
-       REQUEST COUNT
-       ======================================================== */
-
-    Dashboard.loadRequestCount =
-        async function () {
-
-            const database =
-                Dashboard.getDatabase();
-
-
-            const riderId =
-                Dashboard.getRiderId();
-
-
-            if (
-                !database ||
-                !riderId
-            ) {
-
-                Dashboard.state.requests =
-                    0;
-
-                Dashboard.updateRequestUI();
-
-                return 0;
-            }
-
-
-            /*
-             * Actual rideAccept state is preferred.
-             */
-
-            try {
-
-                if (
-                    RX.rideAccept &&
-                    RX.rideAccept.state &&
-                    RX.rideAccept.state.requests
-                ) {
-
-                    Dashboard.state.requests =
-                        Object.keys(
-                            RX.rideAccept.state
-                                .requests
-                        ).length;
-
-
-                    Dashboard.updateRequestUI();
-
-
-                    return Dashboard.state.requests;
-                }
-
-            } catch (error) {}
-
-
-            return 0;
-        };
-
-
-    /* ========================================================
-       DAY KEY
-       ======================================================== */
-
-    Dashboard.getDayKey =
-        function (
-            timestamp
-        ) {
-
-            const date =
-                new Date(
-                    Number(
-                        timestamp
-                    )
-                );
-
-
-            if (
-                Number.isNaN(
-                    date.getTime()
-                )
-            ) {
-
-                return "";
-            }
-
-
-            return [
-                date.getFullYear(),
-                String(
-                    date.getMonth() + 1
-                ).padStart(
-                    2,
-                    "0"
-                ),
-                String(
-                    date.getDate()
-                ).padStart(
-                    2,
-                    "0"
-                )
-            ].join(
-                "-"
-            );
-        };
-
-
-    /* ========================================================
-       PROFILE UI
-       ======================================================== */
-
-    Dashboard.updateProfileUI =
-        function (
-            rider
-        ) {
-
-            if (
-                !rider
-            ) {
-
-                return;
-            }
-
-
-            const name =
-                rider.name ||
-                rider.displayName ||
-                "Rider";
-
-
-            const rating =
-                Number(
-                    rider.rating ??
-                    rider.averageRating ??
-                    5
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-name]"
+                Object.keys(
+                    data
                 )
                 .forEach(
                     function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            name;
-
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-rating]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            rating.toFixed(
-                                1
-                            );
-
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-photo]"
-                )
-                .forEach(
-                    function (
-                        element
+                        key
                     ) {
 
                         if (
-                            rider.photo ||
-                            rider.photoURL
+                            key in
+                            Dashboard.state
                         ) {
 
-                            element.src =
-                                rider.photo ||
-                                rider.photoURL;
-
+                            Dashboard.state[
+                                key
+                            ] =
+                                data[
+                                    key
+                                ];
                         }
-
                     }
                 );
+
+            } catch (error) {}
         };
 
 
     /* ========================================================
-       STATS UI
+       DATE HELPERS
        ======================================================== */
 
-    Dashboard.updateStatsUI =
+    Dashboard.startOfToday =
         function () {
 
-            const stats =
-                Dashboard.state.stats;
+            const date =
+                new Date();
 
 
-            Dashboard.setText(
-                "today-earnings",
-                Dashboard.formatMoney(
-                    stats.todayEarnings
-                )
+            date.setHours(
+                0,
+                0,
+                0,
+                0
             );
 
 
-            Dashboard.setText(
-                "today-rides",
-                stats.todayRides
+            return date.getTime();
+        };
+
+
+    Dashboard.endOfToday =
+        function () {
+
+            const date =
+                new Date();
+
+
+            date.setHours(
+                23,
+                59,
+                59,
+                999
             );
 
 
-            Dashboard.setText(
-                "total-earnings",
-                Dashboard.formatMoney(
-                    stats.totalEarnings
-                )
-            );
-
-
-            Dashboard.setText(
-                "total-rides",
-                stats.totalRides
-            );
-
-
-            Dashboard.setText(
-                "completed-rides",
-                stats.completedRides ||
-                stats.totalRides
-            );
-
-
-            Dashboard.setText(
-                "rider-rating",
-                Number(
-                    stats.rating ||
-                    5
-                ).toFixed(
-                    1
-                )
-            );
-
-
-            /*
-             * Also support data attributes.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-rider-today-earnings]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            Dashboard.formatMoney(
-                                stats.todayEarnings
-                            );
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-today-rides]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            stats.todayRides;
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-total-earnings]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            Dashboard.formatMoney(
-                                stats.totalEarnings
-                            );
-                    }
-                );
+            return date.getTime();
         };
 
 
     /* ========================================================
-       ONLINE UI
+       GET STATS
        ======================================================== */
 
-    Dashboard.updateOnlineUI =
-        function (
-            online
-        ) {
+    Dashboard.getStats =
+        function () {
 
-            online =
-                Boolean(
-                    online
-                );
+            return {
+
+                riderId:
+                    Dashboard.state.riderId,
+
+                online:
+                    Dashboard.state.online,
+
+                earningsToday:
+                    Dashboard.state
+                        .earningsToday,
+
+                ridesToday:
+                    Dashboard.state
+                        .ridesToday,
+
+                completedToday:
+                    Dashboard.state
+                        .completedToday,
+
+                cancelledToday:
+                    Dashboard.state
+                        .cancelledToday,
+
+                availableRides:
+                    Dashboard.state
+                        .availableRides,
+
+                activeRide:
+                    Dashboard.state
+                        .activeRide,
+
+                totalDistanceToday:
+                    Dashboard.state
+                        .totalDistanceToday,
+
+                totalDurationToday:
+                    Dashboard.state
+                        .totalDurationToday,
+
+                rating:
+                    Dashboard.state
+                        .rating
+            };
+        };
+
+
+    /* ========================================================
+       RENDER
+       ======================================================== */
+
+    Dashboard.render =
+        function () {
+
+            Dashboard.renderStatus();
+
+            Dashboard.renderProfile();
+
+            Dashboard.renderStats();
+
+            Dashboard.renderActiveRide();
+
+            Dashboard.renderCounters();
+        };
+
+
+    /* ========================================================
+       RENDER STATUS
+       ======================================================== */
+
+    Dashboard.renderStatus =
+        function () {
+
+            const online =
+                Dashboard.state.online;
 
 
             document
@@ -1311,34 +1316,10 @@
                                 ? "Online"
                                 : "Offline";
 
-                        element.dataset.online =
-                            String(
-                                online
-                            );
-
-                    }
-                );
-
-
-            document
-                .querySelectorAll(
-                    "[data-online-indicator]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.classList.toggle(
-                            "online",
+                        element.dataset.status =
                             online
-                        );
-
-                        element.classList.toggle(
-                            "offline",
-                            !online
-                        );
-
+                                ? "online"
+                                : "offline";
                     }
                 );
 
@@ -1353,8 +1334,8 @@
                     ) {
 
                         if (
-                            element.tagName ===
-                            "INPUT"
+                            element.type ===
+                            "checkbox"
                         ) {
 
                             element.checked =
@@ -1362,20 +1343,20 @@
 
                         } else {
 
-                            element.textContent =
-                                online
-                                    ? "Go Offline"
-                                    : "Go Online";
-
+                            element
+                                .classList
+                                .toggle(
+                                    "active",
+                                    online
+                                );
                         }
-
                     }
                 );
 
 
             document
                 .querySelectorAll(
-                    "[data-rider-status]"
+                    "[data-online-text]"
                 )
                 .forEach(
                     function (
@@ -1384,19 +1365,247 @@
 
                         element.textContent =
                             online
-                                ? "You're online"
-                                : "You're offline";
+                                ? "Go Offline"
+                                : "Go Online";
+                    }
+                );
 
+
+            document
+                .querySelectorAll(
+                    "[data-online-dot]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.dataset.status =
+                            online
+                                ? "online"
+                                : "offline";
                     }
                 );
         };
 
 
     /* ========================================================
-       ACTIVE RIDE UI
+       RENDER PROFILE
        ======================================================== */
 
-    Dashboard.updateActiveRideUI =
+    Dashboard.renderProfile =
+        function () {
+
+            const rider =
+                Dashboard.state.rider;
+
+
+            if (
+                !rider
+            ) {
+
+                return;
+            }
+
+
+            const name =
+                rider.name ||
+                rider.fullName ||
+                rider.displayName ||
+                "Rider";
+
+
+            const phone =
+                rider.phone ||
+                rider.mobile ||
+                "";
+
+
+            const photo =
+                rider.photoURL ||
+                rider.photo ||
+                rider.profileImage ||
+                "";
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-name]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            name;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-phone]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            phone;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-photo]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        if (
+                            photo
+                        ) {
+
+                            element.src =
+                                photo;
+
+                        } else {
+
+                            element.removeAttribute(
+                                "src"
+                            );
+                        }
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-rider-rating]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            Number(
+                                Dashboard.state
+                                    .rating ||
+                                5
+                            ).toFixed(
+                                1
+                            );
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       RENDER STATS
+       ======================================================== */
+
+    Dashboard.renderStats =
+        function () {
+
+            const values =
+                {
+
+                    earnings:
+                        Dashboard.formatMoney(
+                            Dashboard.state
+                                .earningsToday
+                        ),
+
+                    earningsToday:
+                        Dashboard.formatMoney(
+                            Dashboard.state
+                                .earningsToday
+                        ),
+
+                    rides:
+                        Dashboard.state
+                            .ridesToday,
+
+                    ridesToday:
+                        Dashboard.state
+                            .ridesToday,
+
+                    completed:
+                        Dashboard.state
+                            .completedToday,
+
+                    cancelled:
+                        Dashboard.state
+                            .cancelledToday,
+
+                    distance:
+                        Dashboard.state
+                            .totalDistanceToday
+                            .toFixed(
+                                1
+                            ) +
+                        " km",
+
+                    duration:
+                        Dashboard.state
+                            .totalDurationToday +
+                        " min",
+
+                    rating:
+                        Number(
+                            Dashboard.state
+                                .rating ||
+                            5
+                        ).toFixed(
+                            1
+                        ),
+
+                    requests:
+                        Dashboard.state
+                            .availableRides
+                };
+
+
+            Object.entries(
+                values
+            )
+            .forEach(
+                function (
+                    [
+                        key,
+                        value
+                    ]
+                ) {
+
+                    document
+                        .querySelectorAll(
+                            `[data-rider-stat="${key}"]`
+                        )
+                        .forEach(
+                            function (
+                                element
+                            ) {
+
+                                element.textContent =
+                                    value;
+                            }
+                        );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       RENDER ACTIVE RIDE
+       ======================================================== */
+
+    Dashboard.renderActiveRide =
         function () {
 
             const ride =
@@ -1414,7 +1623,6 @@
 
                         element.hidden =
                             !ride;
-
                     }
                 );
 
@@ -1427,101 +1635,50 @@
             }
 
 
-            Dashboard.setText(
-                "active-ride-status",
-                ride.status ||
-                "Active"
-            );
+            const values =
+                {
+
+                    id:
+                        ride.id,
+
+                    customer:
+                        ride.customerName ||
+                        "Customer",
+
+                    pickup:
+                        ride.pickupAddress ||
+                        "Pickup location",
+
+                    destination:
+                        ride.destinationAddress ||
+                        "Destination",
+
+                    fare:
+                        Dashboard.formatMoney(
+                            ride.fare
+                        ),
+
+                    status:
+                        Dashboard.statusLabel(
+                            ride.status
+                        )
+                };
 
 
-            Dashboard.setText(
-                "active-ride-pickup",
-                ride.pickupAddress ||
-                ride.pickup?.address ||
-                "Pickup"
-            );
-
-
-            Dashboard.setText(
-                "active-ride-destination",
-                ride.destinationAddress ||
-                ride.destination?.address ||
-                "Destination"
-            );
-
-
-            Dashboard.setText(
-                "active-ride-fare",
-                Dashboard.formatMoney(
-                    ride.finalFare ??
-                    ride.estimatedFare ??
-                    ride.fare ??
-                    0
-                )
-            );
-        };
-
-
-    /* ========================================================
-       REQUEST UI
-       ======================================================== */
-
-    Dashboard.updateRequestUI =
-        function () {
-
-            const count =
-                Dashboard.state.requests;
-
-
-            document
-                .querySelectorAll(
-                    "[data-ride-request-count]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            count;
-
-                        element.hidden =
-                            count <= 0;
-
-                    }
-                );
-        };
-
-
-    /* ========================================================
-       HELPERS
-       ======================================================== */
-
-    Dashboard.setText =
-        function (
-            id,
-            value
-        ) {
-
-            const selectors = [
-
-                `#${id}`,
-
-                `[data-dashboard="${id}"]`,
-
-                `[data-${id}]`
-
-            ];
-
-
-            selectors.forEach(
+            Object.entries(
+                values
+            )
+            .forEach(
                 function (
-                    selector
+                    [
+                        key,
+                        value
+                    ]
                 ) {
 
                     document
                         .querySelectorAll(
-                            selector
+                            `[data-active-ride-${key}]`
                         )
                         .forEach(
                             function (
@@ -1530,7 +1687,6 @@
 
                                 element.textContent =
                                     value;
-
                             }
                         );
                 }
@@ -1538,275 +1694,395 @@
         };
 
 
-    Dashboard.formatMoney =
+    /* ========================================================
+       RENDER COUNTERS
+       ======================================================== */
+
+    Dashboard.renderCounters =
+        function () {
+
+            const counters =
+                {
+
+                    rides:
+                        Dashboard.state
+                            .ridesToday,
+
+                    completed:
+                        Dashboard.state
+                            .completedToday,
+
+                    cancelled:
+                        Dashboard.state
+                            .cancelledToday,
+
+                    requests:
+                        Dashboard.state
+                            .availableRides,
+
+                    active:
+                        Dashboard.state.activeRide
+                            ? 1
+                            : 0
+                };
+
+
+            Object.entries(
+                counters
+            )
+            .forEach(
+                function (
+                    [
+                        key,
+                        value
+                    ]
+                ) {
+
+                    document
+                        .querySelectorAll(
+                            `[data-dashboard-count="${key}"]`
+                        )
+                        .forEach(
+                            function (
+                                element
+                            ) {
+
+                                element.textContent =
+                                    value;
+                            }
+                        );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       STATUS LABEL
+       ======================================================== */
+
+    Dashboard.statusLabel =
         function (
-            value
+            status
         ) {
 
-            value =
-                Number(
-                    value
-                ) || 0;
+            const labels =
+                {
+
+                    accepted:
+                        "Ride accepted",
+
+                    arriving:
+                        "Going to pickup",
+
+                    arrived:
+                        "Arrived at pickup",
+
+                    started:
+                        "Ride started",
+
+                    in_progress:
+                        "Ride in progress"
+                };
 
 
-            return "₹" +
-                value.toLocaleString(
+            return (
+                labels[
+                    String(
+                        status ||
+                        ""
+                    ).toLowerCase()
+                ] ||
+                "Active ride"
+            );
+        };
+
+
+    /* ========================================================
+       MONEY
+       ======================================================== */
+
+    Dashboard.formatMoney =
+        function (
+            amount
+        ) {
+
+            try {
+
+                return new Intl.NumberFormat(
                     "en-IN",
                     {
 
-                        minimumFractionDigits:
-                            0,
+                        style:
+                            "currency",
+
+                        currency:
+                            "INR",
 
                         maximumFractionDigits:
-                            2
+                            0
+
                     }
+                ).format(
+                    Number(
+                        amount ||
+                        0
+                    )
                 );
+
+            } catch (error) {
+
+                return "₹" +
+                    Math.round(
+                        Number(
+                            amount ||
+                            0
+                        )
+                    );
+            }
         };
 
 
     /* ========================================================
-       EVENT HANDLERS
+       REALTIME RIDER LISTENER
        ======================================================== */
 
-    Dashboard.bindEvents =
+    Dashboard.listen =
         function () {
 
-            document.addEventListener(
-                "click",
-                function (
-                    event
-                ) {
-
-                    const toggle =
-                        event.target.closest(
-                            "[data-online-toggle]"
-                        );
+            Dashboard.stopListening();
 
 
-                    if (
-                        toggle
-                    ) {
-
-                        Dashboard
-                            .toggleOnline();
-
-                        return;
-                    }
+            const database =
+                Dashboard.getDatabase();
 
 
-                    const refresh =
-                        event.target.closest(
-                            "[data-refresh-dashboard]"
-                        );
+            const riderId =
+                Dashboard.getRiderId();
 
-
-                    if (
-                        refresh
-                    ) {
-
-                        Dashboard.refresh();
-
-                        return;
-                    }
-
-                }
-            );
-
-
-            document.addEventListener(
-                "change",
-                function (
-                    event
-                ) {
-
-                    const toggle =
-                        event.target.closest(
-                            "[data-online-toggle]"
-                        );
-
-
-                    if (
-                        !toggle ||
-                        toggle.tagName !==
-                        "INPUT"
-                    ) {
-
-                        return;
-                    }
-
-
-                    Dashboard.setOnline(
-                        toggle.checked
-                    );
-                }
-            );
-
-
-            /*
-             * Incoming request changes.
-             */
-
-            window.addEventListener(
-                "riderx-ride-accept-request",
-                function () {
-
-                    Dashboard
-                        .loadRequestCount();
-
-                }
-            );
-
-
-            window.addEventListener(
-                "riderx-ride-accept-accepted",
-                function () {
-
-                    Dashboard.state.requests =
-                        0;
-
-                    Dashboard.updateRequestUI();
-
-                    Dashboard.loadActiveRide();
-
-                }
-            );
-
-
-            window.addEventListener(
-                "riderx-ride-flow-status",
-                function (
-                    event
-                ) {
-
-                    const ride =
-                        event.detail?.ride;
-
-
-                    if (
-                        ride
-                    ) {
-
-                        Dashboard.state.activeRide =
-                            ride;
-
-                        Dashboard.updateActiveRideUI();
-
-                    }
-
-                }
-            );
-
-
-            window.addEventListener(
-                "riderx-ride-complete-completed",
-                function () {
-
-                    Dashboard.state.activeRide =
-                        null;
-
-                    Dashboard.refresh();
-
-                }
-            );
-        };
-
-
-    /* ========================================================
-       REFRESH
-       ======================================================== */
-
-    Dashboard.refresh =
-        async function () {
 
             if (
-                Dashboard.state.loading
+                !database ||
+                !riderId
             ) {
 
                 return;
             }
 
 
-            Dashboard.state.loading =
-                true;
-
-
-            try {
-
-                await Promise.all(
-                    [
-
-                        Dashboard.loadRider(),
-
-                        Dashboard.loadStats(),
-
-                        Dashboard.loadRating(),
-
-                        Dashboard.loadActiveRide(),
-
-                        Dashboard.loadRequestCount()
-
-                    ]
+            const ref =
+                database.ref(
+                    Dashboard.config
+                        .ridersPath +
+                    "/" +
+                    riderId
                 );
 
 
-                Dashboard.updateOnlineUI(
-                    Dashboard.state.online
-                );
+            const callback =
+                function (
+                    snapshot
+                ) {
+
+                    const rider =
+                        snapshot.val();
 
 
-            } finally {
+                    if (
+                        !rider
+                    ) {
 
-                Dashboard.state.loading =
-                    false;
-            }
+                        return;
+                    }
 
 
-            Dashboard.emit(
-                "refreshed",
+                    Dashboard.state.rider =
+                        {
+
+                            ...rider,
+
+                            id:
+                                rider.id ||
+                                rider.uid ||
+                                riderId,
+
+                            uid:
+                                rider.uid ||
+                                riderId
+                        };
+
+
+                    Dashboard.state.online =
+                        rider.online ===
+                        true ||
+                        rider.isOnline ===
+                        true;
+
+
+                    if (
+                        rider.rating !==
+                        undefined
+                    ) {
+
+                        Dashboard.state.rating =
+                            Number(
+                                rider.rating
+                            );
+                    }
+
+
+                    Dashboard.renderProfile();
+                    Dashboard.renderStatus();
+                    Dashboard.saveCache();
+
+
+                    Dashboard.emit(
+                        "rider-updated",
+                        {
+
+                            rider:
+                                rider
+                        }
+                    );
+                };
+
+
+            ref.on(
+                "value",
+                callback
+            );
+
+
+            Dashboard.state.listener =
                 {
 
-                    stats:
-                        Dashboard.state.stats,
+                    ref:
+                        ref,
 
-                    rider:
-                        Dashboard.state.rider,
-
-                    activeRide:
-                        Dashboard.state.activeRide
-                }
-            );
+                    callback:
+                        callback
+                };
         };
 
 
     /* ========================================================
-       FIREBASE ONLINE RECOVERY
+       STOP LISTENER
        ======================================================== */
 
-    Dashboard.restoreOnline =
+    Dashboard.stopListening =
         function () {
+
+            if (
+                Dashboard.state.listener
+            ) {
+
+                try {
+
+                    Dashboard.state.listener
+                        .ref
+                        .off(
+                            "value",
+                            Dashboard.state.listener
+                                .callback
+                        );
+
+                } catch (error) {}
+
+
+                Dashboard.state.listener =
+                    null;
+            }
+        };
+
+
+    /* ========================================================
+       AUTO REFRESH
+       ======================================================== */
+
+    Dashboard.startRefresh =
+        function () {
+
+            Dashboard.stopRefresh();
+
+
+            Dashboard.state.refreshTimer =
+                setInterval(
+                    function () {
+
+                        Dashboard.loadStats();
+
+                    },
+                    Dashboard.config
+                        .refreshInterval
+                );
+        };
+
+
+    Dashboard.stopRefresh =
+        function () {
+
+            if (
+                Dashboard.state.refreshTimer
+            ) {
+
+                clearInterval(
+                    Dashboard.state.refreshTimer
+                );
+
+                Dashboard.state.refreshTimer =
+                    null;
+            }
+        };
+
+
+    /* ========================================================
+       MESSAGE
+       ======================================================== */
+
+    Dashboard.showMessage =
+        function (
+            message,
+            type
+        ) {
 
             try {
 
-                const saved =
-                    localStorage.getItem(
-                        Dashboard.config
-                            .onlineKey
+                if (
+                    RX.toast &&
+                    typeof RX.toast ===
+                    "function"
+                ) {
+
+                    RX.toast(
+                        message,
+                        type
                     );
 
+                    return;
+                }
 
-                Dashboard.state.online =
-                    saved === "true";
-
-            } catch (error) {
-
-                Dashboard.state.online =
-                    false;
-            }
+            } catch (error) {}
 
 
-            Dashboard.updateOnlineUI(
-                Dashboard.state.online
-            );
+            document
+                .querySelectorAll(
+                    "[data-dashboard-message]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            message;
+
+                        element.dataset.type =
+                            type ||
+                            "info";
+
+                        element.hidden =
+                            false;
+                    }
+                );
         };
 
 
@@ -1834,51 +2110,122 @@
         };
 
 
-    Dashboard.on =
-        function (
-            name,
-            callback
-        ) {
+    /* ========================================================
+       BIND EVENTS
+       ======================================================== */
 
-            if (
-                typeof callback !==
-                "function"
-            ) {
+    Dashboard.bindEvents =
+        function () {
 
-                return;
-            }
+            /*
+             * Online toggle.
+             */
 
-
-            const event =
-                "riderx-dashboard-" +
-                name;
-
-
-            const handler =
+            document.addEventListener(
+                "click",
                 function (
-                    e
+                    event
                 ) {
 
-                    callback(
-                        e.detail || {},
-                        e
-                    );
-                };
+                    const button =
+                        event.target.closest(
+                            "[data-online-toggle]"
+                        );
 
 
-            window.addEventListener(
-                event,
-                handler
+                    if (
+                        button &&
+                        button.type !==
+                        "checkbox"
+                    ) {
+
+                        event.preventDefault();
+
+                        Dashboard.toggleOnline();
+                    }
+                }
             );
 
 
-            return function () {
+            document.addEventListener(
+                "change",
+                function (
+                    event
+                ) {
 
-                window.removeEventListener(
-                    event,
-                    handler
-                );
-            };
+                    const toggle =
+                        event.target.closest(
+                            "[data-online-toggle]"
+                        );
+
+
+                    if (
+                        toggle &&
+                        toggle.type ===
+                        "checkbox"
+                    ) {
+
+                        Dashboard.setOnline(
+                            toggle.checked
+                        );
+                    }
+                }
+            );
+
+
+            /*
+             * Active ride.
+             */
+
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
+
+                    const button =
+                        event.target.closest(
+                            "[data-open-active-ride]"
+                        );
+
+
+                    if (
+                        button
+                    ) {
+
+                        event.preventDefault();
+
+                        Dashboard.openActiveRide();
+                    }
+                }
+            );
+
+
+            /*
+             * Refresh dashboard.
+             */
+
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
+
+                    const button =
+                        event.target.closest(
+                            "[data-refresh-dashboard]"
+                        );
+
+
+                    if (
+                        button
+                    ) {
+
+                        Dashboard.loadStats();
+                        Dashboard.loadRider();
+                    }
+                }
+            );
         };
 
 
@@ -1886,19 +2233,26 @@
        GLOBAL API
        ======================================================== */
 
-    RX.riderSetOnline =
+    RX.setRiderOnline =
         Dashboard.setOnline;
 
-    RX.riderToggleOnline =
+
+    RX.toggleRiderOnline =
         Dashboard.toggleOnline;
 
-    RX.riderRefreshDashboard =
-        Dashboard.refresh;
 
     RX.getRiderDashboardStats =
+        Dashboard.getStats;
+
+
+    RX.refreshRiderDashboard =
+        Dashboard.loadStats;
+
+
+    RX.getRiderActiveRide =
         function () {
 
-            return Dashboard.state.stats;
+            return Dashboard.state.activeRide;
         };
 
 
@@ -1921,13 +2275,23 @@
                 true;
 
 
-            Dashboard.restoreOnline();
+            Dashboard.loadCache();
 
 
             Dashboard.bindEvents();
 
 
-            await Dashboard.refresh();
+            await Dashboard.loadRider();
+
+            await Dashboard.loadStats();
+
+
+            Dashboard.listen();
+
+            Dashboard.startRefresh();
+
+
+            Dashboard.render();
 
 
             console.log(
