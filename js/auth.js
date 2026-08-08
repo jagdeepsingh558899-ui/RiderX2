@@ -1,503 +1,888 @@
-// =====================================
-// RiderX Authentication System
-// Customer + Rider + Admin
-// Firebase v10 Compatible
-//
-// IMPORTANT:
-// Admin pages use their own dedicated
-// admin/login.html and admin/dashboard.html
-// verification.
-//
-// This common auth file NEVER redirects
-// users while they are inside /admin/.
-// =====================================
+/* ============================================================
+RiderX Authentication Guard
+Customer + Rider + Admin
+Firebase v10 Modular SDK
+
+PURPOSE:
+
+- Protect customer pages
+- Protect rider pages
+- Protect admin pages
+- Verify Firebase login
+- Verify Firestore users/{uid} role
+- Prevent wrong-role access
+- Prevent Access Denied -> Book Ride redirect loop
+- No automatic redirect for logged-out users to Book Ride
+  ============================================================ */
 
 import {
-    auth,
-    db
+auth,
+db
 } from "../firebase/firebase-config.js";
 
 import {
-    onAuthStateChanged,
-    signOut
+onAuthStateChanged,
+signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 import {
-    doc,
-    getDoc
+doc,
+getDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+/* ============================================================
+PATH INFORMATION
+============================================================ */
 
-// =====================================
-// CURRENT PATH
-// =====================================
+const pathname =
+window.location.pathname.toLowerCase();
 
-const currentPath =
-    window.location.pathname.toLowerCase();
+const currentPage =
+window.location.pathname
+.split("/")
+.pop()
+.toLowerCase();
 
+const isAdminPage =
+pathname.includes("/admin/");
 
-// =====================================
-// CHECK ADMIN AREA
-// =====================================
+const isRiderPage =
+pathname.includes("/rider/");
 
-const isAdminArea =
-    currentPath.includes("/admin/");
+const isCustomerPage =
+pathname.includes("/customer/");
 
+/* ============================================================
+IMPORTANT PUBLIC PAGES
 
-// =====================================
-// LOGIN PAGE CHECK
-// =====================================
+These pages are allowed without Firebase login.
 
-const isLoginPage =
-    currentPath.includes("/auth/login.html");
+============================================================ */
 
+const publicPages = [
 
-// =====================================
-// CUSTOMER AREA
-// =====================================
+"/auth/login.html",
+"/auth/register.html",
+"/auth/customer-login.html",
+"/auth/rider-login.html",
+"/auth/otp-login.html",
+"/auth/verify-otp.html",
+"/auth/role.html",
+"/index.html"
 
-const isCustomerArea =
-    currentPath.includes("/customer/");
+];
 
+function isPublicPage(){
 
-// =====================================
-// RIDER AREA
-// =====================================
+return publicPages.some(
+    page =>
+        pathname.endsWith(page)
+);
 
-const isRiderArea =
-    currentPath.includes("/rider/");
+}
 
+/* ============================================================
+ROLE NORMALIZATION
+============================================================ */
 
-// =====================================
-// ROLE REDIRECT
-// =====================================
+function normalizeRole(data){
 
-async function redirectByRole(uid) {
+if(!data){
+    return "";
+}
 
-    try {
 
-        const userSnap =
-            await getDoc(
-                doc(
-                    db,
-                    "users",
-                    uid
-                )
-            );
+const role =
+    String(
+        data.role ||
+        data.userType ||
+        data.type ||
+        ""
+    )
+    .trim()
+    .toLowerCase();
 
 
-        // ---------------------------------
-        // USER DOCUMENT NOT FOUND
-        // ---------------------------------
+if(
+    role === "administrator"
+){
 
-        if (!userSnap.exists()) {
-
-            console.warn(
-                "RiderX: User profile not found."
-            );
-
-            return;
-
-        }
-
-
-        const user =
-            userSnap.data();
-
-
-        const role =
-            String(
-                user.role ||
-                user.userType ||
-                user.type ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        console.log(
-            "RiderX Role:",
-            role
-        );
-
-
-        // =================================
-        // ADMIN
-        // =================================
-
-        if (role === "admin") {
-
-            /*
-             * IMPORTANT:
-             *
-             * If already inside /admin/,
-             * do NOTHING.
-             *
-             * Admin pages have their own
-             * authentication system.
-             */
-
-            if (isAdminArea) {
-
-                console.log(
-                    "RiderX: Admin area detected. Common auth redirect disabled."
-                );
-
-                return;
-
-            }
-
-
-            /*
-             * If admin is somewhere outside
-             * admin area, send to dashboard.
-             */
-
-            window.location.replace(
-                "../admin/dashboard.html"
-            );
-
-            return;
-
-        }
-
-
-        // =================================
-        // RIDER
-        // =================================
-
-        if (role === "rider") {
-
-            /*
-             * Never redirect an Admin-area page
-             * to Rider pages.
-             */
-
-            if (isAdminArea) {
-
-                console.log(
-                    "RiderX: Admin area protected from rider redirect."
-                );
-
-                return;
-
-            }
-
-
-            const approved =
-                user.approved === true ||
-                user.isApproved === true;
-
-
-            const status =
-                String(
-                    user.status ||
-                    user.accountStatus ||
-                    ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            if (
-                approved &&
-                (
-                    status === "active" ||
-                    status === "approved"
-                )
-            ) {
-
-                window.location.replace(
-                    "../rider/home.html"
-                );
-
-            } else {
-
-                window.location.replace(
-                    "../rider/pending.html"
-                );
-
-            }
-
-            return;
-
-        }
-
-
-        // =================================
-        // CUSTOMER
-        // =================================
-
-        /*
-         * IMPORTANT:
-         *
-         * Customer redirect is NEVER allowed
-         * from /admin/.
-         */
-
-        if (isAdminArea) {
-
-            console.warn(
-                "RiderX: Customer redirect blocked inside Admin area."
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * Only redirect recognized customer
-         * accounts to customer home.
-         */
-
-        if (
-            role === "customer" ||
-            role === "user" ||
-            role === ""
-        ) {
-
-            /*
-             * Don't redirect if already inside
-             * customer area.
-             */
-
-            if (isCustomerArea) {
-
-                return;
-
-            }
-
-
-            window.location.replace(
-                "../customer/home.html"
-            );
-
-            return;
-
-        }
-
-
-        // =================================
-        // UNKNOWN ROLE
-        // =================================
-
-        console.warn(
-            "RiderX: Unknown user role:",
-            role
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "RiderX Role Redirect Error:",
-            error
-        );
-
-    }
+    return "admin";
 
 }
 
 
-// =====================================
-// AUTH STATE CHECK
-// =====================================
+if(
+    role === "admin"
+){
+
+    return "admin";
+
+}
+
+
+if(
+    role === "rider" ||
+    role === "driver"
+){
+
+    return "rider";
+
+}
+
+
+if(
+    role === "customer" ||
+    role === "user"
+){
+
+    return "customer";
+
+}
+
+
+return role;
+
+}
+
+/* ============================================================
+GET USER PROFILE
+============================================================ */
+
+async function getUserProfile(uid){
+
+const userRef =
+    doc(
+        db,
+        "users",
+        uid
+    );
+
+
+const userSnap =
+    await getDoc(
+        userRef
+    );
+
+
+if(
+    !userSnap.exists()
+){
+
+    return null;
+
+}
+
+
+return userSnap.data();
+
+}
+
+/* ============================================================
+LOGIN PAGE REDIRECT
+============================================================ */
+
+function redirectToLogin(){
 
 /*
- * VERY IMPORTANT:
+ * NEVER use "../auth/login.html" blindly.
  *
- * If this is an Admin URL, this common
- * authentication listener does NOT perform
- * customer/rider redirects.
- *
- * Admin pages handle their own Firebase
- * verification.
+ * All protected folders are one level below
+ * RiderX root, so this path is correct.
  */
 
-if (!isAdminArea) {
+window.location.replace(
+    "../auth/login.html"
+);
 
-    onAuthStateChanged(
-        auth,
-        async (user) => {
+}
 
-            // -----------------------------
-            // USER LOGGED IN
-            // -----------------------------
+/* ============================================================
+ADMIN ACCESS
+============================================================ */
 
-            if (user) {
+function checkAdminAccess(data){
 
-                await redirectByRole(
-                    user.uid
-                );
+const role =
+    normalizeRole(data);
+
+
+if(
+    role !== "admin"
+){
+
+    return false;
+
+}
+
+
+return true;
+
+}
+
+/* ============================================================
+RIDER ACCESS
+============================================================ */
+
+function checkRiderAccess(data){
+
+const role =
+    normalizeRole(data);
+
+
+if(
+    role !== "rider"
+){
+
+    return {
+        allowed:false,
+        reason:"not-rider"
+    };
+
+}
+
+
+const approved =
+    data.approved === true;
+
+
+const status =
+    String(
+        data.status || ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+/*
+ * Rider is authenticated but not yet approved.
+ *
+ * We allow pending page itself.
+ * Other rider pages go to pending.
+ */
+
+if(
+    !approved ||
+    status !== "active"
+){
+
+    return {
+        allowed:false,
+        reason:"pending"
+    };
+
+}
+
+
+return {
+    allowed:true,
+    reason:"active"
+};
+
+}
+
+/* ============================================================
+CUSTOMER ACCESS
+============================================================ */
+
+function checkCustomerAccess(data){
+
+const role =
+    normalizeRole(data);
+
+
+if(
+    role !== "customer"
+){
+
+    return false;
+
+}
+
+
+return true;
+
+}
+
+/* ============================================================
+REDIRECT BASED ON ACTUAL ROLE
+============================================================ */
+
+function redirectToCorrectArea(
+role,
+data
+){
+
+/* ========================================================
+   ADMIN
+======================================================== */
+
+if(
+    role === "admin"
+){
+
+    /*
+     * Admin should never be sent to Book Ride.
+     */
+
+    if(!isAdminPage){
+
+        window.location.replace(
+            "../admin/dashboard.html"
+        );
+
+    }
+
+    return;
+
+}
+
+
+/* ========================================================
+   RIDER
+======================================================== */
+
+if(
+    role === "rider"
+){
+
+    const approved =
+        data.approved === true;
+
+
+    const status =
+        String(
+            data.status || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        approved &&
+        status === "active"
+    ){
+
+        if(!isRiderPage){
+
+            window.location.replace(
+                "../rider/home.html"
+            );
+
+        }
+
+    }
+    else{
+
+        /*
+         * Pending rider should not enter
+         * customer Book Ride pages.
+         */
+
+        if(
+            !pathname.endsWith(
+                "/rider/pending.html"
+            )
+        ){
+
+            window.location.replace(
+                "../rider/pending.html"
+            );
+
+        }
+
+    }
+
+    return;
+
+}
+
+
+/* ========================================================
+   CUSTOMER
+======================================================== */
+
+if(
+    role === "customer"
+){
+
+    if(!isCustomerPage){
+
+        window.location.replace(
+            "../customer/home.html"
+        );
+
+    }
+
+    return;
+
+}
+
+
+/* ========================================================
+   UNKNOWN ROLE
+======================================================== */
+
+console.warn(
+    "RiderX: Unknown user role."
+);
+
+}
+
+/* ============================================================
+AUTH STATE GUARD
+============================================================ */
+
+let guardRunning = false;
+
+onAuthStateChanged(
+auth,
+async user => {
+
+    /*
+     * Prevent multiple simultaneous checks.
+     */
+
+    if(guardRunning){
+
+        return;
+
+    }
+
+
+    guardRunning = true;
+
+
+    try{
+
+        /* =================================================
+           NO FIREBASE USER
+        ================================================= */
+
+        if(!user){
+
+            /*
+             * Public page:
+             * stay where the user is.
+             */
+
+            if(
+                isPublicPage()
+            ){
 
                 return;
 
             }
 
 
-            // -----------------------------
-            // USER NOT LOGGED IN
-            // -----------------------------
-
             /*
-             * Only protect Customer and
-             * Rider areas here.
+             * Protected page:
+             * send to login.
+             *
+             * IMPORTANT:
+             * We DO NOT send to customer/home.html.
              */
 
-            if (
-                isCustomerArea ||
-                isRiderArea
-            ) {
+            if(
+                isAdminPage ||
+                isRiderPage ||
+                isCustomerPage
+            ){
+
+                redirectToLogin();
+
+                return;
+
+            }
+
+
+            return;
+
+        }
+
+
+        /* =================================================
+           FIREBASE USER EXISTS
+        ================================================= */
+
+        const data =
+            await getUserProfile(
+                user.uid
+            );
+
+
+        /* =================================================
+           PROFILE MISSING
+        ================================================= */
+
+        if(!data){
+
+            console.warn(
+                "RiderX: Firebase user exists but users profile is missing."
+            );
+
+
+            await signOut(
+                auth
+            );
+
+
+            /*
+             * If already on a public page,
+             * stay there.
+             */
+
+            if(
+                isPublicPage()
+            ){
+
+                return;
+
+            }
+
+
+            redirectToLogin();
+
+            return;
+
+        }
+
+
+        /* =================================================
+           ROLE
+        ================================================= */
+
+        const role =
+            normalizeRole(data);
+
+
+        console.log(
+            "RiderX Auth Guard:",
+            {
+                uid:user.uid,
+                email:user.email,
+                role:role,
+                path:pathname
+            }
+        );
+
+
+        /* =================================================
+           ADMIN PAGE
+        ================================================= */
+
+        if(
+            isAdminPage
+        ){
+
+            if(
+                !checkAdminAccess(
+                    data
+                )
+            ){
 
                 /*
-                 * Calculate correct path to
-                 * auth/login.html.
+                 * DO NOT redirect to Book Ride.
                  *
-                 * Customer/Rider pages are one
-                 * folder below root.
+                 * Sign out first and return to login.
                  */
+
+                await signOut(
+                    auth
+                );
+
 
                 window.location.replace(
                     "../auth/login.html"
                 );
 
+
                 return;
 
             }
 
-        }
-    );
 
-}
-
-
-// =====================================
-// LOGOUT
-// =====================================
-
-export async function logoutUser() {
-
-    try {
-
-        await signOut(
-            auth
-        );
-
-
-        /*
-         * Decide where to return based on
-         * current section.
-         */
-
-        if (isAdminArea) {
-
-            window.location.replace(
-                "../admin/login.html"
-            );
+            /*
+             * Valid admin.
+             * Stay on admin page.
+             */
 
             return;
 
         }
 
 
-        window.location.replace(
-            "../auth/login.html"
-        );
+        /* =================================================
+           RIDER PAGE
+        ================================================= */
 
-    }
+        if(
+            isRiderPage
+        ){
 
-    catch (error) {
-
-        console.error(
-            "RiderX Logout Error:",
-            error
-        );
-
-    }
-
-}
+            const riderAccess =
+                checkRiderAccess(
+                    data
+                );
 
 
-// =====================================
-// OPTIONAL ROLE HELPER
-// =====================================
+            if(
+                riderAccess.allowed
+            ){
 
-export async function getCurrentUserRole() {
+                /*
+                 * Active rider.
+                 * Stay on rider page.
+                 */
 
-    try {
+                return;
 
-        const user =
-            auth.currentUser;
-
-
-        if (!user) {
-
-            return null;
-
-        }
+            }
 
 
-        const snap =
-            await getDoc(
-                doc(
-                    db,
-                    "users",
-                    user.uid
-                )
+            if(
+                riderAccess.reason ===
+                "pending"
+            ){
+
+                /*
+                 * Don't create redirect loop
+                 * on pending.html itself.
+                 */
+
+                if(
+                    !pathname.endsWith(
+                        "/rider/pending.html"
+                    )
+                ){
+
+                    window.location.replace(
+                        "../rider/pending.html"
+                    );
+
+                }
+
+                return;
+
+            }
+
+
+            /*
+             * Account isn't rider.
+             */
+
+            await signOut(
+                auth
             );
 
 
-        if (!snap.exists()) {
+            window.location.replace(
+                "../auth/login.html?role=rider"
+            );
 
-            return null;
+
+            return;
 
         }
 
 
-        const data =
-            snap.data();
+        /* =================================================
+           CUSTOMER PAGE
+        ================================================= */
+
+        if(
+            isCustomerPage
+        ){
+
+            if(
+                checkCustomerAccess(
+                    data
+                )
+            ){
+
+                /*
+                 * Valid customer.
+                 * Stay on customer page.
+                 */
+
+                return;
+
+            }
 
 
-        return String(
-            data.role ||
-            data.userType ||
-            data.type ||
-            ""
-        )
-        .trim()
-        .toLowerCase();
+            /*
+             * Customer page opened by another role.
+             *
+             * DO NOT send to Book Ride.
+             */
+
+            if(
+                role === "admin"
+            ){
+
+                window.location.replace(
+                    "../admin/dashboard.html"
+                );
+
+                return;
+
+            }
+
+
+            if(
+                role === "rider"
+            ){
+
+                const riderAccess =
+                    checkRiderAccess(
+                        data
+                    );
+
+
+                if(
+                    riderAccess.allowed
+                ){
+
+                    window.location.replace(
+                        "../rider/home.html"
+                    );
+
+                }
+                else{
+
+                    window.location.replace(
+                        "../rider/pending.html"
+                    );
+
+                }
+
+                return;
+
+            }
+
+
+            /*
+             * Unknown role.
+             */
+
+            await signOut(
+                auth
+            );
+
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+
+            return;
+
+        }
+
+
+        /* =================================================
+           PUBLIC PAGE + LOGGED-IN USER
+        ================================================= */
+
+        if(
+            isPublicPage()
+        ){
+
+            /*
+             * Do NOT interfere with login/register
+             * pages here.
+             *
+             * Login.js and index.html handle their
+             * own controlled redirects.
+             */
+
+            return;
+
+        }
 
     }
-
-    catch (error) {
+    catch(error){
 
         console.error(
-            "RiderX Role Read Error:",
+            "RiderX Auth Guard Error:",
             error
         );
 
-        return null;
+
+        /*
+         * IMPORTANT:
+         *
+         * Never send the user to Book Ride when
+         * authentication checking fails.
+         */
+
+        if(
+            isAdminPage ||
+            isRiderPage ||
+            isCustomerPage
+        ){
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+        }
+
+    }
+    finally{
+
+        guardRunning =
+            false;
 
     }
 
 }
 
-
-// =====================================
-// RIDERX AUTH READY
-// =====================================
-
-console.log(
-    "RiderX Authentication System Loaded"
 );
 
-if (isAdminArea) {
+/* ============================================================
+LOGOUT
+============================================================ */
 
-    console.log(
-        "RiderX: Admin area detected — common customer/rider redirects disabled."
+async function logoutUser(){
+
+try{
+
+    await signOut(
+        auth
+    );
+
+
+    /*
+     * Logout always goes to public login page.
+     */
+
+    window.location.replace(
+        "../auth/login.html"
     );
 
 }
+catch(error){
+
+    console.error(
+        "RiderX Logout Error:",
+        error
+    );
+
+}
+
+}
+
+/* ============================================================
+EXPORT
+============================================================ */
+
+export {
+getUserProfile,
+normalizeRole,
+checkAdminAccess,
+checkRiderAccess,
+checkCustomerAccess,
+redirectToCorrectArea,
+logoutUser
+};
