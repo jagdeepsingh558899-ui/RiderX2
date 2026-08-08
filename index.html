@@ -32,60 +32,39 @@
 }
 
 body{
-
     background:#000;
-
     color:#fff;
-
     min-height:100vh;
-
     overflow:hidden;
 }
 
 
-/* =========================================================
+/* ==============================
    SPLASH
-========================================================= */
+============================== */
 
 .splash{
-
     position:fixed;
-
     inset:0;
-
     width:100%;
-
     height:100vh;
-
     background:#000;
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
     z-index:9999;
-
-    animation:
-        splashOut .5s ease 1.3s forwards;
+    animation:splashOut .5s ease 1.3s forwards;
 }
 
 .logo-animation{
-
     font-size:45px;
-
     font-weight:900;
-
     letter-spacing:3px;
-
-    animation:
-        logoPulse 1.2s ease;
+    animation:logoPulse 1.2s ease;
 }
 
 .logo-animation span,
 .brand span{
-
     color:#FFD600;
 }
 
@@ -100,6 +79,7 @@ body{
         opacity:1;
         transform:scale(1);
     }
+
 }
 
 @keyframes splashOut{
@@ -109,162 +89,117 @@ body{
         visibility:hidden;
         pointer-events:none;
     }
+
 }
 
 
-/* =========================================================
+/* ==============================
    MAIN
-========================================================= */
+============================== */
 
 .main{
-
     min-height:100vh;
-
     display:flex;
-
     flex-direction:column;
-
     align-items:center;
-
     justify-content:center;
-
     padding:25px;
-
     text-align:center;
 }
 
 .brand{
-
     font-size:42px;
-
     font-weight:900;
 }
 
 .tagline{
-
     margin-top:15px;
-
     color:#aaa;
-
     max-width:500px;
-
     line-height:1.5;
 }
 
 
-/* =========================================================
+/* ==============================
    BUTTONS
-========================================================= */
+============================== */
 
 .buttons{
-
     width:100%;
-
     max-width:390px;
-
     margin-top:45px;
 }
 
 .btn{
-
     width:100%;
-
     padding:17px;
-
     margin:10px 0;
-
     border-radius:15px;
-
     font-size:18px;
-
     font-weight:bold;
-
     cursor:pointer;
-
     transition:.2s;
 }
 
 .btn:active{
-
     transform:scale(.98);
 }
 
 .customer{
-
     background:#FFD600;
-
     color:#000;
-
     border:2px solid #FFD600;
 }
 
 .customer:hover{
-
     filter:brightness(1.05);
 }
 
 .rider{
-
     background:#111;
-
     border:2px solid #FFD600;
-
     color:#FFD600;
 }
 
 .rider:hover{
-
     background:#191900;
 }
 
 
-/* =========================================================
+/* ==============================
+   ADMIN LINK
+============================== */
+
+.admin-link{
+    position:fixed;
+    bottom:58px;
+    left:50%;
+    transform:translateX(-50%);
+    color:#555;
+    font-size:11px;
+    text-decoration:none;
+}
+
+.admin-link:hover{
+    color:#FFD600;
+}
+
+
+/* ==============================
    FOOTER
-========================================================= */
+============================== */
 
 .footer{
-
     position:absolute;
-
-    bottom:30px;
-
+    bottom:25px;
     color:#666;
-
     font-size:13px;
 }
 
 
-/* =========================================================
-   SESSION MESSAGE
-========================================================= */
-
-.session-box{
-
-    position:fixed;
-
-    left:50%;
-
-    bottom:75px;
-
-    transform:translateX(-50%);
-
-    background:#111;
-
-    border:1px solid #333;
-
-    border-radius:12px;
-
-    padding:12px 18px;
-
-    color:#aaa;
-
-    font-size:12px;
-
-    display:none;
-
-    z-index:10000;
-}
-
+/* ==============================
+   MOBILE
+============================== */
 
 @media(max-width:420px){
 
@@ -279,6 +214,7 @@ body{
     .tagline{
         font-size:14px;
     }
+
 }
 
 </style>
@@ -289,9 +225,9 @@ body{
 <body>
 
 
-<!-- =======================================================
+<!-- ==============================
      SPLASH
-======================================================== -->
+============================== -->
 
 <div
     id="splash"
@@ -306,12 +242,11 @@ body{
 </div>
 
 
-<!-- =======================================================
+<!-- ==============================
      MAIN
-======================================================== -->
+============================== -->
 
 <div class="main">
-
 
     <div class="brand">
 
@@ -328,7 +263,6 @@ body{
 
 
     <div class="buttons">
-
 
         <button
             id="customerBtn"
@@ -349,11 +283,22 @@ body{
 
         </button>
 
-
     </div>
 
-
 </div>
+
+
+<!-- ==============================
+     ADMIN LOGIN
+============================== -->
+
+<a
+    href="admin/login.html"
+    class="admin-link">
+
+    Admin
+
+</a>
 
 
 <div class="footer">
@@ -363,158 +308,137 @@ body{
 </div>
 
 
-<div
-    id="sessionBox"
-    class="session-box">
+<script>
 
-    Checking session...
+/*
+===========================================================
+RIDERX ROOT PAGE
 
-</div>
+IMPORTANT:
 
+This page NEVER checks Firebase authentication.
 
-<!-- =======================================================
-     FIREBASE SESSION CHECK
-======================================================== -->
+It NEVER redirects to:
 
-<script type="module">
+admin/dashboard.html
+admin/login.html
+customer/home.html
+rider/home.html
 
-import {
-    auth
-} from "./firebase/firebase-config.js";
+The root URL must always remain the RiderX landing page.
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-
-// ==========================================================
-// BUTTONS
-// ==========================================================
-
-const customerBtn =
-    document.getElementById("customerBtn");
-
-const riderBtn =
-    document.getElementById("riderBtn");
+===========================================================
+*/
 
 
-// ==========================================================
-// CUSTOMER
-// ==========================================================
+/* ==============================
+   CUSTOMER
+============================== */
 
-customerBtn.addEventListener(
-    "click",
-    () => {
+document
+    .getElementById("customerBtn")
+    .addEventListener(
+        "click",
+        function(){
 
-        window.location.href =
-            "auth/login.html?role=customer";
-
-    }
-);
-
-
-// ==========================================================
-// RIDER
-// ==========================================================
-
-riderBtn.addEventListener(
-    "click",
-    () => {
-
-        window.location.href =
-            "auth/login.html?role=rider";
-
-    }
-);
-
-
-// ==========================================================
-// IMPORTANT
-//
-// ROOT PAGE DOES NOT REDIRECT LOGGED-IN USERS.
-//
-// This prevents:
-//
-// Rider session
-//      ↓
-// index.html
-//      ↓
-// rider/home.html
-//      ↓
-// book ride page
-//
-// Admin session also remains here until the
-// user intentionally opens the admin login/dashboard.
-//
-// ==========================================================
-
-onAuthStateChanged(
-    auth,
-    (user) => {
-
-        if (user) {
-
-            console.log(
-                "RiderX Firebase session detected:",
-                user.email
-            );
-
-            /*
-             * DO NOT REDIRECT HERE.
-             *
-             * Role-based redirects are handled by
-             * login.js and protected dashboard pages.
-             */
-
-        } else {
-
-            console.log(
-                "RiderX: No active Firebase session."
-            );
-        }
-
-    }
-);
-
-
-// ==========================================================
-// SERVICE WORKER
-// ==========================================================
-
-if ("serviceWorker" in navigator) {
-
-    window.addEventListener(
-        "load",
-        () => {
-
-            navigator.serviceWorker
-                .register("./sw.js")
-                .then(
-                    registration => {
-
-                        console.log(
-                            "RiderX Service Worker registered:",
-                            registration.scope
-                        );
-
-                    }
-                )
-                .catch(
-                    error => {
-
-                        console.warn(
-                            "Service Worker registration failed:",
-                            error
-                        );
-
-                    }
-                );
+            window.location.href =
+                "auth/login.html?role=customer";
 
         }
     );
+
+
+/* ==============================
+   RIDER
+============================== */
+
+document
+    .getElementById("riderBtn")
+    .addEventListener(
+        "click",
+        function(){
+
+            window.location.href =
+                "auth/login.html?role=rider";
+
+        }
+    );
+
+
+/* ==============================
+   SERVICE WORKER CLEANUP
+
+   This removes an old Service Worker
+   that may be incorrectly serving the
+   Admin Dashboard for the "/" URL.
+============================== */
+
+if("serviceWorker" in navigator){
+
+    window.addEventListener(
+        "load",
+        async function(){
+
+            try{
+
+                const registrations =
+                    await navigator
+                        .serviceWorker
+                        .getRegistrations();
+
+                for(
+                    const registration
+                    of registrations
+                ){
+
+                    await registration.unregister();
+
+                    console.log(
+                        "Old RiderX Service Worker removed."
+                    );
+
+                }
+
+
+                if("caches" in window){
+
+                    const cacheNames =
+                        await caches.keys();
+
+                    for(
+                        const cacheName
+                        of cacheNames
+                    ){
+
+                        await caches.delete(
+                            cacheName
+                        );
+
+                    }
+
+                    console.log(
+                        "Old RiderX caches cleared."
+                    );
+
+                }
+
+            }
+            catch(error){
+
+                console.warn(
+                    "Cache cleanup failed:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
 }
 
 </script>
+
 
 </body>
 
