@@ -1,31 +1,1141 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"><title>RiderX Admin Dashboard</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
-:root{--y:#ffe500;--b:#050505;--p:#111;--c:#191919;--bd:#2b2b2b;--m:#999;--g:#20d36b;--r:#ff4d4d}*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}body{background:var(--b);color:#fff;min-height:100vh}.header{height:68px;background:#111;border-bottom:1px solid #252525;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:10}.logo{font-size:25px;font-weight:900}.logo span{color:var(--y)}.right{display:flex;gap:9px;align-items:center}.badge{font-size:11px;color:var(--y);border:1px solid #333;background:#1c1c1c;padding:7px 10px;border-radius:20px}.ib{width:40px;height:40px;border-radius:50%;border:1px solid #333;background:#191919;color:#fff;cursor:pointer}.ib:hover{border-color:var(--y);color:var(--y)}main{max-width:1250px;margin:auto;padding:20px}.heading{font-size:28px;font-weight:800}.sub{font-size:13px;color:var(--m);margin:5px 0 18px}.status{background:#101010;border:1px solid #292929;border-radius:13px;padding:11px 13px;display:flex;gap:9px;align-items:center;margin-bottom:18px;font-size:13px}.dot{width:8px;height:8px;border-radius:50%;background:var(--y)}.success .dot{background:var(--g)}.errorS .dot{background:var(--r)}.error{display:none;background:#230d0d;border:1px solid #6b2525;color:#ff8a8a;border-radius:12px;padding:13px;margin-bottom:18px;font-size:13px;line-height:1.5}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.card{background:var(--c);border:1px solid var(--bd);border-radius:17px;padding:16px;min-height:120px;position:relative}.card:after{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;background:var(--y);border-radius:0 0 17px 17px}.card i{font-size:21px;color:var(--y)}.num{font-size:27px;font-weight:800;margin-top:12px}.title{font-size:12px;color:var(--m);margin-top:4px}.section{margin-top:28px}.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.st{font-size:19px;font-weight:800}.refresh{background:#151515;border:1px solid #333;color:#ddd;padding:8px 11px;border-radius:9px;cursor:pointer}.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.menu button{background:#111;color:#fff;border:1px solid #303030;border-radius:13px;padding:15px;text-align:left;cursor:pointer}.menu button:hover{border-color:var(--y);background:#171717}.menu i{width:25px;color:var(--y);margin-right:8px}.table{overflow:auto;background:#171717;border:1px solid #292929;border-radius:15px}table{width:100%;min-width:650px;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid #292929;text-align:left;font-size:12px}th{background:#242424;color:var(--y)}td:last-child,th:last-child{text-align:left}.empty{text-align:center;color:#888;padding:22px}.pill{padding:5px 8px;border-radius:20px;background:#292929;font-size:10px;font-weight:700}.pill.c{background:#103a25;color:#62e99b}.pill.a{background:#3d3500;color:var(--y)}.pill.x{background:#3b1515;color:#ff7d7d}.footer{text-align:center;color:#555;font-size:11px;padding:28px}.loading{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:50}.box{background:#171717;border:1px solid #333;border-radius:17px;padding:25px;width:220px;text-align:center}.spin{width:38px;height:38px;border:3px solid #333;border-top-color:var(--y);border-radius:50%;animation:s .8s linear infinite;margin:auto auto 13px}@keyframes s{to{transform:rotate(360deg)}}@media(max-width:950px){.stats{grid-template-columns:repeat(3,1fr)}.menu{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.container{padding:14px}.badge{display:none}.stats{grid-template-columns:repeat(2,1fr);gap:10px}.card{min-height:105px;padding:14px}.num{font-size:23px}.menu{grid-template-columns:1fr}.heading{font-size:25px}}
-</style></head><body>
-<header class="header"><div class="logo">RIDER<span>X</span></div><div class="right"><div class="badge"><i class="fa-solid fa-shield-halved"></i> ADMIN</div><button class="ib" id="refresh" title="Refresh"><i class="fa-solid fa-rotate"></i></button><button class="ib" id="logout" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button></div></header>
-<main><h1 class="heading">Admin Dashboard</h1><p class="sub">RiderX management, rides and live statistics</p><div id="status" class="status"><span class="dot"></span><span id="statusText">Checking admin access...</span></div><div id="error" class="error"></div>
-<section class="stats">
-<div class="card"><i class="fa-solid fa-users"></i><div class="num" id="customers">0</div><div class="title">Customers</div></div><div class="card"><i class="fa-solid fa-motorcycle"></i><div class="num" id="riders">0</div><div class="title">Riders</div></div><div class="card"><i class="fa-solid fa-clock"></i><div class="num" id="pending">0</div><div class="title">Pending Riders</div></div><div class="card"><i class="fa-solid fa-signal"></i><div class="num" id="online">0</div><div class="title">Online Riders</div></div><div class="card"><i class="fa-solid fa-route"></i><div class="num" id="rides">0</div><div class="title">Total Rides</div></div><div class="card"><i class="fa-solid fa-spinner"></i><div class="num" id="active">0</div><div class="title">Active Rides</div></div><div class="card"><i class="fa-solid fa-circle-check"></i><div class="num" id="completed">0</div><div class="title">Completed</div></div><div class="card"><i class="fa-solid fa-xmark"></i><div class="num" id="cancelled">0</div><div class="title">Cancelled</div></div><div class="card"><i class="fa-solid fa-indian-rupee-sign"></i><div class="num" id="revenue">₹0</div><div class="title">Revenue</div></div><div class="card"><i class="fa-solid fa-calendar-day"></i><div class="num" id="today">₹0</div><div class="title">Today Revenue</div></div><div class="card"><i class="fa-solid fa-percent"></i><div class="num" id="commission">₹0</div><div class="title">Admin Commission</div></div><div class="card"><i class="fa-solid fa-wallet"></i><div class="num" id="earn">₹0</div><div class="title">Rider Earnings</div></div>
-</section>
-<section class="section"><div class="sh"><div class="st">Management</div><button class="refresh" id="refresh2"><i class="fa-solid fa-rotate"></i> Refresh</button></div><div class="menu"><button data-p="riders.html"><i class="fa-solid fa-motorcycle"></i>Manage Riders</button><button data-p="customers.html"><i class="fa-solid fa-users"></i>Manage Customers</button><button data-p="rides.html"><i class="fa-solid fa-route"></i>Manage Rides</button><button data-p="fare-settings.html"><i class="fa-solid fa-money-bill"></i>Fare Settings</button><button data-p="commission.html"><i class="fa-solid fa-percent"></i>Commission Settings</button><button data-p="settings.html"><i class="fa-solid fa-gear"></i>App Settings</button><button data-p="supports.html"><i class="fa-solid fa-headset"></i>Support</button></div></section>
-<section class="section"><div class="st" style="margin-bottom:12px">Recent Transactions</div><div class="table"><table><thead><tr><th>Ride ID</th><th>Service</th><th>Fare</th><th>Status</th><th>Date</th></tr></thead><tbody id="recent"><tr><td colspan="5" class="empty">Loading system data...</td></tr></tbody></table></div></section><div class="footer">RiderX Admin Panel</div></main>
-<div id="loading" class="loading"><div class="box"><div class="spin"></div><p id="loadingText">Loading...</p></div></div>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>RiderX Admin Dashboard</title>
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+
+:root{
+    --yellow:#FFE500;
+    --black:#050505;
+    --card:#111;
+    --border:#292929;
+    --gray:#999;
+    --green:#19d36b;
+    --red:#ff4444;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:var(--black);
+    color:white;
+    min-height:100vh;
+    padding-bottom:50px;
+}
+
+/* HEADER */
+
+.header{
+    height:70px;
+    background:#111;
+    border-bottom:1px solid #222;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 20px;
+
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:900;
+}
+
+.logo span{
+    color:var(--yellow);
+}
+
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.admin-badge{
+    font-size:12px;
+    background:#1c1c1c;
+    border:1px solid #333;
+    padding:7px 10px;
+    border-radius:20px;
+    color:var(--yellow);
+}
+
+.logout{
+    font-size:22px;
+    color:var(--red);
+    cursor:pointer;
+}
+
+/* CONTAINER */
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+.welcome{
+    font-size:28px;
+    font-weight:bold;
+    margin-bottom:6px;
+}
+
+.subtitle{
+    color:var(--gray);
+    font-size:14px;
+    margin-bottom:20px;
+}
+
+/* STATUS */
+
+.status{
+    background:#101010;
+    border:1px solid #252525;
+    border-radius:14px;
+    padding:12px 15px;
+    margin-bottom:20px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.status-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--yellow);
+}
+
+.status.success .status-dot{
+    background:var(--green);
+}
+
+.status.error .status-dot{
+    background:var(--red);
+}
+
+.status-text{
+    color:#ccc;
+}
+
+/* ERROR */
+
+.error{
+    display:none;
+    background:#210d0d;
+    border:1px solid #662222;
+    color:#ff7777;
+    padding:14px;
+    border-radius:12px;
+    margin-bottom:18px;
+    font-size:14px;
+    line-height:1.5;
+}
+
+/* STATISTICS */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+}
+
+.card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:18px;
+    min-height:125px;
+}
+
+.card i{
+    font-size:24px;
+    color:var(--yellow);
+}
+
+.number{
+    font-size:29px;
+    font-weight:bold;
+    margin-top:12px;
+}
+
+.title{
+    font-size:13px;
+    color:var(--gray);
+    margin-top:5px;
+}
+
+/* MANAGEMENT */
+
+.menu{
+    margin-top:30px;
+}
+
+.menu-title{
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:12px;
+}
+
+.menu-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.menu button{
+    width:100%;
+    padding:17px;
+
+    background:#111;
+    border:1px solid #333;
+    border-radius:15px;
+
+    color:white;
+    font-size:16px;
+    text-align:left;
+
+    cursor:pointer;
+}
+
+.menu button:hover{
+    border-color:var(--yellow);
+}
+
+.menu i{
+    width:35px;
+    color:var(--yellow);
+}
+
+/* FOOTER */
+
+.footer{
+    text-align:center;
+    color:#666;
+    font-size:12px;
+    margin-top:35px;
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:600px){
+
+    .header{
+        padding:0 15px;
+    }
+
+    .logo{
+        font-size:24px;
+    }
+
+    .admin-badge{
+        display:none;
+    }
+
+    .container{
+        padding:15px;
+    }
+
+    .welcome{
+        font-size:25px;
+    }
+
+    .grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:10px;
+    }
+
+    .card{
+        padding:15px;
+        min-height:110px;
+    }
+
+    .number{
+        font-size:23px;
+    }
+
+    .menu-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header class="header">
+
+    <div class="logo">
+        RID<span>ERX</span>
+    </div>
+
+    <div class="header-right">
+
+        <div class="admin-badge">
+            <i class="fa-solid fa-shield-halved"></i>
+            ADMIN
+        </div>
+
+        <i
+            id="logoutBtn"
+            class="fa-solid fa-right-from-bracket logout"
+            title="Logout">
+        </i>
+
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <div class="welcome">
+        Admin Dashboard
+    </div>
+
+    <div class="subtitle">
+        RiderX management & statistics
+    </div>
+
+
+    <!-- STATUS -->
+
+    <div id="statusBox" class="status">
+
+        <div class="status-dot"></div>
+
+        <div id="statusText" class="status-text">
+            Checking admin access...
+        </div>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    <div id="errorBox" class="error"></div>
+
+
+    <!-- STATISTICS -->
+
+    <div class="grid">
+
+        <div class="card">
+            <i class="fa-solid fa-users"></i>
+            <div id="customers" class="number">0</div>
+            <div class="title">Customers</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-motorcycle"></i>
+            <div id="riders" class="number">0</div>
+            <div class="title">Riders</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-clock"></i>
+            <div id="pending" class="number">0</div>
+            <div class="title">Pending Riders</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-signal"></i>
+            <div id="online" class="number">0</div>
+            <div class="title">Online Riders</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-route"></i>
+            <div id="rides" class="number">0</div>
+            <div class="title">Total Rides</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-spinner"></i>
+            <div id="active" class="number">0</div>
+            <div class="title">Active Rides</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-circle-check"></i>
+            <div id="completed" class="number">0</div>
+            <div class="title">Completed</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-xmark"></i>
+            <div id="cancelled" class="number">0</div>
+            <div class="title">Cancelled</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+            <div id="revenue" class="number">₹0</div>
+            <div class="title">Revenue</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-calendar-day"></i>
+            <div id="todayRevenue" class="number">₹0</div>
+            <div class="title">Today Revenue</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-percent"></i>
+            <div id="commission" class="number">₹0</div>
+            <div class="title">Admin Commission</div>
+        </div>
+
+        <div class="card">
+            <i class="fa-solid fa-wallet"></i>
+            <div id="riderEarn" class="number">₹0</div>
+            <div class="title">Rider Earnings</div>
+        </div>
+
+    </div>
+
+
+    <!-- MANAGEMENT -->
+
+    <div class="menu">
+
+        <div class="menu-title">
+            Management
+        </div>
+
+        <div class="menu-grid">
+
+            <button onclick="openPage('riders.html')">
+                <i class="fa-solid fa-motorcycle"></i>
+                Manage Riders
+            </button>
+
+            <button onclick="openPage('customers.html')">
+                <i class="fa-solid fa-users"></i>
+                Manage Customers
+            </button>
+
+            <button onclick="openPage('rides.html')">
+                <i class="fa-solid fa-route"></i>
+                Manage Rides
+            </button>
+
+            <button onclick="openPage('fare-settings.html')">
+                <i class="fa-solid fa-money-bill"></i>
+                Fare Settings
+            </button>
+
+            <button onclick="openPage('commission.html')">
+                <i class="fa-solid fa-percent"></i>
+                Commission Settings
+            </button>
+
+            <button onclick="openPage('settings.html')">
+                <i class="fa-solid fa-gear"></i>
+                App Settings
+            </button>
+
+            <button onclick="openPage('rider-approval.html')">
+                <i class="fa-solid fa-user-check"></i>
+                Rider Approval
+            </button>
+
+            <button onclick="openPage('supports.html')">
+                <i class="fa-solid fa-headset"></i>
+                Support
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+        RiderX Admin Panel
+    </div>
+
+</div>
+
+
 <script type="module">
-import {auth,db} from "../firebase/firebase-config.js";
-import {onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import {collection,getDocs,doc,getDoc} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-const $=x=>document.getElementById(x);let verified=false;
-const active=["accepted","ongoing","started","arriving","in_progress","in-progress","active","driver_assigned"],done=["completed","complete","finished","success"],cancel=["cancelled","canceled","rejected"];
-function status(t,c=""){ $("statusText").textContent=t;$("status").className="status "+(c?"success":"");if(c==="error")$("status").className="status errorS" }
-function err(t){$("error").textContent=t;$("error").style.display="block"}function noerr(){$("error").style.display="none"}function money(v){return "₹"+(Number(v)||0).toLocaleString("en-IN")}
-function role(d){return String(d?.role??d?.userType??d?.type??"").toLowerCase().trim()}function admin(d){return role(d)==="admin"||role(d)==="administrator"||d?.isAdmin===true}function rs(d){return String(d?.status??d?.rideStatus??d?.bookingStatus??"").toLowerCase().trim()}function amt(d){return Number(d?.fare??d?.amount??d?.price??d?.totalFare??d?.totalAmount??0)||0}
-function date(v){try{if(!v)return null;if(typeof v.toDate==="function")return v.toDate();if(typeof v==="object"&&typeof v.seconds==="number")return new Date(v.seconds*1000);let d=new Date(v);return isNaN(d)?null:d}catch(e){return null}}
-function rd(d){return date(d?.createdAt??d?.timestamp??d?.date??d?.createdDate??d?.updatedAt)}function today(d){let x=rd(d),n=new Date();return x&&x.getFullYear()===n.getFullYear()&&x.getMonth()===n.getMonth()&&x.getDate()===n.getDate()}
-async function col(n){try{let s=await getDocs(collection(db,n));return s.docs.map(x=>({id:x.id,...x.data()}))}catch(e){console.warn(n,e);return[]}}
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
-function recent(a){let b=$("recent");b.innerHTML="";if(!a.length){b.innerHTML='<tr><td colspan="5" class="empty">No rides found.</td></tr>';return}a.sort((x,y)=>(rd(y)?.getTime()||0)-(rd(x)?.getTime()||0)).slice(0,10).forEach(r=>{let s=rs(r)||"pending",cl=done.includes(s)?"c":active.includes(s)?"a":cancel.includes(s)?"x":"";let d=rd(r);b.innerHTML+=`<tr><td>${esc(r.rideId??r.bookingId??r.id??"-")}</td><td>${esc(r.service??r.serviceType??r.vehicleType??"Ride")}</td><td>${money(amt(r))}</td><td><span class="pill ${cl}">${esc(s)}</span></td><td>${d?esc(d.toLocaleDateString("en-IN")):"-"}</td></tr>`})}
-async function stats(){ $("loading").style.display="flex";noerr();let [u,r,rides]=await Promise.all([col("users"),col("riders"),col("rides")]);let c=0,rr=0,p=0,o=0;u.forEach(x=>{let q=role(x);if(q==="customer"||q==="user")c++;if(q==="rider"){rr++;let s=String(x.status??x.riderStatus??"").toLowerCase();if(["pending","pending_approval","pending-approval"].includes(s))p++;if(x.online===true||x.isOnline===true||s==="online")o++}});if(r.length){rr=r.length;p=r.filter(x=>["pending","pending_approval","pending-approval"].includes(String(x.status??x.approvalStatus??x.riderStatus??"").toLowerCase())).length;o=r.filter(x=>x.online===true||x.isOnline===true||String(x.status??"").toLowerCase()==="online").length}let ac=0,co=0,ca=0,rev=0,tr=0;rides.forEach(x=>{let s=rs(x),m=amt(x);if(active.includes(s))ac++;if(done.includes(s)){co++;rev+=m;if(today(x))tr+=m}if(cancel.includes(s))ca++});$("customers").textContent=c;$("riders").textContent=rr;$("pending").textContent=p;$("online").textContent=o;$("rides").textContent=rides.length;$("active").textContent=ac;$("completed").textContent=co;$("cancelled").textContent=ca;$("revenue").textContent=money(rev);$("today").textContent=money(tr);let cm=rev*.2;$("commission").textContent=money(cm);$("earn").textContent=money(rev-cm);recent( rides );$("loading").style.display="none"}
-async function verify(u){status("Verifying admin account...");try{let s=await getDoc(doc(db,"users",u.uid));if(!s.exists()){status("Admin profile not found.","error");err("users/"+u.uid+" document nahi mila. Firestore users collection me is account ka document aur role = admin hona chahiye.");return}if(!admin(s.data())){status("Access denied.","error");err("Access denied. Is account ke users document me role exactly admin hona chahiye.");try{await signOut(auth)}catch(e){}setTimeout(()=>location.replace("login.html"),1200);return}verified=true;status("Admin verified • Dashboard ready",true);await stats()}catch(e){console.error(e);status("Admin verification failed.","error");err("Firebase se admin verify nahi ho pa raha. firebase-config.js aur Firestore rules check karein.");$("loading").style.display="none"}}
-onAuthStateChanged(auth,u=>{if(!u){status("Admin login required.","error");setTimeout(()=>location.replace("login.html"),500)}else verify(u)});
-$("refresh").onclick=()=>verified&&stats();$("refresh2").onclick=()=>verified&&stats();$("logout").onclick=async()=>{if(confirm("Are you sure you want to logout?")){try{await signOut(auth);location.replace("login.html")}catch(e){alert("Logout failed. Please try again.")}}};document.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>location.href=b.dataset.p);
-</script></body></html>
+
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
+
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+import {
+    collection,
+    getDocs,
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+const statusBox =
+    document.getElementById("statusBox");
+
+const statusText =
+    document.getElementById("statusText");
+
+const errorBox =
+    document.getElementById("errorBox");
+
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+
+const customersEl =
+    document.getElementById("customers");
+
+const ridersEl =
+    document.getElementById("riders");
+
+const pendingEl =
+    document.getElementById("pending");
+
+const onlineEl =
+    document.getElementById("online");
+
+const ridesEl =
+    document.getElementById("rides");
+
+const activeEl =
+    document.getElementById("active");
+
+const completedEl =
+    document.getElementById("completed");
+
+const cancelledEl =
+    document.getElementById("cancelled");
+
+const revenueEl =
+    document.getElementById("revenue");
+
+const todayRevenueEl =
+    document.getElementById("todayRevenue");
+
+const commissionEl =
+    document.getElementById("commission");
+
+const riderEarnEl =
+    document.getElementById("riderEarn");
+
+
+function setStatus(text,type=""){
+
+    statusText.textContent = text;
+
+    statusBox.className =
+        "status " + type;
+}
+
+
+function showError(text){
+
+    errorBox.style.display = "block";
+
+    errorBox.textContent = text;
+}
+
+
+function hideError(){
+
+    errorBox.style.display = "none";
+}
+
+
+function money(value){
+
+    return "₹" +
+        (Number(value) || 0)
+        .toLocaleString("en-IN");
+}
+
+
+function roleOf(data){
+
+    return String(
+        data?.role ??
+        data?.userType ??
+        data?.type ??
+        ""
+    ).trim().toLowerCase();
+}
+
+
+function isAdmin(data){
+
+    return (
+        roleOf(data) === "admin" ||
+        roleOf(data) === "administrator" ||
+        data?.isAdmin === true
+    );
+}
+
+
+function statusOf(data){
+
+    return String(
+        data?.status ??
+        data?.rideStatus ??
+        ""
+    ).trim().toLowerCase();
+}
+
+
+function amountOf(data){
+
+    return Number(
+        data?.fare ??
+        data?.amount ??
+        data?.price ??
+        data?.totalFare ??
+        data?.totalAmount ??
+        0
+    ) || 0;
+}
+
+
+function convertDate(value){
+
+    if(!value){
+        return null;
+    }
+
+    try{
+
+        if(
+            typeof value === "object" &&
+            typeof value.toDate === "function"
+        ){
+
+            return value.toDate();
+        }
+
+        if(
+            typeof value === "object" &&
+            typeof value.seconds === "number"
+        ){
+
+            return new Date(
+                value.seconds * 1000
+            );
+        }
+
+        const date = new Date(value);
+
+        if(Number.isNaN(date.getTime())){
+            return null;
+        }
+
+        return date;
+
+    }catch(error){
+
+        return null;
+    }
+}
+
+
+function isToday(data){
+
+    const value =
+        data?.createdAt ??
+        data?.timestamp ??
+        data?.date ??
+        data?.createdDate ??
+        null;
+
+    const date =
+        convertDate(value);
+
+    if(!date){
+        return false;
+    }
+
+    const now =
+        new Date();
+
+    return (
+        date.getDate() === now.getDate() &&
+        date.getMonth() === now.getMonth() &&
+        date.getFullYear() === now.getFullYear()
+    );
+}
+
+
+async function safeCollection(name){
+
+    try{
+
+        const snapshot =
+            await getDocs(
+                collection(db,name)
+            );
+
+        return snapshot.docs.map(
+            item => ({
+                id:item.id,
+                ...item.data()
+            })
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Collection error:",
+            name,
+            error
+        );
+
+        return [];
+    }
+}
+
+
+async function loadStatistics(){
+
+    const users =
+        await safeCollection("users");
+
+    const ridersData =
+        await safeCollection("riders");
+
+    const rides =
+        await safeCollection("rides");
+
+
+    let customers = 0;
+    let riders = 0;
+    let pending = 0;
+    let online = 0;
+
+
+    users.forEach(user => {
+
+        const role =
+            roleOf(user);
+
+        if(
+            role === "customer" ||
+            role === "user"
+        ){
+
+            customers++;
+        }
+
+        if(role === "rider"){
+
+            riders++;
+
+            const status =
+                String(
+                    user.status ??
+                    user.riderStatus ??
+                    ""
+                ).toLowerCase();
+
+            if(
+                status === "pending" ||
+                status === "pending_approval" ||
+                status === "pending-approval"
+            ){
+
+                pending++;
+            }
+
+            if(
+                user.online === true ||
+                user.isOnline === true ||
+                status === "online"
+            ){
+
+                online++;
+            }
+        }
+
+    });
+
+
+    if(ridersData.length > 0){
+
+        riders =
+            ridersData.length;
+
+        pending =
+            ridersData.filter(rider => {
+
+                const status =
+                    String(
+                        rider.status ??
+                        rider.approvalStatus ??
+                        ""
+                    ).toLowerCase();
+
+                return (
+                    status === "pending" ||
+                    status === "pending_approval" ||
+                    status === "pending-approval"
+                );
+
+            }).length;
+
+
+        online =
+            ridersData.filter(rider => {
+
+                const status =
+                    String(
+                        rider.status ?? ""
+                    ).toLowerCase();
+
+                return (
+                    rider.online === true ||
+                    rider.isOnline === true ||
+                    status === "online"
+                );
+
+            }).length;
+
+    }
+
+
+    let active = 0;
+    let completed = 0;
+    let cancelled = 0;
+    let revenue = 0;
+    let todayRevenue = 0;
+
+
+    rides.forEach(ride => {
+
+        const status =
+            statusOf(ride);
+
+        const amount =
+            amountOf(ride);
+
+
+        if([
+            "accepted",
+            "ongoing",
+            "started",
+            "arriving",
+            "in_progress",
+            "in-progress",
+            "active"
+        ].includes(status)){
+
+            active++;
+        }
+
+
+        if([
+            "completed",
+            "complete",
+            "finished",
+            "success"
+        ].includes(status)){
+
+            completed++;
+
+            revenue += amount;
+
+            if(isToday(ride)){
+
+                todayRevenue += amount;
+            }
+        }
+
+
+        if([
+            "cancelled",
+            "canceled",
+            "rejected"
+        ].includes(status)){
+
+            cancelled++;
+        }
+
+    });
+
+
+    customersEl.textContent =
+        customers.toLocaleString("en-IN");
+
+    ridersEl.textContent =
+        riders.toLocaleString("en-IN");
+
+    pendingEl.textContent =
+        pending.toLocaleString("en-IN");
+
+    onlineEl.textContent =
+        online.toLocaleString("en-IN");
+
+    ridesEl.textContent =
+        rides.length.toLocaleString("en-IN");
+
+    activeEl.textContent =
+        active.toLocaleString("en-IN");
+
+    completedEl.textContent =
+        completed.toLocaleString("en-IN");
+
+    cancelledEl.textContent =
+        cancelled.toLocaleString("en-IN");
+
+    revenueEl.textContent =
+        money(revenue);
+
+    todayRevenueEl.textContent =
+        money(todayRevenue);
+
+
+    const commissionRate = 20;
+
+    const adminCommission =
+        revenue * commissionRate / 100;
+
+    const riderEarnings =
+        revenue - adminCommission;
+
+    commissionEl.textContent =
+        money(adminCommission);
+
+    riderEarnEl.textContent =
+        money(riderEarnings);
+
+}
+
+
+let authCheckFinished = false;
+
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(authCheckFinished){
+            return;
+        }
+
+
+        if(!user){
+
+            authCheckFinished = true;
+
+            setStatus(
+                "Admin login required.",
+                "error"
+            );
+
+            setTimeout(() => {
+
+                window.location.replace(
+                    "login.html"
+                );
+
+            },500);
+
+            return;
+        }
+
+
+        setStatus(
+            "Verifying admin account..."
+        );
+
+
+        try{
+
+            const adminRef =
+                doc(
+                    db,
+                    "users",
+                    user.uid
+                );
+
+            const adminSnap =
+                await getDoc(adminRef);
+
+
+            if(!adminSnap.exists()){
+
+                authCheckFinished = true;
+
+                setStatus(
+                    "Admin profile not found.",
+                    "error"
+                );
+
+                showError(
+                    "Firebase users collection me is account ke UID ka document nahi mila."
+                );
+
+                return;
+            }
+
+
+            const adminData =
+                adminSnap.data();
+
+
+            if(!isAdmin(adminData)){
+
+                authCheckFinished = true;
+
+                setStatus(
+                    "Access denied.",
+                    "error"
+                );
+
+                showError(
+                    "Is account ke users document me role = admin hona chahiye."
+                );
+
+                await signOut(auth);
+
+                setTimeout(() => {
+
+                    window.location.replace(
+                        "login.html"
+                    );
+
+                },1500);
+
+                return;
+            }
+
+
+            authCheckFinished = true;
+
+            setStatus(
+                "Admin verified • Dashboard ready",
+                "success"
+            );
+
+            hideError();
+
+
+            try{
+
+                await loadStatistics();
+
+            }catch(error){
+
+                console.error(error);
+
+                showError(
+                    "Dashboard open ho gaya hai, lekin Firebase statistics load nahi ho paayi."
+                );
+            }
+
+
+        }catch(error){
+
+            console.error(
+                "Admin verification error:",
+                error
+            );
+
+            authCheckFinished = true;
+
+            setStatus(
+                "Admin verification failed.",
+                "error"
+            );
+
+            showError(
+                "Firebase admin verification failed. firebase-config.js aur Firestore rules check karein."
+            );
+
+        }
+
+    }
+);
+
+
+window.openPage =
+function(page){
+
+    window.location.href =
+        page;
+
+};
+
+
+logoutBtn.addEventListener(
+    "click",
+    async () => {
+
+        if(
+            !confirm(
+                "Are you sure you want to logout?"
+            )
+        ){
+
+            return;
+        }
+
+        try{
+
+            await signOut(auth);
+
+            window.location.replace(
+                "login.html"
+            );
+
+        }catch(error){
+
+            console.error(error);
+
+            alert(
+                "Logout failed. Please try again."
+            );
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
