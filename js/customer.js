@@ -1,2393 +1,2285 @@
-// ============================================================
-// RiderX Customer Engine
-// FINAL - Uber-style Customer Booking / Ride Tracking
-// Firebase v10 Modular SDK
-// ============================================================
+/* ============================================================
+   RIDERX CUSTOMER CORE CONTROLLER
+   File: js/customer.js
 
-import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
+   Customer-side application controller
+   ============================================================ */
 
-import {
-    collection,
-    addDoc,
-    doc,
-    getDoc,
-    onSnapshot,
-    serverTimestamp,
-    updateDoc
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+(function () {
 
+    "use strict";
 
-// ============================================================
-// GLOBAL STATE
-// ============================================================
+    window.RiderX = window.RiderX || {};
 
-const state = {
+    const RX = window.RiderX;
 
-    map: null,
+    const Customer =
+        RX.customer =
+        RX.customer || {};
 
-    pickupMarker: null,
-    dropMarker: null,
-    routeLayer: null,
 
-    pickupCoords: null,
-    dropCoords: null,
+    /* ========================================================
+       STATE
+       ======================================================== */
 
-    pickupAddress: "",
-    dropAddress: "",
+    Customer.state = {
 
-    selectingMode: "pickup",
+        initialized:
+            false,
 
-    selectedService: "bike",
+        user:
+            null,
 
-    currentUser: null,
+        uid:
+            null,
 
-    currentRideId: null,
+        online:
+            true,
 
-    rideUnsubscribe: null,
+        currentPage:
+            "",
 
-    fareSettings: null,
+        activeRide:
+            null,
 
-    distanceKm: 0,
+        notifications:
+            [],
 
-    durationMinutes: 0,
+        unreadNotifications:
+            0,
 
-    fare: 0,
+        walletBalance:
+            0,
 
-    bookingInProgress: false,
-
-    locationWatchId: null,
-
-    riderMarker: null
-
-};
-
-
-// ============================================================
-// DEFAULT FARE
-// ============================================================
-
-const DEFAULT_FARE = {
-
-    bike: {
-        baseFare: 30,
-        dayRate: 8,
-        extraRate: 9,
-        nightRate: 11
-    },
-
-    cab: {
-        baseFare: 50,
-        dayRate: 12,
-        extraRate: 14,
-        nightRate: 16
-    },
-
-    parcel: {
-        baseFare: 30,
-        dayRate: 8,
-        extraRate: 9,
-        nightRate: 11
-    },
-
-    food: {
-        baseFare: 25,
-        dayRate: 8,
-        extraRate: 9,
-        nightRate: 11
-    }
-
-};
-
-
-// ============================================================
-// DOM HELPER
-// ============================================================
-
-const $ = (id) => document.getElementById(id);
-
-
-// ============================================================
-// STATUS
-// ============================================================
-
-function setStatus(message) {
-
-    const status = $("status");
-
-    if (status) {
-        status.innerText = message;
-    }
-
-
-    const bookingStatus = $("bookingStatus");
-
-    if (bookingStatus) {
-        bookingStatus.innerText = message;
-    }
-
-}
-
-
-// ============================================================
-// AUTH
-// ============================================================
-
-auth.onAuthStateChanged((user) => {
-
-    state.currentUser = user;
-
-
-    const button = $("bookRide");
-
-
-    if (!user) {
-
-        setStatus("Please login first");
-
-        if (button) {
-            button.disabled = true;
-        }
-
-        return;
-
-    }
-
-
-    if (
-        state.pickupCoords &&
-        state.dropCoords
-    ) {
-
-        setStatus(
-            "Pickup & destination selected"
-        );
-
-    } else {
-
-        setStatus(
-            "Select pickup location"
-        );
-
-    }
-
-
-    updateBookButton();
-
-});
-
-
-// ============================================================
-// MAP INIT
-// ============================================================
-
-function initMap() {
-
-    const mapElement = $("map");
-
-    if (!mapElement) {
-        console.error(
-            "RiderX: #map not found"
-        );
-        return;
-    }
-
-
-    if (state.map) {
-        return;
-    }
-
-
-    if (
-        typeof L === "undefined"
-    ) {
-
-        console.error(
-            "Leaflet is not loaded."
-        );
-
-        setStatus(
-            "Map failed to load"
-        );
-
-        return;
-
-    }
-
-
-    state.map =
-        L.map(
-            "map",
-            {
-                zoomControl: true
-            }
-        )
-        .setView(
-            [30.7333, 76.7794],
-            13
-        );
-
-
-    L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            maxZoom: 19,
-            attribution:
-                "&copy; OpenStreetMap contributors"
-        }
-    )
-    .addTo(state.map);
-
-
-    state.map.on(
-        "click",
-        handleMapClick
-    );
-
-
-    setTimeout(
-        () => {
-
-            if (state.map) {
-                state.map.invalidateSize();
-            }
-
-        },
-        500
-    );
-
-
-    setStatus(
-        "Select pickup location"
-    );
-
-}
-
-
-// ============================================================
-// MAP CLICK
-// ============================================================
-
-function handleMapClick(event) {
-
-    if (!event || !event.latlng) {
-        return;
-    }
-
-
-    const lat =
-        Number(
-            event.latlng.lat.toFixed(6)
-        );
-
-
-    const lng =
-        Number(
-            event.latlng.lng.toFixed(6)
-        );
-
-
-    if (
-        state.selectingMode ===
-        "pickup"
-    ) {
-
-        setPickup(
-            lat,
-            lng,
-            `${lat}, ${lng}`
-        );
-
-
-        state.selectingMode =
-            "drop";
-
-
-        setStatus(
-            "Now select destination"
-        );
-
-
-        return;
-
-    }
-
-
-    if (
-        state.selectingMode ===
-        "drop"
-    ) {
-
-        setDrop(
-            lat,
-            lng,
-            `${lat}, ${lng}`
-        );
-
-
-        state.selectingMode =
-            "pickup";
-
-
-        setStatus(
-            "Pickup & destination selected"
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// SET PICKUP
-// ============================================================
-
-function setPickup(
-    lat,
-    lng,
-    address = ""
-) {
-
-    if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
-    ) {
-        return;
-    }
-
-
-    state.pickupCoords = {
-        lat: Number(lat),
-        lng: Number(lng)
+        language:
+            localStorage.getItem(
+                "riderx_language"
+            ) || "en"
     };
 
 
-    state.pickupAddress =
-        String(
-            address ||
-            `${lat}, ${lng}`
-        );
-
-
-    if (
-        state.pickupMarker &&
-        state.map
-    ) {
-
-        state.map.removeLayer(
-            state.pickupMarker
-        );
-
-    }
-
-
-    if (state.map) {
-
-        state.pickupMarker =
-            L.marker(
-                [lat, lng]
-            )
-            .addTo(state.map)
-            .bindPopup(
-                "RiderX Pickup"
-            );
-
-    }
-
-
-    const input =
-        $("pickupLocation");
-
-
-    if (input) {
-
-        input.value =
-            state.pickupAddress;
-
-    }
-
-
-    updateRide();
-
-}
-
-
-// ============================================================
-// SET DROP
-// ============================================================
-
-function setDrop(
-    lat,
-    lng,
-    address = ""
-) {
-
-    if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
-    ) {
-        return;
-    }
-
-
-    state.dropCoords = {
-        lat: Number(lat),
-        lng: Number(lng)
-    };
-
-
-    state.dropAddress =
-        String(
-            address ||
-            `${lat}, ${lng}`
-        );
-
-
-    if (
-        state.dropMarker &&
-        state.map
-    ) {
-
-        state.map.removeLayer(
-            state.dropMarker
-        );
-
-    }
-
-
-    if (state.map) {
-
-        state.dropMarker =
-            L.marker(
-                [lat, lng]
-            )
-            .addTo(state.map)
-            .bindPopup(
-                "RiderX Destination"
-            );
-
-    }
-
-
-    const input =
-        $("dropoffLocation");
-
-
-    if (input) {
-
-        input.value =
-            state.dropAddress;
-
-    }
-
-
-    updateRide();
-
-}
-
-
-// ============================================================
-// CURRENT LOCATION
-// ============================================================
-
-function useCurrentLocation() {
-
-    if (
-        !navigator.geolocation
-    ) {
-
-        setStatus(
-            "Location is not supported"
-        );
-
-        return;
-
-    }
-
-
-    setStatus(
-        "Getting your location..."
-    );
-
-
-    navigator.geolocation.getCurrentPosition(
-
-        (position) => {
-
-            const lat =
-                Number(
-                    position.coords.latitude
-                );
-
-
-            const lng =
-                Number(
-                    position.coords.longitude
-                );
-
-
-            if (state.map) {
-
-                state.map.setView(
-                    [lat, lng],
-                    16
-                );
-
-            }
-
-
-            setPickup(
-                lat,
-                lng,
-                "Current location"
-            );
-
-
-            state.selectingMode =
-                "drop";
-
-
-            setStatus(
-                "Now select destination"
-            );
-
-        },
-
-        (error) => {
-
-            console.error(
-                "RiderX location error:",
-                error
-            );
+    /* ========================================================
+       USER
+       ======================================================== */
+
+    Customer.getUser =
+        function () {
+
+            let user =
+                null;
 
 
             if (
-                error.code ===
-                1
+                RX.auth &&
+                typeof RX.auth.getUser ===
+                "function"
             ) {
 
-                setStatus(
-                    "Location permission denied"
+                try {
+
+                    user =
+                        RX.auth.getUser();
+
+                } catch (error) {
+
+                    console.warn(
+                        "Auth user read failed:",
+                        error
+                    );
+                }
+            }
+
+
+            if (!user) {
+
+                try {
+
+                    user =
+                        JSON.parse(
+                            localStorage.getItem(
+                                "riderx_user"
+                            ) || "null"
+                        );
+
+                } catch (error) {
+
+                    user =
+                        null;
+                }
+            }
+
+
+            Customer.state.user =
+                user;
+
+
+            Customer.state.uid =
+                user?.uid ||
+                user?.id ||
+                user?.userId ||
+                null;
+
+
+            return user;
+        };
+
+
+    Customer.requireLogin =
+        function () {
+
+            const user =
+                Customer.getUser();
+
+
+            if (user) {
+                return true;
+            }
+
+
+            Customer.redirectLogin();
+
+
+            return false;
+        };
+
+
+    Customer.redirectLogin =
+        function () {
+
+            const current =
+                window.location.href;
+
+
+            const loginPages = [
+                "/auth/login.html",
+                "/auth/customer-login.html",
+                "auth/login.html",
+                "auth/customer-login.html"
+            ];
+
+
+            let login =
+                "auth/customer-login.html";
+
+
+            for (
+                const page of
+                loginPages
+            ) {
+
+                if (
+                    window.location.pathname
+                        .includes(
+                            page.replace(
+                                "/",
+                                ""
+                            )
+                        )
+                ) {
+
+                    return;
+                }
+            }
+
+
+            const base =
+                Customer.getBasePath();
+
+
+            login =
+                base +
+                "auth/customer-login.html";
+
+
+            window.location.href =
+                login +
+                "?redirect=" +
+                encodeURIComponent(
+                    current
+                );
+        };
+
+
+    /* ========================================================
+       BASE PATH
+       ======================================================== */
+
+    Customer.getBasePath =
+        function () {
+
+            const path =
+                window.location.pathname;
+
+
+            if (
+                path.includes(
+                    "/customer/"
+                )
+            ) {
+
+                return "../";
+            }
+
+
+            if (
+                path.includes(
+                    "/auth/"
+                )
+            ) {
+
+                return "../";
+            }
+
+
+            if (
+                path.includes(
+                    "/admin/"
+                ) ||
+                path.includes(
+                    "/rider/"
+                )
+            ) {
+
+                return "../";
+            }
+
+
+            return "";
+        };
+
+
+    /* ========================================================
+       NAVIGATION
+       ======================================================== */
+
+    Customer.go =
+        function (
+            page,
+            options
+        ) {
+
+            options =
+                options ||
+                {};
+
+
+            if (!page) {
+                return;
+            }
+
+
+            const base =
+                Customer.getBasePath();
+
+
+            let target =
+                String(
+                    page
+                );
+
+
+            if (
+                !target.includes(
+                    ".html"
+                )
+            ) {
+
+                target +=
+                    ".html";
+            }
+
+
+            if (
+                !target.includes(
+                    "/"
+                )
+            ) {
+
+                target =
+                    base +
+                    "customer/" +
+                    target;
+            }
+
+
+            if (
+                options.params
+            ) {
+
+                const params =
+                    new URLSearchParams(
+                        options.params
+                    );
+
+
+                target +=
+                    "?" +
+                    params.toString();
+            }
+
+
+            if (
+                options.replace
+            ) {
+
+                window.location.replace(
+                    target
                 );
 
             } else {
 
-                setStatus(
-                    "Unable to get your location"
-                );
-
+                window.location.href =
+                    target;
             }
-
-        },
-
-        {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 5000
-        }
-
-    );
-
-}
-
-
-// ============================================================
-// DISTANCE
-// ============================================================
-
-function calculateDistance(
-    lat1,
-    lng1,
-    lat2,
-    lng2
-) {
-
-    const R = 6371;
-
-
-    const dLat =
-        (
-            lat2 -
-            lat1
-        ) *
-        Math.PI /
-        180;
-
-
-    const dLng =
-        (
-            lng2 -
-            lng1
-        ) *
-        Math.PI /
-        180;
-
-
-    const a =
-
-        Math.sin(
-            dLat / 2
-        ) ** 2
-
-        +
-
-        Math.cos(
-            lat1 *
-            Math.PI /
-            180
-        )
-
-        *
-
-        Math.cos(
-            lat2 *
-            Math.PI /
-            180
-        )
-
-        *
-
-        Math.sin(
-            dLng / 2
-        ) ** 2;
-
-
-    const c =
-        2 *
-        Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1 - a)
-        );
-
-
-    return R * c;
-
-}
-
-
-// ============================================================
-// LOAD FARE SETTINGS
-// ============================================================
-
-async function loadFareSettings() {
-
-    try {
-
-        const ref =
-            doc(
-                db,
-                "settings",
-                "fare"
-            );
-
-
-        const snap =
-            await getDoc(ref);
-
-
-        if (
-            snap.exists()
-        ) {
-
-            state.fareSettings =
-                snap.data();
-
-            console.log(
-                "RiderX fare settings:",
-                state.fareSettings
-            );
-
-        } else {
-
-            state.fareSettings =
-                DEFAULT_FARE;
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "RiderX fare settings error:",
-            error
-        );
-
-
-        state.fareSettings =
-            DEFAULT_FARE;
-
-    }
-
-}
-
-
-// ============================================================
-// SERVICE FARE
-// ============================================================
-
-function getServiceFare() {
-
-    const service =
-        state.selectedService;
-
-
-    const defaults =
-        DEFAULT_FARE[
-            service
-        ] ||
-        DEFAULT_FARE.bike;
-
-
-    if (
-        state.fareSettings &&
-        state.fareSettings[service]
-    ) {
-
-        return {
-            ...defaults,
-            ...state.fareSettings[service]
         };
 
-    }
+
+    Customer.back =
+        function () {
+
+            if (
+                window.history.length >
+                1
+            ) {
+
+                window.history.back();
+
+            } else {
+
+                Customer.go(
+                    "home"
+                );
+            }
+        };
 
 
-    return defaults;
+    /* ========================================================
+       PAGE DETECTION
+       ======================================================== */
 
-}
+    Customer.getCurrentPage =
+        function () {
 
-
-// ============================================================
-// CALCULATE FARE
-// ============================================================
-
-function calculateFare() {
-
-    if (
-        !state.pickupCoords ||
-        !state.dropCoords
-    ) {
-
-        state.distanceKm = 0;
-        state.durationMinutes = 0;
-        state.fare = 0;
-
-        updateFareUI();
-
-        return 0;
-
-    }
+            const file =
+                window.location.pathname
+                    .split("/")
+                    .pop()
+                    .toLowerCase();
 
 
-    const distance =
-        calculateDistance(
-
-            state.pickupCoords.lat,
-            state.pickupCoords.lng,
-
-            state.dropCoords.lat,
-            state.dropCoords.lng
-
-        );
-
-
-    state.distanceKm =
-        Number(
-            distance.toFixed(2)
-        );
-
-
-    /*
-     * Approximate ETA.
-     * Actual road ETA/navigation will be
-     * handled by the routing/navigation layer.
-     */
-
-    state.durationMinutes =
-        Math.max(
-            1,
-            Math.round(
-                state.distanceKm * 3
-            )
-        );
-
-
-    const fareSettings =
-        getServiceFare();
-
-
-    const hour =
-        new Date().getHours();
-
-
-    let rate;
-
-
-    if (
-        hour >= 22 ||
-        hour < 6
-    ) {
-
-        rate =
-            Number(
-                fareSettings.nightRate ??
-                11
+            return (
+                file
+                    .replace(
+                        ".html",
+                        ""
+                    ) ||
+                "home"
             );
+        };
 
-    } else {
 
-        rate =
-            Number(
-                fareSettings.dayRate ??
-                8
+    /* ========================================================
+       RIDE
+       ======================================================== */
+
+    Customer.getActiveRide =
+        function () {
+
+            if (
+                RX.customerRide &&
+                typeof RX.customerRide
+                    .getCurrentRide ===
+                "function"
+            ) {
+
+                return RX.customerRide
+                    .getCurrentRide();
+            }
+
+
+            return (
+                Customer.state.activeRide ||
+                null
             );
-
-    }
-
-
-    const extraRate =
-        Number(
-            fareSettings.extraRate ??
-            rate
-        );
+        };
 
 
-    const baseFare =
-        Number(
-            fareSettings.baseFare ??
-            30
-        );
-
-
-    let total =
-        baseFare;
-
-
-    if (
-        state.distanceKm <= 10
-    ) {
-
-        total +=
-            state.distanceKm *
-            rate;
-
-    } else {
-
-        total +=
-            10 *
-            rate;
-
-
-        total +=
-            (
-                state.distanceKm -
-                10
-            ) *
-            extraRate;
-
-    }
-
-
-    state.fare =
-        Math.max(
-            50,
-            Math.round(total)
-        );
-
-
-    updateFareUI();
-
-
-    return state.fare;
-
-}
-
-
-// ============================================================
-// FARE UI
-// ============================================================
-
-function updateFareUI() {
-
-    const fare =
-        $("fare");
-
-
-    if (fare) {
-
-        fare.innerText =
-            "₹" +
-            state.fare;
-
-    }
-
-
-    const distance =
-        $("estimated-distance-display");
-
-
-    if (distance) {
-
-        distance.innerText =
-            state.distanceKm > 0
-
-                ? `${state.distanceKm.toFixed(1)} KM`
-
-                : "0 KM";
-
-    }
-
-
-    const info =
-        $("fareInfo");
-
-
-    if (info) {
-
-        if (
-            state.distanceKm > 0
+    Customer.setActiveRide =
+        function (
+            ride
         ) {
 
-            info.innerText =
-                `${state.selectedService.toUpperCase()} • ${state.distanceKm.toFixed(1)} km`;
-
-        } else {
-
-            info.innerText =
-                "Select pickup & drop";
-
-        }
-
-    }
-
-}
+            Customer.state.activeRide =
+                ride ||
+                null;
 
 
-// ============================================================
-// DRAW ROUTE
-// ============================================================
+            if (ride) {
 
-function drawRoute() {
+                try {
 
-    if (
-        !state.map ||
-        !state.pickupCoords ||
-        !state.dropCoords
-    ) {
+                    localStorage.setItem(
+                        "riderx_active_ride",
+                        JSON.stringify(
+                            ride
+                        )
+                    );
 
-        return;
-
-    }
-
-
-    if (
-        state.routeLayer
-    ) {
-
-        state.map.removeLayer(
-            state.routeLayer
-        );
-
-    }
-
-
-    /*
-     * Temporary straight-line route.
-     *
-     * Later routing engine can replace this
-     * with actual road navigation.
-     */
-
-    state.routeLayer =
-        L.polyline(
-
-            [
-
-                [
-                    state.pickupCoords.lat,
-                    state.pickupCoords.lng
-                ],
-
-                [
-                    state.dropCoords.lat,
-                    state.dropCoords.lng
-                ]
-
-            ],
-
-            {
-                weight: 5
+                } catch (error) {}
             }
 
-        )
-        .addTo(state.map);
+
+            Customer.emit(
+                "active-ride-changed",
+                {
+                    ride:
+                        ride
+                }
+            );
+        };
 
 
-    try {
+    Customer.hasActiveRide =
+        function () {
 
-        state.map.fitBounds(
-            state.routeLayer.getBounds(),
-            {
-                padding: [
-                    80,
-                    120
-                ]
+            const ride =
+                Customer.getActiveRide();
+
+
+            if (!ride) {
+                return false;
             }
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX map bounds error:",
-            error
-        );
-
-    }
-
-}
 
 
-// ============================================================
-// UPDATE RIDE
-// ============================================================
-
-function updateRide() {
-
-    calculateFare();
-
-    drawRoute();
-
-    updateBookButton();
-
-}
+            const status =
+                String(
+                    ride.status ||
+                    ""
+                )
+                .toLowerCase();
 
 
-// ============================================================
-// BOOK BUTTON
-// ============================================================
-
-function updateBookButton() {
-
-    const button =
-        $("bookRide");
-
-
-    if (!button) {
-        return;
-    }
+            return ![
+                "completed",
+                "cancelled",
+                "canceled"
+            ].includes(
+                status
+            );
+        };
 
 
-    if (
-        state.bookingInProgress
-    ) {
+    Customer.openActiveRide =
+        function () {
 
-        button.disabled =
-            true;
-
-        return;
-
-    }
+            const ride =
+                Customer.getActiveRide();
 
 
-    button.disabled =
-        !state.currentUser ||
-        !state.pickupCoords ||
-        !state.dropCoords;
-
-}
+            if (!ride) {
+                return false;
+            }
 
 
-// ============================================================
-// SERVICE SELECTOR
-// ============================================================
+            Customer.go(
+                "tracking",
+                {
+                    params: {
+                        rideId:
+                            ride.id ||
+                            ride.rideId ||
+                            ""
+                    }
+                }
+            );
 
-function setupServices() {
 
-    document
-        .querySelectorAll(".service")
-        .forEach(
-            (service) => {
+            return true;
+        };
 
-                service.addEventListener(
-                    "click",
-                    () => {
 
-                        document
-                            .querySelectorAll(
-                                ".service"
+    /* ========================================================
+       BOOKING
+       ======================================================== */
+
+    Customer.openBooking =
+        function () {
+
+            Customer.go(
+                "booking"
+            );
+        };
+
+
+    Customer.bookRide =
+        function (
+            options
+        ) {
+
+            if (
+                !Customer.requireLogin()
+            ) {
+
+                return Promise.reject(
+                    new Error(
+                        "Please login first."
+                    )
+                );
+            }
+
+
+            if (
+                RX.customerRide &&
+                typeof RX.customerRide
+                    .createBooking ===
+                "function"
+            ) {
+
+                return RX.customerRide
+                    .createBooking(
+                        options
+                    );
+            }
+
+
+            if (
+                RX.booking &&
+                typeof RX.booking
+                    .createRide ===
+                "function"
+            ) {
+
+                return RX.booking
+                    .createRide(
+                        options
+                    );
+            }
+
+
+            return Promise.reject(
+                new Error(
+                    "Booking service is unavailable."
+                )
+            );
+        };
+
+
+    Customer.cancelRide =
+        function (
+            reason
+        ) {
+
+            if (
+                RX.customerRide &&
+                typeof RX.customerRide
+                    .cancelRide ===
+                "function"
+            ) {
+
+                return RX.customerRide
+                    .cancelRide(
+                        reason
+                    );
+            }
+
+
+            return Promise.reject(
+                new Error(
+                    "Ride cancellation service is unavailable."
+                )
+            );
+        };
+
+
+    /* ========================================================
+       LOCATION
+       ======================================================== */
+
+    Customer.getCurrentLocation =
+        function () {
+
+            return new Promise(
+                function (
+                    resolve,
+                    reject
+                ) {
+
+                    if (
+                        !navigator.geolocation
+                    ) {
+
+                        reject(
+                            new Error(
+                                "Location is not supported."
                             )
-                            .forEach(
-                                (item) => {
+                        );
 
-                                    item.classList.remove(
-                                        "active"
-                                    );
-
-                                }
-                            );
+                        return;
+                    }
 
 
-                        service.classList.add(
-                            "active"
+                    navigator
+                        .geolocation
+                        .getCurrentPosition(
+                            function (
+                                position
+                            ) {
+
+                                resolve({
+
+                                    lat:
+                                        position
+                                            .coords
+                                            .latitude,
+
+                                    lng:
+                                        position
+                                            .coords
+                                            .longitude,
+
+                                    accuracy:
+                                        position
+                                            .coords
+                                            .accuracy
+                                });
+                            },
+
+                            function (
+                                error
+                            ) {
+
+                                reject(
+                                    error
+                                );
+                            },
+
+                            {
+                                enableHighAccuracy:
+                                    true,
+
+                                timeout:
+                                    15000,
+
+                                maximumAge:
+                                    10000
+                            }
+                        );
+                }
+            );
+        };
+
+
+    Customer.useCurrentLocation =
+        async function () {
+
+            try {
+
+                const location =
+                    await Customer
+                        .getCurrentLocation();
+
+
+                if (
+                    RX.customerMap &&
+                    typeof RX.customerMap
+                        .setPickupLocation ===
+                    "function"
+                ) {
+
+                    await RX.customerMap
+                        .setPickupLocation(
+                            location
+                        );
+                }
+
+
+                Customer.emit(
+                    "location-selected",
+                    {
+                        location:
+                            location
+                    }
+                );
+
+
+                return location;
+
+            } catch (error) {
+
+                Customer.showError(
+                    "Unable to get your location."
+                );
+
+
+                throw error;
+            }
+        };
+
+
+    /* ========================================================
+       FARE
+       ======================================================== */
+
+    Customer.calculateFare =
+        function (
+            distance,
+            service,
+            options
+        ) {
+
+            if (
+                RX.customerRide &&
+                typeof RX.customerRide
+                    .calculateFare ===
+                "function"
+            ) {
+
+                return RX.customerRide
+                    .calculateFare(
+                        distance,
+                        service,
+                        options
+                    );
+            }
+
+
+            if (
+                RX.fareCalculator &&
+                typeof RX.fareCalculator
+                    .calculate ===
+                "function"
+            ) {
+
+                return RX.fareCalculator
+                    .calculate(
+                        distance,
+                        service,
+                        options
+                    );
+            }
+
+
+            return null;
+        };
+
+
+    /* ========================================================
+       WALLET
+       ======================================================== */
+
+    Customer.getWalletBalance =
+        async function () {
+
+            const uid =
+                Customer.state.uid ||
+                Customer.getUser()?.uid;
+
+
+            if (!uid) {
+                return 0;
+            }
+
+
+            const database =
+                Customer.getDatabase();
+
+
+            if (!database) {
+                return 0;
+            }
+
+
+            try {
+
+                const snapshot =
+                    await database
+                        .ref(
+                            "wallets/" +
+                            uid +
+                            "/balance"
+                        )
+                        .once(
+                            "value"
                         );
 
 
-                        state.selectedService =
-                            String(
-                                service.dataset.service ||
-                                "bike"
-                            )
-                            .trim()
-                            .toLowerCase();
+                const balance =
+                    Number(
+                        snapshot.val()
+                    ) ||
+                    0;
 
 
-                        calculateFare();
+                Customer.state.walletBalance =
+                    balance;
 
-                    }
-                );
 
-            }
-        );
-
-}
-
-
-// ============================================================
-// PICKUP MAP BUTTON
-// ============================================================
-
-function setupPickupButton() {
-
-    const button =
-        $("pickupMapBtn");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            state.selectingMode =
-                "pickup";
-
-
-            setStatus(
-                "Move map and select pickup"
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================================
-// DROP MAP BUTTON
-// ============================================================
-
-function setupDropButton() {
-
-    const button =
-        $("dropMapBtn");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        "click",
-        () => {
-
-            state.selectingMode =
-                "drop";
-
-
-            setStatus(
-                "Move map and select destination"
-            );
-
-        }
-    );
-
-}
-
-
-// ============================================================
-// LOCATION BUTTON
-// ============================================================
-
-function setupLocationButton() {
-
-    const button =
-        $("myLocation");
-
-
-    if (!button) {
-        return;
-    }
-
-
-    button.addEventListener(
-        "click",
-        useCurrentLocation
-    );
-
-}
-
-
-// ============================================================
-// INPUTS
-// ============================================================
-
-function setupInputs() {
-
-    const pickup =
-        $("pickupLocation");
-
-
-    const drop =
-        $("dropoffLocation");
-
-
-    if (pickup) {
-
-        pickup.addEventListener(
-            "focus",
-            () => {
-
-                state.selectingMode =
-                    "pickup";
-
-
-                setStatus(
-                    "Select pickup on map"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (drop) {
-
-        drop.addEventListener(
-            "focus",
-            () => {
-
-                state.selectingMode =
-                    "drop";
-
-
-                setStatus(
-                    "Select destination on map"
-                );
-
-            }
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// RIDE REQUEST SOUND
-// ============================================================
-
-function playRideSound() {
-
-    try {
-
-        const audio =
-            new Audio(
-                "../assets/sounds/ride-request.mp3"
-            );
-
-
-        audio.volume =
-            0.8;
-
-
-        audio.play()
-            .catch(
-                () => {
-                    /*
-                     * Browser may block autoplay.
-                     */
-                }
-            );
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX sound error:",
-            error
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// BOOK RIDE
-// ============================================================
-
-async function bookRide() {
-
-    if (
-        state.bookingInProgress
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !state.currentUser
-    ) {
-
-        window.location.href =
-            "../auth/login.html?role=customer";
-
-
-        return;
-
-    }
-
-
-    if (
-        !state.pickupCoords ||
-        !state.dropCoords
-    ) {
-
-        setStatus(
-            "Please select pickup & destination"
-        );
-
-        return;
-
-    }
-
-
-    const button =
-        $("bookRide");
-
-
-    state.bookingInProgress =
-        true;
-
-
-    if (button) {
-
-        button.disabled =
-            true;
-
-
-        button.innerHTML =
-            '<i class="fa-solid fa-spinner fa-spin"></i> Finding Rider...';
-
-    }
-
-
-    try {
-
-        const fare =
-            calculateFare();
-
-
-        const pickupAddress =
-            $("pickupLocation")?.value ||
-            state.pickupAddress ||
-            "Pickup location";
-
-
-        const dropAddress =
-            $("dropoffLocation")?.value ||
-            state.dropAddress ||
-            "Destination";
-
-
-        const paymentMethod =
-            $("paymentMethod")?.value ||
-            "cash";
-
-
-        const timestamp =
-            serverTimestamp();
-
-
-        const rideData = {
-
-            customerId:
-                state.currentUser.uid,
-
-
-            customerName:
-                state.currentUser.displayName ||
-                state.currentUser.email ||
-                "RiderX Customer",
-
-
-            serviceType:
-                state.selectedService,
-
-
-            service:
-                state.selectedService,
-
-
-            pickup: {
-
-                lat:
-                    state.pickupCoords.lat,
-
-                lng:
-                    state.pickupCoords.lng,
-
-                address:
-                    pickupAddress,
-
-                name:
-                    pickupAddress
-
-            },
-
-
-            drop: {
-
-                lat:
-                    state.dropCoords.lat,
-
-                lng:
-                    state.dropCoords.lng,
-
-                address:
-                    dropAddress,
-
-                name:
-                    dropAddress
-
-            },
-
-
-            distance:
-                Number(
-                    state.distanceKm.toFixed(2)
-                ),
-
-
-            duration:
-                Number(
-                    state.durationMinutes
-                ),
-
-
-            fare:
-                Number(fare),
-
-
-            paymentMethod:
-                String(
-                    paymentMethod
-                )
-                .trim()
-                .toLowerCase(),
-
-
-            status:
-                "REQUESTED",
-
-
-            riderId:
-                null,
-
-
-            driverId:
-                null,
-
-
-            createdAt:
-                timestamp,
-
-
-            requestedAt:
-                timestamp
-
-        };
-
-
-        const rideRef =
-            await addDoc(
-
-                collection(
-                    db,
-                    "rides"
-                ),
-
-                rideData
-
-            );
-
-
-        state.currentRideId =
-            rideRef.id;
-
-
-        window.RiderXCurrentRideId =
-            rideRef.id;
-
-
-        console.log(
-            "RiderX ride created:",
-            rideRef.id
-        );
-
-
-        setStatus(
-            "Searching nearby RiderX riders..."
-        );
-
-
-        playRideSound();
-
-
-        startRideListener(
-            rideRef.id
-        );
-
-
-        window.dispatchEvent(
-
-            new CustomEvent(
-                "riderx:ride-created",
-                {
-                    detail: {
-
-                        rideId:
-                            rideRef.id,
-
-                        ride:
-                            rideData
-
-                    }
-                }
-            )
-
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "RiderX booking error:",
-            error
-        );
-
-
-        state.bookingInProgress =
-            false;
-
-
-        if (
-            error.code ===
-            "permission-denied"
-        ) {
-
-            setStatus(
-                "Booking permission denied. Check Firestore Rules."
-            );
-
-        } else {
-
-            setStatus(
-                "Ride booking failed. Please try again."
-            );
-
-        }
-
-
-        if (button) {
-
-            button.disabled =
-                false;
-
-
-            button.innerHTML =
-                '<i class="fa-solid fa-paper-plane"></i> Book Ride';
-
-        }
-
-    }
-
-}
-
-
-// ============================================================
-// RIDE STATUS LISTENER
-// ============================================================
-
-function startRideListener(
-    rideId
-) {
-
-    if (
-        typeof state.rideUnsubscribe ===
-        "function"
-    ) {
-
-        state.rideUnsubscribe();
-
-        state.rideUnsubscribe =
-            null;
-
-    }
-
-
-    const rideRef =
-        doc(
-            db,
-            "rides",
-            rideId
-        );
-
-
-    state.rideUnsubscribe =
-        onSnapshot(
-
-            rideRef,
-
-            (snapshot) => {
-
-                if (
-                    !snapshot.exists()
-                ) {
-
-                    setStatus(
-                        "Ride request no longer exists"
-                    );
-
-                    return;
-
-                }
-
-
-                const ride =
-                    snapshot.data();
-
-
-                const status =
-                    String(
-                        ride.status ||
-                        "REQUESTED"
-                    )
-                    .trim()
-                    .toUpperCase();
-
-
-                console.log(
-                    "RiderX ride status:",
-                    status
+                Customer.updateWalletUI(
+                    balance
                 );
 
 
-                window.dispatchEvent(
+                return balance;
 
-                    new CustomEvent(
-                        "riderx:ride-status",
-                        {
-                            detail: {
+            } catch (error) {
 
-                                rideId:
-                                    rideId,
-
-                                ride:
-                                    ride,
-
-                                status:
-                                    status
-
-                            }
-                        }
-                    )
-
-                );
-
-
-                // --------------------------------------------
-                // REQUESTED
-                // --------------------------------------------
-
-                if (
-                    status ===
-                    "REQUESTED"
-                ) {
-
-                    setStatus(
-                        "Searching nearby RiderX riders..."
-                    );
-
-                }
-
-
-                // --------------------------------------------
-                // ACCEPTED
-                // --------------------------------------------
-
-                else if (
-                    status ===
-                    "ACCEPTED"
-                ) {
-
-                    setStatus(
-                        "Rider accepted your ride"
-                    );
-
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-accepted",
-                            {
-                                detail: {
-
-                                    rideId:
-                                        rideId,
-
-                                    ride:
-                                        ride
-
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-
-                // --------------------------------------------
-                // ARRIVING
-                // --------------------------------------------
-
-                else if (
-                    status ===
-                    "ARRIVING"
-                ) {
-
-                    setStatus(
-                        "Your RiderX rider is arriving"
-                    );
-
-
-                    updateRiderLocation(
-                        ride
-                    );
-
-                }
-
-
-                // --------------------------------------------
-                // STARTED
-                // --------------------------------------------
-
-                else if (
-                    status ===
-                    "STARTED"
-                ) {
-
-                    setStatus(
-                        "Ride started"
-                    );
-
-
-                    updateRiderLocation(
-                        ride
-                    );
-
-                }
-
-
-                // --------------------------------------------
-                // COMPLETED
-                // --------------------------------------------
-
-                else if (
-                    status ===
-                    "COMPLETED"
-                ) {
-
-                    setStatus(
-                        "Ride completed"
-                    );
-
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-completed",
-                            {
-                                detail: {
-
-                                    rideId:
-                                        rideId,
-
-                                    ride:
-                                        ride
-
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-
-                // --------------------------------------------
-                // CANCELLED
-                // --------------------------------------------
-
-                else if (
-                    status ===
-                    "CANCELLED"
-                ) {
-
-                    setStatus(
-                        "Ride cancelled"
-                    );
-
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-cancelled",
-                            {
-                                detail: {
-
-                                    rideId:
-                                        rideId,
-
-                                    ride:
-                                        ride
-
-                                }
-                            }
-                        )
-
-                    );
-
-                }
-
-            },
-
-            (error) => {
-
-                console.error(
-                    "RiderX ride listener error:",
+                console.warn(
+                    "Wallet balance failed:",
                     error
                 );
 
 
-                setStatus(
-                    "Unable to track ride"
+                return 0;
+            }
+        };
+
+
+    Customer.updateWalletUI =
+        function (
+            balance
+        ) {
+
+            document
+                .querySelectorAll(
+                    "[data-wallet-balance]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            "₹" +
+                            Number(
+                                balance ||
+                                0
+                            )
+                            .toLocaleString(
+                                "en-IN"
+                            );
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       NOTIFICATIONS
+       ======================================================== */
+
+    Customer.getNotifications =
+        async function () {
+
+            const uid =
+                Customer.state.uid ||
+                Customer.getUser()?.uid;
+
+
+            if (!uid) {
+                return [];
+            }
+
+
+            const database =
+                Customer.getDatabase();
+
+
+            if (!database) {
+                return [];
+            }
+
+
+            try {
+
+                const snapshot =
+                    await database
+                        .ref(
+                            "notifications/" +
+                            uid
+                        )
+                        .limitToLast(
+                            100
+                        )
+                        .once(
+                            "value"
+                        );
+
+
+                const data =
+                    snapshot.val() ||
+                    {};
+
+
+                const notifications =
+                    Object.keys(
+                        data
+                    )
+                    .map(
+                        function (
+                            id
+                        ) {
+
+                            return {
+                                id:
+                                    id,
+
+                                ...data[id]
+                            };
+                        }
+                    )
+                    .sort(
+                        function (
+                            a,
+                            b
+                        ) {
+
+                            return (
+                                Number(
+                                    b.createdAt ||
+                                    b.timestamp ||
+                                    0
+                                ) -
+                                Number(
+                                    a.createdAt ||
+                                    a.timestamp ||
+                                    0
+                                )
+                            );
+                        }
+                    );
+
+
+                Customer.state.notifications =
+                    notifications;
+
+
+                Customer.state
+                    .unreadNotifications =
+                    notifications.filter(
+                        function (
+                            item
+                        ) {
+
+                            return (
+                                item.read !==
+                                true
+                            );
+                        }
+                    ).length;
+
+
+                Customer.updateNotificationBadge();
+
+
+                Customer.emit(
+                    "notifications-loaded",
+                    {
+                        notifications:
+                            notifications
+                    }
                 );
 
+
+                return notifications;
+
+            } catch (error) {
+
+                console.warn(
+                    "Notifications failed:",
+                    error
+                );
+
+
+                return [];
             }
+        };
 
-        );
 
-}
+    Customer.updateNotificationBadge =
+        function () {
 
+            const count =
+                Customer.state
+                    .unreadNotifications;
 
-// ============================================================
-// RIDER LIVE LOCATION
-// ============================================================
 
-function updateRiderLocation(
-    ride
-) {
-
-    if (
-        !state.map
-    ) {
-        return;
-    }
-
-
-    const location =
-        ride.riderLocation ||
-        ride.driverLocation ||
-        null;
-
-
-    if (
-        !location ||
-        !Number.isFinite(
-            Number(location.lat)
-        ) ||
-        !Number.isFinite(
-            Number(location.lng)
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    const lat =
-        Number(
-            location.lat
-        );
-
-
-    const lng =
-        Number(
-            location.lng
-        );
-
-
-    if (
-        state.riderMarker
-    ) {
-
-        state.riderMarker.setLatLng(
-            [lat, lng]
-        );
-
-        return;
-
-    }
-
-
-    state.riderMarker =
-        L.marker(
-            [lat, lng]
-        )
-        .addTo(state.map)
-        .bindPopup(
-            "RiderX Rider"
-        );
-
-}
-
-
-// ============================================================
-// CANCEL RIDE
-// ============================================================
-
-async function cancelRide() {
-
-    if (
-        !state.currentRideId
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !state.currentUser
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        await updateDoc(
-
-            doc(
-                db,
-                "rides",
-                state.currentRideId
-            ),
-
-            {
-
-                status:
-                    "CANCELLED",
-
-                cancelledBy:
-                    "customer",
-
-                cancelledAt:
-                    serverTimestamp()
-
-            }
-
-        );
-
-
-        setStatus(
-            "Ride cancelled"
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "RiderX cancel error:",
-            error
-        );
-
-
-        setStatus(
-            "Unable to cancel ride"
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// RESET BOOKING
-// ============================================================
-
-function resetBooking() {
-
-    if (
-        typeof state.rideUnsubscribe ===
-        "function"
-    ) {
-
-        state.rideUnsubscribe();
-
-    }
-
-
-    state.rideUnsubscribe =
-        null;
-
-
-    if (
-        state.locationWatchId !==
-        null
-    ) {
-
-        navigator.geolocation.clearWatch(
-            state.locationWatchId
-        );
-
-        state.locationWatchId =
-            null;
-
-    }
-
-
-    if (
-        state.pickupMarker &&
-        state.map
-    ) {
-
-        state.map.removeLayer(
-            state.pickupMarker
-        );
-
-    }
-
-
-    if (
-        state.dropMarker &&
-        state.map
-    ) {
-
-        state.map.removeLayer(
-            state.dropMarker
-        );
-
-    }
-
-
-    if (
-        state.routeLayer &&
-        state.map
-    ) {
-
-        state.map.removeLayer(
-            state.routeLayer
-        );
-
-    }
-
-
-    if (
-        state.riderMarker &&
-        state.map
-    ) {
-
-        state.map.removeLayer(
-            state.riderMarker
-        );
-
-    }
-
-
-    state.pickupMarker =
-        null;
-
-    state.dropMarker =
-        null;
-
-    state.routeLayer =
-        null;
-
-    state.riderMarker =
-        null;
-
-    state.pickupCoords =
-        null;
-
-    state.dropCoords =
-        null;
-
-    state.pickupAddress =
-        "";
-
-    state.dropAddress =
-        "";
-
-    state.distanceKm =
-        0;
-
-    state.durationMinutes =
-        0;
-
-    state.fare =
-        0;
-
-    state.currentRideId =
-        null;
-
-    state.bookingInProgress =
-        false;
-
-    state.selectingMode =
-        "pickup";
-
-
-    const pickup =
-        $("pickupLocation");
-
-
-    const drop =
-        $("dropoffLocation");
-
-
-    if (pickup) {
-        pickup.value = "";
-    }
-
-
-    if (drop) {
-        drop.value = "";
-    }
-
-
-    updateFareUI();
-
-    updateBookButton();
-
-
-    setStatus(
-        "Select pickup location"
-    );
-
-}
-
-
-// ============================================================
-// GET CURRENT RIDE
-// ============================================================
-
-async function getCurrentRide() {
-
-    if (
-        !state.currentRideId
-    ) {
-
-        return null;
-
-    }
-
-
-    try {
-
-        const snapshot =
-            await getDoc(
-
-                doc(
-                    db,
-                    "rides",
-                    state.currentRideId
+            document
+                .querySelectorAll(
+                    "[data-notification-badge]"
                 )
+                .forEach(
+                    function (
+                        element
+                    ) {
 
+                        element.textContent =
+                            count >
+                            99
+                                ? "99+"
+                                : String(
+                                    count
+                                );
+
+
+                        element.hidden =
+                            count <= 0;
+                    }
+                );
+        };
+
+
+    Customer.markNotificationRead =
+        async function (
+            notificationId
+        ) {
+
+            if (!notificationId) {
+                return;
+            }
+
+
+            const uid =
+                Customer.state.uid;
+
+
+            const database =
+                Customer.getDatabase();
+
+
+            if (
+                !uid ||
+                !database
+            ) {
+                return;
+            }
+
+
+            try {
+
+                await database
+                    .ref(
+                        "notifications/" +
+                        uid +
+                        "/" +
+                        notificationId
+                    )
+                    .update({
+
+                        read:
+                            true,
+
+                        readAt:
+                            Date.now()
+                    });
+
+
+                await Customer
+                    .getNotifications();
+
+            } catch (error) {
+
+                console.warn(
+                    "Notification update failed:",
+                    error
+                );
+            }
+        };
+
+
+    /* ========================================================
+       CHAT
+       ======================================================== */
+
+    Customer.openChat =
+        function (
+            rideId
+        ) {
+
+            if (!rideId) {
+
+                const ride =
+                    Customer.getActiveRide();
+
+
+                rideId =
+                    ride?.id ||
+                    ride?.rideId ||
+                    "";
+            }
+
+
+            Customer.go(
+                "chat",
+                {
+                    params: {
+                        rideId:
+                            rideId
+                    }
+                }
+            );
+        };
+
+
+    /* ========================================================
+       CALL RIDER
+       ======================================================== */
+
+    Customer.callRider =
+        function () {
+
+            const ride =
+                Customer.getActiveRide();
+
+
+            const phone =
+                ride?.riderPhone ||
+                ride?.driverPhone ||
+                Customer.state.activeRide
+                    ?.riderPhone;
+
+
+            if (!phone) {
+
+                Customer.showError(
+                    "Rider phone number is not available."
+                );
+
+
+                return false;
+            }
+
+
+            window.location.href =
+                "tel:" +
+                phone;
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       PAYMENT
+       ======================================================== */
+
+    Customer.payRide =
+        function (
+            method
+        ) {
+
+            const ride =
+                Customer.getActiveRide();
+
+
+            if (
+                RX.customerRide &&
+                typeof RX.customerRide
+                    .payFare ===
+                "function"
+            ) {
+
+                return RX.customerRide
+                    .payFare(
+                        method ||
+                        ride?.paymentMethod ||
+                        "cash"
+                    );
+            }
+
+
+            if (
+                RX.payment &&
+                typeof RX.payment
+                    .payRide ===
+                "function"
+            ) {
+
+                return RX.payment
+                    .payRide(
+                        ride,
+                        method
+                    );
+            }
+
+
+            return Promise.reject(
+                new Error(
+                    "Payment service is unavailable."
+                )
+            );
+        };
+
+
+    /* ========================================================
+       RATING
+       ======================================================== */
+
+    Customer.rateRide =
+        function (
+            stars,
+            comment
+        ) {
+
+            if (
+                RX.customerRide &&
+                typeof RX.customerRide
+                    .submitRating ===
+                "function"
+            ) {
+
+                return RX.customerRide
+                    .submitRating(
+                        stars,
+                        comment
+                    );
+            }
+
+
+            if (
+                RX.rating &&
+                typeof RX.rating
+                    .submit ===
+                "function"
+            ) {
+
+                return RX.rating
+                    .submit(
+                        stars,
+                        comment
+                    );
+            }
+
+
+            return Promise.reject(
+                new Error(
+                    "Rating service is unavailable."
+                )
+            );
+        };
+
+
+    /* ========================================================
+       DATABASE
+       ======================================================== */
+
+    Customer.getDatabase =
+        function () {
+
+            try {
+
+                if (
+                    window.firebase &&
+                    typeof firebase.database ===
+                    "function"
+                ) {
+
+                    return firebase.database();
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Firebase database unavailable:",
+                    error
+                );
+            }
+
+
+            return null;
+        };
+
+
+    Customer.getFirestore =
+        function () {
+
+            try {
+
+                if (
+                    window.firebase &&
+                    typeof firebase.firestore ===
+                    "function"
+                ) {
+
+                    return firebase.firestore();
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Firestore unavailable:",
+                    error
+                );
+            }
+
+
+            return null;
+        };
+
+
+    /* ========================================================
+       PROFILE
+       ======================================================== */
+
+    Customer.updateProfile =
+        async function (
+            data
+        ) {
+
+            if (
+                !Customer.requireLogin()
+            ) {
+
+                return false;
+            }
+
+
+            data =
+                data ||
+                {};
+
+
+            const uid =
+                Customer.state.uid;
+
+
+            const database =
+                Customer.getDatabase();
+
+
+            if (!database) {
+
+                throw new Error(
+                    "Database unavailable."
+                );
+            }
+
+
+            const updates = {
+
+                ...data,
+
+                updatedAt:
+                    Date.now()
+            };
+
+
+            await database
+                .ref(
+                    "users/" +
+                    uid
+                )
+                .update(
+                    updates
+                );
+
+
+            Customer.state.user =
+                {
+                    ...Customer.state.user,
+                    ...updates
+                };
+
+
+            try {
+
+                localStorage.setItem(
+                    "riderx_user",
+                    JSON.stringify(
+                        Customer.state.user
+                    )
+                );
+
+            } catch (error) {}
+
+
+            Customer.updateUserUI();
+
+
+            Customer.emit(
+                "profile-updated",
+                {
+                    user:
+                        Customer.state.user
+                }
             );
 
 
-        if (
-            !snapshot.exists()
-        ) {
-
-            return null;
-
-        }
-
-
-        return {
-
-            id:
-                snapshot.id,
-
-            ...snapshot.data()
-
+            return Customer.state.user;
         };
 
-    } catch (error) {
 
-        console.error(
-            "RiderX get ride error:",
-            error
+    Customer.updateUserUI =
+        function () {
+
+            const user =
+                Customer.state.user ||
+                Customer.getUser();
+
+
+            if (!user) {
+                return;
+            }
+
+
+            const name =
+                user.name ||
+                user.displayName ||
+                "Customer";
+
+
+            const phone =
+                user.phone ||
+                user.phoneNumber ||
+                "";
+
+
+            const email =
+                user.email ||
+                "";
+
+
+            const photo =
+                user.photoURL ||
+                user.photo ||
+                "";
+
+
+            document
+                .querySelectorAll(
+                    "[data-customer-name]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            name;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-customer-phone]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            phone;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-customer-email]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            email;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-customer-photo]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        if (
+                            element.tagName ===
+                            "IMG"
+                        ) {
+
+                            element.src =
+                                photo ||
+                                "../assest/logo.png";
+
+                        } else {
+
+                            element.style
+                                .backgroundImage =
+                                photo
+                                    ? `url("${photo}")`
+                                    : "";
+                        }
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       LANGUAGE
+       ======================================================== */
+
+    Customer.setLanguage =
+        function (
+            language
+        ) {
+
+            language =
+                String(
+                    language ||
+                    "en"
+                )
+                .toLowerCase();
+
+
+            if (
+                ![
+                    "en",
+                    "hi"
+                ].includes(
+                    language
+                )
+            ) {
+
+                language =
+                    "en";
+            }
+
+
+            Customer.state.language =
+                language;
+
+
+            localStorage.setItem(
+                "riderx_language",
+                language
+            );
+
+
+            if (
+                RX.language &&
+                typeof RX.language
+                    .setLanguage ===
+                "function"
+            ) {
+
+                RX.language
+                    .setLanguage(
+                        language
+                    );
+            }
+
+
+            Customer.emit(
+                "language-changed",
+                {
+                    language:
+                        language
+                }
+            );
+        };
+
+
+    /* ========================================================
+       MENU
+       ======================================================== */
+
+    Customer.openMenu =
+        function () {
+
+            const menu =
+                document.querySelector(
+                    "[data-customer-menu]"
+                ) ||
+                document.querySelector(
+                    ".customer-menu"
+                ) ||
+                document.querySelector(
+                    ".side-menu"
+                );
+
+
+            if (!menu) {
+
+                Customer.go(
+                    "menu"
+                );
+
+                return;
+            }
+
+
+            menu.classList.toggle(
+                "open"
+            );
+
+
+            document.body.classList.toggle(
+                "menu-open"
+            );
+        };
+
+
+    Customer.closeMenu =
+        function () {
+
+            document
+                .querySelectorAll(
+                    "[data-customer-menu].open, .customer-menu.open, .side-menu.open"
+                )
+                .forEach(
+                    function (
+                        menu
+                    ) {
+
+                        menu.classList.remove(
+                            "open"
+                        );
+                    }
+                );
+
+
+            document.body.classList.remove(
+                "menu-open"
+            );
+        };
+
+
+    /* ========================================================
+       UI HELPERS
+       ======================================================== */
+
+    Customer.showLoading =
+        function (
+            text
+        ) {
+
+            const loader =
+                document.querySelector(
+                    "[data-customer-loader]"
+                );
+
+
+            if (!loader) {
+                return;
+            }
+
+
+            const label =
+                loader.querySelector(
+                    "[data-loader-text]"
+                );
+
+
+            if (label) {
+
+                label.textContent =
+                    text ||
+                    "Please wait...";
+            }
+
+
+            loader.hidden =
+                false;
+        };
+
+
+    Customer.hideLoading =
+        function () {
+
+            document
+                .querySelectorAll(
+                    "[data-customer-loader]"
+                )
+                .forEach(
+                    function (
+                        loader
+                    ) {
+
+                        loader.hidden =
+                            true;
+                    }
+                );
+        };
+
+
+    Customer.showError =
+        function (
+            message
+        ) {
+
+            if (
+                RX.toast &&
+                typeof RX.toast ===
+                "function"
+            ) {
+
+                RX.toast(
+                    message,
+                    "error"
+                );
+
+                return;
+            }
+
+
+            const event =
+                new CustomEvent(
+                    "riderx-customer-error",
+                    {
+                        detail: {
+                            message:
+                                message
+                        }
+                    }
+                );
+
+
+            window.dispatchEvent(
+                event
+            );
+        };
+
+
+    Customer.showSuccess =
+        function (
+            message
+        ) {
+
+            if (
+                RX.toast &&
+                typeof RX.toast ===
+                "function"
+            ) {
+
+                RX.toast(
+                    message,
+                    "success"
+                );
+
+                return;
+            }
+
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-customer-success",
+                    {
+                        detail: {
+                            message:
+                                message
+                        }
+                    }
+                )
+            );
+        };
+
+
+    /* ========================================================
+       EVENT BUS
+       ======================================================== */
+
+    Customer.emit =
+        function (
+            name,
+            detail
+        ) {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-customer-" +
+                    name,
+                    {
+                        detail:
+                            detail ||
+                            {}
+                    }
+                )
+            );
+        };
+
+
+    Customer.on =
+        function (
+            name,
+            callback
+        ) {
+
+            if (
+                typeof callback !==
+                "function"
+            ) {
+                return;
+            }
+
+
+            window.addEventListener(
+                "riderx-customer-" +
+                name,
+                function (
+                    event
+                ) {
+
+                    callback(
+                        event.detail ||
+                        {}
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       BUTTON BINDINGS
+       ======================================================== */
+
+    Customer.bindUI =
+        function () {
+
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
+
+                    const target =
+                        event.target.closest(
+                            "[data-customer-action]"
+                        );
+
+
+                    if (!target) {
+                        return;
+                    }
+
+
+                    const action =
+                        target.dataset
+                            .customerAction;
+
+
+                    switch (
+                        action
+                    ) {
+
+                        case "home":
+                            Customer.go(
+                                "home"
+                            );
+                            break;
+
+
+                        case "booking":
+                            Customer.openBooking();
+                            break;
+
+
+                        case "history":
+                            Customer.go(
+                                "history"
+                            );
+                            break;
+
+
+                        case "wallet":
+                            Customer.go(
+                                "wallet"
+                            );
+                            break;
+
+
+                        case "profile":
+                            Customer.go(
+                                "profile"
+                            );
+                            break;
+
+
+                        case "settings":
+                            Customer.go(
+                                "settings"
+                            );
+                            break;
+
+
+                        case "notifications":
+                            Customer.go(
+                                "notifications"
+                            );
+                            break;
+
+
+                        case "menu":
+                            Customer.openMenu();
+                            break;
+
+
+                        case "close-menu":
+                            Customer.closeMenu();
+                            break;
+
+
+                        case "active-ride":
+                            Customer.openActiveRide();
+                            break;
+
+
+                        case "chat":
+                            Customer.openChat();
+                            break;
+
+
+                        case "call-rider":
+                            Customer.callRider();
+                            break;
+
+
+                        case "use-location":
+                            Customer
+                                .useCurrentLocation()
+                                .catch(
+                                    function () {}
+                                );
+                            break;
+
+
+                        case "back":
+                            Customer.back();
+                            break;
+                    }
+                }
+            );
+
+
+            /*
+             * Language buttons.
+             */
+
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
+
+                    const button =
+                        event.target.closest(
+                            "[data-language]"
+                        );
+
+
+                    if (!button) {
+                        return;
+                    }
+
+
+                    Customer.setLanguage(
+                        button.dataset
+                            .language
+                    );
+                }
+            );
+
+
+            /*
+             * Close menu when clicking outside.
+             */
+
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
+
+                    const menu =
+                        document.querySelector(
+                            "[data-customer-menu]"
+                        );
+
+
+                    if (
+                        !menu ||
+                        !menu.classList.contains(
+                            "open"
+                        )
+                    ) {
+
+                        return;
+                    }
+
+
+                    if (
+                        !event.target.closest(
+                            "[data-customer-menu]"
+                        ) &&
+                        !event.target.closest(
+                            "[data-customer-action='menu']"
+                        )
+                    ) {
+
+                        Customer.closeMenu();
+                    }
+                }
+            );
+        };
+
+
+    /* ========================================================
+       ACTIVE RIDE LISTENER
+       ======================================================== */
+
+    Customer.bindRideEvents =
+        function () {
+
+            window.addEventListener(
+                "riderx-ride-ride-updated",
+                function (
+                    event
+                ) {
+
+                    const ride =
+                        event.detail?.ride;
+
+
+                    if (!ride) {
+                        return;
+                    }
+
+
+                    Customer.setActiveRide(
+                        ride
+                    );
+                }
+            );
+
+
+            window.addEventListener(
+                "riderx-ride-ride-created",
+                function (
+                    event
+                ) {
+
+                    const ride =
+                        event.detail?.ride;
+
+
+                    Customer.setActiveRide(
+                        ride
+                    );
+                }
+            );
+
+
+            window.addEventListener(
+                "riderx-ride-trip-completed",
+                function (
+                    event
+                ) {
+
+                    const ride =
+                        event.detail?.ride;
+
+
+                    Customer.setActiveRide(
+                        ride
+                    );
+                }
+            );
+
+
+            window.addEventListener(
+                "riderx-ride-cancelled",
+                function () {
+
+                    Customer.state.activeRide =
+                        null;
+                }
+            );
+        };
+
+
+    /* ========================================================
+       BOOT
+       ======================================================== */
+
+    Customer.init =
+        async function () {
+
+            if (
+                Customer.state.initialized
+            ) {
+                return;
+            }
+
+
+            Customer.state.currentPage =
+                Customer.getCurrentPage();
+
+
+            Customer.getUser();
+
+
+            /*
+             * Customer pages require authentication.
+             */
+
+            const protectedPages = [
+                "home",
+                "dashboard",
+                "booking",
+                "chat",
+                "history",
+                "live-tracking",
+                "map",
+                "menu",
+                "notifications",
+                "payment",
+                "profile",
+                "rating",
+                "receipt",
+                "ride-status",
+                "searching",
+                "settings",
+                "tracking",
+                "trip",
+                "wallet"
+            ];
+
+
+            if (
+                protectedPages.includes(
+                    Customer.state.currentPage
+                ) &&
+                !Customer.state.uid
+            ) {
+
+                Customer.redirectLogin();
+
+                return;
+            }
+
+
+            Customer.bindUI();
+
+
+            Customer.bindRideEvents();
+
+
+            Customer.updateUserUI();
+
+
+            /*
+             * Load wallet and notifications
+             * without blocking the page.
+             */
+
+            if (
+                Customer.state.uid
+            ) {
+
+                Customer.getWalletBalance()
+                    .catch(
+                        function () {}
+                    );
+
+
+                Customer.getNotifications()
+                    .catch(
+                        function () {}
+                    );
+            }
+
+
+            /*
+             * Active ride.
+             */
+
+            const activeRide =
+                Customer.getActiveRide();
+
+
+            if (activeRide) {
+
+                Customer.state.activeRide =
+                    activeRide;
+            }
+
+
+            Customer.state.initialized =
+                true;
+
+
+            Customer.emit(
+                "ready",
+                {
+                    page:
+                        Customer.state.currentPage
+                }
+            );
+
+
+            console.log(
+                "RiderX customer.js loaded."
+            );
+        };
+
+
+    /* ========================================================
+       PUBLIC HELPERS
+       ======================================================== */
+
+    RX.customerGo =
+        Customer.go;
+
+
+    RX.customerBookRide =
+        Customer.bookRide;
+
+
+    RX.customerCancelRide =
+        Customer.cancelRide;
+
+
+    RX.customerOpenChat =
+        Customer.openChat;
+
+
+    RX.customerCallRider =
+        Customer.callRider;
+
+
+    RX.customerUseLocation =
+        Customer.useCurrentLocation;
+
+
+    /* ========================================================
+       AUTO INIT
+       ======================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                Customer.init();
+
+            },
+            {
+                once:
+                    true
+            }
         );
 
+    } else {
 
-        return null;
-
+        Customer.init();
     }
 
-}
-
-
-// ============================================================
-// GLOBAL API
-// ============================================================
-
-window.RiderXCustomer = {
-
-    init,
-
-    setPickup,
-
-    setDrop,
-
-    calculateFare,
-
-    bookRide,
-
-    cancelRide,
-
-    reset:
-        resetBooking,
-
-    getCurrentRide,
-
-    getRideId:
-        () =>
-            state.currentRideId,
-
-    getState:
-        () => ({
-            ...state
-        })
-
-};
-
-
-// ============================================================
-// INIT
-// ============================================================
-
-async function init() {
-
-    console.log(
-        "RiderX Customer Engine Started"
-    );
-
-
-    initMap();
-
-    setupServices();
-
-    setupPickupButton();
-
-    setupDropButton();
-
-    setupLocationButton();
-
-    setupInputs();
-
-
-    await loadFareSettings();
-
-
-    calculateFare();
-
-    updateBookButton();
-
-}
-
-
-// ============================================================
-// DOM READY
-// ============================================================
-
-if (
-    document.readyState ===
-    "loading"
-) {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        init,
-        {
-            once: true
-        }
-    );
-
-} else {
-
-    init();
-
-}
-
-
-// ============================================================
-// BOOK BUTTON
-// ============================================================
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        const button =
-            $("bookRide");
-
-
-        if (!button) {
-            return;
-        }
-
-
-        button.addEventListener(
-            "click",
-            bookRide
-        );
-
-    },
-    {
-        once: true
-    }
-);
+})();
