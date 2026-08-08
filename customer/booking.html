@@ -7,7 +7,7 @@
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 >
 
 <meta
@@ -17,147 +17,77 @@
 
 <title>RiderX | Book Ride</title>
 
-
-<!-- =========================================================
-     LEAFLET
-========================================================= -->
-
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 >
-
-
-<!-- =========================================================
-     FONT AWESOME
-========================================================= -->
 
 <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 >
 
-
-<!-- =========================================================
-     FONT
-========================================================= -->
-
 <link
     href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
     rel="stylesheet"
 >
 
-
 <style>
 
-/* =========================================================
-   ROOT
-========================================================= */
-
 :root{
-
     --yellow:#ffe500;
-
-    --black:#000000;
-
+    --black:#000;
     --dark:#090909;
-
     --card:#151515;
-
     --card2:#202020;
-
-    --border:#2c2c2c;
-
-    --white:#ffffff;
-
-    --muted:#888888;
-
+    --white:#fff;
+    --muted:#8b8b8b;
     --green:#22c55e;
-
     --red:#ef4444;
-
-    --sheet-compact:30vh;
-
-    --sheet-expanded:78vh;
-
 }
-
-
-/* =========================================================
-   RESET
-========================================================= */
 
 *{
-
     margin:0;
-
     padding:0;
-
     box-sizing:border-box;
-
     font-family:Poppins,Arial,sans-serif;
-
     -webkit-tap-highlight-color:transparent;
-
 }
-
 
 html,
 body{
-
     width:100%;
-
     height:100%;
-
     overflow:hidden;
-
     background:#000;
-
     color:#fff;
-
 }
 
+body{
+    position:fixed;
+    inset:0;
+}
 
 /* =========================================================
    MAP
 ========================================================= */
 
 #map{
-
     position:fixed;
-
-    top:0;
-
-    left:0;
-
-    right:0;
-
-    bottom:0;
-
+    inset:0;
     width:100%;
-
     height:100%;
-
     z-index:1;
-
     background:#ddd;
-
 }
-
 
 .leaflet-control-zoom{
-
-    display:none;
-
+    display:none!important;
 }
 
-
 .leaflet-control-attribution{
-
     font-size:8px!important;
-
-    padding:1px 3px!important;
-
+    padding:2px 4px!important;
 }
 
 
@@ -166,104 +96,73 @@ body{
 ========================================================= */
 
 .topbar{
-
     position:fixed;
-
     top:0;
-
     left:0;
-
     right:0;
-
     z-index:1000;
-
     padding:
-
-        max(12px, env(safe-area-inset-top))
-
+        max(12px,env(safe-area-inset-top))
         14px
-
-        0
-
-        14px;
-
+        0;
     pointer-events:none;
-
 }
-
 
 .topbar-inner{
+    height:52px;
 
     display:flex;
-
     align-items:center;
-
     justify-content:space-between;
-
 }
 
-
 .top-btn{
-
     width:45px;
-
     height:45px;
 
-    border:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
+    border:0;
     border-radius:50%;
 
-    background:rgba(10,10,10,.94);
-
+    background:rgba(15,15,15,.94);
     color:#fff;
 
     font-size:17px;
 
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
     box-shadow:
-
-        0 5px 20px rgba(0,0,0,.35);
+        0 6px 22px rgba(0,0,0,.4);
 
     pointer-events:auto;
 
+    transition:
+        transform .15s ease;
 }
-
 
 .top-btn:active{
-
-    transform:scale(.94);
-
+    transform:scale(.91);
 }
 
-
 .logo{
-
     padding:8px 17px;
 
     border-radius:15px;
 
-    background:rgba(10,10,10,.94);
+    background:rgba(15,15,15,.94);
 
     font-size:17px;
-
     font-weight:800;
 
+    letter-spacing:.3px;
+
     box-shadow:
-
-        0 5px 20px rgba(0,0,0,.35);
-
+        0 6px 22px rgba(0,0,0,.4);
 }
 
-
 .logo span{
-
     color:var(--yellow);
-
 }
 
 
@@ -272,16 +171,19 @@ body{
 ========================================================= */
 
 .status-pill{
-
     position:fixed;
 
-    top:72px;
+    top:
+        calc(
+            max(12px,env(safe-area-inset-top))
+            + 61px
+        );
 
     left:50%;
 
     transform:translateX(-50%);
 
-    z-index:900;
+    z-index:1000;
 
     max-width:90%;
 
@@ -297,12 +199,13 @@ body{
 
     white-space:nowrap;
 
-    box-shadow:
+    overflow:hidden;
+    text-overflow:ellipsis;
 
+    box-shadow:
         0 5px 20px rgba(0,0,0,.35);
 
     pointer-events:none;
-
 }
 
 
@@ -311,285 +214,212 @@ body{
 ========================================================= */
 
 .center-pin{
-
     position:fixed;
 
     left:50%;
-
     top:50%;
 
     z-index:500;
 
-    transform:translate(-50%,-100%);
+    transform:
+        translate(-50%,-100%);
 
     pointer-events:none;
-
 }
 
-
 .center-pin-icon{
-
     width:45px;
-
     height:45px;
 
     display:flex;
-
     align-items:center;
-
     justify-content:center;
 
     background:var(--yellow);
-
     color:#000;
 
-    border-radius:50% 50% 50% 0;
+    border-radius:
+        50%
+        50%
+        50%
+        0;
 
     transform:rotate(-45deg);
 
     box-shadow:
-
         0 7px 20px rgba(0,0,0,.35);
-
 }
 
-
 .center-pin-icon i{
-
     transform:rotate(45deg);
-
 }
 
 
 /* =========================================================
-   MAP LOCATION BUTTON
+   FLOATING LOCATION
 ========================================================= */
 
 .location-btn{
-
     position:fixed;
 
     right:15px;
 
+    /*
+     * Sheet collapsed height approximately 30vh.
+     * Button stays above the sheet.
+     */
     bottom:
-
         calc(
-
-            var(--sheet-compact) + 18px
-
+            30vh + 18px
         );
 
-    z-index:850;
+    z-index:950;
 
     width:48px;
-
     height:48px;
 
     border:0;
-
     border-radius:50%;
 
-    background:rgba(17,17,17,.96);
-
+    background:#111;
     color:var(--yellow);
 
     font-size:18px;
 
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
     box-shadow:
-
-        0 5px 20px rgba(0,0,0,.4);
+        0 5px 20px rgba(0,0,0,.45);
 
     transition:
-
-        bottom .35s ease,
-
+        bottom .3s ease,
         transform .15s ease;
-
 }
 
-
 .location-btn:active{
-
-    transform:scale(.94);
-
+    transform:scale(.92);
 }
 
 
 /* =========================================================
-   BOOKING SHEET
+   BOTTOM SHEET
 ========================================================= */
 
 .sheet{
-
     position:fixed;
 
     left:0;
-
     right:0;
 
+    /*
+     * Initial collapsed position.
+     * About 30% of screen visible.
+     */
     bottom:0;
+
+    height:auto;
+
+    max-height:
+        calc(
+            88vh
+        );
 
     z-index:1000;
 
-    height:var(--sheet-compact);
-
-    max-height:var(--sheet-expanded);
-
-    overflow:hidden;
-
     padding:
-
-        8px
-
+        10px
         14px
-
-        max(14px, env(safe-area-inset-bottom))
-
-        14px;
-
-    background:
-
-        linear-gradient(
-
-            180deg,
-
-            #0b0b0b 0%,
-
-            #090909 100%
-
+        max(
+            14px,
+            env(safe-area-inset-bottom)
         );
 
+    background:
+        rgba(9,9,9,.985);
+
     border-radius:
-
-        27px
-
-        27px
-
+        28px
+        28px
         0
-
         0;
 
     box-shadow:
+        0 -12px 40px rgba(0,0,0,.5);
 
-        0 -12px 35px rgba(0,0,0,.48);
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    /*
+     * Sheet position is controlled by JS.
+     */
+    transform:
+        translateY(
+            calc(
+                100% - 30vh
+            )
+        );
 
     transition:
+        transform .32s cubic-bezier(.22,.8,.22,1);
 
-        height .35s cubic-bezier(.22,.8,.24,1);
+    overscroll-behavior:contain;
 
-    touch-action:none;
+    touch-action:pan-y;
 
+    -webkit-overflow-scrolling:touch;
+}
+
+.sheet.dragging{
+    transition:none;
 }
 
 
 /* =========================================================
-   SHEET EXPANDED
-========================================================= */
-
-.sheet.expanded{
-
-    height:var(--sheet-expanded);
-
-}
-
-
-/* =========================================================
-   HANDLE AREA
+   HANDLE
 ========================================================= */
 
 .handle-area{
-
     width:100%;
 
-    height:36px;
+    height:32px;
 
     display:flex;
 
     align-items:center;
-
     justify-content:center;
 
     cursor:grab;
 
     touch-action:none;
-
 }
-
 
 .handle-area:active{
-
     cursor:grabbing;
-
 }
 
-
 .handle{
-
-    width:46px;
-
+    width:48px;
     height:5px;
 
     background:#555;
 
-    border-radius:20px;
+    border-radius:10px;
 
     transition:
-
-        width .2s ease,
-
-        background .2s ease;
-
+        background .2s ease,
+        width .2s ease;
 }
 
-
 .handle-area:active .handle{
-
     width:58px;
-
     background:#777;
-
 }
 
 
 /* =========================================================
-   SHEET SCROLL
+   SHEET CONTENT
 ========================================================= */
 
 .sheet-content{
-
-    height:
-
-        calc(
-
-            100%
-
-            - 36px
-
-        );
-
-    overflow-y:auto;
-
-    overflow-x:hidden;
-
-    padding-bottom:8px;
-
-    overscroll-behavior:contain;
-
-    -webkit-overflow-scrolling:touch;
-
-}
-
-
-.sheet-content::-webkit-scrollbar{
-
-    width:0;
-
+    padding-bottom:4px;
 }
 
 
@@ -598,13 +428,13 @@ body{
 ========================================================= */
 
 .title{
-
     font-size:19px;
-
     font-weight:800;
 
-    margin-bottom:13px;
-
+    margin:
+        0
+        0
+        13px;
 }
 
 
@@ -613,18 +443,18 @@ body{
 ========================================================= */
 
 .search-box{
-
     background:#151515;
 
     border-radius:17px;
 
     overflow:hidden;
 
+    border:
+        1px solid
+        rgba(255,255,255,.04);
 }
 
-
 .search-row{
-
     display:flex;
 
     align-items:center;
@@ -633,26 +463,19 @@ body{
 
     min-height:56px;
 
-    padding:8px 10px;
-
+    padding:
+        8px
+        10px;
 }
-
 
 .search-row + .search-row{
-
     border-top:
-
         1px solid
-
-        var(--border);
-
+        #2c2c2c;
 }
 
-
 .location-dot{
-
     width:27px;
-
     height:27px;
 
     min-width:27px;
@@ -660,36 +483,24 @@ body{
     display:flex;
 
     align-items:center;
-
     justify-content:center;
 
     border-radius:50%;
 
     font-size:10px;
-
 }
-
 
 .pick-dot{
-
     background:#12351f;
-
     color:var(--green);
-
 }
-
 
 .drop-dot{
-
     background:#3a3300;
-
     color:var(--yellow);
-
 }
 
-
 .location-input{
-
     flex:1;
 
     width:100%;
@@ -697,7 +508,6 @@ body{
     min-width:0;
 
     border:0;
-
     outline:0;
 
     background:transparent;
@@ -705,21 +515,18 @@ body{
     color:#fff;
 
     font-size:13px;
-
 }
-
 
 .location-input::placeholder{
-
     color:#777;
-
 }
 
+.location-input:focus{
+    color:#fff;
+}
 
 .map-select-btn{
-
     width:36px;
-
     height:36px;
 
     min-width:36px;
@@ -733,35 +540,12 @@ body{
     color:var(--yellow);
 
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
 }
-
 
 .map-select-btn:active{
-
-    transform:scale(.94);
-
-}
-
-
-/* =========================================================
-   SECTION TITLE
-========================================================= */
-
-.section-title{
-
-    margin-top:15px;
-
-    margin-bottom:8px;
-
-    font-size:12px;
-
-    color:#999;
-
+    transform:scale(.92);
 }
 
 
@@ -769,21 +553,24 @@ body{
    SERVICES
 ========================================================= */
 
-.services{
+.section-title{
+    margin-top:15px;
+    margin-bottom:8px;
 
+    font-size:12px;
+    color:#999;
+}
+
+.services{
     display:grid;
 
     grid-template-columns:
-
         repeat(4,1fr);
 
     gap:8px;
-
 }
 
-
 .service{
-
     min-height:72px;
 
     display:flex;
@@ -791,12 +578,13 @@ body{
     flex-direction:column;
 
     align-items:center;
-
     justify-content:center;
 
     gap:5px;
 
-    border:1px solid #303030;
+    border:
+        1px solid
+        #303030;
 
     border-radius:15px;
 
@@ -807,47 +595,32 @@ body{
     cursor:pointer;
 
     transition:
-
-        .2s ease;
-
+        transform .15s ease,
+        background .2s ease,
+        color .2s ease,
+        border-color .2s ease;
 }
 
+.service:active{
+    transform:scale(.95);
+}
 
 .service i{
-
     font-size:19px;
-
 }
-
 
 .service span{
-
     font-size:10px;
-
 }
 
-
 .service.active{
-
     background:var(--yellow);
-
     border-color:var(--yellow);
-
     color:#000;
 
     box-shadow:
-
-        0 5px 18px
-
-        rgba(255,229,0,.08);
-
-}
-
-
-.service:active{
-
-    transform:scale(.97);
-
+        0 5px 15px
+        rgba(255,229,0,.1);
 }
 
 
@@ -856,11 +629,9 @@ body{
 ========================================================= */
 
 .fare-card{
-
     display:flex;
 
     align-items:center;
-
     justify-content:space-between;
 
     margin-top:14px;
@@ -871,37 +642,30 @@ body{
 
     border-radius:16px;
 
+    border:
+        1px solid
+        rgba(255,255,255,.04);
 }
-
 
 .fare-label{
-
     font-size:13px;
-
     font-weight:600;
-
 }
 
-
 .fare-info{
-
     margin-top:3px;
 
     color:#777;
 
     font-size:10px;
-
 }
 
-
 .fare-price{
-
     color:var(--yellow);
 
     font-size:23px;
 
     font-weight:800;
-
 }
 
 
@@ -910,7 +674,6 @@ body{
 ========================================================= */
 
 .distance{
-
     text-align:center;
 
     margin-top:8px;
@@ -918,7 +681,6 @@ body{
     color:#777;
 
     font-size:10px;
-
 }
 
 
@@ -927,7 +689,6 @@ body{
 ========================================================= */
 
 .payment-row{
-
     display:flex;
 
     align-items:center;
@@ -941,23 +702,18 @@ body{
     background:#151515;
 
     border-radius:15px;
-
 }
-
 
 .payment-icon{
-
     color:var(--yellow);
-
 }
 
-
 #paymentMethod{
-
     flex:1;
 
-    border:0;
+    min-width:0;
 
+    border:0;
     outline:0;
 
     background:#151515;
@@ -965,7 +721,6 @@ body{
     color:#fff;
 
     font-size:13px;
-
 }
 
 
@@ -974,7 +729,6 @@ body{
 ========================================================= */
 
 .book-btn{
-
     width:100%;
 
     margin-top:14px;
@@ -994,35 +748,22 @@ body{
     font-weight:800;
 
     box-shadow:
-
         0 5px 20px
-
         rgba(255,229,0,.12);
 
     transition:
-
         transform .15s ease,
-
         background .2s ease;
-
 }
-
 
 .book-btn:active{
-
     transform:scale(.985);
-
 }
 
-
 .book-btn:disabled{
-
     background:#444;
-
     color:#888;
-
     box-shadow:none;
-
 }
 
 
@@ -1031,7 +772,6 @@ body{
 ========================================================= */
 
 #bookingStatus{
-
     min-height:20px;
 
     margin-top:9px;
@@ -1041,7 +781,6 @@ body{
     color:var(--yellow);
 
     font-size:11px;
-
 }
 
 
@@ -1050,7 +789,6 @@ body{
 ========================================================= */
 
 .active-ride{
-
     display:none;
 
     margin-top:12px;
@@ -1060,57 +798,43 @@ body{
     background:#151515;
 
     border-radius:16px;
-
 }
-
 
 .active-ride.show{
-
     display:block;
-
 }
 
-
 .active-ride-top{
-
     display:flex;
 
     align-items:center;
-
     justify-content:space-between;
 
     gap:10px;
-
 }
-
 
 .active-title{
-
     font-size:13px;
-
     font-weight:700;
-
 }
-
 
 .active-status{
-
     color:var(--yellow);
-
     font-size:11px;
 
+    text-align:right;
 }
 
-
 .cancel-btn{
-
     width:100%;
 
     margin-top:10px;
 
     padding:11px;
 
-    border:1px solid #3a2020;
+    border:
+        1px solid
+        #3a2020;
 
     border-radius:12px;
 
@@ -1121,69 +845,115 @@ body{
     font-size:12px;
 
     font-weight:600;
+}
+
+
+/* =========================================================
+   SHEET STATE
+========================================================= */
+
+body.sheet-expanded .sheet{
+    transform:translateY(0);
+}
+
+body.sheet-expanded .location-btn{
+    bottom:
+        calc(
+            88vh + 12px
+        );
+}
+
+body.sheet-collapsed .sheet{
+    transform:
+        translateY(
+            calc(
+                100% - 30vh
+            )
+        );
+}
+
+body.sheet-collapsed .location-btn{
+    bottom:
+        calc(
+            30vh + 18px
+        );
+}
+
+
+/* =========================================================
+   TABLET / SMALL DESKTOP
+========================================================= */
+
+@media(min-width:700px){
+
+    .sheet{
+        left:50%;
+        right:auto;
+
+        width:520px;
+
+        transform:
+            translate(
+                -50%,
+                calc(
+                    100% - 30vh
+                )
+            );
+
+        border-radius:
+            28px
+            28px
+            0
+            0;
+    }
+
+    body.sheet-expanded .sheet{
+        transform:
+            translate(
+                -50%,
+                0
+            );
+    }
 
 }
 
 
 /* =========================================================
-   SMALL MOBILE
+   SMALL PHONES
 ========================================================= */
 
 @media(max-width:380px){
 
-    :root{
-
-        --sheet-compact:31vh;
-
-        --sheet-expanded:82vh;
-
+    .topbar{
+        padding-left:10px;
+        padding-right:10px;
     }
 
+    .top-btn{
+        width:42px;
+        height:42px;
+    }
+
+    .logo{
+        font-size:15px;
+        padding:7px 14px;
+    }
 
     .sheet{
-
         padding-left:11px;
-
         padding-right:11px;
-
     }
-
 
     .title{
-
         font-size:17px;
-
     }
-
 
     .service{
-
         min-height:66px;
-
     }
-
 
     .service i{
-
         font-size:17px;
-
-    }
-
-}
-
-
-/* =========================================================
-   TALL MOBILE
-========================================================= */
-
-@media(min-height:750px){
-
-    :root{
-
-        --sheet-compact:29vh;
-
-        --sheet-expanded:76vh;
-
     }
 
 }
@@ -1196,17 +966,27 @@ body{
 @supports(padding:max(0px)){
 
     .sheet{
-
         padding-bottom:
-
             max(
-
                 14px,
-
                 env(safe-area-inset-bottom)
-
             );
+    }
 
+}
+
+
+/* =========================================================
+   REDUCE MOTION
+========================================================= */
+
+@media(prefers-reduced-motion:reduce){
+
+    .sheet,
+    .service,
+    .top-btn,
+    .book-btn{
+        transition:none!important;
     }
 
 }
@@ -1216,24 +996,23 @@ body{
 </head>
 
 
-<body>
+<body class="sheet-collapsed">
 
 
-<!-- =========================================================
+<!-- =======================================================
      MAP
-========================================================= -->
+======================================================== -->
 
 <div id="map"></div>
 
 
-<!-- =========================================================
+<!-- =======================================================
      TOP BAR
-========================================================= -->
+======================================================== -->
 
 <div class="topbar">
 
     <div class="topbar-inner">
-
 
         <button
             class="top-btn"
@@ -1261,52 +1040,45 @@ body{
             aria-label="My location"
         >
 
-            <i
-                class="fa-solid fa-location-crosshairs"
-            ></i>
+            <i class="fa-solid fa-location-crosshairs"></i>
 
         </button>
-
 
     </div>
 
 </div>
 
 
-<!-- =========================================================
+<!-- =======================================================
      STATUS
-========================================================= -->
+======================================================== -->
 
 <div
     id="status"
     class="status-pill"
 >
-
     Select pickup location
-
 </div>
 
 
-<!-- =========================================================
-     CENTER PIN
-========================================================= -->
+<!-- =======================================================
+     CENTER MAP PIN
+======================================================== -->
 
 <div class="center-pin">
 
     <div class="center-pin-icon">
 
-        <i
-            class="fa-solid fa-location-dot"
-        ></i>
+        <i class="fa-solid fa-location-dot"></i>
 
     </div>
 
 </div>
 
 
-<!-- =========================================================
+<!-- =======================================================
      FLOATING LOCATION
-========================================================= -->
+======================================================== -->
 
 <button
     id="floatingLocation"
@@ -1315,41 +1087,32 @@ body{
     aria-label="Current location"
 >
 
-    <i
-        class="fa-solid fa-crosshairs"
-    ></i>
+    <i class="fa-solid fa-crosshairs"></i>
 
 </button>
 
 
-<!-- =========================================================
-     BOOKING SHEET
-========================================================= -->
+<!-- =======================================================
+     BOTTOM SHEET
+======================================================== -->
 
 <div
     id="bookingSheet"
     class="sheet"
 >
 
-
-    <!-- =====================================================
-         DRAG HANDLE
-    ====================================================== -->
+    <!-- DRAG HANDLE -->
 
     <div
         id="sheetHandle"
         class="handle-area"
-        aria-label="Expand booking panel"
+        aria-label="Drag booking panel"
     >
 
         <div class="handle"></div>
 
     </div>
 
-
-    <!-- =====================================================
-         SHEET CONTENT
-    ====================================================== -->
 
     <div class="sheet-content">
 
@@ -1359,9 +1122,7 @@ body{
         ================================================== -->
 
         <div class="title">
-
             Where are you going?
-
         </div>
 
 
@@ -1376,14 +1137,9 @@ body{
 
             <div class="search-row">
 
+                <div class="location-dot pick-dot">
 
-                <div
-                    class="location-dot pick-dot"
-                >
-
-                    <i
-                        class="fa-solid fa-circle"
-                    ></i>
+                    <i class="fa-solid fa-circle"></i>
 
                 </div>
 
@@ -1404,12 +1160,9 @@ body{
                     aria-label="Select pickup on map"
                 >
 
-                    <i
-                        class="fa-solid fa-map-pin"
-                    ></i>
+                    <i class="fa-solid fa-map-pin"></i>
 
                 </button>
-
 
             </div>
 
@@ -1418,14 +1171,9 @@ body{
 
             <div class="search-row">
 
+                <div class="location-dot drop-dot">
 
-                <div
-                    class="location-dot drop-dot"
-                >
-
-                    <i
-                        class="fa-solid fa-location-dot"
-                    ></i>
+                    <i class="fa-solid fa-location-dot"></i>
 
                 </div>
 
@@ -1446,15 +1194,11 @@ body{
                     aria-label="Select destination on map"
                 >
 
-                    <i
-                        class="fa-solid fa-map-pin"
-                    ></i>
+                    <i class="fa-solid fa-map-pin"></i>
 
                 </button>
 
-
             </div>
-
 
         </div>
 
@@ -1464,9 +1208,7 @@ body{
         ================================================== -->
 
         <div class="section-title">
-
             Choose your service
-
         </div>
 
 
@@ -1476,11 +1218,11 @@ body{
             <div
                 class="service active"
                 data-service="bike"
+                role="button"
+                tabindex="0"
             >
 
-                <i
-                    class="fa-solid fa-motorcycle"
-                ></i>
+                <i class="fa-solid fa-motorcycle"></i>
 
                 <span>Bike</span>
 
@@ -1490,11 +1232,11 @@ body{
             <div
                 class="service"
                 data-service="cab"
+                role="button"
+                tabindex="0"
             >
 
-                <i
-                    class="fa-solid fa-car"
-                ></i>
+                <i class="fa-solid fa-car"></i>
 
                 <span>Cab</span>
 
@@ -1504,11 +1246,11 @@ body{
             <div
                 class="service"
                 data-service="parcel"
+                role="button"
+                tabindex="0"
             >
 
-                <i
-                    class="fa-solid fa-box"
-                ></i>
+                <i class="fa-solid fa-box"></i>
 
                 <span>Parcel</span>
 
@@ -1518,16 +1260,15 @@ body{
             <div
                 class="service"
                 data-service="food"
+                role="button"
+                tabindex="0"
             >
 
-                <i
-                    class="fa-solid fa-utensils"
-                ></i>
+                <i class="fa-solid fa-utensils"></i>
 
                 <span>Food</span>
 
             </div>
-
 
         </div>
 
@@ -1538,26 +1279,18 @@ body{
 
         <div class="fare-card">
 
-
             <div>
 
-
                 <div class="fare-label">
-
                     Estimated fare
-
                 </div>
-
 
                 <div
                     id="fareInfo"
                     class="fare-info"
                 >
-
                     Select pickup & drop
-
                 </div>
-
 
             </div>
 
@@ -1566,11 +1299,8 @@ body{
                 id="fare"
                 class="fare-price"
             >
-
                 ₹0
-
             </div>
-
 
         </div>
 
@@ -1583,9 +1313,7 @@ body{
             id="estimated-distance-display"
             class="distance"
         >
-
             0 KM
-
         </div>
 
 
@@ -1594,7 +1322,6 @@ body{
         ================================================== -->
 
         <div class="payment-row">
-
 
             <i
                 class="fa-solid fa-wallet payment-icon"
@@ -1606,34 +1333,24 @@ body{
             >
 
                 <option value="cash">
-
                     💵 Cash
-
                 </option>
-
 
                 <option value="online">
-
                     📱 UPI / Online
-
                 </option>
-
 
                 <option value="wallet">
-
                     💳 RiderX Wallet
-
                 </option>
 
-
             </select>
-
 
         </div>
 
 
         <!-- =================================================
-             BOOK
+             BOOK BUTTON
         ================================================== -->
 
         <button
@@ -1643,9 +1360,7 @@ body{
             disabled
         >
 
-            <i
-                class="fa-solid fa-paper-plane"
-            ></i>
+            <i class="fa-solid fa-paper-plane"></i>
 
             Book RiderX
 
@@ -1656,9 +1371,7 @@ body{
              BOOKING STATUS
         ================================================== -->
 
-        <div
-            id="bookingStatus"
-        ></div>
+        <div id="bookingStatus"></div>
 
 
         <!-- =================================================
@@ -1670,30 +1383,18 @@ body{
             class="active-ride"
         >
 
+            <div class="active-ride-top">
 
-            <div
-                class="active-ride-top"
-            >
-
-
-                <div
-                    class="active-title"
-                >
-
+                <div class="active-title">
                     Your RiderX ride
-
                 </div>
-
 
                 <div
                     id="activeRideStatus"
                     class="active-status"
                 >
-
                     Searching...
-
                 </div>
-
 
             </div>
 
@@ -1708,7 +1409,6 @@ body{
 
             </button>
 
-
         </div>
 
 
@@ -1717,18 +1417,18 @@ body{
 </div>
 
 
-<!-- =========================================================
+<!-- =======================================================
      LEAFLET
-========================================================= -->
+======================================================== -->
 
 <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
 ></script>
 
 
-<!-- =========================================================
+<!-- =======================================================
      RIDERX CUSTOMER ENGINE
-========================================================= -->
+======================================================== -->
 
 <script
     type="module"
@@ -1736,40 +1436,47 @@ body{
 ></script>
 
 
-<!-- =========================================================
+<!-- =======================================================
      PAGE CONTROLLER
-========================================================= -->
+======================================================== -->
 
 <script type="module">
 
 document.addEventListener(
-
     "DOMContentLoaded",
-
     () => {
 
+        /* ==================================================
+           BACK BUTTON
+        ================================================== */
 
-        /* ====================================================
-           ELEMENTS
-        ==================================================== */
-
-        const sheet =
+        const back =
             document.getElementById(
-                "bookingSheet"
+                "backButton"
             );
 
+        if(back){
 
-        const handle =
-            document.getElementById(
-                "sheetHandle"
+            back.addEventListener(
+                "click",
+                () => {
+
+                    history.back();
+
+                }
             );
 
+        }
 
-        const floatingLocation =
+
+        /* ==================================================
+           LOCATION BUTTON
+        ================================================== */
+
+        const locationButton =
             document.getElementById(
                 "floatingLocation"
             );
-
 
         const mainLocation =
             document.getElementById(
@@ -1777,17 +1484,28 @@ document.addEventListener(
             );
 
 
-        const back =
-            document.getElementById(
-                "backButton"
+        if(locationButton){
+
+            locationButton.addEventListener(
+                "click",
+                () => {
+
+                    mainLocation?.click();
+
+                }
             );
 
+        }
+
+
+        /* ==================================================
+           ACTIVE RIDE
+        ================================================== */
 
         const activeRide =
             document.getElementById(
                 "activeRide"
             );
-
 
         const activeStatus =
             document.getElementById(
@@ -1795,455 +1513,13 @@ document.addEventListener(
             );
 
 
-        /* ====================================================
-           SHEET STATE
-        ==================================================== */
-
-        let expanded = false;
-
-        let startY = 0;
-
-        let currentY = 0;
-
-        let dragging = false;
-
-
-        /* ====================================================
-           MAP RESIZE
-        ==================================================== */
-
-        function refreshMap(){
-
-            setTimeout(
-
-                () => {
-
-                    if(
-                        window.RiderXCustomer &&
-                        typeof window.RiderXCustomer.getState ===
-                        "function"
-                    ){
-
-                        const map =
-                            window.RiderXCustomer
-                                .getState()
-                                ?.map;
-
-                        if(map){
-
-                            map.invalidateSize();
-
-                        }
-
-                    }
-
-                    if(
-                        window.L &&
-                        window.RiderXCustomer
-                    ){
-
-                        const state =
-                            window.RiderXCustomer
-                                .getState?.();
-
-                        if(
-                            state &&
-                            state.map
-                        ){
-
-                            state.map.invalidateSize();
-
-                        }
-
-                    }
-
-                },
-
-                380
-
-            );
-
-        }
-
-
-        /* ====================================================
-           SET SHEET
-        ==================================================== */
-
-        function setSheet(
-            shouldExpand
-        ){
-
-            expanded =
-                Boolean(
-                    shouldExpand
-                );
-
-
-            if(sheet){
-
-                sheet.classList.toggle(
-                    "expanded",
-                    expanded
-                );
-
-            }
-
-
-            refreshMap();
-
-        }
-
-
-        /* ====================================================
-           TOGGLE SHEET
-        ==================================================== */
-
-        function toggleSheet(){
-
-            setSheet(
-                !expanded
-            );
-
-        }
-
-
-        /* ====================================================
-           HANDLE CLICK
-        ==================================================== */
-
-        if(handle){
-
-            handle.addEventListener(
-
-                "click",
-
-                () => {
-
-                    if(!dragging){
-
-                        toggleSheet();
-
-                    }
-
-                }
-
-            );
-
-        }
-
-
-        /* ====================================================
-           TOUCH START
-        ==================================================== */
-
-        if(handle){
-
-            handle.addEventListener(
-
-                "touchstart",
-
-                (event) => {
-
-                    if(
-                        !event.touches ||
-                        !event.touches.length
-                    ){
-
-                        return;
-
-                    }
-
-
-                    startY =
-                        event.touches[0].clientY;
-
-
-                    currentY =
-                        startY;
-
-
-                    dragging =
-                        true;
-
-                },
-
-                {
-                    passive:true
-                }
-
-            );
-
-
-            /* =================================================
-               TOUCH MOVE
-            ================================================= */
-
-            handle.addEventListener(
-
-                "touchmove",
-
-                (event) => {
-
-                    if(
-                        !dragging ||
-                        !event.touches ||
-                        !event.touches.length
-                    ){
-
-                        return;
-
-                    }
-
-
-                    currentY =
-                        event.touches[0].clientY;
-
-                },
-
-                {
-                    passive:true
-                }
-
-            );
-
-
-            /* =================================================
-               TOUCH END
-            ================================================= */
-
-            handle.addEventListener(
-
-                "touchend",
-
-                () => {
-
-                    if(!dragging){
-
-                        return;
-
-                    }
-
-
-                    const difference =
-                        currentY -
-                        startY;
-
-
-                    dragging =
-                        false;
-
-
-                    if(
-                        Math.abs(
-                            difference
-                        ) < 20
-                    ){
-
-                        toggleSheet();
-
-                        return;
-
-                    }
-
-
-                    if(
-                        difference < 0
-                    ){
-
-                        setSheet(true);
-
-                    }else{
-
-                        setSheet(false);
-
-                    }
-
-                },
-
-                {
-                    passive:true
-                }
-
-            );
-
-        }
-
-
-        /* ====================================================
-           MOUSE DRAG
-        ==================================================== */
-
-        if(handle){
-
-            handle.addEventListener(
-
-                "mousedown",
-
-                (event) => {
-
-                    startY =
-                        event.clientY;
-
-                    currentY =
-                        startY;
-
-                    dragging =
-                        true;
-
-                    event.preventDefault();
-
-                }
-
-            );
-
-
-            window.addEventListener(
-
-                "mousemove",
-
-                (event) => {
-
-                    if(!dragging){
-
-                        return;
-
-                    }
-
-
-                    currentY =
-                        event.clientY;
-
-                }
-
-            );
-
-
-            window.addEventListener(
-
-                "mouseup",
-
-                () => {
-
-                    if(!dragging){
-
-                        return;
-
-                    }
-
-
-                    const difference =
-                        currentY -
-                        startY;
-
-
-                    dragging =
-                        false;
-
-
-                    if(
-                        Math.abs(
-                            difference
-                        ) < 20
-                    ){
-
-                        toggleSheet();
-
-                        return;
-
-                    }
-
-
-                    if(
-                        difference < 0
-                    ){
-
-                        setSheet(true);
-
-                    }else{
-
-                        setSheet(false);
-
-                    }
-
-                }
-
-            );
-
-        }
-
-
-        /* ====================================================
-           BACK BUTTON
-        ==================================================== */
-
-        if(back){
-
-            back.addEventListener(
-
-                "click",
-
-                () => {
-
-                    if(
-                        expanded
-                    ){
-
-                        setSheet(false);
-
-                        return;
-
-                    }
-
-
-                    history.back();
-
-                }
-
-            );
-
-        }
-
-
-        /* ====================================================
-           LOCATION BUTTON
-        ==================================================== */
-
-        if(floatingLocation){
-
-            floatingLocation.addEventListener(
-
-                "click",
-
-                () => {
-
-                    if(mainLocation){
-
-                        mainLocation.click();
-
-                    }
-
-                }
-
-            );
-
-        }
-
-
-        /* ====================================================
-           RIDE CREATED
-        ==================================================== */
-
         window.addEventListener(
-
             "riderx:ride-created",
-
             () => {
 
                 activeRide?.classList.add(
                     "show"
                 );
-
 
                 if(activeStatus){
 
@@ -2252,19 +1528,19 @@ document.addEventListener(
 
                 }
 
-            }
+                /*
+                 * Automatically expand the
+                 * booking sheet after booking.
+                 */
 
+                expandSheet();
+
+            }
         );
 
 
-        /* ====================================================
-           RIDE STATUS
-        ==================================================== */
-
         window.addEventListener(
-
             "riderx:ride-status",
-
             (event) => {
 
                 const status =
@@ -2284,6 +1560,10 @@ document.addEventListener(
 
                 }
 
+                /*
+                 * Ride tracking information
+                 * deserves expanded panel.
+                 */
 
                 if(
                     status === "ACCEPTED" ||
@@ -2291,28 +1571,17 @@ document.addEventListener(
                     status === "STARTED"
                 ){
 
-                    setSheet(false);
-
-                }
-
-
-                if(
-                    status === "COMPLETED" ||
-                    status === "CANCELLED"
-                ){
-
-                    setSheet(false);
+                    expandSheet();
 
                 }
 
             }
-
         );
 
 
-        /* ====================================================
+        /* ==================================================
            CANCEL
-        ==================================================== */
+        ================================================== */
 
         const cancel =
             document.getElementById(
@@ -2323,14 +1592,13 @@ document.addEventListener(
         if(cancel){
 
             cancel.addEventListener(
-
                 "click",
-
                 () => {
 
                     if(
                         window.RiderXCustomer &&
-                        typeof window.RiderXCustomer.cancelRide ===
+                        typeof
+                        window.RiderXCustomer.cancelRide ===
                         "function"
                     ){
 
@@ -2339,35 +1607,537 @@ document.addEventListener(
                     }
 
                 }
-
             );
 
         }
 
 
-        /* ====================================================
-           INITIAL MAP REFRESH
-        ==================================================== */
+        /* ==================================================
+           BOTTOM SHEET
+        ================================================== */
+
+        const sheet =
+            document.getElementById(
+                "bookingSheet"
+            );
+
+        const handle =
+            document.getElementById(
+                "sheetHandle"
+            );
+
+
+        if(!sheet || !handle){
+            return;
+        }
+
+
+        let dragging = false;
+
+        let startY = 0;
+
+        let currentY = 0;
+
+        let startTranslate = 0;
+
+
+        /*
+         * Calculate current transform
+         */
+
+        function getTranslateY(){
+
+            const style =
+                window.getComputedStyle(
+                    sheet
+                );
+
+            const matrix =
+                new DOMMatrixReadOnly(
+                    style.transform
+                );
+
+            return matrix.m42 || 0;
+
+        }
+
+
+        /*
+         * Sheet positions
+         */
+
+        function collapsedPosition(){
+
+            return Math.max(
+                0,
+                sheet.offsetHeight -
+                window.innerHeight * 0.30
+            );
+
+        }
+
+
+        function expandedPosition(){
+
+            return 0;
+
+        }
+
+
+        function setSheetPosition(
+            value,
+            animate = true
+        ){
+
+            const max =
+                collapsedPosition();
+
+            const min =
+                expandedPosition();
+
+            const clamped =
+                Math.max(
+                    min,
+                    Math.min(
+                        max,
+                        value
+                    )
+                );
+
+
+            if(!animate){
+
+                sheet.classList.add(
+                    "dragging"
+                );
+
+            }else{
+
+                sheet.classList.remove(
+                    "dragging"
+                );
+
+            }
+
+
+            sheet.style.transform =
+                `translateY(${clamped}px)`;
+
+        }
+
+
+        function expandSheet(){
+
+            document.body.classList.remove(
+                "sheet-collapsed"
+            );
+
+            document.body.classList.add(
+                "sheet-expanded"
+            );
+
+
+            sheet.classList.remove(
+                "dragging"
+            );
+
+
+            sheet.style.transform =
+                "translateY(0)";
+
+
+            setTimeout(
+                () => {
+
+                    if(window.RiderXCustomer?.getState){
+
+                        const map =
+                            window.RiderXCustomer
+                                .getState()
+                                ?.map;
+
+                        if(map){
+
+                            map.invalidateSize();
+
+                        }
+
+                    }
+
+                },
+                350
+            );
+
+        }
+
+
+        function collapseSheet(){
+
+            document.body.classList.remove(
+                "sheet-expanded"
+            );
+
+            document.body.classList.add(
+                "sheet-collapsed"
+            );
+
+
+            sheet.classList.remove(
+                "dragging"
+            );
+
+
+            sheet.style.transform =
+                `translateY(${collapsedPosition()}px)`;
+
+
+            setTimeout(
+                () => {
+
+                    if(window.RiderXCustomer?.getState){
+
+                        const map =
+                            window.RiderXCustomer
+                                .getState()
+                                ?.map;
+
+                        if(map){
+
+                            map.invalidateSize();
+
+                        }
+
+                    }
+
+                },
+                350
+            );
+
+        }
+
+
+        function toggleSheet(){
+
+            if(
+                document.body.classList.contains(
+                    "sheet-expanded"
+                )
+            ){
+
+                collapseSheet();
+
+            }else{
+
+                expandSheet();
+
+            }
+
+        }
+
+
+        /*
+         * Initial position
+         */
 
         setTimeout(
-
             () => {
 
-                refreshMap();
+                collapseSheet();
 
             },
-
-            800
-
+            100
         );
 
 
-    },
+        /*
+         * TOUCH START
+         */
 
+        handle.addEventListener(
+            "touchstart",
+            (event) => {
+
+                if(
+                    !event.touches ||
+                    !event.touches.length
+                ){
+
+                    return;
+
+                }
+
+
+                dragging = true;
+
+                startY =
+                    event.touches[0].clientY;
+
+                currentY =
+                    startY;
+
+                startTranslate =
+                    getTranslateY();
+
+
+                sheet.classList.add(
+                    "dragging"
+                );
+
+            },
+            {
+                passive:true
+            }
+        );
+
+
+        /*
+         * TOUCH MOVE
+         */
+
+        handle.addEventListener(
+            "touchmove",
+            (event) => {
+
+                if(!dragging){
+                    return;
+                }
+
+
+                currentY =
+                    event.touches[0].clientY;
+
+
+                const delta =
+                    currentY -
+                    startY;
+
+
+                const next =
+                    startTranslate +
+                    delta;
+
+
+                setSheetPosition(
+                    next,
+                    false
+                );
+
+            },
+            {
+                passive:true
+            }
+        );
+
+
+        /*
+         * TOUCH END
+         */
+
+        handle.addEventListener(
+            "touchend",
+            () => {
+
+                if(!dragging){
+                    return;
+                }
+
+
+                dragging = false;
+
+
+                sheet.classList.remove(
+                    "dragging"
+                );
+
+
+                const finalY =
+                    getTranslateY();
+
+
+                const max =
+                    collapsedPosition();
+
+
+                /*
+                 * Snap point:
+                 *
+                 * Top  = 0
+                 * Bottom = 30% visible
+                 */
+
+                if(
+                    finalY <
+                    max * 0.50
+                ){
+
+                    expandSheet();
+
+                }else{
+
+                    collapseSheet();
+
+                }
+
+            },
+            {
+                passive:true
+            }
+        );
+
+
+        /*
+         * MOUSE / DESKTOP DRAG
+         */
+
+        handle.addEventListener(
+            "mousedown",
+            (event) => {
+
+                dragging = true;
+
+                startY =
+                    event.clientY;
+
+                currentY =
+                    startY;
+
+                startTranslate =
+                    getTranslateY();
+
+
+                sheet.classList.add(
+                    "dragging"
+                );
+
+
+                event.preventDefault();
+
+            }
+        );
+
+
+        document.addEventListener(
+            "mousemove",
+            (event) => {
+
+                if(!dragging){
+                    return;
+                }
+
+
+                currentY =
+                    event.clientY;
+
+
+                const delta =
+                    currentY -
+                    startY;
+
+
+                setSheetPosition(
+                    startTranslate +
+                    delta,
+                    false
+                );
+
+            }
+        );
+
+
+        document.addEventListener(
+            "mouseup",
+            () => {
+
+                if(!dragging){
+                    return;
+                }
+
+
+                dragging = false;
+
+
+                sheet.classList.remove(
+                    "dragging"
+                );
+
+
+                const finalY =
+                    getTranslateY();
+
+
+                const max =
+                    collapsedPosition();
+
+
+                if(
+                    finalY <
+                    max * 0.50
+                ){
+
+                    expandSheet();
+
+                }else{
+
+                    collapseSheet();
+
+                }
+
+            }
+        );
+
+
+        /*
+         * TAP HANDLE
+         */
+
+        handle.addEventListener(
+            "click",
+            () => {
+
+                if(
+                    Math.abs(
+                        currentY -
+                        startY
+                    ) < 8
+                ){
+
+                    toggleSheet();
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Recalculate on orientation
+         */
+
+        window.addEventListener(
+            "resize",
+            () => {
+
+                if(
+                    document.body.classList.contains(
+                        "sheet-expanded"
+                    )
+                ){
+
+                    expandSheet();
+
+                }else{
+
+                    collapseSheet();
+
+                }
+
+            }
+        );
+
+    },
     {
         once:true
     }
-
 );
 
 </script>
