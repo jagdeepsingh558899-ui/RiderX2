@@ -1,42 +1,49 @@
 /* ============================================================
-   RIDERX 2.0
-   LANGUAGE SYSTEM
+   RIDERX LANGUAGE ENGINE
    File: js/language.js
 
    Supports:
    - English
    - Hindi
+   - Customer
+   - Rider
+   - Admin
+   - Dynamic translation
+   - Placeholder translation
+   - Title translation
+   - Button translation
    - Saved language preference
-   - Dynamic text translation
-   - Dynamic placeholders
-   - Buttons / labels / navigation
-   - Language selector
+   - Runtime language switching
    ============================================================ */
 
 (function () {
+
     "use strict";
 
-    window.RiderX = window.RiderX || {};
+    window.RiderX =
+        window.RiderX || {};
 
-    const RX = window.RiderX;
+    const RX =
+        window.RiderX;
 
-    RX.language = RX.language || {};
-
-    const LANG = RX.language;
+    const Language =
+        RX.language =
+        RX.language || {};
 
 
     /* ========================================================
        CONFIG
        ======================================================== */
 
-    LANG.config = {
+    Language.config = {
 
-        defaultLanguage: "en",
+        defaultLanguage:
+            "en",
 
         storageKey:
             "riderx_language",
 
-        supported: [
+        supportedLanguages: [
             "en",
             "hi"
         ]
@@ -47,10 +54,13 @@
        STATE
        ======================================================== */
 
-    LANG.state = {
+    Language.state = {
 
         current:
-            LANG.config.defaultLanguage
+            Language.config.defaultLanguage,
+
+        ready:
+            false
     };
 
 
@@ -58,27 +68,77 @@
        TRANSLATIONS
        ======================================================== */
 
-    LANG.translations = {
+    Language.translations = {
 
         en: {
 
-            appName:
+            /* General */
+
+            app_name:
                 "RiderX",
 
             home:
                 "Home",
 
-            booking:
-                "Booking",
+            menu:
+                "Menu",
 
-            rides:
-                "Rides",
+            back:
+                "Back",
 
-            history:
-                "History",
+            next:
+                "Next",
 
-            wallet:
-                "Wallet",
+            continue:
+                "Continue",
+
+            cancel:
+                "Cancel",
+
+            confirm:
+                "Confirm",
+
+            save:
+                "Save",
+
+            update:
+                "Update",
+
+            edit:
+                "Edit",
+
+            delete:
+                "Delete",
+
+            close:
+                "Close",
+
+            done:
+                "Done",
+
+            retry:
+                "Retry",
+
+            search:
+                "Search",
+
+            submit:
+                "Submit",
+
+            loading:
+                "Loading...",
+
+            yes:
+                "Yes",
+
+            no:
+                "No",
+
+            ok:
+                "OK",
+
+
+            /* Navigation */
 
             profile:
                 "Profile",
@@ -89,103 +149,85 @@
             notifications:
                 "Notifications",
 
+            wallet:
+                "Wallet",
+
+            history:
+                "History",
+
             support:
                 "Support",
+
+            rides:
+                "Rides",
+
+            payments:
+                "Payments",
+
+            offers:
+                "Offers",
 
             logout:
                 "Logout",
 
-            login:
-                "Login",
 
-            register:
-                "Register",
+            /* Customer */
 
-            continue:
-                "Continue",
+            where_to:
+                "Where to?",
 
-            next:
-                "Next",
-
-            back:
-                "Back",
-
-            save:
-                "Save",
-
-            cancel:
-                "Cancel",
-
-            confirm:
-                "Confirm",
-
-            done:
-                "Done",
-
-            search:
-                "Search",
-
-            pickup:
+            pickup_location:
                 "Pickup location",
 
             destination:
-                "Where to?",
+                "Destination",
 
-            chooseDestination:
-                "Choose destination",
+            choose_destination:
+                "Choose your destination",
 
-            currentLocation:
+            set_pickup:
+                "Set pickup location",
+
+            current_location:
                 "Current location",
 
-            setLocation:
-                "Set location",
+            choose_ride:
+                "Choose a ride",
 
-            bikeTaxi:
-                "Bike Taxi",
+            book_ride:
+                "Book a ride",
 
-            cab:
-                "Cab",
+            confirm_ride:
+                "Confirm ride",
 
-            parcel:
-                "Parcel",
+            searching_for_rider:
+                "Finding your rider...",
 
-            foodDelivery:
-                "Food Delivery",
+            rider_found:
+                "Rider found",
 
-            bookRide:
-                "Book Ride",
+            ride_accepted:
+                "Ride accepted",
 
-            findingRider:
-                "Finding a rider",
-
-            riderAccepted:
-                "Rider accepted",
-
-            riderArriving:
+            rider_arriving:
                 "Rider is arriving",
 
-            riderArrived:
-                "Rider has arrived",
+            trip_started:
+                "Trip started",
 
-            rideStarted:
-                "Ride started",
+            trip_completed:
+                "Trip completed",
 
-            rideCompleted:
-                "Ride completed",
-
-            rideCancelled:
+            ride_cancelled:
                 "Ride cancelled",
 
-            rideInProgress:
-                "Ride in progress",
+            ride_details:
+                "Ride details",
 
             fare:
                 "Fare",
 
-            total:
-                "Total",
-
-            estimatedFare:
+            estimated_fare:
                 "Estimated fare",
 
             distance:
@@ -203,173 +245,182 @@
             online:
                 "Online",
 
-            walletPayment:
+            upi:
+                "UPI",
+
+            card:
+                "Card",
+
+            wallet_payment:
                 "Wallet",
 
-            chat:
-                "Chat",
+            rate_your_ride:
+                "Rate your ride",
 
-            call:
-                "Call",
+            how_was_your_ride:
+                "How was your ride?",
 
-            message:
-                "Message",
+            submit_rating:
+                "Submit rating",
 
-            send:
-                "Send",
 
-            typeMessage:
-                "Type a message",
+            /* Services */
 
-            arrived:
+            bike_taxi:
+                "Bike Taxi",
+
+            cab:
+                "Cab",
+
+            parcel:
+                "Parcel",
+
+            food_delivery:
+                "Food Delivery",
+
+            fast_affordable:
+                "Fast & affordable",
+
+            comfortable_rides:
+                "Comfortable rides",
+
+            send_anything:
+                "Send anything",
+
+            quick_delivery:
+                "Quick delivery",
+
+
+            /* Rider */
+
+            rider_dashboard:
+                "Rider Dashboard",
+
+            go_online:
+                "Go Online",
+
+            go_offline:
+                "Go Offline",
+
+            online_status:
+                "You are online",
+
+            offline_status:
+                "You are offline",
+
+            new_ride_request:
+                "New ride request",
+
+            accept_ride:
+                "Accept Ride",
+
+            decline_ride:
+                "Decline",
+
+            pickup:
+                "Pickup",
+
+            drop:
+                "Drop",
+
+            navigate:
+                "Navigate",
+
+            arrive:
                 "Arrived",
 
-            otp:
-                "OTP",
+            start_ride:
+                "Start Ride",
 
-            shareRide:
-                "Share Ride",
-
-            safety:
-                "Safety",
-
-            emergency:
-                "Emergency",
-
-            help:
-                "Help",
-
-            referral:
-                "Referral",
-
-            inviteFriends:
-                "Invite Friends",
+            complete_ride:
+                "Complete Ride",
 
             earnings:
                 "Earnings",
 
-            available:
-                "Available",
+            today_earnings:
+                "Today's earnings",
 
-            offline:
-                "Offline",
+            total_earnings:
+                "Total earnings",
 
-            onlineStatus:
-                "Online",
+            completed_rides:
+                "Completed rides",
 
-            goOnline:
-                "Go Online",
+            rider_profile:
+                "Rider Profile",
 
-            goOffline:
-                "Go Offline",
 
-            accept:
-                "Accept",
+            /* History */
 
-            reject:
-                "Reject",
+            ride_history:
+                "Ride History",
 
-            startRide:
-                "Start Ride",
+            no_rides:
+                "No rides found",
 
-            endRide:
-                "End Ride",
+            past_rides:
+                "Past rides",
 
-            completeRide:
-                "Complete Ride",
+            completed:
+                "Completed",
 
-            pickupRequired:
-                "Please select your pickup location.",
+            cancelled:
+                "Cancelled",
 
-            destinationRequired:
-                "Please select your destination.",
+            pending:
+                "Pending",
 
-            loginRequired:
-                "Please login to continue.",
+            accepted:
+                "Accepted",
 
-            noActiveRide:
-                "No active ride found.",
+            searching:
+                "Searching",
 
-            bookingFailed:
-                "Booking failed.",
+            ongoing:
+                "On trip",
 
-            somethingWrong:
-                "Something went wrong.",
+            details:
+                "Details",
 
-            tryAgain:
-                "Please try again.",
 
-            noRides:
-                "No rides yet.",
+            /* Wallet */
 
-            noNotifications:
-                "No notifications.",
+            available_balance:
+                "Available balance",
 
-            noMessages:
-                "No messages yet.",
+            add_money:
+                "Add money",
 
-            welcome:
-                "Welcome to RiderX",
+            withdraw:
+                "Withdraw",
 
-            welcomeBack:
-                "Welcome back",
+            transactions:
+                "Transactions",
 
-            goodMorning:
-                "Good morning",
+            transaction_history:
+                "Transaction history",
 
-            goodAfternoon:
-                "Good afternoon",
+            recharge:
+                "Recharge",
 
-            goodEvening:
-                "Good evening",
+            refund:
+                "Refund",
 
-            chooseService:
-                "Choose a service",
 
-            whereAreYouGoing:
-                "Where are you going?",
+            /* Profile */
 
-            selectPayment:
-                "Select payment method",
+            personal_information:
+                "Personal information",
 
-            rideDetails:
-                "Ride Details",
+            full_name:
+                "Full name",
 
-            driverDetails:
-                "Rider Details",
+            phone_number:
+                "Phone number",
 
-            customerDetails:
-                "Customer Details",
-
-            vehicle:
-                "Vehicle",
-
-            vehicleNumber:
-                "Vehicle Number",
-
-            rating:
-                "Rating",
-
-            reviews:
-                "Reviews",
-
-            rateRide:
-                "Rate your ride",
-
-            submitRating:
-                "Submit Rating",
-
-            skip:
-                "Skip",
-
-            thankYou:
-                "Thank you",
-
-            privacy:
-                "Privacy",
-
-            terms:
-                "Terms & Conditions",
+            email:
+                "Email",
 
             language:
                 "Language",
@@ -380,173 +431,92 @@
             hindi:
                 "Hindi",
 
-            selectLanguage:
-                "Select Language",
+            change_language:
+                "Change language",
+
+
+            /* Notifications */
+
+            no_notifications:
+                "No notifications",
+
+            mark_all_read:
+                "Mark all as read",
+
+            new_notification:
+                "New notification",
+
+
+            /* Settings */
 
             account:
                 "Account",
 
-            personalInformation:
-                "Personal Information",
+            privacy:
+                "Privacy",
 
-            editProfile:
-                "Edit Profile",
+            security:
+                "Security",
 
-            name:
-                "Name",
+            dark_mode:
+                "Dark mode",
 
-            phone:
-                "Phone",
+            location:
+                "Location",
 
-            email:
-                "Email",
+            permissions:
+                "Permissions",
+
+            app_settings:
+                "App settings",
+
+
+            /* Authentication */
+
+            login:
+                "Login",
+
+            register:
+                "Register",
+
+            create_account:
+                "Create account",
+
+            phone_login:
+                "Login with phone",
+
+            email_login:
+                "Login with email",
+
+            enter_phone:
+                "Enter phone number",
+
+            enter_otp:
+                "Enter OTP",
+
+            verify_otp:
+                "Verify OTP",
+
+            send_otp:
+                "Send OTP",
+
+            resend_otp:
+                "Resend OTP",
 
             password:
                 "Password",
 
-            changePassword:
-                "Change Password",
+            forgot_password:
+                "Forgot password?",
 
-            deleteAccount:
-                "Delete Account",
+            welcome:
+                "Welcome to RiderX",
 
-            appSettings:
-                "App Settings",
 
-            darkMode:
-                "Dark Mode",
+            /* Admin */
 
-            notificationsSettings:
-                "Notification Settings",
-
-            locationPermission:
-                "Location Permission",
-
-            enableLocation:
-                "Enable Location",
-
-            walletBalance:
-                "Wallet Balance",
-
-            addMoney:
-                "Add Money",
-
-            withdraw:
-                "Withdraw",
-
-            transactionHistory:
-                "Transaction History",
-
-            referralCode:
-                "Referral Code",
-
-            copy:
-                "Copy",
-
-            copied:
-                "Copied",
-
-            invite:
-                "Invite",
-
-            logoutConfirm:
-                "Are you sure you want to logout?",
-
-            cancelRideConfirm:
-                "Are you sure you want to cancel this ride?",
-
-            noRiderAvailable:
-                "No rider is available right now.",
-
-            searchingNearby:
-                "Searching for nearby riders...",
-
-            rideRequested:
-                "Ride requested",
-
-            waitingForRider:
-                "Waiting for a rider to accept.",
-
-            riderOnTheWay:
-                "Your rider is on the way.",
-
-            riderReached:
-                "Your rider has reached the pickup location.",
-
-            enjoyRide:
-                "Enjoy your ride!",
-
-            paymentSuccessful:
-                "Payment successful",
-
-            paymentFailed:
-                "Payment failed",
-
-            insufficientBalance:
-                "Insufficient wallet balance.",
-
-            networkError:
-                "Network error. Please check your internet connection.",
-
-            locationUnavailable:
-                "Unable to get your location.",
-
-            permissionDenied:
-                "Location permission denied.",
-
-            retry:
-                "Retry",
-
-            refresh:
-                "Refresh",
-
-            loading:
-                "Loading...",
-
-            pleaseWait:
-                "Please wait...",
-
-            today:
-                "Today",
-
-            yesterday:
-                "Yesterday",
-
-            tomorrow:
-                "Tomorrow",
-
-            date:
-                "Date",
-
-            time:
-                "Time",
-
-            status:
-                "Status",
-
-            pending:
-                "Pending",
-
-            accepted:
-                "Accepted",
-
-            rejected:
-                "Rejected",
-
-            completed:
-                "Completed",
-
-            cancelled:
-                "Cancelled",
-
-            active:
-                "Active",
-
-            inactive:
-                "Inactive",
-
-            admin:
-                "Admin",
+            admin_dashboard:
+                "Admin Dashboard",
 
             customers:
                 "Customers",
@@ -554,29 +524,89 @@
             riders:
                 "Riders",
 
-            dashboard:
-                "Dashboard",
+            rider_approval:
+                "Rider Approval",
 
             reports:
                 "Reports",
 
-            manageRiders:
-                "Manage Riders",
+            pricing:
+                "Pricing",
 
-            manageCustomers:
-                "Manage Customers",
+            fare_settings:
+                "Fare Settings",
 
-            rideRequests:
-                "Ride Requests",
+            service_settings:
+                "Service Settings",
 
-            allRides:
-                "All Rides",
+            coupons:
+                "Coupons",
 
-            supportTickets:
-                "Support Tickets",
+            commission:
+                "Commission",
 
-            systemSettings:
-                "System Settings"
+            admin_notifications:
+                "Notifications",
+
+            users:
+                "Users",
+
+            supports:
+                "Supports",
+
+            admin_settings:
+                "Admin Settings",
+
+
+            /* Errors */
+
+            something_wrong:
+                "Something went wrong.",
+
+            network_error:
+                "Network error. Please try again.",
+
+            location_error:
+                "Unable to get your location.",
+
+            login_required:
+                "Please login to continue.",
+
+            permission_denied:
+                "Permission denied.",
+
+            ride_not_found:
+                "Ride not found.",
+
+
+            /* Messages */
+
+            changes_saved:
+                "Changes saved successfully.",
+
+            ride_booked:
+                "Your ride has been booked.",
+
+            ride_cancel_confirm:
+                "Are you sure you want to cancel this ride?",
+
+            logout_confirm:
+                "Are you sure you want to logout?",
+
+            welcome_back:
+                "Welcome back",
+
+            good_morning:
+                "Good morning",
+
+            good_afternoon:
+                "Good afternoon",
+
+            good_evening:
+                "Good evening",
+
+            good_night:
+                "Good night"
         },
 
 
@@ -586,23 +616,73 @@
 
         hi: {
 
-            appName:
+            /* General */
+
+            app_name:
                 "RiderX",
 
             home:
                 "होम",
 
-            booking:
-                "बुकिंग",
+            menu:
+                "मेन्यू",
 
-            rides:
-                "राइड्स",
+            back:
+                "वापस",
 
-            history:
-                "इतिहास",
+            next:
+                "आगे",
 
-            wallet:
-                "वॉलेट",
+            continue:
+                "जारी रखें",
+
+            cancel:
+                "रद्द करें",
+
+            confirm:
+                "पुष्टि करें",
+
+            save:
+                "सेव करें",
+
+            update:
+                "अपडेट करें",
+
+            edit:
+                "एडिट करें",
+
+            delete:
+                "डिलीट करें",
+
+            close:
+                "बंद करें",
+
+            done:
+                "हो गया",
+
+            retry:
+                "फिर कोशिश करें",
+
+            search:
+                "खोजें",
+
+            submit:
+                "सबमिट करें",
+
+            loading:
+                "लोड हो रहा है...",
+
+            yes:
+                "हाँ",
+
+            no:
+                "नहीं",
+
+            ok:
+                "ठीक है",
+
+
+            /* Navigation */
 
             profile:
                 "प्रोफाइल",
@@ -613,103 +693,85 @@
             notifications:
                 "नोटिफिकेशन",
 
+            wallet:
+                "वॉलेट",
+
+            history:
+                "हिस्ट्री",
+
             support:
                 "सपोर्ट",
+
+            rides:
+                "राइड्स",
+
+            payments:
+                "पेमेंट्स",
+
+            offers:
+                "ऑफर्स",
 
             logout:
                 "लॉग आउट",
 
-            login:
-                "लॉगिन",
 
-            register:
-                "रजिस्टर",
+            /* Customer */
 
-            continue:
-                "जारी रखें",
+            where_to:
+                "कहाँ जाना है?",
 
-            next:
-                "आगे",
-
-            back:
-                "पीछे",
-
-            save:
-                "सेव करें",
-
-            cancel:
-                "रद्द करें",
-
-            confirm:
-                "पुष्टि करें",
-
-            done:
-                "हो गया",
-
-            search:
-                "खोजें",
-
-            pickup:
+            pickup_location:
                 "पिकअप लोकेशन",
 
             destination:
-                "कहाँ जाना है?",
+                "डेस्टिनेशन",
 
-            chooseDestination:
-                "डेस्टिनेशन चुनें",
+            choose_destination:
+                "अपना डेस्टिनेशन चुनें",
 
-            currentLocation:
+            set_pickup:
+                "पिकअप लोकेशन सेट करें",
+
+            current_location:
                 "वर्तमान लोकेशन",
 
-            setLocation:
-                "लोकेशन सेट करें",
+            choose_ride:
+                "राइड चुनें",
 
-            bikeTaxi:
-                "बाइक टैक्सी",
-
-            cab:
-                "कैब",
-
-            parcel:
-                "पार्सल",
-
-            foodDelivery:
-                "फूड डिलीवरी",
-
-            bookRide:
+            book_ride:
                 "राइड बुक करें",
 
-            findingRider:
-                "राइडर खोज रहे हैं",
+            confirm_ride:
+                "राइड कन्फर्म करें",
 
-            riderAccepted:
-                "राइडर ने राइड स्वीकार कर ली",
+            searching_for_rider:
+                "राइडर खोज रहे हैं...",
 
-            riderArriving:
+            rider_found:
+                "राइडर मिल गया",
+
+            ride_accepted:
+                "राइड स्वीकार कर ली गई",
+
+            rider_arriving:
                 "राइडर आ रहा है",
 
-            riderArrived:
-                "राइडर पहुँच गया है",
+            trip_started:
+                "ट्रिप शुरू हो गई",
 
-            rideStarted:
-                "राइड शुरू हो गई",
+            trip_completed:
+                "ट्रिप पूरी हो गई",
 
-            rideCompleted:
-                "राइड पूरी हो गई",
-
-            rideCancelled:
+            ride_cancelled:
                 "राइड रद्द कर दी गई",
 
-            rideInProgress:
-                "राइड चल रही है",
+            ride_details:
+                "राइड की जानकारी",
 
             fare:
                 "किराया",
 
-            total:
-                "कुल",
-
-            estimatedFare:
+            estimated_fare:
                 "अनुमानित किराया",
 
             distance:
@@ -719,7 +781,7 @@
                 "समय",
 
             payment:
-                "भुगतान",
+                "पेमेंट",
 
             cash:
                 "कैश",
@@ -727,173 +789,182 @@
             online:
                 "ऑनलाइन",
 
-            walletPayment:
+            upi:
+                "UPI",
+
+            card:
+                "कार्ड",
+
+            wallet_payment:
                 "वॉलेट",
 
-            chat:
-                "चैट",
+            rate_your_ride:
+                "अपनी राइड को रेट करें",
 
-            call:
-                "कॉल",
+            how_was_your_ride:
+                "आपकी राइड कैसी रही?",
 
-            message:
-                "मैसेज",
+            submit_rating:
+                "रेटिंग सबमिट करें",
 
-            send:
-                "भेजें",
 
-            typeMessage:
-                "मैसेज लिखें",
+            /* Services */
 
-            arrived:
+            bike_taxi:
+                "बाइक टैक्सी",
+
+            cab:
+                "कैब",
+
+            parcel:
+                "पार्सल",
+
+            food_delivery:
+                "फूड डिलीवरी",
+
+            fast_affordable:
+                "तेज़ और किफायती",
+
+            comfortable_rides:
+                "आरामदायक राइड",
+
+            send_anything:
+                "कुछ भी भेजें",
+
+            quick_delivery:
+                "तेज़ डिलीवरी",
+
+
+            /* Rider */
+
+            rider_dashboard:
+                "राइडर डैशबोर्ड",
+
+            go_online:
+                "ऑनलाइन जाएँ",
+
+            go_offline:
+                "ऑफलाइन जाएँ",
+
+            online_status:
+                "आप ऑनलाइन हैं",
+
+            offline_status:
+                "आप ऑफलाइन हैं",
+
+            new_ride_request:
+                "नई राइड रिक्वेस्ट",
+
+            accept_ride:
+                "राइड स्वीकार करें",
+
+            decline_ride:
+                "मना करें",
+
+            pickup:
+                "पिकअप",
+
+            drop:
+                "ड्रॉप",
+
+            navigate:
+                "नेविगेट करें",
+
+            arrive:
                 "पहुँच गया",
 
-            otp:
-                "ओटीपी",
+            start_ride:
+                "राइड शुरू करें",
 
-            shareRide:
-                "राइड शेयर करें",
-
-            safety:
-                "सेफ्टी",
-
-            emergency:
-                "इमरजेंसी",
-
-            help:
-                "मदद",
-
-            referral:
-                "रेफरल",
-
-            inviteFriends:
-                "दोस्तों को आमंत्रित करें",
+            complete_ride:
+                "राइड पूरी करें",
 
             earnings:
                 "कमाई",
 
-            available:
-                "उपलब्ध",
+            today_earnings:
+                "आज की कमाई",
 
-            offline:
-                "ऑफलाइन",
+            total_earnings:
+                "कुल कमाई",
 
-            onlineStatus:
-                "ऑनलाइन",
+            completed_rides:
+                "पूरी हुई राइड्स",
 
-            goOnline:
-                "ऑनलाइन जाएँ",
+            rider_profile:
+                "राइडर प्रोफाइल",
 
-            goOffline:
-                "ऑफलाइन जाएँ",
 
-            accept:
-                "स्वीकार करें",
+            /* History */
 
-            reject:
-                "अस्वीकार करें",
+            ride_history:
+                "राइड हिस्ट्री",
 
-            startRide:
-                "राइड शुरू करें",
+            no_rides:
+                "कोई राइड नहीं मिली",
 
-            endRide:
-                "राइड समाप्त करें",
+            past_rides:
+                "पिछली राइड्स",
 
-            completeRide:
-                "राइड पूरी करें",
+            completed:
+                "पूरी हुई",
 
-            pickupRequired:
-                "कृपया पिकअप लोकेशन चुनें।",
+            cancelled:
+                "रद्द",
 
-            destinationRequired:
-                "कृपया डेस्टिनेशन चुनें।",
+            pending:
+                "पेंडिंग",
 
-            loginRequired:
-                "जारी रखने के लिए लॉगिन करें।",
+            accepted:
+                "स्वीकार की गई",
 
-            noActiveRide:
-                "कोई एक्टिव राइड नहीं मिली।",
+            searching:
+                "खोज रहे हैं",
 
-            bookingFailed:
-                "बुकिंग असफल रही।",
+            ongoing:
+                "राइड चल रही है",
 
-            somethingWrong:
-                "कुछ गलत हो गया।",
+            details:
+                "जानकारी",
 
-            tryAgain:
-                "कृपया दोबारा प्रयास करें।",
 
-            noRides:
-                "अभी कोई राइड नहीं है।",
+            /* Wallet */
 
-            noNotifications:
-                "कोई नोटिफिकेशन नहीं है।",
+            available_balance:
+                "उपलब्ध बैलेंस",
 
-            noMessages:
-                "अभी कोई मैसेज नहीं है।",
+            add_money:
+                "पैसे जोड़ें",
 
-            welcome:
-                "RiderX में आपका स्वागत है",
+            withdraw:
+                "पैसे निकालें",
 
-            welcomeBack:
-                "वापसी पर स्वागत है",
+            transactions:
+                "लेन-देन",
 
-            goodMorning:
-                "सुप्रभात",
+            transaction_history:
+                "लेन-देन की हिस्ट्री",
 
-            goodAfternoon:
-                "नमस्कार",
+            recharge:
+                "रिचार्ज",
 
-            goodEvening:
-                "शुभ संध्या",
+            refund:
+                "रिफंड",
 
-            chooseService:
-                "सर्विस चुनें",
 
-            whereAreYouGoing:
-                "आप कहाँ जाना चाहते हैं?",
+            /* Profile */
 
-            selectPayment:
-                "पेमेंट का तरीका चुनें",
+            personal_information:
+                "व्यक्तिगत जानकारी",
 
-            rideDetails:
-                "राइड की जानकारी",
+            full_name:
+                "पूरा नाम",
 
-            driverDetails:
-                "राइडर की जानकारी",
+            phone_number:
+                "फोन नंबर",
 
-            customerDetails:
-                "कस्टमर की जानकारी",
-
-            vehicle:
-                "वाहन",
-
-            vehicleNumber:
-                "वाहन नंबर",
-
-            rating:
-                "रेटिंग",
-
-            reviews:
-                "रिव्यू",
-
-            rateRide:
-                "अपनी राइड को रेट करें",
-
-            submitRating:
-                "रेटिंग भेजें",
-
-            skip:
-                "स्किप करें",
-
-            thankYou:
-                "धन्यवाद",
-
-            privacy:
-                "प्राइवेसी",
-
-            terms:
-                "नियम और शर्तें",
+            email:
+                "ईमेल",
 
             language:
                 "भाषा",
@@ -904,173 +975,92 @@
             hindi:
                 "हिंदी",
 
-            selectLanguage:
-                "भाषा चुनें",
+            change_language:
+                "भाषा बदलें",
+
+
+            /* Notifications */
+
+            no_notifications:
+                "कोई नोटिफिकेशन नहीं",
+
+            mark_all_read:
+                "सभी को पढ़ा हुआ करें",
+
+            new_notification:
+                "नया नोटिफिकेशन",
+
+
+            /* Settings */
 
             account:
                 "अकाउंट",
 
-            personalInformation:
-                "व्यक्तिगत जानकारी",
+            privacy:
+                "प्राइवेसी",
 
-            editProfile:
-                "प्रोफाइल एडिट करें",
+            security:
+                "सिक्योरिटी",
 
-            name:
-                "नाम",
+            dark_mode:
+                "डार्क मोड",
 
-            phone:
-                "फोन",
+            location:
+                "लोकेशन",
 
-            email:
-                "ईमेल",
+            permissions:
+                "परमिशन",
+
+            app_settings:
+                "ऐप सेटिंग्स",
+
+
+            /* Authentication */
+
+            login:
+                "लॉगिन",
+
+            register:
+                "रजिस्टर",
+
+            create_account:
+                "अकाउंट बनाएँ",
+
+            phone_login:
+                "फोन से लॉगिन",
+
+            email_login:
+                "ईमेल से लॉगिन",
+
+            enter_phone:
+                "फोन नंबर दर्ज करें",
+
+            enter_otp:
+                "OTP दर्ज करें",
+
+            verify_otp:
+                "OTP वेरीफाई करें",
+
+            send_otp:
+                "OTP भेजें",
+
+            resend_otp:
+                "OTP दोबारा भेजें",
 
             password:
                 "पासवर्ड",
 
-            changePassword:
-                "पासवर्ड बदलें",
+            forgot_password:
+                "पासवर्ड भूल गए?",
 
-            deleteAccount:
-                "अकाउंट डिलीट करें",
+            welcome:
+                "RiderX में आपका स्वागत है",
 
-            appSettings:
-                "ऐप सेटिंग्स",
 
-            darkMode:
-                "डार्क मोड",
+            /* Admin */
 
-            notificationsSettings:
-                "नोटिफिकेशन सेटिंग्स",
-
-            locationPermission:
-                "लोकेशन परमिशन",
-
-            enableLocation:
-                "लोकेशन चालू करें",
-
-            walletBalance:
-                "वॉलेट बैलेंस",
-
-            addMoney:
-                "पैसे जोड़ें",
-
-            withdraw:
-                "पैसे निकालें",
-
-            transactionHistory:
-                "लेन-देन इतिहास",
-
-            referralCode:
-                "रेफरल कोड",
-
-            copy:
-                "कॉपी",
-
-            copied:
-                "कॉपी हो गया",
-
-            invite:
-                "आमंत्रित करें",
-
-            logoutConfirm:
-                "क्या आप लॉग आउट करना चाहते हैं?",
-
-            cancelRideConfirm:
-                "क्या आप इस राइड को रद्द करना चाहते हैं?",
-
-            noRiderAvailable:
-                "अभी कोई राइडर उपलब्ध नहीं है।",
-
-            searchingNearby:
-                "पास के राइडर खोजे जा रहे हैं...",
-
-            rideRequested:
-                "राइड रिक्वेस्ट भेज दी गई",
-
-            waitingForRider:
-                "राइडर के स्वीकार करने का इंतजार है।",
-
-            riderOnTheWay:
-                "आपका राइडर रास्ते में है।",
-
-            riderReached:
-                "आपका राइडर पिकअप लोकेशन पर पहुँच गया है।",
-
-            enjoyRide:
-                "अपनी राइड का आनंद लें!",
-
-            paymentSuccessful:
-                "पेमेंट सफल रहा",
-
-            paymentFailed:
-                "पेमेंट असफल रहा",
-
-            insufficientBalance:
-                "वॉलेट में पर्याप्त बैलेंस नहीं है।",
-
-            networkError:
-                "नेटवर्क एरर। इंटरनेट कनेक्शन चेक करें।",
-
-            locationUnavailable:
-                "आपकी लोकेशन प्राप्त नहीं हो सकी।",
-
-            permissionDenied:
-                "लोकेशन परमिशन नहीं दी गई।",
-
-            retry:
-                "दोबारा प्रयास करें",
-
-            refresh:
-                "रिफ्रेश करें",
-
-            loading:
-                "लोड हो रहा है...",
-
-            pleaseWait:
-                "कृपया प्रतीक्षा करें...",
-
-            today:
-                "आज",
-
-            yesterday:
-                "कल",
-
-            tomorrow:
-                "कल",
-
-            date:
-                "तारीख",
-
-            time:
-                "समय",
-
-            status:
-                "स्थिति",
-
-            pending:
-                "पेंडिंग",
-
-            accepted:
-                "स्वीकार किया गया",
-
-            rejected:
-                "अस्वीकार किया गया",
-
-            completed:
-                "पूरा हुआ",
-
-            cancelled:
-                "रद्द",
-
-            active:
-                "सक्रिय",
-
-            inactive:
-                "निष्क्रिय",
-
-            admin:
-                "एडमिन",
+            admin_dashboard:
+                "एडमिन डैशबोर्ड",
 
             customers:
                 "कस्टमर्स",
@@ -1078,709 +1068,1375 @@
             riders:
                 "राइडर्स",
 
-            dashboard:
-                "डैशबोर्ड",
+            rider_approval:
+                "राइडर अप्रूवल",
 
             reports:
                 "रिपोर्ट्स",
 
-            manageRiders:
-                "राइडर्स मैनेज करें",
+            pricing:
+                "प्राइसिंग",
 
-            manageCustomers:
-                "कस्टमर्स मैनेज करें",
+            fare_settings:
+                "फेयर सेटिंग्स",
 
-            rideRequests:
-                "राइड रिक्वेस्ट",
+            service_settings:
+                "सर्विस सेटिंग्स",
 
-            allRides:
-                "सभी राइड्स",
+            coupons:
+                "कूपन्स",
 
-            supportTickets:
-                "सपोर्ट टिकट्स",
+            commission:
+                "कमीशन",
 
-            systemSettings:
-                "सिस्टम सेटिंग्स"
+            admin_notifications:
+                "नोटिफिकेशन",
+
+            users:
+                "यूज़र्स",
+
+            supports:
+                "सपोर्ट्स",
+
+            admin_settings:
+                "एडमिन सेटिंग्स",
+
+
+            /* Errors */
+
+            something_wrong:
+                "कुछ गलत हो गया।",
+
+            network_error:
+                "नेटवर्क एरर। कृपया फिर कोशिश करें।",
+
+            location_error:
+                "आपकी लोकेशन प्राप्त नहीं हो सकी।",
+
+            login_required:
+                "जारी रखने के लिए लॉगिन करें।",
+
+            permission_denied:
+                "परमिशन नहीं है।",
+
+            ride_not_found:
+                "राइड नहीं मिली।",
+
+
+            /* Messages */
+
+            changes_saved:
+                "बदलाव सफलतापूर्वक सेव हो गए।",
+
+            ride_booked:
+                "आपकी राइड बुक हो गई है।",
+
+            ride_cancel_confirm:
+                "क्या आप वाकई इस राइड को रद्द करना चाहते हैं?",
+
+            logout_confirm:
+                "क्या आप वाकई लॉग आउट करना चाहते हैं?",
+
+            welcome_back:
+                "वापसी पर स्वागत है",
+
+            good_morning:
+                "सुप्रभात",
+
+            good_afternoon:
+                "नमस्कार",
+
+            good_evening:
+                "शुभ संध्या",
+
+            good_night:
+                "शुभ रात्रि"
         }
     };
 
 
     /* ========================================================
-       GET CURRENT LANGUAGE
+       LANGUAGE VALIDATION
        ======================================================== */
 
-    LANG.get = function () {
-
-        return LANG.state.current;
-    };
-
-
-    /* ========================================================
-       GET TRANSLATION
-       ======================================================== */
-
-    LANG.t = function (
-        key,
-        fallback
-    ) {
-
-        const language =
-            LANG.state.current;
-
-        const dictionary =
-            LANG.translations[
-                language
-            ] ||
-            LANG.translations.en;
-
-        if (
-            dictionary &&
-            Object.prototype
-                .hasOwnProperty
-                .call(
-                    dictionary,
-                    key
-                )
+    Language.isSupported =
+        function (
+            language
         ) {
 
-            return dictionary[key];
-        }
-
-        if (
-            LANG.translations.en &&
-            Object.prototype
-                .hasOwnProperty
-                .call(
-                    LANG.translations.en,
-                    key
-                )
-        ) {
-
-            return LANG.translations
-                .en[key];
-        }
-
-        return (
-            fallback ||
-            key
-        );
-    };
+            return Language.config
+                .supportedLanguages
+                .includes(
+                    language
+                );
+        };
 
 
-    /* ========================================================
-       SET LANGUAGE
-       ======================================================== */
-
-    LANG.set = function (
-        language
-    ) {
-
-        language =
-            String(
-                language || ""
-            ).toLowerCase();
-
-        if (
-            !LANG.config.supported
-                .includes(language)
+    Language.normalize =
+        function (
+            language
         ) {
 
             language =
-                LANG.config.defaultLanguage;
-        }
+                String(
+                    language ||
+                    ""
+                )
+                .toLowerCase()
+                .trim();
 
-        LANG.state.current =
-            language;
 
-        try {
+            if (
+                language.startsWith(
+                    "hi"
+                )
+            ) {
 
-            localStorage.setItem(
-                LANG.config.storageKey,
-                language
-            );
+                return "hi";
+            }
 
-        } catch (error) {
 
-            console.warn(
-                "Language storage unavailable",
-                error
-            );
-        }
+            if (
+                language.startsWith(
+                    "en"
+                )
+            ) {
 
-        document.documentElement
-            .setAttribute(
-                "lang",
-                language === "hi"
-                    ? "hi"
-                    : "en"
-            );
+                return "en";
+            }
 
-        document.body.dataset.language =
-            language;
 
-        LANG.apply();
+            return Language.config
+                .defaultLanguage;
+        };
 
-        LANG.updateSelectors();
 
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx-language-changed",
-                {
-                    detail: {
-                        language:
-                            language
-                    }
-                }
-            )
-        );
+    /* ========================================================
+       GET LANGUAGE
+       ======================================================== */
 
-        return language;
-    };
+    Language.get =
+        function () {
+
+            return Language.state.current;
+        };
 
 
     /* ========================================================
        LOAD SAVED LANGUAGE
        ======================================================== */
 
-    LANG.load = function () {
+    Language.load =
+        function () {
 
-        let language =
-            LANG.config.defaultLanguage;
+            let language =
+                null;
 
-        try {
 
-            const saved =
-                localStorage.getItem(
-                    LANG.config.storageKey
-                );
-
-            if (
-                saved &&
-                LANG.config.supported
-                    .includes(saved)
-            ) {
+            try {
 
                 language =
-                    saved;
+                    localStorage.getItem(
+                        Language.config
+                            .storageKey
+                    );
+
+            } catch (error) {}
+
+
+            if (
+                !language
+            ) {
+
+                /*
+                 * Detect browser language.
+                 */
+
+                language =
+                    navigator
+                        .language ||
+                    "en";
             }
 
-        } catch (error) {
 
-            console.warn(
-                "Unable to load language",
-                error
-            );
-        }
+            Language.state.current =
+                Language.normalize(
+                    language
+                );
 
-        LANG.state.current =
-            language;
 
-        document.documentElement
-            .setAttribute(
-                "lang",
-                language === "hi"
-                    ? "hi"
-                    : "en"
-            );
-
-        document.body.dataset.language =
-            language;
-    };
+            return Language.state.current;
+        };
 
 
     /* ========================================================
-       APPLY TRANSLATIONS
+       SAVE LANGUAGE
        ======================================================== */
 
-    LANG.apply = function () {
+    Language.save =
+        function (
+            language
+        ) {
 
-        /*
-         * Text content
-         *
-         * Example:
-         * <span data-i18n="home"></span>
-         */
+            try {
 
-        document
-            .querySelectorAll(
-                "[data-i18n]"
-            )
-            .forEach(
-                function (element) {
+                localStorage.setItem(
+                    Language.config
+                        .storageKey,
+                    language
+                );
 
-                    const key =
-                        element.dataset
-                            .i18n;
+            } catch (error) {}
+        };
 
-                    if (!key) {
-                        return;
+
+    /* ========================================================
+       TRANSLATE
+       ======================================================== */
+
+    Language.t =
+        function (
+            key,
+            fallback
+        ) {
+
+            if (
+                !key
+            ) {
+
+                return (
+                    fallback ||
+                    ""
+                );
+            }
+
+
+            const language =
+                Language.state.current;
+
+
+            const dictionary =
+                Language.translations[
+                    language
+                ] || {};
+
+
+            /*
+             * Direct key.
+             */
+
+            if (
+                dictionary[key] !==
+                undefined
+            ) {
+
+                return dictionary[key];
+            }
+
+
+            /*
+             * Dot notation support:
+             * customer.home.title
+             */
+
+            const parts =
+                String(
+                    key
+                )
+                .split(".");
+
+
+            let value =
+                dictionary;
+
+
+            for (
+                const part of parts
+            ) {
+
+                if (
+                    value &&
+                    value[part] !==
+                    undefined
+                ) {
+
+                    value =
+                        value[part];
+
+                } else {
+
+                    value =
+                        undefined;
+
+                    break;
+                }
+            }
+
+
+            if (
+                value !== undefined
+            ) {
+
+                return value;
+            }
+
+
+            /*
+             * Try English fallback.
+             */
+
+            const english =
+                Language.translations.en;
+
+
+            if (
+                english[key] !==
+                undefined
+            ) {
+
+                return english[key];
+            }
+
+
+            return (
+                fallback ||
+                key
+            );
+        };
+
+
+    /* ========================================================
+       SET LANGUAGE
+       ======================================================== */
+
+    Language.set =
+        function (
+            language,
+            options
+        ) {
+
+            options =
+                options || {};
+
+
+            language =
+                Language.normalize(
+                    language
+                );
+
+
+            if (
+                !Language.isSupported(
+                    language
+                )
+            ) {
+
+                return false;
+            }
+
+
+            const previous =
+                Language.state.current;
+
+
+            Language.state.current =
+                language;
+
+
+            Language.save(
+                language
+            );
+
+
+            /*
+             * Update document language.
+             */
+
+            try {
+
+                document.documentElement
+                    .setAttribute(
+                        "lang",
+                        language === "hi"
+                            ? "hi"
+                            : "en"
+                    );
+
+            } catch (error) {}
+
+
+            /*
+             * Apply translations.
+             */
+
+            if (
+                options.apply !==
+                false
+            ) {
+
+                Language.apply();
+            }
+
+
+            Language.emit(
+                "changed",
+                {
+
+                    language:
+                        language,
+
+                    previous:
+                        previous
+                }
+            );
+
+
+            return language;
+        };
+
+
+    /* ========================================================
+       TOGGLE
+       ======================================================== */
+
+    Language.toggle =
+        function () {
+
+            const next =
+                Language.state.current ===
+                "en"
+                    ? "hi"
+                    : "en";
+
+
+            return Language.set(
+                next
+            );
+        };
+
+
+    /* ========================================================
+       APPLY ELEMENT TRANSLATION
+       ======================================================== */
+
+    Language.translateElement =
+        function (
+            element
+        ) {
+
+            if (
+                !element
+            ) {
+                return;
+            }
+
+
+            /*
+             * Text content.
+             */
+
+            if (
+                element.hasAttribute(
+                    "data-i18n"
+                )
+            ) {
+
+                const key =
+                    element.getAttribute(
+                        "data-i18n"
+                    );
+
+
+                element.textContent =
+                    Language.t(
+                        key
+                    );
+            }
+
+
+            /*
+             * HTML content.
+             */
+
+            if (
+                element.hasAttribute(
+                    "data-i18n-html"
+                )
+            ) {
+
+                const key =
+                    element.getAttribute(
+                        "data-i18n-html"
+                    );
+
+
+                element.innerHTML =
+                    Language.t(
+                        key
+                    );
+            }
+
+
+            /*
+             * Placeholder.
+             */
+
+            if (
+                element.hasAttribute(
+                    "data-i18n-placeholder"
+                )
+            ) {
+
+                const key =
+                    element.getAttribute(
+                        "data-i18n-placeholder"
+                    );
+
+
+                element.setAttribute(
+                    "placeholder",
+                    Language.t(
+                        key
+                    )
+                );
+            }
+
+
+            /*
+             * Title.
+             */
+
+            if (
+                element.hasAttribute(
+                    "data-i18n-title"
+                )
+            ) {
+
+                const key =
+                    element.getAttribute(
+                        "data-i18n-title"
+                    );
+
+
+                element.setAttribute(
+                    "title",
+                    Language.t(
+                        key
+                    )
+                );
+            }
+
+
+            /*
+             * Aria label.
+             */
+
+            if (
+                element.hasAttribute(
+                    "data-i18n-aria"
+                )
+            ) {
+
+                const key =
+                    element.getAttribute(
+                        "data-i18n-aria"
+                    );
+
+
+                element.setAttribute(
+                    "aria-label",
+                    Language.t(
+                        key
+                    )
+                );
+            }
+
+
+            /*
+             * Value.
+             */
+
+            if (
+                element.hasAttribute(
+                    "data-i18n-value"
+                )
+            ) {
+
+                const key =
+                    element.getAttribute(
+                        "data-i18n-value"
+                    );
+
+
+                element.value =
+                    Language.t(
+                        key
+                    );
+            }
+        };
+
+
+    /* ========================================================
+       APPLY ALL TRANSLATIONS
+       ======================================================== */
+
+    Language.apply =
+        function (
+            root
+        ) {
+
+            root =
+                root ||
+                document;
+
+
+            /*
+             * Translate root itself.
+             */
+
+            if (
+                root !== document
+            ) {
+
+                Language.translateElement(
+                    root
+                );
+            }
+
+
+            /*
+             * Translate all children.
+             */
+
+            root
+                .querySelectorAll(
+                    [
+                        "[data-i18n]",
+                        "[data-i18n-html]",
+                        "[data-i18n-placeholder]",
+                        "[data-i18n-title]",
+                        "[data-i18n-aria]",
+                        "[data-i18n-value]"
+                    ]
+                    .join(",")
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        Language
+                            .translateElement(
+                                element
+                            );
                     }
-
-                    element.textContent =
-                        LANG.t(
-                            key,
-                            element
-                                .textContent
-                        );
-                }
-            );
+                );
 
 
-        /*
-         * HTML content
-         */
+            /*
+             * Update language selectors.
+             */
 
-        document
-            .querySelectorAll(
-                "[data-i18n-html]"
-            )
-            .forEach(
-                function (element) {
+            document
+                .querySelectorAll(
+                    "[data-language-value]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
 
-                    const key =
-                        element.dataset
-                            .i18nHtml;
-
-                    if (!key) {
-                        return;
+                        element.value =
+                            Language.state
+                                .current;
                     }
+                );
 
-                    element.innerHTML =
-                        LANG.t(
-                            key,
-                            element
-                                .innerHTML
+
+            document
+                .querySelectorAll(
+                    "[data-language]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        const value =
+                            element.getAttribute(
+                                "data-language"
+                            );
+
+
+                        element.classList.toggle(
+                            "active",
+                            value ===
+                            Language.state.current
                         );
-                }
-            );
-
-
-        /*
-         * Placeholder
-         */
-
-        document
-            .querySelectorAll(
-                "[data-i18n-placeholder]"
-            )
-            .forEach(
-                function (element) {
-
-                    const key =
-                        element.dataset
-                            .i18nPlaceholder;
-
-                    if (!key) {
-                        return;
                     }
+                );
 
-                    element.placeholder =
-                        LANG.t(
-                            key,
-                            element.placeholder
-                        );
+
+            Language.emit(
+                "applied",
+                {
+                    language:
+                        Language.state.current
                 }
             );
 
 
-        /*
-         * Title
-         */
+            return true;
+        };
 
-        document
-            .querySelectorAll(
-                "[data-i18n-title]"
-            )
-            .forEach(
-                function (element) {
 
-                    const key =
-                        element.dataset
-                            .i18nTitle;
+    /* ========================================================
+       LANGUAGE SELECTOR
+       ======================================================== */
 
-                    element.title =
-                        LANG.t(
-                            key,
-                            element.title
+    Language.bindSelectors =
+        function () {
+
+            /*
+             * Buttons:
+             *
+             * <button data-language="hi">
+             * Hindi
+             * </button>
+             */
+
+            document
+                .querySelectorAll(
+                    "[data-language]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.addEventListener(
+                            "click",
+                            function () {
+
+                                const language =
+                                    element
+                                        .getAttribute(
+                                            "data-language"
+                                        );
+
+
+                                Language.set(
+                                    language
+                                );
+                            }
                         );
+                    }
+                );
+
+
+            /*
+             * Select:
+             *
+             * <select data-language-value>
+             */
+
+            document
+                .querySelectorAll(
+                    "[data-language-value]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.value =
+                            Language.state
+                                .current;
+
+
+                        element.addEventListener(
+                            "change",
+                            function () {
+
+                                Language.set(
+                                    element.value
+                                );
+                            }
+                        );
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       GET ALL LANGUAGES
+       ======================================================== */
+
+    Language.getSupported =
+        function () {
+
+            return [
+                {
+                    code:
+                        "en",
+
+                    name:
+                        "English",
+
+                    nativeName:
+                        "English"
+                },
+
+                {
+                    code:
+                        "hi",
+
+                    name:
+                        "Hindi",
+
+                    nativeName:
+                        "हिंदी"
                 }
+            ];
+        };
+
+
+    /* ========================================================
+       LANGUAGE NAME
+       ======================================================== */
+
+    Language.name =
+        function (
+            language
+        ) {
+
+            language =
+                Language.normalize(
+                    language
+                );
+
+
+            const item =
+                Language.getSupported()
+                    .find(
+                        function (
+                            lang
+                        ) {
+
+                            return (
+                                lang.code ===
+                                language
+                            );
+                        }
+                    );
+
+
+            return (
+                item?.nativeName ||
+                language
             );
+        };
 
 
-        /*
-         * Aria label
-         */
+    /* ========================================================
+       USER LANGUAGE
+       ======================================================== */
 
-        document
-            .querySelectorAll(
-                "[data-i18n-aria]"
-            )
-            .forEach(
-                function (element) {
+    Language.getUserLanguage =
+        function () {
 
-                    const key =
-                        element.dataset
-                            .i18nAria;
+            try {
 
-                    element.setAttribute(
-                        "aria-label",
-                        LANG.t(
-                            key,
-                            element
-                                .getAttribute(
-                                    "aria-label"
-                                ) || ""
+                const user =
+                    RX.auth?.currentUser;
+
+
+                if (
+                    user?.language
+                ) {
+
+                    return Language.normalize(
+                        user.language
+                    );
+                }
+
+
+                const saved =
+                    localStorage.getItem(
+                        "riderx_user"
+                    );
+
+
+                if (
+                    saved
+                ) {
+
+                    const data =
+                        JSON.parse(
+                            saved
+                        );
+
+
+                    if (
+                        data.language
+                    ) {
+
+                        return Language.normalize(
+                            data.language
+                        );
+                    }
+                }
+
+            } catch (error) {}
+
+
+            return null;
+        };
+
+
+    /* ========================================================
+       SAVE USER LANGUAGE
+       ======================================================== */
+
+    Language.saveUserLanguage =
+        async function (
+            language
+        ) {
+
+            language =
+                Language.normalize(
+                    language
+                );
+
+
+            /*
+             * Update local user.
+             */
+
+            try {
+
+                const saved =
+                    localStorage.getItem(
+                        "riderx_user"
+                    );
+
+
+                if (
+                    saved
+                ) {
+
+                    const user =
+                        JSON.parse(
+                            saved
+                        );
+
+
+                    user.language =
+                        language;
+
+
+                    localStorage.setItem(
+                        "riderx_user",
+                        JSON.stringify(
+                            user
                         )
                     );
                 }
-            );
-    };
+
+            } catch (error) {}
 
 
-    /* ========================================================
-       LANGUAGE SELECTORS
-       ======================================================== */
+            /*
+             * Update Firebase user profile
+             * when available.
+             */
 
-    LANG.updateSelectors = function () {
+            try {
 
-        document
-            .querySelectorAll(
-                "[data-language]"
-            )
-            .forEach(
-                function (element) {
-
-                    element.classList.toggle(
-                        "active",
-                        element.dataset
-                            .language ===
-                        LANG.state.current
+                const db =
+                    RX.firebase?.firestore ||
+                    (
+                        window.firebase &&
+                        typeof firebase.firestore ===
+                        "function"
+                            ? firebase.firestore()
+                            : null
                     );
 
-                    element
-                        .setAttribute(
-                            "aria-selected",
-                            element.dataset
-                                .language ===
-                            LANG.state.current
-                                ? "true"
-                                : "false"
+
+                const uid =
+                    RX.auth?.currentUser?.uid ||
+                    (
+                        window.firebase &&
+                        firebase.auth &&
+                        firebase.auth()
+                            .currentUser?.uid
+                    );
+
+
+                if (
+                    db &&
+                    uid
+                ) {
+
+                    await db
+                        .collection(
+                            "users"
+                        )
+                        .doc(
+                            uid
+                        )
+                        .set(
+                            {
+                                language:
+                                    language,
+
+                                languageUpdatedAt:
+                                    new Date()
+                            },
+                            {
+                                merge:
+                                    true
+                            }
                         );
                 }
-            );
+
+            } catch (error) {
+
+                console.warn(
+                    "User language sync failed:",
+                    error
+                );
+            }
 
 
-        document
-            .querySelectorAll(
-                "[data-language-value]"
-            )
-            .forEach(
-                function (element) {
-
-                    element.value =
-                        LANG.state.current;
-                }
-            );
-    };
+            return language;
+        };
 
 
     /* ========================================================
-       TOGGLE LANGUAGE
+       CHANGE USER LANGUAGE
        ======================================================== */
 
-    LANG.toggle = function () {
-
-        const next =
-            LANG.state.current === "en"
-                ? "hi"
-                : "en";
-
-        return LANG.set(
-            next
-        );
-    };
-
-
-    /* ========================================================
-       GET LANGUAGE NAME
-       ======================================================== */
-
-    LANG.getName = function (
-        language
-    ) {
-
-        if (
-            language === "hi"
+    Language.changeUserLanguage =
+        async function (
+            language
         ) {
 
-            return "हिंदी";
-        }
-
-        return "English";
-    };
-
-
-    /* ========================================================
-       CREATE LANGUAGE SWITCHER
-       ======================================================== */
-
-    LANG.createSwitcher = function (
-        container
-    ) {
-
-        if (!container) {
-            return;
-        }
-
-        container.innerHTML = "";
-
-        const wrapper =
-            document.createElement(
-                "div"
-            );
-
-        wrapper.className =
-            "rx-language-switcher";
+            const selected =
+                Language.set(
+                    language
+                );
 
 
-        LANG.config.supported
-            .forEach(
-                function (language) {
+            if (
+                !selected
+            ) {
 
-                    const button =
-                        document
-                            .createElement(
-                                "button"
-                            );
+                return false;
+            }
 
-                    button.type =
-                        "button";
 
-                    button.className =
-                        "rx-language-option";
+            await Language
+                .saveUserLanguage(
+                    selected
+                );
 
-                    button.dataset.language =
-                        language;
 
-                    button.textContent =
-                        LANG.getName(
-                            language
-                        );
-
-                    button.classList.toggle(
-                        "active",
-                        language ===
-                        LANG.state.current
-                    );
-
-                    button.addEventListener(
-                        "click",
-                        function () {
-
-                            LANG.set(
-                                language
-                            );
-
-                            LANG.createSwitcher(
-                                container
-                            );
-                        }
-                    );
-
-                    wrapper.appendChild(
-                        button
-                    );
+            Language.emit(
+                "user-language-changed",
+                {
+                    language:
+                        selected
                 }
             );
 
-        container.appendChild(
-            wrapper
-        );
-    };
+
+            return selected;
+        };
 
 
     /* ========================================================
-       BIND LANGUAGE BUTTONS
+       FORMAT LANGUAGE-AWARE DATE
        ======================================================== */
 
-    LANG.bind = function () {
+    Language.formatDate =
+        function (
+            value,
+            options
+        ) {
 
-        document
-            .querySelectorAll(
-                "[data-language]"
+            const date =
+                value instanceof Date
+                    ? value
+                    : new Date(
+                        value
+                    );
+
+
+            if (
+                isNaN(
+                    date.getTime()
+                )
+            ) {
+
+                return "";
+            }
+
+
+            const locale =
+                Language.state.current ===
+                "hi"
+                    ? "hi-IN"
+                    : "en-IN";
+
+
+            return date.toLocaleDateString(
+                locale,
+                options || {
+                    day:
+                        "2-digit",
+
+                    month:
+                        "short",
+
+                    year:
+                        "numeric"
+                }
+            );
+        };
+
+
+    /* ========================================================
+       FORMAT NUMBER
+       ======================================================== */
+
+    Language.formatNumber =
+        function (
+            value,
+            options
+        ) {
+
+            const locale =
+                Language.state.current ===
+                "hi"
+                    ? "hi-IN"
+                    : "en-IN";
+
+
+            return Number(
+                value || 0
             )
-            .forEach(
-                function (element) {
-
-                    if (
-                        element.dataset
-                            .languageBound ===
-                        "true"
-                    ) {
-                        return;
-                    }
-
-                    element.dataset
-                        .languageBound =
-                        "true";
-
-                    element.addEventListener(
-                        "click",
-                        function () {
-
-                            LANG.set(
-                                element.dataset
-                                    .language
-                            );
-                        }
-                    );
-                }
+            .toLocaleString(
+                locale,
+                options || {}
             );
-
-
-        document
-            .querySelectorAll(
-                "[data-action='toggle-language']"
-            )
-            .forEach(
-                function (button) {
-
-                    if (
-                        button.dataset
-                            .languageBound ===
-                        "true"
-                    ) {
-                        return;
-                    }
-
-                    button.dataset
-                        .languageBound =
-                        "true";
-
-                    button.addEventListener(
-                        "click",
-                        function () {
-
-                            LANG.toggle();
-                        }
-                    );
-                }
-            );
-
-
-        document
-            .querySelectorAll(
-                "[data-language-select]"
-            )
-            .forEach(
-                function (select) {
-
-                    if (
-                        select.dataset
-                            .languageBound ===
-                        "true"
-                    ) {
-                        return;
-                    }
-
-                    select.dataset
-                        .languageBound =
-                        "true";
-
-                    select.value =
-                        LANG.state.current;
-
-                    select.addEventListener(
-                        "change",
-                        function () {
-
-                            LANG.set(
-                                select.value
-                            );
-                        }
-                    );
-                }
-            );
-    };
+        };
 
 
     /* ========================================================
-       FORMAT TEXT
+       FORMAT CURRENCY
        ======================================================== */
 
-    LANG.format = function (
-        key,
-        values
-    ) {
+    Language.formatCurrency =
+        function (
+            value
+        ) {
 
-        let text =
-            LANG.t(key);
+            const locale =
+                Language.state.current ===
+                "hi"
+                    ? "hi-IN"
+                    : "en-IN";
 
-        values =
-            values || {};
 
-        Object.keys(values)
-            .forEach(
-                function (name) {
+            return Number(
+                value || 0
+            )
+            .toLocaleString(
+                locale,
+                {
+                    style:
+                        "currency",
 
-                    text =
-                        text.replace(
-                            new RegExp(
-                                "\\{" +
-                                name +
-                                "\\}",
-                                "g"
-                            ),
-                            String(
-                                values[name]
-                            )
-                        );
+                    currency:
+                        "INR",
+
+                    maximumFractionDigits:
+                        0
                 }
             );
-
-        return text;
-    };
+        };
 
 
     /* ========================================================
-       INIT
+       EVENT SYSTEM
        ======================================================== */
 
-    LANG.init = function () {
+    Language.emit =
+        function (
+            name,
+            data
+        ) {
 
-        LANG.load();
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-language-" +
+                    name,
+                    {
+                        detail:
+                            data || {}
+                    }
+                )
+            );
+        };
 
-        LANG.apply();
 
-        LANG.bind();
+    Language.on =
+        function (
+            name,
+            callback
+        ) {
 
-        LANG.updateSelectors();
+            if (
+                typeof callback !==
+                "function"
+            ) {
 
-        console.log(
-            "RiderX Language System loaded:",
-            LANG.state.current
-        );
-    };
+                return;
+            }
+
+
+            window.addEventListener(
+                "riderx-language-" +
+                name,
+                function (
+                    event
+                ) {
+
+                    callback(
+                        event.detail || {},
+                        event
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       INITIALIZATION
+       ======================================================== */
+
+    Language.init =
+        function () {
+
+            Language.load();
+
+
+            /*
+             * Prefer language saved on
+             * logged-in user.
+             */
+
+            const userLanguage =
+                Language.getUserLanguage();
+
+
+            if (
+                userLanguage &&
+                Language.isSupported(
+                    userLanguage
+                )
+            ) {
+
+                Language.state.current =
+                    userLanguage;
+            }
+
+
+            try {
+
+                document.documentElement
+                    .setAttribute(
+                        "lang",
+                        Language.state.current
+                    );
+
+            } catch (error) {}
+
+
+            Language.state.ready =
+                true;
+
+
+            /*
+             * DOM may already exist.
+             */
+
+            if (
+                document.readyState !==
+                "loading"
+            ) {
+
+                Language.apply();
+
+                Language.bindSelectors();
+            }
+
+
+            Language.emit(
+                "ready",
+                {
+                    language:
+                        Language.state.current
+                }
+            );
+
+
+            return Language.state.current;
+        };
 
 
     /* ========================================================
        DOM READY
        ======================================================== */
 
-    if (
-        document.readyState ===
-        "loading"
-    ) {
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            LANG.init
-        );
+            Language.init();
 
-    } else {
+        }
+    );
 
-        LANG.init();
-    }
 
+    /* ========================================================
+       GLOBAL SHORTCUTS
+       ======================================================== */
+
+    RX.t =
+        Language.t;
+
+    RX.setLanguage =
+        Language.set;
+
+    RX.getLanguage =
+        Language.get;
+
+    RX.translate =
+        Language.apply;
+
+
+    /* ========================================================
+       START
+       ======================================================== */
+
+    Language.init();
+
+
+    console.log(
+        "RiderX language.js loaded."
+    );
 
 })();
