@@ -1,50 +1,30 @@
 /* ============================================================
-   RIDERX RIDE FLOW ENGINE
+   RIDERX - RIDE FLOW
    File: js/ride-flow.js
 
-   Complete Uber-style ride lifecycle controller.
+   Rider trip state machine:
 
-   CUSTOMER:
-   booking
-      ↓
    searching
-      ↓
-   driver assigned
-      ↓
-   driver arriving
-      ↓
-   driver arrived
-      ↓
-   OTP
-      ↓
-   trip started
-      ↓
-   live trip
-      ↓
-   completed
-      ↓
-   payment
-      ↓
-   rating
-
-   RIDER:
-   request
-      ↓
-   accept
-      ↓
-   navigation to pickup
-      ↓
+       ↓
+   accepted
+       ↓
+   arriving
+       ↓
    arrived
-      ↓
-   OTP verification
-      ↓
-   start trip
-      ↓
-   complete trip
-      ↓
-   payment
-      ↓
-   next ride
+       ↓
+   otp_verified
+       ↓
+   in_progress
+       ↓
+   completed
+
+   Also handles:
+   - Firebase ride synchronization
+   - Customer notifications
+   - OTP verification
+   - Pickup / drop status
+   - Ride completion handoff
+   - Local active ride recovery
    ============================================================ */
 
 (function () {
@@ -55,8 +35,7 @@
 
     const RX = window.RiderX;
 
-    const Flow =
-        RX.rideFlow =
+    const Flow = RX.rideFlow =
         RX.rideFlow || {};
 
 
@@ -66,94 +45,29 @@
 
     Flow.config = {
 
-        ridePath:
+        ridesPath:
             "rides",
 
-        tripPath:
-            "trips",
-
-        requestPath:
+        requestsPath:
             "rideRequests",
+
+        customersPath:
+            "customers",
+
+        ridersPath:
+            "riders",
 
         activeRideKey:
             "riderx_active_ride",
 
-        activeTripKey:
-            "riderx_active_trip",
+        activeStatusKey:
+            "riderx_ride_status",
 
-        roleKey:
-            "riderx_role",
+        otpLength:
+            4,
 
-        timeout:
-            30000,
-
-        retryDelay:
-            2000,
-
-        maxRetries:
-            3
-    };
-
-
-    /* ========================================================
-       FLOW STATES
-       ======================================================== */
-
-    Flow.states = {
-
-        IDLE:
-            "idle",
-
-        BOOKING:
-            "booking",
-
-        SEARCHING:
-            "searching",
-
-        ACCEPTED:
-            "accepted",
-
-        DRIVER_ARRIVING:
-            "driver_arriving",
-
-        DRIVER_ARRIVED:
-            "driver_arrived",
-
-        OTP_PENDING:
-            "otp_pending",
-
-        OTP_VERIFIED:
-            "otp_verified",
-
-        STARTED:
-            "trip_started",
-
-        IN_PROGRESS:
-            "in_progress",
-
-        COMPLETING:
-            "completing",
-
-        COMPLETED:
-            "completed",
-
-        PAYMENT_PENDING:
-            "payment_pending",
-
-        PAYMENT_COMPLETED:
-            "payment_completed",
-
-        RATING:
-            "rating",
-
-        CANCELLED:
-            "cancelled",
-
-        NO_DRIVER:
-            "no_driver",
-
-        ERROR:
-            "error"
+        maxOtpAttempts:
+            5
     };
 
 
@@ -166,80 +80,26 @@
         initialized:
             false,
 
-        role:
+        ride:
             null,
 
         rideId:
             null,
 
-        tripId:
-            null,
-
-        customerId:
-            null,
-
-        riderId:
-            null,
-
         status:
-            Flow.states.IDLE,
-
-        service:
-            "bike",
-
-        paymentMethod:
-            "cash",
-
-        pickup:
             null,
 
-        destination:
-            null,
-
-        fare:
-            null,
-
-        distanceKm:
+        otpAttempts:
             0,
 
-        durationMinutes:
-            0,
-
-        rider:
-            null,
-
-        customer:
-            null,
-
-        ride:
-            null,
-
-        trip:
-            null,
-
-        createdAt:
-            null,
-
-        acceptedAt:
-            null,
-
-        startedAt:
-            null,
-
-        completedAt:
-            null,
-
-        cancelledAt:
-            null,
-
-        error:
-            null,
+        updating:
+            false,
 
         listeners:
             [],
 
-        initializedRide:
-            false
+        customerListener:
+            null
     };
 
 
@@ -258,7 +118,6 @@
                 ) {
 
                     return RX.firebase.database;
-
                 }
 
             } catch (error) {}
@@ -273,7 +132,6 @@
                 ) {
 
                     return firebase.database();
-
                 }
 
             } catch (error) {}
@@ -283,7 +141,11 @@
         };
 
 
-    Flow.getAuth =
+    /* ========================================================
+       USER
+       ======================================================== */
+
+    Flow.getUser =
         function () {
 
             try {
@@ -293,8 +155,7 @@
                     RX.firebase.auth
                 ) {
 
-                    return RX.firebase.auth;
-
+                    return RX.firebase.auth.currentUser;
                 }
 
             } catch (error) {}
@@ -308,33 +169,7 @@
                     "function"
                 ) {
 
-                    return firebase.auth();
-
-                }
-
-            } catch (error) {}
-
-
-            return null;
-        };
-
-
-    Flow.getCurrentUser =
-        function () {
-
-            const auth =
-                Flow.getAuth();
-
-
-            try {
-
-                if (
-                    auth &&
-                    auth.currentUser
-                ) {
-
-                    return auth.currentUser;
-
+                    return firebase.auth().currentUser;
                 }
 
             } catch (error) {}
@@ -347,7 +182,6 @@
                         "riderx_user"
                     );
 
-
                 if (
                     saved
                 ) {
@@ -355,7 +189,6 @@
                     return JSON.parse(
                         saved
                     );
-
                 }
 
             } catch (error) {}
@@ -365,17 +198,22 @@
         };
 
 
-    Flow.getUserId =
+    /* ========================================================
+       RIDER ID
+       ======================================================== */
+
+    Flow.getRiderId =
         function () {
 
             const user =
-                Flow.getCurrentUser();
-
+                Flow.getUser() ||
+                {};
 
             return (
-                user?.uid ||
-                user?.id ||
-                user?.userId ||
+                user.uid ||
+                user.id ||
+                user.riderId ||
+                user.driverId ||
                 localStorage.getItem(
                     "riderx_uid"
                 ) ||
@@ -385,325 +223,1176 @@
 
 
     /* ========================================================
-       ROLE
+       RIDE ID
        ======================================================== */
 
-    Flow.getRole =
-        function () {
-
-            if (
-                Flow.state.role
-            ) {
-
-                return Flow.state.role;
-
-            }
-
-
-            const user =
-                Flow.getCurrentUser();
-
-
-            const role =
-                user?.role ||
-                localStorage.getItem(
-                    Flow.config.roleKey
-                );
-
-
-            if (
-                role
-            ) {
-
-                Flow.state.role =
-                    String(
-                        role
-                    ).toLowerCase();
-
-            }
-
+    Flow.getRideId =
+        function (
+            ride
+        ) {
 
             return (
-                Flow.state.role ||
+                ride?.rideId ||
+                ride?.id ||
+                Flow.state.rideId ||
+                localStorage.getItem(
+                    Flow.config.activeRideKey
+                ) ||
                 null
             );
         };
 
 
-    Flow.setRole =
-        function (
-            role
-        ) {
-
-            role =
-                String(
-                    role ||
-                    ""
-                )
-                .toLowerCase()
-                .trim();
-
-
-            if (
-                ![
-                    "customer",
-                    "rider",
-                    "driver",
-                    "admin"
-                ].includes(
-                    role
-                )
-            ) {
-
-                return false;
-            }
-
-
-            if (
-                role ===
-                "driver"
-            ) {
-
-                role =
-                    "rider";
-            }
-
-
-            Flow.state.role =
-                role;
-
-
-            localStorage.setItem(
-                Flow.config.roleKey,
-                role
-            );
-
-
-            return true;
-        };
-
-
     /* ========================================================
-       UTILITIES
+       NORMALIZE STATUS
        ======================================================== */
-
-    Flow.now =
-        function () {
-
-            return Date.now();
-
-        };
-
-
-    Flow.generateId =
-        function (
-            prefix
-        ) {
-
-            return (
-                String(
-                    prefix ||
-                    "ride"
-                ) +
-                "_" +
-                Date.now() +
-                "_" +
-                Math.random()
-                    .toString(36)
-                    .slice(
-                        2,
-                        9
-                    )
-            );
-        };
-
 
     Flow.normalizeStatus =
         function (
             status
         ) {
 
-            status =
+            const value =
                 String(
                     status ||
-                    ""
+                    "accepted"
                 )
                 .toLowerCase()
                 .trim();
 
 
-            const map = {
+            const aliases = {
 
-                "driver arriving":
-                    Flow.states
-                        .DRIVER_ARRIVING,
+                pending:
+                    "accepted",
 
-                "arriving":
-                    Flow.states
-                        .DRIVER_ARRIVING,
+                assigned:
+                    "accepted",
 
-                "driver arrived":
-                    Flow.states
-                        .DRIVER_ARRIVED,
+                accepted:
+                    "accepted",
 
-                "arrived":
-                    Flow.states
-                        .DRIVER_ARRIVED,
+                driver_assigned:
+                    "accepted",
 
-                "otp":
-                    Flow.states
-                        .OTP_PENDING,
+                arriving:
+                    "arriving",
 
-                "otp pending":
-                    Flow.states
-                        .OTP_PENDING,
+                enroute:
+                    "arriving",
 
-                "otp verified":
-                    Flow.states
-                        .OTP_VERIFIED,
+                en_route:
+                    "arriving",
 
-                "started":
-                    Flow.states
-                        .STARTED,
+                on_the_way:
+                    "arriving",
 
-                "in progress":
-                    Flow.states
-                        .IN_PROGRESS,
+                arrived:
+                    "arrived",
 
-                "complete":
-                    Flow.states
-                        .COMPLETED,
+                at_pickup:
+                    "arrived",
 
-                "cancel":
-                    Flow.states
-                        .CANCELLED
+                otp:
+                    "otp_verified",
+
+                otp_verified:
+                    "otp_verified",
+
+                started:
+                    "in_progress",
+
+                ongoing:
+                    "in_progress",
+
+                in_progress:
+                    "in_progress",
+
+                riding:
+                    "in_progress",
+
+                completed:
+                    "completed",
+
+                finished:
+                    "completed",
+
+                cancelled:
+                    "cancelled",
+
+                canceled:
+                    "cancelled"
             };
 
 
             return (
-                map[status] ||
-                status ||
-                Flow.states.IDLE
+                aliases[value] ||
+                value
             );
         };
 
 
     /* ========================================================
-       SAVE ACTIVE RIDE
+       STATUS ORDER
        ======================================================== */
 
-    Flow.saveActiveRide =
-        function () {
+    Flow.statusOrder =
+        {
 
-            if (
-                Flow.state.rideId
-            ) {
+            searching:
+                0,
 
-                localStorage.setItem(
-                    Flow.config.activeRideKey,
-                    Flow.state.rideId
-                );
+            accepted:
+                1,
 
-            }
+            arriving:
+                2,
 
+            arrived:
+                3,
 
-            if (
-                Flow.state.tripId
-            ) {
+            otp_verified:
+                4,
 
-                localStorage.setItem(
-                    Flow.config.activeTripKey,
-                    Flow.state.tripId
-                );
+            in_progress:
+                5,
 
-            }
-        };
+            completed:
+                6,
 
-
-    Flow.clearActiveRide =
-        function () {
-
-            localStorage.removeItem(
-                Flow.config.activeRideKey
-            );
-
-            localStorage.removeItem(
-                Flow.config.activeTripKey
-            );
+            cancelled:
+                99
         };
 
 
     /* ========================================================
-       SET STATE
+       CAN TRANSITION
        ======================================================== */
 
-    Flow.setState =
+    Flow.canTransition =
         function (
-            updates
+            from,
+            to
         ) {
 
+            from =
+                Flow.normalizeStatus(
+                    from
+                );
+
+            to =
+                Flow.normalizeStatus(
+                    to
+                );
+
+
             if (
-                !updates
+                from ===
+                to
             ) {
 
-                return Flow.state;
+                return true;
             }
 
 
-            Object.assign(
-                Flow.state,
-                updates
+            if (
+                to ===
+                "cancelled"
+            ) {
+
+                return true;
+            }
+
+
+            if (
+                !Flow.statusOrder
+                    .hasOwnProperty(
+                        from
+                    ) ||
+                !Flow.statusOrder
+                    .hasOwnProperty(
+                        to
+                    )
+            ) {
+
+                return true;
+            }
+
+
+            return (
+                Flow.statusOrder[to] >=
+                Flow.statusOrder[from]
+            );
+        };
+
+
+    /* ========================================================
+       ACCEPT RIDE
+       ======================================================== */
+
+    Flow.acceptRide =
+        async function (
+            data
+        ) {
+
+            data =
+                data ||
+                {};
+
+
+            const rideId =
+                data.rideId ||
+                data.id;
+
+
+            if (
+                !rideId
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Ride ID is required."
+                };
+            }
+
+
+            const riderId =
+                data.riderId ||
+                Flow.getRiderId();
+
+
+            if (
+                !riderId
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Rider login required."
+                };
+            }
+
+
+            const existing =
+                await Flow.loadRide(
+                    rideId
+                );
+
+
+            const ride =
+                {
+
+                    ...(existing || {}),
+                    ...data,
+
+                    rideId:
+                        rideId,
+
+                    riderId:
+                        riderId,
+
+                    driverId:
+                        riderId,
+
+                    status:
+                        "accepted",
+
+                    acceptedAt:
+                        existing?.acceptedAt ||
+                        Date.now(),
+
+                    updatedAt:
+                        Date.now()
+                };
+
+
+            const result =
+                await Flow.updateRide(
+                    ride,
+                    {
+
+                        status:
+                            "accepted",
+
+                        riderId:
+                            riderId,
+
+                        driverId:
+                            riderId,
+
+                        acceptedAt:
+                            ride.acceptedAt
+                    }
+                );
+
+
+            if (
+                !result.success
+            ) {
+
+                return result;
+            }
+
+
+            Flow.setActiveRide(
+                ride
             );
 
 
-            if (
-                Flow.state.status
-            ) {
+            Flow.state.ride =
+                ride;
 
-                Flow.state.status =
-                    Flow.normalizeStatus(
-                        Flow.state.status
-                    );
+            Flow.state.rideId =
+                rideId;
 
-            }
+            Flow.state.status =
+                "accepted";
 
 
-            Flow.saveActiveRide();
+            Flow.startRideListener(
+                rideId
+            );
+
+
+            Flow.notifyCustomer(
+                ride,
+                "accepted"
+            );
 
 
             Flow.emit(
-                "state",
+                "accepted",
                 {
 
-                    state:
-                        Flow.getState()
+                    ride:
+                        ride,
+
+                    rideId:
+                        rideId
                 }
             );
 
 
-            Flow.updateUI();
-
-
-            return Flow.state;
-        };
-
-
-    Flow.getState =
-        function () {
-
             return {
-                ...Flow.state
+
+                success:
+                    true,
+
+                ride:
+                    ride,
+
+                rideId:
+                    rideId
             };
         };
 
 
     /* ========================================================
-       FIREBASE RIDE UPDATE
+       START ARRIVING
        ======================================================== */
 
-    Flow.updateFirebaseRide =
+    Flow.startArriving =
+        async function () {
+
+            return Flow.setStatus(
+                "arriving"
+            );
+        };
+
+
+    /* ========================================================
+       ARRIVED AT PICKUP
+       ======================================================== */
+
+    Flow.arrivedAtPickup =
+        async function () {
+
+            const ride =
+                Flow.state.ride;
+
+
+            if (
+                !ride
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "No active ride."
+                };
+            }
+
+
+            const result =
+                await Flow.setStatus(
+                    "arrived",
+                    {
+
+                        arrivedAt:
+                            Date.now()
+                    }
+                );
+
+
+            if (
+                result.success
+            ) {
+
+                Flow.notifyCustomer(
+                    Flow.state.ride,
+                    "arrived"
+                );
+
+            }
+
+
+            return result;
+        };
+
+
+    /* ========================================================
+       VERIFY OTP
+       ======================================================== */
+
+    Flow.verifyOTP =
         async function (
-            updates
+            otp
+        ) {
+
+            otp =
+                String(
+                    otp ??
+                    ""
+                )
+                .replace(
+                    /\D/g,
+                    ""
+                );
+
+
+            if (
+                otp.length !==
+                Flow.config.otpLength
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Enter a valid 4-digit OTP."
+                };
+            }
+
+
+            if (
+                Flow.state.otpAttempts >=
+                Flow.config.maxOtpAttempts
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Too many OTP attempts."
+                };
+            }
+
+
+            const ride =
+                Flow.state.ride;
+
+
+            if (
+                !ride
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "No active ride."
+                };
+            }
+
+
+            /*
+             * Accept multiple possible field names
+             * so the customer and rider systems
+             * remain compatible.
+             */
+
+            const expected =
+                String(
+                    ride.otp ||
+                    ride.rideOtp ||
+                    ride.pickupOtp ||
+                    ride.customerOtp ||
+                    ""
+                )
+                .replace(
+                    /\D/g,
+                    "");
+
+
+            /*
+             * If OTP is not stored in ride object,
+             * try Firebase customer record.
+             */
+
+            let valid =
+                expected &&
+                expected === otp;
+
+
+            if (
+                !valid &&
+                !expected
+            ) {
+
+                const database =
+                    Flow.getDatabase();
+
+
+                const customerId =
+                    ride.customerId ||
+                    ride.userId ||
+                    ride.passengerId;
+
+
+                if (
+                    database &&
+                    customerId
+                ) {
+
+                    try {
+
+                        const snapshot =
+                            await database
+                                .ref(
+                                    Flow.config
+                                        .customersPath +
+                                    "/" +
+                                    customerId
+                                )
+                                .once(
+                                    "value"
+                                );
+
+
+                        const customer =
+                            snapshot.val() ||
+                            {};
+
+
+                        const customerOtp =
+                            String(
+                                customer.rideOtp ||
+                                customer.otp ||
+                                ""
+                            )
+                            .replace(
+                                /\D/g,
+                                "");
+
+
+                        valid =
+                            customerOtp ===
+                            otp;
+
+                    } catch (error) {
+
+                        console.warn(
+                            "Customer OTP lookup failed:",
+                            error
+                        );
+                    }
+                }
+            }
+
+
+            if (
+                !valid
+            ) {
+
+                Flow.state.otpAttempts++;
+
+
+                Flow.emit(
+                    "otp-invalid",
+                    {
+
+                        attempts:
+                            Flow.state.otpAttempts
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Incorrect OTP.",
+
+                    attempts:
+                        Flow.state.otpAttempts
+                };
+            }
+
+
+            /*
+             * OTP verified.
+             */
+
+            const result =
+                await Flow.setStatus(
+                    "otp_verified",
+                    {
+
+                        otpVerified:
+                            true,
+
+                        otpVerifiedAt:
+                            Date.now()
+                    }
+                );
+
+
+            if (
+                !result.success
+            ) {
+
+                return result;
+            }
+
+
+            Flow.state.otpAttempts =
+                0;
+
+
+            Flow.emit(
+                "otp-verified",
+                {
+
+                    ride:
+                        Flow.state.ride
+                }
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                ride:
+                    Flow.state.ride
+            };
+        };
+
+
+    /* ========================================================
+       START TRIP
+       ======================================================== */
+
+    Flow.startTrip =
+        async function () {
+
+            const ride =
+                Flow.state.ride;
+
+
+            if (
+                !ride
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "No active ride."
+                };
+            }
+
+
+            const status =
+                Flow.normalizeStatus(
+                    ride.status
+                );
+
+
+            /*
+             * Normally OTP must be verified
+             * before starting.
+             */
+
+            if (
+                status !==
+                    "otp_verified" &&
+                status !==
+                    "arrived" &&
+                status !==
+                    "accepted"
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Ride cannot be started from the current status."
+                };
+            }
+
+
+            const result =
+                await Flow.setStatus(
+                    "in_progress",
+                    {
+
+                        startedAt:
+                            Date.now(),
+
+                        tripStartedAt:
+                            Date.now(),
+
+                        otpVerified:
+                            ride.otpVerified ||
+                            status ===
+                                "otp_verified"
+                    }
+                );
+
+
+            if (
+                result.success
+            ) {
+
+                Flow.notifyCustomer(
+                    Flow.state.ride,
+                    "started"
+                );
+
+
+                Flow.emit(
+                    "started",
+                    {
+
+                        ride:
+                            Flow.state.ride
+                    }
+                );
+            }
+
+
+            return result;
+        };
+
+
+    /* ========================================================
+       COMPLETE TRIP
+       ======================================================== */
+
+    Flow.completeTrip =
+        async function (
+            options
+        ) {
+
+            options =
+                options ||
+                {};
+
+
+            const ride =
+                Flow.state.ride;
+
+
+            if (
+                !ride
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "No active ride."
+                };
+            }
+
+
+            /*
+             * Handoff to ride-complete.js
+             */
+
+            if (
+                RX.rideComplete &&
+                typeof RX.rideComplete
+                    .complete ===
+                "function"
+            ) {
+
+                const result =
+                    await RX.rideComplete
+                        .complete(
+                            ride,
+                            options
+                        );
+
+
+                if (
+                    result.success
+                ) {
+
+                    Flow.state.status =
+                        "completed";
+
+                    Flow.state.ride =
+                        result.ride ||
+                        ride;
+
+
+                    Flow.clearActiveRide();
+
+
+                    Flow.notifyCustomer(
+                        Flow.state.ride,
+                        "completed"
+                    );
+
+
+                    Flow.emit(
+                        "completed",
+                        result
+                    );
+                }
+
+
+                return result;
+            }
+
+
+            /*
+             * Fallback if ride-complete.js
+             * is not loaded.
+             */
+
+            const result =
+                await Flow.setStatus(
+                    "completed",
+                    {
+
+                        completedAt:
+                            Date.now(),
+
+                        endedAt:
+                            Date.now(),
+
+                        paymentMethod:
+                            options.paymentMethod ||
+                            ride.paymentMethod ||
+                            "cash"
+                    }
+                );
+
+
+            if (
+                result.success
+            ) {
+
+                Flow.clearActiveRide();
+
+                Flow.notifyCustomer(
+                    Flow.state.ride,
+                    "completed"
+                );
+            }
+
+
+            return result;
+        };
+
+
+    /* ========================================================
+       CANCEL RIDE
+       ======================================================== */
+
+    Flow.cancelRide =
+        async function (
+            reason
+        ) {
+
+            reason =
+                reason ||
+                "Cancelled by rider";
+
+
+            const ride =
+                Flow.state.ride;
+
+
+            if (
+                !ride
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "No active ride."
+                };
+            }
+
+
+            const result =
+                await Flow.setStatus(
+                    "cancelled",
+                    {
+
+                        cancelledAt:
+                            Date.now(),
+
+                        cancelledBy:
+                            "rider",
+
+                        cancellationReason:
+                            reason
+                    }
+                );
+
+
+            if (
+                result.success
+            ) {
+
+                Flow.clearActiveRide();
+
+
+                Flow.notifyCustomer(
+                    Flow.state.ride,
+                    "cancelled"
+                );
+
+
+                Flow.emit(
+                    "cancelled",
+                    {
+
+                        ride:
+                            Flow.state.ride,
+
+                        reason:
+                            reason
+                    }
+                );
+            }
+
+
+            return result;
+        };
+
+
+    /* ========================================================
+       SET STATUS
+       ======================================================== */
+
+    Flow.setStatus =
+        async function (
+            status,
+            extra
+        ) {
+
+            status =
+                Flow.normalizeStatus(
+                    status
+                );
+
+
+            extra =
+                extra ||
+                {};
+
+
+            if (
+                Flow.state.updating
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Another ride update is in progress."
+                };
+            }
+
+
+            const ride =
+                Flow.state.ride;
+
+
+            if (
+                !ride
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "No active ride."
+                };
+            }
+
+
+            const current =
+                Flow.normalizeStatus(
+                    ride.status ||
+                    "accepted"
+                );
+
+
+            if (
+                !Flow.canTransition(
+                    current,
+                    status
+                )
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        `Cannot change ride from ${current} to ${status}.`
+                };
+            }
+
+
+            const updated =
+                {
+
+                    ...ride,
+                    ...extra,
+
+                    rideId:
+                        Flow.getRideId(
+                            ride
+                        ),
+
+                    status:
+                        status,
+
+                    updatedAt:
+                        Date.now()
+                };
+
+
+            Flow.state.updating =
+                true;
+
+
+            try {
+
+                const result =
+                    await Flow.updateRide(
+                        updated,
+                        extra
+                    );
+
+
+                if (
+                    !result.success
+                ) {
+
+                    return result;
+                }
+
+
+                Flow.state.ride =
+                    updated;
+
+                Flow.state.status =
+                    status;
+
+
+                Flow.setActiveRide(
+                    updated
+                );
+
+
+                Flow.updateStatusUI(
+                    updated
+                );
+
+
+                Flow.emit(
+                    "status",
+                    {
+
+                        status:
+                            status,
+
+                        ride:
+                            updated
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        true,
+
+                    status:
+                        status,
+
+                    ride:
+                        updated
+                };
+
+            } finally {
+
+                Flow.state.updating =
+                    false;
+            }
+        };
+
+
+    /* ========================================================
+       UPDATE FIREBASE RIDE
+       ======================================================== */
+
+    Flow.updateRide =
+        async function (
+            ride,
+            extra
         ) {
 
             const database =
@@ -711,227 +1400,179 @@
 
 
             const rideId =
-                Flow.state.rideId;
-
-
-            if (
-                !database ||
-                !rideId
-            ) {
-
-                return false;
-            }
-
-
-            try {
-
-                await database
-                    .ref(
-                        Flow.config
-                            .ridePath +
-                        "/" +
-                        rideId
-                    )
-                    .update(
-                        {
-
-                            ...updates,
-
-                            updatedAt:
-                                Flow.now()
-                        }
-                    );
-
-
-                return true;
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX ride update failed:",
-                    error
+                Flow.getRideId(
+                    ride
                 );
 
 
-                return false;
+            if (
+                !rideId
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Ride ID missing."
+                };
             }
+
+
+            const payload =
+                {
+
+                    status:
+                        ride.status,
+
+                    updatedAt:
+                        Date.now(),
+
+                    ...(extra || {})
+                };
+
+
+            /*
+             * Keep important rider information.
+             */
+
+            if (
+                ride.riderId
+            ) {
+
+                payload.riderId =
+                    ride.riderId;
+            }
+
+
+            if (
+                ride.driverId
+            ) {
+
+                payload.driverId =
+                    ride.driverId;
+            }
+
+
+            if (
+                database
+            ) {
+
+                try {
+
+                    await database
+                        .ref(
+                            Flow.config
+                                .ridesPath +
+                            "/" +
+                            rideId
+                        )
+                        .update(
+                            payload
+                        );
+
+
+                    /*
+                     * Keep request status in sync.
+                     */
+
+                    try {
+
+                        await database
+                            .ref(
+                                Flow.config
+                                    .requestsPath +
+                                "/" +
+                                rideId
+                            )
+                            .update(
+                                payload
+                            );
+
+                    } catch (error) {
+
+                        console.warn(
+                            "Ride request sync failed:",
+                            error
+                        );
+                    }
+
+
+                    return {
+
+                        success:
+                            true
+                    };
+
+                } catch (error) {
+
+                    console.error(
+                        "Ride Firebase update failed:",
+                        error
+                    );
+
+
+                    return {
+
+                        success:
+                            false,
+
+                        error:
+                            error.message ||
+                            "Firebase update failed."
+                    };
+                }
+            }
+
+
+            /*
+             * Offline/local fallback.
+             */
+
+            try {
+
+                localStorage.setItem(
+                    Flow.config.activeRideKey,
+                    JSON.stringify(
+                        ride
+                    )
+                );
+
+            } catch (error) {}
+
+
+            return {
+
+                success:
+                    true,
+
+                offline:
+                    true
+            };
         };
 
 
     /* ========================================================
-       CREATE RIDE
+       LOAD RIDE
        ======================================================== */
 
-    Flow.createRide =
+    Flow.loadRide =
         async function (
-            options
+            rideId
         ) {
 
-            options =
-                options || {};
-
-
-            Flow.setRole(
-                "customer"
-            );
-
-
-            const customerId =
-                options.customerId ||
-                options.userId ||
-                Flow.getUserId();
+            rideId =
+                rideId ||
+                Flow.getRideId();
 
 
             if (
-                !customerId
+                !rideId
             ) {
 
-                throw new Error(
-                    "Customer login required."
-                );
+                return null;
             }
-
-
-            const rideId =
-                options.rideId ||
-                Flow.generateId(
-                    "ride"
-                );
-
-
-            const tripId =
-                options.tripId ||
-                Flow.generateId(
-                    "trip"
-                );
-
-
-            const ride = {
-
-                rideId:
-                    rideId,
-
-                tripId:
-                    tripId,
-
-                customerId:
-                    customerId,
-
-                riderId:
-                    null,
-
-                status:
-                    Flow.states.SEARCHING,
-
-                service:
-                    options.service ||
-                    options.serviceType ||
-                    "bike",
-
-                paymentMethod:
-                    options.paymentMethod ||
-                    "cash",
-
-                pickup:
-                    options.pickup ||
-                    null,
-
-                destination:
-                    options.destination ||
-                    options.dropoff ||
-                    null,
-
-                pickupAddress:
-                    options.pickupAddress ||
-                    "",
-
-                destinationAddress:
-                    options.destinationAddress ||
-                    options.dropoffAddress ||
-                    "",
-
-                fare:
-                    options.fare ||
-                    null,
-
-                distanceKm:
-                    Number(
-                        options.distanceKm ||
-                        0
-                    ),
-
-                durationMinutes:
-                    Number(
-                        options.durationMinutes ||
-                        0
-                    ),
-
-                createdAt:
-                    Flow.now(),
-
-                updatedAt:
-                    Flow.now()
-            };
-
-
-            Flow.setState(
-                {
-
-                    role:
-                        "customer",
-
-                    rideId:
-                        rideId,
-
-                    tripId:
-                        tripId,
-
-                    customerId:
-                        customerId,
-
-                    riderId:
-                        null,
-
-                    status:
-                        Flow.states.SEARCHING,
-
-                    service:
-                        ride.service,
-
-                    paymentMethod:
-                        ride.paymentMethod,
-
-                    pickup:
-                        ride.pickup,
-
-                    destination:
-                        ride.destination,
-
-                    fare:
-                        ride.fare,
-
-                    distanceKm:
-                        ride.distanceKm,
-
-                    durationMinutes:
-                        ride.durationMinutes,
-
-                    ride:
-                        ride,
-
-                    trip:
-                        null,
-
-                    createdAt:
-                        ride.createdAt,
-
-                    error:
-                        null,
-
-                    initializedRide:
-                        true
-                }
-            );
 
 
             const database =
@@ -944,1812 +1585,119 @@
 
                 try {
 
-                    await database
-                        .ref(
-                            Flow.config
-                                .ridePath +
-                            "/" +
-                            rideId
-                        )
-                        .set(
-                            ride
-                        );
+                    const snapshot =
+                        await database
+                            .ref(
+                                Flow.config
+                                    .ridesPath +
+                                "/" +
+                                rideId
+                            )
+                            .once(
+                                "value"
+                            );
 
 
-                    await database
-                        .ref(
-                            Flow.config
-                                .tripPath +
-                            "/" +
-                            tripId
-                        )
-                        .set(
-                            {
+                    const data =
+                        snapshot.val();
 
-                                tripId:
-                                    tripId,
-
-                                rideId:
-                                    rideId,
-
-                                customerId:
-                                    customerId,
-
-                                status:
-                                    Flow.states
-                                        .SEARCHING,
-
-                                service:
-                                    ride.service,
-
-                                paymentMethod:
-                                    ride.paymentMethod,
-
-                                pickup:
-                                    ride.pickup,
-
-                                destination:
-                                    ride.destination,
-
-                                createdAt:
-                                    ride.createdAt,
-
-                                updatedAt:
-                                    ride.updatedAt
-                            }
-                        );
-
-
-                    await database
-                        .ref(
-                            Flow.config
-                                .requestPath +
-                            "/" +
-                            rideId
-                        )
-                        .set(
-                            {
-
-                                rideId:
-                                    rideId,
-
-                                tripId:
-                                    tripId,
-
-                                customerId:
-                                    customerId,
-
-                                service:
-                                    ride.service,
-
-                                pickup:
-                                    ride.pickup,
-
-                                destination:
-                                    ride.destination,
-
-                                status:
-                                    Flow.states
-                                        .SEARCHING,
-
-                                createdAt:
-                                    ride.createdAt,
-
-                                updatedAt:
-                                    ride.updatedAt
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Ride creation Firebase error:",
-                        error
-                    );
-
-                    Flow.setState(
-                        {
-
-                            error:
-                                error.message
-                        }
-                    );
-                }
-            }
-
-
-            Flow.emit(
-                "created",
-                {
-
-                    ride:
-                        ride
-                }
-            );
-
-
-            Flow.startListening(
-                rideId
-            );
-
-
-            Flow.startMatching();
-
-
-            return ride;
-        };
-
-
-    /* ========================================================
-       START MATCHING
-       ======================================================== */
-
-    Flow.startMatching =
-        async function () {
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states.SEARCHING
-                }
-            );
-
-
-            Flow.emit(
-                "searching",
-                {
-
-                    rideId:
-                        Flow.state.rideId
-                }
-            );
-
-
-            /*
-             * Use matching.js if available.
-             */
-
-            try {
-
-                if (
-                    RX.matching
-                ) {
 
                     if (
-                        typeof RX.matching.start ===
-                        "function"
-                    ) {
-
-                        await RX.matching.start(
-                            Flow.getState()
-                        );
-
-                    } else if (
-                        typeof RX.matching.findDriver ===
-                        "function"
-                    ) {
-
-                        await RX.matching.findDriver(
-                            Flow.getState()
-                        );
-
-                    }
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Matching module error:",
-                    error
-                );
-            }
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       RIDER ACCEPT
-       ======================================================== */
-
-    Flow.acceptRide =
-        async function (
-            options
-        ) {
-
-            options =
-                options || {};
-
-
-            Flow.setRole(
-                "rider"
-            );
-
-
-            const riderId =
-                options.riderId ||
-                options.driverId ||
-                options.uid ||
-                Flow.getUserId();
-
-
-            if (
-                !riderId
-            ) {
-
-                throw new Error(
-                    "Rider login required."
-                );
-            }
-
-
-            if (
-                !Flow.state.rideId &&
-                options.rideId
-            ) {
-
-                Flow.state.rideId =
-                    options.rideId;
-
-            }
-
-
-            if (
-                !Flow.state.rideId
-            ) {
-
-                throw new Error(
-                    "Ride ID is required."
-                );
-            }
-
-
-            const acceptedAt =
-                Flow.now();
-
-
-            const rider = {
-
-                riderId:
-                    riderId,
-
-                driverId:
-                    riderId,
-
-                name:
-                    options.name ||
-                    options.riderName ||
-                    "",
-
-                phone:
-                    options.phone ||
-                    "",
-
-                photo:
-                    options.photo ||
-                    "",
-
-                vehicle:
-                    options.vehicle ||
-                    null,
-
-                rating:
-                    options.rating ||
-                    0
-            };
-
-
-            Flow.setState(
-                {
-
-                    role:
-                        "rider",
-
-                    riderId:
-                        riderId,
-
-                    rider:
-                        rider,
-
-                    status:
-                        Flow.states.ACCEPTED,
-
-                    acceptedAt:
-                        acceptedAt
-                }
-            );
-
-
-            const updates = {
-
-                riderId:
-                    riderId,
-
-                driverId:
-                    riderId,
-
-                rider:
-                    rider,
-
-                status:
-                    Flow.states.ACCEPTED,
-
-                acceptedAt:
-                    acceptedAt,
-
-                updatedAt:
-                    Flow.now()
-            };
-
-
-            await Flow.updateFirebaseRide(
-                updates
-            );
-
-
-            /*
-             * Update trip if available.
-             */
-
-            const database =
-                Flow.getDatabase();
-
-
-            if (
-                database &&
-                Flow.state.tripId
-            ) {
-
-                try {
-
-                    await database
-                        .ref(
-                            Flow.config
-                                .tripPath +
-                            "/" +
-                            Flow.state.tripId
-                        )
-                        .update(
-                            updates
-                        );
-
-                } catch (error) {}
-            }
-
-
-            Flow.emit(
-                "accepted",
-                {
-
-                    rideId:
-                        Flow.state.rideId,
-
-                    rider:
-                        rider
-                }
-            );
-
-
-            Flow.beginDriverArrival();
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       DRIVER ARRIVAL
-       ======================================================== */
-
-    Flow.beginDriverArrival =
-        async function () {
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states
-                            .DRIVER_ARRIVING
-                }
-            );
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    status:
-                        Flow.states
-                            .DRIVER_ARRIVING,
-
-                    driverArrivingAt:
-                        Flow.now()
-                }
-            );
-
-
-            Flow.emit(
-                "driver-arriving",
-                {
-
-                    rideId:
-                        Flow.state.rideId
-                }
-            );
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       DRIVER ARRIVED
-       ======================================================== */
-
-    Flow.driverArrived =
-        async function () {
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states
-                            .DRIVER_ARRIVED
-                }
-            );
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    status:
-                        Flow.states
-                            .DRIVER_ARRIVED,
-
-                    arrivedAt:
-                        Flow.now()
-                }
-            );
-
-
-            /*
-             * Ask trip.js to generate OTP.
-             */
-
-            try {
-
-                if (
-                    RX.trip &&
-                    typeof RX.trip.driverArrived ===
-                    "function"
-                ) {
-
-                    await RX.trip.driverArrived();
-
-                } else if (
-                    RX.trip &&
-                    typeof RX.trip.generateOTP ===
-                    "function"
-                ) {
-
-                    await RX.trip.generateOTP();
-
-                }
-
-            } catch (error) {}
-
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states
-                            .OTP_PENDING
-                }
-            );
-
-
-            Flow.emit(
-                "driver-arrived",
-                {
-
-                    rideId:
-                        Flow.state.rideId
-                }
-            );
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       OTP VERIFY
-       ======================================================== */
-
-    Flow.verifyOTP =
-        async function (
-            otp
-        ) {
-
-            otp =
-                String(
-                    otp ||
-                    ""
-                )
-                .replace(
-                    /\D/g,
-                    ""
-                );
-
-
-            /*
-             * Prefer trip.js.
-             */
-
-            if (
-                RX.trip &&
-                typeof RX.trip.verifyOTP ===
-                "function"
-            ) {
-
-                const result =
-                    await RX.trip.verifyOTP(
-                        otp
-                    );
-
-
-                if (
-                    result?.success
-                ) {
-
-                    Flow.setState(
-                        {
-
-                            status:
-                                Flow.states
-                                    .OTP_VERIFIED
-                        }
-                    );
-
-
-                    await Flow.updateFirebaseRide(
-                        {
-
-                            status:
-                                Flow.states
-                                    .OTP_VERIFIED,
-
-                            otpVerified:
-                                true,
-
-                            otpVerifiedAt:
-                                Flow.now()
-                        }
-                    );
-
-
-                    Flow.emit(
-                        "otp-verified",
-                        {
-
-                            success:
-                                true
-                        }
-                    );
-
-                }
-
-
-                return result;
-            }
-
-
-            return {
-
-                success:
-                    false,
-
-                error:
-                    "OTP service unavailable."
-            };
-        };
-
-
-    /* ========================================================
-       START TRIP
-       ======================================================== */
-
-    Flow.startTrip =
-        async function (
-            options
-        ) {
-
-            options =
-                options || {};
-
-
-            /*
-             * Prefer trip.js.
-             */
-
-            if (
-                RX.trip &&
-                typeof RX.trip.start ===
-                "function"
-            ) {
-
-                const result =
-                    await RX.trip.start(
-                        options
-                    );
-
-
-                if (
-                    result?.success
-                ) {
-
-                    Flow.setState(
-                        {
-
-                            status:
-                                Flow.states
-                                    .STARTED,
-
-                            startedAt:
-                                Flow.now()
-                        }
-                    );
-
-                    await Flow.updateFirebaseRide(
-                        {
-
-                            status:
-                                Flow.states
-                                    .STARTED,
-
-                            startedAt:
-                                Flow.now(),
-
-                            tripStartedAt:
-                                Flow.now(),
-
-                            otpVerified:
-                                true
-                        }
-                    );
-
-
-                    Flow.emit(
-                        "started",
-                        {
-
-                            rideId:
-                                Flow.state
-                                    .rideId
-                        }
-                    );
-
-                }
-
-
-                return result;
-            }
-
-
-            /*
-             * Fallback.
-             */
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states.STARTED,
-
-                    startedAt:
-                        Flow.now()
-                }
-            );
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    status:
-                        Flow.states.STARTED,
-
-                    startedAt:
-                        Flow.now()
-                }
-            );
-
-
-            return {
-
-                success:
-                    true
-            };
-        };
-
-
-    /* ========================================================
-       LIVE TRIP
-       ======================================================== */
-
-    Flow.startLiveTrip =
-        async function () {
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states.IN_PROGRESS
-                }
-            );
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    status:
-                        Flow.states.IN_PROGRESS
-                }
-            );
-
-
-            Flow.emit(
-                "in-progress",
-                {
-
-                    rideId:
-                        Flow.state.rideId
-                }
-            );
-
-
-            /*
-             * Start tracking module.
-             */
-
-            try {
-
-                if (
-                    RX.tracking
-                ) {
-
-                    if (
-                        typeof RX.tracking.start ===
-                        "function"
-                    ) {
-
-                        RX.tracking.start(
-                            Flow.state
-                        );
-
-                    } else if (
-                        typeof RX.tracking.startTracking ===
-                        "function"
-                    ) {
-
-                        RX.tracking.startTracking(
-                            Flow.state
-                        );
-
-                    }
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Tracking module error:",
-                    error
-                );
-            }
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       UPDATE DISTANCE
-       ======================================================== */
-
-    Flow.updateDistance =
-        async function (
-            distanceKm
-        ) {
-
-            distanceKm =
-                Number(
-                    distanceKm
-                );
-
-
-            if (
-                !Number.isFinite(
-                    distanceKm
-                )
-            ) {
-
-                return false;
-            }
-
-
-            Flow.state.distanceKm =
-                Math.max(
-                    0,
-                    distanceKm
-                );
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    distanceKm:
-                        Flow.state
-                            .distanceKm
-                }
-            );
-
-
-            try {
-
-                if (
-                    RX.trip &&
-                    typeof RX.trip.updateDistance ===
-                    "function"
-                ) {
-
-                    await RX.trip.updateDistance(
-                        Flow.state.distanceKm
-                    );
-
-                }
-
-            } catch (error) {}
-
-
-            Flow.emit(
-                "distance",
-                {
-
-                    distanceKm:
-                        Flow.state
-                            .distanceKm
-                }
-            );
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       UPDATE DURATION
-       ======================================================== */
-
-    Flow.updateDuration =
-        async function (
-            minutes
-        ) {
-
-            minutes =
-                Number(
-                    minutes
-                );
-
-
-            if (
-                !Number.isFinite(
-                    minutes
-                )
-            ) {
-
-                return false;
-            }
-
-
-            Flow.state.durationMinutes =
-                Math.max(
-                    0,
-                    minutes
-                );
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    durationMinutes:
-                        Flow.state
-                            .durationMinutes
-                }
-            );
-
-
-            try {
-
-                if (
-                    RX.trip &&
-                    typeof RX.trip.updateDuration ===
-                    "function"
-                ) {
-
-                    await RX.trip.updateDuration(
-                        Flow.state
-                            .durationMinutes
-                    );
-
-                }
-
-            } catch (error) {}
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       COMPLETE RIDE
-       ======================================================== */
-
-    Flow.completeRide =
-        async function (
-            options
-        ) {
-
-            options =
-                options || {};
-
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states.COMPLETING
-                }
-            );
-
-
-            /*
-             * Stop tracking.
-             */
-
-            try {
-
-                if (
-                    RX.tracking
-                ) {
-
-                    if (
-                        typeof RX.tracking.stop ===
-                        "function"
-                    ) {
-
-                        RX.tracking.stop();
-
-                    } else if (
-                        typeof RX.tracking.stopTracking ===
-                        "function"
-                    ) {
-
-                        RX.tracking.stopTracking();
-
-                    }
-
-                }
-
-            } catch (error) {}
-
-
-            let result =
-                null;
-
-
-            /*
-             * Use trip.js.
-             */
-
-            if (
-                RX.trip &&
-                typeof RX.trip.complete ===
-                "function"
-            ) {
-
-                result =
-                    await RX.trip.complete(
-                        {
-
-                            ...options,
-
-                            distanceKm:
-                                options.distanceKm ??
-                                Flow.state
-                                    .distanceKm,
-
-                            durationMinutes:
-                                options
-                                    .durationMinutes ??
-                                Flow.state
-                                    .durationMinutes
-                        }
-                    );
-
-            }
-
-
-            /*
-             * Fallback completion.
-             */
-
-            if (
-                !result?.success
-            ) {
-
-                const completedAt =
-                    Flow.now();
-
-
-                Flow.setState(
-                    {
-
-                        status:
-                            Flow.states
-                                .COMPLETED,
-
-                        completedAt:
-                            completedAt,
-
-                        fare:
-                            options.fare ??
-                            Flow.state.fare
-                    }
-                );
-
-
-                await Flow.updateFirebaseRide(
-                    {
-
-                        status:
-                            Flow.states
-                                .COMPLETED,
-
-                        completedAt:
-                            completedAt,
-
-                        distanceKm:
-                            Flow.state
-                                .distanceKm,
-
-                        durationMinutes:
-                            Flow.state
-                                .durationMinutes,
-
-                        fare:
-                            Flow.state.fare
-                    }
-                );
-
-
-                result = {
-
-                    success:
-                        true,
-
-                    completion:
-                        {
-
-                            completedAt:
-                                completedAt,
-
-                            fare:
-                                Flow.state
-                                    .fare
-                        }
-                };
-
-            } else {
-
-                Flow.setState(
-                    {
-
-                        status:
-                            Flow.states
-                                .COMPLETED,
-
-                        completedAt:
-                            Flow.now(),
-
-                        fare:
-                            result
-                                .completion
-                                ?.fare ??
-                            Flow.state.fare
-                    }
-                );
-
-            }
-
-
-            Flow.emit(
-                "completed",
-                {
-
-                    result:
-                        result
-                }
-            );
-
-
-            /*
-             * Payment stage.
-             */
-
-            if (
-                Flow.state.paymentMethod ===
-                "cash"
-            ) {
-
-                Flow.setState(
-                    {
-
-                        status:
-                            Flow.states
-                                .PAYMENT_PENDING
-                    }
-                );
-
-            } else {
-
-                Flow.setState(
-                    {
-
-                        status:
-                            Flow.states
-                                .PAYMENT_PENDING
-                    }
-                );
-
-            }
-
-
-            return result;
-        };
-
-
-    /* ========================================================
-       PAYMENT
-       ======================================================== */
-
-    Flow.setPaymentMethod =
-        async function (
-            method
-        ) {
-
-            method =
-                String(
-                    method ||
-                    "cash"
-                )
-                .toLowerCase();
-
-
-            const allowed = [
-                "cash",
-                "online",
-                "upi",
-                "wallet",
-                "card"
-            ];
-
-
-            if (
-                !allowed.includes(
-                    method
-                )
-            ) {
-
-                method =
-                    "cash";
-            }
-
-
-            Flow.state.paymentMethod =
-                method;
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    paymentMethod:
-                        method
-                }
-            );
-
-
-            return method;
-        };
-
-
-    Flow.completePayment =
-        async function (
-            paymentData
-        ) {
-
-            paymentData =
-                paymentData || {};
-
-
-            await Flow.updateFirebaseRide(
-                {
-
-                    status:
-                        Flow.states
-                            .PAYMENT_COMPLETED,
-
-                    paymentStatus:
-                        "paid",
-
-                    payment:
-                        paymentData,
-
-                    paidAt:
-                        Flow.now()
-                }
-            );
-
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states
-                            .PAYMENT_COMPLETED
-                }
-            );
-
-
-            Flow.emit(
-                "payment-completed",
-                {
-
-                    payment:
-                        paymentData
-                }
-            );
-
-
-            /*
-             * Move to rating.
-             */
-
-            Flow.setState(
-                {
-
-                    status:
-                        Flow.states.RATING
-                }
-            );
-
-
-            Flow.emit(
-                "rating-required",
-                {
-
-                    rideId:
-                        Flow.state.rideId
-                }
-            );
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       CANCEL
-       ======================================================== */
-
-    Flow.cancelRide =
-        async function (
-            reason,
-            options
-        ) {
-
-            options =
-                options || {};
-
-
-            reason =
-                reason ||
-                "Cancelled by user";
-
-
-            if (
-                Flow.state.status ===
-                Flow.states.COMPLETED
-            ) {
-
-                return {
-
-                    success:
-                        false,
-
-                    error:
-                        "Completed ride cannot be cancelled."
-                };
-            }
-
-
-            let result =
-                null;
-
-
-            /*
-             * Use trip.js cancellation.
-             */
-
-            if (
-                RX.trip &&
-                typeof RX.trip.cancel ===
-                "function"
-            ) {
-
-                result =
-                    await RX.trip.cancel(
-                        reason,
-                        {
-
-                            ...options,
-
-                            cancelledBy:
-                                options.cancelledBy ||
-                                Flow.getRole()
-                        }
-                    );
-
-            }
-
-
-            if (
-                !result?.success
-            ) {
-
-                Flow.setState(
-                    {
-
-                        status:
-                            Flow.states
-                                .CANCELLED,
-
-                        cancelledAt:
-                            Flow.now(),
-
-                        error:
-                            null
-                    }
-                );
-
-
-                await Flow.updateFirebaseRide(
-                    {
-
-                        status:
-                            Flow.states
-                                .CANCELLED,
-
-                        cancellationReason:
-                            reason,
-
-                        cancelledBy:
-                            options.cancelledBy ||
-                            Flow.getRole() ||
-                            "user",
-
-                        cancelledAt:
-                            Flow.now()
-                    }
-                );
-
-
-                result = {
-
-                    success:
-                        true
-                };
-
-            } else {
-
-                Flow.setState(
-                    {
-
-                        status:
-                            Flow.states
-                                .CANCELLED,
-
-                        cancelledAt:
-                            Flow.now()
-                    }
-                );
-
-            }
-
-
-            /*
-             * Stop tracking.
-             */
-
-            try {
-
-                if (
-                    RX.tracking &&
-                    typeof RX.tracking.stop ===
-                    "function"
-                ) {
-
-                    RX.tracking.stop();
-
-                }
-
-            } catch (error) {}
-
-
-            Flow.emit(
-                "cancelled",
-                {
-
-                    reason:
-                        reason
-                }
-            );
-
-
-            Flow.clearActiveRide();
-
-
-            return result;
-        };
-
-
-    /* ========================================================
-       RIDE RATING
-       ======================================================== */
-
-    Flow.submitRating =
-        async function (
-            ratingData
-        ) {
-
-            ratingData =
-                ratingData || {};
-
-
-            const rating =
-                Number(
-                    ratingData.rating
-                );
-
-
-            if (
-                !Number.isFinite(
-                    rating
-                ) ||
-                rating <
-                1 ||
-                rating >
-                5
-            ) {
-
-                return {
-
-                    success:
-                        false,
-
-                    error:
-                        "Rating must be between 1 and 5."
-                };
-            }
-
-
-            const database =
-                Flow.getDatabase();
-
-
-            const rideId =
-                Flow.state.rideId;
-
-
-            const data = {
-
-                rating:
-                    rating,
-
-                comment:
-                    ratingData.comment ||
-                    "",
-
-                ratedBy:
-                    ratingData.ratedBy ||
-                    Flow.getRole(),
-
-                ratedAt:
-                    Flow.now()
-            };
-
-
-            if (
-                database &&
-                rideId
-            ) {
-
-                try {
-
-                    await database
-                        .ref(
-                            Flow.config
-                                .ridePath +
-                            "/" +
-                            rideId +
-                            "/rating"
-                        )
-                        .set(
-                            data
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Rating save failed:",
-                        error
-                    );
-                }
-            }
-
-
-            Flow.emit(
-                "rated",
-                {
-
-                    rating:
                         data
-                }
-            );
+                    ) {
+
+                        const ride =
+                            {
+
+                                ...data,
+
+                                rideId:
+                                    data.rideId ||
+                                    rideId
+                            };
 
 
-            Flow.clearActiveRide();
+                        Flow.state.ride =
+                            ride;
 
+                        Flow.state.rideId =
+                            rideId;
 
-            return {
-
-                success:
-                    true,
-
-                rating:
-                    data
-            };
-        };
-
-
-    /* ========================================================
-       RESTORE ACTIVE RIDE
-       ======================================================== */
-
-    Flow.restore =
-        async function (
-            rideId
-        ) {
-
-            rideId =
-                rideId ||
-                localStorage.getItem(
-                    Flow.config
-                        .activeRideKey
-                );
-
-
-            if (
-                !rideId
-            ) {
-
-                return null;
-            }
-
-
-            const database =
-                Flow.getDatabase();
-
-
-            if (
-                !database
-            ) {
-
-                return null;
-            }
-
-
-            try {
-
-                const snapshot =
-                    await database
-                        .ref(
-                            Flow.config
-                                .ridePath +
-                            "/" +
-                            rideId
-                        )
-                        .once(
-                            "value"
-                        );
-
-
-                const ride =
-                    snapshot.val();
-
-
-                if (
-                    !ride
-                ) {
-
-                    Flow.clearActiveRide();
-
-                    return null;
-                }
-
-
-                Flow.setState(
-                    {
-
-                        rideId:
-                            ride.rideId ||
-                            rideId,
-
-                        tripId:
-                            ride.tripId ||
-                            null,
-
-                        customerId:
-                            ride.customerId ||
-                            ride.userId ||
-                            null,
-
-                        riderId:
-                            ride.riderId ||
-                            ride.driverId ||
-                            null,
-
-                        status:
+                        Flow.state.status =
                             Flow.normalizeStatus(
                                 ride.status
-                            ),
+                            );
 
-                        service:
-                            ride.service ||
-                            ride.serviceType ||
-                            "bike",
 
-                        paymentMethod:
-                            ride.paymentMethod ||
-                            "cash",
-
-                        pickup:
-                            ride.pickup ||
-                            null,
-
-                        destination:
-                            ride.destination ||
-                            ride.dropoff ||
-                            null,
-
-                        fare:
-                            ride.fare ||
-                            null,
-
-                        distanceKm:
-                            Number(
-                                ride.distanceKm ||
-                                0
-                            ),
-
-                        durationMinutes:
-                            Number(
-                                ride.durationMinutes ||
-                                0
-                            ),
-
-                        rider:
-                            ride.rider ||
-                            null,
-
-                        ride:
-                            ride,
-
-                        createdAt:
-                            ride.createdAt ||
-                            null,
-
-                        acceptedAt:
-                            ride.acceptedAt ||
-                            null,
-
-                        startedAt:
-                            ride.startedAt ||
-                            null,
-
-                        completedAt:
-                            ride.completedAt ||
-                            null,
-
-                        cancelledAt:
-                            ride.cancelledAt ||
-                            null,
-
-                        initializedRide:
-                            true
+                        return ride;
                     }
-                );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Ride load failed:",
+                        error
+                    );
+                }
+            }
 
 
-                /*
-                 * Restore trip state if
-                 * trip.js is available.
-                 */
+            /*
+             * Local fallback.
+             */
 
-                try {
+            try {
 
-                    if (
-                        RX.trip &&
-                        typeof RX.trip.restore ===
-                        "function"
-                    ) {
+                const saved =
+                    localStorage.getItem(
+                        Flow.config.activeRideKey
+                    );
 
-                        await RX.trip.restore(
-                            rideId
+
+                if (
+                    saved
+                ) {
+
+                    const ride =
+                        JSON.parse(
+                            saved
                         );
 
-                    }
 
-                } catch (error) {}
-
-
-                Flow.startListening(
-                    rideId
-                );
-
-
-                Flow.emit(
-                    "restored",
-                    {
-
-                        ride:
+                    if (
+                        Flow.getRideId(
                             ride
+                        ) === rideId
+                    ) {
+
+                        Flow.state.ride =
+                            ride;
+
+                        Flow.state.rideId =
+                            rideId;
+
+                        Flow.state.status =
+                            Flow.normalizeStatus(
+                                ride.status
+                            );
+
+
+                        return ride;
                     }
-                );
+                }
+
+            } catch (error) {}
 
 
-                return ride;
-
-            } catch (error) {
-
-                console.warn(
-                    "Ride restore failed:",
-                    error
-                );
-
-
-                return null;
-            }
+            return null;
         };
 
 
     /* ========================================================
-       REALTIME LISTENER
+       START RIDE LISTENER
        ======================================================== */
 
-    Flow.startListening =
+    Flow.startRideListener =
         function (
             rideId
         ) {
@@ -2760,7 +1708,7 @@
 
             rideId =
                 rideId ||
-                Flow.state.rideId;
+                Flow.getRideId();
 
 
             if (
@@ -2772,13 +1720,13 @@
             }
 
 
-            Flow.stopListening();
+            Flow.stopRideListener();
 
 
             const ref =
                 database.ref(
                     Flow.config
-                        .ridePath +
+                        .ridesPath +
                     "/" +
                     rideId
                 );
@@ -2789,140 +1737,76 @@
                     snapshot
                 ) {
 
-                    const ride =
+                    const data =
                         snapshot.val();
 
 
                     if (
-                        !ride
+                        !data
                     ) {
 
                         return;
                     }
 
 
-                    const previousStatus =
-                        Flow.state.status;
+                    const ride =
+                        {
+
+                            ...data,
+
+                            rideId:
+                                data.rideId ||
+                                rideId
+                        };
 
 
-                    const currentStatus =
+                    Flow.state.ride =
+                        ride;
+
+                    Flow.state.rideId =
+                        rideId;
+
+                    Flow.state.status =
                         Flow.normalizeStatus(
                             ride.status
                         );
 
 
-                    Flow.setState(
+                    Flow.setActiveRide(
+                        ride
+                    );
+
+
+                    Flow.updateStatusUI(
+                        ride
+                    );
+
+
+                    Flow.emit(
+                        "remote-update",
                         {
 
                             ride:
-                                ride,
-
-                            rideId:
-                                ride.rideId ||
-                                rideId,
-
-                            tripId:
-                                ride.tripId ||
-                                Flow.state.tripId,
-
-                            customerId:
-                                ride.customerId ||
-                                ride.userId ||
-                                Flow.state
-                                    .customerId,
-
-                            riderId:
-                                ride.riderId ||
-                                ride.driverId ||
-                                Flow.state
-                                    .riderId,
-
-                            status:
-                                currentStatus,
-
-                            service:
-                                ride.service ||
-                                ride.serviceType ||
-                                Flow.state
-                                    .service,
-
-                            paymentMethod:
-                                ride.paymentMethod ||
-                                Flow.state
-                                    .paymentMethod,
-
-                            pickup:
-                                ride.pickup ||
-                                Flow.state.pickup,
-
-                            destination:
-                                ride.destination ||
-                                ride.dropoff ||
-                                Flow.state
-                                    .destination,
-
-                            fare:
-                                ride.fare ||
-                                Flow.state.fare,
-
-                            distanceKm:
-                                Number(
-                                    ride.distanceKm ??
-                                    Flow.state
-                                        .distanceKm ??
-                                    0
-                                ),
-
-                            durationMinutes:
-                                Number(
-                                    ride.durationMinutes ??
-                                    Flow.state
-                                        .durationMinutes ??
-                                    0
-                                ),
-
-                            rider:
-                                ride.rider ||
-                                Flow.state.rider
+                                ride
                         }
                     );
 
 
                     /*
-                     * Notify about status change.
+                     * Stop listener after completed/cancelled.
                      */
 
                     if (
-                        previousStatus !==
-                        currentStatus
+                        [
+                            "completed",
+                            "cancelled"
+                        ].includes(
+                            Flow.state.status
+                        )
                     ) {
 
-                        Flow.emit(
-                            "status-changed",
-                            {
-
-                                previous:
-                                    previousStatus,
-
-                                current:
-                                    currentStatus,
-
-                                ride:
-                                    ride
-                            }
-                        );
-
+                        Flow.stopRideListener();
                     }
-
-
-                    Flow.handleRemoteStatus(
-                        currentStatus,
-                        ride
-                    );
-
-
-                    Flow.updateUI();
-
                 };
 
 
@@ -2938,6 +1822,9 @@
                     ref:
                         ref,
 
+                    event:
+                        "value",
+
                     callback:
                         callback
                 }
@@ -2948,15 +1835,18 @@
         };
 
 
-    Flow.stopListening =
+    /* ========================================================
+       STOP RIDE LISTENER
+       ======================================================== */
+
+    Flow.stopRideListener =
         function () {
 
-            const listeners =
+            (
                 Flow.state.listeners ||
-                [];
-
-
-            listeners.forEach(
+                []
+            )
+            .forEach(
                 function (
                     item
                 ) {
@@ -2964,7 +1854,7 @@
                     try {
 
                         item.ref.off(
-                            "value",
+                            item.event,
                             item.callback
                         );
 
@@ -2977,457 +1867,375 @@
             Flow.state.listeners =
                 [];
 
-
             return true;
         };
 
 
     /* ========================================================
-       REMOTE STATUS HANDLER
+       ACTIVE RIDE STORAGE
        ======================================================== */
 
-    Flow.handleRemoteStatus =
+    Flow.setActiveRide =
         function (
-            status,
             ride
         ) {
 
-            switch (
-                Flow.normalizeStatus(
-                    status
-                )
+            if (
+                !ride
             ) {
 
-                case Flow.states.ACCEPTED:
-
-                    Flow.emit(
-                        "driver-assigned",
-                        {
-
-                            ride:
-                                ride,
-
-                            rider:
-                                ride.rider ||
-                                null
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.DRIVER_ARRIVING:
-
-                    Flow.emit(
-                        "driver-arriving",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.DRIVER_ARRIVED:
-
-                    Flow.emit(
-                        "driver-arrived",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.OTP_PENDING:
-
-                    Flow.emit(
-                        "otp-required",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.STARTED:
-
-                case Flow.states.IN_PROGRESS:
-
-                    Flow.emit(
-                        "trip-live",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.COMPLETED:
-
-                    Flow.emit(
-                        "trip-completed",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.CANCELLED:
-
-                    Flow.emit(
-                        "ride-cancelled",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.PAYMENT_PENDING:
-
-                    Flow.emit(
-                        "payment-required",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
-
-
-                case Flow.states.PAYMENT_COMPLETED:
-
-                    Flow.emit(
-                        "payment-completed",
-                        {
-
-                            ride:
-                                ride
-                        }
-                    );
-
-                    break;
+                return;
             }
+
+
+            Flow.state.ride =
+                ride;
+
+            Flow.state.rideId =
+                Flow.getRideId(
+                    ride
+                );
+
+            Flow.state.status =
+                Flow.normalizeStatus(
+                    ride.status
+                );
+
+
+            try {
+
+                localStorage.setItem(
+                    Flow.config.activeRideKey,
+                    JSON.stringify(
+                        ride
+                    )
+                );
+
+
+                localStorage.setItem(
+                    Flow.config.activeStatusKey,
+                    Flow.state.status
+                );
+
+            } catch (error) {}
         };
 
 
-    /* ========================================================
-       UI
-       ======================================================== */
+    Flow.clearActiveRide =
+        function () {
 
-    Flow.prettyStatus =
-        function (
-            status
-        ) {
-
-            const labels = {
-
-                idle:
-                    "Ready",
-
-                booking:
-                    "Booking ride",
-
-                searching:
-                    "Finding a driver",
-
-                accepted:
-                    "Driver assigned",
-
-                driver_arriving:
-                    "Driver is arriving",
-
-                driver_arrived:
-                    "Driver has arrived",
-
-                otp_pending:
-                    "Enter ride OTP",
-
-                otp_verified:
-                    "OTP verified",
-
-                trip_started:
-                    "Trip started",
-
-                in_progress:
-                    "Trip in progress",
-
-                completing:
-                    "Completing trip",
-
-                completed:
-                    "Trip completed",
-
-                payment_pending:
-                    "Payment pending",
-
-                payment_completed:
-                    "Payment completed",
-
-                rating:
-                    "Rate your ride",
-
-                cancelled:
-                    "Ride cancelled",
-
-                no_driver:
-                    "No driver available",
-
-                error:
-                    "Something went wrong"
-            };
+            Flow.stopRideListener();
 
 
-            return (
-                labels[
-                    status
-                ] ||
-                "Ride"
+            Flow.state.ride =
+                null;
+
+            Flow.state.rideId =
+                null;
+
+            Flow.state.status =
+                null;
+
+            try {
+
+                localStorage.removeItem(
+                    Flow.config.activeRideKey
+                );
+
+                localStorage.removeItem(
+                    Flow.config.activeStatusKey
+                );
+
+            } catch (error) {}
+
+
+            Flow.emit(
+                "active-cleared"
             );
         };
 
 
-    Flow.updateUI =
-        function () {
+    Flow.restoreActiveRide =
+        async function () {
 
-            const state =
-                Flow.state;
+            try {
 
-
-            /*
-             * Status text.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-ride-status], #rideStatus, #tripStatus"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            Flow.prettyStatus(
-                                state.status
-                            );
-
-                    }
-                );
-
-
-            /*
-             * Ride ID.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-ride-id], #rideId"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            state.rideId ||
-                            "—";
-
-                    }
-                );
-
-
-            /*
-             * Distance.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-distance], #rideDistance"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            Number(
-                                state.distanceKm ||
-                                0
-                            ).toFixed(
-                                1
-                            ) +
-                            " km";
-
-                    }
-                );
-
-
-            /*
-             * Duration.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-duration], #rideDuration"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            Math.round(
-                                state
-                                    .durationMinutes ||
-                                0
-                            ) +
-                            " min";
-
-                    }
-                );
-
-
-            /*
-             * Payment.
-             */
-
-            document
-                .querySelectorAll(
-                    "[data-payment-method]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            String(
-                                state.paymentMethod ||
-                                "cash"
-                            )
-                            .toUpperCase();
-
-                    }
-                );
-
-
-            /*
-             * Fare.
-             */
-
-            let fare =
-                state.fare;
-
-
-            if (
-                fare &&
-                typeof fare ===
-                "object"
-            ) {
-
-                fare =
-                    fare.finalFare ??
-                    fare.total ??
-                    fare.amount ??
-                    null;
-
-            }
-
-
-            if (
-                fare != null
-            ) {
-
-                document
-                    .querySelectorAll(
-                        "[data-fare], #rideFare, #finalFare"
-                    )
-                    .forEach(
-                        function (
-                            element
-                        ) {
-
-                            element.textContent =
-                                "₹" +
-                                Number(
-                                    fare
-                                ).toFixed(
-                                    2
-                                );
-
-                        }
+                const saved =
+                    localStorage.getItem(
+                        Flow.config.activeRideKey
                     );
 
-            }
+
+                if (
+                    !saved
+                ) {
+
+                    return null;
+                }
 
 
-            /*
-             * Rider name.
-             */
-
-            const riderName =
-                state.rider?.name ||
-                state.ride?.riderName ||
-                "";
+                const localRide =
+                    JSON.parse(
+                        saved
+                    );
 
 
-            document
-                .querySelectorAll(
-                    "[data-rider-name], #riderName"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
+                const rideId =
+                    Flow.getRideId(
+                        localRide
+                    );
 
-                        element.textContent =
-                            riderName ||
-                            "Rider";
 
-                    }
+                if (
+                    !rideId
+                ) {
+
+                    return null;
+                }
+
+
+                const remoteRide =
+                    await Flow.loadRide(
+                        rideId
+                    );
+
+
+                const ride =
+                    remoteRide ||
+                    localRide;
+
+
+                const status =
+                    Flow.normalizeStatus(
+                        ride.status
+                    );
+
+
+                if (
+                    [
+                        "completed",
+                        "cancelled"
+                    ].includes(
+                        status
+                    )
+                ) {
+
+                    Flow.clearActiveRide();
+
+                    return null;
+                }
+
+
+                Flow.setActiveRide(
+                    ride
                 );
 
 
-            /*
-             * Action buttons.
-             */
+                Flow.startRideListener(
+                    rideId
+                );
 
-            Flow.updateActionButtons();
 
+                return ride;
+
+            } catch (error) {
+
+                console.warn(
+                    "Active ride restore failed:",
+                    error
+                );
+
+
+                return null;
+            }
         };
 
 
     /* ========================================================
-       ACTION BUTTONS
+       CUSTOMER NOTIFICATION
        ======================================================== */
 
-    Flow.updateActionButtons =
-        function () {
+    Flow.notifyCustomer =
+        async function (
+            ride,
+            type
+        ) {
 
-            const state =
-                Flow.state;
+            const database =
+                Flow.getDatabase();
+
+
+            if (
+                !database ||
+                !ride
+            ) {
+
+                return false;
+            }
+
+
+            const customerId =
+                ride.customerId ||
+                ride.userId ||
+                ride.passengerId;
+
+
+            if (
+                !customerId
+            ) {
+
+                return false;
+            }
+
+
+            const messages =
+                {
+
+                    accepted:
+                        "Your RiderX ride has been accepted.",
+
+                    arrived:
+                        "Your RiderX rider has arrived at pickup.",
+
+                    started:
+                        "Your RiderX trip has started.",
+
+                    completed:
+                        "Your RiderX trip has been completed.",
+
+                    cancelled:
+                        "Your RiderX ride has been cancelled."
+                };
+
+
+            const message =
+                messages[type] ||
+                "Your ride has been updated.";
+
+
+            try {
+
+                await database
+                    .ref(
+                        "notifications/" +
+                        customerId
+                    )
+                    .push(
+                        {
+
+                            type:
+                                "ride",
+
+                            rideId:
+                                Flow.getRideId(
+                                    ride
+                                ),
+
+                            title:
+                                "RiderX",
+
+                            message:
+                                message,
+
+                            rideStatus:
+                                ride.status,
+
+                            read:
+                                false,
+
+                            createdAt:
+                                Date.now()
+                        }
+                    );
+
+
+                /*
+                 * Also keep customer ride record
+                 * synchronized.
+                 */
+
+                await database
+                    .ref(
+                        Flow.config
+                            .customersPath +
+                        "/" +
+                        customerId +
+                        "/activeRide"
+                    )
+                    .update(
+                        {
+
+                            rideId:
+                                Flow.getRideId(
+                                    ride
+                                ),
+
+                            status:
+                                ride.status,
+
+                            updatedAt:
+                                Date.now()
+                        }
+                    );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "Customer notification failed:",
+                    error
+                );
+
+
+                return false;
+            }
+        };
+
+
+    /* ========================================================
+       UPDATE UI
+       ======================================================== */
+
+    Flow.updateStatusUI =
+        function (
+            ride
+        ) {
+
+            if (
+                !ride
+            ) {
+
+                return;
+            }
+
+
+            const status =
+                Flow.normalizeStatus(
+                    ride.status
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-ride-status]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            Flow.getStatusLabel(
+                                status
+                            );
+
+                        element.dataset.status =
+                            status;
+
+                    }
+                );
 
 
             document
@@ -3436,114 +2244,163 @@
                 )
                 .forEach(
                     function (
-                        button
+                        element
                     ) {
 
                         const action =
-                            button.dataset
+                            element.dataset
                                 .rideAction;
 
 
-                        let visible =
-                            true;
-
-
-                        switch (
-                            action
-                        ) {
-
-                            case "accept":
-
-                                visible =
-                                    state.status ===
-                                    Flow.states
-                                        .SEARCHING;
-
-                                break;
-
-
-                            case "arrived":
-
-                                visible =
-                                    state.status ===
-                                    Flow.states
-                                        .DRIVER_ARRIVING;
-
-                                break;
-
-
-                            case "start":
-
-                                visible =
-                                    state.status ===
-                                        Flow.states
-                                            .OTP_VERIFIED ||
-                                    state.status ===
-                                        Flow.states
-                                            .DRIVER_ARRIVED;
-
-                                break;
-
-
-                            case "complete":
-
-                                visible =
-                                    state.status ===
-                                        Flow.states
-                                            .STARTED ||
-                                    state.status ===
-                                        Flow.states
-                                            .IN_PROGRESS;
-
-                                break;
-
-
-                            case "cancel":
-
-                                visible =
-                                    ![
-                                        Flow.states
-                                            .COMPLETED,
-
-                                        Flow.states
-                                            .CANCELLED
-                                    ].includes(
-                                        state.status
-                                    );
-
-                                break;
-
-
-                            case "pay":
-
-                                visible =
-                                    state.status ===
-                                    Flow.states
-                                        .PAYMENT_PENDING;
-
-                                break;
-
-
-                            case "rate":
-
-                                visible =
-                                    state.status ===
-                                    Flow.states.RATING;
-
-                                break;
-                        }
-
-
-                        button.hidden =
-                            !visible;
+                        element.disabled =
+                            !Flow.canUseAction(
+                                action,
+                                status
+                            );
 
                     }
+                );
+
+
+            Flow.emit(
+                "ui-update",
+                {
+
+                    status:
+                        status,
+
+                    ride:
+                        ride
+                }
+            );
+        };
+
+
+    /* ========================================================
+       ACTION CHECK
+       ======================================================== */
+
+    Flow.canUseAction =
+        function (
+            action,
+            status
+        ) {
+
+            status =
+                Flow.normalizeStatus(
+                    status
+                );
+
+
+            const rules =
+                {
+
+                    accept:
+                        [
+                            "accepted"
+                        ],
+
+                    arriving:
+                        [
+                            "accepted"
+                        ],
+
+                    arrived:
+                        [
+                            "arriving"
+                        ],
+
+                    otp:
+                        [
+                            "arrived"
+                        ],
+
+                    start:
+                        [
+                            "arrived",
+                            "otp_verified"
+                        ],
+
+                    complete:
+                        [
+                            "in_progress"
+                        ],
+
+                    cancel:
+                        [
+                            "accepted",
+                            "arriving",
+                            "arrived"
+                        ]
+                };
+
+
+            if (
+                !rules[action]
+            ) {
+
+                return true;
+            }
+
+
+            return rules[action]
+                .includes(
+                    status
                 );
         };
 
 
     /* ========================================================
-       EVENT SYSTEM
+       STATUS LABEL
+       ======================================================== */
+
+    Flow.getStatusLabel =
+        function (
+            status
+        ) {
+
+            const labels =
+                {
+
+                    searching:
+                        "Finding rider",
+
+                    accepted:
+                        "Ride accepted",
+
+                    arriving:
+                        "On the way to pickup",
+
+                    arrived:
+                        "Arrived at pickup",
+
+                    otp_verified:
+                        "OTP verified",
+
+                    in_progress:
+                        "Trip in progress",
+
+                    completed:
+                        "Ride completed",
+
+                    cancelled:
+                        "Ride cancelled"
+                };
+
+
+            return (
+                labels[
+                    Flow.normalizeStatus(
+                        status
+                    )
+                ] ||
+                "Ride"
+            );
+        };
+
+
+    /* ========================================================
+       EMIT EVENT
        ======================================================== */
 
     Flow.emit =
@@ -3554,7 +2411,7 @@
 
             window.dispatchEvent(
                 new CustomEvent(
-                    "riderx-ride-" +
+                    "riderx-ride-flow-" +
                     name,
                     {
 
@@ -3581,26 +2438,25 @@
             }
 
 
-            const eventName =
-                "riderx-ride-" +
+            const event =
+                "riderx-ride-flow-" +
                 name;
 
 
             const handler =
                 function (
-                    event
+                    e
                 ) {
 
                     callback(
-                        event.detail || {},
-                        event
+                        e.detail || {},
+                        e
                     );
-
                 };
 
 
             window.addEventListener(
-                eventName,
+                event,
                 handler
             );
 
@@ -3608,135 +2464,194 @@
             return function () {
 
                 window.removeEventListener(
-                    eventName,
+                    event,
                     handler
                 );
-
             };
         };
 
 
     /* ========================================================
-       BUTTON AUTO-BINDING
+       GLOBAL API
        ======================================================== */
 
-    Flow.bindButtons =
+    RX.acceptRide =
+        Flow.acceptRide;
+
+    RX.startArriving =
+        Flow.startArriving;
+
+    RX.arrivedAtPickup =
+        Flow.arrivedAtPickup;
+
+    RX.verifyRideOTP =
+        Flow.verifyOTP;
+
+    RX.startTrip =
+        Flow.startTrip;
+
+    RX.completeTrip =
+        Flow.completeTrip;
+
+    RX.cancelRide =
+        Flow.cancelRide;
+
+    RX.getActiveRide =
         function () {
 
-            document
-                .querySelectorAll(
+            return Flow.state.ride;
+        };
+
+
+    /* ========================================================
+       DOM EVENT HANDLERS
+       ======================================================== */
+
+    document.addEventListener(
+        "click",
+        function (
+            event
+        ) {
+
+            const button =
+                event.target.closest(
                     "[data-ride-action]"
-                )
-                .forEach(
-                    function (
-                        button
+                );
+
+
+            if (
+                !button
+            ) {
+
+                return;
+            }
+
+
+            const action =
+                button.dataset
+                    .rideAction;
+
+
+            if (
+                action ===
+                "arriving"
+            ) {
+
+                Flow.startArriving();
+
+            } else if (
+                action ===
+                "arrived"
+            ) {
+
+                Flow.arrivedAtPickup();
+
+            } else if (
+                action ===
+                "start"
+            ) {
+
+                Flow.startTrip();
+
+            } else if (
+                action ===
+                "complete"
+            ) {
+
+                Flow.completeTrip();
+
+            } else if (
+                action ===
+                "cancel"
+            ) {
+
+                Flow.cancelRide(
+                    button.dataset
+                        .cancelReason
+                );
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       OTP FORM SUPPORT
+       ======================================================== */
+
+    document.addEventListener(
+        "submit",
+        function (
+            event
+        ) {
+
+            const form =
+                event.target.closest(
+                    "[data-ride-otp-form]"
+                );
+
+
+            if (
+                !form
+            ) {
+
+                return;
+            }
+
+
+            event.preventDefault();
+
+
+            const input =
+                form.querySelector(
+                    "input[name='otp'], input[data-ride-otp]"
+                );
+
+
+            if (
+                !input
+            ) {
+
+                return;
+            }
+
+
+            Flow.verifyOTP(
+                input.value
+            )
+            .then(
+                function (
+                    result
+                ) {
+
+                    if (
+                        !result.success
                     ) {
 
                         if (
-                            button.dataset
-                                .rxBound ===
-                            "true"
+                            RX.notification &&
+                            typeof RX.notification
+                                .show ===
+                            "function"
                         ) {
 
-                            return;
+                            RX.notification.show(
+                                result.error
+                            );
+                        } else {
+
+                            console.warn(
+                                result.error
+                            );
                         }
 
-
-                        button.dataset
-                            .rxBound =
-                            "true";
-
-
-                        button.addEventListener(
-                            "click",
-                            async function () {
-
-                                const action =
-                                    button.dataset
-                                        .rideAction;
-
-
-                                try {
-
-                                    switch (
-                                        action
-                                    ) {
-
-                                        case "accept":
-
-                                            await Flow
-                                                .acceptRide();
-
-                                            break;
-
-
-                                        case "arrived":
-
-                                            await Flow
-                                                .driverArrived();
-
-                                            break;
-
-
-                                        case "start":
-
-                                            await Flow
-                                                .startTrip();
-
-                                            break;
-
-
-                                        case "complete":
-
-                                            await Flow
-                                                .completeRide();
-
-                                            break;
-
-
-                                        case "cancel":
-
-                                            await Flow
-                                                .cancelRide(
-                                                    "Cancelled by user"
-                                                );
-
-                                            break;
-
-
-                                        case "pay":
-
-                                            await Flow
-                                                .completePayment();
-
-                                            break;
-
-                                    }
-
-                                } catch (error) {
-
-                                    console.error(
-                                        "Ride action failed:",
-                                        error
-                                    );
-
-
-                                    Flow.setState(
-                                        {
-
-                                            error:
-                                                error.message
-                                        }
-                                    );
-
-                                }
-
-                            }
-                        );
-
                     }
-                );
-        };
+
+                }
+            );
+
+        }
+    );
 
 
     /* ========================================================
@@ -3758,46 +2673,25 @@
                 true;
 
 
-            Flow.getRole();
+            /*
+             * Recover active ride after refresh.
+             */
 
-
-            Flow.bindButtons();
+            await Flow.restoreActiveRide();
 
 
             /*
-             * Restore active ride.
+             * If ride exists, update UI.
              */
 
-            try {
+            if (
+                Flow.state.ride
+            ) {
 
-                const activeRide =
-                    localStorage.getItem(
-                        Flow.config
-                            .activeRideKey
-                    );
-
-
-                if (
-                    activeRide
-                ) {
-
-                    await Flow.restore(
-                        activeRide
-                    );
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Active ride restore failed:",
-                    error
+                Flow.updateStatusUI(
+                    Flow.state.ride
                 );
-
             }
-
-
-            Flow.updateUI();
 
 
             console.log(
@@ -3805,51 +2699,6 @@
             );
         };
 
-
-    /* ========================================================
-       GLOBAL API
-       ======================================================== */
-
-    RX.createRide =
-        Flow.createRide;
-
-    RX.startMatching =
-        Flow.startMatching;
-
-    RX.acceptRide =
-        Flow.acceptRide;
-
-    RX.driverArrived =
-        Flow.driverArrived;
-
-    RX.verifyRideOTP =
-        Flow.verifyOTP;
-
-    RX.startRide =
-        Flow.startTrip;
-
-    RX.startLiveRide =
-        Flow.startLiveTrip;
-
-    RX.completeRide =
-        Flow.completeRide;
-
-    RX.cancelRide =
-        Flow.cancelRide;
-
-    RX.completePayment =
-        Flow.completePayment;
-
-    RX.submitRideRating =
-        Flow.submitRating;
-
-    RX.getRideFlow =
-        Flow.getState;
-
-
-    /* ========================================================
-       DOM READY
-       ======================================================== */
 
     if (
         document.readyState ===
@@ -3866,6 +2715,5 @@
         Flow.init();
 
     }
-
 
 })();
