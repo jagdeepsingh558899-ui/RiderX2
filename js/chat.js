@@ -1,20 +1,19 @@
 /* ============================================================
-   RIDERX 2.0
-   CHAT ENGINE
+   RIDERX
+   REAL-TIME CHAT ENGINE
    File: js/chat.js
 
    Supports:
    - Customer ↔ Rider chat
-   - Ride based conversations
-   - Realtime Firebase messages
-   - Unread count
-   - Sent / delivered / read status
-   - Typing indicator
-   - Online status
-   - Message timestamps
+   - Firebase Realtime Database
+   - Firestore mirror
    - Text messages
-   - Quick replies
-   - Local fallback
+   - Read / unread state
+   - Typing indicator
+   - Message timestamps
+   - Active ride chat
+   - Chat history
+   - Notification events
    ============================================================ */
 
 (function () {
@@ -24,173 +23,91 @@
     window.RiderX = window.RiderX || {};
 
     const RX = window.RiderX;
-    RX.chat = RX.chat || {};
 
-    const CHAT = RX.chat;
+    const CHAT =
+        RX.chat =
+        RX.chat || {};
+
+
+    /* ========================================================
+       CONFIG
+       ======================================================== */
 
     CHAT.config = {
 
-        maxMessages: 300,
-
-        storagePrefix:
-            "riderx_chat_",
+        maxMessageLength:
+            1000,
 
         typingTimeout:
             2500,
 
-        onlineTimeout:
-            15000
-    };
+        historyLimit:
+            100,
 
-    CHAT.state = {
+        databasePath:
+            "chats",
 
-        user: null,
+        messagesPath:
+            "messages",
 
-        userId: null,
-
-        role: null,
-
-        rideId: null,
-
-        conversationId: null,
-
-        otherUserId: null,
-
-        otherUserName: null,
-
-        messages: [],
-
-        unread: 0,
-
-        listening: false,
-
-        typing: false,
-
-        typingTimer: null,
-
-        messageReference: null,
-
-        messageListener: null,
-
-        typingReference: null,
-
-        typingListener: null,
-
-        onlineReference: null,
-
-        onlineListener: null,
-
-        initialized: false
+        unreadPath:
+            "unread"
     };
 
 
     /* ========================================================
-       HELPERS
+       STATE
        ======================================================== */
 
-    CHAT.getUser = function () {
+    CHAT.state = {
 
-        if (CHAT.state.user) {
-            return CHAT.state.user;
-        }
+        initialized:
+            false,
+
+        active:
+            false,
+
+        rideId:
+            null,
+
+        currentUser:
+            null,
+
+        otherUser:
+            null,
+
+        messages:
+            [],
+
+        messageListener:
+            null,
+
+        typingListener:
+            null,
+
+        typingTimer:
+            null,
+
+        unreadListener:
+            null,
+
+        unreadCount:
+            0
+    };
+
+
+    /* ========================================================
+       FIREBASE
+       ======================================================== */
+
+    CHAT.database = function () {
 
         try {
 
             if (
                 window.firebase &&
-                firebase.auth
-            ) {
-
-                const user =
-                    firebase.auth()
-                        .currentUser;
-
-                if (user) {
-
-                    CHAT.state.user = user;
-
-                    return user;
-                }
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Chat auth error:",
-                error
-            );
-        }
-
-        try {
-
-            const user =
-                JSON.parse(
-                    localStorage.getItem(
-                        "riderx_user"
-                    ) || "null"
-                );
-
-            if (user) {
-
-                CHAT.state.user = user;
-
-                return user;
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Chat local user error:",
-                error
-            );
-        }
-
-        return null;
-    };
-
-
-    CHAT.getUserId = function () {
-
-        const user = CHAT.getUser();
-
-        if (!user) {
-            return null;
-        }
-
-        return (
-            user.uid ||
-            user.userId ||
-            user.id ||
-            null
-        );
-    };
-
-
-    CHAT.getRole = function () {
-
-        const user = CHAT.getUser();
-
-        return (
-            user &&
-            (
-                user.role ||
-                user.userRole
-            )
-        ) ||
-        localStorage.getItem(
-            "riderx_role"
-        ) ||
-        null;
-    };
-
-
-    CHAT.getDatabase = function () {
-
-        try {
-
-            if (
-                window.firebase &&
-                firebase.database
+                typeof firebase.database ===
+                "function"
             ) {
 
                 return firebase.database();
@@ -199,7 +116,7 @@
         } catch (error) {
 
             console.warn(
-                "Firebase database error:",
+                "RiderX chat database error:",
                 error
             );
         }
@@ -208,334 +125,665 @@
     };
 
 
+    CHAT.firestore = function () {
+
+        try {
+
+            if (
+                window.firebase &&
+                typeof firebase.firestore ===
+                "function"
+            ) {
+
+                return firebase.firestore();
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX chat firestore error:",
+                error
+            );
+        }
+
+        return null;
+    };
+
+
+    /* ========================================================
+       USER
+       ======================================================== */
+
+    CHAT.getUser = function () {
+
+        if (
+            RX.auth &&
+            typeof RX.auth.getUser ===
+            "function"
+        ) {
+
+            return RX.auth.getUser();
+        }
+
+
+        try {
+
+            return JSON.parse(
+                localStorage.getItem(
+                    "riderx_user"
+                ) || "null"
+            );
+
+        } catch (error) {
+
+            return null;
+        }
+    };
+
+
+    CHAT.getUid = function () {
+
+        const user =
+            CHAT.getUser();
+
+
+        return (
+            user?.uid ||
+            user?.id ||
+            user?.userId ||
+            null
+        );
+    };
+
+
+    CHAT.getRole = function () {
+
+        const user =
+            CHAT.getUser();
+
+
+        return String(
+            user?.role ||
+            user?.userType ||
+            user?.type ||
+            "customer"
+        )
+        .toLowerCase();
+    };
+
+
+    /* ========================================================
+       HELPERS
+       ======================================================== */
+
     CHAT.generateId = function () {
 
         return (
             "msg_" +
-            Date.now() +
+            Date.now().toString(36) +
             "_" +
             Math.random()
                 .toString(36)
-                .slice(2, 9)
+                .substring(2, 10)
         );
     };
 
 
-    CHAT.escape = function (value) {
+    CHAT.escape = function (
+        value
+    ) {
 
-        const div =
-            document.createElement("div");
+        const text =
+            String(
+                value ??
+                ""
+            );
 
-        div.textContent =
-            String(value ?? "");
 
-        return div.innerHTML;
+        return text
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
     };
 
 
-    CHAT.formatTime = function (timestamp) {
+    CHAT.formatTime = function (
+        timestamp
+    ) {
 
         const date =
-            new Date(timestamp);
+            new Date(
+                Number(
+                    timestamp
+                ) ||
+                Date.now()
+            );
 
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "";
-        }
 
         return date.toLocaleTimeString(
-            "en-IN",
+            [],
             {
-                hour: "2-digit",
-                minute: "2-digit"
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit"
             }
         );
     };
 
 
-    CHAT.formatDate = function (timestamp) {
+    CHAT.formatDate = function (
+        timestamp
+    ) {
 
         const date =
-            new Date(timestamp);
+            new Date(
+                Number(
+                    timestamp
+                ) ||
+                Date.now()
+            );
 
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "";
-        }
 
         return date.toLocaleDateString(
-            "en-IN",
+            [],
             {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
+                day:
+                    "numeric",
+
+                month:
+                    "short",
+
+                year:
+                    "numeric"
             }
         );
     };
 
 
-    CHAT.getConversationId = function (
-        rideId,
-        userA,
-        userB
-    ) {
-
-        if (rideId) {
-
-            return "ride_" + rideId;
-        }
-
-        const ids = [
-            userA,
-            userB
-        ]
-            .filter(Boolean)
-            .sort();
-
-        return (
-            "chat_" +
-            ids.join("_")
-        );
-    };
-
-
     /* ========================================================
-       INITIALIZE CONVERSATION
+       ACTIVE RIDE
        ======================================================== */
 
-    CHAT.open = async function (
-        options = {}
-    ) {
-
-        const currentUser =
-            CHAT.getUser();
-
-        const currentUserId =
-            CHAT.getUserId();
-
-        const rideId =
-            options.rideId ||
-            options.bookingId ||
-            null;
-
-        const otherUserId =
-            options.otherUserId ||
-            options.riderId ||
-            options.customerId ||
-            null;
-
-        CHAT.state.user =
-            currentUser;
-
-        CHAT.state.userId =
-            currentUserId;
-
-        CHAT.state.role =
-            options.role ||
-            CHAT.getRole();
-
-        CHAT.state.rideId =
-            rideId;
-
-        CHAT.state.otherUserId =
-            otherUserId;
-
-        CHAT.state.otherUserName =
-            options.otherUserName ||
-            options.name ||
-            (
-                CHAT.state.role === "customer"
-                    ? "Rider"
-                    : "Customer"
-            );
-
-        CHAT.state.conversationId =
-            options.conversationId ||
-            CHAT.getConversationId(
-                rideId,
-                currentUserId,
-                otherUserId
-            );
-
-
-        CHAT.loadLocal();
-
-        CHAT.renderHeader();
-
-        CHAT.render();
-
-        CHAT.stopListeners();
-
-        CHAT.startListeners();
-
-        CHAT.setOnline(true);
-
-        return CHAT.state
-            .conversationId;
-    };
-
-
-    /* ========================================================
-       LOCAL STORAGE
-       ======================================================== */
-
-    CHAT.getStorageKey = function () {
-
-        return (
-            CHAT.config.storagePrefix +
-            (
-                CHAT.state
-                    .conversationId ||
-                "default"
-            )
-        );
-    };
-
-
-    CHAT.loadLocal = function () {
-
-        try {
-
-            const data =
-                JSON.parse(
-                    localStorage.getItem(
-                        CHAT.getStorageKey()
-                    ) || "null"
-                );
+    CHAT.getActiveRide =
+        function () {
 
             if (
-                Array.isArray(data)
+                RX.booking &&
+                RX.booking.state &&
+                RX.booking.state.booking
             ) {
 
-                CHAT.state.messages =
-                    data.slice(
-                        0,
-                        CHAT.config.maxMessages
-                    );
+                return RX.booking.state.booking;
             }
 
-        } catch (error) {
 
-            console.warn(
-                "Chat local load error:",
-                error
+            try {
+
+                const saved =
+                    localStorage.getItem(
+                        "riderx_active_ride"
+                    );
+
+
+                if (saved) {
+
+                    return JSON.parse(
+                        saved
+                    );
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Active ride restore failed:",
+                    error
+                );
+            }
+
+
+            return null;
+        };
+
+
+    CHAT.getRideId =
+        function () {
+
+            const ride =
+                CHAT.getActiveRide();
+
+
+            return (
+                CHAT.state.rideId ||
+                ride?.id ||
+                ride?.bookingId ||
+                localStorage.getItem(
+                    "riderx_active_ride_id"
+                ) ||
+                null
             );
-
-            CHAT.state.messages = [];
-        }
-
-        CHAT.calculateUnread();
-    };
+        };
 
 
-    CHAT.saveLocal = function () {
+    /* ========================================================
+       CHAT ID
+       ======================================================== */
 
-        try {
+    CHAT.getChatId =
+        function (
+            rideId
+        ) {
 
-            localStorage.setItem(
-                CHAT.getStorageKey(),
-
-                JSON.stringify(
-                    CHAT.state.messages
-                        .slice(
-                            0,
-                            CHAT.config.maxMessages
-                        )
+            return (
+                String(
+                    rideId ||
+                    CHAT.getRideId() ||
+                    ""
                 )
             );
-
-        } catch (error) {
-
-            console.warn(
-                "Chat local save error:",
-                error
-            );
-        }
-    };
+        };
 
 
     /* ========================================================
-       FIREBASE REFERENCES
+       OPEN CHAT
        ======================================================== */
 
-    CHAT.getConversationReference =
+    CHAT.open =
+        async function (
+            rideId,
+            otherUser
+        ) {
+
+            rideId =
+                rideId ||
+                CHAT.getRideId();
+
+
+            if (!rideId) {
+
+                throw new Error(
+                    "No active ride found for chat."
+                );
+            }
+
+
+            const currentUser =
+                CHAT.getUser();
+
+
+            if (!currentUser) {
+
+                throw new Error(
+                    "Please login to use chat."
+                );
+            }
+
+
+            CHAT.close();
+
+
+            CHAT.state.rideId =
+                rideId;
+
+
+            CHAT.state.currentUser =
+                currentUser;
+
+
+            CHAT.state.otherUser =
+                otherUser ||
+                CHAT.getOtherUserFromRide();
+
+
+            CHAT.state.active =
+                true;
+
+
+            CHAT.updateHeader();
+
+
+            CHAT.attachMessageListener(
+                rideId
+            );
+
+
+            CHAT.attachTypingListener(
+                rideId
+            );
+
+
+            CHAT.attachUnreadListener(
+                rideId
+            );
+
+
+            await CHAT.markAsRead(
+                rideId
+            );
+
+
+            CHAT.emit(
+                "opened",
+                {
+                    rideId:
+                        rideId,
+
+                    otherUser:
+                        CHAT.state.otherUser
+                }
+            );
+
+
+            return {
+                rideId:
+                    rideId,
+
+                otherUser:
+                    CHAT.state.otherUser
+            };
+        };
+
+
+    /* ========================================================
+       CLOSE CHAT
+       ======================================================== */
+
+    CHAT.close =
         function () {
 
-            const database =
-                CHAT.getDatabase();
+            CHAT.removeMessageListener();
 
-            const conversationId =
-                CHAT.state
-                    .conversationId;
+            CHAT.removeTypingListener();
+
+            CHAT.removeUnreadListener();
+
 
             if (
-                !database ||
-                !conversationId
+                CHAT.state.typingTimer
             ) {
 
-                return null;
+                clearTimeout(
+                    CHAT.state.typingTimer
+                );
             }
 
-            return database.ref(
-                "chats/" +
-                conversationId
-            );
+
+            CHAT.state.active =
+                false;
+
+            CHAT.state.rideId =
+                null;
+
+            CHAT.state.messages =
+                [];
+
+            CHAT.state.otherUser =
+                null;
+
+            CHAT.state.typingTimer =
+                null;
         };
 
 
-    CHAT.getMessagesReference =
+    /* ========================================================
+       OTHER USER
+       ======================================================== */
+
+    CHAT.getOtherUserFromRide =
         function () {
 
-            const reference =
-                CHAT.getConversationReference();
+            const ride =
+                CHAT.getActiveRide();
 
-            if (!reference) {
+
+            if (!ride) {
                 return null;
             }
 
-            return reference.child(
-                "messages"
-            );
+
+            const role =
+                CHAT.getRole();
+
+
+            if (
+                role ===
+                "rider" ||
+                role ===
+                "driver"
+            ) {
+
+                return {
+
+                    uid:
+                        ride.customerId ||
+                        ride.customerUid ||
+                        null,
+
+                    id:
+                        ride.customerId ||
+                        ride.customerUid ||
+                        null,
+
+                    name:
+                        ride.customerName ||
+                        "Customer",
+
+                    phone:
+                        ride.customerPhone ||
+                        "",
+
+                    photo:
+                        ride.customerPhoto ||
+                        ""
+                };
+            }
+
+
+            return {
+
+                uid:
+                    ride.riderId ||
+                    ride.riderUid ||
+                    null,
+
+                id:
+                    ride.riderId ||
+                    ride.riderUid ||
+                    null,
+
+                name:
+                    ride.riderName ||
+                    "Rider",
+
+                phone:
+                    ride.riderPhone ||
+                    "",
+
+                photo:
+                    ride.riderPhoto ||
+                    ""
+            };
         };
 
 
-    CHAT.getTypingReference =
-        function () {
+    /* ========================================================
+       MESSAGE LISTENER
+       ======================================================== */
 
-            const reference =
-                CHAT.getConversationReference();
+    CHAT.attachMessageListener =
+        function (
+            rideId
+        ) {
 
-            if (!reference) {
-                return null;
+            const database =
+                CHAT.database();
+
+
+            if (!database) {
+
+                console.warn(
+                    "Firebase Realtime Database unavailable."
+                );
+
+                return;
             }
 
-            return reference.child(
-                "typing"
+
+            CHAT.removeMessageListener();
+
+
+            const reference =
+                database
+                    .ref(
+                        CHAT.config.databasePath +
+                        "/" +
+                        rideId +
+                        "/" +
+                        CHAT.config.messagesPath
+                    )
+                    .limitToLast(
+                        CHAT.config.historyLimit
+                    );
+
+
+            const callback =
+                function (
+                    snapshot
+                ) {
+
+                    const data =
+                        snapshot.val() ||
+                        {};
+
+
+                    const messages =
+                        Object.keys(
+                            data
+                        )
+                        .map(
+                            function (
+                                id
+                            ) {
+
+                                return {
+
+                                    id:
+                                        id,
+
+                                    ...(
+                                        data[id] ||
+                                        {}
+                                    )
+                                };
+                            }
+                        )
+                        .sort(
+                            function (
+                                a,
+                                b
+                            ) {
+
+                                return (
+                                    Number(
+                                        a.createdAt ||
+                                        0
+                                    ) -
+                                    Number(
+                                        b.createdAt ||
+                                        0
+                                    )
+                                );
+                            }
+                        );
+
+
+                    CHAT.state.messages =
+                        messages;
+
+
+                    CHAT.renderMessages(
+                        messages
+                    );
+
+
+                    CHAT.emit(
+                        "messages-updated",
+                        {
+                            rideId:
+                                rideId,
+
+                            messages:
+                                messages
+                        }
+                    );
+                };
+
+
+            reference.on(
+                "value",
+                callback
             );
+
+
+            CHAT.state.messageListener =
+                {
+                    reference:
+                        reference,
+
+                    callback:
+                        callback
+                };
         };
 
 
-    CHAT.getOnlineReference =
+    CHAT.removeMessageListener =
         function () {
 
-            const reference =
-                CHAT.getConversationReference();
+            const listener =
+                CHAT.state.messageListener;
 
-            if (!reference) {
-                return null;
+
+            if (!listener) {
+                return;
             }
 
-            return reference.child(
-                "online"
-            );
+
+            try {
+
+                listener.reference.off(
+                    "value",
+                    listener.callback
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "Chat listener cleanup failed:",
+                    error
+                );
+            }
+
+
+            CHAT.state.messageListener =
+                null;
         };
 
 
@@ -543,493 +791,304 @@
        SEND MESSAGE
        ======================================================== */
 
-    CHAT.send = async function (
-        text,
-        options = {}
-    ) {
-
-        text =
-            String(
-                text || ""
-            ).trim();
-
-        if (!text) {
-            return false;
-        }
-
-        const userId =
-            CHAT.getUserId();
-
-        if (!userId) {
-
-            throw new Error(
-                "Please login before sending messages."
-            );
-        }
-
-        if (
-            !CHAT.state
-                .conversationId
+    CHAT.send =
+        async function (
+            text,
+            type,
+            metadata
         ) {
 
-            throw new Error(
-                "Chat conversation is not open."
-            );
-        }
-
-
-        const message = {
-
-            id:
-                options.id ||
-                CHAT.generateId(),
-
-            senderId:
-                userId,
-
-            senderRole:
-                CHAT.state.role ||
-                CHAT.getRole() ||
-                "user",
-
-            receiverId:
-                CHAT.state
-                    .otherUserId ||
-                null,
-
-            text:
-                text,
-
-            type:
-                options.type ||
-                "text",
-
-            rideId:
-                CHAT.state.rideId ||
-                options.rideId ||
-                null,
-
-            timestamp:
-                Date.now(),
-
-            createdAt:
-                Date.now(),
-
-            status:
-                "sent",
-
-            read:
-                false
-        };
-
-
-        /*
-         * Local immediate render.
-         */
-
-        CHAT.addLocalMessage(
-            message
-        );
-
-
-        const reference =
-            CHAT.getMessagesReference();
-
-
-        if (!reference) {
-
-            CHAT.saveLocal();
-
-            CHAT.stopTyping();
-
-            return message;
-        }
-
-
-        try {
-
-            await reference
-                .child(
-                    message.id
+            text =
+                String(
+                    text ??
+                    ""
                 )
+                .trim();
+
+
+            if (!text) {
+                return null;
+            }
+
+
+            if (
+                text.length >
+                CHAT.config.maxMessageLength
+            ) {
+
+                throw new Error(
+                    "Message is too long."
+                );
+            }
+
+
+            const user =
+                CHAT.getUser();
+
+
+            if (!user) {
+
+                throw new Error(
+                    "Please login to send messages."
+                );
+            }
+
+
+            const rideId =
+                CHAT.getRideId();
+
+
+            if (!rideId) {
+
+                throw new Error(
+                    "No active ride found."
+                );
+            }
+
+
+            const database =
+                CHAT.database();
+
+
+            if (!database) {
+
+                throw new Error(
+                    "Chat service is unavailable."
+                );
+            }
+
+
+            const uid =
+                CHAT.getUid();
+
+
+            const messageId =
+                CHAT.generateId();
+
+
+            const message = {
+
+                id:
+                    messageId,
+
+                rideId:
+                    rideId,
+
+                senderId:
+                    uid,
+
+                senderUid:
+                    uid,
+
+                senderRole:
+                    CHAT.getRole(),
+
+                senderName:
+                    user.name ||
+                    user.displayName ||
+                    (
+                        CHAT.getRole() ===
+                        "rider"
+                            ? "Rider"
+                            : "Customer"
+                    ),
+
+                senderPhoto:
+                    user.photoURL ||
+                    user.photo ||
+                    user.profilePhoto ||
+                    "",
+
+                receiverId:
+                    CHAT.state.otherUser
+                        ?.uid ||
+                    CHAT.state.otherUser
+                        ?.id ||
+                    null,
+
+                text:
+                    text,
+
+                type:
+                    type ||
+                    "text",
+
+                metadata:
+                    metadata ||
+                    null,
+
+                createdAt:
+                    Date.now(),
+
+                timestamp:
+                    Date.now(),
+
+                read:
+                    false
+            };
+
+
+            const path =
+                CHAT.config.databasePath +
+                "/" +
+                rideId +
+                "/" +
+                CHAT.config.messagesPath +
+                "/" +
+                messageId;
+
+
+            await database
+                .ref(path)
                 .set(
                     message
                 );
 
 
             /*
-             * Update conversation metadata.
+             * Update last message.
              */
 
-            const conversation =
-                CHAT.getConversationReference();
-
-            if (conversation) {
-
-                await conversation
-                    .update({
+            await database
+                .ref(
+                    CHAT.config.databasePath +
+                    "/" +
+                    rideId
+                )
+                .update(
+                    {
 
                         lastMessage:
                             text,
 
+                        lastMessageType:
+                            message.type,
+
                         lastMessageAt:
-                            message.timestamp,
+                            message.createdAt,
 
                         lastMessageSender:
-                            userId,
+                            uid
+                    }
+                );
 
-                        rideId:
-                            message.rideId ||
-                            null
-                    });
+
+            /*
+             * Firestore mirror.
+             */
+
+            const firestore =
+                CHAT.firestore();
+
+
+            if (firestore) {
+
+                try {
+
+                    await firestore
+                        .collection(
+                            "chats"
+                        )
+                        .doc(
+                            rideId
+                        )
+                        .collection(
+                            "messages"
+                        )
+                        .doc(
+                            messageId
+                        )
+                        .set(
+                            message
+                        );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Firestore chat mirror failed:",
+                        error
+                    );
+                }
             }
+
+
+            /*
+             * Notification event.
+             */
+
+            CHAT.notifyReceiver(
+                message
+            );
 
 
             CHAT.stopTyping();
 
+
+            CHAT.emit(
+                "message-sent",
+                {
+                    message:
+                        message
+                }
+            );
+
+
             return message;
-
-        } catch (error) {
-
-            console.error(
-                "Chat send failed:",
-                error
-            );
-
-            return message;
-        }
-    };
+        };
 
 
     /* ========================================================
-       LOCAL MESSAGE
+       SEND QUICK MESSAGE
        ======================================================== */
 
-    CHAT.addLocalMessage = function (
-        message
-    ) {
-
-        const exists =
-            CHAT.state.messages.some(
-                function (item) {
-
-                    return (
-                        item.id ===
-                        message.id
-                    );
-                }
-            );
-
-        if (!exists) {
-
-            CHAT.state.messages.push(
-                message
-            );
-        }
-
-        CHAT.state.messages =
-            CHAT.state.messages
-                .sort(
-                    function (a, b) {
-
-                        return (
-                            Number(
-                                a.timestamp
-                            ) -
-                            Number(
-                                b.timestamp
-                            )
-                        );
-                    }
-                )
-                .slice(
-                    -CHAT.config
-                        .maxMessages
-                );
-
-        CHAT.saveLocal();
-
-        CHAT.render();
-
-        CHAT.calculateUnread();
-    };
-
-
-    /* ========================================================
-       LISTENERS
-       ======================================================== */
-
-    CHAT.startListeners = function () {
-
-        const messages =
-            CHAT.getMessagesReference();
-
-        if (!messages) {
-            return false;
-        }
-
-
-        const messageListener =
-            function (snapshot) {
-
-                const data =
-                    snapshot.val();
-
-                if (!data) {
-                    return;
-                }
-
-                const message = {
-
-                    ...data,
-
-                    id:
-                        data.id ||
-                        snapshot.key
-                };
-
-
-                const alreadyExists =
-                    CHAT.state.messages
-                        .some(
-                            function (
-                                item
-                            ) {
-
-                                return (
-                                    item.id ===
-                                    message.id
-                                );
-                            }
-                        );
-
-
-                if (!alreadyExists) {
-
-                    CHAT.state.messages
-                        .push(
-                            message
-                        );
-
-                    CHAT.state.messages =
-                        CHAT.state.messages
-                            .sort(
-                                function (
-                                    a,
-                                    b
-                                ) {
-
-                                    return (
-                                        Number(
-                                            a.timestamp
-                                        ) -
-                                        Number(
-                                            b.timestamp
-                                        )
-                                    );
-                                }
-                            )
-                            .slice(
-                                -CHAT.config
-                                    .maxMessages
-                            );
-
-                    CHAT.saveLocal();
-
-                    CHAT.render();
-
-                    /*
-                     * Mark received message
-                     * as delivered.
-                     */
-
-                    if (
-                        message.senderId !==
-                        CHAT.state.userId
-                    ) {
-
-                        CHAT.markDelivered(
-                            message.id
-                        );
-
-                        CHAT.playMessageNotification(
-                            message
-                        );
-                    }
-                }
-            };
-
-
-        messages.on(
-            "child_added",
-            messageListener
-        );
-
-
-        CHAT.state.messageReference =
-            messages;
-
-        CHAT.state.messageListener =
-            messageListener;
-
-
-        CHAT.startTypingListener();
-
-        CHAT.startOnlineListener();
-
-        CHAT.state.listening =
-            true;
-
-        return true;
-    };
-
-
-    /* ========================================================
-       STOP LISTENERS
-       ======================================================== */
-
-    CHAT.stopListeners = function () {
-
-        if (
-            CHAT.state
-                .messageReference &&
-            CHAT.state
-                .messageListener
+    CHAT.sendQuick =
+        function (
+            text
         ) {
 
-            try {
-
-                CHAT.state
-                    .messageReference
-                    .off(
-                        "child_added",
-                        CHAT.state
-                            .messageListener
-                    );
-
-            } catch (error) {
-                /* Ignore */
-            }
-        }
-
-
-        if (
-            CHAT.state
-                .typingReference &&
-            CHAT.state
-                .typingListener
-        ) {
-
-            try {
-
-                CHAT.state
-                    .typingReference
-                    .off(
-                        "value",
-                        CHAT.state
-                            .typingListener
-                    );
-
-            } catch (error) {
-                /* Ignore */
-            }
-        }
-
-
-        if (
-            CHAT.state
-                .onlineReference &&
-            CHAT.state
-                .onlineListener
-        ) {
-
-            try {
-
-                CHAT.state
-                    .onlineReference
-                    .off(
-                        "value",
-                        CHAT.state
-                            .onlineListener
-                    );
-
-            } catch (error) {
-                /* Ignore */
-            }
-        }
-
-
-        CHAT.state.messageReference =
-            null;
-
-        CHAT.state.messageListener =
-            null;
-
-        CHAT.state.typingReference =
-            null;
-
-        CHAT.state.typingListener =
-            null;
-
-        CHAT.state.onlineReference =
-            null;
-
-        CHAT.state.onlineListener =
-            null;
-
-        CHAT.state.listening =
-            false;
-    };
-
-
-    /* ========================================================
-       DELIVERY STATUS
-       ======================================================== */
-
-    CHAT.markDelivered = async function (
-        messageId
-    ) {
-
-        const reference =
-            CHAT.getMessagesReference();
-
-        if (!reference) {
-            return;
-        }
-
-        try {
-
-            await reference
-                .child(
-                    messageId
-                )
-                .update({
-
-                    status:
-                        "delivered"
-                });
-
-        } catch (error) {
-
-            console.warn(
-                "Mark delivered failed:",
-                error
+            return CHAT.send(
+                text,
+                "quick"
             );
-        }
-    };
+        };
 
 
     /* ========================================================
-       READ MESSAGE
+       DELETE MESSAGE
        ======================================================== */
 
-    CHAT.markRead = async function (
-        messageId
-    ) {
+    CHAT.deleteMessage =
+        async function (
+            messageId
+        ) {
 
-        const message =
-            CHAT.state.messages
-                .find(
+            if (!messageId) {
+                return false;
+            }
+
+
+            const database =
+                CHAT.database();
+
+
+            const rideId =
+                CHAT.getRideId();
+
+
+            if (
+                !database ||
+                !rideId
+            ) {
+                return false;
+            }
+
+
+            const uid =
+                CHAT.getUid();
+
+
+            const message =
+                CHAT.state.messages.find(
                     function (
                         item
                     ) {
@@ -1041,509 +1100,567 @@
                     }
                 );
 
-        if (message) {
 
-            message.read = true;
+            if (
+                !message ||
+                message.senderId !==
+                uid
+            ) {
 
-            message.status =
-                "read";
-        }
+                return false;
+            }
 
-        CHAT.saveLocal();
 
-        const reference =
-            CHAT.getMessagesReference();
-
-        if (!reference) {
-            return;
-        }
-
-        try {
-
-            await reference
-                .child(
+            await database
+                .ref(
+                    CHAT.config.databasePath +
+                    "/" +
+                    rideId +
+                    "/" +
+                    CHAT.config.messagesPath +
+                    "/" +
                     messageId
                 )
-                .update({
+                .update(
+                    {
 
-                    read:
-                        true,
+                        deleted:
+                            true,
 
-                    status:
-                        "read"
-                });
+                        deletedAt:
+                            Date.now(),
 
-        } catch (error) {
-
-            console.warn(
-                "Mark read failed:",
-                error
-            );
-        }
-
-        CHAT.calculateUnread();
-        CHAT.render();
-    };
-
-
-    CHAT.markAllRead = async function () {
-
-        const incoming =
-            CHAT.state.messages
-                .filter(
-                    function (
-                        message
-                    ) {
-
-                        return (
-                            message.senderId !==
-                            CHAT.state.userId &&
-                            !message.read
-                        );
+                        text:
+                            "Message deleted."
                     }
                 );
 
-        for (
-            const message
-            of incoming
-        ) {
 
-            await CHAT.markRead(
-                message.id
-            );
-        }
-    };
+            return true;
+        };
 
 
     /* ========================================================
-       UNREAD
+       READ STATE
        ======================================================== */
 
-    CHAT.calculateUnread = function () {
+    CHAT.markAsRead =
+        async function (
+            rideId
+        ) {
 
-        CHAT.state.unread =
-            CHAT.state.messages
-                .filter(
-                    function (
-                        message
+            rideId =
+                rideId ||
+                CHAT.getRideId();
+
+
+            const database =
+                CHAT.database();
+
+
+            const uid =
+                CHAT.getUid();
+
+
+            if (
+                !database ||
+                !uid ||
+                !rideId
+            ) {
+
+                return;
+            }
+
+
+            const unreadRef =
+                database
+                    .ref(
+                        CHAT.config.databasePath +
+                        "/" +
+                        rideId +
+                        "/" +
+                        CHAT.config.unreadPath +
+                        "/" +
+                        uid
+                    );
+
+
+            await unreadRef.set(
+                0
+            );
+
+
+            /*
+             * Mark incoming messages as read.
+             */
+
+            const messagesRef =
+                database
+                    .ref(
+                        CHAT.config.databasePath +
+                        "/" +
+                        rideId +
+                        "/" +
+                        CHAT.config.messagesPath
+                    );
+
+
+            const snapshot =
+                await messagesRef
+                    .once(
+                        "value"
+                    );
+
+
+            const data =
+                snapshot.val() ||
+                {};
+
+
+            const updates = {};
+
+
+            Object.keys(
+                data
+            )
+            .forEach(
+                function (
+                    messageId
+                ) {
+
+                    const message =
+                        data[messageId];
+
+
+                    if (
+                        message &&
+                        message.senderId !==
+                        uid &&
+                        message.read !==
+                        true
                     ) {
 
-                        return (
-                            message.senderId !==
-                            CHAT.state.userId &&
-                            !message.read
-                        );
+                        updates[
+                            messageId +
+                            "/read"
+                        ] =
+                            true;
+
+                        updates[
+                            messageId +
+                            "/readAt"
+                        ] =
+                            Date.now();
                     }
-                )
-                .length;
-
-
-        CHAT.updateUnreadBadge();
-    };
-
-
-    CHAT.updateUnreadBadge = function () {
-
-        document
-            .querySelectorAll(
-                "[data-chat-unread]"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
-
-                    const count =
-                        CHAT.state.unread;
-
-                    element.textContent =
-                        count > 99
-                            ? "99+"
-                            : String(
-                                count
-                            );
-
-                    element.hidden =
-                        count === 0;
                 }
             );
 
 
-        document
-            .querySelectorAll(
-                ".chat-unread-badge"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
+            if (
+                Object.keys(
+                    updates
+                ).length
+            ) {
 
-                    element.textContent =
-                        CHAT.state.unread;
+                await messagesRef.update(
+                    updates
+                );
+            }
 
-                    element.style.display =
-                        CHAT.state.unread === 0
-                            ? "none"
-                            : "";
+
+            CHAT.state.unreadCount =
+                0;
+
+
+            CHAT.updateUnreadUI();
+
+
+            CHAT.emit(
+                "read",
+                {
+                    rideId:
+                        rideId
                 }
             );
-    };
+        };
+
+
+    /* ========================================================
+       UNREAD LISTENER
+       ======================================================== */
+
+    CHAT.attachUnreadListener =
+        function (
+            rideId
+        ) {
+
+            const database =
+                CHAT.database();
+
+
+            const uid =
+                CHAT.getUid();
+
+
+            if (
+                !database ||
+                !uid ||
+                !rideId
+            ) {
+                return;
+            }
+
+
+            CHAT.removeUnreadListener();
+
+
+            const reference =
+                database
+                    .ref(
+                        CHAT.config.databasePath +
+                        "/" +
+                        rideId +
+                        "/" +
+                        CHAT.config.unreadPath +
+                        "/" +
+                        uid
+                    );
+
+
+            const callback =
+                function (
+                    snapshot
+                ) {
+
+                    CHAT.state.unreadCount =
+                        Number(
+                            snapshot.val()
+                        ) ||
+                        0;
+
+
+                    CHAT.updateUnreadUI();
+
+
+                    CHAT.emit(
+                        "unread-updated",
+                        {
+                            count:
+                                CHAT.state
+                                    .unreadCount
+                        }
+                    );
+                };
+
+
+            reference.on(
+                "value",
+                callback
+            );
+
+
+            CHAT.state.unreadListener =
+                {
+                    reference:
+                        reference,
+
+                    callback:
+                        callback
+                };
+        };
+
+
+    CHAT.removeUnreadListener =
+        function () {
+
+            const listener =
+                CHAT.state
+                    .unreadListener;
+
+
+            if (!listener) {
+                return;
+            }
+
+
+            try {
+
+                listener.reference.off(
+                    "value",
+                    listener.callback
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "Unread listener cleanup failed:",
+                    error
+                );
+            }
+
+
+            CHAT.state.unreadListener =
+                null;
+        };
+
+
+    /* ========================================================
+       INCREMENT UNREAD
+       ======================================================== */
+
+    CHAT.incrementUnread =
+        async function (
+            receiverId,
+            rideId
+        ) {
+
+            const database =
+                CHAT.database();
+
+
+            if (
+                !database ||
+                !receiverId ||
+                !rideId
+            ) {
+                return;
+            }
+
+
+            const reference =
+                database.ref(
+                    CHAT.config.databasePath +
+                    "/" +
+                    rideId +
+                    "/" +
+                    CHAT.config.unreadPath +
+                    "/" +
+                    receiverId
+                );
+
+
+            const snapshot =
+                await reference.once(
+                    "value"
+                );
+
+
+            const current =
+                Number(
+                    snapshot.val()
+                ) ||
+                0;
+
+
+            await reference.set(
+                current + 1
+            );
+        };
+
+
+    /* ========================================================
+       NOTIFICATION
+       ======================================================== */
+
+    CHAT.notifyReceiver =
+        async function (
+            message
+        ) {
+
+            if (!message) {
+                return;
+            }
+
+
+            if (
+                !message.receiverId
+            ) {
+                return;
+            }
+
+
+            try {
+
+                await CHAT.incrementUnread(
+                    message.receiverId,
+                    message.rideId
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "Unread count update failed:",
+                    error
+                );
+            }
+
+
+            /*
+             * Existing notification module.
+             */
+
+            if (
+                RX.notification &&
+                typeof RX.notification
+                    .send ===
+                "function"
+            ) {
+
+                try {
+
+                    await RX.notification.send(
+                        {
+                            recipientId:
+                                message.receiverId,
+
+                            title:
+                                message.senderName,
+
+                            body:
+                                message.text,
+
+                            type:
+                                "chat",
+
+                            rideId:
+                                message.rideId
+                        }
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Notification module failed:",
+                        error
+                    );
+                }
+            }
+
+
+            CHAT.emit(
+                "notification",
+                {
+                    message:
+                        message
+                }
+            );
+        };
 
 
     /* ========================================================
        TYPING
        ======================================================== */
 
-    CHAT.startTyping = function () {
+    CHAT.startTyping =
+        async function () {
 
-        if (
-            CHAT.state.typing
-        ) {
-            return;
-        }
+            const database =
+                CHAT.database();
 
-        CHAT.state.typing =
-            true;
 
-        CHAT.updateTyping(true);
+            const rideId =
+                CHAT.getRideId();
 
-        clearTimeout(
-            CHAT.state.typingTimer
-        );
 
-        CHAT.state.typingTimer =
-            setTimeout(
-                function () {
+            const uid =
+                CHAT.getUid();
 
-                    CHAT.stopTyping();
-
-                },
-                CHAT.config
-                    .typingTimeout
-            );
-    };
-
-
-    CHAT.stopTyping = function () {
-
-        CHAT.state.typing =
-            false;
-
-        clearTimeout(
-            CHAT.state.typingTimer
-        );
-
-        CHAT.updateTyping(false);
-    };
-
-
-    CHAT.updateTyping = function (
-        value
-    ) {
-
-        const reference =
-            CHAT.getTypingReference();
-
-        const userId =
-            CHAT.getUserId();
-
-        if (
-            !reference ||
-            !userId
-        ) {
-            return;
-        }
-
-        reference
-            .child(
-                userId
-            )
-            .set({
-                typing:
-                    Boolean(value),
-
-                name:
-                    CHAT.getUserName(),
-
-                timestamp:
-                    Date.now()
-            });
-    };
-
-
-    CHAT.startTypingListener =
-        function () {
-
-            const reference =
-                CHAT.getTypingReference();
-
-            const currentUser =
-                CHAT.getUserId();
-
-            if (!reference) {
-                return;
-            }
-
-            const listener =
-                function (
-                    snapshot
-                ) {
-
-                    const data =
-                        snapshot.val() ||
-                        {};
-
-                    let someoneTyping =
-                        false;
-
-                    Object.keys(
-                        data
-                    ).forEach(
-                        function (
-                            userId
-                        ) {
-
-                            if (
-                                userId ===
-                                currentUser
-                            ) {
-                                return;
-                            }
-
-                            if (
-                                data[userId] &&
-                                data[userId]
-                                    .typing
-                            ) {
-
-                                someoneTyping =
-                                    true;
-                            }
-                        }
-                    );
-
-
-                    CHAT.renderTyping(
-                        someoneTyping
-                    );
-                };
-
-
-            reference.on(
-                "value",
-                listener
-            );
-
-
-            CHAT.state.typingReference =
-                reference;
-
-            CHAT.state.typingListener =
-                listener;
-        };
-
-
-    /* ========================================================
-       ONLINE STATUS
-       ======================================================== */
-
-    CHAT.setOnline = function (
-        online
-    ) {
-
-        const reference =
-            CHAT.getOnlineReference();
-
-        const userId =
-            CHAT.getUserId();
-
-        if (
-            !reference ||
-            !userId
-        ) {
-            return;
-        }
-
-        reference
-            .child(
-                userId
-            )
-            .set({
-
-                online:
-                    Boolean(online),
-
-                timestamp:
-                    Date.now()
-            });
-    };
-
-
-    CHAT.startOnlineListener =
-        function () {
-
-            const reference =
-                CHAT.getOnlineReference();
-
-            if (!reference) {
-                return;
-            }
-
-            const listener =
-                function (
-                    snapshot
-                ) {
-
-                    const data =
-                        snapshot.val() ||
-                        {};
-
-                    const otherId =
-                        CHAT.state
-                            .otherUserId;
-
-                    if (
-                        !otherId
-                    ) {
-                        return;
-                    }
-
-                    const other =
-                        data[otherId];
-
-
-                    if (
-                        !other
-                    ) {
-
-                        CHAT.renderOnline(
-                            false
-                        );
-
-                        return;
-                    }
-
-
-                    const isOnline =
-                        other.online &&
-                        (
-                            Date.now() -
-                            Number(
-                                other.timestamp
-                            )
-                        ) <
-                        CHAT.config
-                            .onlineTimeout;
-
-
-                    CHAT.renderOnline(
-                        isOnline
-                    );
-                };
-
-
-            reference.on(
-                "value",
-                listener
-            );
-
-
-            CHAT.state.onlineReference =
-                reference;
-
-            CHAT.state.onlineListener =
-                listener;
-        };
-
-
-    /* ========================================================
-       USER NAME
-       ======================================================== */
-
-    CHAT.getUserName = function () {
-
-        const user =
-            CHAT.getUser();
-
-        if (!user) {
-            return "User";
-        }
-
-        return (
-            user.displayName ||
-            user.name ||
-            user.fullName ||
-            user.email ||
-            "User"
-        );
-    };
-
-
-    /* ========================================================
-       MESSAGE NOTIFICATION
-       ======================================================== */
-
-    CHAT.playMessageNotification =
-        function (
-            message
-        ) {
-
-            /*
-             * Don't notify when chat is currently
-             * open/focused.
-             */
 
             if (
-                document.visibilityState ===
-                "visible"
+                !database ||
+                !rideId ||
+                !uid
+            ) {
+                return;
+            }
+
+
+            await database
+                .ref(
+                    CHAT.config.databasePath +
+                    "/" +
+                    rideId +
+                    "/typing/" +
+                    uid
+                )
+                .set(
+                    {
+                        name:
+                            CHAT.getUser()
+                                ?.name ||
+                            "User",
+
+                        at:
+                            Date.now(),
+
+                        active:
+                            true
+                    }
+                );
+
+
+            if (
+                CHAT.state.typingTimer
             ) {
 
-                const chat =
-                    document.querySelector(
-                        "[data-chat-window]"
-                    );
+                clearTimeout(
+                    CHAT.state.typingTimer
+                );
+            }
 
-                if (chat) {
-                    return;
-                }
+
+            CHAT.state.typingTimer =
+                setTimeout(
+                    function () {
+
+                        CHAT.stopTyping();
+
+                    },
+                    CHAT.config.typingTimeout
+                );
+        };
+
+
+    CHAT.stopTyping =
+        async function () {
+
+            const database =
+                CHAT.database();
+
+
+            const rideId =
+                CHAT.getRideId();
+
+
+            const uid =
+                CHAT.getUid();
+
+
+            if (
+                !database ||
+                !rideId ||
+                !uid
+            ) {
+                return;
             }
 
 
             try {
 
-                if (
-                    RX.notify
-                ) {
-
-                    RX.notify({
-
-                        type:
-                            "chat_message",
-
-                        title:
-                            CHAT.state
-                                .otherUserName ||
-                            "New message",
-
-                        body:
-                            message.text,
-
-                        sound:
-                            true,
-
-                        data: {
-
-                            rideId:
-                                message.rideId ||
-                                CHAT.state.rideId
-                        }
-                    });
-                }
+                await database
+                    .ref(
+                        CHAT.config.databasePath +
+                        "/" +
+                        rideId +
+                        "/typing/" +
+                        uid
+                    )
+                    .remove();
 
             } catch (error) {
 
                 console.warn(
-                    "Chat notification error:",
+                    "Stop typing failed:",
                     error
                 );
             }
@@ -1551,754 +1668,773 @@
 
 
     /* ========================================================
-       QUICK REPLIES
+       TYPING LISTENER
        ======================================================== */
 
-    CHAT.quickReplies = function () {
-
-        const role =
-            CHAT.state.role ||
-            CHAT.getRole();
-
-
-        if (
-            role === "rider"
+    CHAT.attachTypingListener =
+        function (
+            rideId
         ) {
 
-            return [
-
-                "I'm on my way.",
-                "I have arrived.",
-                "Please wait a moment.",
-                "Where are you?",
-                "I'm coming."
-            ];
-        }
+            const database =
+                CHAT.database();
 
 
-        return [
-
-            "I'm waiting here.",
-            "Where are you?",
-            "I'm coming.",
-            "Please call me.",
-            "Thank you."
-        ];
-    };
+            if (
+                !database ||
+                !rideId
+            ) {
+                return;
+            }
 
 
-    /* ========================================================
-       RENDER HEADER
-       ======================================================== */
+            CHAT.removeTypingListener();
 
-    CHAT.renderHeader = function () {
 
-        document
-            .querySelectorAll(
-                "[data-chat-name]"
-            )
-            .forEach(
+            const reference =
+                database.ref(
+                    CHAT.config.databasePath +
+                    "/" +
+                    rideId +
+                    "/typing"
+                );
+
+
+            const callback =
                 function (
-                    element
+                    snapshot
                 ) {
 
-                    element.textContent =
-                        CHAT.state
-                            .otherUserName ||
-                        (
-                            CHAT.state.role ===
-                            "customer"
-                                ? "Rider"
-                                : "Customer"
-                        );
-                }
-            );
+                    const data =
+                        snapshot.val() ||
+                        {};
 
 
-        document
-            .querySelectorAll(
-                "[data-chat-ride-id]"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
-
-                    element.textContent =
-                        CHAT.state
-                            .rideId
-                            ? "Ride #" +
-                              CHAT.state.rideId
-                            : "";
-                }
-            );
-    };
+                    const uid =
+                        CHAT.getUid();
 
 
-    /* ========================================================
-       RENDER ONLINE
-       ======================================================== */
+                    let typingUser =
+                        null;
 
-    CHAT.renderOnline = function (
-        online
-    ) {
 
-        document
-            .querySelectorAll(
-                "[data-chat-online]"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
+                    Object.keys(
+                        data
+                    )
+                    .forEach(
+                        function (
+                            key
+                        ) {
 
-                    element.textContent =
-                        online
-                            ? "Online"
-                            : "Offline";
+                            if (
+                                key !==
+                                uid &&
+                                data[key] &&
+                                data[key].active
+                            ) {
 
-                    element.classList.toggle(
-                        "online",
-                        online
+                                typingUser =
+                                    data[key];
+                            }
+                        }
                     );
-                }
+
+
+                    CHAT.updateTypingUI(
+                        typingUser
+                    );
+
+
+                    CHAT.emit(
+                        "typing",
+                        {
+                            typing:
+                                Boolean(
+                                    typingUser
+                                ),
+
+                            user:
+                                typingUser
+                        }
+                    );
+                };
+
+
+            reference.on(
+                "value",
+                callback
             );
-    };
 
 
-    /* ========================================================
-       RENDER TYPING
-       ======================================================== */
+            CHAT.state.typingListener =
+                {
+                    reference:
+                        reference,
 
-    CHAT.renderTyping = function (
-        typing
-    ) {
+                    callback:
+                        callback
+                };
+        };
 
-        document
-            .querySelectorAll(
-                "[data-chat-typing]"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
 
-                    element.textContent =
-                        typing
-                            ? (
-                                CHAT.state
-                                    .otherUserName ||
-                                "User"
-                              ) +
-                              " is typing..."
-                            : "";
+    CHAT.removeTypingListener =
+        function () {
 
-                    element.style.display =
-                        typing
-                            ? ""
-                            : "none";
-                }
-            );
-    };
+            const listener =
+                CHAT.state
+                    .typingListener;
+
+
+            if (!listener) {
+                return;
+            }
+
+
+            try {
+
+                listener.reference.off(
+                    "value",
+                    listener.callback
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "Typing listener cleanup failed:",
+                    error
+                );
+            }
+
+
+            CHAT.state.typingListener =
+                null;
+        };
 
 
     /* ========================================================
        RENDER MESSAGES
        ======================================================== */
 
-    CHAT.render = function () {
+    CHAT.renderMessages =
+        function (
+            messages
+        ) {
 
-        const containers =
-            document.querySelectorAll(
-                "[data-chat-messages]"
-            );
+            const containers =
+                document.querySelectorAll(
+                    "[data-chat-messages]"
+                );
 
 
-        containers.forEach(
-            function (
-                container
-            ) {
+            if (!containers.length) {
+                return;
+            }
 
-                if (
-                    !CHAT.state.messages
-                        .length
+
+            const uid =
+                CHAT.getUid();
+
+
+            containers.forEach(
+                function (
+                    container
                 ) {
 
                     container.innerHTML =
-                        `
-                        <div class="chat-empty">
-                            <div class="chat-empty-icon">
-                                💬
-                            </div>
+                        "";
 
-                            <h3>Start a conversation</h3>
 
-                            <p>
-                                Send a message to ${
-                                    CHAT.escape(
-                                        CHAT.state
-                                            .otherUserName ||
-                                        "the other person"
-                                    )
-                                }.
-                            </p>
-                        </div>
-                        `;
-
-                    return;
-                }
-
-
-                let previousDate = "";
-
-
-                container.innerHTML =
-                    CHAT.state.messages
-                        .map(
-                            function (
-                                message
-                            ) {
-
-                                const date =
-                                    CHAT.formatDate(
-                                        message.timestamp
-                                    );
-
-                                let dateSeparator =
-                                    "";
-
-
-                                if (
-                                    date !==
-                                    previousDate
-                                ) {
-
-                                    dateSeparator =
-                                        `
-                                        <div class="chat-date">
-                                            ${CHAT.escape(
-                                                date
-                                            )}
-                                        </div>
-                                        `;
-
-                                    previousDate =
-                                        date;
-                                }
-
-
-                                const own =
-                                    message
-                                        .senderId ===
-                                    CHAT.state
-                                        .userId;
-
-
-                                let status =
-                                    "";
-
-
-                                if (
-                                    own
-                                ) {
-
-                                    if (
-                                        message.status ===
-                                        "read"
-                                    ) {
-
-                                        status =
-                                            "✓✓";
-
-                                    } else if (
-                                        message.status ===
-                                        "delivered"
-                                    ) {
-
-                                        status =
-                                            "✓✓";
-
-                                    } else {
-
-                                        status =
-                                            "✓";
-                                    }
-                                }
-
-
-                                return `
-                                ${dateSeparator}
-
-                                <div
-                                    class="chat-message ${
-                                        own
-                                            ? "chat-message-own"
-                                            : "chat-message-other"
-                                    }"
-                                    data-message-id="${CHAT.escape(message.id)}"
-                                >
-
-                                    <div class="chat-bubble">
-
-                                        ${
-                                            message.type ===
-                                            "image"
-                                                ? `
-                                                <img
-                                                    src="${CHAT.escape(message.text)}"
-                                                    class="chat-image"
-                                                    alt="Image"
-                                                >
-                                                `
-                                                : `
-                                                <div class="chat-text">
-                                                    ${CHAT.escape(
-                                                        message.text
-                                                    )}
-                                                </div>
-                                                `
-                                        }
-
-                                        <div class="chat-message-meta">
-
-                                            <span>
-                                                ${CHAT.formatTime(
-                                                    message.timestamp
-                                                )}
-                                            </span>
-
-                                            ${
-                                                own
-                                                    ? `
-                                                    <span class="chat-status">
-                                                        ${status}
-                                                    </span>
-                                                    `
-                                                    : ""
-                                            }
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                                `;
-                            }
-                        )
-                        .join("");
-
-
-                /*
-                 * Scroll to bottom.
-                 */
-
-                requestAnimationFrame(
-                    function () {
-
-                        container.scrollTop =
-                            container.scrollHeight;
-                    }
-                );
-            }
-        );
-
-
-        CHAT.updateUnreadBadge();
-    };
-
-
-    /* ========================================================
-       CHAT UI EVENTS
-       ======================================================== */
-
-    CHAT.bindEvents = function () {
-
-        document.addEventListener(
-            "submit",
-            async function (
-                event
-            ) {
-
-                const form =
-                    event.target.closest(
-                        "[data-chat-form]"
-                    );
-
-                if (!form) {
-                    return;
-                }
-
-                event.preventDefault();
-
-
-                const input =
-                    form.querySelector(
-                        "[data-chat-input]"
-                    );
-
-
-                if (!input) {
-                    return;
-                }
-
-
-                const text =
-                    input.value.trim();
-
-
-                if (!text) {
-                    return;
-                }
-
-
-                try {
-
-                    await CHAT.send(
-                        text
-                    );
-
-                    input.value = "";
-
-                } catch (error) {
-
-                    CHAT.showMessage(
-                        error.message,
-                        true
-                    );
-                }
-            }
-        );
-
-
-        document.addEventListener(
-            "input",
-            function (
-                event
-            ) {
-
-                const input =
-                    event.target.closest(
-                        "[data-chat-input]"
-                    );
-
-                if (!input) {
-                    return;
-                }
-
-                if (
-                    input.value.trim()
-                ) {
-
-                    CHAT.startTyping();
-
-                } else {
-
-                    CHAT.stopTyping();
-                }
-            }
-        );
-
-
-        document.addEventListener(
-            "click",
-            async function (
-                event
-            ) {
-
-                const quick =
-                    event.target.closest(
-                        "[data-chat-quick]"
-                    );
-
-                if (quick) {
-
-                    event.preventDefault();
-
-                    const text =
-                        quick.dataset
-                            .chatQuick;
-
-                    if (text) {
-
-                        await CHAT.send(
-                            text
-                        );
-                    }
-
-                    return;
-                }
-
-
-                const read =
-                    event.target.closest(
-                        "[data-chat-mark-read]"
-                    );
-
-                if (read) {
-
-                    event.preventDefault();
-
-                    await CHAT.markAllRead();
-
-                    return;
-                }
-
-
-                const close =
-                    event.target.closest(
-                        "[data-chat-close]"
-                    );
-
-                if (close) {
-
-                    event.preventDefault();
-
-                    CHAT.close();
-
-                    return;
-                }
-            }
-        );
-    };
-
-
-    /* ========================================================
-       CLOSE
-       ======================================================== */
-
-    CHAT.close = function () {
-
-        CHAT.stopTyping();
-
-        CHAT.setOnline(false);
-
-        CHAT.stopListeners();
-
-        CHAT.state.conversationId =
-            null;
-
-        CHAT.state.rideId =
-            null;
-
-        CHAT.state.otherUserId =
-            null;
-
-        CHAT.state.messages =
-            [];
-
-        const windows =
-            document.querySelectorAll(
-                "[data-chat-window]"
-            );
-
-        windows.forEach(
-            function (
-                element
-            ) {
-
-                element.classList.remove(
-                    "active"
-                );
-
-                element.classList.remove(
-                    "open"
-                );
-            }
-        );
-    };
-
-
-    /* ========================================================
-       SHOW MESSAGE
-       ======================================================== */
-
-    CHAT.showMessage = function (
-        message,
-        error = false
-    ) {
-
-        const existing =
-            document.querySelector(
-                ".riderx-chat-message"
-            );
-
-        if (existing) {
-            existing.remove();
-        }
-
-
-        const element =
-            document.createElement(
-                "div"
-            );
-
-        element.className =
-            "riderx-chat-message " +
-            (
-                error
-                    ? "error"
-                    : "success"
-            );
-
-        element.textContent =
-            message;
-
-
-        document.body.appendChild(
-            element
-        );
-
-
-        setTimeout(
-            function () {
-
-                element.remove();
-
-            },
-            2500
-        );
-    };
-
-
-    /* ========================================================
-       AUTH
-       ======================================================== */
-
-    CHAT.bindAuth = function () {
-
-        try {
-
-            if (
-                window.firebase &&
-                firebase.auth
-            ) {
-
-                firebase.auth()
-                    .onAuthStateChanged(
+                    messages.forEach(
                         function (
-                            user
+                            message
                         ) {
 
-                            CHAT.state.user =
-                                user;
+                            const mine =
+                                message.senderId ===
+                                uid;
 
-                            CHAT.state.userId =
-                                user
-                                    ? user.uid
-                                    : null;
+
+                            const wrapper =
+                                document.createElement(
+                                    "div"
+                                );
+
+
+                            wrapper.className =
+                                "chat-message " +
+                                (
+                                    mine
+                                        ? "sent"
+                                        : "received"
+                                );
+
+
+                            wrapper.dataset
+                                .messageId =
+                                message.id;
+
+
+                            const text =
+                                message.deleted
+                                    ? "Message deleted."
+                                    : message.text;
+
+
+                            wrapper.innerHTML =
+                                `
+                                <div class="chat-bubble">
+                                    <div class="chat-text">
+                                        ${CHAT.escape(text)}
+                                    </div>
+
+                                    <div class="chat-meta">
+                                        <span>
+                                            ${CHAT.escape(
+                                                CHAT.formatTime(
+                                                    message.createdAt
+                                                )
+                                            )}
+                                        </span>
+
+                                        ${
+                                            mine
+                                                ? `
+                                                <span class="chat-read">
+                                                    ${
+                                                        message.read
+                                                            ? "✓✓"
+                                                            : "✓"
+                                                    }
+                                                </span>
+                                                `
+                                                : ""
+                                        }
+                                    </div>
+                                </div>
+                                `;
+
+
+                            container.appendChild(
+                                wrapper
+                            );
                         }
                     );
-            }
 
-        } catch (error) {
 
-            console.warn(
-                "Chat auth binding error:",
-                error
+                    container.scrollTop =
+                        container.scrollHeight;
+                }
             );
-        }
-    };
+        };
 
 
     /* ========================================================
-       PAGE VISIBILITY
+       HEADER
        ======================================================== */
 
-    CHAT.bindVisibility = function () {
+    CHAT.updateHeader =
+        function () {
 
-        document.addEventListener(
-            "visibilitychange",
-            function () {
+            const other =
+                CHAT.state.otherUser;
 
-                if (
-                    document.visibilityState ===
-                    "visible"
+
+            document
+                .querySelectorAll(
+                    "[data-chat-user-name]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            other?.name ||
+                            (
+                                CHAT.getRole() ===
+                                "rider"
+                                    ? "Customer"
+                                    : "Rider"
+                            );
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-chat-user-phone]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            other?.phone ||
+                            "";
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-chat-user-photo]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        if (
+                            other?.photo
+                        ) {
+
+                            element.src =
+                                other.photo;
+                        }
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       TYPING UI
+       ======================================================== */
+
+    CHAT.updateTypingUI =
+        function (
+            typingUser
+        ) {
+
+            document
+                .querySelectorAll(
+                    "[data-chat-typing]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        if (
+                            typingUser
+                        ) {
+
+                            element.textContent =
+                                (
+                                    typingUser.name ||
+                                    "User"
+                                ) +
+                                " is typing...";
+
+                            element.classList.add(
+                                "active"
+                            );
+
+                        } else {
+
+                            element.textContent =
+                                "";
+
+                            element.classList.remove(
+                                "active"
+                            );
+                        }
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       UNREAD UI
+       ======================================================== */
+
+    CHAT.updateUnreadUI =
+        function () {
+
+            const count =
+                CHAT.state.unreadCount;
+
+
+            document
+                .querySelectorAll(
+                    "[data-chat-unread]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            count > 99
+                                ? "99+"
+                                : String(
+                                    count
+                                );
+
+
+                        element.hidden =
+                            count <= 0;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-chat-badge]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            count > 99
+                                ? "99+"
+                                : String(
+                                    count
+                                );
+
+
+                        element.style.display =
+                            count > 0
+                                ? ""
+                                : "none";
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       UI EVENTS
+       ======================================================== */
+
+    CHAT.bindUI =
+        function () {
+
+            document.addEventListener(
+                "submit",
+                function (
+                    event
                 ) {
 
-                    CHAT.markAllRead();
+                    const form =
+                        event.target.closest(
+                            "[data-chat-form]"
+                        );
 
+
+                    if (!form) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    const input =
+                        form.querySelector(
+                            "[data-chat-input]"
+                        ) ||
+                        form.querySelector(
+                            "textarea"
+                        ) ||
+                        form.querySelector(
+                            "input"
+                        );
+
+
+                    if (!input) {
+                        return;
+                    }
+
+
+                    CHAT.send(
+                        input.value
+                    )
+                    .then(
+                        function () {
+
+                            input.value =
+                                "";
+
+                            CHAT.stopTyping();
+
+                        }
+                    )
+                    .catch(
+                        function (
+                            error
+                        ) {
+
+                            console.error(
+                                "Chat send error:",
+                                error
+                            );
+
+
+                            if (
+                                RX.toast
+                            ) {
+
+                                RX.toast(
+                                    error.message ||
+                                    "Message could not be sent.",
+                                    "error"
+                                );
+                            }
+                        }
+                    );
                 }
-            }
-        );
+            );
 
 
-        window.addEventListener(
-            "beforeunload",
-            function () {
+            document.addEventListener(
+                "input",
+                function (
+                    event
+                ) {
 
-                CHAT.setOnline(false);
-            }
-        );
-    };
+                    const input =
+                        event.target.closest(
+                            "[data-chat-input]"
+                        );
+
+
+                    if (!input) {
+                        return;
+                    }
+
+
+                    if (
+                        input.value.trim()
+                    ) {
+
+                        CHAT.startTyping();
+
+                    } else {
+
+                        CHAT.stopTyping();
+                    }
+                }
+            );
+
+
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
+
+                    const quick =
+                        event.target.closest(
+                            "[data-chat-quick]"
+                        );
+
+
+                    if (
+                        quick
+                    ) {
+
+                        event.preventDefault();
+
+
+                        CHAT.sendQuick(
+                            quick.dataset
+                                .chatQuick
+                        );
+                    }
+                }
+            );
+        };
 
 
     /* ========================================================
        PUBLIC API
        ======================================================== */
 
-    RX.openChat = function (
-        options
-    ) {
+    RX.openChat =
+        function (
+            rideId,
+            otherUser
+        ) {
 
-        return CHAT.open(
-            options
-        );
-    };
-
-
-    RX.sendChatMessage = function (
-        text,
-        options
-    ) {
-
-        return CHAT.send(
-            text,
-            options
-        );
-    };
+            return CHAT.open(
+                rideId,
+                otherUser
+            );
+        };
 
 
-    RX.closeChat = function () {
-
-        CHAT.close();
-    };
-
-
-    RX.getChatUnread =
+    RX.closeChat =
         function () {
 
-            return CHAT.state
-                .unread;
+            return CHAT.close();
+        };
+
+
+    RX.sendChatMessage =
+        function (
+            text,
+            type,
+            metadata
+        ) {
+
+            return CHAT.send(
+                text,
+                type,
+                metadata
+            );
+        };
+
+
+    RX.markChatRead =
+        function (
+            rideId
+        ) {
+
+            return CHAT.markAsRead(
+                rideId
+            );
         };
 
 
     /* ========================================================
-       INITIALIZE
+       EVENT BUS
        ======================================================== */
 
-    CHAT.init = function () {
-
-        if (
-            CHAT.state.initialized
+    CHAT.emit =
+        function (
+            eventName,
+            detail
         ) {
-            return;
-        }
 
-        CHAT.bindEvents();
+            try {
 
-        CHAT.bindAuth();
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "riderx-chat-" +
+                        eventName,
+                        {
+                            detail:
+                                detail ||
+                                {}
+                        }
+                    )
+                );
 
-        CHAT.bindVisibility();
+            } catch (error) {
 
-        CHAT.state.initialized =
-            true;
+                console.warn(
+                    "RiderX chat event error:",
+                    error
+                );
+            }
+        };
 
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx-chat-ready"
-            )
-        );
-    };
+
+    CHAT.on =
+        function (
+            eventName,
+            callback
+        ) {
+
+            if (
+                typeof callback !==
+                "function"
+            ) {
+                return;
+            }
+
+
+            window.addEventListener(
+                "riderx-chat-" +
+                eventName,
+                function (
+                    event
+                ) {
+
+                    callback(
+                        event.detail ||
+                        {}
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       INITIALIZATION
+       ======================================================== */
+
+    CHAT.init =
+        async function () {
+
+            if (
+                CHAT.state.initialized
+            ) {
+                return;
+            }
+
+
+            CHAT.bindUI();
+
+
+            CHAT.updateUnreadUI();
+
+
+            /*
+             * Automatically open chat when an
+             * active ride exists and page requests it.
+             */
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            const rideId =
+                params.get(
+                    "rideId"
+                ) ||
+                params.get(
+                    "bookingId"
+                );
+
+
+            if (
+                rideId
+            ) {
+
+                try {
+
+                    await CHAT.open(
+                        rideId
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Automatic chat open failed:",
+                        error
+                    );
+                }
+            }
+
+
+            CHAT.state.initialized =
+                true;
+
+
+            CHAT.emit(
+                "ready"
+            );
+
+
+            console.log(
+                "RiderX chat.js loaded."
+            );
+        };
 
 
     /* ========================================================
@@ -2315,6 +2451,11 @@
             function () {
 
                 CHAT.init();
+
+            },
+            {
+                once:
+                    true
             }
         );
 
@@ -2322,10 +2463,5 @@
 
         CHAT.init();
     }
-
-
-    console.log(
-        "RiderX Chat Engine loaded."
-    );
 
 })();
