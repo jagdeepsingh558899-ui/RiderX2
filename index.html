@@ -5,154 +5,227 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>RiderX - Move Faster</title>
 
-<link rel="manifest" href="manifest.json">
+<link
+    rel="manifest"
+    href="manifest.json"
+>
 
-<meta name="theme-color" content="#000000">
+<meta
+    name="theme-color"
+    content="#000000"
+>
 
-<link rel="stylesheet" href="assets/app.css">
+<link
+    rel="stylesheet"
+    href="assets/app.css"
+>
 
-<link rel="stylesheet" href="assets/animation.css">
+<link
+    rel="stylesheet"
+    href="assets/animation.css"
+>
 
 
 <style>
 
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
 }
-
 
 body{
-background:#000;
-color:#fff;
-height:100vh;
-overflow:hidden;
+    background:#000;
+    color:#fff;
+    height:100vh;
+    overflow:hidden;
 }
 
 
+/* =====================================
+   SPLASH
+===================================== */
+
 .splash{
-
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100vh;
-background:#000;
-display:flex;
-align-items:center;
-justify-content:center;
-z-index:9999;
-
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100vh;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
 }
 
 
 .logo-animation{
-
-font-size:45px;
-font-weight:900;
-letter-spacing:3px;
-
+    font-size:45px;
+    font-weight:900;
+    letter-spacing:3px;
 }
 
 
 .logo-animation span,
 .brand span{
-
-color:#FFD600;
-
+    color:#FFD600;
 }
 
 
+/* =====================================
+   MAIN
+===================================== */
 
 .main{
-
-height:100vh;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-padding:25px;
-
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:25px;
 }
-
 
 
 .brand{
-
-font-size:42px;
-font-weight:900;
-
+    font-size:42px;
+    font-weight:900;
 }
-
 
 
 .tagline{
-
-margin-top:15px;
-color:#aaa;
-text-align:center;
-
+    margin-top:15px;
+    color:#aaa;
+    text-align:center;
 }
-
 
 
 .buttons{
-
-width:100%;
-margin-top:50px;
-
+    width:100%;
+    max-width:420px;
+    margin-top:50px;
 }
-
 
 
 .btn{
-
-width:100%;
-padding:17px;
-margin:12px 0;
-border-radius:15px;
-border:none;
-font-size:18px;
-font-weight:bold;
-
+    width:100%;
+    padding:17px;
+    margin:12px 0;
+    border-radius:15px;
+    border:none;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
 }
-
 
 
 .customer{
-
-background:#FFD600;
-color:#000;
-
+    background:#FFD600;
+    color:#000;
 }
-
 
 
 .rider{
-
-background:#111;
-border:2px solid #FFD600;
-color:#FFD600;
-
+    background:#111;
+    border:2px solid #FFD600;
+    color:#FFD600;
 }
-
 
 
 .footer{
+    position:absolute;
+    bottom:30px;
+    color:#777;
+}
 
-position:absolute;
-bottom:30px;
-color:#777;
+
+/* =====================================
+   SESSION CHECK
+===================================== */
+
+.session-loading{
+    position:fixed;
+    inset:0;
+    background:#000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:10000;
+}
+
+
+.session-loading.show{
+    display:flex;
+}
+
+
+.session-logo{
+    font-size:36px;
+    font-weight:900;
+}
+
+
+.session-logo span{
+    color:#FFD600;
+}
+
+
+.session-text{
+    margin-top:18px;
+    color:#aaa;
+    font-size:14px;
+    text-align:center;
+}
+
+
+.spinner{
+    width:32px;
+    height:32px;
+    border:3px solid #333;
+    border-top-color:#FFD600;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+    margin-top:20px;
+}
+
+
+@keyframes spin{
+
+    to{
+        transform:rotate(360deg);
+    }
 
 }
 
 
+/* =====================================
+   MOBILE
+===================================== */
+
+@media(max-width:500px){
+
+    .brand{
+        font-size:36px;
+    }
+
+    .logo-animation{
+        font-size:40px;
+    }
+
+    .tagline{
+        font-size:14px;
+    }
+
+}
 
 </style>
 
@@ -162,176 +235,524 @@ color:#777;
 <body>
 
 
-<div class="splash">
+<!-- =====================================
+     SPLASH
+===================================== -->
 
-<div class="logo-animation">
+<div
+    id="splash"
+    class="splash"
+>
 
-RID<span>ERX</span>
+    <div class="logo-animation">
+
+        RID<span>ERX</span>
+
+    </div>
 
 </div>
 
+
+<!-- =====================================
+     SESSION LOADING
+===================================== -->
+
+<div
+    id="sessionLoading"
+    class="session-loading"
+>
+
+    <div class="session-logo">
+
+        RID<span>ERX</span>
+
+    </div>
+
+
+    <div class="spinner"></div>
+
+
+    <div
+        id="sessionText"
+        class="session-text"
+    >
+
+        Checking your account...
+
+    </div>
+
 </div>
 
 
+<!-- =====================================
+     MAIN LANDING PAGE
+===================================== -->
 
 <div class="main">
 
 
-<div class="brand">
+    <div class="brand">
 
-RID<span>ERX</span>
+        RID<span>ERX</span>
+
+    </div>
+
+
+    <p class="tagline">
+
+        India's Premium Bike Taxi, Cab,
+        Parcel & Food Platform
+
+    </p>
+
+
+    <div class="buttons">
+
+
+        <button
+            class="btn customer"
+            type="button"
+            onclick="joinCustomer()"
+        >
+
+            Join as Customer
+
+        </button>
+
+
+        <button
+            class="btn rider"
+            type="button"
+            onclick="joinRider()"
+        >
+
+            Join as Rider
+
+        </button>
+
+
+    </div>
+
+
+    <div class="footer">
+
+        Fast • Safe • Reliable
+
+    </div>
 
 </div>
 
 
-<p class="tagline">
-
-India's Premium Bike Taxi, Cab, Parcel & Food Platform
-
-</p>
-
-
-
-<div class="buttons">
-
-
-<button class="btn customer" onclick="joinCustomer()">
-
-Join as Customer
-
-</button>
-
-
-
-<button class="btn rider" onclick="joinRider()">
-
-Join as Rider
-
-</button>
-
-
-</div>
-
-
-
-<div class="footer">
-
-Fast • Safe • Reliable
-
-</div>
-
-
-</div>
-
-
-
-
+<!-- =====================================
+     FIREBASE SESSION
+===================================== -->
 
 <script type="module">
 
 import {
-auth,
-db,
-onAuthStateChanged,
-doc,
-getDoc
-}
-from "./firebase/firebase-config.js";
+    auth,
+    db,
+    onAuthStateChanged,
+    doc,
+    getDoc
+} from "./firebase/firebase-config.js";
 
 
-
-onAuthStateChanged(auth, async(user)=>{
-
-
-if(!user) return;
-
+const splash =
+    document.getElementById(
+        "splash"
+    );
 
 
-try{
+const sessionLoading =
+    document.getElementById(
+        "sessionLoading"
+    );
 
 
-const snap =
-await getDoc(
-doc(db,"users",user.uid)
+const sessionText =
+    document.getElementById(
+        "sessionText"
+    );
+
+
+/*
+ * Hide splash after a short delay.
+ */
+
+setTimeout(
+    () => {
+
+        if (splash) {
+
+            splash.style.display =
+                "none";
+
+        }
+
+    },
+    1000
 );
 
 
+/*
+ * Firebase authentication state.
+ */
 
-if(!snap.exists()) return;
+onAuthStateChanged(
+    auth,
+    async (user) => {
 
+        /*
+         * No logged-in user:
+         * stay on landing page.
+         */
 
+        if (!user) {
 
-const data =
-snap.data();
+            if (sessionLoading) {
 
+                sessionLoading.classList.remove(
+                    "show"
+                );
 
+            }
 
-if(data.role==="admin"){
+            return;
 
-location.href="admin/dashboard.html";
-
-}
-
-else if(data.role==="rider"){
-
-location.href="rider/home.html";
-
-}
-
-else{
-
-location.href="customer/home.html";
-
-}
-
-
-}
-catch(e){
-
-console.log(e);
-
-}
+        }
 
 
-});
+        /*
+         * Show account checking.
+         */
+
+        if (sessionLoading) {
+
+            sessionLoading.classList.add(
+                "show"
+            );
+
+        }
 
 
+        if (sessionText) {
+
+            sessionText.textContent =
+                "Checking your RiderX account...";
+
+        }
 
 
+        try {
+
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    user.uid
+                );
+
+
+            const snap =
+                await getDoc(
+                    userRef
+                );
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Do NOT send missing/unknown
+             * accounts to Customer.
+             */
+
+            if (!snap.exists()) {
+
+                console.warn(
+                    "RiderX: User profile not found."
+                );
+
+
+                if (sessionText) {
+
+                    sessionText.textContent =
+                        "Account profile not found.";
+
+                }
+
+
+                setTimeout(
+                    () => {
+
+                        if (sessionLoading) {
+
+                            sessionLoading.classList.remove(
+                                "show"
+                            );
+
+                        }
+
+                    },
+                    1000
+                );
+
+
+                return;
+
+            }
+
+
+            const data =
+                snap.data();
+
+
+            const role =
+                String(
+                    data.role ||
+                    data.userType ||
+                    data.type ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            console.log(
+                "RiderX Root Account Role:",
+                role
+            );
+
+
+            /* =========================
+               ADMIN
+            ========================= */
+
+            if (role === "admin") {
+
+                if (sessionText) {
+
+                    sessionText.textContent =
+                        "Admin account detected. Opening Admin Panel...";
+
+                }
+
+
+                window.location.replace(
+                    "admin/dashboard.html"
+                );
+
+                return;
+
+            }
+
+
+            /* =========================
+               RIDER
+            ========================= */
+
+            if (role === "rider") {
+
+                const approved =
+                    data.approved === true ||
+                    data.isApproved === true;
+
+
+                const status =
+                    String(
+                        data.status ||
+                        data.accountStatus ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if (sessionText) {
+
+                    sessionText.textContent =
+                        "Opening Rider Panel...";
+
+                }
+
+
+                if (
+                    approved &&
+                    (
+                        status === "active" ||
+                        status === "approved"
+                    )
+                ) {
+
+                    window.location.replace(
+                        "rider/home.html"
+                    );
+
+                } else {
+
+                    window.location.replace(
+                        "rider/pending.html"
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            /* =========================
+               CUSTOMER
+            ========================= */
+
+            if (
+                role === "customer" ||
+                role === "user"
+            ) {
+
+                if (sessionText) {
+
+                    sessionText.textContent =
+                        "Opening Customer App...";
+
+                }
+
+
+                window.location.replace(
+                    "customer/home.html"
+                );
+
+                return;
+
+            }
+
+
+            /* =========================
+               UNKNOWN ROLE
+            ========================= */
+
+            console.warn(
+                "RiderX: Unknown account role:",
+                role
+            );
+
+
+            if (sessionText) {
+
+                sessionText.textContent =
+                    "Account role is not configured.";
+
+            }
+
+
+            setTimeout(
+                () => {
+
+                    if (sessionLoading) {
+
+                        sessionLoading.classList.remove(
+                            "show"
+                        );
+
+                    }
+
+                },
+                1200
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "RiderX Root Authentication Error:",
+                error
+            );
+
+
+            if (sessionText) {
+
+                sessionText.textContent =
+                    "Unable to verify account.";
+
+            }
+
+
+            setTimeout(
+                () => {
+
+                    if (sessionLoading) {
+
+                        sessionLoading.classList.remove(
+                            "show"
+                        );
+
+                    }
+
+                },
+                1200
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================
+   CUSTOMER BUTTON
+===================================== */
+
+window.joinCustomer =
+    function(){
+
+        window.location.href =
+            "auth/login.html?role=customer";
+
+    };
+
+
+/* =====================================
+   RIDER BUTTON
+===================================== */
+
+window.joinRider =
+    function(){
+
+        window.location.href =
+            "auth/login.html?role=rider";
+
+    };
 
 </script>
 
 
-
+<!-- =====================================
+     SERVICE WORKER
+===================================== -->
 
 <script>
 
+if (
+    "serviceWorker" in navigator
+) {
 
-function joinCustomer(){
+    navigator.serviceWorker
+        .register("sw.js")
+        .catch(
+            error => {
 
-location.href="auth/login.html?role=customer";
+                console.warn(
+                    "RiderX Service Worker Error:",
+                    error
+                );
 
-}
-
-
-
-function joinRider(){
-
-location.href="auth/login.html?role=rider";
-
-}
-
-
-
-if("serviceWorker" in navigator){
-
-navigator.serviceWorker.register("sw.js");
+            }
+        );
 
 }
-
 
 </script>
-
 
 
 </body>
