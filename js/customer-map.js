@@ -1,1442 +1,2023 @@
-/**
- * ============================================================
- * RiderX Customer Map Controller
- * ============================================================
- * IMPORTANT:
- * This file does NOT create another Leaflet map.
- * The only map engine is:
- *
- *     js/map.js
- *
- * This controller only manages:
- * - Customer GPS
- * - Pickup location
- * - Destination location
- * - Nearby riders
- * - Rider live location
- * - Ride route
- * - Map UI buttons
- * ============================================================
- */
+/* ============================================================
+   RIDERX CUSTOMER MAP
+   File: js/customer-map.js
 
-const CustomerMap = (() => {
+   Customer-side map controller
+   - Leaflet / OpenStreetMap
+   - Current customer location
+   - Pickup marker
+   - Destination marker
+   - Route drawing
+   - Driver live location
+   - Map fitting
+   - Location permission handling
+   - Booking page integration
+   ============================================================ */
 
-    let initialized = false;
-    let gpsStarted = false;
+(function () {
 
-    let nearbyRiderUnsubscribe = null;
-    let rideUnsubscribe = null;
+    "use strict";
 
-    let pickup = null;
-    let destination = null;
+    window.RiderX = window.RiderX || {};
 
-    let currentRideId = null;
+    const RX = window.RiderX;
+
+    const CM = RX.customerMap = RX.customerMap || {};
+
+    CM.state = {
+        initialized: false,
+        map: null,
+        customerMarker: null,
+        pickupMarker: null,
+        destinationMarker: null,
+        riderMarker: null,
+        routeLine: null,
+        accuracyCircle: null,
+        watchId: null,
+        pickup: null,
+        destination: null,
+        riderLocation: null,
+        currentLocation: null,
+        geocoderBusy: false
+    };
+
 
     /* ========================================================
-       HELPERS
-    ======================================================== */
+       CONFIG
+       ======================================================== */
 
-    function getMapEngine() {
-
-        if (
-            window.RiderXMap
-        ) {
-            return window.RiderXMap;
-        }
-
-        console.warn(
-            "RiderX Customer Map: map.js has not loaded yet."
-        );
-
-        return null;
-    }
+    CM.config = {
+        defaultCenter: [30.7333, 76.7794],
+        defaultZoom: 13,
+        locationZoom: 16,
+        routeColor: "#f7c600",
+        riderColor: "#111111",
+        maxZoom: 17,
+        locationTimeout: 12000
+    };
 
 
-    function getMap() {
+    /* ========================================================
+       LEAFLET CHECK
+       ======================================================== */
 
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return null;
-        }
-
-        return engine.getMap();
-    }
-
-
-    function validCoordinates(
-        lat,
-        lng
-    ) {
+    CM.isLeafletReady = function () {
 
         return (
-            Number.isFinite(
-                Number(lat)
-            ) &&
-            Number.isFinite(
-                Number(lng)
-            )
+            typeof window.L !== "undefined"
         );
-    }
-
-
-    function normalizeLocation(
-        location
-    ) {
-
-        if (!location) {
-            return null;
-        }
-
-        const lat =
-            Number(
-                location.lat ??
-                location.latitude
-            );
-
-        const lng =
-            Number(
-                location.lng ??
-                location.longitude
-            );
-
-        if (
-            !validCoordinates(
-                lat,
-                lng
-            )
-        ) {
-            return null;
-        }
-
-        return {
-            lat,
-            lng
-        };
-    }
+    };
 
 
     /* ========================================================
-       INITIALIZE
-    ======================================================== */
+       MAP ELEMENT
+       ======================================================== */
 
-    function init() {
+    CM.getMapElement = function () {
 
-        if (initialized) {
-            return true;
-        }
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return false;
-        }
-
-
-        /*
-         * IMPORTANT:
-         *
-         * We do NOT call L.map().
-         *
-         * map.js owns the Leaflet instance.
-         */
-
-        let map =
-            engine.getMap();
-
-
-        if (!map) {
-
-            map =
-                engine.initMap(
-                    "map"
-                );
-        }
-
-
-        if (!map) {
-            return false;
-        }
-
-
-        initialized = true;
-
-
-        setupMapButtons();
-
-        startCustomerGPS();
-
-        listenForMapResize();
-
-
-        /*
-         * Restore saved pickup/drop
-         * if available.
-         */
-
-        restoreBookingLocations();
-
-
-        return true;
-    }
+        return (
+            document.querySelector("[data-customer-map]") ||
+            document.getElementById("customerMap") ||
+            document.getElementById("map") ||
+            document.querySelector(".customer-map")
+        );
+    };
 
 
     /* ========================================================
-       CUSTOMER GPS
-    ======================================================== */
+       INIT
+       ======================================================== */
 
-    function startCustomerGPS() {
+    CM.init = function (element) {
 
-        if (gpsStarted) {
-            return;
+        if (CM.state.initialized) {
+            return CM.state.map;
         }
 
-        const engine =
-            getMapEngine();
+        if (!CM.isLeafletReady()) {
 
-        if (!engine) {
-            return;
+            console.error(
+                "RiderX: Leaflet is not loaded."
+            );
+
+            return null;
         }
 
-        gpsStarted = true;
+
+        const mapElement =
+            element ||
+            CM.getMapElement();
 
 
-        /*
-         * map.js has one centralized
-         * geolocation watcher.
-         */
+        if (!mapElement) {
 
-        engine.initLiveGPS();
+            console.warn(
+                "RiderX: Customer map element not found."
+            );
+
+            return null;
+        }
 
 
-        /*
-         * Listen for location updates.
-         */
-
-        engine.onLocationChange(
-            location => {
-
-                if (!location) {
-                    return;
+        CM.state.map =
+            L.map(
+                mapElement,
+                {
+                    zoomControl: false,
+                    attributionControl: true,
+                    preferCanvas: true
                 }
+            )
+            .setView(
+                CM.config.defaultCenter,
+                CM.config.defaultZoom
+            );
 
-                updateCustomerLocation(
-                    location
-                );
 
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+                attribution:
+                    "&copy; OpenStreetMap contributors"
             }
-        );
-    }
-
-
-    function updateCustomerLocation(
-        location
-    ) {
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-        const normalized =
-            normalizeLocation(
-                location
-            );
-
-        if (!normalized) {
-            return;
-        }
-
-
-        engine.setCustomerLocation(
-            normalized.lat,
-            normalized.lng
+        )
+        .addTo(
+            CM.state.map
         );
 
 
-        /*
-         * Keep current marker synchronized
-         * as well.
-         */
+        CM.addControls();
 
-        engine.setCurrentLocationMarker(
-            normalized.lat,
-            normalized.lng,
-            "customer"
+        CM.bindEvents();
+
+        CM.state.initialized = true;
+
+
+        setTimeout(
+            function () {
+
+                try {
+                    CM.state.map.invalidateSize();
+                } catch (error) {}
+
+            },
+            300
         );
 
 
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx:customer-location",
-                {
-                    detail:
-                        normalized
-                }
-            )
-        );
-    }
-
-
-    /* ========================================================
-       CENTER CUSTOMER
-    ======================================================== */
-
-    function centerOnCustomer() {
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-        engine.centerToCurrentLocation();
-    }
-
-
-    /* ========================================================
-       PICKUP
-    ======================================================== */
-
-    function setPickup(
-        location,
-        address = ""
-    ) {
-
-        const normalized =
-            normalizeLocation(
-                location
-            );
-
-        if (!normalized) {
-            return false;
-        }
-
-
-        pickup = {
-
-            ...normalized,
-
-            address:
-                address ||
-                location.address ||
-                ""
-
-        };
-
-
-        const engine =
-            getMapEngine();
-
-        if (engine) {
-
-            engine.setPickupMarker(
-                pickup.lat,
-                pickup.lng
-            );
-        }
-
-
-        saveBookingLocations();
-
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx:pickup-selected",
-                {
-                    detail:
-                        pickup
-                }
-            )
-        );
-
-
-        return true;
-    }
-
-
-    /* ========================================================
-       DESTINATION
-    ======================================================== */
-
-    function setDestination(
-        location,
-        address = ""
-    ) {
-
-        const normalized =
-            normalizeLocation(
-                location
-            );
-
-        if (!normalized) {
-            return false;
-        }
-
-
-        destination = {
-
-            ...normalized,
-
-            address:
-                address ||
-                location.address ||
-                ""
-
-        };
-
-
-        const engine =
-            getMapEngine();
-
-        if (engine) {
-
-            engine.setDestinationMarker(
-                destination.lat,
-                destination.lng
-            );
-        }
-
-
-        saveBookingLocations();
-
-
-        /*
-         * Draw route automatically
-         * when both points exist.
-         */
-
-        if (
-            pickup &&
-            destination
-        ) {
-
-            drawBookingRoute();
-        }
-
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx:destination-selected",
-                {
-                    detail:
-                        destination
-                }
-            )
-        );
-
-
-        return true;
-    }
-
-
-    /* ========================================================
-       DRAW BOOKING ROUTE
-    ======================================================== */
-
-    function drawBookingRoute() {
-
-        if (
-            !pickup ||
-            !destination
-        ) {
-            return null;
-        }
-
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return null;
-        }
-
-
-        return engine.drawRoute(
-            pickup,
-            destination
-        );
-    }
-
-
-    /* ========================================================
-       CLEAR ROUTE
-    ======================================================== */
-
-    function clearRoute() {
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-        engine.clearRoute();
-    }
-
-
-    /* ========================================================
-       CLEAR LOCATIONS
-    ======================================================== */
-
-    function clearLocations() {
-
-        pickup =
-            null;
-
-        destination =
-            null;
-
-
-        clearRoute();
-
-
-        const engine =
-            getMapEngine();
-
-        if (engine) {
-
-            engine.setPickupMarker =
-                engine.setPickupMarker;
-
-            /*
-             * Clear all markers and allow
-             * customer GPS to recreate
-             * the customer marker.
-             */
-
-            engine.clearMarkers();
-
-        }
-
-
-        saveBookingLocations();
-    }
-
-
-    /* ========================================================
-       NEARBY RIDERS
-    ======================================================== */
-
-    function showNearbyRider(
-        rider
-    ) {
-
-        if (!rider) {
-            return;
-        }
-
-
-        const id =
-            rider.id ||
-            rider.uid ||
-            rider.riderId;
-
-
-        const location =
-            normalizeLocation(
-                rider.location ||
-                rider
-            );
-
-
-        if (
-            !id ||
-            !location
-        ) {
-            return;
-        }
-
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-
-        const marker =
-            engine.setRiderLocation(
-                location.lat,
-                location.lng,
-                String(id)
-            );
-
-
-        if (
-            marker &&
-            rider.name
-        ) {
-
-            marker.bindPopup(
-                `
-                    <div
-                        style="
-                            min-width:160px;
-                            font-family:Arial,sans-serif;
-                        "
-                    >
-                        <strong>
-                            ${escapeHTML(
-                                rider.name
-                            )}
-                        </strong>
-
-                        ${
-                            rider.vehicleNumber
-                                ? `
-                                    <br>
-                                    <small>
-                                        ${escapeHTML(
-                                            rider.vehicleNumber
-                                        )}
-                                    </small>
-                                  `
-                                : ""
+        CM.locateCustomer();
+
+
+        RX.emit =
+            RX.emit ||
+            function (name, detail) {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "riderx-" + name,
+                        {
+                            detail:
+                                detail || {}
                         }
-                    </div>
-                `
-            );
-        }
-    }
-
-
-    function removeNearbyRider(
-        riderId
-    ) {
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-        engine.removeRider(
-            String(riderId)
-        );
-    }
-
-
-    function clearNearbyRiders() {
-
-        /*
-         * RiderXMap manages its own marker
-         * registry. Remove only markers
-         * registered as nearby riders.
-         */
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-
-        const state =
-            window.RiderXMapState;
-
-
-        if (
-            !state ||
-            !state.markers
-        ) {
-            return;
-        }
-
-
-        Array.from(
-            state.markers.keys()
-        ).forEach(
-            id => {
-
-                engine.removeRider(
-                    id
+                    )
                 );
+            };
 
-            }
-        );
-    }
+
+        return CM.state.map;
+    };
 
 
     /* ========================================================
-       LIVE RIDE RIDER LOCATION
-    ======================================================== */
+       CONTROLS
+       ======================================================== */
 
-    function updateRideRiderLocation(
-        location
-    ) {
+    CM.addControls = function () {
 
-        const normalized =
-            normalizeLocation(
-                location
-            );
-
-        if (!normalized) {
+        if (!CM.state.map) {
             return;
         }
 
 
-        const engine =
-            getMapEngine();
+        const ZoomControl =
+            L.Control.extend({
 
-        if (!engine) {
-            return;
-        }
+                options: {
+                    position: "bottomright"
+                },
 
+                onAdd: function () {
 
-        engine.setRiderLocation(
-            normalized.lat,
-            normalized.lng,
-            "active-rider"
-        );
-
-
-        /*
-         * During active ride, fit map
-         * between rider and customer.
-         */
-
-        const customerLocation =
-            getCustomerLocation();
+                    const container =
+                        L.DomUtil.create(
+                            "div",
+                            "riderx-map-controls"
+                        );
 
 
-        if (customerLocation) {
-
-            engine.fitToPoints(
-                [
-                    customerLocation,
-                    normalized
-                ]
-            );
-        }
+                    const zoomIn =
+                        L.DomUtil.create(
+                            "button",
+                            "riderx-map-control",
+                            container
+                        );
 
 
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx:rider-location",
-                {
-                    detail:
-                        normalized
+                    zoomIn.type = "button";
+                    zoomIn.innerHTML = "+";
+                    zoomIn.setAttribute(
+                        "aria-label",
+                        "Zoom in"
+                    );
+
+
+                    const locate =
+                        L.DomUtil.create(
+                            "button",
+                            "riderx-map-control",
+                            container
+                        );
+
+
+                    locate.type = "button";
+                    locate.innerHTML = "⌖";
+                    locate.setAttribute(
+                        "aria-label",
+                        "My location"
+                    );
+
+
+                    const zoomOut =
+                        L.DomUtil.create(
+                            "button",
+                            "riderx-map-control",
+                            container
+                        );
+
+
+                    zoomOut.type = "button";
+                    zoomOut.innerHTML = "−";
+                    zoomOut.setAttribute(
+                        "aria-label",
+                        "Zoom out"
+                    );
+
+
+                    L.DomEvent.disableClickPropagation(
+                        container
+                    );
+
+
+                    L.DomEvent.on(
+                        zoomIn,
+                        "click",
+                        function () {
+
+                            CM.state.map.zoomIn();
+
+                        }
+                    );
+
+
+                    L.DomEvent.on(
+                        zoomOut,
+                        "click",
+                        function () {
+
+                            CM.state.map.zoomOut();
+
+                        }
+                    );
+
+
+                    L.DomEvent.on(
+                        locate,
+                        "click",
+                        function () {
+
+                            CM.locateCustomer(
+                                true
+                            );
+
+                        }
+                    );
+
+
+                    return container;
                 }
-            )
+            });
+
+
+        CM.state.map.addControl(
+            new ZoomControl()
         );
-    }
+    };
+
+
+    /* ========================================================
+       EVENTS
+       ======================================================== */
+
+    CM.bindEvents = function () {
+
+        if (!CM.state.map) {
+            return;
+        }
+
+
+        CM.state.map.on(
+            "click",
+            function (event) {
+
+                const point = {
+                    lat:
+                        event.latlng.lat,
+
+                    lng:
+                        event.latlng.lng
+                };
+
+
+                CM.setDestination(
+                    point,
+                    true
+                );
+            }
+        );
+    };
 
 
     /* ========================================================
        CUSTOMER LOCATION
-    ======================================================== */
+       ======================================================== */
 
-    function getCustomerLocation() {
-
-        const state =
-            window.RiderXMapState;
-
-        if (
-            state &&
-            state.currentLocation
-        ) {
-
-            return {
-                lat:
-                    Number(
-                        state.currentLocation.lat
-                    ),
-
-                lng:
-                    Number(
-                        state.currentLocation.lng
-                    )
-            };
-        }
-
-
-        return null;
-    }
-
-
-    /* ========================================================
-       FIT BOOKING ROUTE
-    ======================================================== */
-
-    function fitBookingRoute() {
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-
-        const points = [];
-
-
-        if (pickup) {
-            points.push(
-                pickup
-            );
-        }
-
-
-        if (destination) {
-            points.push(
-                destination
-            );
-        }
-
-
-        if (points.length) {
-
-            engine.fitToPoints(
-                points
-            );
-        }
-    }
-
-
-    /* ========================================================
-       MAP BUTTONS
-    ======================================================== */
-
-    function setupMapButtons() {
-
-        const locateButtons =
-            document.querySelectorAll(
-                "[data-map-locate], #locateBtn, #myLocationBtn, #currentLocationBtn"
-            );
-
-
-        locateButtons.forEach(
-            button => {
-
-                if (
-                    button.dataset.riderxMapBound ===
-                    "true"
-                ) {
-                    return;
-                }
-
-
-                button.dataset.riderxMapBound =
-                    "true";
-
-
-                button.addEventListener(
-                    "click",
-                    event => {
-
-                        event.preventDefault();
-
-                        centerOnCustomer();
-                    }
-                );
-            }
-        );
-
-
-        const fitButtons =
-            document.querySelectorAll(
-                "[data-map-fit]"
-            );
-
-
-        fitButtons.forEach(
-            button => {
-
-                if (
-                    button.dataset.riderxMapBound ===
-                    "true"
-                ) {
-                    return;
-                }
-
-
-                button.dataset.riderxMapBound =
-                    "true";
-
-
-                button.addEventListener(
-                    "click",
-                    event => {
-
-                        event.preventDefault();
-
-                        fitBookingRoute();
-                    }
-                );
-            }
-        );
-    }
-
-
-    /* ========================================================
-       MAP RESIZE
-    ======================================================== */
-
-    function listenForMapResize() {
-
-        const engine =
-            getMapEngine();
-
-        if (!engine) {
-            return;
-        }
-
-
-        const invalidate =
-            () => {
-
-                setTimeout(
-                    () => {
-
-                        engine.invalidateMapSize();
-
-                    },
-                    100
-                );
-            };
-
-
-        window.addEventListener(
-            "resize",
-            invalidate
-        );
-
-
-        document.addEventListener(
-            "visibilitychange",
-            () => {
-
-                if (
-                    !document.hidden
-                ) {
-                    invalidate();
-                }
-
-            }
-        );
-    }
-
-
-    /* ========================================================
-       LOCAL STORAGE
-    ======================================================== */
-
-    function saveBookingLocations() {
-
-        try {
-
-            localStorage.setItem(
-                "riderx_customer_pickup",
-                JSON.stringify(
-                    pickup
-                )
-            );
-
-
-            localStorage.setItem(
-                "riderx_customer_destination",
-                JSON.stringify(
-                    destination
-                )
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX: unable to save locations.",
-                error
-            );
-        }
-    }
-
-
-    function restoreBookingLocations() {
-
-        try {
-
-            const savedPickup =
-                JSON.parse(
-                    localStorage.getItem(
-                        "riderx_customer_pickup"
-                    )
-                );
-
-
-            const savedDestination =
-                JSON.parse(
-                    localStorage.getItem(
-                        "riderx_customer_destination"
-                    )
-                );
-
-
-            if (
-                savedPickup
-            ) {
-
-                setPickup(
-                    savedPickup,
-                    savedPickup.address
-                );
-            }
-
-
-            if (
-                savedDestination
-            ) {
-
-                setDestination(
-                    savedDestination,
-                    savedDestination.address
-                );
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX: location restore failed.",
-                error
-            );
-        }
-    }
-
-
-    /* ========================================================
-       ACTIVE RIDE
-    ======================================================== */
-
-    function setActiveRide(
-        rideId
+    CM.locateCustomer = function (
+        force
     ) {
 
-        currentRideId =
-            rideId ||
+        if (
+            !navigator.geolocation
+        ) {
+
+            CM.showLocationError(
+                "Location is not supported on this device."
+            );
+
+            return;
+        }
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            function (position) {
+
+                const point = {
+                    lat:
+                        position.coords.latitude,
+
+                    lng:
+                        position.coords.longitude
+                };
+
+
+                CM.state.currentLocation =
+                    point;
+
+
+                CM.setCustomerLocation(
+                    point,
+                    position.coords.accuracy
+                );
+
+
+                if (
+                    force ||
+                    !CM.state.pickup
+                ) {
+
+                    CM.setPickup(
+                        point,
+                        false
+                    );
+                }
+
+
+                CM.startLocationTracking();
+            },
+
+
+            function (error) {
+
+                console.warn(
+                    "RiderX location error:",
+                    error
+                );
+
+
+                CM.showLocationError(
+                    "Location permission is required for accurate pickup."
+                );
+            },
+
+            {
+                enableHighAccuracy: true,
+                timeout:
+                    CM.config.locationTimeout,
+                maximumAge: 5000
+            }
+        );
+    };
+
+
+    /* ========================================================
+       LIVE LOCATION TRACKING
+       ======================================================== */
+
+    CM.startLocationTracking = function () {
+
+        if (
+            !navigator.geolocation
+        ) {
+            return;
+        }
+
+
+        CM.stopLocationTracking();
+
+
+        CM.state.watchId =
+            navigator.geolocation.watchPosition(
+
+                function (position) {
+
+                    const point = {
+                        lat:
+                            position.coords.latitude,
+
+                        lng:
+                            position.coords.longitude
+                    };
+
+
+                    CM.state.currentLocation =
+                        point;
+
+
+                    CM.setCustomerLocation(
+                        point,
+                        position.coords.accuracy
+                    );
+
+
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "riderx-customer-location",
+                            {
+                                detail: {
+                                    lat:
+                                        point.lat,
+
+                                    lng:
+                                        point.lng,
+
+                                    accuracy:
+                                        position.coords.accuracy
+                                }
+                            }
+                        )
+                    );
+                },
+
+                function (error) {
+
+                    console.warn(
+                        "Customer location tracking error:",
+                        error
+                    );
+                },
+
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 3000,
+                    timeout: 15000
+                }
+            );
+    };
+
+
+    CM.stopLocationTracking = function () {
+
+        if (
+            CM.state.watchId !== null &&
+            navigator.geolocation
+        ) {
+
+            navigator.geolocation.clearWatch(
+                CM.state.watchId
+            );
+        }
+
+
+        CM.state.watchId = null;
+    };
+
+
+    /* ========================================================
+       CUSTOMER MARKER
+       ======================================================== */
+
+    CM.createCustomerIcon = function () {
+
+        return L.divIcon({
+
+            className:
+                "riderx-customer-marker-wrapper",
+
+            html:
+                `
+                <div class="riderx-customer-marker">
+                    <span></span>
+                </div>
+                `,
+
+            iconSize: [34, 34],
+
+            iconAnchor: [17, 17]
+        });
+    };
+
+
+    CM.setCustomerLocation = function (
+        point,
+        accuracy
+    ) {
+
+        if (!CM.state.map) {
+            return;
+        }
+
+
+        const latLng =
+            [point.lat, point.lng];
+
+
+        if (
+            !CM.state.customerMarker
+        ) {
+
+            CM.state.customerMarker =
+                L.marker(
+                    latLng,
+                    {
+                        icon:
+                            CM.createCustomerIcon(),
+                        zIndexOffset:
+                            1000
+                    }
+                )
+                .addTo(
+                    CM.state.map
+                );
+
+        } else {
+
+            CM.state.customerMarker.setLatLng(
+                latLng
+            );
+        }
+
+
+        if (
+            accuracy &&
+            Number(accuracy) > 0
+        ) {
+
+            if (
+                !CM.state.accuracyCircle
+            ) {
+
+                CM.state.accuracyCircle =
+                    L.circle(
+                        latLng,
+                        {
+                            radius:
+                                accuracy,
+                            weight:
+                                1,
+                            fillOpacity:
+                                0.08
+                        }
+                    )
+                    .addTo(
+                        CM.state.map
+                    );
+
+            } else {
+
+                CM.state.accuracyCircle
+                    .setLatLng(
+                        latLng
+                    )
+                    .setRadius(
+                        accuracy
+                    );
+            }
+        }
+    };
+
+
+    /* ========================================================
+       PICKUP
+       ======================================================== */
+
+    CM.createPickupIcon = function () {
+
+        return L.divIcon({
+
+            className:
+                "riderx-pickup-marker-wrapper",
+
+            html:
+                `
+                <div class="riderx-pickup-marker">
+                    <span></span>
+                </div>
+                `,
+
+            iconSize: [34, 34],
+
+            iconAnchor: [17, 17]
+        });
+    };
+
+
+    CM.setPickup = function (
+        point,
+        moveMap
+    ) {
+
+        if (!point) {
+            return;
+        }
+
+
+        CM.state.pickup =
+            {
+                lat:
+                    Number(point.lat),
+
+                lng:
+                    Number(point.lng),
+
+                address:
+                    point.address ||
+                    ""
+            };
+
+
+        if (!CM.state.map) {
+            return;
+        }
+
+
+        const latLng = [
+            CM.state.pickup.lat,
+            CM.state.pickup.lng
+        ];
+
+
+        if (
+            !CM.state.pickupMarker
+        ) {
+
+            CM.state.pickupMarker =
+                L.marker(
+                    latLng,
+                    {
+                        icon:
+                            CM.createPickupIcon(),
+                        draggable:
+                            true,
+                        zIndexOffset:
+                            800
+                    }
+                )
+                .addTo(
+                    CM.state.map
+                );
+
+
+            CM.state.pickupMarker.on(
+                "dragend",
+                function () {
+
+                    const position =
+                        CM.state.pickupMarker
+                            .getLatLng();
+
+
+                    CM.state.pickup = {
+                        lat:
+                            position.lat,
+
+                        lng:
+                            position.lng,
+
+                        address:
+                            ""
+                    };
+
+
+                    CM.reverseGeocode(
+                        CM.state.pickup
+                    );
+                }
+            );
+
+        } else {
+
+            CM.state.pickupMarker.setLatLng(
+                latLng
+            );
+        }
+
+
+        if (moveMap) {
+
+            CM.state.map.setView(
+                latLng,
+                CM.config.locationZoom
+            );
+        }
+
+
+        CM.reverseGeocode(
+            CM.state.pickup
+        );
+
+
+        CM.emitLocationChange();
+    };
+
+
+    /* ========================================================
+       DESTINATION
+       ======================================================== */
+
+    CM.createDestinationIcon =
+        function () {
+
+            return L.divIcon({
+
+                className:
+                    "riderx-destination-marker-wrapper",
+
+                html:
+                    `
+                    <div class="riderx-destination-marker">
+                        <span></span>
+                    </div>
+                    `,
+
+                iconSize: [36, 36],
+
+                iconAnchor: [18, 36]
+            });
+        };
+
+
+    CM.setDestination = function (
+        point,
+        reverseGeocode
+    ) {
+
+        if (!point) {
+            return;
+        }
+
+
+        CM.state.destination =
+            {
+                lat:
+                    Number(point.lat),
+
+                lng:
+                    Number(point.lng),
+
+                address:
+                    point.address ||
+                    ""
+            };
+
+
+        if (!CM.state.map) {
+            return;
+        }
+
+
+        const latLng = [
+            CM.state.destination.lat,
+            CM.state.destination.lng
+        ];
+
+
+        if (
+            !CM.state.destinationMarker
+        ) {
+
+            CM.state.destinationMarker =
+                L.marker(
+                    latLng,
+                    {
+                        icon:
+                            CM.createDestinationIcon(),
+                        draggable:
+                            true,
+                        zIndexOffset:
+                            900
+                    }
+                )
+                .addTo(
+                    CM.state.map
+                );
+
+
+            CM.state.destinationMarker.on(
+                "dragend",
+                function () {
+
+                    const position =
+                        CM.state.destinationMarker
+                            .getLatLng();
+
+
+                    CM.state.destination = {
+                        lat:
+                            position.lat,
+
+                        lng:
+                            position.lng,
+
+                        address:
+                            ""
+                    };
+
+
+                    CM.reverseGeocode(
+                        CM.state.destination
+                    );
+
+
+                    CM.emitLocationChange();
+                }
+            );
+
+        } else {
+
+            CM.state.destinationMarker
+                .setLatLng(
+                    latLng
+                );
+        }
+
+
+        if (reverseGeocode !== false) {
+
+            CM.reverseGeocode(
+                CM.state.destination
+            );
+        }
+
+
+        CM.fitPickupDestination();
+
+
+        CM.emitLocationChange();
+
+
+        if (
+            RX.booking &&
+            typeof RX.booking
+                .setDestination ===
+            "function"
+        ) {
+
+            RX.booking.setDestination(
+                CM.state.destination
+            );
+        }
+    };
+
+
+    /* ========================================================
+       CLEAR DESTINATION
+       ======================================================== */
+
+    CM.clearDestination = function () {
+
+        if (
+            CM.state.destinationMarker &&
+            CM.state.map
+        ) {
+
+            CM.state.map.removeLayer(
+                CM.state.destinationMarker
+            );
+        }
+
+
+        CM.state.destinationMarker =
+            null;
+
+        CM.state.destination =
             null;
 
 
+        CM.clearRoute();
+
+
+        CM.emitLocationChange();
+    };
+
+
+    /* ========================================================
+       CLEAR PICKUP
+       ======================================================== */
+
+    CM.clearPickup = function () {
+
+        if (
+            CM.state.pickupMarker &&
+            CM.state.map
+        ) {
+
+            CM.state.map.removeLayer(
+                CM.state.pickupMarker
+            );
+        }
+
+
+        CM.state.pickupMarker =
+            null;
+
+        CM.state.pickup =
+            null;
+
+
+        CM.clearRoute();
+
+
+        CM.emitLocationChange();
+    };
+
+
+    /* ========================================================
+       ROUTE
+       ======================================================== */
+
+    CM.drawRoute = async function (
+        start,
+        end
+    ) {
+
+        if (
+            !start ||
+            !end ||
+            !CM.state.map
+        ) {
+            return null;
+        }
+
+
+        const url =
+            "https://router.project-osrm.org/route/v1/driving/" +
+            encodeURIComponent(
+                start.lng
+            ) +
+            "," +
+            encodeURIComponent(
+                start.lat
+            ) +
+            ";" +
+            encodeURIComponent(
+                end.lng
+            ) +
+            "," +
+            encodeURIComponent(
+                end.lat
+            ) +
+            "?overview=full&geometries=geojson";
+
+
         try {
 
+            const response =
+                await fetch(
+                    url
+                );
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Route service unavailable."
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
             if (
-                currentRideId
+                !data.routes ||
+                !data.routes.length
             ) {
 
-                localStorage.setItem(
-                    "riderx_active_ride_id",
-                    currentRideId
+                throw new Error(
+                    "No route found."
+                );
+            }
+
+
+            const route =
+                data.routes[0];
+
+
+            CM.clearRoute();
+
+
+            CM.state.routeLine =
+                L.geoJSON(
+                    route.geometry,
+                    {
+                        style: {
+                            weight:
+                                6,
+
+                            opacity:
+                                0.9,
+
+                            color:
+                                CM.config.routeColor,
+
+                            lineCap:
+                                "round",
+
+                            lineJoin:
+                                "round"
+                        }
+                    }
+                )
+                .addTo(
+                    CM.state.map
+                );
+
+
+            CM.fitPickupDestination();
+
+
+            const result = {
+
+                distance:
+                    route.distance,
+
+                duration:
+                    route.duration,
+
+                geometry:
+                    route.geometry
+            };
+
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-route-updated",
+                    {
+                        detail:
+                            result
+                    }
+                )
+            );
+
+
+            return result;
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX route error:",
+                error
+            );
+
+
+            CM.drawStraightRoute(
+                start,
+                end
+            );
+
+
+            return null;
+        }
+    };
+
+
+    /* ========================================================
+       STRAIGHT ROUTE FALLBACK
+       ======================================================== */
+
+    CM.drawStraightRoute = function (
+        start,
+        end
+    ) {
+
+        if (!CM.state.map) {
+            return;
+        }
+
+
+        CM.clearRoute();
+
+
+        CM.state.routeLine =
+            L.polyline(
+                [
+                    [
+                        start.lat,
+                        start.lng
+                    ],
+
+                    [
+                        end.lat,
+                        end.lng
+                    ]
+                ],
+                {
+                    weight:
+                        5,
+
+                    opacity:
+                        0.8,
+
+                    dashArray:
+                        "8 8",
+
+                    color:
+                        CM.config.routeColor
+                }
+            )
+            .addTo(
+                CM.state.map
+            );
+    };
+
+
+    CM.clearRoute = function () {
+
+        if (
+            CM.state.routeLine &&
+            CM.state.map
+        ) {
+
+            CM.state.map.removeLayer(
+                CM.state.routeLine
+            );
+        }
+
+
+        CM.state.routeLine =
+            null;
+    };
+
+
+    /* ========================================================
+       FIT MAP
+       ======================================================== */
+
+    CM.fitPickupDestination =
+        function () {
+
+            if (
+                !CM.state.map
+            ) {
+                return;
+            }
+
+
+            const points = [];
+
+
+            if (
+                CM.state.pickup
+            ) {
+
+                points.push(
+                    [
+                        CM.state.pickup.lat,
+                        CM.state.pickup.lng
+                    ]
+                );
+            }
+
+
+            if (
+                CM.state.destination
+            ) {
+
+                points.push(
+                    [
+                        CM.state.destination.lat,
+                        CM.state.destination.lng
+                    ]
+                );
+            }
+
+
+            if (
+                CM.state.riderLocation
+            ) {
+
+                points.push(
+                    [
+                        CM.state.riderLocation.lat,
+                        CM.state.riderLocation.lng
+                    ]
+                );
+            }
+
+
+            if (
+                points.length < 2
+            ) {
+
+                if (
+                    points.length === 1
+                ) {
+
+                    CM.state.map.setView(
+                        points[0],
+                        CM.config.locationZoom
+                    );
+                }
+
+                return;
+            }
+
+
+            const bounds =
+                L.latLngBounds(
+                    points
+                );
+
+
+            CM.state.map.fitBounds(
+                bounds,
+                {
+                    padding:
+                        [50, 100],
+
+                    maxZoom:
+                        CM.config.maxZoom
+                }
+            );
+        };
+
+
+    /* ========================================================
+       RIDER LIVE LOCATION
+       ======================================================== */
+
+    CM.createRiderIcon = function () {
+
+        return L.divIcon({
+
+            className:
+                "riderx-rider-marker-wrapper",
+
+            html:
+                `
+                <div class="riderx-rider-marker">
+                    <div class="riderx-rider-arrow">
+                        ▲
+                    </div>
+                </div>
+                `,
+
+            iconSize:
+                [42, 42],
+
+            iconAnchor:
+                [21, 21]
+        });
+    };
+
+
+    CM.setRiderLocation = function (
+        point,
+        heading
+    ) {
+
+        if (
+            !point ||
+            !CM.state.map
+        ) {
+            return;
+        }
+
+
+        CM.state.riderLocation =
+            {
+                lat:
+                    Number(point.lat),
+
+                lng:
+                    Number(point.lng),
+
+                heading:
+                    Number(
+                        heading ||
+                        0
+                    )
+            };
+
+
+        const latLng = [
+            CM.state.riderLocation.lat,
+            CM.state.riderLocation.lng
+        ];
+
+
+        if (
+            !CM.state.riderMarker
+        ) {
+
+            CM.state.riderMarker =
+                L.marker(
+                    latLng,
+                    {
+                        icon:
+                            CM.createRiderIcon(),
+                        zIndexOffset:
+                            1100
+                    }
+                )
+                .addTo(
+                    CM.state.map
+                );
+
+        } else {
+
+            CM.state.riderMarker
+                .setLatLng(
+                    latLng
+                );
+        }
+
+
+        const element =
+            CM.state.riderMarker
+                .getElement();
+
+
+        if (
+            element &&
+            heading !== undefined
+        ) {
+
+            const arrow =
+                element.querySelector(
+                    ".riderx-rider-arrow"
+                );
+
+
+            if (arrow) {
+
+                arrow.style.transform =
+                    "rotate(" +
+                    Number(heading) +
+                    "deg)";
+            }
+        }
+
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "riderx-rider-location-updated",
+                {
+                    detail:
+                        CM.state.riderLocation
+                }
+            )
+        );
+    };
+
+
+    CM.removeRiderMarker =
+        function () {
+
+            if (
+                CM.state.riderMarker &&
+                CM.state.map
+            ) {
+
+                CM.state.map.removeLayer(
+                    CM.state.riderMarker
+                );
+            }
+
+
+            CM.state.riderMarker =
+                null;
+
+            CM.state.riderLocation =
+                null;
+        };
+
+
+    /* ========================================================
+       REVERSE GEOCODING
+       ======================================================== */
+
+    CM.reverseGeocode = async function (
+        point
+    ) {
+
+        if (
+            !point ||
+            CM.state.geocoderBusy
+        ) {
+            return null;
+        }
+
+
+        CM.state.geocoderBusy =
+            true;
+
+
+        try {
+
+            const url =
+                "https://nominatim.openstreetmap.org/reverse" +
+                "?format=jsonv2" +
+                "&lat=" +
+                encodeURIComponent(
+                    point.lat
+                ) +
+                "&lon=" +
+                encodeURIComponent(
+                    point.lng
+                );
+
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Geocoder unavailable."
+                );
+            }
+
+
+            const data =
+                await response.json();
+
+
+            const address =
+                data.display_name ||
+                "";
+
+
+            point.address =
+                address;
+
+
+            CM.updateAddressUI(
+                point
+            );
+
+
+            CM.emitLocationChange();
+
+
+            return address;
+
+        } catch (error) {
+
+            console.warn(
+                "Reverse geocoding failed:",
+                error
+            );
+
+
+            return null;
+
+        } finally {
+
+            CM.state.geocoderBusy =
+                false;
+        }
+    };
+
+
+    /* ========================================================
+       ADDRESS UI
+       ======================================================== */
+
+    CM.updateAddressUI = function (
+        point
+    ) {
+
+        if (!point) {
+            return;
+        }
+
+
+        const isPickup =
+            CM.state.pickup === point;
+
+
+        const isDestination =
+            CM.state.destination === point;
+
+
+        if (isPickup) {
+
+            document
+                .querySelectorAll(
+                    "[data-pickup-address]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.value =
+                            point.address ||
+                            "";
+
+                        element.textContent =
+                            point.address ||
+                            "";
+                    }
+                );
+        }
+
+
+        if (isDestination) {
+
+            document
+                .querySelectorAll(
+                    "[data-destination-address]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.value =
+                            point.address ||
+                            "";
+
+                        element.textContent =
+                            point.address ||
+                            "";
+                    }
+                );
+        }
+    };
+
+
+    /* ========================================================
+       ADDRESS SEARCH
+       ======================================================== */
+
+    CM.searchAddress = async function (
+        query
+    ) {
+
+        query =
+            String(
+                query ||
+                ""
+            )
+            .trim();
+
+
+        if (!query) {
+            return null;
+        }
+
+
+        try {
+
+            const url =
+                "https://nominatim.openstreetmap.org/search" +
+                "?format=jsonv2" +
+                "&limit=5" +
+                "&countrycodes=in" +
+                "&q=" +
+                encodeURIComponent(
+                    query
+                );
+
+
+            const response =
+                await fetch(
+                    url
+                );
+
+
+            if (!response.ok) {
+                throw new Error(
+                    "Search unavailable."
+                );
+            }
+
+
+            const results =
+                await response.json();
+
+
+            return results.map(
+                function (
+                    item
+                ) {
+
+                    return {
+
+                        lat:
+                            Number(
+                                item.lat
+                            ),
+
+                        lng:
+                            Number(
+                                item.lon
+                            ),
+
+                        address:
+                            item.display_name ||
+                            ""
+                    };
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Address search failed:",
+                error
+            );
+
+
+            return [];
+        }
+    };
+
+
+    /* ========================================================
+       SEARCH RESULT SELECT
+       ======================================================== */
+
+    CM.selectSearchResult =
+        function (
+            result,
+            type
+        ) {
+
+            if (!result) {
+                return;
+            }
+
+
+            if (
+                type ===
+                "pickup"
+            ) {
+
+                CM.setPickup(
+                    result,
+                    true
                 );
 
             } else {
 
-                localStorage.removeItem(
-                    "riderx_active_ride_id"
+                CM.setDestination(
+                    result,
+                    true
                 );
             }
-
-        } catch (error) {}
-    }
-
-
-    function getActiveRide() {
-
-        if (
-            currentRideId
-        ) {
-            return currentRideId;
-        }
-
-
-        try {
-
-            return localStorage.getItem(
-                "riderx_active_ride_id"
-            );
-
-        } catch (error) {
-
-            return null;
-        }
-    }
+        };
 
 
     /* ========================================================
-       FIREBASE RIDE LISTENER
-    ======================================================== */
+       CALCULATE ROUTE
+       ======================================================== */
 
-    async function listenToRide(
-        rideId,
-        callback
-    ) {
-
-        /*
-         * This function intentionally uses
-         * the existing global Firebase module
-         * if available.
-         *
-         * It does not create another map.
-         */
-
-        if (!rideId) {
-            return () => {};
-        }
-
-
-        setActiveRide(
-            rideId
-        );
-
-
-        try {
-
-            const firebase =
-                await import(
-                    "../firebase/firebase-config.js"
-                );
-
-
-            const {
-                db,
-                doc,
-                onSnapshot
-            } =
-                firebase;
-
+    CM.calculateRoute =
+        async function () {
 
             if (
-                !db ||
-                !doc ||
-                !onSnapshot
+                !CM.state.pickup ||
+                !CM.state.destination
             ) {
 
-                return () => {};
+                return null;
             }
 
 
-            if (
-                rideUnsubscribe
-            ) {
+            return CM.drawRoute(
+                CM.state.pickup,
+                CM.state.destination
+            );
+        };
 
-                rideUnsubscribe();
 
-                rideUnsubscribe =
-                    null;
+    /* ========================================================
+       DISTANCE
+       ======================================================== */
+
+    CM.distanceBetween =
+        function (
+            a,
+            b
+        ) {
+
+            if (!a || !b) {
+                return 0;
             }
 
 
-            const rideRef =
-                doc(
-                    db,
-                    "rides",
-                    rideId
+            const R =
+                6371;
+
+
+            const lat1 =
+                Number(a.lat) *
+                Math.PI /
+                180;
+
+
+            const lat2 =
+                Number(b.lat) *
+                Math.PI /
+                180;
+
+
+            const dLat =
+                (
+                    Number(b.lat) -
+                    Number(a.lat)
+                ) *
+                Math.PI /
+                180;
+
+
+            const dLng =
+                (
+                    Number(b.lng) -
+                    Number(a.lng)
+                ) *
+                Math.PI /
+                180;
+
+
+            const x =
+                Math.sin(
+                    dLat / 2
+                ) *
+                Math.sin(
+                    dLat / 2
+                ) +
+                Math.cos(
+                    lat1
+                ) *
+                Math.cos(
+                    lat2
+                ) *
+                Math.sin(
+                    dLng / 2
+                ) *
+                Math.sin(
+                    dLng / 2
                 );
 
 
-            rideUnsubscribe =
-                onSnapshot(
-                    rideRef,
-                    snapshot => {
-
-                        if (
-                            !snapshot.exists()
-                        ) {
-                            return;
-                        }
+            const y =
+                2 *
+                Math.atan2(
+                    Math.sqrt(x),
+                    Math.sqrt(
+                        1 - x
+                    )
+                );
 
 
-                        const ride =
-                            snapshot.data();
+            return R * y;
+        };
 
 
-                        /*
-                         * Rider live location
-                         */
+    /* ========================================================
+       LOCATION CHANGE
+       ======================================================== */
 
-                        const riderLocation =
-                            normalizeLocation(
-                                ride.riderLocation ||
-                                ride.driverLocation ||
-                                ride.rider?.location
-                            );
+    CM.emitLocationChange =
+        function () {
 
+            const detail = {
 
-                        if (
-                            riderLocation
-                        ) {
+                pickup:
+                    CM.state.pickup,
 
-                            updateRideRiderLocation(
-                                riderLocation
-                            );
-                        }
+                destination:
+                    CM.state.destination,
 
+                customerLocation:
+                    CM.state.currentLocation,
 
-                        /*
-                         * Update route
-                         * if ride coordinates
-                         * are available.
-                         */
-
-                        const ridePickup =
-                            normalizeLocation(
-                                ride.pickup
-                            );
+                riderLocation:
+                    CM.state.riderLocation
+            };
 
 
-                        const rideDestination =
-                            normalizeLocation(
-                                ride.destination
-                            );
-
-
-                        if (
-                            ridePickup &&
-                            rideDestination
-                        ) {
-
-                            pickup =
-                                {
-                                    ...ridePickup,
-                                    address:
-                                        ride.pickup?.address ||
-                                        ""
-                                };
-
-
-                            destination =
-                                {
-                                    ...rideDestination,
-                                    address:
-                                        ride.destination?.address ||
-                                        ""
-                                };
-                        }
-
-
-                        if (
-                            typeof callback ===
-                            "function"
-                        ) {
-
-                            callback(
-                                ride
-                            );
-                        }
-
-
-                        window.dispatchEvent(
-                            new CustomEvent(
-                                "riderx:ride-updated",
-                                {
-                                    detail:
-                                        ride
-                                }
-                            )
-                        );
-
-                    },
-                    error => {
-
-                        console.error(
-                            "RiderX ride listener:",
-                            error
-                        );
-
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-customer-map-change",
+                    {
+                        detail:
+                            detail
                     }
-                );
+                )
+            );
+        };
 
 
-            return rideUnsubscribe;
+    /* ========================================================
+       ERROR
+       ======================================================== */
 
-        } catch (error) {
+    CM.showLocationError =
+        function (
+            message
+        ) {
 
-            console.error(
-                "RiderX: ride listener failed.",
-                error
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-location-error",
+                    {
+                        detail: {
+                            message:
+                                message
+                        }
+                    }
+                )
             );
 
 
-            return () => {};
-        }
-    }
+            if (
+                RX.toast &&
+                typeof RX.toast ===
+                "function"
+            ) {
+
+                RX.toast(
+                    message,
+                    "warning"
+                );
+            }
+        };
 
 
     /* ========================================================
-       STOP RIDE LISTENER
-    ======================================================== */
+       GET STATE
+       ======================================================== */
 
-    function stopRideListener() {
+    CM.getState = function () {
 
-        if (
-            rideUnsubscribe
-        ) {
+        return {
 
-            rideUnsubscribe();
+            pickup:
+                CM.state.pickup,
 
-            rideUnsubscribe =
-                null;
-        }
-    }
+            destination:
+                CM.state.destination,
 
+            customerLocation:
+                CM.state.currentLocation,
 
-    /* ========================================================
-       ESCAPE HTML
-    ======================================================== */
-
-    function escapeHTML(
-        value
-    ) {
-
-        return String(
-            value ?? ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-    }
-
-
-    /* ========================================================
-       PUBLIC API
-    ======================================================== */
-
-    return {
-
-        init,
-
-        startCustomerGPS,
-
-        centerOnCustomer,
-
-        setPickup,
-
-        setDestination,
-
-        drawBookingRoute,
-
-        clearRoute,
-
-        clearLocations,
-
-        showNearbyRider,
-
-        removeNearbyRider,
-
-        clearNearbyRiders,
-
-        updateRideRiderLocation,
-
-        getCustomerLocation,
-
-        fitBookingRoute,
-
-        listenToRide,
-
-        stopRideListener,
-
-        setActiveRide,
-
-        getActiveRide,
-
-        getPickup: () =>
-            pickup,
-
-        getDestination: () =>
-            destination
-
+            riderLocation:
+                CM.state.riderLocation
+        };
     };
 
-})();
+
+    /* ========================================================
+       PUBLIC SHORTCUTS
+       ======================================================== */
+
+    RX.initCustomerMap =
+        function (
+            element
+        ) {
+
+            return CM.init(
+                element
+            );
+        };
 
 
-/* ============================================================
-   GLOBAL ACCESS
-============================================================ */
+    RX.getCustomerMapState =
+        function () {
 
-window.RiderXCustomerMap =
-    CustomerMap;
-
-
-/* ============================================================
-   SAFE INITIALIZATION
-============================================================ */
-
-function initializeCustomerMap() {
-
-    const map =
-        document.getElementById(
-            "map"
-        );
+            return CM.getState();
+        };
 
 
-    if (!map) {
-        return;
+    RX.setPickup =
+        function (
+            point
+        ) {
+
+            return CM.setPickup(
+                point,
+                true
+            );
+        };
+
+
+    RX.setDestination =
+        function (
+            point
+        ) {
+
+            return CM.setDestination(
+                point,
+                true
+            );
+        };
+
+
+    RX.clearDestination =
+        function () {
+
+            return CM.clearDestination();
+        };
+
+
+    RX.getCustomerLocation =
+        function () {
+
+            return CM.state.currentLocation;
+        };
+
+
+    /* ========================================================
+       AUTO INIT
+       ======================================================== */
+
+    function autoInit() {
+
+        const element =
+            CM.getMapElement();
+
+
+        if (element) {
+
+            CM.init(
+                element
+            );
+        }
     }
 
 
-    CustomerMap.init();
-}
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            autoInit,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        autoInit();
+    }
 
 
-/*
- * Wait for centralized map engine.
- */
-
-if (
-    document.readyState ===
-    "loading"
-) {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        () => {
-
-            /*
-             * Give map.js a moment to
-             * initialize the central map.
-             */
-
-            setTimeout(
-                initializeCustomerMap,
-                100
-            );
-
-        },
-        {
-            once:
-                true
-        }
-    );
-
-} else {
-
-    setTimeout(
-        initializeCustomerMap,
-        100
-    );
-              }
+})();
