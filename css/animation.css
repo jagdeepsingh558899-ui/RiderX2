@@ -1,203 +1,1079 @@
-/* =========================================
-   RiderX Premium Animations
-   Final Clean Version
-========================================= */
+/* ============================================================
+   RIDERX 2.0
+   ANIMATION SYSTEM
+   File: css/Animation.css
+   ============================================================ */
 
 
-/* Page Load */
+/* ============================================================
+   GLOBAL
+   ============================================================ */
 
-.page{
+* {
+    -webkit-tap-highlight-color: transparent;
+}
 
-animation:pageOpen .5s ease;
+.rx-animated {
+    will-change: transform, opacity;
+}
+
+
+/* ============================================================
+   FADE
+   ============================================================ */
+
+.rx-fade-in {
+    animation: rxFadeIn .28s ease both;
+}
+
+.rx-fade-out {
+    animation: rxFadeOut .22s ease both;
+}
+
+@keyframes rxFadeIn {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes rxFadeOut {
+
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   FADE UP
+   ============================================================ */
+
+.rx-fade-up {
+    animation: rxFadeUp .35s ease both;
+}
+
+@keyframes rxFadeUp {
+
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   FADE DOWN
+   ============================================================ */
+
+.rx-fade-down {
+    animation: rxFadeDown .35s ease both;
+}
+
+@keyframes rxFadeDown {
+
+    from {
+        opacity: 0;
+        transform: translateY(-18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   SCALE IN
+   ============================================================ */
+
+.rx-scale-in {
+    animation: rxScaleIn .25s ease both;
+}
+
+@keyframes rxScaleIn {
+
+    from {
+        opacity: 0;
+        transform: scale(.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+
+/* ============================================================
+   SLIDE FROM RIGHT
+   ============================================================ */
+
+.rx-slide-right {
+    animation: rxSlideRight .3s ease both;
+}
+
+@keyframes rxSlideRight {
+
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+/* ============================================================
+   SLIDE FROM LEFT
+   ============================================================ */
+
+.rx-slide-left {
+    animation: rxSlideLeft .3s ease both;
+}
+
+@keyframes rxSlideLeft {
+
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+/* ============================================================
+   SLIDE UP
+   ============================================================ */
+
+.rx-slide-up {
+    animation: rxSlideUp .3s ease both;
+}
+
+@keyframes rxSlideUp {
+
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   SLIDE DOWN
+   ============================================================ */
+
+.rx-slide-down {
+    animation: rxSlideDown .3s ease both;
+}
+
+@keyframes rxSlideDown {
+
+    from {
+        transform: translateY(-100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   BOUNCE
+   ============================================================ */
+
+.rx-bounce {
+    animation: rxBounce .65s ease both;
+}
+
+@keyframes rxBounce {
+
+    0% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-8px);
+    }
+
+    55% {
+        transform: translateY(3px);
+    }
+
+    75% {
+        transform: translateY(-3px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   PULSE
+   ============================================================ */
+
+.rx-pulse {
+    animation: rxPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes rxPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.04);
+        opacity: .78;
+    }
+}
+
+
+/* ============================================================
+   YELLOW PULSE
+   ============================================================ */
+
+.rx-yellow-pulse {
+    animation: rxYellowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes rxYellowPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 0 rgba(255,212,0,.35);
+    }
+
+    50% {
+        box-shadow:
+            0 0 0 12px rgba(255,212,0,0);
+    }
+}
+
+
+/* ============================================================
+   LOCATION PULSE
+   ============================================================ */
+
+.rx-location-pulse {
+    position: relative;
+}
+
+.rx-location-pulse::before,
+.rx-location-pulse::after {
+    content: "";
+
+    position: absolute;
+
+    inset: -7px;
+
+    border-radius: 50%;
+
+    border: 2px solid var(--rx-yellow);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    animation: rxLocationPulse 2s ease-out infinite;
+}
+
+.rx-location-pulse::after {
+    animation-delay: 1s;
+}
+
+@keyframes rxLocationPulse {
+
+    0% {
+        transform: scale(.55);
+        opacity: .75;
+    }
+
+    100% {
+        transform: scale(1.7);
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   ONLINE RIDER PULSE
+   ============================================================ */
+
+.rx-online-pulse {
+    position: relative;
+}
+
+.rx-online-pulse::after {
+    content: "";
+
+    position: absolute;
+
+    inset: -5px;
+
+    border-radius: 50%;
+
+    border: 2px solid var(--rx-success);
+
+    animation:
+        rxOnlinePulse 1.7s ease-out infinite;
+}
+
+@keyframes rxOnlinePulse {
+
+    0% {
+        transform: scale(.75);
+        opacity: .9;
+    }
+
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   RIPPLE
+   ============================================================ */
+
+.rx-ripple {
+    position: relative;
+    overflow: hidden;
+}
+
+.rx-ripple::after {
+    content: "";
+
+    position: absolute;
+
+    width: 10px;
+    height: 10px;
+
+    left: 50%;
+    top: 50%;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,.35);
+
+    transform:
+        translate(-50%, -50%)
+        scale(0);
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+.rx-ripple:active::after {
+    animation: rxRipple .45s ease-out;
+}
+
+@keyframes rxRipple {
+
+    0% {
+        transform:
+            translate(-50%, -50%)
+            scale(0);
+
+        opacity: .7;
+    }
+
+    100% {
+        transform:
+            translate(-50%, -50%)
+            scale(20);
+
+        opacity: 0;
+    }
+}
+
+
+/* ============================================================
+   BUTTON PRESS
+   ============================================================ */
+
+.rx-press {
+    transition:
+        transform .12s ease,
+        opacity .12s ease;
+}
+
+.rx-press:active {
+    transform: scale(.95);
+}
+
+
+/* ============================================================
+   CARD HOVER / TOUCH
+   ============================================================ */
+
+.rx-card-hover {
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.rx-card-hover:active {
+    transform: translateY(1px);
+}
+
+@media (hover: hover) {
+
+    .rx-card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--rx-shadow-md);
+    }
 
 }
 
 
-@keyframes pageOpen{
+/* ============================================================
+   LIST ITEM PRESS
+   ============================================================ */
 
-from{
+.rx-list-press {
+    transition:
+        background .18s ease,
+        transform .12s ease;
+}
 
-opacity:0;
-
-transform:translateY(20px);
-
+.rx-list-press:active {
+    background: var(--rx-bg-2);
+    transform: scale(.99);
 }
 
 
-to{
+/* ============================================================
+   LOADING SHIMMER
+   ============================================================ */
 
-opacity:1;
+.rx-shimmer {
+    position: relative;
 
-transform:translateY(0);
+    overflow: hidden;
 
+    background: #E8E8E8;
 }
 
+.rx-shimmer::after {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    transform:
+        translateX(-100%);
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.65),
+            transparent
+        );
+
+    animation:
+        rxShimmer 1.25s infinite;
 }
 
+@keyframes rxShimmer {
 
-
-
-
-/* Splash Logo Animation */
-
-
-.splash-logo{
-
-animation:riderLogo 2s ease infinite;
-
-}
-
-
-
-@keyframes riderLogo{
-
-
-0%{
-
-transform:scale(.7);
-
-opacity:0;
-
-}
-
-
-40%{
-
-transform:scale(1.1);
-
-opacity:1;
-
+    100% {
+        transform:
+            translateX(100%);
+    }
 }
 
 
-100%{
+/* ============================================================
+   SKELETON
+   ============================================================ */
 
-transform:scale(1);
+.rx-skeleton {
+    background: #E7E7E7;
+    border-radius: 8px;
+    overflow: hidden;
+}
 
-opacity:1;
+.rx-skeleton-line {
+    height: 12px;
+    width: 100%;
+}
 
+.rx-skeleton-line.short {
+    width: 55%;
+}
+
+.rx-skeleton-line.medium {
+    width: 75%;
 }
 
 
+/* ============================================================
+   SPINNER
+   ============================================================ */
+
+.rx-spin {
+    animation:
+        rxSpin 1s linear infinite;
+}
+
+@keyframes rxSpin {
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 
+/* ============================================================
+   SUCCESS CHECK
+   ============================================================ */
 
+.rx-success-pop {
+    animation:
+        rxSuccessPop .5s cubic-bezier(.2,1.5,.5,1) both;
+}
 
+@keyframes rxSuccessPop {
 
+    0% {
+        opacity: 0;
+        transform: scale(.5);
+    }
 
+    70% {
+        transform: scale(1.12);
+    }
 
-/* Splash Hide */
-
-
-.splash-hide{
-
-animation:splashOut .8s forwards;
-
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 
+/* ============================================================
+   ERROR SHAKE
+   ============================================================ */
 
-@keyframes splashOut{
+.rx-shake {
+    animation:
+        rxShake .42s ease both;
+}
 
+@keyframes rxShake {
 
-from{
+    0%,
+    100% {
+        transform: translateX(0);
+    }
 
-opacity:1;
+    20% {
+        transform: translateX(-7px);
+    }
 
+    40% {
+        transform: translateX(7px);
+    }
+
+    60% {
+        transform: translateX(-5px);
+    }
+
+    80% {
+        transform: translateX(5px);
+    }
 }
 
 
-to{
+/* ============================================================
+   NOTIFICATION BELL
+   ============================================================ */
 
-opacity:0;
+.rx-bell-shake {
+    animation:
+        rxBellShake .55s ease both;
+    transform-origin: top center;
+}
 
-visibility:hidden;
+@keyframes rxBellShake {
 
+    0% {
+        transform: rotate(0);
+    }
+
+    20% {
+        transform: rotate(14deg);
+    }
+
+    40% {
+        transform: rotate(-12deg);
+    }
+
+    60% {
+        transform: rotate(9deg);
+    }
+
+    80% {
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        transform: rotate(0);
+    }
 }
 
 
+/* ============================================================
+   NOTIFICATION BADGE
+   ============================================================ */
+
+.rx-notification-badge {
+    animation:
+        rxNotificationBadge .3s ease both;
+}
+
+@keyframes rxNotificationBadge {
+
+    from {
+        opacity: 0;
+        transform: scale(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 
+/* ============================================================
+   RIDE REQUEST ALERT
+   ============================================================ */
 
+.rx-ride-request {
+    animation:
+        rxRideRequest 1.5s ease-in-out infinite;
+}
 
+@keyframes rxRideRequest {
 
+    0%,
+    100% {
+        transform: translateY(0);
+    }
 
-
-/* Button Animation */
-
-
-.btn-animation{
-
-animation:buttonPulse 2s infinite;
-
+    50% {
+        transform: translateY(-3px);
+    }
 }
 
 
+/* ============================================================
+   INCOMING REQUEST GLOW
+   ============================================================ */
 
-@keyframes buttonPulse{
+.rx-request-glow {
+    animation:
+        rxRequestGlow 1.4s ease-in-out infinite;
+}
 
+@keyframes rxRequestGlow {
 
-0%{
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 0 rgba(255,212,0,.1);
+    }
 
-box-shadow:0 0 0 0 rgba(255,214,0,.5);
-
+    50% {
+        box-shadow:
+            0 0 0 8px rgba(255,212,0,.22);
+    }
 }
 
 
-70%{
+/* ============================================================
+   COUNTDOWN
+   ============================================================ */
 
-box-shadow:0 0 0 15px rgba(255,214,0,0);
+.rx-countdown {
+    animation:
+        rxCountdown .9s ease-in-out infinite;
+}
 
+@keyframes rxCountdown {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
 }
 
 
-100%{
+/* ============================================================
+   DRIVER MOVING
+   ============================================================ */
 
-box-shadow:0 0 0 0 rgba(255,214,0,0);
+.rx-driver-moving {
+    animation:
+        rxDriverMoving 1s ease-in-out infinite;
+}
 
+@keyframes rxDriverMoving {
+
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(2px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
 
 
+/* ============================================================
+   MAP MARKER BOUNCE
+   ============================================================ */
+
+.rx-marker-bounce {
+    animation:
+        rxMarkerBounce 1.3s ease-in-out infinite;
+}
+
+@keyframes rxMarkerBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
 }
 
 
+/* ============================================================
+   BOTTOM SHEET
+   ============================================================ */
 
+.rx-sheet-enter {
+    animation:
+        rxSheetEnter .32s cubic-bezier(.2,.8,.2,1) both;
+}
 
+@keyframes rxSheetEnter {
 
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
 
-
-/* Card Animation */
-
-
-.fade-in{
-
-animation:fadeCard .6s ease;
-
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 
+/* ============================================================
+   SHEET EXPAND
+   ============================================================ */
 
-@keyframes fadeCard{
+.rx-sheet-expand {
+    animation:
+        rxSheetExpand .28s ease both;
+}
 
+@keyframes rxSheetExpand {
 
-from{
+    from {
+        max-height: 45vh;
+    }
 
-opacity:0;
-
-transform:translateY(30px);
-
+    to {
+        max-height: 90vh;
+    }
 }
 
 
-to{
+/* ============================================================
+   MODAL
+   ============================================================ */
 
-opacity:1;
+.rx-modal-enter {
+    animation:
+        rxModalEnter .2s ease both;
+}
 
-transform:translateY(0);
+@keyframes rxModalEnter {
 
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 
+/* ============================================================
+   TOAST
+   ============================================================ */
+
+.rx-toast-enter {
+    animation:
+        rxToastEnter .28s ease both;
 }
+
+@keyframes rxToastEnter {
+
+    from {
+        opacity: 0;
+        transform:
+            translate(-50%, 20px);
+    }
+
+    to {
+        opacity: 1;
+        transform:
+            translate(-50%, 0);
+    }
+}
+
+
+/* ============================================================
+   STAGGER ANIMATIONS
+   ============================================================ */
+
+.rx-stagger > * {
+    animation:
+        rxFadeUp .35s ease both;
+}
+
+.rx-stagger > *:nth-child(1) {
+    animation-delay: .03s;
+}
+
+.rx-stagger > *:nth-child(2) {
+    animation-delay: .07s;
+}
+
+.rx-stagger > *:nth-child(3) {
+    animation-delay: .11s;
+}
+
+.rx-stagger > *:nth-child(4) {
+    animation-delay: .15s;
+}
+
+.rx-stagger > *:nth-child(5) {
+    animation-delay: .19s;
+}
+
+.rx-stagger > *:nth-child(6) {
+    animation-delay: .23s;
+}
+
+.rx-stagger > *:nth-child(7) {
+    animation-delay: .27s;
+}
+
+.rx-stagger > *:nth-child(8) {
+    animation-delay: .31s;
+}
+
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+
+.rx-progress {
+    position: relative;
+
+    width: 100%;
+    height: 6px;
+
+    overflow: hidden;
+
+    background: #E5E5E5;
+
+    border-radius: 99px;
+}
+
+.rx-progress-value {
+    height: 100%;
+
+    background: var(--rx-yellow);
+
+    border-radius: inherit;
+
+    transition:
+        width .4s ease;
+}
+
+
+/* ============================================================
+   PROGRESS INDETERMINATE
+   ============================================================ */
+
+.rx-progress-loading
+.rx-progress-value {
+    width: 35%;
+
+    animation:
+        rxProgressLoading 1.3s ease-in-out infinite;
+}
+
+@keyframes rxProgressLoading {
+
+    0% {
+        transform: translateX(-100%);
+    }
+
+    50% {
+        transform: translateX(150%);
+    }
+
+    100% {
+        transform: translateX(300%);
+    }
+}
+
+
+/* ============================================================
+   HEART / FAVORITE
+   ============================================================ */
+
+.rx-heart-pop {
+    animation:
+        rxHeartPop .35s cubic-bezier(.2,1.5,.5,1);
+}
+
+@keyframes rxHeartPop {
+
+    0% {
+        transform: scale(.7);
+    }
+
+    65% {
+        transform: scale(1.25);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* ============================================================
+   RATING STAR
+   ============================================================ */
+
+.rx-star-pop {
+    animation:
+        rxStarPop .25s ease both;
+}
+
+@keyframes rxStarPop {
+
+    from {
+        opacity: 0;
+        transform: scale(.4) rotate(-15deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+
+/* ============================================================
+   PAGE TRANSITION
+   ============================================================ */
+
+.rx-page-enter {
+    animation:
+        rxPageEnter .25s ease both;
+}
+
+@keyframes rxPageEnter {
+
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   REDUCE MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation-duration: .01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        scroll-behavior: auto !important;
+
+        transition-duration: .01ms !important;
+
+    }
+
+                      }
