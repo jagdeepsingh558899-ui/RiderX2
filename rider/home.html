@@ -1,27 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-<title>RiderX | Rider</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-<style>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes"><title>RiderX | Rider Home</title><link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"><style>
 :root{
     --yellow:#FFD600;
+    --yellow2:#ffe500;
     --black:#050505;
-    --dark:#0d0d0d;
+    --dark:#0b0b0b;
     --card:#151515;
-    --border:#292929;
+    --card2:#1c1c1c;
+    --border:#2d2d2d;
+    --muted:#888;
     --green:#22c55e;
     --red:#ef4444;
     --blue:#3b82f6;
-    --text:#fff;
-    --muted:#888;
+    --white:#fff;
 }
 
 *{
@@ -41,9 +40,18 @@ body{
     color:#fff;
 }
 
+button,
+input{
+    font:inherit;
+}
+
 button{
-    font-family:inherit;
     cursor:pointer;
+}
+
+button:disabled{
+    opacity:.55;
+    cursor:not-allowed;
 }
 
 /* =========================================================
@@ -54,6 +62,7 @@ button{
     position:fixed;
     inset:0;
     z-index:1;
+    background:#ddd;
 }
 
 .leaflet-control-zoom{
@@ -72,34 +81,37 @@ button{
 }
 
 /* =========================================================
-   TOP HEADER
+   TOP BAR
 ========================================================= */
 
 .topbar{
     position:fixed;
-    top:0;
     left:0;
     right:0;
-    z-index:1200;
-    padding:10px 12px;
+    top:0;
+    z-index:1500;
+    padding:
+        max(10px,env(safe-area-inset-top))
+        12px
+        0;
     pointer-events:none;
 }
 
-.topbar-row{
+.toprow{
     display:flex;
     align-items:center;
     justify-content:space-between;
 }
 
 .logo{
-    background:rgba(8,8,8,.94);
+    background:rgba(8,8,8,.95);
     border:1px solid #333;
     border-radius:15px;
-    padding:8px 15px;
-    font-size:20px;
+    padding:8px 16px;
+    font-size:19px;
     font-weight:900;
-    letter-spacing:-1px;
-    box-shadow:0 7px 25px rgba(0,0,0,.4);
+    letter-spacing:-.8px;
+    box-shadow:0 8px 28px rgba(0,0,0,.45);
     backdrop-filter:blur(12px);
 }
 
@@ -107,45 +119,71 @@ button{
     color:var(--yellow);
 }
 
+.top-actions{
+    display:flex;
+    gap:8px;
+}
+
 .top-btn{
-    width:43px;
-    height:43px;
+    width:44px;
+    height:44px;
     border-radius:50%;
     border:1px solid #333;
-    background:rgba(10,10,10,.94);
+    background:rgba(8,8,8,.95);
     color:#fff;
-    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     pointer-events:auto;
-    box-shadow:0 7px 25px rgba(0,0,0,.4);
+    box-shadow:0 8px 25px rgba(0,0,0,.4);
 }
 
 .top-btn:active{
-    transform:scale(.94);
+    transform:scale(.92);
+}
+
+.notification-wrap{
+    position:relative;
+}
+
+.notification-dot{
+    position:absolute;
+    right:3px;
+    top:2px;
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--red);
+    border:2px solid #080808;
+    display:none;
 }
 
 /* =========================================================
-   ONLINE BAR
+   ONLINE CONTROL
 ========================================================= */
 
 .online-control{
     position:fixed;
-    top:67px;
     left:12px;
     right:12px;
-    z-index:1150;
+    top:calc(max(10px,env(safe-area-inset-top)) + 58px);
+    z-index:1400;
+
     max-width:500px;
     margin:auto;
-
-    background:rgba(8,8,8,.95);
-    border:1px solid #333;
-    border-radius:18px;
-    padding:10px 12px;
 
     display:flex;
     align-items:center;
     justify-content:space-between;
+    gap:10px;
 
-    box-shadow:0 8px 28px rgba(0,0,0,.4);
+    padding:10px 12px;
+
+    background:rgba(7,7,7,.96);
+    border:1px solid #333;
+    border-radius:18px;
+
+    box-shadow:0 9px 30px rgba(0,0,0,.45);
     backdrop-filter:blur(14px);
 }
 
@@ -160,6 +198,7 @@ button{
     height:11px;
     border-radius:50%;
     background:#666;
+    flex-shrink:0;
 }
 
 .online-dot.online{
@@ -168,13 +207,14 @@ button{
 }
 
 .online-title{
-    font-size:13px;
+    font-size:12px;
     font-weight:900;
 }
 
 .online-sub{
-    font-size:8px;
+    margin-top:1px;
     color:#777;
+    font-size:8px;
 }
 
 .online-btn{
@@ -183,7 +223,7 @@ button{
     padding:9px 13px;
     background:var(--yellow);
     color:#000;
-    font-size:10px;
+    font-size:9px;
     font-weight:900;
 }
 
@@ -193,29 +233,29 @@ button{
 }
 
 /* =========================================================
-   LOCATION BUTTON
+   LOCATION
 ========================================================= */
 
 .location-btn{
     position:fixed;
     right:13px;
-    bottom:205px;
-    z-index:1050;
+    bottom:calc(28vh + 82px);
+    z-index:1300;
 
-    width:46px;
-    height:46px;
+    width:47px;
+    height:47px;
 
-    border-radius:50%;
     border:1px solid #444;
+    border-radius:50%;
+
     background:#111;
     color:var(--yellow);
 
-    font-size:17px;
-    box-shadow:0 7px 22px rgba(0,0,0,.45);
+    box-shadow:0 8px 25px rgba(0,0,0,.5);
 }
 
 .location-btn:active{
-    transform:scale(.94);
+    transform:scale(.92);
 }
 
 /* =========================================================
@@ -226,17 +266,18 @@ button{
     position:fixed;
     left:12px;
     right:12px;
-    top:130px;
-    z-index:1100;
+    top:calc(max(10px,env(safe-area-inset-top)) + 115px);
+    z-index:1350;
 
     display:none;
 
-    background:rgba(8,8,8,.96);
+    padding:11px 13px;
+
+    background:rgba(7,7,7,.97);
     border:1px solid var(--yellow);
     border-radius:17px;
-    padding:10px 13px;
 
-    box-shadow:0 8px 28px rgba(0,0,0,.45);
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
 }
 
 .navigation-banner.show{
@@ -245,14 +286,14 @@ button{
 
 .nav-title{
     color:var(--yellow);
-    font-size:10px;
+    font-size:9px;
     font-weight:900;
 }
 
 .nav-distance{
-    font-size:21px;
+    margin-top:1px;
+    font-size:20px;
     font-weight:900;
-    line-height:1.2;
 }
 
 .nav-sub{
@@ -269,32 +310,39 @@ button{
     left:0;
     right:0;
     bottom:68px;
-    z-index:1100;
+    z-index:1200;
+
+    max-height:43vh;
+    overflow-y:auto;
+
+    padding:8px 13px 15px;
 
     background:rgba(7,7,7,.98);
     border-top:1px solid #292929;
-    border-radius:23px 23px 0 0;
+    border-radius:24px 24px 0 0;
 
-    max-height:42vh;
-    overflow-y:auto;
+    box-shadow:0 -13px 38px rgba(0,0,0,.55);
 
-    padding:8px 13px 14px;
-
-    box-shadow:0 -12px 35px rgba(0,0,0,.5);
+    -webkit-overflow-scrolling:touch;
 }
 
 .handle{
-    width:40px;
+    width:43px;
     height:4px;
-    background:#444;
-    border-radius:10px;
     margin:0 auto 10px;
+    border-radius:20px;
+    background:#444;
 }
+
+/* =========================================================
+   SHEET HEADER
+========================================================= */
 
 .sheet-title-row{
     display:flex;
     align-items:center;
     justify-content:space-between;
+    gap:10px;
     margin-bottom:9px;
 }
 
@@ -305,7 +353,7 @@ button{
 
 .request-count{
     color:#777;
-    font-size:9px;
+    font-size:8px;
 }
 
 /* =========================================================
@@ -313,20 +361,22 @@ button{
 ========================================================= */
 
 .empty{
+    padding:20px 14px;
+    text-align:center;
+
     background:#111;
     border:1px solid #252525;
-    border-radius:16px;
-    padding:17px;
-    text-align:center;
+    border-radius:17px;
+
     color:#777;
-    font-size:11px;
+    font-size:10px;
 }
 
 .empty i{
     display:block;
+    margin-bottom:8px;
     color:var(--yellow);
-    font-size:24px;
-    margin-bottom:7px;
+    font-size:25px;
 }
 
 /* =========================================================
@@ -334,26 +384,27 @@ button{
 ========================================================= */
 
 .request-card{
+    margin-bottom:9px;
+    padding:12px;
+
     background:#131313;
     border:1px solid #393939;
     border-radius:18px;
-    padding:12px;
-    margin-bottom:9px;
 }
 
 .request-top{
     display:flex;
-    justify-content:space-between;
     align-items:center;
+    justify-content:space-between;
     margin-bottom:8px;
 }
 
 .badge{
+    padding:4px 8px;
+    border-radius:8px;
     background:var(--yellow);
     color:#000;
-    border-radius:8px;
-    padding:4px 8px;
-    font-size:8px;
+    font-size:7px;
     font-weight:900;
 }
 
@@ -364,22 +415,22 @@ button{
 }
 
 .customer-name{
+    margin-bottom:8px;
     font-size:14px;
     font-weight:800;
-    margin-bottom:8px;
 }
 
 .route{
+    padding:9px;
     background:#080808;
     border:1px solid #222;
     border-radius:13px;
-    padding:9px;
 }
 
 .route-row{
     display:flex;
-    gap:9px;
     align-items:flex-start;
+    gap:9px;
 }
 
 .route-row + .route-row{
@@ -389,11 +440,13 @@ button{
 .route-icon{
     width:23px;
     height:23px;
+    min-width:23px;
     border-radius:50%;
+
     display:flex;
     align-items:center;
     justify-content:center;
-    flex-shrink:0;
+
     font-size:8px;
 }
 
@@ -420,13 +473,6 @@ button{
     word-break:break-word;
 }
 
-.route-line{
-    width:1px;
-    height:7px;
-    background:#444;
-    margin-left:11px;
-}
-
 .request-info{
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -435,11 +481,12 @@ button{
 }
 
 .request-info-box{
+    padding:7px;
+    text-align:center;
+
     background:#0a0a0a;
     border:1px solid #222;
     border-radius:9px;
-    padding:7px;
-    text-align:center;
 }
 
 .request-info-box small{
@@ -455,14 +502,15 @@ button{
 
 .earning-box{
     margin-top:8px;
-    background:#1c1800;
-    border:1px solid #4c4300;
-    border-radius:13px;
     padding:9px;
 
     display:flex;
-    justify-content:space-between;
     align-items:center;
+    justify-content:space-between;
+
+    background:#1c1800;
+    border:1px solid #4c4300;
+    border-radius:13px;
 }
 
 .earning-label{
@@ -483,24 +531,24 @@ button{
     margin-top:8px;
 }
 
-.reject-btn{
-    border:1px solid #552222;
+.reject-btn,
+.accept{
     border-radius:11px;
-    background:#291010;
-    color:#ff6666;
-    padding:11px 5px;
+    padding:11px 6px;
     font-size:10px;
     font-weight:900;
 }
 
+.reject-btn{
+    border:1px solid #552222;
+    background:#291010;
+    color:#ff6666;
+}
+
 .accept{
     border:0;
-    border-radius:11px;
-    padding:11px;
     background:var(--yellow);
     color:#000;
-    font-size:11px;
-    font-weight:900;
 }
 
 /* =========================================================
@@ -508,10 +556,10 @@ button{
 ========================================================= */
 
 .active-card{
+    padding:12px;
     background:#111;
     border:1px solid var(--green);
     border-radius:18px;
-    padding:12px;
 }
 
 .active-header{
@@ -528,10 +576,10 @@ button{
 }
 
 .active-status{
-    background:#12351f;
-    color:var(--green);
     padding:4px 8px;
     border-radius:8px;
+    background:#12351f;
+    color:var(--green);
     font-size:7px;
     font-weight:900;
 }
@@ -540,26 +588,31 @@ button{
     display:flex;
     align-items:center;
     gap:10px;
+
+    margin-bottom:8px;
+    padding:9px;
+
     background:#0b0b0b;
     border:1px solid #222;
     border-radius:13px;
-    padding:9px;
-    margin-bottom:8px;
 }
 
 .customer-avatar{
-    width:39px;
-    height:39px;
+    width:40px;
+    height:40px;
     border-radius:50%;
-    background:#222;
-    color:var(--yellow);
+
     display:flex;
     align-items:center;
     justify-content:center;
+
+    background:#222;
+    color:var(--yellow);
 }
 
 .customer-info{
     flex:1;
+    min-width:0;
 }
 
 .customer-info strong{
@@ -580,36 +633,39 @@ button{
 }
 
 .contact-btn{
-    border:1px solid #333;
-    border-radius:11px;
     padding:10px;
-    font-size:10px;
+    border-radius:11px;
+    font-size:9px;
     font-weight:900;
 }
 
 .call-btn{
+    border:1px solid #244f34;
     background:#12351f;
     color:var(--green);
 }
 
 .chat-btn{
+    border:1px solid #4c4300;
     background:#181800;
     color:var(--yellow);
 }
 
 .active-route{
+    padding:9px;
     background:#080808;
     border:1px solid #222;
     border-radius:13px;
-    padding:9px;
 }
 
 .active-fare{
     display:flex;
-    justify-content:space-between;
     align-items:center;
+    justify-content:space-between;
+
     margin-top:8px;
     padding:9px;
+
     background:#1c1800;
     border:1px solid #4c4300;
     border-radius:13px;
@@ -637,25 +693,24 @@ button{
 
 .nav-btn{
     background:#222;
-    color:#fff;
     border:1px solid #444;
+    color:#fff;
 }
 
-.start-btn{
+.start-btn,
+.complete-btn{
     background:var(--green);
     color:#000;
 }
 
 .complete-btn{
-    background:var(--green);
-    color:#000;
     grid-column:1/-1;
 }
 
 .cancel-btn{
     background:#291010;
-    color:#ff6666;
     border:1px solid #552222;
+    color:#ff6666;
 }
 
 /* =========================================================
@@ -667,16 +722,17 @@ button{
     left:0;
     right:0;
     bottom:0;
-    height:68px;
-    z-index:1500;
+    z-index:2000;
 
-    background:rgba(8,8,8,.98);
-    border-top:1px solid #292929;
+    height:68px;
 
     display:grid;
     grid-template-columns:repeat(4,1fr);
 
-    box-shadow:0 -8px 25px rgba(0,0,0,.45);
+    background:rgba(8,8,8,.99);
+    border-top:1px solid #292929;
+
+    box-shadow:0 -8px 25px rgba(0,0,0,.5);
 }
 
 .nav-item{
@@ -707,7 +763,7 @@ button{
 }
 
 /* =========================================================
-   CHAT MODAL
+   CHAT
 ========================================================= */
 
 .chat-overlay{
@@ -716,31 +772,34 @@ button{
     z-index:5000;
 
     display:none;
-    background:rgba(0,0,0,.72);
+    align-items:flex-end;
+
+    background:rgba(0,0,0,.74);
 }
 
 .chat-overlay.show{
     display:flex;
-    align-items:flex-end;
 }
 
 .chat-box{
     width:100%;
     height:82vh;
-    background:#0b0b0b;
-    border-radius:24px 24px 0 0;
-    border-top:1px solid #333;
 
     display:flex;
     flex-direction:column;
+
+    background:#0b0b0b;
+    border-top:1px solid #333;
+    border-radius:24px 24px 0 0;
 }
 
 .chat-header{
-    padding:12px 14px;
-    border-bottom:1px solid #292929;
     display:flex;
     align-items:center;
     gap:10px;
+
+    padding:12px 14px;
+    border-bottom:1px solid #292929;
 }
 
 .chat-back{
@@ -769,8 +828,8 @@ button{
 .chat-call{
     width:38px;
     height:38px;
-    border-radius:50%;
     border:0;
+    border-radius:50%;
     background:#12351f;
     color:var(--green);
 }
@@ -782,17 +841,19 @@ button{
 }
 
 .chat-empty{
+    padding-top:30px;
     text-align:center;
     color:#666;
     font-size:10px;
-    padding-top:30px;
 }
 
 .message{
     max-width:78%;
-    padding:8px 10px;
-    border-radius:13px;
     margin-bottom:8px;
+    padding:8px 10px;
+
+    border-radius:13px;
+
     font-size:10px;
     line-height:1.4;
     word-break:break-word;
@@ -801,14 +862,12 @@ button{
 .message.mine{
     margin-left:auto;
     background:#3a3200;
-    color:#fff;
     border-bottom-right-radius:4px;
 }
 
 .message.theirs{
     margin-right:auto;
     background:#1b1b1b;
-    color:#eee;
     border-bottom-left-radius:4px;
 }
 
@@ -820,20 +879,26 @@ button{
 }
 
 .chat-input-row{
-    padding:9px;
-    border-top:1px solid #292929;
     display:flex;
     gap:7px;
+
+    padding:9px;
+    border-top:1px solid #292929;
 }
 
 .chat-input{
     flex:1;
+    min-width:0;
+
+    padding:10px;
+
     border:1px solid #333;
     border-radius:13px;
+    outline:none;
+
     background:#151515;
     color:#fff;
-    padding:10px;
-    outline:none;
+
     font-size:10px;
 }
 
@@ -853,22 +918,25 @@ button{
     position:fixed;
     left:50%;
     bottom:82px;
-    transform:translate(-50%,20px);
-
     z-index:7000;
 
-    background:#222;
-    border:1px solid #444;
-    border-radius:12px;
+    max-width:90%;
+
     padding:9px 14px;
 
+    border:1px solid #444;
+    border-radius:12px;
+
+    background:#222;
+
     font-size:10px;
+    text-align:center;
+
     opacity:0;
     pointer-events:none;
-    transition:.25s;
 
-    max-width:90%;
-    text-align:center;
+    transform:translate(-50%,20px);
+    transition:.25s;
 }
 
 .toast.show{
@@ -893,11 +961,11 @@ button{
     inset:0;
     z-index:8000;
 
-    background:rgba(0,0,0,.68);
-
     display:none;
     align-items:center;
     justify-content:center;
+
+    background:rgba(0,0,0,.68);
 }
 
 .loading.show{
@@ -905,17 +973,18 @@ button{
 }
 
 .loading-box{
+    padding:24px 32px;
+    text-align:center;
+
     background:#111;
     border:1px solid #333;
     border-radius:18px;
-    padding:24px 32px;
-    text-align:center;
 }
 
 .loading-box i{
+    margin-bottom:9px;
     color:var(--yellow);
     font-size:24px;
-    margin-bottom:9px;
 }
 
 .loading-box p{
@@ -938,8 +1007,9 @@ button{
 
     .bottom-nav{
         left:50%;
-        transform:translateX(-50%);
+        right:auto;
         width:450px;
+        transform:translateX(-50%);
         border-radius:20px 20px 0 0;
     }
 
@@ -949,210 +1019,146 @@ button{
 
     .chat-box{
         width:450px;
-        margin-left:auto;
-        margin-right:auto;
+        margin:auto;
     }
 }
-</style>
-</head>
+</style></head><body><!-- =======================================================
+     MAP
+======================================================= --><div id="map"></div><!-- =======================================================
+     TOP BAR
+======================================================= --><div class="topbar"><div class="toprow">
 
-<body>
+    <div class="logo">
+        RIDER<span>X</span>
+    </div>
 
-<!-- MAP -->
-<div id="map"></div>
+    <div class="top-actions">
 
-<!-- TOP BAR -->
-<div class="topbar">
-    <div class="topbar-row">
+        <button
+            id="notificationBtn"
+            class="top-btn"
+            type="button"
+            aria-label="Notifications"
+        >
+            <span class="notification-wrap">
+                <i class="fa-solid fa-bell"></i>
+                <span
+                    id="notificationDot"
+                    class="notification-dot">
+                </span>
+            </span>
+        </button>
 
-        <div class="logo">
-            RIDER<span>X</span>
-        </div>
-
-        <button class="top-btn" id="profileTopBtn">
+        <button
+            id="profileTopBtn"
+            class="top-btn"
+            type="button"
+            aria-label="Profile"
+        >
             <i class="fa-solid fa-user"></i>
         </button>
 
     </div>
+
 </div>
 
-<!-- ONLINE -->
-<div class="online-control">
+</div><!-- =======================================================
+     ONLINE CONTROL
+======================================================= --><div class="online-control"><div class="online-info">
 
-    <div class="online-info">
+    <div
+        id="onlineDot"
+        class="online-dot">
+    </div>
 
-        <div id="onlineDot" class="online-dot"></div>
+    <div>
 
-        <div>
-            <div id="onlineTitle" class="online-title">
-                Offline
-            </div>
+        <div
+            id="onlineTitle"
+            class="online-title">
+            Offline
+        </div>
 
-            <div id="onlineSub" class="online-sub">
-                Go online to receive rides
-            </div>
+        <div
+            id="onlineSub"
+            class="online-sub">
+            Go online to receive rides
         </div>
 
     </div>
 
-    <button id="onlineBtn" class="online-btn">
-        GO ONLINE
-    </button>
-
 </div>
 
-<!-- NAVIGATION -->
-<div id="navigationBanner" class="navigation-banner">
-
-    <div id="navigationTitle" class="nav-title">
-        NAVIGATING
-    </div>
-
-    <div id="navigationDistance" class="nav-distance">
-        --
-    </div>
-
-    <div id="navigationSub" class="nav-sub">
-        --
-    </div>
-
-</div>
-
-<!-- LOCATION -->
-<button id="locationBtn" class="location-btn">
-    <i class="fa-solid fa-location-crosshairs"></i>
+<button
+    id="onlineBtn"
+    class="online-btn"
+    type="button">
+    GO ONLINE
 </button>
 
-<!-- BOTTOM SHEET -->
-<section class="sheet">
+</div><!-- =======================================================
+     NAVIGATION BANNER
+======================================================= --><div
+    id="navigationBanner"
+    class="navigation-banner"><div
+    id="navigationTitle"
+    class="nav-title">
+    NAVIGATING
+</div>
 
-    <div class="handle"></div>
+<div
+    id="navigationDistance"
+    class="nav-distance">
+    --
+</div>
 
-    <!-- REQUESTS -->
-    <div id="requestsArea">
+<div
+    id="navigationSub"
+    class="nav-sub">
+    --
+</div>
 
-        <div class="sheet-title-row">
+</div><!-- =======================================================
+     LOCATION
+======================================================= --><button
+id="locationBtn"
+class="location-btn"
+type="button"
+aria-label="My location">
 
-            <div class="sheet-title">
-                Ride Requests
-            </div>
+<i class="fa-solid fa-location-crosshairs"></i>
 
-            <div id="requestCount" class="request-count">
-                0 requests
-            </div>
+</button><!-- =======================================================
+     BOTTOM SHEET
+======================================================= --><section class="sheet"><div class="handle"></div>
 
+
+<!-- REQUESTS -->
+
+<div id="requestsArea">
+
+    <div class="sheet-title-row">
+
+        <div class="sheet-title">
+            Ride Requests
         </div>
 
-        <div id="requestsContainer">
-
-            <div class="empty">
-
-                <i class="fa-solid fa-power-off"></i>
-
-                Go online to receive ride requests.
-
-            </div>
-
+        <div
+            id="requestCount"
+            class="request-count">
+            0 requests
         </div>
 
     </div>
 
-    <!-- ACTIVE RIDE -->
-    <div id="activeArea" style="display:none;">
 
-        <div class="sheet-title-row">
+    <div id="requestsContainer">
 
-            <div class="sheet-title">
-                Active Ride
-            </div>
+        <div class="empty">
 
-            <div class="request-count">
-                Current trip
-            </div>
+            <i class="fa-solid fa-power-off"></i>
 
-        </div>
-
-        <div id="activeContainer"></div>
-
-    </div>
-
-</section>
-
-<!-- BOTTOM NAVIGATION -->
-<nav class="bottom-nav">
-
-    <button class="nav-item active" id="homeNav">
-        <i class="fa-solid fa-house"></i>
-        <span>Home</span>
-    </button>
-
-    <button class="nav-item" id="ridesNav">
-        <i class="fa-solid fa-motorcycle"></i>
-        <span>Rides</span>
-    </button>
-
-    <button class="nav-item" id="walletNav">
-        <i class="fa-solid fa-wallet"></i>
-        <span>Wallet</span>
-    </button>
-
-    <button class="nav-item" id="profileNav">
-        <i class="fa-solid fa-user"></i>
-        <span>Profile</span>
-    </button>
-
-</nav>
-
-<!-- CHAT -->
-<div id="chatOverlay" class="chat-overlay">
-
-    <div class="chat-box">
-
-        <div class="chat-header">
-
-            <button id="chatBack" class="chat-back">
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
-
-            <div class="chat-person">
-
-                <strong id="chatCustomerName">
-                    Customer
-                </strong>
-
-                <small>
-                    RiderX Active Ride
-                </small>
-
-            </div>
-
-            <button id="chatCall" class="chat-call">
-                <i class="fa-solid fa-phone"></i>
-            </button>
-
-        </div>
-
-        <div id="chatMessages" class="chat-messages">
-
-            <div class="chat-empty">
-                Start conversation with customer.
-            </div>
-
-        </div>
-
-        <div class="chat-input-row">
-
-            <input
-                id="chatInput"
-                class="chat-input"
-                type="text"
-                maxlength="500"
-                placeholder="Type message..."
-            >
-
-            <button id="chatSend" class="chat-send">
-                <i class="fa-solid fa-paper-plane"></i>
-            </button>
+            Go online to receive ride requests.
 
         </div>
 
@@ -1160,27 +1166,175 @@ button{
 
 </div>
 
-<!-- TOAST -->
-<div id="toast" class="toast"></div>
 
-<!-- LOADING -->
-<div id="loading" class="loading">
+<!-- ACTIVE RIDE -->
 
-    <div class="loading-box">
+<div
+    id="activeArea"
+    style="display:none;">
 
-        <i class="fa-solid fa-spinner fa-spin"></i>
+    <div class="sheet-title-row">
 
-        <p id="loadingText">
-            Please wait...
-        </p>
+        <div class="sheet-title">
+            Active Ride
+        </div>
+
+        <div class="request-count">
+            Current trip
+        </div>
+
+    </div>
+
+    <div id="activeContainer"></div>
+
+</div>
+
+</section><!-- =======================================================
+     BOTTOM NAV
+======================================================= --><nav class="bottom-nav"><button
+    class="nav-item active"
+    id="homeNav"
+    type="button">
+
+    <i class="fa-solid fa-house"></i>
+    <span>Home</span>
+
+</button>
+
+
+<button
+    class="nav-item"
+    id="ridesNav"
+    type="button">
+
+    <i class="fa-solid fa-route"></i>
+    <span>Rides</span>
+
+</button>
+
+
+<button
+    class="nav-item"
+    id="walletNav"
+    type="button">
+
+    <i class="fa-solid fa-wallet"></i>
+    <span>Wallet</span>
+
+</button>
+
+
+<button
+    class="nav-item"
+    id="profileNav"
+    type="button">
+
+    <i class="fa-solid fa-user"></i>
+    <span>Profile</span>
+
+</button>
+
+</nav><!-- =======================================================
+     CHAT
+======================================================= --><div
+    id="chatOverlay"
+    class="chat-overlay"><div class="chat-box">
+
+    <div class="chat-header">
+
+        <button
+            id="chatBack"
+            class="chat-back"
+            type="button">
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+        </button>
+
+        <div class="chat-person">
+
+            <strong id="chatCustomerName">
+                Customer
+            </strong>
+
+            <small>
+                RiderX customer
+            </small>
+
+        </div>
+
+        <button
+            id="chatCall"
+            class="chat-call"
+            type="button">
+
+            <i class="fa-solid fa-phone"></i>
+
+        </button>
+
+    </div>
+
+
+    <div
+        id="chatMessages"
+        class="chat-messages">
+
+        <div class="chat-empty">
+            Start conversation with customer.
+        </div>
+
+    </div>
+
+
+    <div class="chat-input-row">
+
+        <input
+            id="chatInput"
+            class="chat-input"
+            type="text"
+            maxlength="500"
+            placeholder="Type message..."
+            autocomplete="off">
+
+        <button
+            id="chatSend"
+            class="chat-send"
+            type="button">
+
+            <i class="fa-solid fa-paper-plane"></i>
+
+        </button>
 
     </div>
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</div><!-- =======================================================
+     TOAST
+======================================================= --><div
+    id="toast"
+    class="toast">
+</div><!-- =======================================================
+     LOADING
+======================================================= --><div
+    id="loading"
+    class="loading"><div class="loading-box">
 
-<script type="module">
+    <i class="fa-solid fa-spinner fa-spin"></i>
+
+    <p id="loadingText">
+        Please wait...
+    </p>
+
+</div>
+
+</div><!-- =======================================================
+     LEAFLET
+======================================================= --><script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script><!-- =======================================================
+     RIDERX FIREBASE RIDER ENGINE
+======================================================= --><script type="module">
 
 import {
     auth,
@@ -1205,45 +1359,13 @@ import {
     runTransaction
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-/* =========================================================
-   STATE
-========================================================= */
-
-let currentUser = null;
-let userData = null;
-let riderData = null;
-
-let isOnline = false;
-
-let map = null;
-let riderMarker = null;
-let accuracyCircle = null;
-let riderLocation = null;
-let locationWatchId = null;
-
-let requestListener = null;
-let activeRideListener = null;
-let allRidesListener = null;
-
-let activeRideId = null;
-let activeRide = null;
-
-let requestMarkers = new Map();
-let seenRideIds = new Set();
-let rejectedRideIds = new Set();
-
-let navigationTarget = null;
-let navigationLine = null;
-let targetMarker = null;
-let navigationTimer = null;
-
-let audioContext = null;
-
-let chatListener = null;
 
 /* =========================================================
-   ELEMENTS
+   DOM
 ========================================================= */
+
+const mapEl =
+    document.getElementById("map");
 
 const onlineBtn =
     document.getElementById("onlineBtn");
@@ -1257,11 +1379,14 @@ const onlineTitle =
 const onlineSub =
     document.getElementById("onlineSub");
 
+const requestCount =
+    document.getElementById("requestCount");
+
 const requestsContainer =
     document.getElementById("requestsContainer");
 
-const requestCount =
-    document.getElementById("requestCount");
+const requestsArea =
+    document.getElementById("requestsArea");
 
 const activeArea =
     document.getElementById("activeArea");
@@ -1281,6 +1406,21 @@ const navigationDistance =
 const navigationSub =
     document.getElementById("navigationSub");
 
+const locationBtn =
+    document.getElementById("locationBtn");
+
+const profileTopBtn =
+    document.getElementById("profileTopBtn");
+
+const notificationBtn =
+    document.getElementById("notificationBtn");
+
+const notificationDot =
+    document.getElementById("notificationDot");
+
+const toast =
+    document.getElementById("toast");
+
 const loading =
     document.getElementById("loading");
 
@@ -1296,159 +1436,111 @@ const chatMessages =
 const chatInput =
     document.getElementById("chatInput");
 
+const chatSend =
+    document.getElementById("chatSend");
+
+const chatBack =
+    document.getElementById("chatBack");
+
+const chatCall =
+    document.getElementById("chatCall");
+
+const chatCustomerName =
+    document.getElementById("chatCustomerName");
+
+
 /* =========================================================
-   NAVIGATION
+   STATE
 ========================================================= */
 
-function go(path){
-    location.href = path;
+let currentUser = null;
+let userData = null;
+let riderData = null;
+
+let map = null;
+let riderMarker = null;
+let accuracyCircle = null;
+
+let riderLocation = null;
+let locationWatchId = null;
+
+let isOnline = false;
+
+let requestListener = null;
+let activeRideListener = null;
+let chatListener = null;
+
+let activeRideId = null;
+let activeRide = null;
+
+let rejectedRideIds = new Set();
+
+let navigationTarget = null;
+let navigationLine = null;
+let targetMarker = null;
+let navigationTimer = null;
+
+let audioContext = null;
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
 }
 
-document
-    .getElementById("profileTopBtn")
-    .addEventListener("click",()=>{
-        go("profile.html");
-    });
 
-document
-    .getElementById("profileNav")
-    .addEventListener("click",()=>{
-        go("profile.html");
-    });
-
-document
-    .getElementById("ridesNav")
-    .addEventListener("click",()=>{
-        go("rides.html");
-    });
-
-document
-    .getElementById("walletNav")
-    .addEventListener("click",()=>{
-        go("wallet.html");
-    });
-
-document
-    .getElementById("homeNav")
-    .addEventListener("click",()=>{
-        if(map && riderLocation){
-            map.setView(
-                [riderLocation.lat,riderLocation.lng],
-                16,
-                {animate:true}
-            );
-        }
-    });
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(text,type="success"){
-
-    const toast =
-        document.getElementById("toast");
+function showToast(
+    text,
+    type="success"
+){
 
     toast.textContent = text;
 
     toast.className =
         "toast show " + type;
 
-    setTimeout(()=>{
-        toast.className = "toast";
-    },3000);
+    clearTimeout(showToast.timer);
+
+    showToast.timer =
+        setTimeout(() => {
+
+            toast.className =
+                "toast";
+
+        },3000);
+
 }
 
 window.showToast = showToast;
 
-/* =========================================================
-   LOADING
-========================================================= */
 
-function showLoading(text="Please wait..."){
+function showLoading(
+    text="Please wait..."
+){
 
     loadingText.textContent = text;
+
     loading.classList.add("show");
+
 }
+
 
 function hideLoading(){
 
     loading.classList.remove("show");
-}
-
-/* =========================================================
-   SOUND
-========================================================= */
-
-function playRequestSound(){
-
-    try{
-
-        if(!audioContext){
-
-            audioContext =
-                new (
-                    window.AudioContext ||
-                    window.webkitAudioContext
-                )();
-        }
-
-        if(audioContext.state === "suspended"){
-            audioContext.resume();
-        }
-
-        const now =
-            audioContext.currentTime;
-
-        [0,.18,.36].forEach((offset,index)=>{
-
-            const oscillator =
-                audioContext.createOscillator();
-
-            const gain =
-                audioContext.createGain();
-
-            oscillator.type = "sine";
-
-            oscillator.frequency.value =
-                index === 1 ? 880 : 660;
-
-            gain.gain.setValueAtTime(
-                .0001,
-                now + offset
-            );
-
-            gain.gain.exponentialRampToValueAtTime(
-                .20,
-                now + offset + .02
-            );
-
-            gain.gain.exponentialRampToValueAtTime(
-                .0001,
-                now + offset + .16
-            );
-
-            oscillator.connect(gain);
-            gain.connect(audioContext.destination);
-
-            oscillator.start(now + offset);
-            oscillator.stop(now + offset + .18);
-
-        });
-
-    }
-    catch(error){
-        console.warn(error);
-    }
-
-    try{
-        if(navigator.vibrate){
-            navigator.vibrate([150,80,150]);
-        }
-    }
-    catch(error){}
 
 }
+
 
 /* =========================================================
    MAP
@@ -1456,14 +1548,18 @@ function playRequestSound(){
 
 function initMap(){
 
-    if(map) return;
+    if(map){
+        return;
+    }
 
     map =
-        L.map("map",{
-            zoomControl:true,
-            attributionControl:true
-        })
-        .setView(
+        L.map(
+            "map",
+            {
+                zoomControl:true,
+                attributionControl:true
+            }
+        ).setView(
             [30.7333,76.7794],
             13
         );
@@ -1472,45 +1568,50 @@ function initMap(){
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
         {
             maxZoom:19,
-            attribution:"&copy; OpenStreetMap"
+            attribution:"© OpenStreetMap"
         }
     ).addTo(map);
 
-    setTimeout(()=>{
-        map.invalidateSize();
-    },500);
 }
+
 
 /* =========================================================
    RIDER MARKER
 ========================================================= */
 
-function updateRiderMarker(lat,lng,accuracy=0){
+function updateRiderMarker(
+    lat,
+    lng,
+    accuracy=0
+){
 
-    if(!map) return;
+    riderLocation = {
+        lat:Number(lat),
+        lng:Number(lng)
+    };
 
     const icon =
         L.divIcon({
             className:"",
             html:`
                 <div style="
-                    width:48px;
-                    height:48px;
+                    width:46px;
+                    height:46px;
                     border-radius:50%;
-                    background:#111;
-                    border:4px solid #FFD600;
                     display:flex;
                     align-items:center;
                     justify-content:center;
-                    color:#FFD600;
-                    box-shadow:0 0 0 5px rgba(255,214,0,.16),0 5px 20px rgba(0,0,0,.5);
-                    font-size:19px;
+                    background:#FFD600;
+                    color:#000;
+                    border:4px solid #fff;
+                    box-shadow:0 5px 18px rgba(0,0,0,.45);
+                    font-size:20px;
                 ">
                     <i class="fa-solid fa-motorcycle"></i>
                 </div>
             `,
-            iconSize:[48,48],
-            iconAnchor:[24,24]
+            iconSize:[46,46],
+            iconAnchor:[23,23]
         });
 
     if(!riderMarker){
@@ -1524,13 +1625,16 @@ function updateRiderMarker(lat,lng,accuracy=0){
                 }
             ).addTo(map);
 
-    }
-    else{
+    }else{
 
-        riderMarker.setLatLng([lat,lng]);
+        riderMarker.setLatLng(
+            [lat,lng]
+        );
+
     }
 
-    if(accuracy && accuracy < 500){
+
+    if(accuracy){
 
         if(!accuracyCircle){
 
@@ -1546,74 +1650,95 @@ function updateRiderMarker(lat,lng,accuracy=0){
                     }
                 ).addTo(map);
 
-        }
-        else{
+        }else{
 
-            accuracyCircle.setLatLng([lat,lng]);
-            accuracyCircle.setRadius(accuracy);
+            accuracyCircle.setLatLng(
+                [lat,lng]
+            );
+
+            accuracyCircle.setRadius(
+                accuracy
+            );
+
         }
+
     }
 
-    riderLocation = {
-        lat,
-        lng
-    };
 }
+
 
 /* =========================================================
    GPS
 ========================================================= */
 
-function startLocationTracking(){
+function startLocationWatch(){
 
     if(!navigator.geolocation){
 
         showToast(
-            "GPS is not supported on this device.",
+            "GPS is not available.",
             "error"
         );
 
         return;
+
     }
+
 
     if(locationWatchId !== null){
 
         navigator.geolocation.clearWatch(
             locationWatchId
         );
+
     }
+
 
     locationWatchId =
         navigator.geolocation.watchPosition(
+
             async position => {
 
-                const {
-                    latitude,
-                    longitude,
-                    accuracy
-                } = position.coords;
+                const lat =
+                    position.coords.latitude;
+
+                const lng =
+                    position.coords.longitude;
 
                 updateRiderMarker(
-                    latitude,
-                    longitude,
-                    accuracy
+                    lat,
+                    lng,
+                    position.coords.accuracy
                 );
 
-                if(isOnline && currentUser){
+
+                if(
+                    isOnline &&
+                    currentUser
+                ){
 
                     await updateRiderLocation(
-                        latitude,
-                        longitude
+                        lat,
+                        lng
                     );
+
                 }
 
-                updateNavigationDistance();
+
+                if(
+                    navigationTarget
+                ){
+
+                    updateNavigationDistance();
+
+                }
 
             },
+
             error => {
 
                 console.warn(
-                    "GPS error:",
+                    "GPS:",
                     error
                 );
 
@@ -1623,34 +1748,64 @@ function startLocationTracking(){
                         "Please allow location permission.",
                         "error"
                     );
+
                 }
 
             },
+
             {
                 enableHighAccuracy:true,
                 maximumAge:3000,
                 timeout:15000
             }
+
         );
+
 }
 
+
+function stopLocationWatch(){
+
+    if(locationWatchId !== null){
+
+        navigator.geolocation.clearWatch(
+            locationWatchId
+        );
+
+        locationWatchId = null;
+
+    }
+
+}
+
+
 /* =========================================================
-   SAVE LOCATION
+   FIRESTORE LOCATION
 ========================================================= */
 
-async function updateRiderLocation(lat,lng){
+async function updateRiderLocation(
+    lat,
+    lng
+){
 
-    if(!currentUser) return;
+    if(!currentUser){
+        return;
+    }
 
     const location = {
         lat:Number(lat),
         lng:Number(lng)
     };
 
+
     try{
 
         await updateDoc(
-            doc(db,"users",currentUser.uid),
+            doc(
+                db,
+                "users",
+                currentUser.uid
+            ),
             {
                 isOnline:true,
                 location,
@@ -1660,19 +1815,24 @@ async function updateRiderLocation(lat,lng){
             }
         );
 
-    }
-    catch(error){
+    }catch(error){
 
         console.warn(
             "users location:",
             error
         );
+
     }
+
 
     try{
 
         await updateDoc(
-            doc(db,"riders",currentUser.uid),
+            doc(
+                db,
+                "riders",
+                currentUser.uid
+            ),
             {
                 isOnline:true,
                 location,
@@ -1682,25 +1842,30 @@ async function updateRiderLocation(lat,lng){
             }
         );
 
-    }
-    catch(error){
+    }catch(error){
 
         console.warn(
             "riders location:",
             error
         );
+
     }
+
 }
 
+
 /* =========================================================
-   CENTER LOCATION
+   CURRENT LOCATION BUTTON
 ========================================================= */
 
-document
-    .getElementById("locationBtn")
-    .addEventListener("click",()=>{
+locationBtn.addEventListener(
+    "click",
+    () => {
 
-        if(riderLocation){
+        if(
+            map &&
+            riderLocation
+        ){
 
             map.setView(
                 [
@@ -1714,24 +1879,299 @@ document
             );
 
             return;
+
         }
 
-        requestLocation();
-    });
 
-function requestLocation(){
+        if(!navigator.geolocation){
 
-    if(!navigator.geolocation){
+            showToast(
+                "GPS not available.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            position => {
+
+                const lat =
+                    position.coords.latitude;
+
+                const lng =
+                    position.coords.longitude;
+
+                updateRiderMarker(
+                    lat,
+                    lng,
+                    position.coords.accuracy
+                );
+
+                map.setView(
+                    [lat,lng],
+                    16,
+                    {
+                        animate:true
+                    }
+                );
+
+            },
+
+            () => {
+
+                showToast(
+                    "Unable to get your location.",
+                    "error"
+                );
+
+            },
+
+            {
+                enableHighAccuracy:true,
+                timeout:15000
+            }
+
+        );
+
+    }
+);
+
+
+/* =========================================================
+   ONLINE / OFFLINE
+========================================================= */
+
+onlineBtn.addEventListener(
+    "click",
+    toggleOnline
+);
+
+
+async function toggleOnline(){
+
+    if(!currentUser){
 
         showToast(
-            "GPS not available.",
+            "Please login first.",
             "error"
         );
 
         return;
+
+    }
+
+
+    onlineBtn.disabled = true;
+
+
+    try{
+
+        if(!isOnline){
+
+            showLoading(
+                "Going online..."
+            );
+
+
+            await updateDoc(
+                doc(
+                    db,
+                    "users",
+                    currentUser.uid
+                ),
+                {
+                    isOnline:true,
+                    updatedAt:serverTimestamp()
+                }
+            );
+
+
+            try{
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "riders",
+                        currentUser.uid
+                    ),
+                    {
+                        isOnline:true,
+                        updatedAt:serverTimestamp()
+                    }
+                );
+
+            }catch(e){
+
+                console.warn(
+                    "rider online:",
+                    e
+                );
+
+            }
+
+
+            isOnline = true;
+
+            updateOnlineUI();
+
+            startLocationWatch();
+
+            requestLocationOnce();
+
+            listenForRequests();
+
+            hideLoading();
+
+            showToast(
+                "You are now ONLINE.",
+                "success"
+            );
+
+        }else{
+
+            showLoading(
+                "Going offline..."
+            );
+
+
+            isOnline = false;
+
+            stopRequestListener();
+
+            clearRequestMarkers();
+
+
+            try{
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "users",
+                        currentUser.uid
+                    ),
+                    {
+                        isOnline:false,
+                        updatedAt:serverTimestamp()
+                    }
+                );
+
+            }catch(e){
+
+                console.warn(e);
+
+            }
+
+
+            try{
+
+                await updateDoc(
+                    doc(
+                        db,
+                        "riders",
+                        currentUser.uid
+                    ),
+                    {
+                        isOnline:false,
+                        updatedAt:serverTimestamp()
+                    }
+                );
+
+            }catch(e){
+
+                console.warn(e);
+
+            }
+
+
+            updateOnlineUI();
+
+            showOfflineState();
+
+            hideLoading();
+
+            showToast(
+                "You are now OFFLINE.",
+                "success"
+            );
+
+        }
+
+    }catch(error){
+
+        hideLoading();
+
+        console.error(
+            "Online toggle:",
+            error
+        );
+
+        showToast(
+            "Unable to change online status.",
+            "error"
+        );
+
+    }
+
+    onlineBtn.disabled = false;
+
+}
+
+
+function updateOnlineUI(){
+
+    if(isOnline){
+
+        onlineDot.classList.add("online");
+
+        onlineTitle.textContent =
+            "Online";
+
+        onlineSub.textContent =
+            "You can receive ride requests";
+
+        onlineBtn.textContent =
+            "GO OFFLINE";
+
+        onlineBtn.classList.remove(
+            "offline"
+        );
+
+    }else{
+
+        onlineDot.classList.remove(
+            "online"
+        );
+
+        onlineTitle.textContent =
+            "Offline";
+
+        onlineSub.textContent =
+            "Go online to receive rides";
+
+        onlineBtn.textContent =
+            "GO ONLINE";
+
+        onlineBtn.classList.add(
+            "offline"
+        );
+
+    }
+
+}
+
+
+function requestLocationOnce(){
+
+    if(!navigator.geolocation){
+        return;
     }
 
     navigator.geolocation.getCurrentPosition(
+
         position => {
 
             const lat =
@@ -1746,351 +2186,166 @@ function requestLocation(){
                 position.coords.accuracy
             );
 
-            map.setView(
-                [lat,lng],
-                16,
-                {animate:true}
+            if(map){
+
+                map.setView(
+                    [lat,lng],
+                    15,
+                    {
+                        animate:true
+                    }
+                );
+
+            }
+
+        },
+
+        error => {
+
+            console.warn(
+                "Initial location:",
+                error
             );
 
         },
-        ()=>{
-            showToast(
-                "Please allow location permission.",
-                "error"
-            );
-        },
+
         {
             enableHighAccuracy:true,
             timeout:15000
         }
+
     );
+
 }
 
+
 /* =========================================================
-   AUTH
+   REQUEST LISTENER
 ========================================================= */
 
-onAuthStateChanged(
-    auth,
-    async user => {
+function listenForRequests(){
 
-        if(!user){
+    stopRequestListener();
 
-            location.replace(
-                "../auth/login.html?role=rider"
-            );
-
-            return;
-        }
-
-        currentUser = user;
-
-        initMap();
-        startLocationTracking();
-
-        await loadRiderProfile();
+    if(!currentUser){
+        return;
     }
-);
 
-/* =========================================================
-   PROFILE
-========================================================= */
 
-async function loadRiderProfile(){
-
-    try{
-
-        const userSnap =
-            await getDoc(
-                doc(
-                    db,
-                    "users",
-                    currentUser.uid
-                )
-            );
-
-        if(!userSnap.exists()){
-
-            showToast(
-                "Rider profile not found.",
-                "error"
-            );
-
-            return;
-        }
-
-        userData =
-            userSnap.data();
-
-        const role =
-            String(
-                userData.role || ""
+    const ridesQuery =
+        query(
+            collection(db,"rides"),
+            where(
+                "status",
+                "==",
+                "searching"
             )
-            .trim()
-            .toLowerCase();
-
-        if(role !== "rider"){
-
-            showToast(
-                "This is not a rider account.",
-                "error"
-            );
-
-            return;
-        }
-
-        const riderSnap =
-            await getDoc(
-                doc(
-                    db,
-                    "riders",
-                    currentUser.uid
-                )
-            );
-
-        riderData =
-            riderSnap.exists()
-                ? riderSnap.data()
-                : {};
-
-        const approved =
-            userData.adminApproved === true ||
-            riderData.adminApproved === true ||
-            userData.approved === true ||
-            riderData.approved === true ||
-            String(userData.status || "").toLowerCase() === "active" ||
-            String(riderData.status || "").toLowerCase() === "active";
-
-        if(!approved){
-
-            location.replace("pending.html");
-            return;
-        }
-
-        const blocked =
-            [
-                userData.status,
-                riderData.status
-            ].some(status =>
-                [
-                    "blocked",
-                    "disabled",
-                    "suspended"
-                ].includes(
-                    String(status || "").toLowerCase()
-                )
-            );
-
-        if(blocked){
-
-            showToast(
-                "Your rider account is disabled.",
-                "error"
-            );
-
-            return;
-        }
-
-        isOnline =
-            userData.isOnline === true ||
-            riderData.isOnline === true;
-
-        updateOnlineUI();
-
-        if(isOnline){
-
-            listenForRequests();
-            requestLocation();
-
-        }
-        else{
-
-            showOfflineState();
-        }
-
-        findActiveRide();
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        showToast(
-            "Unable to load rider profile.",
-            "error"
         );
-    }
-}
 
-/* =========================================================
-   ONLINE UI
-========================================================= */
 
-function updateOnlineUI(){
+    requestListener =
+        onSnapshot(
+            ridesQuery,
 
-    if(isOnline){
+            snapshot => {
 
-        onlineDot.classList.add("online");
+                const rides = [];
 
-        onlineTitle.textContent =
-            "Online";
 
-        onlineSub.textContent =
-            "Receiving ride requests";
+                snapshot.forEach(
+                    snap => {
 
-        onlineBtn.textContent =
-            "GO OFFLINE";
+                        const ride =
+                            snap.data();
 
-        onlineBtn.classList.add("offline");
 
-    }
-    else{
+                        if(
+                            ride.riderId &&
+                            ride.riderId !==
+                            currentUser.uid
+                        ){
 
-        onlineDot.classList.remove("online");
+                            return;
 
-        onlineTitle.textContent =
-            "Offline";
+                        }
 
-        onlineSub.textContent =
-            "Go online to receive rides";
 
-        onlineBtn.textContent =
-            "GO ONLINE";
+                        if(
+                            rejectedRideIds.has(
+                                snap.id
+                            )
+                        ){
 
-        onlineBtn.classList.remove("offline");
-    }
-}
+                            return;
 
-/* =========================================================
-   ONLINE TOGGLE
-========================================================= */
+                        }
 
-onlineBtn.addEventListener(
-    "click",
-    async()=>{
 
-        if(!currentUser){
+                        rides.push({
+                            ...ride,
+                            id:snap.id
+                        });
 
-            showToast(
-                "Please login first.",
-                "error"
-            );
-
-            return;
-        }
-
-        const next =
-            !isOnline;
-
-        onlineBtn.disabled = true;
-
-        try{
-
-            const locationData =
-                riderLocation
-                    ? {
-                        lat:riderLocation.lat,
-                        lng:riderLocation.lng
                     }
-                    : null;
-
-            const userUpdate = {
-                isOnline:next,
-                updatedAt:serverTimestamp()
-            };
-
-            const riderUpdate = {
-                isOnline:next,
-                updatedAt:serverTimestamp()
-            };
-
-            if(locationData){
-
-                userUpdate.location =
-                    locationData;
-
-                userUpdate.lat =
-                    locationData.lat;
-
-                userUpdate.lng =
-                    locationData.lng;
-
-                riderUpdate.location =
-                    locationData;
-
-                riderUpdate.lat =
-                    locationData.lat;
-
-                riderUpdate.lng =
-                    locationData.lng;
-            }
-
-            await updateDoc(
-                doc(
-                    db,
-                    "users",
-                    currentUser.uid
-                ),
-                userUpdate
-            );
-
-            await updateDoc(
-                doc(
-                    db,
-                    "riders",
-                    currentUser.uid
-                ),
-                riderUpdate
-            );
-
-            isOnline = next;
-
-            updateOnlineUI();
-
-            if(isOnline){
-
-                showToast(
-                    "You are now ONLINE.",
-                    "success"
                 );
 
-                listenForRequests();
-                requestLocation();
 
-            }
-            else{
+                rides.sort(
+                    (a,b) => {
 
-                stopRequestListener();
-                clearRequestMarkers();
-                showOfflineState();
+                        const aTime =
+                            a.createdAt?.seconds ||
+                            0;
+
+                        const bTime =
+                            b.createdAt?.seconds ||
+                            0;
+
+                        return bTime-aTime;
+
+                    }
+                );
+
+
+                renderRequests(
+                    rides
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "Ride request listener:",
+                    error
+                );
 
                 showToast(
-                    "You are now OFFLINE.",
-                    "success"
+                    "Ride requests unavailable.",
+                    "error"
                 );
+
             }
 
-        }
-        catch(error){
+        );
 
-            console.error(
-                "Online toggle:",
-                error
-            );
+}
 
-            showToast(
-                "Unable to change online status.",
-                "error"
-            );
-        }
 
-        onlineBtn.disabled = false;
+function stopRequestListener(){
+
+    if(
+        requestListener
+    ){
+
+        requestListener();
+
+        requestListener = null;
+
     }
-);
 
-/* =========================================================
-   OFFLINE STATE
-========================================================= */
+}
+
 
 function showOfflineState(){
 
@@ -2103,93 +2358,17 @@ function showOfflineState(){
             Go online to receive ride requests.
         </div>
     `;
+
 }
+
 
 /* =========================================================
-   REQUEST LISTENER
+   REQUEST RENDER
 ========================================================= */
 
-function listenForRequests(){
-
-    stopRequestListener();
-    clearRequestMarkers();
-
-    const ridesQuery =
-        query(
-            collection(db,"rides"),
-            where(
-                "status",
-                "==",
-                "searching"
-            )
-        );
-
-    requestListener =
-        onSnapshot(
-            ridesQuery,
-            snapshot => {
-
-                const rides = [];
-
-                snapshot.forEach(
-                    snap => {
-
-                        const ride =
-                            snap.data();
-
-                        if(
-                            ride.riderId &&
-                            ride.riderId !== currentUser.uid
-                        ){
-                            return;
-                        }
-
-                        if(
-                            rejectedRideIds.has(snap.id)
-                        ){
-                            return;
-                        }
-
-                        rides.push({
-                            id:snap.id,
-                            ...ride
-                        });
-                    }
-                );
-
-                renderRequests(rides);
-            },
-            error => {
-
-                console.error(
-                    "Ride requests:",
-                    error
-                );
-
-                showToast(
-                    "Ride requests could not be loaded. Check Firestore rules.",
-                    "error"
-                );
-            }
-        );
-}
-
-function stopRequestListener(){
-
-    if(requestListener){
-
-        requestListener();
-        requestListener = null;
-    }
-}
-
-/* =========================================================
-   RENDER REQUESTS
-========================================================= */
-
-function renderRequests(rides){
-
-    clearRequestMarkers();
+function renderRequests(
+    rides
+){
 
     if(!rides.length){
 
@@ -2199,374 +2378,287 @@ function renderRequests(rides){
         requestsContainer.innerHTML = `
             <div class="empty">
                 <i class="fa-solid fa-motorcycle"></i>
-                ${
-                    isOnline
-                        ? "Waiting for new ride requests..."
-                        : "Go online to receive ride requests."
-                }
+                Waiting for ride requests...
             </div>
         `;
 
         return;
+
     }
 
+
     requestCount.textContent =
-        rides.length +
-        (
-            rides.length === 1
-                ? " request"
-                : " requests"
-        );
+        `${rides.length} request${rides.length === 1 ? "" : "s"}`;
 
-    requestsContainer.innerHTML = "";
 
-    rides.forEach(ride => {
+    requestsContainer.innerHTML =
+        rides.map(
+            ride => renderRequestCard(
+                ride
+            )
+        ).join("");
 
-        if(!seenRideIds.has(ride.id)){
 
-            seenRideIds.add(ride.id);
-            playRequestSound();
+    rides.forEach(
+        ride => {
+
+            document
+                .getElementById(
+                    `accept-${ride.id}`
+                )
+                ?.addEventListener(
+                    "click",
+                    () => acceptRide(
+                        ride.id
+                    )
+                );
+
+
+            document
+                .getElementById(
+                    `reject-${ride.id}`
+                )
+                ?.addEventListener(
+                    "click",
+                    () => rejectRide(
+                        ride.id
+                    )
+                );
+
         }
+    );
 
-        requestsContainer.appendChild(
-            createRequestCard(ride)
-        );
-
-        addRequestMarker(ride);
-    });
 }
 
-/* =========================================================
-   REQUEST CARD
-========================================================= */
 
-function createRequestCard(ride){
-
-    const card =
-        document.createElement("div");
-
-    card.className =
-        "request-card";
-
-    const pickup =
-        locationData(ride.pickup);
-
-    const drop =
-        locationData(ride.drop);
-
-    const fare =
-        Number(ride.fare || 0);
-
-    const distance =
-        Number(ride.distance || 0);
+function renderRequestCard(
+    ride
+){
 
     const customer =
         ride.customerName ||
-        ride.customer?.name ||
-        "RiderX Customer";
+        ride.userName ||
+        ride.name ||
+        "Customer";
+
+
+    const pickup =
+        getLocation(
+            ride.pickup ||
+            ride.pickupLocation
+        );
+
+
+    const drop =
+        getLocation(
+            ride.dropoff ||
+            ride.dropoffLocation ||
+            ride.destination
+        );
+
+
+    const fare =
+        Number(
+            ride.fare ||
+            ride.estimatedFare ||
+            ride.amount ||
+            0
+        );
+
+
+    const distance =
+        Number(
+            ride.distance ||
+            ride.distanceKm ||
+            0
+        );
+
 
     const service =
         String(
             ride.serviceType ||
             ride.service ||
-            "bike"
-        ).toUpperCase();
+            "Bike"
+        );
 
-    const payment =
-        String(
-            ride.paymentMethod ||
-            "cash"
-        ).toUpperCase();
 
-    card.innerHTML = `
+    return `
 
-        <div class="request-top">
+        <div class="request-card">
 
-            <div class="badge">
-                ${escapeHtml(service)}
-            </div>
+            <div class="request-top">
 
-            <div class="new-badge">
-                ● NEW RIDE
-            </div>
+                <span class="badge">
+                    ${escapeHtml(service)}
+                </span>
 
-        </div>
-
-        <div class="customer-name">
-            ${escapeHtml(customer)}
-        </div>
-
-        <div class="route">
-
-            <div class="route-row">
-
-                <div class="route-icon pick-icon">
-                    <i class="fa-solid fa-circle"></i>
-                </div>
-
-                <div>
-
-                    <div class="route-label">
-                        Pickup
-                    </div>
-
-                    <div class="route-address">
-                        ${escapeHtml(pickup.text)}
-                    </div>
-
-                </div>
+                <span class="new-badge">
+                    NEW RIDE
+                </span>
 
             </div>
 
-            <div class="route-line"></div>
 
-            <div class="route-row">
+            <div class="customer-name">
+                ${escapeHtml(customer)}
+            </div>
 
-                <div class="route-icon drop-icon">
-                    <i class="fa-solid fa-flag-checkered"></i>
-                </div>
 
-                <div>
+            <div class="route">
 
-                    <div class="route-label">
-                        Drop
+                <div class="route-row">
+
+                    <div class="route-icon pick-icon">
+                        <i class="fa-solid fa-circle"></i>
                     </div>
 
-                    <div class="route-address">
-                        ${escapeHtml(drop.text)}
+                    <div>
+
+                        <div class="route-label">
+                            Pickup
+                        </div>
+
+                        <div class="route-address">
+                            ${escapeHtml(pickup.text)}
+                        </div>
+
                     </div>
 
                 </div>
 
+
+                <div class="route-row">
+
+                    <div class="route-icon drop-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+
+                    <div>
+
+                        <div class="route-label">
+                            Drop
+                        </div>
+
+                        <div class="route-address">
+                            ${escapeHtml(drop.text)}
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
-        </div>
 
-        <div class="request-info">
+            <div class="request-info">
 
-            <div class="request-info-box">
-                <small>TRIP</small>
-                <strong>${distance.toFixed(1)} KM</strong>
+                <div class="request-info-box">
+                    <small>DISTANCE</small>
+                    <strong>
+                        ${distance.toFixed(1)} KM
+                    </strong>
+                </div>
+
+                <div class="request-info-box">
+                    <small>SERVICE</small>
+                    <strong>
+                        ${escapeHtml(service)}
+                    </strong>
+                </div>
+
+                <div class="request-info-box">
+                    <small>PAYMENT</small>
+                    <strong>
+                        ${escapeHtml(
+                            String(
+                                ride.paymentMethod ||
+                                "cash"
+                            ).toUpperCase()
+                        )}
+                    </strong>
+                </div>
+
             </div>
 
-            <div class="request-info-box">
-                <small>PAYMENT</small>
-                <strong>${escapeHtml(payment)}</strong>
-            </div>
 
-            <div class="request-info-box">
-                <small>SERVICE</small>
-                <strong>${escapeHtml(service)}</strong>
-            </div>
+            <div class="earning-box">
 
-        </div>
-
-        <div class="earning-box">
-
-            <div>
                 <div class="earning-label">
-                    Your Ride Earning
+                    Estimated earning
                 </div>
 
-                <div class="earning-label">
-                    ${distance.toFixed(1)} KM trip
+                <div class="earning">
+                    ₹${fare.toFixed(0)}
                 </div>
+
             </div>
 
-            <div class="earning">
-                ₹${fare.toFixed(0)}
+
+            <div class="request-actions">
+
+                <button
+                    id="reject-${escapeHtml(ride.id)}"
+                    class="reject-btn"
+                    type="button">
+                    REJECT
+                </button>
+
+                <button
+                    id="accept-${escapeHtml(ride.id)}"
+                    class="accept"
+                    type="button">
+                    ACCEPT RIDE
+                </button>
+
             </div>
 
         </div>
 
-        <div class="request-actions">
-
-            <button
-                class="reject-btn"
-                data-reject="${escapeHtml(ride.id)}">
-
-                <i class="fa-solid fa-xmark"></i>
-                REJECT
-
-            </button>
-
-            <button
-                class="accept"
-                data-accept="${escapeHtml(ride.id)}">
-
-                <i class="fa-solid fa-check"></i>
-                ACCEPT RIDE
-
-            </button>
-
-        </div>
     `;
 
-    card
-        .querySelector("[data-reject]")
-        .addEventListener(
-            "click",
-            ()=>{
-                rejectedRideIds.add(ride.id);
-                card.remove();
-            }
-        );
-
-    card
-        .querySelector("[data-accept]")
-        .addEventListener(
-            "click",
-            ()=>{
-                acceptRide(ride.id);
-            }
-        );
-
-    return card;
 }
 
+
 /* =========================================================
-   REQUEST MARKER
+   REJECT
 ========================================================= */
 
-function addRequestMarker(ride){
+function rejectRide(
+    rideId
+){
 
-    const pickup =
-        locationData(ride.pickup);
+    rejectedRideIds.add(
+        rideId
+    );
+
+    showToast(
+        "Ride rejected.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   ACCEPT RIDE
+========================================================= */
+
+async function acceptRide(
+    rideId
+){
 
     if(
-        pickup.lat == null ||
-        pickup.lng == null
+        !currentUser ||
+        !rideId
     ){
         return;
     }
 
-    const icon =
-        L.divIcon({
-            className:"",
-            html:`
-                <div style="
-                    width:42px;
-                    height:42px;
-                    border-radius:50%;
-                    background:#FFD600;
-                    border:3px solid #111;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    color:#000;
-                    box-shadow:0 4px 15px rgba(0,0,0,.45);
-                ">
-                    <i class="fa-solid fa-location-dot"></i>
-                </div>
-            `,
-            iconSize:[42,42],
-            iconAnchor:[21,21]
-        });
 
-    const marker =
-        L.marker(
-            [pickup.lat,pickup.lng],
-            {
-                icon,
-                zIndexOffset:500
-            }
-        ).addTo(map);
-
-    const fare =
-        Number(ride.fare || 0);
-
-    const distance =
-        Number(ride.distance || 0);
-
-    marker.bindPopup(`
-        <div style="
-            color:#111;
-            min-width:170px;
-            font-family:Arial;
-        ">
-
-            <strong>RiderX New Ride</strong>
-
-            <br><br>
-
-            <b>Fare:</b>
-            ₹${fare.toFixed(0)}
-
-            <br>
-
-            <b>Trip:</b>
-            ${distance.toFixed(1)} KM
-
-            <br><br>
-
-            <button
-                id="popupAccept"
-                style="
-                    width:100%;
-                    padding:9px;
-                    background:#FFD600;
-                    border:0;
-                    border-radius:8px;
-                    font-weight:bold;
-                ">
-                ACCEPT
-            </button>
-
-        </div>
-    `);
-
-    marker.on("popupopen",()=>{
-        const button =
-            document.getElementById("popupAccept");
-
-        if(button){
-
-            button.onclick = ()=>{
-                acceptRide(ride.id);
-            };
-        }
-    });
-
-    requestMarkers.set(
-        ride.id,
-        marker
+    showLoading(
+        "Accepting ride..."
     );
-}
 
-/* =========================================================
-   CLEAR REQUEST MARKERS
-========================================================= */
-
-function clearRequestMarkers(){
-
-    requestMarkers.forEach(marker=>{
-
-        if(map){
-            map.removeLayer(marker);
-        }
-    });
-
-    requestMarkers.clear();
-}
-
-/* =========================================================
-   ACCEPT RIDE
-   TRANSACTION = prevents two riders accepting same ride
-========================================================= */
-
-async function acceptRide(rideId){
-
-    if(!currentUser){
-
-        showToast(
-            "Please login again.",
-            "error"
-        );
-
-        return;
-    }
-
-    showLoading("Accepting ride...");
 
     try{
 
@@ -2577,7 +2669,9 @@ async function acceptRide(rideId){
                 rideId
             );
 
+
         let acceptedRide = null;
+
 
         await runTransaction(
             db,
@@ -2588,68 +2682,108 @@ async function acceptRide(rideId){
                         rideRef
                     );
 
+
                 if(!snap.exists()){
 
                     throw new Error(
                         "RIDE_NOT_FOUND"
                     );
+
                 }
+
 
                 const ride =
                     snap.data();
 
+
+                const status =
+                    String(
+                        ride.status || ""
+                    ).toLowerCase();
+
+
                 if(
-                    String(ride.status || "").toLowerCase()
-                    !== "searching"
+                    status !== "searching"
                 ){
 
                     throw new Error(
                         "RIDE_ALREADY_TAKEN"
                     );
+
                 }
+
 
                 if(
                     ride.riderId &&
-                    ride.riderId !== currentUser.uid
+                    ride.riderId !==
+                    currentUser.uid
                 ){
 
                     throw new Error(
                         "RIDE_ALREADY_ASSIGNED"
                     );
+
                 }
+
+
+                const riderName =
+                    userData?.name ||
+                    userData?.fullName ||
+                    riderData?.name ||
+                    currentUser.displayName ||
+                    "Rider";
+
+
+                const riderPhone =
+                    userData?.phone ||
+                    riderData?.phone ||
+                    currentUser.phoneNumber ||
+                    "";
+
 
                 transaction.update(
                     rideRef,
                     {
+
                         status:"ACCEPTED",
-                        riderId:currentUser.uid,
-                        riderName:
-                            userData?.name ||
-                            userData?.fullName ||
-                            currentUser.displayName ||
-                            "Rider",
-                        riderPhone:
-                            userData?.phone ||
-                            currentUser.phoneNumber ||
-                            "",
+
+                        riderId:
+                            currentUser.uid,
+
+                        riderName,
+
+                        riderPhone,
+
                         acceptedAt:
                             serverTimestamp()
+
                     }
                 );
+
 
                 acceptedRide = {
                     ...ride,
                     id:rideId,
                     status:"ACCEPTED",
-                    riderId:currentUser.uid
+                    riderId:
+                        currentUser.uid,
+                    riderName,
+                    riderPhone
                 };
+
             }
         );
 
-        activeRideId = rideId;
-        activeRide = acceptedRide;
+
+        activeRideId =
+            rideId;
+
+        activeRide =
+            acceptedRide;
+
 
         stopRequestListener();
+
         clearRequestMarkers();
 
         hideLoading();
@@ -2659,13 +2793,17 @@ async function acceptRide(rideId){
             "success"
         );
 
+
         showActiveRide();
+
         listenActiveRide();
 
-        startNavigation("pickup");
+        startNavigation(
+            "pickup"
+        );
 
-    }
-    catch(error){
+
+    }catch(error){
 
         hideLoading();
 
@@ -2674,118 +2812,40 @@ async function acceptRide(rideId){
             error
         );
 
-        if(error.message === "RIDE_ALREADY_TAKEN"){
+
+        if(
+            error.message ===
+            "RIDE_ALREADY_TAKEN"
+        ){
 
             showToast(
-                "Another rider already accepted this ride.",
+                "Another rider accepted this ride.",
                 "error"
             );
 
-        }
-        else if(error.message === "RIDE_NOT_FOUND"){
+        }else if(
+            error.message ===
+            "RIDE_NOT_FOUND"
+        ){
 
             showToast(
-                "Ride is no longer available.",
+                "Ride no longer exists.",
                 "error"
             );
 
-        }
-        else{
+        }else{
 
             showToast(
                 "Unable to accept ride.",
                 "error"
             );
+
         }
+
     }
+
 }
 
-window.acceptRide = acceptRide;
-
-/* =========================================================
-   FIND ACTIVE RIDE
-========================================================= */
-
-async function findActiveRide(){
-
-    if(!currentUser) return;
-
-    try{
-
-        const q =
-            query(
-                collection(db,"rides"),
-                where(
-                    "riderId",
-                    "==",
-                    currentUser.uid
-                )
-            );
-
-        allRidesListener =
-            onSnapshot(
-                q,
-                snapshot => {
-
-                    let found = null;
-
-                    snapshot.forEach(
-                        snap => {
-
-                            const ride =
-                                snap.data();
-
-                            const status =
-                                String(
-                                    ride.status || ""
-                                ).toUpperCase();
-
-                            if(
-                                status === "ACCEPTED" ||
-                                status === "STARTED"
-                            ){
-
-                                found = {
-                                    id:snap.id,
-                                    ...ride
-                                };
-                            }
-                        }
-                    );
-
-                    if(found){
-
-                        activeRideId =
-                            found.id;
-
-                        activeRide =
-                            found;
-
-                        showActiveRide();
-
-                        listenActiveRide();
-
-                    }
-                    else if(!activeRideId){
-
-                        clearActiveRide();
-                    }
-                },
-                error => {
-
-                    console.error(
-                        "Active ride search:",
-                        error
-                    );
-                }
-            );
-
-    }
-    catch(error){
-
-        console.error(error);
-    }
-}
 
 /* =========================================================
    ACTIVE RIDE LISTENER
@@ -2793,149 +2853,123 @@ async function findActiveRide(){
 
 function listenActiveRide(){
 
-    if(activeRideListener){
+    if(
+        activeRideListener
+    ){
 
         activeRideListener();
-        activeRideListener = null;
+
+        activeRideListener =
+            null;
+
     }
 
-    if(!activeRideId) return;
+
+    if(!activeRideId){
+        return;
+    }
+
 
     activeRideListener =
         onSnapshot(
+
             doc(
                 db,
                 "rides",
                 activeRideId
             ),
+
             snapshot => {
 
                 if(!snapshot.exists()){
 
-                    clearActiveRide();
+                    activeRide = null;
+
+                    activeRideId = null;
+
+                    showRequests();
+
                     return;
+
                 }
 
-                const ride =
-                    snapshot.data();
-
-                if(
-                    ride.riderId !==
-                    currentUser.uid
-                ){
-                    return;
-                }
 
                 activeRide = {
-                    ...ride,
-                    id:activeRideId
+                    ...snapshot.data(),
+                    id:snapshot.id
                 };
 
-                const status =
-                    String(
-                        ride.status || ""
-                    ).toUpperCase();
-
-                if(status === "COMPLETED"){
-
-                    clearActiveRide();
-
-                    showToast(
-                        "Ride completed.",
-                        "success"
-                    );
-
-                    if(isOnline){
-                        listenForRequests();
-                    }
-
-                    return;
-                }
 
                 showActiveRide();
 
-                if(status === "ACCEPTED"){
-
-                    startNavigation("pickup");
-                }
-
-                if(status === "STARTED"){
-
-                    startNavigation("drop");
-                }
             },
+
             error => {
 
                 console.error(
-                    "Active ride listener:",
+                    "Active ride:",
                     error
                 );
+
             }
+
         );
+
 }
+
 
 /* =========================================================
-   CUSTOMER CONTACT DATA
-========================================================= */
-
-function getCustomerName(){
-
-    if(!activeRide) return "Customer";
-
-    return (
-        activeRide.customerName ||
-        activeRide.customer?.name ||
-        activeRide.customer?.fullName ||
-        activeRide.customer?.displayName ||
-        "Customer"
-    );
-}
-
-function getCustomerPhone(){
-
-    if(!activeRide) return "";
-
-    return (
-        activeRide.customerPhone ||
-        activeRide.customer?.phone ||
-        activeRide.customer?.phoneNumber ||
-        activeRide.phone ||
-        ""
-    );
-}
-
-/* =========================================================
-   SHOW ACTIVE RIDE
+   ACTIVE RIDE UI
 ========================================================= */
 
 function showActiveRide(){
 
-    if(!activeRide) return;
+    if(!activeRide){
 
-    activeArea.style.display = "block";
+        showRequests();
 
-    document.getElementById(
-        "requestsArea"
-    ).style.display = "none";
+        return;
+
+    }
+
+
+    requestsArea.style.display =
+        "none";
+
+    activeArea.style.display =
+        "block";
+
+
+    const customer =
+        activeRide.customerName ||
+        activeRide.userName ||
+        activeRide.name ||
+        "Customer";
+
 
     const pickup =
-        locationData(activeRide.pickup);
+        getLocation(
+            activeRide.pickup ||
+            activeRide.pickupLocation
+        );
+
 
     const drop =
-        locationData(activeRide.drop);
+        getLocation(
+            activeRide.dropoff ||
+            activeRide.dropoffLocation ||
+            activeRide.destination
+        );
+
 
     const fare =
-        Number(activeRide.fare || 0);
+        Number(
+            activeRide.fare ||
+            activeRide.estimatedFare ||
+            activeRide.amount ||
+            0
+        );
 
-    const distance =
-        Number(activeRide.distance || 0);
-
-    const service =
-        String(
-            activeRide.serviceType ||
-            activeRide.service ||
-            "bike"
-        ).toUpperCase();
 
     const status =
         String(
@@ -2943,65 +2977,80 @@ function showActiveRide(){
             "ACCEPTED"
         ).toUpperCase();
 
-    const customer =
-        getCustomerName();
 
-    const phone =
-        getCustomerPhone();
+    const statusLower =
+        status.toLowerCase();
 
-    let statusText =
-        status === "STARTED"
-            ? "RIDE STARTED"
-            : "ACCEPTED";
 
-    let buttons = "";
+    let buttons = `
 
-    if(status === "ACCEPTED"){
+        <button
+            id="pickupNavBtn"
+            class="action-btn nav-btn"
+            type="button">
 
-        buttons = `
+            <i class="fa-solid fa-route"></i>
+            PICKUP
+
+        </button>
+
+        <button
+            id="dropNavBtn"
+            class="action-btn nav-btn"
+            type="button">
+
+            <i class="fa-solid fa-location-arrow"></i>
+            DROP
+
+        </button>
+
+    `;
+
+
+    if(
+        statusLower === "accepted" ||
+        statusLower === "arriving"
+    ){
+
+        buttons += `
 
             <button
-                class="action-btn nav-btn"
-                id="pickupNavBtn">
-
-                <i class="fa-solid fa-location-arrow"></i>
-                Pickup Navigation
-
-            </button>
-
-            <button
+                id="startRideBtn"
                 class="action-btn start-btn"
-                id="startRideBtn">
+                type="button">
 
                 <i class="fa-solid fa-play"></i>
-                Start Ride
+                START RIDE
 
             </button>
+
         `;
+
     }
-    else if(status === "STARTED"){
 
-        buttons = `
 
-            <button
-                class="action-btn nav-btn"
-                id="dropNavBtn">
+    if(
+        statusLower === "started" ||
+        statusLower === "in_progress" ||
+        statusLower === "ongoing"
+    ){
 
-                <i class="fa-solid fa-location-arrow"></i>
-                Drop Navigation
-
-            </button>
+        buttons += `
 
             <button
+                id="completeRideBtn"
                 class="action-btn complete-btn"
-                id="completeRideBtn">
+                type="button">
 
-                <i class="fa-solid fa-check-double"></i>
-                Complete Ride
+                <i class="fa-solid fa-flag-checkered"></i>
+                COMPLETE RIDE
 
             </button>
+
         `;
+
     }
+
 
     activeContainer.innerHTML = `
 
@@ -3010,17 +3059,16 @@ function showActiveRide(){
             <div class="active-header">
 
                 <div class="active-title">
-                    <i class="fa-solid fa-motorcycle"></i>
-                    ${escapeHtml(service)} RIDE
+                    Active Ride
                 </div>
 
                 <div class="active-status">
-                    ${escapeHtml(statusText)}
+                    ${escapeHtml(status)}
                 </div>
 
             </div>
 
-            <!-- CUSTOMER -->
+
             <div class="customer-box">
 
                 <div class="customer-avatar">
@@ -3034,28 +3082,30 @@ function showActiveRide(){
                     </strong>
 
                     <small>
-                        RiderX Customer
+                        RiderX customer
                     </small>
 
                 </div>
 
             </div>
 
-            <!-- CALL + CHAT -->
+
             <div class="contact-actions">
 
                 <button
                     id="callCustomerBtn"
-                    class="contact-btn call-btn">
+                    class="contact-btn call-btn"
+                    type="button">
 
                     <i class="fa-solid fa-phone"></i>
-                    CALL CUSTOMER
+                    CALL
 
                 </button>
 
                 <button
                     id="chatCustomerBtn"
-                    class="contact-btn chat-btn">
+                    class="contact-btn chat-btn"
+                    type="button">
 
                     <i class="fa-solid fa-message"></i>
                     CHAT
@@ -3063,6 +3113,7 @@ function showActiveRide(){
                 </button>
 
             </div>
+
 
             <div class="active-route">
 
@@ -3075,7 +3126,7 @@ function showActiveRide(){
                     <div>
 
                         <div class="route-label">
-                            CUSTOMER PICKUP
+                            Pickup
                         </div>
 
                         <div class="route-address">
@@ -3086,18 +3137,17 @@ function showActiveRide(){
 
                 </div>
 
-                <div class="route-line"></div>
 
                 <div class="route-row">
 
                     <div class="route-icon drop-icon">
-                        <i class="fa-solid fa-flag-checkered"></i>
+                        <i class="fa-solid fa-location-dot"></i>
                     </div>
 
                     <div>
 
                         <div class="route-label">
-                            CUSTOMER DROP
+                            Drop
                         </div>
 
                         <div class="route-address">
@@ -3110,39 +3160,10 @@ function showActiveRide(){
 
             </div>
 
-            <div class="request-info">
-
-                <div class="request-info-box">
-                    <small>TRIP</small>
-                    <strong>${distance.toFixed(1)} KM</strong>
-                </div>
-
-                <div class="request-info-box">
-                    <small>PAYMENT</small>
-                    <strong>
-                        ${escapeHtml(
-                            String(
-                                activeRide.paymentMethod ||
-                                "cash"
-                            ).toUpperCase()
-                        )}
-                    </strong>
-                </div>
-
-                <div class="request-info-box">
-                    <small>STATUS</small>
-                    <strong>${escapeHtml(statusText)}</strong>
-                </div>
-
-            </div>
 
             <div class="active-fare">
 
                 <div>
-
-                    <div class="earning-label">
-                        Your Earning
-                    </div>
 
                     <div class="earning-label">
                         Ride Fare
@@ -3156,6 +3177,7 @@ function showActiveRide(){
 
             </div>
 
+
             <div class="active-actions">
 
                 ${buttons}
@@ -3163,79 +3185,90 @@ function showActiveRide(){
             </div>
 
         </div>
+
     `;
 
-    const callButton =
-        document.getElementById(
+
+    document
+        .getElementById(
             "callCustomerBtn"
-        );
-
-    if(callButton){
-
-        callButton.addEventListener(
+        )
+        ?.addEventListener(
             "click",
             callCustomer
         );
-    }
+
 
     document
-        .getElementById("chatCustomerBtn")
+        .getElementById(
+            "chatCustomerBtn"
+        )
         ?.addEventListener(
             "click",
             openChat
         );
 
-    document
-        .getElementById("pickupNavBtn")
-        ?.addEventListener(
-            "click",
-            ()=>startNavigation("pickup")
-        );
 
     document
-        .getElementById("dropNavBtn")
+        .getElementById(
+            "pickupNavBtn"
+        )
         ?.addEventListener(
             "click",
-            ()=>startNavigation("drop")
+            () => startNavigation(
+                "pickup"
+            )
         );
 
+
     document
-        .getElementById("startRideBtn")
+        .getElementById(
+            "dropNavBtn"
+        )
+        ?.addEventListener(
+            "click",
+            () => startNavigation(
+                "drop"
+            )
+        );
+
+
+    document
+        .getElementById(
+            "startRideBtn"
+        )
         ?.addEventListener(
             "click",
             startRide
         );
 
+
     document
-        .getElementById("completeRideBtn")
+        .getElementById(
+            "completeRideBtn"
+        )
         ?.addEventListener(
             "click",
             completeRide
         );
+
 }
+
 
 /* =========================================================
-   CALL CUSTOMER
+   REQUESTS VIEW
 ========================================================= */
 
-function callCustomer(){
+function showRequests(){
 
-    const phone =
-        getCustomerPhone();
+    requestsArea.style.display =
+        "block";
 
-    if(!phone){
+    activeArea.style.display =
+        "none";
 
-        showToast(
-            "Customer phone number is not available.",
-            "error"
-        );
-
-        return;
-    }
-
-    window.location.href =
-        "tel:" + phone;
 }
+
 
 /* =========================================================
    START RIDE
@@ -3243,57 +3276,34 @@ function callCustomer(){
 
 async function startRide(){
 
-    if(!activeRideId || !currentUser){
+    if(
+        !activeRideId ||
+        !currentUser
+    ){
         return;
     }
 
+
+    showLoading(
+        "Starting ride..."
+    );
+
+
     try{
 
-        showLoading(
-            "Starting ride..."
-        );
-
-        const ref =
+        await updateDoc(
             doc(
                 db,
                 "rides",
                 activeRideId
-            );
-
-        const snap =
-            await getDoc(ref);
-
-        if(!snap.exists()){
-
-            hideLoading();
-            return;
-        }
-
-        const ride =
-            snap.data();
-
-        if(
-            ride.riderId !==
-            currentUser.uid
-        ){
-
-            hideLoading();
-
-            showToast(
-                "This ride is not assigned to you.",
-                "error"
-            );
-
-            return;
-        }
-
-        await updateDoc(
-            ref,
+            ),
             {
                 status:"STARTED",
-                startedAt:serverTimestamp()
+                startedAt:
+                    serverTimestamp()
             }
         );
+
 
         hideLoading();
 
@@ -3302,10 +3312,12 @@ async function startRide(){
             "success"
         );
 
-        startNavigation("drop");
 
-    }
-    catch(error){
+        startNavigation(
+            "drop"
+        );
+
+    }catch(error){
 
         hideLoading();
 
@@ -3315,8 +3327,11 @@ async function startRide(){
             "Unable to start ride.",
             "error"
         );
+
     }
+
 }
+
 
 /* =========================================================
    COMPLETE RIDE
@@ -3324,79 +3339,80 @@ async function startRide(){
 
 async function completeRide(){
 
-    if(!activeRideId || !currentUser){
-        return;
-    }
-
     if(
-        !confirm(
-            "Are you sure you want to complete this ride?"
-        )
+        !activeRideId ||
+        !currentUser
     ){
         return;
     }
 
-    try{
 
-        showLoading(
-            "Completing ride..."
+    const confirmed =
+        window.confirm(
+            "Complete this ride?"
         );
 
-        const ref =
+
+    if(!confirmed){
+        return;
+    }
+
+
+    showLoading(
+        "Completing ride..."
+    );
+
+
+    try{
+
+        await updateDoc(
             doc(
                 db,
                 "rides",
                 activeRideId
-            );
-
-        const snap =
-            await getDoc(ref);
-
-        if(!snap.exists()){
-
-            hideLoading();
-            return;
-        }
-
-        const ride =
-            snap.data();
-
-        if(
-            ride.riderId !==
-            currentUser.uid
-        ){
-
-            hideLoading();
-
-            showToast(
-                "This ride is not assigned to you.",
-                "error"
-            );
-
-            return;
-        }
-
-        await updateDoc(
-            ref,
+            ),
             {
                 status:"COMPLETED",
-                completedAt:serverTimestamp()
+                completedAt:
+                    serverTimestamp()
             }
         );
 
-        hideLoading();
 
         stopNavigation();
 
-        closeChat();
+        activeRideId = null;
+
+        activeRide = null;
+
+
+        if(activeRideListener){
+
+            activeRideListener();
+
+            activeRideListener =
+                null;
+
+        }
+
+
+        hideLoading();
+
+        showRequests();
 
         showToast(
             "Ride completed successfully.",
             "success"
         );
 
-    }
-    catch(error){
+
+        if(isOnline){
+
+            listenForRequests();
+
+        }
+
+    }catch(error){
 
         hideLoading();
 
@@ -3406,172 +3422,542 @@ async function completeRide(){
             "Unable to complete ride.",
             "error"
         );
-    }
-}
 
-/* =========================================================
-   CLEAR ACTIVE RIDE
-========================================================= */
-
-function clearActiveRide(){
-
-    activeRideId = null;
-    activeRide = null;
-
-    if(activeRideListener){
-
-        activeRideListener();
-        activeRideListener = null;
     }
 
-    stopNavigation();
-    closeChat();
-
-    activeArea.style.display = "none";
-
-    document.getElementById(
-        "requestsArea"
-    ).style.display = "block";
 }
 
+
 /* =========================================================
-   ROUTING / NAVIGATION
+   CALL CUSTOMER
 ========================================================= */
 
-async function startNavigation(type){
+function getCustomerPhone(){
 
-    if(!activeRide){
+    return (
+        activeRide?.customerPhone ||
+        activeRide?.userPhone ||
+        activeRide?.phone ||
+        ""
+    );
+
+}
+
+
+function callCustomer(){
+
+    const phone =
+        getCustomerPhone();
+
+
+    if(!phone){
 
         showToast(
-            "Active ride not found.",
+            "Customer phone number unavailable.",
             "error"
         );
 
         return;
+
     }
 
-    const destination =
-        type === "pickup"
-            ? locationData(activeRide.pickup)
-            : locationData(activeRide.drop);
+
+    window.location.href =
+        `tel:${phone}`;
+
+}
+
+
+/* =========================================================
+   CHAT
+========================================================= */
+
+function openChat(){
+
+    if(!activeRideId){
+
+        showToast(
+            "No active ride.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const customer =
+        activeRide?.customerName ||
+        activeRide?.userName ||
+        "Customer";
+
+
+    chatCustomerName.textContent =
+        customer;
+
+
+    chatOverlay.classList.add(
+        "show"
+    );
+
+
+    listenChat();
+
+}
+
+
+function closeChat(){
+
+    chatOverlay.classList.remove(
+        "show"
+    );
+
+
+    if(chatListener){
+
+        chatListener();
+
+        chatListener =
+            null;
+
+    }
+
+}
+
+
+chatBack.addEventListener(
+    "click",
+    closeChat
+);
+
+
+chatCall.addEventListener(
+    "click",
+    callCustomer
+);
+
+
+chatSend.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+chatInput.addEventListener(
+    "keydown",
+    event => {
+
+        if(
+            event.key === "Enter"
+        ){
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+function listenChat(){
+
+    if(chatListener){
+
+        chatListener();
+
+        chatListener =
+            null;
+
+    }
+
+
+    if(!activeRideId){
+        return;
+    }
+
+
+    const messagesQuery =
+        query(
+            collection(
+                db,
+                "rides",
+                activeRideId,
+                "messages"
+            ),
+            orderBy(
+                "createdAt",
+                "asc"
+            )
+        );
+
+
+    chatListener =
+        onSnapshot(
+            messagesQuery,
+
+            snapshot => {
+
+                if(snapshot.empty){
+
+                    chatMessages.innerHTML = `
+                        <div class="chat-empty">
+                            Start conversation with customer.
+                        </div>
+                    `;
+
+                    return;
+
+                }
+
+
+                chatMessages.innerHTML =
+                    snapshot.docs
+                        .map(
+                            snap => {
+
+                                const message =
+                                    snap.data();
+
+
+                                const mine =
+                                    message.senderId ===
+                                    currentUser?.uid;
+
+
+                                const time =
+                                    message.createdAt
+                                        ?.toDate
+                                        ?.()
+                                        ?.toLocaleTimeString(
+                                            [],
+                                            {
+                                                hour:"2-digit",
+                                                minute:"2-digit"
+                                            }
+                                        ) || "";
+
+
+                                return `
+
+                                    <div class="
+                                        message
+                                        ${mine ? "mine" : "theirs"}
+                                    ">
+
+                                        ${escapeHtml(
+                                            message.text
+                                        )}
+
+                                        <span class="message-time">
+                                            ${escapeHtml(time)}
+                                        </span>
+
+                                    </div>
+
+                                `;
+
+                            }
+                        )
+                        .join("");
+
+
+                chatMessages.scrollTop =
+                    chatMessages.scrollHeight;
+
+            },
+
+            error => {
+
+                console.error(
+                    "Chat listener:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
+async function sendMessage(){
+
+    const text =
+        chatInput.value.trim();
+
 
     if(
-        destination.lat == null ||
-        destination.lng == null
+        !text ||
+        !activeRideId ||
+        !currentUser
+    ){
+        return;
+    }
+
+
+    chatInput.value = "";
+
+
+    try{
+
+        await addDoc(
+            collection(
+                db,
+                "rides",
+                activeRideId,
+                "messages"
+            ),
+            {
+
+                text,
+
+                senderId:
+                    currentUser.uid,
+
+                senderRole:
+                    "rider",
+
+                senderName:
+                    userData?.name ||
+                    riderData?.name ||
+                    "Rider",
+
+                createdAt:
+                    serverTimestamp()
+
+            }
+        );
+
+    }catch(error){
+
+        console.error(
+            "Send message:",
+            error
+        );
+
+        chatInput.value =
+            text;
+
+        showToast(
+            "Message could not be sent.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+async function startNavigation(
+    type
+){
+
+    if(
+        !activeRide ||
+        !riderLocation
+    ){
+
+        if(!riderLocation){
+
+            requestLocationOnce();
+
+        }
+
+        showToast(
+            "Waiting for your location.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const source =
+        type === "pickup"
+            ? (
+                activeRide.pickup ||
+                activeRide.pickupLocation
+              )
+            : (
+                activeRide.dropoff ||
+                activeRide.dropoffLocation ||
+                activeRide.destination
+              );
+
+
+    const target =
+        getLocation(
+            source
+        );
+
+
+    if(
+        target.lat === null ||
+        target.lng === null
     ){
 
         showToast(
-            "Destination coordinates are missing.",
+            "Destination coordinates unavailable.",
             "error"
         );
 
-        openExternalNavigation(
-            destination
-        );
-
         return;
+
     }
 
+
     navigationTarget = {
-        lat:destination.lat,
-        lng:destination.lng,
-        type
+        lat:Number(target.lat),
+        lng:Number(target.lng)
     };
+
 
     navigationTitle.textContent =
         type === "pickup"
-            ? "NAVIGATING TO CUSTOMER"
-            : "NAVIGATING TO DROP";
+            ? "GO TO PICKUP"
+            : "GO TO DROP";
+
 
     navigationSub.textContent =
-        type === "pickup"
-            ? "Follow the road to customer pickup"
-            : "Follow the road to customer destination";
+        target.text ||
+        "Destination";
 
-    navigationBanner.classList.add("show");
 
-    await drawRoadRoute();
+    navigationBanner.classList.add(
+        "show"
+    );
+
+
+    if(targetMarker){
+
+        map.removeLayer(
+            targetMarker
+        );
+
+    }
+
+
+    targetMarker =
+        L.marker(
+            [
+                navigationTarget.lat,
+                navigationTarget.lng
+            ],
+            {
+                icon:
+                    L.divIcon({
+                        className:"",
+                        html:`
+                            <div style="
+                                width:40px;
+                                height:40px;
+                                border-radius:50%;
+                                display:flex;
+                                align-items:center;
+                                justify-content:center;
+                                background:#000;
+                                color:#FFD600;
+                                border:3px solid #FFD600;
+                                box-shadow:0 5px 18px rgba(0,0,0,.4);
+                                font-size:16px;
+                            ">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                        `,
+                        iconSize:[40,40],
+                        iconAnchor:[20,20]
+                    }),
+                zIndexOffset:900
+            }
+        )
+        .addTo(map);
+
+
+    await drawRoute();
+
 
     updateNavigationDistance();
 
-    if(navigationTimer){
-        clearInterval(navigationTimer);
-    }
-
-    navigationTimer =
-        setInterval(
-            ()=>{
-                drawRoadRoute();
-                updateNavigationDistance();
-            },
-            10000
-        );
 }
 
+
 /* =========================================================
-   ROAD ROUTE USING OSRM
+   ROUTE
 ========================================================= */
 
-async function drawRoadRoute(){
+async function drawRoute(){
 
     if(
-        !map ||
+        !riderLocation ||
         !navigationTarget ||
-        !riderLocation
+        !map
     ){
         return;
     }
 
-    const start =
-        `${riderLocation.lng},${riderLocation.lat}`;
 
-    const end =
-        `${navigationTarget.lng},${navigationTarget.lat}`;
+    if(navigationLine){
 
-    const url =
-        "https://router.project-osrm.org/route/v1/driving/" +
-        start +
-        ";" +
-        end +
-        "?overview=full&geometries=geojson";
+        map.removeLayer(
+            navigationLine
+        );
+
+        navigationLine =
+            null;
+
+    }
+
 
     try{
+
+        const url =
+            `https://router.project-osrm.org/route/v1/driving/` +
+            `${riderLocation.lng},${riderLocation.lat};` +
+            `${navigationTarget.lng},${navigationTarget.lat}` +
+            `?overview=full&geometries=geojson`;
+
 
         const response =
             await fetch(url);
 
+
         if(!response.ok){
-            throw new Error("Routing unavailable");
+            throw new Error(
+                "Routing failed"
+            );
         }
+
 
         const data =
             await response.json();
 
-        if(
-            !data.routes ||
-            !data.routes.length
-        ){
-            throw new Error("No route");
-        }
 
         const route =
-            data.routes[0];
+            data.routes?.[0];
+
+
+        if(!route){
+            throw new Error(
+                "No route"
+            );
+        }
+
 
         const coordinates =
             route.geometry.coordinates.map(
-                point =>
-                    [
-                        point[1],
-                        point[0]
-                    ]
+                point => [
+                    point[1],
+                    point[0]
+                ]
             );
 
-        if(navigationLine){
-
-            map.removeLayer(
-                navigationLine
-            );
-        }
 
         navigationLine =
             L.polyline(
@@ -3579,88 +3965,40 @@ async function drawRoadRoute(){
                 {
                     color:"#FFD600",
                     weight:6,
-                    opacity:.95
+                    opacity:.9
                 }
             ).addTo(map);
 
-        const distanceKm =
-            route.distance / 1000;
-
-        navigationDistance.textContent =
-            distanceKm < 1
-                ? Math.round(
-                    route.distance
-                ) + " m"
-                : distanceKm.toFixed(1) + " km";
-
-        if(targetMarker){
-
-            map.removeLayer(
-                targetMarker
-            );
-        }
-
-        targetMarker =
-            L.marker(
-                [
-                    navigationTarget.lat,
-                    navigationTarget.lng
-                ],
-                {
-                    icon:
-                        L.divIcon({
-                            className:"",
-                            html:`
-                                <div style="
-                                    width:40px;
-                                    height:40px;
-                                    border-radius:50%;
-                                    background:#22c55e;
-                                    border:3px solid #fff;
-                                    display:flex;
-                                    align-items:center;
-                                    justify-content:center;
-                                    color:#000;
-                                    box-shadow:0 4px 15px rgba(0,0,0,.4);
-                                ">
-                                    <i class="fa-solid fa-flag"></i>
-                                </div>
-                            `,
-                            iconSize:[40,40],
-                            iconAnchor:[20,20]
-                        }),
-                    zIndexOffset:900
-                }
-            ).addTo(map);
-
-        const bounds =
-            L.latLngBounds(
-                coordinates
-            );
 
         map.fitBounds(
-            bounds,
+            navigationLine.getBounds(),
             {
-                padding:[70,70],
-                maxZoom:16
+                padding:[80,80],
+                maxZoom:17
             }
         );
 
-    }
-    catch(error){
+
+        navigationDistance.textContent =
+            `${(
+                route.distance / 1000
+            ).toFixed(1)} km`;
+
+
+    }catch(error){
 
         console.warn(
-            "OSRM routing:",
+            "OSRM:",
             error
         );
 
+
         drawStraightLine();
+
     }
+
 }
 
-/* =========================================================
-   FALLBACK STRAIGHT LINE
-========================================================= */
 
 function drawStraightLine(){
 
@@ -3672,12 +4010,15 @@ function drawStraightLine(){
         return;
     }
 
+
     if(navigationLine){
 
         map.removeLayer(
             navigationLine
         );
+
     }
+
 
     navigationLine =
         L.polyline(
@@ -3698,11 +4039,18 @@ function drawStraightLine(){
                 dashArray:"12 8"
             }
         ).addTo(map);
+
+
+    map.fitBounds(
+        navigationLine.getBounds(),
+        {
+            padding:[70,70],
+            maxZoom:16
+        }
+    );
+
 }
 
-/* =========================================================
-   DISTANCE
-========================================================= */
 
 function updateNavigationDistance(){
 
@@ -3713,6 +4061,7 @@ function updateNavigationDistance(){
         return;
     }
 
+
     const distance =
         calculateDistance(
             riderLocation.lat,
@@ -3721,27 +4070,17 @@ function updateNavigationDistance(){
             navigationTarget.lng
         );
 
+
     navigationDistance.textContent =
-        distance < 1
-            ? Math.round(distance * 1000) + " m"
-            : distance.toFixed(1) + " km";
+        `${distance.toFixed(1)} km`;
 
-    if(distance < .05){
-
-        navigationSub.textContent =
-            "You have reached the destination.";
-    }
 }
 
-/* =========================================================
-   STOP NAVIGATION
-========================================================= */
 
 function stopNavigation(){
 
     navigationTarget = null;
 
-    navigationBanner.classList.remove("show");
 
     if(navigationLine){
 
@@ -3749,8 +4088,11 @@ function stopNavigation(){
             navigationLine
         );
 
-        navigationLine = null;
+        navigationLine =
+            null;
+
     }
+
 
     if(targetMarker){
 
@@ -3758,323 +4100,26 @@ function stopNavigation(){
             targetMarker
         );
 
-        targetMarker = null;
+        targetMarker =
+            null;
+
     }
 
-    if(navigationTimer){
 
-        clearInterval(
-            navigationTimer
-        );
-
-        navigationTimer = null;
-    }
-}
-
-/* =========================================================
-   EXTERNAL GOOGLE MAPS FALLBACK
-========================================================= */
-
-function openExternalNavigation(destination){
-
-    if(
-        !destination ||
-        destination.lat == null ||
-        destination.lng == null
-    ){
-        return;
-    }
-
-    const url =
-        "https://www.google.com/maps/dir/?api=1" +
-        "&destination=" +
-        encodeURIComponent(
-            destination.lat +
-            "," +
-            destination.lng
-        );
-
-    window.open(
-        url,
-        "_blank"
-    );
-}
-
-/* =========================================================
-   CHAT OPEN
-========================================================= */
-
-async function openChat(){
-
-    if(!activeRideId){
-
-        showToast(
-            "No active ride.",
-            "error"
-        );
-
-        return;
-    }
-
-    chatOverlay.classList.add("show");
-
-    document.getElementById(
-        "chatCustomerName"
-    ).textContent =
-        getCustomerName();
-
-    loadChatMessages();
-}
-
-/* =========================================================
-   CHAT CLOSE
-========================================================= */
-
-function closeChat(){
-
-    chatOverlay.classList.remove("show");
-
-    if(chatListener){
-
-        chatListener();
-        chatListener = null;
-    }
-}
-
-document
-    .getElementById("chatBack")
-    .addEventListener(
-        "click",
-        closeChat
+    navigationBanner.classList.remove(
+        "show"
     );
 
-/* =========================================================
-   CHAT CALL
-========================================================= */
 
-document
-    .getElementById("chatCall")
-    .addEventListener(
-        "click",
-        callCustomer
+    clearInterval(
+        navigationTimer
     );
 
-/* =========================================================
-   CHAT LISTENER
-========================================================= */
-
-function loadChatMessages(){
-
-    if(!activeRideId) return;
-
-    if(chatListener){
-
-        chatListener();
-        chatListener = null;
-    }
-
-    chatMessages.innerHTML = `
-        <div class="chat-empty">
-            Loading messages...
-        </div>
-    `;
-
-    try{
-
-        const messagesRef =
-            collection(
-                db,
-                "rides",
-                activeRideId,
-                "messages"
-            );
-
-        const q =
-            query(
-                messagesRef,
-                orderBy(
-                    "createdAt",
-                    "asc"
-                )
-            );
-
-        chatListener =
-            onSnapshot(
-                q,
-                snapshot => {
-
-                    if(snapshot.empty){
-
-                        chatMessages.innerHTML = `
-                            <div class="chat-empty">
-                                Start conversation with customer.
-                            </div>
-                        `;
-
-                        return;
-                    }
-
-                    chatMessages.innerHTML = "";
-
-                    snapshot.forEach(
-                        snap => {
-
-                            const message =
-                                snap.data();
-
-                            const mine =
-                                message.senderId ===
-                                currentUser.uid;
-
-                            const div =
-                                document.createElement(
-                                    "div"
-                                );
-
-                            div.className =
-                                "message " +
-                                (
-                                    mine
-                                        ? "mine"
-                                        : "theirs"
-                                );
-
-                            const time =
-                                message.createdAt?.toDate
-                                    ? message.createdAt.toDate()
-                                    : null;
-
-                            div.innerHTML = `
-                                ${escapeHtml(
-                                    message.text || ""
-                                )}
-
-                                <span class="message-time">
-                                    ${
-                                        time
-                                            ? time.toLocaleTimeString(
-                                                [],
-                                                {
-                                                    hour:"2-digit",
-                                                    minute:"2-digit"
-                                                }
-                                            )
-                                            : ""
-                                    }
-                                </span>
-                            `;
-
-                            chatMessages.appendChild(div);
-                        }
-                    );
-
-                    chatMessages.scrollTop =
-                        chatMessages.scrollHeight;
-                },
-                error => {
-
-                    console.error(
-                        "Chat listener:",
-                        error
-                    );
-
-                    chatMessages.innerHTML = `
-                        <div class="chat-empty">
-                            Chat could not be loaded.
-                        </div>
-                    `;
-                }
-            );
-
-    }
-    catch(error){
-
-        console.error(error);
-
-        chatMessages.innerHTML = `
-            <div class="chat-empty">
-                Chat is currently unavailable.
-            </div>
-        `;
-    }
 }
 
-/* =========================================================
-   SEND CHAT
-========================================================= */
-
-document
-    .getElementById("chatSend")
-    .addEventListener(
-        "click",
-        sendMessage
-    );
-
-chatInput.addEventListener(
-    "keydown",
-    event => {
-
-        if(event.key === "Enter"){
-
-            event.preventDefault();
-
-            sendMessage();
-        }
-    }
-);
-
-async function sendMessage(){
-
-    const text =
-        chatInput.value.trim();
-
-    if(!text || !activeRideId || !currentUser){
-        return;
-    }
-
-    chatInput.value = "";
-
-    try{
-
-        await addDoc(
-            collection(
-                db,
-                "rides",
-                activeRideId,
-                "messages"
-            ),
-            {
-                text,
-                senderId:currentUser.uid,
-                senderRole:"rider",
-                senderName:
-                    userData?.name ||
-                    userData?.fullName ||
-                    "Rider",
-                createdAt:
-                    serverTimestamp()
-            }
-        );
-
-    }
-    catch(error){
-
-        console.error(
-            "Send message:",
-            error
-        );
-
-        chatInput.value = text;
-
-        showToast(
-            "Message could not be sent.",
-            "error"
-        );
-    }
-}
 
 /* =========================================================
-   DISTANCE CALCULATOR
+   DISTANCE
 ========================================================= */
 
 function calculateDistance(
@@ -4084,15 +4129,19 @@ function calculateDistance(
     lon2
 ){
 
-    const R = 6371;
+    const R =
+        6371;
+
 
     const dLat =
         (lat2-lat1) *
         Math.PI / 180;
 
+
     const dLon =
         (lon2-lon1) *
         Math.PI / 180;
+
 
     const a =
         Math.sin(dLat/2) *
@@ -4100,18 +4149,17 @@ function calculateDistance(
         +
         Math.cos(
             lat1 *
-            Math.PI /
-            180
+            Math.PI / 180
         )
         *
         Math.cos(
             lat2 *
-            Math.PI /
-            180
+            Math.PI / 180
         )
         *
         Math.sin(dLon/2) *
         Math.sin(dLon/2);
+
 
     const c =
         2 *
@@ -4120,23 +4168,30 @@ function calculateDistance(
             Math.sqrt(1-a)
         );
 
+
     return R*c;
+
 }
+
 
 /* =========================================================
    LOCATION DATA
 ========================================================= */
 
-function locationData(value){
+function getLocation(
+    value
+){
 
     if(!value){
 
         return {
-            text:"Location not available",
+            text:"Location unavailable",
             lat:null,
             lng:null
         };
+
     }
+
 
     if(typeof value === "string"){
 
@@ -4145,7 +4200,9 @@ function locationData(value){
             lat:null,
             lng:null
         };
+
     }
+
 
     const lat =
         value.lat ??
@@ -4153,51 +4210,520 @@ function locationData(value){
         value.coordinates?.lat ??
         null;
 
+
     const lng =
         value.lng ??
         value.longitude ??
         value.coordinates?.lng ??
         null;
 
+
+    const text =
+        value.address ||
+        value.name ||
+        value.text ||
+        value.label ||
+        value.formattedAddress ||
+        "Location";
+
+
     return {
-
-        text:
-            value.address ||
-            value.name ||
-            value.location ||
-            value.formattedAddress ||
-            (
-                lat != null &&
-                lng != null
-                    ? `${lat}, ${lng}`
-                    : "Location not available"
-            ),
-
+        text,
         lat:
-            lat != null
+            lat !== null
                 ? Number(lat)
                 : null,
-
         lng:
-            lng != null
+            lng !== null
                 ? Number(lng)
                 : null
     };
+
 }
+
 
 /* =========================================================
-   ESCAPE HTML
+   REQUEST MARKERS
 ========================================================= */
 
-function escapeHtml(value){
+const requestMarkers =
+    new Map();
 
-    return String(value ?? "")
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
+
+function clearRequestMarkers(){
+
+    requestMarkers.forEach(
+        marker => {
+
+            try{
+
+                map.removeLayer(
+                    marker
+                );
+
+            }catch(e){}
+
+        }
+    );
+
+
+    requestMarkers.clear();
+
 }
+
+
+/* =========================================================
+   SOUND
+========================================================= */
+
+function playRequestSound(){
+
+    try{
+
+        if(!audioContext){
+
+            audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+        }
+
+
+        if(
+            audioContext.state ===
+            "suspended"
+        ){
+
+            audioContext.resume();
+
+        }
+
+
+        const now =
+            audioContext.currentTime;
+
+
+        [0,.18,.36].forEach(
+            (offset,index) => {
+
+                const oscillator =
+                    audioContext.createOscillator();
+
+                const gain =
+                    audioContext.createGain();
+
+
+                oscillator.type =
+                    "sine";
+
+
+                oscillator.frequency.value =
+                    index === 1
+                        ? 880
+                        : 660;
+
+
+                gain.gain.setValueAtTime(
+                    .0001,
+                    now + offset
+                );
+
+
+                gain.gain.exponentialRampToValueAtTime(
+                    .18,
+                    now + offset + .03
+                );
+
+
+                gain.gain.exponentialRampToValueAtTime(
+                    .0001,
+                    now + offset + .15
+                );
+
+
+                oscillator.connect(
+                    gain
+                );
+
+
+                gain.connect(
+                    audioContext.destination
+                );
+
+
+                oscillator.start(
+                    now + offset
+                );
+
+
+                oscillator.stop(
+                    now + offset + .16
+                );
+
+            }
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Sound:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   NAVIGATION BUTTONS
+========================================================= */
+
+function go(
+    page
+){
+
+    window.location.href =
+        page;
+
+}
+
+
+document
+    .getElementById("homeNav")
+    .addEventListener(
+        "click",
+        () => {
+
+            if(
+                map &&
+                riderLocation
+            ){
+
+                map.setView(
+                    [
+                        riderLocation.lat,
+                        riderLocation.lng
+                    ],
+                    16,
+                    {
+                        animate:true
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+document
+    .getElementById("ridesNav")
+    .addEventListener(
+        "click",
+        () => go(
+            "Rides.html"
+        )
+    );
+
+
+document
+    .getElementById("walletNav")
+    .addEventListener(
+        "click",
+        () => go(
+            "Wallet.html"
+        )
+    );
+
+
+document
+    .getElementById("profileNav")
+    .addEventListener(
+        "click",
+        () => go(
+            "Profile.html"
+        )
+    );
+
+
+profileTopBtn.addEventListener(
+    "click",
+    () => go(
+        "Profile.html"
+    )
+);
+
+
+notificationBtn.addEventListener(
+    "click",
+    () => {
+
+        notificationDot.style.display =
+            "none";
+
+        showToast(
+            "Notifications opened.",
+            "success"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(!user){
+
+            window.location.href =
+                "../auth/login.html";
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        await loadUserData();
+
+
+        initMap();
+
+
+        startLocationWatch();
+
+
+        restoreOnlineStatus();
+
+
+    }
+);
+
+
+/* =========================================================
+   USER DATA
+========================================================= */
+
+async function loadUserData(){
+
+    try{
+
+        const userSnap =
+            await getDoc(
+                doc(
+                    db,
+                    "users",
+                    currentUser.uid
+                )
+            );
+
+
+        if(userSnap.exists()){
+
+            userData =
+                userSnap.data();
+
+        }
+
+
+    }catch(error){
+
+        console.warn(
+            "User data:",
+            error
+        );
+
+    }
+
+
+    try{
+
+        const riderSnap =
+            await getDoc(
+                doc(
+                    db,
+                    "riders",
+                    currentUser.uid
+                )
+            );
+
+
+        if(riderSnap.exists()){
+
+            riderData =
+                riderSnap.data();
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Rider data:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RESTORE ONLINE
+========================================================= */
+
+async function restoreOnlineStatus(){
+
+    const online =
+        Boolean(
+            riderData?.isOnline ||
+            userData?.isOnline
+        );
+
+
+    if(
+        online &&
+        !activeRideId
+    ){
+
+        isOnline = true;
+
+        updateOnlineUI();
+
+        listenForRequests();
+
+        requestLocationOnce();
+
+    }else{
+
+        isOnline = false;
+
+        updateOnlineUI();
+
+        showOfflineState();
+
+    }
+
+
+    await restoreActiveRide();
+
+}
+
+
+/* =========================================================
+   RESTORE ACTIVE RIDE
+========================================================= */
+
+async function restoreActiveRide(){
+
+    if(!currentUser){
+        return;
+    }
+
+
+    try{
+
+        const ridesQuery =
+            query(
+                collection(db,"rides"),
+                where(
+                    "riderId",
+                    "==",
+                    currentUser.uid
+                )
+            );
+
+
+        onSnapshot(
+            ridesQuery,
+            snapshot => {
+
+                let found = null;
+
+
+                snapshot.forEach(
+                    snap => {
+
+                        const ride =
+                            snap.data();
+
+
+                        const status =
+                            String(
+                                ride.status ||
+                                ""
+                            ).toLowerCase();
+
+
+                        if(
+                            [
+                                "accepted",
+                                "arriving",
+                                "started",
+                                "in_progress",
+                                "ongoing"
+                            ].includes(
+                                status
+                            )
+                        ){
+
+                            found = {
+                                ...ride,
+                                id:snap.id
+                            };
+
+                        }
+
+                    }
+                );
+
+
+                if(found){
+
+                    activeRideId =
+                        found.id;
+
+                    activeRide =
+                        found;
+
+                    showActiveRide();
+
+                    listenActiveRide();
+
+                }
+
+            },
+            error => {
+
+                console.warn(
+                    "Active ride restore:",
+                    error
+                );
+
+            }
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Restore active ride:",
+            error
+        );
+
+    }
+
+}
+
 
 /* =========================================================
    CLEANUP
@@ -4205,33 +4731,29 @@ function escapeHtml(value){
 
 window.addEventListener(
     "beforeunload",
-    ()=>{
-        stopRequestListener();
-
-        if(activeRideListener){
-            activeRideListener();
-        }
-
-        if(allRidesListener){
-            allRidesListener();
-        }
-
-        if(chatListener){
-            chatListener();
-        }
+    () => {
 
         if(locationWatchId !== null){
 
-            navigator.geolocation?.clearWatch(
+            navigator.geolocation.clearWatch(
                 locationWatchId
             );
+
         }
 
-        stopNavigation();
     }
 );
 
-</script>
 
-</body>
-      </html>
+/* =========================================================
+   INITIAL
+========================================================= */
+
+initMap();
+
+updateOnlineUI();
+
+showOfflineState();
+
+</script></body>
+    </html>
