@@ -7,18 +7,18 @@
 
 <title>RiderX Registration</title>
 
-<meta name="theme-color" content="#050505">
+<meta name="theme-color" content="#000000">
 
 <style>
 
 :root{
     --yellow:#FFE500;
     --black:#050505;
-    --card:#111;
+    --card:#111111;
     --border:#292929;
-    --gray:#999;
+    --gray:#999999;
     --red:#ff5555;
-    --green:#20d66b;
+    --green:#22d66b;
 }
 
 *{
@@ -35,7 +35,7 @@ body{
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:15px;
+    padding:18px;
 }
 
 .box{
@@ -44,7 +44,7 @@ body{
     background:#111;
     border:1px solid #292929;
     border-radius:24px;
-    padding:28px 24px;
+    padding:28px 22px;
     box-shadow:0 20px 70px rgba(0,0,0,.55);
 }
 
@@ -52,6 +52,7 @@ body{
     text-align:center;
     font-size:38px;
     font-weight:900;
+    letter-spacing:-1px;
 }
 
 .logo span{
@@ -63,12 +64,12 @@ body{
     color:var(--yellow);
     font-size:15px;
     font-weight:bold;
-    margin:10px 0 25px;
+    margin:9px 0 25px;
 }
 
 .input{
     width:100%;
-    padding:14px;
+    padding:15px;
     margin:7px 0;
     background:#050505;
     color:#fff;
@@ -80,6 +81,11 @@ body{
 
 .input:focus{
     border-color:var(--yellow);
+}
+
+select.input option{
+    background:#111;
+    color:#fff;
 }
 
 .section{
@@ -133,12 +139,20 @@ body{
     color:#ff7777;
 }
 
+.info{
+    color:#aaa;
+}
+
 .back{
     text-align:center;
     color:#888;
     margin-top:20px;
     font-size:14px;
     cursor:pointer;
+}
+
+.back:hover{
+    color:#fff;
 }
 
 .note{
@@ -153,16 +167,33 @@ body{
     display:none;
 }
 
-.statusBox{
+.debug{
     display:none;
     margin-top:15px;
     padding:12px;
-    border-radius:12px;
     background:#080808;
-    border:1px solid #292929;
-    color:#aaa;
-    font-size:12px;
-    line-height:1.6;
+    border:1px solid #333;
+    border-radius:10px;
+    color:#888;
+    font-size:11px;
+    line-height:1.5;
+    word-break:break-word;
+}
+
+@media(max-width:480px){
+
+    body{
+        padding:10px;
+    }
+
+    .box{
+        padding:24px 17px;
+        border-radius:20px;
+    }
+
+    .logo{
+        font-size:34px;
+    }
 }
 
 </style>
@@ -182,7 +213,9 @@ body{
     </div>
 
 
-    <!-- BASIC DETAILS -->
+    <!-- =====================================================
+         BASIC DETAILS
+    ====================================================== -->
 
     <input
         id="fullName"
@@ -218,7 +251,9 @@ body{
     >
 
 
-    <!-- RIDER DETAILS -->
+    <!-- =====================================================
+         RIDER DETAILS
+    ====================================================== -->
 
     <div id="riderBox">
 
@@ -230,7 +265,6 @@ body{
             id="vehicleType"
             class="input"
         >
-
             <option value="">
                 Select Vehicle Type
             </option>
@@ -242,9 +276,7 @@ body{
             <option value="cab">
                 Cab
             </option>
-
         </select>
-
 
         <input
             id="vehicleNumber"
@@ -253,7 +285,6 @@ body{
             placeholder="Vehicle Number"
             autocomplete="off"
         >
-
 
         <input
             id="licenseNumber"
@@ -265,6 +296,10 @@ body{
 
     </div>
 
+
+    <!-- =====================================================
+         REGISTER BUTTON
+    ====================================================== -->
 
     <button
         id="registerBtn"
@@ -290,8 +325,8 @@ body{
 
 
     <div
-        id="statusBox"
-        class="statusBox"
+        id="debug"
+        class="debug"
     ></div>
 
 
@@ -299,15 +334,12 @@ body{
         id="backBtn"
         class="back"
     >
-        ← Back
+        ← Back to Login
     </div>
 
 
     <div class="note">
-
-        Rider registrations are reviewed by RiderX Admin
-        before activation.
-
+        Rider registrations are reviewed by RiderX Admin before activation.
     </div>
 
 </div>
@@ -315,44 +347,25 @@ body{
 
 <script type="module">
 
-/*
-==============================================================
-RIDERX REGISTRATION
-==============================================================
-
-NO FIREBASE STORAGE USED.
-
-Customer:
-Firebase Auth
-    ↓
-users/{uid}
-    ↓
-customers/{uid}
-
-Rider:
-Firebase Auth
-    ↓
-users/{uid}
-    ↓
-riders/{uid}
-
-==============================================================
-*/
-
+/* ============================================================
+   FIREBASE
+============================================================ */
 
 import {
-
     auth,
-    db,
+    db
+} from "../firebase/firebase-config.js";
 
+import {
     createUserWithEmailAndPassword,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+import {
     doc,
     setDoc,
-
     serverTimestamp
-
-} from "../firebase/firebase-config.js";
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 /* ============================================================
@@ -395,15 +408,15 @@ const loading =
 const message =
     document.getElementById("message");
 
-const statusBox =
-    document.getElementById("statusBox");
+const debug =
+    document.getElementById("debug");
 
 const backBtn =
     document.getElementById("backBtn");
 
 
 /* ============================================================
-   GET ROLE
+   ROLE
 ============================================================ */
 
 const params =
@@ -428,10 +441,6 @@ if(
 
 }
 
-
-/* ============================================================
-   SHOW ROLE
-============================================================ */
 
 if(role === "rider"){
 
@@ -471,28 +480,26 @@ function showMessage(
 
 
 /* ============================================================
-   STATUS
+   DEBUG
 ============================================================ */
 
-function showStatus(text){
+function showDebug(text){
 
-    if(!text){
-
-        statusBox.style.display =
-            "none";
-
-        statusBox.textContent =
-            "";
-
-        return;
-
-    }
-
-    statusBox.style.display =
+    debug.style.display =
         "block";
 
-    statusBox.textContent =
+    debug.textContent =
         text;
+
+}
+
+function hideDebug(){
+
+    debug.style.display =
+        "none";
+
+    debug.textContent =
+        "";
 
 }
 
@@ -509,13 +516,45 @@ function setLoading(
     registerBtn.disabled =
         active;
 
-    loading.style.display =
-        active
-            ? "block"
-            : "none";
+    fullNameInput.disabled =
+        active;
 
-    loading.textContent =
-        text;
+    phoneInput.disabled =
+        active;
+
+    emailInput.disabled =
+        active;
+
+    passwordInput.disabled =
+        active;
+
+    if(role === "rider"){
+
+        vehicleTypeInput.disabled =
+            active;
+
+        vehicleNumberInput.disabled =
+            active;
+
+        licenseNumberInput.disabled =
+            active;
+
+    }
+
+    if(active){
+
+        loading.style.display =
+            "block";
+
+        loading.textContent =
+            text;
+
+    }else{
+
+        loading.style.display =
+            "none";
+
+    }
 
 }
 
@@ -526,7 +565,7 @@ function setLoading(
 
 function validate(){
 
-    const name =
+    const fullName =
         fullNameInput.value.trim();
 
     const phone =
@@ -539,7 +578,7 @@ function validate(){
         passwordInput.value;
 
 
-    if(!name){
+    if(!fullName){
 
         showMessage(
             "❌ Please enter your full name.",
@@ -553,19 +592,45 @@ function validate(){
     }
 
 
-    const phoneDigits =
+    if(fullName.length < 2){
+
+        showMessage(
+            "❌ Please enter a valid name.",
+            "error"
+        );
+
+        fullNameInput.focus();
+
+        return false;
+
+    }
+
+
+    if(!phone){
+
+        showMessage(
+            "❌ Please enter your phone number.",
+            "error"
+        );
+
+        phoneInput.focus();
+
+        return false;
+
+    }
+
+
+    const cleanPhone =
         phone.replace(
             /\D/g,
             ""
         );
 
 
-    if(
-        phoneDigits.length !== 10
-    ){
+    if(cleanPhone.length < 10){
 
         showMessage(
-            "❌ Please enter a valid 10 digit phone number.",
+            "❌ Please enter a valid 10-digit phone number.",
             "error"
         );
 
@@ -590,13 +655,7 @@ function validate(){
     }
 
 
-    const emailPattern =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-    if(
-        !emailPattern.test(email)
-    ){
+    if(!email.includes("@")){
 
         showMessage(
             "❌ Please enter a valid email address.",
@@ -610,9 +669,7 @@ function validate(){
     }
 
 
-    if(
-        password.length < 6
-    ){
+    if(password.length < 6){
 
         showMessage(
             "❌ Password must be at least 6 characters.",
@@ -626,17 +683,13 @@ function validate(){
     }
 
 
-    /*
-    ------------------------------------------------------------
-    RIDER VALIDATION
-    ------------------------------------------------------------
-    */
+    /* ========================================================
+       RIDER VALIDATION
+    ====================================================== */
 
     if(role === "rider"){
 
-        if(
-            !vehicleTypeInput.value
-        ){
+        if(!vehicleTypeInput.value){
 
             showMessage(
                 "❌ Please select vehicle type.",
@@ -693,17 +746,17 @@ function validate(){
    FIREBASE ERROR
 ============================================================ */
 
-function getFirebaseError(error){
+function firebaseErrorMessage(error){
 
     console.error(
-        "RIDERX FIREBASE ERROR:",
+        "RiderX Firebase Error:",
         error
     );
 
 
     if(!error){
 
-        return "Unknown registration error.";
+        return "Unknown Firebase error.";
 
     }
 
@@ -712,31 +765,27 @@ function getFirebaseError(error){
 
         case "auth/email-already-in-use":
 
-            return "This email is already registered. Please login instead.";
+            return "This email is already registered.";
 
         case "auth/invalid-email":
 
             return "Invalid email address.";
 
-        case "auth/missing-password":
-
-            return "Please enter a password.";
-
         case "auth/weak-password":
 
-            return "Password must contain at least 6 characters.";
+            return "Password is too weak. Use at least 6 characters.";
 
         case "auth/network-request-failed":
 
-            return "Network error. Please check your internet connection.";
+            return "Network error. Check your internet connection.";
 
         case "auth/operation-not-allowed":
 
-            return "Email/password authentication is disabled in Firebase.";
+            return "Email/Password login is disabled in Firebase Authentication.";
 
-        case "auth/user-disabled":
+        case "auth/admin-restricted-operation":
 
-            return "This account has been disabled.";
+            return "Firebase Authentication operation is restricted.";
 
         case "auth/too-many-requests":
 
@@ -744,15 +793,19 @@ function getFirebaseError(error){
 
         case "permission-denied":
 
-            return "Firestore permission denied. Please check Firestore Rules.";
+            return "Firestore permission denied.";
 
         case "failed-precondition":
 
-            return "Firebase configuration or Firestore setup problem.";
+            return "Firebase operation failed because a required condition is missing.";
 
         case "unavailable":
 
-            return "Firebase is temporarily unavailable. Try again.";
+            return "Firebase service is temporarily unavailable.";
+
+        case "unauthenticated":
+
+            return "Firebase authentication session is not available.";
 
         default:
 
@@ -770,7 +823,7 @@ function getFirebaseError(error){
 
             return (
                 error.message ||
-                "Registration failed."
+                "Unknown Firebase error."
             );
 
     }
@@ -779,262 +832,7 @@ function getFirebaseError(error){
 
 
 /* ============================================================
-   CUSTOMER REGISTRATION
-============================================================ */
-
-async function createCustomerProfile(
-    firebaseUser
-){
-
-    const uid =
-        firebaseUser.uid;
-
-
-    const name =
-        fullNameInput.value.trim();
-
-    const phone =
-        phoneInput.value.trim();
-
-    const email =
-        emailInput.value
-            .trim()
-            .toLowerCase();
-
-
-    const customerData = {
-
-        uid: uid,
-
-        name: name,
-
-        fullName: name,
-
-        phone: phone,
-
-        email: email,
-
-        role: "customer",
-
-        userType: "customer",
-
-        status: "active",
-
-        accountStatus: "active",
-
-        approved: true,
-
-        isApproved: true,
-
-        online: false,
-
-        isOnline: false,
-
-        createdAt:
-            serverTimestamp(),
-
-        updatedAt:
-            serverTimestamp()
-
-    };
-
-
-    /*
-    ------------------------------------------------------------
-    USERS
-    ------------------------------------------------------------
-    */
-
-    setLoading(
-        true,
-        "Creating customer profile..."
-    );
-
-
-    await setDoc(
-        doc(
-            db,
-            "users",
-            uid
-        ),
-        customerData
-    );
-
-
-    /*
-    ------------------------------------------------------------
-    CUSTOMERS
-    ------------------------------------------------------------
-    */
-
-    setLoading(
-        true,
-        "Saving customer account..."
-    );
-
-
-    await setDoc(
-        doc(
-            db,
-            "customers",
-            uid
-        ),
-        customerData
-    );
-
-}
-
-
-/* ============================================================
-   RIDER REGISTRATION
-============================================================ */
-
-async function createRiderProfile(
-    firebaseUser
-){
-
-    const uid =
-        firebaseUser.uid;
-
-
-    const name =
-        fullNameInput.value.trim();
-
-    const phone =
-        phoneInput.value.trim();
-
-    const email =
-        emailInput.value
-            .trim()
-            .toLowerCase();
-
-
-    const vehicleType =
-        vehicleTypeInput.value;
-
-    const vehicleNumber =
-        vehicleNumberInput.value
-            .trim()
-            .toUpperCase();
-
-    const licenseNumber =
-        licenseNumberInput.value
-            .trim()
-            .toUpperCase();
-
-
-    const riderData = {
-
-        uid: uid,
-
-        name: name,
-
-        fullName: name,
-
-        phone: phone,
-
-        email: email,
-
-        role: "rider",
-
-        userType: "rider",
-
-        status: "pending",
-
-        approvalStatus: "pending",
-
-        riderStatus: "pending",
-
-        verificationStatus: "pending",
-
-        accountStatus: "pending",
-
-        approved: false,
-
-        isApproved: false,
-
-        online: false,
-
-        isOnline: false,
-
-        vehicleType:
-            vehicleType,
-
-        vehicleNumber:
-            vehicleNumber,
-
-        licenseNumber:
-            licenseNumber,
-
-        applicationSubmitted:
-            true,
-
-        registrationCompleted:
-            true,
-
-        documentsSubmitted:
-            false,
-
-        documentsUploaded:
-            false,
-
-        createdAt:
-            serverTimestamp(),
-
-        updatedAt:
-            serverTimestamp()
-
-    };
-
-
-    /*
-    ------------------------------------------------------------
-    USERS
-    ------------------------------------------------------------
-    */
-
-    setLoading(
-        true,
-        "Creating rider profile..."
-    );
-
-
-    await setDoc(
-        doc(
-            db,
-            "users",
-            uid
-        ),
-        riderData
-    );
-
-
-    /*
-    ------------------------------------------------------------
-    RIDERS
-    ------------------------------------------------------------
-    */
-
-    setLoading(
-        true,
-        "Saving rider application..."
-    );
-
-
-    await setDoc(
-        doc(
-            db,
-            "riders",
-            uid
-        ),
-        riderData
-    );
-
-}
-
-
-/* ============================================================
-   MAIN REGISTRATION
+   REGISTER
 ============================================================ */
 
 async function registerAccount(){
@@ -1046,11 +844,11 @@ async function registerAccount(){
     }
 
 
+    hideDebug();
+
     showMessage("");
 
-    showStatus("");
-
-
+    
     if(!validate()){
 
         return;
@@ -1058,27 +856,33 @@ async function registerAccount(){
     }
 
 
+    const fullName =
+        fullNameInput.value.trim();
+
+    const phone =
+        phoneInput.value.trim();
+
     const email =
-        emailInput.value
-            .trim()
-            .toLowerCase();
+        emailInput.value.trim().toLowerCase();
 
     const password =
         passwordInput.value;
 
 
+    let firebaseUser =
+        null;
+
+
     try{
 
-        /*
-        ========================================================
-        STEP 1
-        FIREBASE AUTH
-        ========================================================
-        */
+        /* ====================================================
+           STEP 1
+           CREATE FIREBASE AUTH ACCOUNT
+        ==================================================== */
 
         setLoading(
             true,
-            "Creating Firebase account..."
+            "1/3 Creating Firebase account..."
         );
 
 
@@ -1090,65 +894,155 @@ async function registerAccount(){
             );
 
 
-        const firebaseUser =
+        firebaseUser =
             result.user;
 
 
         if(!firebaseUser){
 
             throw new Error(
-                "Firebase account was not returned."
+                "Firebase account was not created."
             );
 
         }
 
 
+        const uid =
+            firebaseUser.uid;
+
+
         console.log(
             "RiderX Auth account created:",
-            firebaseUser.uid
+            uid
         );
 
 
-        /*
-        ========================================================
-        STEP 2
-        CUSTOMER
-        ========================================================
-        */
+        /* ====================================================
+           STEP 2
+           CREATE USER DOCUMENT
+        ==================================================== */
+
+        setLoading(
+            true,
+            "2/3 Saving RiderX user profile..."
+        );
+
+
+        const commonData = {
+
+            uid: uid,
+
+            name: fullName,
+
+            fullName: fullName,
+
+            phone: phone,
+
+            email: email,
+
+            role: role,
+
+            userType: role,
+
+            createdAt:
+                serverTimestamp(),
+
+            updatedAt:
+                serverTimestamp(),
+
+            online: false,
+
+            isOnline: false
+
+        };
+
 
         if(role === "customer"){
 
-            await createCustomerProfile(
-                firebaseUser
+            const customerData = {
+
+                ...commonData,
+
+                role: "customer",
+
+                userType: "customer",
+
+                status: "active",
+
+                accountStatus: "active",
+
+                approved: true,
+
+                isApproved: true
+
+            };
+
+
+            /*
+             * Main users document
+             */
+
+            await setDoc(
+                doc(
+                    db,
+                    "users",
+                    uid
+                ),
+                customerData
             );
 
+
+            console.log(
+                "RiderX users/customer created:",
+                uid
+            );
+
+
+            /*
+             * Customer document
+             */
+
+            await setDoc(
+                doc(
+                    db,
+                    "customers",
+                    uid
+                ),
+                customerData
+            );
+
+
+            console.log(
+                "RiderX customers document created:",
+                uid
+            );
+
+
+            /* =================================================
+               SUCCESS CUSTOMER
+            ================================================= */
 
             showMessage(
-                "✅ Account created successfully!",
+                "✅ Customer account created successfully!",
                 "success"
-            );
-
-
-            showStatus(
-                "Your RiderX customer account is ready. Opening Customer Home..."
             );
 
 
             setLoading(
                 true,
-                "Opening RiderX..."
+                "Opening Customer Home..."
             );
 
 
             setTimeout(
-                function(){
+                () => {
 
                     window.location.replace(
                         "../customer/home.html"
                     );
 
                 },
-                1000
+                800
             );
 
 
@@ -1157,226 +1051,93 @@ async function registerAccount(){
         }
 
 
-        /*
-        ========================================================
-        STEP 3
-        RIDER
-        ========================================================
-        */
+        /* ====================================================
+           RIDER
+        ==================================================== */
 
-        await createRiderProfile(
-            firebaseUser
-        );
+        const riderData = {
 
+            ...commonData,
 
-        showMessage(
-            "✅ Rider registration submitted successfully!",
-            "success"
-        );
+            role: "rider",
 
+            userType: "rider",
 
-        showStatus(
-            "Your rider application is pending Admin approval. Documents can be added later when Firebase Storage is enabled."
-        );
+            status: "pending",
 
+            accountStatus: "pending",
 
-        setLoading(
-            true,
-            "Opening Rider..."
-        );
+            approvalStatus: "pending",
 
+            riderStatus: "pending",
 
-        setTimeout(
-            function(){
+            verificationStatus: "pending",
 
-                /*
-                ------------------------------------------------
-                TRY PENDING PAGE
-                ------------------------------------------------
-                */
+            approved: false,
 
-                window.location.replace(
-                    "../rider/pending.html"
-                );
+            isApproved: false,
 
-            },
-            1200
-        );
+            applicationSubmitted: true,
 
-    }
-    catch(error){
+            registrationCompleted: true,
 
-        console.error(
-            "RIDERX REGISTRATION ERROR:",
-            error
-        );
+            documentsSubmitted: false,
 
+            vehicleType:
+                vehicleTypeInput.value,
 
-        setLoading(
-            false
-        );
+            vehicleNumber:
+                vehicleNumberInput.value
+                    .trim()
+                    .toUpperCase(),
 
+            licenseNumber:
+                licenseNumberInput.value
+                    .trim()
+                    .toUpperCase()
 
-        showMessage(
-            "❌ " +
-            getFirebaseError(error),
-            "error"
-        );
+        };
 
 
         /*
-        --------------------------------------------------------
-        TECHNICAL INFORMATION
-        --------------------------------------------------------
-        */
+         * Main users document
+         */
 
-        if(error.code){
-
-            showStatus(
-                "Firebase error code: " +
-                error.code +
-                "\n\n" +
-                (
-                    error.message ||
-                    "No additional Firebase message."
-                )
-            );
-
-        }else{
-
-            showStatus(
-                error.message ||
-                "Unknown error."
-            );
-
-        }
-
-    }
-
-}
-
-
-/* ============================================================
-   REGISTER BUTTON
-============================================================ */
-
-registerBtn.addEventListener(
-    "click",
-    registerAccount
-);
-
-
-/* ============================================================
-   ENTER KEY
-============================================================ */
-
-const enterInputs = [
-
-    fullNameInput,
-    phoneInput,
-    emailInput,
-    passwordInput,
-    vehicleNumberInput,
-    licenseNumberInput
-
-];
-
-
-enterInputs.forEach(
-    function(input){
-
-        if(!input){
-
-            return;
-
-        }
-
-
-        input.addEventListener(
-            "keydown",
-            function(event){
-
-                if(
-                    event.key ===
-                    "Enter"
-                ){
-
-                    event.preventDefault();
-
-                    registerAccount();
-
-                }
-
-            }
+        await setDoc(
+            doc(
+                db,
+                "users",
+                uid
+            ),
+            riderData
         );
 
-    }
-);
+
+        console.log(
+            "RiderX users/rider created:",
+            uid
+        );
 
 
-/* ============================================================
-   BACK
-============================================================ */
+        /*
+         * Rider document
+         */
 
-backBtn.addEventListener(
-    "click",
-    function(){
-
-        if(
-            window.history.length > 1
-        ){
-
-            window.history.back();
-
-        }else{
-
-            window.location.replace(
-                "../index.html"
-            );
-
-        }
-
-    }
-);
+        await setDoc(
+            doc(
+                db,
+                "riders",
+                uid
+            ),
+            riderData
+        );
 
 
-/* ============================================================
-   PAGE READY
-============================================================ */
+        console.log(
+            "RiderX riders document created:",
+            uid
+        );
 
-console.log(
-    "================================"
-);
 
-console.log(
-    "RiderX Registration Loaded"
-);
-
-console.log(
-    "Role:",
-    role
-);
-
-console.log(
-    "Firebase Auth:",
-    !!auth
-);
-
-console.log(
-    "Firestore:",
-    !!db
-);
-
-console.log(
-    "Storage:",
-    "NOT REQUIRED"
-);
-
-console.log(
-    "================================"
-);
-
-</script>
-
-</body>
-</html>
+        /* ====================================================
+          
