@@ -1,88 +1,89 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>RiderX Captain | Verification Pending</title>
-    
-    <!-- CSS & Frameworks -->
+
     <link rel="stylesheet" href="../css/Style.css">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script>
         tailwind.config = {
-            darkMode: 'class',
+            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
                         brand: {
-                            black: '#090A0F',
-                            dark: '#12141C',
-                            card: '#1A1D29',
-                            yellow: '#FFE500',
-                            yellowDark: '#CCA800',
-                            gray: '#8A8F9E',
-                            border: '#2A2E3D',
-                            emerald: '#10B981',
-                            rose: '#F43F5E',
-                            amber: '#F59E0B',
-                            blue: '#3B82F6'
+                            black: "#090A0F",
+                            dark: "#12141C",
+                            card: "#1A1D29",
+                            yellow: "#FFE500",
+                            gray: "#8A8F9E",
+                            border: "#2A2E3D",
+                            emerald: "#10B981",
+                            rose: "#F43F5E",
+                            amber: "#F59E0B"
                         }
                     },
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
+                        sans: ["Plus Jakarta Sans", "Inter", "sans-serif"]
                     }
                 }
             }
-        }
+        };
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
     <style>
         body {
-            background-color: #090A0F;
-            color: #FFFFFF;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            background: #090A0F;
+            color: #fff;
+            font-family: "Plus Jakarta Sans", sans-serif;
             overflow-x: hidden;
         }
 
         .glass-card {
-            background: linear-gradient(135deg, rgba(26, 29, 41, 0.92) 0%, rgba(18, 20, 28, 0.98) 100%);
+            background: linear-gradient(
+                135deg,
+                rgba(26, 29, 41, .94),
+                rgba(18, 20, 28, .98)
+            );
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 229, 0, 0.12);
+            border: 1px solid rgba(255, 229, 0, .12);
         }
 
-        .glass-card-interactive {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .glass-card-interactive:hover {
-            border-color: rgba(255, 229, 0, 0.35);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 28px -6px rgba(255, 229, 0, 0.12);
-        }
-
-        /* Radar Scanning Radar Animation */
         .radar-spinner {
             position: relative;
-            width: 130px;
-            height: 130px;
+            width: 125px;
+            height: 125px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255, 229, 0, 0.15) 0%, rgba(9, 10, 15, 0) 70%);
-            border: 2px solid rgba(255, 229, 0, 0.2);
+            background: radial-gradient(
+                circle,
+                rgba(255, 229, 0, .15),
+                rgba(9, 10, 15, 0) 70%
+            );
+            border: 2px solid rgba(255, 229, 0, .2);
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .radar-spinner::before {
-            content: '';
+            content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             border-radius: 50%;
             border: 2px solid transparent;
             border-top-color: #FFE500;
@@ -91,735 +92,1748 @@
 
         .radar-pulse {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             border-radius: 50%;
-            background: rgba(255, 229, 0, 0.1);
+            background: rgba(255, 229, 0, .1);
             animation: pulseWave 2.2s ease-out infinite;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes pulseWave {
-            0% { transform: scale(0.8); opacity: 0.8; }
-            100% { transform: scale(1.6); opacity: 0; }
-        }
+            from {
+                transform: scale(.8);
+                opacity: .8;
+            }
 
-        /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #12141C;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #2A2E3D;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #FFE500;
+            to {
+                transform: scale(1.6);
+                opacity: 0;
+            }
         }
 
         .modal-backdrop {
-            background-color: rgba(9, 10, 15, 0.85);
+            background: rgba(9, 10, 15, .88);
             backdrop-filter: blur(8px);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #12141C;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #2A2E3D;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #FFE500;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between custom-scrollbar">
 
-    <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-brand-black/90 backdrop-blur-md border-b border-brand-border/60 px-4 lg:px-8 py-3.5">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            
-            <div class="flex items-center gap-3">
-                <a href="../index.html" class="flex items-center gap-2">
-                    <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-8 w-auto object-contain" onerror="this.src='https://via.placeholder.com/120x35/090A0F/FFE500?text=RiderX+Captain'">
-                </a>
-                <span class="text-[10px] bg-brand-yellow/10 text-brand-yellow px-2.5 py-1 rounded-full font-bold border border-brand-yellow/20 hidden sm:inline-block uppercase tracking-wider">
-                    Captain Onboarding
+<body class="min-h-screen flex flex-col custom-scrollbar">
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="sticky top-0 z-40 bg-brand-black/95 backdrop-blur-md
+               border-b border-brand-border px-4 lg:px-8 py-3.5">
+
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+
+        <a href="../index.html"
+           class="flex items-center gap-2">
+
+            <img
+                src="../assets/Logo/RiderX-logo.png"
+                alt="RiderX"
+                class="h-8 w-auto object-contain"
+                onerror="this.style.display='none';">
+
+            <span class="font-black text-lg">
+                RID<span class="text-brand-yellow">ERX</span>
+            </span>
+        </a>
+
+        <div class="flex items-center gap-2">
+
+            <button
+                onclick="checkRiderStatusManual()"
+                id="refreshBtn"
+                class="px-3 py-2 rounded-xl bg-brand-dark
+                       border border-brand-border text-xs font-bold
+                       hover:border-brand-yellow">
+
+                <i id="refreshIcon"
+                   class="fa-solid fa-rotate mr-1"></i>
+
+                <span class="hidden sm:inline">
+                    Refresh
                 </span>
+            </button>
+
+            <button
+                onclick="handleRiderLogout()"
+                class="px-3 py-2 rounded-xl
+                       bg-rose-500/10
+                       border border-rose-500/30
+                       text-rose-400 text-xs font-bold">
+
+                <i class="fa-solid fa-right-from-bracket mr-1"></i>
+
+                <span class="hidden sm:inline">
+                    Logout
+                </span>
+            </button>
+
+        </div>
+    </div>
+</header>
+
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
+
+<main class="flex-grow max-w-5xl w-full mx-auto px-4 lg:px-8 py-8 space-y-6">
+
+    <!-- STATUS CARD -->
+
+    <section class="glass-card p-6 sm:p-8 rounded-3xl">
+
+        <div class="flex flex-col md:flex-row
+                    items-center justify-between gap-7">
+
+            <div class="flex flex-col sm:flex-row
+                        items-center sm:items-start
+                        text-center sm:text-left gap-4">
+
+                <div class="relative">
+
+                    <img
+                        id="riderProfilePhoto"
+                        src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F"
+                        alt="Rider"
+                        class="w-20 h-20 sm:w-24 sm:h-24
+                               rounded-2xl object-cover
+                               border-2 border-brand-yellow">
+
+                    <span
+                        class="absolute -bottom-1 -right-1
+                               w-6 h-6 rounded-full
+                               bg-amber-500
+                               border-2 border-brand-black
+                               flex items-center justify-center
+                               text-black text-[10px]">
+
+                        <i class="fa-solid fa-clock"></i>
+
+                    </span>
+
+                </div>
+
+                <div>
+
+                    <div class="flex flex-wrap
+                                items-center
+                                justify-center
+                                sm:justify-start gap-2">
+
+                        <h1
+                            id="riderWelcomeName"
+                            class="text-xl sm:text-2xl font-black">
+
+                            Welcome, Captain!
+
+                        </h1>
+
+                        <span
+                            id="approvalBadge"
+                            class="px-2.5 py-1 rounded-full
+                                   bg-amber-500/10
+                                   text-amber-400
+                                   border border-amber-500/30
+                                   text-[10px] font-bold">
+
+                            PENDING APPROVAL
+
+                        </span>
+
+                    </div>
+
+                    <p
+                        id="statusMessage"
+                        class="text-xs text-brand-gray
+                               max-w-md mt-2">
+
+                        Your RiderX captain application is under review.
+
+                    </p>
+
+                    <p
+                        id="riderDocIdText"
+                        class="text-[11px] text-brand-yellow
+                               font-mono font-semibold mt-2">
+
+                        Captain ID:
+                        <span class="text-white">
+                            VERIFYING...
+                        </span>
+
+                    </p>
+
+                </div>
+
             </div>
+
+
+            <div class="flex flex-col items-center">
+
+                <div class="radar-spinner">
+
+                    <div class="radar-pulse"></div>
+
+                    <i class="fa-solid fa-shield-halved
+                              text-brand-yellow text-3xl z-10"></i>
+
+                </div>
+
+                <span
+                    class="text-[10px] font-bold
+                           text-brand-gray
+                           uppercase tracking-widest mt-2">
+
+                    Auto Check Active
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         VERIFICATION
+    ====================================================== -->
+
+    <section class="glass-card p-6 rounded-3xl">
+
+        <div class="flex items-center justify-between
+                    border-b border-brand-border pb-4">
+
+            <div>
+
+                <h2 class="text-sm font-extrabold uppercase">
+                    <i class="fa-solid fa-bars-staggered
+                              text-brand-yellow mr-2"></i>
+
+                    Verification Status
+                </h2>
+
+                <p class="text-xs text-brand-gray mt-1">
+                    Your account verification progress
+                </p>
+
+            </div>
+
+            <span
+                id="progressPercentText"
+                class="text-brand-yellow
+                       font-mono font-bold text-sm">
+
+                75%
+
+            </span>
+
+        </div>
+
+
+        <div class="mt-5">
+
+            <div
+                class="w-full h-3 bg-brand-dark
+                       rounded-full overflow-hidden
+                       border border-brand-border">
+
+                <div
+                    id="progressBarFill"
+                    class="h-full rounded-full
+                           bg-brand-yellow"
+                    style="width:75%;">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="grid grid-cols-1 sm:grid-cols-2
+                    lg:grid-cols-4 gap-4 mt-6">
+
+            <div class="bg-brand-dark p-4 rounded-2xl
+                        border border-emerald-500/30">
+
+                <div class="text-emerald-400 text-xl">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+
+                <p class="text-[10px] text-emerald-400
+                          font-bold uppercase mt-2">
+
+                    Step 1
+
+                </p>
+
+                <h3 class="text-xs font-bold mt-1">
+                    Registration
+                </h3>
+
+            </div>
+
+
+            <div class="bg-brand-dark p-4 rounded-2xl
+                        border border-emerald-500/30">
+
+                <div class="text-emerald-400 text-xl">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+
+                <p class="text-[10px] text-emerald-400
+                          font-bold uppercase mt-2">
+
+                    Step 2
+
+                </p>
+
+                <h3 class="text-xs font-bold mt-1">
+                    Documents
+                </h3>
+
+            </div>
+
+
+            <div class="bg-brand-dark p-4 rounded-2xl
+                        border border-amber-500/40">
+
+                <div class="text-amber-400 text-xl">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                </div>
+
+                <p class="text-[10px] text-amber-400
+                          font-bold uppercase mt-2">
+
+                    Step 3
+
+                </p>
+
+                <h3 class="text-xs font-bold mt-1">
+                    Admin Review
+                </h3>
+
+            </div>
+
+
+            <div class="bg-brand-dark p-4 rounded-2xl
+                        border border-brand-border opacity-60">
+
+                <div class="text-brand-gray text-xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+
+                <p class="text-[10px] text-brand-gray
+                          font-bold uppercase mt-2">
+
+                    Step 4
+
+                </p>
+
+                <h3 class="text-xs font-bold mt-1">
+                    Activation
+                </h3>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DOCUMENTS
+    ====================================================== -->
+
+    <section class="glass-card p-6 rounded-3xl">
+
+        <div class="flex flex-col sm:flex-row
+                    justify-between gap-3
+                    border-b border-brand-border pb-4">
+
+            <div>
+
+                <h2 class="text-sm font-extrabold uppercase">
+
+                    <i class="fa-solid fa-file-shield
+                              text-brand-yellow mr-2"></i>
+
+                    Document Verification
+
+                </h2>
+
+                <p class="text-xs text-brand-gray mt-1">
+                    Documents submitted with your rider application
+                </p>
+
+            </div>
+
+            <div class="flex gap-2">
+
+                <button
+                    onclick="openDocumentsModal()"
+                    class="px-3 py-2 rounded-xl
+                           bg-brand-dark
+                           border border-brand-border
+                           text-xs font-bold">
+
+                    <i class="fa-solid fa-eye
+                              text-brand-yellow mr-1"></i>
+
+                    View
+
+                </button>
+
+                <button
+                    onclick="openEditDocsModal()"
+                    class="px-3 py-2 rounded-xl
+                           bg-brand-yellow
+                           text-black
+                           text-xs font-bold">
+
+                    <i class="fa-solid fa-pen mr-1"></i>
+
+                    Update
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="documentsGrid"
+            class="grid grid-cols-1
+                   sm:grid-cols-2
+                   md:grid-cols-3
+                   gap-3 mt-5">
+
+        </div>
+
+    </section>
+
+
+    <!-- SUPPORT -->
+
+    <section class="glass-card p-6 rounded-3xl">
+
+        <h3 class="text-sm font-extrabold uppercase">
+
+            <i class="fa-solid fa-headset
+                      text-brand-yellow mr-2"></i>
+
+            Need Help?
+
+        </h3>
+
+        <p class="text-xs text-brand-gray mt-2">
+            If your verification is taking longer than expected,
+            contact RiderX support.
+        </p>
+
+        <div class="flex flex-wrap gap-2 mt-4">
+
+            <a
+                href="../support.html"
+                class="px-4 py-2.5 rounded-xl
+                       bg-brand-dark
+                       border border-brand-border
+                       text-xs font-bold">
+
+                Open Support
+
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- =========================================================
+     DOCUMENT VIEW MODAL
+========================================================= -->
+
+<div
+    id="viewDocsModal"
+    class="fixed inset-0 z-50
+           flex items-center justify-center
+           p-4 modal-backdrop hidden">
+
+    <div
+        class="glass-card max-w-2xl w-full
+               rounded-2xl p-6
+               max-h-[90vh]
+               flex flex-col">
+
+        <div
+            class="flex items-center justify-between
+                   border-b border-brand-border pb-3">
+
+            <h3 class="font-bold text-sm">
+                Submitted Documents
+            </h3>
+
+            <button
+                onclick="closeDocumentsModal()"
+                class="text-brand-gray hover:text-white">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+        <div
+            id="docsListModalContainer"
+            class="overflow-y-auto
+                   custom-scrollbar
+                   space-y-3 mt-4">
+
+        </div>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     EDIT DOCUMENT MODAL
+========================================================= -->
+
+<div
+    id="editDocsModal"
+    class="fixed inset-0 z-50
+           flex items-center justify-center
+           p-4 modal-backdrop hidden">
+
+    <div
+        class="glass-card max-w-lg w-full
+               rounded-2xl p-6">
+
+        <div
+            class="flex items-center justify-between
+                   border-b border-brand-border pb-3">
+
+            <h3 class="font-bold text-sm">
+                Update Document
+            </h3>
+
+            <button
+                onclick="closeEditDocsModal()"
+                class="text-brand-gray">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <form
+            id="editDocForm"
+            class="space-y-4 mt-5">
+
+            <div>
+
+                <label
+                    class="text-[10px] text-brand-gray
+                           font-bold uppercase">
+
+                    Document
+
+                </label>
+
+                <select
+                    id="selectDocType"
+                    required
+                    class="w-full mt-1
+                           bg-brand-dark
+                           border border-brand-border
+                           rounded-xl px-3 py-3
+                           text-xs text-white">
+
+                    <option value="drivingLicense">
+                        Driving License
+                    </option>
+
+                    <option value="rc">
+                        Vehicle RC
+                    </option>
+
+                    <option value="vehiclePhoto">
+                        Vehicle Photo
+                    </option>
+
+                    <option value="insurance">
+                        Insurance
+                    </option>
+
+                    <option value="aadhaar">
+                        National ID
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div>
+
+                <label
+                    class="text-[10px] text-brand-gray
+                           font-bold uppercase">
+
+                    New File
+
+                </label>
+
+                <input
+                    type="file"
+                    id="inputDocFile"
+                    accept="image/*,application/pdf"
+                    required
+                    class="w-full mt-1
+                           bg-brand-dark
+                           border border-brand-border
+                           rounded-xl p-2 text-xs">
+
+            </div>
+
+
+            <p class="text-[10px] text-brand-gray">
+                Maximum file size: 5MB.
+            </p>
+
+
+            <button
+                type="submit"
+                id="docUploadSubmitBtn"
+                class="w-full py-3
+                       rounded-xl
+                       bg-brand-yellow
+                       text-black
+                       font-extrabold
+                       text-xs">
+
+                Upload Document
+
+            </button>
+
+        </form>
+
+    </div>
+</div>
+
+
+<!-- =========================================================
+     FIREBASE PAGE SCRIPT
+========================================================= -->
+
+<script type="module">
+
+import {
+    auth,
+    db,
+    storage
+} from "../firebase/firebase-config.js";
+
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+import {
+    doc,
+    getDoc,
+    onSnapshot,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+import {
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+
+let currentUser = null;
+let riderData = null;
+let unsubscribeRider = null;
+let statusTimer = null;
+let redirecting = false;
+
+
+/* ==========================================================
+   AUTH CHECK
+========================================================== */
+
+onAuthStateChanged(auth, async (user) => {
+
+    if (!user) {
+
+        redirectToLogin();
+
+        return;
+    }
+
+    currentUser = user;
+
+    await loadRider(user.uid);
+
+    subscribeRider(user.uid);
+
+    startStatusPolling(user.uid);
+
+});
+
+
+/* ==========================================================
+   LOGIN REDIRECT
+========================================================== */
+
+function redirectToLogin() {
+
+    if (redirecting) return;
+
+    redirecting = true;
+
+    /*
+     * Current RiderX structure:
+     * auth/rider-login.html
+     *
+     * If this file does not exist in your project,
+     * next we will fix the actual login file.
+     */
+
+    window.location.replace("../auth/rider-login.html");
+}
+
+
+/* ==========================================================
+   LOAD RIDER
+========================================================== */
+
+async function loadRider(uid) {
+
+    try {
+
+        const riderRef = doc(db, "riders", uid);
+
+        const snap = await getDoc(riderRef);
+
+        if (!snap.exists()) {
+
+            showMissingRider();
+
+            return;
+        }
+
+        riderData = snap.data();
+
+        handleRiderStatus(riderData, uid);
+
+    } catch (error) {
+
+        console.error("Rider load error:", error);
+
+    }
+
+}
+
+
+/* ==========================================================
+   REALTIME RIDER LISTENER
+========================================================== */
+
+function subscribeRider(uid) {
+
+    const riderRef = doc(db, "riders", uid);
+
+    unsubscribeRider = onSnapshot(
+        riderRef,
+
+        (snap) => {
+
+            if (!snap.exists()) {
+
+                showMissingRider();
+
+                return;
+            }
+
+            riderData = snap.data();
+
+            handleRiderStatus(riderData, uid);
+
+        },
+
+        (error) => {
+
+            console.error(
+                "Rider realtime error:",
+                error
+            );
+
+        }
+    );
+
+}
+
+
+/* ==========================================================
+   STATUS POLLING
+========================================================== */
+
+function startStatusPolling(uid) {
+
+    if (statusTimer) {
+        clearInterval(statusTimer);
+    }
+
+    statusTimer = setInterval(
+        () => checkRiderStatus(uid),
+        10000
+    );
+
+}
+
+
+async function checkRiderStatus(uid) {
+
+    try {
+
+        const snap =
+            await getDoc(
+                doc(db, "riders", uid)
+            );
+
+        if (!snap.exists()) return;
+
+        riderData = snap.data();
+
+        handleRiderStatus(
+            riderData,
+            uid
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Status check error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================================
+   HANDLE APPROVAL
+========================================================== */
+
+function handleRiderStatus(data, uid) {
+
+    /*
+     * Supports both old and new fields:
+     *
+     * adminApproved
+     * approved
+     * status
+     */
+
+    const approved =
+        data.adminApproved === true ||
+        data.approved === true ||
+        data.status === "approved" ||
+        data.status === "active";
+
+    const rejected =
+        data.rejected === true ||
+        data.status === "rejected";
+
+    if (approved) {
+
+        stopTimers();
+
+        window.location.replace(
+            "../rider/Home.html"
+        );
+
+        return;
+    }
+
+
+    if (rejected) {
+
+        renderRejected(data, uid);
+
+        return;
+    }
+
+
+    renderRiderDetails(data, uid);
+
+}
+
+
+/* ==========================================================
+   RENDER RIDER
+========================================================== */
+
+function renderRiderDetails(data, uid) {
+
+    const name =
+        data.fullName ||
+        data.name ||
+        "Captain";
+
+
+    document.getElementById(
+        "riderWelcomeName"
+    ).textContent =
+        `Welcome, ${name}!`;
+
+
+    const photo =
+        data.photoURL ||
+        data.profilePhoto ||
+        data.photo ||
+        "";
+
+
+    if (photo) {
+
+        document.getElementById(
+            "riderProfilePhoto"
+        ).src = photo;
+
+    } else {
+
+        document.getElementById(
+            "riderProfilePhoto"
+        ).src =
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=FFE500&color=090A0F`;
+
+    }
+
+
+    document.getElementById(
+        "riderDocIdText"
+    ).innerHTML =
+        `Captain ID:
+         <span class="text-white">
+         ${uid.substring(0, 12).toUpperCase()}
+         </span>`;
+
+
+    const badge =
+        document.getElementById(
+            "approvalBadge"
+        );
+
+    badge.textContent =
+        "PENDING APPROVAL";
+
+
+    badge.className =
+        "px-2.5 py-1 rounded-full " +
+        "bg-amber-500/10 text-amber-400 " +
+        "border border-amber-500/30 " +
+        "text-[10px] font-bold";
+
+
+    document.getElementById(
+        "statusMessage"
+    ).textContent =
+        data.adminMessage ||
+        data.rejectionReason ||
+        "Your RiderX captain application is currently under review.";
+
+
+    renderDocuments(data);
+
+}
+
+
+/* ==========================================================
+   REJECTED
+========================================================== */
+
+function renderRejected(data, uid) {
+
+    document.getElementById(
+        "approvalBadge"
+    ).textContent =
+        "APPLICATION REJECTED";
+
+
+    document.getElementById(
+        "approvalBadge"
+    ).className =
+        "px-2.5 py-1 rounded-full " +
+        "bg-rose-500/10 text-rose-400 " +
+        "border border-rose-500/30 " +
+        "text-[10px] font-bold";
+
+
+    document.getElementById(
+        "statusMessage"
+    ).textContent =
+        data.rejectionReason ||
+        data.adminMessage ||
+        "Your application requires changes before approval.";
+
+    renderRiderDetails(
+        {
+            ...data,
+            adminApproved: false
+        },
+        uid
+    );
+
+}
+
+
+/* ==========================================================
+   DOCUMENT RENDER
+========================================================== */
+
+function renderDocuments(data) {
+
+    const docs =
+        data.documents || {};
+
+
+    const items = [
+
+        {
+            key: "profilePhoto",
+            title: "Profile Photo",
+            value:
+                data.photoURL ||
+                data.profilePhoto ||
+                docs.profilePhoto
+        },
+
+        {
+            key: "drivingLicense",
+            title: "Driving License",
+            value:
+                docs.drivingLicense ||
+                data.license
+        },
+
+        {
+            key: "rc",
+            title: "Vehicle RC",
+            value:
+                docs.rc ||
+                data.rc
+        },
+
+        {
+            key: "vehiclePhoto",
+            title: "Vehicle Photo",
+            value:
+                docs.vehiclePhoto ||
+                data.vehiclePhoto
+        },
+
+        {
+            key: "insurance",
+            title: "Vehicle Insurance",
+            value:
+                docs.insurance ||
+                data.insurance
+        },
+
+        {
+            key: "aadhaar",
+            title: "National ID",
+            value:
+                docs.aadhaar ||
+                data.aadhaar
+        }
+
+    ];
+
+
+    const grid =
+        document.getElementById(
+            "documentsGrid"
+        );
+
+    grid.innerHTML = "";
+
+
+    let uploadedCount = 0;
+
+
+    items.forEach(item => {
+
+        if (item.value) {
+            uploadedCount++;
+        }
+
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "bg-brand-dark p-4 rounded-2xl " +
+            "border border-brand-border " +
+            "flex items-center justify-between";
+
+
+        card.innerHTML = `
 
             <div class="flex items-center gap-3">
-                <!-- Notifications Bell Dropdown Toggle -->
-                <div class="relative">
-                    <button onclick="toggleNotificationsModal()" class="w-9 h-9 rounded-xl bg-brand-dark border border-brand-border flex items-center justify-center text-brand-gray hover:text-brand-yellow hover:border-brand-yellow/40 transition">
-                        <i class="fa-solid fa-bell text-sm"></i>
-                        <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-brand-yellow"></span>
-                    </button>
+
+                <div class="w-9 h-9 rounded-xl
+                            bg-brand-black
+                            flex items-center justify-center
+                            text-brand-yellow">
+
+                    <i class="fa-solid fa-file"></i>
+
                 </div>
 
-                <!-- Refresh Button -->
-                <button onclick="checkRiderStatusManual()" id="refreshBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs font-bold text-white hover:border-brand-yellow hover:text-brand-yellow transition">
-                    <i class="fa-solid fa-rotate text-xs" id="refreshIcon"></i>
-                    <span class="hidden sm:inline">Refresh Status</span>
-                </button>
-
-                <!-- Logout Button -->
-                <button onclick="handleRiderLogout()" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs font-bold text-rose-400 hover:bg-rose-500/20 transition">
-                    <i class="fa-solid fa-right-from-bracket text-xs"></i>
-                    <span class="hidden sm:inline">Logout</span>
-                </button>
-            </div>
-
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="flex-grow max-w-5xl w-full mx-auto px-4 lg:px-8 py-8 space-y-6">
-
-        <!-- Welcome Banner + Status Card -->
-        <div class="glass-card p-6 sm:p-8 rounded-3xl relative overflow-hidden border-brand-yellow/20">
-            <div class="absolute -right-16 -top-16 w-64 h-64 bg-brand-yellow/5 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6 z-10 relative">
-                
-                <!-- Profile Avatar & Details -->
-                <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4">
-                    <div class="relative">
-                        <img id="riderProfilePhoto" src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F" alt="Rider Photo" class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border-2 border-brand-yellow shadow-xl">
-                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 border-2 border-brand-black flex items-center justify-center text-brand-black text-[10px]">
-                            <i class="fa-solid fa-clock"></i>
-                        </span>
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex items-center justify-center sm:justify-start gap-2">
-                            <h1 id="riderWelcomeName" class="text-xl sm:text-2xl font-black text-white">Welcome, Captain!</h1>
-                            <span class="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-extrabold uppercase tracking-wider">
-                                Pending Approval
-                            </span>
-                        </div>
-                        <p class="text-xs text-brand-gray max-w-md">Your captain application has been received and is currently under priority review by our compliance team.</p>
-                        <p class="text-[11px] text-brand-yellow font-mono font-semibold pt-1" id="riderDocIdText">
-                            Captain ID: <span class="text-white">VERIFYING...</span>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Radar Scan Animation -->
-                <div class="flex flex-col items-center justify-center text-center space-y-2">
-                    <div class="radar-spinner">
-                        <div class="radar-pulse"></div>
-                        <i class="fa-solid fa-shield-halved text-brand-yellow text-3xl z-10"></i>
-                    </div>
-                    <span class="text-[10px] font-bold text-brand-gray uppercase tracking-widest">Live Auto-Check</span>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Verification Progress Tracker -->
-        <div class="glass-card p-6 rounded-3xl space-y-6">
-            
-            <div class="flex items-center justify-between border-b border-brand-border/60 pb-4">
                 <div>
-                    <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-bars-staggered text-brand-yellow"></i> Verification Timeline
-                    </h2>
-                    <p class="text-xs text-brand-gray mt-0.5">Step 3 of 4 is currently in progress</p>
-                </div>
-                <div class="text-right">
-                    <span class="text-xs font-mono font-bold text-brand-yellow" id="estApprovalTime">Est. 2 to 6 Hours</span>
-                    <p class="text-[10px] text-brand-gray">Expected Completion</p>
-                </div>
-            </div>
 
-            <!-- Overall Progress Bar -->
-            <div class="space-y-2">
-                <div class="flex justify-between text-xs font-bold">
-                    <span class="text-white">Onboarding Completion</span>
-                    <span class="text-brand-yellow font-mono" id="progressPercentText">75%</span>
-                </div>
-                <div class="w-full h-3 bg-brand-dark rounded-full border border-brand-border/80 overflow-hidden p-0.5">
-                    <div id="progressBarFill" class="h-full bg-gradient-to-r from-amber-500 to-brand-yellow rounded-full transition-all duration-700 ease-out" style="width: 75%;"></div>
-                </div>
-            </div>
+                    <h4 class="text-xs font-bold">
+                        ${escapeHtml(item.title)}
+                    </h4>
 
-            <!-- Timeline Steps Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-                
-                <!-- Step 1 -->
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-emerald-500/30 flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold text-sm">
-                        <i class="fa-solid fa-check"></i>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block">Step 1</span>
-                        <h3 class="text-xs font-extrabold text-white">Registration Completed</h3>
-                        <p class="text-[10px] text-brand-gray mt-0.5">Profile created successfully</p>
-                    </div>
-                </div>
+                    <span class="text-[10px]
+                                 ${item.value
+                                     ? "text-emerald-400"
+                                     : "text-amber-400"}
+                                 font-bold">
 
-                <!-- Step 2 -->
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-emerald-500/30 flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 font-bold text-sm">
-                        <i class="fa-solid fa-check"></i>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block">Step 2</span>
-                        <h3 class="text-xs font-extrabold text-white">Documents Uploaded</h3>
-                        <p class="text-[10px] text-brand-gray mt-0.5">All required credentials submitted</p>
-                    </div>
-                </div>
+                        ${item.value
+                            ? "Uploaded"
+                            : "Pending Upload"}
 
-                <!-- Step 3 -->
-                <div class="bg-brand-dark/80 p-4 rounded-2xl border border-amber-500/50 shadow-lg shadow-amber-500/5 flex items-start gap-3 relative overflow-hidden">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 font-bold text-sm animate-pulse">
-                        <i class="fa-solid fa-spinner fa-spin"></i>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-amber-400 font-extrabold uppercase tracking-wider block">Step 3</span>
-                        <h3 class="text-xs font-extrabold text-white">Admin Verification</h3>
-                        <p class="text-[10px] text-brand-gray mt-0.5">In Progress by Compliance</p>
-                    </div>
-                </div>
+                    </span>
 
-                <!-- Step 4 -->
-                <div class="bg-brand-dark/40 p-4 rounded-2xl border border-brand-border/60 flex items-start gap-3 opacity-60">
-                    <div class="w-8 h-8 rounded-xl bg-brand-border text-brand-gray flex items-center justify-center shrink-0 font-bold text-sm">
-                        4
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-brand-gray font-extrabold uppercase tracking-wider block">Step 4</span>
-                        <h3 class="text-xs font-extrabold text-white">Account Activation</h3>
-                        <p class="text-[10px] text-brand-gray mt-0.5">Ready to accept trip requests</p>
-                    </div>
                 </div>
 
             </div>
 
-        </div>
+            <i class="fa-solid
+                ${item.value
+                    ? "fa-circle-check text-emerald-400"
+                    : "fa-clock text-amber-400"}
+                text-sm"></i>
+        `;
 
-        <!-- Document Verification Grid -->
-        <div class="glass-card p-6 rounded-3xl space-y-4">
-            
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-brand-border/60 pb-4">
-                <div>
-                    <h2 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-file-shield text-brand-yellow"></i> Document Audit Status
-                    </h2>
-                    <p class="text-xs text-brand-gray">Status of documents submitted during captain registration</p>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <button onclick="openDocumentsModal()" class="px-3.5 py-2 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center gap-2">
-                        <i class="fa-solid fa-eye text-brand-yellow"></i> View Uploads
-                    </button>
-                    <button onclick="openEditDocsModal()" class="px-3.5 py-2 rounded-xl bg-brand-yellow text-brand-black text-xs font-extrabold hover:bg-yellow-300 transition flex items-center gap-2">
-                        <i class="fa-solid fa-pen-to-square"></i> Update / Edit
-                    </button>
-                </div>
+
+        grid.appendChild(card);
+
+    });
+
+
+    const progress =
+        Math.min(
+            95,
+            Math.round(
+                40 +
+                uploadedCount * 8
+            )
+        );
+
+
+    document.getElementById(
+        "progressPercentText"
+    ).textContent =
+        progress + "%";
+
+
+    document.getElementById(
+        "progressBarFill"
+    ).style.width =
+        progress + "%";
+
+}
+
+
+/* ==========================================================
+   VIEW DOCUMENTS
+========================================================== */
+
+window.openDocumentsModal = function() {
+
+    const container =
+        document.getElementById(
+            "docsListModalContainer"
+        );
+
+    container.innerHTML = "";
+
+
+    const data =
+        riderData || {};
+
+
+    const docs =
+        data.documents || {};
+
+
+    const items = [
+
+        {
+            title: "Profile Photo",
+            url:
+                data.photoURL ||
+                data.profilePhoto ||
+                docs.profilePhoto
+        },
+
+        {
+            title: "Driving License",
+            url:
+                docs.drivingLicense ||
+                data.license
+        },
+
+        {
+            title: "Vehicle RC",
+            url:
+                docs.rc ||
+                data.rc
+        },
+
+        {
+            title: "Vehicle Photo",
+            url:
+                docs.vehiclePhoto ||
+                data.vehiclePhoto
+        },
+
+        {
+            title: "Insurance",
+            url:
+                docs.insurance ||
+                data.insurance
+        },
+
+        {
+            title: "National ID",
+            url:
+                docs.aadhaar ||
+                data.aadhaar
+        }
+
+    ];
+
+
+    items.forEach(item => {
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "bg-brand-dark p-4 rounded-xl " +
+            "border border-brand-border " +
+            "flex items-center justify-between gap-3";
+
+
+        div.innerHTML = `
+
+            <div>
+
+                <p class="text-xs font-bold">
+                    ${escapeHtml(item.title)}
+                </p>
+
+                <p class="text-[10px] text-brand-gray">
+                    ${item.url
+                        ? "File uploaded"
+                        : "Not uploaded"}
+                </p>
+
             </div>
 
-            <!-- Documents Checklist Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="documentsGrid">
-                
-                <!-- Profile Photo -->
-                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
-                            <i class="fa-solid fa-user-circle"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Profile Photo</h4>
-                            <span id="status-photo" class="text-[10px] text-emerald-400 font-bold">Uploaded & Verified</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
-                </div>
+            ${
+                item.url
+                ?
+                `<a
+                    href="${safeUrl(item.url)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="px-3 py-2 rounded-lg
+                           bg-brand-yellow/10
+                           text-brand-yellow
+                           text-[10px] font-bold">
+                    View
+                </a>`
+                :
+                `<span class="text-[10px]
+                              text-amber-400
+                              font-bold">
+                    Missing
+                </span>`
+            }
 
-                <!-- Driving License -->
-                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
-                            <i class="fa-solid fa-id-card"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Driving License</h4>
-                            <span id="status-license" class="text-[10px] text-amber-400 font-bold">Under Review</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
-                </div>
+        `;
 
-                <!-- RC -->
-                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
-                            <i class="fa-solid fa-car-rear"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Vehicle RC</h4>
-                            <span id="status-rc" class="text-[10px] text-amber-400 font-bold">Under Review</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
-                </div>
 
-                <!-- Vehicle Photo -->
-                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
-                            <i class="fa-solid fa-camera"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Vehicle Photo</h4>
-                            <span id="status-vehicle" class="text-[10px] text-amber-400 font-bold">Under Review</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
-                </div>
+        container.appendChild(div);
 
-                <!-- Insurance -->
-                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
-                            <i class="fa-solid fa-file-contract"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">Vehicle Insurance</h4>
-                            <span id="status-insurance" class="text-[10px] text-amber-400 font-bold">Under Review</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
-                </div>
+    });
 
-                <!-- Aadhaar Identification -->
-                <div class="bg-brand-dark/80 p-3.5 rounded-2xl border border-brand-border/60 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-brand-black border border-brand-border flex items-center justify-center text-brand-yellow">
-                            <i class="fa-solid fa-address-card"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-extrabold text-white">National ID Proof</h4>
-                            <span id="status-aadhaar" class="text-[10px] text-amber-400 font-bold">Under Review</span>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-spinner fa-spin text-amber-400 text-sm"></i>
-                </div>
 
-            </div>
+    document.getElementById(
+        "viewDocsModal"
+    ).classList.remove("hidden");
 
-        </div>
+};
 
-        <!-- Tips While Waiting & Support Box -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            <!-- Pro Tips (2 Columns) -->
-            <div class="md:col-span-2 glass-card p-6 rounded-3xl space-y-4">
-                <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-lightbulb text-brand-yellow"></i> Pro Tips While You Wait
-                </h3>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
-                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
-                            <i class="fa-solid fa-mobile-screen"></i> Keep Phone Ready
-                        </div>
-                        <p class="text-brand-gray text-[11px]">Ensure your registered phone line is active for compliance verification calls if needed.</p>
-                    </div>
+window.closeDocumentsModal = function() {
 
-                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
-                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
-                            <i class="fa-solid fa-shield-cat"></i> Clean Vehicle
-                        </div>
-                        <p class="text-brand-gray text-[11px]">Prepare your vehicle clean & sanitized to maintain high initial captain rating scores.</p>
-                    </div>
+    document.getElementById(
+        "viewDocsModal"
+    ).classList.add("hidden");
 
-                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
-                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
-                            <i class="fa-solid fa-route"></i> Know Hotspots
-                        </div>
-                        <p class="text-brand-gray text-[11px]">Familiarize with peak demand zones near airport, railway station and tech parks.</p>
-                    </div>
+};
 
-                    <div class="bg-brand-dark/60 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
-                        <div class="text-brand-yellow font-extrabold flex items-center gap-1.5">
-                            <i class="fa-solid fa-building-columns"></i> Bank Account
-                        </div>
-                        <p class="text-brand-gray text-[11px]">Keep your bank passbook/UPI ready for instantaneous payout setups after activation.</p>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Support & Assistance Box -->
-            <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
-                <div class="space-y-2">
-                    <h3 class="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-headset text-brand-yellow"></i> Need Assistance?
-                    </h3>
-                    <p class="text-xs text-brand-gray">Have questions about your pending verification? Connect with RiderX Captain Support 24/7.</p>
-                </div>
+/* ==========================================================
+   EDIT MODAL
+========================================================== */
 
-                <div class="space-y-2 pt-2">
-                    <a href="tel:+18001234567" class="w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-white transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-phone text-brand-yellow"></i> Call Onboarding Desk
-                    </a>
-                    <button onclick="openFaqModal()" class="w-full py-2.5 rounded-xl bg-brand-dark border border-brand-border hover:border-brand-yellow text-xs font-bold text-brand-gray hover:text-white transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-circle-question"></i> View Captain FAQs
-                    </button>
-                </div>
-            </div>
+window.openEditDocsModal = function() {
 
-        </div>
+    document.getElementById(
+        "editDocsModal"
+    ).classList.remove("hidden");
 
-    </main>
+};
 
-    <!-- Modal 1: View Documents Modal -->
-    <div id="viewDocsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="glass-card max-w-2xl w-full rounded-2xl p-6 space-y-5 border-brand-yellow/30 shadow-2xl max-h-[90vh] flex flex-col">
-            <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-file-contract text-brand-yellow"></i> Submitted Documents
-                </h3>
-                <button onclick="closeDocumentsModal()" class="text-brand-gray hover:text-white">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
-            </div>
 
-            <div class="overflow-y-auto custom-scrollbar space-y-4 pr-1 flex-grow" id="docsListModalContainer">
-                <!-- Dynamic Injection -->
-            </div>
-        </div>
-    </div>
+window.closeEditDocsModal = function() {
 
-    <!-- Modal 2: Edit / Update Documents Modal -->
-    <div id="editDocsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="glass-card max-w-lg w-full rounded-2xl p-6 space-y-5 border-brand-yellow/30 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-brand-yellow"></i> Re-upload Document
-                </h3>
-                <button onclick="closeEditDocsModal()" class="text-brand-gray hover:text-white">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
-            </div>
+    document.getElementById(
+        "editDocsModal"
+    ).classList.add("hidden");
 
-            <form id="editDocForm" onsubmit="handleDocReupload(event)" class="space-y-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-brand-gray uppercase">Select Document to Replace</label>
-                    <select id="selectDocType" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-yellow">
-                        <option value="drivingLicense">Driving License</option>
-                        <option value="rc">Vehicle RC</option>
-                        <option value="vehiclePhoto">Vehicle Photo</option>
-                        <option value="insurance">Insurance Policy</option>
-                        <option value="aadhaar">National ID Proof</option>
-                    </select>
-                </div>
+};
 
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold text-brand-gray uppercase">Upload Clear Image / PDF</label>
-                    <input type="file" id="inputDocFile" accept="image/*,application/pdf" required class="w-full bg-brand-dark border border-brand-border rounded-xl px-3.5 py-2 text-xs text-brand-gray file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-brand-yellow file:text-brand-black hover:file:bg-yellow-300">
-                </div>
 
-                <div class="text-[10px] text-brand-gray bg-brand-dark/40 p-3 rounded-lg border border-brand-border/40">
-                    Ensure document image is clear, unblurred, and all four corners are visible. Max file size: 5MB.
-                </div>
+/* ==========================================================
+   REAL FILE RE-UPLOAD
+========================================================== */
 
-                <button type="submit" id="docUploadSubmitBtn" class="w-full py-3 rounded-xl bg-brand-yellow text-brand-black font-extrabold text-xs hover:bg-yellow-300 transition uppercase tracking-wider">
-                    Submit Updated Document
-                </button>
-            </form>
-        </div>
-    </div>
+document.getElementById(
+    "editDocForm"
+).addEventListener(
+    "submit",
+    async function(event) {
 
-    <!-- Modal 3: Notifications Modal -->
-    <div id="notificationsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="glass-card max-w-md w-full rounded-2xl p-6 space-y-4 border-brand-yellow/30 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-bell text-brand-yellow"></i> Onboarding Updates
-                </h3>
-                <button onclick="toggleNotificationsModal()" class="text-brand-gray hover:text-white">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
-            </div>
+        event.preventDefault();
 
-            <div class="space-y-3">
-                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-white">Application Received</span>
-                        <span class="text-[9px] text-brand-gray">Just now</span>
-                    </div>
-                    <p class="text-[11px] text-brand-gray">Your documents are undergoing initial automated compliance scanning.</p>
-                </div>
 
-                <div class="bg-brand-dark/80 p-3 rounded-xl border border-brand-border/60 space-y-1">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-brand-yellow">Welcome to RiderX</span>
-                        <span class="text-[9px] text-brand-gray">10m ago</span>
-                    </div>
-                    <p class="text-[11px] text-brand-gray">Thanks for registering as a RiderX Captain! Verification is fast and automated.</p>
-                </div>
-            </div>
-        </div>
-    </div>
+        if (!currentUser) {
 
-    <!-- Modal 4: FAQ Modal -->
-    <div id="faqModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop hidden">
-        <div class="glass-card max-w-lg w-full rounded-2xl p-6 space-y-4 border-brand-yellow/30 shadow-2xl max-h-[85vh] flex flex-col">
-            <div class="flex items-center justify-between border-b border-brand-border pb-3">
-                <h3 class="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-2">
-                    <i class="fa-solid fa-circle-question text-brand-yellow"></i> Onboarding FAQs
-                </h3>
-                <button onclick="closeFaqModal()" class="text-brand-gray hover:text-white">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
-            </div>
+            alert("Please login again.");
 
-            <div class="overflow-y-auto custom-scrollbar space-y-3 text-xs pr-1">
-                <div class="bg-brand-dark/80 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
-                    <h4 class="font-extrabold text-white">How long does verification take?</h4>
-                    <p class="text-brand-gray text-[11px]">Most captain applications are approved within 2 to 6 hours during operational business windows.</p>
-                </div>
-                <div class="bg-brand-dark/80 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
-                    <h4 class="font-extrabold text-white">Why is my document marked under review?</h4>
-                    <p class="text-brand-gray text-[11px]">Our team verifies identity details against government registries for rider and captain safety.</p>
-                </div>
-                <div class="bg-brand-dark/80 p-3.5 rounded-xl border border-brand-border/60 space-y-1">
-                    <h4 class="font-extrabold text-white">Can I edit uploaded documents?</h4>
-                    <p class="text-brand-gray text-[11px]">Yes, click the 'Update / Edit' button on the audit status section to re-upload any document.</p>
-                </div>
-            </div>
-        </div>
-    </div>
+            redirectToLogin();
 
-    <!-- Premium Footer -->
-    <footer class="border-t border-brand-border/60 bg-brand-black py-6 px-4 lg:px-8 mt-auto">
-        <div class="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-brand-gray">
-            <div class="flex items-center gap-2">
-                <img src="../assets/Logo/RiderX-logo.png" alt="RiderX Logo" class="h-5 w-auto object-contain opacity-70">
-                <span>&copy; 2026 RiderX Technologies Inc. All rights reserved.</span>
-            </div>
+            return;
+        }
 
-            <div class="flex items-center gap-6">
-                <a href="../terms.html" class="hover:text-brand-yellow transition">Terms & Conditions</a>
-                <a href="../privacy.html" class="hover:text-brand-yellow transition">Privacy Policy</a>
-                <a href="../support.html" class="hover:text-brand-yellow transition">Support</a>
-            </div>
-        </div>
-    </footer>
 
-    <!-- Firebase & Application Modules -->
-    <script type="module" src="../firebase/firebase-config.js"></script>
-    <script type="module" src="../js/App.js"></script>
+        const file =
+            document.getElementById(
+                "inputDocFile"
+            ).files[0];
 
-    <!-- Page Module Script -->
-    <script type="module">
-        import { auth, db } from '../firebase/firebase-config.js';
-        import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { doc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        let currentRider = null;
-        let autoCheckInterval = null;
-        let riderDocData = null;
+        const docType =
+            document.getElementById(
+                "selectDocType"
+            ).value;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check Security Auth
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    window.location.href = '../auth/rider-login.html';
-                    return;
-                }
 
-                currentRider = user;
-                subscribeToRiderDoc(user.uid);
+        if (!file) {
 
-                // Start 10-second polling check fallback
-                autoCheckInterval = setInterval(() => {
-                    checkRiderStatusSilent(user.uid);
-                }, 10000);
-            });
-        });
+            alert("Please select a file.");
 
-        function subscribeToRiderDoc(uid) {
-            const riderRef = doc(db, "riders", uid);
-            onSnapshot(riderRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    riderDocData = docSnap.data();
-                    
-                    // IF APPROVED -> REDIRECT IMMEDIATELY TO HOME
-                    if (riderDocData.adminApproved === true) {
-                        window.location.href = '../rider/Home.html';
-                        return;
+            return;
+        }
+
+
+        if (file.size > 5 * 1024 * 1024) {
+
+            alert(
+                "File size must be 5MB or less."
+            );
+
+            return;
+        }
+
+
+        const btn =
+            document.getElementById(
+                "docUploadSubmitBtn"
+            );
+
+
+        btn.disabled = true;
+
+        btn.textContent =
+            "Uploading...";
+
+
+        try {
+
+            const uid =
+                currentUser.uid;
+
+
+            const extension =
+                file.name.includes(".")
+                ? file.name
+                    .split(".")
+                    .pop()
+                    .toLowerCase()
+                : "file";
+
+
+            const path =
+                `riders/${uid}/documents/${docType}_${Date.now()}.${extension}`;
+
+
+            const storageRef =
+                ref(storage, path);
+
+
+            await uploadBytes(
+                storageRef,
+                file
+            );
+
+
+            const downloadURL =
+                await getDownloadURL(
+                    storageRef
+                );
+
+
+            const riderRef =
+                doc(db, "riders", uid);
+
+
+            const updateData = {};
+
+            updateData[
+                `documents.${docType}`
+            ] = downloadURL;
+
+
+            updateData[
+                `documentStatus.${docType}`
+            ] = "pending";
+
+
+            updateData.updatedAt =
+                serverTimestamp();
+
+
+            updateData.adminApproved =
+                false;
+
+
+            updateData.approved =
+                false;
+
+
+            updateData.status =
+                "pending";
+
+
+            await updateDoc(
+                riderRef,
+                updateData
+            );
+
+
+            /*
+             * Also keep old fields compatible
+             * with existing RiderX registration data.
+             */
+
+            if (docType === "rc") {
+
+                await updateDoc(
+                    riderRef,
+                    {
+                        rc: downloadURL
                     }
+                );
 
-                    renderRiderDetails(riderDocData, uid);
-                } else {
-                    console.warn("Rider document not found in Firestore.");
-                }
-            }, (error) => {
-                console.error("Snapshot error:", error);
-            });
-        }
+            }
 
-        async function checkRiderStatusSilent(uid) {
-            try {
-                const riderRef = doc(db, "riders", uid);
-                const snap = await getDoc(riderRef);
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.adminApproved === true) {
-                        window.location.href = '../rider/Home.html';
+
+            if (docType === "drivingLicense") {
+
+                await updateDoc(
+                    riderRef,
+                    {
+                        license: downloadURL
                     }
-                }
-            } catch (err) {
-                console.error("Silent check error:", err);
+                );
+
             }
+
+
+            alert(
+                "Document uploaded successfully and sent for re-verification."
+            );
+
+
+            document.getElementById(
+                "inputDocFile"
+            ).value = "";
+
+
+            closeEditDocsModal();
+
+
+        } catch (error) {
+
+            console.error(
+                "Document upload error:",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "Document upload failed."
+            );
+
+        } finally {
+
+            btn.disabled = false;
+
+            btn.textContent =
+                "Upload Document";
+
         }
 
-        function renderRiderDetails(data, uid) {
-            // Name & Photo
-            const fullName = data.fullName || data.name || "Captain";
-            document.getElementById('riderWelcomeName').innerText = `Welcome, ${fullName}!`;
-            
-            if (data.photoURL || data.profilePhoto) {
-                document.getElementById('riderProfilePhoto').src = data.photoURL || data.profilePhoto;
-            } else {
-                document.getElementById('riderProfilePhoto').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}&background=FFE500&color=090A0F`;
-            }
+    }
+);
 
-            document.getElementById('riderDocIdText').innerHTML = `Captain ID: <span class="text-white font-mono">${uid.substring(0, 10).toUpperCase()}</span>`;
 
-            // Document status rendering
-            const docs = data.documents || {};
-            updateDocBadge('status-photo', data.photoURL || data.profilePhoto || docs.profilePhoto);
-            updateDocBadge('status-license', docs.drivingLicense);
-            updateDocBadge('status-rc', docs.rc);
-            updateDocBadge('status-vehicle', docs.vehiclePhoto);
-            updateDocBadge('status-insurance', docs.insurance);
-            updateDocBadge('status-aadhaar', docs.aadhaar);
-        }
+/* ==========================================================
+   REFRESH
+========================================================== */
 
-        function updateDocBadge(elementId, docVal) {
-            const elem = document.getElementById(elementId);
-            if (!elem) return;
+window.checkRiderStatusManual = async function() {
 
-            if (docVal) {
-                elem.innerText = "Uploaded & Under Review";
-                elem.className = "text-[10px] text-emerald-400 font-bold";
-            } else {
-                elem.innerText = "Pending Upload";
-                elem.className = "text-[10px] text-amber-400 font-bold";
-            }
-        }
+    if (!currentUser) {
 
-        // Global Action Functions
-        window.checkRiderStatusManual = async function() {
-            const icon = document.getElementById('refreshIcon');
-            icon.classList.add('fa-spin');
+        redirectToLogin();
 
-            if (currentRider) {
-                await checkRiderStatusSilent(currentRider.uid);
-            }
+        return;
+    }
 
-            setTimeout(() => {
-                icon.classList.remove('fa-spin');
-            }, 800);
-        };
 
-        window.handleRiderLogout = async function() {
-            try {
-                if (autoCheckInterval) clearInterval(autoCheckInterval);
-                await signOut(auth);
-                window.location.href = '../auth/rider-login.html';
-            } catch (err) {
-                console.error("Logout error:", err);
-            }
-        };
+    const icon =
+        document.getElementById(
+            "refreshIcon"
+        );
 
-        window.openDocumentsModal = function() {
-            const container = document.getElementById('docsListModalContainer');
-            container.innerHTML = '';
 
-            const docs = (riderDocData && riderDocData.documents) ? riderDocData.documents : {};
-            const docItems = [
-                { title: "Profile Photo", url: riderDocData?.photoURL || docs.profilePhoto },
-                { title: "Driving License", url: docs.drivingLicense },
-                { title: "Vehicle RC", url: docs.rc },
-                { title: "Vehicle Photo", url: docs.vehiclePhoto },
-                { title: "Insurance Policy", url: docs.insurance },
-                { title: "National ID Proof", url: docs.aadhaar }
-            ];
+    icon.classList.add(
+        "fa-spin"
+    );
 
-            docItems.forEach(item => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = "bg-brand-dark/90 p-4 rounded-xl border border-brand-border/60 flex flex-col sm:flex-row items-center justify-between gap-3";
-                
-                itemDiv.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-file-image text-brand-yellow text-lg"></i>
-                        <div>
-                            <p class="text-xs font-bold text-white">${item.title}</p>
-                            <p class="text-[10px] text-brand-gray">${item.url ? 'File Uploaded' : 'Not Uploaded Yet'}</p>
-                        </div>
-                    </div>
-                    ${item.url ? `<a href="${item.url}" target="_blank" class="px-3 py-1.5 rounded-lg bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/30 text-[11px] font-bold hover:bg-brand-yellow hover:text-brand-black transition">Preview Document</a>` : '<span class="text-[10px] text-amber-400 font-bold">Missing</span>'}
-                `;
-                container.appendChild(itemDiv);
-            });
 
-            document.getElementById('viewDocsModal').classList.remove('hidden');
-        };
+    try {
 
-        window.closeDocumentsModal = function() {
-            document.getElementById('viewDocsModal').classList.add('hidden');
-        };
+        await checkRiderStatus(
+            currentUser.uid
+        );
 
-        window.openEditDocsModal = function() {
-            document.getElementById('editDocsModal').classList.remove('hidden');
-        };
+    } finally {
 
-        window.closeEditDocsModal = function() {
-            document.getElementById('editDocsModal').classList.add('hidden');
-        };
+        setTimeout(
+            () => {
+                icon.classList.remove(
+                    "fa-spin"
+                );
+            },
+            800
+        );
 
-        window.handleDocReupload = async function(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('docUploadSubmitBtn');
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Submitting...";
+    }
 
-            try {
-                // Simulating document update submission to firestore
-                const docType = document.getElementById('selectDocType').value;
-                const riderRef = doc(db, "riders", currentRider.uid);
+};
 
-                const updateObj = {};
-                updateObj[`documents.${docType}`] = `https://via.placeholder.com/600x400/1A1D29/FFE500?text=${docType}+Updated`;
-                updateObj[`updatedAt`] = new Date();
 
-                await updateDoc(riderRef, updateObj);
+/* ==========================================================
+   LOGOUT
+========================================================== */
 
-                alert("Document successfully submitted for re-verification!");
-                closeEditDocsModal();
-            } catch (err) {
-                console.error("Reupload error:", err);
-                alert("Failed to submit document. Please try again.");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Submit Updated Document";
-            }
-        };
+window.handleRiderLogout = async function() {
 
-        window.toggleNotificationsModal = function() {
-            const modal = document.getElementById('notificationsModal');
-            modal.classList.toggle('hidden');
-        };
+    try {
 
-        window.openFaqModal = function() {
-            document.getElementById('faqModal').classList.remove('hidden');
-        };
+        stopTimers();
 
-        window.closeFaqModal = function() {
-            document.getElementById('faqModal').classList.add('hidden');
-        };
-    </script>
+        await signOut(auth);
+
+        window.location.replace(
+            "../auth/rider-login.html"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+        alert(
+            "Logout failed. Please try again."
+        );
+
+    }
+
+};
+
+
+/* ==========================================================
+   MISSING RIDER
+========================================================== */
+
+function showMissingRider() {
+
+    document.getElementById(
+        "statusMessage"
+    ).textContent =
+        "Rider profile could not be found. Please contact RiderX support.";
+
+}
+
+
+/* ==========================================================
+   STOP TIMERS
+========================================================== */
+
+function stopTimers() {
+
+    if (statusTimer) {
+
+        clearInterval(
+            statusTimer
+        );
+
+        statusTimer = null;
+
+    }
+
+
+    if (unsubscribeRider) {
+
+        unsubscribeRider();
+
+        unsubscribeRider = null;
+
+    }
+
+}
+
+
+/* ==========================================================
+   SECURITY HELPERS
+========================================================== */
+
+function escapeHtml(value) {
+
+    return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function safeUrl(url) {
+
+    const value =
+        String(url || "").trim();
+
+
+    if (
+        value.startsWith("https://") ||
+        value.startsWith("http://")
+    ) {
+
+        return value
+            .replace(/"/g, "%22");
+
+    }
+
+
+    return "#";
+
+}
+
+
+/* ==========================================================
+   CLEANUP
+========================================================== */
+
+window.addEventListener(
+    "beforeunload",
+    stopTimers
+);
+
+</script>
+
 </body>
 </html>
