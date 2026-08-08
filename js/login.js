@@ -1,7 +1,13 @@
 // =====================================
-// RiderX Login System
-// Customer + Rider + Admin
-// Firebase v10 Compatible
+// RiderX CUSTOMER / RIDER LOGIN
+// Firebase v10 Modular SDK
+//
+// IMPORTANT:
+// Admin login is handled ONLY by:
+// /admin/login.html
+//
+// This file never sends a user to the
+// Admin dashboard automatically.
 // =====================================
 
 import {
@@ -19,226 +25,411 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
+const loginForm =
+    document.getElementById("login-form");
 
-const loginForm = document.getElementById("login-form");
-const message = document.getElementById("error-message");
+const message =
+    document.getElementById("error-message");
+
+const loginButton =
+    document.getElementById("login-btn");
 
 
+function showMessage(text, type = "") {
 
-function showMessage(text){
-
-    if(message){
-
-        message.style.display = "block";
-        message.innerHTML = text;
-
+    if (!message) {
+        return;
     }
 
+    message.style.display = "block";
+    message.textContent = text;
+
+    message.style.color =
+        type === "success"
+            ? "#22d66b"
+            : "#ff4444";
 }
 
 
+function setLoading(loading) {
 
+    if (!loginButton) {
+        return;
+    }
 
+    loginButton.disabled =
+        loading;
 
-if(loginForm){
-
-
-loginForm.addEventListener(
-"submit",
-async(e)=>{
-
-
-e.preventDefault();
-
-
-
-const email =
-document.getElementById("email")
-.value
-.trim();
-
-
-
-const password =
-document.getElementById("password")
-.value;
-
-
-
-if(!email || !password){
-
-showMessage("Please enter email and password");
-return;
-
+    loginButton.textContent =
+        loading
+            ? "Logging in..."
+            : "Login";
 }
 
 
+if (loginForm) {
 
-try{
+    loginForm.addEventListener(
+        "submit",
+        async (event) => {
 
+            event.preventDefault();
 
-showMessage("Logging in...");
 
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim()
+                    .toLowerCase();
 
 
-const result =
-await signInWithEmailAndPassword(
-auth,
-email,
-password
-);
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
 
 
+            if (!email || !password) {
 
-const user =
-result.user;
+                showMessage(
+                    "Please enter email and password."
+                );
 
+                return;
+            }
 
 
+            setLoading(true);
 
-const userSnap =
-await getDoc(
-doc(
-db,
-"users",
-user.uid
-)
-);
+            showMessage("");
 
 
+            try {
 
+                const result =
+                    await signInWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
 
 
-if(!userSnap.exists()){
+                const user =
+                    result.user;
 
 
-showMessage(
-"User profile not found"
-);
+                if (!user) {
 
+                    throw new Error(
+                        "Firebase authentication failed."
+                    );
 
-return;
+                }
 
-}
 
+                /*
+                 * Get the user's profile.
+                 */
 
+                const userRef =
+                    doc(
+                        db,
+                        "users",
+                        user.uid
+                    );
 
 
+                const userSnap =
+                    await getDoc(
+                        userRef
+                    );
 
-const data =
-userSnap.data();
 
+                if (!userSnap.exists()) {
 
-// Debug check
-console.log(
-"RiderX User Data:",
-data
-);
+                    throw new Error(
+                        "User profile not found in Firestore."
+                    );
 
+                }
 
 
-showMessage(
-"Login Successful"
-);
+                const data =
+                    userSnap.data();
 
 
+                const role =
+                    String(
+                        data.role ||
+                        data.userType ||
+                        data.type ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
 
 
+                console.log(
+                    "RiderX Login Role:",
+                    role
+                );
 
-setTimeout(()=>{
 
+                /*
+                 * ADMIN
+                 *
+                 * Admin can still use the common
+                 * login if necessary, but always
+                 * goes ONLY to Admin dashboard.
+                 */
 
+                if (role === "admin") {
 
-// ADMIN
+                    showMessage(
+                        "Admin account detected. Opening Admin Panel...",
+                        "success"
+                    );
 
-if(data.role === "admin"){
 
+                    setTimeout(
+                        () => {
 
-window.location.href =
-"../admin/dashboard.html";
+                            window.location.replace(
+                                "../admin/dashboard.html"
+                            );
 
+                        },
+                        300
+                    );
 
-}
 
+                    return;
+                }
 
 
-// RIDER
+                /*
+                 * RIDER
+                 */
 
-else if(data.role === "rider"){
+                if (role === "rider") {
 
+                    const approved =
+                        data.approved === true ||
+                        data.isApproved === true;
 
 
-if(
-data.approved === true &&
-data.status === "active"
-){
+                    const status =
+                        String(
+                            data.status ||
+                            data.accountStatus ||
+                            ""
+                        )
+                        .trim()
+                        .toLowerCase();
 
 
-window.location.href =
-"../rider/home.html";
+                    showMessage(
+                        "Rider login successful.",
+                        "success"
+                    );
 
 
-}
+                    setTimeout(
+                        () => {
 
-else{
+                            if (
+                                approved &&
+                                (
+                                    status === "active" ||
+                                    status === "approved"
+                                )
+                            ) {
 
+                                window.location.replace(
+                                    "../rider/home.html"
+                                );
 
-window.location.href =
-"../rider/pending.html";
+                            } else {
 
+                                window.location.replace(
+                                    "../rider/pending.html"
+                                );
 
-}
+                            }
 
+                        },
+                        300
+                    );
 
 
-}
+                    return;
+                }
 
 
+                /*
+                 * CUSTOMER
+                 *
+                 * Only explicitly recognized
+                 * customer/user accounts are sent
+                 * to customer home.
+                 */
 
-// CUSTOMER
+                if (
+                    role === "customer" ||
+                    role === "user"
+                ) {
 
-else{
+                    showMessage(
+                        "Login successful.",
+                        "success"
+                    );
 
 
-window.location.href =
-"../customer/home.html";
+                    setTimeout(
+                        () => {
 
+                            window.location.replace(
+                                "../customer/home.html"
+                            );
 
-}
+                        },
+                        300
+                    );
 
 
+                    return;
+                }
 
 
-},500);
+                /*
+                 * UNKNOWN ROLE
+                 *
+                 * VERY IMPORTANT:
+                 * Do NOT send unknown users to
+                 * Book Ride/customer page.
+                 */
 
+                showMessage(
+                    "Access denied. Your account role is not configured."
+                );
 
 
+            }
+            catch (error) {
 
+                console.error(
+                    "RiderX Login Error:",
+                    error
+                );
 
 
-}
+                let errorMessage =
+                    "Login failed.";
 
-catch(error){
 
+                switch (error.code) {
 
-console.error(
-"Login Error:",
-error
-);
+                    case "auth/invalid-credential":
 
+                        errorMessage =
+                            "Email or password is incorrect.";
 
+                        break;
 
-showMessage(
-error.message
-);
 
+                    case "auth/user-not-found":
 
+                        errorMessage =
+                            "Account not found.";
 
-}
+                        break;
 
 
+                    case "auth/wrong-password":
 
-});
+                        errorMessage =
+                            "Wrong password.";
 
+                        break;
+
+
+                    case "auth/invalid-email":
+
+                        errorMessage =
+                            "Invalid email address.";
+
+                        break;
+
+
+                    case "auth/user-disabled":
+
+                        errorMessage =
+                            "This account has been disabled.";
+
+                        break;
+
+
+                    case "auth/too-many-requests":
+
+                        errorMessage =
+                            "Too many login attempts. Please try again later.";
+
+                        break;
+
+
+                    case "auth/network-request-failed":
+
+                        errorMessage =
+                            "Network error. Check your internet connection.";
+
+                        break;
+
+
+                    case "permission-denied":
+
+                        errorMessage =
+                            "Firestore permission denied.";
+
+                        break;
+
+
+                    default:
+
+                        if (
+                            error.message &&
+                            error.message.includes(
+                                "Missing or insufficient permissions"
+                            )
+                        ) {
+
+                            errorMessage =
+                                "Firestore permission denied.";
+
+                        }
+                        else {
+
+                            errorMessage =
+                                error.message ||
+                                "Login failed.";
+
+                        }
+
+                }
+
+
+                showMessage(
+                    "❌ " + errorMessage
+                );
+
+            }
+            finally {
+
+                setLoading(false);
+
+            }
+
+        }
+    );
 
 }
