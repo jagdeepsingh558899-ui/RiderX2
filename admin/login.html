@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>    
+
+<head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>RiderX Admin Login</title>
 
+<meta
+    name="theme-color"
+    content="#000000"
+>
+
 <style>
+
 :root{
     --yellow:#FFE500;
     --black:#050505;
@@ -49,7 +57,6 @@ body{
     font-size:36px;
     font-weight:900;
     margin-bottom:8px;
-    letter-spacing:-1px;
 }
 
 .logo span{
@@ -60,7 +67,7 @@ body{
     text-align:center;
     color:var(--gray);
     font-size:14px;
-    margin-bottom:30px;
+    margin-bottom:25px;
 }
 
 .security{
@@ -89,11 +96,6 @@ label{
     margin-bottom:18px;
 }
 
-.input-wrap input{
-    margin-bottom:0;
-    padding-right:48px;
-}
-
 input{
     width:100%;
     padding:15px;
@@ -103,34 +105,26 @@ input{
     color:#fff;
     font-size:16px;
     outline:none;
-    transition:.2s;
 }
 
 input:focus{
     border-color:var(--yellow);
-    box-shadow:0 0 0 2px rgba(255,229,0,.08);
 }
 
-input::placeholder{
-    color:#666;
+.password-input{
+    padding-right:50px;
 }
 
 .password-toggle{
     position:absolute;
-    right:12px;
+    right:8px;
     top:50%;
     transform:translateY(-50%);
-    background:transparent;
+    background:none;
     border:0;
     color:#777;
-    width:auto;
     padding:8px;
-    font-size:16px;
     cursor:pointer;
-}
-
-.password-toggle:hover{
-    color:var(--yellow);
 }
 
 .login-btn{
@@ -143,21 +137,11 @@ input::placeholder{
     font-size:17px;
     font-weight:bold;
     cursor:pointer;
-    transition:.2s;
-}
-
-.login-btn:hover{
-    filter:brightness(1.05);
-}
-
-.login-btn:active{
-    transform:scale(.99);
 }
 
 .login-btn:disabled{
     opacity:.55;
     cursor:not-allowed;
-    transform:none;
 }
 
 .loading{
@@ -185,26 +169,17 @@ input::placeholder{
     color:var(--green);
 }
 
-.small-note{
+.back{
+    display:block;
     text-align:center;
+    margin-top:20px;
     color:#666;
-    font-size:11px;
-    line-height:1.5;
-    margin-top:22px;
+    font-size:12px;
+    text-decoration:none;
 }
 
-@media(max-width:420px){
-
-    .login-box{
-        padding:27px 20px;
-        border-radius:22px;
-    }
-
-    .logo{
-        font-size:32px;
-    }
-}
 </style>
+
 </head>
 
 <body>
@@ -224,40 +199,43 @@ input::placeholder{
         Authorized administrators only
     </div>
 
+
     <label for="email">
         Admin Email
     </label>
 
     <div class="input-wrap">
+
         <input
-            type="email"
             id="email"
-            placeholder="Enter admin email"
+            type="email"
             autocomplete="username"
-            inputmode="email"
-        >
+            placeholder="Enter admin email">
+
     </div>
 
 
     <label for="password">
-        Password
+        Admin Password
     </label>
 
     <div class="input-wrap">
 
         <input
-            type="password"
             id="password"
-            placeholder="Enter admin password"
+            class="password-input"
+            type="password"
             autocomplete="current-password"
-        >
+            placeholder="Enter admin password">
+
 
         <button
-            type="button"
             id="togglePassword"
             class="password-toggle"
-            aria-label="Show password">
+            type="button">
+
             👁
+
         </button>
 
     </div>
@@ -288,47 +266,47 @@ input::placeholder{
     </div>
 
 
-    <div class="small-note">
-        RiderX secure administration panel
-    </div>
+    <a
+        href="../index.html"
+        class="back">
+
+        ← Back to RiderX
+
+    </a>
 
 </div>
 
 
 <script type="module">
 
-/*
-============================================================
-RIDERX ADMIN LOGIN
-Firebase v10 Modular SDK
-============================================================
-*/
-
 import {
+
     auth,
     db
+
 } from "../firebase/firebase-config.js";
 
-import {
-    signInWithEmailAndPassword,
-    signOut,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 import {
+
+    signInWithEmailAndPassword,
+    signOut
+
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+
+import {
+
     doc,
     getDoc
+
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const emailInput =
+const email =
     document.getElementById("email");
 
-const passwordInput =
+const password =
     document.getElementById("password");
 
 const loginBtn =
@@ -340,246 +318,146 @@ const loading =
 const message =
     document.getElementById("message");
 
-const togglePassword =
+const toggle =
     document.getElementById("togglePassword");
 
 
-/* =========================================================
-   STATE
-========================================================= */
-
-let loginInProgress = false;
+let busy = false;
 
 
-/* =========================================================
-   MESSAGE
-========================================================= */
-
-function showMessage(text, type = ""){
+function showMessage(
+    text,
+    type = ""
+){
 
     message.textContent =
         text || "";
 
     message.className =
         "message " + type;
+
 }
 
-
-/* =========================================================
-   LOADING
-========================================================= */
 
 function setLoading(
     active,
     text = "Checking Admin Account..."
 ){
 
-    if(active){
+    busy =
+        active;
 
-        loading.style.display =
-            "block";
+    loginBtn.disabled =
+        active;
 
-        loading.textContent =
-            text;
+    email.disabled =
+        active;
 
-        loginBtn.disabled =
-            true;
+    password.disabled =
+        active;
 
-        emailInput.disabled =
-            true;
+    loading.style.display =
+        active ? "block" : "none";
 
-        passwordInput.disabled =
-            true;
+    loading.textContent =
+        text;
 
-    }else{
-
-        loading.style.display =
-            "none";
-
-        loginBtn.disabled =
-            false;
-
-        emailInput.disabled =
-            false;
-
-        passwordInput.disabled =
-            false;
-
-    }
 }
 
 
-/* =========================================================
-   PASSWORD SHOW/HIDE
-========================================================= */
-
-togglePassword.addEventListener(
+toggle.addEventListener(
     "click",
-    () => {
+    function(){
 
         if(
-            passwordInput.type ===
+            password.type ===
             "password"
         ){
 
-            passwordInput.type =
+            password.type =
                 "text";
 
-            togglePassword.textContent =
+            toggle.textContent =
                 "🙈";
 
-            togglePassword.setAttribute(
-                "aria-label",
-                "Hide password"
-            );
+        }
+        else{
 
-        }else{
-
-            passwordInput.type =
+            password.type =
                 "password";
 
-            togglePassword.textContent =
+            toggle.textContent =
                 "👁";
 
-            togglePassword.setAttribute(
-                "aria-label",
-                "Show password"
-            );
         }
+
     }
 );
 
 
-/* =========================================================
-   LOGIN BUTTON
-========================================================= */
+async function adminLogin(){
 
-loginBtn.addEventListener(
-    "click",
-    loginAdmin
-);
-
-
-/* =========================================================
-   ENTER KEY
-========================================================= */
-
-emailInput.addEventListener(
-    "keydown",
-    event => {
-
-        if(event.key === "Enter"){
-
-            event.preventDefault();
-
-            loginAdmin();
-        }
-    }
-);
-
-
-passwordInput.addEventListener(
-    "keydown",
-    event => {
-
-        if(event.key === "Enter"){
-
-            event.preventDefault();
-
-            loginAdmin();
-        }
-    }
-);
-
-
-/* =========================================================
-   ADMIN LOGIN
-========================================================= */
-
-async function loginAdmin(){
-
-    if(loginInProgress){
+    if(busy){
         return;
     }
 
-    const email =
-        emailInput.value
+
+    const emailValue =
+        email.value
             .trim()
             .toLowerCase();
 
-    const password =
-        passwordInput.value;
+    const passwordValue =
+        password.value;
 
 
-    /* -----------------------------------------------------
-       VALIDATION
-    ----------------------------------------------------- */
-
-    if(!email){
+    if(!emailValue){
 
         showMessage(
-            "❌ Please enter admin email.",
+            "Please enter admin email.",
             "error"
         );
 
-        emailInput.focus();
+        email.focus();
 
         return;
+
     }
 
 
-    if(!email.includes("@")){
+    if(!passwordValue){
 
         showMessage(
-            "❌ Please enter a valid email address.",
+            "Please enter admin password.",
             "error"
         );
 
-        emailInput.focus();
+        password.focus();
 
         return;
+
     }
 
-
-    if(!password){
-
-        showMessage(
-            "❌ Please enter password.",
-            "error"
-        );
-
-        passwordInput.focus();
-
-        return;
-    }
-
-
-    /* -----------------------------------------------------
-       START
-    ----------------------------------------------------- */
-
-    loginInProgress =
-        true;
-
-    showMessage("");
 
     setLoading(
         true,
         "Signing in..."
     );
 
+    showMessage("");
+
 
     try{
 
-        /* =================================================
-           FIREBASE AUTHENTICATION
-        ================================================= */
+        /*
+         * Firebase Authentication
+         */
 
         const result =
             await signInWithEmailAndPassword(
                 auth,
-                email,
-                password
+                emailValue,
+                passwordValue
             );
 
 
@@ -590,56 +468,46 @@ async function loginAdmin(){
         if(!user){
 
             throw new Error(
-                "Firebase did not return a user account."
+                "Firebase user was not returned."
             );
+
         }
 
 
-        /* =================================================
-           VERIFY FIRESTORE ADMIN PROFILE
-        ================================================= */
+        /*
+         * Firestore admin profile
+         */
 
         setLoading(
             true,
-            "Verifying admin access..."
+            "Verifying administrator..."
         );
-
-
-        const adminRef =
-            doc(
-                db,
-                "users",
-                user.uid
-            );
 
 
         const adminSnap =
             await getDoc(
-                adminRef
+                doc(
+                    db,
+                    "users",
+                    user.uid
+                )
             );
 
-
-        /* -------------------------------------------------
-           ADMIN DOCUMENT DOES NOT EXIST
-        ------------------------------------------------- */
 
         if(!adminSnap.exists()){
 
             await signOut(auth);
 
             throw new Error(
-                "Admin profile not found. Firebase Auth UID ke naam se users collection me document nahi mila."
+                "Admin profile not found for this Firebase UID."
             );
+
         }
 
 
         const data =
             adminSnap.data();
 
-
-        /* =================================================
-           ADMIN ROLE CHECK
-        ================================================= */
 
         const role =
             String(
@@ -658,26 +526,23 @@ async function loginAdmin(){
             data.isAdmin === true;
 
 
-        /* -------------------------------------------------
-           ACCESS DENIED
-        ------------------------------------------------- */
-
         if(!isAdmin){
 
             await signOut(auth);
 
             throw new Error(
-                "Access denied. Is account ke users document me admin role nahi hai."
+                "Access denied. This Firebase account is not an administrator."
             );
+
         }
 
 
-        /* =================================================
-           SUCCESS
-        ================================================= */
+        /*
+         * ADMIN VERIFIED
+         */
 
         showMessage(
-            "✅ Admin Login Successful",
+            "Admin login successful.",
             "success"
         );
 
@@ -688,24 +553,19 @@ async function loginAdmin(){
         );
 
 
-        /*
-           Small delay gives the user time
-           to see successful login message.
-        */
-
         setTimeout(
-            () => {
+            function(){
 
                 window.location.replace(
-                    "dashboard.html"
+                    "./dashboard.html"
                 );
 
             },
-            300
+            400
         );
 
-
-    }catch(error){
+    }
+    catch(error){
 
         console.error(
             "RiderX Admin Login Error:",
@@ -714,7 +574,7 @@ async function loginAdmin(){
 
 
         let msg =
-            "❌ Login failed.";
+            "Login failed.";
 
 
         switch(error.code){
@@ -722,211 +582,129 @@ async function loginAdmin(){
             case "auth/invalid-credential":
 
                 msg =
-                    "❌ Email or password is incorrect.";
+                    "Email or password is incorrect.";
 
                 break;
-
 
             case "auth/user-not-found":
 
                 msg =
-                    "❌ Admin account not found in Firebase Authentication.";
+                    "Admin Firebase account not found.";
 
                 break;
-
 
             case "auth/wrong-password":
 
                 msg =
-                    "❌ Wrong password.";
+                    "Wrong password.";
 
                 break;
-
 
             case "auth/invalid-email":
 
                 msg =
-                    "❌ Invalid email address.";
+                    "Invalid email address.";
 
                 break;
-
 
             case "auth/user-disabled":
 
                 msg =
-                    "❌ This Firebase account has been disabled.";
+                    "This Firebase account is disabled.";
 
                 break;
-
 
             case "auth/too-many-requests":
 
                 msg =
-                    "❌ Too many login attempts. Please try again later.";
+                    "Too many attempts. Try again later.";
 
                 break;
-
 
             case "auth/network-request-failed":
 
                 msg =
-                    "❌ Network error. Check your internet connection.";
+                    "Network error. Check your internet connection.";
 
                 break;
-
 
             case "permission-denied":
 
                 msg =
-                    "❌ Firestore permission denied. Check Firestore rules.";
+                    "Firestore permission denied.";
 
                 break;
-
 
             default:
 
                 if(
-                    error.message &&
+                    error.message
+                    &&
                     error.message.includes(
                         "Missing or insufficient permissions"
                     )
                 ){
 
                     msg =
-                        "❌ Firestore permission denied. Check Firestore rules.";
+                        "Firestore permission denied.";
 
-                }else{
+                }
+                else if(error.message){
 
                     msg =
-                        "❌ " +
-                        (
-                            error.message ||
-                            "Login failed."
-                        );
+                        error.message;
+
                 }
+
         }
 
 
-        setLoading(
-            false
-        );
-
-        loginInProgress =
-            false;
+        setLoading(false);
 
         showMessage(
-            msg,
+            "❌ " + msg,
             "error"
         );
+
     }
+
 }
 
 
-/* =========================================================
-   OPTIONAL SESSION CHECK
-=========================================================
+loginBtn.addEventListener(
+    "click",
+    adminLogin
+);
 
-   If an admin is already logged in and directly opens
-   login.html, verify the account before redirecting.
 
-   Normal users are NOT redirected.
-========================================================= */
+email.addEventListener(
+    "keydown",
+    function(event){
 
-onAuthStateChanged(
-    auth,
-    async user => {
+        if(event.key === "Enter"){
 
-        if(!user){
-            return;
+            event.preventDefault();
+
+            adminLogin();
+
         }
 
+    }
+);
 
-        /*
-           Do not interfere while the user is
-           currently pressing Login.
-        */
 
-        if(loginInProgress){
-            return;
+password.addEventListener(
+    "keydown",
+    function(event){
+
+        if(event.key === "Enter"){
+
+            event.preventDefault();
+
+            adminLogin();
+
         }
 
-
-        try{
-
-            const adminRef =
-                doc(
-                    db,
-                    "users",
-                    user.uid
-                );
-
-
-            const adminSnap =
-                await getDoc(
-                    adminRef
-                );
-
-
-            if(!adminSnap.exists()){
-
-                return;
-            }
-
-
-            const data =
-                adminSnap.data();
-
-
-            const role =
-                String(
-                    data.role ||
-                    data.userType ||
-                    data.type ||
-                    ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            const isAdmin =
-                role === "admin" ||
-                role === "administrator" ||
-                data.isAdmin === true;
-
-
-            if(isAdmin){
-
-                showMessage(
-                    "✅ Admin session found. Opening dashboard...",
-                    "success"
-                );
-
-
-                setLoading(
-                    true,
-                    "Opening Admin Dashboard..."
-                );
-
-
-                setTimeout(
-                    () => {
-
-                        window.location.replace(
-                            "dashboard.html"
-                        );
-
-                    },
-                    300
-                );
-            }
-
-        }catch(error){
-
-            console.warn(
-                "Existing admin session check failed:",
-                error
-            );
-        }
     }
 );
 
