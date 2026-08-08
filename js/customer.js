@@ -1,561 +1,1242 @@
-// =====================================
+// ============================================================
 // RiderX Customer Engine
-// Map + Fare + Booking + Firebase
-// =====================================
-
-
-import {
-auth,
-db
-}
-from "../firebase/firebase-config.js";
-
+// FINAL CUSTOMER BOOKING ENGINE
+// Map + GPS + Route + Fare + Firebase + Ride Tracking
+// ============================================================
 
 import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
-collection,
-addDoc,
-serverTimestamp
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-
-console.log("RiderX Customer Engine Loaded");
+import {
+    collection,
+    addDoc,
+    doc,
+    getDoc,
+    onSnapshot,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
+// ============================================================
+// GLOBAL STATE
+// ============================================================
 
-let map;
+let map = null;
 
-let pickupMarker;
-let dropMarker;
+let pickupMarker = null;
+let dropMarker = null;
+let routeLayer = null;
+
+let pickupCoords = null;
+let dropCoords = null;
+
+let selectedService = "bike";
+let selectingMode = "pickup";
+
+let currentUser = null;
+let currentRideId = null;
+let rideUnsubscribe = null;
+
+let routeDistanceKm = 0;
+let estimatedFare = 0;
+
+let fareSettings = null;
+
+let isBooking = false;
 
 
-let pickupCoords=null;
-let dropCoords=null;
+// ============================================================
+// RIDERX DEFAULT SETTINGS
+// ============================================================
 
+const DEFAULT_FARES = {
 
-let selectedService="bike";
+    bike: {
+        baseFare: 20,
+        dayRate: 8,
+        extraRate: 9,
+        nightRate: 11
+    },
 
+    cab: {
+        baseFare: 50,
+        dayRate: 12,
+        extraRate: 14,
+        nightRate: 16
+    },
 
+    parcel: {
+        baseFare: 30,
+        dayRate: 9,
+        extraRate: 10,
+        nightRate: 12
+    },
 
-const baseFare={
-
-bike:20,
-cab:50,
-parcel:30,
-food:25
+    food: {
+        baseFare: 25,
+        dayRate: 8,
+        extraRate: 9,
+        nightRate: 11
+    }
 
 };
 
 
+// ============================================================
+// ELEMENTS
+// ============================================================
+
+const pickupInput =
+    document.getElementById("pickupLocation");
+
+const dropInput =
+    document.getElementById("dropoffLocation");
+
+const fareElement =
+    document.getElementById("fare");
+
+const bookingStatus =
+    document.getElementById("bookingStatus");
+
+const bookButton =
+    document.getElementById("bookRide");
+
+const paymentMethod =
+    document.getElementById("paymentMethod");
 
 
+// ============================================================
+// STATUS
+// ============================================================
 
+function setStatus(text, type = "") {
 
-// ================= MAP =================
+    if (!bookingStatus) return;
 
+    bookingStatus.textContent = text;
 
-function initMap(){
-
-
-const mapBox=document.getElementById("map");
-
-
-if(!mapBox) return;
-
-
-
-map=L.map("map")
-.setView(
-[30.7333,76.7794],
-13
-);
-
-
-
-L.tileLayer(
-
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-{
-
-maxZoom:19
-
-}
-
-).addTo(map);
-
-
-
-
-
-map.on("click",(e)=>{
-
-
-const lat=e.latlng.lat;
-const lng=e.latlng.lng;
-
-
-
-const text =
-lat.toFixed(5)+", "+
-lng.toFixed(5);
-
-
-
-
-
-if(!pickupCoords){
-
-
-pickupCoords={lat,lng};
-
-
-
-pickupMarker=
-L.marker([lat,lng])
-.addTo(map)
-.bindPopup("Pickup")
-.openPopup();
-
-
-
-document.getElementById(
-"pickupLocation"
-).value=text;
-
-
-
-setStatus("Pickup Selected");
-
+    bookingStatus.style.color =
+        type === "error"
+            ? "#ff6666"
+            : type === "success"
+                ? "#22c55e"
+                : "#ffe500";
 
 }
 
 
+// ============================================================
+// MAP STATUS
+// ============================================================
 
+function setMapStatus(text) {
 
+    const status =
+        document.getElementById("status");
 
-else if(!dropCoords){
-
-
-dropCoords={lat,lng};
-
-
-
-dropMarker=
-L.marker([lat,lng])
-.addTo(map)
-.bindPopup("Drop")
-.openPopup();
-
-
-
-document.getElementById(
-"dropoffLocation"
-).value=text;
-
-
-
-calculateFare();
-
-
-
-setStatus("Drop Selected");
-
+    if (status) {
+        status.textContent = text;
+    }
 
 }
 
 
+// ============================================================
+// INIT MAP
+// ============================================================
 
-});
+function initMap() {
 
+    const mapBox =
+        document.getElementById("map");
 
+    if (!mapBox) return;
 
-}
+    if (map) return;
 
-
-
-
-
-
-// ================= SERVICE =================
-
-
-function setupServices(){
-
-
-document
-.querySelectorAll(".service")
-.forEach(item=>{
-
-
-item.onclick=()=>{
+    map =
+        L.map("map", {
+            zoomControl: false
+        }).setView(
+            [30.7333, 76.7794],
+            13
+        );
 
 
-document
-.querySelectorAll(".service")
-.forEach(x=>
-x.classList.remove("active")
-);
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 19,
+            attribution:
+                "&copy; OpenStreetMap contributors"
+        }
+    ).addTo(map);
 
 
-
-item.classList.add("active");
-
-
-selectedService =
-item.dataset.service;
+    L.control.zoom({
+        position: "bottomright"
+    }).addTo(map);
 
 
-calculateFare();
+    map.on(
+        "moveend",
+        handleMapMove
+    );
 
 
-};
+    setMapStatus(
+        "Select pickup location"
+    );
 
 
-
-});
-
-
-}
-
-
-
-
-
-
-
-// ================= FARE =================
-
-
-function calculateFare(){
-
-
-if(!pickupCoords || !dropCoords){
-
-document.getElementById("fare").innerText="₹0";
-
-return 0;
+    console.log(
+        "RiderX Map Initialized"
+    );
 
 }
 
 
+// ============================================================
+// MAP MOVE
+// ============================================================
 
-let km =
-getDistance(
+function handleMapMove() {
 
-pickupCoords.lat,
-pickupCoords.lng,
-
-dropCoords.lat,
-dropCoords.lng
-
-);
-
-
-
-let rate=8;
+    if (
+        selectingMode !== "pickup" &&
+        selectingMode !== "drop"
+    ) {
+        return;
+    }
 
 
-
-let hour =
-new Date().getHours();
-
+    const center =
+        map.getCenter();
 
 
-if(hour>=22 || hour<6){
+    if (
+        selectingMode === "pickup"
+    ) {
 
-rate=11;
+        setMapStatus(
+            "Release map to set pickup"
+        );
 
-}
+    } else {
 
-else if(km>10){
+        setMapStatus(
+            "Release map to set destination"
+        );
 
-rate=9;
-
-}
-
-
-
-
-
-let total =
-baseFare[selectedService]
-+
-(km*rate);
-
-
-
-total=Math.round(total);
-
-
-
-document.getElementById("fare").innerText=
-"₹"+total;
-
-
-
-return total;
-
+    }
 
 }
 
 
+// ============================================================
+// MAP CENTER SELECTION
+// ============================================================
+
+async function selectMapCenter() {
+
+    if (!map) return;
+
+    const center =
+        map.getCenter();
 
 
+    const lat =
+        Number(center.lat.toFixed(6));
+
+    const lng =
+        Number(center.lng.toFixed(6));
 
 
+    setMapStatus(
+        "Getting location..."
+    );
 
 
-// ================= DISTANCE =================
+    let address =
+        `${lat}, ${lng}`;
 
+
+    try {
+
+        address =
+            await reverseGeocode(
+                lat,
+                lng
+            );
+
+    } catch (error) {
+
+        console.log(
+            "Reverse geocoding failed:",
+            error
+        );
+
+    }
+
+
+    if (
+        selectingMode === "pickup"
+    ) {
+
+        setPickup(
+            lat,
+            lng,
+            address
+        );
+
+
+        selectingMode =
+            "drop";
+
+
+        setMapStatus(
+            "Now select destination"
+        );
+
+
+    } else {
+
+        setDrop(
+            lat,
+            lng,
+            address
+        );
+
+
+        selectingMode =
+            "pickup";
+
+
+        setMapStatus(
+            "Pickup & destination selected"
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// PICKUP
+// ============================================================
+
+function setPickup(
+    lat,
+    lng,
+    address = ""
+) {
+
+    pickupCoords = {
+        lat: Number(lat),
+        lng: Number(lng)
+    };
+
+
+    if (pickupMarker) {
+
+        map.removeLayer(
+            pickupMarker
+        );
+
+    }
+
+
+    pickupMarker =
+        L.marker(
+            [lat, lng]
+        )
+        .addTo(map)
+        .bindPopup(
+            "Pickup"
+        );
+
+
+    if (pickupInput) {
+
+        pickupInput.value =
+            address ||
+            `${lat}, ${lng}`;
+
+    }
+
+
+    calculateRide();
+
+
+    setStatus(
+        "Pickup selected"
+    );
+
+}
+
+
+// ============================================================
+// DROP
+// ============================================================
+
+function setDrop(
+    lat,
+    lng,
+    address = ""
+) {
+
+    dropCoords = {
+        lat: Number(lat),
+        lng: Number(lng)
+    };
+
+
+    if (dropMarker) {
+
+        map.removeLayer(
+            dropMarker
+        );
+
+    }
+
+
+    dropMarker =
+        L.marker(
+            [lat, lng]
+        )
+        .addTo(map)
+        .bindPopup(
+            "Destination"
+        );
+
+
+    if (dropInput) {
+
+        dropInput.value =
+            address ||
+            `${lat}, ${lng}`;
+
+    }
+
+
+    calculateRide();
+
+
+    setStatus(
+        "Destination selected"
+    );
+
+}
+
+
+// ============================================================
+// CURRENT GPS LOCATION
+// ============================================================
+
+function useCurrentLocation() {
+
+    if (
+        !navigator.geolocation
+    ) {
+
+        setStatus(
+            "GPS is not supported on this device.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    setMapStatus(
+        "Getting your current location..."
+    );
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        async position => {
+
+            const lat =
+                position.coords.latitude;
+
+            const lng =
+                position.coords.longitude;
+
+
+            map.setView(
+                [lat, lng],
+                16,
+                {
+                    animate: true
+                }
+            );
+
+
+            let address =
+                `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+
+            try {
+
+                address =
+                    await reverseGeocode(
+                        lat,
+                        lng
+                    );
+
+            } catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+
+            setPickup(
+                lat,
+                lng,
+                address
+            );
+
+
+            selectingMode =
+                "drop";
+
+
+            setMapStatus(
+                "Now select destination"
+            );
+
+
+            setStatus(
+                "Current location selected",
+                "success"
+            );
+
+        },
+
+        error => {
+
+            console.error(
+                "GPS Error:",
+                error
+            );
+
+
+            setMapStatus(
+                "Unable to get GPS location"
+            );
+
+
+            setStatus(
+                "Please allow location permission.",
+                "error"
+            );
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 10000
+        }
+
+    );
+
+}
+
+
+// ============================================================
+// REVERSE GEOCODING
+// ============================================================
+
+async function reverseGeocode(
+    lat,
+    lng
+) {
+
+    const url =
+        "https://nominatim.openstreetmap.org/reverse" +
+        `?format=jsonv2&lat=${lat}&lon=${lng}`;
+
+
+    const response =
+        await fetch(url, {
+            headers: {
+                "Accept":
+                    "application/json"
+            }
+        });
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Address lookup failed"
+        );
+
+    }
+
+
+    const data =
+        await response.json();
+
+
+    return (
+        data.display_name ||
+        `${lat}, ${lng}`
+    );
+
+}
+
+
+// ============================================================
+// SERVICE SELECTION
+// ============================================================
+
+function setupServices() {
+
+    const services =
+        document.querySelectorAll(
+            ".service"
+        );
+
+
+    services.forEach(
+        service => {
+
+            service.addEventListener(
+                "click",
+                () => {
+
+                    services.forEach(
+                        item =>
+                            item.classList.remove(
+                                "active"
+                            )
+                    );
+
+
+                    service.classList.add(
+                        "active"
+                    );
+
+
+                    selectedService =
+                        String(
+                            service.dataset.service ||
+                            "bike"
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    calculateRide();
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// DISTANCE
+// ============================================================
 
 function getDistance(
-lat1,
-lon1,
-lat2,
-lon2
-){
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+
+    const R = 6371;
 
 
-const R=6371;
+    const dLat =
+        (lat2 - lat1) *
+        Math.PI /
+        180;
 
 
-const dLat=
-(lat2-lat1)
-*Math.PI/180;
+    const dLon =
+        (lon2 - lon1) *
+        Math.PI /
+        180;
 
 
-const dLon=
-(lon2-lon1)
-*Math.PI/180;
+    const a =
+
+        Math.sin(dLat / 2) ** 2
+
+        +
+
+        Math.cos(
+            lat1 * Math.PI / 180
+        )
+
+        *
+
+        Math.cos(
+            lat2 * Math.PI / 180
+        )
+
+        *
+
+        Math.sin(dLon / 2) ** 2;
 
 
-
-const a=
-
-Math.sin(dLat/2)**2
-
-+
-
-Math.cos(lat1*Math.PI/180)
-*
-Math.cos(lat2*Math.PI/180)
-*
-Math.sin(dLon/2)**2;
-
-
-
-return R *
-2 *
-Math.atan2(
-Math.sqrt(a),
-Math.sqrt(1-a)
-);
-
-
-}
-
-
-
-
-
-
-
-
-// ================= BOOK RIDE =================
-
-
-function setupBooking(){
-
-
-const btn=
-document.getElementById("bookRide");
-
-
-
-if(!btn)return;
-
-
-
-btn.onclick=async()=>{
-
-
-const user=auth.currentUser;
-
-
-
-if(!user){
-
-alert("Please Login First");
-
-return;
+    return (
+        R *
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
+        )
+    );
 
 }
 
 
+// ============================================================
+// LOAD FARE SETTINGS
+// ============================================================
+
+async function loadFareSettings() {
+
+    try {
+
+        const ref =
+            doc(
+                db,
+                "settings",
+                "fare"
+            );
 
 
-
-const pickup=
-document.getElementById(
-"pickupLocation"
-).value;
+        const snap =
+            await getDoc(ref);
 
 
+        if (snap.exists()) {
 
-const drop=
-document.getElementById(
-"dropoffLocation"
-).value;
-
+            fareSettings =
+                snap.data();
 
 
+            console.log(
+                "RiderX Fare Settings:",
+                fareSettings
+            );
 
-if(!pickup || !drop){
+        }
 
+    } catch (error) {
 
-alert(
-"Pickup and Drop select kare"
-);
+        console.log(
+            "Fare settings unavailable. Using defaults.",
+            error
+        );
 
-
-return;
-
-
-}
-
-
-
-
-
-try{
-
-
-await addDoc(
-
-collection(db,"rides"),
-
-{
-
-
-customerId:user.uid,
-
-
-pickupLocation:pickup,
-
-
-dropLocation:drop,
-
-
-pickupCoords,
-
-
-dropCoords,
-
-
-serviceType:selectedService,
-
-
-paymentMethod:
-document.getElementById(
-"paymentMethod"
-).value,
-
-
-fare:
-calculateFare(),
-
-
-status:"REQUESTED",
-
-
-createdAt:
-serverTimestamp()
-
-
-}
-
-);
-
-
-
-
-setStatus(
-"Searching RiderX Rider..."
-);
-
-
+    }
 
 }
 
 
-catch(error){
+// ============================================================
+// GET SERVICE FARE
+// ============================================================
+
+function getFareConfig(
+    service
+) {
+
+    if (
+        fareSettings &&
+        fareSettings[service]
+    ) {
+
+        return {
+            ...DEFAULT_FARES[service],
+            ...fareSettings[service]
+        };
+
+    }
 
 
-console.error(error);
-
-alert(error.message);
-
-
-}
-
-
-
-};
-
-
-}
-
-
-
-
-
-
-
-function setStatus(text){
-
-
-const box=
-document.getElementById(
-"bookingStatus"
-);
-
-
-
-if(box){
-
-box.innerText=text;
+    return (
+        DEFAULT_FARES[service] ||
+        DEFAULT_FARES.bike
+    );
 
 }
 
 
+// ============================================================
+// CALCULATE FARE
+// ============================================================
+
+function calculateFare() {
+
+    if (
+        !pickupCoords ||
+        !dropCoords
+    ) {
+
+        estimatedFare = 0;
+
+
+        if (fareElement) {
+
+            fareElement.textContent =
+                "₹0";
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    routeDistanceKm =
+        getDistance(
+
+            pickupCoords.lat,
+            pickupCoords.lng,
+
+            dropCoords.lat,
+            dropCoords.lng
+
+        );
+
+
+    routeDistanceKm =
+        Number(
+            routeDistanceKm.toFixed(2)
+        );
+
+
+    const config =
+        getFareConfig(
+            selectedService
+        );
+
+
+    const hour =
+        new Date().getHours();
+
+
+    let rate;
+
+
+    if (
+        hour >= 22 ||
+        hour < 6
+    ) {
+
+        rate =
+            Number(
+                config.nightRate ?? 11
+            );
+
+    } else {
+
+        rate =
+            Number(
+                config.dayRate ?? 8
+            );
+
+    }
+
+
+    const extraRate =
+        Number(
+            config.extraRate ??
+            9
+        );
+
+
+    const base =
+        Number(
+            config.baseFare ??
+            20
+        );
+
+
+    let total =
+        base;
+
+
+    if (
+        routeDistanceKm <= 10
+    ) {
+
+        total +=
+            routeDistanceKm *
+            rate;
+
+    } else {
+
+        total +=
+            10 * rate;
+
+
+        total +=
+            (
+                routeDistanceKm - 10
+            ) *
+            extraRate;
+
+    }
+
+
+    /*
+       Minimum fare
+    */
+
+    estimatedFare =
+        Math.max(
+            50,
+            Math.round(total)
+        );
+
+
+    if (fareElement) {
+
+        fareElement.textContent =
+            "₹" +
+            estimatedFare;
+
+    }
+
+
+    return estimatedFare;
+
 }
 
 
+// ============================================================
+// DRAW ROUTE
+// ============================================================
+
+async function drawRoute() {
+
+    if (
+        !pickupCoords ||
+        !dropCoords
+    ) {
+
+        return;
+
+    }
 
 
+    if (routeLayer) {
+
+        map.removeLayer(
+            routeLayer
+        );
+
+        routeLayer = null;
+
+    }
 
 
+    /*
+       Try real road route through OSRM.
+    */
 
-// ================= START =================
+    try {
 
-
-window.onload=()=>{
-
-
-initMap();
-
-
-setupServices();
-
-
-setupBooking();
+        const url =
+            "https://router.project-osrm.org/route/v1/driving/" +
+            `${pickupCoords.lng},${pickupCoords.lat};` +
+            `${dropCoords.lng},${dropCoords.lat}` +
+            "?overview=full&geometries=geojson";
 
 
-};
+        const response =
+            await fetch(url);
+
+
+        if (
+            response.ok
+        ) {
+
+            const data =
+                await response.json();
+
+
+            if (
+                data.routes &&
+                data.routes.length
+            ) {
+
+                const route =
+                    data.routes[0];
+
+
+                routeDistanceKm =
+                    Number(
+                        (
+                            route.distance /
+                            1000
+                        ).toFixed(2)
+                    );
+
+
+                routeLayer =
+                    L.geoJSON(
+                        route.geometry,
+                        {
+                            style: {
+                                weight: 5
+                            }
+                        }
+                    ).addTo(map);
+
+
+                map.fitBounds(
+                    routeLayer.getBounds(),
+                    {
+                        padding: [50, 100]
+                    }
+                );
+
+
+                calculateFare();
+
+                return;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.log(
+            "OSRM route unavailable:",
+            error
+        );
+
+    }
+
+
+    /*
+       Fallback straight-line route.
+    */
+
+    routeDistanceKm =
+        getDistance(
+
+            pickupCoords.lat,
+            pickupCoords.lng,
+
+            dropCoords.lat,
+            dropCoords.lng
+
+        );
+
+
+    routeLayer =
+        L.polyline(
+            [
+                [
+                    pickupCoords.lat,
+                    pickupCoords.lng
+                ],
+                [
+                    dropCoords.lat,
+                    dropCoords.lng
+                ]
+            ],
+            {
+                weight: 5
+            }
+        ).addTo(map);
+
+
+    map.fitBounds(
+        routeLayer.getBounds(),
+        {
+            padding: [50, 100]
+        }
+    );
+
+
+    calculateFare();
+
+}
+
+
+// ============================================================
+// COMPLETE RIDE CALCULATION
+// ============================================================
+
+async function calculateRide() {
+
+    if (
+        !pickupCoords ||
+        !dropCoords
+    ) {
+
+        calculateFare();
+
+        return;
+
+    }
+
+
+    await drawRoute();
+
+}
+
+
+// ============================================================
+// BUTTON LOADING
+// ============================================================
+
+function setBookingLoading(
+    loading
+) {
+
+    if (!bookButton) return;
+
+
+    bookButton.disabled =
+        loading;
+
+
+    if (loading) {
+
+        bookButton.dataset.oldText =
+            bookButton.innerHTML;
+
+
+        bookButton.innerHTML =
+            '<i class="fa-solid fa-spinner fa-spin"></i> Finding Rider...';
+
+    } else {
+
+        bookButton.innerHTML =
+            bookButton.dataset.oldText ||
+            '<i class="fa-solid fa-paper-plane"></i> Book Ride';
+
+    }
+
+}
+
+
+// ============================================================
+// BOOK RIDE
+// ============================================================
+
+async function bookRide() {
+
+    if (isBooking) {
+        return;
+    }
+
+
+    const user =
+        auth.currentUser;
+
+
+    if (!user) {
+
+        setStatus(
+            "Please login first.",
+            "error"
+        );
+
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    "../auth/login.html?role=customer";
+
+            },
+            700
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        !pickupCoords ||
+        !dropCoords
+    ) {
+
+        setStatus(
+            "Please select pickup and destination.",
+            "error"
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        pickupInput &&
+        !pickupInput.value.trim()
+    ) {
+
+        setStatus(
+            "Pickup address is required.",
+            "error"
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        dropInput &&
+        !dropInput.value.trim()
+    ) {
+
+        setStatus(
+            "Destination is required.",
+            "error"
+        );
+
+
+        return;
+
+    }
+
+
+    isBooking = true;
+
+    setBookingLoading(true);
+
+
+    try {
+
+        await calculateRide();
+
+
+        const fare =
+            calculateFare();
+
+
+        const payment =
+            paymentMethod
+                ? String(
