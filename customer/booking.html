@@ -1,21 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+>
 
 <title>RiderX | Book Ride</title>
 
-<link rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
 
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+>
 
 <style>
 
@@ -24,17 +34,18 @@
     --black:#050505;
     --card:#111;
     --card2:#181818;
-    --border:#303030;
+    --line:#2b2b2b;
     --green:#22c55e;
-    --red:#ff4d4d;
-    --muted:#999;
+    --red:#ef4444;
+    --white:#fff;
+    --muted:#888;
 }
 
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family:Poppins,Arial,sans-serif;
+    font-family:Poppins,sans-serif;
 }
 
 html,
@@ -50,9 +61,7 @@ body{
     position:relative;
 }
 
-/* =========================================================
-   MAP
-========================================================= */
+/* MAP */
 
 #map{
     position:absolute;
@@ -61,7 +70,7 @@ body{
 }
 
 .leaflet-control-zoom{
-    margin-top:80px!important;
+    margin-top:75px!important;
 }
 
 .leaflet-control-zoom a{
@@ -70,9 +79,11 @@ body{
     border-color:#333!important;
 }
 
-/* =========================================================
-   TOP BAR
-========================================================= */
+.leaflet-control-attribution{
+    font-size:8px!important;
+}
+
+/* TOP */
 
 .topbar{
     position:absolute;
@@ -81,6 +92,7 @@ body{
     right:0;
     z-index:1000;
     padding:14px;
+    pointer-events:none;
 }
 
 .topbar-inner{
@@ -89,155 +101,152 @@ body{
     justify-content:space-between;
 }
 
-.icon-btn{
+.top-btn{
     width:44px;
     height:44px;
-    border:1px solid #333;
+    border:0;
     border-radius:50%;
-    background:#111;
+    background:rgba(10,10,10,.94);
     color:#fff;
     font-size:17px;
     display:flex;
     align-items:center;
     justify-content:center;
-    cursor:pointer;
-    box-shadow:0 5px 20px rgba(0,0,0,.35);
+    box-shadow:0 5px 18px rgba(0,0,0,.4);
+    pointer-events:auto;
 }
 
-.icon-btn:active{
-    transform:scale(.95);
+.top-btn:active{
+    transform:scale(.94);
 }
 
 .logo{
-    background:#111;
-    border:1px solid #333;
-    padding:8px 17px;
+    background:rgba(10,10,10,.94);
+    padding:9px 17px;
     border-radius:15px;
-    font-size:18px;
+    font-size:17px;
     font-weight:800;
-    box-shadow:0 5px 20px rgba(0,0,0,.35);
+    letter-spacing:.4px;
+    box-shadow:0 5px 18px rgba(0,0,0,.4);
 }
 
 .logo span{
     color:var(--yellow);
 }
 
-/* =========================================================
-   STATUS
-========================================================= */
+/* GPS */
 
-.status{
+.gps-ring{
     position:absolute;
     top:72px;
-    left:50%;
-    transform:translateX(-50%);
+    right:15px;
     z-index:900;
-
-    min-width:170px;
-    max-width:85%;
-
-    background:#111;
-    border:1px solid #333;
-    padding:8px 15px;
-    border-radius:30px;
-
-    text-align:center;
-    font-size:11px;
-    color:#ddd;
-
-    box-shadow:0 5px 20px rgba(0,0,0,.4);
 }
 
-/* =========================================================
-   CENTER PICKUP PIN
-========================================================= */
+.gps-btn{
+    width:46px;
+    height:46px;
+    border:0;
+    border-radius:50%;
+    background:#111;
+    color:var(--yellow);
+    font-size:17px;
+    box-shadow:0 5px 18px rgba(0,0,0,.4);
+}
+
+/* CENTER PIN */
 
 .center-marker{
     position:absolute;
-    top:50%;
     left:50%;
+    top:50%;
     transform:translate(-50%,-100%);
-    z-index:500;
+    z-index:600;
     pointer-events:none;
+    display:none;
 }
 
 .pin{
-    width:45px;
-    height:45px;
-
+    width:44px;
+    height:44px;
     background:var(--yellow);
     color:#000;
-
     border-radius:50% 50% 50% 0;
-
     transform:rotate(-45deg);
-
     display:flex;
     align-items:center;
     justify-content:center;
-
-    box-shadow:0 5px 25px rgba(255,229,0,.35);
+    box-shadow:0 8px 25px rgba(0,0,0,.45);
 }
 
 .pin i{
     transform:rotate(45deg);
 }
 
-/* =========================================================
-   BOOKING SHEET
-========================================================= */
+/* STATUS */
+
+.status-pill{
+    position:absolute;
+    top:73px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:900;
+    padding:8px 15px;
+    border-radius:30px;
+    background:rgba(10,10,10,.94);
+    color:#fff;
+    font-size:10px;
+    white-space:nowrap;
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
+}
+
+/* BOTTOM SHEET */
 
 .booking-sheet{
     position:absolute;
     left:0;
     right:0;
     bottom:0;
-
     z-index:1000;
 
-    background:rgba(9,9,9,.97);
+    background:#080808;
 
-    border-radius:27px 27px 0 0;
+    border-radius:25px 25px 0 0;
 
-    padding:13px 15px 18px;
+    padding:14px;
 
-    max-height:62vh;
+    max-height:65vh;
     overflow-y:auto;
 
-    border-top:1px solid #292929;
-
-    box-shadow:0 -10px 40px rgba(0,0,0,.55);
+    box-shadow:0 -12px 35px rgba(0,0,0,.55);
 }
 
 .handle{
-    width:45px;
+    width:44px;
     height:5px;
-    background:#555;
     border-radius:20px;
+    background:#444;
     margin:0 auto 14px;
 }
 
 .title{
-    font-size:18px;
+    font-size:19px;
     font-weight:800;
-    margin-bottom:13px;
 }
 
 .subtitle{
+    margin-top:3px;
+    margin-bottom:13px;
     color:#777;
     font-size:11px;
-    margin-top:-8px;
-    margin-bottom:13px;
 }
 
-/* =========================================================
-   LOCATION
-========================================================= */
+/* LOCATION */
 
 .location-box{
-    background:#151515;
-    border:1px solid #292929;
-    border-radius:16px;
+    background:var(--card2);
+    border-radius:17px;
+    border:1px solid #242424;
     overflow:hidden;
 }
 
@@ -249,21 +258,18 @@ body{
 }
 
 .location-row + .location-row{
-    border-top:1px solid #292929;
+    border-top:1px solid var(--line);
 }
 
 .location-dot{
     width:26px;
     height:26px;
     min-width:26px;
-
     border-radius:50%;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
-    font-size:10px;
+    font-size:9px;
 }
 
 .pick-dot{
@@ -278,106 +284,86 @@ body{
 
 .location-input{
     flex:1;
-
     min-width:0;
-
-    background:transparent;
     border:0;
     outline:0;
-
+    background:transparent;
     color:#fff;
-
     font-size:12px;
 }
 
 .location-input::placeholder{
-    color:#777;
+    color:#666;
 }
 
 .location-action{
-    width:34px;
-    height:34px;
-
+    width:36px;
+    height:36px;
+    min-width:36px;
     border:0;
     border-radius:50%;
-
-    background:#222;
+    background:#252525;
     color:var(--yellow);
-
-    cursor:pointer;
 }
 
-/* =========================================================
-   SEARCH RESULTS
-========================================================= */
+.location-action:active{
+    transform:scale(.94);
+}
+
+/* SEARCH RESULTS */
 
 .search-results{
     display:none;
-
-    background:#111;
-    border:1px solid #333;
-    border-radius:12px;
-
-    margin-top:6px;
-
     max-height:160px;
     overflow-y:auto;
+    border-top:1px solid #292929;
+}
 
-    position:relative;
-    z-index:2000;
+.search-results.show{
+    display:block;
 }
 
 .search-item{
-    padding:10px;
+    padding:10px 12px;
+    border-bottom:1px solid #222;
     font-size:11px;
     color:#ddd;
-    border-bottom:1px solid #222;
-    cursor:pointer;
 }
 
 .search-item:last-child{
     border-bottom:0;
 }
 
-.search-item:hover{
-    background:#1d1d1d;
+.search-item:active{
+    background:#222;
 }
 
-/* =========================================================
-   SERVICES
-========================================================= */
+/* SERVICES */
 
 .services{
     display:grid;
     grid-template-columns:repeat(4,1fr);
     gap:8px;
-    margin-top:14px;
+    margin-top:13px;
 }
 
 .service{
-    background:#171717;
-    border:1px solid #333;
-    border-radius:14px;
-
+    background:#151515;
+    border:1px solid #2c2c2c;
+    border-radius:15px;
     padding:11px 4px;
-
     text-align:center;
-
-    color:#aaa;
-
-    cursor:pointer;
-
-    transition:.15s;
+    color:#888;
 }
 
 .service i{
     font-size:18px;
-    margin-bottom:4px;
 }
 
 .service span{
     display:block;
-    font-size:10px;
+    margin-top:4px;
+    font-size:9px;
 }
 
 .service.active{
@@ -386,15 +372,13 @@ body{
     color:#000;
 }
 
-/* =========================================================
-   FARE
-========================================================= */
+/* ESTIMATE */
 
 .estimate{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:8px;
-    margin-top:13px;
+    margin-top:12px;
 }
 
 .info-card{
@@ -406,7 +390,7 @@ body{
 
 .info-label{
     color:#777;
-    font-size:10px;
+    font-size:9px;
 }
 
 .info-value{
@@ -415,194 +399,127 @@ body{
     font-weight:700;
 }
 
-.fare-card{
-    margin-top:8px;
+/* FARE */
 
+.fare-card{
+    margin-top:10px;
     background:#151515;
     border:1px solid #292929;
     border-radius:15px;
-
     padding:13px;
-
     display:flex;
     align-items:center;
     justify-content:space-between;
 }
 
 .fare-label{
-    font-size:12px;
-    color:#aaa;
+    font-size:11px;
+    color:#999;
+}
+
+.fare-sub{
+    margin-top:3px;
+    font-size:9px;
+    color:#666;
 }
 
 .price{
+    color:var(--yellow);
     font-size:23px;
     font-weight:800;
-    color:var(--yellow);
 }
 
-/* =========================================================
-   PAYMENT
-========================================================= */
+/* PAYMENT */
+
+.payment-title{
+    margin-top:12px;
+    margin-bottom:7px;
+    font-size:10px;
+    color:#777;
+}
 
 .payment{
-    margin-top:10px;
-
-    display:flex;
-    gap:8px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
 }
 
 .payment-option{
-    flex:1;
-
-    padding:11px 5px;
-
+    padding:10px 5px;
+    border:1px solid #303030;
+    border-radius:12px;
     background:#151515;
-    border:1px solid #333;
-
-    border-radius:13px;
-
-    color:#aaa;
-
+    color:#888;
     text-align:center;
-
-    font-size:10px;
-
-    cursor:pointer;
+    font-size:9px;
 }
 
 .payment-option i{
     display:block;
-    font-size:17px;
-    margin-bottom:3px;
+    margin-bottom:4px;
+    font-size:14px;
 }
 
 .payment-option.active{
     border-color:var(--yellow);
-    background:#211f00;
     color:var(--yellow);
+    background:#1b1b00;
 }
 
-/* =========================================================
-   BOOK BUTTON
-========================================================= */
+/* BOOK */
 
 .book-btn{
     width:100%;
-
     margin-top:13px;
-
     padding:15px;
-
     border:0;
     border-radius:15px;
-
     background:var(--yellow);
     color:#000;
-
-    font-size:16px;
+    font-size:15px;
     font-weight:800;
-
-    cursor:pointer;
 }
 
 .book-btn:disabled{
-    background:#444;
-    color:#888;
-    cursor:not-allowed;
+    background:#3c3c3c;
+    color:#777;
 }
 
-.book-btn.loading{
-    opacity:.7;
+.book-btn:active{
+    transform:scale(.985);
 }
 
-/* =========================================================
-   TOAST
-========================================================= */
-
-.toast{
-    position:fixed;
-
-    left:50%;
-    bottom:20px;
-
-    transform:translate(-50%,120px);
-
-    z-index:5000;
-
-    background:#111;
-
-    border:1px solid #333;
-
-    padding:12px 18px;
-
-    border-radius:13px;
-
-    font-size:12px;
-
-    box-shadow:0 10px 35px rgba(0,0,0,.55);
-
-    transition:.3s;
-
-    text-align:center;
-}
-
-.toast.show{
-    transform:translate(-50%,0);
-}
-
-.toast.success{
-    border-color:#1f9d55;
-}
-
-.toast.error{
-    border-color:#a33;
-}
-
-/* =========================================================
-   SEARCHING OVERLAY
-========================================================= */
+/* SEARCHING */
 
 .searching-overlay{
-    display:none;
-
     position:fixed;
     inset:0;
+    z-index:5000;
+    background:rgba(0,0,0,.72);
+    display:none;
+    align-items:flex-end;
+}
 
-    z-index:4500;
-
-    background:rgba(0,0,0,.75);
-
-    align-items:center;
-    justify-content:center;
+.searching-overlay.show{
+    display:flex;
 }
 
 .searching-box{
-    width:calc(100% - 40px);
-    max-width:360px;
-
-    background:#111;
-
-    border:1px solid #333;
-
-    border-radius:22px;
-
-    padding:28px 20px;
-
+    width:100%;
+    background:#0b0b0b;
+    border-radius:25px 25px 0 0;
+    padding:25px 20px 30px;
     text-align:center;
 }
 
 .loader{
     width:45px;
     height:45px;
-
+    border-radius:50%;
     border:4px solid #333;
     border-top-color:var(--yellow);
-
-    border-radius:50%;
-
     animation:spin 1s linear infinite;
-
-    margin:0 auto 15px;
+    margin:0 auto 14px;
 }
 
 @keyframes spin{
@@ -612,32 +529,68 @@ body{
 }
 
 .searching-title{
-    font-size:17px;
+    font-size:18px;
     font-weight:800;
 }
 
 .searching-text{
-    margin-top:6px;
-    color:#888;
+    margin-top:5px;
+    color:#777;
     font-size:11px;
 }
 
-/* =========================================================
-   MOBILE
-========================================================= */
+/* TOAST */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    transform:translate(-50%,100px);
+    z-index:6000;
+    background:#111;
+    border:1px solid #333;
+    padding:11px 17px;
+    border-radius:13px;
+    font-size:11px;
+    opacity:0;
+    transition:.25s;
+    pointer-events:none;
+    max-width:90%;
+    text-align:center;
+}
+
+.toast.show{
+    transform:translate(-50%,0);
+    opacity:1;
+}
+
+.toast.success{
+    border-color:#22c55e;
+}
+
+.toast.error{
+    border-color:#ef4444;
+}
+
+/* MOBILE */
 
 @media(max-width:380px){
 
     .booking-sheet{
-        max-height:66vh;
+        max-height:68vh;
+        padding:12px;
     }
 
     .service{
-        padding:9px 2px;
+        padding:9px 3px;
     }
 
     .service i{
         font-size:16px;
+    }
+
+    .title{
+        font-size:17px;
     }
 
 }
@@ -648,25 +601,22 @@ body{
 
 <body>
 
-<!-- ======================================================
-     MAP
-====================================================== -->
+
+<!-- MAP -->
 
 <div id="map"></div>
 
 
-<!-- ======================================================
-     TOP BAR
-====================================================== -->
+<!-- TOP -->
 
 <div class="topbar">
 
     <div class="topbar-inner">
 
         <button
-            class="icon-btn"
             id="backBtn"
-            aria-label="Back">
+            class="top-btn"
+            type="button">
 
             <i class="fa-solid fa-arrow-left"></i>
 
@@ -678,40 +628,45 @@ body{
         </div>
 
 
-        <button
-            class="icon-btn"
-            id="myLocation"
-            aria-label="My Location">
-
-            <i class="fa-solid fa-location-crosshairs"></i>
-
-        </button>
+        <div style="width:44px;"></div>
 
     </div>
 
 </div>
 
 
-<!-- ======================================================
-     STATUS
-====================================================== -->
+<!-- GPS -->
+
+<div class="gps-ring">
+
+    <button
+        id="myLocation"
+        class="gps-btn"
+        type="button">
+
+        <i class="fa-solid fa-location-crosshairs"></i>
+
+    </button>
+
+</div>
+
+
+<!-- STATUS -->
 
 <div
-    class="status"
-    id="status">
+    id="status"
+    class="status-pill">
 
     Getting your location...
 
 </div>
 
 
-<!-- ======================================================
-     CENTER PIN
-====================================================== -->
+<!-- CENTER PIN -->
 
 <div
-    class="center-marker"
-    id="centerMarker">
+    id="centerMarker"
+    class="center-marker">
 
     <div class="pin">
 
@@ -722,9 +677,7 @@ body{
 </div>
 
 
-<!-- ======================================================
-     BOOKING SHEET
-====================================================== -->
+<!-- BOOKING SHEET -->
 
 <div class="booking-sheet">
 
@@ -736,16 +689,13 @@ body{
     </div>
 
     <div class="subtitle">
-        Choose your pickup and destination
+        Choose pickup and destination
     </div>
 
 
-    <!-- LOCATION -->
+    <!-- LOCATIONS -->
 
     <div class="location-box">
-
-
-        <!-- PICKUP -->
 
         <div class="location-row">
 
@@ -768,7 +718,7 @@ body{
                 class="location-action"
                 type="button">
 
-                <i class="fa-solid fa-location-crosshairs"></i>
+                <i class="fa-solid fa-crosshairs"></i>
 
             </button>
 
@@ -780,8 +730,6 @@ body{
             class="search-results">
         </div>
 
-
-        <!-- DROP -->
 
         <div class="location-row">
 
@@ -812,2018 +760,4 @@ body{
 
 
         <div
-            id="dropResults"
-            class="search-results">
-        </div>
-
-    </div>
-
-
-    <!-- SERVICES -->
-
-    <div class="services">
-
-
-        <div
-            class="service active"
-            data-service="bike">
-
-            <i class="fa-solid fa-motorcycle"></i>
-
-            <span>Bike</span>
-
-        </div>
-
-
-        <div
-            class="service"
-            data-service="cab">
-
-            <i class="fa-solid fa-car"></i>
-
-            <span>Cab</span>
-
-        </div>
-
-
-        <div
-            class="service"
-            data-service="parcel">
-
-            <i class="fa-solid fa-box"></i>
-
-            <span>Parcel</span>
-
-        </div>
-
-
-        <div
-            class="service"
-            data-service="food">
-
-            <i class="fa-solid fa-utensils"></i>
-
-            <span>Food</span>
-
-        </div>
-
-    </div>
-
-
-    <!-- ESTIMATE -->
-
-    <div class="estimate">
-
-
-        <div class="info-card">
-
-            <div class="info-label">
-                Distance
-            </div>
-
-            <div
-                id="distanceDisplay"
-                class="info-value">
-
-                0 km
-
-            </div>
-
-        </div>
-
-
-        <div class="info-card">
-
-            <div class="info-label">
-                Estimated time
-            </div>
-
-            <div
-                id="durationDisplay"
-                class="info-value">
-
-                0 min
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- FARE -->
-
-    <div class="fare-card">
-
-        <div class="fare-label">
-            Estimated Fare
-        </div>
-
-        <div
-            id="fareDisplay"
-            class="price">
-
-            ₹0
-
-        </div>
-
-    </div>
-
-
-    <!-- PAYMENT -->
-
-    <div class="payment">
-
-
-        <div
-            class="payment-option active"
-            data-payment="cash">
-
-            <i class="fa-solid fa-money-bill-wave"></i>
-
-            Cash
-
-        </div>
-
-
-        <div
-            class="payment-option"
-            data-payment="upi">
-
-            <i class="fa-solid fa-qrcode"></i>
-
-            QR / UPI
-
-        </div>
-
-
-        <div
-            class="payment-option"
-            data-payment="wallet">
-
-            <i class="fa-solid fa-wallet"></i>
-
-            Wallet
-
-        </div>
-
-    </div>
-
-
-    <!-- BOOK -->
-
-    <button
-        id="bookRideBtn"
-        class="book-btn"
-        disabled>
-
-        <i class="fa-solid fa-car-side"></i>
-        Confirm Ride
-
-    </button>
-
-</div>
-
-
-<!-- ======================================================
-     SEARCHING OVERLAY
-====================================================== -->
-
-<div
-    id="searchingOverlay"
-    class="searching-overlay">
-
-    <div class="searching-box">
-
-        <div class="loader"></div>
-
-        <div class="searching-title">
-            Finding your Rider
-        </div>
-
-        <div
-            id="searchingText"
-            class="searching-text">
-
-            Looking for nearby riders...
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- ======================================================
-     TOAST
-====================================================== -->
-
-<div
-    id="toast"
-    class="toast">
-</div>
-
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-
-<script type="module">
-
-/* =========================================================
-   RIDERX BOOKING — CLEAN FINAL CONTROLLER
-========================================================= */
-
-import {
-
-    auth,
-    db
-
-} from "../firebase/firebase-config.js";
-
-
-import {
-
-    collection,
-    addDoc,
-    doc,
-    getDoc,
-    onSnapshot,
-    Timestamp
-
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-import {
-
-    onAuthStateChanged
-
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const mapElement =
-    document.getElementById("map");
-
-const statusElement =
-    document.getElementById("status");
-
-const centerMarker =
-    document.getElementById("centerMarker");
-
-const pickupInput =
-    document.getElementById("pickupInput");
-
-const dropInput =
-    document.getElementById("dropInput");
-
-const pickupResults =
-    document.getElementById("pickupResults");
-
-const dropResults =
-    document.getElementById("dropResults");
-
-const pickupMapBtn =
-    document.getElementById("pickupMapBtn");
-
-const dropMapBtn =
-    document.getElementById("dropMapBtn");
-
-const myLocationBtn =
-    document.getElementById("myLocation");
-
-const bookRideBtn =
-    document.getElementById("bookRideBtn");
-
-const distanceDisplay =
-    document.getElementById("distanceDisplay");
-
-const durationDisplay =
-    document.getElementById("durationDisplay");
-
-const fareDisplay =
-    document.getElementById("fareDisplay");
-
-const searchingOverlay =
-    document.getElementById("searchingOverlay");
-
-const searchingText =
-    document.getElementById("searchingText");
-
-const toast =
-    document.getElementById("toast");
-
-
-/* =========================================================
-   STATE
-========================================================= */
-
-let map = null;
-
-let currentUser = null;
-
-let pickupCoords = null;
-
-let dropCoords = null;
-
-let pickupMarker = null;
-
-let dropMarker = null;
-
-let routeLayer = null;
-
-let selectingMode = null;
-
-let selectedService = "bike";
-
-let selectedPayment = "cash";
-
-let distanceKm = 0;
-
-let durationMin = 0;
-
-let estimatedFare = 0;
-
-let fareSettings = null;
-
-let rideListener = null;
-
-let currentRideId = null;
-
-
-/* =========================================================
-   DEFAULT FARE
-========================================================= */
-
-const DEFAULT_FARES = {
-
-    bike: {
-        baseFare: 30,
-        dayRate: 8,
-        extraRate: 9,
-        nightRate: 11
-    },
-
-    cab: {
-        baseFare: 60,
-        dayRate: 12,
-        extraRate: 14,
-        nightRate: 16
-    },
-
-    parcel: {
-        baseFare: 40,
-        dayRate: 9,
-        extraRate: 10,
-        nightRate: 12
-    },
-
-    food: {
-        baseFare: 30,
-        dayRate: 8,
-        extraRate: 9,
-        nightRate: 11
-    }
-
-};
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(
-    text,
-    type = ""
-){
-
-    toast.textContent = text;
-
-    toast.className =
-        "toast show " + type;
-
-
-    setTimeout(
-        () => {
-
-            toast.classList.remove(
-                "show"
-            );
-
-        },
-        2800
-    );
-
-}
-
-
-/* =========================================================
-   MAP INIT
-========================================================= */
-
-function initMap(){
-
-    map =
-        L.map(
-            mapElement,
-            {
-                zoomControl:true
-            }
-        );
-
-
-    L.tileLayer(
-
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-        {
-
-            maxZoom:19,
-
-            attribution:
-                "&copy; OpenStreetMap contributors"
-
-        }
-
-    ).addTo(map);
-
-
-    map.setView(
-        [30.7333, 76.7794],
-        13
-    );
-
-
-    map.on(
-        "moveend",
-        handleMapMove
-    );
-
-
-    statusElement.textContent =
-        "Getting your location...";
-
-
-    setTimeout(
-        () => {
-
-            useCurrentLocation();
-
-        },
-        500
-    );
-
-}
-
-
-/* =========================================================
-   CURRENT LOCATION
-========================================================= */
-
-function useCurrentLocation(){
-
-    if(
-        !navigator.geolocation
-    ){
-
-        showToast(
-            "Location is not supported on this device.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    statusElement.textContent =
-        "Getting your location...";
-
-
-    navigator.geolocation.getCurrentPosition(
-
-        async position => {
-
-            const lat =
-                position.coords.latitude;
-
-            const lng =
-                position.coords.longitude;
-
-
-            map.setView(
-                [lat,lng],
-                16
-            );
-
-
-            setPickupFromCoords(
-                lat,
-                lng,
-                "Current location"
-            );
-
-
-            try{
-
-                const address =
-                    await reverseGeocode(
-                        lat,
-                        lng
-                    );
-
-
-                pickupInput.value =
-                    address ||
-                    "Current location";
-
-
-                if(pickupCoords){
-
-                    pickupCoords.address =
-                        pickupInput.value;
-
-                }
-
-            }catch(error){
-
-                console.warn(
-                    "Reverse geocode failed",
-                    error
-                );
-
-            }
-
-
-            statusElement.textContent =
-                "Pickup location selected";
-
-        },
-
-        error => {
-
-            console.error(
-                error
-            );
-
-
-            statusElement.textContent =
-                "Select pickup location";
-
-
-            showToast(
-                "Location permission allow karein.",
-                "error"
-            );
-
-        },
-
-        {
-
-            enableHighAccuracy:true,
-
-            timeout:10000,
-
-            maximumAge:10000
-
-        }
-
-    );
-
-}
-
-
-/* =========================================================
-   MAP CENTER SELECTION
-========================================================= */
-
-function handleMapMove(){
-
-    if(!selectingMode){
-        return;
-    }
-
-
-    const center =
-        map.getCenter();
-
-
-    if(
-        selectingMode === "pickup"
-    ){
-
-        setPickupFromCoords(
-            center.lat,
-            center.lng,
-            pickupInput.value ||
-            "Selected pickup"
-        );
-
-    }
-
-
-    if(
-        selectingMode === "drop"
-    ){
-
-        setDropFromCoords(
-            center.lat,
-            center.lng,
-            dropInput.value ||
-            "Selected destination"
-        );
-
-    }
-
-
-    updateRouteAndFare();
-
-}
-
-
-/* =========================================================
-   PICKUP
-========================================================= */
-
-function setPickupFromCoords(
-    lat,
-    lng,
-    address
-){
-
-    pickupCoords = {
-
-        lat:Number(lat),
-
-        lng:Number(lng),
-
-        address:
-            String(address || "")
-
-    };
-
-
-    if(pickupMarker){
-
-        map.removeLayer(
-            pickupMarker
-        );
-
-    }
-
-
-    pickupMarker =
-        L.marker(
-            [lat,lng]
-        )
-        .addTo(map)
-        .bindPopup(
-            "Pickup"
-        );
-
-
-    selectingMode = null;
-
-}
-
-
-/* =========================================================
-   DROP
-========================================================= */
-
-function setDropFromCoords(
-    lat,
-    lng,
-    address
-){
-
-    dropCoords = {
-
-        lat:Number(lat),
-
-        lng:Number(lng),
-
-        address:
-            String(address || "")
-
-    };
-
-
-    if(dropMarker){
-
-        map.removeLayer(
-            dropMarker
-        );
-
-    }
-
-
-    dropMarker =
-        L.marker(
-            [lat,lng]
-        )
-        .addTo(map)
-        .bindPopup(
-            "Destination"
-        );
-
-
-    selectingMode = null;
-
-}
-
-
-/* =========================================================
-   MAP BUTTONS
-========================================================= */
-
-pickupMapBtn.addEventListener(
-    "click",
-    () => {
-
-        selectingMode =
-            "pickup";
-
-
-        centerMarker.style.display =
-            "block";
-
-
-        statusElement.textContent =
-            "Move map to choose pickup";
-
-
-        showToast(
-            "Map ko move karke pickup select karein."
-        );
-
-    }
-);
-
-
-dropMapBtn.addEventListener(
-    "click",
-    () => {
-
-        selectingMode =
-            "drop";
-
-
-        centerMarker.style.display =
-            "block";
-
-
-        statusElement.textContent =
-            "Move map to choose destination";
-
-
-        showToast(
-            "Map ko move karke destination select karein."
-        );
-
-    }
-);
-
-
-myLocationBtn.addEventListener(
-    "click",
-    useCurrentLocation
-);
-
-
-/* =========================================================
-   SERVICE
-========================================================= */
-
-document
-.querySelectorAll(".service")
-.forEach(
-    card => {
-
-        card.addEventListener(
-            "click",
-            () => {
-
-                document
-                .querySelectorAll(".service")
-                .forEach(
-                    c =>
-                    c.classList.remove(
-                        "active"
-                    )
-                );
-
-
-                card.classList.add(
-                    "active"
-                );
-
-
-                selectedService =
-                    card.dataset.service ||
-                    "bike";
-
-
-                calculateFare();
-
-            }
-        );
-
-    }
-);
-
-
-/* =========================================================
-   PAYMENT
-========================================================= */
-
-document
-.querySelectorAll(".payment-option")
-.forEach(
-    option => {
-
-        option.addEventListener(
-            "click",
-            () => {
-
-                document
-                .querySelectorAll(
-                    ".payment-option"
-                )
-                .forEach(
-                    x =>
-                    x.classList.remove(
-                        "active"
-                    )
-                );
-
-
-                option.classList.add(
-                    "active"
-                );
-
-
-                selectedPayment =
-                    option.dataset.payment ||
-                    "cash";
-
-            }
-        );
-
-    }
-);
-
-
-/* =========================================================
-   HAVERSINE DISTANCE
-========================================================= */
-
-function calculateDistance(
-    lat1,
-    lng1,
-    lat2,
-    lng2
-){
-
-    const R = 6371;
-
-
-    const dLat =
-        (lat2-lat1)
-        *
-        Math.PI /
-        180;
-
-
-    const dLng =
-        (lng2-lng1)
-        *
-        Math.PI /
-        180;
-
-
-    const a =
-
-        Math.sin(dLat/2)
-        *
-        Math.sin(dLat/2)
-
-        +
-
-        Math.cos(
-            lat1 *
-            Math.PI /
-            180
-        )
-
-        *
-
-        Math.cos(
-            lat2 *
-            Math.PI /
-            180
-        )
-
-        *
-
-        Math.sin(dLng/2)
-        *
-        Math.sin(dLng/2);
-
-
-    const c =
-        2 *
-        Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(1-a)
-        );
-
-
-    return R*c;
-
-}
-
-
-/* =========================================================
-   REAL ROUTE — OSRM
-========================================================= */
-
-async function getRealRoute(){
-
-    if(
-        !pickupCoords ||
-        !dropCoords
-    ){
-
-        return null;
-
-    }
-
-
-    const url =
-
-        "https://router.project-osrm.org/route/v1/driving/"
-        +
-
-        pickupCoords.lng +
-        "," +
-        pickupCoords.lat +
-
-        ";" +
-
-        dropCoords.lng +
-        "," +
-        dropCoords.lat +
-
-        "?overview=full&geometries=geojson";
-
-
-    const response =
-        await fetch(url);
-
-
-    if(!response.ok){
-
-        throw new Error(
-            "Route service unavailable"
-        );
-
-    }
-
-
-    const data =
-        await response.json();
-
-
-    if(
-        !data.routes ||
-        !data.routes.length
-    ){
-
-        return null;
-
-    }
-
-
-    const route =
-        data.routes[0];
-
-
-    return {
-
-        distance:
-            route.distance / 1000,
-
-        duration:
-            route.duration / 60,
-
-        geometry:
-            route.geometry
-
-    };
-
-}
-
-
-/* =========================================================
-   ROUTE + FARE
-========================================================= */
-
-async function updateRouteAndFare(){
-
-    if(
-        !pickupCoords ||
-        !dropCoords
-    ){
-
-        distanceKm = 0;
-
-        durationMin = 0;
-
-        estimatedFare = 0;
-
-        updateUI();
-
-        return;
-
-    }
-
-
-    try{
-
-        const route =
-            await getRealRoute();
-
-
-        if(route){
-
-            distanceKm =
-                Number(
-                    route.distance.toFixed(2)
-                );
-
-
-            durationMin =
-                Math.max(
-                    1,
-                    Math.round(
-                        route.duration
-                    )
-                );
-
-
-            if(routeLayer){
-
-                map.removeLayer(
-                    routeLayer
-                );
-
-            }
-
-
-            routeLayer =
-                L.geoJSON(
-                    route.geometry,
-                    {
-
-                        style:{
-                            color:"#ffe500",
-                            weight:5,
-                            opacity:.9
-                        }
-
-                    }
-                )
-                .addTo(map);
-
-
-        }else{
-
-            distanceKm =
-                calculateDistance(
-
-                    pickupCoords.lat,
-                    pickupCoords.lng,
-
-                    dropCoords.lat,
-                    dropCoords.lng
-
-                );
-
-
-            durationMin =
-                Math.max(
-                    1,
-                    Math.round(
-                        distanceKm * 3
-                    )
-                );
-
-        }
-
-
-    }catch(error){
-
-        console.warn(
-            "OSRM failed:",
-            error
-        );
-
-
-        distanceKm =
-            calculateDistance(
-
-                pickupCoords.lat,
-                pickupCoords.lng,
-
-                dropCoords.lat,
-                dropCoords.lng
-
-            );
-
-
-        durationMin =
-            Math.max(
-                1,
-                Math.round(
-                    distanceKm * 3
-                )
-            );
-
-    }
-
-
-    calculateFare();
-
-}
-
-
-/* =========================================================
-   FARE SETTINGS
-========================================================= */
-
-async function loadFareSettings(){
-
-    try{
-
-        const snap =
-            await getDoc(
-                doc(
-                    db,
-                    "settings",
-                    "fare"
-                )
-            );
-
-
-        if(
-            snap.exists()
-        ){
-
-            fareSettings =
-                snap.data();
-
-            console.log(
-                "RiderX admin fare settings:",
-                fareSettings
-            );
-
-        }
-
-    }catch(error){
-
-        console.warn(
-            "Fare settings unavailable:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   GET FARE
-========================================================= */
-
-function getFareForService(){
-
-    const adminFare =
-        fareSettings &&
-        fareSettings[selectedService];
-
-
-    if(adminFare){
-
-        return {
-
-            baseFare:
-                Number(
-                    adminFare.baseFare ??
-                    30
-                ),
-
-            dayRate:
-                Number(
-                    adminFare.dayRate ??
-                    8
-                ),
-
-            extraRate:
-                Number(
-                    adminFare.extraRate ??
-                    9
-                ),
-
-            nightRate:
-                Number(
-                    adminFare.nightRate ??
-                    11
-                )
-
-        };
-
-    }
-
-
-    return (
-        DEFAULT_FARES[
-            selectedService
-        ]
-        ||
-        DEFAULT_FARES.bike
-    );
-
-}
-
-
-/* =========================================================
-   CALCULATE FARE
-========================================================= */
-
-function calculateFare(){
-
-    if(
-        !pickupCoords ||
-        !dropCoords ||
-        distanceKm <= 0
-    ){
-
-        estimatedFare = 0;
-
-        updateUI();
-
-        return;
-
-    }
-
-
-    const fare =
-        getFareForService();
-
-
-    const hour =
-        new Date().getHours();
-
-
-    let perKm;
-
-
-    if(
-        hour >= 22 ||
-        hour < 6
-    ){
-
-        perKm =
-            fare.nightRate;
-
-    }else{
-
-        perKm =
-            fare.dayRate;
-
-    }
-
-
-    let total =
-        fare.baseFare;
-
-
-    if(
-        distanceKm <= 10
-    ){
-
-        total +=
-            distanceKm *
-            perKm;
-
-    }else{
-
-        total +=
-            10 *
-            perKm;
-
-
-        total +=
-            (
-                distanceKm - 10
-            )
-            *
-            fare.extraRate;
-
-    }
-
-
-    estimatedFare =
-        Math.max(
-            50,
-            Math.round(total)
-        );
-
-
-    updateUI();
-
-}
-
-
-/* =========================================================
-   UI
-========================================================= */
-
-function updateUI(){
-
-    distanceDisplay.textContent =
-        distanceKm > 0
-        ? distanceKm.toFixed(1) + " km"
-        : "0 km";
-
-
-    durationDisplay.textContent =
-        durationMin > 0
-        ? durationMin + " min"
-        : "0 min";
-
-
-    fareDisplay.textContent =
-        "₹" +
-        estimatedFare;
-
-
-    bookRideBtn.disabled =
-        !(
-            currentUser &&
-            pickupCoords &&
-            dropCoords &&
-            distanceKm > 0
-        );
-
-}
-
-
-/* =========================================================
-   SEARCH LOCATION
-========================================================= */
-
-let searchTimer = null;
-
-
-async function searchLocation(
-    text,
-    type
-){
-
-    const query =
-        text.trim();
-
-
-    const resultsBox =
-        type === "pickup"
-        ? pickupResults
-        : dropResults;
-
-
-    if(
-        query.length < 3
-    ){
-
-        resultsBox.style.display =
-            "none";
-
-        resultsBox.innerHTML =
-            "";
-
-        return;
-
-    }
-
-
-    clearTimeout(
-        searchTimer
-    );
-
-
-    searchTimer =
-        setTimeout(
-            async () => {
-
-                try{
-
-                    const url =
-
-                        "https://nominatim.openstreetmap.org/search"
-                        +
-                        "?format=json"
-                        +
-                        "&limit=5"
-                        +
-                        "&countrycodes=in"
-                        +
-                        "&q="
-                        +
-                        encodeURIComponent(
-                            query
-                        );
-
-
-                    const response =
-                        await fetch(
-                            url,
-                            {
-                                headers:{
-                                    "Accept":
-                                        "application/json"
-                                }
-                            }
-                        );
-
-
-                    const data =
-                        await response.json();
-
-
-                    resultsBox.innerHTML =
-                        "";
-
-
-                    if(!data.length){
-
-                        resultsBox.style.display =
-                            "none";
-
-                        return;
-
-                    }
-
-
-                    data.forEach(
-                        place => {
-
-                            const item =
-                                document.createElement(
-                                    "div"
-                                );
-
-
-                            item.className =
-                                "search-item";
-
-
-                            item.textContent =
-                                place.display_name;
-
-
-                            item.addEventListener(
-                                "click",
-                                () => {
-
-                                    const lat =
-                                        Number(
-                                            place.lat
-                                        );
-
-                                    const lng =
-                                        Number(
-                                            place.lon
-                                        );
-
-
-                                    if(
-                                        type ===
-                                        "pickup"
-                                    ){
-
-                                        pickupInput.value =
-                                            place.display_name;
-
-
-                                        setPickupFromCoords(
-                                            lat,
-                                            lng,
-                                            place.display_name
-                                        );
-
-                                    }else{
-
-                                        dropInput.value =
-                                            place.display_name;
-
-
-                                        setDropFromCoords(
-                                            lat,
-                                            lng,
-                                            place.display_name
-                                        );
-
-                                    }
-
-
-                                    resultsBox.style.display =
-                                        "none";
-
-
-                                    map.setView(
-                                        [lat,lng],
-                                        16
-                                    );
-
-
-                                    updateRouteAndFare();
-
-                                }
-                            );
-
-
-                            resultsBox.appendChild(
-                                item
-                            );
-
-                        }
-                    );
-
-
-                    resultsBox.style.display =
-                        "block";
-
-                }catch(error){
-
-                    console.warn(
-                        "Search error:",
-                        error
-                    );
-
-                }
-
-            },
-            450
-        );
-
-}
-
-
-pickupInput.addEventListener(
-    "input",
-    () =>
-        searchLocation(
-            pickupInput.value,
-            "pickup"
-        )
-);
-
-
-dropInput.addEventListener(
-    "input",
-    () =>
-        searchLocation(
-            dropInput.value,
-            "drop"
-        )
-);
-
-
-/* =========================================================
-   REVERSE GEOCODING
-========================================================= */
-
-async function reverseGeocode(
-    lat,
-    lng
-){
-
-    const url =
-
-        "https://nominatim.openstreetmap.org/reverse"
-        +
-        "?format=json"
-        +
-        "&lat=" +
-        encodeURIComponent(lat)
-        +
-        "&lon=" +
-        encodeURIComponent(lng);
-
-
-    const response =
-        await fetch(
-            url,
-            {
-                headers:{
-                    "Accept":
-                        "application/json"
-                }
-            }
-        );
-
-
-    if(!response.ok){
-
-        return "";
-
-    }
-
-
-    const data =
-        await response.json();
-
-
-    return data.display_name || "";
-
-}
-
-
-/* =========================================================
-   BOOK RIDE
-========================================================= */
-
-bookRideBtn.addEventListener(
-    "click",
-    createRide
-);
-
-
-async function createRide(){
-
-    if(!currentUser){
-
-        showToast(
-            "Please login first.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    if(
-        !pickupCoords ||
-        !dropCoords
-    ){
-
-        showToast(
-            "Pickup aur destination select karein.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    if(
-        distanceKm <= 0
-    ){
-
-        showToast(
-            "Route calculate ho raha hai. Thoda wait karein.",
-            "error"
-        );
-
-        await updateRouteAndFare();
-
-        if(distanceKm <= 0){
-            return;
-        }
-
-    }
-
-
-    bookRideBtn.disabled =
-        true;
-
-
-    bookRideBtn.classList.add(
-        "loading"
-    );
-
-
-    searchingOverlay.style.display =
-        "flex";
-
-
-    searchingText.textContent =
-        "Creating your ride request...";
-
-
-    try{
-
-        const ride = {
-
-            customerId:
-                currentUser.uid,
-
-            customerEmail:
-                currentUser.email ||
-                "",
-
-            customerName:
-                currentUser.displayName ||
-                currentUser.email ||
-                "RiderX Customer",
-
-
-            serviceType:
-                selectedService,
-
-            service:
-                selectedService,
-
-
-            pickup:{
-
-                lat:
-                    pickupCoords.lat,
-
-                lng:
-                    pickupCoords.lng,
-
-                address:
-                    pickupCoords.address ||
-                    pickupInput.value,
-
-                name:
-                    pickupCoords.address ||
-                    pickupInput.value
-
-            },
-
-
-            drop:{
-
-                lat:
-                    dropCoords.lat,
-
-                lng:
-                    dropCoords.lng,
-
-                address:
-                    dropCoords.address ||
-                    dropInput.value,
-
-                name:
-                    dropCoords.address ||
-                    dropInput.value
-
-            },
-
-
-            distance:
-                Number(
-                    distanceKm.toFixed(2)
-                ),
-
-            duration:
-                Number(
-                    durationMin
-                ),
-
-            fare:
-                Number(
-                    estimatedFare
-                ),
-
-
-            paymentMethod:
-                selectedPayment,
-
-
-            paymentStatus:
-                selectedPayment === "cash"
-                ? "pending"
-                : "pending",
-
-
-            status:
-                "REQUESTED",
-
-
-            riderId:
-                null,
-
-            driverId:
-                null,
-
-
-            createdAt:
-                Timestamp.now(),
-
-            requestedAt:
-                Timestamp.now()
-
-        };
-
-
-        searchingText.textContent =
-            "Sending request to nearby riders...";
-
-
-        const rideRef =
-            await addDoc(
-                collection(
-                    db,
-                    "rides"
-                ),
-                ride
-            );
-
-
-        currentRideId =
-            rideRef.id;
-
-
-        console.log(
-            "RiderX ride created:",
-            rideRef.id
-        );
-
-
-        localStorage.setItem(
-            "riderx_current_ride_id",
-            rideRef.id
-        );
-
-
-        showToast(
-            "Ride request sent successfully.",
-            "success"
-        );
-
-
-        searchingText.textContent =
-            "Waiting for a nearby rider to accept...";
-
-
-        startRideListener(
-            rideRef.id
-        );
-
-
-    }catch(error){
-
-        console.error(
-            "RiderX booking error:",
-            error
-        );
-
-
-        searchingOverlay.style.display =
-            "none";
-
-
-        bookRideBtn.disabled =
-            false;
-
-
-        bookRideBtn.classList.remove(
-            "loading"
-        );
-
-
-        if(
-            error.code ===
-            "permission-denied"
-        ){
-
-            showToast(
-                "Firestore permission denied. Rides rule check karein.",
-                "error"
-            );
-
-        }else{
-
-            showToast(
-                error.message ||
-                "Ride booking failed.",
-                "error"
-            );
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   RIDE STATUS LISTENER
-========================================================= */
-
-function startRideListener(
-    rideId
-){
-
-    if(
-        typeof rideListener ===
-        "function"
-    ){
-
-        rideListener();
-
-    }
-
-
-    rideListener =
-        onSnapshot(
-
-            doc(
-                db,
-                "rides",
-                rideId
-            ),
-
-            snapshot => {
-
-                if(
-                    !snapshot.exists()
-                ){
-
-                    return;
-
-                }
-
-
-                const ride =
-                    snapshot.data();
-
-
-                console.log(
-                    "Ride status:",
-                    ride.status
-                );
-
-
-                switch(
-                    String(
-                        ride.status ||
-                        ""
-                    ).toUpperCase()
-                ){
-
-                    case "REQUESTED":
-
-                        searchingOverlay.style.display =
-                            "flex";
-
-                        searchingText.textContent =
-                            "Looking for nearby riders...";
-
-                        break;
-
-
-                    case "SEARCHING":
-
-                        searchingOverlay.style.display =
-                            "flex";
-
-                        searchingText.textContent =
-                            "Looking for nearby riders...";
-
-                        break;
-
-
-                    case "ACCEPTED":
-
-                        searchingOverlay.style.display =
-                            "none";
-
-                        showToast(
-                            "🎉 Rider accepted your ride!",
-                            "success"
-                        );
-
-
-                        localStorage.setItem(
-                            "riderx_active_ride_id",
-                            rideId
-                        );
-
-
-                        setTimeout(
-                            () => {
-
-                                window.location.href =
-                                    "history.html";
-
-                            },
-                            
+            id="drop
