@@ -1,2926 +1,2978 @@
-/**
- * ============================================================
- * RiderX - SMART RIDER MATCHING ENGINE
- * ============================================================
- *
- * CUSTOMER
- *    ↓
- * RIDE REQUESTED
- *    ↓
- * FIND ONLINE RIDERS
- *    ↓
- * FILTER AVAILABLE RIDERS
- *    ↓
- * DISTANCE / SERVICE MATCH
- *    ↓
- * SEND REQUEST
- *    ↓
- * RIDER ACCEPTS
- *    ↓
- * ATOMIC ACCEPT
- *    ↓
- * RIDE ACCEPTED
- *
- * IMPORTANT
- * ------------------------------------------------------------
- * This file DOES NOT create GPS watchers.
- * This file DOES NOT create maps.
- * This file uses the central Firebase config.
- *
- * GPS owner:
- *      js/map.js
- *
- * Booking owner:
- *      js/booking.js
- *
- * Matching owner:
- *      js/matching.js
- *
- * ============================================================
- */
-
-import {
-    auth,
-    db,
-
-    doc,
-    getDoc,
-    updateDoc,
-    collection,
-    query,
-    where,
-    getDocs,
-    onSnapshot,
-    runTransaction,
-    serverTimestamp
-} from "../firebase/firebase-config.js";
-
-
 /* ============================================================
-   STATE
-============================================================ */
+   RIDERX MATCHING ENGINE
+   File: js/matching.js
 
-const state =
-    window.RiderXMatchingState ||
-    {
+   Handles:
+   - Nearby rider discovery
+   - Rider availability
+   - Distance based matching
+   - Ride request dispatch
+   - Multiple rider matching
+   - Matching timeout
+   - Accepted ride locking
+   - Firebase Realtime Database
+   - Firestore fallback
 
-        activeRideId:
+   Works with:
+   js/booking.js
+   js/requests.js
+   js/ride-accept.js
+   js/rider-location.js
+   js/distance.js
+   js/fare-calculator.js
+
+   IMPORTANT:
+   This file does NOT create a map.
+   ============================================================ */
+
+(function () {
+
+    "use strict";
+
+    window.RiderX =
+        window.RiderX || {};
+
+    const RX =
+        window.RiderX;
+
+    const Matching =
+        RX.matching =
+        RX.matching || {};
+
+
+    /* ========================================================
+       CONFIG
+       ======================================================== */
+
+    Matching.config = {
+
+        ridersCollection:
+            "riders",
+
+        customersCollection:
+            "customers",
+
+        ridesCollection:
+            "rides",
+
+        requestsCollection:
+            "rideRequests",
+
+        liveLocationsCollection:
+            "liveLocations",
+
+        defaultSearchRadius:
+            8,
+
+        minimumSearchRadius:
+            2,
+
+        maximumSearchRadius:
+            20,
+
+        initialBatchSize:
+            5,
+
+        maximumBatchSize:
+            15,
+
+        riderRequestTimeout:
+            15000,
+
+        totalMatchingTimeout:
+            90000,
+
+        retryDelay:
+            3000,
+
+        locationFreshness:
+            45000,
+
+        maxDriverAge:
+            60,
+
+        allowMultipleRequests:
+            true,
+
+        requireOnline:
+            true,
+
+        requireAvailable:
+            true
+    };
+
+
+    /* ========================================================
+       STATE
+       ======================================================== */
+
+    Matching.state = {
+
+        initialized:
+            false,
+
+        active:
+            false,
+
+        rideId:
             null,
 
-        matching:
-            false,
+        requestId:
+            null,
+
+        customerId:
+            null,
+
+        matchedRiderId:
+            null,
+
+        candidateRiders:
+            [],
+
+        requestedRiders:
+            [],
+
+        rejectedRiders:
+            [],
+
+        expiredRiders:
+            [],
+
+        searchRadius:
+            8,
+
+        startedAt:
+            null,
+
+        timeoutId:
+            null,
+
+        retryTimeoutId:
+            null,
 
         listener:
             null,
 
-        riderRequests:
-            new Map(),
-
-        timeout:
-            null
-
+        accepted:
+            false
     };
 
 
-window.RiderXMatchingState =
-    state;
+    /* ========================================================
+       HELPERS
+       ======================================================== */
 
+    Matching.now =
+        function () {
 
-/* ============================================================
-   CONFIG
-============================================================ */
+            return Date.now();
+        };
 
-const CONFIG = {
 
-    /*
-     * Initial rider search radius.
-     */
-
-    initialRadiusKm:
-        5,
-
-    /*
-     * Expand radius if no rider accepts.
-     */
-
-    maximumRadiusKm:
-        20,
-
-    /*
-     * How often matching runs.
-     */
-
-    retryIntervalMs:
-        7000,
-
-    /*
-     * Rider request expiry.
-     */
-
-    requestExpiryMs:
-        15000,
-
-    /*
-     * Maximum riders contacted
-     * in one matching round.
-     */
-
-    maximumRidersPerRound:
-        5,
-
-    /*
-     * Maximum total riders for one ride.
-     */
-
-    maximumRiders:
-        20
-
-};
-
-
-/* ============================================================
-   START MATCHING
-============================================================ */
-
-export async function startMatching(
-    rideId
-) {
-
-    if (
-        !rideId
-    ) {
-
-        console.warn(
-            "RiderX matching: rideId missing."
-        );
-
-        return false;
-
-    }
-
-
-    /*
-     * Stop previous matching.
-     */
-
-    stopMatching();
-
-
-    state.activeRideId =
-        String(
-            rideId
-        );
-
-
-    state.matching =
-        true;
-
-
-    console.log(
-        "RiderX matching started:",
-        state.activeRideId
-    );
-
-
-    /*
-     * Watch ride status.
-     */
-
-    startRideWatcher(
-        state.activeRideId
-    );
-
-
-    /*
-     * First matching round.
-     */
-
-    await runMatchingRound(
-        state.activeRideId
-    );
-
-
-    return true;
-
-}
-
-
-/* ============================================================
-   STOP MATCHING
-============================================================ */
-
-export function stopMatching() {
-
-    state.matching =
-        false;
-
-
-    if (
-        typeof state.listener ===
-        "function"
-    ) {
-
-        try {
-
-            state.listener();
-
-        } catch (error) {}
-
-    }
-
-
-    state.listener =
-        null;
-
-
-    if (
-        state.timeout
-    ) {
-
-        clearTimeout(
-            state.timeout
-        );
-
-        state.timeout =
-            null;
-
-    }
-
-
-    state.activeRideId =
-        null;
-
-
-    state.riderRequests.clear();
-
-}
-
-
-/* ============================================================
-   RIDE WATCHER
-============================================================ */
-
-function startRideWatcher(
-    rideId
-) {
-
-    const rideRef =
-        doc(
-            db,
-            "rides",
-            rideId
-        );
-
-
-    state.listener =
-        onSnapshot(
-
-            rideRef,
-
-            async snapshot => {
-
-                if (
-                    !snapshot.exists()
-                ) {
-
-                    stopMatching();
-
-                    return;
-
-                }
-
-
-                const ride =
-                    snapshot.data();
-
-
-                const status =
-                    normalizeStatus(
-                        ride.status ||
-                        ride.rideStatus
-                    );
-
-
-                /*
-                 * Once rider accepts, matching
-                 * is finished.
-                 */
-
-                if (
-                    [
-                        "ACCEPTED",
-                        "ARRIVING",
-                        "ARRIVED",
-                        "STARTED",
-                        "COMPLETED",
-                        "CANCELLED"
-                    ].includes(
-                        status
-                    )
-                ) {
-
-                    state.matching =
-                        false;
-
-
-                    if (
-                        state.timeout
-                    ) {
-
-                        clearTimeout(
-                            state.timeout
-                        );
-
-                        state.timeout =
-                            null;
-
-                    }
-
-
-                    return;
-
-                }
-
-
-                /*
-                 * Continue searching.
-                 */
-
-                if (
-                    status ===
-                    "REQUESTED" ||
-                    status ===
-                    "SEARCHING"
-                ) {
-
-                    if (
-                        state.matching
-                    ) {
-
-                        scheduleNextRound(
-                            rideId
-                        );
-
-                    }
-
-                }
-
-            },
-
-            error => {
-
-                console.error(
-                    "RiderX matching ride listener:",
-                    error
-                );
-
-            }
-
-        );
-
-}
-
-
-/* ============================================================
-   MATCHING ROUND
-============================================================ */
-
-async function runMatchingRound(
-    rideId
-) {
-
-    if (
-        !state.matching
-    ) {
-
-        return;
-
-    }
-
-
-    try {
-
-        const rideRef =
-            doc(
-                db,
-                "rides",
-                rideId
-            );
-
-
-        const rideSnapshot =
-            await getDoc(
-                rideRef
-            );
-
-
-        if (
-            !rideSnapshot.exists()
-        ) {
-
-            stopMatching();
-
-            return;
-
-        }
-
-
-        const ride =
-            rideSnapshot.data();
-
-
-        const status =
-            normalizeStatus(
-                ride.status ||
-                ride.rideStatus
-            );
-
-
-        /*
-         * Do not match completed,
-         * cancelled or accepted rides.
-         */
-
-        if (
-            [
-                "ACCEPTED",
-                "ARRIVING",
-                "ARRIVED",
-                "STARTED",
-                "COMPLETED",
-                "CANCELLED"
-            ].includes(
-                status
-            )
-        ) {
-
-            state.matching =
-                false;
-
-            return;
-
-        }
-
-
-        /*
-         * Mark ride as SEARCHING.
-         */
-
-        if (
-            status ===
-            "REQUESTED"
-        ) {
+    Matching.getDatabase =
+        function () {
 
             try {
 
-                await updateDoc(
+                if (
+                    RX.firebase?.database
+                ) {
 
-                    rideRef,
+                    return RX.firebase.database;
+                }
 
-                    {
 
-                        status:
-                            "SEARCHING",
+                if (
+                    window.firebase &&
+                    typeof firebase.database ===
+                    "function"
+                ) {
 
-                        rideStatus:
-                            "SEARCHING",
+                    return firebase.database();
+                }
 
-                        matchingStatus:
-                            "SEARCHING",
+            } catch (error) {
 
-                        updatedAt:
-                            serverTimestamp()
+                console.warn(
+                    "RiderX RTDB unavailable:",
+                    error
+                );
+            }
 
+
+            return null;
+        };
+
+
+    Matching.getFirestore =
+        function () {
+
+            try {
+
+                if (
+                    RX.firebase?.firestore
+                ) {
+
+                    return RX.firebase.firestore;
+                }
+
+
+                if (
+                    window.firebase &&
+                    typeof firebase.firestore ===
+                    "function"
+                ) {
+
+                    return firebase.firestore();
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX Firestore unavailable:",
+                    error
+                );
+            }
+
+
+            return null;
+        };
+
+
+    Matching.getAuthUser =
+        function () {
+
+            try {
+
+                if (
+                    RX.auth?.currentUser
+                ) {
+
+                    return RX.auth.currentUser;
+                }
+
+
+                if (
+                    window.firebase &&
+                    firebase.auth
+                ) {
+
+                    return firebase.auth()
+                        .currentUser;
+                }
+
+            } catch (error) {}
+
+
+            try {
+
+                const saved =
+                    localStorage.getItem(
+                        "riderx_user"
+                    );
+
+
+                if (
+                    saved
+                ) {
+
+                    return JSON.parse(
+                        saved
+                    );
+                }
+
+            } catch (error) {}
+
+
+            return null;
+        };
+
+
+    Matching.getUserId =
+        function () {
+
+            const user =
+                Matching.getAuthUser();
+
+
+            return (
+                user?.uid ||
+                user?.id ||
+                user?.userId ||
+                localStorage.getItem(
+                    "riderx_uid"
+                ) ||
+                null
+            );
+        };
+
+
+    Matching.normalizeRole =
+        function (
+            role
+        ) {
+
+            role =
+                String(
+                    role ||
+                    ""
+                )
+                .toLowerCase()
+                .trim();
+
+
+            if (
+                role === "driver"
+            ) {
+
+                return "rider";
+            }
+
+
+            if (
+                role === "user" ||
+                role === "passenger"
+            ) {
+
+                return "customer";
+            }
+
+
+            return role;
+        };
+
+
+    /* ========================================================
+       LOCATION NORMALIZATION
+       ======================================================== */
+
+    Matching.normalizeLocation =
+        function (
+            location
+        ) {
+
+            if (
+                !location
+            ) {
+
+                return null;
+            }
+
+
+            const lat =
+                Number(
+                    location.lat ??
+                    location.latitude
+                );
+
+
+            const lng =
+                Number(
+                    location.lng ??
+                    location.longitude
+                );
+
+
+            if (
+                !Number.isFinite(lat) ||
+                !Number.isFinite(lng)
+            ) {
+
+                return null;
+            }
+
+
+            return {
+
+                lat:
+                    lat,
+
+                lng:
+                    lng,
+
+                accuracy:
+                    Number(
+                        location.accuracy ||
+                        0
+                    ),
+
+                heading:
+                    Number.isFinite(
+                        Number(
+                            location.heading
+                        )
+                    )
+                        ? Number(
+                            location.heading
+                        )
+                        : null,
+
+                speed:
+                    Number.isFinite(
+                        Number(
+                            location.speed
+                        )
+                    )
+                        ? Number(
+                            location.speed
+                        )
+                        : null,
+
+                timestamp:
+                    Number(
+                        location.timestamp ||
+                        location.updatedAt ||
+                        Date.now()
+                    )
+            };
+        };
+
+
+    /* ========================================================
+       DISTANCE
+       ======================================================== */
+
+    Matching.distance =
+        function (
+            from,
+            to
+        ) {
+
+            from =
+                Matching.normalizeLocation(
+                    from
+                );
+
+
+            to =
+                Matching.normalizeLocation(
+                    to
+                );
+
+
+            if (
+                !from ||
+                !to
+            ) {
+
+                return Infinity;
+            }
+
+
+            const earth =
+                6371;
+
+
+            const lat1 =
+                from.lat *
+                Math.PI /
+                180;
+
+
+            const lat2 =
+                to.lat *
+                Math.PI /
+                180;
+
+
+            const dLat =
+                (
+                    to.lat -
+                    from.lat
+                ) *
+                Math.PI /
+                180;
+
+
+            const dLng =
+                (
+                    to.lng -
+                    from.lng
+                ) *
+                Math.PI /
+                180;
+
+
+            const a =
+                Math.sin(
+                    dLat / 2
+                ) *
+                Math.sin(
+                    dLat / 2
+                ) +
+                Math.cos(lat1) *
+                Math.cos(lat2) *
+                Math.sin(
+                    dLng / 2
+                ) *
+                Math.sin(
+                    dLng / 2
+                );
+
+
+            const c =
+                2 *
+                Math.atan2(
+                    Math.sqrt(a),
+                    Math.sqrt(
+                        1 - a
+                    )
+                );
+
+
+            return earth * c;
+        };
+
+
+    /* ========================================================
+       LOCATION FRESHNESS
+       ======================================================== */
+
+    Matching.isLocationFresh =
+        function (
+            location
+        ) {
+
+            location =
+                Matching.normalizeLocation(
+                    location
+                );
+
+
+            if (
+                !location
+            ) {
+
+                return false;
+            }
+
+
+            const timestamp =
+                Number(
+                    location.timestamp ||
+                    0
+                );
+
+
+            if (
+                !timestamp
+            ) {
+
+                return false;
+            }
+
+
+            return (
+                Matching.now() -
+                timestamp
+            ) <=
+            Matching.config
+                .locationFreshness;
+        };
+
+
+    /* ========================================================
+       RIDER ELIGIBILITY
+       ======================================================== */
+
+    Matching.isRiderEligible =
+        function (
+            rider,
+            customerLocation
+        ) {
+
+            if (
+                !rider
+            ) {
+
+                return false;
+            }
+
+
+            const riderId =
+                rider.uid ||
+                rider.id ||
+                rider.userId;
+
+
+            if (
+                !riderId
+            ) {
+
+                return false;
+            }
+
+
+            /*
+             * Rider must be online.
+             */
+
+            if (
+                Matching.config
+                    .requireOnline
+            ) {
+
+                const online =
+                    rider.online === true ||
+                    rider.isOnline === true ||
+                    rider.status === "online" ||
+                    rider.availability ===
+                        "online";
+
+
+                if (
+                    !online
+                ) {
+
+                    return false;
+                }
+            }
+
+
+            /*
+             * Rider must be available.
+             */
+
+            if (
+                Matching.config
+                    .requireAvailable
+            ) {
+
+                const available =
+                    rider.available !== false &&
+                    rider.isAvailable !== false &&
+                    rider.busy !== true &&
+                    rider.onRide !== true &&
+                    rider.currentRideId == null;
+
+
+                if (
+                    !available
+                ) {
+
+                    return false;
+                }
+            }
+
+
+            /*
+             * Approved rider check.
+             */
+
+            if (
+                rider.approved === false ||
+                rider.verified === false ||
+                rider.status === "blocked" ||
+                rider.status === "suspended"
+            ) {
+
+                return false;
+            }
+
+
+            /*
+             * Location.
+             */
+
+            const location =
+                Matching.normalizeLocation(
+                    rider.location ||
+                    rider.liveLocation ||
+                    rider.currentLocation ||
+                    rider
+                );
+
+
+            if (
+                !location
+            ) {
+
+                return false;
+            }
+
+
+            if (
+                !Matching.isLocationFresh(
+                    location
+                )
+            ) {
+
+                return false;
+            }
+
+
+            const distance =
+                Matching.distance(
+                    customerLocation,
+                    location
+                );
+
+
+            if (
+                !Number.isFinite(
+                    distance
+                )
+            ) {
+
+                return false;
+            }
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       GET RIDER LOCATION
+       ======================================================== */
+
+    Matching.getRiderLocation =
+        function (
+            rider
+        ) {
+
+            return Matching.normalizeLocation(
+                rider?.location ||
+                rider?.liveLocation ||
+                rider?.currentLocation ||
+                rider
+            );
+        };
+
+
+    /* ========================================================
+       GET AVAILABLE RIDERS FROM RTDB
+       ======================================================== */
+
+    Matching.getRidersFromRTDB =
+        async function () {
+
+            const database =
+                Matching.getDatabase();
+
+
+            if (
+                !database
+            ) {
+
+                return [];
+            }
+
+
+            try {
+
+                const snapshot =
+                    await database
+                        .ref(
+                            Matching.config
+                                .ridersCollection
+                        )
+                        .once(
+                            "value"
+                        );
+
+
+                const data =
+                    snapshot.val();
+
+
+                if (
+                    !data
+                ) {
+
+                    return [];
+                }
+
+
+                return Object.keys(
+                    data
+                ).map(
+                    function (
+                        key
+                    ) {
+
+                        return {
+
+                            id:
+                                key,
+
+                            uid:
+                                data[key]
+                                    ?.uid ||
+                                key,
+
+                            ...data[key]
+                        };
                     }
-
                 );
 
             } catch (error) {
 
                 console.warn(
-                    "RiderX search status update:",
+                    "RTDB rider search failed:",
                     error
                 );
 
+
+                return [];
+            }
+        };
+
+
+    /* ========================================================
+       GET AVAILABLE RIDERS FROM FIRESTORE
+       ======================================================== */
+
+    Matching.getRidersFromFirestore =
+        async function () {
+
+            const firestore =
+                Matching.getFirestore();
+
+
+            if (
+                !firestore
+            ) {
+
+                return [];
             }
 
-        }
 
+            try {
 
-        const pickup =
-            getPickup(
-                ride
-            );
+                const snapshot =
+                    await firestore
+                        .collection(
+                            Matching.config
+                                .ridersCollection
+                        )
+                        .get();
 
 
-        if (
-            !pickup
-        ) {
+                return snapshot.docs.map(
+                    function (
+                        doc
+                    ) {
 
-            console.warn(
-                "RiderX: pickup location missing."
-            );
+                        return {
 
-            return;
+                            id:
+                                doc.id,
 
-        }
+                            uid:
+                                doc.data()
+                                    ?.uid ||
+                                doc.id,
 
-
-        /*
-         * Get radius.
-         */
-
-        const radius =
-            getSearchRadius(
-                ride
-            );
-
-
-        /*
-         * Find riders.
-         */
-
-        const riders =
-            await findAvailableRiders(
-                pickup,
-                ride.serviceType ||
-                ride.service ||
-                "bike",
-                radius
-            );
-
-
-        if (
-            !riders.length
-        ) {
-
-            console.log(
-                "RiderX: no rider found in radius",
-                radius
-            );
-
-
-            expandSearchRadius(
-                rideId
-            );
-
-
-            dispatchMatchingEvent(
-                "riderx:no-rider-found",
-                {
-
-                    rideId,
-
-                    radius
-
-                }
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-         * Exclude already contacted riders.
-         */
-
-        const eligible =
-            riders.filter(
-                rider => {
-
-                    const riderId =
-                        String(
-                            rider.id
-                        );
-
-
-                    const alreadyContacted =
-                        Array.isArray(
-                            ride.notifiedRiders
-                        ) &&
-                        ride.notifiedRiders
-                            .includes(
-                                riderId
-                            );
-
-
-                    const rejected =
-                        Array.isArray(
-                            ride.rejectedRiders
-                        ) &&
-                        ride.rejectedRiders
-                            .includes(
-                                riderId
-                            );
-
-
-                    return (
-                        !alreadyContacted &&
-                        !rejected
-                    );
-
-                }
-            );
-
-
-        if (
-            !eligible.length
-        ) {
-
-            /*
-             * All nearby riders already contacted.
-             * Expand search.
-             */
-
-            expandSearchRadius(
-                rideId
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-         * Select closest riders.
-         */
-
-        const selected =
-            eligible.slice(
-                0,
-                CONFIG.maximumRidersPerRound
-            );
-
-
-        /*
-         * Send requests.
-         */
-
-        for (
-            const rider
-            of selected
-        ) {
-
-            await sendRideRequest(
-                rideId,
-                rider
-            );
-
-        }
-
-
-        /*
-         * Notify UI.
-         */
-
-        dispatchMatchingEvent(
-            "riderx:ride-matching",
-            {
-
-                rideId,
-
-                riders:
-                    selected.map(
-                        rider => rider.id
-                    ),
-
-                count:
-                    selected.length
-
-            }
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "RiderX matching round failed:",
-            error
-        );
-
-
-        dispatchMatchingEvent(
-            "riderx:matching-error",
-            {
-
-                rideId,
-
-                error
-
-            }
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   FIND AVAILABLE RIDERS
-============================================================ */
-
-export async function findAvailableRiders(
-    pickup,
-    service,
-    radiusKm = CONFIG.initialRadiusKm
-) {
-
-    try {
-
-        const ridersQuery =
-            query(
-
-                collection(
-                    db,
-                    "riders"
-                ),
-
-                where(
-                    "online",
-                    "==",
-                    true
-                ),
-
-                where(
-                    "availability",
-                    "==",
-                    "online"
-                )
-
-            );
-
-
-        let snapshot;
-
-
-        try {
-
-            snapshot =
-                await getDocs(
-                    ridersQuery
-                );
-
-        } catch (error) {
-
-            /*
-             * Compatibility fallback for older
-             * rider documents that only contain
-             * status = online.
-             */
-
-            const fallbackQuery =
-                query(
-
-                    collection(
-                        db,
-                        "riders"
-                    ),
-
-                    where(
-                        "status",
-                        "==",
-                        "online"
-                    )
-
-                );
-
-
-            snapshot =
-                await getDocs(
-                    fallbackQuery
-                );
-
-        }
-
-
-        if (
-            snapshot.empty
-        ) {
-
-            return [];
-
-        }
-
-
-        const riders =
-            [];
-
-
-        snapshot.forEach(
-            riderDoc => {
-
-                const data =
-                    riderDoc.data();
-
-
-                const rider =
-                    {
-
-                        id:
-                            riderDoc.id,
-
-                        ...data
-
-                    };
-
-
-                /*
-                 * Do not match rider with
-                 * an active ride.
-                 */
-
-                if (
-                    rider.activeRideId
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    rider.currentRideId
-                ) {
-
-                    return;
-
-                }
-
-
-                /*
-                 * Service compatibility.
-                 */
-
-                if (
-                    !serviceMatches(
-                        rider,
-                        service
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                /*
-                 * Get rider location.
-                 */
-
-                const location =
-                    getRiderLocation(
-                        rider
-                    );
-
-
-                if (
-                    !location
-                ) {
-
-                    return;
-
-                }
-
-
-                const distance =
-                    distanceKm(
-
-                        pickup.lat,
-
-                        pickup.lng,
-
-                        location.lat,
-
-                        location.lng
-
-                    );
-
-
-                if (
-                    distance >
-                    radiusKm
-                ) {
-
-                    return;
-
-                }
-
-
-                riders.push(
-
-                    {
-
-                        ...rider,
-
-                        distanceKm:
-                            Number(
-                                distance.toFixed(
-                                    2
-                                )
-                            )
-
+                            ...doc.data()
+                        };
                     }
-
                 );
 
+            } catch (error) {
+
+                console.warn(
+                    "Firestore rider search failed:",
+                    error
+                );
+
+
+                return [];
             }
-        );
+        };
 
 
-        /*
-         * Closest first.
-         */
+    /* ========================================================
+       LOAD ALL AVAILABLE RIDERS
+       ======================================================== */
 
-        riders.sort(
-            (
-                a,
-                b
-            ) =>
-                a.distanceKm -
-                b.distanceKm
-        );
+    Matching.loadRiders =
+        async function () {
+
+            let riders =
+                [];
 
 
-        return riders;
+            /*
+             * RTDB first.
+             */
 
-    } catch (error) {
-
-        console.error(
-            "RiderX find riders failed:",
-            error
-        );
-
-
-        return [];
-
-    }
-
-}
+            riders =
+                await Matching
+                    .getRidersFromRTDB();
 
 
-/* ============================================================
-   FIND SINGLE AVAILABLE RIDER
-   COMPATIBILITY FUNCTION
-============================================================ */
+            /*
+             * Firestore fallback.
+             */
 
-export async function findAvailableRider(
-    pickup = null,
-    service = "bike"
-) {
+            if (
+                !riders.length
+            ) {
 
-    /*
-     * If pickup wasn't provided,
-     * find any available rider.
-     */
+                riders =
+                    await Matching
+                        .getRidersFromFirestore();
+            }
 
-    if (
-        !pickup
-    ) {
 
-        try {
+            return riders;
+        };
 
-            const ridersQuery =
-                query(
 
-                    collection(
-                        db,
-                        "riders"
-                    ),
+    /* ========================================================
+       SORT RIDERS BY DISTANCE
+       ======================================================== */
 
-                    where(
-                        "online",
-                        "==",
-                        true
-                    )
+    Matching.sortByDistance =
+        function (
+            riders,
+            customerLocation
+        ) {
 
+            return riders
+                .map(
+                    function (
+                        rider
+                    ) {
+
+                        const location =
+                            Matching
+                                .getRiderLocation(
+                                    rider
+                                );
+
+
+                        const distance =
+                            Matching
+                                .distance(
+                                    customerLocation,
+                                    location
+                                );
+
+
+                        return {
+
+                            ...rider,
+
+                            location:
+                                location,
+
+                            distance:
+                                distance
+                        };
+                    }
+                )
+                .sort(
+                    function (
+                        a,
+                        b
+                    ) {
+
+                        return (
+                            a.distance -
+                            b.distance
+                        );
+                    }
                 );
+        };
 
 
-            const snapshot =
-                await getDocs(
-                    ridersQuery
+    /* ========================================================
+       FIND NEARBY RIDERS
+       ======================================================== */
+
+    Matching.findNearbyRiders =
+        async function (
+            customerLocation,
+            options
+        ) {
+
+            options =
+                options || {};
+
+
+            customerLocation =
+                Matching.normalizeLocation(
+                    customerLocation
                 );
 
 
             if (
-                snapshot.empty
+                !customerLocation
             ) {
 
-                return null;
-
+                throw new Error(
+                    "Customer location is required."
+                );
             }
 
 
-            const first =
-                snapshot.docs[0];
-
-
-            return {
-
-                id:
-                    first.id,
-
-                ...first.data()
-
-            };
-
-        } catch (error) {
-
-            console.error(
-                error
-            );
-
-
-            return null;
-
-        }
-
-    }
-
-
-    const riders =
-        await findAvailableRiders(
-            pickup,
-            service
-        );
-
-
-    return (
-        riders[0] ||
-        null
-    );
-
-}
-
-
-/* ============================================================
-   SERVICE MATCHING
-============================================================ */
-
-function serviceMatches(
-    rider,
-    service
-) {
-
-    const requested =
-        normalizeService(
-            service
-        );
-
-
-    /*
-     * If rider hasn't specified a service,
-     * allow the rider.
-     */
-
-    if (
-        !rider.serviceType &&
-        !rider.service &&
-        !Array.isArray(
-            rider.services
-        )
-    ) {
-
-        return true;
-
-    }
-
-
-    const services =
-        [];
-
-
-    if (
-        rider.serviceType
-    ) {
-
-        services.push(
-            normalizeService(
-                rider.serviceType
-            )
-        );
-
-    }
-
-
-    if (
-        rider.service
-    ) {
-
-        services.push(
-            normalizeService(
-                rider.service
-            )
-        );
-
-    }
-
-
-    if (
-        Array.isArray(
-            rider.services
-        )
-    ) {
-
-        rider.services.forEach(
-            item => {
-
-                services.push(
-                    normalizeService(
-                        item
-                    )
+            const radius =
+                Math.min(
+                    Number(
+                        options.radius ||
+                        Matching.config
+                            .defaultSearchRadius
+                    ),
+                    Matching.config
+                        .maximumSearchRadius
                 );
 
+
+            const riders =
+                await Matching.loadRiders();
+
+
+            const eligible =
+                riders.filter(
+                    function (
+                        rider
+                    ) {
+
+                        return Matching
+                            .isRiderEligible(
+                                rider,
+                                customerLocation
+                            );
+                    }
+                );
+
+
+            const sorted =
+                Matching.sortByDistance(
+                    eligible,
+                    customerLocation
+                );
+
+
+            const nearby =
+                sorted.filter(
+                    function (
+                        rider
+                    ) {
+
+                        return (
+                            rider.distance <=
+                            radius
+                        );
+                    }
+                );
+
+
+            return nearby;
+        };
+
+
+    /* ========================================================
+       EXPAND SEARCH
+       ======================================================== */
+
+    Matching.expandSearch =
+        function () {
+
+            let radius =
+                Number(
+                    Matching.state
+                        .searchRadius
+                );
+
+
+            radius =
+                Math.max(
+                    radius,
+                    Matching.config
+                        .minimumSearchRadius
+                );
+
+
+            radius =
+                Math.min(
+                    radius * 1.5,
+                    Matching.config
+                        .maximumSearchRadius
+                );
+
+
+            Matching.state
+                .searchRadius =
+                radius;
+
+
+            return radius;
+        };
+
+
+    /* ========================================================
+       CREATE REQUEST ID
+       ======================================================== */
+
+    Matching.createRequestId =
+        function () {
+
+            return (
+                "req_" +
+                Date.now() +
+                "_" +
+                Math.random()
+                    .toString(36)
+                    .slice(
+                        2,
+                        10
+                    )
+            );
+        };
+
+
+    /* ========================================================
+       CREATE RIDE ID
+       ======================================================== */
+
+    Matching.createRideId =
+        function () {
+
+            return (
+                "ride_" +
+                Date.now() +
+                "_" +
+                Math.random()
+                    .toString(36)
+                    .slice(
+                        2,
+                        10
+                    )
+            );
+        };
+
+
+    /* ========================================================
+       SAVE RIDE REQUEST
+       ======================================================== */
+
+    Matching.saveRideRequest =
+        async function (
+            request
+        ) {
+
+            const database =
+                Matching.getDatabase();
+
+
+            const firestore =
+                Matching.getFirestore();
+
+
+            let saved =
+                false;
+
+
+            /*
+             * RTDB.
+             */
+
+            if (
+                database
+            ) {
+
+                try {
+
+                    await database
+                        .ref(
+                            Matching.config
+                                .requestsCollection +
+                            "/" +
+                            request.requestId
+                        )
+                        .set(
+                            request
+                        );
+
+
+                    saved =
+                        true;
+
+                } catch (error) {
+
+                    console.warn(
+                        "RTDB request save failed:",
+                        error
+                    );
+                }
             }
-        );
-
-    }
 
 
-    /*
-     * Cab / car aliases.
-     */
+            /*
+             * Firestore fallback.
+             */
 
-    if (
-        requested ===
-        "cab"
-    ) {
+            if (
+                !saved &&
+                firestore
+            ) {
 
-        return (
-            services.includes(
-                "cab"
-            ) ||
-            services.includes(
-                "car"
-            ) ||
-            services.includes(
-                "taxi"
-            )
-        );
+                try {
 
-    }
-
-
-    return services.includes(
-        requested
-    );
-
-}
+                    await firestore
+                        .collection(
+                            Matching.config
+                                .requestsCollection
+                        )
+                        .doc(
+                            request.requestId
+                        )
+                        .set(
+                            request
+                        );
 
 
-/* ============================================================
-   NORMALIZE SERVICE
-============================================================ */
+                    saved =
+                        true;
 
-function normalizeService(
-    service
-) {
+                } catch (error) {
 
-    const value =
-        String(
-            service ||
-            ""
-        )
-        .trim()
-        .toLowerCase();
+                    console.warn(
+                        "Firestore request save failed:",
+                        error
+                    );
+                }
+            }
 
 
-    if (
-        [
-            "bike",
-            "bike taxi",
-            "motorcycle"
-        ].includes(
-            value
-        )
-    ) {
-
-        return "bike";
-
-    }
-
-
-    if (
-        [
-            "cab",
-            "car",
-            "taxi"
-        ].includes(
-            value
-        )
-    ) {
-
-        return "cab";
-
-    }
-
-
-    if (
-        [
-            "parcel",
-            "delivery"
-        ].includes(
-            value
-        )
-    ) {
-
-        return "parcel";
-
-    }
-
-
-    if (
-        [
-            "food",
-            "food delivery"
-        ].includes(
-            value
-        )
-    ) {
-
-        return "food";
-
-    }
-
-
-    return value;
-
-}
-
-
-/* ============================================================
-   GET RIDER LOCATION
-============================================================ */
-
-function getRiderLocation(
-    rider
-) {
-
-    if (
-        rider.location &&
-        validCoordinates(
-            rider.location.lat,
-            rider.location.lng
-        )
-    ) {
-
-        return {
-
-            lat:
-                Number(
-                    rider.location.lat
-                ),
-
-            lng:
-                Number(
-                    rider.location.lng
-                )
-
+            return saved;
         };
 
-    }
 
+    /* ========================================================
+       CREATE RIDE
+       ======================================================== */
 
-    if (
-        validCoordinates(
-            rider.latitude,
-            rider.longitude
-        )
-    ) {
-
-        return {
-
-            lat:
-                Number(
-                    rider.latitude
-                ),
-
-            lng:
-                Number(
-                    rider.longitude
-                )
-
-        };
-
-    }
-
-
-    if (
-        validCoordinates(
-            rider.lat,
-            rider.lng
-        )
-    ) {
-
-        return {
-
-            lat:
-                Number(
-                    rider.lat
-                ),
-
-            lng:
-                Number(
-                    rider.lng
-                )
-
-        };
-
-    }
-
-
-    return null;
-
-}
-
-
-/* ============================================================
-   SEND RIDE REQUEST
-============================================================ */
-
-export async function sendRideRequest(
-    rideId,
-    rider
-) {
-
-    if (
-        !rideId ||
-        !rider ||
-        !rider.id
-    ) {
-
-        return false;
-
-    }
-
-
-    const riderId =
-        String(
-            rider.id
-        );
-
-
-    const requestRef =
-        doc(
-
-            db,
-
-            "rideRequests",
-
-            `${rideId}_${riderId}`
-
-        );
-
-
-    const rideRef =
-        doc(
-            db,
-            "rides",
-            rideId
-        );
-
-
-    try {
-
-        /*
-         * Check ride first.
-         */
-
-        const rideSnapshot =
-            await getDoc(
-                rideRef
-            );
-
-
-        if (
-            !rideSnapshot.exists()
+    Matching.createRide =
+        async function (
+            data
         ) {
 
-            return false;
-
-        }
-
-
-        const ride =
-            rideSnapshot.data();
+            const rideId =
+                data.rideId ||
+                Matching.createRideId();
 
 
-        const status =
-            normalizeStatus(
-                ride.status ||
-                ride.rideStatus
-            );
+            const ride = {
 
-
-        if (
-            [
-                "ACCEPTED",
-                "ARRIVING",
-                "ARRIVED",
-                "STARTED",
-                "COMPLETED",
-                "CANCELLED"
-            ].includes(
-                status
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        /*
-         * Don't duplicate requests.
-         */
-
-        const requestSnapshot =
-            await getDoc(
-                requestRef
-            );
-
-
-        if (
-            requestSnapshot.exists()
-        ) {
-
-            return false;
-
-        }
-
-
-        const expiresAt =
-            Date.now() +
-            CONFIG.requestExpiryMs;
-
-
-        /*
-         * Create rider request.
-         */
-
-        await setDoc(
-
-            requestRef,
-
-            {
-
-                rideId,
-
-                riderId,
+                rideId:
+                    rideId,
 
                 customerId:
-                    ride.customerId ||
+                    data.customerId ||
+                    Matching.getUserId(),
+
+                riderId:
+                    data.riderId ||
                     null,
 
-                serviceType:
-                    ride.serviceType ||
-                    ride.service ||
+                service:
+                    data.service ||
                     "bike",
 
+                status:
+                    data.status ||
+                    "searching",
+
                 pickup:
-                    ride.pickup ||
+                    data.pickup ||
                     null,
 
-                drop:
-                    ride.drop ||
-                    ride.destination ||
+                destination:
+                    data.destination ||
+                    null,
+
+                pickupLocation:
+                    data.pickupLocation ||
+                    null,
+
+                destinationLocation:
+                    data.destinationLocation ||
                     null,
 
                 fare:
-                    ride.fare ||
-                    ride.estimatedFare ||
-                    0,
+                    Number(
+                        data.fare ||
+                        0
+                    ),
 
-                distance:
-                    ride.distance ||
-                    ride.estimatedDistance ||
-                    0,
-
-                customerName:
-                    ride.customerName ||
-                    "RiderX Customer",
-
-                riderName:
-                    rider.name ||
-                    rider.displayName ||
-                    rider.fullName ||
-                    "RiderX Rider",
-
-                riderDistance:
-                    rider.distanceKm ||
-                    0,
-
-                status:
-                    "PENDING",
+                paymentMethod:
+                    data.paymentMethod ||
+                    "cash",
 
                 createdAt:
-                    serverTimestamp(),
-
-                expiresAt,
+                    Date.now(),
 
                 updatedAt:
-                    serverTimestamp()
+                    Date.now()
+            };
 
-            }
 
-        );
+            const database =
+                Matching.getDatabase();
 
 
-        /*
-         * Update ride notified riders.
-         */
+            if (
+                database
+            ) {
 
-        await appendRiderToRide(
-            rideRef,
-            riderId
-        );
+                try {
 
-
-        /*
-         * Store rider's current request.
-         */
-
-        state.riderRequests.set(
-            riderId,
-            {
-
-                rideId,
-
-                riderId,
-
-                requestId:
-                    requestRef.id,
-
-                expiresAt
-
-            }
-        );
-
-
-        /*
-         * Notify rider side if it is open.
-         */
-
-        dispatchMatchingEvent(
-            "riderx:new-ride-request",
-            {
-
-                rideId,
-
-                riderId,
-
-                requestId:
-                    requestRef.id,
-
-                rider
-
-            }
-        );
-
-
-        /*
-         * Auto-expire request.
-         */
-
-        setTimeout(
-            () => {
-
-                expireRideRequest(
-                    rideId,
-                    riderId
-                );
-
-            },
-            CONFIG.requestExpiryMs
-        );
-
-
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "RiderX send ride request failed:",
-            error
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/* ============================================================
-   APPEND RIDER TO RIDE
-============================================================ */
-
-async function appendRiderToRide(
-    rideRef,
-    riderId
-) {
-
-    try {
-
-        await runTransaction(
-
-            db,
-
-            async transaction => {
-
-                const snapshot =
-                    await transaction.get(
-                        rideRef
-                    );
-
-
-                if (
-                    !snapshot.exists()
-                ) {
-
-                    throw new Error(
-                        "Ride not found."
-                    );
-
-                }
-
-
-                const ride =
-                    snapshot.data();
-
-
-                const current =
-                    Array.isArray(
-                        ride.notifiedRiders
-                    )
-                        ? [
-                            ...ride.notifiedRiders
-                        ]
-                        : [];
-
-
-                if (
-                    current.includes(
-                        riderId
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    current.length >=
-                    CONFIG.maximumRiders
-                ) {
-
-                    return;
-
-                }
-
-
-                current.push(
-                    riderId
-                );
-
-
-                transaction.update(
-
-                    rideRef,
-
-                    {
-
-                        notifiedRiders:
-                            current,
-
-                        updatedAt:
-                            serverTimestamp()
-
-                    }
-
-                );
-
-            }
-
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX notified rider update:",
-            error
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   ACCEPT RIDE
-   ATOMIC FIRST-WIN SYSTEM
-============================================================ */
-
-export async function acceptRideRequest(
-    rideId,
-    riderId = null
-) {
-
-    const user =
-        auth.currentUser;
-
-
-    const actualRiderId =
-        riderId ||
-        user?.uid;
-
-
-    if (
-        !rideId ||
-        !actualRiderId
-    ) {
-
-        return false;
-
-    }
-
-
-    const rideRef =
-        doc(
-            db,
-            "rides",
-            String(
-                rideId
-            )
-        );
-
-
-    const requestRef =
-        doc(
-
-            db,
-
-            "rideRequests",
-
-            `${rideId}_${actualRiderId}`
-
-        );
-
-
-    try {
-
-        let acceptedRide =
-            null;
-
-
-        await runTransaction(
-
-            db,
-
-            async transaction => {
-
-                /*
-                 * IMPORTANT:
-                 *
-                 * Ride is read first.
-                 * This makes the acceptance
-                 * atomic.
-                 */
-
-                const rideSnapshot =
-                    await transaction.get(
-                        rideRef
-                    );
-
-
-                if (
-                    !rideSnapshot.exists()
-                ) {
-
-                    throw new Error(
-                        "Ride no longer exists."
-                    );
-
-                }
-
-
-                const ride =
-                    rideSnapshot.data();
-
-
-                const status =
-                    normalizeStatus(
-                        ride.status ||
-                        ride.rideStatus
-                    );
-
-
-                /*
-                 * Another rider already won.
-                 */
-
-                if (
-                    status !==
-                    "REQUESTED" &&
-                    status !==
-                    "SEARCHING"
-                ) {
-
-                    throw new Error(
-                        "This ride has already been accepted."
-                    );
-
-                }
-
-
-                /*
-                 * Read rider profile.
-                 */
-
-                const riderRef =
-                    doc(
-                        db,
-                        "riders",
-                        String(
-                            actualRiderId
+                    await database
+                        .ref(
+                            Matching.config
+                                .ridesCollection +
+                            "/" +
+                            rideId
                         )
+                        .set(
+                            ride
+                        );
+
+
+                    return ride;
+
+                } catch (error) {
+
+                    console.warn(
+                        "RTDB ride create failed:",
+                        error
                     );
-
-
-                const riderSnapshot =
-                    await transaction.get(
-                        riderRef
-                    );
-
-
-                if (
-                    !riderSnapshot.exists()
-                ) {
-
-                    throw new Error(
-                        "Rider profile not found."
-                    );
-
                 }
+            }
 
 
-                const rider =
-                    riderSnapshot.data();
+            const firestore =
+                Matching.getFirestore();
 
 
-                /*
-                 * Verify rider is online.
-                 */
+            if (
+                firestore
+            ) {
 
-                if (
-                    rider.online ===
-                    false ||
-                    rider.availability ===
-                    "offline"
-                ) {
+                try {
 
-                    throw new Error(
-                        "You are offline."
+                    await firestore
+                        .collection(
+                            Matching.config
+                                .ridesCollection
+                        )
+                        .doc(
+                            rideId
+                        )
+                        .set(
+                            ride
+                        );
+
+
+                    return ride;
+
+                } catch (error) {
+
+                    console.warn(
+                        "Firestore ride create failed:",
+                        error
                     );
-
                 }
+            }
 
 
-                const riderName =
-                    rider.name ||
-                    rider.fullName ||
-                    rider.displayName ||
-                    "RiderX Rider";
+            return ride;
+        };
 
 
-                /*
-                 * Update ride.
-                 */
+    /* ========================================================
+       BUILD RIDER REQUEST
+       ======================================================== */
 
-                transaction.update(
+    Matching.buildRiderRequest =
+        function (
+            ride,
+            rider
+        ) {
 
-                    rideRef,
+            return {
 
-                    {
+                requestId:
+                    Matching.state
+                        .requestId,
 
-                        status:
-                            "ACCEPTED",
+                rideId:
+                    ride.rideId,
 
-                        rideStatus:
-                            "ACCEPTED",
+                customerId:
+                    ride.customerId,
 
-                        matchingStatus:
-                            "ACCEPTED",
+                riderId:
+                    rider.uid ||
+                    rider.id,
 
-                        riderId:
-                            String(
-                                actualRiderId
-                            ),
+                service:
+                    ride.service,
 
-                        driverId:
-                            String(
-                                actualRiderId
-                            ),
+                pickup:
+                    ride.pickup,
 
-                        riderName,
+                destination:
+                    ride.destination,
 
-                        riderPhone:
-                            rider.phone ||
-                            rider.mobile ||
-                            "",
+                pickupLocation:
+                    ride.pickupLocation,
 
-                        riderVehicle:
-                            rider.vehicleType ||
-                            rider.vehicle ||
-                            "Bike",
+                destinationLocation:
+                    ride.destinationLocation,
 
-                        riderVehicleNumber:
-                            rider.vehicleNumber ||
-                            rider.registrationNumber ||
-                            "",
+                fare:
+                    ride.fare,
 
-                        riderPhoto:
-                            rider.photoURL ||
-                            rider.photo ||
-                            "",
+                paymentMethod:
+                    ride.paymentMethod,
 
-                        riderRating:
-                            rider.rating ||
-                            5,
+                riderDistance:
+                    rider.distance,
 
-                        acceptedAt:
-                            serverTimestamp(),
+                status:
+                    "pending",
 
-                        updatedAt:
-                            serverTimestamp()
+                createdAt:
+                    Date.now(),
 
-                    }
+                expiresAt:
+                    Date.now() +
+                    Matching.config
+                        .riderRequestTimeout
+            };
+        };
 
+
+    /* ========================================================
+       SEND REQUEST TO RIDER
+       ======================================================== */
+
+    Matching.sendRequestToRider =
+        async function (
+            ride,
+            rider
+        ) {
+
+            const riderId =
+                rider.uid ||
+                rider.id;
+
+
+            if (
+                !riderId
+            ) {
+
+                return false;
+            }
+
+
+            const request =
+                Matching.buildRiderRequest(
+                    ride,
+                    rider
                 );
 
 
-                /*
-                 * Make rider busy.
-                 */
-
-                transaction.update(
-
-                    riderRef,
-
-                    {
-
-                        availability:
-                            "busy",
-
-                        activeRideId:
-                            String(
-                                rideId
-                            ),
-
-                        currentRideId:
-                            String(
-                                rideId
-                            ),
-
-                        lastRideAcceptedAt:
-                            serverTimestamp()
-
-                    }
-
-                );
+            const database =
+                Matching.getDatabase();
 
 
-                /*
-                 * Update request.
-                 */
+            let sent =
+                false;
 
-                const requestSnapshot =
-                    await transaction.get(
-                        requestRef
+
+            /*
+             * Rider inbox in RTDB.
+             */
+
+            if (
+                database
+            ) {
+
+                try {
+
+                    await database
+                        .ref(
+                            "riderRequests/" +
+                            riderId +
+                            "/" +
+                            request.requestId
+                        )
+                        .set(
+                            request
+                        );
+
+
+                    /*
+                     * Also store under global
+                     * request path.
+                     */
+
+                    await database
+                        .ref(
+                            Matching.config
+                                .requestsCollection +
+                            "/" +
+                            request.requestId +
+                            "/riders/" +
+                            riderId
+                        )
+                        .set(
+                            request
+                        );
+
+
+                    sent =
+                        true;
+
+                } catch (error) {
+
+                    console.warn(
+                        "Rider request failed:",
+                        error
                     );
+                }
+            }
+
+
+            /*
+             * Firestore fallback.
+             */
+
+            if (
+                !sent
+            ) {
+
+                const firestore =
+                    Matching.getFirestore();
 
 
                 if (
-                    requestSnapshot.exists()
+                    firestore
                 ) {
 
-                    transaction.update(
+                    try {
 
-                        requestRef,
+                        await firestore
+                            .collection(
+                                "riderRequests"
+                            )
+                            .doc(
+                                riderId
+                            )
+                            .collection(
+                                "requests"
+                            )
+                            .doc(
+                                request.requestId
+                            )
+                            .set(
+                                request
+                            );
 
-                        {
 
-                            status:
-                                "ACCEPTED",
+                        sent =
+                            true;
 
-                            acceptedAt:
-                                serverTimestamp(),
+                    } catch (error) {
 
-                            updatedAt:
-                                serverTimestamp()
+                        console.warn(
+                            "Firestore rider request failed:",
+                            error
+                        );
+                    }
+                }
+            }
 
+
+            if (
+                sent
+            ) {
+
+                Matching.state
+                    .requestedRiders
+                    .push(
+                        riderId
+                    );
+
+
+                Matching.emit(
+                    "request-sent",
+                    {
+                        ride:
+                            ride,
+
+                        rider:
+                            rider,
+
+                        request:
+                            request
+                    }
+                );
+            }
+
+
+            return sent;
+        };
+
+
+    /* ========================================================
+       SEND BATCH
+       ======================================================== */
+
+    Matching.sendBatch =
+        async function (
+            ride,
+            riders
+        ) {
+
+            if (
+                !Array.isArray(
+                    riders
+                ) ||
+                !riders.length
+            ) {
+
+                return 0;
+            }
+
+
+            let count =
+                0;
+
+
+            const batch =
+                riders.slice(
+                    0,
+                    Matching.config
+                        .maximumBatchSize
+                );
+
+
+            for (
+                const rider of batch
+            ) {
+
+                const riderId =
+                    rider.uid ||
+                    rider.id;
+
+
+                /*
+                 * Don't request same rider twice.
+                 */
+
+                if (
+                    Matching.state
+                        .requestedRiders
+                        .includes(
+                            riderId
+                        )
+                ) {
+
+                    continue;
+                }
+
+
+                if (
+                    Matching.state
+                        .rejectedRiders
+                        .includes(
+                            riderId
+                        )
+                ) {
+
+                    continue;
+                }
+
+
+                if (
+                    Matching.state
+                        .expiredRiders
+                        .includes(
+                            riderId
+                        )
+                ) {
+
+                    continue;
+                }
+
+
+                const sent =
+                    await Matching
+                        .sendRequestToRider(
+                            ride,
+                            rider
+                        );
+
+
+                if (
+                    sent
+                ) {
+
+                    count++;
+                }
+
+
+                /*
+                 * Stop if another rider
+                 * has already accepted.
+                 */
+
+                if (
+                    Matching.state.accepted
+                ) {
+
+                    break;
+                }
+            }
+
+
+            return count;
+        };
+
+
+    /* ========================================================
+       START MATCHING
+       ======================================================== */
+
+    Matching.start =
+        async function (
+            data
+        ) {
+
+            data =
+                data || {};
+
+
+            if (
+                Matching.state.active
+            ) {
+
+                await Matching.stop(
+                    false
+                );
+            }
+
+
+            const customerId =
+                data.customerId ||
+                Matching.getUserId();
+
+
+            const pickupLocation =
+                Matching.normalizeLocation(
+                    data.pickupLocation ||
+                    data.pickup ||
+                    data.customerLocation
+                );
+
+
+            if (
+                !customerId
+            ) {
+
+                throw new Error(
+                    "Customer ID is required."
+                );
+            }
+
+
+            if (
+                !pickupLocation
+            ) {
+
+                throw new Error(
+                    "Pickup location is required."
+                );
+            }
+
+
+            /*
+             * Create ride first.
+             */
+
+            const ride =
+                await Matching.createRide({
+
+                    rideId:
+                        data.rideId,
+
+                    customerId:
+                        customerId,
+
+                    service:
+                        data.service ||
+                        data.serviceType ||
+                        "bike",
+
+                    pickup:
+                        data.pickupAddress ||
+                        data.pickupName ||
+                        "",
+
+                    destination:
+                        data.destinationAddress ||
+                        data.destinationName ||
+                        "",
+
+                    pickupLocation:
+                        pickupLocation,
+
+                    destinationLocation:
+                        Matching.normalizeLocation(
+                            data.destinationLocation ||
+                            data.destination
+                        ),
+
+                    fare:
+                        data.fare ||
+                        data.estimatedFare ||
+                        0,
+
+                    paymentMethod:
+                        data.paymentMethod ||
+                        "cash"
+                });
+
+
+            const requestId =
+                data.requestId ||
+                Matching.createRequestId();
+
+
+            Matching.state.active =
+                true;
+
+
+            Matching.state.rideId =
+                ride.rideId;
+
+
+            Matching.state.requestId =
+                requestId;
+
+
+            Matching.state.customerId =
+                customerId;
+
+
+            Matching.state.matchedRiderId =
+                null;
+
+
+            Matching.state.candidateRiders =
+                [];
+
+
+            Matching.state.requestedRiders =
+                [];
+
+
+            Matching.state.rejectedRiders =
+                [];
+
+
+            Matching.state.expiredRiders =
+                [];
+
+
+            Matching.state.searchRadius =
+                Number(
+                    data.radius ||
+                    Matching.config
+                        .defaultSearchRadius
+                );
+
+
+            Matching.state.startedAt =
+                Date.now();
+
+
+            Matching.state.accepted =
+                false;
+
+
+            /*
+             * Save global request.
+             */
+
+            await Matching.saveRideRequest({
+
+                requestId:
+                    requestId,
+
+                rideId:
+                    ride.rideId,
+
+                customerId:
+                    customerId,
+
+                pickupLocation:
+                    pickupLocation,
+
+                destinationLocation:
+                    ride.destinationLocation,
+
+                service:
+                    ride.service,
+
+                fare:
+                    ride.fare,
+
+                status:
+                    "searching",
+
+                createdAt:
+                    Date.now(),
+
+                expiresAt:
+                    Date.now() +
+                    Matching.config
+                        .totalMatchingTimeout
+            });
+
+
+            Matching.emit(
+                "matching-started",
+                {
+                    ride:
+                        ride,
+
+                    requestId:
+                        requestId,
+
+                    radius:
+                        Matching.state
+                            .searchRadius
+                }
+            );
+
+
+            /*
+             * Start global timeout.
+             */
+
+            Matching.state.timeoutId =
+                setTimeout(
+                    function () {
+
+                        if (
+                            Matching.state
+                                .active &&
+                            !Matching.state
+                                .accepted
+                        ) {
+
+                            Matching.emit(
+                                "matching-timeout"
+                            );
+
+                            Matching.stop(
+                                true
+                            );
                         }
 
-                    );
-
-                }
-
-
-                acceptedRide =
-                    {
-
-                        id:
-                            rideSnapshot.id,
-
-                        ...ride,
-
-                        status:
-                            "ACCEPTED",
-
-                        rideStatus:
-                            "ACCEPTED",
-
-                        riderId:
-                            String(
-                                actualRiderId
-                            ),
-
-                        driverId:
-                            String(
-                                actualRiderId
-                            ),
-
-                        riderName
-
-                    };
-
-            }
-
-        );
-
-
-        /*
-         * Notify rider side.
-         */
-
-        dispatchMatchingEvent(
-            "riderx:ride-accepted",
-            {
-
-                rideId,
-
-                riderId:
-                    actualRiderId,
-
-                ride:
-                    acceptedRide
-
-            }
-        );
-
-
-        /*
-         * Customer side receives this
-         * through its ride listener.
-         */
-
-        return acceptedRide;
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX accept ride:",
-            error.message
-        );
-
-
-        dispatchMatchingEvent(
-            "riderx:accept-failed",
-            {
-
-                rideId,
-
-                riderId:
-                    actualRiderId,
-
-                message:
-                    error.message
-
-            }
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/* ============================================================
-   REJECT RIDE REQUEST
-============================================================ */
-
-export async function rejectRideRequest(
-    rideId,
-    riderId = null
-) {
-
-    const user =
-        auth.currentUser;
-
-
-    const actualRiderId =
-        riderId ||
-        user?.uid;
-
-
-    if (
-        !rideId ||
-        !actualRiderId
-    ) {
-
-        return false;
-
-    }
-
-
-    try {
-
-        const requestRef =
-            doc(
-
-                db,
-
-                "rideRequests",
-
-                `${rideId}_${actualRiderId}`
-
-            );
-
-
-        await updateDoc(
-
-            requestRef,
-
-            {
-
-                status:
-                    "REJECTED",
-
-                rejectedAt:
-                    serverTimestamp(),
-
-                updatedAt:
-                    serverTimestamp()
-
-            }
-
-        );
-
-
-        /*
-         * Add rider to rejected list.
-         */
-
-        const rideRef =
-            doc(
-                db,
-                "rides",
-                String(
-                    rideId
-                )
-            );
-
-
-        await addRejectedRider(
-            rideRef,
-            actualRiderId
-        );
-
-
-        state.riderRequests.delete(
-            String(
-                actualRiderId
-            )
-        );
-
-
-        dispatchMatchingEvent(
-            "riderx:ride-rejected",
-            {
-
-                rideId,
-
-                riderId:
-                    actualRiderId
-
-            }
-        );
-
-
-        return true;
-
-    } catch (error) {
-
-        console.error(
-            "RiderX reject request:",
-            error
-        );
-
-
-        return false;
-
-    }
-
-}
-
-
-/* ============================================================
-   ADD REJECTED RIDER
-============================================================ */
-
-async function addRejectedRider(
-    rideRef,
-    riderId
-) {
-
-    try {
-
-        await runTransaction(
-
-            db,
-
-            async transaction => {
-
-                const snapshot =
-                    await transaction.get(
-                        rideRef
-                    );
-
-
-                if (
-                    !snapshot.exists()
-                ) {
-
-                    return;
-
-                }
-
-
-                const ride =
-                    snapshot.data();
-
-
-                const list =
-                    Array.isArray(
-                        ride.rejectedRiders
-                    )
-                        ? [
-                            ...ride.rejectedRiders
-                        ]
-                        : [];
-
-
-                if (
-                    !list.includes(
-                        String(
-                            riderId
-                        )
-                    )
-                ) {
-
-                    list.push(
-                        String(
-                            riderId
-                        )
-                    );
-
-                }
-
-
-                transaction.update(
-
-                    rideRef,
-
-                    {
-
-                        rejectedRiders:
-                            list,
-
-                        updatedAt:
-                            serverTimestamp()
-
-                    }
-
+                    },
+                    Matching.config
+                        .totalMatchingTimeout
                 );
 
-            }
 
-        );
+            /*
+             * First search.
+             */
 
-    } catch (error) {
-
-        console.warn(
-            "RiderX rejected rider update:",
-            error
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   EXPIRE REQUEST
-============================================================ */
-
-async function expireRideRequest(
-    rideId,
-    riderId
-) {
-
-    try {
-
-        const requestRef =
-            doc(
-
-                db,
-
-                "rideRequests",
-
-                `${rideId}_${riderId}`
-
-            );
-
-
-        const snapshot =
-            await getDoc(
-                requestRef
-            );
-
-
-        if (
-            !snapshot.exists()
-        ) {
-
-            return;
-
-        }
-
-
-        const request =
-            snapshot.data();
-
-
-        if (
-            request.status !==
-            "PENDING"
-        ) {
-
-            return;
-
-        }
-
-
-        await updateDoc(
-
-            requestRef,
-
-            {
-
-                status:
-                    "EXPIRED",
-
-                expiredAt:
-                    serverTimestamp(),
-
-                updatedAt:
-                    serverTimestamp()
-
-            }
-
-        );
-
-
-        state.riderRequests.delete(
-            String(
-                riderId
-            )
-        );
-
-
-        dispatchMatchingEvent(
-            "riderx:ride-request-expired",
-            {
-
-                rideId,
-
-                riderId
-
-            }
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX request expiry:",
-            error
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   SEARCH RADIUS
-============================================================ */
-
-function getSearchRadius(
-    ride
-) {
-
-    const radius =
-        Number(
-            ride.searchRadiusKm
-        );
-
-
-    if (
-        Number.isFinite(
-            radius
-        ) &&
-        radius > 0
-    ) {
-
-        return Math.min(
-            radius,
-            CONFIG.maximumRadiusKm
-        );
-
-    }
-
-
-    return CONFIG.initialRadiusKm;
-
-}
-
-
-/* ============================================================
-   EXPAND SEARCH RADIUS
-============================================================ */
-
-async function expandSearchRadius(
-    rideId
-) {
-
-    try {
-
-        const rideRef =
-            doc(
-                db,
-                "rides",
-                rideId
-            );
-
-
-        const snapshot =
-            await getDoc(
-                rideRef
-            );
-
-
-        if (
-            !snapshot.exists()
-        ) {
-
-            return;
-
-        }
-
-
-        const ride =
-            snapshot.data();
-
-
-        const current =
-            getSearchRadius(
+            await Matching.searchAndDispatch(
                 ride
             );
 
 
-        const next =
-            Math.min(
+            return {
 
-                current +
-                5,
+                success:
+                    true,
 
-                CONFIG.maximumRadiusKm
+                ride:
+                    ride,
 
+                rideId:
+                    ride.rideId,
+
+                requestId:
+                    requestId,
+
+                riders:
+                    Matching.state
+                        .candidateRiders
+            };
+        };
+
+
+    /* ========================================================
+       SEARCH + DISPATCH
+       ======================================================== */
+
+    Matching.searchAndDispatch =
+        async function (
+            ride
+        ) {
+
+            if (
+                !Matching.state.active ||
+                Matching.state.accepted
+            ) {
+
+                return [];
+            }
+
+
+            const riders =
+                await Matching
+                    .findNearbyRiders(
+                        ride.pickupLocation,
+                        {
+                            radius:
+                                Matching.state
+                                    .searchRadius
+                        }
+                    );
+
+
+            /*
+             * Remove riders already requested.
+             */
+
+            const available =
+                riders.filter(
+                    function (
+                        rider
+                    ) {
+
+                        const riderId =
+                            rider.uid ||
+                            rider.id;
+
+
+                        return !Matching
+                            .state
+                            .requestedRiders
+                            .includes(
+                                riderId
+                            );
+                    }
+                );
+
+
+            Matching.state
+                .candidateRiders =
+                riders;
+
+
+            Matching.emit(
+                "riders-found",
+                {
+                    ride:
+                        ride,
+
+                    riders:
+                        riders,
+
+                    radius:
+                        Matching.state
+                            .searchRadius
+                }
             );
 
 
-        if (
-            next ===
-            current
-        ) {
+            if (
+                !available.length
+            ) {
 
-            return;
+                /*
+                 * Expand search if no riders.
+                 */
 
-        }
+                const elapsed =
+                    Date.now() -
+                    Matching.state
+                        .startedAt;
 
-
-        await updateDoc(
-
-            rideRef,
-
-            {
-
-                searchRadiusKm:
-                    next,
-
-                updatedAt:
-                    serverTimestamp()
-
-            }
-
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX radius expansion:",
-            error
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   NEXT MATCHING ROUND
-============================================================ */
-
-function scheduleNextRound(
-    rideId
-) {
-
-    if (
-        state.timeout
-    ) {
-
-        clearTimeout(
-            state.timeout
-        );
-
-    }
-
-
-    state.timeout =
-        setTimeout(
-
-            async () => {
 
                 if (
-                    !state.matching
+                    elapsed <
+                    Matching.config
+                        .totalMatchingTimeout
                 ) {
 
-                    return;
+                    Matching.expandSearch();
 
+
+                    Matching.state
+                        .retryTimeoutId =
+                        setTimeout(
+                            function () {
+
+                                Matching
+                                    .searchAndDispatch(
+                                        ride
+                                    );
+
+                            },
+                            Matching.config
+                                .retryDelay
+                        );
                 }
 
 
-                await runMatchingRound(
-                    rideId
+                return [];
+            }
+
+
+            /*
+             * Limit initial requests.
+             */
+
+            const batch =
+                available.slice(
+                    0,
+                    Matching.config
+                        .initialBatchSize
                 );
 
-            },
 
-            CONFIG.retryIntervalMs
-
-        );
-
-}
+            await Matching.sendBatch(
+                ride,
+                batch
+            );
 
 
-/* ============================================================
-   GET PICKUP
-============================================================ */
+            /*
+             * If fewer riders are found,
+             * search again after timeout.
+             */
 
-function getPickup(
-    ride
-) {
+            Matching.state
+                .retryTimeoutId =
+                setTimeout(
+                    async function () {
 
-    const pickup =
-        ride.pickup ||
-        ride.pickupLocation;
+                        if (
+                            !Matching.state
+                                .active ||
+                            Matching.state
+                                .accepted
+                        ) {
+
+                            return;
+                        }
 
 
-    if (
-        pickup &&
-        validCoordinates(
-            pickup.lat,
-            pickup.lng
-        )
-    ) {
+                        await Matching
+                            .searchAndDispatch(
+                                ride
+                            );
 
-        return {
+                    },
+                    Matching.config
+                        .retryDelay
+                );
 
-            lat:
-                Number(
-                    pickup.lat
-                ),
 
-            lng:
-                Number(
-                    pickup.lng
-                )
-
+            return batch;
         };
 
-    }
 
+    /* ========================================================
+       RIDER ACCEPTED
+       ======================================================== */
 
-    if (
-        validCoordinates(
-            ride.pickupLat,
-            ride.pickupLng
-        )
-    ) {
-
-        return {
-
-            lat:
-                Number(
-                    ride.pickupLat
-                ),
-
-            lng:
-                Number(
-                    ride.pickupLng
-                )
-
-        };
-
-    }
-
-
-    return null;
-
-}
-
-
-/* ============================================================
-   DISTANCE
-============================================================ */
-
-function distanceKm(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-) {
-
-    const R =
-        6371;
-
-
-    const dLat =
-        (
-            lat2 -
-            lat1
-        ) *
-        Math.PI /
-        180;
-
-
-    const dLon =
-        (
-            lon2 -
-            lon1
-        ) *
-        Math.PI /
-        180;
-
-
-    const a =
-        Math.sin(
-            dLat / 2
-        ) ** 2 +
-
-        Math.cos(
-            lat1 *
-            Math.PI /
-            180
-        ) *
-
-        Math.cos(
-            lat2 *
-            Math.PI /
-            180
-        ) *
-
-        Math.sin(
-            dLon / 2
-        ) ** 2;
-
-
-    return (
-        R *
-        2 *
-        Math.atan2(
-            Math.sqrt(a),
-            Math.sqrt(
-                1 -
-                a
-            )
-        )
-    );
-
-}
-
-
-/* ============================================================
-   VALID COORDINATES
-============================================================ */
-
-function validCoordinates(
-    lat,
-    lng
-) {
-
-    return (
-
-        Number.isFinite(
-            Number(lat)
-        ) &&
-
-        Number.isFinite(
-            Number(lng)
-        ) &&
-
-        Number(lat) >= -90 &&
-        Number(lat) <= 90 &&
-
-        Number(lng) >= -180 &&
-        Number(lng) <= 180
-
-    );
-
-}
-
-
-/* ============================================================
-   NORMALIZE STATUS
-============================================================ */
-
-function normalizeStatus(
-    status
-) {
-
-    return String(
-        status ||
-        "REQUESTED"
-    )
-        .trim()
-        .toUpperCase();
-
-}
-
-
-/* ============================================================
-   EVENT DISPATCHER
-============================================================ */
-
-function dispatchMatchingEvent(
-    name,
-    detail
-) {
-
-    window.dispatchEvent(
-        new CustomEvent(
-            name,
-            {
-                detail
-            }
-        )
-    );
-
-}
-
-
-/* ============================================================
-   GLOBAL API
-============================================================ */
-
-window.RiderXMatching = {
-
-    startMatching,
-
-    stopMatching,
-
-    findAvailableRiders,
-
-    findAvailableRider,
-
-    sendRideRequest,
-
-    acceptRideRequest,
-
-    rejectRideRequest
-
-};
-
-
-/* ============================================================
-   AUTO LISTEN TO CUSTOMER BOOKING
-============================================================ */
-
-window.addEventListener(
-    "riderx:ride-created",
-    event => {
-
-        const rideId =
-            event.detail?.rideId;
-
-
-        if (
-            !rideId
+    Matching.riderAccepted =
+        async function (
+            riderId,
+            rideId
         ) {
 
-            return;
+            riderId =
+                riderId ||
+                null;
 
-        }
+
+            rideId =
+                rideId ||
+                Matching.state
+                    .rideId;
 
 
-        startMatching(
-            rideId
+            if (
+                !riderId ||
+                !rideId
+            ) {
+
+                return false;
+            }
+
+
+            /*
+             * First rider wins.
+             */
+
+            if (
+                Matching.state.accepted &&
+                Matching.state
+                    .matchedRiderId !==
+                riderId
+            ) {
+
+                return false;
+            }
+
+
+            Matching.state.accepted =
+                true;
+
+
+            Matching.state.active =
+                false;
+
+
+            Matching.state.matchedRiderId =
+                riderId;
+
+
+            /*
+             * Stop retry timers.
+             */
+
+            if (
+                Matching.state
+                    .retryTimeoutId
+            ) {
+
+                clearTimeout(
+                    Matching.state
+                        .retryTimeoutId
+                );
+
+                Matching.state
+                    .retryTimeoutId =
+                    null;
+            }
+
+
+            if (
+                Matching.state
+                    .timeoutId
+            ) {
+
+                clearTimeout(
+                    Matching.state
+                        .timeoutId
+                );
+
+                Matching.state.timeoutId =
+                    null;
+            }
+
+
+            /*
+             * Cancel all other rider requests.
+             */
+
+            await Matching
+                .cancelOtherRequests(
+                    riderId
+                );
+
+
+            /*
+             * Update ride.
+             */
+
+            await Matching
+                .updateRideAfterAccept(
+                    rideId,
+                    riderId
+                );
+
+
+            Matching.emit(
+                "rider-accepted",
+                {
+                    rideId:
+                        rideId,
+
+                    riderId:
+                        riderId
+                }
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       UPDATE RIDE AFTER ACCEPT
+       ======================================================== */
+
+    Matching.updateRideAfterAccept =
+        async function (
+            rideId,
+            riderId
+        ) {
+
+            const update = {
+
+                riderId:
+                    riderId,
+
+                status:
+                    "accepted",
+
+                acceptedAt:
+                    Date.now(),
+
+                updatedAt:
+                    Date.now()
+            };
+
+
+            const database =
+                Matching.getDatabase();
+
+
+            if (
+                database
+            ) {
+
+                try {
+
+                    await database
+                        .ref(
+                            Matching.config
+                                .ridesCollection +
+                            "/" +
+                            rideId
+                        )
+                        .update(
+                            update
+                        );
+
+
+                    return true;
+
+                } catch (error) {
+
+                    console.warn(
+                        "RTDB ride update failed:",
+                        error
+                    );
+                }
+            }
+
+
+            const firestore =
+                Matching.getFirestore();
+
+
+            if (
+                firestore
+            ) {
+
+                try {
+
+                    await firestore
+                        .collection(
+                            Matching.config
+                                .ridesCollection
+                        )
+                        .doc(
+                            rideId
+                        )
+                        .set(
+                            update,
+                            {
+                                merge:
+                                    true
+                            }
+                        );
+
+
+                    return true;
+
+                } catch (error) {}
+            }
+
+
+            return false;
+        };
+
+
+    /* ========================================================
+       CANCEL OTHER REQUESTS
+       ======================================================== */
+
+    Matching.cancelOtherRequests =
+        async function (
+            acceptedRiderId
+        ) {
+
+            const requestId =
+                Matching.state
+                    .requestId;
+
+
+            const database =
+                Matching.getDatabase();
+
+
+            if (
+                database &&
+                requestId
+            ) {
+
+                try {
+
+                    const snapshot =
+                        await database
+                            .ref(
+                                "riderRequests"
+                            )
+                            .once(
+                                "value"
+                            );
+
+
+                    const data =
+                        snapshot.val();
+
+
+                    if (
+                        data
+                    ) {
+
+                        const updates =
+                            {};
+
+
+                        Object.keys(
+                            data
+                        ).forEach(
+                            function (
+                                riderId
+                            ) {
+
+                                if (
+                                    riderId ===
+                                    acceptedRiderId
+                                ) {
+
+                                    return;
+                                }
+
+
+                                if (
+                                    data[
+                                        riderId
+                                    ]?.[
+                                        requestId
+                                    ]
+                                ) {
+
+                                    updates[
+                                        riderId +
+                                        "/" +
+                                        requestId +
+                                        "/status"
+                                    ] =
+                                        "cancelled";
+
+                                    updates[
+                                        riderId +
+                                        "/" +
+                                        requestId +
+                                        "/cancelledAt"
+                                    ] =
+                                        Date.now();
+                                }
+                            }
+                        );
+
+
+                        if (
+                            Object.keys(
+                                updates
+                            ).length
+                        ) {
+
+                            await database
+                                .ref(
+                                    "riderRequests"
+                                )
+                                .update(
+                                    updates
+                                );
+                        }
+                    }
+
+                } catch (error) {
+
+                    console.warn(
+                        "Cancel requests failed:",
+                        error
+                    );
+                }
+            }
+
+
+            Matching.emit(
+                "other-requests-cancelled",
+                {
+                    acceptedRiderId:
+                        acceptedRiderId
+                }
+            );
+        };
+
+
+    /* ========================================================
+       RIDER REJECTED
+       ======================================================== */
+
+    Matching.riderRejected =
+        function (
+            riderId
+        ) {
+
+            if (
+                !riderId
+            ) {
+                return;
+            }
+
+
+            if (
+                !Matching.state
+                    .rejectedRiders
+                    .includes(
+                        riderId
+                    )
+            ) {
+
+                Matching.state
+                    .rejectedRiders
+                    .push(
+                        riderId
+                    );
+            }
+
+
+            Matching.emit(
+                "rider-rejected",
+                {
+                    riderId:
+                        riderId
+                }
+            );
+        };
+
+
+    /* ========================================================
+       REQUEST EXPIRED
+       ======================================================== */
+
+    Matching.riderRequestExpired =
+        function (
+            riderId
+        ) {
+
+            if (
+                !riderId
+            ) {
+                return;
+            }
+
+
+            if (
+                !Matching.state
+                    .expiredRiders
+                    .includes(
+                        riderId
+                    )
+            ) {
+
+                Matching.state
+                    .expiredRiders
+                    .push(
+                        riderId
+                    );
+            }
+
+
+            Matching.emit(
+                "rider-request-expired",
+                {
+                    riderId:
+                        riderId
+                }
+            );
+        };
+
+
+    /* ========================================================
+       STOP MATCHING
+       ======================================================== */
+
+    Matching.stop =
+        async function (
+            timedOut
+        ) {
+
+            Matching.state.active =
+                false;
+
+
+            if (
+                Matching.state
+                    .retryTimeoutId
+            ) {
+
+                clearTimeout(
+                    Matching.state
+                        .retryTimeoutId
+                );
+
+                Matching.state
+                    .retryTimeoutId =
+                    null;
+            }
+
+
+            if (
+                Matching.state
+                    .timeoutId
+            ) {
+
+                clearTimeout(
+                    Matching.state
+                        .timeoutId
+                );
+
+                Matching.state.timeoutId =
+                    null;
+            }
+
+
+            /*
+             * Update ride if not accepted.
+             */
+
+            if (
+                Matching.state.rideId &&
+                !Matching.state.accepted
+            ) {
+
+                const update = {
+
+                    status:
+                        timedOut
+                            ? "no_driver"
+                            : "cancelled",
+
+                    updatedAt:
+                        Date.now()
+                };
+
+
+                const database =
+                    Matching.getDatabase();
+
+
+                if (
+                    database
+                ) {
+
+                    try {
+
+                        await database
+                            .ref(
+                                Matching.config
+                                    .ridesCollection +
+                                "/" +
+                                Matching.state
+                                    .rideId
+                            )
+                            .update(
+                                update
+                            );
+
+                    } catch (error) {}
+                }
+
+
+                const firestore =
+                    Matching.getFirestore();
+
+
+                if (
+                    firestore
+                ) {
+
+                    try {
+
+                        await firestore
+                            .collection(
+                                Matching.config
+                                    .ridesCollection
+                            )
+                            .doc(
+                                Matching.state
+                                    .rideId
+                            )
+                            .set(
+                                update,
+                                {
+                                    merge:
+                                        true
+                                }
+                            );
+
+                    } catch (error) {}
+                }
+            }
+
+
+            Matching.emit(
+                "matching-stopped",
+                {
+
+                    rideId:
+                        Matching.state
+                            .rideId,
+
+                    requestId:
+                        Matching.state
+                            .requestId,
+
+                    timedOut:
+                        Boolean(
+                            timedOut
+                        ),
+
+                    accepted:
+                        Matching.state
+                            .accepted,
+
+                    riderId:
+                        Matching.state
+                            .matchedRiderId
+                }
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       CANCEL MATCHING
+       ======================================================== */
+
+    Matching.cancel =
+        async function () {
+
+            Matching.state.accepted =
+                false;
+
+
+            return Matching.stop(
+                false
+            );
+        };
+
+
+    /* ========================================================
+       GET STATE
+       ======================================================== */
+
+    Matching.getState =
+        function () {
+
+            return {
+
+                ...Matching.state,
+
+                candidateRiders:
+                    [
+                        ...Matching.state
+                            .candidateRiders
+                    ],
+
+                requestedRiders:
+                    [
+                        ...Matching.state
+                            .requestedRiders
+                    ],
+
+                rejectedRiders:
+                    [
+                        ...Matching.state
+                            .rejectedRiders
+                    ],
+
+                expiredRiders:
+                    [
+                        ...Matching.state
+                            .expiredRiders
+                    ]
+            };
+        };
+
+
+    /* ========================================================
+       IS ACTIVE
+       ======================================================== */
+
+    Matching.isActive =
+        function () {
+
+            return (
+                Matching.state.active ===
+                true
+            );
+        };
+
+
+    /* ========================================================
+       EVENT SYSTEM
+       ======================================================== */
+
+    Matching.emit =
+        function (
+            name,
+            data
+        ) {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-matching-" +
+                    name,
+                    {
+                        detail:
+                            data || {}
+                    }
+                )
+            );
+        };
+
+
+    Matching.on =
+        function (
+            name,
+            callback
+        ) {
+
+            if (
+                typeof callback !==
+                "function"
+            ) {
+
+                return;
+            }
+
+
+            window.addEventListener(
+                "riderx-matching-" +
+                name,
+                function (
+                    event
+                ) {
+
+                    callback(
+                        event.detail || {},
+                        event
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       INIT
+       ======================================================== */
+
+    Matching.init =
+        function () {
+
+            if (
+                Matching.state
+                    .initialized
+            ) {
+
+                return;
+            }
+
+
+            Matching.state
+                .initialized =
+                true;
+
+
+            Matching.emit(
+                "ready"
+            );
+
+
+            console.log(
+                "RiderX matching.js loaded."
+            );
+        };
+
+
+    /* ========================================================
+       GLOBAL API
+       ======================================================== */
+
+    RX.findNearbyRiders =
+        Matching.findNearbyRiders;
+
+    RX.startMatching =
+        Matching.start;
+
+    RX.stopMatching =
+        Matching.stop;
+
+    RX.cancelMatching =
+        Matching.cancel;
+
+    RX.acceptedRider =
+        Matching.riderAccepted;
+
+
+    /* ========================================================
+       INIT
+       ======================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            Matching.init
         );
 
+    } else {
+
+        Matching.init();
     }
-);
 
 
-/* ============================================================
-   AUTO STOP AFTER RIDE EVENTS
-============================================================ */
-
-window.addEventListener(
-    "riderx:ride-accepted",
-    () => {
-
-        state.matching =
-            false;
-
-    }
-);
-
-
-window.addEventListener(
-    "riderx:ride-completed",
-    () => {
-
-        stopMatching();
-
-    }
-);
-
-
-window.addEventListener(
-    "riderx:ride-cancelled",
-    () => {
-
-        stopMatching();
-
-    }
-);
-
-
-/* ============================================================
-   EXPORT DEFAULT
-============================================================ */
-
-export default {
-
-    startMatching,
-
-    stopMatching,
-
-    findAvailableRiders,
-
-    findAvailableRider,
-
-    sendRideRequest,
-
-    acceptRideRequest,
-
-    rejectRideRequest
-
-};
+})();
