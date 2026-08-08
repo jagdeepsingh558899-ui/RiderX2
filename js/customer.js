@@ -1,6 +1,6 @@
 // ============================================================
 // RiderX Customer Engine
-// COMPLETE CUSTOMER BOOKING ENGINE
+// FINAL - Uber-style Customer Booking / Ride Tracking
 // Firebase v10 Modular SDK
 // ============================================================
 
@@ -15,7 +15,8 @@ import {
     doc,
     getDoc,
     onSnapshot,
-    serverTimestamp
+    serverTimestamp,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
@@ -23,32 +24,45 @@ import {
 // GLOBAL STATE
 // ============================================================
 
-let map = null;
+const state = {
 
-let pickupMarker = null;
-let dropMarker = null;
-let routeLayer = null;
-let riderLocationMarker = null;
+    map: null,
 
-let pickupCoords = null;
-let dropCoords = null;
+    pickupMarker: null,
+    dropMarker: null,
+    routeLayer: null,
 
-let selectingMode = "pickup";
+    pickupCoords: null,
+    dropCoords: null,
 
-let selectedService = "bike";
+    pickupAddress: "",
+    dropAddress: "",
 
-let currentUser = null;
+    selectingMode: "pickup",
 
-let routeDistanceKm = 0;
+    selectedService: "bike",
 
-let currentRideId = null;
+    currentUser: null,
 
-let rideUnsubscribe = null;
-let riderLocationUnsubscribe = null;
+    currentRideId: null,
 
-let fareSettings = null;
+    rideUnsubscribe: null,
 
-let bookingInProgress = false;
+    fareSettings: null,
+
+    distanceKm: 0,
+
+    durationMinutes: 0,
+
+    fare: 0,
+
+    bookingInProgress: false,
+
+    locationWatchId: null,
+
+    riderMarker: null
+
+};
 
 
 // ============================================================
@@ -92,82 +106,81 @@ const DEFAULT_FARE = {
 // DOM HELPER
 // ============================================================
 
-const $ = (id) =>
-    document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 
 // ============================================================
 // STATUS
 // ============================================================
 
-function setStatus(text) {
+function setStatus(message) {
 
     const status = $("status");
 
     if (status) {
-        status.innerText = text;
+        status.innerText = message;
     }
+
 
     const bookingStatus = $("bookingStatus");
 
     if (bookingStatus) {
-        bookingStatus.innerText = text;
+        bookingStatus.innerText = message;
     }
 
 }
 
 
 // ============================================================
-// AUTH STATE
+// AUTH
 // ============================================================
 
-auth.onAuthStateChanged(
-    (user) => {
+auth.onAuthStateChanged((user) => {
 
-        currentUser = user || null;
+    state.currentUser = user;
 
-        const button = $("bookRide");
 
-        if (!user) {
+    const button = $("bookRide");
 
-            setStatus(
-                "Please login first"
-            );
 
-            if (button) {
-                button.disabled = true;
-            }
+    if (!user) {
 
-            return;
+        setStatus("Please login first");
+
+        if (button) {
+            button.disabled = true;
         }
 
-        if (
-            pickupCoords &&
-            dropCoords
-        ) {
-
-            setStatus(
-                "Ready to book"
-            );
-
-        } else {
-
-            setStatus(
-                "Select pickup location"
-            );
-
-        }
-
-        updateBookButton();
-
-        restoreActiveRide();
+        return;
 
     }
-);
+
+
+    if (
+        state.pickupCoords &&
+        state.dropCoords
+    ) {
+
+        setStatus(
+            "Pickup & destination selected"
+        );
+
+    } else {
+
+        setStatus(
+            "Select pickup location"
+        );
+
+    }
+
+
+    updateBookButton();
+
+});
 
 
 // ============================================================
-// MAP INITIALIZATION
+// MAP INIT
 // ============================================================
 
 function initMap() {
@@ -175,18 +188,24 @@ function initMap() {
     const mapElement = $("map");
 
     if (!mapElement) {
-
         console.error(
             "RiderX: #map not found"
         );
-
         return;
     }
 
-    if (typeof L === "undefined") {
+
+    if (state.map) {
+        return;
+    }
+
+
+    if (
+        typeof L === "undefined"
+    ) {
 
         console.error(
-            "Leaflet is not loaded"
+            "Leaflet is not loaded."
         );
 
         setStatus(
@@ -194,25 +213,22 @@ function initMap() {
         );
 
         return;
+
     }
 
-    if (map) {
-        return;
-    }
 
-    map =
+    state.map =
         L.map(
             "map",
             {
                 zoomControl: true
             }
-        ).setView(
-            [
-                30.7333,
-                76.7794
-            ],
+        )
+        .setView(
+            [30.7333, 76.7794],
             13
         );
+
 
     L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -221,23 +237,27 @@ function initMap() {
             attribution:
                 "&copy; OpenStreetMap contributors"
         }
-    ).addTo(map);
+    )
+    .addTo(state.map);
 
-    map.on(
+
+    state.map.on(
         "click",
         handleMapClick
     );
 
+
     setTimeout(
         () => {
 
-            if (map) {
-                map.invalidateSize();
+            if (state.map) {
+                state.map.invalidateSize();
             }
 
         },
         500
     );
+
 
     setStatus(
         "Select pickup location"
@@ -252,25 +272,25 @@ function initMap() {
 
 function handleMapClick(event) {
 
-    if (
-        !event ||
-        !event.latlng
-    ) {
+    if (!event || !event.latlng) {
         return;
     }
+
 
     const lat =
         Number(
             event.latlng.lat.toFixed(6)
         );
 
+
     const lng =
         Number(
             event.latlng.lng.toFixed(6)
         );
 
+
     if (
-        selectingMode ===
+        state.selectingMode ===
         "pickup"
     ) {
 
@@ -280,18 +300,23 @@ function handleMapClick(event) {
             `${lat}, ${lng}`
         );
 
-        selectingMode =
+
+        state.selectingMode =
             "drop";
+
 
         setStatus(
             "Now select destination"
         );
 
+
         return;
+
     }
 
+
     if (
-        selectingMode ===
+        state.selectingMode ===
         "drop"
     ) {
 
@@ -301,8 +326,10 @@ function handleMapClick(event) {
             `${lat}, ${lng}`
         );
 
-        selectingMode =
+
+        state.selectingMode =
             "pickup";
+
 
         setStatus(
             "Pickup & destination selected"
@@ -330,55 +357,59 @@ function setPickup(
         return;
     }
 
-    pickupCoords = {
 
-        lat:
-            Number(lat),
-
-        lng:
-            Number(lng)
-
+    state.pickupCoords = {
+        lat: Number(lat),
+        lng: Number(lng)
     };
 
+
+    state.pickupAddress =
+        String(
+            address ||
+            `${lat}, ${lng}`
+        );
+
+
     if (
-        pickupMarker &&
-        map
+        state.pickupMarker &&
+        state.map
     ) {
 
-        map.removeLayer(
-            pickupMarker
+        state.map.removeLayer(
+            state.pickupMarker
         );
 
     }
 
-    if (map) {
 
-        pickupMarker =
+    if (state.map) {
+
+        state.pickupMarker =
             L.marker(
-                [
-                    lat,
-                    lng
-                ]
+                [lat, lng]
             )
-            .addTo(map)
+            .addTo(state.map)
             .bindPopup(
-                "Pickup location"
+                "RiderX Pickup"
             );
 
     }
 
+
     const input =
         $("pickupLocation");
+
 
     if (input) {
 
         input.value =
-            address ||
-            `${lat}, ${lng}`;
+            state.pickupAddress;
 
     }
 
-    updateRideData();
+
+    updateRide();
 
 }
 
@@ -400,55 +431,59 @@ function setDrop(
         return;
     }
 
-    dropCoords = {
 
-        lat:
-            Number(lat),
-
-        lng:
-            Number(lng)
-
+    state.dropCoords = {
+        lat: Number(lat),
+        lng: Number(lng)
     };
 
+
+    state.dropAddress =
+        String(
+            address ||
+            `${lat}, ${lng}`
+        );
+
+
     if (
-        dropMarker &&
-        map
+        state.dropMarker &&
+        state.map
     ) {
 
-        map.removeLayer(
-            dropMarker
+        state.map.removeLayer(
+            state.dropMarker
         );
 
     }
 
-    if (map) {
 
-        dropMarker =
+    if (state.map) {
+
+        state.dropMarker =
             L.marker(
-                [
-                    lat,
-                    lng
-                ]
+                [lat, lng]
             )
-            .addTo(map)
+            .addTo(state.map)
             .bindPopup(
-                "Destination"
+                "RiderX Destination"
             );
 
     }
 
+
     const input =
         $("dropoffLocation");
+
 
     if (input) {
 
         input.value =
-            address ||
-            `${lat}, ${lng}`;
+            state.dropAddress;
 
     }
 
-    updateRideData();
+
+    updateRide();
 
 }
 
@@ -468,11 +503,14 @@ function useCurrentLocation() {
         );
 
         return;
+
     }
+
 
     setStatus(
         "Getting your location..."
     );
+
 
     navigator.geolocation.getCurrentPosition(
 
@@ -483,25 +521,22 @@ function useCurrentLocation() {
                     position.coords.latitude
                 );
 
+
             const lng =
                 Number(
                     position.coords.longitude
                 );
 
-            if (map) {
 
-                map.setView(
-                    [
-                        lat,
-                        lng
-                    ],
-                    16,
-                    {
-                        animate: true
-                    }
+            if (state.map) {
+
+                state.map.setView(
+                    [lat, lng],
+                    16
                 );
 
             }
+
 
             setPickup(
                 lat,
@@ -509,8 +544,10 @@ function useCurrentLocation() {
                 "Current location"
             );
 
-            selectingMode =
+
+            state.selectingMode =
                 "drop";
+
 
             setStatus(
                 "Now select destination"
@@ -525,9 +562,10 @@ function useCurrentLocation() {
                 error
             );
 
+
             if (
-                error &&
-                error.code === 1
+                error.code ===
+                1
             ) {
 
                 setStatus(
@@ -537,7 +575,7 @@ function useCurrentLocation() {
             } else {
 
                 setStatus(
-                    "Unable to get location"
+                    "Unable to get your location"
                 );
 
             }
@@ -545,14 +583,9 @@ function useCurrentLocation() {
         },
 
         {
-            enableHighAccuracy:
-                true,
-
-            timeout:
-                15000,
-
-            maximumAge:
-                5000
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 5000
         }
 
     );
@@ -573,6 +606,7 @@ function calculateDistance(
 
     const R = 6371;
 
+
     const dLat =
         (
             lat2 -
@@ -581,6 +615,7 @@ function calculateDistance(
         Math.PI /
         180;
 
+
     const dLng =
         (
             lng2 -
@@ -588,6 +623,7 @@ function calculateDistance(
         ) *
         Math.PI /
         180;
+
 
     const a =
 
@@ -617,14 +653,14 @@ function calculateDistance(
             dLng / 2
         ) ** 2;
 
+
     const c =
         2 *
         Math.atan2(
             Math.sqrt(a),
-            Math.sqrt(
-                1 - a
-            )
+            Math.sqrt(1 - a)
         );
+
 
     return R * c;
 
@@ -639,28 +675,33 @@ async function loadFareSettings() {
 
     try {
 
-        const fareRef =
+        const ref =
             doc(
                 db,
                 "settings",
                 "fare"
             );
 
-        const snapshot =
-            await getDoc(
-                fareRef
-            );
+
+        const snap =
+            await getDoc(ref);
+
 
         if (
-            snapshot.exists()
+            snap.exists()
         ) {
 
-            fareSettings =
-                snapshot.data();
+            state.fareSettings =
+                snap.data();
+
+            console.log(
+                "RiderX fare settings:",
+                state.fareSettings
+            );
 
         } else {
 
-            fareSettings =
+            state.fareSettings =
                 DEFAULT_FARE;
 
         }
@@ -668,11 +709,12 @@ async function loadFareSettings() {
     } catch (error) {
 
         console.error(
-            "Fare settings error:",
+            "RiderX fare settings error:",
             error
         );
 
-        fareSettings =
+
+        state.fareSettings =
             DEFAULT_FARE;
 
     }
@@ -681,33 +723,34 @@ async function loadFareSettings() {
 
 
 // ============================================================
-// GET SERVICE FARE
+// SERVICE FARE
 // ============================================================
 
 function getServiceFare() {
 
+    const service =
+        state.selectedService;
+
+
     const defaults =
         DEFAULT_FARE[
-            selectedService
+            service
         ] ||
         DEFAULT_FARE.bike;
 
+
     if (
-        fareSettings &&
-        fareSettings[selectedService]
+        state.fareSettings &&
+        state.fareSettings[service]
     ) {
 
         return {
-
             ...defaults,
-
-            ...fareSettings[
-                selectedService
-            ]
-
+            ...state.fareSettings[service]
         };
 
     }
+
 
     return defaults;
 
@@ -721,43 +764,64 @@ function getServiceFare() {
 function calculateFare() {
 
     if (
-        !pickupCoords ||
-        !dropCoords
+        !state.pickupCoords ||
+        !state.dropCoords
     ) {
 
-        routeDistanceKm = 0;
+        state.distanceKm = 0;
+        state.durationMinutes = 0;
+        state.fare = 0;
 
-        updateFareUI(
-            0,
-            0
-        );
+        updateFareUI();
 
         return 0;
+
     }
 
-    routeDistanceKm =
-        calculateDistance(
-
-            pickupCoords.lat,
-            pickupCoords.lng,
-
-            dropCoords.lat,
-            dropCoords.lng
-
-        );
 
     const distance =
-        Number(
-            routeDistanceKm.toFixed(2)
+        calculateDistance(
+
+            state.pickupCoords.lat,
+            state.pickupCoords.lng,
+
+            state.dropCoords.lat,
+            state.dropCoords.lng
+
         );
 
-    const fare =
+
+    state.distanceKm =
+        Number(
+            distance.toFixed(2)
+        );
+
+
+    /*
+     * Approximate ETA.
+     * Actual road ETA/navigation will be
+     * handled by the routing/navigation layer.
+     */
+
+    state.durationMinutes =
+        Math.max(
+            1,
+            Math.round(
+                state.distanceKm * 3
+            )
+        );
+
+
+    const fareSettings =
         getServiceFare();
+
 
     const hour =
         new Date().getHours();
 
+
     let rate;
+
 
     if (
         hour >= 22 ||
@@ -766,7 +830,7 @@ function calculateFare() {
 
         rate =
             Number(
-                fare.nightRate ??
+                fareSettings.nightRate ??
                 11
             );
 
@@ -774,32 +838,37 @@ function calculateFare() {
 
         rate =
             Number(
-                fare.dayRate ??
+                fareSettings.dayRate ??
                 8
             );
 
     }
 
+
     const extraRate =
         Number(
-            fare.extraRate ??
+            fareSettings.extraRate ??
             rate
         );
 
-    const base =
+
+    const baseFare =
         Number(
-            fare.baseFare ??
+            fareSettings.baseFare ??
             30
         );
 
-    let total = base;
+
+    let total =
+        baseFare;
+
 
     if (
-        distance <= 10
+        state.distanceKm <= 10
     ) {
 
         total +=
-            distance *
+            state.distanceKm *
             rate;
 
     } else {
@@ -808,27 +877,28 @@ function calculateFare() {
             10 *
             rate;
 
+
         total +=
             (
-                distance -
+                state.distanceKm -
                 10
             ) *
             extraRate;
 
     }
 
-    total =
+
+    state.fare =
         Math.max(
-            base,
+            50,
             Math.round(total)
         );
 
-    updateFareUI(
-        total,
-        distance
-    );
 
-    return total;
+    updateFareUI();
+
+
+    return state.fare;
 
 }
 
@@ -837,43 +907,49 @@ function calculateFare() {
 // FARE UI
 // ============================================================
 
-function updateFareUI(
-    fare = 0,
-    distance = 0
-) {
+function updateFareUI() {
 
-    const fareElement =
+    const fare =
         $("fare");
 
-    if (fareElement) {
 
-        fareElement.innerText =
+    if (fare) {
+
+        fare.innerText =
             "₹" +
-            fare;
+            state.fare;
 
     }
 
-    const distanceElement =
+
+    const distance =
         $("estimated-distance-display");
 
-    if (distanceElement) {
 
-        distanceElement.innerText =
-            distance > 0
-                ? `${distance.toFixed(1)} KM`
+    if (distance) {
+
+        distance.innerText =
+            state.distanceKm > 0
+
+                ? `${state.distanceKm.toFixed(1)} KM`
+
                 : "0 KM";
 
     }
 
+
     const info =
         $("fareInfo");
 
+
     if (info) {
 
-        if (distance > 0) {
+        if (
+            state.distanceKm > 0
+        ) {
 
             info.innerText =
-                `${selectedService.toUpperCase()} • ${distance.toFixed(1)} km`;
+                `${state.selectedService.toUpperCase()} • ${state.distanceKm.toFixed(1)} km`;
 
         } else {
 
@@ -894,66 +970,75 @@ function updateFareUI(
 function drawRoute() {
 
     if (
-        !map ||
-        !pickupCoords ||
-        !dropCoords
+        !state.map ||
+        !state.pickupCoords ||
+        !state.dropCoords
     ) {
+
         return;
+
     }
 
-    if (routeLayer) {
 
-        map.removeLayer(
-            routeLayer
+    if (
+        state.routeLayer
+    ) {
+
+        state.map.removeLayer(
+            state.routeLayer
         );
 
-        routeLayer =
-            null;
-
     }
 
-    routeLayer =
+
+    /*
+     * Temporary straight-line route.
+     *
+     * Later routing engine can replace this
+     * with actual road navigation.
+     */
+
+    state.routeLayer =
         L.polyline(
 
             [
 
                 [
-                    pickupCoords.lat,
-                    pickupCoords.lng
+                    state.pickupCoords.lat,
+                    state.pickupCoords.lng
                 ],
 
                 [
-                    dropCoords.lat,
-                    dropCoords.lng
+                    state.dropCoords.lat,
+                    state.dropCoords.lng
                 ]
 
             ],
 
             {
-                weight: 5,
-                opacity: .85
+                weight: 5
             }
 
         )
-        .addTo(map);
+        .addTo(state.map);
+
 
     try {
 
-        map.fitBounds(
-            routeLayer.getBounds(),
+        state.map.fitBounds(
+            state.routeLayer.getBounds(),
             {
-                padding:
-                    [
-                        70,
-                        120
-                    ]
+                padding: [
+                    80,
+                    120
+                ]
             }
         );
 
     } catch (error) {
 
         console.warn(
-            "Map fitBounds error:",
+            "RiderX map bounds error:",
             error
         );
 
@@ -963,10 +1048,10 @@ function drawRoute() {
 
 
 // ============================================================
-// UPDATE RIDE DATA
+// UPDATE RIDE
 // ============================================================
 
-function updateRideData() {
+function updateRide() {
 
     calculateFare();
 
@@ -986,34 +1071,40 @@ function updateBookButton() {
     const button =
         $("bookRide");
 
+
     if (!button) {
         return;
     }
 
-    const ready =
-        Boolean(
-            currentUser &&
-            pickupCoords &&
-            dropCoords &&
-            !bookingInProgress
-        );
+
+    if (
+        state.bookingInProgress
+    ) {
+
+        button.disabled =
+            true;
+
+        return;
+
+    }
+
 
     button.disabled =
-        !ready;
+        !state.currentUser ||
+        !state.pickupCoords ||
+        !state.dropCoords;
 
 }
 
 
 // ============================================================
-// SERVICES
+// SERVICE SELECTOR
 // ============================================================
 
 function setupServices() {
 
     document
-        .querySelectorAll(
-            ".service"
-        )
+        .querySelectorAll(".service")
         .forEach(
             (service) => {
 
@@ -1028,26 +1119,27 @@ function setupServices() {
                             .forEach(
                                 (item) => {
 
-                                    item.classList
-                                        .remove(
-                                            "active"
-                                        );
+                                    item.classList.remove(
+                                        "active"
+                                    );
 
                                 }
                             );
 
-                        service.classList
-                            .add(
-                                "active"
-                            );
 
-                        selectedService =
+                        service.classList.add(
+                            "active"
+                        );
+
+
+                        state.selectedService =
                             String(
                                 service.dataset.service ||
                                 "bike"
                             )
                             .trim()
                             .toLowerCase();
+
 
                         calculateFare();
 
@@ -1061,7 +1153,7 @@ function setupServices() {
 
 
 // ============================================================
-// PICKUP BUTTON
+// PICKUP MAP BUTTON
 // ============================================================
 
 function setupPickupButton() {
@@ -1069,19 +1161,22 @@ function setupPickupButton() {
     const button =
         $("pickupMapBtn");
 
+
     if (!button) {
         return;
     }
+
 
     button.addEventListener(
         "click",
         () => {
 
-            selectingMode =
+            state.selectingMode =
                 "pickup";
 
+
             setStatus(
-                "Select pickup on map"
+                "Move map and select pickup"
             );
 
         }
@@ -1091,7 +1186,7 @@ function setupPickupButton() {
 
 
 // ============================================================
-// DROP BUTTON
+// DROP MAP BUTTON
 // ============================================================
 
 function setupDropButton() {
@@ -1099,19 +1194,22 @@ function setupDropButton() {
     const button =
         $("dropMapBtn");
 
+
     if (!button) {
         return;
     }
+
 
     button.addEventListener(
         "click",
         () => {
 
-            selectingMode =
+            state.selectingMode =
                 "drop";
 
+
             setStatus(
-                "Select destination on map"
+                "Move map and select destination"
             );
 
         }
@@ -1121,32 +1219,23 @@ function setupDropButton() {
 
 
 // ============================================================
-// LOCATION BUTTONS
+// LOCATION BUTTON
 // ============================================================
 
 function setupLocationButton() {
 
-    const buttons = [
+    const button =
+        $("myLocation");
 
-        $("myLocation"),
 
-        $("mapLocationButton")
+    if (!button) {
+        return;
+    }
 
-    ];
 
-    buttons.forEach(
-        (button) => {
-
-            if (!button) {
-                return;
-            }
-
-            button.addEventListener(
-                "click",
-                useCurrentLocation
-            );
-
-        }
+    button.addEventListener(
+        "click",
+        useCurrentLocation
     );
 
 }
@@ -1161,8 +1250,10 @@ function setupInputs() {
     const pickup =
         $("pickupLocation");
 
+
     const drop =
         $("dropoffLocation");
+
 
     if (pickup) {
 
@@ -1170,8 +1261,9 @@ function setupInputs() {
             "focus",
             () => {
 
-                selectingMode =
+                state.selectingMode =
                     "pickup";
+
 
                 setStatus(
                     "Select pickup on map"
@@ -1182,14 +1274,16 @@ function setupInputs() {
 
     }
 
+
     if (drop) {
 
         drop.addEventListener(
             "focus",
             () => {
 
-                selectingMode =
+                state.selectingMode =
                     "drop";
+
 
                 setStatus(
                     "Select destination on map"
@@ -1204,67 +1298,40 @@ function setupInputs() {
 
 
 // ============================================================
-// LOADING
+// RIDE REQUEST SOUND
 // ============================================================
 
-function showLoading() {
+function playRideSound() {
 
-    const overlay =
-        $("rideLoading");
+    try {
 
-    if (overlay) {
-        overlay.style.display =
-            "flex";
+        const audio =
+            new Audio(
+                "../assets/sounds/ride-request.mp3"
+            );
+
+
+        audio.volume =
+            0.8;
+
+
+        audio.play()
+            .catch(
+                () => {
+                    /*
+                     * Browser may block autoplay.
+                     */
+                }
+            );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX sound error:",
+            error
+        );
+
     }
-
-}
-
-
-function hideLoading() {
-
-    const overlay =
-        $("rideLoading");
-
-    if (overlay) {
-        overlay.style.display =
-            "none";
-    }
-
-}
-
-
-// ============================================================
-// OPEN RIDE STATUS
-// ============================================================
-
-function openRideStatus(
-    rideId
-) {
-
-    if (!rideId) {
-        return;
-    }
-
-    localStorage.setItem(
-        "RiderXCurrentRideId",
-        rideId
-    );
-
-    localStorage.setItem(
-        "activeRideId",
-        rideId
-    );
-
-    localStorage.setItem(
-        "rideId",
-        rideId
-    );
-
-    window.RiderXCurrentRideId =
-        rideId;
-
-    window.location.href =
-        `ride-status.html?rideId=${encodeURIComponent(rideId)}`;
 
 }
 
@@ -1275,108 +1342,116 @@ function openRideStatus(
 
 async function bookRide() {
 
-    if (bookingInProgress) {
+    if (
+        state.bookingInProgress
+    ) {
+
         return;
+
     }
 
-    if (!currentUser) {
 
-        alert(
-            "Please login first."
-        );
+    if (
+        !state.currentUser
+    ) {
 
         window.location.href =
             "../auth/login.html?role=customer";
 
+
         return;
+
     }
 
+
     if (
-        !pickupCoords ||
-        !dropCoords
+        !state.pickupCoords ||
+        !state.dropCoords
     ) {
 
         setStatus(
-            "Please select pickup and destination"
+            "Please select pickup & destination"
         );
 
         return;
+
     }
 
-    bookingInProgress =
-        true;
 
     const button =
         $("bookRide");
+
+
+    state.bookingInProgress =
+        true;
+
 
     if (button) {
 
         button.disabled =
             true;
 
+
         button.innerHTML =
             '<i class="fa-solid fa-spinner fa-spin"></i> Finding Rider...';
 
     }
 
-    showLoading();
 
     try {
 
         const fare =
             calculateFare();
 
-        const pickupInput =
-            $("pickupLocation");
-
-        const dropInput =
-            $("dropoffLocation");
-
-        const paymentInput =
-            $("paymentMethod");
 
         const pickupAddress =
-            pickupInput?.value?.trim() ||
+            $("pickupLocation")?.value ||
+            state.pickupAddress ||
             "Pickup location";
 
+
         const dropAddress =
-            dropInput?.value?.trim() ||
+            $("dropoffLocation")?.value ||
+            state.dropAddress ||
             "Destination";
 
-        const payment =
-            paymentInput?.value ||
+
+        const paymentMethod =
+            $("paymentMethod")?.value ||
             "cash";
+
 
         const timestamp =
             serverTimestamp();
 
+
         const rideData = {
 
             customerId:
-                currentUser.uid,
+                state.currentUser.uid,
+
 
             customerName:
-                currentUser.displayName ||
-                currentUser.email ||
+                state.currentUser.displayName ||
+                state.currentUser.email ||
                 "RiderX Customer",
 
-            customerPhone:
-                currentUser.phoneNumber ||
-                "",
 
             serviceType:
-                selectedService,
+                state.selectedService,
+
 
             service:
-                selectedService,
+                state.selectedService,
+
 
             pickup: {
 
                 lat:
-                    pickupCoords.lat,
+                    state.pickupCoords.lat,
 
                 lng:
-                    pickupCoords.lng,
+                    state.pickupCoords.lng,
 
                 address:
                     pickupAddress,
@@ -1386,13 +1461,14 @@ async function bookRide() {
 
             },
 
+
             drop: {
 
                 lat:
-                    dropCoords.lat,
+                    state.dropCoords.lat,
 
                 lng:
-                    dropCoords.lng,
+                    state.dropCoords.lng,
 
                 address:
                     dropAddress,
@@ -1402,79 +1478,52 @@ async function bookRide() {
 
             },
 
+
             distance:
                 Number(
-                    routeDistanceKm.toFixed(2)
+                    state.distanceKm.toFixed(2)
                 ),
+
+
+            duration:
+                Number(
+                    state.durationMinutes
+                ),
+
 
             fare:
                 Number(fare),
 
-            estimatedFare:
-                Number(fare),
 
             paymentMethod:
                 String(
-                    payment
+                    paymentMethod
                 )
                 .trim()
                 .toLowerCase(),
 
+
             status:
                 "REQUESTED",
+
 
             riderId:
                 null,
 
+
             driverId:
                 null,
 
-            riderName:
-                "",
-
-            riderPhone:
-                "",
-
-            riderVehicle:
-                "",
-
-            riderRating:
-                null,
-
-            riderLocation:
-                null,
-
-            otp:
-                null,
 
             createdAt:
                 timestamp,
 
+
             requestedAt:
-                timestamp,
-
-            acceptedAt:
-                null,
-
-            arrivedAt:
-                null,
-
-            startedAt:
-                null,
-
-            completedAt:
-                null,
-
-            cancelledAt:
-                null,
-
-            cancelledBy:
-                null,
-
-            updatedAt:
                 timestamp
 
         };
+
 
         const rideRef =
             await addDoc(
@@ -1488,37 +1537,33 @@ async function bookRide() {
 
             );
 
-        currentRideId =
+
+        state.currentRideId =
             rideRef.id;
+
 
         window.RiderXCurrentRideId =
             rideRef.id;
 
-        localStorage.setItem(
-            "RiderXCurrentRideId",
-            rideRef.id
-        );
-
-        localStorage.setItem(
-            "activeRideId",
-            rideRef.id
-        );
-
-        localStorage.setItem(
-            "rideId",
-            rideRef.id
-        );
-
-        hideLoading();
-
-        setStatus(
-            "Finding a nearby RiderX rider..."
-        );
 
         console.log(
             "RiderX ride created:",
             rideRef.id
         );
+
+
+        setStatus(
+            "Searching nearby RiderX riders..."
+        );
+
+
+        playRideSound();
+
+
+        startRideListener(
+            rideRef.id
+        );
+
 
         window.dispatchEvent(
 
@@ -1526,36 +1571,19 @@ async function bookRide() {
                 "riderx:ride-created",
                 {
                     detail: {
+
                         rideId:
                             rideRef.id,
 
                         ride:
                             rideData
+
                     }
                 }
             )
 
         );
 
-        startRideListener(
-            rideRef.id
-        );
-
-        /*
-         * Customer should immediately move to the
-         * Uber-style live ride tracking page.
-         */
-
-        setTimeout(
-            () => {
-
-                openRideStatus(
-                    rideRef.id
-                );
-
-            },
-            250
-        );
 
     } catch (error) {
 
@@ -1564,10 +1592,10 @@ async function bookRide() {
             error
         );
 
-        hideLoading();
 
-        bookingInProgress =
+        state.bookingInProgress =
             false;
+
 
         if (
             error.code ===
@@ -1586,13 +1614,15 @@ async function bookRide() {
 
         }
 
+
         if (button) {
 
             button.disabled =
                 false;
 
+
             button.innerHTML =
-                '<i class="fa-solid fa-paper-plane"></i> Book RiderX';
+                '<i class="fa-solid fa-paper-plane"></i> Book Ride';
 
         }
 
@@ -1610,20 +1640,17 @@ function startRideListener(
 ) {
 
     if (
-        typeof rideUnsubscribe ===
+        typeof state.rideUnsubscribe ===
         "function"
     ) {
 
-        rideUnsubscribe();
+        state.rideUnsubscribe();
 
-        rideUnsubscribe =
+        state.rideUnsubscribe =
             null;
 
     }
 
-    if (!rideId) {
-        return;
-    }
 
     const rideRef =
         doc(
@@ -1632,7 +1659,8 @@ function startRideListener(
             rideId
         );
 
-    rideUnsubscribe =
+
+    state.rideUnsubscribe =
         onSnapshot(
 
             rideRef,
@@ -1648,10 +1676,13 @@ function startRideListener(
                     );
 
                     return;
+
                 }
+
 
                 const ride =
                     snapshot.data();
+
 
                 const status =
                     String(
@@ -1661,10 +1692,12 @@ function startRideListener(
                     .trim()
                     .toUpperCase();
 
+
                 console.log(
                     "RiderX ride status:",
                     status
                 );
+
 
                 window.dispatchEvent(
 
@@ -1688,19 +1721,14 @@ function startRideListener(
 
                 );
 
-                // ============================================
-                // REQUESTED / SEARCHING
-                // ============================================
+
+                // --------------------------------------------
+                // REQUESTED
+                // --------------------------------------------
 
                 if (
                     status ===
                     "REQUESTED"
-                    ||
-                    status ===
-                    "SEARCHING"
-                    ||
-                    status ===
-                    "PENDING"
                 ) {
 
                     setStatus(
@@ -1709,30 +1737,20 @@ function startRideListener(
 
                 }
 
-                // ============================================
-                // ACCEPTED / ASSIGNED
-                // ============================================
+
+                // --------------------------------------------
+                // ACCEPTED
+                // --------------------------------------------
 
                 else if (
                     status ===
                     "ACCEPTED"
-                    ||
-                    status ===
-                    "ASSIGNED"
                 ) {
-
-                    hideLoading();
-
-                    bookingInProgress =
-                        false;
 
                     setStatus(
                         "Rider accepted your ride"
                     );
 
-                    listenRiderLocation(
-                        ride
-                    );
 
                     window.dispatchEvent(
 
@@ -1755,123 +1773,62 @@ function startRideListener(
 
                 }
 
-                // ============================================
+
+                // --------------------------------------------
                 // ARRIVING
-                // ============================================
+                // --------------------------------------------
 
                 else if (
                     status ===
                     "ARRIVING"
-                    ||
-                    status ===
-                    "EN_ROUTE"
-                    ||
-                    status ===
-                    "ON_THE_WAY"
                 ) {
 
                     setStatus(
-                        "Your RiderX rider is on the way"
+                        "Your RiderX rider is arriving"
                     );
 
-                    listenRiderLocation(
+
+                    updateRiderLocation(
                         ride
                     );
 
                 }
 
-                // ============================================
-                // ARRIVED
-                // ============================================
 
-                else if (
-                    status ===
-                    "ARRIVED"
-                    ||
-                    status ===
-                    "RIDER_ARRIVED"
-                    ||
-                    status ===
-                    "AT_PICKUP"
-                ) {
-
-                    setStatus(
-                        "Your rider has arrived"
-                    );
-
-                    listenRiderLocation(
-                        ride
-                    );
-
-                }
-
-                // ============================================
+                // --------------------------------------------
                 // STARTED
-                // ============================================
+                // --------------------------------------------
 
                 else if (
                     status ===
                     "STARTED"
-                    ||
-                    status ===
-                    "ONGOING"
-                    ||
-                    status ===
-                    "IN_PROGRESS"
-                    ||
-                    status ===
-                    "RIDE_STARTED"
                 ) {
 
                     setStatus(
                         "Ride started"
                     );
 
-                    listenRiderLocation(
+
+                    updateRiderLocation(
                         ride
-                    );
-
-                    window.dispatchEvent(
-
-                        new CustomEvent(
-                            "riderx:ride-started",
-                            {
-                                detail: {
-
-                                    rideId:
-                                        rideId,
-
-                                    ride:
-                                        ride
-
-                                }
-                            }
-                        )
-
                     );
 
                 }
 
-                // ============================================
+
+                // --------------------------------------------
                 // COMPLETED
-                // ============================================
+                // --------------------------------------------
 
                 else if (
                     status ===
                     "COMPLETED"
-                    ||
-                    status ===
-                    "COMPLETE"
-                    ||
-                    status ===
-                    "FINISHED"
                 ) {
 
                     setStatus(
                         "Ride completed"
                     );
 
-                    stopRiderLocationListener();
 
                     window.dispatchEvent(
 
@@ -1894,26 +1851,20 @@ function startRideListener(
 
                 }
 
-                // ============================================
+
+                // --------------------------------------------
                 // CANCELLED
-                // ============================================
+                // --------------------------------------------
 
                 else if (
                     status ===
                     "CANCELLED"
-                    ||
-                    status ===
-                    "CANCELED"
                 ) {
 
                     setStatus(
                         "Ride cancelled"
                     );
 
-                    bookingInProgress =
-                        false;
-
-                    stopRiderLocationListener();
 
                     window.dispatchEvent(
 
@@ -1945,6 +1896,7 @@ function startRideListener(
                     error
                 );
 
+
                 setStatus(
                     "Unable to track ride"
                 );
@@ -1957,107 +1909,7 @@ function startRideListener(
 
 
 // ============================================================
-// RIDER LIVE LOCATION LISTENER
-// ============================================================
-
-function listenRiderLocation(
-    ride
-) {
-
-    if (!ride) {
-        return;
-    }
-
-    const riderId =
-        ride.riderId ||
-        ride.driverId;
-
-    if (!riderId) {
-
-        updateRiderLocation(
-            ride
-        );
-
-        return;
-    }
-
-    stopRiderLocationListener();
-
-    const riderLocationRef =
-        doc(
-            db,
-            "riderLocations",
-            riderId
-        );
-
-    riderLocationUnsubscribe =
-        onSnapshot(
-
-            riderLocationRef,
-
-            (snapshot) => {
-
-                if (
-                    !snapshot.exists()
-                ) {
-
-                    updateRiderLocation(
-                        ride
-                    );
-
-                    return;
-                }
-
-                const location =
-                    snapshot.data();
-
-                updateRiderMarker(
-                    location
-                );
-
-            },
-
-            (error) => {
-
-                console.warn(
-                    "Rider location listener:",
-                    error
-                );
-
-                updateRiderLocation(
-                    ride
-                );
-
-            }
-
-        );
-
-}
-
-
-// ============================================================
-// STOP RIDER LOCATION
-// ============================================================
-
-function stopRiderLocationListener() {
-
-    if (
-        typeof riderLocationUnsubscribe ===
-        "function"
-    ) {
-
-        riderLocationUnsubscribe();
-
-        riderLocationUnsubscribe =
-            null;
-
-    }
-
-}
-
-
-// ============================================================
-// UPDATE RIDER LOCATION FROM RIDE
+// RIDER LIVE LOCATION
 // ============================================================
 
 function updateRiderLocation(
@@ -2065,123 +1917,135 @@ function updateRiderLocation(
 ) {
 
     if (
-        !map ||
-        !ride
+        !state.map
     ) {
         return;
     }
+
 
     const location =
         ride.riderLocation ||
-        ride.riderCurrentLocation ||
-        ride.driverLocation;
+        ride.driverLocation ||
+        null;
 
-    if (!location) {
-        return;
-    }
-
-    updateRiderMarker(
-        location
-    );
-
-}
-
-
-// ============================================================
-// UPDATE RIDER MARKER
-// ============================================================
-
-function updateRiderMarker(
-    location
-) {
 
     if (
-        !map ||
-        !location
+        !location ||
+        !Number.isFinite(
+            Number(location.lat)
+        ) ||
+        !Number.isFinite(
+            Number(location.lng)
+        )
     ) {
+
         return;
+
     }
+
 
     const lat =
         Number(
             location.lat
         );
 
+
     const lng =
         Number(
             location.lng
         );
 
+
     if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng)
+        state.riderMarker
     ) {
+
+        state.riderMarker.setLatLng(
+            [lat, lng]
+        );
+
         return;
+
     }
 
-    const riderIcon =
-        L.divIcon({
 
-            className:
-                "riderx-rider-marker",
+    state.riderMarker =
+        L.marker(
+            [lat, lng]
+        )
+        .addTo(state.map)
+        .bindPopup(
+            "RiderX Rider"
+        );
 
-            html:
-                `
-                <div style="
-                    width:42px;
-                    height:42px;
-                    border-radius:50%;
-                    background:#FFD600;
-                    color:#000;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    border:3px solid #000;
-                    box-shadow:
-                        0 4px 18px rgba(0,0,0,.45),
-                        0 0 0 7px rgba(255,214,0,.18);
-                    font-size:18px;
-                ">
-                    <span>🏍️</span>
-                </div>
-                `,
+}
 
-            iconSize:
-                [
-                    42,
-                    42
-                ],
 
-            iconAnchor:
-                [
-                    21,
-                    21
-                ]
+// ============================================================
+// CANCEL RIDE
+// ============================================================
 
-        });
+async function cancelRide() {
 
-    if (!riderLocationMarker) {
+    if (
+        !state.currentRideId
+    ) {
 
-        riderLocationMarker =
-            L.marker(
-                [
-                    lat,
-                    lng
-                ],
-                {
-                    icon:
-                        riderIcon
-                }
-            )
-            .addTo(map);
+        return;
 
-    } else {
+    }
 
-        riderLocationMarker.setLatLng(
-            [
-                lat,
-                lng
-            ]
+
+    if (
+        !state.currentUser
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        await updateDoc(
+
+            doc(
+                db,
+                "rides",
+                state.currentRideId
+            ),
+
+            {
+
+                status:
+                    "CANCELLED",
+
+                cancelledBy:
+                    "customer",
+
+                cancelledAt:
+                    serverTimestamp()
+
+            }
+
+        );
+
+
+        setStatus(
+            "Ride cancelled"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "RiderX cancel error:",
+            error
+        );
+
+
+        setStatus(
+            "Unable to cancel ride"
         );
 
     }
@@ -2190,257 +2054,253 @@ function updateRiderMarker(
 
 
 // ============================================================
-// RESTORE ACTIVE RIDE
-// ============================================================
-
-function restoreActiveRide() {
-
-    if (!currentUser) {
-        return;
-    }
-
-    if (currentRideId) {
-
-        startRideListener(
-            currentRideId
-        );
-
-        return;
-    }
-
-    const savedRideId =
-        localStorage.getItem(
-            "RiderXCurrentRideId"
-        )
-        ||
-        localStorage.getItem(
-            "activeRideId"
-        )
-        ||
-        localStorage.getItem(
-            "rideId"
-        );
-
-    if (!savedRideId) {
-        return;
-    }
-
-    currentRideId =
-        savedRideId;
-
-    window.RiderXCurrentRideId =
-        savedRideId;
-
-    startRideListener(
-        savedRideId
-    );
-
-}
-
-
-// ============================================================
-// RESET
+// RESET BOOKING
 // ============================================================
 
 function resetBooking() {
 
-    pickupCoords =
-        null;
-
-    dropCoords =
-        null;
-
-    routeDistanceKm =
-        0;
-
-    currentRideId =
-        null;
-
-    bookingInProgress =
-        false;
-
-    window.RiderXCurrentRideId =
-        null;
-
-    localStorage.removeItem(
-        "RiderXCurrentRideId"
-    );
-
-    localStorage.removeItem(
-        "activeRideId"
-    );
-
-    localStorage.removeItem(
-        "rideId"
-    );
-
     if (
-        typeof rideUnsubscribe ===
+        typeof state.rideUnsubscribe ===
         "function"
     ) {
 
-        rideUnsubscribe();
-
-        rideUnsubscribe =
-            null;
+        state.rideUnsubscribe();
 
     }
 
-    stopRiderLocationListener();
+
+    state.rideUnsubscribe =
+        null;
+
 
     if (
-        pickupMarker &&
-        map
+        state.locationWatchId !==
+        null
     ) {
 
-        map.removeLayer(
-            pickupMarker
+        navigator.geolocation.clearWatch(
+            state.locationWatchId
         );
 
-        pickupMarker =
+        state.locationWatchId =
             null;
 
     }
+
 
     if (
-        dropMarker &&
-        map
+        state.pickupMarker &&
+        state.map
     ) {
 
-        map.removeLayer(
-            dropMarker
+        state.map.removeLayer(
+            state.pickupMarker
         );
 
-        dropMarker =
-            null;
-
     }
+
 
     if (
-        routeLayer &&
-        map
+        state.dropMarker &&
+        state.map
     ) {
 
-        map.removeLayer(
-            routeLayer
+        state.map.removeLayer(
+            state.dropMarker
         );
 
-        routeLayer =
-            null;
-
     }
+
 
     if (
-        riderLocationMarker &&
-        map
+        state.routeLayer &&
+        state.map
     ) {
 
-        map.removeLayer(
-            riderLocationMarker
+        state.map.removeLayer(
+            state.routeLayer
         );
 
-        riderLocationMarker =
-            null;
+    }
+
+
+    if (
+        state.riderMarker &&
+        state.map
+    ) {
+
+        state.map.removeLayer(
+            state.riderMarker
+        );
 
     }
+
+
+    state.pickupMarker =
+        null;
+
+    state.dropMarker =
+        null;
+
+    state.routeLayer =
+        null;
+
+    state.riderMarker =
+        null;
+
+    state.pickupCoords =
+        null;
+
+    state.dropCoords =
+        null;
+
+    state.pickupAddress =
+        "";
+
+    state.dropAddress =
+        "";
+
+    state.distanceKm =
+        0;
+
+    state.durationMinutes =
+        0;
+
+    state.fare =
+        0;
+
+    state.currentRideId =
+        null;
+
+    state.bookingInProgress =
+        false;
+
+    state.selectingMode =
+        "pickup";
+
 
     const pickup =
         $("pickupLocation");
 
+
     const drop =
         $("dropoffLocation");
+
 
     if (pickup) {
         pickup.value = "";
     }
 
+
     if (drop) {
         drop.value = "";
     }
 
-    updateFareUI(
-        0,
-        0
-    );
 
-    selectingMode =
-        "pickup";
+    updateFareUI();
+
+    updateBookButton();
+
 
     setStatus(
         "Select pickup location"
     );
 
-    updateBookButton();
+}
+
+
+// ============================================================
+// GET CURRENT RIDE
+// ============================================================
+
+async function getCurrentRide() {
+
+    if (
+        !state.currentRideId
+    ) {
+
+        return null;
+
+    }
+
+
+    try {
+
+        const snapshot =
+            await getDoc(
+
+                doc(
+                    db,
+                    "rides",
+                    state.currentRideId
+                )
+
+            );
+
+
+        if (
+            !snapshot.exists()
+        ) {
+
+            return null;
+
+        }
+
+
+        return {
+
+            id:
+                snapshot.id,
+
+            ...snapshot.data()
+
+        };
+
+    } catch (error) {
+
+        console.error(
+            "RiderX get ride error:",
+            error
+        );
+
+
+        return null;
+
+    }
 
 }
 
 
 // ============================================================
-// PUBLIC LOCATION
-// ============================================================
-
-function locate() {
-
-    useCurrentLocation();
-
-}
-
-
-// ============================================================
-// PUBLIC API
+// GLOBAL API
 // ============================================================
 
 window.RiderXCustomer = {
 
-    init:
-        init,
+    init,
 
-    locate:
-        locate,
+    setPickup,
 
-    setPickup:
-        setPickup,
+    setDrop,
 
-    setDrop:
-        setDrop,
+    calculateFare,
 
-    calculateFare:
-        calculateFare,
+    bookRide,
 
-    bookRide:
-        bookRide,
+    cancelRide,
 
     reset:
         resetBooking,
 
-    openRideStatus:
-        openRideStatus,
+    getCurrentRide,
 
     getRideId:
         () =>
-            currentRideId,
+            state.currentRideId,
 
-    getRide:
+    getState:
         () => ({
-
-            rideId:
-                currentRideId,
-
-            pickup:
-                pickupCoords,
-
-            drop:
-                dropCoords,
-
-            service:
-                selectedService,
-
-            distance:
-                routeDistanceKm,
-
-            fare:
-                calculateFare()
-
+            ...state
         })
 
 };
@@ -2456,6 +2316,7 @@ async function init() {
         "RiderX Customer Engine Started"
     );
 
+
     initMap();
 
     setupServices();
@@ -2468,31 +2329,19 @@ async function init() {
 
     setupInputs();
 
+
     await loadFareSettings();
+
 
     calculateFare();
 
     updateBookButton();
 
-    const button =
-        $("bookRide");
-
-    if (button) {
-
-        button.addEventListener(
-            "click",
-            bookRide
-        );
-
-    }
-
-    restoreActiveRide();
-
 }
 
 
 // ============================================================
-// START
+// DOM READY
 // ============================================================
 
 if (
@@ -2516,28 +2365,29 @@ if (
 
 
 // ============================================================
-// RESTORE SAVED RIDE ID
+// BOOK BUTTON
 // ============================================================
 
-const savedRideId =
-    localStorage.getItem(
-        "RiderXCurrentRideId"
-    )
-    ||
-    localStorage.getItem(
-        "activeRideId"
-    )
-    ||
-    localStorage.getItem(
-        "rideId"
-    );
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-if (savedRideId) {
+        const button =
+            $("bookRide");
 
-    currentRideId =
-        savedRideId;
 
-    window.RiderXCurrentRideId =
-        savedRideId;
-
+        if (!button) {
+            return;
         }
+
+
+        button.addEventListener(
+            "click",
+            bookRide
+        );
+
+    },
+    {
+        once: true
+    }
+);
