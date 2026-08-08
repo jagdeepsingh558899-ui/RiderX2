@@ -1,19 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"
 >
 
-<meta
-    name="theme-color"
-    content="#000000"
->
+<meta name="theme-color" content="#000000">
 
 <title>RiderX | Book Ride</title>
 
@@ -33,17 +28,18 @@
 >
 
 <style>
-
 :root{
     --yellow:#ffe500;
     --black:#000;
-    --dark:#090909;
-    --card:#151515;
-    --card2:#202020;
+    --dark:#080808;
+    --card:#141414;
+    --card2:#1d1d1d;
+    --line:#2b2b2b;
     --white:#fff;
-    --muted:#8b8b8b;
+    --muted:#8d8d8d;
     --green:#22c55e;
     --red:#ef4444;
+    --blue:#3b82f6;
 }
 
 *{
@@ -68,6 +64,17 @@ body{
     inset:0;
 }
 
+button,
+input,
+select{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+
 /* =========================================================
    MAP
 ========================================================= */
@@ -90,6 +97,10 @@ body{
     padding:2px 4px!important;
 }
 
+.leaflet-container{
+    font-family:Poppins,Arial,sans-serif;
+}
+
 
 /* =========================================================
    TOP BAR
@@ -100,17 +111,16 @@ body{
     top:0;
     left:0;
     right:0;
-    z-index:1000;
+    z-index:1200;
     padding:
-        max(12px,env(safe-area-inset-top))
+        max(10px,env(safe-area-inset-top))
         14px
         0;
     pointer-events:none;
 }
 
 .topbar-inner{
-    height:52px;
-
+    height:54px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -119,26 +129,17 @@ body{
 .top-btn{
     width:45px;
     height:45px;
-
+    border:0;
+    border-radius:50%;
     display:flex;
     align-items:center;
     justify-content:center;
-
-    border:0;
-    border-radius:50%;
-
-    background:rgba(15,15,15,.94);
+    background:rgba(10,10,10,.94);
     color:#fff;
-
     font-size:17px;
-
-    box-shadow:
-        0 6px 22px rgba(0,0,0,.4);
-
+    box-shadow:0 6px 24px rgba(0,0,0,.42);
     pointer-events:auto;
-
-    transition:
-        transform .15s ease;
+    transition:transform .15s ease;
 }
 
 .top-btn:active{
@@ -147,18 +148,13 @@ body{
 
 .logo{
     padding:8px 17px;
-
     border-radius:15px;
-
-    background:rgba(15,15,15,.94);
-
+    background:rgba(10,10,10,.94);
+    color:#fff;
     font-size:17px;
     font-weight:800;
-
-    letter-spacing:.3px;
-
-    box-shadow:
-        0 6px 22px rgba(0,0,0,.4);
+    letter-spacing:.4px;
+    box-shadow:0 6px 24px rgba(0,0,0,.42);
 }
 
 .logo span{
@@ -167,44 +163,54 @@ body{
 
 
 /* =========================================================
-   STATUS
+   NOTIFICATION BUTTON
+========================================================= */
+
+.notification-btn{
+    position:relative;
+}
+
+.notification-dot{
+    position:absolute;
+    top:8px;
+    right:8px;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--yellow);
+    border:2px solid #111;
+    display:none;
+}
+
+.notification-dot.show{
+    display:block;
+}
+
+
+/* =========================================================
+   STATUS PILL
 ========================================================= */
 
 .status-pill{
     position:fixed;
-
     top:
         calc(
-            max(12px,env(safe-area-inset-top))
-            + 61px
+            max(10px,env(safe-area-inset-top))
+            + 63px
         );
-
     left:50%;
-
     transform:translateX(-50%);
-
-    z-index:1000;
-
-    max-width:90%;
-
-    padding:8px 16px;
-
+    z-index:1100;
+    max-width:88%;
+    padding:8px 15px;
     border-radius:30px;
-
-    background:rgba(17,17,17,.94);
-
+    background:rgba(15,15,15,.94);
     color:#fff;
-
-    font-size:11px;
-
+    font-size:10px;
     white-space:nowrap;
-
     overflow:hidden;
     text-overflow:ellipsis;
-
-    box-shadow:
-        0 5px 20px rgba(0,0,0,.35);
-
+    box-shadow:0 5px 20px rgba(0,0,0,.35);
     pointer-events:none;
 }
 
@@ -215,39 +221,24 @@ body{
 
 .center-pin{
     position:fixed;
-
     left:50%;
     top:50%;
-
     z-index:500;
-
-    transform:
-        translate(-50%,-100%);
-
+    transform:translate(-50%,-100%);
     pointer-events:none;
 }
 
 .center-pin-icon{
     width:45px;
     height:45px;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     background:var(--yellow);
     color:#000;
-
-    border-radius:
-        50%
-        50%
-        50%
-        0;
-
+    border-radius:50% 50% 50% 0;
     transform:rotate(-45deg);
-
-    box-shadow:
-        0 7px 20px rgba(0,0,0,.35);
+    box-shadow:0 7px 20px rgba(0,0,0,.35);
 }
 
 .center-pin-icon i{
@@ -256,39 +247,22 @@ body{
 
 
 /* =========================================================
-   FLOATING LOCATION
+   LOCATION BUTTON
 ========================================================= */
 
 .location-btn{
     position:fixed;
-
     right:15px;
-
-    /*
-     * Sheet collapsed height approximately 30vh.
-     * Button stays above the sheet.
-     */
-    bottom:
-        calc(
-            30vh + 18px
-        );
-
-    z-index:950;
-
+    bottom:calc(30vh + 18px);
+    z-index:1050;
     width:48px;
     height:48px;
-
     border:0;
     border-radius:50%;
-
     background:#111;
     color:var(--yellow);
-
     font-size:18px;
-
-    box-shadow:
-        0 5px 20px rgba(0,0,0,.45);
-
+    box-shadow:0 5px 20px rgba(0,0,0,.45);
     transition:
         bottom .3s ease,
         transform .15s ease;
@@ -305,57 +279,28 @@ body{
 
 .sheet{
     position:fixed;
-
     left:0;
     right:0;
-
-    /*
-     * Initial collapsed position.
-     * About 30% of screen visible.
-     */
     bottom:0;
-
-    height:auto;
-
-    max-height:
-        calc(
-            88vh
-        );
-
     z-index:1000;
 
+    max-height:88vh;
+
     padding:
-        10px
+        8px
         14px
-        max(
-            14px,
-            env(safe-area-inset-bottom)
-        );
+        max(14px,env(safe-area-inset-bottom));
 
-    background:
-        rgba(9,9,9,.985);
+    background:rgba(8,8,8,.985);
 
-    border-radius:
-        28px
-        28px
-        0
-        0;
+    border-radius:28px 28px 0 0;
 
-    box-shadow:
-        0 -12px 40px rgba(0,0,0,.5);
+    box-shadow:0 -14px 42px rgba(0,0,0,.55);
 
     overflow-y:auto;
     overflow-x:hidden;
 
-    /*
-     * Sheet position is controlled by JS.
-     */
-    transform:
-        translateY(
-            calc(
-                100% - 30vh
-            )
-        );
+    transform:translateY(calc(100% - 30vh));
 
     transition:
         transform .32s cubic-bezier(.22,.8,.22,1);
@@ -378,16 +323,11 @@ body{
 
 .handle-area{
     width:100%;
-
     height:32px;
-
     display:flex;
-
     align-items:center;
     justify-content:center;
-
     cursor:grab;
-
     touch-action:none;
 }
 
@@ -398,14 +338,8 @@ body{
 .handle{
     width:48px;
     height:5px;
-
-    background:#555;
-
     border-radius:10px;
-
-    transition:
-        background .2s ease,
-        width .2s ease;
+    background:#555;
 }
 
 .handle-area:active .handle{
@@ -415,79 +349,53 @@ body{
 
 
 /* =========================================================
-   SHEET CONTENT
+   CONTENT
 ========================================================= */
 
 .sheet-content{
     padding-bottom:4px;
 }
 
-
-/* =========================================================
-   TITLE
-========================================================= */
-
 .title{
-    font-size:19px;
+    font-size:20px;
+    line-height:1.2;
     font-weight:800;
-
-    margin:
-        0
-        0
-        13px;
+    margin:0 0 13px;
 }
 
 
 /* =========================================================
-   SEARCH BOX
+   LOCATION SEARCH
 ========================================================= */
 
 .search-box{
     background:#151515;
-
     border-radius:17px;
-
     overflow:hidden;
-
-    border:
-        1px solid
-        rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.045);
 }
 
 .search-row{
+    min-height:57px;
     display:flex;
-
     align-items:center;
-
     gap:10px;
-
-    min-height:56px;
-
-    padding:
-        8px
-        10px;
+    padding:8px 10px;
 }
 
 .search-row + .search-row{
-    border-top:
-        1px solid
-        #2c2c2c;
+    border-top:1px solid #292929;
 }
 
 .location-dot{
     width:27px;
     height:27px;
-
     min-width:27px;
-
     display:flex;
-
     align-items:center;
     justify-content:center;
-
     border-radius:50%;
-
-    font-size:10px;
+    font-size:9px;
 }
 
 .pick-dot{
@@ -502,18 +410,12 @@ body{
 
 .location-input{
     flex:1;
-
     width:100%;
-
     min-width:0;
-
     border:0;
     outline:0;
-
     background:transparent;
-
     color:#fff;
-
     font-size:13px;
 }
 
@@ -521,31 +423,84 @@ body{
     color:#777;
 }
 
-.location-input:focus{
-    color:#fff;
-}
-
 .map-select-btn{
     width:36px;
     height:36px;
-
     min-width:36px;
-
     border:0;
-
     border-radius:50%;
-
-    background:#242424;
-
-    color:var(--yellow);
-
     display:flex;
     align-items:center;
     justify-content:center;
+    background:#242424;
+    color:var(--yellow);
 }
 
 .map-select-btn:active{
     transform:scale(.92);
+}
+
+
+/* =========================================================
+   RECENT / LOCATION SUGGESTIONS
+========================================================= */
+
+.suggestions{
+    display:none;
+    margin-top:8px;
+    background:#151515;
+    border-radius:15px;
+    overflow:hidden;
+    border:1px solid #292929;
+}
+
+.suggestions.show{
+    display:block;
+}
+
+.suggestion{
+    min-height:52px;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:8px 12px;
+    border:0;
+    border-bottom:1px solid #282828;
+    width:100%;
+    background:transparent;
+    color:#fff;
+    text-align:left;
+}
+
+.suggestion:last-child{
+    border-bottom:0;
+}
+
+.suggestion:active{
+    background:#222;
+}
+
+.suggestion-icon{
+    width:32px;
+    height:32px;
+    min-width:32px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#242424;
+    color:var(--yellow);
+}
+
+.suggestion-title{
+    font-size:12px;
+    font-weight:600;
+}
+
+.suggestion-subtitle{
+    font-size:9px;
+    color:#777;
+    margin-top:2px;
 }
 
 
@@ -556,44 +511,28 @@ body{
 .section-title{
     margin-top:15px;
     margin-bottom:8px;
-
-    font-size:12px;
     color:#999;
+    font-size:12px;
+    font-weight:500;
 }
 
 .services{
     display:grid;
-
-    grid-template-columns:
-        repeat(4,1fr);
-
+    grid-template-columns:repeat(4,1fr);
     gap:8px;
 }
 
 .service{
-    min-height:72px;
-
+    min-height:74px;
+    border:1px solid #303030;
+    border-radius:15px;
     display:flex;
-
     flex-direction:column;
-
     align-items:center;
     justify-content:center;
-
     gap:5px;
-
-    border:
-        1px solid
-        #303030;
-
-    border-radius:15px;
-
     background:#151515;
-
     color:#aaa;
-
-    cursor:pointer;
-
     transition:
         transform .15s ease,
         background .2s ease,
@@ -617,10 +556,7 @@ body{
     background:var(--yellow);
     border-color:var(--yellow);
     color:#000;
-
-    box-shadow:
-        0 5px 15px
-        rgba(255,229,0,.1);
+    box-shadow:0 5px 16px rgba(255,229,0,.12);
 }
 
 
@@ -630,21 +566,14 @@ body{
 
 .fare-card{
     display:flex;
-
     align-items:center;
     justify-content:space-between;
-
+    gap:10px;
     margin-top:14px;
-
     padding:14px;
-
     background:#151515;
-
     border-radius:16px;
-
-    border:
-        1px solid
-        rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.04);
 }
 
 .fare-label{
@@ -654,18 +583,15 @@ body{
 
 .fare-info{
     margin-top:3px;
-
     color:#777;
-
     font-size:10px;
 }
 
 .fare-price{
     color:var(--yellow);
-
     font-size:23px;
-
     font-weight:800;
+    white-space:nowrap;
 }
 
 
@@ -675,11 +601,8 @@ body{
 
 .distance{
     text-align:center;
-
     margin-top:8px;
-
     color:#777;
-
     font-size:10px;
 }
 
@@ -690,17 +613,11 @@ body{
 
 .payment-row{
     display:flex;
-
     align-items:center;
-
     gap:9px;
-
     margin-top:10px;
-
     padding:13px;
-
     background:#151515;
-
     border-radius:15px;
 }
 
@@ -710,16 +627,11 @@ body{
 
 #paymentMethod{
     flex:1;
-
     min-width:0;
-
     border:0;
     outline:0;
-
     background:#151515;
-
     color:#fff;
-
     font-size:13px;
 }
 
@@ -730,30 +642,16 @@ body{
 
 .book-btn{
     width:100%;
-
-    margin-top:14px;
-
     min-height:54px;
-
+    margin-top:14px;
     border:0;
-
     border-radius:16px;
-
     background:var(--yellow);
-
     color:#000;
-
     font-size:16px;
-
     font-weight:800;
-
-    box-shadow:
-        0 5px 20px
-        rgba(255,229,0,.12);
-
-    transition:
-        transform .15s ease,
-        background .2s ease;
+    box-shadow:0 5px 20px rgba(255,229,0,.12);
+    transition:transform .15s ease,background .2s ease;
 }
 
 .book-btn:active{
@@ -761,25 +659,40 @@ body{
 }
 
 .book-btn:disabled{
-    background:#444;
+    background:#3e3e3e;
     color:#888;
     box-shadow:none;
 }
 
 
 /* =========================================================
-   STATUS
+   LOADING
+========================================================= */
+
+.book-btn.loading{
+    pointer-events:none;
+}
+
+.book-btn.loading i{
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   BOOKING STATUS
 ========================================================= */
 
 #bookingStatus{
     min-height:20px;
-
     margin-top:9px;
-
     text-align:center;
-
     color:var(--yellow);
-
     font-size:11px;
 }
 
@@ -790,14 +703,11 @@ body{
 
 .active-ride{
     display:none;
-
     margin-top:12px;
-
     padding:13px;
-
     background:#151515;
-
     border-radius:16px;
+    border:1px solid rgba(255,255,255,.04);
 }
 
 .active-ride.show{
@@ -806,10 +716,8 @@ body{
 
 .active-ride-top{
     display:flex;
-
     align-items:center;
     justify-content:space-between;
-
     gap:10px;
 }
 
@@ -821,35 +729,28 @@ body{
 .active-status{
     color:var(--yellow);
     font-size:11px;
-
     text-align:right;
 }
 
 .cancel-btn{
     width:100%;
-
     margin-top:10px;
-
     padding:11px;
-
-    border:
-        1px solid
-        #3a2020;
-
+    border:1px solid #3a2020;
     border-radius:12px;
-
     background:#170909;
-
     color:#ff6b6b;
-
     font-size:12px;
-
     font-weight:600;
+}
+
+.cancel-btn:active{
+    transform:scale(.985);
 }
 
 
 /* =========================================================
-   SHEET STATE
+   SHEET STATES
 ========================================================= */
 
 body.sheet-expanded .sheet{
@@ -857,31 +758,20 @@ body.sheet-expanded .sheet{
 }
 
 body.sheet-expanded .location-btn{
-    bottom:
-        calc(
-            88vh + 12px
-        );
+    bottom:calc(88vh + 12px);
 }
 
 body.sheet-collapsed .sheet{
-    transform:
-        translateY(
-            calc(
-                100% - 30vh
-            )
-        );
+    transform:translateY(calc(100% - 30vh));
 }
 
 body.sheet-collapsed .location-btn{
-    bottom:
-        calc(
-            30vh + 18px
-        );
+    bottom:calc(30vh + 18px);
 }
 
 
 /* =========================================================
-   TABLET / SMALL DESKTOP
+   DESKTOP / TABLET
 ========================================================= */
 
 @media(min-width:700px){
@@ -889,32 +779,17 @@ body.sheet-collapsed .location-btn{
     .sheet{
         left:50%;
         right:auto;
-
         width:520px;
-
         transform:
             translate(
                 -50%,
-                calc(
-                    100% - 30vh
-                )
+                calc(100% - 30vh)
             );
-
-        border-radius:
-            28px
-            28px
-            0
-            0;
     }
 
     body.sheet-expanded .sheet{
-        transform:
-            translate(
-                -50%,
-                0
-            );
+        transform:translate(-50%,0);
     }
-
 }
 
 
@@ -935,8 +810,8 @@ body.sheet-collapsed .location-btn{
     }
 
     .logo{
-        font-size:15px;
         padding:7px 14px;
+        font-size:15px;
     }
 
     .sheet{
@@ -945,7 +820,7 @@ body.sheet-collapsed .location-btn{
     }
 
     .title{
-        font-size:17px;
+        font-size:18px;
     }
 
     .service{
@@ -955,24 +830,6 @@ body.sheet-collapsed .location-btn{
     .service i{
         font-size:17px;
     }
-
-}
-
-
-/* =========================================================
-   SAFE AREA
-========================================================= */
-
-@supports(padding:max(0px)){
-
-    .sheet{
-        padding-bottom:
-            max(
-                14px,
-                env(safe-area-inset-bottom)
-            );
-    }
-
 }
 
 
@@ -988,11 +845,8 @@ body.sheet-collapsed .location-btn{
     .book-btn{
         transition:none!important;
     }
-
 }
-
 </style>
-
 </head>
 
 
@@ -1020,28 +874,27 @@ body.sheet-collapsed .location-btn{
             type="button"
             aria-label="Back"
         >
-
             <i class="fa-solid fa-arrow-left"></i>
-
         </button>
 
 
         <div class="logo">
-
             RIDER<span>X</span>
-
         </div>
 
 
         <button
-            class="top-btn"
-            id="myLocation"
+            class="top-btn notification-btn"
+            id="notificationButton"
             type="button"
-            aria-label="My location"
+            aria-label="Notifications"
         >
+            <i class="fa-regular fa-bell"></i>
 
-            <i class="fa-solid fa-location-crosshairs"></i>
-
+            <span
+                id="notificationDot"
+                class="notification-dot"
+            ></span>
         </button>
 
     </div>
@@ -1062,22 +915,20 @@ body.sheet-collapsed .location-btn{
 
 
 <!-- =======================================================
-     CENTER MAP PIN
+     CENTER PIN
 ======================================================== -->
 
 <div class="center-pin">
 
     <div class="center-pin-icon">
-
         <i class="fa-solid fa-location-dot"></i>
-
     </div>
 
 </div>
 
 
 <!-- =======================================================
-     FLOATING LOCATION
+     CURRENT LOCATION
 ======================================================== -->
 
 <button
@@ -1086,14 +937,12 @@ body.sheet-collapsed .location-btn{
     type="button"
     aria-label="Current location"
 >
-
     <i class="fa-solid fa-crosshairs"></i>
-
 </button>
 
 
 <!-- =======================================================
-     BOTTOM SHEET
+     BOTTOM BOOKING SHEET
 ======================================================== -->
 
 <div
@@ -1101,25 +950,17 @@ body.sheet-collapsed .location-btn{
     class="sheet"
 >
 
-    <!-- DRAG HANDLE -->
-
     <div
         id="sheetHandle"
         class="handle-area"
         aria-label="Drag booking panel"
     >
-
         <div class="handle"></div>
-
     </div>
 
 
     <div class="sheet-content">
 
-
-        <!-- =================================================
-             TITLE
-        ================================================== -->
 
         <div class="title">
             Where are you going?
@@ -1127,7 +968,7 @@ body.sheet-collapsed .location-btn{
 
 
         <!-- =================================================
-             LOCATION SEARCH
+             LOCATION INPUTS
         ================================================== -->
 
         <div class="search-box">
@@ -1138,11 +979,8 @@ body.sheet-collapsed .location-btn{
             <div class="search-row">
 
                 <div class="location-dot pick-dot">
-
                     <i class="fa-solid fa-circle"></i>
-
                 </div>
-
 
                 <input
                     id="pickupLocation"
@@ -1152,16 +990,13 @@ body.sheet-collapsed .location-btn{
                     autocomplete="off"
                 >
 
-
                 <button
                     id="pickupMapBtn"
                     class="map-select-btn"
                     type="button"
                     aria-label="Select pickup on map"
                 >
-
                     <i class="fa-solid fa-map-pin"></i>
-
                 </button>
 
             </div>
@@ -1172,11 +1007,8 @@ body.sheet-collapsed .location-btn{
             <div class="search-row">
 
                 <div class="location-dot drop-dot">
-
                     <i class="fa-solid fa-location-dot"></i>
-
                 </div>
-
 
                 <input
                     id="dropoffLocation"
@@ -1186,21 +1018,28 @@ body.sheet-collapsed .location-btn{
                     autocomplete="off"
                 >
 
-
                 <button
                     id="dropMapBtn"
                     class="map-select-btn"
                     type="button"
                     aria-label="Select destination on map"
                 >
-
                     <i class="fa-solid fa-map-pin"></i>
-
                 </button>
 
             </div>
 
         </div>
+
+
+        <!-- =================================================
+             SUGGESTIONS
+        ================================================== -->
+
+        <div
+            id="locationSuggestions"
+            class="suggestions"
+        ></div>
 
 
         <!-- =================================================
@@ -1214,18 +1053,14 @@ body.sheet-collapsed .location-btn{
 
         <div class="services">
 
-
             <div
                 class="service active"
                 data-service="bike"
                 role="button"
                 tabindex="0"
             >
-
                 <i class="fa-solid fa-motorcycle"></i>
-
                 <span>Bike</span>
-
             </div>
 
 
@@ -1235,11 +1070,8 @@ body.sheet-collapsed .location-btn{
                 role="button"
                 tabindex="0"
             >
-
                 <i class="fa-solid fa-car"></i>
-
                 <span>Cab</span>
-
             </div>
 
 
@@ -1249,11 +1081,8 @@ body.sheet-collapsed .location-btn{
                 role="button"
                 tabindex="0"
             >
-
                 <i class="fa-solid fa-box"></i>
-
                 <span>Parcel</span>
-
             </div>
 
 
@@ -1263,11 +1092,8 @@ body.sheet-collapsed .location-btn{
                 role="button"
                 tabindex="0"
             >
-
                 <i class="fa-solid fa-utensils"></i>
-
                 <span>Food</span>
-
             </div>
 
         </div>
@@ -1350,7 +1176,7 @@ body.sheet-collapsed .location-btn{
 
 
         <!-- =================================================
-             BOOK BUTTON
+             BOOK
         ================================================== -->
 
         <button
@@ -1362,13 +1188,15 @@ body.sheet-collapsed .location-btn{
 
             <i class="fa-solid fa-paper-plane"></i>
 
-            Book RiderX
+            <span>
+                Book RiderX
+            </span>
 
         </button>
 
 
         <!-- =================================================
-             BOOKING STATUS
+             STATUS
         ================================================== -->
 
         <div id="bookingStatus"></div>
@@ -1404,13 +1232,10 @@ body.sheet-collapsed .location-btn{
                 class="cancel-btn"
                 type="button"
             >
-
                 Cancel Ride
-
             </button>
 
         </div>
-
 
     </div>
 
@@ -1427,7 +1252,7 @@ body.sheet-collapsed .location-btn{
 
 
 <!-- =======================================================
-     RIDERX CUSTOMER ENGINE
+     CUSTOMER ENGINE
 ======================================================== -->
 
 <script
@@ -1437,41 +1262,36 @@ body.sheet-collapsed .location-btn{
 
 
 <!-- =======================================================
-     PAGE CONTROLLER
+     BOOKING PAGE CONTROLLER
 ======================================================== -->
 
 <script type="module">
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
+    function(){
+
+        "use strict";
+
 
         /* ==================================================
-           BACK BUTTON
+           ELEMENTS
         ================================================== */
 
-        const back =
+        const sheet =
+            document.getElementById(
+                "bookingSheet"
+            );
+
+        const handle =
+            document.getElementById(
+                "sheetHandle"
+            );
+
+        const backButton =
             document.getElementById(
                 "backButton"
             );
-
-        if(back){
-
-            back.addEventListener(
-                "click",
-                () => {
-
-                    history.back();
-
-                }
-            );
-
-        }
-
-
-        /* ==================================================
-           LOCATION BUTTON
-        ================================================== */
 
         const locationButton =
             document.getElementById(
@@ -1483,14 +1303,142 @@ document.addEventListener(
                 "myLocation"
             );
 
+        const notificationButton =
+            document.getElementById(
+                "notificationButton"
+            );
+
+
+        /* ==================================================
+           BACK
+        ================================================== */
+
+        if(backButton){
+
+            backButton.addEventListener(
+                "click",
+                function(){
+
+                    if(
+                        window.history.length > 1
+                    ){
+
+                        window.history.back();
+
+                    }else{
+
+                        window.location.href =
+                            "./Home.html";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* ==================================================
+           CURRENT LOCATION
+        ================================================== */
 
         if(locationButton){
 
             locationButton.addEventListener(
                 "click",
-                () => {
+                function(){
 
-                    mainLocation?.click();
+                    if(mainLocation){
+
+                        mainLocation.click();
+
+                        return;
+                    }
+
+
+                    if(
+                        navigator.geolocation
+                    ){
+
+                        navigator.geolocation.getCurrentPosition(
+                            function(position){
+
+                                window.dispatchEvent(
+                                    new CustomEvent(
+                                        "riderx:current-location",
+                                        {
+                                            detail:{
+                                                lat:
+                                                    position.coords.latitude,
+
+                                                lng:
+                                                    position.coords.longitude
+                                            }
+                                        }
+                                    )
+                                );
+
+                            },
+                            function(){
+
+                                console.warn(
+                                    "RiderX: Location permission unavailable."
+                                );
+
+                            },
+                            {
+                                enableHighAccuracy:true,
+                                timeout:10000,
+                                maximumAge:5000
+                            }
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* ==================================================
+           NOTIFICATION
+        ================================================== */
+
+        if(notificationButton){
+
+            notificationButton.addEventListener(
+                "click",
+                function(){
+
+                    /*
+                     * If notification page exists,
+                     * open it. Otherwise trigger the
+                     * notification permission helper.
+                     */
+
+                    if(
+                        window.RiderX &&
+                        window.RiderX.enableNotification
+                    ){
+
+                        window.RiderX
+                            .enableNotification()
+                            .catch(
+                                function(error){
+                                    console.error(error);
+                                }
+                            );
+
+                    }else{
+
+                        window.dispatchEvent(
+                            new CustomEvent(
+                                "riderx:notification-open"
+                            )
+                        );
+
+                    }
 
                 }
             );
@@ -1515,23 +1463,22 @@ document.addEventListener(
 
         window.addEventListener(
             "riderx:ride-created",
-            () => {
+            function(){
 
-                activeRide?.classList.add(
-                    "show"
-                );
+                if(activeRide){
 
-                if(activeStatus){
-
-                    activeStatus.innerText =
-                        "Searching...";
+                    activeRide.classList.add(
+                        "show"
+                    );
 
                 }
 
-                /*
-                 * Automatically expand the
-                 * booking sheet after booking.
-                 */
+                if(activeStatus){
+
+                    activeStatus.textContent =
+                        "Searching...";
+
+                }
 
                 expandSheet();
 
@@ -1541,34 +1488,40 @@ document.addEventListener(
 
         window.addEventListener(
             "riderx:ride-status",
-            (event) => {
+            function(event){
 
                 const status =
-                    event.detail?.status ||
-                    "REQUESTED";
+                    event.detail &&
+                    event.detail.status
+                        ? event.detail.status
+                        : "REQUESTED";
 
 
-                activeRide?.classList.add(
-                    "show"
-                );
+                if(activeRide){
 
-
-                if(activeStatus){
-
-                    activeStatus.innerText =
-                        status;
+                    activeRide.classList.add(
+                        "show"
+                    );
 
                 }
 
-                /*
-                 * Ride tracking information
-                 * deserves expanded panel.
-                 */
+                if(activeStatus){
+
+                    activeStatus.textContent =
+                        String(status)
+                            .replace(
+                                /_/g,
+                                " "
+                            );
+
+                }
+
 
                 if(
                     status === "ACCEPTED" ||
                     status === "ARRIVING" ||
-                    status === "STARTED"
+                    status === "STARTED" ||
+                    status === "IN_PROGRESS"
                 ){
 
                     expandSheet();
@@ -1580,7 +1533,7 @@ document.addEventListener(
 
 
         /* ==================================================
-           CANCEL
+           CANCEL RIDE
         ================================================== */
 
         const cancel =
@@ -1593,16 +1546,26 @@ document.addEventListener(
 
             cancel.addEventListener(
                 "click",
-                () => {
+                function(){
 
                     if(
                         window.RiderXCustomer &&
                         typeof
-                        window.RiderXCustomer.cancelRide ===
+                        window.RiderXCustomer
+                            .cancelRide ===
                         "function"
                     ){
 
-                        window.RiderXCustomer.cancelRide();
+                        window.RiderXCustomer
+                            .cancelRide();
+
+                    }else{
+
+                        window.dispatchEvent(
+                            new CustomEvent(
+                                "riderx:cancel-ride"
+                            )
+                        );
 
                     }
 
@@ -1616,18 +1579,8 @@ document.addEventListener(
            BOTTOM SHEET
         ================================================== */
 
-        const sheet =
-            document.getElementById(
-                "bookingSheet"
-            );
-
-        const handle =
-            document.getElementById(
-                "sheetHandle"
-            );
-
-
         if(!sheet || !handle){
+
             return;
         }
 
@@ -1636,14 +1589,12 @@ document.addEventListener(
 
         let startY = 0;
 
-        let currentY = 0;
-
         let startTranslate = 0;
 
+        let lastY = 0;
 
-        /*
-         * Calculate current transform
-         */
+        let moved = false;
+
 
         function getTranslateY(){
 
@@ -1652,52 +1603,57 @@ document.addEventListener(
                     sheet
                 );
 
-            const matrix =
-                new DOMMatrixReadOnly(
-                    style.transform
-                );
+            const transform =
+                style.transform;
 
-            return matrix.m42 || 0;
+
+            if(
+                !transform ||
+                transform === "none"
+            ){
+
+                return 0;
+            }
+
+
+            try{
+
+                const matrix =
+                    new DOMMatrixReadOnly(
+                        transform
+                    );
+
+                return matrix.m42 || 0;
+
+            }catch(error){
+
+                return 0;
+            }
 
         }
 
-
-        /*
-         * Sheet positions
-         */
 
         function collapsedPosition(){
 
             return Math.max(
                 0,
                 sheet.offsetHeight -
-                window.innerHeight * 0.30
+                window.innerHeight * .30
             );
 
         }
 
 
-        function expandedPosition(){
-
-            return 0;
-
-        }
-
-
-        function setSheetPosition(
-            value,
-            animate = true
+        function applyPosition(
+            value
         ){
 
             const max =
                 collapsedPosition();
 
-            const min =
-                expandedPosition();
-
             const clamped =
                 Math.max(
-                    min,
+                    0,
                     Math.min(
                         max,
                         value
@@ -1705,23 +1661,10 @@ document.addEventListener(
                 );
 
 
-            if(!animate){
-
-                sheet.classList.add(
-                    "dragging"
-                );
-
-            }else{
-
-                sheet.classList.remove(
-                    "dragging"
-                );
-
-            }
-
-
             sheet.style.transform =
-                `translateY(${clamped}px)`;
+                "translateY(" +
+                clamped +
+                "px)";
 
         }
 
@@ -1736,37 +1679,15 @@ document.addEventListener(
                 "sheet-expanded"
             );
 
-
             sheet.classList.remove(
                 "dragging"
             );
-
 
             sheet.style.transform =
                 "translateY(0)";
 
 
-            setTimeout(
-                () => {
-
-                    if(window.RiderXCustomer?.getState){
-
-                        const map =
-                            window.RiderXCustomer
-                                .getState()
-                                ?.map;
-
-                        if(map){
-
-                            map.invalidateSize();
-
-                        }
-
-                    }
-
-                },
-                350
-            );
+            invalidateMap();
 
         }
 
@@ -1781,37 +1702,18 @@ document.addEventListener(
                 "sheet-collapsed"
             );
 
-
             sheet.classList.remove(
                 "dragging"
             );
 
 
             sheet.style.transform =
-                `translateY(${collapsedPosition()}px)`;
+                "translateY(" +
+                collapsedPosition() +
+                "px)";
 
 
-            setTimeout(
-                () => {
-
-                    if(window.RiderXCustomer?.getState){
-
-                        const map =
-                            window.RiderXCustomer
-                                .getState()
-                                ?.map;
-
-                        if(map){
-
-                            map.invalidateSize();
-
-                        }
-
-                    }
-
-                },
-                350
-            );
+            invalidateMap();
 
         }
 
@@ -1835,27 +1737,74 @@ document.addEventListener(
         }
 
 
-        /*
-         * Initial position
-         */
+        function invalidateMap(){
+
+            setTimeout(
+                function(){
+
+                    try{
+
+                        if(
+                            window.RiderXCustomer &&
+                            typeof
+                            window.RiderXCustomer
+                                .getState ===
+                            "function"
+                        ){
+
+                            const state =
+                                window.RiderXCustomer
+                                    .getState();
+
+                            const map =
+                                state &&
+                                state.map;
+
+                            if(map){
+
+                                map.invalidateSize();
+
+                            }
+
+                        }
+
+                    }catch(error){
+
+                        console.warn(
+                            "RiderX map resize:",
+                            error
+                        );
+
+                    }
+
+                },
+                350
+            );
+
+        }
+
+
+        /* ==================================================
+           INITIAL STATE
+        ================================================== */
 
         setTimeout(
-            () => {
+            function(){
 
                 collapseSheet();
 
             },
-            100
+            120
         );
 
 
-        /*
-         * TOUCH START
-         */
+        /* ==================================================
+           TOUCH START
+        ================================================== */
 
         handle.addEventListener(
             "touchstart",
-            (event) => {
+            function(event){
 
                 if(
                     !event.touches ||
@@ -1863,16 +1812,17 @@ document.addEventListener(
                 ){
 
                     return;
-
                 }
 
 
                 dragging = true;
 
+                moved = false;
+
                 startY =
                     event.touches[0].clientY;
 
-                currentY =
+                lastY =
                     startY;
 
                 startTranslate =
@@ -1890,36 +1840,45 @@ document.addEventListener(
         );
 
 
-        /*
-         * TOUCH MOVE
-         */
+        /* ==================================================
+           TOUCH MOVE
+        ================================================== */
 
         handle.addEventListener(
             "touchmove",
-            (event) => {
+            function(event){
 
-                if(!dragging){
+                if(
+                    !dragging ||
+                    !event.touches ||
+                    !event.touches.length
+                ){
+
                     return;
                 }
 
 
-                currentY =
+                lastY =
                     event.touches[0].clientY;
 
 
                 const delta =
-                    currentY -
+                    lastY -
                     startY;
 
 
-                const next =
+                if(
+                    Math.abs(delta) > 5
+                ){
+
+                    moved = true;
+
+                }
+
+
+                applyPosition(
                     startTranslate +
-                    delta;
-
-
-                setSheetPosition(
-                    next,
-                    false
+                    delta
                 );
 
             },
@@ -1929,21 +1888,21 @@ document.addEventListener(
         );
 
 
-        /*
-         * TOUCH END
-         */
+        /* ==================================================
+           TOUCH END
+        ================================================== */
 
         handle.addEventListener(
             "touchend",
-            () => {
+            function(){
 
                 if(!dragging){
+
                     return;
                 }
 
 
                 dragging = false;
-
 
                 sheet.classList.remove(
                     "dragging"
@@ -1953,21 +1912,21 @@ document.addEventListener(
                 const finalY =
                     getTranslateY();
 
-
                 const max =
                     collapsedPosition();
 
 
-                /*
-                 * Snap point:
-                 *
-                 * Top  = 0
-                 * Bottom = 30% visible
-                 */
+                if(!moved){
+
+                    toggleSheet();
+
+                    return;
+                }
+
 
                 if(
                     finalY <
-                    max * 0.50
+                    max * .50
                 ){
 
                     expandSheet();
@@ -1985,20 +1944,22 @@ document.addEventListener(
         );
 
 
-        /*
-         * MOUSE / DESKTOP DRAG
-         */
+        /* ==================================================
+           DESKTOP MOUSE DRAG
+        ================================================== */
 
         handle.addEventListener(
             "mousedown",
-            (event) => {
+            function(event){
 
                 dragging = true;
+
+                moved = false;
 
                 startY =
                     event.clientY;
 
-                currentY =
+                lastY =
                     startY;
 
                 startTranslate =
@@ -2018,26 +1979,35 @@ document.addEventListener(
 
         document.addEventListener(
             "mousemove",
-            (event) => {
+            function(event){
 
                 if(!dragging){
+
                     return;
                 }
 
 
-                currentY =
+                lastY =
                     event.clientY;
 
 
                 const delta =
-                    currentY -
+                    lastY -
                     startY;
 
 
-                setSheetPosition(
+                if(
+                    Math.abs(delta) > 5
+                ){
+
+                    moved = true;
+
+                }
+
+
+                applyPosition(
                     startTranslate +
-                    delta,
-                    false
+                    delta
                 );
 
             }
@@ -2046,15 +2016,15 @@ document.addEventListener(
 
         document.addEventListener(
             "mouseup",
-            () => {
+            function(){
 
                 if(!dragging){
+
                     return;
                 }
 
 
                 dragging = false;
-
 
                 sheet.classList.remove(
                     "dragging"
@@ -2064,63 +2034,21 @@ document.addEventListener(
                 const finalY =
                     getTranslateY();
 
-
                 const max =
                     collapsedPosition();
 
 
-                if(
-                    finalY <
-                    max * 0.50
-                ){
-
-                    expandSheet();
-
-                }else{
-
-                    collapseSheet();
-
-                }
-
-            }
-        );
-
-
-        /*
-         * TAP HANDLE
-         */
-
-        handle.addEventListener(
-            "click",
-            () => {
-
-                if(
-                    Math.abs(
-                        currentY -
-                        startY
-                    ) < 8
-                ){
+                if(!moved){
 
                     toggleSheet();
 
+                    return;
                 }
 
-            }
-        );
-
-
-        /*
-         * Recalculate on orientation
-         */
-
-        window.addEventListener(
-            "resize",
-            () => {
 
                 if(
-                    document.body.classList.contains(
-                        "sheet-expanded"
-                    )
+                    finalY <
+                    max * .50
                 ){
 
                     expandSheet();
@@ -2133,6 +2061,208 @@ document.addEventListener(
 
             }
         );
+
+
+        /* ==================================================
+           RESIZE
+        ================================================== */
+
+        let resizeTimer = null;
+
+
+        window.addEventListener(
+            "resize",
+            function(){
+
+                clearTimeout(
+                    resizeTimer
+                );
+
+
+                resizeTimer =
+                    setTimeout(
+                        function(){
+
+                            if(
+                                document.body
+                                    .classList
+                                    .contains(
+                                        "sheet-expanded"
+                                    )
+                            ){
+
+                                expandSheet();
+
+                            }else{
+
+                                collapseSheet();
+
+                            }
+
+                        },
+                        120
+                    );
+
+            }
+        );
+
+
+        /* ==================================================
+           NOTIFICATION EVENT
+        ================================================== */
+
+        window.addEventListener(
+            "riderx:notification",
+            function(){
+
+                const dot =
+                    document.getElementById(
+                        "notificationDot"
+                    );
+
+
+                if(dot){
+
+                    dot.classList.add(
+                        "show"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* ==================================================
+           LOCATION SUGGESTION INPUT SUPPORT
+        ================================================== */
+
+        const pickup =
+            document.getElementById(
+                "pickupLocation"
+            );
+
+        const dropoff =
+            document.getElementById(
+                "dropoffLocation"
+            );
+
+        const suggestions =
+            document.getElementById(
+                "locationSuggestions"
+            );
+
+
+        function hideSuggestions(){
+
+            if(suggestions){
+
+                suggestions.classList.remove(
+                    "show"
+                );
+
+                suggestions.innerHTML =
+                    "";
+
+            }
+
+        }
+
+
+        function dispatchLocationSearch(
+            type,
+            value
+        ){
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx:location-search",
+                    {
+                        detail:{
+                            type:type,
+                            value:value
+                        }
+                    }
+                )
+            );
+
+        }
+
+
+        if(pickup){
+
+            pickup.addEventListener(
+                "focus",
+                function(){
+
+                    expandSheet();
+
+                }
+            );
+
+
+            pickup.addEventListener(
+                "input",
+                function(){
+
+                    dispatchLocationSearch(
+                        "pickup",
+                        pickup.value.trim()
+                    );
+
+                }
+            );
+
+        }
+
+
+        if(dropoff){
+
+            dropoff.addEventListener(
+                "focus",
+                function(){
+
+                    expandSheet();
+
+                }
+            );
+
+
+            dropoff.addEventListener(
+                "input",
+                function(){
+
+                    dispatchLocationSearch(
+                        "dropoff",
+                        dropoff.value.trim()
+                    );
+
+                }
+            );
+
+        }
+
+
+        document.addEventListener(
+            "click",
+            function(event){
+
+                if(
+                    suggestions &&
+                    !suggestions.contains(
+                        event.target
+                    ) &&
+                    event.target !== pickup &&
+                    event.target !== dropoff
+                ){
+
+                    hideSuggestions();
+
+                }
+
+            }
+        );
+
 
     },
     {
@@ -2142,7 +2272,5 @@ document.addEventListener(
 
 </script>
 
-
 </body>
-
-</html>
+    </html>
