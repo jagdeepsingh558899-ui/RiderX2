@@ -1,534 +1,1260 @@
-/* =========================================
-   RiderX Dashboard Premium Design
-   Customer + Rider + Admin
-   ========================================= */
+/* ============================================================
+   RIDERX 2.0
+   DASHBOARD STYLES
+   File: css/dashboard.css
+   ============================================================ */
 
 
-/* Main Dashboard */
+/* ============================================================
+   DASHBOARD LAYOUT
+   ============================================================ */
 
-.dashboard-wrapper{
+.rx-dashboard {
+    min-height: 100vh;
+    background: var(--rx-bg);
+}
 
-    min-height:100vh;
-
-    background:#0b0b0b;
-
-    padding:25px;
-
+.rx-dashboard-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 16px;
 }
 
 
+/* ============================================================
+   DASHBOARD HEADER
+   ============================================================ */
 
-.dashboard-header{
+.rx-dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 
-    display:flex;
+    margin-bottom: 18px;
+}
 
-    justify-content:space-between;
+.rx-dashboard-heading {
+    min-width: 0;
+}
 
-    align-items:center;
+.rx-dashboard-title {
+    color: var(--rx-text);
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -.5px;
+}
 
-    margin-bottom:25px;
+.rx-dashboard-subtitle {
+    margin-top: 4px;
+    color: var(--rx-muted);
+    font-size: 11px;
+    line-height: 1.4;
+}
 
+.rx-dashboard-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 
+/* ============================================================
+   DASHBOARD ICON BUTTON
+   ============================================================ */
 
-.dashboard-header h1{
+.rx-dashboard-icon-button {
+    position: relative;
 
-    color:#fff;
+    width: 42px;
+    height: 42px;
 
-    font-size:28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
+    border: 1px solid var(--rx-border);
+    border-radius: 13px;
+
+    background: var(--rx-white);
+    color: var(--rx-text);
+
+    font-size: 18px;
+}
+
+.rx-dashboard-icon-button:active {
+    transform: scale(.95);
 }
 
 
+/* ============================================================
+   NOTIFICATION BADGE
+   ============================================================ */
 
-.dashboard-header span{
+.rx-notification-dot {
+    position: absolute;
 
-    color:#FFD600;
+    top: 7px;
+    right: 7px;
 
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--rx-danger);
+
+    border: 2px solid var(--rx-white);
 }
 
 
+/* ============================================================
+   WELCOME CARD
+   ============================================================ */
 
+.rx-welcome-card {
+    position: relative;
 
-/* =========================================
-   Welcome Card
-   ========================================= */
+    overflow: hidden;
 
+    margin-bottom: 16px;
+    padding: 20px;
 
-.welcome-card{
+    border-radius: 22px;
 
-    background:linear-gradient(
-    135deg,
-    #1f1f1f,
-    #111
-    );
+    background:
+        linear-gradient(
+            135deg,
+            #FFD400 0%,
+            #FFE76A 100%
+        );
 
-    padding:30px;
+    color: var(--rx-black);
 
-    border-radius:25px;
+    box-shadow: var(--rx-shadow-md);
+}
 
-    display:flex;
+.rx-welcome-card::after {
+    content: "";
 
-    justify-content:space-between;
+    position: absolute;
 
-    align-items:center;
+    width: 150px;
+    height: 150px;
 
-    border:1px solid rgba(255,214,0,.2);
+    right: -55px;
+    bottom: -70px;
 
-    margin-bottom:25px;
+    border-radius: 50%;
 
+    background: rgba(255,255,255,.22);
+}
+
+.rx-welcome-title {
+    position: relative;
+    z-index: 1;
+
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.rx-welcome-text {
+    position: relative;
+    z-index: 1;
+
+    max-width: 80%;
+
+    margin-top: 5px;
+
+    font-size: 11px;
+    line-height: 1.5;
+
+    opacity: .78;
 }
 
 
+/* ============================================================
+   ONLINE / OFFLINE CARD
+   ============================================================ */
 
-.welcome-card h2{
+.rx-status-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 
-    color:#FFD600;
+    margin-bottom: 16px;
+    padding: 15px;
 
-    margin-bottom:10px;
+    border:
+        1px solid var(--rx-border);
 
+    border-radius: 18px;
+
+    background: var(--rx-white);
+}
+
+.rx-status-left {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.rx-status-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background: var(--rx-bg-2);
+
+    font-size: 18px;
+}
+
+.rx-status-title {
+    color: var(--rx-text);
+
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.rx-status-subtitle {
+    margin-top: 3px;
+
+    color: var(--rx-muted);
+
+    font-size: 10px;
 }
 
 
+/* ============================================================
+   STATUS SWITCH
+   ============================================================ */
 
-.welcome-card p{
+.rx-status-switch {
+    position: relative;
 
-    color:#aaa;
+    width: 52px;
+    height: 30px;
 
+    flex: 0 0 auto;
+}
+
+.rx-status-switch input {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+}
+
+.rx-status-slider {
+    position: absolute;
+
+    inset: 0;
+
+    cursor: pointer;
+
+    border-radius: 999px;
+
+    background: #D5D5D5;
+
+    transition: background .2s ease;
+}
+
+.rx-status-slider::before {
+    content: "";
+
+    position: absolute;
+
+    width: 24px;
+    height: 24px;
+
+    left: 3px;
+    top: 3px;
+
+    border-radius: 50%;
+
+    background: var(--rx-white);
+
+    box-shadow: 0 2px 6px rgba(0,0,0,.18);
+
+    transition: transform .2s ease;
+}
+
+.rx-status-switch input:checked
++ .rx-status-slider {
+    background: var(--rx-success);
+}
+
+.rx-status-switch input:checked
++ .rx-status-slider::before {
+    transform: translateX(22px);
 }
 
 
+/* ============================================================
+   STAT GRID
+   ============================================================ */
 
-
-.welcome-card img{
-
-    width:90px;
-
-    animation:floatLogo 3s infinite;
-
-}
-
-
-
-@keyframes floatLogo{
-
-    0%,100%{
-
-        transform:translateY(0);
-
-    }
-
-    50%{
-
-        transform:translateY(-10px);
-
-    }
-
-}
-
-
-
-/* =========================================
-   Stats
-   ========================================= */
-
-
-.dashboard-stats{
-
-    display:grid;
+.rx-stat-grid {
+    display: grid;
 
     grid-template-columns:
-    repeat(4,1fr);
+        repeat(2, 1fr);
 
-    gap:20px;
+    gap: 10px;
 
+    margin-bottom: 16px;
+}
+
+.rx-stat-card {
+    min-width: 0;
+
+    padding: 15px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 18px;
+
+    background: var(--rx-white);
+
+    box-shadow: var(--rx-shadow-sm);
+}
+
+.rx-stat-icon {
+    width: 35px;
+    height: 35px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 10px;
+
+    border-radius: 11px;
+
+    background: var(--rx-bg-2);
+
+    color: var(--rx-text);
+
+    font-size: 16px;
+}
+
+.rx-stat-label {
+    color: var(--rx-muted);
+
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.rx-stat-value {
+    margin-top: 3px;
+
+    color: var(--rx-text);
+
+    font-size: 20px;
+    font-weight: 900;
+
+    letter-spacing: -.4px;
+}
+
+.rx-stat-change {
+    margin-top: 5px;
+
+    font-size: 9px;
+    font-weight: 750;
+}
+
+.rx-stat-change.positive {
+    color: var(--rx-success);
+}
+
+.rx-stat-change.negative {
+    color: var(--rx-danger);
 }
 
 
+/* ============================================================
+   LARGE EARNINGS CARD
+   ============================================================ */
 
-.dashboard-stat{
+.rx-earnings-card {
+    margin-bottom: 16px;
+    padding: 18px;
 
-    background:#181818;
+    border-radius: 21px;
 
-    padding:25px;
+    background: var(--rx-black);
 
-    border-radius:22px;
+    color: var(--rx-white);
 
-    border-left:5px solid #FFD600;
+    box-shadow: var(--rx-shadow-md);
+}
 
-    transition:.3s;
+.rx-earnings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
 
+.rx-earnings-label {
+    color: rgba(255,255,255,.65);
+
+    font-size: 10px;
+    font-weight: 650;
+}
+
+.rx-earnings-period {
+    padding: 6px 9px;
+
+    border-radius: 8px;
+
+    background: rgba(255,255,255,.1);
+
+    color: var(--rx-white);
+
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.rx-earnings-value {
+    margin-top: 8px;
+
+    color: var(--rx-yellow);
+
+    font-size: 30px;
+    font-weight: 900;
+
+    letter-spacing: -1px;
+}
+
+.rx-earnings-meta {
+    display: flex;
+    gap: 18px;
+
+    margin-top: 10px;
+}
+
+.rx-earnings-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rx-earnings-meta-label {
+    color: rgba(255,255,255,.5);
+
+    font-size: 9px;
+}
+
+.rx-earnings-meta-value {
+    color: var(--rx-white);
+
+    font-size: 12px;
+    font-weight: 800;
 }
 
 
+/* ============================================================
+   QUICK ACTIONS
+   ============================================================ */
 
-.dashboard-stat:hover{
-
-    transform:translateY(-6px);
-
+.rx-quick-actions {
+    margin-bottom: 18px;
 }
 
+.rx-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-
-.dashboard-stat h2{
-
-    color:#FFD600;
-
-    font-size:30px;
-
+    margin-bottom: 10px;
 }
 
+.rx-section-title {
+    color: var(--rx-text);
 
-
-.dashboard-stat p{
-
-    color:#aaa;
-
+    font-size: 15px;
+    font-weight: 900;
 }
 
+.rx-section-link {
+    border: 0;
 
+    background: transparent;
 
+    color: var(--rx-muted);
 
-/* =========================================
-   Customer Booking Card
-   ========================================= */
-
-
-.booking-card{
-
-    background:#181818;
-
-    padding:22px;
-
-    border-radius:22px;
-
-    margin-bottom:15px;
-
-    transition:.3s;
-
+    font-size: 10px;
+    font-weight: 750;
 }
 
-
-
-.booking-card:hover{
-
-    transform:translateY(-4px);
-
-}
-
-
-
-.booking-card .location{
-
-    display:flex;
-
-    gap:10px;
-
-    margin:12px 0;
-
-}
-
-
-
-.pickup{
-
-    color:#00e676;
-
-}
-
-
-
-.drop{
-
-    color:#ff5252;
-
-}
-
-
-
-
-.fare{
-
-    color:#FFD600;
-
-    font-size:22px;
-
-    font-weight:700;
-
-}
-
-
-
-
-
-/* =========================================
-   Rider Online Status
-   ========================================= */
-
-
-.online-toggle{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
-
-    background:#181818;
-
-    padding:20px;
-
-    border-radius:20px;
-
-}
-
-
-
-.toggle{
-
-    width:60px;
-
-    height:30px;
-
-    background:#333;
-
-    border-radius:30px;
-
-    position:relative;
-
-    cursor:pointer;
-
-}
-
-
-
-.toggle::after{
-
-    content:"";
-
-    position:absolute;
-
-    width:25px;
-
-    height:25px;
-
-    background:#fff;
-
-    border-radius:50%;
-
-    top:2.5px;
-
-    left:3px;
-
-    transition:.3s;
-
-}
-
-
-
-.toggle.active{
-
-    background:#00c853;
-
-}
-
-
-
-.toggle.active::after{
-
-    left:32px;
-
-}
-
-
-
-
-/* =========================================
-   Ride Request
-   ========================================= */
-
-
-.ride-request{
-
-    background:#151515;
-
-    border-radius:25px;
-
-    padding:25px;
-
-    border:1px solid rgba(255,214,0,.3);
-
-    animation:requestShow .5s ease;
-
-}
-
-
-
-@keyframes requestShow{
-
-    from{
-
-        opacity:0;
-
-        transform:scale(.9);
-
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:scale(1);
-
-    }
-
-}
-
-
-
-
-.request-buttons{
-
-    display:flex;
-
-    gap:15px;
-
-    margin-top:20px;
-
-}
-
-
-
-.request-buttons button{
-
-    flex:1;
-
-}
-
-
-
-
-/* =========================================
-   Admin Dashboard
-   ========================================= */
-
-
-.admin-grid{
-
-    display:grid;
+.rx-action-grid {
+    display: grid;
 
     grid-template-columns:
-    repeat(3,1fr);
+        repeat(4, 1fr);
 
-    gap:20px;
+    gap: 8px;
+}
 
+.rx-action-card {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 11px 5px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 15px;
+
+    background: var(--rx-white);
+
+    color: var(--rx-text);
+
+    text-align: center;
+
+    transition:
+        transform .15s ease,
+        background .2s ease;
+}
+
+.rx-action-card:active {
+    transform: scale(.96);
+    background: var(--rx-bg-2);
+}
+
+.rx-action-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 6px;
+
+    border-radius: 12px;
+
+    background: var(--rx-yellow);
+
+    color: var(--rx-black);
+
+    font-size: 17px;
+}
+
+.rx-action-name {
+    color: var(--rx-text);
+
+    font-size: 9px;
+    font-weight: 750;
 }
 
 
+/* ============================================================
+   RIDE REQUEST CARD
+   ============================================================ */
 
-.admin-box{
+.rx-ride-request-card {
+    position: relative;
 
-    background:#181818;
+    margin-bottom: 14px;
+    padding: 16px;
 
-    padding:25px;
+    border:
+        1px solid var(--rx-border);
 
-    border-radius:22px;
+    border-radius: 19px;
 
+    background: var(--rx-white);
+
+    box-shadow: var(--rx-shadow-sm);
+}
+
+.rx-ride-request-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 13px;
+}
+
+.rx-request-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    color: var(--rx-text);
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.rx-request-time {
+    color: var(--rx-muted);
+
+    font-size: 9px;
+}
+
+.rx-request-pulse {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--rx-success);
 }
 
 
+/* ============================================================
+   RIDE ROUTE
+   ============================================================ */
 
-.admin-box h2{
+.rx-route {
+    position: relative;
 
-    color:#FFD600;
+    padding-left: 26px;
+}
 
+.rx-route::before {
+    content: "";
+
+    position: absolute;
+
+    left: 7px;
+    top: 15px;
+    bottom: 15px;
+
+    width: 2px;
+
+    background: var(--rx-border);
+}
+
+.rx-route-point {
+    position: relative;
+
+    min-height: 50px;
+
+    display: flex;
+    align-items: flex-start;
+}
+
+.rx-route-marker {
+    position: absolute;
+
+    left: -26px;
+    top: 3px;
+
+    width: 15px;
+    height: 15px;
+
+    border-radius: 50%;
+
+    border: 4px solid var(--rx-white);
+
+    background: var(--rx-black);
+
+    box-shadow:
+        0 0 0 1px var(--rx-border);
+}
+
+.rx-route-point.destination
+.rx-route-marker {
+    border-radius: 3px;
+
+    background: var(--rx-yellow);
+}
+
+.rx-route-label {
+    color: var(--rx-muted);
+
+    font-size: 9px;
+    font-weight: 650;
+}
+
+.rx-route-address {
+    margin-top: 3px;
+
+    color: var(--rx-text);
+
+    font-size: 12px;
+    font-weight: 750;
+
+    line-height: 1.35;
 }
 
 
+/* ============================================================
+   REQUEST DETAILS
+   ============================================================ */
 
-.admin-box p{
-
-    color:#aaa;
-
-}
-
-
-
-/* =========================================
-   Responsive
-   ========================================= */
-
-
-@media(max-width:900px){
-
-
-.dashboard-wrapper{
-
-    padding:15px;
-
-}
-
-
-
-.dashboard-stats{
+.rx-request-details {
+    display: grid;
 
     grid-template-columns:
-    repeat(2,1fr);
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 12px;
+}
+
+.rx-request-detail {
+    padding: 9px;
+
+    border-radius: 11px;
+
+    background: var(--rx-bg-2);
+
+    text-align: center;
+}
+
+.rx-request-detail-label {
+    color: var(--rx-muted);
+
+    font-size: 8px;
+}
+
+.rx-request-detail-value {
+    margin-top: 3px;
+
+    color: var(--rx-text);
+
+    font-size: 11px;
+    font-weight: 850;
+}
+
+
+/* ============================================================
+   REQUEST BUTTONS
+   ============================================================ */
+
+.rx-request-actions {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 8px;
+
+    margin-top: 13px;
+}
+
+.rx-request-button {
+    min-height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+    font-weight: 850;
+}
+
+.rx-request-button.reject {
+    border:
+        1px solid var(--rx-border);
+
+    background: var(--rx-white);
+
+    color: var(--rx-text);
+}
+
+.rx-request-button.accept {
+    border: 0;
+
+    background: var(--rx-yellow);
+
+    color: var(--rx-black);
+}
+
+
+/* ============================================================
+   ACTIVE RIDE CARD
+   ============================================================ */
+
+.rx-active-ride {
+    margin-bottom: 16px;
+    padding: 17px;
+
+    border-radius: 20px;
+
+    background: var(--rx-black);
+
+    color: var(--rx-white);
+}
+
+.rx-active-ride-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rx-active-ride-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: var(--rx-yellow);
+
+    font-size: 11px;
+    font-weight: 850;
+}
+
+.rx-active-ride-status-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--rx-yellow);
+}
+
+.rx-active-ride-id {
+    color: rgba(255,255,255,.5);
+
+    font-size: 9px;
+}
+
+.rx-active-passenger {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    margin-top: 15px;
+}
+
+.rx-passenger-avatar {
+    width: 43px;
+    height: 43px;
+
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    border-radius: 50%;
+
+    background: var(--rx-yellow);
+
+    color: var(--rx-black);
+
+    font-weight: 900;
+}
+
+.rx-passenger-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rx-passenger-name {
+    color: var(--rx-white);
+
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.rx-passenger-rating {
+    margin-top: 3px;
+
+    color: rgba(255,255,255,.6);
+
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   DASHBOARD PANEL
+   ============================================================ */
+
+.rx-dashboard-panel {
+    margin-bottom: 16px;
+    padding: 16px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 19px;
+
+    background: var(--rx-white);
+
+    box-shadow: var(--rx-shadow-sm);
+}
+
+.rx-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 13px;
+}
+
+.rx-panel-title {
+    color: var(--rx-text);
+
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.rx-panel-action {
+    border: 0;
+
+    background: transparent;
+
+    color: var(--rx-muted);
+
+    font-size: 10px;
+    font-weight: 750;
+}
+
+
+/* ============================================================
+   RECENT RIDE
+   ============================================================ */
+
+.rx-recent-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.rx-recent-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    padding: 12px 0;
+
+    border-bottom:
+        1px solid var(--rx-border);
+}
+
+.rx-recent-item:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.rx-recent-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    border-radius: 12px;
+
+    background: var(--rx-bg-2);
+
+    color: var(--rx-text);
+
+    font-size: 17px;
+}
+
+.rx-recent-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.rx-recent-title {
+    overflow: hidden;
+
+    color: var(--rx-text);
+
+    font-size: 11px;
+    font-weight: 800;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rx-recent-time {
+    margin-top: 3px;
+
+    color: var(--rx-muted);
+
+    font-size: 9px;
+}
+
+.rx-recent-price {
+    color: var(--rx-text);
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+
+/* ============================================================
+   ADMIN STATISTICS
+   ============================================================ */
+
+.rx-admin-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 12px;
+
+    margin-bottom: 18px;
+}
+
+.rx-admin-stat {
+    padding: 17px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 18px;
+
+    background: var(--rx-white);
+}
+
+.rx-admin-stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rx-admin-stat-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: var(--rx-bg-2);
+
+    font-size: 17px;
+}
+
+.rx-admin-stat-trend {
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.rx-admin-stat-number {
+    margin-top: 12px;
+
+    color: var(--rx-text);
+
+    font-size: 23px;
+    font-weight: 900;
+}
+
+.rx-admin-stat-label {
+    margin-top: 3px;
+
+    color: var(--rx-muted);
+
+    font-size: 10px;
+}
+
+
+/* ============================================================
+   CHART CONTAINER
+   ============================================================ */
+
+.rx-chart-card {
+    margin-bottom: 18px;
+    padding: 17px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 19px;
+
+    background: var(--rx-white);
+}
+
+.rx-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 15px;
+}
+
+.rx-chart-title {
+    color: var(--rx-text);
+
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.rx-chart-filter {
+    height: 32px;
+
+    padding: 0 9px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 9px;
+
+    background: var(--rx-white);
+
+    color: var(--rx-text);
+
+    font-size: 9px;
+}
+
+
+/* ============================================================
+   EMPTY DASHBOARD STATE
+   ============================================================ */
+
+.rx-dashboard-empty {
+    padding: 35px 18px;
+
+    color: var(--rx-muted);
+
+    text-align: center;
+}
+
+.rx-dashboard-empty-icon {
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 11px;
+
+    border-radius: 50%;
+
+    background: var(--rx-bg-2);
+
+    color: var(--rx-text);
+
+    font-size: 25px;
+}
+
+.rx-dashboard-empty-title {
+    color: var(--rx-text);
+
+    font-size: 14px;
+    font-weight: 850;
+}
+
+.rx-dashboard-empty-text {
+    max-width: 300px;
+
+    margin: 5px auto 0;
+
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (min-width: 600px) {
+
+    .rx-dashboard-container {
+        padding: 22px;
+    }
+
+    .rx-stat-grid {
+        grid-template-columns:
+            repeat(4, 1fr);
+    }
+
+    .rx-admin-stats {
+        grid-template-columns:
+            repeat(4, 1fr);
+    }
+
+    .rx-action-grid {
+        grid-template-columns:
+            repeat(8, 1fr);
+    }
 
 }
 
 
+/* ============================================================
+   DESKTOP
+   ============================================================ */
 
-.admin-grid{
+@media (min-width: 900px) {
 
-    grid-template-columns:1fr;
+    .rx-dashboard-container {
+        padding: 28px;
+    }
 
-}
+    .rx-dashboard-title {
+        font-size: 27px;
+    }
 
+    .rx-dashboard-layout {
+        display: grid;
 
+        grid-template-columns:
+            minmax(0, 1.65fr)
+            minmax(300px, .85fr);
 
-.welcome-card{
+        gap: 18px;
 
-    flex-direction:column;
+        align-items: start;
+    }
 
-    text-align:center;
+    .rx-dashboard-main,
+    .rx-dashboard-sidebar {
+        min-width: 0;
+    }
 
-    gap:20px;
+    .rx-stat-grid {
+        gap: 13px;
+    }
 
-}
-
-
-
-}
-
-
-
-@media(max-width:500px){
-
-
-.dashboard-stats{
-
-    grid-template-columns:1fr;
-
-}
-
-
-
-.dashboard-header h1{
-
-    font-size:22px;
-
-}
-
-
-
-.request-buttons{
-
-    flex-direction:column;
+    .rx-stat-card {
+        padding: 18px;
+    }
 
 }
 
 
+/* ============================================================
+   LARGE DESKTOP
+   ============================================================ */
 
-}
+@media (min-width: 1200px) {
+
+    .rx-dashboard-container {
+        padding: 32px;
+    }
+
+    .rx-dashboard-layout {
+        grid-template-columns:
+            minmax(0, 1.8fr)
+            minmax(340px, .7fr);
+    }
+
+   }
