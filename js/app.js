@@ -1,22 +1,24 @@
 /* ============================================================
-   RIDERX 2.0
-   APP CORE
+   RIDERX
+   MAIN APPLICATION CONTROLLER
    File: js/app.js
 
    Handles:
-   - Firebase initialization
-   - Authentication state
-   - User profile/session
-   - Role detection
-   - Protected page routing
-   - Theme
-   - Language preference
-   - Common utilities
-   - Notifications
-   - Logout
+   - Global RiderX initialization
+   - Firebase readiness
+   - Authentication startup
+   - Role-based application startup
+   - Customer / Rider / Admin routing
+   - Global UI state
+   - Online/offline detection
+   - Install prompt
+   - Service worker
+   - Global logout
+   - Global notifications/events
    ============================================================ */
 
 (function () {
+
     "use strict";
 
     /* ========================================================
@@ -27,330 +29,87 @@
 
     const RX = window.RiderX;
 
-    RX.version = "2.0.0";
-    RX.appName = "RiderX";
+    RX.app = RX.app || {};
 
-    RX.config = {
-        city: "Chandigarh",
-        currency: "₹",
-        defaultLanguage: "en",
-        defaultTheme: "light"
+    const APP = RX.app;
+
+
+    /* ========================================================
+       CONFIG
+       ======================================================== */
+
+    APP.config = {
+
+        name:
+            "RiderX",
+
+        version:
+            "2.0.0",
+
+        city:
+            "Chandigarh",
+
+        defaultLanguage:
+            "en",
+
+        supportedLanguages:
+            [
+                "en",
+                "hi"
+            ],
+
+        defaultTheme:
+            "dark",
+
+        firebaseRequired:
+            true,
+
+        serviceWorker:
+            true
     };
 
 
     /* ========================================================
-       FIREBASE REFERENCES
+       STATE
        ======================================================== */
 
-    RX.firebase = {
-        app: null,
-        auth: null,
-        db: null,
-        realtime: null,
-        storage: null
-    };
+    APP.state = {
 
+        initialized:
+            false,
 
-    /* ========================================================
-       APP STATE
-       ======================================================== */
+        firebaseReady:
+            false,
 
-    RX.state = {
-        initialized: false,
-        authReady: false,
-        currentUser: null,
-        profile: null,
-        role: null,
-        language: localStorage.getItem("riderx_language") || "en",
-        theme: localStorage.getItem("riderx_theme") || "light",
-        online: navigator.onLine
-    };
+        online:
+            navigator.onLine,
 
+        installed:
+            false,
 
-    /* ========================================================
-       FIREBASE INITIALIZATION
-       ======================================================== */
+        deferredInstallPrompt:
+            null,
 
-    RX.initFirebase = function () {
+        currentPage:
+            "",
 
-        try {
+        currentRole:
+            "",
 
-            if (typeof firebase === "undefined") {
-                console.error(
-                    "RiderX: Firebase SDK not loaded."
-                );
-                return false;
-            }
+        currentUser:
+            null,
 
-            if (
-                typeof firebaseConfig === "undefined" ||
-                !firebaseConfig
-            ) {
-                console.error(
-                    "RiderX: firebaseConfig not found."
-                );
-                return false;
-            }
+        language:
+            localStorage.getItem(
+                "riderx_language"
+            ) ||
+            APP.config.defaultLanguage,
 
-            if (!firebase.apps.length) {
-                RX.firebase.app =
-                    firebase.initializeApp(firebaseConfig);
-            } else {
-                RX.firebase.app =
-                    firebase.app();
-            }
-
-            RX.firebase.auth =
-                firebase.auth();
-
-            if (typeof firebase.firestore === "function") {
-                RX.firebase.db =
-                    firebase.firestore();
-            }
-
-            if (
-                typeof firebase.database === "function"
-            ) {
-                RX.firebase.realtime =
-                    firebase.database();
-            }
-
-            if (
-                typeof firebase.storage === "function"
-            ) {
-                RX.firebase.storage =
-                    firebase.storage();
-            }
-
-            RX.state.initialized = true;
-
-            console.log(
-                "RiderX Firebase initialized."
-            );
-
-            return true;
-
-        } catch (error) {
-
-            console.error(
-                "RiderX Firebase initialization failed:",
-                error
-            );
-
-            RX.state.initialized = false;
-
-            return false;
-        }
-    };
-
-
-    /* ========================================================
-       AUTH STATE
-       ======================================================== */
-
-    RX.watchAuth = function () {
-
-        if (!RX.firebase.auth) {
-            return;
-        }
-
-        RX.firebase.auth.onAuthStateChanged(
-            async function (user) {
-
-                RX.state.authReady = true;
-                RX.state.currentUser = user || null;
-
-                if (user) {
-
-                    try {
-
-                        RX.state.profile =
-                            await RX.getUserProfile(
-                                user.uid
-                            );
-
-                        RX.state.role =
-                            RX.getUserRole(
-                                RX.state.profile,
-                                user
-                            );
-
-                    } catch (error) {
-
-                        console.warn(
-                            "RiderX profile loading failed:",
-                            error
-                        );
-
-                        RX.state.profile = null;
-                        RX.state.role = null;
-                    }
-
-                } else {
-
-                    RX.state.profile = null;
-                    RX.state.role = null;
-                }
-
-                RX.dispatchAuthEvent();
-
-                RX.handleProtectedPage();
-            }
-        );
-    };
-
-
-    /* ========================================================
-       AUTH EVENT
-       ======================================================== */
-
-    RX.dispatchAuthEvent = function () {
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx-auth-changed",
-                {
-                    detail: {
-                        user: RX.state.currentUser,
-                        profile: RX.state.profile,
-                        role: RX.state.role
-                    }
-                }
-            )
-        );
-    };
-
-
-    /* ========================================================
-       GET USER PROFILE
-       ======================================================== */
-
-    RX.getUserProfile = async function (uid) {
-
-        if (!uid) {
-            return null;
-        }
-
-        if (!RX.firebase.db) {
-            return null;
-        }
-
-        try {
-
-            const userDoc =
-                await RX.firebase.db
-                    .collection("users")
-                    .doc(uid)
-                    .get();
-
-            if (userDoc.exists) {
-
-                return {
-                    uid: uid,
-                    ...userDoc.data()
-                };
-            }
-
-            return null;
-
-        } catch (error) {
-
-            console.warn(
-                "Unable to load users/{uid}:",
-                error
-            );
-
-            return null;
-        }
-    };
-
-
-    /* ========================================================
-       GET USER ROLE
-       ======================================================== */
-
-    RX.getUserRole = function (profile, user) {
-
-        if (profile && profile.role) {
-
-            return String(
-                profile.role
-            ).toLowerCase();
-        }
-
-        if (
-            user &&
-            user.displayName
-        ) {
-
-            const name =
-                user.displayName.toLowerCase();
-
-            if (name.includes("admin")) {
-                return "admin";
-            }
-
-            if (name.includes("rider")) {
-                return "rider";
-            }
-
-            if (name.includes("driver")) {
-                return "rider";
-            }
-        }
-
-        return "customer";
-    };
-
-
-    /* ========================================================
-       AUTH STATUS
-       ======================================================== */
-
-    RX.isLoggedIn = function () {
-
-        return !!RX.state.currentUser;
-    };
-
-
-    RX.isAdmin = function () {
-
-        return RX.state.role === "admin";
-    };
-
-
-    RX.isRider = function () {
-
-        return RX.state.role === "rider" ||
-               RX.state.role === "driver";
-    };
-
-
-    RX.isCustomer = function () {
-
-        return RX.state.role === "customer";
-    };
-
-
-    /* ========================================================
-       CURRENT USER
-       ======================================================== */
-
-    RX.getCurrentUser = function () {
-
-        return RX.state.currentUser;
-    };
-
-
-    RX.getCurrentProfile = function () {
-
-        return RX.state.profile;
-    };
-
-
-    RX.getCurrentRole = function () {
-
-        return RX.state.role;
+        theme:
+            localStorage.getItem(
+                "riderx_theme"
+            ) ||
+            APP.config.defaultTheme
     };
 
 
@@ -358,1704 +117,2000 @@
        PAGE DETECTION
        ======================================================== */
 
-    RX.getCurrentPath = function () {
+    APP.getPage = function () {
 
-        return window.location.pathname
-            .replace(/\\/g, "/");
+        const path =
+            window.location.pathname
+                .split("/")
+                .pop()
+                .toLowerCase();
+
+
+        return path ||
+            "index.html";
     };
 
 
-    RX.getPageName = function () {
+    APP.getFolder = function () {
 
-        const path =
-            RX.getCurrentPath();
+        const parts =
+            window.location.pathname
+                .split("/")
+                .filter(Boolean);
 
-        const file =
-            path.split("/").pop();
 
-        return (
-            file ||
-            "index.html"
-        ).toLowerCase();
+        const folders = [
+            "admin",
+            "auth",
+            "customer",
+            "rider"
+        ];
+
+
+        for (
+            let i = 0;
+            i < parts.length;
+            i++
+        ) {
+
+            const item =
+                parts[i]
+                    .toLowerCase();
+
+
+            if (
+                folders.includes(
+                    item
+                )
+            ) {
+
+                return item;
+            }
+        }
+
+
+        return "";
     };
 
 
     /* ========================================================
-       AUTH PAGES
+       FIREBASE DETECTION
        ======================================================== */
 
-    RX.isAuthPage = function () {
+    APP.firebaseReady =
+        function () {
 
-        const path =
-            RX.getCurrentPath();
+            try {
+
+                if (
+                    window.firebase &&
+                    typeof firebase.auth ===
+                    "function"
+                ) {
+
+                    APP.state.firebaseReady =
+                        true;
+
+                    return true;
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX Firebase check failed:",
+                    error
+                );
+            }
+
+
+            APP.state.firebaseReady =
+                false;
+
+
+            return false;
+        };
+
+
+    /* ========================================================
+       USER / ROLE
+       ======================================================== */
+
+    APP.getUser = function () {
+
+        if (
+            RX.auth &&
+            typeof RX.auth.getUser ===
+            "function"
+        ) {
+
+            return RX.auth.getUser();
+        }
+
+
+        try {
+
+            return JSON.parse(
+                localStorage.getItem(
+                    "riderx_user"
+                ) || "null"
+            );
+
+        } catch (error) {
+
+            return null;
+        }
+    };
+
+
+    APP.getRole = function () {
+
+        if (
+            RX.auth &&
+            typeof RX.auth.getRole ===
+            "function"
+        ) {
+
+            return RX.auth.getRole();
+        }
+
+
+        const user =
+            APP.getUser();
+
+
+        return String(
+            user?.role ||
+            localStorage.getItem(
+                "riderx_role"
+            ) ||
+            ""
+        )
+            .toLowerCase();
+    };
+
+
+    /* ========================================================
+       AUTH PAGE DETECTION
+       ======================================================== */
+
+    APP.isAuthPage = function () {
+
+        const folder =
+            APP.getFolder();
+
+        const page =
+            APP.state.currentPage;
+
 
         return (
-            path.includes("/auth/") ||
-            path.endsWith("/login.html") ||
-            path.endsWith("/register.html") ||
-            path.endsWith("/otp.html")
+            folder === "auth" ||
+            [
+                "login.html",
+                "register.html",
+                "otp-login.html",
+                "verify-otp.html",
+                "customer-login.html",
+                "rider-login.html",
+                "role.html"
+            ].includes(
+                page
+            )
         );
     };
 
 
     /* ========================================================
-       PUBLIC PAGES
+       ROLE HOME
        ======================================================== */
 
-    RX.isPublicPage = function () {
+    APP.getRoleHome = function (
+        role
+    ) {
 
-        const path =
-            RX.getCurrentPath();
+        role =
+            String(
+                role || ""
+            )
+            .toLowerCase();
 
-        const publicPages = [
-            "",
-            "/",
-            "/index.html",
-            "/auth/login.html",
-            "/auth/register.html",
-            "/auth/forgot-password.html"
-        ];
-
-        return publicPages.includes(path);
-    };
-
-
-    /* ========================================================
-       ROLE FOLDER DETECTION
-       ======================================================== */
-
-    RX.getPageArea = function () {
-
-        const path =
-            RX.getCurrentPath()
-                .toLowerCase();
-
-        if (path.includes("/admin/")) {
-            return "admin";
-        }
-
-        if (path.includes("/rider/")) {
-            return "rider";
-        }
-
-        if (path.includes("/customer/")) {
-            return "customer";
-        }
-
-        return "public";
-    };
-
-
-    /* ========================================================
-       PROTECTED PAGE HANDLER
-       ======================================================== */
-
-    RX.handleProtectedPage = function () {
-
-        if (!RX.state.authReady) {
-            return;
-        }
-
-        const area =
-            RX.getPageArea();
 
         if (
-            area === "public" ||
-            RX.isAuthPage()
+            role === "admin" ||
+            role === "superadmin" ||
+            role === "super_admin"
         ) {
 
-            return;
+            return "admin/dashboard.html";
         }
 
-        if (!RX.isLoggedIn()) {
-
-            RX.redirectToLogin();
-
-            return;
-        }
-
-        const role =
-            RX.getCurrentRole();
-
-        if (
-            area === "admin" &&
-            role !== "admin"
-        ) {
-
-            RX.redirectByRole();
-
-            return;
-        }
-
-        if (
-            area === "rider" &&
-            role !== "rider" &&
-            role !== "driver"
-        ) {
-
-            RX.redirectByRole();
-
-            return;
-        }
-
-        if (
-            area === "customer" &&
-            role === "admin"
-        ) {
-
-            RX.redirectByRole();
-
-            return;
-        }
-
-        RX.applyUserToPage();
-    };
-
-
-    /* ========================================================
-       LOGIN REDIRECT
-       ======================================================== */
-
-    RX.redirectToLogin = function () {
-
-        if (
-            RX.isAuthPage()
-        ) {
-            return;
-        }
-
-        const returnUrl =
-            encodeURIComponent(
-                window.location.pathname +
-                window.location.search
-            );
-
-        window.location.href =
-            "/auth/login.html?returnUrl=" +
-            returnUrl;
-    };
-
-
-    /* ========================================================
-       ROLE REDIRECT
-       ======================================================== */
-
-    RX.redirectByRole = function () {
-
-        const role =
-            RX.getCurrentRole();
-
-        if (role === "admin") {
-
-            window.location.href =
-                "/admin/dashboard.html";
-
-            return;
-        }
 
         if (
             role === "rider" ||
             role === "driver"
         ) {
 
-            window.location.href =
-                "/rider/home.html";
-
-            return;
+            return "rider/home.html";
         }
 
-        window.location.href =
-            "/customer/home.html";
-    };
-
-
-    /* ========================================================
-       LOGIN SUCCESS REDIRECT
-       ======================================================== */
-
-    RX.redirectAfterLogin = function () {
-
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
-
-        const returnUrl =
-            params.get("returnUrl");
-
-        if (returnUrl) {
-
-            try {
-
-                const decoded =
-                    decodeURIComponent(
-                        returnUrl
-                    );
-
-                if (
-                    decoded.startsWith("/")
-                ) {
-
-                    window.location.href =
-                        decoded;
-
-                    return;
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Invalid return URL."
-                );
-            }
-        }
-
-        RX.redirectByRole();
-    };
-
-
-    /* ========================================================
-       LOGOUT
-       ======================================================== */
-
-    RX.logout = async function () {
-
-        try {
-
-            if (
-                RX.firebase.auth
-            ) {
-
-                await RX.firebase.auth.signOut();
-            }
-
-            RX.clearSession();
-
-            window.location.href =
-                "/auth/login.html";
-
-        } catch (error) {
-
-            console.error(
-                "Logout failed:",
-                error
-            );
-
-            RX.showToast(
-                "Logout failed",
-                "Please try again.",
-                "danger"
-            );
-        }
-    };
-
-
-    /* ========================================================
-       CLEAR SESSION
-       ======================================================== */
-
-    RX.clearSession = function () {
-
-        RX.state.currentUser = null;
-        RX.state.profile = null;
-        RX.state.role = null;
-
-        localStorage.removeItem(
-            "riderx_user"
-        );
-
-        localStorage.removeItem(
-            "riderx_role"
-        );
-    };
-
-
-    /* ========================================================
-       SAVE SESSION
-       ======================================================== */
-
-    RX.saveSession = function () {
 
         if (
-            RX.state.currentUser
+            role === "customer"
         ) {
 
-            localStorage.setItem(
-                "riderx_user",
-                JSON.stringify({
-                    uid:
-                        RX.state.currentUser.uid,
-                    email:
-                        RX.state.currentUser.email
-                })
-            );
+            return "customer/home.html";
         }
 
-        if (RX.state.role) {
 
-            localStorage.setItem(
-                "riderx_role",
-                RX.state.role
-            );
-        }
+        return "auth/login.html";
     };
 
 
     /* ========================================================
-       APPLY USER TO PAGE
+       SAFE REDIRECT
        ======================================================== */
 
-    RX.applyUserToPage = function () {
-
-        const user =
-            RX.state.currentUser;
-
-        const profile =
-            RX.state.profile;
-
-        if (!user) {
-            return;
-        }
-
-        const displayName =
-            (
-                profile &&
-                (
-                    profile.name ||
-                    profile.displayName
-                )
-            ) ||
-            user.displayName ||
-            "RiderX User";
-
-        const email =
-            (
-                profile &&
-                profile.email
-            ) ||
-            user.email ||
-            "";
-
-        const photo =
-            (
-                profile &&
-                (
-                    profile.photoURL ||
-                    profile.photo
-                )
-            ) ||
-            user.photoURL ||
-            "";
-
-        document
-            .querySelectorAll(
-                "[data-user-name]"
-            )
-            .forEach(
-                function (element) {
-
-                    element.textContent =
-                        displayName;
-                }
-            );
-
-        document
-            .querySelectorAll(
-                "[data-user-email]"
-            )
-            .forEach(
-                function (element) {
-
-                    element.textContent =
-                        email;
-                }
-            );
-
-        document
-            .querySelectorAll(
-                "[data-user-role]"
-            )
-            .forEach(
-                function (element) {
-
-                    element.textContent =
-                        RX.state.role ||
-                        "customer";
-                }
-            );
-
-        document
-            .querySelectorAll(
-                "[data-user-photo]"
-            )
-            .forEach(
-                function (element) {
-
-                    if (photo) {
-
-                        element.src =
-                            photo;
-
-                        element.style.display =
-                            "block";
-                    }
-                }
-            );
-
-        RX.saveSession();
-    };
-
-
-    /* ========================================================
-       THEME
-       ======================================================== */
-
-    RX.applyTheme = function () {
-
-        const theme =
-            RX.state.theme;
-
-        document.body.classList.remove(
-            "rx-dark"
-        );
-
-        document.body.classList.remove(
-            "rx-auto-dark"
-        );
-
-        if (theme === "dark") {
-
-            document.body.classList.add(
-                "rx-dark"
-            );
-
-        } else if (theme === "auto") {
-
-            document.body.classList.add(
-                "rx-auto-dark"
-            );
-        }
-
-        localStorage.setItem(
-            "riderx_theme",
-            theme
-        );
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx-theme-changed",
-                {
-                    detail: {
-                        theme: theme
-                    }
-                }
-            )
-        );
-    };
-
-
-    RX.setTheme = function (theme) {
-
-        const allowed = [
-            "light",
-            "dark",
-            "auto"
-        ];
-
-        if (
-            !allowed.includes(theme)
-        ) {
-            theme = "light";
-        }
-
-        RX.state.theme = theme;
-
-        RX.applyTheme();
-    };
-
-
-    RX.toggleTheme = function () {
-
-        if (
-            RX.state.theme === "dark"
+    APP.redirect =
+        function (
+            path
         ) {
 
-            RX.setTheme("light");
-
-        } else {
-
-            RX.setTheme("dark");
-        }
-    };
-
-
-    /* ========================================================
-       LANGUAGE
-       ======================================================== */
-
-    RX.setLanguage = function (language) {
-
-        const allowed = [
-            "en",
-            "hi"
-        ];
-
-        if (
-            !allowed.includes(language)
-        ) {
-
-            language = "en";
-        }
-
-        RX.state.language =
-            language;
-
-        localStorage.setItem(
-            "riderx_language",
-            language
-        );
-
-        document.documentElement
-            .setAttribute(
-                "lang",
-                language
-            );
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx-language-changed",
-                {
-                    detail: {
-                        language: language
-                    }
-                }
-            )
-        );
-    };
-
-
-    /* ========================================================
-       TRANSLATION HELPER
-       ======================================================== */
-
-    RX.t = function (
-        english,
-        hindi
-    ) {
-
-        if (
-            RX.state.language === "hi" &&
-            hindi
-        ) {
-
-            return hindi;
-        }
-
-        return english;
-    };
-
-
-    /* ========================================================
-       ESCAPE HTML
-       ======================================================== */
-
-    RX.escapeHTML = function (value) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-
-            return "";
-        }
-
-        return String(value)
-            .replace(
-                /&/g,
-                "&amp;"
-            )
-            .replace(
-                /</g,
-                "&lt;"
-            )
-            .replace(
-                />/g,
-                "&gt;"
-            )
-            .replace(
-                /"/g,
-                "&quot;"
-            )
-            .replace(
-                /'/g,
-                "&#039;"
-            );
-    };
-
-
-    /* ========================================================
-       CURRENCY
-       ======================================================== */
-
-    RX.formatCurrency = function (
-        amount
-    ) {
-
-        const number =
-            Number(amount) || 0;
-
-        return (
-            RX.config.currency +
-            number.toLocaleString(
-                "en-IN",
-                {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2
-                }
-            )
-        );
-    };
-
-
-    /* ========================================================
-       NUMBER FORMAT
-       ======================================================== */
-
-    RX.formatNumber = function (
-        number
-    ) {
-
-        return (
-            Number(number) || 0
-        ).toLocaleString(
-            "en-IN"
-        );
-    };
-
-
-    /* ========================================================
-       DATE FORMAT
-       ======================================================== */
-
-    RX.formatDate = function (
-        value
-    ) {
-
-        if (!value) {
-            return "-";
-        }
-
-        let date;
-
-        if (
-            value &&
-            typeof value.toDate === "function"
-        ) {
-
-            date = value.toDate();
-
-        } else if (
-            value instanceof Date
-        ) {
-
-            date = value;
-
-        } else {
-
-            date = new Date(value);
-        }
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "-";
-        }
-
-        return date.toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric"
-            }
-        );
-    };
-
-
-    /* ========================================================
-       TIME FORMAT
-       ======================================================== */
-
-    RX.formatTime = function (
-        value
-    ) {
-
-        if (!value) {
-            return "-";
-        }
-
-        let date;
-
-        if (
-            value &&
-            typeof value.toDate === "function"
-        ) {
-
-            date = value.toDate();
-
-        } else {
-
-            date = new Date(value);
-        }
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "-";
-        }
-
-        return date.toLocaleTimeString(
-            "en-IN",
-            {
-                hour: "2-digit",
-                minute: "2-digit"
-            }
-        );
-    };
-
-
-    /* ========================================================
-       RIDE ID
-       ======================================================== */
-
-    RX.generateRideId = function () {
-
-        const now =
-            Date.now()
-                .toString(36)
-                .toUpperCase();
-
-        const random =
-            Math.random()
-                .toString(36)
-                .substring(2, 7)
-                .toUpperCase();
-
-        return "RX-" + now + "-" + random;
-    };
-
-
-    /* ========================================================
-       RANDOM ID
-       ======================================================== */
-
-    RX.generateId = function (
-        prefix
-    ) {
-
-        const p =
-            prefix || "RX";
-
-        return (
-            p +
-            "-" +
-            Date.now().toString(36) +
-            "-" +
-            Math.random()
-                .toString(36)
-                .substring(2, 9)
-        ).toUpperCase();
-    };
-
-
-    /* ========================================================
-       DEBOUNCE
-       ======================================================== */
-
-    RX.debounce = function (
-        callback,
-        delay
-    ) {
-
-        let timer;
-
-        return function () {
-
-            const args = arguments;
-            const context = this;
-
-            clearTimeout(timer);
-
-            timer = setTimeout(
-                function () {
-
-                    callback.apply(
-                        context,
-                        args
-                    );
-
-                },
-                delay || 300
-            );
-        };
-    };
-
-
-    /* ========================================================
-       THROTTLE
-       ======================================================== */
-
-    RX.throttle = function (
-        callback,
-        delay
-    ) {
-
-        let waiting = false;
-
-        return function () {
-
-            if (waiting) {
+            if (!path) {
                 return;
             }
 
-            const args = arguments;
-            const context = this;
 
-            callback.apply(
-                context,
-                args
-            );
+            window.location.href =
+                path;
+        };
 
-            waiting = true;
 
-            setTimeout(
-                function () {
+    APP.redirectRoleHome =
+        function () {
 
-                    waiting = false;
+            const role =
+                APP.getRole();
 
-                },
-                delay || 300
+
+            const destination =
+                APP.getRoleHome(
+                    role
+                );
+
+
+            APP.redirect(
+                destination
             );
         };
-    };
 
 
     /* ========================================================
-       NETWORK STATUS
+       INDEX ROUTING
        ======================================================== */
 
-    RX.updateNetworkStatus = function () {
+    APP.handleIndex =
+        function () {
 
-        RX.state.online =
-            navigator.onLine;
+            const page =
+                APP.state.currentPage;
 
-        document.body.classList.toggle(
-            "rx-offline",
-            !RX.state.online
-        );
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx-network-changed",
-                {
-                    detail: {
-                        online:
-                            RX.state.online
-                    }
-                }
-            )
-        );
-    };
-
-
-    /* ========================================================
-       TOAST
-       ======================================================== */
-
-    RX.showToast = function (
-        title,
-        message,
-        type
-    ) {
-
-        type = type || "info";
-
-        let container =
-            document.querySelector(
-                ".rx-toast-container"
-            );
-
-        if (!container) {
-
-            container =
-                document.createElement(
-                    "div"
-                );
-
-            container.className =
-                "rx-toast-container";
-
-            document.body.appendChild(
-                container
-            );
-        }
-
-        const toast =
-            document.createElement(
-                "div"
-            );
-
-        toast.className =
-            "rx-toast";
-
-        let icon = "●";
-
-        if (type === "success") {
-            icon = "✓";
-        }
-
-        if (type === "danger") {
-            icon = "!";
-        }
-
-        if (type === "warning") {
-            icon = "!";
-        }
-
-        toast.innerHTML = `
-            <div class="rx-toast-icon">
-                ${icon}
-            </div>
-
-            <div>
-                <div class="rx-toast-title">
-                    ${RX.escapeHTML(title || "RiderX")}
-                </div>
-
-                <div class="rx-toast-message">
-                    ${RX.escapeHTML(message || "")}
-                </div>
-            </div>
-        `;
-
-        container.appendChild(
-            toast
-        );
-
-        setTimeout(
-            function () {
-
-                toast.style.opacity = "0";
-                toast.style.transform =
-                    "translateY(-8px)";
-
-                setTimeout(
-                    function () {
-
-                        toast.remove();
-
-                    },
-                    220
-                );
-
-            },
-            3500
-        );
-    };
-
-
-    /* ========================================================
-       CONFIRM DIALOG
-       ======================================================== */
-
-    RX.confirm = function (
-        message,
-        callback
-    ) {
-
-        const result =
-            window.confirm(
-                message ||
-                "Are you sure?"
-            );
-
-        if (
-            result &&
-            typeof callback === "function"
-        ) {
-
-            callback();
-        }
-
-        return result;
-    };
-
-
-    /* ========================================================
-       SAFE LOCAL STORAGE
-       ======================================================== */
-
-    RX.storage = {
-
-        set: function (
-            key,
-            value
-        ) {
-
-            try {
-
-                localStorage.setItem(
-                    key,
-                    JSON.stringify(value)
-                );
-
-            } catch (error) {
-
-                console.warn(
-                    "Local storage save failed.",
-                    error
-                );
-            }
-        },
-
-        get: function (
-            key,
-            fallback
-        ) {
-
-            try {
-
-                const value =
-                    localStorage.getItem(
-                        key
-                    );
-
-                if (value === null) {
-                    return fallback;
-                }
-
-                return JSON.parse(
-                    value
-                );
-
-            } catch (error) {
-
-                return fallback;
-            }
-        },
-
-        remove: function (
-            key
-        ) {
-
-            try {
-
-                localStorage.removeItem(
-                    key
-                );
-
-            } catch (error) {
-
-                console.warn(
-                    "Local storage remove failed."
-                );
-            }
-        }
-    };
-
-
-    /* ========================================================
-       LOCATION
-       ======================================================== */
-
-    RX.getCurrentLocation = function () {
-
-        return new Promise(
-            function (
-                resolve,
-                reject
-            ) {
-
-                if (
-                    !navigator.geolocation
-                ) {
-
-                    reject(
-                        new Error(
-                            "Geolocation is not supported."
-                        )
-                    );
-
-                    return;
-                }
-
-                navigator.geolocation.getCurrentPosition(
-                    function (position) {
-
-                        resolve({
-                            latitude:
-                                position.coords.latitude,
-
-                            longitude:
-                                position.coords.longitude,
-
-                            accuracy:
-                                position.coords.accuracy
-                        });
-
-                    },
-                    function (error) {
-
-                        reject(error);
-
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 15000,
-                        maximumAge: 5000
-                    }
-                );
-            }
-        );
-    };
-
-
-    /* ========================================================
-       GEOLOCATION WATCH
-       ======================================================== */
-
-    RX.watchLocation = function (
-        success,
-        error
-    ) {
-
-        if (
-            !navigator.geolocation
-        ) {
 
             if (
-                typeof error === "function"
+                page !== "index.html"
             ) {
 
-                error(
-                    new Error(
-                        "Geolocation unavailable."
-                    )
-                );
+                return;
             }
 
-            return null;
-        }
 
-        return navigator.geolocation.watchPosition(
-            function (position) {
+            /*
+             * Do not redirect if the page
+             * contains a splash/landing state.
+             */
 
-                if (
-                    typeof success === "function"
-                ) {
+            const user =
+                APP.getUser();
 
-                    success({
-                        latitude:
-                            position.coords.latitude,
 
-                        longitude:
-                            position.coords.longitude,
+            if (
+                !user
+            ) {
 
-                        accuracy:
-                            position.coords.accuracy,
-
-                        heading:
-                            position.coords.heading,
-
-                        speed:
-                            position.coords.speed
-                    });
-                }
-
-            },
-            error,
-            {
-                enableHighAccuracy: true,
-                maximumAge: 3000,
-                timeout: 15000
+                return;
             }
-        );
-    };
 
 
-    RX.clearLocationWatch = function (
-        watchId
-    ) {
-
-        if (
-            watchId !== null &&
-            watchId !== undefined &&
-            navigator.geolocation
-        ) {
-
-            navigator.geolocation.clearWatch(
-                watchId
-            );
-        }
-    };
+            const role =
+                APP.getRole();
 
 
-    /* ========================================================
-       USER DATA HELPERS
-       ======================================================== */
-
-    RX.getUserName = function () {
-
-        const user =
-            RX.state.currentUser;
-
-        const profile =
-            RX.state.profile;
-
-        return (
-            (
-                profile &&
-                (
-                    profile.name ||
-                    profile.displayName
-                )
-            ) ||
-            (
-                user &&
-                user.displayName
-            ) ||
-            "RiderX User"
-        );
-    };
+            if (!role) {
+                return;
+            }
 
 
-    RX.getUserPhone = function () {
+            /*
+             * Only redirect when explicitly
+             * requested by the index page.
+             */
 
-        const profile =
-            RX.state.profile;
+            if (
+                document.body.dataset
+                    .redirectLoggedUser ===
+                "true"
+            ) {
 
-        return (
-            (
-                profile &&
-                (
-                    profile.phone ||
-                    profile.phoneNumber
-                )
-            ) ||
-            (
-                RX.state.currentUser &&
-                RX.state.currentUser.phoneNumber
-            ) ||
-            ""
-        );
-    };
-
-
-    RX.getUserPhoto = function () {
-
-        const profile =
-            RX.state.profile;
-
-        return (
-            (
-                profile &&
-                (
-                    profile.photoURL ||
-                    profile.photo
-                )
-            ) ||
-            (
-                RX.state.currentUser &&
-                RX.state.currentUser.photoURL
-            ) ||
-            ""
-        );
-    };
-
-
-    /* ========================================================
-       ROLE CHECK
-       ======================================================== */
-
-    RX.requireRole = function (
-        roles
-    ) {
-
-        if (!Array.isArray(roles)) {
-            roles = [roles];
-        }
-
-        if (
-            !RX.isLoggedIn()
-        ) {
-
-            RX.redirectToLogin();
-
-            return false;
-        }
-
-        if (
-            !roles.includes(
-                RX.state.role
-            )
-        ) {
-
-            RX.redirectByRole();
-
-            return false;
-        }
-
-        return true;
-    };
-
-
-    /* ========================================================
-       REQUIRE AUTH
-       ======================================================== */
-
-    RX.requireAuth = function () {
-
-        if (
-            !RX.isLoggedIn()
-        ) {
-
-            RX.redirectToLogin();
-
-            return false;
-        }
-
-        return true;
-    };
-
-
-    /* ========================================================
-       FIREBASE ERROR MESSAGE
-       ======================================================== */
-
-    RX.firebaseErrorMessage = function (
-        error
-    ) {
-
-        if (!error) {
-            return "Something went wrong.";
-        }
-
-        const code =
-            error.code || "";
-
-        const messages = {
-
-            "auth/invalid-email":
-                "Please enter a valid email address.",
-
-            "auth/user-disabled":
-                "This account has been disabled.",
-
-            "auth/user-not-found":
-                "No account was found with these details.",
-
-            "auth/wrong-password":
-                "Incorrect password.",
-
-            "auth/invalid-credential":
-                "Invalid login details.",
-
-            "auth/email-already-in-use":
-                "This email is already registered.",
-
-            "auth/weak-password":
-                "Password should be at least 6 characters.",
-
-            "auth/network-request-failed":
-                "Network error. Please check your internet.",
-
-            "auth/too-many-requests":
-                "Too many attempts. Please try again later.",
-
-            "auth/requires-recent-login":
-                "Please login again to continue."
+                APP.redirectRoleHome();
+            }
         };
-
-        return (
-            messages[code] ||
-            error.message ||
-            "Something went wrong."
-        );
-    };
-
-
-    /* ========================================================
-       GLOBAL LOGOUT BUTTONS
-       ======================================================== */
-
-    RX.bindLogoutButtons = function () {
-
-        document
-            .querySelectorAll(
-                "[data-action='logout'], .rx-logout"
-            )
-            .forEach(
-                function (button) {
-
-                    if (
-                        button.dataset.rxBound ===
-                        "true"
-                    ) {
-
-                        return;
-                    }
-
-                    button.dataset.rxBound =
-                        "true";
-
-                    button.addEventListener(
-                        "click",
-                        function (event) {
-
-                            event.preventDefault();
-
-                            RX.confirm(
-                                "Do you want to logout?",
-                                function () {
-                                    RX.logout();
-                                }
-                            );
-                        }
-                    );
-                }
-            );
-    };
-
-
-    /* ========================================================
-       THEME BUTTONS
-       ======================================================== */
-
-    RX.bindThemeButtons = function () {
-
-        document
-            .querySelectorAll(
-                "[data-theme]"
-            )
-            .forEach(
-                function (button) {
-
-                    if (
-                        button.dataset.rxThemeBound ===
-                        "true"
-                    ) {
-
-                        return;
-                    }
-
-                    button.dataset.rxThemeBound =
-                        "true";
-
-                    button.addEventListener(
-                        "click",
-                        function () {
-
-                            RX.setTheme(
-                                button.dataset.theme
-                            );
-                        }
-                    );
-                }
-            );
-
-        document
-            .querySelectorAll(
-                "[data-action='toggle-theme']"
-            )
-            .forEach(
-                function (button) {
-
-                    if (
-                        button.dataset.rxThemeToggleBound ===
-                        "true"
-                    ) {
-
-                        return;
-                    }
-
-                    button.dataset.rxThemeToggleBound =
-                        "true";
-
-                    button.addEventListener(
-                        "click",
-                        function () {
-
-                            RX.toggleTheme();
-                        }
-                    );
-                }
-            );
-    };
-
-
-    /* ========================================================
-       LANGUAGE BUTTONS
-       ======================================================== */
-
-    RX.bindLanguageButtons = function () {
-
-        document
-            .querySelectorAll(
-                "[data-language]"
-            )
-            .forEach(
-                function (button) {
-
-                    if (
-                        button.dataset.rxLanguageBound ===
-                        "true"
-                    ) {
-
-                        return;
-                    }
-
-                    button.dataset.rxLanguageBound =
-                        "true";
-
-                    button.addEventListener(
-                        "click",
-                        function () {
-
-                            RX.setLanguage(
-                                button.dataset.language
-                            );
-                        }
-                    );
-                }
-            );
-    };
-
-
-    /* ========================================================
-       MOBILE MENU
-       ======================================================== */
-
-    RX.initMobileMenu = function () {
-
-        const toggles =
-            document.querySelectorAll(
-                "[data-action='mobile-menu']"
-            );
-
-        toggles.forEach(
-            function (toggle) {
-
-                toggle.addEventListener(
-                    "click",
-                    function () {
-
-                        document.body.classList.toggle(
-                            "rx-menu-open"
-                        );
-                    }
-                );
-            }
-        );
-    };
 
 
     /* ========================================================
        ONLINE / OFFLINE
        ======================================================== */
 
-    window.addEventListener(
-        "online",
+    APP.updateConnectionUI =
+        function (
+            online
+        ) {
+
+            APP.state.online =
+                online;
+
+
+            document.body.classList.toggle(
+                "is-online",
+                online
+            );
+
+
+            document.body.classList.toggle(
+                "is-offline",
+                !online
+            );
+
+
+            document
+                .querySelectorAll(
+                    "[data-connection-status]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            online
+                                ? "Online"
+                                : "Offline";
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-offline-banner]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.hidden =
+                            online;
+                    }
+                );
+
+
+            APP.emit(
+                online
+                    ? "online"
+                    : "offline"
+            );
+        };
+
+
+    APP.setupConnection =
         function () {
 
-            RX.updateNetworkStatus();
+            window.addEventListener(
+                "online",
+                function () {
 
-            RX.showToast(
-                "Back online",
-                "Internet connection restored.",
-                "success"
+                    APP.updateConnectionUI(
+                        true
+                    );
+                }
             );
-        }
-    );
 
 
-    window.addEventListener(
-        "offline",
-        function () {
+            window.addEventListener(
+                "offline",
+                function () {
 
-            RX.updateNetworkStatus();
-
-            RX.showToast(
-                "You're offline",
-                "Some RiderX features may not work.",
-                "warning"
+                    APP.updateConnectionUI(
+                        false
+                    );
+                }
             );
-        }
-    );
+
+
+            APP.updateConnectionUI(
+                navigator.onLine
+            );
+        };
 
 
     /* ========================================================
-       INITIALIZATION
+       THEME
        ======================================================== */
 
-    RX.init = function () {
+    APP.applyTheme =
+        function (
+            theme
+        ) {
+
+            theme =
+                String(
+                    theme ||
+                    APP.state.theme
+                )
+                .toLowerCase();
+
+
+            if (
+                ![
+                    "dark",
+                    "light"
+                ].includes(
+                    theme
+                )
+            ) {
+
+                theme =
+                    "dark";
+            }
+
+
+            APP.state.theme =
+                theme;
+
+
+            document.documentElement
+                .setAttribute(
+                    "data-theme",
+                    theme
+                );
+
+
+            document.body
+                .setAttribute(
+                    "data-theme",
+                    theme
+                );
+
+
+            localStorage.setItem(
+                "riderx_theme",
+                theme
+            );
+
+
+            document
+                .querySelectorAll(
+                    "[data-theme-toggle]"
+                )
+                .forEach(
+                    function (
+                        button
+                    ) {
+
+                        button
+                            .setAttribute(
+                                "aria-label",
+                                theme ===
+                                    "dark"
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            );
+                    }
+                );
+        };
+
+
+    APP.toggleTheme =
+        function () {
+
+            APP.applyTheme(
+                APP.state.theme ===
+                    "dark"
+                    ? "light"
+                    : "dark"
+            );
+        };
+
+
+    APP.setupTheme =
+        function () {
+
+            APP.applyTheme(
+                APP.state.theme
+            );
+
+
+            document.addEventListener(
+                "click",
+                function (
+                    event
+                ) {
+
+                    const button =
+                        event.target.closest(
+                            "[data-theme-toggle]"
+                        );
+
+
+                    if (!button) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    APP.toggleTheme();
+                }
+            );
+        };
+
+
+    /* ========================================================
+       LANGUAGE
+       ======================================================== */
+
+    APP.setLanguage =
+        function (
+            language
+        ) {
+
+            language =
+                String(
+                    language || ""
+                )
+                .toLowerCase();
+
+
+            if (
+                !APP.config
+                    .supportedLanguages
+                    .includes(
+                        language
+                    )
+            ) {
+
+                language =
+                    APP.config
+                        .defaultLanguage;
+            }
+
+
+            APP.state.language =
+                language;
+
+
+            localStorage.setItem(
+                "riderx_language",
+                language
+            );
+
+
+            document.documentElement
+                .setAttribute(
+                    "lang",
+                    language
+                );
+
+
+            APP.emit(
+                "language-changed",
+                {
+                    language:
+                        language
+                }
+            );
+
+
+            /*
+             * Use existing language module
+             * when available.
+             */
+
+            if (
+                RX.language &&
+                typeof RX.language.setLanguage ===
+                "function"
+            ) {
+
+                RX.language.setLanguage(
+                    language
+                );
+            }
+        };
+
+
+    APP.setupLanguage =
+        function () {
+
+            APP.setLanguage(
+                APP.state.language
+            );
+
+
+            document.addEventListener(
+                "change",
+                function (
+                    event
+                ) {
+
+                    const select =
+                        event.target.closest(
+                            "[data-language]"
+                        );
+
+
+                    if (!select) {
+                        return;
+                    }
+
+
+                    APP.setLanguage(
+                        select.value
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       INSTALL APP
+       ======================================================== */
+
+    APP.setupInstallPrompt =
+        function () {
+
+            window.addEventListener(
+                "beforeinstallprompt",
+                function (
+                    event
+                ) {
+
+                    event.preventDefault();
+
+
+                    APP.state
+                        .deferredInstallPrompt =
+                        event;
+
+
+                    document
+                        .querySelectorAll(
+                            "[data-install-app]"
+                        )
+                        .forEach(
+                            function (
+                                button
+                            ) {
+
+                                button.hidden =
+                                    false;
+                            }
+                        );
+                }
+            );
+
+
+            window.addEventListener(
+                "appinstalled",
+                function () {
+
+                    APP.state.installed =
+                        true;
+
+                    APP.state
+                        .deferredInstallPrompt =
+                        null;
+
+
+                    document
+                        .querySelectorAll(
+                            "[data-install-app]"
+                        )
+                        .forEach(
+                            function (
+                                button
+                            ) {
+
+                                button.hidden =
+                                    true;
+                            }
+                        );
+
+
+                    APP.emit(
+                        "installed"
+                    );
+                }
+            );
+
+
+            document.addEventListener(
+                "click",
+                async function (
+                    event
+                ) {
+
+                    const button =
+                        event.target.closest(
+                            "[data-install-app]"
+                        );
+
+
+                    if (!button) {
+                        return;
+                    }
+
+
+                    event.preventDefault();
+
+
+                    await APP.install();
+                }
+            );
+        };
+
+
+    APP.install =
+        async function () {
+
+            const prompt =
+                APP.state
+                    .deferredInstallPrompt;
+
+
+            if (!prompt) {
+
+                APP.emit(
+                    "install-unavailable"
+                );
+
+                return false;
+            }
+
+
+            try {
+
+                await prompt.prompt();
+
+
+                const result =
+                    await prompt.userChoice;
+
+
+                APP.state
+                    .deferredInstallPrompt =
+                    null;
+
+
+                APP.emit(
+                    "install-result",
+                    {
+                        outcome:
+                            result.outcome
+                    }
+                );
+
+
+                return (
+                    result.outcome ===
+                    "accepted"
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX install prompt failed:",
+                    error
+                );
+
+
+                return false;
+            }
+        };
+
+
+    /* ========================================================
+       SERVICE WORKER
+       ======================================================== */
+
+    APP.registerServiceWorker =
+        async function () {
+
+            if (
+                !APP.config.serviceWorker
+            ) {
+                return;
+            }
+
+
+            if (
+                !("serviceWorker" in navigator)
+            ) {
+                return;
+            }
+
+
+            try {
+
+                const registration =
+                    await navigator
+                        .serviceWorker
+                        .register(
+                            "sw.js",
+                            {
+                                scope:
+                                    "./"
+                            }
+                        );
+
+
+                APP.state.serviceWorker =
+                    registration;
+
+
+                APP.emit(
+                    "service-worker-ready",
+                    {
+                        registration:
+                            registration
+                    }
+                );
+
+            } catch (error) {
+
+                /*
+                 * Some nested pages can have
+                 * a different relative path.
+                 */
+
+                try {
+
+                    const registration =
+                        await navigator
+                            .serviceWorker
+                            .register(
+                                "../sw.js"
+                            );
+
+
+                    APP.state.serviceWorker =
+                        registration;
+
+                } catch (secondError) {
+
+                    console.warn(
+                        "RiderX service worker registration failed:",
+                        secondError
+                    );
+                }
+            }
+        };
+
+
+    /* ========================================================
+       GLOBAL LOADING
+       ======================================================== */
+
+    APP.showLoading =
+        function (
+            message
+        ) {
+
+            let loader =
+                document.getElementById(
+                    "riderx-global-loader"
+                );
+
+
+            if (!loader) {
+
+                loader =
+                    document.createElement(
+                        "div"
+                    );
+
+                loader.id =
+                    "riderx-global-loader";
+
+                loader.innerHTML =
+                    `
+                    <div class="riderx-loader-inner">
+
+                        <div class="riderx-loader-spinner">
+                        </div>
+
+                        <div
+                            class="riderx-loader-text"
+                            data-loader-text
+                        >
+                            Loading...
+                        </div>
+
+                    </div>
+                    `;
+
+
+                document.body.appendChild(
+                    loader
+                );
+            }
+
+
+            const text =
+                loader.querySelector(
+                    "[data-loader-text]"
+                );
+
+
+            if (text) {
+
+                text.textContent =
+                    message ||
+                    "Loading...";
+            }
+
+
+            loader.classList.add(
+                "show"
+            );
+        };
+
+
+    APP.hideLoading =
+        function () {
+
+            const loader =
+                document.getElementById(
+                    "riderx-global-loader"
+                );
+
+
+            if (!loader) {
+                return;
+            }
+
+
+            loader.classList.remove(
+                "show"
+            );
+        };
+
+
+    /* ========================================================
+       GLOBAL TOAST
+       ======================================================== */
+
+    APP.toast =
+        function (
+            message,
+            type,
+            duration
+        ) {
+
+            message =
+                String(
+                    message || ""
+                );
+
+
+            if (!message) {
+                return;
+            }
+
+
+            type =
+                type ||
+                "info";
+
+
+            duration =
+                Number(
+                    duration ||
+                    3000
+                );
+
+
+            let container =
+                document.getElementById(
+                    "riderx-toast-container"
+                );
+
+
+            if (!container) {
+
+                container =
+                    document.createElement(
+                        "div"
+                    );
+
+                container.id =
+                    "riderx-toast-container";
+
+                container.className =
+                    "riderx-toast-container";
+
+                document.body.appendChild(
+                    container
+                );
+            }
+
+
+            const toast =
+                document.createElement(
+                    "div"
+                );
+
+
+            toast.className =
+                "riderx-toast " +
+                "riderx-toast-" +
+                type;
+
+
+            toast.innerHTML =
+                `
+                <div class="riderx-toast-message"></div>
+
+                <button
+                    type="button"
+                    class="riderx-toast-close"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+                `;
+
+
+            toast.querySelector(
+                ".riderx-toast-message"
+            ).textContent =
+                message;
+
+
+            toast.querySelector(
+                ".riderx-toast-close"
+            ).addEventListener(
+                "click",
+                function () {
+
+                    toast.remove();
+                }
+            );
+
+
+            container.appendChild(
+                toast
+            );
+
+
+            window.setTimeout(
+                function () {
+
+                    toast.classList.add(
+                        "hide"
+                    );
+
+
+                    window.setTimeout(
+                        function () {
+
+                            toast.remove();
+
+                        },
+                        300
+                    );
+
+                },
+                duration
+            );
+        };
+
+
+    /* ========================================================
+       GLOBAL EVENTS
+       ======================================================== */
+
+    APP.emit =
+        function (
+            eventName,
+            detail
+        ) {
+
+            try {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "riderx-" +
+                        eventName,
+                        {
+                            detail:
+                                detail ||
+                                {}
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX event error:",
+                    error
+                );
+            }
+        };
+
+
+    APP.on =
+        function (
+            eventName,
+            callback
+        ) {
+
+            if (
+                typeof callback !==
+                "function"
+            ) {
+                return;
+            }
+
+
+            window.addEventListener(
+                "riderx-" +
+                eventName,
+                function (
+                    event
+                ) {
+
+                    callback(
+                        event.detail ||
+                        {}
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       GLOBAL CLICK ACTIONS
+       ======================================================== */
+
+    APP.setupGlobalActions =
+        function () {
+
+            document.addEventListener(
+                "click",
+                async function (
+                    event
+                ) {
+
+                    /*
+                     * Logout
+                     */
+
+                    const logout =
+                        event.target.closest(
+                            "[data-logout]"
+                        );
+
+
+                    if (logout) {
+
+                        event.preventDefault();
+
+
+                        if (
+                            RX.auth &&
+                            typeof RX.auth.logout ===
+                            "function"
+                        ) {
+
+                            await RX.auth.logout();
+
+                        } else {
+
+                            localStorage.clear();
+
+                            window.location.href =
+                                "auth/login.html";
+                        }
+
+
+                        return;
+                    }
+
+
+                    /*
+                     * Back button
+                     */
+
+                    const back =
+                        event.target.closest(
+                            "[data-back]"
+                        );
+
+
+                    if (back) {
+
+                        event.preventDefault();
+
+
+                        if (
+                            window.history.length >
+                            1
+                        ) {
+
+                            window.history.back();
+
+                        } else {
+
+                            window.location.href =
+                                "../index.html";
+                        }
+
+
+                        return;
+                    }
+
+
+                    /*
+                     * Theme
+                     */
+
+                    const theme =
+                        event.target.closest(
+                            "[data-theme-toggle]"
+                        );
+
+
+                    if (theme) {
+
+                        event.preventDefault();
+
+                        APP.toggleTheme();
+
+                        return;
+                    }
+                }
+            );
+        };
+
+
+    /* ========================================================
+       AUTH EVENTS
+       ======================================================== */
+
+    APP.setupAuthEvents =
+        function () {
+
+            /*
+             * Login
+             */
+
+            APP.on(
+                "auth-login",
+                function (
+                    detail
+                ) {
+
+                    const role =
+                        String(
+                            detail.role ||
+                            ""
+                        )
+                        .toLowerCase();
+
+
+                    APP.state.currentUser =
+                        detail.user ||
+                        APP.getUser();
+
+
+                    APP.state.currentRole =
+                        role;
+
+
+                    APP.emit(
+                        "user-ready",
+                        {
+                            user:
+                                APP.state
+                                    .currentUser,
+
+                            role:
+                                role
+                        }
+                    );
+                }
+            );
+
+
+            /*
+             * RiderX auth module.
+             */
+
+            if (
+                RX.auth &&
+                typeof RX.auth.on ===
+                "function"
+            ) {
+
+                RX.auth.on(
+                    "login",
+                    function (
+                        detail
+                    ) {
+
+                        APP.state.currentUser =
+                            detail.user;
+
+                        APP.state.currentRole =
+                            detail.role;
+
+
+                        APP.emit(
+                            "user-ready",
+                            detail
+                        );
+                    }
+                );
+
+
+                RX.auth.on(
+                    "signed-in",
+                    function (
+                        detail
+                    ) {
+
+                        APP.state.currentUser =
+                            detail.user;
+
+                        APP.state.currentRole =
+                            detail.role;
+
+
+                        APP.emit(
+                            "user-ready",
+                            detail
+                        );
+                    }
+                );
+
+
+                RX.auth.on(
+                    "logout",
+                    function () {
+
+                        APP.state.currentUser =
+                            null;
+
+                        APP.state.currentRole =
+                            "";
+
+
+                        APP.emit(
+                            "user-logout"
+                        );
+                    }
+                );
+            }
+        };
+
+
+    /* ========================================================
+       ROLE-BASED BODY CLASS
+       ======================================================== */
+
+    APP.applyRoleUI =
+        function () {
+
+            const role =
+                APP.getRole();
+
+
+            APP.state.currentRole =
+                role;
+
+
+            document.body
+                .setAttribute(
+                    "data-role",
+                    role ||
+                    "guest"
+                );
+
+
+            document.body.classList.remove(
+                "role-customer",
+                "role-rider",
+                "role-admin",
+                "role-guest"
+            );
+
+
+            if (
+                role ===
+                "customer"
+            ) {
+
+                document.body.classList.add(
+                    "role-customer"
+                );
+
+            } else if (
+                role ===
+                "rider"
+            ) {
+
+                document.body.classList.add(
+                    "role-rider"
+                );
+
+            } else if (
+                role ===
+                    "admin" ||
+                role ===
+                    "superadmin" ||
+                role ===
+                    "super_admin"
+            ) {
+
+                document.body.classList.add(
+                    "role-admin"
+                );
+
+            } else {
+
+                document.body.classList.add(
+                    "role-guest"
+                );
+            }
+        };
+
+
+    /* ========================================================
+       GLOBAL USER UI
+       ======================================================== */
+
+    APP.renderUserUI =
+        function () {
+
+            const user =
+                APP.getUser();
+
+
+            if (!user) {
+                return;
+            }
+
+
+            const name =
+                user.name ||
+                user.displayName ||
+                "User";
+
+
+            const email =
+                user.email ||
+                "";
+
+
+            const phone =
+                user.phone ||
+                user.phoneNumber ||
+                "";
+
+
+            document
+                .querySelectorAll(
+                    "[data-user-name]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            name;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-user-email]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            email;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-user-phone]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            phone;
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-user-role]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        element.textContent =
+                            APP.getRole();
+                    }
+                );
+
+
+            document
+                .querySelectorAll(
+                    "[data-user-avatar]"
+                )
+                .forEach(
+                    function (
+                        element
+                    ) {
+
+                        if (
+                            user.photoURL
+                        ) {
+
+                            element.src =
+                                user.photoURL;
+                        }
+                    }
+                );
+        };
+
+
+    /* ========================================================
+       MODULE INITIALIZATION
+       ======================================================== */
+
+    APP.initModules =
+        function () {
+
+            const modules = [
+
+                "auth",
+                "map",
+                "booking",
+                "chat",
+                "notification",
+                "payment",
+                "pricing",
+                "profile",
+                "rating",
+                "tracking",
+                "trip",
+                "wallet",
+                "history",
+                "settings"
+            ];
+
+
+            modules.forEach(
+                function (
+                    name
+                ) {
+
+                    const module =
+                        RX[name];
+
+
+                    if (
+                        module &&
+                        typeof module.init ===
+                        "function"
+                    ) {
+
+                        try {
+
+                            module.init();
+
+                        } catch (error) {
+
+                            console.warn(
+                                "RiderX module failed:",
+                                name,
+                                error
+                            );
+                        }
+                    }
+                }
+            );
+        };
+
+
+    /* ========================================================
+       FIREBASE CONNECTION STATE
+       ======================================================== */
+
+    APP.setupFirebaseConnection =
+        function () {
+
+            const database =
+                (
+                    window.firebase &&
+                    typeof firebase.database ===
+                    "function"
+                )
+                    ? firebase.database()
+                    : null;
+
+
+            if (!database) {
+                return;
+            }
+
+
+            try {
+
+                const connectedRef =
+                    database.ref(
+                        ".info/connected"
+                    );
+
+
+                connectedRef.on(
+                    "value",
+                    function (
+                        snapshot
+                    ) {
+
+                        const connected =
+                            snapshot.val() ===
+                            true;
+
+
+                        document.body
+                            .classList.toggle(
+                                "firebase-connected",
+                                connected
+                            );
+
+
+                        document.body
+                            .classList.toggle(
+                                "firebase-disconnected",
+                                !connected
+                            );
+
+
+                        APP.emit(
+                            "firebase-connection",
+                            {
+                                connected:
+                                    connected
+                            }
+                        );
+                    }
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "Firebase connection listener failed:",
+                    error
+                );
+            }
+        };
+
+
+    /* ========================================================
+       PAGE READY
+       ======================================================== */
+
+    APP.pageReady =
+        function () {
+
+            document.body.classList.add(
+                "riderx-ready"
+            );
+
+
+            APP.hideLoading();
+
+
+            APP.emit(
+                "page-ready",
+                {
+                    page:
+                        APP.state.currentPage,
+
+                    folder:
+                        APP.getFolder(),
+
+                    role:
+                        APP.getRole()
+                }
+            );
+        };
+
+
+    /* ========================================================
+       ERROR HANDLING
+       ======================================================== */
+
+    APP.setupErrors =
+        function () {
+
+            window.addEventListener(
+                "error",
+                function (
+                    event
+                ) {
+
+                    console.error(
+                        "RiderX error:",
+                        event.error ||
+                        event.message
+                    );
+                }
+            );
+
+
+            window.addEventListener(
+                "unhandledrejection",
+                function (
+                    event
+                ) {
+
+                    console.error(
+                        "RiderX promise error:",
+                        event.reason
+                    );
+                }
+            );
+        };
+
+
+    /* ========================================================
+       APP INITIALIZATION
+       ======================================================== */
+
+    APP.init = async function () {
 
         if (
-            RX.state.initialized
+            APP.state.initialized
         ) {
 
             return;
         }
 
-        RX.applyTheme();
 
-        RX.setLanguage(
-            RX.state.language
+        APP.state.currentPage =
+            APP.getPage();
+
+
+        APP.showLoading(
+            "Starting RiderX..."
         );
 
-        RX.initFirebase();
+
+        /*
+         * Global UI first.
+         */
+
+        APP.setupConnection();
+
+        APP.setupTheme();
+
+        APP.setupLanguage();
+
+        APP.setupInstallPrompt();
+
+        APP.setupGlobalActions();
+
+        APP.setupErrors();
+
+
+        /*
+         * Firebase.
+         */
+
+        APP.firebaseReady();
+
+
+        APP.setupFirebaseConnection();
+
+
+        /*
+         * Auth module.
+         */
 
         if (
-            RX.firebase.auth
+            RX.auth &&
+            typeof RX.auth.init ===
+            "function"
         ) {
 
-            RX.watchAuth();
-        } else {
+            try {
 
-            RX.state.authReady = true;
+                RX.auth.init();
 
-            RX.handleProtectedPage();
+            } catch (error) {
+
+                console.warn(
+                    "RiderX auth initialization failed:",
+                    error
+                );
+            }
         }
 
-        RX.bindLogoutButtons();
 
-        RX.bindThemeButtons();
+        /*
+         * Current user.
+         */
 
-        RX.bindLanguageButtons();
+        APP.state.currentUser =
+            APP.getUser();
 
-        RX.initMobileMenu();
 
-        RX.updateNetworkStatus();
+        APP.state.currentRole =
+            APP.getRole();
 
-        document.body.classList.add(
-            "rx-app-ready"
-        );
+
+        APP.applyRoleUI();
+
+        APP.renderUserUI();
+
+
+        /*
+         * Modules.
+         */
+
+        APP.initModules();
+
+
+        /*
+         * Service worker.
+         */
+
+        APP.registerServiceWorker();
+
+
+        /*
+         * Index handling.
+         */
+
+        APP.handleIndex();
+
+
+        /*
+         * Finished.
+         */
+
+        APP.state.initialized =
+            true;
+
+
+        APP.pageReady();
+
 
         console.log(
-            "RiderX " +
-            RX.version +
-            " initialized."
+            "RiderX app.js initialized.",
+            {
+                page:
+                    APP.state.currentPage,
+
+                folder:
+                    APP.getFolder(),
+
+                role:
+                    APP.state.currentRole
+            }
         );
     };
 
 
     /* ========================================================
-       DOM READY
+       PUBLIC API
+       ======================================================== */
+
+    RX.getApp =
+        function () {
+
+            return APP;
+        };
+
+
+    RX.getUser =
+        function () {
+
+            return APP.getUser();
+        };
+
+
+    RX.getRole =
+        function () {
+
+            return APP.getRole();
+        };
+
+
+    RX.toast =
+        function (
+            message,
+            type,
+            duration
+        ) {
+
+            return APP.toast(
+                message,
+                type,
+                duration
+            );
+        };
+
+
+    RX.showLoading =
+        function (
+            message
+        ) {
+
+            return APP.showLoading(
+                message
+            );
+        };
+
+
+    RX.hideLoading =
+        function () {
+
+            return APP.hideLoading();
+        };
+
+
+    RX.redirect =
+        function (
+            path
+        ) {
+
+            return APP.redirect(
+                path
+            );
+        };
+
+
+    /* ========================================================
+       AUTO START
        ======================================================== */
 
     if (
@@ -2067,38 +2122,18 @@
             "DOMContentLoaded",
             function () {
 
-                RX.init();
+                APP.init();
+
+            },
+            {
+                once:
+                    true
             }
         );
 
     } else {
 
-        RX.init();
+        APP.init();
     }
-
-
-    /* ========================================================
-       GLOBAL SHORTCUTS
-       ======================================================== */
-
-    window.RiderXLogout =
-        function () {
-
-            return RX.logout();
-        };
-
-    window.RiderXToast =
-        function (
-            title,
-            message,
-            type
-        ) {
-
-            return RX.showToast(
-                title,
-                message,
-                type
-            );
-        };
 
 })();
