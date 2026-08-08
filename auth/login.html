@@ -1,10 +1,31 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<html lang="en">
 
-<title>RiderX Login</title><link rel="stylesheet"
-      href="../assets/app.css"><link rel="manifest"
-      href="../manifest.json"><meta name="theme-color"
-content="#000000">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>RiderX Login</title>
+
+<link
+    rel="stylesheet"
+    href="../assets/app.css"
+>
+
+<link
+    rel="manifest"
+    href="../manifest.json"
+>
+
+<meta
+    name="theme-color"
+    content="#000000"
+>
 
 <style>
 
@@ -12,447 +33,408 @@ content="#000000">
     box-sizing:border-box;
 }
 
+html,
 body{
     margin:0;
+    padding:0;
+    min-height:100%;
+}
+
+body{
+
     min-height:100vh;
+
     background:#000;
+
     color:#fff;
+
     display:flex;
+
     justify-content:center;
+
     align-items:center;
+
     font-family:Arial,sans-serif;
+
     padding:20px;
 }
 
 .auth-card{
+
     width:100%;
+
     max-width:420px;
+
     background:#111;
+
     padding:30px;
+
     border-radius:25px;
+
     border:1px solid #333;
-    box-shadow:0 20px 60px rgba(0,0,0,.55);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.55);
 }
 
 .logo{
+
     text-align:center;
+
     font-size:38px;
+
     font-weight:900;
-    margin-bottom:10px;
-    letter-spacing:-1px;
+
+    margin-bottom:8px;
 }
 
 .logo span{
+
     color:#FFD600;
 }
 
-.login-type{
+.subtitle{
+
     text-align:center;
-    color:#FFD600;
-    font-size:14px;
-    font-weight:bold;
+
+    color:#888;
+
+    font-size:13px;
+
     margin-bottom:25px;
 }
 
+h2{
+
+    text-align:center;
+
+    color:#FFD600;
+
+    margin:0 0 25px;
+}
+
 .input-box{
-    margin-bottom:17px;
+
+    margin-bottom:18px;
 }
 
 label{
+
     color:#aaa;
+
     font-size:14px;
+
     display:block;
+
     margin-bottom:7px;
 }
 
 input{
+
     width:100%;
-    padding:15px;
+
+    padding:14px;
+
     background:#000;
+
     border:1px solid #444;
+
     border-radius:12px;
+
     color:#fff;
+
     font-size:15px;
+
     outline:none;
 }
 
 input:focus{
+
     border-color:#FFD600;
-    box-shadow:0 0 0 2px rgba(255,214,0,.08);
+
+    box-shadow:
+        0 0 0 2px rgba(255,214,0,.08);
 }
 
 input::placeholder{
+
     color:#666;
 }
 
-.password-wrap{
-    position:relative;
-}
-
-.password-wrap input{
-    padding-right:52px;
-}
-
-.toggle-password{
-    position:absolute;
-    right:8px;
-    top:50%;
-    transform:translateY(-50%);
-    background:transparent;
-    border:0;
-    color:#777;
-    cursor:pointer;
-    font-size:18px;
-    padding:8px;
-}
-
-.toggle-password:hover{
-    color:#FFD600;
-}
-
 .btn{
+
     width:100%;
-    padding:16px;
+
+    padding:15px;
+
     background:#FFD600;
+
     color:#000;
+
     border:none;
+
     border-radius:12px;
+
     font-weight:bold;
+
     font-size:17px;
+
     cursor:pointer;
-    transition:.2s;
-}
-
-.btn:hover{
-    filter:brightness(1.06);
-}
-
-.btn:active{
-    transform:scale(.99);
 }
 
 .btn:disabled{
-    opacity:.55;
+
+    opacity:.5;
+
     cursor:not-allowed;
 }
 
-.status{
-    min-height:22px;
-    margin-top:16px;
-    text-align:center;
-    font-size:14px;
+.error-msg{
+
+    color:#ff4444;
+
+    margin-bottom:15px;
+
+    display:none;
+
     line-height:1.5;
-    word-break:break-word;
-}
 
-.status.error{
-    color:#ff5555;
-}
-
-.status.success{
-    color:#22d66b;
-}
-
-.status.info{
-    color:#FFD600;
+    font-size:14px;
 }
 
 .auth-links{
+
     text-align:center;
-    margin-top:22px;
+
+    margin-top:20px;
+
     color:#aaa;
+
     font-size:14px;
 }
 
 .auth-links a{
+
     color:#FFD600;
+
     text-decoration:none;
+
     font-weight:bold;
 }
 
-.back-link{
-    display:block;
+.mode{
+
     text-align:center;
-    margin-top:18px;
-    color:#666;
-    text-decoration:none;
-    font-size:13px;
+
+    margin-bottom:20px;
+
+    padding:10px;
+
+    background:#080808;
+
+    border:1px solid #222;
+
+    border-radius:10px;
+
+    color:#aaa;
+
+    font-size:12px;
+
+    display:none;
 }
 
-.back-link:hover{
+.mode strong{
+
     color:#FFD600;
 }
 
-.security{
-    text-align:center;
-    color:#666;
-    font-size:11px;
-    margin-top:24px;
-}
+</style>
 
-@media(max-width:420px){
-
-    .auth-card{
-        padding:25px 20px;
-        border-radius:22px;
-    }
-
-    .logo{
-        font-size:34px;
-    }
-
-}
-
-</style></head><body><div class="auth-card"><div class="logo">
-
-    RID<span>ERX</span>
-
-</div>
+</head>
 
 
-<div
-    id="loginType"
-    class="login-type">
-
-    Login
-
-</div>
+<body>
 
 
-<div
-    id="status"
-    class="status">
-
-</div>
+<div class="auth-card">
 
 
-<form id="login-form">
-
-
-    <div class="input-box">
-
-        <label for="email">
-            Email
-        </label>
-
-        <input
-            id="email"
-            type="email"
-            placeholder="Email Address"
-            autocomplete="username"
-            inputmode="email"
-            required>
-
+    <div class="logo">
+        RID<span>ERX</span>
     </div>
 
 
-    <div class="input-box">
-
-        <label for="password">
-            Password
-        </label>
+    <div class="subtitle">
+        Secure RiderX Account Login
+    </div>
 
 
-        <div class="password-wrap">
+    <h2>
+        Login
+    </h2>
+
+
+    <div
+        id="loginMode"
+        class="mode">
+    </div>
+
+
+    <div
+        id="error-message"
+        class="error-msg">
+    </div>
+
+
+    <form id="login-form">
+
+
+        <div class="input-box">
+
+            <label for="email">
+                Email
+            </label>
+
+            <input
+                id="email"
+                type="email"
+                required
+                autocomplete="username"
+                inputmode="email"
+                placeholder="Email Address"
+            >
+
+        </div>
+
+
+        <div class="input-box">
+
+            <label for="password">
+                Password
+            </label>
 
             <input
                 id="password"
                 type="password"
-                placeholder="Password"
+                required
                 autocomplete="current-password"
-                required>
-
-
-            <button
-                type="button"
-                id="togglePassword"
-                class="toggle-password"
-                aria-label="Show password">
-
-                👁
-
-            </button>
+                placeholder="Password"
+            >
 
         </div>
+
+
+        <button
+            class="btn"
+            id="login-btn"
+            type="submit">
+
+            Login
+
+        </button>
+
+
+    </form>
+
+
+    <div class="auth-links">
+
+        Don't have an account?
+
+        <a
+            id="registerLink"
+            href="register.html">
+
+            Register
+
+        </a>
 
     </div>
 
 
-    <button
-        id="login-btn"
-        class="btn"
-        type="submit">
-
-        Login
-
-    </button>
-
-
-</form>
-
-
-<div
-    id="registerArea"
-    class="auth-links">
-
-    Don't have an account?
-
-    <a
-        id="registerLink"
-        href="register.html">
-
-        Register
-
-    </a>
-
 </div>
 
 
-<a
-    class="back-link"
-    href="../index.html">
-
-    ← Back to RiderX
-
-</a>
+<script>
 
 
-<div class="security">
-
-    🔒 Secure RiderX Authentication
-
-</div>
-
-</div><script>
-
-/* =========================================
-   READ LOGIN ROLE
-========================================= */
+// ============================================================
+// LOGIN PAGE ROLE
+// ============================================================
 
 const params =
     new URLSearchParams(
         window.location.search
     );
 
-const requestedRole =
-    String(
+
+const role =
+    (
         params.get("role") || ""
     )
     .trim()
     .toLowerCase();
 
 
-const loginType =
-    document.getElementById(
-        "loginType"
-    );
+const mode =
+    document.getElementById("loginMode");
+
 
 const registerLink =
-    document.getElementById(
-        "registerLink"
-    );
+    document.getElementById("registerLink");
 
 
-/* =========================================
-   CUSTOMER LOGIN
-========================================= */
+// ============================================================
+// RIDER LOGIN
+// ============================================================
 
-if(requestedRole === "customer"){
+if (role === "rider") {
 
-    loginType.textContent =
-        "Customer Login";
+    mode.style.display = "block";
 
-    registerLink.href =
-        "register.html?role=customer";
-
-}
-
-
-/* =========================================
-   RIDER LOGIN
-========================================= */
-
-else if(requestedRole === "rider"){
-
-    loginType.textContent =
-        "Rider Login";
+    mode.innerHTML =
+        "Login as <strong>Rider</strong>";
 
     registerLink.href =
         "register.html?role=rider";
-
 }
 
 
-/* =========================================
-   NORMAL LOGIN
-========================================= */
+// ============================================================
+// CUSTOMER LOGIN
+// ============================================================
 
-else{
+else if (role === "customer") {
 
-    loginType.textContent =
-        "RiderX Login";
+    mode.style.display = "block";
+
+    mode.innerHTML =
+        "Login as <strong>Customer</strong>";
+
+    registerLink.href =
+        "register.html?role=customer";
+}
+
+
+// ============================================================
+// NORMAL LOGIN
+// ============================================================
+
+else {
 
     registerLink.href =
         "register.html";
-
 }
 
-
-/* =========================================
-   PASSWORD TOGGLE
-========================================= */
-
-const passwordInput =
-    document.getElementById(
-        "password"
-    );
-
-const togglePassword =
-    document.getElementById(
-        "togglePassword"
-    );
+</script>
 
 
-togglePassword.addEventListener(
-    "click",
-    () => {
-
-        if(
-            passwordInput.type ===
-            "password"
-        ){
-
-            passwordInput.type =
-                "text";
-
-            togglePassword.textContent =
-                "🙈";
-
-            togglePassword.setAttribute(
-                "aria-label",
-                "Hide password"
-            );
-
-        }
-        else{
-
-            passwordInput.type =
-                "password";
-
-            togglePassword.textContent =
-                "👁";
-
-            togglePassword.setAttribute(
-                "aria-label",
-                "Show password"
-            );
-
-        }
-
-    }
-);
-
-</script><script
+<script
     type="module"
     src="../js/login.js">
-</script></body></html>
+</script>
+
+
+</body>
+
+</html>
