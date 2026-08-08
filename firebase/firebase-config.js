@@ -1,6 +1,6 @@
 // ============================================================
 // RiderX Firebase Configuration
-// FINAL CENTRAL CONFIG
+// FINAL CENTRAL FIREBASE CONFIG
 // ============================================================
 
 import {
@@ -51,15 +51,30 @@ import {
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
-  authDomain: "riderx-1.firebaseapp.com",
+
+  apiKey:
+    "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
+
+  authDomain:
+    "riderx-1.firebaseapp.com",
+
   databaseURL:
     "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "riderx-1",
-  storageBucket: "riderx-1.firebasestorage.app",
-  messagingSenderId: "261640190671",
-  appId: "1:261640190671:web:701b3ce5dcb6135fd955ba",
-  measurementId: "G-SM8KLBVPWN"
+
+  projectId:
+    "riderx-1",
+
+  storageBucket:
+    "riderx-1.firebasestorage.app",
+
+  messagingSenderId:
+    "261640190671",
+
+  appId:
+    "1:261640190671:web:701b3ce5dcb6135fd955ba",
+
+  measurementId:
+    "G-SM8KLBVPWN"
 };
 
 
@@ -67,54 +82,101 @@ const firebaseConfig = {
 // INITIALIZE FIREBASE
 // ============================================================
 
-const app = initializeApp(firebaseConfig);
-
-const auth = getAuth(app);
-
-const db = getFirestore(app);
-
-const storage = getStorage(app);
-
-const rtdb = getDatabase(app);
+const app =
+  initializeApp(firebaseConfig);
 
 
 // ============================================================
-// EXPORT EVERYTHING USED BY RIDERX
+// FIREBASE SERVICES
+// ============================================================
+
+const auth =
+  getAuth(app);
+
+const db =
+  getFirestore(app);
+
+const storage =
+  getStorage(app);
+
+const rtdb =
+  getDatabase(app);
+
+
+// ============================================================
+// EXPORT RIDERX FIREBASE SERVICES
 // ============================================================
 
 export {
-  // Firebase
-  app,
-  auth,
-  db,
-  storage,
-  rtdb,
 
-  // Authentication
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
+  // Firebase App
+  app,
+
+  // Firebase Authentication
+  auth,
 
   // Firestore
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  collection,
-  addDoc,
-  query,
-  where,
-  onSnapshot,
-  runTransaction,
-  serverTimestamp,
+  db,
+
+  // Firebase Storage
+  storage,
 
   // Realtime Database
+  rtdb,
+
+  // ----------------------------------------------------------
+  // Authentication Functions
+  // ----------------------------------------------------------
+
+  createUserWithEmailAndPassword,
+
+  signInWithEmailAndPassword,
+
+  signOut,
+
+  onAuthStateChanged,
+
+  // ----------------------------------------------------------
+  // Firestore Functions
+  // ----------------------------------------------------------
+
+  doc,
+
+  setDoc,
+
+  getDoc,
+
+  updateDoc,
+
+  collection,
+
+  addDoc,
+
+  query,
+
+  where,
+
+  onSnapshot,
+
+  runTransaction,
+
+  serverTimestamp,
+
+  // ----------------------------------------------------------
+  // Realtime Database Functions
+  // ----------------------------------------------------------
+
   ref,
+
   set,
+
   get,
+
   update,
+
   remove,
+
   onValue,
+
   off
 };
