@@ -1,47 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
->
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
 <title>RiderX | Book Ride</title>
 
-<link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
->
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
->
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet">
 
 <style>
 
 :root{
     --yellow:#ffe500;
-    --bg:#050505;
-    --card:#111;
-    --line:#303030;
-    --muted:#888;
+    --black:#050505;
+    --panel:#101010;
+    --card:#181818;
+    --card2:#202020;
+    --border:#303030;
+    --white:#fff;
+    --muted:#999;
     --green:#22c55e;
+    --red:#ef4444;
 }
 
 *{
-    box-sizing:border-box;
     margin:0;
     padding:0;
-    font-family:Poppins,Arial,sans-serif;
+    box-sizing:border-box;
+    font-family:Poppins,sans-serif;
 }
 
 html,
@@ -53,17 +48,9 @@ body{
     color:#fff;
 }
 
-button,
-input,
-select{
-    font-family:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-/* MAP */
+/* =========================================================
+   MAP
+========================================================= */
 
 #map{
     position:absolute;
@@ -72,7 +59,8 @@ button{
 }
 
 .leaflet-control-zoom{
-    margin-top:78px!important;
+    margin-top:75px!important;
+    margin-right:12px!important;
 }
 
 .leaflet-control-zoom a{
@@ -81,8 +69,13 @@ button{
     border-color:#333!important;
 }
 
+.leaflet-control-attribution{
+    font-size:8px!important;
+}
 
-/* TOP BAR */
+/* =========================================================
+   TOP BAR
+========================================================= */
 
 .topbar{
     position:absolute;
@@ -90,7 +83,8 @@ button{
     left:0;
     right:0;
     z-index:1000;
-    padding:14px;
+    padding:13px;
+    pointer-events:none;
 }
 
 .topbar-inner{
@@ -102,14 +96,17 @@ button{
 .icon-btn{
     width:44px;
     height:44px;
-    border:none;
+    border:0;
     border-radius:50%;
-    background:#111;
+    background:rgba(15,15,15,.95);
     color:#fff;
-    border:1px solid #333;
-    display:grid;
-    place-items:center;
-    box-shadow:0 5px 20px #0008;
+    font-size:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
+    pointer-events:auto;
+    cursor:pointer;
 }
 
 .icon-btn:active{
@@ -117,21 +114,43 @@ button{
 }
 
 .logo{
+    background:rgba(15,15,15,.96);
     padding:8px 17px;
     border-radius:15px;
-    background:#111;
-    border:1px solid #333;
-    box-shadow:0 5px 20px #0008;
-    font-size:18px;
+    font-size:17px;
     font-weight:800;
+    box-shadow:0 5px 18px rgba(0,0,0,.35);
 }
 
 .logo span{
     color:var(--yellow);
 }
 
+/* =========================================================
+   MAP LOCATION BUTTON
+========================================================= */
 
-/* STATUS */
+.map-location{
+    position:absolute;
+    right:14px;
+    bottom:285px;
+    z-index:900;
+}
+
+.map-location button{
+    width:46px;
+    height:46px;
+    border:0;
+    border-radius:50%;
+    background:#111;
+    color:var(--yellow);
+    font-size:18px;
+    box-shadow:0 5px 18px rgba(0,0,0,.4);
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
 
 .status{
     position:absolute;
@@ -141,23 +160,20 @@ button{
     z-index:900;
 
     background:#111;
-    border:1px solid #333;
+    color:#fff;
 
     padding:8px 15px;
     border-radius:30px;
 
-    font-size:11px;
-
+    font-size:10px;
     white-space:nowrap;
-    max-width:90%;
-    overflow:hidden;
-    text-overflow:ellipsis;
 
-    box-shadow:0 5px 20px #0008;
+    box-shadow:0 5px 18px rgba(0,0,0,.4);
 }
 
-
-/* CENTER PIN */
+/* =========================================================
+   CENTER PIN
+========================================================= */
 
 .center-marker{
     position:absolute;
@@ -169,30 +185,31 @@ button{
 }
 
 .pin{
-    width:44px;
-    height:44px;
+    width:46px;
+    height:46px;
 
     background:var(--yellow);
     color:#000;
 
     border-radius:50% 50% 50% 0;
-
     transform:rotate(-45deg);
 
-    display:grid;
-    place-items:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-    box-shadow:0 6px 20px #0008;
+    box-shadow:0 7px 22px rgba(0,0,0,.45);
 }
 
 .pin i{
     transform:rotate(45deg);
 }
 
+/* =========================================================
+   BOTTOM SHEET
+========================================================= */
 
-/* BOOKING SHEET */
-
-.sheet{
+.booking-sheet{
     position:absolute;
     left:0;
     right:0;
@@ -200,74 +217,78 @@ button{
 
     z-index:1000;
 
-    background:#090909f5;
+    background:#090909;
 
-    border-top:1px solid #292929;
     border-radius:27px 27px 0 0;
 
-    padding:13px 15px 18px;
+    padding:12px 15px
+             calc(15px + env(safe-area-inset-bottom));
 
-    max-height:64vh;
+    max-height:66vh;
+    overflow-y:auto;
 
-    overflow:auto;
-
-    box-shadow:0 -10px 40px #0009;
+    box-shadow:0 -12px 35px rgba(0,0,0,.5);
 }
 
 .handle{
-    width:45px;
+    width:42px;
     height:5px;
-
+    border-radius:10px;
     background:#555;
-
-    border-radius:20px;
-
-    margin:0 auto 14px;
+    margin:1px auto 14px;
 }
 
 .title{
-    font-size:18px;
+    font-size:19px;
     font-weight:800;
+    margin-bottom:13px;
 }
 
-.sub{
-    font-size:11px;
+.subtitle{
     color:#777;
-    margin:2px 0 13px;
+    font-size:11px;
+    margin-top:-8px;
+    margin-bottom:13px;
 }
 
+/* =========================================================
+   LOCATION CARD
+========================================================= */
 
-/* LOCATIONS */
-
-.loc{
-    background:#151515;
-    border:1px solid #292929;
-    border-radius:16px;
-    overflow:visible;
+.location-box{
+    background:var(--card);
+    border-radius:17px;
+    border:1px solid #262626;
+    overflow:hidden;
 }
 
 .row{
+    min-height:55px;
+
     display:flex;
     align-items:center;
-    gap:9px;
-    padding:10px;
+
+    gap:10px;
+
+    padding:9px 10px;
 }
 
 .row + .row{
-    border-top:1px solid #292929;
+    border-top:1px solid #2c2c2c;
 }
 
 .dot{
-    width:26px;
-    height:26px;
-    min-width:26px;
+    width:27px;
+    height:27px;
+    min-width:27px;
 
     border-radius:50%;
 
-    display:grid;
-    place-items:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-    font-size:9px;
+    font-size:10px;
 }
 
 .pick{
@@ -280,353 +301,312 @@ button{
     color:var(--yellow);
 }
 
-input{
+.location-input{
     flex:1;
     min-width:0;
 
-    background:none;
+    background:transparent;
     border:0;
     outline:0;
 
     color:#fff;
 
-    font-size:12px;
+    font-size:13px;
 }
 
-input::placeholder{
+.location-input::placeholder{
     color:#777;
 }
 
 .action{
-    width:35px;
-    height:35px;
+    width:36px;
+    height:36px;
+    min-width:36px;
 
     border:0;
     border-radius:50%;
 
-    background:#222;
+    background:#252525;
     color:var(--yellow);
+
+    cursor:pointer;
 }
 
 .action:active{
     transform:scale(.94);
 }
 
+/* =========================================================
+   SERVICE SELECTOR
+========================================================= */
 
-/* SEARCH RESULTS */
-
-.results{
-    display:none;
-
-    max-height:150px;
-    overflow:auto;
-
-    background:#101010;
-    border:1px solid #333;
-
-    border-radius:12px;
-
-    margin:5px 10px;
-
-    position:relative;
-    z-index:3000;
+.section-label{
+    font-size:12px;
+    color:#888;
+    margin-top:15px;
+    margin-bottom:8px;
 }
-
-.result{
-    padding:10px;
-
-    font-size:11px;
-
-    border-bottom:1px solid #222;
-
-    color:#ddd;
-}
-
-.result:last-child{
-    border-bottom:none;
-}
-
-.result:active{
-    background:#222;
-}
-
-
-/* SERVICES */
 
 .services{
     display:grid;
     grid-template-columns:repeat(4,1fr);
     gap:8px;
-
-    margin-top:13px;
 }
 
 .service{
+    min-height:68px;
+
     background:#171717;
 
-    border:1px solid #333;
+    border:1px solid #303030;
 
-    border-radius:14px;
+    border-radius:15px;
 
-    padding:11px 3px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
 
-    text-align:center;
+    gap:5px;
 
     color:#aaa;
+
+    cursor:pointer;
+    user-select:none;
 }
 
 .service i{
-    font-size:18px;
+    font-size:19px;
 }
 
 .service span{
-    display:block;
-
     font-size:10px;
-
-    margin-top:4px;
+    font-weight:600;
 }
 
 .service.active{
     background:var(--yellow);
-    border-color:var(--yellow);
     color:#000;
+    border-color:var(--yellow);
 }
 
-
-/* ESTIMATE */
-
-.estimate{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-
-    gap:8px;
-
-    margin-top:12px;
-}
-
-.info{
-    background:#151515;
-
-    border:1px solid #292929;
-
-    border-radius:14px;
-
-    padding:11px;
-}
-
-.label{
-    font-size:10px;
-    color:#777;
-}
-
-.value{
-    font-size:14px;
-    font-weight:700;
-}
-
-
-/* FARE */
+/* =========================================================
+   FARE CARD
+========================================================= */
 
 .fare{
-    margin-top:8px;
+    margin-top:13px;
 
-    background:#151515;
+    background:var(--card);
 
     border:1px solid #292929;
 
-    border-radius:14px;
+    border-radius:17px;
 
-    padding:11px;
+    padding:13px;
 
     display:flex;
-
-    justify-content:space-between;
     align-items:center;
+    justify-content:space-between;
+}
+
+.fare-left{
+    font-size:13px;
+    font-weight:600;
+}
+
+.fare-left small{
+    display:block;
+    color:#777;
+    font-size:10px;
+    margin-top:3px;
+    font-weight:400;
 }
 
 .price{
+    color:var(--yellow);
     font-size:23px;
     font-weight:800;
-    color:var(--yellow);
 }
 
-
-/* PAYMENT */
-
-.pay{
-    display:flex;
-    gap:8px;
-
-    margin-top:10px;
-}
-
-.payment-option{
-    flex:1;
-
-    background:#151515;
-
-    border:1px solid #333;
-
-    border-radius:13px;
-
-    padding:10px 3px;
-
-    color:#aaa;
-
+#estimated-distance-display{
+    text-align:center;
+    color:#777;
     font-size:10px;
+    margin-top:7px;
 }
 
-.payment-option i{
-    display:block;
+/* =========================================================
+   PAYMENT
+========================================================= */
 
-    font-size:16px;
-
-    margin-bottom:3px;
+.payment-title{
+    font-size:12px;
+    color:#888;
+    margin-top:12px;
+    margin-bottom:7px;
 }
 
-.payment-option.active{
-    border-color:var(--yellow);
+.payment{
+    width:100%;
 
-    background:#211f00;
+    padding:13px;
 
-    color:var(--yellow);
+    background:var(--card);
+
+    border:1px solid #303030;
+
+    color:#fff;
+
+    border-radius:14px;
+
+    outline:none;
+
+    font-size:12px;
 }
 
+.payment option{
+    background:#111;
+    color:#fff;
+}
 
-/* BOOK */
+/* =========================================================
+   BOOK BUTTON
+========================================================= */
 
-.book{
+.book-btn{
     width:100%;
 
     margin-top:13px;
 
-    padding:15px;
+    min-height:53px;
 
     border:0;
 
-    border-radius:15px;
+    border-radius:16px;
 
     background:var(--yellow);
 
     color:#000;
 
-    font-size:16px;
-
+    font-size:15px;
     font-weight:800;
+
+    cursor:pointer;
+
+    box-shadow:0 5px 18px rgba(255,229,0,.15);
 }
 
-.book:active{
-    transform:scale(.98);
+.book-btn:active{
+    transform:scale(.985);
 }
 
-.book:disabled{
-    background:#444;
-    color:#888;
+.book-btn:disabled{
+    background:#4b4b4b;
+    color:#999;
+    box-shadow:none;
+    cursor:not-allowed;
 }
 
+/* =========================================================
+   BOOKING STATUS
+========================================================= */
 
-/* TOAST */
+#bookingStatus{
+    min-height:18px;
 
-.toast{
-    position:fixed;
+    text-align:center;
 
-    left:50%;
-    bottom:20px;
+    margin-top:8px;
 
-    transform:translate(-50%,120px);
+    color:var(--yellow);
 
-    z-index:6000;
-
-    background:#111;
-
-    border:1px solid #333;
-
-    padding:11px 16px;
-
-    border-radius:13px;
-
-    font-size:12px;
-
-    transition:.25s;
+    font-size:11px;
 }
 
-.toast.show{
-    transform:translate(-50%,0);
-}
+/* =========================================================
+   SEARCH / LOADING OVERLAY
+========================================================= */
 
-
-/* SEARCHING */
-
-.searching{
-    display:none;
-
+#rideLoading{
     position:fixed;
     inset:0;
 
     z-index:5000;
 
-    background:#000b;
+    background:rgba(0,0,0,.78);
 
-    place-items:center;
+    display:none;
+
+    align-items:center;
+    justify-content:center;
 }
 
-.searching.show{
-    display:grid;
-}
+.loading-card{
+    width:85%;
+    max-width:340px;
 
-.search-box{
-    width:calc(100% - 40px);
+    background:#151515;
 
-    max-width:360px;
-
-    background:#111;
-
-    border:1px solid #333;
+    border:1px solid #303030;
 
     border-radius:22px;
 
-    padding:28px 20px;
+    padding:25px;
 
     text-align:center;
 }
 
-.loader{
-    width:45px;
-    height:45px;
+.loading-icon{
+    width:60px;
+    height:60px;
 
-    border:4px solid #333;
-
-    border-top-color:var(--yellow);
+    margin:0 auto 15px;
 
     border-radius:50%;
 
-    animation:spin 1s linear infinite;
+    background:var(--yellow);
 
-    margin:0 auto 15px;
+    color:#000;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:24px;
 }
 
-@keyframes spin{
-    to{
-        transform:rotate(360deg);
-    }
+.loading-card h3{
+    font-size:17px;
+    margin-bottom:5px;
 }
 
+.loading-card p{
+    color:#888;
+    font-size:11px;
+}
 
-/* MOBILE */
+/* =========================================================
+   MOBILE
+========================================================= */
 
 @media(max-width:380px){
 
-    .sheet{
-        padding:12px 12px 16px;
+    .booking-sheet{
+        padding-left:11px;
+        padding-right:11px;
     }
 
     .service{
-        padding:10px 2px;
+        min-height:62px;
+    }
+
+    .service i{
+        font-size:17px;
     }
 
     .title{
-        font-size:16px;
+        font-size:17px;
     }
 
 }
@@ -637,13 +617,16 @@ input::placeholder{
 
 <body>
 
-
-<!-- MAP -->
+<!-- =====================================================
+     MAP
+===================================================== -->
 
 <div id="map"></div>
 
 
-<!-- TOP BAR -->
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
 
 <div class="topbar">
 
@@ -651,9 +634,8 @@ input::placeholder{
 
         <button
             class="icon-btn"
-            id="backBtn"
             type="button"
-            aria-label="Back">
+            onclick="history.back()">
 
             <i class="fa-solid fa-arrow-left"></i>
 
@@ -669,9 +651,8 @@ input::placeholder{
 
         <button
             class="icon-btn"
-            id="myLocation"
             type="button"
-            aria-label="My location">
+            id="myLocation">
 
             <i class="fa-solid fa-location-crosshairs"></i>
 
@@ -682,23 +663,26 @@ input::placeholder{
 </div>
 
 
-<!-- STATUS -->
+<!-- =====================================================
+     STATUS
+===================================================== -->
 
 <div
     class="status"
     id="status">
 
-    Getting your location...
+    Select pickup location
 
 </div>
 
 
-<!-- CENTER PIN -->
+<!-- =====================================================
+     CENTER PIN
+===================================================== -->
 
 <div
     class="center-marker"
-    id="centerMarker"
-    style="display:none">
+    id="centerMarker">
 
     <div class="pin">
 
@@ -709,31 +693,44 @@ input::placeholder{
 </div>
 
 
-<!-- BOOKING SHEET -->
+<!-- =====================================================
+     MAP LOCATION BUTTON
+===================================================== -->
 
-<div class="sheet">
+<div class="map-location">
+
+    <button
+        type="button"
+        id="mapLocationButton">
+
+        <i class="fa-solid fa-location-crosshairs"></i>
+
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     BOOKING SHEET
+===================================================== -->
+
+<div class="booking-sheet">
 
     <div class="handle"></div>
 
 
     <div class="title">
-
-        Where are you going?
-
+        Where do you want to go?
     </div>
 
-
-    <div class="sub">
-
+    <div class="subtitle">
         Choose pickup and destination
-
     </div>
 
 
     <!-- LOCATION -->
 
-    <div class="loc">
-
+    <div class="location-box">
 
         <!-- PICKUP -->
 
@@ -747,11 +744,11 @@ input::placeholder{
 
 
             <input
-                id="pickupInput"
+                id="pickupLocation"
+                class="location-input"
                 type="text"
                 placeholder="Pickup location"
-                autocomplete="off"
-            >
+                autocomplete="off">
 
 
             <button
@@ -759,16 +756,10 @@ input::placeholder{
                 id="pickupMapBtn"
                 type="button">
 
-                <i class="fa-solid fa-location-crosshairs"></i>
+                <i class="fa-solid fa-map-pin"></i>
 
             </button>
 
-        </div>
-
-
-        <div
-            id="pickupResults"
-            class="results">
         </div>
 
 
@@ -784,11 +775,11 @@ input::placeholder{
 
 
             <input
-                id="dropInput"
+                id="dropoffLocation"
+                class="location-input"
                 type="text"
                 placeholder="Where to?"
-                autocomplete="off"
-            >
+                autocomplete="off">
 
 
             <button
@@ -802,103 +793,58 @@ input::placeholder{
 
         </div>
 
-
-        <div
-            id="dropResults"
-            class="results">
-        </div>
-
     </div>
 
 
     <!-- SERVICES -->
 
+    <div class="section-label">
+        Choose service
+    </div>
+
+
     <div class="services">
 
-        <button
+        <div
             class="service active"
-            data-service="bike"
-            type="button">
+            data-service="bike">
 
             <i class="fa-solid fa-motorcycle"></i>
 
             <span>Bike</span>
 
-        </button>
+        </div>
 
 
-        <button
+        <div
             class="service"
-            data-service="cab"
-            type="button">
+            data-service="cab">
 
             <i class="fa-solid fa-car"></i>
 
             <span>Cab</span>
 
-        </button>
+        </div>
 
 
-        <button
+        <div
             class="service"
-            data-service="parcel"
-            type="button">
+            data-service="parcel">
 
             <i class="fa-solid fa-box"></i>
 
             <span>Parcel</span>
 
-        </button>
+        </div>
 
 
-        <button
+        <div
             class="service"
-            data-service="food"
-            type="button">
+            data-service="food">
 
             <i class="fa-solid fa-utensils"></i>
 
             <span>Food</span>
-
-        </button>
-
-    </div>
-
-
-    <!-- DISTANCE + ETA -->
-
-    <div class="estimate">
-
-        <div class="info">
-
-            <div class="label">
-                Distance
-            </div>
-
-            <div
-                id="distanceDisplay"
-                class="value">
-
-                0 km
-
-            </div>
-
-        </div>
-
-
-        <div class="info">
-
-            <div class="label">
-                Estimated time
-            </div>
-
-            <div
-                id="durationDisplay"
-                class="value">
-
-                0 min
-
-            </div>
 
         </div>
 
@@ -909,135 +855,118 @@ input::placeholder{
 
     <div class="fare">
 
-        <span class="label">
+        <div class="fare-left">
 
             Estimated Fare
 
-        </span>
+            <small id="fareInfo">
+                Select pickup & drop
+            </small>
 
-
-        <span
-            id="fareDisplay"
-            class="price">
-
-            ₹0
-
-        </span>
-
-    </div>
-
-
-    <!-- PAYMENT -->
-
-    <div class="pay">
-
-        <button
-            class="payment-option active"
-            data-payment="cash"
-            type="button">
-
-            <i class="fa-solid fa-money-bill-wave"></i>
-
-            Cash
-
-        </button>
-
-
-        <button
-            class="payment-option"
-            data-payment="upi"
-            type="button">
-
-            <i class="fa-solid fa-qrcode"></i>
-
-            UPI
-
-        </button>
-
-
-        <button
-            class="payment-option"
-            data-payment="wallet"
-            type="button">
-
-            <i class="fa-solid fa-wallet"></i>
-
-            Wallet
-
-        </button>
-
-    </div>
-
-
-    <!-- BOOK -->
-
-    <button
-        id="bookRideBtn"
-        class="book"
-        type="button"
-        disabled>
-
-        <i class="fa-solid fa-car-side"></i>
-
-        Confirm Ride
-
-    </button>
-
-</div>
-
-
-<!-- SEARCHING OVERLAY -->
-
-<div
-    id="searchingOverlay"
-    class="searching">
-
-    <div class="search-box">
-
-        <div class="loader"></div>
-
-
-        <b style="font-size:17px">
-
-            Finding your Rider
-
-        </b>
+        </div>
 
 
         <div
-            id="searchingText"
-            style="
-                font-size:11px;
-                color:#888;
-                margin-top:6px;
-            ">
+            class="price"
+            id="fare">
 
-            Looking for nearby riders...
+            ₹0
 
         </div>
 
     </div>
 
+
+    <div id="estimated-distance-display">
+        0 KM
+    </div>
+
+
+    <!-- PAYMENT -->
+
+    <div class="payment-title">
+        Payment method
+    </div>
+
+
+    <select
+        id="paymentMethod"
+        class="payment">
+
+        <option value="cash">
+            💵 Cash
+        </option>
+
+        <option value="online">
+            📱 UPI / Online
+        </option>
+
+        <option value="wallet">
+            💳 RiderX Wallet
+        </option>
+
+    </select>
+
+
+    <!-- BOOK -->
+
+    <button
+        id="bookRide"
+        class="book-btn"
+        type="button"
+        disabled>
+
+        <i class="fa-solid fa-paper-plane"></i>
+
+        Book RiderX
+
+    </button>
+
+
+    <div id="bookingStatus"></div>
+
 </div>
 
 
-<!-- TOAST -->
+<!-- =====================================================
+     LOADING
+===================================================== -->
 
-<div
-    id="toast"
-    class="toast">
+<div id="rideLoading">
+
+    <div class="loading-card">
+
+        <div class="loading-icon">
+
+            <i class="fa-solid fa-motorcycle"></i>
+
+        </div>
+
+        <h3>
+            Finding a RiderX rider
+        </h3>
+
+        <p>
+            Searching nearby available riders...
+        </p>
+
+    </div>
 
 </div>
 
 
-<!-- LEAFLET -->
+<!-- =====================================================
+     LEAFLET
+===================================================== -->
 
 <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 </script>
 
 
-<!-- RIDERX CUSTOMER ENGINE -->
+<!-- =====================================================
+     RIDERX CUSTOMER ENGINE
+===================================================== -->
 
 <script
     type="module"
@@ -1045,6 +974,57 @@ input::placeholder{
 </script>
 
 
-</body>
+<script>
 
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const locationButton =
+            document.getElementById(
+                "mapLocationButton"
+            );
+
+        const topLocationButton =
+            document.getElementById(
+                "myLocation"
+            );
+
+        function locate(){
+
+            if(
+                window.RiderXCustomer &&
+                typeof window.RiderXCustomer.locate === "function"
+            ){
+
+                window.RiderXCustomer.locate();
+
+            }
+
+        }
+
+        if(locationButton){
+
+            locationButton.addEventListener(
+                "click",
+                locate
+            );
+
+        }
+
+        if(topLocationButton){
+
+            topLocationButton.addEventListener(
+                "click",
+                locate
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
 </html>
