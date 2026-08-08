@@ -1,385 +1,1878 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>RiderX | Driver Approvals</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>RiderX - Rider Approval</title>
 
-  <!-- FontAwesome 6 Pro CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              yellow: '#FACC15',
-              yellowHover: '#EAB308',
-              gold: '#EAB308',
-              dark: '#090D16',
-              card: '#111827',
-              border: 'rgba(255, 255, 255, 0.08)',
-              glass: 'rgba(17, 24, 39, 0.75)'
-            }
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-          },
-          boxShadow: {
-            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
-            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
-          }
-        }
-      }
-    }
-  </script>
+*{
+    box-sizing:border-box;
+}
 
-  <style>
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #090D16;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1F2937;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #FACC15;
+body{
+    margin:0;
+    background:#050505;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    padding:18px;
+}
+
+.wrap{
+    max-width:1050px;
+    margin:auto;
+}
+
+.top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.logo{
+    font-size:26px;
+    font-weight:900;
+}
+
+.logo span{
+    color:#ffe500;
+}
+
+.back{
+    background:#171717;
+    border:1px solid #333;
+    color:#fff;
+    border-radius:10px;
+    padding:10px 14px;
+    text-decoration:none;
+    cursor:pointer;
+}
+
+.back:hover{
+    border-color:#ffe500;
+}
+
+h1{
+    font-size:28px;
+    margin:10px 0 5px;
+}
+
+.sub{
+    color:#999;
+    margin-bottom:20px;
+    line-height:1.5;
+}
+
+.status{
+    display:none;
+    padding:13px 15px;
+    border-radius:12px;
+    margin-bottom:15px;
+    line-height:1.5;
+    font-size:14px;
+}
+
+.status.error{
+    display:block;
+    background:#210d0d;
+    border:1px solid #662222;
+    color:#ff7777;
+}
+
+.status.success{
+    display:block;
+    background:#092216;
+    border:1px solid #17683c;
+    color:#63e89b;
+}
+
+.box{
+    background:#111;
+    border:1px solid #292929;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.head{
+    padding:17px;
+    border-bottom:1px solid #292929;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.head-title{
+    font-size:17px;
+    font-weight:bold;
+}
+
+.badge{
+    background:#2a2300;
+    color:#ffe500;
+    border:1px solid #695d00;
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:12px;
+    white-space:nowrap;
+}
+
+.row{
+    padding:18px;
+    border-bottom:1px solid #252525;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+}
+
+.row:last-child{
+    border-bottom:0;
+}
+
+.info{
+    min-width:0;
+    flex:1;
+}
+
+.name{
+    font-size:18px;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.meta{
+    color:#999;
+    line-height:1.7;
+    font-size:13px;
+    word-break:break-word;
+}
+
+.status-pill{
+    display:inline-block;
+    margin-top:8px;
+    padding:5px 9px;
+    border-radius:15px;
+    background:#2a2300;
+    color:#ffe500;
+    border:1px solid #695d00;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-shrink:0;
+}
+
+.btn{
+    border:0;
+    border-radius:10px;
+    padding:11px 15px;
+    font-weight:bold;
+    cursor:pointer;
+    min-width:105px;
+}
+
+.btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+.approve{
+    background:#19d36b;
+    color:#06170d;
+}
+
+.approve:hover{
+    background:#25e77a;
+}
+
+.reject{
+    background:#301010;
+    color:#ff7777;
+    border:1px solid #6d2222;
+}
+
+.reject:hover{
+    background:#431414;
+}
+
+.view{
+    background:#222;
+    color:#fff;
+    border:1px solid #444;
+}
+
+.view:hover{
+    border-color:#ffe500;
+}
+
+.empty,
+.load{
+    text-align:center;
+    padding:30px 20px;
+    color:#999;
+}
+
+.empty i{
+    font-size:28px;
+    color:#19d36b;
+    margin-bottom:10px;
+}
+
+.refresh{
+    margin-top:15px;
+    width:100%;
+    padding:13px;
+    background:#151515;
+    color:#fff;
+    border:1px solid #333;
+    border-radius:12px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.refresh:hover{
+    border-color:#ffe500;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.78);
+    z-index:9999;
+    padding:20px;
+    overflow:auto;
+}
+
+.modal.show{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.modal-box{
+    width:100%;
+    max-width:600px;
+    background:#111;
+    border:1px solid #333;
+    border-radius:18px;
+    padding:20px;
+}
+
+.modal-title{
+    font-size:21px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.details{
+    display:grid;
+    gap:10px;
+}
+
+.detail{
+    background:#181818;
+    border:1px solid #292929;
+    border-radius:10px;
+    padding:12px;
+}
+
+.detail-label{
+    color:#888;
+    font-size:11px;
+    text-transform:uppercase;
+    margin-bottom:4px;
+}
+
+.detail-value{
+    color:#fff;
+    word-break:break-word;
+}
+
+.close{
+    margin-top:15px;
+    width:100%;
+    padding:12px;
+    border:1px solid #444;
+    background:#222;
+    color:#fff;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+@media(max-width:650px){
+
+    body{
+        padding:12px;
     }
 
-    .glass-panel {
-      background: rgba(17, 24, 39, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    .top{
+        align-items:flex-start;
     }
 
-    .glass-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
+    .logo{
+        font-size:21px;
     }
-  </style>
+
+    .back{
+        padding:9px 11px;
+        font-size:13px;
+    }
+
+    h1{
+        font-size:25px;
+    }
+
+    .row{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .actions{
+        width:100%;
+    }
+
+    .btn{
+        flex:1;
+        min-width:0;
+    }
+
+    .head{
+        align-items:flex-start;
+    }
+
+}
+
+</style>
 </head>
 
-<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
+<body>
 
-  <!-- TOP HEADER / BAR -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
-    <div class="flex items-center space-x-4">
-      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
-        <i class="fa-solid fa-bars-staggered text-lg"></i>
-      </button>
-      <a href="dashboard.html" class="flex items-center space-x-3 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
-          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
+<div class="wrap">
+
+    <div class="top">
+
+        <div class="logo">
+            RID<span>ERX</span> ADMIN
         </div>
-        <div>
-          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-            RIDER<span class="text-brand-yellow">X</span>
-            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
-          </span>
-        </div>
-      </a>
+
+        <a
+            class="back"
+            href="dashboard.html">
+            ← Dashboard
+        </a>
+
     </div>
 
-    <div class="flex items-center space-x-3 lg:space-x-5">
-      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
-        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-        <span id="headerPendingCount">5 Applications Pending</span>
-      </div>
 
-      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
-        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
-        <div class="hidden md:block">
-          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
-          <p class="text-[10px] text-slate-400">Super Admin</p>
-        </div>
-      </div>
+    <h1>
+        Rider Approval
+    </h1>
+
+    <div class="sub">
+        Review rider registration requests. Approve a rider only after
+        checking the submitted registration details.
     </div>
-  </header>
 
-  <!-- MAIN LAYOUT -->
-  <div class="flex-1 flex overflow-hidden">
 
-    <!-- SIDE NAVIGATION -->
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
-      <div class="px-4 py-6 space-y-8 overflow-y-auto">
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
-          <nav class="space-y-1">
-            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
-              <span>Dashboard</span>
-            </a>
-            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
-              <span>Trips & Live Map</span>
-            </a>
-            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
-              <span>Riders</span>
-            </a>
-            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
-              <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-user-check text-base"></i>
-                <span>Rider Approvals</span>
-              </div>
-              <span id="sidebarPendingBadge" class="px-2 py-0.5 text-[10px] font-bold bg-slate-950 text-brand-yellow rounded-full">5</span>
-            </a>
-            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
-              <span>Customers</span>
-            </a>
-          </nav>
-        </div>
+    <div id="statusBox" class="status"></div>
 
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
-          <nav class="space-y-1">
-            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
-              <span>Fare & Pricing</span>
-            </a>
-            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
-              <span>Commission Rules</span>
-            </a>
-            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
-              <span>Payouts & Wallet</span>
-            </a>
-            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
-              <span>Coupons & Offers</span>
-            </a>
-          </nav>
-        </div>
-      </div>
-    </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+    <div class="box">
 
-      <!-- HEADER ACTION BAR -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            <i class="fa-solid fa-user-clock text-brand-yellow"></i> Partner Verification Queue
-          </h1>
-          <p class="text-xs text-slate-400">Inspect RC, Driving Licenses, and Identity Verification before granting driver platform access.</p>
-        </div>
+        <div class="head">
 
-        <div class="flex items-center space-x-3">
-          <button onclick="approveAllPending()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition-all flex items-center space-x-2">
-            <i class="fa-solid fa-check-double"></i>
-            <span>Quick Approve Verified</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- APPLICATIONS GRID -->
-      <div id="applicationsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Rendered dynamically -->
-      </div>
-
-    </main>
-  </div>
-
-  <!-- DOCUMENT VERIFICATION INSPECTION MODAL -->
-  <div id="docModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-brand-border space-y-5 max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-brand-border pb-3">
-        <h3 class="text-base font-extrabold text-white flex items-center gap-2">
-          <i class="fa-solid fa-file-shield text-brand-yellow"></i> Document Inspection: <span id="modalRiderName" class="text-brand-yellow"></span>
-        </h3>
-        <button onclick="closeDocModal()" class="text-slate-400 hover:text-white p-1">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-
-      <div class="space-y-4">
-        <div class="grid grid-cols-2 gap-3 text-xs">
-          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
-            <p class="text-slate-400">Vehicle Type & Model</p>
-            <p id="modalVehicle" class="text-white font-bold mt-0.5">Honda Activa 6G (DL 03 XY 8899)</p>
-          </div>
-          <div class="p-3 bg-slate-900 rounded-xl border border-brand-border">
-            <p class="text-slate-400">Submission Date</p>
-            <p id="modalDate" class="text-white font-bold mt-0.5">Today, 11:20 AM</p>
-          </div>
-        </div>
-
-        <!-- Document Preview Boxes -->
-        <div class="space-y-3">
-          <p class="text-xs font-bold text-slate-300">Driving License Preview</p>
-          <div class="h-44 bg-slate-900 rounded-xl border border-brand-border overflow-hidden relative group">
-            <img id="dlPreviewImg" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-            <div class="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <span class="text-xs font-bold text-brand-yellow bg-slate-950/80 px-3 py-1.5 rounded-lg border border-brand-border">High Res Inspection</span>
+            <div class="head-title">
+                🏍️ Pending Rider Requests
             </div>
-          </div>
 
-          <p class="text-xs font-bold text-slate-300">Vehicle RC Preview</p>
-          <div class="h-44 bg-slate-900 rounded-xl border border-brand-border overflow-hidden relative group">
-            <img id="rcPreviewImg" src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=600" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-            <div class="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <span class="text-xs font-bold text-brand-yellow bg-slate-950/80 px-3 py-1.5 rounded-lg border border-brand-border">High Res Inspection</span>
-            </div>
-          </div>
+            <span
+                id="count"
+                class="badge">
+                0 pending
+            </span>
+
         </div>
-      </div>
 
-      <!-- Actions -->
-      <div class="flex items-center space-x-3 pt-3 border-t border-brand-border">
-        <button onclick="rejectRider()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold hover:bg-rose-500/30 transition-all">
-          Reject Application
-        </button>
-        <button onclick="approveRider()" class="flex-1 py-2.5 rounded-xl bg-brand-yellow text-slate-950 text-xs font-extrabold hover:bg-yellow-400 transition-all shadow-glow-yellow">
-          Approve Driver Access
-        </button>
-      </div>
+
+        <div
+            id="list"
+            class="load">
+            Checking rider registrations...
+        </div>
+
     </div>
-  </div>
 
-  <script>
-    let pendingApplications = [
-      { id: 'APP-201', name: 'Manish Kumar', phone: '+91 98112 00112', category: 'Bike Taxi', plate: 'DL 03 XY 8899', date: 'Today, 11:20 AM', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120' },
-      { id: 'APP-202', name: 'Deepak Sharma', phone: '+91 97113 44556', category: 'Sedan Cab', plate: 'HR 51 B 4321', date: 'Today, 10:45 AM', avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=120' },
-      { id: 'APP-203', name: 'Sunil Yadav', phone: '+91 99554 33221', category: 'Auto Rickshaw', plate: 'UP 16 AT 9911', date: 'Yesterday', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&q=80&w=120' },
-      { id: 'APP-204', name: 'Pankaj Joshi', phone: '+91 98990 11223', category: 'Parcel Delivery', plate: 'DL 12 S 7766', date: 'Yesterday', avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=120' },
-      { id: 'APP-205', name: 'Harpreet Singh', phone: '+91 98100 99887', category: 'SUV Cab', plate: 'PB 65 AC 1001', date: '2 days ago', avatar: 'https://images.unsplash.com/photo-1628157582853-a796fa650a6a?auto=format&fit=crop&q=80&w=120' }
+
+    <button
+        id="refreshBtn"
+        class="refresh">
+        🔄 Refresh Requests
+    </button>
+
+</div>
+
+
+<!-- DETAILS MODAL -->
+
+<div
+    id="detailsModal"
+    class="modal">
+
+    <div class="modal-box">
+
+        <div class="modal-title">
+            Rider Registration Details
+        </div>
+
+        <div
+            id="details"
+            class="details">
+        </div>
+
+        <button
+            id="closeModal"
+            class="close">
+            Close
+        </button>
+
+    </div>
+
+</div>
+
+
+<script type="module">
+
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
+
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+
+import {
+    collection,
+    getDocs,
+    doc,
+    getDoc,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const list =
+    document.getElementById("list");
+
+const count =
+    document.getElementById("count");
+
+const statusBox =
+    document.getElementById("statusBox");
+
+const refreshBtn =
+    document.getElementById("refreshBtn");
+
+const detailsModal =
+    document.getElementById("detailsModal");
+
+const details =
+    document.getElementById("details");
+
+const closeModal =
+    document.getElementById("closeModal");
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function roleOf(data){
+
+    return String(
+        data?.role ??
+        data?.userType ??
+        data?.type ??
+        ""
+    )
+    .trim()
+    .toLowerCase();
+
+}
+
+
+function statusOf(data){
+
+    return String(
+        data?.status ??
+        data?.approvalStatus ??
+        data?.riderStatus ??
+        data?.verificationStatus ??
+        ""
+    )
+    .trim()
+    .toLowerCase();
+
+}
+
+
+function isAdmin(data){
+
+    return (
+        roleOf(data) === "admin" ||
+        roleOf(data) === "administrator" ||
+        data?.isAdmin === true
+    );
+
+}
+
+
+function escapeHtml(value){
+
+    return String(
+        value ?? ""
+    ).replace(
+        /[&<>"']/g,
+        char => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#039;"
+        }[char])
+    );
+
+}
+
+
+function showStatus(
+    message,
+    type="success"
+){
+
+    statusBox.className =
+        "status " + type;
+
+    statusBox.textContent =
+        message;
+
+}
+
+
+function hideStatus(){
+
+    statusBox.className =
+        "status";
+
+    statusBox.textContent =
+        "";
+
+}
+
+
+async function getCollection(
+    collectionName
+){
+
+    try{
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    collectionName
+                )
+            );
+
+        return snapshot.docs.map(
+            item => ({
+                id:item.id,
+                ...item.data()
+            })
+        );
+
+    }catch(error){
+
+        console.error(
+            "Collection error:",
+            collectionName,
+            error
+        );
+
+        return [];
+
+    }
+
+}
+
+
+/* =========================
+   FIND USER ID
+========================= */
+
+function getPossibleUserIds(rider){
+
+    const ids = new Set();
+
+    if(rider.id){
+        ids.add(String(rider.id));
+    }
+
+    const possible = [
+
+        rider.uid,
+
+        rider.userId,
+
+        rider.userUID,
+
+        rider.authUid,
+
+        rider.authUID,
+
+        rider.ownerId,
+
+        rider.accountId
+
     ];
 
-    let selectedAppId = null;
+    possible.forEach(
+        value => {
 
-    document.addEventListener('DOMContentLoaded', () => {
-      renderApplications();
-      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
-      });
-    });
+            if(value){
+                ids.add(
+                    String(value)
+                );
+            }
 
-    function renderApplications() {
-      const container = document.getElementById('applicationsContainer');
-      container.innerHTML = '';
+        }
+    );
 
-      updateBadges();
+    return [...ids];
 
-      if (pendingApplications.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full glass-panel p-12 text-center rounded-2xl space-y-3">
-            <i class="fa-solid fa-circle-check text-4xl text-emerald-400"></i>
-            <h3 class="text-lg font-bold text-white">All Clear!</h3>
-            <p class="text-xs text-slate-400">There are no pending driver verification applications in the queue.</p>
-          </div>
-        `;
-        return;
-      }
+}
 
-      pendingApplications.forEach(app => {
-        const card = document.createElement('div');
-        card.className = 'glass-card rounded-2xl p-5 border border-brand-border space-y-4 flex flex-col justify-between';
 
-        card.innerHTML = `
-          <div class="space-y-3">
-            <div class="flex items-start justify-between">
-              <div class="flex items-center space-x-3">
-                <img src="${app.avatar}" class="w-11 h-11 rounded-xl object-cover ring-2 ring-brand-yellow/30" />
-                <div>
-                  <h4 class="font-extrabold text-white text-sm">${app.name}</h4>
-                  <p class="text-[11px] text-slate-400">${app.phone}</p>
+/* =========================
+   LOAD RIDER REQUESTS
+========================= */
+
+let allRiders = [];
+
+
+async function loadRiderRequests(){
+
+    list.innerHTML =
+        '<div class="load">Loading rider requests...</div>';
+
+    try{
+
+        const [
+            riders,
+            users
+        ] = await Promise.all([
+
+            getCollection("riders"),
+
+            getCollection("users")
+
+        ]);
+
+
+        /*
+         * Riders collection ko primary source
+         */
+
+        const riderMap =
+            new Map();
+
+
+        riders.forEach(
+            rider => {
+
+                riderMap.set(
+                    rider.id,
+                    {
+                        ...rider,
+                        source:"riders"
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+         * Users collection me rider accounts
+         * agar riders collection me nahi hain
+         */
+
+        users
+        .filter(
+            user =>
+                roleOf(user) === "rider"
+        )
+        .forEach(
+            user => {
+
+                if(
+                    !riderMap.has(user.id)
+                ){
+
+                    riderMap.set(
+                        user.id,
+                        {
+                            ...user,
+                            source:"users"
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+        allRiders =
+            [...riderMap.values()];
+
+
+        /*
+         * Sirf pending requests
+         */
+
+        const pending =
+            allRiders.filter(
+                rider => {
+
+                    const status =
+                        statusOf(rider);
+
+
+                    const approved =
+                        rider.approved === true ||
+                        rider.isApproved === true;
+
+
+                    const rejected =
+                        status === "rejected" ||
+                        status === "declined";
+
+
+                    if(
+                        approved ||
+                        rejected
+                    ){
+
+                        return false;
+
+                    }
+
+
+                    /*
+                     * Blank status ko bhi pending
+                     * maana jayega.
+                     */
+
+                    return (
+
+                        status === "" ||
+
+                        status === "pending" ||
+
+                        status === "pending_approval" ||
+
+                        status === "pending-approval" ||
+
+                        status === "under_review" ||
+
+                        status === "under-review" ||
+
+                        status === "verifying" ||
+
+                        status === "submitted" ||
+
+                        status === "application_submitted"
+
+                    );
+
+                }
+            );
+
+
+        count.textContent =
+            pending.length +
+            " pending";
+
+
+        if(!pending.length){
+
+            list.innerHTML = `
+                <div class="empty">
+                    <div style="font-size:30px;">✓</div>
+                    No pending rider registration requests.
                 </div>
-              </div>
-              <span class="px-2 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow text-[10px] font-bold">${app.category}</span>
-            </div>
+            `;
 
-            <div class="p-3 bg-slate-900/80 rounded-xl border border-brand-border space-y-1.5 text-xs">
-              <div class="flex justify-between">
-                <span class="text-slate-400">Vehicle No:</span>
-                <span class="font-mono text-brand-yellow font-bold">${app.plate}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">Submitted:</span>
-                <span class="text-slate-300 font-medium">${app.date}</span>
-              </div>
-            </div>
-          </div>
+            return;
 
-          <div class="flex items-center space-x-2 pt-2">
-            <button onclick="inspectDocs('${app.id}')" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-brand-border">
-              <i class="fa-solid fa-eye mr-1.5 text-brand-yellow"></i> Review Docs
-            </button>
-            <button onclick="quickApprove('${app.id}')" class="p-2 rounded-xl bg-brand-yellow text-slate-950 font-bold hover:bg-yellow-400 transition-all shadow-glow-yellow">
-              <i class="fa-solid fa-check"></i>
-            </button>
-          </div>
+        }
+
+
+        list.innerHTML = "";
+
+
+        pending.forEach(
+            rider => {
+
+                const name =
+                    rider.name ||
+                    rider.fullName ||
+                    rider.displayName ||
+                    (
+                        rider.firstName
+                        ? (
+                            rider.firstName +
+                            " " +
+                            (
+                                rider.lastName ||
+                                ""
+                            )
+                        ).trim()
+                        : "Rider"
+                    );
+
+
+                const phone =
+                    rider.phone ||
+                    rider.mobile ||
+                    rider.phoneNumber ||
+                    "No phone";
+
+
+                const email =
+                    rider.email ||
+                    "No email";
+
+
+                const vehicle =
+                    rider.vehicleType ||
+                    rider.vehicle ||
+                    rider.bikeModel ||
+                    "Not provided";
+
+
+                const currentStatus =
+                    statusOf(rider) ||
+                    "pending";
+
+
+                const row =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                row.className =
+                    "row";
+
+
+                row.innerHTML = `
+
+                    <div class="info">
+
+                        <div class="name">
+                            ${escapeHtml(name)}
+                        </div>
+
+                        <div class="meta">
+
+                            Rider ID:
+                            ${escapeHtml(rider.id)}
+
+                            <br>
+
+                            📱 ${escapeHtml(phone)}
+
+                            <br>
+
+                            ✉️ ${escapeHtml(email)}
+
+                            <br>
+
+                            🏍️ ${escapeHtml(vehicle)}
+
+                        </div>
+
+                        <span class="status-pill">
+                            ${escapeHtml(currentStatus)}
+                        </span>
+
+                    </div>
+
+
+                    <div class="actions">
+
+                        <button
+                            class="btn view"
+                            data-action="view"
+                            data-id="${escapeHtml(rider.id)}">
+
+                            View
+
+                        </button>
+
+
+                        <button
+                            class="btn approve"
+                            data-action="approve"
+                            data-id="${escapeHtml(rider.id)}">
+
+                            ✓ Approve
+
+                        </button>
+
+
+                        <button
+                            class="btn reject"
+                            data-action="reject"
+                            data-id="${escapeHtml(rider.id)}">
+
+                            ✕ Reject
+
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                list.appendChild(row);
+
+            }
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Load riders error:",
+            error
+        );
+
+
+        list.innerHTML = `
+            <div class="empty">
+                Failed to load rider requests.
+                <br><br>
+                Check Firebase Firestore connection and rules.
+            </div>
         `;
 
-        container.appendChild(card);
-      });
+        showStatus(
+            "Firebase se rider requests load nahi ho paayi.",
+            "error"
+        );
+
     }
 
-    function updateBadges() {
-      const count = pendingApplications.length;
-      document.getElementById('headerPendingCount').textContent = `${count} Applications Pending`;
-      document.getElementById('sidebarPendingBadge').textContent = count;
+}
+
+
+/* =========================
+   FIND RIDER
+========================= */
+
+function findRiderById(id){
+
+    return allRiders.find(
+        rider =>
+            String(rider.id) ===
+            String(id)
+    );
+
+}
+
+
+/* =========================
+   VIEW DETAILS
+========================= */
+
+function showDetails(rider){
+
+    if(!rider){
+        return;
     }
 
-    function inspectDocs(id) {
-      selectedAppId = id;
-      const app = pendingApplications.find(a => a.id === id);
-      if (!app) return;
 
-      document.getElementById('modalRiderName').textContent = app.name;
-      document.getElementById('modalVehicle').textContent = `${app.category} (${app.plate})`;
-      document.getElementById('modalDate').textContent = app.date;
-      document.getElementById('docModal').classList.remove('hidden');
+    const ignored = [
+        "source"
+    ];
+
+
+    details.innerHTML = "";
+
+
+    const entries =
+        Object.entries(rider)
+        .filter(
+            ([key]) =>
+                !ignored.includes(key)
+        );
+
+
+    entries.forEach(
+        ([key,value]) => {
+
+            let displayValue;
+
+
+            if(
+                value &&
+                typeof value === "object"
+            ){
+
+                try{
+
+                    displayValue =
+                        JSON.stringify(
+                            value,
+                            null,
+                            2
+                        );
+
+                }catch{
+
+                    displayValue =
+                        String(value);
+
+                }
+
+            }else{
+
+                displayValue =
+                    String(
+                        value ?? ""
+                    );
+
+            }
+
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "detail";
+
+
+            item.innerHTML = `
+
+                <div class="detail-label">
+                    ${escapeHtml(key)}
+                </div>
+
+                <div class="detail-value">
+                    ${escapeHtml(displayValue)}
+                </div>
+
+            `;
+
+
+            details.appendChild(item);
+
+        }
+    );
+
+
+    detailsModal.classList.add(
+        "show"
+    );
+
+}
+
+
+/* =========================
+   UPDATE RIDER
+========================= */
+
+async function updateRiderStatus(
+    rider,
+    action
+){
+
+    if(!rider){
+        throw new Error(
+            "Rider not found"
+        );
     }
 
-    function closeDocModal() {
-      document.getElementById('docModal').classList.add('hidden');
+
+    const approved =
+        action === "approve";
+
+
+    const payload =
+        approved
+        ?
+
+        {
+
+            role:"rider",
+
+            status:"approved",
+
+            approvalStatus:"approved",
+
+            riderStatus:"approved",
+
+            verificationStatus:"approved",
+
+            approved:true,
+
+            isApproved:true,
+
+            online:false,
+
+            isOnline:false,
+
+            canGoOnline:true,
+
+            accountStatus:"active",
+
+            approvedAt:
+                serverTimestamp(),
+
+            rejectedAt:null
+
+        }
+
+        :
+
+        {
+
+            role:"rider",
+
+            status:"rejected",
+
+            approvalStatus:"rejected",
+
+            riderStatus:"rejected",
+
+            verificationStatus:"rejected",
+
+            approved:false,
+
+            isApproved:false,
+
+            online:false,
+
+            isOnline:false,
+
+            canGoOnline:false,
+
+            accountStatus:"rejected",
+
+            rejectedAt:
+                serverTimestamp()
+
+        };
+
+
+    /*
+     * Rider document IDs
+     */
+
+    const possibleIds =
+        getPossibleUserIds(
+            rider
+        );
+
+
+    let updatedCount = 0;
+
+
+    /*
+     * 1. riders collection
+     */
+
+    for(
+        const id of possibleIds
+    ){
+
+        try{
+
+            const riderRef =
+                doc(
+                    db,
+                    "riders",
+                    id
+                );
+
+
+            const riderSnap =
+                await getDoc(
+                    riderRef
+                );
+
+
+            if(
+                riderSnap.exists()
+            ){
+
+                await updateDoc(
+                    riderRef,
+                    payload
+                );
+
+
+                updatedCount++;
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.warn(
+                "Rider update failed:",
+                error
+            );
+
+        }
+
     }
 
-    function approveRider() {
-      if (!selectedAppId) return;
-      pendingApplications = pendingApplications.filter(a => a.id !== selectedAppId);
-      renderApplications();
-      closeDocModal();
+
+    /*
+     * 2. users collection
+     */
+
+    /*
+     * Pehle known IDs try
+     */
+
+    for(
+        const id of possibleIds
+    ){
+
+        try{
+
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    id
+                );
+
+
+            const userSnap =
+                await getDoc(
+                    userRef
+                );
+
+
+            if(
+                userSnap.exists()
+            ){
+
+                const userData =
+                    userSnap.data();
+
+
+                /*
+                 * Agar rider account hai
+                 * tab update karein
+                 */
+
+                if(
+                    roleOf(userData) === "rider" ||
+                    id === rider.id
+                ){
+
+                    await updateDoc(
+                        userRef,
+                        payload
+                    );
+
+
+                    updatedCount++;
+
+                    break;
+
+                }
+
+            }
+
+        }catch(error){
+
+            console.warn(
+                "User update failed:",
+                error
+            );
+
+        }
+
     }
 
-    function rejectRider() {
-      const reason = prompt('Specify rejection reason for the partner driver:');
-      if (reason) {
-        pendingApplications = pendingApplications.filter(a => a.id !== selectedAppId);
-        renderApplications();
-        closeDocModal();
-      }
+
+    /*
+     * Agar riders document ID alag hai,
+     * users me matching UID/email se search
+     */
+
+    if(
+        updatedCount === 0 ||
+        (
+            rider.source === "riders"
+        )
+    ){
+
+        try{
+
+            const users =
+                await getCollection(
+                    "users"
+                );
+
+
+            const matchingUsers =
+                users.filter(
+                    user => {
+
+                        if(
+                            roleOf(user) !==
+                            "rider"
+                        ){
+
+                            return false;
+
+                        }
+
+
+                        const riderUid =
+                            rider.uid ||
+                            rider.userId ||
+                            rider.userUID;
+
+
+                        if(
+                            riderUid &&
+                            (
+                                user.id ===
+                                riderUid
+                            )
+                        ){
+
+                            return true;
+
+                        }
+
+
+                        if(
+                            rider.email &&
+                            user.email &&
+                            String(
+                                rider.email
+                            ).toLowerCase() ===
+                            String(
+                                user.email
+                            ).toLowerCase()
+                        ){
+
+                            return true;
+
+                        }
+
+
+                        const riderPhone =
+                            rider.phone ||
+                            rider.mobile ||
+                            rider.phoneNumber;
+
+
+                        const userPhone =
+                            user.phone ||
+                            user.mobile ||
+                            user.phoneNumber;
+
+
+                        if(
+                            riderPhone &&
+                            userPhone &&
+                            String(
+                                riderPhone
+                            ) ===
+                            String(
+                                userPhone
+                            )
+                        ){
+
+                            return true;
+
+                        }
+
+
+                        return false;
+
+                    }
+                );
+
+
+            for(
+                const user of matchingUsers
+            ){
+
+                try{
+
+                    await updateDoc(
+                        doc(
+                            db,
+                            "users",
+                            user.id
+                        ),
+                        payload
+                    );
+
+
+                    updatedCount++;
+
+                }catch(error){
+
+                    console.warn(
+                        "Matching user update failed:",
+                        error
+                    );
+
+                }
+
+            }
+
+        }catch(error){
+
+            console.warn(
+                "User matching failed:",
+                error
+            );
+
+        }
+
     }
 
-    function quickApprove(id) {
-      pendingApplications = pendingApplications.filter(a => a.id !== id);
-      renderApplications();
+
+    if(
+        updatedCount === 0
+    ){
+
+        throw new Error(
+            "Rider document not found or Firestore permission denied."
+        );
+
     }
 
-    function approveAllPending() {
-      if (confirm('Approve all pending rider document applications?')) {
-        pendingApplications = [];
-        renderApplications();
-      }
+}
+
+
+/* =========================
+   BUTTON ACTIONS
+========================= */
+
+list.addEventListener(
+    "click",
+    async event => {
+
+        const button =
+            event.target.closest(
+                "button[data-action]"
+            );
+
+
+        if(!button){
+            return;
+        }
+
+
+        const action =
+            button.dataset.action;
+
+
+        const id =
+            button.dataset.id;
+
+
+        const rider =
+            findRiderById(id);
+
+
+        if(!rider){
+
+            alert(
+                "Rider request nahi mili. Refresh karke dobara try karein."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * VIEW
+         */
+
+        if(
+            action === "view"
+        ){
+
+            showDetails(
+                rider
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * APPROVE / REJECT
+         */
+
+        const name =
+            rider.name ||
+            rider.fullName ||
+            rider.displayName ||
+            "this rider";
+
+
+        const message =
+            action === "approve"
+
+            ?
+
+            `Kya aap ${name} ko APPROVE karna chahte hain?`
+
+            :
+
+            `Kya aap ${name} ko REJECT karna chahte hain?`;
+
+
+        if(
+            !confirm(message)
+        ){
+
+            return;
+
+        }
+
+
+        /*
+         * Disable all action buttons
+         */
+
+        const row =
+            button.closest(
+                ".row"
+            );
+
+
+        const buttons =
+            row.querySelectorAll(
+                "button"
+            );
+
+
+        buttons.forEach(
+            btn => {
+
+                btn.disabled =
+                    true;
+
+            }
+        );
+
+
+        const oldText =
+            button.textContent;
+
+
+        button.textContent =
+            action === "approve"
+            ? "Approving..."
+            : "Rejecting...";
+
+
+        try{
+
+            await updateRiderStatus(
+                rider,
+                action
+            );
+
+
+            showStatus(
+                action === "approve"
+
+                ?
+
+                "Rider successfully approved. Ab rider account active hai aur rider app approval detect kar sakti hai."
+
+                :
+
+                "Rider registration rejected.",
+
+                "success"
+            );
+
+
+            await loadRiderRequests();
+
+
+        }catch(error){
+
+            console.error(
+                "Approval action error:",
+                error
+            );
+
+
+            showStatus(
+                "Action failed. Firestore Rules ya rider/user document permissions check karein.",
+                "error"
+            );
+
+
+            buttons.forEach(
+                btn => {
+
+                    btn.disabled =
+                        false;
+
+                }
+            );
+
+
+            button.textContent =
+                oldText;
+
+        }
+
     }
-  </script>
+);
+
+
+/* =========================
+   REFRESH
+========================= */
+
+refreshBtn.addEventListener(
+    "click",
+    async () => {
+
+        hideStatus();
+
+        await loadRiderRequests();
+
+    }
+);
+
+
+/* =========================
+   MODAL
+========================= */
+
+closeModal.addEventListener(
+    "click",
+    () => {
+
+        detailsModal.classList.remove(
+            "show"
+        );
+
+    }
+);
+
+
+detailsModal.addEventListener(
+    "click",
+    event => {
+
+        if(
+            event.target ===
+            detailsModal
+        ){
+
+            detailsModal.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================
+   ADMIN AUTH
+========================= */
+
+let authFinished =
+    false;
+
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(
+            authFinished
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !user
+        ){
+
+            authFinished =
+                true;
+
+            location.replace(
+                "login.html"
+            );
+
+            return;
+
+        }
+
+
+        try{
+
+            const userRef =
+                doc(
+                    db,
+                    "users",
+                    user.uid
+                );
+
+
+            const userSnap =
+                await getDoc(
+                    userRef
+                );
+
+
+            if(
+                !userSnap.exists()
+            ){
+
+                authFinished =
+                    true;
+
+                showStatus(
+                    "Admin profile nahi mila.",
+                    "error"
+                );
+
+                setTimeout(
+                    () => {
+
+                        location.replace(
+                            "login.html"
+                        );
+
+                    },
+                    1000
+                );
+
+                return;
+
+            }
+
+
+            const adminData =
+                userSnap.data();
+
+
+            if(
+                !isAdmin(
+                    adminData
+                )
+            ){
+
+                authFinished =
+                    true;
+
+                showStatus(
+                    "Access denied. Ye account admin nahi hai.",
+                    "error"
+                );
+
+                setTimeout(
+                    () => {
+
+                        location.replace(
+                            "login.html"
+                        );
+
+                    },
+                    1000
+                );
+
+                return;
+
+            }
+
+
+            authFinished =
+                true;
+
+
+            await loadRiderRequests();
+
+
+        }catch(error){
+
+            console.error(
+                "Admin authentication error:",
+                error
+            );
+
+
+            authFinished =
+                true;
+
+
+            showStatus(
+                "Firebase admin verification failed. firebase-config.js aur Firestore Rules check karein.",
+                "error"
+            );
+
+        }
+
+    }
+);
+
+</script>
+
 </body>
 </html>
