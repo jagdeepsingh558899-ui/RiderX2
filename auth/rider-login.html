@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>RiderX Rider Login</title>
+<title>RiderX - Rider Login</title>
 
 <style>
 :root{
@@ -13,9 +13,8 @@
   --card:#111;
   --border:#292929;
   --gray:#999;
-  --green:#19d36b;
   --red:#ff5555;
-  --orange:#ffad1f;
+  --green:#20d66b;
 }
 
 *{
@@ -37,11 +36,11 @@ body{
 
 .login-box{
   width:100%;
-  max-width:400px;
+  max-width:410px;
   background:var(--card);
   border:1px solid var(--border);
   border-radius:24px;
-  padding:30px 24px;
+  padding:28px 24px;
   box-shadow:0 20px 60px rgba(0,0,0,.55);
 }
 
@@ -49,7 +48,7 @@ body{
   text-align:center;
   font-size:36px;
   font-weight:900;
-  margin-bottom:8px;
+  margin-bottom:5px;
 }
 
 .logo span{
@@ -70,25 +69,40 @@ label{
   margin-bottom:7px;
 }
 
+.input-box{
+  position:relative;
+  margin-bottom:17px;
+}
+
 input{
   width:100%;
-  padding:15px;
-  margin-bottom:17px;
+  height:52px;
+  padding:0 14px;
   background:#050505;
-  color:#fff;
   border:1px solid #333;
   border-radius:12px;
-  outline:none;
+  color:#fff;
   font-size:16px;
+  outline:none;
 }
 
 input:focus{
   border-color:var(--yellow);
 }
 
+.password-toggle{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#aaa;
+  cursor:pointer;
+  font-size:14px;
+}
+
 .login-btn{
   width:100%;
-  padding:16px;
+  height:54px;
   border:0;
   border-radius:12px;
   background:var(--yellow);
@@ -96,11 +110,29 @@ input:focus{
   font-size:17px;
   font-weight:bold;
   cursor:pointer;
+  margin-top:4px;
 }
 
 .login-btn:disabled{
   opacity:.55;
   cursor:not-allowed;
+}
+
+.register-btn{
+  width:100%;
+  height:50px;
+  margin-top:12px;
+  border-radius:12px;
+  background:#171717;
+  border:1px solid #333;
+  color:#fff;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.register-btn:hover{
+  border-color:var(--yellow);
 }
 
 .loading{
@@ -112,46 +144,40 @@ input:focus{
 }
 
 .message{
-  min-height:24px;
-  margin-top:16px;
+  min-height:22px;
   text-align:center;
   font-size:14px;
   line-height:1.5;
+  margin-top:15px;
+}
+
+.message.error{
+  color:#ff7777;
 }
 
 .message.success{
   color:var(--green);
 }
 
-.message.error{
-  color:var(--red);
-}
-
-.message.pending{
-  color:var(--orange);
-}
-
-.links{
-  margin-top:22px;
-  text-align:center;
-}
-
-.links a{
-  color:var(--yellow);
-  text-decoration:none;
-  font-size:14px;
-}
-
-.links a:hover{
-  text-decoration:underline;
-}
-
 .note{
   text-align:center;
   color:#666;
   font-size:11px;
-  margin-top:20px;
   line-height:1.5;
+  margin-top:20px;
+}
+
+.back{
+  display:block;
+  text-align:center;
+  color:#888;
+  text-decoration:none;
+  font-size:13px;
+  margin-top:18px;
+}
+
+.back:hover{
+  color:var(--yellow);
 }
 </style>
 </head>
@@ -168,75 +194,88 @@ input:focus{
     Rider Login
   </div>
 
-  <label for="email">
-    Email
-  </label>
+  <label for="email">Email</label>
 
-  <input
-    id="email"
-    type="email"
-    placeholder="Enter registered email"
-    autocomplete="username"
-  >
+  <div class="input-box">
+    <input
+      type="email"
+      id="email"
+      placeholder="Enter your registered email"
+      autocomplete="username"
+    >
+  </div>
 
-  <label for="password">
-    Password
-  </label>
+  <label for="password">Password</label>
 
-  <input
-    id="password"
-    type="password"
-    placeholder="Enter password"
-    autocomplete="current-password"
-  >
+  <div class="input-box">
+    <input
+      type="password"
+      id="password"
+      placeholder="Enter your password"
+      autocomplete="current-password"
+    >
+
+    <span
+      id="togglePassword"
+      class="password-toggle">
+      Show
+    </span>
+  </div>
 
   <button
     id="loginBtn"
     class="login-btn"
-    type="button"
-  >
+    type="button">
     Rider Login
   </button>
 
-  <div id="loading" class="loading">
+  <button
+    id="registerBtn"
+    class="register-btn"
+    type="button">
+    New Rider? Register
+  </button>
+
+  <div
+    id="loading"
+    class="loading">
     Signing in...
   </div>
 
-  <div id="message" class="message"></div>
-
-  <div class="links">
-    <a href="rider-register.html">
-      New rider? Register here
-    </a>
+  <div
+    id="message"
+    class="message">
   </div>
 
   <div class="note">
-    Rider account must be approved by RiderX Admin
-    before going online.
+    Your rider account must be approved by RiderX Admin before you can go online.
   </div>
+
+  <a
+    href="../index.html"
+    class="back">
+    ← Back to RiderX
+  </a>
 
 </div>
 
 
 <script type="module">
 
-/* ============================================================
-   RIDERX RIDER LOGIN
-   FINAL APPROVAL-BASED LOGIN
-   ============================================================ */
-
 import {
   auth,
-  db,
-  signInWithEmailAndPassword,
-  signOut,
-  doc,
-  getDoc
+  db
 } from "../firebase/firebase-config.js";
 
 import {
-  onAuthStateChanged
+  signInWithEmailAndPassword,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
 const emailInput =
@@ -248,35 +287,26 @@ const passwordInput =
 const loginBtn =
   document.getElementById("loginBtn");
 
+const registerBtn =
+  document.getElementById("registerBtn");
+
 const loading =
   document.getElementById("loading");
 
 const message =
   document.getElementById("message");
 
+const togglePassword =
+  document.getElementById("togglePassword");
 
-let loggingIn = false;
 
-
-/* ============================================================
-   HELPERS
-   ============================================================ */
-
-function showMessage(text,type="error"){
+function setMessage(text,type=""){
 
   message.textContent = text;
 
   message.className =
     "message " + type;
-}
 
-
-function clearMessage(){
-
-  message.textContent = "";
-
-  message.className =
-    "message";
 }
 
 
@@ -284,56 +314,62 @@ function setLoading(active,text="Signing in..."){
 
   if(active){
 
-    loading.style.display =
-      "block";
+    loading.style.display = "block";
 
-    loading.textContent =
-      text;
+    loading.textContent = text;
 
-    loginBtn.disabled =
-      true;
+    loginBtn.disabled = true;
+
+    registerBtn.disabled = true;
 
   }else{
 
-    loading.style.display =
-      "none";
+    loading.style.display = "none";
 
-    loginBtn.disabled =
-      false;
+    loginBtn.disabled = false;
+
+    registerBtn.disabled = false;
 
   }
+
 }
 
 
-function normalize(value){
+function roleOf(data){
 
   return String(
-    value ?? ""
+    data?.role ??
+    data?.userType ??
+    data?.type ??
+    ""
   )
   .trim()
   .toLowerCase();
+
 }
 
 
-function getStatus(data){
+function getApprovalStatus(data){
 
-  return normalize(
-    data?.status ??
+  return String(
     data?.approvalStatus ??
     data?.riderStatus ??
+    data?.status ??
     data?.verificationStatus ??
     ""
-  );
+  )
+  .trim()
+  .toLowerCase();
+
 }
 
 
-function isAdminApproved(data){
+function isApproved(data){
 
   const status =
-    getStatus(data);
+    getApprovalStatus(data);
 
   return (
-    data?.adminApproved === true ||
     data?.approved === true ||
     data?.isApproved === true ||
     [
@@ -342,112 +378,23 @@ function isAdminApproved(data){
       "verified"
     ].includes(status)
   );
+
 }
 
 
 function isRejected(data){
 
   const status =
-    getStatus(data);
+    getApprovalStatus(data);
 
-  return (
-    [
-      "rejected",
-      "declined",
-      "blocked"
-    ].includes(status) ||
-    data?.accountStatus === "rejected"
-  );
+  return [
+    "rejected",
+    "declined",
+    "blocked"
+  ].includes(status);
+
 }
 
-
-function isPending(data){
-
-  if(isAdminApproved(data)){
-    return false;
-  }
-
-  if(isRejected(data)){
-    return false;
-  }
-
-  const status =
-    getStatus(data);
-
-  return (
-    !status ||
-    [
-      "pending",
-      "pending_approval",
-      "pending-approval",
-      "under_review",
-      "under-review",
-      "verifying",
-      "verification",
-      "review",
-      "submitted",
-      "application_submitted"
-    ].includes(status)
-  );
-}
-
-
-/* ============================================================
-   ERROR MESSAGE
-   ============================================================ */
-
-function firebaseError(error){
-
-  const code =
-    error?.code || "";
-
-  switch(code){
-
-    case "auth/invalid-credential":
-      return "Email or password is incorrect.";
-
-    case "auth/user-not-found":
-      return "Rider account not found.";
-
-    case "auth/wrong-password":
-      return "Wrong password.";
-
-    case "auth/invalid-email":
-      return "Invalid email address.";
-
-    case "auth/too-many-requests":
-      return "Too many login attempts. Please try again later.";
-
-    case "auth/network-request-failed":
-      return "Network error. Please check your internet.";
-
-    case "auth/user-disabled":
-      return "This rider account has been disabled.";
-
-    default:
-
-      if(
-        String(error?.message || "")
-          .toLowerCase()
-          .includes(
-            "missing or insufficient permissions"
-          )
-      ){
-
-        return "Firestore permission denied.";
-      }
-
-      return (
-        error?.message ||
-        "Login failed."
-      );
-  }
-}
-
-
-/* ============================================================
-   LOAD RIDER PROFILE
-   ============================================================ */
 
 async function getRiderProfile(uid){
 
@@ -455,61 +402,83 @@ async function getRiderProfile(uid){
     First check users/{uid}
   */
 
-  let usersSnap =
-    await getDoc(
-      doc(db,"users",uid)
+  try{
+
+    const userRef =
+      doc(db,"users",uid);
+
+    const userSnap =
+      await getDoc(userRef);
+
+    if(userSnap.exists()){
+
+      const data =
+        userSnap.data();
+
+      if(
+        roleOf(data) === "rider" ||
+        data.rider === true ||
+        data.userType === "rider"
+      ){
+
+        return {
+          ...data,
+          _collection:"users",
+          _id:uid
+        };
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "users profile check failed:",
+      error
     );
 
-  let usersData =
-    usersSnap.exists()
-      ? usersSnap.data()
-      : null;
+  }
 
 
   /*
     Then check riders/{uid}
   */
 
-  let ridersSnap =
-    await getDoc(
-      doc(db,"riders",uid)
+  try{
+
+    const riderRef =
+      doc(db,"riders",uid);
+
+    const riderSnap =
+      await getDoc(riderRef);
+
+    if(riderSnap.exists()){
+
+      return {
+        ...riderSnap.data(),
+        _collection:"riders",
+        _id:uid
+      };
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "riders profile check failed:",
+      error
     );
 
-  let ridersData =
-    ridersSnap.exists()
-      ? ridersSnap.data()
-      : null;
-
-
-  if(!usersData && !ridersData){
-
-    return null;
   }
 
 
-  /*
-    Merge both documents.
+  return null;
 
-    Rider document has priority for
-    rider-specific fields.
-  */
-
-  return {
-    ...(usersData || {}),
-    ...(ridersData || {})
-  };
 }
 
 
-/* ============================================================
-   LOGIN
-   ============================================================ */
-
 async function loginRider(){
-
-  if(loggingIn){
-    return;
-  }
 
   const email =
     emailInput.value.trim();
@@ -520,31 +489,33 @@ async function loginRider(){
 
   if(!email){
 
-    showMessage(
-      "Please enter your email."
+    setMessage(
+      "❌ Please enter your email.",
+      "error"
     );
 
     emailInput.focus();
 
     return;
+
   }
 
 
   if(!password){
 
-    showMessage(
-      "Please enter your password."
+    setMessage(
+      "❌ Please enter your password.",
+      "error"
     );
 
     passwordInput.focus();
 
     return;
+
   }
 
 
-  loggingIn = true;
-
-  clearMessage();
+  setMessage("");
 
   setLoading(
     true,
@@ -555,7 +526,7 @@ async function loginRider(){
   try{
 
     /*
-      Firebase Authentication
+      Firebase Authentication login
     */
 
     const result =
@@ -569,13 +540,10 @@ async function loginRider(){
     const user =
       result.user;
 
-    const uid =
-      user.uid;
-
 
     setLoading(
       true,
-      "Checking rider approval..."
+      "Checking rider account..."
     );
 
 
@@ -584,111 +552,87 @@ async function loginRider(){
     */
 
     const rider =
-      await getRiderProfile(uid);
+      await getRiderProfile(
+        user.uid
+      );
 
 
     if(!rider){
 
       await signOut(auth);
 
-      showMessage(
-        "Rider profile not found. Please register again."
-      );
-
       setLoading(false);
 
-      loggingIn = false;
+      setMessage(
+        "❌ Rider profile not found. Please register as a rider first.",
+        "error"
+      );
 
       return;
+
     }
 
 
     /*
-      Make sure this is a rider account.
+      Make sure this is a rider
     */
 
-    const role =
-      normalize(
-        rider.role ??
-        rider.userType ??
-        rider.type ??
-        "rider"
-      );
-
-
     if(
-      role !== "rider" &&
-      role !== "driver"
+      roleOf(rider) &&
+      roleOf(rider) !== "rider"
     ){
 
       await signOut(auth);
 
-      showMessage(
-        "This account is not registered as a rider."
-      );
-
       setLoading(false);
 
-      loggingIn = false;
+      setMessage(
+        "❌ This account is not registered as a rider.",
+        "error"
+      );
 
       return;
+
     }
 
 
     /*
-      REJECTED
+      REJECTED ACCOUNT
     */
 
     if(isRejected(rider)){
 
       await signOut(auth);
 
-      showMessage(
-        "Your rider registration was rejected by Admin. Please contact RiderX support.",
+      setLoading(false);
+
+      setMessage(
+        "❌ Your rider registration was rejected by Admin.",
         "error"
       );
 
-      setLoading(false);
-
-      loggingIn = false;
-
       return;
+
     }
 
 
     /*
-      PENDING
+      PENDING ACCOUNT
     */
 
-    if(!isAdminApproved(rider)){
-
-      /*
-        Do NOT send pending rider to home.
-      */
+    if(!isApproved(rider)){
 
       await signOut(auth);
 
-      showMessage(
-        "Your rider account is pending Admin approval.",
-        "pending"
-      );
-
       setLoading(false);
 
-      loggingIn = false;
-
-      setTimeout(
-        () => {
-
-          window.location.replace(
-            "pending.html"
-          );
-
-        },
-        900
+      setMessage(
+        "⏳ Your rider registration is pending Admin approval. You cannot go online yet.",
+        "error"
       );
 
       return;
+
     }
 
 
@@ -696,85 +640,140 @@ async function loginRider(){
       APPROVED
     */
 
-    setLoading(
-      true,
-      "Admin approved. Opening Rider Panel..."
+    setMessage(
+      "✅ Login successful. Opening rider dashboard...",
+      "success"
     );
 
 
-    /*
-      Keep account offline initially.
-      Rider can manually go online
-      from Rider Home.
-    */
-
-    try{
-
-      await import(
-        "../firebase/firebase-config.js"
-      );
-
-      /*
-        We intentionally do not change
-        approval fields here.
-      */
-
-    }catch(error){
-
-      console.warn(
-        "Optional Firebase module warning:",
-        error
-      );
-    }
-
-
-    showMessage(
-      "Login successful. Opening Rider Panel...",
-      "success"
+    setLoading(
+      true,
+      "Opening Rider Dashboard..."
     );
 
 
     /*
       IMPORTANT:
-      Use lowercase home.html.
-
-      This prevents Vercel/Linux
-      case-sensitive 404 problems.
+      Change ONLY this path if your actual rider
+      home file has a different name.
     */
 
-    setTimeout(
-      () => {
-
-        window.location.replace(
-          "../rider/home.html"
-        );
-
-      },
-      300
+    window.location.replace(
+      "../rider/Home.html"
     );
 
 
   }catch(error){
 
     console.error(
-      "Rider Login Error:",
+      "Rider login error:",
       error
     );
 
-    showMessage(
-      firebaseError(error)
-    );
+
+    let text =
+      "❌ Login failed.";
+
+
+    switch(error.code){
+
+      case "auth/invalid-credential":
+
+        text =
+          "❌ Email or password is incorrect.";
+
+        break;
+
+
+      case "auth/user-not-found":
+
+        text =
+          "❌ Rider account not found.";
+
+        break;
+
+
+      case "auth/wrong-password":
+
+        text =
+          "❌ Wrong password.";
+
+        break;
+
+
+      case "auth/invalid-email":
+
+        text =
+          "❌ Invalid email address.";
+
+        break;
+
+
+      case "auth/user-disabled":
+
+        text =
+          "❌ This account has been disabled.";
+
+        break;
+
+
+      case "auth/too-many-requests":
+
+        text =
+          "❌ Too many login attempts. Please try again later.";
+
+        break;
+
+
+      case "auth/network-request-failed":
+
+        text =
+          "❌ Network error. Check your internet connection.";
+
+        break;
+
+
+      default:
+
+        if(
+          error.message &&
+          error.message.includes(
+            "Missing or insufficient permissions"
+          )
+        ){
+
+          text =
+            "❌ Firestore permission denied.";
+
+        }else{
+
+          text =
+            "❌ " +
+            (
+              error.message ||
+              "Unable to login."
+            );
+
+        }
+
+    }
+
 
     setLoading(false);
 
-    loggingIn = false;
+    setMessage(
+      text,
+      "error"
+    );
+
   }
+
 }
 
 
-/* ============================================================
-   BUTTON
-   ============================================================ */
+/*
+  Login button
+*/
 
 loginBtn.addEventListener(
   "click",
@@ -782,9 +781,28 @@ loginBtn.addEventListener(
 );
 
 
-/* ============================================================
-   ENTER KEY
-   ============================================================ */
+/*
+  Register button
+
+  IMPORTANT:
+  If your registration file has a different name,
+  only this path needs changing.
+*/
+
+registerBtn.addEventListener(
+  "click",
+  () => {
+
+    window.location.href =
+      "rider-register.html";
+
+  }
+);
+
+
+/*
+  Enter key
+*/
 
 emailInput.addEventListener(
   "keydown",
@@ -795,7 +813,9 @@ emailInput.addEventListener(
       event.preventDefault();
 
       loginRider();
+
     }
+
   }
 );
 
@@ -809,38 +829,42 @@ passwordInput.addEventListener(
       event.preventDefault();
 
       loginRider();
+
     }
+
   }
 );
 
 
-/* ============================================================
-   IMPORTANT
-   ============================================================
+/*
+  Show / Hide password
+*/
 
-   We DO NOT use onAuthStateChanged here
-   to automatically redirect.
+togglePassword.addEventListener(
+  "click",
+  () => {
 
-   This prevents:
-   - old Firebase session
-   - automatic Home redirect
-   - login page loop
-   - wrong rider/admin routing
-   ============================================================ */
+    if(
+      passwordInput.type === "password"
+    ){
 
+      passwordInput.type =
+        "text";
 
-/* ============================================================
-   PAGE LOAD
-   ============================================================ */
+      togglePassword.textContent =
+        "Hide";
 
-clearMessage();
+    }else{
 
-setLoading(
-  false
-);
+      passwordInput.type =
+        "password";
 
-console.log(
-  "RiderX Rider Login loaded successfully."
+      togglePassword.textContent =
+        "Show";
+
+    }
+
+  }
 );
 
 </script>
