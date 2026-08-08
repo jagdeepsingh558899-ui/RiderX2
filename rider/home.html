@@ -10,7 +10,7 @@
     content="width=device-width, initial-scale=1.0"
 >
 
-<title>RiderX Rider Dashboard</title>
+<title>RiderX Rider Home</title>
 
 <link
     rel="stylesheet"
@@ -19,37 +19,24 @@
 
 <link
     rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 >
-
-<meta
-    name="theme-color"
-    content="#000000"
->
-
 
 <style>
 
 :root{
     --yellow:#FFD600;
-    --black:#000;
-    --dark:#111;
-    --dark2:#171717;
-    --border:#2c2c2c;
+    --black:#050505;
+    --card:#111;
+    --border:#292929;
     --gray:#999;
-    --green:#00c853;
-    --red:#ff3333;
+    --green:#18d66b;
+    --red:#ff4444;
 }
-
-
-/* ============================================================
-   RESET
-============================================================ */
 
 *{
     box-sizing:border-box;
 }
-
 
 html,
 body{
@@ -58,22 +45,11 @@ body{
     min-height:100%;
 }
 
-
 body{
-
-    margin:0;
-
-    padding-bottom:90px;
-
     background:var(--black);
-
     color:#fff;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    font-family:Arial,sans-serif;
+    padding-bottom:90px;
 }
 
 
@@ -85,10 +61,9 @@ body{
 
     height:70px;
 
-    background:var(--dark);
+    background:#111;
 
-    border-bottom:
-        1px solid #222;
+    border-bottom:1px solid #222;
 
     display:flex;
 
@@ -96,41 +71,41 @@ body{
 
     justify-content:space-between;
 
-    padding:
-        0 18px;
+    padding:0 18px;
 
     position:sticky;
 
     top:0;
 
     z-index:100;
-
 }
-
 
 .logo{
 
-    font-size:28px;
+    font-size:27px;
 
     font-weight:900;
-
-    letter-spacing:-1px;
-
 }
-
 
 .logo span{
 
     color:var(--yellow);
-
 }
 
+.header-right{
 
-.profile-button{
+    display:flex;
 
-    width:42px;
+    align-items:center;
 
-    height:42px;
+    gap:15px;
+}
+
+.profile-icon{
+
+    width:40px;
+
+    height:40px;
 
     border-radius:50%;
 
@@ -138,36 +113,29 @@ body{
 
     border:1px solid #444;
 
-    color:#fff;
-
     display:flex;
 
     align-items:center;
 
     justify-content:center;
 
+    color:var(--yellow);
+
     cursor:pointer;
-
-    font-size:18px;
-
 }
 
 
 /* ============================================================
-   MAIN
+   CONTAINER
 ============================================================ */
 
 .container{
 
-    width:100%;
-
     max-width:700px;
 
-    margin:0 auto;
+    margin:auto;
 
-    padding:
-        15px;
-
+    padding:18px 15px;
 }
 
 
@@ -177,31 +145,23 @@ body{
 
 .welcome{
 
-    margin-top:8px;
-
-    margin-bottom:15px;
-
+    margin-bottom:18px;
 }
-
 
 .welcome h2{
 
     margin:0;
 
-    font-size:24px;
-
+    font-size:25px;
 }
-
 
 .welcome p{
 
-    margin:
-        5px 0 0;
+    margin:5px 0 0;
 
-    color:var(--gray);
+    color:#888;
 
     font-size:13px;
-
 }
 
 
@@ -213,43 +173,88 @@ body{
 
     width:100%;
 
-    margin:
-        0 0 15px;
+    padding:17px;
 
-    padding:16px;
+    border:none;
+
+    border-radius:16px;
 
     background:var(--yellow);
 
     color:#000;
 
-    border:none;
-
-    border-radius:15px;
-
-    font-size:18px;
+    font-size:17px;
 
     font-weight:bold;
 
     cursor:pointer;
 
-    transition:.2s;
+    box-shadow:0 8px 25px rgba(255,214,0,.08);
 
+    margin-bottom:15px;
 }
-
-
-.online-btn:active{
-
-    transform:scale(.98);
-
-}
-
 
 .online-btn.offline{
 
-    background:var(--red);
+    background:#ff3333;
 
     color:#fff;
+}
 
+.online-btn:disabled{
+
+    opacity:.5;
+
+    cursor:not-allowed;
+}
+
+
+/* ============================================================
+   STATUS
+============================================================ */
+
+.status-card{
+
+    background:#101010;
+
+    border:1px solid #292929;
+
+    border-radius:16px;
+
+    padding:14px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-bottom:15px;
+}
+
+.status-dot{
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+    background:#777;
+}
+
+.status-dot.online{
+
+    background:var(--green);
+
+    box-shadow:0 0 10px rgba(24,214,107,.7);
+}
+
+.status-text{
+
+    color:#bbb;
+
+    font-size:14px;
 }
 
 
@@ -259,95 +264,66 @@ body{
 
 .earning{
 
-    display:flex;
+    background:var(--card);
 
-    justify-content:space-between;
-
-    align-items:center;
-
-    background:var(--dark);
-
-    border:
-        1px solid var(--border);
-
-    margin:
-        0 0 15px;
-
-    padding:20px;
+    border:1px solid var(--border);
 
     border-radius:20px;
 
-}
+    padding:20px;
 
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:15px;
+}
 
 .earning-title{
 
     color:#aaa;
 
-    font-size:14px;
-
+    font-size:13px;
 }
-
 
 .amount{
 
+    margin-top:5px;
+
     color:var(--yellow);
 
-    font-size:26px;
+    font-size:28px;
 
     font-weight:bold;
-
 }
 
 
 /* ============================================================
-   CARDS
+   CARD
 ============================================================ */
 
 .card{
 
-    background:var(--dark);
+    background:var(--card);
 
-    border:
-        1px solid var(--border);
-
-    margin:
-        15px 0;
-
-    padding:20px;
+    border:1px solid var(--border);
 
     border-radius:20px;
 
-}
+    padding:18px;
 
+    margin-bottom:15px;
+}
 
 .card h3{
 
+    margin:0 0 15px;
+
     color:var(--yellow);
 
-    margin:
-        0 0 15px;
-
     font-size:18px;
-
-}
-
-
-.card p{
-
-    color:#ccc;
-
-    font-size:14px;
-
-    line-height:1.5;
-
-}
-
-
-.card strong{
-
-    color:#fff;
-
 }
 
 
@@ -359,19 +335,16 @@ body{
 
     background:#080808;
 
-    border:
-        1px solid #292929;
+    border:1px solid #252525;
 
     border-radius:14px;
 
     padding:14px;
 
     margin-bottom:14px;
-
 }
 
-
-.ride-row{
+.info-row{
 
     display:flex;
 
@@ -381,112 +354,75 @@ body{
 
     padding:8px 0;
 
-    border-bottom:
-        1px solid #222;
-
-}
-
-
-.ride-row:last-child{
-
-    border-bottom:none;
-
-}
-
-
-.ride-label{
-
-    color:#888;
+    border-bottom:1px solid #222;
 
     font-size:13px;
-
 }
 
+.info-row:last-child{
 
-.ride-value{
+    border-bottom:0;
+}
+
+.info-label{
+
+    color:#888;
+}
+
+.info-value{
 
     color:#fff;
 
     text-align:right;
 
-    font-size:13px;
-
     word-break:break-word;
-
 }
 
-
-.fare-value{
+.fare{
 
     color:var(--yellow);
 
     font-size:18px;
 
     font-weight:bold;
-
 }
-
-
-/* ============================================================
-   BUTTONS
-============================================================ */
 
 .ride-buttons{
 
     display:flex;
 
     gap:10px;
-
 }
 
-
-button{
-
-    cursor:pointer;
-
-    font-family:inherit;
-
-}
-
-
-.accept{
+.btn{
 
     flex:1;
-
-    padding:14px;
-
-    background:var(--yellow);
-
-    color:#000;
 
     border:none;
 
     border-radius:12px;
 
+    padding:14px;
+
     font-weight:bold;
 
-    font-size:15px;
-
+    cursor:pointer;
 }
 
+.accept{
+
+    background:var(--yellow);
+
+    color:#000;
+}
 
 .reject{
 
-    flex:1;
-
-    padding:14px;
-
     background:#222;
 
-    color:white;
+    color:#fff;
 
-    border:
-        1px solid #555;
-
-    border-radius:12px;
-
-    font-size:15px;
-
+    border:1px solid #444;
 }
 
 
@@ -502,31 +438,27 @@ button{
 
     background:#000;
 
-    color:white;
-
-    border:
-        1px solid #555;
+    border:1px solid #444;
 
     border-radius:12px;
 
-    margin-top:10px;
+    color:#fff;
 
     outline:none;
 
     font-size:16px;
 
+    margin-bottom:10px;
 }
-
 
 .input:focus{
 
     border-color:var(--yellow);
-
 }
 
 
 /* ============================================================
-   START BUTTON
+   ACTION BUTTONS
 ============================================================ */
 
 .start{
@@ -541,20 +473,12 @@ button{
 
     border:none;
 
-    border-radius:15px;
+    border-radius:13px;
 
     font-weight:bold;
 
-    margin-top:10px;
-
-    font-size:16px;
-
+    cursor:pointer;
 }
-
-
-/* ============================================================
-   COMPLETE
-============================================================ */
 
 .complete{
 
@@ -564,39 +488,44 @@ button{
 
     background:var(--green);
 
-    color:white;
+    color:#000;
 
     border:none;
 
-    border-radius:15px;
+    border-radius:13px;
 
     font-weight:bold;
 
+    cursor:pointer;
+}
+
+.cancel{
+
+    width:100%;
+
+    padding:13px;
+
+    background:#301010;
+
+    color:#ff7777;
+
+    border:1px solid #622222;
+
+    border-radius:13px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
     margin-top:10px;
-
-    font-size:16px;
-
 }
 
 
 /* ============================================================
-   DISABLED
+   RIDE STATUS
 ============================================================ */
 
-button:disabled{
-
-    opacity:.5;
-
-    cursor:not-allowed;
-
-}
-
-
-/* ============================================================
-   STATUS
-============================================================ */
-
-.status-box{
+.ride-status{
 
     text-align:center;
 
@@ -604,130 +533,60 @@ button:disabled{
 
     background:#080808;
 
-    border:
-        1px solid #292929;
+    border:1px solid #292929;
 
-    border-radius:15px;
+    border-radius:14px;
 
-    color:#aaa;
-
-}
-
-
-.status-dot{
-
-    display:inline-block;
-
-    width:9px;
-
-    height:9px;
-
-    border-radius:50%;
-
-    background:#777;
-
-    margin-right:6px;
-
-}
-
-
-.status-dot.online{
-
-    background:var(--green);
-
-    box-shadow:
-        0 0 10px rgba(0,200,83,.7);
-
-}
-
-
-/* ============================================================
-   LOADING
-============================================================ */
-
-.loading{
-
-    text-align:center;
-
-    padding:25px 10px;
-
-    color:#999;
-
-}
-
-
-.loading i{
-
-    color:var(--yellow);
-
-    font-size:24px;
-
-    margin-bottom:10px;
-
-}
-
-
-/* ============================================================
-   NO RIDES
-============================================================ */
-
-.no-rides{
-
-    text-align:center;
-
-    padding:25px 10px;
-
-    color:#888;
-
-}
-
-
-.no-rides i{
-
-    font-size:32px;
-
-    color:#555;
-
-    margin-bottom:10px;
-
-}
-
-
-/* ============================================================
-   ACTIVE RIDE
-============================================================ */
-
-.active-ride{
-
-    border:
-        1px solid var(--green);
-
-    background:#07140c;
-
-}
-
-
-.active-title{
-
-    color:var(--green);
-
-    font-size:19px;
+    color:#bbb;
 
     font-weight:bold;
+}
 
-    margin-bottom:12px;
+.ride-status.active{
 
+    color:var(--yellow);
 }
 
 
 /* ============================================================
-   HIDDEN
+   EMPTY
 ============================================================ */
 
-.hidden{
+.empty{
 
-    display:none !important;
+    text-align:center;
 
+    padding:25px 10px;
+
+    color:#777;
+
+    font-size:14px;
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+.error{
+
+    display:none;
+
+    background:#210d0d;
+
+    border:1px solid #662222;
+
+    color:#ff7777;
+
+    padding:13px;
+
+    border-radius:12px;
+
+    margin-bottom:15px;
+
+    font-size:13px;
+
+    line-height:1.5;
 }
 
 
@@ -747,108 +606,48 @@ button:disabled{
 
     background:#111;
 
-    border-top:
-        1px solid #292929;
+    border-top:1px solid #292929;
 
     display:flex;
 
     justify-content:space-around;
 
-    padding:
-        10px 0;
+    padding:10px 0;
 
     z-index:200;
-
 }
 
+.bottom-item{
 
-.bottom button{
-
-    background:none;
-
-    border:none;
-
-    color:#888;
+    color:#777;
 
     text-align:center;
 
     font-size:11px;
 
+    cursor:pointer;
+
     min-width:65px;
-
 }
 
+.bottom-item i{
 
-.bottom button i{
+    font-size:19px;
 
-    display:block;
-
-    font-size:18px;
-
-    margin-bottom:5px;
-
+    margin-bottom:4px;
 }
 
-
-.bottom button.active{
+.bottom-item.active{
 
     color:var(--yellow);
-
 }
 
 
 /* ============================================================
-   TOAST
+   LOADING SCREEN
 ============================================================ */
 
-.toast{
-
-    position:fixed;
-
-    left:50%;
-
-    bottom:85px;
-
-    transform:
-        translateX(-50%);
-
-    width:
-        calc(100% - 30px);
-
-    max-width:500px;
-
-    background:#222;
-
-    border:
-        1px solid #444;
-
-    color:#fff;
-
-    padding:14px;
-
-    border-radius:12px;
-
-    text-align:center;
-
-    z-index:500;
-
-    display:none;
-
-}
-
-
-.toast.show{
-
-    display:block;
-
-}
-
-
-/* ============================================================
-   SECURITY SCREEN
-============================================================ */
-
-.security-screen{
+.access-screen{
 
     position:fixed;
 
@@ -856,7 +655,7 @@ button:disabled{
 
     z-index:1000;
 
-    background:#000;
+    background:#050505;
 
     display:flex;
 
@@ -865,65 +664,51 @@ button:disabled{
     justify-content:center;
 
     padding:20px;
-
 }
 
+.access-card{
 
-.security-card{
-
-    width:100%;
-
-    max-width:380px;
+    width:min(380px,100%);
 
     background:#111;
 
-    border:
-        1px solid #292929;
+    border:1px solid #292929;
 
     border-radius:22px;
 
     padding:30px 20px;
 
     text-align:center;
-
 }
 
-
-.security-logo{
+.access-logo{
 
     font-size:34px;
 
     font-weight:900;
 
     margin-bottom:18px;
-
 }
 
-
-.security-logo span{
+.access-logo span{
 
     color:var(--yellow);
-
 }
 
-
-.security-spinner{
+.spinner{
 
     color:var(--yellow);
 
     font-size:28px;
 
     margin-bottom:15px;
-
 }
 
+.access-text{
 
-.security-text{
-
-    color:#999;
+    color:#aaa;
 
     font-size:14px;
-
 }
 
 
@@ -935,53 +720,17 @@ button:disabled{
 
     .container{
 
-        padding:
-            12px;
-
+        padding:15px 12px;
     }
-
-
-    .header{
-
-        padding:
-            0 14px;
-
-    }
-
-
-    .logo{
-
-        font-size:25px;
-
-    }
-
 
     .welcome h2{
 
         font-size:22px;
-
     }
 
+    .earning{
 
-    .card{
-
-        padding:16px;
-
-    }
-
-
-    .ride-buttons{
-
-        flex-direction:column;
-
-    }
-
-
-    .accept,
-    .reject{
-
-        width:100%;
-
+        padding:17px;
     }
 
 }
@@ -995,29 +744,27 @@ button:disabled{
 
 
 <!-- ============================================================
-     SECURITY SCREEN
+     SECURITY / LOADING SCREEN
 ============================================================ -->
 
 <div
-    id="securityScreen"
-    class="security-screen"
+    id="accessScreen"
+    class="access-screen"
 >
 
-    <div class="security-card">
+    <div class="access-card">
 
-        <div class="security-logo">
+        <div class="access-logo">
             RID<span>ERX</span>
         </div>
 
-        <div class="security-spinner">
-
+        <div class="spinner">
             <i class="fa-solid fa-spinner fa-spin"></i>
-
         </div>
 
         <div
-            id="securityText"
-            class="security-text"
+            id="accessText"
+            class="access-text"
         >
             Checking rider account...
         </div>
@@ -1037,17 +784,16 @@ button:disabled{
         RID<span>ERX</span>
     </div>
 
+    <div class="header-right">
 
-    <button
-        id="profileButton"
-        class="profile-button"
-        type="button"
-        aria-label="Profile"
-    >
+        <div
+            id="profileBtn"
+            class="profile-icon"
+        >
+            <i class="fa-solid fa-user"></i>
+        </div>
 
-        <i class="fa-solid fa-user"></i>
-
-    </button>
+    </div>
 
 </header>
 
@@ -1059,44 +805,51 @@ button:disabled{
 <main class="container">
 
 
-    <!-- WELCOME -->
+    <div class="welcome">
 
-    <section class="welcome">
-
-        <h2 id="riderGreeting">
-            Hello, Rider 👋
+        <h2>
+            Welcome,
+            <span id="riderName">
+                Rider
+            </span>
         </h2>
 
-        <p id="riderName">
-            Welcome to RiderX
+        <p>
+            RiderX Partner Dashboard
         </p>
 
-    </section>
+    </div>
 
 
-    <!-- ONLINE -->
+    <div
+        id="errorBox"
+        class="error"
+    ></div>
+
+
+    <!-- ONLINE STATUS -->
 
     <button
         id="onlineBtn"
         class="online-btn"
-        type="button"
     >
         🟢 Go Online
     </button>
 
 
-    <!-- STATUS -->
+    <div class="status-card">
 
-    <div class="status-box">
-
-        <span
+        <div
             id="statusDot"
             class="status-dot"
-        ></span>
+        ></div>
 
-        <span id="statusText">
-            You are currently offline
-        </span>
+        <div
+            id="statusText"
+            class="status-text"
+        >
+            You are currently offline.
+        </div>
 
     </div>
 
@@ -1112,53 +865,40 @@ button:disabled{
             </div>
 
             <div
-                style="
-                    color:#666;
-                    font-size:12px;
-                    margin-top:5px;
-                "
+                id="earningAmount"
+                class="amount"
             >
-                RiderX
+                ₹0
             </div>
 
         </div>
 
-
-        <div
-            id="earningAmount"
-            class="amount"
-        >
-            ₹0
-        </div>
+        <i
+            class="fa-solid fa-wallet"
+            style="font-size:30px;color:#FFD600"
+        ></i>
 
     </div>
 
 
     <!-- ========================================================
-         AVAILABLE RIDES
+         AVAILABLE RIDE
     ========================================================= -->
 
     <div class="card">
 
         <h3>
-
             <i class="fa-solid fa-bell"></i>
-
             New Ride Requests
-
         </h3>
 
+        <div id="rideRequests">
 
-        <div
-            id="availableRides"
-            class="no-rides"
-        >
+            <div class="empty">
 
-            <i class="fa-solid fa-motorcycle"></i>
+                Go online to receive ride requests.
 
-            <br>
-
-            Go online to receive ride requests.
+            </div>
 
         </div>
 
@@ -1169,44 +909,33 @@ button:disabled{
          OTP
     ========================================================= -->
 
-    <div
-        id="otpCard"
-        class="card hidden"
-    >
+    <div class="card">
 
         <h3>
-
-            <i class="fa-solid fa-shield-halved"></i>
-
+            <i class="fa-solid fa-key"></i>
             OTP Verification
-
         </h3>
 
-
-        <p>
-            Enter the OTP provided by the customer.
+        <p
+            style="color:#999;font-size:13px"
+        >
+            Enter the customer's 4-digit OTP to start the ride.
         </p>
-
 
         <input
             id="otpInput"
             class="input"
             type="text"
             inputmode="numeric"
-            maxlength="6"
-            autocomplete="one-time-code"
+            maxlength="4"
             placeholder="Enter Customer OTP"
         >
-
 
         <button
             id="startRide"
             class="start"
-            type="button"
         >
-
             Start Ride
-
         </button>
 
     </div>
@@ -1216,37 +945,26 @@ button:disabled{
          ACTIVE RIDE
     ========================================================= -->
 
-    <div
-        id="activeRideCard"
-        class="card active-ride hidden"
-    >
+    <div class="card">
 
-        <div class="active-title">
-
+        <h3>
             <i class="fa-solid fa-route"></i>
-
-            Active Ride
-
-        </div>
-
+            Current Ride
+        </h3>
 
         <div
-            id="activeRideInfo"
+            id="rideStatus"
+            class="ride-status"
         >
-
-            Ride in progress.
-
+            No active ride
         </div>
-
 
         <button
             id="completeRide"
             class="complete"
-            type="button"
+            style="display:none"
         >
-
             Complete Ride
-
         </button>
 
     </div>
@@ -1256,123 +974,225 @@ button:disabled{
 
 
 <!-- ============================================================
-     BOTTOM NAVIGATION
+     BOTTOM NAV
 ============================================================ -->
 
 <nav class="bottom">
 
-
-    <button
+    <div
+        class="bottom-item active"
         id="homeNav"
-        class="active"
-        type="button"
     >
 
         <i class="fa-solid fa-house"></i>
 
+        <br>
+
         Home
 
-    </button>
+    </div>
 
 
-    <button
+    <div
+        class="bottom-item"
         id="ridesNav"
-        type="button"
     >
 
         <i class="fa-solid fa-clock"></i>
 
+        <br>
+
         Rides
 
-    </button>
+    </div>
 
 
-    <button
+    <div
+        class="bottom-item"
         id="walletNav"
-        type="button"
     >
 
         <i class="fa-solid fa-wallet"></i>
 
+        <br>
+
         Wallet
 
-    </button>
+    </div>
 
 
-    <button
+    <div
+        class="bottom-item"
         id="profileNav"
-        type="button"
     >
 
         <i class="fa-solid fa-user"></i>
 
+        <br>
+
         Profile
 
-    </button>
+    </div>
 
 </nav>
 
 
 <!-- ============================================================
-     TOAST
-============================================================ -->
-
-<div
-    id="toast"
-    class="toast"
-></div>
-
-
-<!-- ============================================================
-     RIDER ENGINE
-============================================================ -->
-
-<script
-    type="module"
-    src="../js/rider.js"
-></script>
-
-
-<!-- ============================================================
-     PAGE CONTROLLER
+     FIREBASE + RIDER ENGINE
 ============================================================ -->
 
 <script type="module">
 
 import {
+
     auth,
+
     db,
+
+    onAuthStateChanged,
+
+    signOut,
+
     doc,
+
     getDoc,
+
+    updateDoc,
+
     collection,
+
     query,
+
     where,
-    onSnapshot
+
+    onSnapshot,
+
+    runTransaction,
+
+    serverTimestamp
+
 } from "../firebase/firebase-config.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+/* ============================================================
+   ELEMENTS
+============================================================ */
 
 const $ =
     id => document.getElementById(id);
 
 
+const accessScreen =
+    $("accessScreen");
+
+const accessText =
+    $("accessText");
+
+const riderName =
+    $("riderName");
+
+const onlineBtn =
+    $("onlineBtn");
+
+const statusDot =
+    $("statusDot");
+
+const statusText =
+    $("statusText");
+
+const rideRequests =
+    $("rideRequests");
+
+const earningAmount =
+    $("earningAmount");
+
+const otpInput =
+    $("otpInput");
+
+const startRideBtn =
+    $("startRide");
+
+const rideStatus =
+    $("rideStatus");
+
+const completeRideBtn =
+    $("completeRide");
+
+const errorBox =
+    $("errorBox");
+
+
+/* ============================================================
+   STATE
+============================================================ */
+
 let currentUser = null;
 
-let riderProfile = null;
+let riderData = null;
+
+let isOnline = false;
 
 let activeRideId = null;
 
-let earningUnsubscribe = null;
+let unsubscribeRides = null;
 
-let rideUnsubscribe = null;
+let unsubscribeUser = null;
 
 
-// ============================================================
-// SECURITY
-// ============================================================
+/* ============================================================
+   HELPERS
+============================================================ */
+
+function showError(text){
+
+    errorBox.style.display =
+        "block";
+
+    errorBox.textContent =
+        text;
+
+}
+
+
+function hideError(){
+
+    errorBox.style.display =
+        "none";
+
+}
+
+
+function hideAccess(){
+
+    accessScreen.style.display =
+        "none";
+
+}
+
+
+function money(value){
+
+    return "₹" +
+        (
+            Number(value) || 0
+        ).toLocaleString("en-IN");
+
+}
+
+
+function roleOf(data){
+
+    return String(
+        data?.role ??
+        data?.userType ??
+        data?.type ??
+        ""
+    )
+    .trim()
+    .toLowerCase();
+
+}
+
 
 function isApproved(data){
 
@@ -1380,18 +1200,16 @@ function isApproved(data){
         return false;
     }
 
-
     const status =
         String(
             data.status ??
             data.approvalStatus ??
             data.riderStatus ??
-            data.accountStatus ??
+            data.verificationStatus ??
             ""
         )
         .trim()
         .toLowerCase();
-
 
     return (
         data.approved === true ||
@@ -1407,102 +1225,14 @@ function isApproved(data){
 }
 
 
-function showSecurity(text){
+/* ============================================================
+   LOAD RIDER
+============================================================ */
 
-    const screen =
-        $("securityScreen");
+async function loadRider(){
 
-    const label =
-        $("securityText");
-
-
-    if(label){
-        label.textContent = text;
-    }
-
-
-    if(screen){
-        screen.style.display = "flex";
-    }
-
-}
-
-
-function hideSecurity(){
-
-    const screen =
-        $("securityScreen");
-
-
-    if(screen){
-        screen.style.display = "none";
-    }
-
-}
-
-
-// ============================================================
-// TOAST
-// ============================================================
-
-function toast(text){
-
-    const box =
-        $("toast");
-
-
-    if(!box){
-        return;
-    }
-
-
-    box.textContent =
-        text;
-
-
-    box.classList.add(
-        "show"
-    );
-
-
-    setTimeout(
-        () => {
-
-            box.classList.remove(
-                "show"
-            );
-
-        },
-        2500
-    );
-
-}
-
-
-// ============================================================
-// RIDER PROFILE
-// ============================================================
-
-async function loadRiderProfile(user){
-
-    const riderRef =
-        doc(
-            db,
-            "riders",
-            user.uid
-        );
-
-
-    const riderSnap =
-        await getDoc(riderRef);
-
-
-    if(
-        riderSnap.exists()
-    ){
-
-        return riderSnap.data();
-
+    if(!currentUser){
+        return false;
     }
 
 
@@ -1510,7 +1240,7 @@ async function loadRiderProfile(user){
         doc(
             db,
             "users",
-            user.uid
+            currentUser.uid
         );
 
 
@@ -1518,484 +1248,784 @@ async function loadRiderProfile(user){
         await getDoc(userRef);
 
 
-    if(
-        userSnap.exists()
-    ){
+    if(!userSnap.exists()){
 
-        return userSnap.data();
+        throw new Error(
+            "Rider profile not found."
+        );
 
     }
 
 
-    return null;
+    const userData =
+        userSnap.data();
 
-}
+
+    if(
+        roleOf(userData) !== "rider"
+    ){
+
+        throw new Error(
+            "This account is not a Rider account."
+        );
+
+    }
 
 
-// ============================================================
-// PROFILE UI
-// ============================================================
+    const riderRef =
+        doc(
+            db,
+            "riders",
+            currentUser.uid
+        );
 
-function updateProfileUI(){
 
-    if(!riderProfile){
-        return;
+    const riderSnap =
+        await getDoc(riderRef);
+
+
+    riderData =
+        riderSnap.exists()
+            ? riderSnap.data()
+            : {};
+
+
+    /*
+     * Approval can be stored in either
+     * users/{uid} or riders/{uid}.
+     */
+
+    if(
+        !isApproved(userData) &&
+        !isApproved(riderData)
+    ){
+
+        window.location.replace(
+            "./pending.html"
+        );
+
+        return false;
+
     }
 
 
     const name =
-        riderProfile.name ||
-        riderProfile.fullName ||
-        riderProfile.displayName ||
+        riderData.name ||
+        riderData.fullName ||
+        userData.name ||
+        userData.fullName ||
+        userData.displayName ||
+        currentUser.email?.split("@")[0] ||
         "Rider";
 
 
-    $("riderGreeting").textContent =
-        "Hello, " + name + " 👋";
+    riderName.textContent =
+        name;
 
 
-    $("riderName").textContent =
-        "Welcome back to RiderX";
+    isOnline =
+        riderData.isOnline === true ||
+        riderData.online === true ||
+        userData.isOnline === true ||
+        userData.online === true;
 
+
+    updateOnlineUI();
+
+
+    return true;
 
 }
 
 
-// ============================================================
-// AUTH
-// ============================================================
+/* ============================================================
+   ONLINE UI
+============================================================ */
 
-onAuthStateChanged(
-    auth,
-    async user => {
+function updateOnlineUI(){
 
-        if(!user){
+    if(isOnline){
 
-            showSecurity(
-                "Login required. Opening Rider login..."
-            );
+        onlineBtn.textContent =
+            "🔴 Go Offline";
 
+        onlineBtn.classList.add(
+            "offline"
+        );
 
-            setTimeout(
-                () => {
+        statusDot.classList.add(
+            "online"
+        );
 
-                    window.location.replace(
-                        "../auth/login.html?role=rider"
-                    );
+        statusText.textContent =
+            "You are online and accepting rides.";
 
-                },
-                500
-            );
+    }else{
 
+        onlineBtn.textContent =
+            "🟢 Go Online";
 
-            return;
-        }
+        onlineBtn.classList.remove(
+            "offline"
+        );
 
+        statusDot.classList.remove(
+            "online"
+        );
 
-        currentUser =
-            user;
-
-
-        try{
-
-            showSecurity(
-                "Loading rider profile..."
-            );
-
-
-            riderProfile =
-                await loadRiderProfile(
-                    user
-                );
-
-
-            if(
-                !riderProfile
-            ){
-
-                showSecurity(
-                    "Rider profile not found."
-                );
-
-
-                setTimeout(
-                    () => {
-
-                        window.location.replace(
-                            "../auth/login.html?role=rider"
-                        );
-
-                    },
-                    800
-                );
-
-
-                return;
-            }
-
-
-            if(
-                !isApproved(
-                    riderProfile
-                )
-            ){
-
-                showSecurity(
-                    "Rider account is waiting for admin approval."
-                );
-
-
-                setTimeout(
-                    () => {
-
-                        window.location.replace(
-                            "../auth/login.html?role=rider"
-                        );
-
-                    },
-                    1200
-                );
-
-
-                return;
-            }
-
-
-            updateProfileUI();
-
-
-            hideSecurity();
-
-
-            startEarningListener();
-
-        }catch(error){
-
-            console.error(
-                "Rider Home error:",
-                error
-            );
-
-
-            showSecurity(
-                "Unable to load rider account."
-            );
-
-        }
+        statusText.textContent =
+            "You are currently offline.";
 
     }
-);
+
+}
 
 
-// ============================================================
-// EARNINGS
-// ============================================================
+/* ============================================================
+   ONLINE / OFFLINE
+============================================================ */
 
-function startEarningListener(){
+async function toggleOnline(){
 
-    if(
-        !currentUser
-    ){
+    if(!currentUser){
         return;
     }
 
 
-    if(
-        typeof earningUnsubscribe ===
-        "function"
-    ){
+    onlineBtn.disabled =
+        true;
 
-        earningUnsubscribe();
+
+    try{
+
+        isOnline =
+            !isOnline;
+
+
+        const userRef =
+            doc(
+                db,
+                "users",
+                currentUser.uid
+            );
+
+
+        const riderRef =
+            doc(
+                db,
+                "riders",
+                currentUser.uid
+            );
+
+
+        /*
+         * Update both collections.
+         */
+
+        await updateDoc(
+            userRef,
+            {
+                isOnline:isOnline,
+                online:isOnline,
+                updatedAt:
+                    serverTimestamp()
+            }
+        );
+
+
+        try{
+
+            await updateDoc(
+                riderRef,
+                {
+                    isOnline:isOnline,
+                    online:isOnline,
+                    updatedAt:
+                        serverTimestamp()
+                }
+            );
+
+        }catch(error){
+
+            console.warn(
+                "Rider online field update:",
+                error
+            );
+
+        }
+
+
+        updateOnlineUI();
+
+
+        if(isOnline){
+
+            listenForRideRequests();
+
+        }else{
+
+            stopRideListener();
+
+            rideRequests.innerHTML = `
+                <div class="empty">
+                    You are offline.
+                    <br><br>
+                    Go online to receive ride requests.
+                </div>
+            `;
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Online status error:",
+            error
+        );
+
+
+        isOnline =
+            !isOnline;
+
+
+        showError(
+            "Online status update failed. Please check Firebase Rules."
+        );
 
     }
 
 
-    const ridesRef =
-        collection(
-            db,
-            "rides"
-        );
+    onlineBtn.disabled =
+        false;
+
+}
 
 
-    const riderQuery =
-        query(
-            ridesRef,
-            where(
-                "riderId",
-                "==",
-                currentUser.uid
-            )
-        );
+/* ============================================================
+   RIDE REQUEST LISTENER
+============================================================ */
+
+function stopRideListener(){
+
+    if(
+        typeof unsubscribeRides ===
+        "function"
+    ){
+
+        unsubscribeRides();
+
+        unsubscribeRides =
+            null;
+
+    }
+
+}
 
 
-    earningUnsubscribe =
-        onSnapshot(
-            riderQuery,
-            snapshot => {
+/* ============================================================
+   LISTEN FOR REQUESTED RIDES
+============================================================ */
 
-                let total =
-                    0;
+function listenForRideRequests(){
 
-
-                const today =
-                    new Date();
+    if(!currentUser){
+        return;
+    }
 
 
-                snapshot.forEach(
-                    rideDoc => {
-
-                        const ride =
-                            rideDoc.data();
+    stopRideListener();
 
 
-                        const status =
-                            String(
-                                ride.status ||
-                                ""
-                            )
-                            .trim()
-                            .toLowerCase();
+    rideRequests.innerHTML = `
+        <div class="empty">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <br><br>
+            Searching for ride requests...
+        </div>
+    `;
 
 
-                        if(
-                            ![
-                                "completed",
-                                "complete",
-                                "finished",
-                                "success"
-                            ].includes(
-                                status
-                            )
-                        ){
+    try{
 
-                            return;
-
-                        }
+        const ridesRef =
+            collection(
+                db,
+                "rides"
+            );
 
 
-                        const timestamp =
-                            ride.completedAt ||
-                            ride.createdAt;
+        const rideQuery =
+            query(
+                ridesRef,
+                where(
+                    "status",
+                    "==",
+                    "REQUESTED"
+                )
+            );
 
 
-                        let date = null;
+        unsubscribeRides =
+            onSnapshot(
+                rideQuery,
+                snapshot => {
 
+                    /*
+                     * If rider already has an active ride,
+                     * don't show new requests.
+                     */
 
-                        if(
-                            typeof timestamp?.toDate ===
-                            "function"
-                        ){
+                    if(activeRideId){
 
-                            date =
-                                timestamp.toDate();
-
-                        }
-
-
-                        if(
-                            !date &&
-                            timestamp
-                        ){
-
-                            date =
-                                new Date(
-                                    timestamp
-                                );
-
-                        }
-
-
-                        if(!date){
-                            return;
-                        }
-
-
-                        if(
-                            date.getDate() ===
-                                today.getDate() &&
-                            date.getMonth() ===
-                                today.getMonth() &&
-                            date.getFullYear() ===
-                                today.getFullYear()
-                        ){
-
-                            total +=
-                                Number(
-                                    ride.fare ??
-                                    ride.amount ??
-                                    ride.totalFare ??
-                                    0
-                                ) || 0;
-
-                        }
+                        return;
 
                     }
-                );
 
 
-                $("earningAmount").textContent =
-                    "₹" +
-                    total.toLocaleString(
-                        "en-IN"
+                    if(snapshot.empty){
+
+                        rideRequests.innerHTML = `
+                            <div class="empty">
+                                No active ride requests right now.
+                            </div>
+                        `;
+
+                        return;
+
+                    }
+
+
+                    rideRequests.innerHTML =
+                        "";
+
+
+                    snapshot.forEach(
+                        rideDoc => {
+
+                            const ride =
+                                rideDoc.data();
+
+
+                            renderRideRequest(
+                                rideDoc.id,
+                                ride
+                            );
+
+                        }
                     );
 
-            },
-            error => {
+                },
+                error => {
 
-                console.warn(
-                    "Earning listener:",
-                    error
+                    console.error(
+                        "Ride listener:",
+                        error
+                    );
+
+
+                    showError(
+                        "Ride requests load nahi ho rahe. Firestore Rules check karein."
+                    );
+
+                }
+            );
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+        showError(
+            "Unable to listen for ride requests."
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   RENDER RIDE
+============================================================ */
+
+function renderRideRequest(
+    rideId,
+    ride
+){
+
+    const pickup =
+        ride.pickupLocation ||
+        ride.pickup ||
+        ride.pickupAddress ||
+        "Pickup not provided";
+
+
+    const drop =
+        ride.dropoffLocation ||
+        ride.dropoff ||
+        ride.destination ||
+        ride.dropLocation ||
+        "Drop not provided";
+
+
+    const fare =
+        Number(
+            ride.fare ??
+            ride.amount ??
+            ride.totalFare ??
+            0
+        ) || 0;
+
+
+    const service =
+        String(
+            ride.serviceType ||
+            ride.type ||
+            "Ride"
+        )
+        .toUpperCase();
+
+
+    const payment =
+        ride.paymentMethod ||
+        ride.payment ||
+        "Cash";
+
+
+    const customerName =
+        ride.customerName ||
+        ride.name ||
+        "Customer";
+
+
+    const card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "ride-info";
+
+
+    card.innerHTML = `
+
+        <div
+            style="
+                color:#FFD600;
+                font-weight:bold;
+                margin-bottom:12px;
+            "
+        >
+            ${escapeHtml(service)} RIDE
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                Customer
+            </span>
+
+            <span class="info-value">
+                ${escapeHtml(customerName)}
+            </span>
+
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                Pickup
+            </span>
+
+            <span class="info-value">
+                ${escapeHtml(pickup)}
+            </span>
+
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                Drop
+            </span>
+
+            <span class="info-value">
+                ${escapeHtml(drop)}
+            </span>
+
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                Payment
+            </span>
+
+            <span class="info-value">
+                ${escapeHtml(payment)}
+            </span>
+
+        </div>
+
+        <div class="info-row">
+
+            <span class="info-label">
+                Fare
+            </span>
+
+            <span class="info-value fare">
+                ${money(fare)}
+            </span>
+
+        </div>
+
+        <div
+            class="ride-buttons"
+            style="margin-top:14px"
+        >
+
+            <button
+                class="btn accept"
+                data-ride-id="${escapeHtml(rideId)}"
+            >
+                <i class="fa-solid fa-check"></i>
+                Accept
+            </button>
+
+            <button
+                class="btn reject"
+                data-reject-id="${escapeHtml(rideId)}"
+            >
+                Reject
+            </button>
+
+        </div>
+    `;
+
+
+    rideRequests.appendChild(
+        card
+    );
+
+
+    const acceptButton =
+        card.querySelector(
+            "[data-ride-id]"
+        );
+
+
+    const rejectButton =
+        card.querySelector(
+            "[data-reject-id]"
+        );
+
+
+    acceptButton.addEventListener(
+        "click",
+        () => acceptRide(rideId)
+    );
+
+
+    rejectButton.addEventListener(
+        "click",
+        () => {
+
+            card.remove();
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   ACCEPT RIDE
+============================================================ */
+
+async function acceptRide(
+    rideId
+){
+
+    if(!currentUser){
+        return;
+    }
+
+
+    try{
+
+        /*
+         * Transaction prevents two riders
+         * accepting the same ride.
+         */
+
+        await runTransaction(
+            db,
+            async transaction => {
+
+                const rideRef =
+                    doc(
+                        db,
+                        "rides",
+                        rideId
+                    );
+
+
+                const rideSnap =
+                    await transaction.get(
+                        rideRef
+                    );
+
+
+                if(
+                    !rideSnap.exists()
+                ){
+
+                    throw new Error(
+                        "Ride request no longer exists."
+                    );
+
+                }
+
+
+                const ride =
+                    rideSnap.data();
+
+
+                const status =
+                    String(
+                        ride.status || ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                if(
+                    status !== "REQUESTED"
+                ){
+
+                    throw new Error(
+                        "This ride has already been accepted by another rider."
+                    );
+
+                }
+
+
+                transaction.update(
+                    rideRef,
+                    {
+
+                        status:"ACCEPTED",
+
+                        riderId:
+                            currentUser.uid,
+
+                        riderUid:
+                            currentUser.uid,
+
+                        acceptedAt:
+                            serverTimestamp()
+
+                    }
                 );
 
             }
         );
 
-}
+
+        activeRideId =
+            rideId;
 
 
-// ============================================================
-// PROFILE BUTTON
-// ============================================================
-
-$("profileButton")
-.addEventListener(
-    "click",
-    () => {
-
-        window.location.href =
-            "Profile.html";
-
-    }
-);
+        stopRideListener();
 
 
-// ============================================================
-// BOTTOM NAV
-// ============================================================
+        rideRequests.innerHTML = `
+            <div class="empty">
+                <i
+                    class="fa-solid fa-circle-check"
+                    style="color:#19d36b;font-size:30px"
+                ></i>
 
-$("homeNav")
-.addEventListener(
-    "click",
-    () => {
+                <br><br>
 
-        window.location.href =
-            "Home.html";
-
-    }
-);
-
-
-$("ridesNav")
-.addEventListener(
-    "click",
-    () => {
-
-        window.location.href =
-            "Rides.html";
-
-    }
-);
+                Ride accepted successfully.
+                <br>
+                Verify customer OTP to start the ride.
+            </div>
+        `;
 
 
-$("walletNav")
-.addEventListener(
-    "click",
-    () => {
+        rideStatus.textContent =
+            "Ride accepted • Waiting for OTP";
 
-        window.location.href =
-            "Wallet.html";
-
-    }
-);
+        rideStatus.classList.add(
+            "active"
+        );
 
 
-$("profileNav")
-.addEventListener(
-    "click",
-    () => {
+        alert(
+            "Ride Accepted! Customer OTP enter karke ride start karein."
+        );
 
-        window.location.href =
-            "Profile.html";
+    }catch(error){
 
-    }
-);
-
-
-// ============================================================
-// START RIDE BUTTON
-// ============================================================
-
-$("startRide")
-.addEventListener(
-    "click",
-    () => {
-
-        const otp =
-            $("otpInput").value
-                .trim();
+        console.error(
+            "Accept ride error:",
+            error
+        );
 
 
-        if(
-            !otp
-        ){
-
-            toast(
-                "Please enter customer OTP."
-            );
-
-            return;
-
-        }
-
-
-        if(
-            !/^\d{4,6}$/.test(
-                otp
-            )
-        ){
-
-            toast(
-                "Please enter a valid OTP."
-            );
-
-            return;
-
-        }
-
-
-        if(
-            !activeRideId
-        ){
-
-            toast(
-                "No active ride found."
-            );
-
-            return;
-
-        }
-
-
-        // Actual ride update is handled
-        // below using modular Firebase.
-
-        startRideWithOtp(
-            activeRideId,
-            otp
+        alert(
+            error.message ||
+            "Failed to accept ride."
         );
 
     }
-);
+
+}
 
 
-// ============================================================
-// START RIDE WITH OTP
-// ============================================================
+/* ============================================================
+   START RIDE WITH OTP
+============================================================ */
 
-async function startRideWithOtp(
-    rideId,
-    otp
-){
+async function startRide(){
+
+    if(!activeRideId){
+
+        alert(
+            "Please accept a ride first."
+        );
+
+        return;
+
+    }
+
+
+    const otp =
+        otpInput.value.trim();
+
+
+    if(
+        !/^\d{4}$/.test(otp)
+    ){
+
+        alert(
+            "Please enter a valid 4-digit OTP."
+        );
+
+        otpInput.focus();
+
+        return;
+
+    }
+
+
+    startRideBtn.disabled =
+        true;
+
 
     try{
 
@@ -2003,7 +2033,7 @@ async function startRideWithOtp(
             doc(
                 db,
                 "rides",
-                rideId
+                activeRideId
             );
 
 
@@ -2017,11 +2047,9 @@ async function startRideWithOtp(
             !rideSnap.exists()
         ){
 
-            toast(
+            throw new Error(
                 "Ride not found."
             );
-
-            return;
 
         }
 
@@ -2030,63 +2058,81 @@ async function startRideWithOtp(
             rideSnap.data();
 
 
+        /*
+         * Support multiple OTP field names.
+         */
+
         const correctOtp =
             String(
                 ride.otp ??
                 ride.customerOtp ??
-                ride.startOtp ??
+                ride.rideOtp ??
                 ""
-            );
+            ).trim();
 
 
         if(
-            correctOtp &&
-            correctOtp !== otp
+            !correctOtp
         ){
 
-            toast(
-                "Incorrect customer OTP."
+            throw new Error(
+                "Customer OTP is not available for this ride."
             );
-
-            return;
 
         }
 
 
-        const {
-            updateDoc,
-            serverTimestamp
-        } =
-            await import(
-                "../firebase/firebase-config.js"
+        if(
+            otp !== correctOtp
+        ){
+
+            throw new Error(
+                "Incorrect customer OTP."
             );
+
+        }
 
 
         await updateDoc(
             rideRef,
             {
-                status:"STARTED",
-                rideStatus:"STARTED",
+
+                status:"ONGOING",
+
+                rideStatus:"ONGOING",
+
                 startedAt:
-                    serverTimestamp()
+                    serverTimestamp(),
+
+                startedBy:
+                    currentUser.uid
+
             }
         );
 
 
-        $("otpCard")
-            .classList.add(
-                "hidden"
-            );
+        otpInput.value =
+            "";
 
 
-        $("activeRideCard")
-            .classList.remove(
-                "hidden"
-            );
+        rideStatus.textContent =
+            "Ride started • Customer is on board";
+
+        rideStatus.classList.add(
+            "active"
+        );
 
 
-        toast(
-            "Ride started successfully."
+        startRideBtn.style.display =
+            "none";
+
+
+        completeRideBtn.style.display =
+            "block";
+
+
+        alert(
+            "OTP verified. Ride started successfully!"
         );
 
     }catch(error){
@@ -2097,9 +2143,296 @@ async function startRideWithOtp(
         );
 
 
-        toast(
-            "Unable to start ride: " +
-            error.message
+        alert(
+            error.message ||
+            "Unable to start ride."
+        );
+
+    }
+
+
+    startRideBtn.disabled =
+        false;
+
+}
+
+
+/* ============================================================
+   COMPLETE RIDE
+============================================================ */
+
+async function completeRide(){
+
+    if(!activeRideId){
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to complete this ride?"
+        );
+
+
+    if(!confirmed){
+        return;
+    }
+
+
+    completeRideBtn.disabled =
+        true;
+
+
+    try{
+
+        const rideRef =
+            doc(
+                db,
+                "rides",
+                activeRideId
+            );
+
+
+        const rideSnap =
+            await getDoc(
+                rideRef
+            );
+
+
+        if(
+            !rideSnap.exists()
+        ){
+
+            throw new Error(
+                "Ride not found."
+            );
+
+        }
+
+
+        const ride =
+            rideSnap.data();
+
+
+        const fare =
+            Number(
+                ride.fare ??
+                ride.amount ??
+                ride.totalFare ??
+                0
+            ) || 0;
+
+
+        await updateDoc(
+            rideRef,
+            {
+
+                status:"COMPLETED",
+
+                rideStatus:"COMPLETED",
+
+                completedAt:
+                    serverTimestamp(),
+
+                completedBy:
+                    currentUser.uid,
+
+                riderEarning:
+                    fare * 0.80,
+
+                adminCommission:
+                    fare * 0.20
+
+            }
+        );
+
+
+        alert(
+            "Ride completed successfully!"
+        );
+
+
+        activeRideId =
+            null;
+
+
+        rideStatus.textContent =
+            "No active ride";
+
+
+        rideStatus.classList.remove(
+            "active"
+        );
+
+
+        startRideBtn.style.display =
+            "block";
+
+
+        completeRideBtn.style.display =
+            "none";
+
+
+        if(isOnline){
+
+            listenForRideRequests();
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Complete ride error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Unable to complete ride."
+        );
+
+    }
+
+
+    completeRideBtn.disabled =
+        false;
+
+}
+
+
+/* ============================================================
+   TODAY EARNING
+============================================================ */
+
+async function loadTodayEarning(){
+
+    /*
+     * We intentionally use the rides collection and filter
+     * in the browser so this works with the current RiderX
+     * Firestore structure.
+     */
+
+    try{
+
+        const ridesRef =
+            collection(
+                db,
+                "rides"
+            );
+
+
+        const rideQuery =
+            query(
+                ridesRef,
+                where(
+                    "riderId",
+                    "==",
+                    currentUser.uid
+                )
+            );
+
+
+        onSnapshot(
+            rideQuery,
+            snapshot => {
+
+                let total =
+                    0;
+
+
+                const now =
+                    new Date();
+
+
+                snapshot.forEach(
+                    rideDoc => {
+
+                        const ride =
+                            rideDoc.data();
+
+
+                        const status =
+                            String(
+                                ride.status || ""
+                            )
+                            .trim()
+                            .toUpperCase();
+
+
+                        if(
+                            status !== "COMPLETED"
+                        ){
+
+                            return;
+
+                        }
+
+
+                        const date =
+                            dateFrom(
+                                ride.completedAt ??
+                                ride.createdAt
+                            );
+
+
+                        if(!date){
+                            return;
+                        }
+
+
+                        if(
+                            date.getDate() ===
+                                now.getDate() &&
+                            date.getMonth() ===
+                                now.getMonth() &&
+                            date.getFullYear() ===
+                                now.getFullYear()
+                        ){
+
+                            const earning =
+                                Number(
+                                    ride.riderEarning ??
+                                    (
+                                        Number(
+                                            ride.fare ??
+                                            ride.amount ??
+                                            0
+                                        ) * .80
+                                    )
+                                ) || 0;
+
+
+                            total +=
+                                earning;
+
+                        }
+
+                    }
+                );
+
+
+                earningAmount.textContent =
+                    money(total);
+
+            },
+            error => {
+
+                console.warn(
+                    "Earning listener:",
+                    error
+                );
+
+            }
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Earning error:",
+            error
         );
 
     }
@@ -2107,24 +2440,270 @@ async function startRideWithOtp(
 }
 
 
-// ============================================================
-// PAGE LOAD
-// ============================================================
+/* ============================================================
+   DATE
+============================================================ */
 
-document.addEventListener(
-    "DOMContentLoaded",
+function dateFrom(value){
+
+    if(!value){
+        return null;
+    }
+
+
+    try{
+
+        if(
+            typeof value.toDate ===
+            "function"
+        ){
+
+            return value.toDate();
+
+        }
+
+
+        if(
+            typeof value.seconds ===
+            "number"
+        ){
+
+            return new Date(
+                value.seconds * 1000
+            );
+
+        }
+
+
+        const date =
+            new Date(value);
+
+
+        return Number.isNaN(
+            date.getTime()
+        )
+            ? null
+            : date;
+
+    }catch{
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   ESCAPE HTML
+============================================================ */
+
+function escapeHtml(value){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /[&<>"']/g,
+        char => ({
+            "&":"&amp;",
+            "<":"&lt;",
+            ">":"&gt;",
+            '"':"&quot;",
+            "'":"&#039;"
+        }[char])
+    );
+
+}
+
+
+/* ============================================================
+   AUTH
+============================================================ */
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(!user){
+
+            accessText.textContent =
+                "Login required...";
+
+            setTimeout(
+                () => {
+
+                    window.location.replace(
+                        "../auth/login.html?role=rider"
+                    );
+
+                },
+                500
+            );
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        accessText.textContent =
+            "Checking rider approval...";
+
+
+        try{
+
+            const approved =
+                await loadRider();
+
+
+            if(!approved){
+                return;
+            }
+
+
+            accessText.textContent =
+                "Rider verified. Opening dashboard...";
+
+
+            hideAccess();
+
+
+            loadTodayEarning();
+
+
+            if(isOnline){
+
+                listenForRideRequests();
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "Rider authentication error:",
+                error
+            );
+
+
+            showError(
+                error.message ||
+                "Unable to load Rider account."
+            );
+
+
+            accessText.textContent =
+                "Unable to open Rider account.";
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   EVENTS
+============================================================ */
+
+onlineBtn.addEventListener(
+    "click",
+    toggleOnline
+);
+
+
+startRideBtn.addEventListener(
+    "click",
+    startRide
+);
+
+
+completeRideBtn.addEventListener(
+    "click",
+    completeRide
+);
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+$("profileBtn").addEventListener(
+    "click",
     () => {
 
-        console.log(
-            "RiderX Home loaded."
-        );
+        window.location.href =
+            "./Profile.html";
+
+    }
+);
+
+
+$("profileNav").addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "./Profile.html";
+
+    }
+);
+
+
+$("ridesNav").addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "./Rides.html";
+
+    }
+);
+
+
+$("walletNav").addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "./Wallet.html";
+
+    }
+);
+
+
+$("homeNav").addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "./home.html";
+
+    }
+);
+
+
+/* ============================================================
+   PAGE CACHE PROTECTION
+============================================================ */
+
+window.addEventListener(
+    "pageshow",
+    event => {
+
+        if(event.persisted){
+
+            window.location.reload();
+
+        }
 
     }
 );
 
 </script>
 
-
 </body>
 
-</html>
+    </html>
