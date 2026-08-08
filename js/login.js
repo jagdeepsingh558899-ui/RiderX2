@@ -261,7 +261,7 @@ async function redirectUser(
     if (role === "customer") {
 
         window.location.replace(
-            "../customer/Home.html"
+            "../customer/home.html"
         );
 
         return;
