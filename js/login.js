@@ -1,8 +1,8 @@
 // ============================================================
 // RiderX Login System
-// CUSTOMER + RIDER + ADMIN
+// Customer + Rider + Admin
 // Firebase v10 Modular SDK
-// FINAL FIXED VERSION
+// FINAL - FIXED ROUTING
 // ============================================================
 
 import {
@@ -36,8 +36,7 @@ const loginBtn = document.getElementById("login-btn");
 // REQUESTED ROLE
 // ============================================================
 
-const params =
-    new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
 
 const requestedRole =
     String(params.get("role") || "")
@@ -56,15 +55,16 @@ function showMessage(text, type = "error") {
     message.style.display = "block";
     message.textContent = text;
 
-    message.style.color =
-        type === "success"
-            ? "#22d66b"
-            : "#ff4444";
+    if (type === "success") {
+        message.style.color = "#22d66b";
+    } else {
+        message.style.color = "#ff4444";
+    }
 }
 
 
 // ============================================================
-// LOADING
+// BUTTON LOADING
 // ============================================================
 
 function setLoading(loading) {
@@ -84,36 +84,16 @@ function setLoading(loading) {
 // ROLE
 // ============================================================
 
-function getRole(data) {
+function getUserRole(data) {
 
     return String(
-        data?.role ??
-        data?.userType ??
-        data?.type ??
+        data?.role ||
+        data?.userType ||
+        data?.type ||
         ""
     )
-    .trim()
-    .toLowerCase();
-
-}
-
-
-// ============================================================
-// NORMALIZE STATUS
-// ============================================================
-
-function getStatus(data) {
-
-    return String(
-        data?.status ??
-        data?.approvalStatus ??
-        data?.riderStatus ??
-        data?.accountStatus ??
-        ""
-    )
-    .trim()
-    .toLowerCase();
-
+        .trim()
+        .toLowerCase();
 }
 
 
@@ -123,60 +103,37 @@ function getStatus(data) {
 
 function isRiderApproved(userData, riderData) {
 
-    const all = [
-        userData || {},
-        riderData || {}
-    ];
+    const adminApproved =
+        riderData?.adminApproved === true ||
+        userData?.adminApproved === true;
 
+    const approved =
+        riderData?.approved === true ||
+        userData?.approved === true;
 
-    // Direct approval flags
-    if (
-        all.some(
-            data =>
-                data.approved === true ||
-                data.isApproved === true ||
-                data.adminApproved === true
-        )
-    ) {
+    const userStatus =
+        String(userData?.status || "")
+            .trim()
+            .toLowerCase();
+
+    const riderStatus =
+        String(riderData?.status || "")
+            .trim()
+            .toLowerCase();
+
+    const active =
+        userStatus === "active" ||
+        riderStatus === "active";
+
+    // Admin approval has priority.
+    if (adminApproved) {
         return true;
     }
 
-
-    // Approved / active statuses
-    const statuses =
-        all
-            .map(getStatus)
-            .filter(Boolean);
-
-
-    if (
-        statuses.some(
-            status =>
-                [
-                    "approved",
-                    "active",
-                    "verified"
-                ].includes(status)
-        )
-    ) {
+    // Old RiderX approval format.
+    if (approved && active) {
         return true;
     }
-
-
-    // Account status can be active
-    if (
-        all.some(
-            data =>
-                String(
-                    data.accountStatus || ""
-                )
-                .trim()
-                .toLowerCase() === "active"
-        )
-    ) {
-        return true;
-    }
-
 
     return false;
 }
@@ -184,15 +141,17 @@ function isRiderApproved(userData, riderData) {
 
 // ============================================================
 // REDIRECT
+// IMPORTANT:
+// Actual rider file is:
+// rider/home.html
+//
+// NOT:
+// rider/Home.html
 // ============================================================
 
-async function redirectUser(
-    userData,
-    riderData = null
-) {
+async function redirectUser(userData, riderData = null) {
 
-    const role =
-        getRole(userData);
+    const role = getUserRole(userData);
 
 
     // ========================================================
@@ -226,20 +185,12 @@ async function redirectUser(
             );
 
 
-        console.log(
-            "Rider approval result:",
-            approved
-        );
-
-
         if (approved) {
 
             // IMPORTANT:
-            // File must be exactly:
-            // rider/Home.html
-
+            // lowercase home.html
             window.location.replace(
-                "../rider/Home.html"
+                "../rider/home.html"
             );
 
         } else {
@@ -247,7 +198,6 @@ async function redirectUser(
             window.location.replace(
                 "../rider/pending.html"
             );
-
         }
 
         return;
@@ -269,13 +219,13 @@ async function redirectUser(
 
 
     // ========================================================
-    // UNKNOWN
+    // UNKNOWN ROLE
     // ========================================================
 
     await signOut(auth);
 
     throw new Error(
-        "Your RiderX account role is missing or invalid."
+        "Your account role is missing or invalid. Please contact RiderX support."
     );
 }
 
@@ -288,11 +238,7 @@ async function loginUser(event) {
 
     event.preventDefault();
 
-
-    if (
-        !emailInput ||
-        !passwordInput
-    ) {
+    if (!emailInput || !passwordInput) {
         return;
     }
 
@@ -305,6 +251,10 @@ async function loginUser(event) {
     const password =
         passwordInput.value;
 
+
+    // ========================================================
+    // VALIDATION
+    // ========================================================
 
     if (!email) {
 
@@ -341,7 +291,7 @@ async function loginUser(event) {
     try {
 
         // ====================================================
-        // FIREBASE LOGIN
+        // FIREBASE AUTH
         // ====================================================
 
         const result =
@@ -357,6 +307,7 @@ async function loginUser(event) {
 
 
         if (!user) {
+
             throw new Error(
                 "Firebase user was not returned."
             );
@@ -384,7 +335,7 @@ async function loginUser(event) {
             await signOut(auth);
 
             throw new Error(
-                "RiderX account profile was not found. Please register again."
+                "Your RiderX account profile was not found. Please register again."
             );
         }
 
@@ -394,7 +345,7 @@ async function loginUser(event) {
 
 
         const role =
-            getRole(userData);
+            getUserRole(userData);
 
 
         console.log(
@@ -403,7 +354,9 @@ async function loginUser(event) {
                 uid: user.uid,
                 email: user.email,
                 role: role,
-                userData: userData
+                status: userData.status,
+                approved: userData.approved,
+                adminApproved: userData.adminApproved
             }
         );
 
@@ -479,71 +432,75 @@ async function loginUser(event) {
                 riderData =
                     riderSnap.data();
 
+            } else {
+
+                console.warn(
+                    "Rider profile not found in riders collection."
+                );
             }
 
 
             console.log(
-                "Rider profile:",
+                "RiderX Rider Profile:",
                 riderData
             );
         }
 
 
         // ====================================================
-        // BLOCKED / DISABLED
+        // ACCOUNT STATUS
         // ====================================================
 
         const userStatus =
-            getStatus(userData);
+            String(userData.status || "")
+                .trim()
+                .toLowerCase();
+
 
         const riderStatus =
-            getStatus(riderData);
+            String(riderData?.status || "")
+                .trim()
+                .toLowerCase();
 
+
+        // ====================================================
+        // BLOCKED / DISABLED RIDER
+        // ====================================================
 
         if (
             role === "rider" &&
-            [
-                userStatus,
-                riderStatus
-            ].includes("blocked")
+            (
+                userStatus === "blocked" ||
+                userStatus === "disabled" ||
+                riderStatus === "blocked" ||
+                riderStatus === "disabled"
+            )
         ) {
 
             await signOut(auth);
 
             throw new Error(
-                "Your Rider account has been blocked."
+                "Your Rider account has been disabled. Please contact RiderX support."
             );
         }
 
 
-        if (
-            role === "rider" &&
-            [
-                userStatus,
-                riderStatus
-            ].includes("disabled")
-        ) {
-
-            await signOut(auth);
-
-            throw new Error(
-                "Your Rider account has been disabled."
-            );
-        }
-
+        // ====================================================
+        // BLOCKED / DISABLED CUSTOMER
+        // ====================================================
 
         if (
             role === "customer" &&
-            [
-                "blocked",
-                "disabled"
-            ].includes(userStatus)
+            (
+                userStatus === "blocked" ||
+                userStatus === "disabled"
+            )
         ) {
 
             await signOut(auth);
 
             throw new Error(
-                "Your Customer account has been disabled."
+                "Your Customer account has been disabled. Please contact RiderX support."
             );
         }
 
@@ -558,6 +515,10 @@ async function loginUser(event) {
         );
 
 
+        // ====================================================
+        // REDIRECT
+        // ====================================================
+
         setTimeout(
             async () => {
 
@@ -568,11 +529,11 @@ async function loginUser(event) {
                         riderData
                     );
 
-                } catch (error) {
+                } catch (redirectError) {
 
                     console.error(
-                        "Redirect error:",
-                        error
+                        "RiderX Redirect Error:",
+                        redirectError
                     );
 
                     setLoading(false);
@@ -580,15 +541,14 @@ async function loginUser(event) {
                     showMessage(
                         "❌ " +
                         (
-                            error.message ||
+                            redirectError.message ||
                             "Unable to open your account."
                         )
                     );
-
                 }
 
             },
-            200
+            250
         );
 
 
@@ -607,67 +567,91 @@ async function loginUser(event) {
         switch (error.code) {
 
             case "auth/invalid-credential":
+
                 text =
                     "Email or password is incorrect.";
+
                 break;
+
 
             case "auth/user-not-found":
+
                 text =
                     "Account not found.";
+
                 break;
+
 
             case "auth/wrong-password":
+
                 text =
                     "Incorrect password.";
+
                 break;
+
 
             case "auth/invalid-email":
+
                 text =
                     "Please enter a valid email address.";
+
                 break;
+
 
             case "auth/user-disabled":
+
                 text =
                     "This Firebase account has been disabled.";
+
                 break;
+
 
             case "auth/too-many-requests":
+
                 text =
                     "Too many login attempts. Please try again later.";
+
                 break;
+
 
             case "auth/network-request-failed":
+
                 text =
                     "Network error. Please check your internet connection.";
+
                 break;
 
+
             case "permission-denied":
+
                 text =
-                    "Firestore permission denied.";
+                    "Firestore permission denied. Please check Firebase security rules.";
+
                 break;
+
 
             default:
 
                 if (error.message) {
-                    text = error.message;
-                }
 
+                    text =
+                        error.message;
+                }
         }
 
 
         setLoading(false);
 
         showMessage(
-            "❌ " + text
+            "❌ " + text,
+            "error"
         );
-
     }
-
 }
 
 
 // ============================================================
-// FORM
+// FORM EVENT
 // ============================================================
 
 if (loginForm) {
@@ -676,5 +660,27 @@ if (loginForm) {
         "submit",
         loginUser
     );
-
 }
+
+
+// ============================================================
+// AUTO FOCUS
+// ============================================================
+
+if (emailInput) {
+
+    setTimeout(
+        () => {
+
+            if (
+                document.activeElement === document.body ||
+                document.activeElement === null
+            ) {
+
+                emailInput.focus();
+            }
+
+        },
+        200
+    );
+                }
