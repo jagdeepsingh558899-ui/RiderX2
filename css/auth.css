@@ -1,441 +1,1040 @@
-/* =========================================
-   RiderX Authentication Design
-   Login + Register
-   ========================================= */
+/* ============================================================
+   RIDERX 2.0
+   AUTHENTICATION STYLES
+   File: css/auth.css
+   ============================================================ */
 
 
-.auth-page{
+/* ============================================================
+   AUTH PAGE
+   ============================================================ */
 
-    min-height:100vh;
+.rx-auth-page {
+    min-height: 100vh;
 
-    display:flex;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    justify-content:center;
-
-    align-items:center;
+    padding: 20px;
 
     background:
-    radial-gradient(
-    circle at top,
-    #252000,
-    #000
-    );
-
-    padding:20px;
-
+        radial-gradient(
+            circle at top right,
+            rgba(255, 212, 0, .12),
+            transparent 35%
+        ),
+        var(--rx-bg);
 }
 
 
+/* ============================================================
+   AUTH CONTAINER
+   ============================================================ */
 
-/* Auth Container */
+.rx-auth-container {
+    width: 100%;
+    max-width: 470px;
 
-.auth-container{
+    margin: auto;
+}
 
-    width:100%;
 
-    max-width:430px;
+/* ============================================================
+   AUTH BRAND
+   ============================================================ */
 
-    background:#151515;
+.rx-auth-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
-    padding:35px;
+    margin-bottom: 25px;
 
-    border-radius:30px;
+    text-align: center;
+}
+
+.rx-auth-brand .rx-logo {
+    margin-bottom: 10px;
+}
+
+.rx-auth-brand-title {
+    color: var(--rx-text);
+
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -.5px;
+}
+
+.rx-auth-brand-subtitle {
+    margin-top: 4px;
+
+    color: var(--rx-muted);
+
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   AUTH CARD
+   ============================================================ */
+
+.rx-auth-card {
+    width: 100%;
+
+    padding: 22px;
+
+    background: var(--rx-white);
+
+    border: 1px solid var(--rx-border);
+    border-radius: 24px;
+
+    box-shadow: var(--rx-shadow-lg);
+}
+
+
+/* ============================================================
+   AUTH HEADER
+   ============================================================ */
+
+.rx-auth-header {
+    margin-bottom: 20px;
+}
+
+.rx-auth-title {
+    color: var(--rx-text);
+
+    font-size: 23px;
+    font-weight: 900;
+
+    letter-spacing: -.3px;
+}
+
+.rx-auth-subtitle {
+    margin-top: 5px;
+
+    color: var(--rx-muted);
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   ROLE SELECTION
+   ============================================================ */
+
+.rx-role-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+.rx-role-option {
+    position: relative;
+
+    min-height: 105px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 12px;
+
+    background: var(--rx-white);
+
+    border: 1px solid var(--rx-border);
+    border-radius: 17px;
+
+    color: var(--rx-text);
+
+    cursor: pointer;
+
+    transition:
+        border-color .2s ease,
+        background .2s ease,
+        transform .15s ease;
+}
+
+.rx-role-option:active {
+    transform: scale(.97);
+}
+
+.rx-role-option.selected {
+    background: #FFFBE5;
+
+    border:
+        2px solid var(--rx-yellow);
+}
+
+.rx-role-icon {
+    width: 45px;
+    height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-bottom: 7px;
+
+    border-radius: 14px;
+
+    background: var(--rx-bg-2);
+
+    font-size: 23px;
+}
+
+.rx-role-option.selected
+.rx-role-icon {
+    background: var(--rx-yellow);
+}
+
+.rx-role-name {
+    font-size: 13px;
+    font-weight: 850;
+}
+
+.rx-role-description {
+    margin-top: 2px;
+
+    color: var(--rx-muted);
+
+    font-size: 9px;
+
+    text-align: center;
+}
+
+
+/* ============================================================
+   ROLE CHECK
+   ============================================================ */
+
+.rx-role-check {
+    position: absolute;
+
+    top: 8px;
+    right: 8px;
+
+    width: 19px;
+    height: 19px;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--rx-yellow);
+    color: var(--rx-black);
+
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.rx-role-option.selected
+.rx-role-check {
+    display: flex;
+}
+
+
+/* ============================================================
+   AUTH INPUT GROUP
+   ============================================================ */
+
+.rx-auth-field {
+    margin-bottom: 15px;
+}
+
+.rx-auth-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 7px;
+
+    color: var(--rx-text);
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.rx-auth-input-wrap {
+    position: relative;
+}
+
+.rx-auth-input-icon {
+    position: absolute;
+
+    left: 14px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--rx-muted);
+
+    pointer-events: none;
+
+    font-size: 17px;
+}
+
+.rx-auth-input {
+    width: 100%;
+    height: 51px;
+
+    padding:
+        0 44px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 14px;
+
+    outline: none;
+
+    background: var(--rx-white);
+    color: var(--rx-text);
+
+    font-size: 14px;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.rx-auth-input:focus {
+    border-color: var(--rx-yellow);
 
     box-shadow:
-    0 20px 50px rgba(0,0,0,.6);
+        0 0 0 3px
+        rgba(255,212,0,.18);
+}
 
-    border:1px solid rgba(255,214,0,.15);
-
-    animation:authShow .5s ease;
-
+.rx-auth-input::placeholder {
+    color: var(--rx-light-text);
 }
 
 
+/* ============================================================
+   PASSWORD VISIBILITY
+   ============================================================ */
 
-@keyframes authShow{
+.rx-password-toggle {
+    position: absolute;
 
-    from{
+    right: 10px;
+    top: 50%;
 
-        opacity:0;
+    width: 34px;
+    height: 34px;
 
-        transform:translateY(30px);
+    transform: translateY(-50%);
 
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    to{
+    border: 0;
+    border-radius: 50%;
 
-        opacity:1;
+    background: transparent;
 
-        transform:translateY(0);
+    color: var(--rx-muted);
 
-    }
+    font-size: 17px;
+}
 
+.rx-password-toggle:active {
+    background: var(--rx-bg-2);
 }
 
 
+/* ============================================================
+   PHONE INPUT
+   ============================================================ */
 
-/* Logo */
+.rx-phone-input {
+    display: flex;
+    gap: 8px;
+}
 
+.rx-country-code {
+    width: 82px;
+    height: 51px;
 
-.auth-logo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    text-align:center;
+    flex: 0 0 82px;
 
-    margin-bottom:25px;
+    border:
+        1px solid var(--rx-border);
 
+    border-radius: 14px;
+
+    background: var(--rx-bg-2);
+
+    color: var(--rx-text);
+
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.rx-phone-number {
+    flex: 1;
 }
 
 
+/* ============================================================
+   FORGOT PASSWORD
+   ============================================================ */
 
-.auth-logo img{
+.rx-forgot-link {
+    display: block;
 
-    width:100px;
+    margin-top: 3px;
 
-    height:100px;
+    color: var(--rx-text);
 
-    object-fit:contain;
+    font-size: 12px;
+    font-weight: 750;
 
-    animation:logoFloat 2s infinite;
+    text-align: right;
+}
 
+.rx-forgot-link:hover {
+    color: var(--rx-yellow-dark);
 }
 
 
+/* ============================================================
+   REMEMBER ME
+   ============================================================ */
 
-@keyframes logoFloat{
+.rx-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-    0%,100%{
+    margin: 4px 0 16px;
 
-        transform:translateY(0);
+    color: var(--rx-muted);
 
-    }
+    font-size: 11px;
+}
 
+.rx-remember input {
+    width: 17px;
+    height: 17px;
 
-    50%{
-
-        transform:translateY(-8px);
-
-    }
-
+    accent-color: var(--rx-yellow-dark);
 }
 
 
+/* ============================================================
+   AUTH BUTTON
+   ============================================================ */
 
+.rx-auth-button {
+    width: 100%;
+    min-height: 52px;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
-.auth-logo h1{
+    border: 0;
+    border-radius: 14px;
 
-    color:#FFD600;
+    background: var(--rx-yellow);
+    color: var(--rx-black);
 
-    font-size:30px;
+    font-size: 15px;
+    font-weight: 900;
 
-    margin-top:10px;
+    transition:
+        transform .15s ease,
+        background .2s ease,
+        opacity .2s ease;
+}
 
+.rx-auth-button:hover {
+    background: var(--rx-yellow-dark);
+}
+
+.rx-auth-button:active {
+    transform: scale(.98);
+}
+
+.rx-auth-button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
 }
 
 
+/* ============================================================
+   SECONDARY AUTH BUTTON
+   ============================================================ */
 
-.auth-logo p{
+.rx-auth-secondary-button {
+    width: 100%;
+    min-height: 50px;
 
-    color:#999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
+    margin-top: 10px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 14px;
+
+    background: var(--rx-white);
+    color: var(--rx-text);
+
+    font-size: 14px;
+    font-weight: 800;
 }
 
 
+/* ============================================================
+   DIVIDER
+   ============================================================ */
 
+.rx-auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
+    margin: 20px 0;
 
-/* Heading */
+    color: var(--rx-muted);
 
-.auth-container h2{
+    font-size: 11px;
+}
 
-    text-align:center;
+.rx-auth-divider::before,
+.rx-auth-divider::after {
+    content: "";
 
-    color:white;
+    flex: 1;
 
-    margin-bottom:25px;
+    height: 1px;
 
+    background: var(--rx-border);
 }
 
 
+/* ============================================================
+   SOCIAL LOGIN
+   ============================================================ */
 
+.rx-social-grid {
+    display: grid;
 
+    grid-template-columns:
+        repeat(2, 1fr);
 
-/* Input */
+    gap: 9px;
+}
 
-.auth-input{
+.rx-social-button {
+    min-height: 48px;
 
-    margin-bottom:18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 13px;
+
+    background: var(--rx-white);
+    color: var(--rx-text);
+
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.rx-social-icon {
+    font-size: 18px;
 }
 
 
+/* ============================================================
+   OTP SECTION
+   ============================================================ */
 
-.auth-input label{
-
-    display:block;
-
-    color:#ddd;
-
-    margin-bottom:8px;
-
+.rx-otp-container {
+    padding: 5px 0;
 }
 
+.rx-otp-message {
+    margin-bottom: 18px;
 
+    color: var(--rx-muted);
 
-.auth-input input,
-.auth-input select{
+    font-size: 12px;
 
+    line-height: 1.5;
 
-    width:100%;
-
-    padding:15px;
-
-    background:#222;
-
-    border:none;
-
-    outline:none;
-
-    color:white;
-
-    border-radius:15px;
-
-    transition:.3s;
-
+    text-align: center;
 }
 
+.rx-otp-phone {
+    color: var(--rx-text);
 
+    font-weight: 800;
+}
 
-.auth-input input:focus,
-.auth-input select:focus{
+.rx-auth-otp {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-bottom: 18px;
+}
+
+.rx-auth-otp input {
+    width: 48px;
+    height: 55px;
+
+    border:
+        1px solid var(--rx-border);
+
+    border-radius: 13px;
+
+    outline: none;
+
+    background: var(--rx-white);
+    color: var(--rx-text);
+
+    font-size: 20px;
+    font-weight: 900;
+
+    text-align: center;
+
+    transition:
+        border-color .2s ease,
+        box-shadow .2s ease;
+}
+
+.rx-auth-otp input:focus {
+    border-color: var(--rx-yellow);
 
     box-shadow:
-    0 0 0 2px #FFD600;
+        0 0 0 3px
+        rgba(255,212,0,.18);
+}
+
+
+/* ============================================================
+   OTP TIMER
+   ============================================================ */
+
+.rx-otp-timer {
+    margin-bottom: 15px;
+
+    color: var(--rx-muted);
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+.rx-otp-timer strong {
+    color: var(--rx-text);
+}
+
+.rx-resend {
+    border: 0;
+
+    background: transparent;
+
+    color: var(--rx-text);
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.rx-resend:disabled {
+    color: var(--rx-muted);
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   AUTH FOOTER
+   ============================================================ */
+
+.rx-auth-footer {
+    margin-top: 20px;
+
+    color: var(--rx-muted);
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+.rx-auth-footer a {
+    color: var(--rx-text);
+
+    font-weight: 850;
+}
+
+.rx-auth-footer a:hover {
+    color: var(--rx-yellow-dark);
+}
+
+
+/* ============================================================
+   TERMS
+   ============================================================ */
+
+.rx-auth-terms {
+    margin-top: 15px;
+
+    color: var(--rx-muted);
+
+    font-size: 10px;
+
+    line-height: 1.5;
+
+    text-align: center;
+}
+
+.rx-auth-terms a {
+    color: var(--rx-text);
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   ERROR MESSAGE
+   ============================================================ */
+
+.rx-auth-error {
+    display: none;
+
+    margin-bottom: 14px;
+
+    padding: 11px 12px;
+
+    border-radius: 12px;
+
+    background: var(--rx-danger-bg);
+    color: #991B1B;
+
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.rx-auth-error.show {
+    display: block;
+}
+
+
+/* ============================================================
+   SUCCESS MESSAGE
+   ============================================================ */
+
+.rx-auth-success {
+    display: none;
+
+    margin-bottom: 14px;
+
+    padding: 11px 12px;
+
+    border-radius: 12px;
+
+    background: var(--rx-success-bg);
+    color: #166534;
+
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.rx-auth-success.show {
+    display: block;
+}
+
+
+/* ============================================================
+   EMAIL VERIFICATION
+   ============================================================ */
+
+.rx-verification-card {
+    padding: 18px;
+
+    border-radius: 18px;
+
+    background: var(--rx-yellow);
+
+    color: var(--rx-black);
+
+    text-align: center;
+}
+
+.rx-verification-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 10px;
+
+    border-radius: 50%;
+
+    background: rgba(0,0,0,.1);
+
+    font-size: 26px;
+}
+
+.rx-verification-title {
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.rx-verification-text {
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    opacity: .75;
+}
+
+
+/* ============================================================
+   LOADING BUTTON
+   ============================================================ */
+
+.rx-auth-loading {
+    position: relative;
+
+    color: transparent !important;
+}
+
+.rx-auth-loading::after {
+    content: "";
+
+    position: absolute;
+
+    width: 21px;
+    height: 21px;
+
+    left: 50%;
+    top: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    border:
+        3px solid
+        rgba(0,0,0,.2);
+
+    border-top-color:
+        var(--rx-black);
+
+    border-radius: 50%;
+
+    animation:
+        rxAuthSpin .7s linear infinite;
+}
+
+@keyframes rxAuthSpin {
+
+    to {
+        transform:
+            translate(-50%, -50%)
+            rotate(360deg);
+    }
+}
+
+
+/* ============================================================
+   PROFILE PHOTO
+   ============================================================ */
+
+.rx-profile-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.rx-profile-preview {
+    position: relative;
+
+    width: 90px;
+    height: 90px;
+
+    overflow: hidden;
+
+    margin-bottom: 10px;
+
+    border-radius: 50%;
+
+    background: var(--rx-yellow);
+
+    border:
+        3px solid
+        var(--rx-white);
+
+    box-shadow: var(--rx-shadow-md);
+}
+
+.rx-profile-preview img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.rx-profile-placeholder {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--rx-black);
+
+    font-size: 30px;
+    font-weight: 900;
+}
+
+.rx-upload-button {
+    border: 0;
+
+    background: transparent;
+
+    color: var(--rx-text);
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+/* ============================================================
+   RIDER VEHICLE SETUP
+   ============================================================ */
+
+.rx-vehicle-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 10px;
+}
+
+.rx-vehicle-option {
+    min-height: 95px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px;
+
+    border:
+        1px solid
+        var(--rx-border);
+
+    border-radius: 15px;
+
+    background: var(--rx-white);
+
+    color: var(--rx-text);
+}
+
+.rx-vehicle-option.selected {
+    background: #FFFBE5;
+
+    border:
+        2px solid
+        var(--rx-yellow);
+}
+
+.rx-vehicle-icon {
+    font-size: 28px;
+
+    margin-bottom: 6px;
+}
+
+.rx-vehicle-name {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 380px) {
+
+    .rx-auth-page {
+        padding: 12px;
+    }
+
+    .rx-auth-card {
+        padding: 17px;
+        border-radius: 20px;
+    }
+
+    .rx-auth-title {
+        font-size: 21px;
+    }
+
+    .rx-auth-otp {
+        gap: 5px;
+    }
+
+    .rx-auth-otp input {
+        width: 43px;
+        height: 51px;
+    }
+
+    .rx-role-option {
+        min-height: 95px;
+    }
 
 }
 
 
-
-
-
-/* Button */
-
-
-.auth-btn{
-
-    width:100%;
-
-    padding:15px;
-
-    border:none;
-
-    border-radius:15px;
-
-    background:#FFD600;
-
-    color:#000;
-
-    font-size:16px;
-
-    font-weight:700;
-
-    cursor:pointer;
-
-    transition:.3s;
-
-}
-
-
-
-.auth-btn:hover{
-
-    transform:translateY(-3px);
-
-    box-shadow:
-    0 10px 25px rgba(255,214,0,.4);
-
-}
-
-
-
-
-
-/* Switch */
-
-
-.auth-switch{
-
-    text-align:center;
-
-    margin-top:20px;
-
-    color:#aaa;
-
-}
-
-
-
-.auth-switch a{
-
-    color:#FFD600;
-
-    text-decoration:none;
-
-    font-weight:600;
-
-}
-
-
-
-
-/* Role Selection */
-
-.role-box{
-
-    display:grid;
-
-    grid-template-columns:1fr 1fr;
-
-    gap:15px;
-
-    margin-bottom:20px;
-
-}
-
-
-
-.role-option{
-
-    background:#222;
-
-    padding:15px;
-
-    text-align:center;
-
-    border-radius:15px;
-
-    cursor:pointer;
-
-    transition:.3s;
-
-}
-
-
-
-.role-option:hover{
-
-    background:#FFD600;
-
-    color:#000;
-
-}
-
-
-
-.role-option.active{
-
-    background:#FFD600;
-
-    color:#000;
-
-}
-
-
-
-
-
-/* OTP Box */
-
-
-.otp-box{
-
-    display:flex;
-
-    gap:10px;
-
-    justify-content:center;
-
-}
-
-
-
-.otp-box input{
-
-    width:50px;
-
-    height:55px;
-
-    text-align:center;
-
-    font-size:22px;
-
-}
-
-
-
-
-
-/* Loader */
-
-
-.auth-loader{
-
-    width:35px;
-
-    height:35px;
-
-    margin:15px auto;
-
-    border-radius:50%;
-
-    border:4px solid #333;
-
-    border-top-color:#FFD600;
-
-    animation:spin 1s linear infinite;
-
-}
-
-
-
-
-@media(max-width:500px){
-
-
-.auth-container{
-
-    padding:25px;
-
-    border-radius:22px;
-
-}
-
-
-
-.auth-logo img{
-
-    width:80px;
-
-    height:80px;
-
-}
-
-
-
-.auth-logo h1{
-
-    font-size:25px;
-
-}
-
-
-
-.role-box{
-
-    grid-template-columns:1fr;
-
-}
-
-
+/* ============================================================
+   TABLET / DESKTOP
+   ============================================================ */
+
+@media (min-width: 700px) {
+
+    .rx-auth-page {
+        padding: 40px 20px;
+    }
+
+    .rx-auth-card {
+        padding: 28px;
+    }
 
 }
