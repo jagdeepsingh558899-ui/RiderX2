@@ -1,7 +1,11 @@
+// ============================================================
 // RiderX Firebase Configuration
-// Firebase v10 Modular SDK
+// FINAL CENTRAL CONFIG
+// ============================================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
 import {
   getAuth,
@@ -30,13 +34,27 @@ import {
   getStorage
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+import {
+  getDatabase,
+  ref,
+  set,
+  get,
+  update,
+  remove,
+  onValue,
+  off
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Firebase Project Configuration
+
+// ============================================================
+// FIREBASE PROJECT CONFIG
+// ============================================================
 
 const firebaseConfig = {
   apiKey: "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
   authDomain: "riderx-1.firebaseapp.com",
-  databaseURL: "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL:
+    "https://riderx-1-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "riderx-1",
   storageBucket: "riderx-1.firebasestorage.app",
   messagingSenderId: "261640190671",
@@ -45,7 +63,9 @@ const firebaseConfig = {
 };
 
 
-// Initialize Firebase
+// ============================================================
+// INITIALIZE FIREBASE
+// ============================================================
 
 const app = initializeApp(firebaseConfig);
 
@@ -55,30 +75,46 @@ const db = getFirestore(app);
 
 const storage = getStorage(app);
 
+const rtdb = getDatabase(app);
 
-// Export
+
+// ============================================================
+// EXPORT EVERYTHING USED BY RIDERX
+// ============================================================
 
 export {
+  // Firebase
   app,
   auth,
   db,
   storage,
+  rtdb,
 
+  // Authentication
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 
+  // Firestore
   doc,
   setDoc,
   getDoc,
   updateDoc,
-
   collection,
   addDoc,
   query,
   where,
   onSnapshot,
   runTransaction,
-  serverTimestamp
+  serverTimestamp,
+
+  // Realtime Database
+  ref,
+  set,
+  get,
+  update,
+  remove,
+  onValue,
+  off
 };
