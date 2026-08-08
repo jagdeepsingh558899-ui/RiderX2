@@ -1,831 +1,1381 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>RiderX Rider Settings</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#090A0F">
+<title>RiderX • Rider Settings</title>
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-
 <style>
-
+:root{
+    --bg:#090A0F;
+    --card:#12141C;
+    --card2:#181B25;
+    --border:#292D39;
+    --yellow:#FFE500;
+    --text:#fff;
+    --muted:#9298A7;
+    --danger:#ff4050;
+    --green:#16c784;
+}
 
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
 }
 
-
+html{
+    background:var(--bg);
+}
 
 body{
-
-background:#050505;
-color:white;
-
+    min-height:100vh;
+    background:
+        radial-gradient(circle at top right,rgba(255,229,0,.08),transparent 28%),
+        var(--bg);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    padding-bottom:30px;
 }
 
+button,
+select{
+    font:inherit;
+}
 
+button{
+    cursor:pointer;
+}
 
 .header{
-
-height:70px;
-
-background:#111;
-
-display:flex;
-
-align-items:center;
-
-gap:20px;
-
-padding:0 20px;
-
-border-bottom:1px solid #222;
-
+    position:sticky;
+    top:0;
+    z-index:50;
+    height:68px;
+    background:rgba(9,10,15,.94);
+    backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    padding:0 17px;
 }
 
-
-
-.header i{
-
-color:#FFE500;
-font-size:22px;
-
+.header-inner{
+    width:100%;
+    max-width:700px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    gap:15px;
 }
 
+.back{
+    width:42px;
+    height:42px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:var(--card);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+}
 
+.back:active{
+    transform:scale(.95);
+}
 
 .logo{
-
-font-size:30px;
-font-weight:900;
-
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:-1px;
 }
-
-
 
 .logo span{
-
-color:#FFE500;
-
+    color:var(--yellow);
 }
 
-
-
-
+.header-title{
+    margin-left:auto;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+}
 
 .container{
-
-padding:20px;
-
+    width:100%;
+    max-width:700px;
+    margin:auto;
+    padding:18px 15px 30px;
 }
 
+.profile-mini{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    padding:16px;
+    margin-bottom:17px;
+    background:linear-gradient(135deg,#171A23,#101219);
+    border:1px solid var(--border);
+    border-radius:20px;
+}
 
+.profile-mini img{
+    width:54px;
+    height:54px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid var(--yellow);
+}
 
+.profile-mini h2{
+    font-size:16px;
+    margin-bottom:4px;
+}
 
+.profile-mini p{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.profile-mini .arrow{
+    margin-left:auto;
+    color:var(--muted);
+}
 
 .card{
-
-background:#111;
-
-border:1px solid #333;
-
-border-radius:20px;
-
-padding:20px;
-
-margin-bottom:18px;
-
+    background:linear-gradient(145deg,rgba(24,27,37,.97),rgba(15,17,24,.98));
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:17px;
+    margin-bottom:15px;
+    overflow:hidden;
 }
-
-
-
-
 
 .title{
-
-color:#FFE500;
-
-font-size:18px;
-
-font-weight:bold;
-
-margin-bottom:15px;
-
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--yellow);
+    font-size:13px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.7px;
+    margin-bottom:4px;
 }
 
+.title i{
+    width:27px;
+    height:27px;
+    border-radius:9px;
+    background:rgba(255,229,0,.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+}
 
-
-
+.subtitle{
+    color:var(--muted);
+    font-size:11px;
+    margin:0 0 8px 37px;
+}
 
 .option{
-
-display:flex;
-
-align-items:center;
-
-justify-content:space-between;
-
-padding:15px 0;
-
-border-bottom:1px solid #222;
-
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    border-bottom:1px solid rgba(255,255,255,.06);
 }
-
-
 
 .option:last-child{
-
-border:none;
-
+    border-bottom:0;
 }
 
+.option.clickable{
+    cursor:pointer;
+}
 
+.option.clickable:active{
+    background:rgba(255,255,255,.035);
+}
 
 .left{
-
-display:flex;
-
-align-items:center;
-
-gap:15px;
-
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    flex:1;
 }
 
-
-
-.left i{
-
-color:#FFE500;
-
-font-size:20px;
-
+.option-icon{
+    width:38px;
+    height:38px;
+    flex:0 0 38px;
+    border-radius:12px;
+    background:#1D202A;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
 }
 
+.option-text{
+    min-width:0;
+}
 
+.option-text strong{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+}
+
+.option-text small{
+    display:block;
+    margin-top:4px;
+    color:var(--muted);
+    font-size:10px;
+}
+
+.chevron{
+    color:#676D7C;
+    font-size:12px;
+}
 
 select{
-
-background:#222;
-
-color:white;
-
-border:none;
-
-padding:10px;
-
-border-radius:10px;
-
+    appearance:none;
+    -webkit-appearance:none;
+    min-width:105px;
+    background:#20232D;
+    color:#fff;
+    border:1px solid var(--border);
+    padding:10px 28px 10px 11px;
+    border-radius:11px;
+    outline:none;
+    font-size:12px;
+    font-weight:700;
 }
 
+.select-wrap{
+    position:relative;
+}
 
-
+.select-wrap i{
+    position:absolute;
+    right:9px;
+    top:50%;
+    transform:translateY(-50%);
+    pointer-events:none;
+    color:var(--yellow);
+    font-size:10px;
+}
 
 .switch{
-
-width:50px;
-
-height:26px;
-
-background:#444;
-
-border-radius:20px;
-
-position:relative;
-
-cursor:pointer;
-
+    position:relative;
+    width:50px;
+    height:28px;
+    flex:0 0 50px;
 }
 
-
-
-.switch::after{
-
-content:"";
-
-position:absolute;
-
-width:22px;
-
-height:22px;
-
-background:white;
-
-border-radius:50%;
-
-top:2px;
-
-left:3px;
-
-transition:.3s;
-
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
 }
 
-
-
-.switch.active{
-
-background:#FFE500;
-
+.slider{
+    position:absolute;
+    inset:0;
+    background:#343845;
+    border:1px solid #454A58;
+    border-radius:30px;
+    transition:.25s;
 }
 
-
-
-.switch.active::after{
-
-left:25px;
-
-background:#000;
-
+.slider:before{
+    content:"";
+    position:absolute;
+    width:20px;
+    height:20px;
+    left:3px;
+    top:3px;
+    border-radius:50%;
+    background:#fff;
+    transition:.25s;
 }
 
-
-
-
-
-
-.btn{
-
-width:100%;
-
-padding:15px;
-
-margin-top:15px;
-
-border-radius:14px;
-
-border:none;
-
-font-size:16px;
-
-font-weight:bold;
-
-background:#FFE500;
-
-color:#000;
-
+.switch input:checked + .slider{
+    background:var(--yellow);
+    border-color:var(--yellow);
 }
 
-
-
-.logout{
-
-background:#ff3030;
-
-color:white;
-
+.switch input:checked + .slider:before{
+    transform:translateX(22px);
+    background:#090A0F;
 }
 
+.install-banner{
+    display:none;
+    align-items:center;
+    gap:12px;
+    padding:13px;
+    margin-bottom:15px;
+    border-radius:17px;
+    background:rgba(255,229,0,.08);
+    border:1px solid rgba(255,229,0,.22);
+}
 
+.install-banner.show{
+    display:flex;
+}
 
+.install-banner .install-icon{
+    width:38px;
+    height:38px;
+    border-radius:12px;
+    background:var(--yellow);
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
 
+.install-banner div:nth-child(2){
+    flex:1;
+}
+
+.install-banner strong{
+    display:block;
+    font-size:12px;
+}
+
+.install-banner small{
+    display:block;
+    color:var(--muted);
+    font-size:10px;
+    margin-top:3px;
+}
+
+.install-btn{
+    border:0;
+    background:var(--yellow);
+    color:#000;
+    font-weight:900;
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:11px;
+}
+
+.action-btn{
+    width:100%;
+    border:1px solid var(--border);
+    background:#181B24;
+    color:#fff;
+    border-radius:14px;
+    padding:14px;
+    margin-top:9px;
+    font-size:13px;
+    font-weight:800;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+}
+
+.action-btn:active{
+    transform:scale(.985);
+}
+
+.action-btn.primary{
+    background:var(--yellow);
+    color:#000;
+    border-color:var(--yellow);
+}
+
+.action-btn.danger{
+    background:rgba(255,64,80,.08);
+    color:#ff6875;
+    border-color:rgba(255,64,80,.25);
+}
+
+.version{
+    text-align:center;
+    color:#5F6470;
+    font-size:10px;
+    padding:12px 0 4px;
+}
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    transform:translate(-50%,20px);
+    width:calc(100% - 30px);
+    max-width:450px;
+    padding:13px 15px;
+    border-radius:14px;
+    background:#20232D;
+    border:1px solid var(--border);
+    box-shadow:0 12px 35px rgba(0,0,0,.45);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:100;
+    font-size:12px;
+    font-weight:700;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+.toast i{
+    color:var(--yellow);
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:90;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    background:rgba(0,0,0,.65);
+    backdrop-filter:blur(5px);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.sheet{
+    width:100%;
+    max-width:700px;
+    max-height:82vh;
+    overflow:auto;
+    background:#12141C;
+    border:1px solid var(--border);
+    border-bottom:0;
+    border-radius:24px 24px 0 0;
+    padding:18px;
+    animation:sheetUp .22s ease;
+}
+
+@keyframes sheetUp{
+    from{
+        transform:translateY(100%);
+    }
+    to{
+        transform:translateY(0);
+    }
+}
+
+.handle{
+    width:42px;
+    height:4px;
+    background:#424754;
+    border-radius:10px;
+    margin:0 auto 17px;
+}
+
+.sheet h3{
+    font-size:17px;
+    margin-bottom:12px;
+}
+
+.sheet p{
+    color:#A0A5B2;
+    font-size:12px;
+    line-height:1.7;
+    margin-bottom:10px;
+}
+
+.close-btn{
+    width:100%;
+    padding:13px;
+    margin-top:8px;
+    border:0;
+    border-radius:13px;
+    background:#242833;
+    color:#fff;
+    font-weight:800;
+}
+
+body.light-mode{
+    --bg:#F4F5F7;
+    --card:#fff;
+    --card2:#fff;
+    --border:#E1E4EA;
+    --text:#12141C;
+    --muted:#707785;
+}
+
+body.light-mode{
+    background:var(--bg);
+}
+
+body.light-mode .header{
+    background:rgba(244,245,247,.94);
+}
+
+body.light-mode .card,
+body.light-mode .profile-mini{
+    background:#fff;
+}
+
+body.light-mode .option-icon,
+body.light-mode select,
+body.light-mode .action-btn{
+    background:#F1F2F5;
+    color:#12141C;
+}
+
+body.light-mode .sheet{
+    background:#fff;
+}
+
+@media(max-width:380px){
+    .container{
+        padding-left:12px;
+        padding-right:12px;
+    }
+
+    .header-title{
+        display:none;
+    }
+
+    select{
+        min-width:92px;
+    }
+}
 </style>
-
-
 </head>
-
 
 <body>
 
+<header class="header">
+    <div class="header-inner">
+        <button class="back" id="backBtn" aria-label="Back">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
 
+        <div class="logo">
+            RID<span>ERX</span>
+        </div>
 
-<div class="header">
+        <div class="header-title">RIDER SETTINGS</div>
+    </div>
+</header>
 
+<main class="container">
 
-<i onclick="history.back()"
-class="fa-solid fa-arrow-left"></i>
+    <div class="profile-mini clickable" id="profileCard">
+        <img id="riderPhoto"
+             src="https://ui-avatars.com/api/?name=Rider&background=FFE500&color=090A0F"
+             alt="Rider">
+        <div>
+            <h2 id="riderName">Rider</h2>
+            <p id="riderEmail">Rider account</p>
+        </div>
+        <i class="fa-solid fa-chevron-right arrow"></i>
+    </div>
 
+    <div class="install-banner" id="installBanner">
+        <div class="install-icon">
+            <i class="fa-solid fa-download"></i>
+        </div>
+        <div>
+            <strong>Install RiderX</strong>
+            <small>Use RiderX like a mobile app.</small>
+        </div>
+        <button class="install-btn" id="installBtn">INSTALL</button>
+    </div>
 
+    <!-- APP -->
+    <section class="card">
+        <div class="title">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            Application
+        </div>
+        <div class="subtitle">App and language preferences</div>
 
-<div class="logo">
+        <div class="option">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-language"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Language</strong>
+                    <small>Choose your preferred language</small>
+                </div>
+            </div>
 
-RID<span>ERX</span>
+            <div class="select-wrap">
+                <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                </select>
+                <i class="fa-solid fa-chevron-down"></i>
+            </div>
+        </div>
 
+        <div class="option clickable" id="installRow">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-download"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Install RiderX App</strong>
+                    <small>Add RiderX to your home screen</small>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right chevron"></i>
+        </div>
+    </section>
+
+    <!-- NOTIFICATIONS -->
+    <section class="card">
+        <div class="title">
+            <i class="fa-solid fa-bell"></i>
+            Notifications
+        </div>
+        <div class="subtitle">Control rider alerts and sounds</div>
+
+        <div class="option">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+                <div class="option-text">
+                    <strong>New Ride Requests</strong>
+                    <small>Receive new booking alerts</small>
+                </div>
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="rideAlerts">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="option">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Earnings Alerts</strong>
+                    <small>Get notified about earnings</small>
+                </div>
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="earningAlerts">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="option">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-volume-high"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Ride Request Sound</strong>
+                    <small>Play sound for incoming requests</small>
+                </div>
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="rideSound">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </section>
+
+    <!-- PREFERENCES -->
+    <section class="card">
+        <div class="title">
+            <i class="fa-solid fa-sliders"></i>
+            Preferences
+        </div>
+        <div class="subtitle">Personalize your RiderX experience</div>
+
+        <div class="option">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-moon"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Dark Mode</strong>
+                    <small>Use the RiderX dark interface</small>
+                </div>
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="darkMode">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="option">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Location Sharing</strong>
+                    <small>Allow RiderX to update your live location</small>
+                </div>
+            </div>
+
+            <label class="switch">
+                <input type="checkbox" id="locationSharing">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </section>
+
+    <!-- SUPPORT -->
+    <section class="card">
+        <div class="title">
+            <i class="fa-solid fa-headset"></i>
+            Help & Safety
+        </div>
+        <div class="subtitle">Rider support and important information</div>
+
+        <div class="option clickable" id="supportBtn">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Help & Support</strong>
+                    <small>Get help with rides and your account</small>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right chevron"></i>
+        </div>
+
+        <div class="option clickable" id="privacyBtn">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Privacy Policy</strong>
+                    <small>How RiderX handles your information</small>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right chevron"></i>
+        </div>
+
+        <div class="option clickable" id="termsBtn">
+            <div class="left">
+                <div class="option-icon">
+                    <i class="fa-solid fa-file-contract"></i>
+                </div>
+                <div class="option-text">
+                    <strong>Terms & Conditions</strong>
+                    <small>RiderX service terms</small>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right chevron"></i>
+        </div>
+    </section>
+
+    <!-- ACCOUNT -->
+    <section class="card">
+        <div class="title">
+            <i class="fa-solid fa-user-gear"></i>
+            Account
+        </div>
+
+        <button class="action-btn primary" id="profileBtn">
+            <i class="fa-solid fa-user"></i>
+            Manage Profile
+        </button>
+
+        <button class="action-btn" id="homeBtn">
+            <i class="fa-solid fa-house"></i>
+            Rider Home
+        </button>
+
+        <button class="action-btn danger" id="logoutBtn">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </button>
+    </section>
+
+    <div class="version">
+        RiderX Rider • Version 2.0
+    </div>
+
+</main>
+
+<!-- INFORMATION MODAL -->
+<div class="modal" id="infoModal">
+    <div class="sheet">
+        <div class="handle"></div>
+
+        <h3 id="modalTitle">RiderX</h3>
+
+        <div id="modalContent"></div>
+
+        <button class="close-btn" id="closeModal">
+            Close
+        </button>
+    </div>
 </div>
 
-
+<div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastText">Saved</span>
 </div>
-
-
-
-
-
-
-<div class="container">
-
-
-
-
-
-<div class="card">
-
-
-<div class="title">
-
-<i class="fa-solid fa-mobile-screen"></i>
-
-Application
-
-</div>
-
-
-
-
-<div class="option"
-onclick="installApp()">
-
-
-
-<div class="left">
-
-<i class="fa-solid fa-download"></i>
-
-<span>
-
-Install RiderX App
-
-</span>
-
-
-</div>
-
-
-
-<i class="fa-solid fa-chevron-right"></i>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<div class="title">
-
-<i class="fa-solid fa-language"></i>
-
-Language
-
-</div>
-
-
-
-
-<div class="option">
-
-
-<div class="left">
-
-<i class="fa-solid fa-globe"></i>
-
-<span>
-
-Language
-
-</span>
-
-
-</div>
-
-
-
-<select onchange="changeLanguage(this.value)">
-
-
-<option value="en">
-
-English
-
-</option>
-
-
-<option value="hi">
-
-हिंदी
-
-</option>
-
-
-</select>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<div class="title">
-
-<i class="fa-solid fa-bell"></i>
-
-Rider Alerts
-
-</div>
-
-
-
-
-<div class="option">
-
-
-<div class="left">
-
-<i class="fa-solid fa-motorcycle"></i>
-
-<span>
-
-New Ride Request
-
-</span>
-
-</div>
-
-
-
-<div class="switch active"
-onclick="toggleSwitch(this)">
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-<div class="option">
-
-
-<div class="left">
-
-<i class="fa-solid fa-wallet"></i>
-
-<span>
-
-Earnings Notification
-
-</span>
-
-
-</div>
-
-
-
-
-<div class="switch active"
-onclick="toggleSwitch(this)">
-
-</div>
-
-
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<div class="title">
-
-Preferences
-
-</div>
-
-
-
-<div class="option">
-
-
-<div class="left">
-
-<i class="fa-solid fa-moon"></i>
-
-<span>
-
-Dark Mode
-
-</span>
-
-
-</div>
-
-
-
-
-<div class="switch active"
-onclick="toggleSwitch(this)">
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<div class="title">
-
-Support
-
-</div>
-
-
-
-<div class="option"
-onclick="alert('RiderX Support Coming Soon')">
-
-
-<div class="left">
-
-<i class="fa-solid fa-headset"></i>
-
-<span>
-
-Help & Support
-
-</span>
-
-
-</div>
-
-
-<i class="fa-solid fa-chevron-right"></i>
-
-
-</div>
-
-
-
-<div class="option">
-
-
-<div class="left">
-
-<i class="fa-solid fa-shield"></i>
-
-<span>
-
-Privacy Policy
-
-</span>
-
-
-</div>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<button class="btn"
-onclick="location.href='profile.html'">
-
-
-<i class="fa-solid fa-user"></i>
-
-Back To Profile
-
-
-</button>
-
-
-
-
-
-<button class="btn logout"
-onclick="logout()">
-
-
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-Logout
-
-
-
-</button>
-
-
-
-
-
-</div>
-
-
-
-
-
-
 
 <script type="module">
 
+import {
+    auth
+} from "../firebase/firebase-config.js";
 
 import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-auth
 
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const $ = id => document.getElementById(id);
+
+const languageSelect = $("languageSelect");
+const rideAlerts = $("rideAlerts");
+const earningAlerts = $("earningAlerts");
+const rideSound = $("rideSound");
+const darkMode = $("darkMode");
+const locationSharing = $("locationSharing");
+
+let deferredPrompt = null;
+
+
+/* =========================================================
+   DEFAULT SETTINGS
+========================================================= */
+
+const DEFAULT_SETTINGS = {
+    language:"en",
+    rideAlerts:true,
+    earningAlerts:true,
+    rideSound:true,
+    darkMode:true,
+    locationSharing:true
+};
+
+
+/* =========================================================
+   LOAD SETTINGS
+========================================================= */
+
+function loadSettings(){
+
+    let saved = {};
+
+    try{
+        saved = JSON.parse(
+            localStorage.getItem("riderx_rider_settings") || "{}"
+        );
+    }catch(e){
+        saved = {};
+    }
+
+    const settings = {
+        ...DEFAULT_SETTINGS,
+        ...saved
+    };
+
+    languageSelect.value = settings.language;
+
+    rideAlerts.checked = !!settings.rideAlerts;
+    earningAlerts.checked = !!settings.earningAlerts;
+    rideSound.checked = !!settings.rideSound;
+    darkMode.checked = !!settings.darkMode;
+    locationSharing.checked = !!settings.locationSharing;
+
+    applyTheme(settings.darkMode);
 }
 
-from "../firebase/firebase-config.js";
 
+/* =========================================================
+   SAVE SETTINGS
+========================================================= */
 
-import {
+function saveSettings(showMessage = true){
 
-signOut
+    const settings = {
+        language:languageSelect.value,
+        rideAlerts:rideAlerts.checked,
+        earningAlerts:earningAlerts.checked,
+        rideSound:rideSound.checked,
+        darkMode:darkMode.checked,
+        locationSharing:locationSharing.checked
+    };
 
+    localStorage.setItem(
+        "riderx_rider_settings",
+        JSON.stringify(settings)
+    );
+
+    /* Shared keys for other RiderX pages */
+    localStorage.setItem(
+        "riderx_language",
+        settings.language
+    );
+
+    localStorage.setItem(
+        "riderx_notifications",
+        JSON.stringify({
+            rideAlerts:settings.rideAlerts,
+            earningAlerts:settings.earningAlerts,
+            rideSound:settings.rideSound
+        })
+    );
+
+    localStorage.setItem(
+        "riderx_location_sharing",
+        settings.locationSharing ? "enabled" : "disabled"
+    );
+
+    if(showMessage){
+        showToast("Settings saved");
+    }
 }
 
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+/* =========================================================
+   THEME
+========================================================= */
+
+function applyTheme(isDark){
+
+    if(isDark){
+        document.body.classList.remove("light-mode");
+    }else{
+        document.body.classList.add("light-mode");
+    }
+}
 
 
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer;
+
+function showToast(message){
+
+    $("toastText").textContent = message;
+
+    $("toast").classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(()=>{
+        $("toast").classList.remove("show");
+    },2200);
+}
 
 
+/* =========================================================
+   AUTH USER
+========================================================= */
 
-let deferredPrompt;
+onAuthStateChanged(auth,(user)=>{
 
+    if(user){
 
+        const name =
+            user.displayName ||
+            localStorage.getItem("riderName") ||
+            "Rider";
 
-window.addEventListener(
-"beforeinstallprompt",
-(e)=>{
+        const email =
+            user.email ||
+            "Rider account";
 
+        $("riderName").textContent = name;
+        $("riderEmail").textContent = email;
 
-e.preventDefault();
+        const photo =
+            user.photoURL ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=FFE500&color=090A0F`;
 
+        $("riderPhoto").src = photo;
 
-deferredPrompt=e;
+    }else{
 
+        /*
+         * Do not instantly redirect.
+         * This prevents page flicker during Firebase auth restore.
+         */
+        $("riderName").textContent =
+            localStorage.getItem("riderName") || "Rider";
+
+        $("riderEmail").textContent =
+            "Rider account";
+    }
 
 });
 
 
+/* =========================================================
+   INSTALL APP
+========================================================= */
+
+window.addEventListener(
+    "beforeinstallprompt",
+    event => {
+
+        event.preventDefault();
+
+        deferredPrompt = event;
+
+        $("installBanner").classList.add("show");
+    }
+);
 
 
+async function installApp(){
 
+    if(!deferredPrompt){
 
+        showToast(
+            "Chrome menu → Add to Home screen / Install app"
+        );
 
-window.installApp=async()=>{
+        return;
+    }
 
+    deferredPrompt.prompt();
 
-if(deferredPrompt){
+    try{
+        await deferredPrompt.userChoice;
+    }catch(e){
+        console.log(e);
+    }
 
+    deferredPrompt = null;
 
-deferredPrompt.prompt();
-
-
-deferredPrompt=null;
-
-
+    $("installBanner").classList.remove("show");
 }
 
-else{
 
+$("installBtn").addEventListener(
+    "click",
+    installApp
+);
 
-alert(
-"Browser menu se Install App select kare"
+$("installRow").addEventListener(
+    "click",
+    installApp
 );
 
 
+/* =========================================================
+   SETTINGS EVENTS
+========================================================= */
+
+languageSelect.addEventListener(
+    "change",
+    ()=>{
+
+        saveSettings(false);
+
+        const lang = languageSelect.value;
+
+        showToast(
+            lang === "hi"
+                ? "हिंदी भाषा चुनी गई"
+                : "English selected"
+        );
+    }
+);
+
+
+rideAlerts.addEventListener(
+    "change",
+    ()=>saveSettings()
+);
+
+earningAlerts.addEventListener(
+    "change",
+    ()=>saveSettings()
+);
+
+rideSound.addEventListener(
+    "change",
+    ()=>saveSettings()
+);
+
+locationSharing.addEventListener(
+    "change",
+    ()=>saveSettings()
+);
+
+darkMode.addEventListener(
+    "change",
+    ()=>{
+
+        applyTheme(darkMode.checked);
+
+        saveSettings();
+    }
+);
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+$("backBtn").addEventListener(
+    "click",
+    ()=>{
+
+        if(history.length > 1){
+            history.back();
+        }else{
+            location.href="profile.html";
+        }
+    }
+);
+
+$("profileCard").addEventListener(
+    "click",
+    ()=>{
+        location.href="profile.html";
+    }
+);
+
+$("profileBtn").addEventListener(
+    "click",
+    ()=>{
+        location.href="profile.html";
+    }
+);
+
+$("homeBtn").addEventListener(
+    "click",
+    ()=>{
+        location.href="home.html";
+    }
+);
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+function openModal(title,html){
+
+    $("modalTitle").textContent = title;
+
+    $("modalContent").innerHTML = html;
+
+    $("infoModal").classList.add("show");
+}
+
+function closeModal(){
+
+    $("infoModal").classList.remove("show");
+}
+
+$("closeModal").addEventListener(
+    "click",
+    closeModal
+);
+
+$("infoModal").addEventListener(
+    "click",
+    event => {
+
+        if(event.target === $("infoModal")){
+            closeModal();
+        }
+    }
+);
+
+
+/* =========================================================
+   SUPPORT
+========================================================= */
+
+$("supportBtn").addEventListener(
+    "click",
+    ()=>{
+
+        openModal(
+            "RiderX Help & Support",
+            `
+            <p><strong>Need help with a ride?</strong></p>
+            <p>
+                For an active ride, use the support option from the
+                ride details screen. Keep your ride ID ready when
+                contacting support.
+            </p>
+            <p>
+                RiderX support will be connected to the admin support
+                system as the support module is enabled.
+            </p>
+            `
+        );
+    }
+);
+
+
+/* =========================================================
+   PRIVACY
+========================================================= */
+
+$("privacyBtn").addEventListener(
+    "click",
+    ()=>{
+
+        openModal(
+            "Privacy Policy",
+            `
+            <p>
+                RiderX uses account, ride and location information
+                to provide rider services and manage trips.
+            </p>
+            <p>
+                Live location is used during rider duty and active
+                ride operations when location sharing is enabled.
+            </p>
+            <p>
+                Do not share your password, OTP or sensitive account
+                information with another person.
+            </p>
+            `
+        );
+    }
+);
+
+
+/* =========================================================
+   TERMS
+========================================================= */
+
+$("termsBtn").addEventListener(
+    "click",
+    ()=>{
+
+        openModal(
+            "Terms & Conditions",
+            `
+            <p>
+                Riders must provide accurate profile and vehicle
+                information and follow applicable traffic and safety
+                requirements.
+            </p>
+            <p>
+                Ride acceptance, cancellation, earnings and account
+                actions are subject to RiderX service rules.
+            </p>
+            <p>
+                Additional platform terms can be published through
+                the RiderX admin system.
+            </p>
+            `
+        );
+    }
+);
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+$("logoutBtn").addEventListener(
+    "click",
+    async ()=>{
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to logout from RiderX?"
+            );
+
+        if(!confirmed){
+            return;
+        }
+
+        try{
+
+            await signOut(auth);
+
+            /*
+             * Keep app preferences,
+             * remove temporary rider state.
+             */
+
+            localStorage.removeItem("riderx_active_ride");
+            localStorage.removeItem("riderx_current_request");
+
+            location.href="../auth/login.html";
+
+        }catch(error){
+
+            console.error(error);
+
+            showToast(
+                "Logout failed. Please try again."
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
+
+if("serviceWorker" in navigator){
+
+    window.addEventListener(
+        "load",
+        ()=>{
+            navigator.serviceWorker
+                .register("../sw.js")
+                .catch(error=>{
+                    console.log(
+                        "Service worker:",
+                        error
+                    );
+                });
+        }
+    );
 }
 
 
+/* =========================================================
+   START
+========================================================= */
 
-};
-
-
-
-
-
-
-window.changeLanguage=(lang)=>{
-
-
-localStorage.setItem(
-"language",
-lang
-);
-
-
-
-alert(
-lang==="hi"
-?"हिंदी Selected"
-:"English Selected"
-);
-
-
-
-};
-
-
-
-
-
-
-
-window.toggleSwitch=(el)=>{
-
-
-el.classList.toggle("active");
-
-
-};
-
-
-
-
-
-
-
-window.logout=async()=>{
-
-
-await signOut(auth);
-
-
-location.href="../auth/login.html";
-
-
-};
-
-
+loadSettings();
 
 </script>
 
-
-
 </body>
-
-</html>
+  </html>
