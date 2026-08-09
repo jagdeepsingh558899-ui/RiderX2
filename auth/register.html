@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -11,12 +12,12 @@
 
     <meta
         name="theme-color"
-        content="#FFD400"
+        content="#ffd400"
     >
 
     <meta
         name="description"
-        content="RiderX - Create Customer or Rider Account"
+        content="RiderX account registration"
     >
 
     <title>RiderX - Create Account</title>
@@ -26,28 +27,28 @@
     <link rel="stylesheet" href="../css/responsive.css">
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
         html,
         body {
+            margin: 0;
             width: 100%;
             min-height: 100%;
-            margin: 0;
         }
 
         body {
             min-height: 100vh;
             min-height: 100dvh;
             background: #070707;
-            color: #fff;
+            color: #ffffff;
             font-family: Arial, Helvetica, sans-serif;
         }
 
         button,
-        input,
-        select {
+        input {
             font: inherit;
         }
 
@@ -55,155 +56,114 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .auth-page {
+        .page {
             min-height: 100vh;
             min-height: 100dvh;
-
             display: flex;
-            align-items: center;
             justify-content: center;
-
+            align-items: center;
             padding:
-                max(14px, env(safe-area-inset-top))
-                max(14px, env(safe-area-inset-right))
-                max(14px, env(safe-area-inset-bottom))
-                max(14px, env(safe-area-inset-left));
-
+                max(16px, env(safe-area-inset-top))
+                max(16px, env(safe-area-inset-right))
+                max(16px, env(safe-area-inset-bottom))
+                max(16px, env(safe-area-inset-left));
             position: relative;
             overflow: auto;
         }
 
-        .auth-page::before {
+        .page::before {
             content: "";
-
             position: absolute;
-
-            width: 350px;
-            height: 350px;
-
-            top: -180px;
-            right: -140px;
-
+            width: 360px;
+            height: 360px;
+            top: -190px;
+            right: -150px;
             border-radius: 50%;
-
             background: rgba(255, 212, 0, .08);
-
             pointer-events: none;
         }
 
-        .auth-page::after {
+        .page::after {
             content: "";
-
             position: absolute;
-
-            width: 310px;
-            height: 310px;
-
-            bottom: -180px;
-            left: -140px;
-
+            width: 330px;
+            height: 330px;
+            left: -170px;
+            bottom: -190px;
             border-radius: 50%;
-
             background: rgba(255, 212, 0, .05);
-
             pointer-events: none;
         }
 
-        .auth-card {
+        .card {
             position: relative;
             z-index: 2;
-
             width: 100%;
-            max-width: 440px;
-
-            margin: 15px 0;
-
-            padding: 27px 22px 22px;
-
-            border: 1px solid #2a2a2a;
+            max-width: 450px;
+            padding: 25px 21px 20px;
+            border: 1px solid #292929;
             border-radius: 22px;
-
-            background: #111;
-
-            box-shadow:
-                0 20px 70px rgba(0, 0, 0, .55);
+            background: #111111;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, .58);
         }
 
         .brand {
             text-align: center;
-            margin-bottom: 22px;
+            margin-bottom: 18px;
         }
 
-        .logo-box {
-            width: 67px;
-            height: 67px;
-
-            margin: 0 auto 12px;
-
+        .logo {
+            width: 62px;
+            height: 62px;
+            margin: 0 auto 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            border-radius: 19px;
-
-            background: #FFD400;
+            border-radius: 18px;
+            background: #ffd400;
             color: #080808;
-
-            font-size: 25px;
+            font-size: 22px;
             font-weight: 1000;
-
-            box-shadow:
-                0 8px 30px rgba(255, 212, 0, .14);
         }
 
         .brand h1 {
             margin: 0;
-
-            font-size: 25px;
+            font-size: 24px;
             font-weight: 1000;
         }
 
         .brand h1 span {
-            color: #FFD400;
+            color: #ffd400;
         }
 
         .brand p {
-            margin: 7px 0 0;
-
-            color: #777;
-
-            font-size: 10px;
+            margin: 6px 0 0;
+            color: #777777;
+            font-size: 9px;
         }
 
-        .welcome {
-            margin-bottom: 18px;
+        .heading {
+            margin-bottom: 17px;
         }
 
-        .welcome h2 {
+        .heading h2 {
             margin: 0;
-
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 900;
         }
 
-        .welcome p {
+        .heading p {
             margin: 6px 0 0;
-
-            color: #777;
-
+            color: #777777;
             font-size: 10px;
             line-height: 1.5;
         }
 
         .message {
             display: none;
-
             margin-bottom: 13px;
-
-            padding: 10px;
-
+            padding: 11px;
             border-radius: 9px;
-
             font-size: 10px;
             line-height: 1.5;
         }
@@ -212,118 +172,28 @@
             display: block;
         }
 
-        .error {
-            border: 1px solid #542828;
-            background: #241414;
+        .message.error {
+            border: 1px solid #572929;
+            background: #251414;
             color: #ff7777;
         }
 
-        .success {
-            border: 1px solid #275335;
+        .message.success {
+            border: 1px solid #285437;
             background: #132319;
-            color: #65e58b;
+            color: #6be58c;
         }
 
-        .role-title {
-            display: block;
-
-            margin-bottom: 8px;
-
-            color: #999;
-
-            font-size: 9px;
-            font-weight: 900;
-
-            text-transform: uppercase;
-        }
-
-        .role-grid {
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 8px;
-
-            margin-bottom: 15px;
-        }
-
-        .role-option {
-            position: relative;
-        }
-
-        .role-option input {
-            position: absolute;
-
-            opacity: 0;
-
-            pointer-events: none;
-        }
-
-        .role-label {
-            min-height: 75px;
-
-            display: flex;
-            flex-direction: column;
-
-            align-items: center;
-            justify-content: center;
-
-            gap: 4px;
-
-            border: 1px solid #303030;
-            border-radius: 11px;
-
-            background: #191919;
-
-            cursor: pointer;
-
-            text-align: center;
-
-            transition: .2s ease;
-        }
-
-        .role-label:hover {
-            border-color: #555;
-        }
-
-        .role-option input:checked + .role-label {
-            border-color: #FFD400;
-
-            background: #211f12;
-
-            box-shadow:
-                0 0 0 1px rgba(255, 212, 0, .08);
-        }
-
-        .role-icon {
-            font-size: 21px;
-        }
-
-        .role-name {
-            color: #ddd;
-
-            font-size: 10px;
-            font-weight: 900;
-        }
-
-        .role-option input:checked + .role-label .role-name {
-            color: #FFD400;
-        }
-
-        .form-group {
+        .group {
             margin-bottom: 13px;
         }
 
-        .form-group label {
+        .group label {
             display: block;
-
             margin-bottom: 7px;
-
-            color: #999;
-
+            color: #999999;
             font-size: 9px;
             font-weight: 900;
-
             text-transform: uppercase;
         }
 
@@ -331,38 +201,35 @@
             position: relative;
         }
 
-        .form-group input,
-        .form-group select {
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="password"] {
             width: 100%;
             height: 47px;
-
             padding: 0 13px;
-
-            border: 1px solid #333;
+            border: 1px solid #333333;
             border-radius: 10px;
-
             outline: none;
-
             background: #1a1a1a;
-            color: #fff;
-
+            color: #ffffff;
             font-size: 12px;
-
             transition:
                 border-color .2s ease,
                 box-shadow .2s ease;
         }
 
-        .form-group input::placeholder {
-            color: #555;
+        input::placeholder {
+            color: #555555;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #FFD400;
+        input:focus {
+            border-color: #ffd400;
+            box-shadow: 0 0 0 2px rgba(255, 212, 0, .08);
+        }
 
-            box-shadow:
-                0 0 0 2px rgba(255, 212, 0, .08);
+        input.invalid {
+            border-color: #ff5555;
         }
 
         .phone-row {
@@ -370,22 +237,17 @@
             gap: 8px;
         }
 
-        .country-code {
-            width: 82px;
-            min-width: 82px;
+        .country {
+            width: 78px;
+            min-width: 78px;
             height: 47px;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
-            border: 1px solid #333;
+            border: 1px solid #333333;
             border-radius: 10px;
-
             background: #1a1a1a;
-
-            color: #FFD400;
-
+            color: #ffd400;
             font-size: 11px;
             font-weight: 900;
         }
@@ -395,195 +257,216 @@
             min-width: 0;
         }
 
-        .password-row {
-            position: relative;
+        .password-wrap input {
+            padding-right: 44px;
         }
 
-        .password-row input {
-            padding-right: 45px;
-        }
-
-        .eye-btn {
+        .eye {
             position: absolute;
-
-            right: 7px;
+            right: 6px;
             top: 50%;
-
-            width: 34px;
-            height: 34px;
-
+            width: 35px;
+            height: 35px;
             transform: translateY(-50%);
-
             border: 0;
             border-radius: 7px;
-
             background: transparent;
-            color: #777;
-
+            color: #777777;
             cursor: pointer;
         }
 
-        .eye-btn:hover {
-            color: #FFD400;
+        .eye:hover {
+            color: #ffd400;
         }
 
-        .password-hint {
+        .strength {
+            height: 4px;
+            margin-top: 7px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #252525;
+        }
+
+        .strength-bar {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: #555555;
+            transition: width .2s ease;
+        }
+
+        .strength-text {
             margin-top: 5px;
-
-            color: #555;
-
+            color: #666666;
             font-size: 8px;
         }
 
-        .checkbox-row {
-            display: flex;
+        .role-title {
+            margin: 16px 0 8px;
+            color: #999999;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
 
-            align-items: flex-start;
-
+        .roles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
+            margin-bottom: 14px;
+        }
 
-            margin: 4px 0 16px;
+        .role {
+            position: relative;
+        }
 
-            color: #777;
+        .role input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
 
+        .role label {
+            min-height: 45px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #333333;
+            border-radius: 10px;
+            background: #191919;
+            color: #aaaaaa;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: none;
+            transition: .2s ease;
+        }
+
+        .role input:checked + label {
+            border-color: #ffd400;
+            background: #201e08;
+            color: #ffd400;
+            box-shadow: 0 0 0 1px rgba(255, 212, 0, .08);
+        }
+
+        .rider-note {
+            display: none;
+            margin-top: -5px;
+            margin-bottom: 14px;
+            padding: 10px;
+            border: 1px solid #3b3500;
+            border-radius: 9px;
+            background: #181600;
+            color: #c7b500;
             font-size: 9px;
             line-height: 1.5;
         }
 
-        .checkbox-row input {
-            width: 14px;
-            height: 14px;
+        .rider-note.show {
+            display: block;
+        }
 
+        .terms {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin: 3px 0 16px;
+            color: #777777;
+            font-size: 9px;
+            line-height: 1.5;
+            cursor: pointer;
+        }
+
+        .terms input {
+            width: 15px;
+            height: 15px;
             margin: 0;
-
-            flex: none;
-
-            accent-color: #FFD400;
+            flex: 0 0 auto;
+            accent-color: #ffd400;
         }
 
-        .checkbox-row a {
-            color: #FFD400;
-
+        .terms a {
+            color: #ffd400;
             text-decoration: none;
-
-            font-weight: 800;
         }
 
-        .register-btn {
+        .terms a:hover {
+            text-decoration: underline;
+        }
+
+        .submit {
             width: 100%;
             min-height: 49px;
-
             border: 0;
             border-radius: 10px;
-
-            background: #FFD400;
-            color: #111;
-
+            background: #ffd400;
+            color: #111111;
             cursor: pointer;
-
             font-size: 12px;
             font-weight: 1000;
-
             transition: .2s ease;
         }
 
-        .register-btn:hover {
+        .submit:hover {
             background: #ffe04a;
             transform: translateY(-1px);
         }
 
-        .register-btn:active {
+        .submit:active {
             transform: scale(.99);
         }
 
-        .register-btn:disabled {
+        .submit:disabled {
             opacity: .6;
-
             cursor: not-allowed;
-
             transform: none;
+        }
+
+        .login {
+            margin-top: 18px;
+            text-align: center;
+            color: #777777;
+            font-size: 10px;
+        }
+
+        .login a {
+            color: #ffd400;
+            text-decoration: none;
+            font-weight: 900;
+        }
+
+        .back {
+            width: 100%;
+            margin-top: 12px;
+            border: 0;
+            background: transparent;
+            color: #666666;
+            cursor: pointer;
+            font-size: 9px;
+        }
+
+        .back:hover {
+            color: #ffd400;
+        }
+
+        .footer {
+            margin-top: 17px;
+            text-align: center;
+            color: #444444;
+            font-size: 8px;
         }
 
         .loader {
             display: inline-block;
-
             width: 13px;
             height: 13px;
-
             margin-right: 7px;
-
             vertical-align: -2px;
-
             border: 2px solid rgba(0, 0, 0, .25);
-            border-top-color: #111;
-
+            border-top-color: #111111;
             border-radius: 50%;
-
             animation: spin .7s linear infinite;
-        }
-
-        .login-link {
-            margin-top: 18px;
-
-            text-align: center;
-
-            color: #777;
-
-            font-size: 10px;
-        }
-
-        .login-link a {
-            color: #FFD400;
-
-            text-decoration: none;
-
-            font-weight: 900;
-        }
-
-        .login-link a:hover {
-            text-decoration: underline;
-        }
-
-        .back-role {
-            display: block;
-
-            width: 100%;
-
-            margin-top: 11px;
-
-            border: 0;
-
-            background: transparent;
-            color: #666;
-
-            cursor: pointer;
-
-            font-size: 9px;
-        }
-
-        .back-role:hover {
-            color: #FFD400;
-        }
-
-        .footer {
-            margin-top: 19px;
-
-            padding-top: 13px;
-
-            border-top: 1px solid #202020;
-
-            text-align: center;
-
-            color: #444;
-
-            font-size: 8px;
-        }
-
-        .field-error {
-            border-color: #ff5555 !important;
-
-            box-shadow:
-                0 0 0 2px rgba(255, 80, 80, .08) !important;
         }
 
         @keyframes spin {
@@ -594,53 +477,43 @@
 
         @media (max-width: 480px) {
 
-            .auth-page {
+            .page {
                 align-items: flex-start;
-
-                padding-top: 16px;
-                padding-bottom: 16px;
+                padding-top: 18px;
+                padding-bottom: 18px;
             }
 
-            .auth-card {
-                margin: 0;
-
-                padding:
-                    24px 17px
-                    18px;
-
+            .card {
+                padding: 23px 16px 18px;
                 border-radius: 18px;
             }
         }
 
         @media (max-width: 340px) {
 
-            .auth-card {
-                padding-left: 13px;
-                padding-right: 13px;
+            .roles {
+                grid-template-columns: 1fr;
             }
 
-            .country-code {
-                width: 70px;
-                min-width: 70px;
-            }
-
-            .role-label {
-                min-height: 68px;
+            .country {
+                width: 68px;
+                min-width: 68px;
             }
         }
-    </style>
-</head>
 
+    </style>
+
+</head>
 
 <body>
 
-<main class="auth-page">
+<main class="page">
 
-    <section class="auth-card">
+    <section class="card">
 
         <div class="brand">
 
-            <div class="logo-box">
+            <div class="logo">
                 RX
             </div>
 
@@ -649,81 +522,201 @@
             </h1>
 
             <p>
-                Your ride. Your journey. Your choice.
+                One platform. Rides. Delivery. Earnings.
             </p>
 
         </div>
 
-
-        <div class="welcome">
+        <div class="heading">
 
             <h2>
-                Create RiderX Account
+                Create your account
             </h2>
 
             <p>
-                Create your customer or rider account and start using RiderX.
+                Join RiderX as a customer or driver partner.
             </p>
 
         </div>
 
-
         <div
-            class="message error"
             id="errorBox"
+            class="message error"
             role="alert"
             aria-live="polite"
         ></div>
 
-
         <div
-            class="message success"
             id="successBox"
+            class="message success"
             role="status"
             aria-live="polite"
         ></div>
-
 
         <form
             id="registerForm"
             novalidate
         >
 
-            <label class="role-title">
+            <div class="group">
+
+                <label for="name">
+                    Full Name
+                </label>
+
+                <input
+                    id="name"
+                    type="text"
+                    autocomplete="name"
+                    maxlength="80"
+                    placeholder="Enter your full name"
+                    required
+                >
+
+            </div>
+
+            <div class="group">
+
+                <label for="phone">
+                    Mobile Number
+                </label>
+
+                <div class="phone-row">
+
+                    <div class="country">
+                        +91
+                    </div>
+
+                    <input
+                        id="phone"
+                        type="tel"
+                        inputmode="numeric"
+                        autocomplete="tel"
+                        maxlength="10"
+                        placeholder="10-digit mobile number"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+            <div class="group">
+
+                <label for="email">
+                    Email Address
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    autocomplete="email"
+                    maxlength="120"
+                    placeholder="Enter your email"
+                    required
+                >
+
+            </div>
+
+            <div class="group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="input-wrap password-wrap">
+
+                    <input
+                        id="password"
+                        type="password"
+                        autocomplete="new-password"
+                        minlength="6"
+                        maxlength="100"
+                        placeholder="Create a password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="eye"
+                        id="passwordEye"
+                        aria-label="Show password"
+                    >
+                        👁
+                    </button>
+
+                </div>
+
+                <div class="strength">
+                    <div
+                        id="strengthBar"
+                        class="strength-bar"
+                    ></div>
+                </div>
+
+                <div
+                    id="strengthText"
+                    class="strength-text"
+                >
+                    Use at least 6 characters.
+                </div>
+
+            </div>
+
+            <div class="group">
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+                <div class="input-wrap password-wrap">
+
+                    <input
+                        id="confirmPassword"
+                        type="password"
+                        autocomplete="new-password"
+                        minlength="6"
+                        maxlength="100"
+                        placeholder="Confirm your password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="eye"
+                        id="confirmEye"
+                        aria-label="Show password"
+                    >
+                        👁
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="role-title">
                 Account Type
-            </label>
+            </div>
 
+            <div class="roles">
 
-            <div class="role-grid">
-
-                <div class="role-option">
+                <div class="role">
 
                     <input
                         type="radio"
                         name="role"
                         id="customerRole"
                         value="customer"
+                        checked
                     >
 
-                    <label
-                        class="role-label"
-                        for="customerRole"
-                    >
-
-                        <span class="role-icon">
-                            👤
-                        </span>
-
-                        <span class="role-name">
-                            Customer
-                        </span>
-
+                    <label for="customerRole">
+                        👤 Customer
                     </label>
 
                 </div>
 
-
-                <div class="role-option">
+                <div class="role">
 
                     <input
                         type="radio"
@@ -732,255 +725,58 @@
                         value="rider"
                     >
 
-                    <label
-                        class="role-label"
-                        for="riderRole"
-                    >
-
-                        <span class="role-icon">
-                            🛵
-                        </span>
-
-                        <span class="role-name">
-                            Rider
-                        </span>
-
+                    <label for="riderRole">
+                        🛵 Rider
                     </label>
 
                 </div>
 
             </div>
-
-
-            <div class="form-group">
-
-                <label for="name">
-                    Full Name
-                </label>
-
-                <input
-                    type="text"
-                    id="name"
-                    autocomplete="name"
-                    maxlength="60"
-                    placeholder="Enter your full name"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="phone">
-                    Mobile Number
-                </label>
-
-                <div class="phone-row">
-
-                    <div class="country-code">
-                        +91
-                    </div>
-
-                    <input
-                        type="tel"
-                        id="phone"
-                        inputmode="numeric"
-                        autocomplete="tel"
-                        maxlength="10"
-                        placeholder="Enter mobile number"
-                        required
-                    >
-
-                </div>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="email">
-                    Email
-                </label>
-
-                <input
-                    type="email"
-                    id="email"
-                    autocomplete="email"
-                    maxlength="100"
-                    placeholder="Enter email address"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="password">
-                    Password
-                </label>
-
-                <div class="password-row">
-
-                    <input
-                        type="password"
-                        id="password"
-                        autocomplete="new-password"
-                        minlength="6"
-                        maxlength="100"
-                        placeholder="Create password"
-                        required
-                    >
-
-                    <button
-                        type="button"
-                        class="eye-btn"
-                        id="togglePassword"
-                        aria-label="Show password"
-                    >
-                        👁
-                    </button>
-
-                </div>
-
-                <div class="password-hint">
-                    Minimum 6 characters.
-                </div>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="confirmPassword">
-                    Confirm Password
-                </label>
-
-                <div class="password-row">
-
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        autocomplete="new-password"
-                        minlength="6"
-                        maxlength="100"
-                        placeholder="Confirm password"
-                        required
-                    >
-
-                    <button
-                        type="button"
-                        class="eye-btn"
-                        id="toggleConfirmPassword"
-                        aria-label="Show confirm password"
-                    >
-                        👁
-                    </button>
-
-                </div>
-
-            </div>
-
 
             <div
-                id="riderFields"
-                style="display:none;"
+                id="riderNote"
+                class="rider-note"
             >
-
-                <div class="form-group">
-
-                    <label for="vehicleType">
-                        Vehicle Type
-                    </label>
-
-                    <select id="vehicleType">
-
-                        <option value="bike">
-                            Bike
-                        </option>
-
-                        <option value="scooter">
-                            Scooter
-                        </option>
-
-                        <option value="cab">
-                            Cab
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="vehicleNumber">
-                        Vehicle Number
-                    </label>
-
-                    <input
-                        type="text"
-                        id="vehicleNumber"
-                        maxlength="20"
-                        autocomplete="off"
-                        placeholder="Example: CH01AB1234"
-                    >
-
-                </div>
-
+                Rider accounts require RiderX approval before they can go online and accept rides.
             </div>
 
-
-            <label class="checkbox-row">
+            <label class="terms">
 
                 <input
-                    type="checkbox"
                     id="terms"
+                    type="checkbox"
+                    required
                 >
 
                 <span>
-
-                    I agree to the RiderX
-
-                    <a
-                        href="../terms.html"
-                        target="_blank"
-                    >
+                    I agree to RiderX
+                    <a href="#" id="termsLink">
                         Terms & Conditions
                     </a>
-
                     and
-
-                    <a
-                        href="../privacy.html"
-                        target="_blank"
-                    >
+                    <a href="#" id="privacyLink">
                         Privacy Policy
                     </a>.
-
                 </span>
 
             </label>
 
-
             <button
+                id="submitBtn"
+                class="submit"
                 type="submit"
-                class="register-btn"
-                id="registerBtn"
             >
                 Create Account
             </button>
 
         </form>
 
-
-        <div class="login-link">
+        <div class="login">
 
             Already have an account?
 
             <a
-                href="./role.html"
+                href="./login.html"
                 id="loginLink"
             >
                 Login
@@ -988,18 +784,16 @@
 
         </div>
 
-
         <button
+            id="backBtn"
+            class="back"
             type="button"
-            class="back-role"
-            id="backRole"
         >
-            ← Choose account type
+            ← Choose another option
         </button>
 
-
         <div class="footer">
-            © 2026 RiderX • Secure Account Registration
+            © 2026 RiderX • Account Registration
         </div>
 
     </section>
@@ -1012,165 +806,448 @@
     "use strict";
 
 
-    /* =========================================================
-       FIREBASE
-    ========================================================= */
-
     import {
+
         auth,
         db,
+
         createUserWithEmailAndPassword,
         updateProfile,
-        doc,
+        signOut,
+
+        collection,
+        query,
+        where,
+        getDocs,
         setDoc,
         serverTimestamp
+
     } from "../firebase/firebase-config.js";
 
 
-    /* =========================================================
-       ELEMENTS
-    ========================================================= */
-
-    const registerForm =
-        document.getElementById("registerForm");
-
-    const customerRole =
-        document.getElementById("customerRole");
-
-    const riderRole =
-        document.getElementById("riderRole");
+    const form =
+        document.getElementById(
+            "registerForm"
+        );
 
     const nameInput =
-        document.getElementById("name");
+        document.getElementById(
+            "name"
+        );
 
     const phoneInput =
-        document.getElementById("phone");
+        document.getElementById(
+            "phone"
+        );
 
     const emailInput =
-        document.getElementById("email");
+        document.getElementById(
+            "email"
+        );
 
     const passwordInput =
-        document.getElementById("password");
+        document.getElementById(
+            "password"
+        );
 
-    const confirmPasswordInput =
-        document.getElementById("confirmPassword");
-
-    const vehicleType =
-        document.getElementById("vehicleType");
-
-    const vehicleNumber =
-        document.getElementById("vehicleNumber");
-
-    const riderFields =
-        document.getElementById("riderFields");
+    const confirmInput =
+        document.getElementById(
+            "confirmPassword"
+        );
 
     const terms =
-        document.getElementById("terms");
+        document.getElementById(
+            "terms"
+        );
 
-    const registerBtn =
-        document.getElementById("registerBtn");
+    const submitBtn =
+        document.getElementById(
+            "submitBtn"
+        );
 
     const errorBox =
-        document.getElementById("errorBox");
+        document.getElementById(
+            "errorBox"
+        );
 
     const successBox =
-        document.getElementById("successBox");
+        document.getElementById(
+            "successBox"
+        );
 
+    const strengthBar =
+        document.getElementById(
+            "strengthBar"
+        );
 
-    /* =========================================================
-       ROLE
-    ========================================================= */
+    const strengthText =
+        document.getElementById(
+            "strengthText"
+        );
 
-    const savedRole =
-        normalizeRole(
-            localStorage.getItem(
-                "riderx_selected_role"
-            )
+    const riderNote =
+        document.getElementById(
+            "riderNote"
+        );
+
+    const customerRole =
+        document.getElementById(
+            "customerRole"
+        );
+
+    const riderRole =
+        document.getElementById(
+            "riderRole"
         );
 
 
-    if (savedRole === "customer") {
+    function selectedRole() {
 
-        customerRole.checked = true;
+        const selected =
+            document.querySelector(
+                'input[name="role"]:checked'
+            );
+
+        return selected
+            ? selected.value
+            : "customer";
 
     }
 
 
-    if (savedRole === "rider") {
+    function normalizePhone(
+        value
+    ) {
 
-        riderRole.checked = true;
+        let phone =
+            String(
+                value || ""
+            )
+                .replace(
+                    /\D/g,
+                    ""
+                );
+
+
+        if (
+            phone.startsWith("91") &&
+            phone.length === 12
+        ) {
+
+            phone =
+                phone.substring(2);
+
+        }
+
+
+        return phone;
 
     }
 
 
-    updateRoleFields();
+    function clearMessages() {
+
+        errorBox.textContent = "";
+        successBox.textContent = "";
+
+        errorBox.classList.remove(
+            "show"
+        );
+
+        successBox.classList.remove(
+            "show"
+        );
+
+    }
 
 
-    customerRole.addEventListener(
-        "change",
-        function () {
+    function showError(
+        message
+    ) {
 
-            localStorage.setItem(
-                "riderx_selected_role",
-                "customer"
+        successBox.textContent = "";
+
+        successBox.classList.remove(
+            "show"
+        );
+
+        errorBox.textContent =
+            message;
+
+        errorBox.classList.add(
+            "show"
+        );
+
+    }
+
+
+    function showSuccess(
+        message
+    ) {
+
+        errorBox.textContent = "";
+
+        errorBox.classList.remove(
+            "show"
+        );
+
+        successBox.textContent =
+            message;
+
+        successBox.classList.add(
+            "show"
+        );
+
+    }
+
+
+    function clearInvalid() {
+
+        document
+            .querySelectorAll(
+                "input.invalid"
+            )
+            .forEach(
+                function (input) {
+
+                    input.classList.remove(
+                        "invalid"
+                    );
+
+                }
             );
 
-            updateRoleFields();
-            hideMessages();
-
-        }
-    );
+    }
 
 
-    riderRole.addEventListener(
-        "change",
-        function () {
+    function invalid(
+        input
+    ) {
 
-            localStorage.setItem(
-                "riderx_selected_role",
-                "rider"
-            );
+        input.classList.add(
+            "invalid"
+        );
 
-            updateRoleFields();
-            hideMessages();
+        input.focus();
 
-        }
-    );
+    }
 
 
-    function updateRoleFields() {
+    function setLoading(
+        loading
+    ) {
 
-        if (riderRole.checked) {
+        submitBtn.disabled =
+            loading;
 
-            riderFields.style.display =
-                "block";
 
-            vehicleType.required =
-                true;
+        if (
+            loading
+        ) {
 
-            vehicleNumber.required =
-                true;
+            submitBtn.innerHTML =
+                '<span class="loader"></span>Creating account...';
 
         } else {
 
-            riderFields.style.display =
-                "none";
-
-            vehicleType.required =
-                false;
-
-            vehicleNumber.required =
-                false;
-
-            vehicleNumber.value = "";
+            submitBtn.textContent =
+                "Create Account";
 
         }
+
     }
 
 
-    /* =========================================================
-       PHONE
-    ========================================================= */
+    function passwordStrength(
+        password
+    ) {
+
+        let score = 0;
+
+
+        if (
+            password.length >= 6
+        ) {
+            score++;
+        }
+
+        if (
+            password.length >= 10
+        ) {
+            score++;
+        }
+
+        if (
+            /[A-Z]/.test(password)
+        ) {
+            score++;
+        }
+
+        if (
+            /[a-z]/.test(password)
+        ) {
+            score++;
+        }
+
+        if (
+            /\d/.test(password)
+        ) {
+            score++;
+        }
+
+        if (
+            /[^A-Za-z0-9]/.test(password)
+        ) {
+            score++;
+        }
+
+
+        const percentage =
+            Math.min(
+                100,
+                (score / 6) * 100
+            );
+
+
+        strengthBar.style.width =
+            percentage + "%";
+
+
+        if (
+            !password
+        ) {
+
+            strengthText.textContent =
+                "Use at least 6 characters.";
+
+        } else if (
+            score <= 2
+        ) {
+
+            strengthText.textContent =
+                "Weak password.";
+
+        } else if (
+            score <= 4
+        ) {
+
+            strengthText.textContent =
+                "Good password.";
+
+        } else {
+
+            strengthText.textContent =
+                "Strong password.";
+
+        }
+
+    }
+
+
+    function togglePassword(
+        input,
+        button
+    ) {
+
+        const show =
+            input.type === "password";
+
+
+        input.type =
+            show
+                ? "text"
+                : "password";
+
+
+        button.textContent =
+            show
+                ? "🙈"
+                : "👁";
+
+
+        button.setAttribute(
+            "aria-label",
+            show
+                ? "Hide password"
+                : "Show password"
+        );
+
+    }
+
+
+    document
+        .getElementById(
+            "passwordEye"
+        )
+        .addEventListener(
+            "click",
+            function () {
+
+                togglePassword(
+                    passwordInput,
+                    this
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "confirmEye"
+        )
+        .addEventListener(
+            "click",
+            function () {
+
+                togglePassword(
+                    confirmInput,
+                    this
+                );
+
+            }
+        );
+
+
+    passwordInput.addEventListener(
+        "input",
+        function () {
+
+            passwordStrength(
+                this.value
+            );
+
+            this.classList.remove(
+                "invalid"
+            );
+
+        }
+    );
+
+
+    confirmInput.addEventListener(
+        "input",
+        function () {
+
+            this.classList.remove(
+                "invalid"
+            );
+
+        }
+    );
+
+
+    nameInput.addEventListener(
+        "input",
+        function () {
+
+            this.classList.remove(
+                "invalid"
+            );
+
+        }
+    );
+
 
     phoneInput.addEventListener(
         "input",
@@ -1178,38 +1255,22 @@
 
             this.value =
                 this.value
-                    .replace(/\D/g, "")
-                    .slice(0, 10);
+                    .replace(
+                        /\D/g,
+                        ""
+                    )
+                    .slice(
+                        0,
+                        10
+                    );
 
-            clearFieldError(this);
-            hideMessages();
-
-        }
-    );
-
-
-    /* =========================================================
-       NAME
-    ========================================================= */
-
-    nameInput.addEventListener(
-        "input",
-        function () {
-
-            this.value =
-                this.value
-                    .replace(/\s+/g, " ")
-                    .replace(/^\s+/, "");
-
-            clearFieldError(this);
+            this.classList.remove(
+                "invalid"
+            );
 
         }
     );
 
-
-    /* =========================================================
-       EMAIL
-    ========================================================= */
 
     emailInput.addEventListener(
         "input",
@@ -1217,150 +1278,264 @@
 
             this.value =
                 this.value
-                    .trimStart()
+                    .trim()
                     .toLowerCase();
 
-            clearFieldError(this);
+            this.classList.remove(
+                "invalid"
+            );
 
         }
     );
 
 
-    /* =========================================================
-       VEHICLE NUMBER
-    ========================================================= */
+    function updateRoleUI() {
 
-    vehicleNumber.addEventListener(
-        "input",
-        function () {
+        const rider =
+            riderRole.checked;
 
-            this.value =
-                this.value
-                    .toUpperCase()
-                    .replace(/\s+/g, "");
 
-            clearFieldError(this);
+        riderNote.classList.toggle(
+            "show",
+            rider
+        );
 
-        }
+
+        document.title =
+            rider
+                ? "RiderX - Join as Rider"
+                : "RiderX - Create Account";
+
+    }
+
+
+    customerRole.addEventListener(
+        "change",
+        updateRoleUI
     );
 
 
-    /* =========================================================
-       PASSWORD VISIBILITY
-    ========================================================= */
+    riderRole.addEventListener(
+        "change",
+        updateRoleUI
+    );
 
-    document
-        .getElementById("togglePassword")
-        .addEventListener(
-            "click",
-            function () {
 
-                const visible =
-                    passwordInput.type ===
-                    "password";
+    async function phoneExists(
+        phone
+    ) {
 
-                passwordInput.type =
-                    visible
-                        ? "text"
-                        : "password";
+        const usersRef =
+            collection(
+                db,
+                "users"
+            );
 
-                this.textContent =
-                    visible
-                        ? "🙈"
-                        : "👁";
 
-                this.setAttribute(
-                    "aria-label",
-                    visible
-                        ? "Hide password"
-                        : "Show password"
-                );
+        const variations = [
+
+            phone,
+
+            "+91" + phone,
+
+            "91" + phone
+
+        ];
+
+
+        const checks =
+            variations.map(
+                function (number) {
+
+                    return getDocs(
+                        query(
+                            usersRef,
+                            where(
+                                "phone",
+                                "==",
+                                number
+                            )
+                        )
+                    );
+
+                }
+            );
+
+
+        const snapshots =
+            await Promise.all(
+                checks
+            );
+
+
+        return snapshots.some(
+            function (snapshot) {
+
+                return !snapshot.empty;
 
             }
         );
 
+    }
 
-    document
-        .getElementById("toggleConfirmPassword")
-        .addEventListener(
-            "click",
-            function () {
 
-                const visible =
-                    confirmPasswordInput.type ===
-                    "password";
+    async function emailExists(
+        email
+    ) {
 
-                confirmPasswordInput.type =
-                    visible
-                        ? "text"
-                        : "password";
+        const usersRef =
+            collection(
+                db,
+                "users"
+            );
 
-                this.textContent =
-                    visible
-                        ? "🙈"
-                        : "👁";
 
-                this.setAttribute(
-                    "aria-label",
-                    visible
-                        ? "Hide confirm password"
-                        : "Show confirm password"
-                );
+        const snapshot =
+            await getDocs(
+                query(
+                    usersRef,
+                    where(
+                        "email",
+                        "==",
+                        email
+                    )
+                )
+            );
 
-            }
+
+        return !snapshot.empty;
+
+    }
+
+
+    function createLocalSession(
+        user,
+        role
+    ) {
+
+        const session = {
+
+            uid:
+                user.uid,
+
+            id:
+                user.uid,
+
+            name:
+                user.name,
+
+            fullName:
+                user.name,
+
+            displayName:
+                user.name,
+
+            email:
+                user.email,
+
+            phone:
+                user.phone,
+
+            mobile:
+                user.phone,
+
+            role:
+                role,
+
+            userRole:
+                role,
+
+            status:
+                user.status,
+
+            approvalStatus:
+                user.approvalStatus,
+
+            approved:
+                user.approved,
+
+            city:
+                user.city,
+
+            photoURL:
+                user.photoURL || "",
+
+            createdAt:
+                user.createdAt
+
+        };
+
+
+        localStorage.setItem(
+            "riderx_user",
+            JSON.stringify(
+                session
+            )
         );
 
 
-    /* =========================================================
-       PASSWORD INPUT
-    ========================================================= */
+        localStorage.setItem(
+            "riderx_role",
+            role
+        );
 
-    passwordInput.addEventListener(
-        "input",
-        function () {
 
-            clearFieldError(this);
-            hideMessages();
+        localStorage.setItem(
+            "userRole",
+            role
+        );
+
+
+        localStorage.setItem(
+            "riderx_selected_role",
+            role
+        );
+
+
+        if (
+            role === "customer"
+        ) {
+
+            localStorage.setItem(
+                "riderx_customer",
+                JSON.stringify(
+                    session
+                )
+            );
 
         }
-    );
 
 
-    confirmPasswordInput.addEventListener(
-        "input",
-        function () {
+        if (
+            role === "rider"
+        ) {
 
-            clearFieldError(this);
-            hideMessages();
+            localStorage.setItem(
+                "riderx_rider",
+                JSON.stringify(
+                    session
+                )
+            );
 
         }
-    );
+
+    }
 
 
-    /* =========================================================
-       REGISTER
-    ========================================================= */
-
-    registerForm.addEventListener(
+    form.addEventListener(
         "submit",
         async function (event) {
 
             event.preventDefault();
 
-            hideMessages();
+            clearMessages();
+            clearInvalid();
 
-            clearAllFieldErrors();
-
-
-            const role =
-                getSelectedRole();
 
             const name =
-                nameInput.value
-                    .trim()
-                    .replace(/\s+/g, " ");
+                nameInput.value.trim();
 
-            const mobile =
+            const phone =
                 normalizePhone(
                     phoneInput.value
                 );
@@ -1374,45 +1549,31 @@
                 passwordInput.value;
 
             const confirmPassword =
-                confirmPasswordInput.value;
+                confirmInput.value;
+
+            const role =
+                selectedRole();
 
 
-            /* -------------------------------------------------
-               ROLE
-            ------------------------------------------------- */
-
-            if (!role) {
-
-                showError(
-                    "Please select Customer or Rider account."
-                );
-
-                return;
-            }
-
-
-            /* -------------------------------------------------
-               NAME
-            ------------------------------------------------- */
-
-            if (name.length < 2) {
+            if (
+                name.length < 2
+            ) {
 
                 showError(
                     "Please enter your full name."
                 );
 
-                markFieldError(
+                invalid(
                     nameInput
                 );
 
-                nameInput.focus();
-
                 return;
+
             }
 
 
             if (
-                !/^[A-Za-zÀ-ÿ\u0900-\u097F\s.'-]{2,60}$/.test(
+                !/^[A-Za-zÀ-ÿ\s.'-]{2,80}$/.test(
                     name
                 )
             ) {
@@ -1421,23 +1582,18 @@
                     "Please enter a valid name."
                 );
 
-                markFieldError(
+                invalid(
                     nameInput
                 );
 
-                nameInput.focus();
-
                 return;
+
             }
 
 
-            /* -------------------------------------------------
-               PHONE
-            ------------------------------------------------- */
-
             if (
                 !/^[6-9]\d{9}$/.test(
-                    mobile
+                    phone
                 )
             ) {
 
@@ -1445,172 +1601,149 @@
                     "Please enter a valid 10-digit Indian mobile number."
                 );
 
-                markFieldError(
+                invalid(
                     phoneInput
                 );
 
-                phoneInput.focus();
-
                 return;
+
             }
 
 
-            /* -------------------------------------------------
-               EMAIL
-            -------------------------------------------------
-               Email is required because this registration
-               flow uses Firebase Email/Password Auth.
-            ------------------------------------------------- */
-
-            if (!isValidEmail(email)) {
+            if (
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                    email
+                )
+            ) {
 
                 showError(
                     "Please enter a valid email address."
                 );
 
-                markFieldError(
+                invalid(
                     emailInput
                 );
 
-                emailInput.focus();
-
                 return;
+
             }
 
 
-            /* -------------------------------------------------
-               PASSWORD
-            ------------------------------------------------- */
-
-            if (password.length < 6) {
+            if (
+                password.length < 6
+            ) {
 
                 showError(
                     "Password must contain at least 6 characters."
                 );
 
-                markFieldError(
+                invalid(
                     passwordInput
                 );
 
-                passwordInput.focus();
-
                 return;
+
             }
 
 
-            if (password !== confirmPassword) {
+            if (
+                password !==
+                confirmPassword
+            ) {
 
                 showError(
                     "Passwords do not match."
                 );
 
-                markFieldError(
-                    confirmPasswordInput
+                invalid(
+                    confirmInput
                 );
 
-                confirmPasswordInput.focus();
-
                 return;
+
             }
 
 
-            /* -------------------------------------------------
-               RIDER VALIDATION
-            ------------------------------------------------- */
-
-            let selectedVehicle = "";
-            let selectedVehicleNumber = "";
-
-
-            if (role === "rider") {
-
-                selectedVehicle =
-                    String(
-                        vehicleType.value ||
-                        "bike"
-                    )
-                        .trim()
-                        .toLowerCase();
-
-
-                selectedVehicleNumber =
-                    vehicleNumber.value
-                        .trim()
-                        .toUpperCase()
-                        .replace(/\s+/g, "");
-
-
-                if (!selectedVehicleNumber) {
-
-                    showError(
-                        "Please enter your vehicle number."
-                    );
-
-                    markFieldError(
-                        vehicleNumber
-                    );
-
-                    vehicleNumber.focus();
-
-                    return;
-                }
-
-
-                if (
-                    !/^[A-Z0-9-]{4,20}$/.test(
-                        selectedVehicleNumber
-                    )
-                ) {
-
-                    showError(
-                        "Please enter a valid vehicle number."
-                    );
-
-                    markFieldError(
-                        vehicleNumber
-                    );
-
-                    vehicleNumber.focus();
-
-                    return;
-                }
-            }
-
-
-            /* -------------------------------------------------
-               TERMS
-            ------------------------------------------------- */
-
-            if (!terms.checked) {
+            if (
+                !terms.checked
+            ) {
 
                 showError(
                     "Please accept the Terms & Conditions and Privacy Policy."
                 );
 
-                terms.focus();
-
                 return;
+
             }
 
 
-            /* -------------------------------------------------
-               START FIREBASE REGISTRATION
-            ------------------------------------------------- */
+            setLoading(
+                true
+            );
 
-            setLoading(true);
+
+            let firebaseUser =
+                null;
 
 
             try {
 
                 /*
-                 * Firebase creates the real authentication
-                 * account here.
-                 *
-                 * Password is NEVER written to Firestore or
-                 * localStorage.
+                 * Check duplicate phone/email in Firestore
+                 * before creating the Firebase Auth account.
                  */
 
-                const credential =
+                if (
+                    await phoneExists(
+                        phone
+                    )
+                ) {
+
+                    showError(
+                        "An account with this mobile number already exists."
+                    );
+
+                    invalid(
+                        phoneInput
+                    );
+
+                    setLoading(
+                        false
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    await emailExists(
+                        email
+                    )
+                ) {
+
+                    showError(
+                        "An account with this email address already exists."
+                    );
+
+                    invalid(
+                        emailInput
+                    );
+
+                    setLoading(
+                        false
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * Create the real Firebase Authentication account.
+                 */
+
+                const result =
                     await createUserWithEmailAndPassword(
                         auth,
                         email,
@@ -1618,40 +1751,64 @@
                     );
 
 
-                const firebaseUser =
-                    credential.user;
+                firebaseUser =
+                    result.user;
 
 
-                if (!firebaseUser) {
+                if (
+                    !firebaseUser
+                ) {
 
                     throw new Error(
-                        "Firebase did not return a user."
+                        "Firebase account creation failed."
                     );
+
                 }
 
 
-                /* -------------------------------------------------
-                   UPDATE AUTH PROFILE
-                ------------------------------------------------- */
+                /*
+                 * Keep Firebase display name synchronized.
+                 */
 
                 await updateProfile(
                     firebaseUser,
                     {
-                        displayName: name
+                        displayName:
+                            name
                     }
                 );
 
 
-                /* -------------------------------------------------
-                   USER PROFILE
-                ------------------------------------------------- */
+                /*
+                 * Customer accounts are active immediately.
+                 *
+                 * Rider accounts remain pending until
+                 * RiderX/admin approval.
+                 */
 
-                const userProfile = {
+                const isRider =
+                    role === "rider";
+
+
+                const status =
+                    isRider
+                        ? "pending"
+                        : "active";
+
+
+                const approvalStatus =
+                    isRider
+                        ? "pending"
+                        : "approved";
+
+
+                const approved =
+                    !isRider;
+
+
+                const profile = {
 
                     uid:
-                        firebaseUser.uid,
-
-                    id:
                         firebaseUser.uid,
 
                     name:
@@ -1660,53 +1817,41 @@
                     fullName:
                         name,
 
+                    displayName:
+                        name,
+
                     email:
                         email,
 
                     phone:
-                        mobile,
+                        phone,
 
                     mobile:
-                        mobile,
+                        phone,
 
                     role:
                         role,
 
+                    userRole:
+                        role,
+
+                    accountType:
+                        role,
+
                     status:
-                        role === "rider"
-                            ? "pending"
-                            : "active",
+                        status,
+
+                    approvalStatus:
+                        approvalStatus,
+
+                    approved:
+                        approved,
 
                     city:
                         "Chandigarh",
 
-                    vehicleType:
-                        role === "rider"
-                            ? selectedVehicle
-                            : "",
-
-                    vehicleNumber:
-                        role === "rider"
-                            ? selectedVehicleNumber
-                            : "",
-
-                    walletBalance:
-                        0,
-
-                    totalEarnings:
-                        0,
-
-                    totalRides:
-                        0,
-
-                    online:
-                        false,
-
-                    available:
-                        false,
-
-                    verified:
-                        false,
+                    photoURL:
+                        "",
 
                     rating:
                         5,
@@ -1714,63 +1859,165 @@
                     ratingCount:
                         0,
 
+                    walletBalance:
+                        0,
+
+                    totalRides:
+                        0,
+
+                    completedRides:
+                        0,
+
+                    cancelledRides:
+                        0,
+
+                    isOnline:
+                        false,
+
+                    online:
+                        false,
+
+                    currentRideId:
+                        null,
+
+                    vehicleType:
+                        isRider
+                            ? "bike"
+                            : null,
+
+                    vehicleNumber:
+                        isRider
+                            ? ""
+                            : null,
+
                     createdAt:
                         serverTimestamp(),
 
                     updatedAt:
                         serverTimestamp()
+
                 };
 
 
-                /* -------------------------------------------------
-                   MAIN USERS COLLECTION
-                ------------------------------------------------- */
+                /*
+                 * Primary user profile.
+                 */
 
                 await setDoc(
-                    doc(
+                    collection(
+                        db,
+                        "users"
+                    ) &&
+                    (
+                        await import(
+                            "../firebase/firebase-config.js"
+                        )
+                    ).doc(
                         db,
                         "users",
                         firebaseUser.uid
                     ),
-                    userProfile
+                    profile
                 );
 
 
-                /* -------------------------------------------------
-                   ROLE COLLECTION
-                ------------------------------------------------- */
+                /*
+                 * Role-specific profile.
+                 *
+                 * These documents make future rider/customer
+                 * features easier to manage without changing
+                 * the authentication identity.
+                 */
 
-                if (role === "customer") {
-
-                    await setDoc(
-                        doc(
-                            db,
-                            "customers",
-                            firebaseUser.uid
-                        ),
-                        userProfile
+                const firebase =
+                    await import(
+                        "../firebase/firebase-config.js"
                     );
 
-                } else {
 
-                    await setDoc(
-                        doc(
+                if (
+                    role === "rider"
+                ) {
+
+                    await firebase.setDoc(
+                        firebase.doc(
                             db,
                             "riders",
                             firebaseUser.uid
                         ),
-                        userProfile
+                        {
+
+                            ...profile,
+
+                            riderId:
+                                firebaseUser.uid,
+
+                            driverId:
+                                firebaseUser.uid,
+
+                            applicationStatus:
+                                "pending",
+
+                            verificationStatus:
+                                "pending",
+
+                            documentsVerified:
+                                false,
+
+                            isApproved:
+                                false,
+
+                            isOnline:
+                                false,
+
+                            online:
+                                false,
+
+                            onboardingCompleted:
+                                false,
+
+                            createdAt:
+                                firebase.serverTimestamp(),
+
+                            updatedAt:
+                                firebase.serverTimestamp()
+
+                        }
                     );
+
+                } else {
+
+                    await firebase.setDoc(
+                        firebase.doc(
+                            db,
+                            "customers",
+                            firebaseUser.uid
+                        ),
+                        {
+
+                            ...profile,
+
+                            customerId:
+                                firebaseUser.uid,
+
+                            createdAt:
+                                firebase.serverTimestamp(),
+
+                            updatedAt:
+                                firebase.serverTimestamp()
+
+                        }
+                    );
+
                 }
 
 
-                /* -------------------------------------------------
-                   LOCAL UI STATE ONLY
-                -------------------------------------------------
-                   No password is stored.
-                */
+                /*
+                 * Store only safe session/profile data locally.
+                 * Password is NEVER stored in localStorage.
+                 */
 
-                const localSession = {
+                const localProfile = {
 
                     uid:
                         firebaseUser.uid,
@@ -1784,117 +2031,107 @@
                     fullName:
                         name,
 
+                    displayName:
+                        name,
+
                     email:
                         email,
 
                     phone:
-                        mobile,
+                        phone,
 
                     mobile:
-                        mobile,
+                        phone,
 
                     role:
                         role,
 
+                    userRole:
+                        role,
+
                     status:
-                        userProfile.status,
+                        status,
 
-                    vehicleType:
-                        userProfile.vehicleType,
+                    approvalStatus:
+                        approvalStatus,
 
-                    vehicleNumber:
-                        userProfile.vehicleNumber,
+                    approved:
+                        approved,
 
                     city:
-                        "Chandigarh"
+                        "Chandigarh",
+
+                    photoURL:
+                        "",
+
+                    vehicleType:
+                        isRider
+                            ? "bike"
+                            : null,
+
+                    vehicleNumber:
+                        ""
+
                 };
 
 
-                localStorage.setItem(
-                    "riderx_user",
-                    JSON.stringify(
-                        localSession
-                    )
-                );
-
-
-                localStorage.setItem(
-                    "userRole",
+                createLocalSession(
+                    localProfile,
                     role
                 );
 
 
-                localStorage.setItem(
-                    "riderx_selected_role",
-                    role
-                );
-
-
-                if (role === "customer") {
-
-                    localStorage.setItem(
-                        "riderx_customer",
-                        JSON.stringify(
-                            localSession
-                        )
-                    );
-
-                } else {
-
-                    localStorage.setItem(
-                        "riderx_rider",
-                        JSON.stringify(
-                            localSession
-                        )
-                    );
-                }
-
-
-                /* -------------------------------------------------
-                   SUCCESS
-                ------------------------------------------------- */
-
-                if (role === "rider") {
+                if (
+                    isRider
+                ) {
 
                     showSuccess(
-                        "Rider account created successfully. Your account is pending verification."
+                        "Rider application created successfully. Your account is waiting for RiderX approval."
                     );
 
                 } else {
 
                     showSuccess(
-                        "Customer account created successfully."
+                        "Account created successfully. Opening RiderX..."
                     );
+
                 }
 
 
                 /*
-                 * Firebase Auth has already established the
-                 * authenticated session.
+                 * Firebase Auth is intentionally signed out here.
                  *
-                 * The next login/guard files will use
-                 * onAuthStateChanged instead of trusting
-                 * localStorage.
+                 * This prevents a newly registered rider from
+                 * bypassing the approval system and automatically
+                 * entering the rider dashboard.
                  */
+
+                await signOut(
+                    auth
+                );
+
 
                 setTimeout(
                     function () {
 
-                        if (role === "rider") {
+                        if (
+                            isRider
+                        ) {
 
                             window.location.replace(
-                                "../rider/home.html"
+                                "./rider-login.html"
                             );
 
                         } else {
 
                             window.location.replace(
-                                "../customer/home.html"
+                                "./customer-login.html"
                             );
+
                         }
 
                     },
-                    900
+                    1100
                 );
 
 
@@ -1907,311 +2144,53 @@
 
 
                 /*
-                 * If Firestore fails after Auth creation,
-                 * the Firebase account may already exist.
-                 *
-                 * We do not store the password anywhere.
+                 * If Auth account was created but Firestore
+                 * profile creation failed, remove the orphaned
+                 * Firebase Auth account so registration does not
+                 * leave a broken account behind.
                  */
 
+                if (
+                    firebaseUser
+                ) {
+
+                    try {
+
+                        await firebaseUser.delete();
+
+                    } catch (deleteError) {
+
+                        console.warn(
+                            "Could not remove incomplete Firebase Auth account:",
+                            deleteError
+                        );
+
+                    }
+
+                }
+
+
                 showError(
-                    getFirebaseErrorMessage(
+                    firebaseErrorMessage(
                         error
                     )
                 );
 
 
-                setLoading(false);
+                setLoading(
+                    false
+                );
+
             }
 
         }
     );
 
 
-    /* =========================================================
-       ROLE HELPERS
-    ========================================================= */
-
-    function getSelectedRole() {
-
-        if (customerRole.checked) {
-
-            return "customer";
-        }
-
-
-        if (riderRole.checked) {
-
-            return "rider";
-        }
-
-
-        return "";
-    }
-
-
-    function normalizeRole(role) {
-
-        const value =
-            String(
-                role || ""
-            )
-                .trim()
-                .toLowerCase();
-
-
-        if (
-            value === "driver" ||
-            value === "delivery"
-        ) {
-
-            return "rider";
-        }
-
-
-        if (value === "rider") {
-
-            return "rider";
-        }
-
-
-        if (value === "customer") {
-
-            return "customer";
-        }
-
-
-        return "";
-    }
-
-
-    /* =========================================================
-       PHONE
-    ========================================================= */
-
-    function normalizePhone(value) {
-
-        return String(
-            value || ""
-        )
-            .replace(
-                /\D/g,
-                ""
-            )
-            .slice(
-                -10
-            );
-    }
-
-
-    /* =========================================================
-       EMAIL
-    ========================================================= */
-
-    function isValidEmail(email) {
-
-        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-            .test(email);
-    }
-
-
-    /* =========================================================
-       FIREBASE ERROR MESSAGES
-    ========================================================= */
-
-    function getFirebaseErrorMessage(error) {
-
-        const code =
-            String(
-                error?.code || ""
-            )
-                .toLowerCase();
-
-
-        switch (code) {
-
-            case "auth/email-already-in-use":
-
-                return "An account with this email already exists. Please login instead.";
-
-
-            case "auth/invalid-email":
-
-                return "Please enter a valid email address.";
-
-
-            case "auth/weak-password":
-
-                return "Password is too weak. Please use at least 6 characters.";
-
-
-            case "auth/network-request-failed":
-
-                return "Network error. Please check your internet connection and try again.";
-
-
-            case "auth/operation-not-allowed":
-
-                return "Email/password registration is not enabled in Firebase Authentication.";
-
-
-            case "auth/too-many-requests":
-
-                return "Too many attempts. Please wait a while and try again.";
-
-
-            case "permission-denied":
-
-                return "Firebase permission denied. Please check Firestore Security Rules.";
-
-
-            default:
-
-                if (
-                    error?.message &&
-                    /permission/i.test(
-                        error.message
-                    )
-                ) {
-
-                    return "Firebase permission denied. Please check Firestore Security Rules.";
-                }
-
-
-                return "Unable to create your account right now. Please try again.";
-        }
-    }
-
-
-    /* =========================================================
-       LOADING
-    ========================================================= */
-
-    function setLoading(loading) {
-
-        registerBtn.disabled =
-            loading;
-
-
-        if (loading) {
-
-            registerBtn.innerHTML =
-                '<span class="loader"></span>Creating account...';
-
-        } else {
-
-            registerBtn.textContent =
-                "Create Account";
-        }
-    }
-
-
-    /* =========================================================
-       MESSAGES
-    ========================================================= */
-
-    function hideMessages() {
-
-        errorBox.classList.remove(
-            "show"
-        );
-
-        successBox.classList.remove(
-            "show"
-        );
-
-        errorBox.textContent =
-            "";
-
-        successBox.textContent =
-            "";
-    }
-
-
-    function showError(message) {
-
-        successBox.classList.remove(
-            "show"
-        );
-
-        successBox.textContent =
-            "";
-
-        errorBox.textContent =
-            message;
-
-        errorBox.classList.add(
-            "show"
-        );
-    }
-
-
-    function showSuccess(message) {
-
-        errorBox.classList.remove(
-            "show"
-        );
-
-        errorBox.textContent =
-            "";
-
-        successBox.textContent =
-            message;
-
-        successBox.classList.add(
-            "show"
-        );
-    }
-
-
-    /* =========================================================
-       FIELD ERROR
-    ========================================================= */
-
-    function markFieldError(field) {
-
-        if (!field) {
-            return;
-        }
-
-        field.classList.add(
-            "field-error"
-        );
-    }
-
-
-    function clearFieldError(field) {
-
-        if (!field) {
-            return;
-        }
-
-        field.classList.remove(
-            "field-error"
-        );
-    }
-
-
-    function clearAllFieldErrors() {
-
-        [
-            nameInput,
-            phoneInput,
-            emailInput,
-            passwordInput,
-            confirmPasswordInput,
-            vehicleNumber
-        ].forEach(
-            clearFieldError
-        );
-    }
-
-
-    /* =========================================================
-       BACK TO ROLE
-    ========================================================= */
-
     document
-        .getElementById("backRole")
+        .getElementById(
+            "backBtn"
+        )
         .addEventListener(
             "click",
             function () {
@@ -2223,34 +2202,125 @@
         );
 
 
-    /* =========================================================
-       LOGIN LINK
-    ========================================================= */
-
     document
-        .getElementById("loginLink")
+        .getElementById(
+            "loginLink"
+        )
         .addEventListener(
             "click",
             function () {
 
                 const role =
-                    getSelectedRole();
+                    selectedRole();
 
 
-                if (role) {
-
-                    localStorage.setItem(
-                        "riderx_selected_role",
-                        role
-                    );
-                }
+                localStorage.setItem(
+                    "riderx_selected_role",
+                    role
+                );
 
             }
         );
 
 
+    document
+        .getElementById(
+            "termsLink"
+        )
+        .addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                showError(
+                    "RiderX Terms & Conditions page will be connected in the legal/settings module."
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "privacyLink"
+        )
+        .addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+
+                showError(
+                    "RiderX Privacy Policy page will be connected in the legal/settings module."
+                );
+
+            }
+        );
+
+
+    function firebaseErrorMessage(
+        error
+    ) {
+
+        const code =
+            String(
+                error?.code || ""
+            )
+                .toLowerCase();
+
+
+        switch (
+            code
+        ) {
+
+            case "auth/email-already-in-use":
+                return "This email address is already registered.";
+
+            case "auth/invalid-email":
+                return "The email address is invalid.";
+
+            case "auth/weak-password":
+                return "The password is too weak. Use at least 6 characters.";
+
+            case "auth/operation-not-allowed":
+                return "Email/password authentication is not enabled in Firebase.";
+
+            case "auth/network-request-failed":
+                return "Network error. Please check your internet connection.";
+
+            case "permission-denied":
+                return "Firebase Firestore permission denied. Check your Firestore Security Rules.";
+
+            default:
+
+                if (
+                    error?.message &&
+                    /permission/i.test(
+                        error.message
+                    )
+                ) {
+
+                    return "Firebase permission denied. Check your Firestore Security Rules.";
+
+                }
+
+
+                return (
+                    error?.message ||
+                    "Account creation failed. Please try again."
+                );
+
+        }
+
+    }
+
+
+    updateRoleUI();
+    passwordStrength("");
+
 </script>
 
 </body>
 
-            </html>
+    </html>
