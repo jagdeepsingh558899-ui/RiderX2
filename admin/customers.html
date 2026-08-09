@@ -6,221 +6,2458 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Manage Customers</title>
+<title>RiderX Admin - Customers</title>
 
+<meta name="theme-color" content="#FFD400">
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
 :root{
-
---yellow:#FFE500;
---black:#050505;
---card:#111;
-
+    --yellow:#FFD400;
+    --bg:#080808;
+    --card:#151515;
+    --card2:#1e1e1e;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
 }
-
 
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
-
+html,
+body{
+    min-height:100%;
+    background:var(--bg);
+}
 
 body{
-
-background:var(--black);
-color:white;
-padding-bottom:50px;
-
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-
-.header{
-
-height:70px;
-background:#111;
-display:flex;
-align-items:center;
-padding:0 20px;
-
+button,
+input,
+select{
+    font-family:inherit;
 }
-
-
-
-.logo{
-
-font-size:28px;
-font-weight:900;
-
-}
-
-
-.logo span{
-
-color:var(--yellow);
-
-}
-
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-
-.back{
-
-width:100%;
-padding:12px;
-background:#222;
-color:white;
-border:none;
-border-radius:12px;
-margin-bottom:20px;
-
-}
-
-
-
-.title{
-
-font-size:24px;
-font-weight:bold;
-margin-bottom:20px;
-
-}
-
-
-
-.customer-card{
-
-background:var(--card);
-border:1px solid #333;
-border-radius:18px;
-padding:18px;
-margin-bottom:15px;
-
-}
-
-
-
-.row{
-
-margin-bottom:8px;
-
-}
-
-
-
-.label{
-
-color:#999;
-
-}
-
-
 
 button{
+    cursor:pointer;
+}
 
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-background:var(--yellow);
-font-weight:bold;
-
+.app{
+    min-height:100vh;
+    background:var(--bg);
 }
 
 
+/* HEADER */
 
-.block{
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
 
-background:#ff3333;
-color:white;
+    display:flex;
+    align-items:center;
+    gap:10px;
 
+    padding:12px;
+
+    background:#0c0c0c;
+    border-bottom:1px solid #292929;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+
+    border:1px solid #363636;
+    border-radius:11px;
+
+    background:#1b1b1b;
+    color:#fff;
+
+    font-size:20px;
+}
+
+.logo{
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:900;
+}
+
+.header-info{
+    flex:1;
+}
+
+.header-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.header-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
 }
 
 
+/* MAIN */
+
+.main{
+    width:100%;
+    max-width:1200px;
+
+    margin:auto;
+
+    padding:15px;
+}
+
+
+/* TOP */
+
+.page-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+
+    margin-bottom:13px;
+}
+
+.page-title{
+    font-size:14px;
+    font-weight:900;
+}
+
+.page-description{
+    margin-top:4px;
+
+    color:#777;
+
+    font-size:6px;
+}
+
+.add-btn{
+    height:38px;
+
+    padding:0 13px;
+
+    border:1px solid #5d5100;
+    border-radius:10px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* STATS */
+
+.stats{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+
+    gap:9px;
+
+    margin-bottom:12px;
+}
+
+.stat{
+    padding:12px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    background:var(--card);
+}
+
+.stat-label{
+    color:#777;
+    font-size:5px;
+    font-weight:700;
+}
+
+.stat-value{
+    margin-top:6px;
+
+    font-size:15px;
+    font-weight:900;
+}
+
+.stat-value.yellow{
+    color:var(--yellow);
+}
+
+.stat-value.green{
+    color:var(--green);
+}
+
+.stat-value.red{
+    color:#ff7070;
+}
+
+
+/* CARD */
+
+.card{
+    overflow:hidden;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+}
+
+.card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+
+    padding:12px;
+
+    border-bottom:1px solid #292929;
+}
+
+.card-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.card-count{
+    color:#777;
+    font-size:5px;
+}
+
+
+/* TOOLBAR */
+
+.toolbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:10px;
+
+    border-bottom:1px solid #292929;
+}
+
+.search-box{
+    position:relative;
+    flex:1;
+}
+
+.search-icon{
+    position:absolute;
+
+    left:10px;
+    top:50%;
+
+    transform:translateY(-50%);
+
+    color:#666;
+
+    font-size:10px;
+}
+
+.search{
+    width:100%;
+    height:38px;
+
+    padding:0 10px 0 30px;
+
+    outline:none;
+
+    border:1px solid #373737;
+    border-radius:10px;
+
+    background:#202020;
+    color:#fff;
+
+    font-size:6px;
+}
+
+.search:focus{
+    border-color:#6b5b00;
+}
+
+.filter{
+    height:38px;
+
+    min-width:105px;
+
+    padding:0 9px;
+
+    outline:none;
+
+    border:1px solid #373737;
+    border-radius:10px;
+
+    background:#202020;
+    color:#fff;
+
+    font-size:6px;
+}
+
+
+/* CUSTOMER LIST */
+
+.customer-list{
+    width:100%;
+}
+
+.customer-row{
+    display:grid;
+
+    grid-template-columns:
+        minmax(170px,1.4fr)
+        minmax(130px,1fr)
+        100px
+        90px
+        70px;
+
+    align-items:center;
+    gap:10px;
+
+    padding:11px 12px;
+
+    border-bottom:1px solid #292929;
+}
+
+.customer-row:last-child{
+    border-bottom:0;
+}
+
+.customer-row:hover{
+    background:#191919;
+}
+
+.customer-info{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    min-width:0;
+}
+
+.avatar{
+    width:38px;
+    height:38px;
+    min-width:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:#262626;
+    color:var(--yellow);
+
+    font-size:10px;
+    font-weight:900;
+}
+
+.customer-details{
+    min-width:0;
+}
+
+.customer-name{
+    overflow:hidden;
+
+    font-size:6px;
+    font-weight:900;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.customer-email{
+    margin-top:4px;
+
+    overflow:hidden;
+
+    color:#666;
+
+    font-size:5px;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.cell{
+    color:#aaa;
+    font-size:5.5px;
+}
+
+.cell strong{
+    color:#fff;
+    font-size:6px;
+}
+
+.status{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:5px 7px;
+
+    border-radius:20px;
+
+    font-size:4.5px;
+    font-weight:900;
+}
+
+.status.active{
+    background:#102517;
+    color:var(--green);
+}
+
+.status.blocked{
+    background:#291414;
+    color:#ff7070;
+}
+
+.status.pending{
+    background:#292500;
+    color:var(--yellow);
+}
+
+.actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:5px;
+}
+
+.action{
+    width:29px;
+    height:29px;
+
+    border:1px solid #373737;
+    border-radius:8px;
+
+    background:#222;
+    color:#fff;
+
+    font-size:9px;
+}
+
+.action:hover{
+    border-color:#685b00;
+}
+
+.action.danger{
+    color:#ff7070;
+}
+
+
+/* EMPTY */
+
+.empty{
+    padding:35px 15px;
+
+    color:#666;
+
+    text-align:center;
+
+    font-size:6px;
+}
+
+
+/* PAGINATION */
+
+.pagination{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:10px 12px;
+
+    border-top:1px solid #292929;
+}
+
+.page-info{
+    color:#666;
+    font-size:5px;
+}
+
+.page-buttons{
+    display:flex;
+    gap:5px;
+}
+
+.page-btn{
+    width:30px;
+    height:30px;
+
+    border:1px solid #373737;
+    border-radius:8px;
+
+    background:#202020;
+    color:#fff;
+
+    font-size:7px;
+}
+
+.page-btn.active{
+    border-color:#665900;
+    background:var(--yellow);
+    color:#000;
+}
+
+
+/* MODAL */
+
+.modal{
+    position:fixed;
+    inset:0;
+
+    z-index:100;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    padding:15px;
+
+    background:rgba(0,0,0,.78);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:450px;
+
+    padding:17px;
+
+    border:1px solid #383838;
+    border-radius:17px;
+
+    background:#171717;
+}
+
+.modal-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.modal-text{
+    margin-top:6px;
+
+    color:#777;
+
+    font-size:6px;
+    line-height:1.6;
+}
+
+.modal-actions{
+    display:flex;
+    gap:8px;
+
+    margin-top:15px;
+}
+
+.modal-btn{
+    flex:1;
+    height:40px;
+
+    border-radius:10px;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+.cancel-btn{
+    border:1px solid #383838;
+    background:#222;
+    color:#fff;
+}
+
+.confirm-btn{
+    border:1px solid #5c5100;
+    background:var(--yellow);
+    color:#000;
+}
+
+
+/* FORM */
+
+.form-group{
+    margin-top:11px;
+}
+
+.form-label{
+    display:block;
+
+    margin-bottom:5px;
+
+    color:#888;
+
+    font-size:5px;
+    font-weight:800;
+}
+
+.form-input{
+    width:100%;
+    height:40px;
+
+    padding:0 10px;
+
+    outline:none;
+
+    border:1px solid #383838;
+    border-radius:9px;
+
+    background:#202020;
+    color:#fff;
+
+    font-size:6px;
+}
+
+.form-input:focus{
+    border-color:#6b5c00;
+}
+
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    z-index:150;
+
+    width:calc(100% - 30px);
+    max-width:450px;
+
+    padding:11px;
+
+    border:1px solid #373737;
+    border-radius:11px;
+
+    background:#222;
+    color:#fff;
+
+    text-align:center;
+
+    font-size:6px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translate(-50%,20px);
+
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:850px){
+
+    .stats{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .customer-row{
+        grid-template-columns:
+            minmax(180px,1.4fr)
+            90px
+            75px
+            65px;
+    }
+
+    .customer-row .email-cell{
+        display:none;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .main{
+        padding:11px;
+    }
+
+    .page-top{
+        align-items:flex-start;
+    }
+
+    .add-btn{
+        padding:0 9px;
+    }
+
+    .toolbar{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .filter{
+        width:100%;
+    }
+
+    .customer-row{
+        grid-template-columns:
+            minmax(0,1fr)
+            70px
+            60px;
+    }
+
+    .customer-row .ride-cell{
+        display:none;
+    }
+
+    .customer-row .status-cell{
+        text-align:right;
+    }
+
+}
 
 </style>
 
-
 </head>
-
-
 
 <body>
 
+<div class="app">
 
-<header class="header">
+
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            ‹
+        </button>
+
+        <div class="logo">
+            RX
+        </div>
+
+        <div class="header-info">
+
+            <div class="header-title">
+                Customers
+            </div>
+
+            <div class="header-subtitle">
+                RiderX customer management
+            </div>
+
+        </div>
+
+    </header>
 
 
-<div class="logo">
+    <main class="main">
 
-RID<span>ERX</span>
+
+        <!-- TOP -->
+
+        <section class="page-top">
+
+            <div>
+
+                <div class="page-title">
+                    Customer Management
+                </div>
+
+                <div class="page-description">
+                    View and manage all RiderX customers.
+                </div>
+
+            </div>
+
+            <button
+                class="add-btn"
+                onclick="openAddCustomer()"
+            >
+                + CUSTOMER
+            </button>
+
+        </section>
+
+
+        <!-- STATS -->
+
+        <section class="stats">
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    TOTAL CUSTOMERS
+                </div>
+
+                <div
+                    class="stat-value yellow"
+                    id="totalCustomers"
+                >
+                    0
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    ACTIVE
+                </div>
+
+                <div
+                    class="stat-value green"
+                    id="activeCustomers"
+                >
+                    0
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    BLOCKED
+                </div>
+
+                <div
+                    class="stat-value red"
+                    id="blockedCustomers"
+                >
+                    0
+                </div>
+
+            </div>
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    NEW TODAY
+                </div>
+
+                <div
+                    class="stat-value yellow"
+                    id="newCustomers"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CUSTOMER CARD -->
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <div class="card-title">
+                    All Customers
+                </div>
+
+                <div
+                    class="card-count"
+                    id="resultCount"
+                >
+                    0 customers
+                </div>
+
+            </div>
+
+
+            <!-- TOOLBAR -->
+
+            <div class="toolbar">
+
+                <div class="search-box">
+
+                    <span class="search-icon">
+                        🔍
+                    </span>
+
+                    <input
+                        class="search"
+                        id="searchInput"
+                        type="search"
+                        placeholder="Search name, phone or email..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <select
+                    class="filter"
+                    id="statusFilter"
+                >
+
+                    <option value="all">
+                        All customers
+                    </option>
+
+                    <option value="active">
+                        Active
+                    </option>
+
+                    <option value="blocked">
+                        Blocked
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- CUSTOMER LIST -->
+
+            <div
+                class="customer-list"
+                id="customerList"
+            >
+
+                <div class="empty">
+                    Loading customers...
+                </div>
+
+            </div>
+
+
+            <!-- PAGINATION -->
+
+            <div class="pagination">
+
+                <div
+                    class="page-info"
+                    id="pageInfo"
+                >
+                    Showing 0 customers
+                </div>
+
+                <div class="page-buttons">
+
+                    <button
+                        class="page-btn"
+                        onclick="previousPage()"
+                    >
+                        ‹
+                    </button>
+
+                    <button
+                        class="page-btn active"
+                        id="pageNumber"
+                    >
+                        1
+                    </button>
+
+                    <button
+                        class="page-btn"
+                        onclick="nextPage()"
+                    >
+                        ›
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
 
 </div>
 
 
-</header>
+<!-- ADD CUSTOMER MODAL -->
 
+<div
+    class="modal"
+    id="customerModal"
+>
 
+    <div class="modal-card">
 
-<div class="container">
+        <div class="modal-title">
+            Add Customer
+        </div>
 
+        <div class="form-group">
 
+            <label class="form-label">
+                CUSTOMER NAME
+            </label>
 
-<button class="back"
-onclick="history.back()">
+            <input
+                class="form-input"
+                id="customerName"
+                type="text"
+                placeholder="Customer name"
+            >
 
-← Back
+        </div>
 
-</button>
+        <div class="form-group">
 
+            <label class="form-label">
+                PHONE
+            </label>
 
+            <input
+                class="form-input"
+                id="customerPhone"
+                type="tel"
+                placeholder="Phone number"
+            >
 
+        </div>
 
-<div class="title">
+        <div class="form-group">
 
-Manage Customers
+            <label class="form-label">
+                EMAIL
+            </label>
+
+            <input
+                class="form-input"
+                id="customerEmail"
+                type="email"
+                placeholder="Email address"
+            >
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="modal-btn cancel-btn"
+                onclick="closeCustomerModal()"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="modal-btn confirm-btn"
+                onclick="addCustomer()"
+            >
+                ADD CUSTOMER
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
 
+<!-- CONFIRM MODAL -->
 
-<div id="customerList">
+<div
+    class="modal"
+    id="confirmModal"
+>
 
-Loading Customers...
+    <div class="modal-card">
+
+        <div
+            class="modal-title"
+            id="confirmTitle"
+        >
+            Confirm action
+        </div>
+
+        <div
+            class="modal-text"
+            id="confirmText"
+        >
+            Are you sure?
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="modal-btn cancel-btn"
+                onclick="closeConfirm()"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="modal-btn confirm-btn"
+                id="confirmActionBtn"
+                onclick="executeConfirm()"
+            >
+                CONFIRM
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
 
-
-</div>
-
-
-
-
-
-<script type="module"
-src="./js/customers.js"></script>
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
+<script>
+
+/* =========================================
+   RIDERX ADMIN CUSTOMERS
+========================================= */
+
+const STORAGE_KEY =
+    "riderxAdminCustomers";
+
+const PAGE_SIZE =
+    10;
+
+let customers = [];
+
+let filteredCustomers = [];
+
+let currentPage = 1;
+
+let confirmAction = null;
+
+let toastTimer;
+
+
+/* =========================================
+   DEFAULT DATA
+========================================= */
+
+function loadCustomers(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+        if(
+            raw
+        ){
+
+            const parsed =
+                JSON.parse(
+                    raw
+                );
+
+            if(
+                Array.isArray(parsed)
+            ){
+
+                customers =
+                    parsed;
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.log(
+            error
+        );
+
+    }
+
+
+    /*
+      Do not create fake customers.
+      Real Firebase/customer data can
+      populate this page later.
+    */
+
+    if(
+        !Array.isArray(
+            customers
+        )
+    ){
+
+        customers = [];
+
+    }
+
+
+    applyFilters();
+
+}
+
+
+/* =========================================
+   SAVE
+========================================= */
+
+function saveCustomers(){
+
+    try{
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+                customers
+            )
+        );
+
+    }catch(error){
+
+        console.log(
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   FILTER
+========================================= */
+
+function applyFilters(){
+
+    const search =
+        (
+            document.getElementById(
+                "searchInput"
+            )?.value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const status =
+        document.getElementById(
+            "statusFilter"
+        )?.value ||
+        "all";
+
+
+    filteredCustomers =
+        customers.filter(
+            function(customer){
+
+                const name =
+                    String(
+                        customer.name ||
+                        customer.displayName ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const phone =
+                    String(
+                        customer.phone ||
+                        customer.mobile ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const email =
+                    String(
+                        customer.email ||
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                const matchesSearch =
+                    !search ||
+                    name.includes(search) ||
+                    phone.includes(search) ||
+                    email.includes(search);
+
+
+                const customerStatus =
+                    String(
+                        customer.status ||
+                        "active"
+                    )
+                    .toLowerCase();
+
+
+                const matchesStatus =
+                    status === "all" ||
+                    customerStatus === status;
+
+
+                return (
+                    matchesSearch &&
+                    matchesStatus
+                );
+
+            }
+        );
+
+
+    currentPage =
+        1;
+
+
+    render();
+
+}
+
+
+/* =========================================
+   RENDER
+========================================= */
+
+function render(){
+
+    renderStats();
+
+    renderList();
+
+}
+
+
+/* =========================================
+   STATS
+========================================= */
+
+function renderStats(){
+
+    const total =
+        customers.length;
+
+
+    const active =
+        customers.filter(
+            function(customer){
+
+                return String(
+                    customer.status ||
+                    "active"
+                ).toLowerCase() ===
+                "active";
+
+            }
+        ).length;
+
+
+    const blocked =
+        customers.filter(
+            function(customer){
+
+                return String(
+                    customer.status ||
+                    ""
+                ).toLowerCase() ===
+                "blocked";
+
+            }
+        ).length;
+
+
+    const today =
+        new Date();
+
+
+    const todayStart =
+        new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate()
+        );
+
+
+    const newToday =
+        customers.filter(
+            function(customer){
+
+                const date =
+                    getCustomerDate(
+                        customer
+                    );
+
+
+                return (
+                    date &&
+                    date >=
+                    todayStart
+                );
+
+            }
+        ).length;
+
+
+    setText(
+        "totalCustomers",
+        total
+    );
+
+    setText(
+        "activeCustomers",
+        active
+    );
+
+    setText(
+        "blockedCustomers",
+        blocked
+    );
+
+    setText(
+        "newCustomers",
+        newToday
+    );
+
+}
+
+
+/* =========================================
+   LIST
+========================================= */
+
+function renderList(){
+
+    const container =
+        document.getElementById(
+            "customerList"
+        );
+
+
+    if(
+        !container
+    ){
+
+        return;
+
+    }
+
+
+    const total =
+        filteredCustomers.length;
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                total /
+                PAGE_SIZE
+            )
+        );
+
+
+    if(
+        currentPage >
+        totalPages
+    ){
+
+        currentPage =
+            totalPages;
+
+    }
+
+
+    const start =
+        (
+            currentPage -
+            1
+        ) *
+        PAGE_SIZE;
+
+
+    const visible =
+        filteredCustomers.slice(
+            start,
+            start +
+            PAGE_SIZE
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    if(
+        !visible.length
+    ){
+
+        container.innerHTML = `
+
+            <div class="empty">
+                No customers found.
+            </div>
+
+        `;
+
+    }
+    else{
+
+        visible.forEach(
+            function(customer){
+
+                container.appendChild(
+                    createCustomerRow(
+                        customer
+                    )
+                );
+
+            }
+        );
+
+    }
+
+
+    setText(
+        "resultCount",
+        total +
+        " customer" +
+        (
+            total === 1
+                ? ""
+                : "s"
+        )
+    );
+
+
+    const end =
+        Math.min(
+            start +
+            visible.length,
+            total
+        );
+
+
+    setText(
+        "pageInfo",
+        total
+            ? "Showing " +
+              (
+                start + 1
+              ) +
+              "-" +
+              end +
+              " of " +
+              total
+            : "Showing 0 customers"
+    );
+
+
+    setText(
+        "pageNumber",
+        currentPage
+    );
+
+}
+
+
+/* =========================================
+   CREATE ROW
+========================================= */
+
+function createCustomerRow(
+    customer
+){
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "customer-row";
+
+
+    const name =
+        customer.name ||
+        customer.displayName ||
+        "Customer";
+
+
+    const phone =
+        customer.phone ||
+        customer.mobile ||
+        "—";
+
+
+    const email =
+        customer.email ||
+        "—";
+
+
+    const rides =
+        Number(
+            customer.rides ||
+            customer.totalRides ||
+            0
+        );
+
+
+    const status =
+        String(
+            customer.status ||
+            "active"
+        ).toLowerCase();
+
+
+    const created =
+        getCustomerDate(
+            customer
+        );
+
+
+    const joined =
+        created
+            ? created.toLocaleDateString(
+                "en-IN",
+                {
+                    day:"2-digit",
+                    month:"short",
+                    year:"numeric"
+                }
+            )
+            : "—";
+
+
+    const initial =
+        String(
+            name
+        )
+        .charAt(0)
+        .toUpperCase();
+
+
+    const statusClass =
+        status === "blocked"
+            ? "blocked"
+            : status === "pending"
+                ? "pending"
+                : "active";
+
+
+    row.innerHTML = `
+
+        <div class="customer-info">
+
+            <div class="avatar">
+                ${escapeHtml(initial)}
+            </div>
+
+            <div class="customer-details">
+
+                <div class="customer-name">
+                    ${escapeHtml(name)}
+                </div>
+
+                <div class="customer-email">
+                    ${escapeHtml(email)}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="cell email-cell">
+
+            <strong>
+                ${escapeHtml(phone)}
+            </strong>
+
+        </div>
+
+
+        <div class="cell ride-cell">
+
+            <strong>
+                ${rides}
+            </strong>
+
+            rides
+
+        </div>
+
+
+        <div class="status-cell">
+
+            <span class="status ${statusClass}">
+                ${escapeHtml(
+                    capitalize(status)
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button
+                class="action"
+                title="View"
+                onclick="viewCustomer('${escapeJs(
+                    customer.id ||
+                    ""
+                )}')"
+            >
+                👁
+            </button>
+
+            <button
+                class="action"
+                title="Edit"
+                onclick="editCustomer('${escapeJs(
+                    customer.id ||
+                    ""
+                )}')"
+            >
+                ✎
+            </button>
+
+            <button
+                class="action danger"
+                title="${status === "blocked" ? "Unblock" : "Block"}"
+                onclick="toggleCustomerStatus('${escapeJs(
+                    customer.id ||
+                    ""
+                )}')"
+            >
+                ${status === "blocked" ? "✓" : "⊘"}
+            </button>
+
+        </div>
+
+    `;
+
+
+    return row;
+
+}
+
+
+/* =========================================
+   CUSTOMER DATE
+========================================= */
+
+function getCustomerDate(
+    customer
+){
+
+    const value =
+        customer.createdAt ||
+        customer.created_at ||
+        customer.joinedAt ||
+        customer.date;
+
+
+    if(
+        !value
+    ){
+
+        return null;
+
+    }
+
+
+    if(
+        value &&
+        typeof value.toDate ===
+        "function"
+    ){
+
+        return value.toDate();
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        return null;
+
+    }
+
+
+    return date;
+
+}
+
+
+/* =========================================
+   VIEW
+========================================= */
+
+function viewCustomer(
+    id
+){
+
+    const customer =
+        customers.find(
+            function(item){
+
+                return String(
+                    item.id || ""
+                ) ===
+                String(id);
+
+            }
+        );
+
+
+    if(
+        !customer
+    ){
+
+        showToast(
+            "Customer details unavailable."
+        );
+
+        return;
+
+    }
+
+
+    const name =
+        customer.name ||
+        customer.displayName ||
+        "Customer";
+
+
+    showToast(
+        name +
+        " • " +
+        (
+            customer.phone ||
+            customer.email ||
+            "Customer"
+        )
+    );
+
+}
+
+
+/* =========================================
+   EDIT
+========================================= */
+
+function editCustomer(
+    id
+){
+
+    const customer =
+        customers.find(
+            function(item){
+
+                return String(
+                    item.id || ""
+                ) ===
+                String(id);
+
+            }
+        );
+
+
+    if(
+        !customer
+    ){
+
+        showToast(
+            "Customer not found."
+        );
+
+        return;
+
+    }
+
+
+    const name =
+        prompt(
+            "Customer name",
+            customer.name ||
+            customer.displayName ||
+            ""
+        );
+
+
+    if(
+        name ===
+        null
+    ){
+
+        return;
+
+    }
+
+
+    customer.name =
+        name.trim() ||
+        "Customer";
+
+
+    saveCustomers();
+
+    applyFilters();
+
+
+    showToast(
+        "Customer updated."
+    );
+
+}
+
+
+/* =========================================
+   BLOCK / UNBLOCK
+========================================= */
+
+function toggleCustomerStatus(
+    id
+){
+
+    const customer =
+        customers.find(
+            function(item){
+
+                return String(
+                    item.id || ""
+                ) ===
+                String(id);
+
+            }
+        );
+
+
+    if(
+        !customer
+    ){
+
+        showToast(
+            "Customer not found."
+        );
+
+        return;
+
+    }
+
+
+    const current =
+        String(
+            customer.status ||
+            "active"
+        ).toLowerCase();
+
+
+    const blocked =
+        current !==
+        "blocked";
+
+
+    openConfirm(
+        blocked
+            ? "Block customer"
+            : "Unblock customer",
+
+        blocked
+            ? "This customer will be marked as blocked."
+            : "This customer will be marked as active.",
+
+        function(){
+
+            customer.status =
+                blocked
+                    ? "blocked"
+                    : "active";
+
+
+            saveCustomers();
+
+            applyFilters();
+
+
+            showToast(
+                blocked
+                    ? "Customer blocked."
+                    : "Customer unblocked."
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   ADD CUSTOMER
+========================================= */
+
+function openAddCustomer(){
+
+    document.getElementById(
+        "customerName"
+    ).value = "";
+
+    document.getElementById(
+        "customerPhone"
+    ).value = "";
+
+    document.getElementById(
+        "customerEmail"
+    ).value = "";
+
+
+    document.getElementById(
+        "customerModal"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+function closeCustomerModal(){
+
+    document.getElementById(
+        "customerModal"
+    ).classList.remove(
+        "show"
+    );
+
+}
+
+
+function addCustomer(){
+
+    const name =
+        document.getElementById(
+            "customerName"
+        ).value.trim();
+
+
+    const phone =
+        document.getElementById(
+            "customerPhone"
+        ).value.trim();
+
+
+    const email =
+        document.getElementById(
+            "customerEmail"
+        ).value.trim();
+
+
+    if(
+        !name
+    ){
+
+        showToast(
+            "Please enter customer name."
+        );
+
+        return;
+
+    }
+
+
+    const customer = {
+
+        id:
+            "customer_" +
+            Date.now(),
+
+        name:name,
+
+        phone:phone,
+
+        email:email,
+
+        status:"active",
+
+        rides:0,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    customers.unshift(
+        customer
+    );
+
+
+    saveCustomers();
+
+    closeCustomerModal();
+
+    applyFilters();
+
+
+    showToast(
+        "Customer added."
+    );
+
+}
+
+
+/* =========================================
+   PAGINATION
+========================================= */
+
+function previousPage(){
+
+    if(
+        currentPage >
+        1
+    ){
+
+        currentPage--;
+
+        renderList();
+
+    }
+
+}
+
+
+function nextPage(){
+
+    const pages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredCustomers.length /
+                PAGE_SIZE
+            )
+        );
+
+
+    if(
+        currentPage <
+        pages
+    ){
+
+        currentPage++;
+
+        renderList();
+
+    }
+
+}
+
+
+/* =========================================
+   CONFIRM
+========================================= */
+
+function openConfirm(
+    title,
+    text,
+    action
+){
+
+    document.getElementById(
+        "confirmTitle"
+    ).textContent =
+        title;
+
+
+    document.getElementById(
+        "confirmText"
+    ).textContent =
+        text;
+
+
+    confirmAction =
+        action;
+
+
+    document.getElementById(
+        "confirmModal"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+function closeConfirm(){
+
+    document.getElementById(
+        "confirmModal"
+    ).classList.remove(
+        "show"
+    );
+
+
+    confirmAction =
+        null;
+
+}
+
+
+function executeConfirm(){
+
+    const action =
+        confirmAction;
+
+
+    closeConfirm();
+
+
+    if(
+        typeof action ===
+        "function"
+    ){
+
+        action();
+
+    }
+
+}
+
+
+/* =========================================
+   UTILITIES
+========================================= */
+
+function setText(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(
+        element
+    ){
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+function capitalize(
+    value
+){
+
+    const text =
+        String(
+            value ||
+            ""
+        );
+
+
+    return text.charAt(0).toUpperCase() +
+        text.slice(1);
+
+}
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeJs(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /\\/g,
+        "\\\\"
+    )
+    .replace(
+        /'/g,
+        "\\'"
+    );
+
+}
+
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        history.back();
+
+    }
+    else{
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+
+}
+
+
+/* =========================================
+   SEARCH EVENTS
+========================================= */
+
+document.getElementById(
+    "searchInput"
+).addEventListener(
+    "input",
+    applyFilters
+);
+
+
+document.getElementById(
+    "statusFilter"
+).addEventListener(
+    "change",
+    applyFilters
+);
+
+
+/* =========================================
+   MODAL CLICK OUTSIDE
+========================================= */
+
+document.getElementById(
+    "customerModal"
+).addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            this
+        ){
+
+            closeCustomerModal();
+
+        }
+
+    }
+);
+
+
+document.getElementById(
+    "confirmModal"
+).addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            this
+        ){
+
+            closeConfirm();
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   INIT
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadCustomers();
+
+    }
+);
+
+</script>
 
 </body>
 
-</html>
+  </html>
