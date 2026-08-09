@@ -6,276 +6,2109 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Payment</title>
+<title>RiderX - Payment</title>
 
-<link rel="stylesheet" href="../css/style.css">
+<meta name="theme-color" content="#FFD400">
 
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
-.box{
+:root{
+    --yellow:#FFD400;
+    --black:#090909;
+    --bg:#101010;
+    --card:#191919;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+}
 
-background:#111;
-padding:25px;
-border-radius:20px;
-border:2px solid #FFD600;
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
+html,
+body{
+    min-height:100%;
+    background:#080808;
+}
+
+body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.app{
+    width:100%;
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:var(--bg);
 }
 
 
-select,button{
+/* =========================
+   HEADER
+========================= */
 
-width:100%;
-padding:15px;
-margin-top:15px;
-border:none;
-border-radius:12px;
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border-bottom:1px solid #252525;
+    background:rgba(10,10,10,.97);
+    backdrop-filter:blur(14px);
+}
 
+.back-btn{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    border:1px solid #303030;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.title-box{
+    flex:1;
+}
+
+.title{
+    font-size:12px;
+    font-weight:900;
+}
+
+.subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
 }
 
 
-button{
+/* =========================
+   CONTENT
+========================= */
 
-background:#FFD600;
-font-weight:bold;
-
+.content{
+    padding:13px;
+    padding-bottom:35px;
 }
 
+
+/* =========================
+   PAYMENT SUMMARY
+========================= */
+
+.summary{
+    padding:16px;
+    border:1px solid #393300;
+    border-radius:18px;
+    background:
+        linear-gradient(
+            135deg,
+            #242000,
+            #171717
+        );
+}
+
+.summary-label{
+    color:#aaa;
+    font-size:6px;
+    font-weight:900;
+    text-transform:uppercase;
+}
 
 .amount{
-
-font-size:30px;
-color:#FFD600;
-
+    margin-top:6px;
+    color:#fff;
+    font-size:25px;
+    font-weight:900;
 }
 
+.amount span{
+    color:var(--yellow);
+}
+
+.summary-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:12px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,.08);
+}
+
+.summary-item{
+    min-width:0;
+}
+
+.summary-item-label{
+    color:#666;
+    font-size:5px;
+}
+
+.summary-item-value{
+    margin-top:4px;
+    font-size:7px;
+    font-weight:900;
+}
+
+
+/* =========================
+   SECTION
+========================= */
+
+.section-title{
+    margin:19px 2px 8px;
+    color:#666;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:.4px;
+    text-transform:uppercase;
+}
+
+
+/* =========================
+   PAYMENT METHODS
+========================= */
+
+.methods{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.method{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:62px;
+    padding:10px 12px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:var(--card);
+    cursor:pointer;
+}
+
+.method.selected{
+    border-color:#806b00;
+    background:#211f0c;
+}
+
+.method-icon{
+    width:38px;
+    height:38px;
+    min-width:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#252525;
+    font-size:15px;
+}
+
+.method-info{
+    flex:1;
+    min-width:0;
+}
+
+.method-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.method-sub{
+    margin-top:4px;
+    color:#707070;
+    font-size:6px;
+}
+
+.radio{
+    width:18px;
+    height:18px;
+    border:2px solid #555;
+    border-radius:50%;
+    position:relative;
+}
+
+.method.selected .radio{
+    border-color:var(--yellow);
+}
+
+.method.selected .radio::after{
+    content:"";
+    position:absolute;
+    inset:3px;
+    border-radius:50%;
+    background:var(--yellow);
+}
+
+
+/* =========================
+   CARD FORM
+========================= */
+
+.card-form{
+    display:none;
+    margin-top:9px;
+    padding:13px;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:#151515;
+}
+
+.card-form.show{
+    display:block;
+}
+
+.input-group{
+    margin-bottom:9px;
+}
+
+.input-label{
+    display:block;
+    margin-bottom:5px;
+    color:#777;
+    font-size:6px;
+    font-weight:900;
+}
+
+.input{
+    width:100%;
+    height:40px;
+    padding:0 11px;
+    border:1px solid #343434;
+    border-radius:10px;
+    outline:none;
+    background:#202020;
+    color:#fff;
+    font-size:8px;
+}
+
+.input:focus{
+    border-color:#8d7700;
+}
+
+.two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+
+/* =========================
+   WALLET
+========================= */
+
+.wallet-box{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border:1px solid #2e2e2e;
+    border-radius:14px;
+    background:#191919;
+}
+
+.wallet-icon{
+    width:38px;
+    height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#282300;
+    color:var(--yellow);
+    font-size:15px;
+}
+
+.wallet-info{
+    flex:1;
+}
+
+.wallet-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.wallet-balance{
+    margin-top:4px;
+    color:var(--yellow);
+    font-size:8px;
+    font-weight:900;
+}
+
+.add-money{
+    height:34px;
+    padding:0 10px;
+    border:1px solid #5d5000;
+    border-radius:9px;
+    background:#272200;
+    color:var(--yellow);
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   COUPON
+========================= */
+
+.coupon{
+    display:flex;
+    gap:7px;
+}
+
+.coupon-input{
+    flex:1;
+    height:40px;
+    padding:0 11px;
+    border:1px solid #333;
+    border-radius:10px;
+    outline:none;
+    background:#1c1c1c;
+    color:#fff;
+    font-size:7px;
+}
+
+.coupon-btn{
+    width:78px;
+    border:1px solid #5d5000;
+    border-radius:10px;
+    background:#282300;
+    color:var(--yellow);
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   PAY BUTTON
+========================= */
+
+.pay-btn{
+    width:100%;
+    height:48px;
+    margin-top:20px;
+    border:0;
+    border-radius:13px;
+    background:var(--yellow);
+    color:#000;
+    font-size:8px;
+    font-weight:900;
+    cursor:pointer;
+    box-shadow:0 8px 25px rgba(255,212,0,.08);
+}
+
+.pay-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+
+/* =========================
+   SECURE
+========================= */
+
+.secure{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-top:11px;
+    color:#555;
+    font-size:5px;
+}
+
+
+/* =========================
+   RECEIPT
+========================= */
+
+.receipt{
+    display:none;
+    margin-top:15px;
+    padding:13px;
+    border:1px solid #263c2c;
+    border-radius:14px;
+    background:#141b17;
+}
+
+.receipt.show{
+    display:block;
+}
+
+.receipt-title{
+    color:#5ee28a;
+    font-size:8px;
+    font-weight:900;
+}
+
+.receipt-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:9px;
+    color:#777;
+    font-size:6px;
+}
+
+.receipt-row strong{
+    color:#fff;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    z-index:200;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
 
 </style>
 
-
 </head>
-
 
 <body>
 
+<div class="app">
 
 
-<div class="header">
+    <!-- HEADER -->
 
-💳 Payment
+    <header class="header">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            ‹
+        </button>
+
+        <div class="title-box">
+
+            <div class="title">
+                Payment
+            </div>
+
+            <div class="subtitle">
+                Secure RiderX payment
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="content">
+
+
+        <!-- SUMMARY -->
+
+        <section class="summary">
+
+            <div class="summary-label">
+                Amount to pay
+            </div>
+
+            <div class="amount">
+                ₹<span id="payAmount">0</span>
+            </div>
+
+            <div class="summary-row">
+
+                <div class="summary-item">
+
+                    <div class="summary-item-label">
+                        Ride
+                    </div>
+
+                    <div
+                        class="summary-item-value"
+                        id="rideName"
+                    >
+                        RiderX Ride
+                    </div>
+
+                </div>
+
+                <div class="summary-item">
+
+                    <div class="summary-item-label">
+                        Booking
+                    </div>
+
+                    <div
+                        class="summary-item-value"
+                        id="bookingId"
+                    >
+                        —
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PAYMENT METHODS -->
+
+        <div class="section-title">
+            Select payment method
+        </div>
+
+        <div class="methods">
+
+
+            <!-- CASH -->
+
+            <div
+                class="method selected"
+                data-method="cash"
+                onclick="selectMethod('cash')"
+            >
+
+                <div class="method-icon">
+                    💵
+                </div>
+
+                <div class="method-info">
+
+                    <div class="method-title">
+                        Cash
+                    </div>
+
+                    <div class="method-sub">
+                        Pay directly to the rider
+                    </div>
+
+                </div>
+
+                <div class="radio"></div>
+
+            </div>
+
+
+            <!-- WALLET -->
+
+            <div
+                class="method"
+                data-method="wallet"
+                onclick="selectMethod('wallet')"
+            >
+
+                <div class="method-icon">
+                    👛
+                </div>
+
+                <div class="method-info">
+
+                    <div class="method-title">
+                        RiderX Wallet
+                    </div>
+
+                    <div class="method-sub">
+                        Balance: ₹<span id="walletBalance">0</span>
+                    </div>
+
+                </div>
+
+                <div class="radio"></div>
+
+            </div>
+
+
+            <!-- CARD -->
+
+            <div
+                class="method"
+                data-method="card"
+                onclick="selectMethod('card')"
+            >
+
+                <div class="method-icon">
+                    💳
+                </div>
+
+                <div class="method-info">
+
+                    <div class="method-title">
+                        Debit / Credit Card
+                    </div>
+
+                    <div class="method-sub">
+                        Secure card payment
+                    </div>
+
+                </div>
+
+                <div class="radio"></div>
+
+            </div>
+
+
+            <!-- UPI -->
+
+            <div
+                class="method"
+                data-method="upi"
+                onclick="selectMethod('upi')"
+            >
+
+                <div class="method-icon">
+                    📱
+                </div>
+
+                <div class="method-info">
+
+                    <div class="method-title">
+                        UPI
+                    </div>
+
+                    <div class="method-sub">
+                        Google Pay, PhonePe, Paytm & more
+                    </div>
+
+                </div>
+
+                <div class="radio"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CARD FORM -->
+
+        <div
+            class="card-form"
+            id="cardForm"
+        >
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Card number
+                </label>
+
+                <input
+                    class="input"
+                    id="cardNumber"
+                    type="tel"
+                    inputmode="numeric"
+                    maxlength="19"
+                    placeholder="1234 5678 9012 3456"
+                    autocomplete="cc-number"
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label class="input-label">
+                    Card holder name
+                </label>
+
+                <input
+                    class="input"
+                    id="cardName"
+                    type="text"
+                    placeholder="Name on card"
+                    autocomplete="cc-name"
+                >
+
+            </div>
+
+
+            <div class="two-col">
+
+                <div class="input-group">
+
+                    <label class="input-label">
+                        Expiry
+                    </label>
+
+                    <input
+                        class="input"
+                        id="cardExpiry"
+                        type="tel"
+                        inputmode="numeric"
+                        maxlength="5"
+                        placeholder="MM/YY"
+                        autocomplete="cc-exp"
+                    >
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label class="input-label">
+                        CVV
+                    </label>
+
+                    <input
+                        class="input"
+                        id="cardCvv"
+                        type="password"
+                        inputmode="numeric"
+                        maxlength="4"
+                        placeholder="•••"
+                        autocomplete="cc-csc"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- WALLET -->
+
+        <div class="section-title">
+            Wallet
+        </div>
+
+        <div class="wallet-box">
+
+            <div class="wallet-icon">
+                ₹
+            </div>
+
+            <div class="wallet-info">
+
+                <div class="wallet-title">
+                    RiderX Wallet
+                </div>
+
+                <div class="wallet-balance">
+                    ₹<span id="walletBalance2">0</span>
+                </div>
+
+            </div>
+
+            <button
+                class="add-money"
+                onclick="addMoney()"
+            >
+                + Add Money
+            </button>
+
+        </div>
+
+
+        <!-- COUPON -->
+
+        <div class="section-title">
+            Promo code
+        </div>
+
+        <div class="coupon">
+
+            <input
+                class="coupon-input"
+                id="couponInput"
+                type="text"
+                placeholder="Enter promo code"
+                maxlength="30"
+            >
+
+            <button
+                class="coupon-btn"
+                onclick="applyCoupon()"
+            >
+                APPLY
+            </button>
+
+        </div>
+
+
+        <!-- RECEIPT -->
+
+        <div
+            class="receipt"
+            id="receipt"
+        >
+
+            <div class="receipt-title">
+                ✓ Payment successful
+            </div>
+
+            <div class="receipt-row">
+                <span>Payment ID</span>
+                <strong id="receiptId">—</strong>
+            </div>
+
+            <div class="receipt-row">
+                <span>Method</span>
+                <strong id="receiptMethod">—</strong>
+            </div>
+
+            <div class="receipt-row">
+                <span>Amount</span>
+                <strong>₹<span id="receiptAmount">0</span></strong>
+            </div>
+
+        </div>
+
+
+        <!-- PAY -->
+
+        <button
+            class="pay-btn"
+            id="payButton"
+            onclick="processPayment()"
+        >
+            Pay ₹<span id="payButtonAmount">0</span>
+        </button>
+
+
+        <div class="secure">
+            🔒 Secure payment • RiderX
+        </div>
+
+    </main>
 
 </div>
 
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
-<div class="container">
+<script>
+
+/* ==========================================
+   RIDERX CUSTOMER PAYMENT
+========================================== */
+
+let selectedMethod = "cash";
+let originalAmount = 0;
+let finalAmount = 0;
+let discount = 0;
+let toastTimer = null;
 
 
-<div class="box">
+/* ==========================================
+   GET URL PARAM
+========================================== */
 
+function getParam(
+    name
+){
 
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-<h2>
-
-RiderX Payment
-
-</h2>
-
-
-
-<h3>
-
-Total Fare
-
-</h3>
-
-
-
-<div class="amount">
-
-₹<span id="fare">0</span>
-
-</div>
-
-
-
-
-<select id="method">
-
-
-<option value="Cash">
-
-💵 Cash
-
-</option>
-
-
-<option value="Online">
-
-📱 Online
-
-</option>
-
-
-</select>
-
-
-
-
-<button id="payBtn">
-
-Confirm Payment
-
-</button>
-
-
-
-
-<p id="msg"></p>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-doc,
-getDoc,
-updateDoc,
-serverTimestamp
+    return params.get(
+        name
+    );
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+/* ==========================================
+   LOAD PAYMENT DATA
+========================================== */
+
+function loadPaymentData(){
+
+    let amount =
+        Number(
+            getParam(
+                "amount"
+            )
+        );
 
 
+    if(
+        !Number.isFinite(amount) ||
+        amount < 0
+    ){
+
+        amount = 0;
+
+    }
 
 
+    /*
+      Try local ride/payment data
+    */
 
-let rideId=
+    if(
+        amount === 0
+    ){
 
-localStorage.getItem("rideId");
+        const keys = [
+
+            "riderxPayment",
+            "riderxBooking",
+            "currentRide",
+            "bookingData",
+            "selectedRide"
+
+        ];
 
 
+        for(
+            const key of keys
+        ){
+
+            try{
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
 
 
+                if(
+                    !raw
+                ){
 
-async function loadFare(){
+                    continue;
+
+                }
 
 
+                const data =
+                    JSON.parse(
+                        raw
+                    );
 
-let snap=
 
-await getDoc(
+                const possibleAmount =
+                    Number(
+                        data.amount ||
+                        data.fare ||
+                        data.total ||
+                        data.totalFare ||
+                        0
+                    );
 
-doc(db,"rides",rideId)
 
+                if(
+                    possibleAmount >
+                    0
+                ){
+
+                    amount =
+                        possibleAmount;
+
+                    break;
+
+                }
+
+            }catch(error){
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    originalAmount =
+        Math.max(
+            0,
+            amount
+        );
+
+
+    finalAmount =
+        originalAmount;
+
+
+    const ride =
+        getParam(
+            "ride"
+        ) ||
+        getParam(
+            "service"
+        ) ||
+        "RiderX Ride";
+
+
+    const booking =
+        getParam(
+            "bookingId"
+        ) ||
+        getParam(
+            "id"
+        );
+
+
+    document.getElementById(
+        "rideName"
+    ).textContent =
+        formatRideName(
+            ride
+        );
+
+
+    document.getElementById(
+        "bookingId"
+    ).textContent =
+        booking ||
+        generateBookingId();
+
+
+    updateAmount();
+
+}
+
+
+/* ==========================================
+   RIDE NAME
+========================================== */
+
+function formatRideName(
+    value
+){
+
+    const map = {
+
+        bike:"Bike Taxi",
+        cab:"Cab",
+        parcel:"Parcel",
+        food:"Food Delivery"
+
+    };
+
+
+    return (
+        map[value] ||
+        value
+    );
+
+}
+
+
+/* ==========================================
+   BOOKING ID
+========================================== */
+
+function generateBookingId(){
+
+    return "RX" +
+        Date.now()
+            .toString()
+            .slice(
+                -8
+            );
+
+}
+
+
+/* ==========================================
+   UPDATE AMOUNT
+========================================== */
+
+function updateAmount(){
+
+    finalAmount =
+        Math.max(
+            0,
+            originalAmount -
+            discount
+        );
+
+
+    document.getElementById(
+        "payAmount"
+    ).textContent =
+        finalAmount.toFixed(0);
+
+
+    document.getElementById(
+        "payButtonAmount"
+    ).textContent =
+        finalAmount.toFixed(0);
+
+
+    if(
+        discount >
+        0
+    ){
+
+        document.getElementById(
+            "payAmount"
+        ).title =
+            "Discount applied: ₹" +
+            discount;
+
+    }
+
+}
+
+
+/* ==========================================
+   SELECT METHOD
+========================================== */
+
+function selectMethod(
+    method
+){
+
+    selectedMethod =
+        method;
+
+
+    document
+        .querySelectorAll(
+            ".method"
+        )
+        .forEach(
+            item => {
+
+                item.classList.toggle(
+                    "selected",
+                    item.dataset.method ===
+                    method
+                );
+
+            }
+        );
+
+
+    const cardForm =
+        document.getElementById(
+            "cardForm"
+        );
+
+
+    if(
+        method ===
+        "card"
+    ){
+
+        cardForm.classList.add(
+            "show"
+        );
+
+    }else{
+
+        cardForm.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   WALLET
+========================================== */
+
+function getWalletBalance(){
+
+    const keys = [
+
+        "riderxWallet",
+        "customerWallet",
+        "walletBalance"
+
+    ];
+
+
+    let balance =
+        0;
+
+
+    for(
+        const key of keys
+    ){
+
+        const raw =
+            localStorage.getItem(
+                key
+            );
+
+
+        if(
+            raw === null
+        ){
+
+            continue;
+
+        }
+
+
+        try{
+
+            if(
+                key ===
+                "riderxWallet" ||
+                key ===
+                "customerWallet"
+            ){
+
+                const data =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                balance =
+                    Number(
+                        data.balance ||
+                        data.amount ||
+                        0
+                    );
+
+            }else{
+
+                balance =
+                    Number(
+                        raw
+                    );
+
+            }
+
+        }catch(error){
+
+            balance =
+                Number(
+                    raw
+                ) ||
+                0;
+
+        }
+
+
+        break;
+
+    }
+
+
+    return Number.isFinite(
+        balance
+    )
+        ? Math.max(
+            0,
+            balance
+        )
+        : 0;
+
+}
+
+
+function loadWallet(){
+
+    const balance =
+        getWalletBalance();
+
+
+    document.getElementById(
+        "walletBalance"
+    ).textContent =
+        balance.toFixed(0);
+
+
+    document.getElementById(
+        "walletBalance2"
+    ).textContent =
+        balance.toFixed(0);
+
+}
+
+
+/* ==========================================
+   ADD MONEY
+========================================== */
+
+function addMoney(){
+
+    window.location.href =
+        "wallet.html";
+
+}
+
+
+/* ==========================================
+   COUPON
+========================================== */
+
+function applyCoupon(){
+
+    const input =
+        document.getElementById(
+            "couponInput"
+        );
+
+
+    const code =
+        input.value
+            .trim()
+            .toUpperCase();
+
+
+    if(
+        !code
+    ){
+
+        showToast(
+            "Enter a promo code."
+        );
+
+        return;
+
+    }
+
+
+    /*
+      Demo/local promo validation.
+      Backend/Firebase coupon validation
+      can override this later.
+    */
+
+    const coupons = {
+
+        RIDERX50:50,
+
+        RIDERX100:100,
+
+        WELCOME10:
+            Math.round(
+                originalAmount *
+                0.10
+            )
+
+    };
+
+
+    if(
+        Object.prototype.hasOwnProperty.call(
+            coupons,
+            code
+        )
+    ){
+
+        discount =
+            Math.min(
+                coupons[code],
+                originalAmount
+            );
+
+
+        input.disabled =
+            true;
+
+
+        updateAmount();
+
+
+        showToast(
+            "Promo applied. You saved ₹" +
+            discount.toFixed(0) +
+            "."
+        );
+
+    }else{
+
+        showToast(
+            "Invalid or expired promo code."
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   CARD VALIDATION
+========================================== */
+
+function validateCard(){
+
+    const number =
+        document.getElementById(
+            "cardNumber"
+        ).value
+            .replace(
+                /\D/g,
+                ""
+            );
+
+
+    const name =
+        document.getElementById(
+            "cardName"
+        ).value
+            .trim();
+
+
+    const expiry =
+        document.getElementById(
+            "cardExpiry"
+        ).value
+            .trim();
+
+
+    const cvv =
+        document.getElementById(
+            "cardCvv"
+        ).value
+            .replace(
+                /\D/g,
+                ""
+            );
+
+
+    if(
+        number.length <
+        12
+    ){
+
+        showToast(
+            "Enter a valid card number."
+        );
+
+        return false;
+
+    }
+
+
+    if(
+        !name
+    ){
+
+        showToast(
+            "Enter the card holder name."
+        );
+
+        return false;
+
+    }
+
+
+    if(
+        !/^\d{2}\/\d{2}$/.test(
+            expiry
+        )
+    ){
+
+        showToast(
+            "Enter expiry as MM/YY."
+        );
+
+        return false;
+
+    }
+
+
+    if(
+        cvv.length <
+        3
+    ){
+
+        showToast(
+            "Enter a valid CVV."
+        );
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* ==========================================
+   PROCESS PAYMENT
+========================================== */
+
+async function processPayment(){
+
+    if(
+        finalAmount <=
+        0
+    ){
+
+        showToast(
+            "No payment amount is required."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        selectedMethod ===
+        "wallet"
+    ){
+
+        const balance =
+            getWalletBalance();
+
+
+        if(
+            balance <
+            finalAmount
+        ){
+
+            showToast(
+                "Insufficient wallet balance."
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    if(
+        selectedMethod ===
+        "card"
+    ){
+
+        if(
+            !validateCard()
+        ){
+
+            return;
+
+        }
+
+    }
+
+
+    const button =
+        document.getElementById(
+            "payButton"
+        );
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Processing...";
+
+
+    /*
+      This is the frontend payment state.
+      A real online payment gateway should
+      confirm payment server-side before
+      marking a ride as paid.
+    */
+
+    try{
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    900
+                )
+        );
+
+
+        if(
+            selectedMethod ===
+            "wallet"
+        ){
+
+            deductWallet(
+                finalAmount
+            );
+
+        }
+
+
+        const paymentId =
+            "PAY" +
+            Date.now()
+                .toString()
+                .slice(
+                    -10
+                );
+
+
+        const payment = {
+
+            id:
+                paymentId,
+
+            bookingId:
+                document.getElementById(
+                    "bookingId"
+                ).textContent,
+
+            amount:
+                finalAmount,
+
+            originalAmount:
+                originalAmount,
+
+            discount:
+                discount,
+
+            method:
+                selectedMethod,
+
+            status:
+                "paid",
+
+            createdAt:
+                Date.now()
+
+        };
+
+
+        savePayment(
+            payment
+        );
+
+
+        showReceipt(
+            payment
+        );
+
+
+        showToast(
+            "Payment successful."
+        );
+
+
+        button.textContent =
+            "Payment Successful";
+
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+
+        button.disabled =
+            false;
+
+
+        button.innerHTML =
+            "Pay ₹<span id='payButtonAmount'>" +
+            finalAmount.toFixed(0) +
+            "</span>";
+
+
+        showToast(
+            "Payment failed. Please try again."
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   DEDUCT WALLET
+========================================== */
+
+function deductWallet(
+    amount
+){
+
+    const balance =
+        getWalletBalance();
+
+
+    const newBalance =
+        Math.max(
+            0,
+            balance -
+            amount
+        );
+
+
+    localStorage.setItem(
+        "walletBalance",
+        String(
+            newBalance
+        )
+    );
+
+
+    localStorage.setItem(
+        "riderxWallet",
+        JSON.stringify({
+            balance:newBalance
+        })
+    );
+
+
+    loadWallet();
+
+}
+
+
+/* ==========================================
+   SAVE PAYMENT
+========================================== */
+
+function savePayment(
+    payment
+){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                "riderxPayments"
+            );
+
+
+        let payments = [];
+
+
+        if(
+            raw
+        ){
+
+            const parsed =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                Array.isArray(
+                    parsed
+                )
+            ){
+
+                payments =
+                    parsed;
+
+            }
+
+        }
+
+
+        payments.unshift(
+            payment
+        );
+
+
+        localStorage.setItem(
+            "riderxPayments",
+            JSON.stringify(
+                payments.slice(
+                    0,
+                    100
+                )
+            )
+        );
+
+
+        localStorage.setItem(
+            "lastRiderXPayment",
+            JSON.stringify(
+                payment
+            )
+        );
+
+
+    }catch(error){
+
+        console.log(
+            "Payment save error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   RECEIPT
+========================================== */
+
+function showReceipt(
+    payment
+){
+
+    document.getElementById(
+        "receiptId"
+    ).textContent =
+        payment.id;
+
+
+    document.getElementById(
+        "receiptMethod"
+    ).textContent =
+        methodName(
+            payment.method
+        );
+
+
+    document.getElementById(
+        "receiptAmount"
+    ).textContent =
+        payment.amount.toFixed(0);
+
+
+    document.getElementById(
+        "receipt"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+/* ==========================================
+   METHOD NAME
+========================================== */
+
+function methodName(
+    method
+){
+
+    const names = {
+
+        cash:"Cash",
+
+        wallet:"RiderX Wallet",
+
+        card:"Debit / Credit Card",
+
+        upi:"UPI"
+
+    };
+
+
+    return (
+        names[method] ||
+        method
+    );
+
+}
+
+
+/* ==========================================
+   INPUT FORMATTING
+========================================== */
+
+document.getElementById(
+    "cardNumber"
+).addEventListener(
+    "input",
+    function(){
+
+        let value =
+            this.value
+                .replace(
+                    /\D/g,
+                    ""
+                )
+                .slice(
+                    0,
+                    16
+                );
+
+
+        const groups =
+            value.match(
+                /.{1,4}/g
+            );
+
+
+        this.value =
+            groups
+                ? groups.join(" ")
+                : "";
+
+    }
 );
 
 
+document.getElementById(
+    "cardExpiry"
+).addEventListener(
+    "input",
+    function(){
 
-if(snap.exists()){
-
-
-document.getElementById("fare").innerHTML=
-
-snap.data().fare || 0;
-
-
-}
-
-
-
-}
-
-
-
-
-document.getElementById("payBtn").onclick=
-
-async()=>{
+        let value =
+            this.value
+                .replace(
+                    /\D/g,
+                    ""
+                )
+                .slice(
+                    0,
+                    4
+                );
 
 
+        if(
+            value.length >
+            2
+        ){
 
-let method=
+            value =
+                value.slice(
+                    0,
+                    2
+                ) +
+                "/" +
+                value.slice(
+                    2
+                );
 
-document.getElementById("method").value;
-
-
-
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-
-paymentMethod:method,
-
-
-paymentStatus:"Paid",
+        }
 
 
-paidAt:serverTimestamp()
+        this.value =
+            value;
 
-
-}
-
+    }
 );
 
 
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        window.location.href =
+            "booking.html";
+
+    }
+
+}
 
 
+/* ==========================================
+   TOAST
+========================================== */
 
-document.getElementById("msg").innerHTML=
+function showToast(
+    message
+){
 
-"Payment Successful ✅";
-
-
-
-
-
-setTimeout(()=>{
-
-
-location.href="receipt.html";
-
-
-},1500);
+    const toast =
+        document.getElementById(
+            "toast"
+        );
 
 
-
-};
-
-
+    toast.textContent =
+        message;
 
 
+    toast.classList.add(
+        "show"
+    );
 
-loadFare();
+
+    clearTimeout(
+        toastTimer
+    );
 
 
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadPaymentData();
+
+        loadWallet();
+
+        selectMethod(
+            "cash"
+        );
+
+    }
+);
 
 </script>
 
-
-
 </body>
-
-</html>
+  </html>
