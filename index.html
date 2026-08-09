@@ -1,991 +1,801 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-      
-<meta charset="UTF-8">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+«»
 
-<meta name="theme-color" content="#000000">
+<meta
+name="theme-color"
+content="#FFD400"
 
-<meta name="description"
-      content="RiderX - India's Premium Bike Taxi, Cab, Parcel & Food Platform">
+«»
 
-<meta name="mobile-web-app-capable" content="yes">
+<meta
+name="description"
+content="RiderX - Chandigarh Bike Taxi, Cab, Parcel and Food Delivery"
 
-<meta name="apple-mobile-web-app-capable" content="yes">
+«»
 
-<meta name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent">
+<meta
+name="mobile-web-app-capable"
+content="yes"
 
-<meta name="apple-mobile-web-app-title"
-      content="RiderX">
+«»
 
-<link rel="manifest" href="./manifest.json">
+<meta
+name="apple-mobile-web-app-capable"
+content="yes"
 
-<link rel="icon"
-      href="./assets/Icons/icon-192.png">
+«»
 
-<title>RiderX - Move Faster</title>
+<meta
+name="apple-mobile-web-app-status-bar-style"
+content="black-translucent"
 
+«»
 
-<style>
+<meta
+name="apple-mobile-web-app-title"
+content="RiderX"
 
-/* =========================================================
-   RESET
-========================================================= */
+«»
+
+<title>RiderX</title><link
+    rel="manifest"
+    href="./manifest.json"
+><link
+    rel="stylesheet"
+    href="./css/Style.css"
+><style>
 
 *{
-    margin:0;
-    padding:0;
     box-sizing:border-box;
-    font-family:Arial, sans-serif;
 }
 
 html,
 body{
     width:100%;
     min-height:100%;
-    background:#000;
-    color:#fff;
+    margin:0;
 }
 
 body{
     min-height:100vh;
-    min-height:100dvh;
-    overflow-x:hidden;
+    overflow:hidden;
+    background:#070707;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-/* =========================================================
-   SPLASH SCREEN
-========================================================= */
 
 .splash{
     position:fixed;
     inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#070707;
+    transition:
+        opacity .45s ease,
+        visibility .45s ease;
+}
 
+
+.splash.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+
+.splash-content{
     width:100%;
-    height:100vh;
-    height:100dvh;
-
-    background:#000;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    z-index:99999;
-
-    animation:
-        splashOut .5s ease 1.4s forwards;
-}
-
-.logo-animation{
-    font-size:45px;
-
-    font-weight:900;
-
-    letter-spacing:3px;
-
-    animation:
-        logoPulse 1.2s ease;
-}
-
-.logo-animation span{
-    color:#FFD600;
-}
-
-
-/* =========================================================
-   SPLASH ANIMATION
-========================================================= */
-
-@keyframes logoPulse{
-
-    0%{
-        opacity:0;
-        transform:scale(.75);
-    }
-
-    60%{
-        opacity:1;
-        transform:scale(1.08);
-    }
-
-    100%{
-        opacity:1;
-        transform:scale(1);
-    }
-
-}
-
-
-@keyframes splashOut{
-
-    to{
-        opacity:0;
-        visibility:hidden;
-        pointer-events:none;
-    }
-
-}
-
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-.main{
-
-    min-height:100vh;
-    min-height:100dvh;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-    justify-content:center;
-
-    padding:25px 20px 100px;
-
+    max-width:360px;
+    padding:25px;
     text-align:center;
-
-    position:relative;
-
 }
 
 
-/* =========================================================
-   BRAND
-========================================================= */
+.logo{
+    width:88px;
+    height:88px;
+    margin:0 auto 20px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:25px;
+
+    background:#FFD400;
+    color:#080808;
+
+    font-size:29px;
+    font-weight:1000;
+
+    box-shadow:
+        0 15px 45px rgba(255,212,0,.14);
+
+    animation:
+        logoIn .7s ease both;
+}
+
 
 .brand{
+    margin:0;
 
-    font-size:44px;
-
-    font-weight:900;
-
-    letter-spacing:-2px;
-
+    font-size:31px;
     line-height:1;
+
+    font-weight:1000;
+    letter-spacing:-1px;
+
+    animation:
+        textIn .7s .12s ease both;
 }
+
 
 .brand span{
-    color:#FFD600;
+    color:#FFD400;
 }
 
-
-/* =========================================================
-   TAGLINE
-========================================================= */
 
 .tagline{
-
-    margin-top:17px;
-
-    color:#aaa;
-
-    max-width:520px;
-
-    line-height:1.6;
-
-    font-size:15px;
-
-}
-
-.tagline strong{
-    color:#FFD600;
-}
-
-
-/* =========================================================
-   SERVICE BADGES
-========================================================= */
-
-.services{
-
-    display:flex;
-
-    flex-wrap:wrap;
-
-    justify-content:center;
-
-    gap:8px;
-
-    margin-top:22px;
-
-    max-width:500px;
-}
-
-.service{
-
-    padding:7px 11px;
-
-    border-radius:30px;
-
-    background:#111;
-
-    border:1px solid #292929;
-
-    color:#ccc;
-
-    font-size:11px;
-
-    font-weight:700;
-
-}
-
-.service i{
-    color:#FFD600;
-    margin-right:5px;
-}
-
-
-/* =========================================================
-   BUTTON AREA
-========================================================= */
-
-.buttons{
-
-    width:100%;
-
-    max-width:390px;
-
-    margin-top:30px;
-
-}
-
-
-/* =========================================================
-   COMMON BUTTON
-========================================================= */
-
-.btn{
-
-    width:100%;
-
-    padding:17px;
-
-    margin:8px 0;
-
-    border-radius:15px;
-
-    font-size:17px;
-
-    font-weight:bold;
-
-    cursor:pointer;
-
-    transition:.2s;
-
-    -webkit-tap-highlight-color:transparent;
-
-    text-decoration:none;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:10px;
-
-}
-
-
-.btn:active{
-
-    transform:scale(.97);
-
-}
-
-
-/* =========================================================
-   CUSTOMER
-========================================================= */
-
-.customer{
-
-    background:#FFD600;
-
-    color:#000;
-
-    border:2px solid #FFD600;
-
-}
-
-
-.customer:hover{
-
-    filter:brightness(1.06);
-
-}
-
-
-/* =========================================================
-   RIDER
-========================================================= */
-
-.rider{
-
-    background:#111;
-
-    border:2px solid #FFD600;
-
-    color:#FFD600;
-
-}
-
-
-.rider:hover{
-
-    background:#181800;
-
-}
-
-
-/* =========================================================
-   INSTALL APP
-========================================================= */
-
-.install-btn{
-
-    display:none;
-
-    width:100%;
-
-    padding:15px;
-
-    margin-top:12px;
-
-    border-radius:15px;
-
-    background:#171717;
-
-    border:1px solid #FFD600;
-
-    color:#FFD600;
-
-    font-size:16px;
-
-    font-weight:800;
-
-    cursor:pointer;
-
-    -webkit-tap-highlight-color:transparent;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:9px;
-
-}
-
-
-.install-btn.show{
-
-    display:flex;
-
-}
-
-
-.install-btn:active{
-
-    transform:scale(.97);
-
-}
-
-
-/* =========================================================
-   INSTALL MESSAGE
-========================================================= */
-
-.install-message{
-
-    display:none;
-
-    margin-top:12px;
+    margin:10px 0 0;
 
     color:#777;
 
-    font-size:12px;
+    font-size:10px;
 
-    line-height:1.5;
-
-    max-width:350px;
-
+    animation:
+        textIn .7s .22s ease both;
 }
 
 
-.install-message.show{
+.loader-wrap{
+    margin-top:32px;
 
-    display:block;
-
+    animation:
+        textIn .7s .3s ease both;
 }
 
 
-/* =========================================================
-   ADMIN
-========================================================= */
+.loader{
+    width:34px;
+    height:34px;
 
-.admin-link{
+    margin:0 auto;
 
-    position:fixed;
-
-    bottom:58px;
-
-    left:50%;
-
-    transform:translateX(-50%);
-
-    color:#555;
-
-    font-size:11px;
-
-    text-decoration:none;
-
-    padding:8px 15px;
-
-    z-index:10;
-
-}
-
-
-.admin-link:hover{
-
-    color:#FFD600;
-
-}
-
-
-/* =========================================================
-   FOOTER
-========================================================= */
-
-.footer{
-
-    position:fixed;
-
-    bottom:18px;
-
-    left:0;
-
-    right:0;
-
-    text-align:center;
-
-    color:#555;
-
-    font-size:11px;
-
-    z-index:5;
-
-}
-
-
-/* =========================================================
-   VERSION
-========================================================= */
-
-.version{
-
-    position:absolute;
-
-    top:18px;
-
-    right:18px;
-
-    color:#333;
-
-    font-size:9px;
-
-}
-
-
-/* =========================================================
-   DECORATION
-========================================================= */
-
-.glow{
-
-    position:absolute;
-
-    width:220px;
-
-    height:220px;
+    border:3px solid #292929;
+    border-top-color:#FFD400;
 
     border-radius:50%;
 
-    background:#FFD600;
-
-    opacity:.045;
-
-    filter:blur(70px);
-
-    pointer-events:none;
-
+    animation:
+        spin .75s linear infinite;
 }
 
 
-.glow.one{
+.loading-text{
+    margin-top:11px;
 
-    top:10%;
+    color:#555;
 
-    left:-100px;
-
+    font-size:8px;
 }
 
 
-.glow.two{
+.status{
+    min-height:15px;
 
-    bottom:10%;
+    margin-top:13px;
 
-    right:-100px;
+    color:#666;
 
+    font-size:8px;
 }
 
 
-/* =========================================================
-   MOBILE
-========================================================= */
+@keyframes spin{
 
-@media(max-width:420px){
-
-    .main{
-
-        padding-left:18px;
-
-        padding-right:18px;
-
-    }
-
-    .brand{
-
-        font-size:37px;
-
-    }
-
-    .logo-animation{
-
-        font-size:38px;
-
-    }
-
-    .tagline{
-
-        font-size:13px;
-
-    }
-
-    .buttons{
-
-        margin-top:27px;
-
-    }
-
-    .btn{
-
-        font-size:16px;
-
-        padding:16px;
-
-    }
-
-    .services{
-
-        gap:6px;
-
-    }
-
-    .service{
-
-        font-size:10px;
-
-        padding:6px 9px;
-
+    to{
+        transform:rotate(360deg);
     }
 
 }
 
 
-/* =========================================================
-   STANDALONE APP
-========================================================= */
+@keyframes logoIn{
 
-@media(display-mode:standalone){
-
-    .admin-link{
-
-        bottom:65px;
-
+    from{
+        opacity:0;
+        transform:
+            translateY(20px)
+            scale(.8);
     }
 
-    .footer{
-
-        bottom:22px;
-
+    to{
+        opacity:1;
+        transform:
+            translateY(0)
+            scale(1);
     }
 
 }
 
-</style>
 
-</head>
+@keyframes textIn{
 
+    from{
+        opacity:0;
+        transform:
+            translateY(10px);
+    }
 
-<body>
+    to{
+        opacity:1;
+        transform:
+            translateY(0);
+    }
 
-
-<!-- =======================================================
-     SPLASH
-======================================================= -->
-
-<div class="splash">
-
-    <div class="logo-animation">
-
-        RIDER<span>X</span>
-
-    </div>
-
-</div>
+}
 
 
-<!-- =======================================================
-     MAIN
-======================================================= -->
+.fallback{
+    display:none;
 
-<main class="main">
+    position:fixed;
+    inset:0;
 
+    align-items:center;
+    justify-content:center;
 
-    <div class="glow one"></div>
+    padding:20px;
 
-    <div class="glow two"></div>
-
-
-    <div class="version">
-
-        RiderX
-
-    </div>
+    background:#070707;
+}
 
 
-    <!-- BRAND -->
+.fallback.show{
+    display:flex;
+}
 
-    <div class="brand">
 
-        RIDER<span>X</span>
+.fallback-card{
+    width:100%;
+    max-width:390px;
 
+    padding:25px;
+
+    border:1px solid #292929;
+    border-radius:18px;
+
+    background:#111;
+
+    text-align:center;
+}
+
+
+.fallback-card h2{
+    margin:0 0 8px;
+
+    font-size:18px;
+}
+
+
+.fallback-card p{
+    margin:0;
+
+    color:#777;
+
+    font-size:10px;
+
+    line-height:1.6;
+}
+
+
+.fallback-btn{
+    width:100%;
+    height:46px;
+
+    margin-top:17px;
+
+    border:0;
+    border-radius:10px;
+
+    background:#FFD400;
+    color:#111;
+
+    cursor:pointer;
+
+    font-size:11px;
+    font-weight:1000;
+}
+
+
+</style></head><body><div
+    class="splash"
+    id="splash"
+><div class="splash-content">
+
+
+    <div class="logo">
+        RX
     </div>
 
 
-    <!-- TAGLINE -->
-
-    <div class="tagline">
-
-        India's Premium
-
-        <strong>Bike Taxi, Cab, Parcel & Food</strong>
-
-        Platform
-
-        <br>
-
-        <span style="color:#777;">
-
-            Fast • Safe • Reliable
-
-        </span>
-
-    </div>
+    <h1 class="brand">
+        Rider<span>X</span>
+    </h1>
 
 
-    <!-- SERVICES -->
+    <p class="tagline">
+        Your ride. Your journey. Your choice.
+    </p>
 
-    <div class="services">
 
+    <div class="loader-wrap">
 
-        <div class="service">
+        <div class="loader"></div>
 
-            <i class="fa-solid fa-motorcycle"></i>
-
-            Bike Taxi
-
+        <div class="loading-text">
+            Starting RiderX...
         </div>
-
-
-        <div class="service">
-
-            <i class="fa-solid fa-car"></i>
-
-            Cab
-
-        </div>
-
-
-        <div class="service">
-
-            <i class="fa-solid fa-box"></i>
-
-            Parcel
-
-        </div>
-
-
-        <div class="service">
-
-            <i class="fa-solid fa-utensils"></i>
-
-            Food
-
-        </div>
-
-
-    </div>
-
-
-    <!-- BUTTONS -->
-
-    <div class="buttons">
-
-
-        <!-- CUSTOMER -->
-
-        <a
-            href="./auth/login.html?role=customer"
-            class="btn customer">
-
-            <i class="fa-solid fa-user"></i>
-
-            Join as Customer
-
-        </a>
-
-
-        <!-- RIDER -->
-
-        <a
-            href="./auth/login.html?role=rider"
-            class="btn rider">
-
-            <i class="fa-solid fa-motorcycle"></i>
-
-            Join as Rider
-
-        </a>
-
-
-        <!-- INSTALL -->
-
-        <button
-            id="installBtn"
-            class="install-btn">
-
-            <i class="fa-solid fa-download"></i>
-
-            Install RiderX App
-
-        </button>
-
 
         <div
-            id="installMessage"
-            class="install-message">
-
-            To install RiderX on Android:
-
-            tap the browser menu
-
-            <strong>⋮</strong>
-
-            and choose
-
-            <strong>Add to Home screen</strong>
-
-            or
-
-            <strong>Install app</strong>.
-
+            class="status"
+            id="status"
+        >
+            Checking your session
         </div>
-
 
     </div>
 
 
-</main>
+</div>
 
+</div><div
+    class="fallback"
+    id="fallback"
+><div class="fallback-card">
 
-<!-- =======================================================
-     ADMIN
-======================================================= -->
+    <h2>
+        RiderX
+    </h2>
 
-<a
-    href="./admin/login.html"
-    class="admin-link">
+    <p>
+        RiderX could not complete the automatic redirect.
+        Please continue manually.
+    </p>
 
-    Admin
-
-</a>
-
-
-<!-- =======================================================
-     FOOTER
-======================================================= -->
-
-<div class="footer">
-
-    RiderX • Move Faster
+    <button
+        class="fallback-btn"
+        id="fallbackBtn"
+    >
+        Continue to RiderX
+    </button>
 
 </div>
 
+</div><script>
 
-<!-- =======================================================
-     FONT AWESOME
-======================================================= -->
-
-<script
-    src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js">
-</script>
+"use strict";
 
 
-<!-- =======================================================
-     PWA INSTALL
-======================================================= -->
-
-<script>
-
-let deferredPrompt = null;
-
-const installBtn =
-    document.getElementById("installBtn");
-
-const installMessage =
-    document.getElementById("installMessage");
+const splash =
+    document.getElementById(
+        "splash"
+    );
 
 
-/* =========================================================
-   CHECK STANDALONE
-========================================================= */
+const fallback =
+    document.getElementById(
+        "fallback"
+    );
 
-function isStandalone(){
 
-    return (
-        window.matchMedia(
-            "(display-mode: standalone)"
-        ).matches
-        ||
-        window.navigator.standalone === true
+const statusText =
+    document.getElementById(
+        "status"
+    );
+
+
+const fallbackBtn =
+    document.getElementById(
+        "fallbackBtn"
+    );
+
+
+
+let redirectStarted =
+    false;
+
+
+
+function setStatus(
+    text
+){
+
+    if(statusText){
+
+        statusText.textContent =
+            text;
+
+    }
+
+}
+
+
+
+function getStoredUser(){
+
+    const keys = [
+
+        "riderx_user",
+        "riderx_customer",
+        "riderx_rider"
+
+    ];
+
+
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(!raw){
+
+                continue;
+
+            }
+
+
+            const user =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                user &&
+                typeof user ===
+                "object"
+            ){
+
+                return user;
+
+            }
+
+        }catch(error){
+
+            console.warn(
+                "Invalid stored session:",
+                key
+            );
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+
+function getRole(){
+
+    const user =
+        getStoredUser();
+
+
+    if(
+        user &&
+        user.role
+    ){
+
+        return normalizeRole(
+            user.role
+        );
+
+    }
+
+
+    const role =
+        localStorage.getItem(
+            "userRole"
+        );
+
+
+    if(role){
+
+        return normalizeRole(
+            role
+        );
+
+    }
+
+
+    const selected =
+        localStorage.getItem(
+            "riderx_selected_role"
+        );
+
+
+    if(selected){
+
+        return normalizeRole(
+            selected
+        );
+
+    }
+
+
+    return "";
+
+}
+
+
+
+function normalizeRole(
+    role
+){
+
+    const value =
+        String(
+            role || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        value === "driver"
+    ){
+
+        return "rider";
+
+    }
+
+
+    if(
+        value === "customer" ||
+        value === "rider" ||
+        value === "admin"
+    ){
+
+        return value;
+
+    }
+
+
+    return "";
+
+}
+
+
+
+function getLoginState(){
+
+    const user =
+        getStoredUser();
+
+
+    if(!user){
+
+        return false;
+
+    }
+
+
+    if(
+        user.status &&
+        [
+            "blocked",
+            "suspended",
+            "disabled"
+        ].includes(
+            String(
+                user.status
+            ).toLowerCase()
+        )
+    ){
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+
+function getDestination(){
+
+    const loggedIn =
+        getLoginState();
+
+
+    const role =
+        getRole();
+
+
+    if(loggedIn){
+
+        if(
+            role ===
+            "admin"
+        ){
+
+            return "./admin/dashboard.html";
+
+        }
+
+
+        if(
+            role ===
+            "rider"
+        ){
+
+            return "./rider/home.html";
+
+        }
+
+
+        if(
+            role ===
+            "customer"
+        ){
+
+            return "./customer/home.html";
+
+        }
+
+    }
+
+
+    return "./auth/role.html";
+
+}
+
+
+
+function redirect(){
+
+    if(
+        redirectStarted
+    ){
+
+        return;
+
+    }
+
+
+    redirectStarted =
+        true;
+
+
+    const destination =
+        getDestination();
+
+
+    setStatus(
+        "Opening RiderX..."
+    );
+
+
+    setTimeout(
+        function(){
+
+            window.location.replace(
+                destination
+            );
+
+        },
+        180
+    );
+
+
+}
+
+
+
+function startApp(){
+
+    setStatus(
+        "Checking your session"
+    );
+
+
+    setTimeout(
+        function(){
+
+            const user =
+                getStoredUser();
+
+
+            if(user){
+
+                setStatus(
+                    "Restoring your RiderX account"
+                );
+
+            }else{
+
+                setStatus(
+                    "Preparing account selection"
+                );
+
+            }
+
+
+            setTimeout(
+                redirect,
+                450
+            );
+
+        },
+        450
     );
 
 }
 
 
-/* =========================================================
-   BEFORE INSTALL PROMPT
-========================================================= */
 
-window.addEventListener(
-    "beforeinstallprompt",
-    function(event){
+fallbackBtn.addEventListener(
+    "click",
+    function(){
 
-        event.preventDefault();
-
-        deferredPrompt = event;
-
-        if(!isStandalone()){
-
-            installBtn.classList.add("show");
-
-        }
+        window.location.href =
+            "./auth/role.html";
 
     }
 );
 
 
-/* =========================================================
-   INSTALL BUTTON
-========================================================= */
 
-installBtn.addEventListener(
-    "click",
-    async function(){
+window.addEventListener(
+    "error",
+    function(){
 
-        if(deferredPrompt){
+        if(
+            !redirectStarted
+        ){
 
-            deferredPrompt.prompt();
+            splash.classList.add(
+                "hide"
+            );
 
-            const result =
-                await deferredPrompt.userChoice;
-
-            if(
-                result.outcome === "accepted"
-            ){
-
-                console.log(
-                    "RiderX installation accepted"
-                );
-
-            }
-
-            deferredPrompt = null;
-
-            installBtn.classList.remove(
+            fallback.classList.add(
                 "show"
             );
 
-            return;
-
         }
 
-
-        /*
-         * If browser does not provide
-         * automatic install prompt.
-         */
-
-        installMessage.classList.add(
-            "show"
-        );
-
     }
 );
 
 
-/* =========================================================
-   INSTALLED
-========================================================= */
 
-window.addEventListener(
-    "appinstalled",
-    function(){
-
-        installBtn.classList.remove(
-            "show"
-        );
-
-        installMessage.classList.remove(
-            "show"
-        );
-
-        console.log(
-            "RiderX installed successfully"
-        );
-
-    }
-);
-
-
-/* =========================================================
-   SERVICE WORKER
-========================================================= */
+/*
+ * Service Worker registration.
+ * Failure here must never block the app.
+ */
 
 if(
-    "serviceWorker" in navigator
+    "serviceWorker" in
+    navigator
 ){
 
     window.addEventListener(
@@ -996,21 +806,11 @@ if(
                 .register(
                     "./sw.js"
                 )
-                .then(
-                    function(registration){
-
-                        console.log(
-                            "RiderX Service Worker registered:",
-                            registration.scope
-                        );
-
-                    }
-                )
                 .catch(
                     function(error){
 
                         console.warn(
-                            "Service Worker registration failed:",
+                            "Service worker registration failed:",
                             error
                         );
 
@@ -1023,29 +823,7 @@ if(
 }
 
 
-/* =========================================================
-   IOS INSTALL MESSAGE
-========================================================= */
 
-const isIOS =
-    /iphone|ipad|ipod/i.test(
-        navigator.userAgent
-    );
+startApp();
 
-if(
-    isIOS &&
-    !isStandalone()
-){
-
-    installBtn.classList.add(
-        "show"
-    );
-
-}
-
-</script>
-
-
-</body>
-
-</html>
+</script></body></html>
