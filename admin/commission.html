@@ -1,137 +1,407 @@
 <!DOCTYPE html>
 <html lang="en">
-  
+
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-<title>RiderX Commission Settings</title>
+<meta
+    name="theme-color"
+    content="#FFD400"
+>
 
+<title>RiderX Admin - Commission</title>
+
+<link
+    rel="stylesheet"
+    href="../css/Style.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/Dashboard.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/Responsive.css"
+>
 
 <style>
 
-:root{
---yellow:#FFE500;
---black:#050505;
---card:#111;
-}
-
-
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
+    box-sizing:border-box;
 }
-
 
 body{
-
-background:var(--black);
-color:white;
-padding:20px;
-
+    margin:0;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
+.admin-page{
+    min-height:100vh;
+    padding-bottom:80px;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:#111;
+    border-bottom:1px solid #292929;
+}
+
+.topbar-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.back-btn,
+.menu-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.page-title{
+    font-size:17px;
+    font-weight:900;
+}
+
+.page-title span{
+    color:#FFD400;
+}
 
 .logo{
-
-font-size:28px;
-font-weight:900;
-margin-bottom:25px;
-
+    font-weight:900;
+    font-size:18px;
+    color:#FFD400;
 }
 
-
-.logo span{
-
-color:var(--yellow);
-
+.content{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    padding:18px;
 }
 
+.hero{
+    padding:18px;
+    border:1px solid #292929;
+    border-radius:18px;
+    background:
+        linear-gradient(
+            145deg,
+            #191919,
+            #0d0d0d
+        );
+    margin-bottom:16px;
+}
 
+.hero h1{
+    margin:0 0 7px;
+    font-size:24px;
+}
+
+.hero p{
+    margin:0;
+    color:#999;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.stat{
+    padding:16px;
+    background:#151515;
+    border:1px solid #292929;
+    border-radius:15px;
+}
+
+.stat-label{
+    color:#888;
+    font-size:11px;
+    text-transform:uppercase;
+    font-weight:800;
+}
+
+.stat-value{
+    margin-top:7px;
+    font-size:23px;
+    font-weight:900;
+    color:#FFD400;
+}
 
 .card{
-
-background:var(--card);
-border:1px solid #333;
-border-radius:20px;
-padding:20px;
-
+    background:#121212;
+    border:1px solid #292929;
+    border-radius:17px;
+    padding:18px;
+    margin-bottom:16px;
 }
 
-
-
-h2{
-
-margin-bottom:20px;
-
+.card-title{
+    margin:0 0 15px;
+    font-size:16px;
+    font-weight:900;
 }
 
-
-
-label{
-
-display:block;
-color:#aaa;
-margin-bottom:8px;
-margin-top:15px;
-
+.form-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+    gap:14px;
 }
 
-
-
-input{
-
-width:100%;
-padding:15px;
-background:#222;
-border:1px solid #444;
-border-radius:12px;
-color:white;
-font-size:16px;
-
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
 }
 
-
-
-button{
-
-width:100%;
-padding:15px;
-margin-top:20px;
-border:none;
-border-radius:12px;
-background:var(--yellow);
-font-weight:bold;
-font-size:16px;
-
+.field.full{
+    grid-column:1/-1;
 }
 
-
-
-#status{
-
-text-align:center;
-margin-top:15px;
-color:#00ff66;
-
+.field label{
+    color:#aaa;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
 }
 
-
-
-.back{
-
-background:#222;
-color:white;
-
+.field input,
+.field select{
+    width:100%;
+    height:45px;
+    padding:0 13px;
+    border:1px solid #363636;
+    border-radius:10px;
+    outline:none;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:13px;
 }
 
+.field input:focus,
+.field select:focus{
+    border-color:#FFD400;
+}
+
+.toggle-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    padding:13px 0;
+    border-bottom:1px solid #292929;
+}
+
+.toggle-row:last-child{
+    border-bottom:0;
+}
+
+.toggle-info strong{
+    display:block;
+    font-size:13px;
+}
+
+.toggle-info small{
+    display:block;
+    margin-top:4px;
+    color:#777;
+    font-size:11px;
+}
+
+.switch{
+    position:relative;
+    width:48px;
+    height:26px;
+    flex-shrink:0;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    background:#333;
+    border-radius:30px;
+    transition:.2s;
+}
+
+.slider:before{
+    content:"";
+    position:absolute;
+    width:20px;
+    height:20px;
+    left:3px;
+    top:3px;
+    border-radius:50%;
+    background:#fff;
+    transition:.2s;
+}
+
+.switch input:checked + .slider{
+    background:#FFD400;
+}
+
+.switch input:checked + .slider:before{
+    transform:translateX(22px);
+    background:#111;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:17px;
+}
+
+.btn{
+    min-height:44px;
+    padding:0 17px;
+    border-radius:10px;
+    border:1px solid #383838;
+    background:#1d1d1d;
+    color:#fff;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.btn.primary{
+    background:#FFD400;
+    color:#111;
+    border-color:#FFD400;
+}
+
+.btn.danger{
+    background:#321717;
+    color:#ff7777;
+    border-color:#713131;
+}
+
+.table-wrap{
+    width:100%;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+
+th,
+td{
+    padding:12px 10px;
+    text-align:left;
+    border-bottom:1px solid #292929;
+    font-size:12px;
+}
+
+th{
+    color:#888;
+    font-size:10px;
+    text-transform:uppercase;
+}
+
+td strong{
+    color:#fff;
+}
+
+.empty{
+    text-align:center;
+    padding:25px;
+    color:#777;
+    font-size:13px;
+}
+
+.status{
+    display:inline-flex;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:900;
+}
+
+.status.active{
+    background:#14351f;
+    color:#4ade80;
+}
+
+.status.inactive{
+    background:#321717;
+    color:#ff7777;
+}
+
+.notice{
+    padding:12px;
+    border-radius:10px;
+    background:#24200b;
+    border:1px solid #51470b;
+    color:#d9c600;
+    font-size:11px;
+    line-height:1.5;
+    margin-top:12px;
+}
+
+@media(max-width:700px){
+
+    .stats{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+    .content{
+        padding:12px;
+    }
+
+    .hero h1{
+        font-size:21px;
+    }
+
+}
 
 </style>
-
 
 </head>
 
@@ -139,73 +409,1691 @@ color:white;
 <body>
 
 
-<div class="logo">
+<div class="admin-page">
 
-RID<span>ERX</span>
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+        <div class="topbar-left">
+
+            <button
+                class="back-btn"
+                type="button"
+                onclick="history.back()"
+                aria-label="Back"
+            >
+                ←
+            </button>
+
+            <div class="page-title">
+                <span>RiderX</span> Commission
+            </div>
+
+        </div>
+
+
+        <div class="logo">
+            RX
+        </div>
+
+    </header>
+
+
+
+    <!-- CONTENT -->
+
+    <main class="content">
+
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <h1>
+                Commission Management
+            </h1>
+
+            <p>
+                Manage RiderX platform commission
+                rates for different services and
+                monitor commission earnings.
+            </p>
+
+        </section>
+
+
+
+        <!-- STATS -->
+
+        <section class="stats">
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Total Commission
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="totalCommission"
+                >
+                    ₹0.00
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Today's Commission
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="todayCommission"
+                >
+                    ₹0.00
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Completed Rides
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="completedRides"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-label">
+                    Active Rate
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="activeRate"
+                >
+                    10%
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- COMMISSION SETTINGS -->
+
+        <section class="card">
+
+            <h2 class="card-title">
+                Commission Rates
+            </h2>
+
+
+            <form
+                id="commissionForm"
+            >
+
+                <div class="form-grid">
+
+
+                    <div class="field">
+
+                        <label>
+                            Bike Taxi Commission (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="bikeCommission"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value="10"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Cab Commission (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="cabCommission"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value="10"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Parcel Commission (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="parcelCommission"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value="10"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>
+                            Food Delivery Commission (%)
+                        </label>
+
+                        <input
+                            type="number"
+                            id="foodCommission"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            value="10"
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="notice">
+
+                    Commission is calculated from the
+                    completed ride/service fare.
+                    Always verify your local business
+                    and tax requirements before going live.
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button
+                        type="submit"
+                        class="btn primary"
+                    >
+                        Save Commission
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn"
+                        id="resetCommission"
+                    >
+                        Reset
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+
+        <!-- OPTIONS -->
+
+        <section class="card">
+
+            <h2 class="card-title">
+                Commission Options
+            </h2>
+
+
+            <div class="toggle-row">
+
+                <div class="toggle-info">
+
+                    <strong>
+                        Commission System
+                    </strong>
+
+                    <small>
+                        Enable platform commission
+                        calculation.
+                    </small>
+
+                </div>
+
+
+                <label class="switch">
+
+                    <input
+                        type="checkbox"
+                        id="commissionEnabled"
+                        checked
+                    >
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+
+            <div class="toggle-row">
+
+                <div class="toggle-info">
+
+                    <strong>
+                        Apply Commission Automatically
+                    </strong>
+
+                    <small>
+                        Automatically calculate commission
+                        when a ride is completed.
+                    </small>
+
+                </div>
+
+
+                <label class="switch">
+
+                    <input
+                        type="checkbox"
+                        id="autoCommission"
+                        checked
+                    >
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+
+            <div class="toggle-row">
+
+                <div class="toggle-info">
+
+                    <strong>
+                        Show Commission in Admin
+                    </strong>
+
+                    <small>
+                        Display commission information
+                        inside admin ride records.
+                    </small>
+
+                </div>
+
+
+                <label class="switch">
+
+                    <input
+                        type="checkbox"
+                        id="showCommission"
+                        checked
+                    >
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- SERVICE TABLE -->
+
+        <section class="card">
+
+            <h2 class="card-title">
+                Service Commission
+            </h2>
+
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Service
+                            </th>
+
+                            <th>
+                                Commission
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    Bike Taxi
+                                </strong>
+                            </td>
+
+                            <td id="bikeRateDisplay">
+                                10%
+                            </td>
+
+                            <td>
+                                <span
+                                    class="status active"
+                                >
+                                    Active
+                                </span>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    Cab
+                                </strong>
+                            </td>
+
+                            <td id="cabRateDisplay">
+                                10%
+                            </td>
+
+                            <td>
+                                <span
+                                    class="status active"
+                                >
+                                    Active
+                                </span>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    Parcel
+                                </strong>
+                            </td>
+
+                            <td id="parcelRateDisplay">
+                                10%
+                            </td>
+
+                            <td>
+                                <span
+                                    class="status active"
+                                >
+                                    Active
+                                </span>
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    Food Delivery
+                                </strong>
+                            </td>
+
+                            <td id="foodRateDisplay">
+                                10%
+                            </td>
+
+                            <td>
+                                <span
+                                    class="status active"
+                                >
+                                    Active
+                                </span>
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- RECENT COMMISSION -->
+
+        <section class="card">
+
+            <h2 class="card-title">
+                Recent Commission
+            </h2>
+
+
+            <div
+                class="table-wrap"
+                id="commissionTableWrap"
+            >
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Ride
+                            </th>
+
+                            <th>
+                                Service
+                            </th>
+
+                            <th>
+                                Fare
+                            </th>
+
+                            <th>
+                                Commission
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="commissionTable"
+                    >
+
+                        <tr>
+
+                            <td
+                                colspan="5"
+                                class="empty"
+                            >
+                                Loading commission data...
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
 
 </div>
 
 
 
-<button class="back"
-onclick="history.back()">
-
-← Back
-
-</button>
+<script
+    src="./js/commission.js"
+></script>
 
 
+<script>
+
+"use strict";
 
 
-<div class="card">
+/* =====================================================
+   COMMISSION PAGE CONTROLLER
+===================================================== */
+
+const COMMISSION_SETTINGS_KEY =
+    "riderxCommissionSettings";
 
 
-<h2>
+const DEFAULT_COMMISSION = {
 
-Commission Settings
+    bike:10,
+    cab:10,
+    parcel:10,
+    food:10,
 
-</h2>
+    enabled:true,
+    automatic:true,
+    show:true
 
-
-
-<label>
-
-Admin Commission Percentage %
-
-</label>
-
-
-<input 
-id="percent"
-type="number"
-placeholder="Example 20">
+};
 
 
+let commissionSettings = {
+    ...DEFAULT_COMMISSION
+};
 
 
+/* =====================================================
+   INIT
+===================================================== */
 
-<button id="save">
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
 
-Save Commission
+        loadCommissionSettings();
 
-</button>
+        renderCommissionSettings();
 
+        bindCommissionPage();
 
+        loadCommissionStats();
 
+        loadRecentCommission();
 
-<div id="status"></div>
-
-
-
-</div>
-
-
+    }
+);
 
 
+/* =====================================================
+   LOAD SETTINGS
+===================================================== */
 
-<script type="module"
-src="./js/commission.js"></script>
+function loadCommissionSettings(){
 
+    try{
+
+        const saved =
+            localStorage.getItem(
+                COMMISSION_SETTINGS_KEY
+            );
+
+
+        if(saved){
+
+            const data =
+                JSON.parse(saved);
+
+
+            commissionSettings = {
+
+                ...DEFAULT_COMMISSION,
+                ...data
+
+            };
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Commission settings error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   SAVE
+===================================================== */
+
+function saveCommissionSettings(){
+
+    localStorage.setItem(
+
+        COMMISSION_SETTINGS_KEY,
+
+        JSON.stringify(
+            commissionSettings
+        )
+
+    );
+
+}
+
+
+/* =====================================================
+   RENDER SETTINGS
+===================================================== */
+
+function renderCommissionSettings(){
+
+    setValue(
+        "bikeCommission",
+        commissionSettings.bike
+    );
+
+    setValue(
+        "cabCommission",
+        commissionSettings.cab
+    );
+
+    setValue(
+        "parcelCommission",
+        commissionSettings.parcel
+    );
+
+    setValue(
+        "foodCommission",
+        commissionSettings.food
+    );
+
+
+    setChecked(
+        "commissionEnabled",
+        commissionSettings.enabled
+    );
+
+    setChecked(
+        "autoCommission",
+        commissionSettings.automatic
+    );
+
+    setChecked(
+        "showCommission",
+        commissionSettings.show
+    );
+
+
+    updateRateDisplay();
+
+}
+
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+function bindCommissionPage(){
+
+    const form =
+        document.getElementById(
+            "commissionForm"
+        );
+
+
+    if(form){
+
+        form.addEventListener(
+            "submit",
+            function(event){
+
+                event.preventDefault();
+
+                saveCommission();
+
+            }
+        );
+
+    }
+
+
+    const reset =
+        document.getElementById(
+            "resetCommission"
+        );
+
+
+    if(reset){
+
+        reset.addEventListener(
+            "click",
+            resetCommission
+        );
+
+    }
+
+
+    [
+        "bikeCommission",
+        "cabCommission",
+        "parcelCommission",
+        "foodCommission"
+    ].forEach(
+        function(id){
+
+            const input =
+                document.getElementById(id);
+
+
+            if(input){
+
+                input.addEventListener(
+                    "input",
+                    updateRateDisplay
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   SAVE COMMISSION
+===================================================== */
+
+function saveCommission(){
+
+    const bike =
+        numberValue(
+            "bikeCommission"
+        );
+
+    const cab =
+        numberValue(
+            "cabCommission"
+        );
+
+    const parcel =
+        numberValue(
+            "parcelCommission"
+        );
+
+    const food =
+        numberValue(
+            "foodCommission"
+        );
+
+
+    if(
+        bike < 0 ||
+        bike > 100 ||
+        cab < 0 ||
+        cab > 100 ||
+        parcel < 0 ||
+        parcel > 100 ||
+        food < 0 ||
+        food > 100
+    ){
+
+        showMessage(
+            "Commission must be between 0% and 100%.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    commissionSettings = {
+
+        bike,
+
+        cab,
+
+        parcel,
+
+        food,
+
+        enabled:
+            checkedValue(
+                "commissionEnabled"
+            ),
+
+        automatic:
+            checkedValue(
+                "autoCommission"
+            ),
+
+        show:
+            checkedValue(
+                "showCommission"
+            )
+
+    };
+
+
+    saveCommissionSettings();
+
+    updateRateDisplay();
+
+    showMessage(
+        "Commission settings saved.",
+        "success"
+    );
+
+}
+
+
+/* =====================================================
+   RESET
+===================================================== */
+
+function resetCommission(){
+
+    if(
+        !confirm(
+            "Reset commission settings?"
+        )
+    ){
+
+        return;
+
+    }
+
+
+    commissionSettings = {
+        ...DEFAULT_COMMISSION
+    };
+
+
+    saveCommissionSettings();
+
+    renderCommissionSettings();
+
+    showMessage(
+        "Commission settings reset.",
+        "success"
+    );
+
+}
+
+
+/* =====================================================
+   DISPLAY
+===================================================== */
+
+function updateRateDisplay(){
+
+    setText(
+        "bikeRateDisplay",
+        numberValue(
+            "bikeCommission"
+        ) + "%"
+    );
+
+    setText(
+        "cabRateDisplay",
+        numberValue(
+            "cabCommission"
+        ) + "%"
+    );
+
+    setText(
+        "parcelRateDisplay",
+        numberValue(
+            "parcelCommission"
+        ) + "%"
+    );
+
+    setText(
+        "foodRateDisplay",
+        numberValue(
+            "foodCommission"
+        ) + "%"
+    );
+
+
+    setText(
+        "activeRate",
+        numberValue(
+            "bikeCommission"
+        ) + "%"
+    );
+
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+function loadCommissionStats(){
+
+    let rides = [];
+
+
+    try{
+
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    "riderxRides"
+                ) || "[]"
+            );
+
+
+        if(
+            Array.isArray(data)
+        ){
+
+            rides = data;
+
+        }
+
+    }catch(error){
+
+        rides = [];
+
+    }
+
+
+    const completed =
+        rides.filter(
+            ride => {
+
+                return String(
+                    ride.status || ""
+                ).toLowerCase()
+                ===
+                "completed";
+
+            }
+        );
+
+
+    let total = 0;
+
+    let today = 0;
+
+
+    const todayDate =
+        new Date()
+        .toDateString();
+
+
+    completed.forEach(
+        function(ride){
+
+            const fare =
+                Number(
+                    ride.fare ||
+                    ride.amount ||
+                    ride.totalFare ||
+                    0
+                );
+
+
+            const rate =
+                getRateForService(
+                    ride.service ||
+                    ride.serviceType ||
+                    "bike"
+                );
+
+
+            const commission =
+                Number(
+                    ride.commission
+                ) ||
+                fare * rate / 100;
+
+
+            total +=
+                commission;
+
+
+            const date =
+                ride.completedAt ||
+                ride.createdAt ||
+                ride.date;
+
+
+            if(
+                date &&
+                new Date(date)
+                    .toDateString()
+                    ===
+                    todayDate
+            ){
+
+                today +=
+                    commission;
+
+            }
+
+        }
+    );
+
+
+    setText(
+        "totalCommission",
+        "₹" +
+        formatMoney(total)
+    );
+
+
+    setText(
+        "todayCommission",
+        "₹" +
+        formatMoney(today)
+    );
+
+
+    setText(
+        "completedRides",
+        completed.length
+    );
+
+}
+
+
+/* =====================================================
+   RECENT COMMISSION
+===================================================== */
+
+function loadRecentCommission(){
+
+    const table =
+        document.getElementById(
+            "commissionTable"
+        );
+
+
+    if(!table){
+
+        return;
+
+    }
+
+
+    let rides = [];
+
+
+    try{
+
+        const data =
+            JSON.parse(
+                localStorage.getItem(
+                    "riderxRides"
+                ) || "[]"
+            );
+
+
+        if(
+            Array.isArray(data)
+        ){
+
+            rides = data;
+
+        }
+
+    }catch(error){
+
+        rides = [];
+
+    }
+
+
+    const completed =
+        rides
+        .filter(
+            ride => {
+
+                return String(
+                    ride.status || ""
+                ).toLowerCase()
+                ===
+                "completed";
+
+            }
+        )
+        .slice(0,20);
+
+
+    if(!completed.length){
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="5"
+                    class="empty"
+                >
+                    No completed ride commission
+                    records found.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    table.innerHTML = "";
+
+
+    completed.forEach(
+        function(ride){
+
+            const fare =
+                Number(
+                    ride.fare ||
+                    ride.amount ||
+                    ride.totalFare ||
+                    0
+                );
+
+
+            const rate =
+                getRateForService(
+                    ride.service ||
+                    ride.serviceType ||
+                    "bike"
+                );
+
+
+            const commission =
+                Number(
+                    ride.commission
+                ) ||
+                fare * rate / 100;
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+                    <strong>
+                        ${escapeHtml(
+                            ride.id ||
+                            ride.rideId ||
+                            "Ride"
+                        )}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        serviceName(
+                            ride.service ||
+                            ride.serviceType
+                        )
+                    )}
+                </td>
+
+                <td>
+                    ₹${formatMoney(fare)}
+                </td>
+
+                <td>
+                    <strong
+                        style="color:#FFD400"
+                    >
+                        ₹${formatMoney(commission)}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHtml(
+                        formatDate(
+                            ride.completedAt ||
+                            ride.createdAt ||
+                            ride.date
+                        )
+                    )}
+                </td>
+
+            `;
+
+
+            table.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   RATE
+===================================================== */
+
+function getRateForService(
+    service
+){
+
+    const value =
+        String(
+            service ||
+            "bike"
+        )
+        .toLowerCase();
+
+
+    if(
+        value.includes("cab") ||
+        value.includes("car") ||
+        value.includes("taxi")
+    ){
+
+        return commissionSettings.cab;
+
+    }
+
+
+    if(
+        value.includes("parcel") ||
+        value.includes("delivery")
+    ){
+
+        return commissionSettings.parcel;
+
+    }
+
+
+    if(
+        value.includes("food")
+    ){
+
+        return commissionSettings.food;
+
+    }
+
+
+    return commissionSettings.bike;
+
+}
+
+
+/* =====================================================
+   SERVICE NAME
+===================================================== */
+
+function serviceName(
+    service
+){
+
+    const value =
+        String(
+            service ||
+            "bike"
+        )
+        .toLowerCase();
+
+
+    if(
+        value.includes("cab") ||
+        value.includes("car") ||
+        value.includes("taxi")
+    ){
+
+        return "Cab";
+
+    }
+
+
+    if(
+        value.includes("parcel")
+    ){
+
+        return "Parcel";
+
+    }
+
+
+    if(
+        value.includes("food")
+    ){
+
+        return "Food Delivery";
+
+    }
+
+
+    return "Bike Taxi";
+
+}
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function setValue(
+    id,
+    value
+){
+
+    const el =
+        document.getElementById(id);
+
+
+    if(el){
+
+        el.value =
+            value;
+
+    }
+
+}
+
+
+function setText(
+    id,
+    value
+){
+
+    const el =
+        document.getElementById(id);
+
+
+    if(el){
+
+        el.textContent =
+            value;
+
+    }
+
+}
+
+
+function setChecked(
+    id,
+    value
+){
+
+    const el =
+        document.getElementById(id);
+
+
+    if(el){
+
+        el.checked =
+            Boolean(value);
+
+    }
+
+}
+
+
+function checkedValue(
+    id
+){
+
+    const el =
+        document.getElementById(id);
+
+
+    return Boolean(
+        el &&
+        el.checked
+    );
+
+}
+
+
+function numberValue(
+    id
+){
+
+    const el =
+        document.getElementById(id);
+
+
+    if(!el){
+
+        return 0;
+
+    }
+
+
+    const value =
+        Number(
+            el.value
+        );
+
+
+    return Number.isFinite(
+        value
+    )
+        ? value
+        : 0;
+
+}
+
+
+function formatMoney(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN",
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+function formatDate(
+    value
+){
+
+    if(!value){
+
+        return "—";
+
+    }
+
+
+    try{
+
+        return new Date(
+            value
+        ).toLocaleDateString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short",
+                year:"numeric"
+            }
+        );
+
+    }catch(error){
+
+        return "—";
+
+    }
+
+}
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showMessage(
+    message,
+    type="info"
+){
+
+    const old =
+        document.getElementById(
+            "commissionMessage"
+        );
+
+
+    if(old){
+
+        old.remove();
+
+    }
+
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+    box.id =
+        "commissionMessage";
+
+
+    box.textContent =
+        message;
+
+
+    box.style.cssText = `
+
+        position:fixed;
+        left:50%;
+        bottom:22px;
+        transform:translateX(-50%);
+        z-index:99999;
+        padding:12px 18px;
+        border-radius:10px;
+        font-size:13px;
+        font-weight:800;
+        box-shadow:0 10px 30px
+            rgba(0,0,0,.4);
+
+    `;
+
+
+    if(
+        type === "success"
+    ){
+
+        box.style.background =
+            "#16351f";
+
+        box.style.color =
+            "#4ade80";
+
+    }
+    else if(
+        type === "error"
+    ){
+
+        box.style.background =
+            "#351616";
+
+        box.style.color =
+            "#ff7777";
+
+    }
+    else{
+
+        box.style.background =
+            "#222";
+
+        box.style.color =
+            "#fff";
+
+    }
+
+
+    document.body.appendChild(
+        box
+    );
+
+
+    setTimeout(
+        function(){
+
+            if(
+                box.parentNode
+            ){
+
+                box.remove();
+
+            }
+
+        },
+        2800
+    );
+
+}
+
+</script>
 
 
 </body>
