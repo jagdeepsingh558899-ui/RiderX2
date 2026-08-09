@@ -4,313 +4,1099 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFD400">
 
-<title>RiderX Fare Settings</title>
+<title>RiderX Admin - Fare Settings</title>
 
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
-:root{
-
---yellow:#FFE500;
---black:#050505;
---card:#111;
-
-}
-
-
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-
+    box-sizing:border-box;
 }
-
-
 
 body{
-
-background:var(--black);
-color:white;
-padding:20px;
-
+    margin:0;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
+.page{
+    min-height:100vh;
+    padding-bottom:80px;
+}
 
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:#111;
+    border-bottom:1px solid #292929;
+}
+
+.top-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.title{
+    font-size:17px;
+    font-weight:900;
+}
+
+.title span{
+    color:#FFD400;
+}
 
 .logo{
-
-font-size:28px;
-font-weight:900;
-margin-bottom:25px;
-
+    color:#FFD400;
+    font-size:18px;
+    font-weight:900;
 }
 
-
-
-.logo span{
-
-color:var(--yellow);
-
+.content{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    padding:18px;
 }
 
+.hero{
+    padding:18px;
+    margin-bottom:16px;
+    border:1px solid #292929;
+    border-radius:18px;
+    background:linear-gradient(145deg,#1a1a1a,#0d0d0d);
+}
 
+.hero h1{
+    margin:0 0 7px;
+    font-size:24px;
+}
+
+.hero p{
+    margin:0;
+    color:#999;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.stat{
+    padding:16px;
+    background:#151515;
+    border:1px solid #292929;
+    border-radius:15px;
+}
+
+.stat-label{
+    color:#888;
+    font-size:10px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.stat-value{
+    margin-top:7px;
+    color:#FFD400;
+    font-size:22px;
+    font-weight:900;
+}
 
 .card{
-
-background:var(--card);
-border:1px solid #333;
-border-radius:20px;
-padding:20px;
-
+    padding:18px;
+    margin-bottom:16px;
+    background:#121212;
+    border:1px solid #292929;
+    border-radius:17px;
 }
 
-
-
-label{
-
-display:block;
-margin-top:15px;
-margin-bottom:8px;
-color:#999;
-
+.card-title{
+    margin:0 0 15px;
+    font-size:16px;
+    font-weight:900;
 }
 
-
-
-select,
-input{
-
-width:100%;
-padding:14px;
-background:#222;
-color:white;
-border:1px solid #444;
-border-radius:12px;
-font-size:16px;
-
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
 }
 
-
-
-button{
-
-width:100%;
-padding:15px;
-margin-top:20px;
-border:none;
-border-radius:12px;
-background:var(--yellow);
-font-weight:bold;
-
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
 }
 
-
-
-.back{
-
-background:#222;
-color:white;
-
+.field.full{
+    grid-column:1/-1;
 }
 
-
-
-#status{
-
-margin-top:15px;
-text-align:center;
-color:#00ff66;
-
+.field label{
+    color:#aaa;
+    font-size:10px;
+    font-weight:900;
+    text-transform:uppercase;
 }
 
+.field input,
+.field select{
+    width:100%;
+    height:45px;
+    padding:0 12px;
+    border:1px solid #363636;
+    border-radius:10px;
+    outline:none;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:13px;
+}
 
+.field input:focus,
+.field select:focus{
+    border-color:#FFD400;
+}
+
+.section-note{
+    margin-top:12px;
+    padding:12px;
+    border:1px solid #51470b;
+    border-radius:10px;
+    background:#24200b;
+    color:#d9c600;
+    font-size:11px;
+    line-height:1.5;
+}
+
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:17px;
+}
+
+.btn{
+    min-height:44px;
+    padding:0 17px;
+    border:1px solid #383838;
+    border-radius:10px;
+    background:#1d1d1d;
+    color:#fff;
+    cursor:pointer;
+    font-weight:900;
+}
+
+.btn.primary{
+    background:#FFD400;
+    border-color:#FFD400;
+    color:#111;
+}
+
+.btn.danger{
+    background:#321717;
+    border-color:#713131;
+    color:#ff7777;
+}
+
+.service-card{
+    padding:15px;
+    margin-bottom:10px;
+    border:1px solid #292929;
+    border-radius:13px;
+    background:#171717;
+}
+
+.service-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:13px;
+}
+
+.service-name{
+    font-size:14px;
+    font-weight:900;
+}
+
+.service-badge{
+    padding:5px 9px;
+    border-radius:20px;
+    background:#26220b;
+    color:#FFD400;
+    font-size:10px;
+    font-weight:900;
+}
+
+.service-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+}
+
+.preview{
+    padding:18px;
+    border:1px solid #292929;
+    border-radius:15px;
+    background:#0e0e0e;
+}
+
+.preview-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:11px 0;
+    border-bottom:1px solid #292929;
+    font-size:12px;
+}
+
+.preview-row:last-child{
+    border-bottom:0;
+}
+
+.preview-row span:first-child{
+    color:#888;
+}
+
+.preview-row strong{
+    color:#FFD400;
+}
+
+.switch-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    padding:13px 0;
+    border-bottom:1px solid #292929;
+}
+
+.switch-row:last-child{
+    border-bottom:0;
+}
+
+.switch-info strong{
+    display:block;
+    font-size:13px;
+}
+
+.switch-info small{
+    display:block;
+    margin-top:4px;
+    color:#777;
+    font-size:11px;
+}
+
+.switch{
+    position:relative;
+    width:48px;
+    height:26px;
+    flex-shrink:0;
+}
+
+.switch input{
+    width:0;
+    height:0;
+    opacity:0;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    background:#333;
+    border-radius:30px;
+}
+
+.slider:before{
+    content:"";
+    position:absolute;
+    width:20px;
+    height:20px;
+    top:3px;
+    left:3px;
+    border-radius:50%;
+    background:#fff;
+    transition:.2s;
+}
+
+.switch input:checked + .slider{
+    background:#FFD400;
+}
+
+.switch input:checked + .slider:before{
+    transform:translateX(22px);
+    background:#111;
+}
+
+@media(max-width:700px){
+
+    .content{
+        padding:12px;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .form-grid,
+    .service-grid{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+    .hero h1{
+        font-size:21px;
+    }
+
+}
 
 </style>
 
 </head>
 
 
-
 <body>
 
+<div class="page">
 
 
-<div class="logo">
+<header class="topbar">
 
-RID<span>ERX</span>
+    <div class="top-left">
 
-</div>
+        <button
+            class="back-btn"
+            type="button"
+            onclick="history.back()"
+            aria-label="Back"
+        >
+            ←
+        </button>
 
+        <div class="title">
+            <span>RiderX</span> Fare Settings
+        </div>
 
+    </div>
 
+    <div class="logo">
+        RX
+    </div>
 
-<button class="back"
-onclick="history.back()">
+</header>
 
-← Back
 
-</button>
 
+<main class="content">
 
 
+<section class="hero">
 
+    <h1>
+        Fare & Pricing Settings
+    </h1>
 
-<div class="card">
+    <p>
+        Configure RiderX base fare, per-kilometre
+        rates, night charges, waiting charges and
+        service-specific pricing.
+    </p>
 
+</section>
 
-<h2>
 
-Fare Settings
 
-</h2>
+<section class="stats">
 
+    <div class="stat">
 
+        <div class="stat-label">
+            Bike Base Fare
+        </div>
 
+        <div
+            class="stat-value"
+            id="bikeBasePreview"
+        >
+            ₹30
+        </div>
 
-<label>
+    </div>
 
-Service Type
 
-</label>
+    <div class="stat">
 
+        <div class="stat-label">
+            Day Rate / KM
+        </div>
 
-<select id="service">
+        <div
+            class="stat-value"
+            id="dayRatePreview"
+        >
+            ₹8
+        </div>
 
+    </div>
 
-<option value="bike">
 
-Bike Taxi
+    <div class="stat">
 
-</option>
+        <div class="stat-label">
+            Long Distance / KM
+        </div>
 
+        <div
+            class="stat-value"
+            id="longRatePreview"
+        >
+            ₹9
+        </div>
 
-<option value="cab">
+    </div>
 
-Cab
 
-</option>
+    <div class="stat">
 
+        <div class="stat-label">
+            Night Rate / KM
+        </div>
 
-<option value="auto">
+        <div
+            class="stat-value"
+            id="nightRatePreview"
+        >
+            ₹11
+        </div>
 
-Auto
+    </div>
 
-</option>
+</section>
 
 
-<option value="parcel">
 
-Parcel
+<section class="card">
 
-</option>
+    <h2 class="card-title">
+        General Fare Rules
+    </h2>
 
 
-<option value="food">
+    <form id="fareForm">
 
-Food Delivery
+        <div class="form-grid">
 
-</option>
 
+            <div class="field">
 
-</select>
+                <label>
+                    Currency
+                </label>
 
+                <select id="currency">
 
+                    <option value="INR">
+                        INR - Indian Rupee
+                    </option>
 
+                </select>
 
+            </div>
 
 
-<label>
+            <div class="field">
 
-Base Fare ₹
+                <label>
+                    Minimum Fare
+                </label>
 
-</label>
+                <input
+                    type="number"
+                    id="minimumFare"
+                    min="0"
+                    step="0.01"
+                    value="30"
+                >
 
+            </div>
 
-<input id="baseFare"
-type="number"
-placeholder="Base Fare">
 
+            <div class="field">
 
+                <label>
+                    Day Start Time
+                </label>
 
+                <input
+                    type="time"
+                    id="dayStart"
+                    value="08:00"
+                >
 
+            </div>
 
-<label>
 
-Day Rate ₹ / KM
+            <div class="field">
 
-</label>
+                <label>
+                    Day End Time
+                </label>
 
+                <input
+                    type="time"
+                    id="dayEnd"
+                    value="22:00"
+                >
 
-<input id="dayRate"
-type="number"
-placeholder="Day Per KM">
+            </div>
 
 
+            <div class="field">
 
+                <label>
+                    Long Distance Threshold (KM)
+                </label>
 
+                <input
+                    type="number"
+                    id="longDistanceKm"
+                    min="0"
+                    step="0.1"
+                    value="10"
+                >
 
-<label>
+            </div>
 
-Extra KM Rate ₹ / KM
 
-</label>
+            <div class="field">
 
+                <label>
+                    Booking Fee
+                </label>
 
-<input id="extraRate"
-type="number"
-placeholder="After 10 KM">
+                <input
+                    type="number"
+                    id="bookingFee"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                >
 
+            </div>
 
 
+        </div>
 
 
+        <div class="section-note">
 
-<label>
+            Default RiderX pricing:
+            8 AM–10 PM = ₹8/km,
+            above 10 km = ₹9/km,
+            10 PM–6 AM = ₹11/km.
+            You can change these values below.
 
-Night Rate ₹ / KM
+        </div>
 
-</label>
+</section>
 
 
-<input id="nightRate"
-type="number"
-placeholder="Night Rate">
 
+<section class="card">
 
+    <h2 class="card-title">
+        Service Pricing
+    </h2>
 
 
+    <div class="service-card">
 
+        <div class="service-head">
 
-<button id="saveFare">
+            <div class="service-name">
+                Bike Taxi
+            </div>
 
-Save Fare
+            <div class="service-badge">
+                BIKE
+            </div>
 
-</button>
+        </div>
 
 
+        <div class="service-grid">
 
+            <div class="field">
 
-<div id="status"></div>
+                <label>
+                    Base Fare
+                </label>
 
+                <input
+                    type="number"
+                    id="bikeBase"
+                    min="0"
+                    step="0.01"
+                    value="30"
+                >
 
+            </div>
 
-</div>
 
+            <div class="field">
 
+                <label>
+                    Day ₹ / KM
+                </label>
 
+                <input
+                    type="number"
+                    id="bikeDayRate"
+                    min="0"
+                    step="0.01"
+                    value="8"
+                >
 
+            </div>
 
 
-<script type="module"
-src="./js/fare-settings.js"></script>
+            <div class="field">
 
+                <label>
+                    Long Distance ₹ / KM
+                </label>
 
+                <input
+                    type="number"
+                    id="bikeLongRate"
+                    min="0"
+                    step="0.01"
+                    value="9"
+                >
 
-</body>
+            </div>
 
-</html>
+
+            <div class="field">
+
+                <label>
+                    Night ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="bikeNightRate"
+                    min="0"
+                    step="0.01"
+                    value="11"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Per Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="bikeMinuteRate"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Waiting / Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="bikeWaitingRate"
+                    min="0"
+                    step="0.01"
+                    value="1"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="service-card">
+
+        <div class="service-head">
+
+            <div class="service-name">
+                Cab
+            </div>
+
+            <div class="service-badge">
+                CAB
+            </div>
+
+        </div>
+
+
+        <div class="service-grid">
+
+            <div class="field">
+
+                <label>
+                    Base Fare
+                </label>
+
+                <input
+                    type="number"
+                    id="cabBase"
+                    min="0"
+                    step="0.01"
+                    value="60"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Day ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="cabDayRate"
+                    min="0"
+                    step="0.01"
+                    value="12"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Long Distance ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="cabLongRate"
+                    min="0"
+                    step="0.01"
+                    value="14"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Night ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="cabNightRate"
+                    min="0"
+                    step="0.01"
+                    value="16"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Per Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="cabMinuteRate"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Waiting / Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="cabWaitingRate"
+                    min="0"
+                    step="0.01"
+                    value="2"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="service-card">
+
+        <div class="service-head">
+
+            <div class="service-name">
+                Parcel
+            </div>
+
+            <div class="service-badge">
+                PARCEL
+            </div>
+
+        </div>
+
+
+        <div class="service-grid">
+
+            <div class="field">
+
+                <label>
+                    Base Fare
+                </label>
+
+                <input
+                    type="number"
+                    id="parcelBase"
+                    min="0"
+                    step="0.01"
+                    value="40"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Day ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="parcelDayRate"
+                    min="0"
+                    step="0.01"
+                    value="9"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Long Distance ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="parcelLongRate"
+                    min="0"
+                    step="0.01"
+                    value="10"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Night ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="parcelNightRate"
+                    min="0"
+                    step="0.01"
+                    value="12"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Per Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="parcelMinuteRate"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Waiting / Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="parcelWaitingRate"
+                    min="0"
+                    step="0.01"
+                    value="1"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="service-card">
+
+        <div class="service-head">
+
+            <div class="service-name">
+                Food Delivery
+            </div>
+
+            <div class="service-badge">
+                FOOD
+            </div>
+
+        </div>
+
+
+        <div class="service-grid">
+
+            <div class="field">
+
+                <label>
+                    Base Fare
+                </label>
+
+                <input
+                    type="number"
+                    id="foodBase"
+                    min="0"
+                    step="0.01"
+                    value="30"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Day ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="foodDayRate"
+                    min="0"
+                    step="0.01"
+                    value="8"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Long Distance ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="foodLongRate"
+                    min="0"
+                    step="0.01"
+                    value="9"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Night ₹ / KM
+                </label>
+
+                <input
+                    type="number"
+                    id="foodNightRate"
+                    min="0"
+                    step="0.01"
+                    value="11"
+                >
+
+            </div>
+
+
+            <
