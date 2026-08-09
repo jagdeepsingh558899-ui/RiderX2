@@ -1,37 +1,684 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Admin Users</title>
+<title>RiderX Admin - Users</title>
 
-<link rel="stylesheet" href="../css/style.css">
+<meta name="theme-color" content="#FFD400">
 
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
-.card{
+:root{
+    --yellow:#FFD400;
+    --bg:#080808;
+    --card:#151515;
+    --card2:#1d1d1d;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#60a5fa;
+    --orange:#f59e0b;
+}
 
-background:#1d1d1d;
-padding:20px;
-border-radius:15px;
-margin:15px 0;
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
+html,
+body{
+    min-height:100%;
+    background:var(--bg);
+}
+
+body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+button,
+input,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    min-height:100vh;
 }
 
 
-button{
+/* HEADER */
 
-width:100%;
-padding:12px;
-margin-top:10px;
-background:#ffcc00;
-border:none;
-border-radius:10px;
-font-weight:bold;
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:12px;
+
+    background:#0c0c0c;
+    border-bottom:1px solid #292929;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+
+    border:1px solid #363636;
+    border-radius:11px;
+
+    background:#1b1b1b;
+    color:#fff;
+
+    font-size:20px;
+}
+
+.logo{
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:900;
+}
+
+.header-info{
+    flex:1;
+}
+
+.header-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.header-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
+}
+
+
+/* MAIN */
+
+.main{
+    width:100%;
+    max-width:1200px;
+
+    margin:auto;
+    padding:15px;
+}
+
+
+/* TOP */
+
+.page-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+
+    margin-bottom:13px;
+}
+
+.page-title{
+    font-size:14px;
+    font-weight:900;
+}
+
+.page-description{
+    margin-top:4px;
+    color:#777;
+    font-size:6px;
+}
+
+.refresh-btn{
+    height:38px;
+
+    padding:0 14px;
+
+    border:1px solid #5d5200;
+    border-radius:10px;
+
+    background:#1c1900;
+    color:var(--yellow);
+
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* STATS */
+
+.stats{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+
+    gap:9px;
+
+    margin-bottom:12px;
+}
+
+.stat{
+    padding:13px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    background:var(--card);
+}
+
+.stat-label{
+    color:#777;
+
+    font-size:5px;
+    font-weight:800;
+}
+
+.stat-value{
+    margin-top:6px;
+
+    font-size:16px;
+    font-weight:900;
+}
+
+
+/* CARD */
+
+.card{
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+
+    overflow:hidden;
+}
+
+
+/* TOOLBAR */
+
+.toolbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:11px;
+
+    border-bottom:1px solid #292929;
+}
+
+.search{
+    flex:1;
+
+    height:37px;
+
+    padding:0 10px;
+
+    border:1px solid #383838;
+    border-radius:9px;
+
+    outline:none;
+
+    background:#101010;
+    color:#fff;
+
+    font-size:6px;
+}
+
+.search:focus{
+    border-color:#766800;
+}
+
+.select{
+    width:150px;
+
+    height:37px;
+
+    padding:0 9px;
+
+    border:1px solid #383838;
+    border-radius:9px;
+
+    outline:none;
+
+    background:#101010;
+    color:#fff;
+
+    font-size:5.5px;
+}
+
+.action-btn{
+    height:37px;
+
+    padding:0 12px;
+
+    border:1px solid #5d5200;
+    border-radius:9px;
+
+    background:#292400;
+    color:var(--yellow);
+
+    font-size:5px;
+    font-weight:900;
+}
+
+
+/* TABLE */
+
+.table-wrap{
+    width:100%;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    min-width:850px;
+
+    border-collapse:collapse;
+}
+
+th{
+    padding:11px;
+
+    background:#111;
+
+    color:#777;
+
+    font-size:5px;
+    font-weight:900;
+
+    text-align:left;
+
+    white-space:nowrap;
+}
+
+td{
+    padding:11px;
+
+    border-top:1px solid #292929;
+
+    font-size:5.5px;
+
+    vertical-align:middle;
+}
+
+tr:hover td{
+    background:#191919;
+}
+
+
+/* USER */
+
+.user-cell{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.avatar{
+    width:34px;
+    height:34px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:10px;
+
+    background:#292929;
+    color:var(--yellow);
+
+    font-size:8px;
+    font-weight:900;
+}
+
+.user-name{
+    font-size:6px;
+    font-weight:900;
+}
+
+.user-email{
+    margin-top:3px;
+
+    color:#666;
+
+    font-size:4.5px;
+}
+
+
+/* BADGES */
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+
+    padding:5px 8px;
+
+    border-radius:20px;
+
+    font-size:4.5px;
+    font-weight:900;
+}
+
+.badge-customer{
+    background:#24243a;
+    color:#a5b4fc;
+}
+
+.badge-rider{
+    background:#2d2500;
+    color:var(--yellow);
+}
+
+.badge-active{
+    background:#102719;
+    color:var(--green);
+}
+
+.badge-blocked{
+    background:#321717;
+    color:#ff7373;
+}
+
+.badge-pending{
+    background:#2e230f;
+    color:var(--orange);
+}
+
+
+/* ACTIONS */
+
+.row-actions{
+    display:flex;
+    gap:5px;
+}
+
+.small-btn{
+    height:29px;
+
+    padding:0 8px;
+
+    border:1px solid #383838;
+    border-radius:7px;
+
+    background:#202020;
+    color:#aaa;
+
+    font-size:4.5px;
+    font-weight:800;
+}
+
+.small-btn:hover{
+    border-color:#665a00;
+    color:var(--yellow);
+}
+
+.small-btn.danger{
+    color:#ff7777;
+    border-color:#512525;
+    background:#211313;
+}
+
+.small-btn.success{
+    color:#55df82;
+    border-color:#235a35;
+    background:#112116;
+}
+
+
+/* EMPTY */
+
+.empty{
+    padding:50px 15px;
+
+    color:#666;
+
+    text-align:center;
+
+    font-size:6px;
+}
+
+
+/* MODAL */
+
+.modal{
+    position:fixed;
+
+    inset:0;
+
+    z-index:100;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    padding:15px;
+
+    background:rgba(0,0,0,.78);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:500px;
+
+    max-height:90vh;
+
+    overflow-y:auto;
+
+    border:1px solid #3a3a3a;
+    border-radius:17px;
+
+    background:#151515;
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.6);
+}
+
+.modal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:14px;
+
+    border-bottom:1px solid #292929;
+}
+
+.modal-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.close-btn{
+    width:31px;
+    height:31px;
+
+    border:1px solid #383838;
+    border-radius:8px;
+
+    background:#222;
+    color:#fff;
+
+    font-size:15px;
+}
+
+.modal-body{
+    padding:14px;
+}
+
+.detail-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+
+    padding:9px 0;
+
+    border-bottom:1px solid #272727;
+
+    font-size:5.5px;
+}
+
+.detail-row:last-child{
+    border-bottom:0;
+}
+
+.detail-label{
+    color:#777;
+}
+
+.detail-value{
+    text-align:right;
+    font-weight:700;
+}
+
+.modal-actions{
+    display:flex;
+    gap:7px;
+
+    padding:12px 14px;
+
+    border-top:1px solid #292929;
+}
+
+.modal-action{
+    flex:1;
+
+    height:37px;
+
+    border:1px solid #3b3b3b;
+    border-radius:9px;
+
+    background:#222;
+    color:#fff;
+
+    font-size:5px;
+    font-weight:900;
+}
+
+.modal-action.primary{
+    border-color:#635700;
+
+    background:var(--yellow);
+    color:#000;
+}
+
+.modal-action.danger{
+    border-color:#602828;
+
+    background:#241414;
+    color:#ff7777;
+}
+
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    z-index:150;
+
+    width:calc(100% - 30px);
+    max-width:450px;
+
+    padding:11px;
+
+    border:1px solid #383838;
+    border-radius:11px;
+
+    background:#222;
+    color:#fff;
+
+    text-align:center;
+
+    font-size:6px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translate(-50%,20px);
+
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:700px){
+
+    .stats{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .toolbar{
+        flex-wrap:wrap;
+    }
+
+    .search{
+        flex-basis:100%;
+    }
+
+    .select{
+        flex:1;
+        width:auto;
+    }
+
+}
+
+@media(max-width:500px){
+
+    .main{
+        padding:11px;
+    }
+
+    .page-top{
+        align-items:flex-start;
+    }
+
+    .refresh-btn{
+        padding:0 10px;
+    }
 
 }
 
@@ -42,232 +689,1784 @@ font-weight:bold;
 
 <body>
 
+<div class="app">
 
-<div class="header">
 
-👥 User Management
+<header class="header">
+
+    <button
+        class="back-btn"
+        onclick="goBack()"
+        aria-label="Back"
+    >
+        ‹
+    </button>
+
+    <div class="logo">
+        RX
+    </div>
+
+    <div class="header-info">
+
+        <div class="header-title">
+            RiderX Users
+        </div>
+
+        <div class="header-subtitle">
+            Manage customers and riders
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="main">
+
+
+<section class="page-top">
+
+    <div>
+
+        <div class="page-title">
+            Users
+        </div>
+
+        <div class="page-description">
+            View, search and manage RiderX platform users.
+        </div>
+
+    </div>
+
+    <button
+        class="refresh-btn"
+        onclick="loadUsers()"
+    >
+        ↻ REFRESH
+    </button>
+
+</section>
+
+
+<section class="stats">
+
+    <div class="stat">
+
+        <div class="stat-label">
+            TOTAL USERS
+        </div>
+
+        <div
+            class="stat-value"
+            id="totalUsers"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            CUSTOMERS
+        </div>
+
+        <div
+            class="stat-value"
+            id="customerCount"
+            style="color:#a5b4fc"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            RIDERS
+        </div>
+
+        <div
+            class="stat-value"
+            id="riderCount"
+            style="color:#FFD400"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            ACTIVE
+        </div>
+
+        <div
+            class="stat-value"
+            id="activeCount"
+            style="color:#22c55e"
+        >
+            0
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="card">
+
+
+<div class="toolbar">
+
+    <input
+        class="search"
+        id="searchInput"
+        type="search"
+        placeholder="Search by name, email or phone..."
+        oninput="renderUsers()"
+    >
+
+
+    <select
+        class="select"
+        id="roleFilter"
+        onchange="renderUsers()"
+    >
+
+        <option value="all">
+            All Roles
+        </option>
+
+        <option value="customer">
+            Customers
+        </option>
+
+        <option value="rider">
+            Riders
+        </option>
+
+    </select>
+
+
+    <select
+        class="select"
+        id="statusFilter"
+        onchange="renderUsers()"
+    >
+
+        <option value="all">
+            All Status
+        </option>
+
+        <option value="active">
+            Active
+        </option>
+
+        <option value="blocked">
+            Blocked
+        </option>
+
+        <option value="pending">
+            Pending
+        </option>
+
+    </select>
 
 </div>
 
 
+<div class="table-wrap">
 
-<div class="container">
+<table>
+
+<thead>
+
+<tr>
+
+    <th>
+        USER
+    </th>
+
+    <th>
+        ROLE
+    </th>
+
+    <th>
+        PHONE
+    </th>
+
+    <th>
+        STATUS
+    </th>
+
+    <th>
+        JOINED
+    </th>
+
+    <th>
+        ACTIONS
+    </th>
+
+</tr>
+
+</thead>
 
 
-<div id="users">
+<tbody id="usersTable">
 
-Loading...
+<tr>
+
+<td colspan="6">
+
+    <div class="empty">
+        Loading users...
+    </div>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
 
 </div>
 
 
+</section>
+
+
+</main>
+
 </div>
 
 
+<!-- USER MODAL -->
+
+<div
+    class="modal"
+    id="userModal"
+    onclick="closeModalOutside(event)"
+>
+
+    <div
+        class="modal-card"
+        onclick="event.stopPropagation()"
+    >
+
+        <div class="modal-head">
+
+            <div class="modal-title">
+                User Details
+            </div>
+
+            <button
+                class="close-btn"
+                onclick="closeModal()"
+            >
+                ×
+            </button>
+
+        </div>
 
 
+        <div
+            class="modal-body"
+            id="modalBody"
+        >
+        </div>
 
-<script type="module">
+
+        <div class="modal-actions">
+
+            <button
+                class="modal-action"
+                onclick="closeModal()"
+            >
+                CLOSE
+            </button>
+
+            <button
+                class="modal-action primary"
+                id="modalStatusButton"
+                onclick="toggleSelectedUserStatus()"
+            >
+                UPDATE STATUS
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 
-import {db} from "../firebase/config.js";
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
-import {
+<script>
 
-collection,
-getDocs,
-doc,
-updateDoc
+const STORAGE_KEY =
+    "riderxAdminUsers";
+
+
+let users = [];
+
+let selectedUserId = null;
+
+let toastTimer;
+
+
+/* =========================================
+   DEFAULT USERS
+========================================= */
+
+const DEFAULT_USERS = [
+
+    {
+        id:"demo-customer-001",
+        name:"RiderX Customer",
+        email:"",
+        phone:"",
+        role:"customer",
+        status:"active",
+        joinedAt:new Date().toISOString()
+    },
+
+    {
+        id:"demo-rider-001",
+        name:"RiderX Rider",
+        email:"",
+        phone:"",
+        role:"rider",
+        status:"active",
+        joinedAt:new Date().toISOString()
+    }
+
+];
+
+
+/* =========================================
+   LOAD USERS
+========================================= */
+
+function loadUsers(){
+
+    let loaded = null;
+
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if(raw){
+
+            loaded =
+                JSON.parse(
+                    raw
+                );
+
+        }
+
+    }catch(error){
+
+        console.log(
+            "Users load error:",
+            error
+        );
+
+    }
+
+
+    if(
+        Array.isArray(
+            loaded
+        )
+    ){
+
+        users =
+            loaded;
+
+    }
+    else{
+
+        users =
+            getUsersFromLocalStorage();
+
+    }
+
+
+    if(
+        !Array.isArray(
+            users
+        )
+    ){
+
+        users = [];
+
+    }
+
+
+    renderStats();
+
+    renderUsers();
 
 }
 
-from
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+/* =========================================
+   FIND USERS FROM APP STORAGE
+========================================= */
+
+function getUsersFromLocalStorage(){
+
+    const result = [];
+
+    const keys = [
+
+        "riderxUsers",
+        "users",
+        "riderx_users",
+        "riderxCustomers",
+        "riderxRiders"
+
+    ];
 
 
+    keys.forEach(
+        function(key){
+
+            try{
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
 
 
+                if(!raw){
+                    return;
+                }
 
 
-async function loadUsers(){
+                const data =
+                    JSON.parse(
+                        raw
+                    );
 
 
+                if(
+                    Array.isArray(
+                        data
+                    )
+                ){
 
-let snap=await getDocs(
+                    data.forEach(
+                        function(item){
 
-collection(db,"users")
+                            addUserIfNew(
+                                result,
+                                item
+                            );
 
+                        }
+                    );
+
+                }
+
+            }catch(error){
+
+                console.log(
+                    key,
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    return result;
+
+}
+
+
+/* =========================================
+   NORMALIZE USER
+========================================= */
+
+function normalizeUser(
+    user
+){
+
+    const role =
+        normalizeRole(
+            user.role ||
+            user.userType ||
+            user.type
+        );
+
+
+    let status =
+        normalizeStatus(
+            user.status ||
+            user.accountStatus
+        );
+
+
+    if(!status){
+
+        status =
+            "active";
+
+    }
+
+
+    return {
+
+        id:
+            user.id ||
+            user.uid ||
+            user.userId ||
+            createId(),
+
+        name:
+            user.name ||
+            user.fullName ||
+            user.displayName ||
+            "RiderX User",
+
+        email:
+            user.email ||
+            "",
+
+        phone:
+            user.phone ||
+            user.phoneNumber ||
+            "",
+
+        role:
+            role,
+
+        status:
+            status,
+
+        joinedAt:
+            user.joinedAt ||
+            user.createdAt ||
+            user.created ||
+            new Date().toISOString()
+
+    };
+
+}
+
+
+function addUserIfNew(
+    list,
+    user
+){
+
+    if(
+        !user ||
+        typeof user !==
+        "object"
+    ){
+
+        return;
+
+    }
+
+
+    const normalized =
+        normalizeUser(
+            user
+        );
+
+
+    const exists =
+        list.some(
+            function(item){
+
+                return String(
+                    item.id
+                ) ===
+                String(
+                    normalized.id
+                );
+
+            }
+        );
+
+
+    if(!exists){
+
+        list.push(
+            normalized
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   STATS
+========================================= */
+
+function renderStats(){
+
+    const customers =
+        users.filter(
+            function(user){
+
+                return user.role ===
+                    "customer";
+
+            }
+        ).length;
+
+
+    const riders =
+        users.filter(
+            function(user){
+
+                return user.role ===
+                    "rider";
+
+            }
+        ).length;
+
+
+    const active =
+        users.filter(
+            function(user){
+
+                return user.status ===
+                    "active";
+
+            }
+        ).length;
+
+
+    setText(
+        "totalUsers",
+        users.length
+    );
+
+    setText(
+        "customerCount",
+        customers
+    );
+
+    setText(
+        "riderCount",
+        riders
+    );
+
+    setText(
+        "activeCount",
+        active
+    );
+
+}
+
+
+/* =========================================
+   RENDER
+========================================= */
+
+function renderUsers(){
+
+    const tbody =
+        document.getElementById(
+            "usersTable"
+        );
+
+
+    if(!tbody){
+        return;
+    }
+
+
+    const search =
+        String(
+            document.getElementById(
+                "searchInput"
+            )?.value ||
+            ""
+        )
+        .toLowerCase()
+        .trim();
+
+
+    const role =
+        document.getElementById(
+            "roleFilter"
+        )?.value ||
+        "all";
+
+
+    const status =
+        document.getElementById(
+            "statusFilter"
+        )?.value ||
+        "all";
+
+
+    const filtered =
+        users.filter(
+            function(user){
+
+                if(
+                    role !==
+                    "all" &&
+                    user.role !==
+                    role
+                ){
+
+                    return false;
+
+                }
+
+
+                if(
+                    status !==
+                    "all" &&
+                    user.status !==
+                    status
+                ){
+
+                    return false;
+
+                }
+
+
+                if(!search){
+
+                    return true;
+
+                }
+
+
+                const text =
+                    [
+                        user.id,
+                        user.name,
+                        user.email,
+                        user.phone,
+                        user.role,
+                        user.status
+                    ]
+                    .join(" ")
+                    .toLowerCase();
+
+
+                return text.includes(
+                    search
+                );
+
+            }
+        );
+
+
+    tbody.innerHTML = "";
+
+
+    if(!filtered.length){
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td colspan="6">
+
+                    <div class="empty">
+                        No users found.
+                    </div>
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    filtered.forEach(
+        function(user){
+
+            tbody.appendChild(
+                createUserRow(
+                    user
+                )
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   USER ROW
+========================================= */
+
+function createUserRow(
+    user
+){
+
+    const tr =
+        document.createElement(
+            "tr"
+        );
+
+
+    const name =
+        user.name ||
+        "RiderX User";
+
+
+    const initial =
+        String(
+            name
+        )
+        .charAt(0)
+        .toUpperCase();
+
+
+    tr.innerHTML = `
+
+        <td>
+
+            <div class="user-cell">
+
+                <div class="avatar">
+                    ${escapeHtml(initial)}
+                </div>
+
+                <div>
+
+                    <div class="user-name">
+                        ${escapeHtml(name)}
+                    </div>
+
+                    <div class="user-email">
+                        ${escapeHtml(
+                            user.email ||
+                            "No email"
+                        )}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </td>
+
+
+        <td>
+
+            <span class="
+                badge
+                ${
+                    user.role === "rider"
+                        ? "badge-rider"
+                        : "badge-customer"
+                }
+            ">
+
+                ${escapeHtml(
+                    user.role ===
+                    "rider"
+                        ? "Rider"
+                        : "Customer"
+                )}
+
+            </span>
+
+        </td>
+
+
+        <td>
+            ${escapeHtml(
+                user.phone ||
+                "—"
+            )}
+        </td>
+
+
+        <td>
+
+            <span class="
+                badge
+                ${statusClass(
+                    user.status
+                )}
+            ">
+
+                ${escapeHtml(
+                    statusLabel(
+                        user.status
+                    )
+                )}
+
+            </span>
+
+        </td>
+
+
+        <td>
+            ${escapeHtml(
+                formatDate(
+                    user.joinedAt
+                )
+            )}
+        </td>
+
+
+        <td>
+
+            <div class="row-actions">
+
+                <button
+                    class="small-btn"
+                    onclick="viewUser('${escapeJs(
+                        user.id
+                    )}')"
+                >
+                    VIEW
+                </button>
+
+
+                ${
+                    user.status ===
+                    "blocked"
+
+                        ? `
+                            <button
+                                class="small-btn success"
+                                onclick="toggleUserStatus('${escapeJs(
+                                    user.id
+                                )}')"
+                            >
+                                UNBLOCK
+                            </button>
+                        `
+
+                        : `
+                            <button
+                                class="small-btn danger"
+                                onclick="toggleUserStatus('${escapeJs(
+                                    user.id
+                                )}')"
+                            >
+                                BLOCK
+                            </button>
+                        `
+                }
+
+            </div>
+
+        </td>
+
+    `;
+
+
+    return tr;
+
+}
+
+
+/* =========================================
+   VIEW USER
+========================================= */
+
+function viewUser(
+    id
+){
+
+    const user =
+        users.find(
+            function(item){
+
+                return String(
+                    item.id
+                ) ===
+                String(id);
+
+            }
+        );
+
+
+    if(!user){
+
+        showToast(
+            "User not found."
+        );
+
+        return;
+
+    }
+
+
+    selectedUserId =
+        id;
+
+
+    const modal =
+        document.getElementById(
+            "userModal"
+        );
+
+
+    const body =
+        document.getElementById(
+            "modalBody"
+        );
+
+
+    const button =
+        document.getElementById(
+            "modalStatusButton"
+        );
+
+
+    if(!modal || !body){
+        return;
+    }
+
+
+    const name =
+        user.name ||
+        "RiderX User";
+
+
+    const initial =
+        String(
+            name
+        )
+        .charAt(0)
+        .toUpperCase();
+
+
+    body.innerHTML = `
+
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                padding-bottom:12px;
+                margin-bottom:5px;
+                border-bottom:1px solid #292929;
+            "
+        >
+
+            <div class="avatar">
+                ${escapeHtml(initial)}
+            </div>
+
+            <div>
+
+                <div class="user-name">
+                    ${escapeHtml(name)}
+                </div>
+
+                <div class="user-email">
+                    ${escapeHtml(
+                        user.email ||
+                        "No email"
+                    )}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+                User ID
+            </span>
+
+            <span class="detail-value">
+                ${escapeHtml(
+                    user.id
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+                Role
+            </span>
+
+            <span class="detail-value">
+                ${escapeHtml(
+                    user.role
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+                Phone
+            </span>
+
+            <span class="detail-value">
+                ${escapeHtml(
+                    user.phone ||
+                    "—"
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+                Status
+            </span>
+
+            <span class="detail-value">
+                ${escapeHtml(
+                    statusLabel(
+                        user.status
+                    )
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+                Joined
+            </span>
+
+            <span class="detail-value">
+                ${escapeHtml(
+                    formatDateLong(
+                        user.joinedAt
+                    )
+                )}
+            </span>
+
+        </div>
+
+    `;
+
+
+    if(button){
+
+        button.textContent =
+            user.status ===
+            "blocked"
+                ? "UNBLOCK USER"
+                : "BLOCK USER";
+
+    }
+
+
+    modal.classList.add(
+        "show"
+    );
+
+}
+
+
+/* =========================================
+   TOGGLE STATUS
+========================================= */
+
+function toggleUserStatus(
+    id
+){
+
+    const user =
+        users.find(
+            function(item){
+
+                return String(
+                    item.id
+                ) ===
+                String(id);
+
+            }
+        );
+
+
+    if(!user){
+
+        showToast(
+            "User not found."
+        );
+
+        return;
+
+    }
+
+
+    const isBlocked =
+        user.status ===
+        "blocked";
+
+
+    user.status =
+        isBlocked
+            ? "active"
+            : "blocked";
+
+
+    user.updatedAt =
+        new Date().toISOString();
+
+
+    saveUsers();
+
+    renderStats();
+
+    renderUsers();
+
+
+    if(
+        String(
+            selectedUserId
+        ) ===
+        String(id)
+    ){
+
+        viewUser(id);
+
+    }
+
+
+    showToast(
+        isBlocked
+            ? "User unblocked."
+            : "User blocked."
+    );
+
+}
+
+
+/* =========================================
+   MODAL STATUS
+========================================= */
+
+function toggleSelectedUserStatus(){
+
+    if(!selectedUserId){
+
+        return;
+
+    }
+
+
+    toggleUserStatus(
+        selectedUserId
+    );
+
+}
+
+
+/* =========================================
+   SAVE
+========================================= */
+
+function saveUsers(){
+
+    try{
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+                users
+            )
+        );
+
+    }catch(error){
+
+        console.log(
+            "Users save error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   CLOSE MODAL
+========================================= */
+
+function closeModal(){
+
+    const modal =
+        document.getElementById(
+            "userModal"
+        );
+
+
+    if(modal){
+
+        modal.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    selectedUserId =
+        null;
+
+}
+
+
+function closeModalOutside(
+    event
+){
+
+    if(
+        event.target &&
+        event.target.id ===
+        "userModal"
+    ){
+
+        closeModal();
+
+    }
+
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+function normalizeRole(
+    role
+){
+
+    const value =
+        String(
+            role ||
+            ""
+        )
+        .toLowerCase();
+
+
+    if(
+        value.includes(
+            "rider"
+        ) ||
+        value.includes(
+            "driver"
+        )
+    ){
+
+        return "rider";
+
+    }
+
+
+    return "customer";
+
+}
+
+
+function normalizeStatus(
+    status
+){
+
+    const value =
+        String(
+            status ||
+            ""
+        )
+        .toLowerCase();
+
+
+    if(
+        value ===
+        "blocked" ||
+        value ===
+        "disabled" ||
+        value ===
+        "suspended"
+    ){
+
+        return "blocked";
+
+    }
+
+
+    if(
+        value ===
+        "pending" ||
+        value ===
+        "waiting"
+    ){
+
+        return "pending";
+
+    }
+
+
+    return "active";
+
+}
+
+
+function statusLabel(
+    status
+){
+
+    const labels = {
+
+        active:"Active",
+
+        blocked:"Blocked",
+
+        pending:"Pending"
+
+    };
+
+
+    return labels[
+        status
+    ] || "Active";
+
+}
+
+
+function statusClass(
+    status
+){
+
+    if(
+        status ===
+        "blocked"
+    ){
+
+        return "badge-blocked";
+
+    }
+
+
+    if(
+        status ===
+        "pending"
+    ){
+
+        return "badge-pending";
+
+    }
+
+
+    return "badge-active";
+
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        history.back();
+
+    }
+    else{
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+
+}
+
+
+/* =========================================
+   HELPERS
+========================================= */
+
+function setText(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(element){
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+function createId(){
+
+    return (
+        "user-" +
+        Date.now() +
+        "-" +
+        Math.random()
+            .toString(36)
+            .slice(2,8)
+    );
+
+}
+
+
+function formatDate(
+    value
+){
+
+    if(!value){
+
+        return "—";
+
+    }
+
+
+    try{
+
+        return new Date(
+            value
+        ).toLocaleDateString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short",
+                year:"numeric"
+            }
+        );
+
+    }catch(error){
+
+        return "—";
+
+    }
+
+}
+
+
+function formatDateLong(
+    value
+){
+
+    if(!value){
+
+        return "—";
+
+    }
+
+
+    try{
+
+        return new Date(
+            value
+        ).toLocaleString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short",
+                year:"numeric",
+                hour:"2-digit",
+                minute:"2-digit"
+            }
+        );
+
+    }catch(error){
+
+        return "—";
+
+    }
+
+}
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeJs(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /\\/g,
+        "\\\\"
+    )
+    .replace(
+        /'/g,
+        "\\'"
+    )
+    .replace(
+        /"/g,
+        '\\"'
+    );
+
+}
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    if(!toast){
+        return;
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* =========================================
+   KEYBOARD
+========================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.key ===
+            "Escape"
+        ){
+
+            closeModal();
+
+        }
+
+    }
 );
 
 
+/* =========================================
+   INIT
+========================================= */
 
-let box=document.getElementById("users");
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
 
+        loadUsers();
 
-box.innerHTML="";
-
-
-
-
-
-snap.forEach((user)=>{
-
-
-let data=user.data();
-
-
-
-box.innerHTML += `
-
-
-<div class="card">
-
-
-<h3>
-
-👤 ${data.name || "User"}
-
-</h3>
-
-
-
-<p>
-
-📧 ${data.email || ""}
-
-</p>
-
-
-
-<p>
-
-Role: ${data.role || "customer"}
-
-</p>
-
-
-
-<p>
-
-Status:
-
-${data.blocked ? "Blocked 🚫" : "Active ✅"}
-
-</p>
-
-
-
-
-<button onclick="blockUser('${user.id}')">
-
-🚫 Block
-
-</button>
-
-
-
-<button onclick="unblockUser('${user.id}')">
-
-✅ Unblock
-
-</button>
-
-
-
-</div>
-
-
-`;
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-
-
-window.blockUser=async function(id){
-
-
-
-await updateDoc(
-
-doc(db,"users",id),
-
-{
-
-
-blocked:true
-
-}
-
+    }
 );
-
-
-
-alert("User Blocked 🚫");
-
-
-loadUsers();
-
-
-}
-
-
-
-
-
-
-
-window.unblockUser=async function(id){
-
-
-
-await updateDoc(
-
-doc(db,"users",id),
-
-{
-
-
-blocked:false
-
-}
-
-);
-
-
-
-alert("User Unblocked ✅");
-
-
-loadUsers();
-
-
-
-}
-
-
-
-
-
-loadUsers();
-
-
 
 </script>
 
-
 </body>
-
-</html>
+  </html>
