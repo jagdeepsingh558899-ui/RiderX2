@@ -1,103 +1,486 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 >
 
-<title>RiderX - Approval Pending</title>
+<title>RiderX • Approval Pending</title>
 
-<meta
-    name="theme-color"
-    content="#050505"
->
+<meta name="theme-color" content="#050505">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
 
+:root{
+    --yellow:#FFE500;
+    --yellow-dark:#d9c300;
+    --black:#050505;
+    --card:#101010;
+    --card2:#171717;
+    --border:#292929;
+    --text:#fff;
+    --muted:#999;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
 *{
     box-sizing:border-box;
-    font-family:Arial,sans-serif;
+    margin:0;
+    padding:0;
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+html,
+body{
+    width:100%;
+    min-height:100%;
 }
 
 body{
-    margin:0;
     min-height:100vh;
-    background:#050505;
-    color:#fff;
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(255,229,0,.13),
+            transparent 38%
+        ),
+        var(--black);
+    color:var(--text);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    overflow-x:hidden;
+}
+
+.page{
+    width:100%;
+    max-width:480px;
+}
+
+/* TOP BRAND */
+
+.brand{
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:20px;
+    gap:9px;
+    margin-bottom:22px;
 }
 
-.box{
-    width:min(440px,100%);
-    background:#111;
-    border:1px solid #292929;
-    border-radius:24px;
-    padding:35px 25px;
-    text-align:center;
-    box-shadow:0 20px 70px rgba(0,0,0,.55);
+.logo-box{
+    width:43px;
+    height:43px;
+    border-radius:13px;
+    background:var(--yellow);
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:21px;
+    font-weight:1000;
+    box-shadow:
+        0 8px 30px rgba(255,229,0,.18);
 }
 
-.logo{
-    font-size:38px;
-    font-weight:900;
+.brand-name{
+    font-size:25px;
+    font-weight:1000;
+    letter-spacing:-1px;
 }
 
-.logo span{
-    color:#FFE500;
+.brand-name span{
+    color:var(--yellow);
+}
+
+/* MAIN CARD */
+
+.card{
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.035),
+            rgba(255,255,255,.015)
+        ),
+        var(--card);
+
+    border:1px solid var(--border);
+    border-radius:28px;
+    padding:28px 22px 22px;
+
+    box-shadow:
+        0 25px 80px rgba(0,0,0,.55);
+
+    position:relative;
+    overflow:hidden;
+}
+
+.card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:3px;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        var(--yellow),
+        transparent
+    );
+}
+
+/* STATUS ICON */
+
+.icon-wrap{
+    width:92px;
+    height:92px;
+    margin:6px auto 22px;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,229,0,.16),
+            rgba(255,229,0,.035)
+        );
+
+    border:1px solid rgba(255,229,0,.25);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
 }
 
 .icon{
-    margin:30px 0 20px;
-    font-size:55px;
-    color:#FFE500;
+    width:58px;
+    height:58px;
+
+    border-radius:18px;
+
+    background:var(--yellow);
+    color:#000;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:29px;
+
+    box-shadow:
+        0 10px 35px rgba(255,229,0,.2);
+}
+
+.pulse{
+    position:absolute;
+    inset:-7px;
+    border:1px solid rgba(255,229,0,.18);
+    border-radius:50%;
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+    0%{
+        transform:scale(.92);
+        opacity:.8;
+    }
+
+    70%{
+        transform:scale(1.08);
+        opacity:0;
+    }
+
+    100%{
+        transform:scale(1.08);
+        opacity:0;
+    }
+}
+
+/* TEXT */
+
+.badge{
+    width:max-content;
+    margin:0 auto 12px;
+
+    padding:7px 12px;
+
+    border-radius:999px;
+
+    background:#211e00;
+    border:1px solid #514900;
+
+    color:var(--yellow);
+
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:.5px;
+    text-transform:uppercase;
 }
 
 h1{
-    font-size:24px;
+    text-align:center;
+    font-size:27px;
+    line-height:1.15;
+    letter-spacing:-.7px;
     margin-bottom:10px;
 }
 
-p{
-    color:#999;
-    line-height:1.6;
+.description{
+    text-align:center;
+    color:var(--muted);
     font-size:14px;
+    line-height:1.65;
+    max-width:370px;
+    margin:0 auto;
 }
 
-.status{
+/* APPLICATION STATUS */
+
+.status-card{
     margin-top:25px;
-    padding:15px;
-    background:#181500;
-    border:1px solid #5e5200;
-    border-radius:14px;
-    color:#FFE500;
-    font-weight:bold;
+
+    padding:16px;
+
+    border-radius:17px;
+
+    background:var(--card2);
+    border:1px solid var(--border);
 }
 
-.btn{
-    width:100%;
-    margin-top:20px;
-    padding:15px;
-    border:0;
-    border-radius:12px;
-    background:#FFE500;
-    color:#000;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
+.status-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    font-size:12px;
+    color:#888;
+
+    margin-bottom:9px;
 }
 
-.logout{
-    background:#222;
+.status-label{
     color:#fff;
-    border:1px solid #444;
+    font-weight:700;
+}
+
+.status-value{
+    color:var(--yellow);
+    font-weight:900;
+    text-transform:capitalize;
+}
+
+.status-line{
+    height:5px;
+    border-radius:20px;
+    background:#292929;
+    overflow:hidden;
+}
+
+.status-progress{
+    width:55%;
+    height:100%;
+    border-radius:20px;
+    background:var(--yellow);
+    transition:.3s;
+}
+
+/* STEPS */
+
+.steps{
+    margin-top:20px;
+    display:grid;
+    gap:10px;
+}
+
+.step{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:12px;
+
+    border-radius:14px;
+
+    background:#131313;
+    border:1px solid #242424;
+}
+
+.step-icon{
+    width:34px;
+    height:34px;
+
+    flex:none;
+
+    border-radius:11px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#202000;
+    color:var(--yellow);
+
+    font-size:15px;
+}
+
+.step-content{
+    min-width:0;
+}
+
+.step-title{
+    font-size:13px;
+    font-weight:800;
+}
+
+.step-text{
+    color:#777;
+    font-size:11px;
+    margin-top:3px;
+}
+
+/* BUTTONS */
+
+.actions{
+    margin-top:22px;
+    display:grid;
+    gap:10px;
+}
+
+button{
+    width:100%;
+    min-height:52px;
+
+    border-radius:15px;
+    border:none;
+
+    font-size:14px;
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s,
+        opacity .15s,
+        background .15s;
+}
+
+button:active{
+    transform:scale(.98);
+}
+
+.primary{
+    background:var(--yellow);
+    color:#000;
+    box-shadow:
+        0 10px 30px rgba(255,229,0,.12);
+}
+
+.primary:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+.secondary{
+    background:#1b1b1b;
+    color:#fff;
+    border:1px solid #333;
+}
+
+/* FOOTER */
+
+.footer{
+    text-align:center;
+    margin-top:17px;
+
+    color:#666;
+    font-size:11px;
+    line-height:1.6;
+}
+
+.footer strong{
+    color:#999;
+}
+
+/* LOADING */
+
+.loading-dot{
+    display:inline-block;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--yellow);
+    margin-left:5px;
+    animation:blink 1s infinite;
+}
+
+@keyframes blink{
+    0%,100%{
+        opacity:.25;
+    }
+
+    50%{
+        opacity:1;
+    }
+}
+
+/* APPROVED */
+
+.status-approved{
+    color:var(--green)!important;
+}
+
+.progress-approved{
+    background:var(--green);
+    width:100%;
+}
+
+/* ERROR */
+
+.status-error{
+    color:var(--red)!important;
+}
+
+/* MOBILE */
+
+@media(max-width:360px){
+
+    body{
+        padding:13px;
+    }
+
+    .card{
+        padding:24px 16px 18px;
+        border-radius:23px;
+    }
+
+    h1{
+        font-size:24px;
+    }
+
+    .icon-wrap{
+        width:82px;
+        height:82px;
+    }
+
+    .icon{
+        width:52px;
+        height:52px;
+    }
+
 }
 
 </style>
@@ -106,52 +489,189 @@ p{
 
 <body>
 
-<div class="box">
+<main class="page">
 
-    <div class="logo">
-        RID<span>ERX</span>
+    <div class="brand">
+
+        <div class="logo-box">
+            RX
+        </div>
+
+        <div class="brand-name">
+            RID<span>ERX</span>
+        </div>
+
     </div>
 
-    <div class="icon">
-        ⏳
-    </div>
 
-    <h1>
-        Approval Pending
-    </h1>
+    <section class="card">
 
-    <p>
-        Your RiderX rider registration has been
-        submitted successfully.
-    </p>
+        <div class="icon-wrap">
 
-    <p>
-        Our Admin team will review your rider
-        application before activation.
-    </p>
+            <div class="pulse"></div>
 
-    <div
-        id="status"
-        class="status"
-    >
-        Checking application status...
-    </div>
+            <div
+                class="icon"
+                id="statusIcon"
+            >
+                ⏳
+            </div>
 
-    <button
-        id="refreshBtn"
-        class="btn"
-    >
-        Check Approval Status
-    </button>
+        </div>
 
-    <button
-        id="logoutBtn"
-        class="btn logout"
-    >
-        Logout
-    </button>
 
-</div>
+        <div class="badge">
+            Rider Verification
+        </div>
+
+
+        <h1>
+            Approval Pending
+        </h1>
+
+
+        <p class="description">
+
+            Your RiderX rider application has been
+            submitted successfully. Our team is
+            reviewing your documents and profile.
+
+        </p>
+
+
+        <div class="status-card">
+
+            <div class="status-title">
+
+                <span class="status-label">
+                    Application Status
+                </span>
+
+                <span
+                    id="statusValue"
+                    class="status-value"
+                >
+                    Checking...
+                </span>
+
+            </div>
+
+
+            <div class="status-line">
+
+                <div
+                    id="progress"
+                    class="status-progress"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <div class="steps">
+
+            <div class="step">
+
+                <div class="step-icon">
+                    ✓
+                </div>
+
+                <div class="step-content">
+
+                    <div class="step-title">
+                        Registration Submitted
+                    </div>
+
+                    <div class="step-text">
+                        Your rider application was received.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-icon">
+                    ⏳
+                </div>
+
+                <div class="step-content">
+
+                    <div class="step-title">
+                        Admin Verification
+                    </div>
+
+                    <div class="step-text">
+                        Documents and rider profile are being checked.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-icon">
+                    🚀
+                </div>
+
+                <div class="step-content">
+
+                    <div class="step-title">
+                        Start Riding
+                    </div>
+
+                    <div class="step-text">
+                        Once approved, your RiderX dashboard will open.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button
+                id="refreshBtn"
+                class="primary"
+                type="button"
+            >
+                Check Approval Status
+            </button>
+
+
+            <button
+                id="logoutBtn"
+                class="secondary"
+                type="button"
+            >
+                Logout
+            </button>
+
+        </div>
+
+
+        <div class="footer">
+
+            Approval status is checked directly
+            from your RiderX account.
+
+            <br>
+
+            <strong>RiderX</strong> • Ride. Earn. Grow.
+
+        </div>
+
+    </section>
+
+</main>
 
 
 <script type="module">
@@ -166,17 +686,28 @@ import {
 } from "../firebase/firebase-config.js";
 
 
-const status =
-    document.getElementById(
-        "status"
-    );
+const statusValue =
+    document.getElementById("statusValue");
 
+const progress =
+    document.getElementById("progress");
+
+const statusIcon =
+    document.getElementById("statusIcon");
 
 const refreshBtn =
-    document.getElementById(
-        "refreshBtn"
-    );
+    document.getElementById("refreshBtn");
 
+const logoutBtn =
+    document.getElementById("logoutBtn");
+
+
+let checking = false;
+
+
+/* --------------------------------
+   APPROVAL CHECK
+-------------------------------- */
 
 function isApproved(data){
 
@@ -205,7 +736,40 @@ function isApproved(data){
 }
 
 
+/* --------------------------------
+   STATUS TEXT
+-------------------------------- */
+
+function getStatus(data){
+
+    return (
+        data?.status ||
+        data?.approvalStatus ||
+        data?.riderStatus ||
+        data?.verificationStatus ||
+        "pending"
+    );
+
+}
+
+
+/* --------------------------------
+   CHECK STATUS
+-------------------------------- */
+
 async function checkStatus(){
+
+    if(checking){
+        return;
+    }
+
+    checking = true;
+
+    refreshBtn.disabled = true;
+
+    refreshBtn.textContent =
+        "Checking Status...";
+
 
     const user =
         auth.currentUser;
@@ -222,11 +786,21 @@ async function checkStatus(){
     }
 
 
+    statusValue.textContent =
+        "Checking...";
+
+    statusValue.className =
+        "status-value";
+
+
+    progress.style.width =
+        "55%";
+
+    progress.className =
+        "status-progress";
+
+
     try{
-
-        status.textContent =
-            "Checking application status...";
-
 
         const snap =
             await getDoc(
@@ -238,12 +812,16 @@ async function checkStatus(){
             );
 
 
-        if(
-            !snap.exists()
-        ){
+        if(!snap.exists()){
 
-            status.textContent =
-                "Rider profile not found.";
+            statusValue.textContent =
+                "Profile Not Found";
+
+            statusValue.className =
+                "status-value status-error";
+
+            progress.style.width =
+                "10%";
 
             return;
 
@@ -254,24 +832,37 @@ async function checkStatus(){
             snap.data();
 
 
-        if(
-            isApproved(data)
-        ){
+        /* APPROVED */
 
-            status.textContent =
-                "✅ Approved! Opening Rider Dashboard...";
+        if(isApproved(data)){
+
+            statusValue.textContent =
+                "Approved";
+
+            statusValue.className =
+                "status-value status-approved";
+
+            progress.className =
+                "status-progress progress-approved";
+
+            progress.style.width =
+                "100%";
+
+            statusIcon.textContent =
+                "✓";
 
 
-            setTimeout(
-                () => {
+            refreshBtn.textContent =
+                "Opening Dashboard...";
 
-                    window.location.replace(
-                        "./Home.html"
-                    );
 
-                },
-                700
-            );
+            setTimeout(() => {
+
+                window.location.replace(
+                    "./home.html"
+                );
+
+            },700);
 
 
             return;
@@ -279,29 +870,91 @@ async function checkStatus(){
         }
 
 
+        /* CURRENT STATUS */
+
         const currentStatus =
-            data.status ||
-            data.approvalStatus ||
-            "pending";
+            getStatus(data);
 
 
-        status.textContent =
-            "⏳ Application status: " +
+        statusValue.textContent =
             currentStatus;
 
-    }catch(error){
+
+        const normalized =
+            String(currentStatus)
+                .toLowerCase();
+
+
+        if(
+            normalized.includes("reject") ||
+            normalized.includes("declin")
+        ){
+
+            statusIcon.textContent =
+                "✕";
+
+            statusValue.className =
+                "status-value status-error";
+
+            progress.style.width =
+                "100%";
+
+            progress.className =
+                "status-progress";
+
+        }
+
+        else{
+
+            statusIcon.textContent =
+                "⏳";
+
+            statusValue.className =
+                "status-value";
+
+            progress.style.width =
+                "55%";
+
+        }
+
+    }
+
+    catch(error){
 
         console.error(
+            "Rider approval check error:",
             error
         );
 
-        status.textContent =
-            "Unable to check status. Please try again.";
+
+        statusValue.textContent =
+            "Check Failed";
+
+        statusValue.className =
+            "status-value status-error";
+
+        progress.style.width =
+            "20%";
+
+    }
+
+    finally{
+
+        checking = false;
+
+        refreshBtn.disabled = false;
+
+        refreshBtn.textContent =
+            "Check Approval Status";
 
     }
 
 }
 
+
+/* --------------------------------
+   AUTH STATE
+-------------------------------- */
 
 onAuthStateChanged(
     auth,
@@ -323,25 +976,56 @@ onAuthStateChanged(
 );
 
 
+/* --------------------------------
+   REFRESH
+-------------------------------- */
+
 refreshBtn.addEventListener(
     "click",
     checkStatus
 );
 
 
-document
-.getElementById(
-    "logoutBtn"
-)
-.addEventListener(
+/* --------------------------------
+   LOGOUT
+-------------------------------- */
+
+logoutBtn.addEventListener(
     "click",
     async () => {
 
-        await signOut(auth);
+        try{
 
-        window.location.replace(
-            "../auth/login.html"
-        );
+            logoutBtn.disabled =
+                true;
+
+            logoutBtn.textContent =
+                "Logging out...";
+
+
+            await signOut(auth);
+
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+        }
+
+        catch(error){
+
+            console.error(
+                "Logout error:",
+                error
+            );
+
+            logoutBtn.disabled =
+                false;
+
+            logoutBtn.textContent =
+                "Logout";
+
+        }
 
     }
 );
@@ -349,5 +1033,4 @@ document
 </script>
 
 </body>
-
 </html>
