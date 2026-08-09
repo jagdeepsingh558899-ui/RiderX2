@@ -6,55 +6,614 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Trip</title>
+<title>RiderX - Trip</title>
+
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
+:root{
+    --yellow:#FFD400;
+    --bg:#0b0b0b;
+    --card:#171717;
+    --card2:#1d1d1d;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
 body{
-
-background:#000;
-color:white;
-font-family:Arial;
-text-align:center;
-padding:30px;
-
+    min-height:100%;
+    background:#080808;
 }
 
-
-.box{
-
-background:#111;
-padding:25px;
-border-radius:20px;
-border:2px solid #FFD600;
-
+body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
-
-
-h1 span{
-
-color:#FFD600;
-
-}
-
-
-.otp{
-
-font-size:40px;
-color:#FFD600;
-margin:30px;
-
-}
-
 
 button{
+    font-family:inherit;
+}
 
-padding:15px;
-width:100%;
-border:none;
-border-radius:12px;
-background:#FFD600;
-font-weight:bold;
+.app{
+    width:100%;
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:var(--bg);
+    position:relative;
+    overflow:hidden;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border-bottom:1px solid #252525;
+    background:#0d0d0d;
+    position:sticky;
+    top:0;
+    z-index:30;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    border:1px solid #343434;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.title-box{
+    flex:1;
+}
+
+.title{
+    font-size:11px;
+    font-weight:900;
+}
+
+.subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
+}
+
+
+/* =========================
+   STATUS HERO
+========================= */
+
+.hero{
+    padding:18px 13px 16px;
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(255,212,0,.12),
+            transparent 50%
+        );
+}
+
+.status-card{
+    padding:17px 14px;
+    border:1px solid #3b3500;
+    border-radius:18px;
+    background:#1b1907;
+    text-align:center;
+}
+
+.status-icon{
+    width:58px;
+    height:58px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #655800;
+    border-radius:50%;
+    background:#292400;
+    color:var(--yellow);
+    font-size:23px;
+}
+
+.status-title{
+    margin-top:11px;
+    font-size:14px;
+    font-weight:900;
+}
+
+.status-text{
+    max-width:360px;
+    margin:6px auto 0;
+    color:#888;
+    font-size:6px;
+    line-height:1.6;
+}
+
+.status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:11px;
+    padding:6px 10px;
+    border-radius:20px;
+    background:#282300;
+    color:var(--yellow);
+    font-size:5px;
+    font-weight:900;
+}
+
+.status-dot{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--yellow);
+}
+
+
+/* =========================
+   LIVE PROGRESS
+========================= */
+
+.progress-card{
+    margin-top:10px;
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:var(--card);
+}
+
+.progress-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.progress-title{
+    font-size:7px;
+    font-weight:900;
+}
+
+.progress-value{
+    color:var(--yellow);
+    font-size:6px;
+    font-weight:900;
+}
+
+.progress{
+    height:6px;
+    margin-top:10px;
+    overflow:hidden;
+    border-radius:20px;
+    background:#292929;
+}
+
+.progress-bar{
+    width:55%;
+    height:100%;
+    border-radius:20px;
+    background:var(--yellow);
+    transition:width .5s ease;
+}
+
+
+/* =========================
+   DRIVER
+========================= */
+
+.section{
+    padding:0 13px;
+}
+
+.driver-card{
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:var(--card);
+}
+
+.driver{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.avatar{
+    width:48px;
+    height:48px;
+    min-width:48px;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#292929;
+    color:var(--yellow);
+    font-size:14px;
+    font-weight:900;
+}
+
+.avatar img{
+    width:100%;
+    height:100%;
+    display:none;
+    object-fit:cover;
+}
+
+.driver-info{
+    flex:1;
+}
+
+.driver-name{
+    font-size:8px;
+    font-weight:900;
+}
+
+.driver-meta{
+    margin-top:4px;
+    color:#777;
+    font-size:5px;
+}
+
+.rating{
+    color:var(--yellow);
+    font-size:7px;
+    font-weight:900;
+}
+
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:7px;
+    margin-top:10px;
+}
+
+.action-btn{
+    height:38px;
+    border:1px solid #363636;
+    border-radius:10px;
+    background:#202020;
+    color:#fff;
+    font-size:5px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.action-btn.primary{
+    border-color:#756600;
+    background:#2a2500;
+    color:var(--yellow);
+}
+
+
+/* =========================
+   ROUTE
+========================= */
+
+.route-card{
+    margin-top:10px;
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:var(--card);
+}
+
+.section-title{
+    margin-bottom:11px;
+    color:#666;
+    font-size:6px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.route{
+    position:relative;
+    padding-left:24px;
+}
+
+.route-line{
+    position:absolute;
+    left:6px;
+    top:10px;
+    bottom:10px;
+    width:1px;
+    background:#444;
+}
+
+.location{
+    position:relative;
+    padding-bottom:16px;
+}
+
+.location:last-child{
+    padding-bottom:0;
+}
+
+.dot{
+    position:absolute;
+    left:-21px;
+    top:1px;
+    width:10px;
+    height:10px;
+    border:2px solid #111;
+    border-radius:50%;
+    background:var(--yellow);
+}
+
+.destination .dot{
+    background:#fff;
+}
+
+.location-label{
+    color:#666;
+    font-size:5px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.location-name{
+    margin-top:4px;
+    color:#fff;
+    font-size:7px;
+    font-weight:800;
+    line-height:1.4;
+}
+
+
+/* =========================
+   INFO GRID
+========================= */
+
+.info-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+}
+
+.info-card{
+    padding:11px;
+    border:1px solid var(--border);
+    border-radius:13px;
+    background:var(--card);
+}
+
+.info-label{
+    color:#666;
+    font-size:5px;
+}
+
+.info-value{
+    margin-top:5px;
+    color:#fff;
+    font-size:8px;
+    font-weight:900;
+}
+
+
+/* =========================
+   FARE
+========================= */
+
+.fare-card{
+    margin-top:10px;
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:var(--card);
+}
+
+.fare-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:8px 0;
+    border-bottom:1px solid #292929;
+}
+
+.fare-row:last-child{
+    border-bottom:0;
+}
+
+.fare-label{
+    color:#777;
+    font-size:6px;
+}
+
+.fare-value{
+    color:#fff;
+    font-size:6px;
+    font-weight:800;
+}
+
+.fare-total{
+    margin-top:2px;
+    padding-top:10px;
+}
+
+.fare-total .fare-label{
+    color:#fff;
+    font-weight:900;
+}
+
+.fare-total .fare-value{
+    color:var(--yellow);
+    font-size:12px;
+}
+
+
+/* =========================
+   PAYMENT
+========================= */
+
+.payment{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:10px;
+    padding:12px;
+    border:1px solid #393400;
+    border-radius:14px;
+    background:#1c1a08;
+}
+
+.payment-left{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.payment-icon{
+    width:35px;
+    height:35px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:#292400;
+    color:var(--yellow);
+    font-size:15px;
+}
+
+.payment-label{
+    color:#777;
+    font-size:5px;
+}
+
+.payment-method{
+    margin-top:4px;
+    color:#fff;
+    font-size:7px;
+    font-weight:900;
+}
+
+.payment-status{
+    color:var(--green);
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* =========================
+   BUTTONS
+========================= */
+
+.bottom-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+    padding-bottom:30px;
+}
+
+.main-btn{
+    height:45px;
+    border:1px solid #3c3700;
+    border-radius:12px;
+    background:var(--yellow);
+    color:#000;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.secondary-btn{
+    height:45px;
+    border:1px solid #383838;
+    border-radius:12px;
+    background:#202020;
+    color:#fff;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.cancel-btn{
+    width:100%;
+    height:42px;
+    margin-top:8px;
+    border:1px solid #542525;
+    border-radius:11px;
+    background:#211313;
+    color:#ff7777;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+    display:none;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:24px;
+    z-index:100;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:420px){
+
+    .hero{
+        padding-top:14px;
+    }
+
+    .status-card{
+        padding:15px 12px;
+    }
+
+    .bottom-actions{
+        grid-template-columns:1fr 1fr;
+    }
 
 }
 
@@ -62,129 +621,2136 @@ font-weight:bold;
 
 </head>
 
-
 <body>
 
-
-<div class="box">
-
-
-<h1>
-RIDER<span>X</span>
-</h1>
+<div class="app">
 
 
-<h2>
+    <!-- HEADER -->
 
-Your Ride OTP
+    <header class="header">
 
-</h2>
+        <button
+            class="back-btn"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ‹
+        </button>
+
+        <div class="title-box">
+
+            <div class="title">
+                Trip Details
+            </div>
+
+            <div class="subtitle">
+                RiderX ride summary
+            </div>
+
+        </div>
+
+    </header>
 
 
+    <!-- HERO -->
 
-<div class="otp" id="otp">
+    <section class="hero">
 
-----
+        <div class="status-card">
+
+            <div
+                class="status-icon"
+                id="statusIcon"
+            >
+                ✓
+            </div>
+
+            <div
+                class="status-title"
+                id="statusTitle"
+            >
+                Ride in progress
+            </div>
+
+            <div
+                class="status-text"
+                id="statusText"
+            >
+                Your RiderX trip is currently active.
+            </div>
+
+            <div class="status-badge">
+
+                <span
+                    class="status-dot"
+                    id="statusDot"
+                ></span>
+
+                <span id="statusBadge">
+                    LIVE TRIP
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="progress-card">
+
+            <div class="progress-head">
+
+                <div class="progress-title">
+                    Trip progress
+                </div>
+
+                <div
+                    class="progress-value"
+                    id="progressValue"
+                >
+                    55%
+                </div>
+
+            </div>
+
+            <div class="progress">
+
+                <div
+                    class="progress-bar"
+                    id="progressBar"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- DRIVER -->
+
+    <section class="section">
+
+        <div class="driver-card">
+
+            <div class="driver">
+
+                <div class="avatar">
+
+                    <span
+                        id="driverInitial"
+                    >
+                        R
+                    </span>
+
+                    <img
+                        id="driverPhoto"
+                        alt="Rider"
+                    >
+
+                </div>
+
+                <div class="driver-info">
+
+                    <div
+                        class="driver-name"
+                        id="driverName"
+                    >
+                        RiderX Partner
+                    </div>
+
+                    <div
+                        class="driver-meta"
+                        id="driverVehicle"
+                    >
+                        Rider
+                    </div>
+
+                </div>
+
+                <div class="rating">
+
+                    ★
+                    <span id="driverRating">
+                        —
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="actions">
+
+                <button
+                    class="action-btn primary"
+                    onclick="callDriver()"
+                >
+                    📞 CALL
+                </button>
+
+                <button
+                    class="action-btn"
+                    onclick="openChat()"
+                >
+                    💬 CHAT
+                </button>
+
+                <button
+                    class="action-btn"
+                    onclick="shareTrip()"
+                >
+                    ↗ SHARE
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ROUTE -->
+
+        <div class="route-card">
+
+            <div class="section-title">
+                Trip route
+            </div>
+
+            <div class="route">
+
+                <div class="route-line"></div>
+
+
+                <div class="location">
+
+                    <div class="dot"></div>
+
+                    <div class="location-label">
+                        Pickup
+                    </div>
+
+                    <div
+                        class="location-name"
+                        id="pickup"
+                    >
+                        Pickup location
+                    </div>
+
+                </div>
+
+
+                <div class="location destination">
+
+                    <div class="dot"></div>
+
+                    <div class="location-label">
+                        Destination
+                    </div>
+
+                    <div
+                        class="location-name"
+                        id="destination"
+                    >
+                        Destination location
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INFO -->
+
+        <div class="info-grid">
+
+            <div class="info-card">
+
+                <div class="info-label">
+                    RIDE ID
+                </div>
+
+                <div
+                    class="info-value"
+                    id="rideId"
+                >
+                    —
+                </div>
+
+            </div>
+
+            <div class="info-card">
+
+                <div class="info-label">
+                    SERVICE
+                </div>
+
+                <div
+                    class="info-value"
+                    id="service"
+                >
+                    Bike Taxi
+                </div>
+
+            </div>
+
+            <div class="info-card">
+
+                <div class="info-label">
+                    DISTANCE
+                </div>
+
+                <div
+                    class="info-value"
+                    id="distance"
+                >
+                    —
+                </div>
+
+            </div>
+
+            <div class="info-card">
+
+                <div class="info-label">
+                    DURATION
+                </div>
+
+                <div
+                    class="info-value"
+                    id="duration"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- FARE -->
+
+        <div class="fare-card">
+
+            <div class="section-title">
+                Fare details
+            </div>
+
+            <div class="fare-row">
+
+                <span class="fare-label">
+                    Base fare
+                </span>
+
+                <span
+                    class="fare-value"
+                    id="baseFare"
+                >
+                    ₹0
+                </span>
+
+            </div>
+
+            <div class="fare-row">
+
+                <span class="fare-label">
+                    Distance fare
+                </span>
+
+                <span
+                    class="fare-value"
+                    id="distanceFare"
+                >
+                    ₹0
+                </span>
+
+            </div>
+
+            <div class="fare-row">
+
+                <span class="fare-label">
+                    Other charges
+                </span>
+
+                <span
+                    class="fare-value"
+                    id="otherFare"
+                >
+                    ₹0
+                </span>
+
+            </div>
+
+            <div class="fare-row fare-total">
+
+                <span class="fare-label">
+                    Total
+                </span>
+
+                <span
+                    class="fare-value"
+                    id="totalFare"
+                >
+                    ₹0
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- PAYMENT -->
+
+        <div class="payment">
+
+            <div class="payment-left">
+
+                <div class="payment-icon">
+                    ₹
+                </div>
+
+                <div>
+
+                    <div class="payment-label">
+                        PAYMENT METHOD
+                    </div>
+
+                    <div
+                        class="payment-method"
+                        id="paymentMethod"
+                    >
+                        Cash
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="payment-status"
+                id="paymentStatus"
+            >
+                PAY AFTER RIDE
+            </div>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="bottom-actions">
+
+            <button
+                class="main-btn"
+                onclick="viewReceipt()"
+            >
+                VIEW RECEIPT
+            </button>
+
+            <button
+                class="secondary-btn"
+                onclick="goHome()"
+            >
+                BACK TO HOME
+            </button>
+
+        </div>
+
+        <button
+            class="cancel-btn"
+            id="cancelBtn"
+            onclick="cancelRide()"
+        >
+            ✕ CANCEL RIDE
+        </button>
+
+    </section>
 
 </div>
 
 
-<p>
-
-Share this OTP with your rider after arrival
-
-</p>
-
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
-<button onclick="goTracking()">
+<script>
 
-Open Tracking
+/* ==========================================
+   RIDERX CUSTOMER TRIP
+========================================== */
 
-</button>
-
-
-</div>
-
-
-
-
-
-<script type="module">
+let rideData = {};
+let syncTimer = null;
+let toastTimer = null;
+let startTime = null;
 
 
-import { db } from "../firebase/config.js";
+/* ==========================================
+   DEFAULT
+========================================== */
 
+const defaultRide = {
 
-import {
+    id:"",
 
-doc,
-updateDoc
+    service:"Bike Taxi",
 
-}
+    status:"started",
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    pickup:"",
+    destination:"",
 
+    fare:0,
+    total:0,
+    amount:0,
 
+    baseFare:0,
+    distanceFare:0,
+    otherFare:0,
 
+    paymentMethod:"Cash",
 
-let otp =
-Math.floor(
+    distance:"",
+    duration:"",
 
-1000 + Math.random()*9000
+    riderName:"RiderX Partner",
+    riderPhoto:"",
+    vehicle:"",
+    vehicleNumber:"",
+    riderRating:"",
+    riderPhone:"",
 
-);
-
-
-
-document.getElementById("otp").innerHTML=otp;
-
-
-
-
-let rideId =
-localStorage.getItem("rideId");
-
-
-
-if(rideId){
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-
-otp:otp,
-
-status:"OTP_PENDING"
-
-
-}
-
-);
-
-
-}
-
-
-
-
-
-window.goTracking=()=>{
-
-location.href="live-tracking.html";
+    startedAt:null,
+    completedAt:null
 
 };
 
 
+/* ==========================================
+   URL PARAM
+========================================== */
+
+function getParam(
+    name
+){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get(
+        name
+    );
+
+}
+
+
+/* ==========================================
+   LOAD
+========================================== */
+
+function loadTrip(){
+
+    rideData = {
+        ...defaultRide
+    };
+
+
+    const urlId =
+        getParam(
+            "rideId"
+        ) ||
+        getParam(
+            "id"
+        );
+
+
+    if(
+        urlId
+    ){
+
+        rideData.id =
+            urlId;
+
+    }
+
+
+    const keys = [
+
+        "currentRide",
+        "activeRide",
+        "riderxCurrentRide",
+        "rideData",
+        "lastRide",
+        "completedRide"
+
+    ];
+
+
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(
+                !raw
+            ){
+
+                continue;
+
+            }
+
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                data &&
+                typeof data ===
+                "object"
+            ){
+
+                rideData = {
+
+                    ...rideData,
+                    ...data
+
+                };
+
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                error
+            );
+
+        }
+
+    }
+
+
+    renderAll();
+
+}
+
+
+/* ==========================================
+   RENDER ALL
+========================================== */
+
+function renderAll(){
+
+    renderStatus();
+
+    renderDriver();
+
+    renderRoute();
+
+    renderInfo();
+
+    renderFare();
+
+    renderPayment();
+
+    updateDuration();
+
+}
+
+
+/* ==========================================
+   STATUS
+========================================== */
+
+function renderStatus(){
+
+    const status =
+        normalizeStatus(
+            rideData.status ||
+            rideData.rideStatus ||
+            rideData.state ||
+            "started"
+        );
+
+
+    const title =
+        document.getElementById(
+            "statusTitle"
+        );
+
+    const text =
+        document.getElementById(
+            "statusText"
+        );
+
+    const icon =
+        document.getElementById(
+            "statusIcon"
+        );
+
+    const badge =
+        document.getElementById(
+            "statusBadge"
+        );
+
+    const progress =
+        document.getElementById(
+            "progressBar"
+        );
+
+    const progressValue =
+        document.getElementById(
+            "progressValue"
+        );
+
+
+    if(
+        status ===
+        "searching"
+    ){
+
+        icon.textContent =
+            "🔎";
+
+        title.textContent =
+            "Finding rider";
+
+        text.textContent =
+            "RiderX is searching for an available rider.";
+
+        badge.textContent =
+            "SEARCHING";
+
+        setProgress(
+            20
+        );
+
+    }
+    else if(
+        status ===
+        "accepted"
+    ){
+
+        icon.textContent =
+            "✓";
+
+        title.textContent =
+            "Ride accepted";
+
+        text.textContent =
+            "Your rider is heading towards you.";
+
+        badge.textContent =
+            "RIDER ASSIGNED";
+
+        setProgress(
+            35
+        );
+
+    }
+    else if(
+        status ===
+        "arriving"
+    ){
+
+        icon.textContent =
+            "🛵";
+
+        title.textContent =
+            "Rider is arriving";
+
+        text.textContent =
+            "Your rider is on the way to pickup.";
+
+        badge.textContent =
+            "RIDER ARRIVING";
+
+        setProgress(
+            45
+        );
+
+    }
+    else if(
+        status ===
+        "started"
+    ){
+
+        icon.textContent =
+            "🛵";
+
+        title.textContent =
+            "Ride in progress";
+
+        text.textContent =
+            "Your RiderX trip is currently active.";
+
+        badge.textContent =
+            "LIVE TRIP";
+
+        setProgress(
+            calculateProgress()
+        );
+
+    }
+    else if(
+        status ===
+        "completed"
+    ){
+
+        icon.textContent =
+            "✓";
+
+        title.textContent =
+            "Ride completed";
+
+        text.textContent =
+            "Your RiderX trip has been completed successfully.";
+
+        badge.textContent =
+            "COMPLETED";
+
+        setProgress(
+            100
+        );
+
+    }
+    else if(
+        status ===
+        "cancelled"
+    ){
+
+        icon.textContent =
+            "✕";
+
+        title.textContent =
+            "Ride cancelled";
+
+        text.textContent =
+            "This RiderX trip has been cancelled.";
+
+        badge.textContent =
+            "CANCELLED";
+
+        setProgress(
+            0
+        );
+
+        document.getElementById(
+            "cancelBtn"
+        ).style.display =
+            "none";
+
+    }
+
+
+    progressValue.textContent =
+        Math.round(
+            Number(
+                progress.style.width
+                    .replace(
+                        "%",
+                        ""
+                    )
+            )
+        ) +
+        "%";
+
+}
+
+
+/* ==========================================
+   PROGRESS
+========================================== */
+
+function setProgress(
+    value
+){
+
+    const safe =
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(value) || 0
+            )
+        );
+
+
+    document.getElementById(
+        "progressBar"
+    ).style.width =
+        safe +
+        "%";
+
+
+    document.getElementById(
+        "progressValue"
+    ).textContent =
+        Math.round(
+            safe
+        ) +
+        "%";
+
+}
+
+
+/* ==========================================
+   CALCULATE PROGRESS
+========================================== */
+
+function calculateProgress(){
+
+    const value =
+        Number(
+            rideData.progress
+        );
+
+
+    if(
+        Number.isFinite(
+            value
+        ) &&
+        value >= 0 &&
+        value <= 100
+    ){
+
+        return value;
+
+    }
+
+
+    return 55;
+
+}
+
+
+/* ==========================================
+   DRIVER
+========================================== */
+
+function renderDriver(){
+
+    const name =
+        rideData.riderName ||
+        rideData.driverName ||
+        rideData.name ||
+        "RiderX Partner";
+
+
+    document.getElementById(
+        "driverName"
+    ).textContent =
+        name;
+
+
+    document.getElementById(
+        "driverVehicle"
+    ).textContent =
+        rideData.vehicleNumber ||
+        rideData.vehicle ||
+        rideData.vehicleType ||
+        "Rider";
+
+
+    document.getElementById(
+        "driverRating"
+    ).textContent =
+        rideData.riderRating ||
+        rideData.driverRating ||
+        "—";
+
+
+    const photo =
+        rideData.riderPhoto ||
+        rideData.driverPhoto ||
+        rideData.photoURL ||
+        "";
+
+
+    if(
+        photo
+    ){
+
+        const image =
+            document.getElementById(
+                "driverPhoto"
+            );
+
+
+        image.src =
+            photo;
+
+
+        image.style.display =
+            "block";
+
+
+        document.getElementById(
+            "driverInitial"
+        ).style.display =
+            "none";
+
+    }
+    else{
+
+        document.getElementById(
+            "driverInitial"
+        ).textContent =
+            name
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+/* ==========================================
+   ROUTE
+========================================== */
+
+function renderRoute(){
+
+    document.getElementById(
+        "pickup"
+    ).textContent =
+        rideData.pickup ||
+        rideData.pickupAddress ||
+        rideData.from ||
+        "Pickup location";
+
+
+    document.getElementById(
+        "destination"
+    ).textContent =
+        rideData.destination ||
+        rideData.destinationAddress ||
+        rideData.to ||
+        "Destination location";
+
+}
+
+
+/* ==========================================
+   INFO
+========================================== */
+
+function renderInfo(){
+
+    document.getElementById(
+        "rideId"
+    ).textContent =
+        rideData.id ||
+        rideData.rideId ||
+        "—";
+
+
+    document.getElementById(
+        "service"
+    ).textContent =
+        rideData.service ||
+        rideData.type ||
+        "Bike Taxi";
+
+
+    document.getElementById(
+        "distance"
+    ).textContent =
+        formatDistance(
+            rideData.distance ||
+            rideData.distanceKm
+        );
+
+
+    document.getElementById(
+        "duration"
+    ).textContent =
+        formatDuration(
+            rideData.duration
+        );
+
+}
+
+
+/* ==========================================
+   FARE
+========================================== */
+
+function renderFare(){
+
+    const total =
+        getNumber(
+            rideData.total,
+            rideData.fare,
+            rideData.amount,
+            rideData.price
+        );
+
+
+    let base =
+        getNumber(
+            rideData.baseFare
+        );
+
+
+    let distanceFare =
+        getNumber(
+            rideData.distanceFare
+        );
+
+
+    let other =
+        getNumber(
+            rideData.otherFare,
+            rideData.extraCharges,
+            rideData.surge
+        );
+
+
+    /*
+      If detailed fare isn't available,
+      preserve total without inventing
+      additional charges.
+    */
+
+    if(
+        base === 0 &&
+        distanceFare === 0 &&
+        other === 0 &&
+        total > 0
+    ){
+
+        base =
+            total;
+
+    }
+
+
+    document.getElementById(
+        "baseFare"
+    ).textContent =
+        "₹" +
+        Math.round(
+            base
+        );
+
+
+    document.getElementById(
+        "distanceFare"
+    ).textContent =
+        "₹" +
+        Math.round(
+            distanceFare
+        );
+
+
+    document.getElementById(
+        "otherFare"
+    ).textContent =
+        "₹" +
+        Math.round(
+            other
+        );
+
+
+    document.getElementById(
+        "totalFare"
+    ).textContent =
+        "₹" +
+        Math.round(
+            total ||
+            base +
+            distanceFare +
+            other
+        );
+
+}
+
+
+/* ==========================================
+   PAYMENT
+========================================== */
+
+function renderPayment(){
+
+    const method =
+        formatPayment(
+            rideData.paymentMethod ||
+            rideData.payment ||
+            "Cash"
+        );
+
+
+    document.getElementById(
+        "paymentMethod"
+    ).textContent =
+        method;
+
+
+    const status =
+        normalizeStatus(
+            rideData.status ||
+            "started"
+        );
+
+
+    if(
+        status ===
+        "completed"
+    ){
+
+        document.getElementById(
+            "paymentStatus"
+        ).textContent =
+            method.toLowerCase()
+                .includes(
+                    "cash"
+                )
+                ? "PAYMENT DUE"
+                : "PAID";
+
+    }
+    else{
+
+        document.getElementById(
+            "paymentStatus"
+        ).textContent =
+            "PAY AFTER RIDE";
+
+    }
+
+}
+
+
+/* ==========================================
+   DURATION
+========================================== */
+
+function updateDuration(){
+
+    const duration =
+        getNumber(
+            rideData.duration
+        );
+
+
+    if(
+        duration > 0
+    ){
+
+        document.getElementById(
+            "duration"
+        ).textContent =
+            formatDuration(
+                duration
+            );
+
+        return;
+
+    }
+
+
+    startTime =
+        rideData.startedAt ||
+        rideData.startTime ||
+        startTime;
+
+
+    if(
+        startTime
+    ){
+
+        const start =
+            new Date(
+                startTime
+            ).getTime();
+
+
+        if(
+            Number.isFinite(
+                start
+            )
+        ){
+
+            const minutes =
+                Math.max(
+                    0,
+                    Math.floor(
+                        (
+                            Date.now() -
+                            start
+                        ) /
+                        60000
+                    )
+                );
+
+
+            document.getElementById(
+                "duration"
+            ).textContent =
+                formatDuration(
+                    minutes
+                );
+
+            return;
+
+        }
+
+    }
+
+
+    document.getElementById(
+        "duration"
+    ).textContent =
+        "—";
+
+}
+
+
+/* ==========================================
+   LIVE SYNC
+========================================== */
+
+function startSync(){
+
+    clearInterval(
+        syncTimer
+    );
+
+
+    syncTimer =
+        setInterval(
+            function(){
+
+                try{
+
+                    const raw =
+                        localStorage.getItem(
+                            "currentRide"
+                        );
+
+
+                    if(
+                        !raw
+                    ){
+
+                        return;
+
+                    }
+
+
+                    const latest =
+                        JSON.parse(
+                            raw
+                        );
+
+
+                    if(
+                        !latest ||
+                        typeof latest !==
+                        "object"
+                    ){
+
+                        return;
+
+                    }
+
+
+                    const currentId =
+                        rideData.id ||
+                        rideData.rideId;
+
+
+                    const latestId =
+                        latest.id ||
+                        latest.rideId;
+
+
+                    if(
+                        currentId &&
+                        latestId &&
+                        String(
+                            currentId
+                        ) !==
+                        String(
+                            latestId
+                        )
+                    ){
+
+                        return;
+
+                    }
+
+
+                    rideData = {
+
+                        ...rideData,
+                        ...latest
+
+                    };
+
+
+                    renderAll();
+
+                }catch(error){
+
+                    console.log(
+                        error
+                    );
+
+                }
+
+            },
+            2500
+        );
+
+
+    setInterval(
+        updateDuration,
+        30000
+    );
+
+}
+
+
+/* ==========================================
+   CALL
+========================================== */
+
+function callDriver(){
+
+    const phone =
+        rideData.riderPhone ||
+        rideData.driverPhone ||
+        rideData.phone ||
+        "";
+
+
+    if(
+        !phone
+    ){
+
+        showToast(
+            "Rider phone number is not available."
+        );
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "tel:" +
+        phone;
+
+}
+
+
+/* ==========================================
+   CHAT
+========================================== */
+
+function openChat(){
+
+    const id =
+        rideData.id ||
+        rideData.rideId ||
+        "";
+
+
+    window.location.href =
+        "chat.html" +
+        (
+            id
+                ? "?rideId=" +
+                  encodeURIComponent(
+                      id
+                  )
+                : ""
+        );
+
+}
+
+
+/* ==========================================
+   SHARE
+========================================== */
+
+async function shareTrip(){
+
+    const id =
+        rideData.id ||
+        rideData.rideId ||
+        "";
+
+
+    const text =
+        "I'm riding with RiderX." +
+        (
+            id
+                ? "\nRide ID: " +
+                  id
+                : ""
+        );
+
+
+    if(
+        navigator.share
+    ){
+
+        try{
+
+            await navigator.share({
+
+                title:
+                    "RiderX Trip",
+
+                text:
+                    text
+
+            });
+
+            return;
+
+        }catch(error){
+
+            if(
+                error.name ===
+                "AbortError"
+            ){
+
+                return;
+
+            }
+
+        }
+
+    }
+
+
+    try{
+
+        await navigator.clipboard.writeText(
+            text
+        );
+
+
+        showToast(
+            "Trip details copied."
+        );
+
+    }catch(error){
+
+        showToast(
+            "Sharing is not available."
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   RECEIPT
+========================================== */
+
+function viewReceipt(){
+
+    const id =
+        rideData.id ||
+        rideData.rideId ||
+        "";
+
+
+    window.location.href =
+        "receipt.html" +
+        (
+            id
+                ? "?rideId=" +
+                  encodeURIComponent(
+                      id
+                  )
+                : ""
+        );
+
+}
+
+
+/* ==========================================
+   CANCEL
+========================================== */
+
+function cancelRide(){
+
+    const status =
+        normalizeStatus(
+            rideData.status ||
+            "started"
+        );
+
+
+    if(
+        status ===
+        "completed"
+    ){
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Are you sure you want to cancel this ride?"
+        );
+
+
+    if(
+        !confirmed
+    ){
+
+        return;
+
+    }
+
+
+    rideData.status =
+        "cancelled";
+
+
+    rideData.cancelledAt =
+        Date.now();
+
+
+    saveRide();
+
+    renderAll();
+
+    showToast(
+        "Ride cancelled."
+    );
+
+
+    setTimeout(
+        function(){
+
+            window.location.href =
+                "home.html";
+
+        },
+        1200
+    );
+
+}
+
+
+/* ==========================================
+   SAVE
+========================================== */
+
+function saveRide(){
+
+    try{
+
+        localStorage.setItem(
+            "currentRide",
+            JSON.stringify(
+                rideData
+            )
+        );
+
+        localStorage.setItem(
+            "activeRide",
+            JSON.stringify(
+                rideData
+            )
+        );
+
+    }catch(error){
+
+        console.log(
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   HOME
+========================================== */
+
+function goHome(){
+
+    window.location.href =
+        "home.html";
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        goHome();
+
+    }
+
+}
+
+
+/* ==========================================
+   NORMALIZE STATUS
+========================================== */
+
+function normalizeStatus(
+    status
+){
+
+    const value =
+        String(
+            status
+        )
+        .toLowerCase()
+        .replace(
+            /[_-]/g,
+            " "
+        )
+        .trim();
+
+
+    if(
+        value.includes(
+            "cancel"
+        )
+    ){
+
+        return "cancelled";
+
+    }
+
+
+    if(
+        value.includes(
+            "complete"
+        ) ||
+        value.includes(
+            "finish"
+        )
+    ){
+
+        return "completed";
+
+    }
+
+
+    if(
+        value.includes(
+            "start"
+        ) ||
+        value.includes(
+            "ongoing"
+        ) ||
+        value.includes(
+            "in progress"
+        ) ||
+        value.includes(
+            "on trip"
+        )
+    ){
+
+        return "started";
+
+    }
+
+
+    if(
+        value.includes(
+            "arriv"
+        )
+    ){
+
+        return "arriving";
+
+    }
+
+
+    if(
+        value.includes(
+            "accept"
+        ) ||
+        value.includes(
+            "confirm"
+        ) ||
+        value === "assigned"
+    ){
+
+        return "accepted";
+
+    }
+
+
+    if(
+        value.includes(
+            "search"
+        ) ||
+        value.includes(
+            "pending"
+        )
+    ){
+
+        return "searching";
+
+    }
+
+
+    return "started";
+
+}
+
+
+/* ==========================================
+   NUMBER
+========================================== */
+
+function getNumber(
+    ...values
+){
+
+    for(
+        const value of values
+    ){
+
+        if(
+            value === null ||
+            value === undefined ||
+            value === ""
+        ){
+
+            continue;
+
+        }
+
+
+        const number =
+            Number(
+                String(
+                    value
+                )
+                .replace(
+                    /[^0-9.-]/g,
+                    ""
+                )
+            );
+
+
+        if(
+            Number.isFinite(
+                number
+            )
+        ){
+
+            return number;
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* ==========================================
+   DISTANCE
+========================================== */
+
+function formatDistance(
+    value
+){
+
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
+
+        return "—";
+
+    }
+
+
+    const number =
+        Number(
+            String(
+                value
+            )
+            .replace(
+                /[^0-9.]/g,
+                ""
+            )
+        );
+
+
+    if(
+        !Number.isFinite(
+            number
+        )
+    ){
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return number.toFixed(
+        number < 10
+            ? 1
+            : 0
+    ) +
+    " km";
+
+}
+
+
+/* ==========================================
+   DURATION
+========================================== */
+
+function formatDuration(
+    value
+){
+
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
+
+        return "—";
+
+    }
+
+
+    const number =
+        Number(
+            String(
+                value
+            )
+            .replace(
+                /[^0-9.]/g,
+                ""
+            )
+        );
+
+
+    if(
+        !Number.isFinite(
+            number
+        )
+    ){
+
+        return String(
+            value
+        );
+
+    }
+
+
+    if(
+        number < 60
+    ){
+
+        return Math.round(
+            number
+        ) +
+        " min";
+
+    }
+
+
+    const hours =
+        Math.floor(
+            number / 60
+        );
+
+
+    const minutes =
+        Math.round(
+            number % 60
+        );
+
+
+    return hours +
+        "h " +
+        minutes +
+        "m";
+
+}
+
+
+/* ==========================================
+   PAYMENT
+========================================== */
+
+function formatPayment(
+    value
+){
+
+    if(
+        typeof value ===
+        "object"
+    ){
+
+        value =
+            value.method ||
+            value.type ||
+            "Cash";
+
+    }
+
+
+    const text =
+        String(
+            value
+        );
+
+
+    const lower =
+        text.toLowerCase();
+
+
+    if(
+        lower.includes(
+            "cash"
+        )
+    ){
+
+        return "Cash";
+
+    }
+
+
+    if(
+        lower.includes(
+            "wallet"
+        )
+    ){
+
+        return "RiderX Wallet";
+
+    }
+
+
+    if(
+        lower.includes(
+            "upi"
+        )
+    ){
+
+        return "UPI";
+
+    }
+
+
+    return text;
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadTrip();
+
+        startSync();
+
+    }
+);
 
 </script>
 
-
-
 </body>
 
-</html>
+  </html>
