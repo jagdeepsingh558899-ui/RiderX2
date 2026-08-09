@@ -1,1726 +1,1898 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX - Rider Approval</title>
+<title>RiderX Admin - Rider Approval</title>
+
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
+:root{
+    --yellow:#FFD400;
+    --bg:#080808;
+    --card:#151515;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#60a5fa;
+    --orange:#f59e0b;
+}
+
 *{
     box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    min-height:100%;
+    background:var(--bg);
 }
 
 body{
-    margin:0;
-    background:#050505;
     color:#fff;
-    font-family:Arial,sans-serif;
-    padding:18px;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-.wrap{
-    max-width:1050px;
-    margin:auto;
+button,
+input,
+select,
+textarea{
+    font-family:inherit;
 }
 
-.top{
+button{
+    cursor:pointer;
+}
+
+.app{
+    min-height:100vh;
+    background:var(--bg);
+}
+
+
+/* HEADER */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+
     display:flex;
-    justify-content:space-between;
     align-items:center;
-    gap:12px;
-    margin-bottom:18px;
+    gap:10px;
+
+    padding:12px;
+
+    background:#0c0c0c;
+    border-bottom:1px solid #292929;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+
+    border:1px solid #363636;
+    border-radius:11px;
+
+    background:#1b1b1b;
+    color:#fff;
+
+    font-size:20px;
 }
 
 .logo{
-    font-size:26px;
-    font-weight:900;
-}
+    width:38px;
+    height:38px;
 
-.logo span{
-    color:#ffe500;
-}
-
-.back{
-    background:#171717;
-    border:1px solid #333;
-    color:#fff;
-    border-radius:10px;
-    padding:10px 14px;
-    text-decoration:none;
-    cursor:pointer;
-}
-
-.back:hover{
-    border-color:#ffe500;
-}
-
-h1{
-    font-size:28px;
-    margin:10px 0 5px;
-}
-
-.sub{
-    color:#999;
-    margin-bottom:20px;
-    line-height:1.5;
-}
-
-.status{
-    display:none;
-    padding:13px 15px;
-    border-radius:12px;
-    margin-bottom:15px;
-    line-height:1.5;
-    font-size:14px;
-}
-
-.status.error{
-    display:block;
-    background:#210d0d;
-    border:1px solid #662222;
-    color:#ff7777;
-}
-
-.status.success{
-    display:block;
-    background:#092216;
-    border:1px solid #17683c;
-    color:#63e89b;
-}
-
-.box{
-    background:#111;
-    border:1px solid #292929;
-    border-radius:18px;
-    overflow:hidden;
-}
-
-.head{
-    padding:17px;
-    border-bottom:1px solid #292929;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-}
-
-.head-title{
-    font-size:17px;
-    font-weight:bold;
-}
-
-.badge{
-    background:#2a2300;
-    color:#ffe500;
-    border:1px solid #695d00;
-    padding:6px 10px;
-    border-radius:20px;
-    font-size:12px;
-    white-space:nowrap;
-}
-
-.row{
-    padding:18px;
-    border-bottom:1px solid #252525;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:18px;
-}
-
-.row:last-child{
-    border-bottom:0;
-}
-
-.info{
-    min-width:0;
-    flex:1;
-}
-
-.name{
-    font-size:18px;
-    font-weight:bold;
-    margin-bottom:5px;
-}
-
-.meta{
-    color:#999;
-    line-height:1.7;
-    font-size:13px;
-    word-break:break-word;
-}
-
-.status-pill{
-    display:inline-block;
-    margin-top:8px;
-    padding:5px 9px;
-    border-radius:15px;
-    background:#2a2300;
-    color:#ffe500;
-    border:1px solid #695d00;
-    font-size:11px;
-    font-weight:bold;
-}
-
-.actions{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    flex-shrink:0;
-}
-
-.btn{
-    border:0;
-    border-radius:10px;
-    padding:11px 15px;
-    font-weight:bold;
-    cursor:pointer;
-    min-width:105px;
-}
-
-.btn:disabled{
-    opacity:.55;
-    cursor:not-allowed;
-}
-
-.approve{
-    background:#19d36b;
-    color:#06170d;
-}
-
-.approve:hover{
-    background:#25e77a;
-}
-
-.reject{
-    background:#301010;
-    color:#ff7777;
-    border:1px solid #6d2222;
-}
-
-.reject:hover{
-    background:#431414;
-}
-
-.view{
-    background:#222;
-    color:#fff;
-    border:1px solid #444;
-}
-
-.view:hover{
-    border-color:#ffe500;
-}
-
-.empty,
-.load{
-    text-align:center;
-    padding:30px 20px;
-    color:#999;
-}
-
-.empty i{
-    font-size:28px;
-    color:#19d36b;
-    margin-bottom:10px;
-}
-
-.refresh{
-    margin-top:15px;
-    width:100%;
-    padding:13px;
-    background:#151515;
-    color:#fff;
-    border:1px solid #333;
-    border-radius:12px;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.refresh:hover{
-    border-color:#ffe500;
-}
-
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.78);
-    z-index:9999;
-    padding:20px;
-    overflow:auto;
-}
-
-.modal.show{
     display:flex;
     align-items:center;
     justify-content:center;
+
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:900;
 }
 
-.modal-box{
+.header-info{
+    flex:1;
+    min-width:0;
+}
+
+.header-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.header-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
+}
+
+
+/* MAIN */
+
+.main{
     width:100%;
-    max-width:600px;
-    background:#111;
-    border:1px solid #333;
-    border-radius:18px;
-    padding:20px;
+    max-width:1200px;
+
+    margin:auto;
+
+    padding:15px;
 }
 
-.modal-title{
-    font-size:21px;
-    font-weight:bold;
-    margin-bottom:15px;
+
+/* PAGE TOP */
+
+.page-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+
+    margin-bottom:13px;
+}
+
+.page-title{
+    font-size:14px;
+    font-weight:900;
+}
+
+.page-description{
+    margin-top:4px;
+    color:#777;
+    font-size:6px;
+}
+
+.refresh-btn{
+    height:38px;
+
+    padding:0 13px;
+
+    border:1px solid #5b4f00;
+    border-radius:10px;
+
+    background:#1d1a00;
+    color:var(--yellow);
+
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* STATS */
+
+.stats{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+
+    gap:9px;
+
+    margin-bottom:12px;
+}
+
+.stat{
+    padding:13px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    background:var(--card);
+}
+
+.stat-label{
+    color:#777;
+    font-size:5px;
+    font-weight:700;
+}
+
+.stat-value{
+    margin-top:6px;
+    font-size:16px;
+    font-weight:900;
+}
+
+.yellow{
+    color:var(--yellow);
+}
+
+.green{
+    color:var(--green);
+}
+
+.red{
+    color:#ff7070;
+}
+
+.blue{
+    color:var(--blue);
+}
+
+
+/* APPLICATION GRID */
+
+.application-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:12px;
+}
+
+
+/* APPLICATION CARD */
+
+.application{
+    overflow:hidden;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+}
+
+.application-header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:13px;
+
+    border-bottom:1px solid #292929;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    min-width:42px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:12px;
+
+    background:#262626;
+    color:var(--yellow);
+
+    font-size:11px;
+    font-weight:900;
+}
+
+.applicant-info{
+    flex:1;
+    min-width:0;
+}
+
+.applicant-name{
+    overflow:hidden;
+
+    font-size:8px;
+    font-weight:900;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.applicant-phone{
+    margin-top:4px;
+    color:#666;
+    font-size:5px;
+}
+
+.pending-badge{
+    padding:5px 7px;
+
+    border-radius:20px;
+
+    background:#292500;
+    color:var(--yellow);
+
+    font-size:4.5px;
+    font-weight:900;
+}
+
+
+/* BODY */
+
+.application-body{
+    padding:13px;
 }
 
 .details{
     display:grid;
-    gap:10px;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:8px;
 }
 
 .detail{
-    background:#181818;
-    border:1px solid #292929;
+    padding:9px;
+
+    border:1px solid #2e2e2e;
     border-radius:10px;
-    padding:12px;
+
+    background:#1c1c1c;
 }
 
 .detail-label{
-    color:#888;
-    font-size:11px;
-    text-transform:uppercase;
-    margin-bottom:4px;
+    color:#666;
+    font-size:4.5px;
+    font-weight:800;
 }
 
 .detail-value{
+    margin-top:4px;
+
+    overflow:hidden;
+
     color:#fff;
-    word-break:break-word;
+
+    font-size:6px;
+    font-weight:800;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
-.close{
-    margin-top:15px;
+
+/* DOCUMENTS */
+
+.documents{
+    margin-top:11px;
+}
+
+.documents-title{
+    margin-bottom:7px;
+
+    color:#777;
+
+    font-size:5px;
+    font-weight:800;
+}
+
+.document-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+    gap:6px;
+}
+
+.document{
+    min-height:54px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    gap:5px;
+
+    border:1px solid #333;
+    border-radius:9px;
+
+    background:#202020;
+
+    color:#aaa;
+
+    font-size:5px;
+}
+
+.document span{
+    font-size:13px;
+}
+
+
+/* ACTIONS */
+
+.actions{
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:7px;
+
+    margin-top:12px;
+}
+
+.action-btn{
+    height:38px;
+
+    border-radius:9px;
+
+    font-size:5.5px;
+    font-weight:900;
+}
+
+.approve{
+    border:1px solid #17672f;
+    background:#102517;
+    color:var(--green);
+}
+
+.reject{
+    border:1px solid #612020;
+    background:#291414;
+    color:#ff7070;
+}
+
+.view{
+    grid-column:1 / -1;
+
+    border:1px solid #373737;
+    background:#202020;
+    color:#fff;
+}
+
+
+/* EMPTY */
+
+.empty{
+    padding:50px 15px;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+
+    color:#666;
+
+    text-align:center;
+
+    font-size:6px;
+}
+
+
+/* MODAL */
+
+.modal{
+    position:fixed;
+    inset:0;
+
+    z-index:100;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    padding:15px;
+
+    background:rgba(0,0,0,.8);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
     width:100%;
-    padding:12px;
-    border:1px solid #444;
+    max-width:470px;
+
+    padding:18px;
+
+    border:1px solid #393939;
+    border-radius:17px;
+
+    background:#171717;
+}
+
+.modal-icon{
+    width:45px;
+    height:45px;
+
+    margin-bottom:10px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:12px;
+
+    background:#292500;
+    color:var(--yellow);
+
+    font-size:18px;
+}
+
+.modal-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.modal-text{
+    margin-top:7px;
+
+    color:#777;
+
+    font-size:6px;
+    line-height:1.6;
+}
+
+.modal-actions{
+    display:flex;
+    gap:8px;
+
+    margin-top:15px;
+}
+
+.modal-btn{
+    flex:1;
+    height:40px;
+
+    border-radius:10px;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+.cancel-btn{
+    border:1px solid #383838;
     background:#222;
     color:#fff;
-    border-radius:10px;
-    cursor:pointer;
 }
 
-@media(max-width:650px){
+.confirm-btn{
+    border:1px solid #5d5100;
+    background:var(--yellow);
+    color:#000;
+}
 
-    body{
-        padding:12px;
+.confirm-btn.danger{
+    border-color:#6b2525;
+    background:#c93636;
+    color:#fff;
+}
+
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    z-index:150;
+
+    width:calc(100% - 30px);
+    max-width:450px;
+
+    padding:11px;
+
+    border:1px solid #373737;
+    border-radius:11px;
+
+    background:#222;
+    color:#fff;
+
+    text-align:center;
+
+    font-size:6px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translate(-50%,20px);
+
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:800px){
+
+    .application-grid{
+        grid-template-columns:1fr;
     }
 
-    .top{
+    .stats{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+}
+
+@media(max-width:520px){
+
+    .main{
+        padding:11px;
+    }
+
+    .page-top{
         align-items:flex-start;
     }
 
-    .logo{
-        font-size:21px;
-    }
-
-    .back{
-        padding:9px 11px;
-        font-size:13px;
-    }
-
-    h1{
-        font-size:25px;
-    }
-
-    .row{
-        flex-direction:column;
-        align-items:stretch;
-    }
-
-    .actions{
-        width:100%;
-    }
-
-    .btn{
-        flex:1;
-        min-width:0;
-    }
-
-    .head{
-        align-items:flex-start;
+    .details{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
     }
 
 }
 
 </style>
+
 </head>
+
 
 <body>
 
-<div class="wrap">
-
-    <div class="top">
-
-        <div class="logo">
-            RID<span>ERX</span> ADMIN
-        </div>
-
-        <a
-            class="back"
-            href="dashboard.html">
-            ← Dashboard
-        </a>
-
-    </div>
+<div class="app">
 
 
-    <h1>
-        Rider Approval
-    </h1>
-
-    <div class="sub">
-        Review rider registration requests. Approve a rider only after
-        checking the submitted registration details.
-    </div>
-
-
-    <div id="statusBox" class="status"></div>
-
-
-    <div class="box">
-
-        <div class="head">
-
-            <div class="head-title">
-                🏍️ Pending Rider Requests
-            </div>
-
-            <span
-                id="count"
-                class="badge">
-                0 pending
-            </span>
-
-        </div>
-
-
-        <div
-            id="list"
-            class="load">
-            Checking rider registrations...
-        </div>
-
-    </div>
-
+<header class="header">
 
     <button
-        id="refreshBtn"
-        class="refresh">
-        🔄 Refresh Requests
+        class="back-btn"
+        onclick="goBack()"
+        aria-label="Back"
+    >
+        ‹
     </button>
+
+    <div class="logo">
+        RX
+    </div>
+
+    <div class="header-info">
+
+        <div class="header-title">
+            Rider Approval
+        </div>
+
+        <div class="header-subtitle">
+            Review and approve rider applications
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="main">
+
+
+<section class="page-top">
+
+    <div>
+
+        <div class="page-title">
+            Rider Applications
+        </div>
+
+        <div class="page-description">
+            Verify rider information and approve or reject applications.
+        </div>
+
+    </div>
+
+    <button
+        class="refresh-btn"
+        onclick="loadApplications()"
+    >
+        ↻ REFRESH
+    </button>
+
+</section>
+
+
+<section class="stats">
+
+    <div class="stat">
+
+        <div class="stat-label">
+            PENDING
+        </div>
+
+        <div
+            class="stat-value yellow"
+            id="pendingCount"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            APPROVED
+        </div>
+
+        <div
+            class="stat-value green"
+            id="approvedCount"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            REJECTED
+        </div>
+
+        <div
+            class="stat-value red"
+            id="rejectedCount"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            TOTAL APPLICATIONS
+        </div>
+
+        <div
+            class="stat-value blue"
+            id="totalCount"
+        >
+            0
+        </div>
+
+    </div>
+
+</section>
+
+
+<div
+    class="application-grid"
+    id="applicationGrid"
+>
+
+    <div class="empty">
+        Loading applications...
+    </div>
 
 </div>
 
 
-<!-- DETAILS MODAL -->
+</main>
+
+</div>
+
+
+<!-- CONFIRM MODAL -->
 
 <div
-    id="detailsModal"
-    class="modal">
+    class="modal"
+    id="confirmModal"
+>
 
-    <div class="modal-box">
+    <div class="modal-card">
 
-        <div class="modal-title">
-            Rider Registration Details
+        <div class="modal-icon">
+            ⚠
         </div>
 
         <div
-            id="details"
-            class="details">
+            class="modal-title"
+            id="confirmTitle"
+        >
+            Confirm action
         </div>
 
-        <button
-            id="closeModal"
-            class="close">
-            Close
-        </button>
+        <div
+            class="modal-text"
+            id="confirmText"
+        >
+            Are you sure?
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="modal-btn cancel-btn"
+                onclick="closeConfirm()"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="modal-btn confirm-btn"
+                id="confirmButton"
+                onclick="executeConfirm()"
+            >
+                CONFIRM
+            </button>
+
+        </div>
 
     </div>
 
 </div>
 
 
-<script type="module">
+<!-- VIEW MODAL -->
 
-import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
+<div
+    class="modal"
+    id="viewModal"
+>
 
+    <div class="modal-card">
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        <div class="modal-icon">
+            🛵
+        </div>
 
+        <div
+            class="modal-title"
+            id="viewTitle"
+        >
+            Rider Details
+        </div>
 
-import {
-    collection,
-    getDocs,
-    doc,
-    getDoc,
-    updateDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        <div
+            class="modal-text"
+            id="viewText"
+        >
+            Rider information
+        </div>
 
+        <div class="modal-actions">
 
-/* =========================
-   ELEMENTS
-========================= */
+            <button
+                class="modal-btn cancel-btn"
+                onclick="closeView()"
+            >
+                CLOSE
+            </button>
 
-const list =
-    document.getElementById("list");
+        </div>
 
-const count =
-    document.getElementById("count");
+    </div>
 
-const statusBox =
-    document.getElementById("statusBox");
-
-const refreshBtn =
-    document.getElementById("refreshBtn");
-
-const detailsModal =
-    document.getElementById("detailsModal");
-
-const details =
-    document.getElementById("details");
-
-const closeModal =
-    document.getElementById("closeModal");
+</div>
 
 
-/* =========================
-   HELPERS
-========================= */
-
-function roleOf(data){
-
-    return String(
-        data?.role ??
-        data?.userType ??
-        data?.type ??
-        ""
-    )
-    .trim()
-    .toLowerCase();
-
-}
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
-function statusOf(data){
+<script>
 
-    return String(
-        data?.status ??
-        data?.approvalStatus ??
-        data?.riderStatus ??
-        data?.verificationStatus ??
-        ""
-    )
-    .trim()
-    .toLowerCase();
+const STORAGE_KEY =
+    "riderxAdminRiderApplications";
 
-}
+let applications = [];
+
+let confirmAction = null;
+
+let toastTimer;
 
 
-function isAdmin(data){
+/* =========================================
+   LOAD
+========================================= */
 
-    return (
-        roleOf(data) === "admin" ||
-        roleOf(data) === "administrator" ||
-        data?.isAdmin === true
-    );
-
-}
-
-
-function escapeHtml(value){
-
-    return String(
-        value ?? ""
-    ).replace(
-        /[&<>"']/g,
-        char => ({
-            "&":"&amp;",
-            "<":"&lt;",
-            ">":"&gt;",
-            '"':"&quot;",
-            "'":"&#039;"
-        }[char])
-    );
-
-}
-
-
-function showStatus(
-    message,
-    type="success"
-){
-
-    statusBox.className =
-        "status " + type;
-
-    statusBox.textContent =
-        message;
-
-}
-
-
-function hideStatus(){
-
-    statusBox.className =
-        "status";
-
-    statusBox.textContent =
-        "";
-
-}
-
-
-async function getCollection(
-    collectionName
-){
+function loadApplications(){
 
     try{
 
-        const snapshot =
-            await getDocs(
-                collection(
-                    db,
-                    collectionName
-                )
+        const raw =
+            localStorage.getItem(
+                STORAGE_KEY
             );
 
-        return snapshot.docs.map(
-            item => ({
-                id:item.id,
-                ...item.data()
-            })
-        );
 
-    }catch(error){
+        if(raw){
 
-        console.error(
-            "Collection error:",
-            collectionName,
-            error
-        );
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================
-   FIND USER ID
-========================= */
-
-function getPossibleUserIds(rider){
-
-    const ids = new Set();
-
-    if(rider.id){
-        ids.add(String(rider.id));
-    }
-
-    const possible = [
-
-        rider.uid,
-
-        rider.userId,
-
-        rider.userUID,
-
-        rider.authUid,
-
-        rider.authUID,
-
-        rider.ownerId,
-
-        rider.accountId
-
-    ];
-
-    possible.forEach(
-        value => {
-
-            if(value){
-                ids.add(
-                    String(value)
+            const data =
+                JSON.parse(
+                    raw
                 );
+
+
+            if(
+                Array.isArray(data)
+            ){
+
+                applications =
+                    data;
+
             }
 
         }
-    );
 
-    return [...ids];
+    }catch(error){
 
-}
-
-
-/* =========================
-   LOAD RIDER REQUESTS
-========================= */
-
-let allRiders = [];
-
-
-async function loadRiderRequests(){
-
-    list.innerHTML =
-        '<div class="load">Loading rider requests...</div>';
-
-    try{
-
-        const [
-            riders,
-            users
-        ] = await Promise.all([
-
-            getCollection("riders"),
-
-            getCollection("users")
-
-        ]);
-
-
-        /*
-         * Riders collection ko primary source
-         */
-
-        const riderMap =
-            new Map();
-
-
-        riders.forEach(
-            rider => {
-
-                riderMap.set(
-                    rider.id,
-                    {
-                        ...rider,
-                        source:"riders"
-                    }
-                );
-
-            }
+        console.log(
+            "Approval data error:",
+            error
         );
 
+    }
 
-        /*
-         * Users collection me rider accounts
-         * agar riders collection me nahi hain
-         */
 
-        users
-        .filter(
-            user =>
-                roleOf(user) === "rider"
+    if(
+        !Array.isArray(
+            applications
         )
-        .forEach(
-            user => {
+    ){
 
-                if(
-                    !riderMap.has(user.id)
-                ){
+        applications = [];
 
-                    riderMap.set(
-                        user.id,
-                        {
-                            ...user,
-                            source:"users"
-                        }
-                    );
+    }
 
-                }
 
-            }
+    render();
+
+}
+
+
+/* =========================================
+   SAVE
+========================================= */
+
+function saveApplications(){
+
+    try{
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+                applications
+            )
         );
-
-
-        allRiders =
-            [...riderMap.values()];
-
-
-        /*
-         * Sirf pending requests
-         */
-
-        const pending =
-            allRiders.filter(
-                rider => {
-
-                    const status =
-                        statusOf(rider);
-
-
-                    const approved =
-                        rider.approved === true ||
-                        rider.isApproved === true;
-
-
-                    const rejected =
-                        status === "rejected" ||
-                        status === "declined";
-
-
-                    if(
-                        approved ||
-                        rejected
-                    ){
-
-                        return false;
-
-                    }
-
-
-                    /*
-                     * Blank status ko bhi pending
-                     * maana jayega.
-                     */
-
-                    return (
-
-                        status === "" ||
-
-                        status === "pending" ||
-
-                        status === "pending_approval" ||
-
-                        status === "pending-approval" ||
-
-                        status === "under_review" ||
-
-                        status === "under-review" ||
-
-                        status === "verifying" ||
-
-                        status === "submitted" ||
-
-                        status === "application_submitted"
-
-                    );
-
-                }
-            );
-
-
-        count.textContent =
-            pending.length +
-            " pending";
-
-
-        if(!pending.length){
-
-            list.innerHTML = `
-                <div class="empty">
-                    <div style="font-size:30px;">✓</div>
-                    No pending rider registration requests.
-                </div>
-            `;
-
-            return;
-
-        }
-
-
-        list.innerHTML = "";
-
-
-        pending.forEach(
-            rider => {
-
-                const name =
-                    rider.name ||
-                    rider.fullName ||
-                    rider.displayName ||
-                    (
-                        rider.firstName
-                        ? (
-                            rider.firstName +
-                            " " +
-                            (
-                                rider.lastName ||
-                                ""
-                            )
-                        ).trim()
-                        : "Rider"
-                    );
-
-
-                const phone =
-                    rider.phone ||
-                    rider.mobile ||
-                    rider.phoneNumber ||
-                    "No phone";
-
-
-                const email =
-                    rider.email ||
-                    "No email";
-
-
-                const vehicle =
-                    rider.vehicleType ||
-                    rider.vehicle ||
-                    rider.bikeModel ||
-                    "Not provided";
-
-
-                const currentStatus =
-                    statusOf(rider) ||
-                    "pending";
-
-
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                row.className =
-                    "row";
-
-
-                row.innerHTML = `
-
-                    <div class="info">
-
-                        <div class="name">
-                            ${escapeHtml(name)}
-                        </div>
-
-                        <div class="meta">
-
-                            Rider ID:
-                            ${escapeHtml(rider.id)}
-
-                            <br>
-
-                            📱 ${escapeHtml(phone)}
-
-                            <br>
-
-                            ✉️ ${escapeHtml(email)}
-
-                            <br>
-
-                            🏍️ ${escapeHtml(vehicle)}
-
-                        </div>
-
-                        <span class="status-pill">
-                            ${escapeHtml(currentStatus)}
-                        </span>
-
-                    </div>
-
-
-                    <div class="actions">
-
-                        <button
-                            class="btn view"
-                            data-action="view"
-                            data-id="${escapeHtml(rider.id)}">
-
-                            View
-
-                        </button>
-
-
-                        <button
-                            class="btn approve"
-                            data-action="approve"
-                            data-id="${escapeHtml(rider.id)}">
-
-                            ✓ Approve
-
-                        </button>
-
-
-                        <button
-                            class="btn reject"
-                            data-action="reject"
-                            data-id="${escapeHtml(rider.id)}">
-
-                            ✕ Reject
-
-                        </button>
-
-                    </div>
-
-                `;
-
-
-                list.appendChild(row);
-
-            }
-        );
-
 
     }catch(error){
 
-        console.error(
-            "Load riders error:",
-            error
-        );
-
-
-        list.innerHTML = `
-            <div class="empty">
-                Failed to load rider requests.
-                <br><br>
-                Check Firebase Firestore connection and rules.
-            </div>
-        `;
-
-        showStatus(
-            "Firebase se rider requests load nahi ho paayi.",
-            "error"
-        );
+        console.log(error);
 
     }
 
 }
 
 
-/* =========================
-   FIND RIDER
-========================= */
+/* =========================================
+   RENDER
+========================================= */
 
-function findRiderById(id){
+function render(){
 
-    return allRiders.find(
-        rider =>
-            String(rider.id) ===
-            String(id)
+    renderStats();
+
+    renderApplications();
+
+}
+
+
+/* =========================================
+   STATS
+========================================= */
+
+function renderStats(){
+
+    const pending =
+        applications.filter(
+            function(item){
+
+                return getStatus(
+                    item
+                ) ===
+                "pending";
+
+            }
+        ).length;
+
+
+    const approved =
+        applications.filter(
+            function(item){
+
+                return getStatus(
+                    item
+                ) ===
+                "approved";
+
+            }
+        ).length;
+
+
+    const rejected =
+        applications.filter(
+            function(item){
+
+                return getStatus(
+                    item
+                ) ===
+                "rejected";
+
+            }
+        ).length;
+
+
+    setText(
+        "pendingCount",
+        pending
+    );
+
+    setText(
+        "approvedCount",
+        approved
+    );
+
+    setText(
+        "rejectedCount",
+        rejected
+    );
+
+    setText(
+        "totalCount",
+        applications.length
     );
 
 }
 
 
-/* =========================
-   VIEW DETAILS
-========================= */
+/* =========================================
+   APPLICATIONS
+========================================= */
 
-function showDetails(rider){
+function renderApplications(){
 
-    if(!rider){
+    const grid =
+        document.getElementById(
+            "applicationGrid"
+        );
+
+
+    if(!grid){
         return;
     }
 
 
-    const ignored = [
-        "source"
-    ];
+    grid.innerHTML = "";
 
 
-    details.innerHTML = "";
+    if(
+        !applications.length
+    ){
+
+        grid.innerHTML = `
+
+            <div class="empty">
+
+                <div
+                    style="
+                    font-size:25px;
+                    margin-bottom:10px;
+                    "
+                >
+                    ✓
+                </div>
+
+                No rider applications available.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
 
 
-    const entries =
-        Object.entries(rider)
-        .filter(
-            ([key]) =>
-                !ignored.includes(key)
+    const pending =
+        applications.filter(
+            function(item){
+
+                return getStatus(
+                    item
+                ) ===
+                "pending";
+
+            }
         );
 
 
-    entries.forEach(
-        ([key,value]) => {
+    const list =
+        pending.length
+            ? pending
+            : applications;
 
-            let displayValue;
+
+    list.forEach(
+        function(application){
+
+            grid.appendChild(
+                createApplication(
+                    application
+                )
+            );
+
+        }
+    );
+
+}
 
 
-            if(
-                value &&
-                typeof value === "object"
-            ){
+/* =========================================
+   CREATE CARD
+========================================= */
 
-                try{
+function createApplication(
+    application
+){
 
-                    displayValue =
-                        JSON.stringify(
-                            value,
-                            null,
-                            2
-                        );
+    const card =
+        document.createElement(
+            "article"
+        );
 
-                }catch{
 
-                    displayValue =
-                        String(value);
+    card.className =
+        "application";
 
+
+    const name =
+        application.name ||
+        application.displayName ||
+        "Rider";
+
+
+    const phone =
+        application.phone ||
+        application.mobile ||
+        "—";
+
+
+    const vehicle =
+        application.vehicleNumber ||
+        application.vehicleNo ||
+        application.vehicle ||
+        "—";
+
+
+    const type =
+        application.vehicleType ||
+        application.service ||
+        "Bike";
+
+
+    const city =
+        application.city ||
+        "Chandigarh";
+
+
+    const license =
+        application.licenseNumber ||
+        application.license ||
+        "Not provided";
+
+
+    const status =
+        getStatus(
+            application
+        );
+
+
+    const initial =
+        String(
+            name
+        )
+        .charAt(0)
+        .toUpperCase();
+
+
+    card.innerHTML = `
+
+        <div class="application-header">
+
+            <div class="avatar">
+                ${escapeHtml(initial)}
+            </div>
+
+            <div class="applicant-info">
+
+                <div class="applicant-name">
+                    ${escapeHtml(name)}
+                </div>
+
+                <div class="applicant-phone">
+                    ${escapeHtml(phone)}
+                </div>
+
+            </div>
+
+            <div class="pending-badge">
+                ${escapeHtml(
+                    capitalize(status)
+                )}
+            </div>
+
+        </div>
+
+
+        <div class="application-body">
+
+            <div class="details">
+
+                <div class="detail">
+
+                    <div class="detail-label">
+                        VEHICLE
+                    </div>
+
+                    <div class="detail-value">
+                        ${escapeHtml(type)}
+                    </div>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <div class="detail-label">
+                        VEHICLE NUMBER
+                    </div>
+
+                    <div class="detail-value">
+                        ${escapeHtml(vehicle)}
+                    </div>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <div class="detail-label">
+                        CITY
+                    </div>
+
+                    <div class="detail-value">
+                        ${escapeHtml(city)}
+                    </div>
+
+                </div>
+
+
+                <div class="detail">
+
+                    <div class="detail-label">
+                        LICENSE
+                    </div>
+
+                    <div class="detail-value">
+                        ${escapeHtml(license)}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="documents">
+
+                <div class="documents-title">
+                    DOCUMENTS
+                </div>
+
+                <div class="document-grid">
+
+                    <div class="document">
+                        <span>🪪</span>
+                        License
+                    </div>
+
+                    <div class="document">
+                        <span>📄</span>
+                        RC
+                    </div>
+
+                    <div class="document">
+                        <span>📷</span>
+                        Photo
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="actions">
+
+                ${
+                    status === "pending"
+                    ? `
+
+                        <button
+                            class="action-btn approve"
+                            onclick="approveRider('${escapeJs(
+                                application.id || ""
+                            )}')"
+                        >
+                            ✓ APPROVE
+                        </button>
+
+                        <button
+                            class="action-btn reject"
+                            onclick="rejectRider('${escapeJs(
+                                application.id || ""
+                            )}')"
+                        >
+                            ✕ REJECT
+                        </button>
+
+                    `
+                    : `
+                        <button
+                            class="action-btn view"
+                            onclick="viewApplication('${escapeJs(
+                                application.id || ""
+                            )}')"
+                        >
+                            👁 VIEW DETAILS
+                        </button>
+                    `
                 }
 
-            }else{
 
-                displayValue =
-                    String(
-                        value ?? ""
-                    );
+                ${
+                    status === "pending"
+                    ? `
+                        <button
+                            class="action-btn view"
+                            onclick="viewApplication('${escapeJs(
+                                application.id || ""
+                            )}')"
+                        >
+                            👁 VIEW DETAILS
+                        </button>
+                    `
+                    : ""
+                }
 
-            }
+            </div>
 
+        </div>
 
-            const item =
-                document.createElement(
-                    "div"
-                );
-
-
-            item.className =
-                "detail";
-
-
-            item.innerHTML = `
-
-                <div class="detail-label">
-                    ${escapeHtml(key)}
-                </div>
-
-                <div class="detail-value">
-                    ${escapeHtml(displayValue)}
-                </div>
-
-            `;
+    `;
 
 
-            details.appendChild(item);
+    return card;
+
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+function getStatus(
+    application
+){
+
+    return String(
+        application.status ||
+        "pending"
+    )
+    .toLowerCase();
+
+}
+
+
+/* =========================================
+   APPROVE
+========================================= */
+
+function approveRider(
+    id
+){
+
+    const application =
+        findApplication(
+            id
+        );
+
+
+    if(!application){
+
+        showToast(
+            "Application not found."
+        );
+
+        return;
+
+    }
+
+
+    openConfirm(
+        "Approve rider",
+        "This rider will be approved and can continue with the RiderX rider flow.",
+        function(){
+
+            application.status =
+                "approved";
+
+            application.approvedAt =
+                new Date().toISOString();
+
+
+            saveApplications();
+
+            render();
+
+
+            showToast(
+                "Rider approved successfully."
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   REJECT
+========================================= */
+
+function rejectRider(
+    id
+){
+
+    const application =
+        findApplication(
+            id
+        );
+
+
+    if(!application){
+
+        showToast(
+            "Application not found."
+        );
+
+        return;
+
+    }
+
+
+    openConfirm(
+        "Reject rider",
+        "This rider application will be marked as rejected.",
+        function(){
+
+            application.status =
+                "rejected";
+
+            application.rejectedAt =
+                new Date().toISOString();
+
+
+            saveApplications();
+
+            render();
+
+
+            showToast(
+                "Rider application rejected."
+            );
 
         }
     );
 
 
-    detailsModal.classList.add(
+    const button =
+        document.getElementById(
+            "confirmButton"
+        );
+
+
+    if(button){
+
+        button.classList.add(
+            "danger"
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   VIEW
+========================================= */
+
+function viewApplication(
+    id
+){
+
+    const application =
+        findApplication(
+            id
+        );
+
+
+    if(!application){
+
+        showToast(
+            "Application not found."
+        );
+
+        return;
+
+    }
+
+
+    const name =
+        application.name ||
+        application.displayName ||
+        "Rider";
+
+
+    const email =
+        application.email ||
+        "—";
+
+
+    const phone =
+        application.phone ||
+        application.mobile ||
+        "—";
+
+
+    const vehicle =
+        application.vehicleNumber ||
+        application.vehicleNo ||
+        "—";
+
+
+    const license =
+        application.licenseNumber ||
+        application.license ||
+        "—";
+
+
+    const city =
+        application.city ||
+        "Chandigarh";
+
+
+    const status =
+        getStatus(
+            application
+        );
+
+
+    document.getElementById(
+        "viewTitle"
+    ).textContent =
+        name;
+
+
+    document.getElementById(
+        "viewText"
+    ).innerHTML = `
+
+        <strong>Phone:</strong>
+        ${escapeHtml(phone)}
+        <br><br>
+
+        <strong>Email:</strong>
+        ${escapeHtml(email)}
+        <br><br>
+
+        <strong>City:</strong>
+        ${escapeHtml(city)}
+        <br><br>
+
+        <strong>Vehicle:</strong>
+        ${escapeHtml(vehicle)}
+        <br><br>
+
+        <strong>License:</strong>
+        ${escapeHtml(license)}
+        <br><br>
+
+        <strong>Status:</strong>
+        ${escapeHtml(
+            capitalize(status)
+        )}
+
+    `;
+
+
+    document.getElementById(
+        "viewModal"
+    ).classList.add(
         "show"
     );
 
 }
 
 
-/* =========================
-   UPDATE RIDER
-========================= */
+function closeView(){
 
-async function updateRiderStatus(
-    rider,
+    document.getElementById(
+        "viewModal"
+    ).classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =========================================
+   FIND
+========================================= */
+
+function findApplication(
+    id
+){
+
+    return applications.find(
+        function(item){
+
+            return String(
+                item.id || ""
+            ) ===
+            String(id);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   CONFIRM
+========================================= */
+
+function openConfirm(
+    title,
+    text,
     action
 ){
 
-    if(!rider){
-        throw new Error(
-            "Rider not found"
-        );
-    }
-
-
-    const approved =
-        action === "approve";
-
-
-    const payload =
-        approved
-        ?
-
-        {
-
-            role:"rider",
-
-            status:"approved",
-
-            approvalStatus:"approved",
-
-            riderStatus:"approved",
-
-            verificationStatus:"approved",
-
-            approved:true,
-
-            isApproved:true,
-
-            online:false,
-
-            isOnline:false,
-
-            canGoOnline:true,
-
-            accountStatus:"active",
-
-            approvedAt:
-                serverTimestamp(),
-
-            rejectedAt:null
-
-        }
-
-        :
-
-        {
-
-            role:"rider",
-
-            status:"rejected",
-
-            approvalStatus:"rejected",
-
-            riderStatus:"rejected",
-
-            verificationStatus:"rejected",
-
-            approved:false,
-
-            isApproved:false,
-
-            online:false,
-
-            isOnline:false,
-
-            canGoOnline:false,
-
-            accountStatus:"rejected",
-
-            rejectedAt:
-                serverTimestamp()
-
-        };
-
-
-    /*
-     * Rider document IDs
-     */
-
-    const possibleIds =
-        getPossibleUserIds(
-            rider
+    const button =
+        document.getElementById(
+            "confirmButton"
         );
 
 
-    let updatedCount = 0;
+    if(button){
 
-
-    /*
-     * 1. riders collection
-     */
-
-    for(
-        const id of possibleIds
-    ){
-
-        try{
-
-            const riderRef =
-                doc(
-                    db,
-                    "riders",
-                    id
-                );
-
-
-            const riderSnap =
-                await getDoc(
-                    riderRef
-                );
-
-
-            if(
-                riderSnap.exists()
-            ){
-
-                await updateDoc(
-                    riderRef,
-                    payload
-                );
-
-
-                updatedCount++;
-
-                break;
-
-            }
-
-        }catch(error){
-
-            console.warn(
-                "Rider update failed:",
-                error
-            );
-
-        }
+        button.classList.remove(
+            "danger"
+        );
 
     }
 
 
-    /*
-     * 2. users collection
-     */
+    document.getElementById(
+        "confirmTitle"
+    ).textContent =
+        title;
 
-    /*
-     * Pehle known IDs try
-     */
 
-    for(
-        const id of possibleIds
-    ){
+    document.getElementById(
+        "confirmText"
+    ).textContent =
+        text;
 
-        try{
 
-            const userRef =
-                doc(
-                    db,
-                    "users",
-                    id
-                );
+    confirmAction =
+        action;
 
 
-            const userSnap =
-                await getDoc(
-                    userRef
-                );
+    document.getElementById(
+        "confirmModal"
+    ).classList.add(
+        "show"
+    );
 
+}
 
-            if(
-                userSnap.exists()
-            ){
 
-                const userData =
-                    userSnap.data();
+function closeConfirm(){
 
+    document.getElementById(
+        "confirmModal"
+    ).classList.remove(
+        "show"
+    );
 
-                /*
-                 * Agar rider account hai
-                 * tab update karein
-                 */
+    confirmAction =
+        null;
 
-                if(
-                    roleOf(userData) === "rider" ||
-                    id === rider.id
-                ){
+}
 
-                    await updateDoc(
-                        userRef,
-                        payload
-                    );
 
+function executeConfirm(){
 
-                    updatedCount++;
+    const action =
+        confirmAction;
 
-                    break;
-
-                }
-
-            }
-
-        }catch(error){
-
-            console.warn(
-                "User update failed:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /*
-     * Agar riders document ID alag hai,
-     * users me matching UID/email se search
-     */
-
-    if(
-        updatedCount === 0 ||
-        (
-            rider.source === "riders"
-        )
-    ){
-
-        try{
-
-            const users =
-                await getCollection(
-                    "users"
-                );
-
-
-            const matchingUsers =
-                users.filter(
-                    user => {
-
-                        if(
-                            roleOf(user) !==
-                            "rider"
-                        ){
-
-                            return false;
-
-                        }
-
-
-                        const riderUid =
-                            rider.uid ||
-                            rider.userId ||
-                            rider.userUID;
-
-
-                        if(
-                            riderUid &&
-                            (
-                                user.id ===
-                                riderUid
-                            )
-                        ){
-
-                            return true;
-
-                        }
-
-
-                        if(
-                            rider.email &&
-                            user.email &&
-                            String(
-                                rider.email
-                            ).toLowerCase() ===
-                            String(
-                                user.email
-                            ).toLowerCase()
-                        ){
-
-                            return true;
-
-                        }
-
-
-                        const riderPhone =
-                            rider.phone ||
-                            rider.mobile ||
-                            rider.phoneNumber;
-
-
-                        const userPhone =
-                            user.phone ||
-                            user.mobile ||
-                            user.phoneNumber;
-
-
-                        if(
-                            riderPhone &&
-                            userPhone &&
-                            String(
-                                riderPhone
-                            ) ===
-                            String(
-                                userPhone
-                            )
-                        ){
-
-                            return true;
-
-                        }
-
-
-                        return false;
-
-                    }
-                );
-
-
-            for(
-                const user of matchingUsers
-            ){
-
-                try{
-
-                    await updateDoc(
-                        doc(
-                            db,
-                            "users",
-                            user.id
-                        ),
-                        payload
-                    );
-
-
-                    updatedCount++;
-
-                }catch(error){
-
-                    console.warn(
-                        "Matching user update failed:",
-                        error
-                    );
-
-                }
-
-            }
-
-        }catch(error){
-
-            console.warn(
-                "User matching failed:",
-                error
-            );
-
-        }
-
-    }
+    closeConfirm();
 
 
     if(
-        updatedCount === 0
+        typeof action ===
+        "function"
     ){
 
-        throw new Error(
-            "Rider document not found or Firestore permission denied."
-        );
+        action();
 
     }
 
 }
 
 
-/* =========================
-   BUTTON ACTIONS
-========================= */
+/* =========================================
+   NAVIGATION
+========================================= */
 
-list.addEventListener(
-    "click",
-    async event => {
+function goBack(){
 
-        const button =
-            event.target.closest(
-                "button[data-action]"
-            );
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
 
+        history.back();
 
-        if(!button){
-            return;
-        }
+    }
+    else{
 
+        window.location.href =
+            "riders.html";
 
-        const action =
-            button.dataset.action;
+    }
 
-
-        const id =
-            button.dataset.id;
-
-
-        const rider =
-            findRiderById(id);
+}
 
 
-        if(!rider){
+/* =========================================
+   UTILITIES
+========================================= */
 
-            alert(
-                "Rider request nahi mili. Refresh karke dobara try karein."
-            );
+function setText(
+    id,
+    value
+){
 
-            return;
-
-        }
-
-
-        /*
-         * VIEW
-         */
-
-        if(
-            action === "view"
-        ){
-
-            showDetails(
-                rider
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * APPROVE / REJECT
-         */
-
-        const name =
-            rider.name ||
-            rider.fullName ||
-            rider.displayName ||
-            "this rider";
-
-
-        const message =
-            action === "approve"
-
-            ?
-
-            `Kya aap ${name} ko APPROVE karna chahte hain?`
-
-            :
-
-            `Kya aap ${name} ko REJECT karna chahte hain?`;
-
-
-        if(
-            !confirm(message)
-        ){
-
-            return;
-
-        }
-
-
-        /*
-         * Disable all action buttons
-         */
-
-        const row =
-            button.closest(
-                ".row"
-            );
-
-
-        const buttons =
-            row.querySelectorAll(
-                "button"
-            );
-
-
-        buttons.forEach(
-            btn => {
-
-                btn.disabled =
-                    true;
-
-            }
+    const element =
+        document.getElementById(
+            id
         );
 
+    if(element){
 
-        const oldText =
-            button.textContent;
-
-
-        button.textContent =
-            action === "approve"
-            ? "Approving..."
-            : "Rejecting...";
-
-
-        try{
-
-            await updateRiderStatus(
-                rider,
-                action
-            );
-
-
-            showStatus(
-                action === "approve"
-
-                ?
-
-                "Rider successfully approved. Ab rider account active hai aur rider app approval detect kar sakti hai."
-
-                :
-
-                "Rider registration rejected.",
-
-                "success"
-            );
-
-
-            await loadRiderRequests();
-
-
-        }catch(error){
-
-            console.error(
-                "Approval action error:",
-                error
-            );
-
-
-            showStatus(
-                "Action failed. Firestore Rules ya rider/user document permissions check karein.",
-                "error"
-            );
-
-
-            buttons.forEach(
-                btn => {
-
-                    btn.disabled =
-                        false;
-
-                }
-            );
-
-
-            button.textContent =
-                oldText;
-
-        }
+        element.textContent =
+            value;
 
     }
-);
+
+}
 
 
-/* =========================
-   REFRESH
-========================= */
+function capitalize(
+    value
+){
 
-refreshBtn.addEventListener(
-    "click",
-    async () => {
-
-        hideStatus();
-
-        await loadRiderRequests();
-
-    }
-);
-
-
-/* =========================
-   MODAL
-========================= */
-
-closeModal.addEventListener(
-    "click",
-    () => {
-
-        detailsModal.classList.remove(
-            "show"
+    const text =
+        String(
+            value ||
+            ""
         );
 
-    }
-);
+    return text.charAt(0).toUpperCase() +
+        text.slice(1);
+
+}
 
 
-detailsModal.addEventListener(
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeJs(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /\\/g,
+        "\\\\"
+    )
+    .replace(
+        /'/g,
+        "\\'"
+    );
+
+}
+
+
+/* =========================================
+   MODAL EVENTS
+========================================= */
+
+document.getElementById(
+    "confirmModal"
+).addEventListener(
     "click",
-    event => {
+    function(event){
 
         if(
             event.target ===
-            detailsModal
+            this
         ){
 
-            detailsModal.classList.remove(
-                "show"
-            );
+            closeConfirm();
 
         }
 
@@ -1728,146 +1900,82 @@ detailsModal.addEventListener(
 );
 
 
-/* =========================
-   ADMIN AUTH
-========================= */
-
-let authFinished =
-    false;
-
-
-onAuthStateChanged(
-    auth,
-    async user => {
+document.getElementById(
+    "viewModal"
+).addEventListener(
+    "click",
+    function(event){
 
         if(
-            authFinished
+            event.target ===
+            this
         ){
 
-            return;
+            closeView();
 
         }
 
-
-        if(
-            !user
-        ){
-
-            authFinished =
-                true;
-
-            location.replace(
-                "login.html"
-            );
-
-            return;
-
-        }
+    }
+);
 
 
-        try{
+/* =========================================
+   TOAST
+========================================= */
 
-            const userRef =
-                doc(
-                    db,
-                    "users",
-                    user.uid
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    if(!toast){
+        return;
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
                 );
 
+            },
+            2200
+        );
 
-            const userSnap =
-                await getDoc(
-                    userRef
-                );
-
-
-            if(
-                !userSnap.exists()
-            ){
-
-                authFinished =
-                    true;
-
-                showStatus(
-                    "Admin profile nahi mila.",
-                    "error"
-                );
-
-                setTimeout(
-                    () => {
-
-                        location.replace(
-                            "login.html"
-                        );
-
-                    },
-                    1000
-                );
-
-                return;
-
-            }
+}
 
 
-            const adminData =
-                userSnap.data();
+/* =========================================
+   INIT
+========================================= */
 
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
 
-            if(
-                !isAdmin(
-                    adminData
-                )
-            ){
-
-                authFinished =
-                    true;
-
-                showStatus(
-                    "Access denied. Ye account admin nahi hai.",
-                    "error"
-                );
-
-                setTimeout(
-                    () => {
-
-                        location.replace(
-                            "login.html"
-                        );
-
-                    },
-                    1000
-                );
-
-                return;
-
-            }
-
-
-            authFinished =
-                true;
-
-
-            await loadRiderRequests();
-
-
-        }catch(error){
-
-            console.error(
-                "Admin authentication error:",
-                error
-            );
-
-
-            authFinished =
-                true;
-
-
-            showStatus(
-                "Firebase admin verification failed. firebase-config.js aur Firestore Rules check karein.",
-                "error"
-            );
-
-        }
+        loadApplications();
 
     }
 );
@@ -1875,4 +1983,5 @@ onAuthStateChanged(
 </script>
 
 </body>
+
 </html>
