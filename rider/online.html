@@ -1,604 +1,1904 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
 
-<head>
+«»
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+name="theme-color"
+content="#000000"
 
-<title>RiderX Online</title>
+«»
 
+<title>RiderX | Online</title><link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+><link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+><link
+    rel="stylesheet"
+    href="../css/style.css"
+><style>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+:root{
+    --yellow:#ffe500;
+    --black:#000;
+    --dark:#090909;
+    --card:#151515;
+    --green:#22c55e;
+    --red:#ef4444;
+    --muted:#888;
+}
 
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Poppins,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
 
-<style>
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    color:#fff;
+}
 
 body{
-
-margin:0;
-background:#000;
-color:white;
-font-family:Arial;
-
+    position:fixed;
+    inset:0;
 }
 
 
-.header{
-
-padding:20px;
-background:#111;
-text-align:center;
-font-size:22px;
-font-weight:bold;
-border-bottom:2px solid #FFD600;
-
-}
-
+/* =========================================================
+   MAP
+========================================================= */
 
 #map{
+    position:fixed;
+    inset:0;
 
-height:55vh;
-width:100%;
+    width:100%;
+    height:100%;
 
+    z-index:1;
+
+    background:#ddd;
+}
+
+.leaflet-control-zoom{
+    display:none!important;
+}
+
+.leaflet-control-attribution{
+    font-size:8px!important;
+    padding:2px 4px!important;
 }
 
 
-button{
+/* =========================================================
+   TOP BAR
+========================================================= */
 
-width:90%;
-margin:15px 5%;
-padding:15px;
-border:none;
-border-radius:15px;
-background:#FFD600;
-font-weight:bold;
+.topbar{
+    position:fixed;
 
+    top:0;
+    left:0;
+    right:0;
+
+    z-index:1000;
+
+    padding:
+        max(12px,env(safe-area-inset-top))
+        14px
+        0;
+
+    pointer-events:none;
+}
+
+.topbar-inner{
+    height:52px;
+
+    display:flex;
+
+    align-items:center;
+    justify-content:space-between;
+}
+
+.top-btn{
+    width:45px;
+    height:45px;
+
+    border:0;
+    border-radius:50%;
+
+    background:rgba(10,10,10,.95);
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:17px;
+
+    box-shadow:
+        0 6px 22px rgba(0,0,0,.4);
+
+    pointer-events:auto;
+}
+
+.top-btn:active{
+    transform:scale(.92);
+}
+
+.logo{
+    padding:8px 17px;
+
+    border-radius:15px;
+
+    background:rgba(10,10,10,.95);
+
+    font-size:17px;
+    font-weight:900;
+
+    box-shadow:
+        0 6px 22px rgba(0,0,0,.4);
+}
+
+.logo span{
+    color:var(--yellow);
 }
 
 
-.card{
+/* =========================================================
+   STATUS
+========================================================= */
 
-background:#111;
-margin:15px;
-padding:15px;
-border-radius:15px;
-border:1px solid #333;
+.status-pill{
+    position:fixed;
 
+    top:
+        calc(
+            max(12px,env(safe-area-inset-top))
+            + 61px
+        );
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    z-index:1000;
+
+    padding:8px 16px;
+
+    max-width:90%;
+
+    border-radius:30px;
+
+    background:rgba(10,10,10,.95);
+
+    color:#fff;
+
+    font-size:11px;
+
+    white-space:nowrap;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,.35);
+}
+
+.status-pill.online{
+    color:var(--green);
+}
+
+.status-pill.offline{
+    color:#aaa;
 }
 
 
-.accept{
+/* =========================================================
+   LOCATION BUTTON
+========================================================= */
 
-background:#FFD600;
-padding:10px;
-border:none;
-border-radius:10px;
-width:100%;
-font-weight:bold;
+.location-btn{
+    position:fixed;
 
+    right:15px;
+
+    bottom:305px;
+
+    z-index:900;
+
+    width:48px;
+    height:48px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#111;
+    color:var(--yellow);
+
+    font-size:18px;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,.45);
+}
+
+.location-btn:active{
+    transform:scale(.92);
 }
 
 
-</style>
+/* =========================================================
+   BOTTOM PANEL
+========================================================= */
 
-</head>
+.panel{
+    position:fixed;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    z-index:1000;
+
+    padding:
+        12px
+        14px
+        max(16px,env(safe-area-inset-bottom));
+
+    background:
+        rgba(9,9,9,.98);
+
+    border-radius:
+        27px
+        27px
+        0
+        0;
+
+    box-shadow:
+        0 -12px 40px rgba(0,0,0,.55);
+}
 
 
-<body>
+/* =========================================================
+   HANDLE
+========================================================= */
+
+.handle{
+    width:48px;
+    height:5px;
+
+    margin:0 auto 13px;
+
+    border-radius:10px;
+
+    background:#555;
+}
 
 
+/* =========================================================
+   RIDER STATUS CARD
+========================================================= */
 
-<div class="header">
+.status-card{
+    display:flex;
 
-🏍 RiderX Rider Online
+    align-items:center;
+    gap:12px;
+
+    padding:13px;
+
+    background:#151515;
+
+    border:1px solid #242424;
+
+    border-radius:17px;
+}
+
+.status-icon{
+    width:45px;
+    height:45px;
+
+    min-width:45px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:14px;
+
+    background:#242424;
+
+    color:#777;
+
+    font-size:19px;
+}
+
+.status-card.online .status-icon{
+    color:var(--green);
+    background:#102517;
+}
+
+.status-info{
+    flex:1;
+}
+
+.status-title{
+    font-size:14px;
+    font-weight:800;
+}
+
+.status-description{
+    margin-top:4px;
+
+    color:#777;
+
+    font-size:10px;
+}
+
+.status-light{
+    width:11px;
+    height:11px;
+
+    border-radius:50%;
+
+    background:#555;
+
+    box-shadow:0 0 0 4px #242424;
+}
+
+.status-card.online .status-light{
+    background:var(--green);
+    box-shadow:
+        0 0 0 4px #12351f;
+}
+
+
+/* =========================================================
+   ONLINE BUTTON
+========================================================= */
+
+.online-btn{
+    width:100%;
+
+    min-height:55px;
+
+    margin-top:12px;
+
+    border:0;
+    border-radius:16px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:15px;
+    font-weight:900;
+
+    box-shadow:
+        0 6px 22px
+        rgba(255,229,0,.12);
+
+    transition:
+        transform .15s ease,
+        background .2s ease;
+}
+
+.online-btn:active{
+    transform:scale(.985);
+}
+
+.online-btn.offline{
+    background:#262626;
+    color:#fff;
+
+    box-shadow:none;
+}
+
+
+/* =========================================================
+   INFO ROW
+========================================================= */
+
+.info-row{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:8px;
+
+    margin-top:10px;
+}
+
+.info{
+    padding:10px 7px;
+
+    background:#121212;
+
+    border-radius:13px;
+
+    text-align:center;
+}
+
+.info-label{
+    color:#666;
+    font-size:8px;
+}
+
+.info-value{
+    margin-top:4px;
+
+    color:#fff;
+
+    font-size:11px;
+    font-weight:700;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.nav-row{
+    display:flex;
+
+    gap:8px;
+
+    margin-top:10px;
+}
+
+.nav-btn{
+    flex:1;
+
+    min-height:42px;
+
+    border:1px solid #292929;
+
+    border-radius:13px;
+
+    background:#151515;
+
+    color:#aaa;
+
+    font-size:10px;
+    font-weight:700;
+}
+
+.nav-btn i{
+    margin-right:4px;
+}
+
+.nav-btn:active{
+    transform:scale(.97);
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error-box{
+    display:none;
+
+    margin-top:9px;
+
+    padding:10px;
+
+    border-radius:12px;
+
+    background:#210d0d;
+
+    color:#ff7777;
+
+    font-size:10px;
+
+    text-align:center;
+}
+
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media(min-width:700px){
+
+    .panel{
+        left:50%;
+        right:auto;
+
+        width:520px;
+
+        transform:translateX(-50%);
+
+        border-radius:
+            27px
+            27px
+            0
+            0;
+    }
+
+}
+
+</style></head><body><!-- =======================================================
+     MAP
+======================================================== --><div id="map"></div><!-- =======================================================
+     TOP BAR
+======================================================== --><div class="topbar"><div class="topbar-inner">
+
+    <button
+        id="backButton"
+        class="top-btn"
+        type="button"
+        aria-label="Back"
+    >
+
+        <i class="fa-solid fa-arrow-left"></i>
+
+    </button>
+
+
+    <div class="logo">
+
+        RIDER<span>X</span>
+
+    </div>
+
+
+    <button
+        id="dashboardButton"
+        class="top-btn"
+        type="button"
+        aria-label="Dashboard"
+    >
+
+        <i class="fa-solid fa-house"></i>
+
+    </button>
+
+</div>
+
+</div><!-- =======================================================
+     STATUS PILL
+======================================================== --><div
+    id="statusPill"
+    class="status-pill offline"
+>
+    Offline
+</div><!-- =======================================================
+     LOCATION BUTTON
+======================================================== --><button
+id="locationButton"
+class="location-btn"
+type="button"
+aria-label="My location"
+
+«»
+
+<i class="fa-solid fa-crosshairs"></i>
+
+</button><!-- =======================================================
+     BOTTOM PANEL
+======================================================== --><div class="panel"><div class="handle"></div>
+
+
+<!-- STATUS -->
+
+<div
+    id="statusCard"
+    class="status-card"
+>
+
+    <div class="status-icon">
+
+        <i
+            id="statusIcon"
+            class="fa-solid fa-power-off"
+        ></i>
+
+    </div>
+
+
+    <div class="status-info">
+
+        <div
+            id="statusTitle"
+            class="status-title"
+        >
+            You're Offline
+        </div>
+
+        <div
+            id="statusDescription"
+            class="status-description"
+        >
+            Go online to receive RiderX ride requests.
+        </div>
+
+    </div>
+
+
+    <div
+        id="statusLight"
+        class="status-light"
+    ></div>
 
 </div>
 
 
+<!-- ONLINE BUTTON -->
 
-<div id="map"></div>
+<button
+    id="onlineButton"
+    class="online-btn"
+    type="button"
+>
 
+    <i class="fa-solid fa-power-off"></i>
 
-
-<button id="onlineBtn">
-
-🟢 Go Online
+    <span id="onlineButtonText">
+        Go Online
+    </span>
 
 </button>
 
 
+<!-- INFO -->
 
-<div id="rides">
+<div class="info-row">
 
-No rides nearby
+    <div class="info">
+
+        <div class="info-label">
+            GPS
+        </div>
+
+        <div
+            id="gpsValue"
+            class="info-value"
+        >
+            Waiting
+        </div>
+
+    </div>
+
+
+    <div class="info">
+
+        <div class="info-label">
+            LATITUDE
+        </div>
+
+        <div
+            id="latValue"
+            class="info-value"
+        >
+            —
+        </div>
+
+    </div>
+
+
+    <div class="info">
+
+        <div class="info-label">
+            LONGITUDE
+        </div>
+
+        <div
+            id="lngValue"
+            class="info-value"
+        >
+            —
+        </div>
+
+    </div>
 
 </div>
 
 
+<!-- NAVIGATION -->
+
+<div class="nav-row">
+
+    <button
+        id="requestsButton"
+        class="nav-btn"
+        type="button"
+    >
+
+        <i class="fa-solid fa-bell"></i>
+
+        Requests
+
+    </button>
 
 
+    <button
+        id="ridesButton"
+        class="nav-btn"
+        type="button"
+    >
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <i class="fa-solid fa-motorcycle"></i>
+
+        Rides
+
+    </button>
 
 
+    <button
+        id="profileButton"
+        class="nav-btn"
+        type="button"
+    >
 
-<script type="module">
+        <i class="fa-solid fa-user"></i>
+
+        Profile
+
+    </button>
+
+</div>
 
 
-import {auth,db} from "../firebase/config.js";
+<!-- ERROR -->
 
+<div
+    id="errorBox"
+    class="error-box"
+></div>
+
+</div><!-- =======================================================
+     LEAFLET
+======================================================== --><script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script><!-- =======================================================
+     FIREBASE
+======================================================== --><script type="module">
 
 import {
+    auth,
+    db
+} from "../firebase/config.js";
 
-doc,
-setDoc,
-collection,
-query,
-where,
-getDocs,
-updateDoc,
-serverTimestamp
+import {
+    doc,
+    setDoc,
+    updateDoc,
+    getDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-}
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
+const statusPill =
+    document.getElementById("statusPill");
 
+const statusCard =
+    document.getElementById("statusCard");
 
+const statusIcon =
+    document.getElementById("statusIcon");
 
-let map=L.map("map")
+const statusTitle =
+    document.getElementById("statusTitle");
 
-.setView(
+const statusDescription =
+    document.getElementById("statusDescription");
 
-[30.7333,76.7794],
+const onlineButton =
+    document.getElementById("onlineButton");
 
-13
+const onlineButtonText =
+    document.getElementById("onlineButtonText");
 
-);
+const gpsValue =
+    document.getElementById("gpsValue");
 
+const latValue =
+    document.getElementById("latValue");
 
+const lngValue =
+    document.getElementById("lngValue");
 
+const errorBox =
+    document.getElementById("errorBox");
 
 
-L.tileLayer(
+/* =========================================================
+   STATE
+========================================================= */
 
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+let currentUser = null;
 
-)
+let isOnline = false;
 
-.addTo(map);
+let watchId = null;
 
+let riderMarker = null;
 
+let map = null;
 
+let lastPosition = null;
 
 
-let marker=null;
+/* =========================================================
+   MAP
+========================================================= */
 
-let riderLat=null;
+function initializeMap(){
 
-let riderLng=null;
+    /*
+     * Chandigarh default.
+     * Actual rider GPS replaces this immediately.
+     */
 
-let online=false;
+    map =
+        L.map(
+            "map",
+            {
+                zoomControl:false,
+                attributionControl:true
+            }
+        ).setView(
+            [30.7333,76.7794],
+            13
+        );
 
 
-
-
-
-let btn=document.getElementById("onlineBtn");
-
-
-
-
-
-
-
-btn.onclick=()=>{
-
-
-online=true;
-
-
-btn.innerHTML=
-
-"🟢 Rider Online";
-
-
-
-
-
-navigator.geolocation.watchPosition(
-
-async(position)=>{
-
-
-riderLat=
-
-position.coords.latitude;
-
-
-riderLng=
-
-position.coords.longitude;
-
-
-
-
-
-if(marker){
-
-
-marker.setLatLng(
-
-[riderLat,riderLng]
-
-);
-
-
-}
-
-else{
-
-
-marker=L.marker(
-
-[riderLat,riderLng]
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-"🟢 You Online"
-
-)
-
-.openPopup();
-
-
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom:19,
+            attribution:
+                '&copy; OpenStreetMap'
+        }
+    ).addTo(map);
 
 }
 
 
+initializeMap();
 
 
+/* =========================================================
+   RIDER ICON
+========================================================= */
 
-map.setView(
+const riderIcon =
+    L.divIcon({
 
-[riderLat,riderLng],
+        className:"rider-location-marker",
 
-16
+        html:`
 
+            <div style="
+                width:44px;
+                height:44px;
+                border-radius:50%;
+                background:#ffe500;
+                border:4px solid #000;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                box-shadow:0 5px 18px rgba(0,0,0,.45);
+                color:#000;
+                font-size:19px;
+            ">
+
+                <i class="fa-solid fa-motorcycle"></i>
+
+            </div>
+
+        `,
+
+        iconSize:[44,44],
+
+        iconAnchor:[22,22]
+
+    });
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(!user){
+
+            stopLocationTracking();
+
+            location.href =
+                "../auth/login.html";
+
+            return;
+        }
+
+
+        currentUser =
+            user;
+
+
+        await loadRiderStatus(
+            user.uid
+        );
+
+    }
 );
 
 
+/* =========================================================
+   LOAD STATUS
+========================================================= */
 
+async function loadRiderStatus(uid){
 
+    try{
 
+        const riderSnap =
+            await getDoc(
+                doc(
+                    db,
+                    "riders",
+                    uid
+                )
+            );
 
-let user=
 
-auth.currentUser;
+        if(
+            riderSnap.exists() &&
+            riderSnap.data().online === true
+        ){
 
+            isOnline = true;
 
+            updateUI();
 
-if(user){
+            startLocationTracking();
 
+        }else{
 
+            isOnline = false;
 
-await setDoc(
+            updateUI();
 
-doc(db,"riderLocations",user.uid),
+        }
 
-{
+    }catch(error){
 
+        console.error(
+            "Rider status error:",
+            error
+        );
 
-lat:riderLat,
+        /*
+         * If rider document is unavailable,
+         * default to offline.
+         */
 
-lng:riderLng,
+        isOnline = false;
 
-status:"Online",
+        updateUI();
 
-updatedAt:serverTimestamp()
-
-
-}
-
-);
-
-
-
-}
-
-
-
-
-loadNearbyRides();
-
-
-
-},
-
-()=>{
-
-
-alert(
-
-"Location permission allow karo"
-
-);
-
-},
-
-
-{
-
-enableHighAccuracy:true
-
-}
-
-
-
-);
-
-
-};
-
-
-
-
-
-
-
-
-
-// =====================
-// LOAD RIDES
-// =====================
-
-
-async function loadNearbyRides(){
-
-
-
-if(!online)
-
-return;
-
-
-
-
-let q=query(
-
-collection(db,"rides"),
-
-where(
-
-"status",
-
-"==",
-
-"Pending"
-
-)
-
-);
-
-
-
-
-
-let snap=
-
-await getDocs(q);
-
-
-
-
-
-let box=
-
-document.getElementById("rides");
-
-
-
-box.innerHTML="";
-
-
-
-
-
-if(snap.empty){
-
-
-box.innerHTML=
-
-"<p>No nearby rides</p>";
-
-return;
-
+    }
 
 }
 
 
+/* =========================================================
+   UI
+========================================================= */
 
+function updateUI(){
 
+    if(isOnline){
 
+        statusPill.textContent =
+            "● Online";
 
-snap.forEach((ride)=>{
+        statusPill.className =
+            "status-pill online";
 
 
-let data=
+        statusCard.classList.add(
+            "online"
+        );
 
-ride.data();
 
+        statusIcon.className =
+            "fa-solid fa-circle-check";
 
 
+        statusTitle.textContent =
+            "You're Online";
 
 
-let card=
+        statusDescription.textContent =
+            "You're ready to receive RiderX ride requests.";
 
-document.createElement("div");
 
+        onlineButton.classList.add(
+            "offline"
+        );
 
 
-card.className="card";
+        onlineButtonText.textContent =
+            "Go Offline";
 
 
+    }else{
 
+        statusPill.textContent =
+            "Offline";
 
+        statusPill.className =
+            "status-pill offline";
 
-card.innerHTML=
 
-`
+        statusCard.classList.remove(
+            "online"
+        );
 
-<h3>
 
-🏍 ${data.service}
+        statusIcon.className =
+            "fa-solid fa-power-off";
 
-</h3>
 
+        statusTitle.textContent =
+            "You're Offline";
 
-<p>
 
-📍 Pickup:
+        statusDescription.textContent =
+            "Go online to receive RiderX ride requests.";
 
-${data.pickup}
 
-</p>
+        onlineButton.classList.remove(
+            "offline"
+        );
 
 
-<p>
+        onlineButtonText.textContent =
+            "Go Online";
 
-🏁 Drop:
-
-${data.drop}
-
-</p>
-
-
-<p>
-
-💰 ₹${data.fare}
-
-</p>
-
-
-
-<button class="accept">
-
-Accept Ride
-
-</button>
-
-`;
-
-
-
-
-
-
-card.querySelector("button")
-
-.onclick=
-
-async()=>{
-
-
-
-
-
-let user=
-
-auth.currentUser;
-
-
-
-
-
-await updateDoc(
-
-doc(db,"rides",ride.id),
-
-{
-
-
-status:"Accepted",
-
-riderId:user.uid,
-
-acceptedAt:serverTimestamp()
-
-
-}
-
-);
-
-
-
-
-
-localStorage.setItem(
-
-"rideId",
-
-ride.id
-
-);
-
-
-
-alert(
-
-"Ride Accepted ✅"
-
-);
-
-
-
-location.href="trip.html";
-
-
-
-};
-
-
-
-
-
-box.appendChild(card);
-
-
-
-});
-
-
+    }
 
 }
 
 
+/* =========================================================
+   ONLINE / OFFLINE
+========================================================= */
+
+onlineButton.addEventListener(
+    "click",
+    async()=>{
+
+        if(!currentUser){
+            return;
+        }
 
 
+        hideError();
 
 
-setInterval(()=>{
+        onlineButton.disabled = true;
 
 
-if(online)
+        try{
 
-loadNearbyRides();
+            if(isOnline){
+
+                await setRiderOffline();
+
+            }else{
+
+                await setRiderOnline();
+
+            }
+
+        }catch(error){
+
+            console.error(
+                "Online toggle error:",
+                error
+            );
+
+            showError(
+                error.message ||
+                "Unable to change online status."
+            );
+
+        }finally{
+
+            onlineButton.disabled = false;
+
+        }
+
+    }
+);
 
 
-},10000);
+/* =========================================================
+   GO ONLINE
+========================================================= */
+
+async function setRiderOnline(){
+
+    if(!navigator.geolocation){
+
+        throw new Error(
+            "GPS is not supported on this device."
+        );
+
+    }
 
 
+    /*
+     * Request location first.
+     * Rider is marked online only after
+     * valid GPS position is received.
+     */
 
-</script>
+    gpsValue.textContent =
+        "Locating...";
 
 
+    const position =
+        await getCurrentPosition();
 
-</body>
 
-</html>
+    lastPosition =
+        position;
+
+
+    const lat =
+        position.coords.latitude;
+
+    const lng =
+        position.coords.longitude;
+
+
+    await setDoc(
+        doc(
+            db,
+            "riders",
+            currentUser.uid
+        ),
+        {
+            online:true,
+            isOnline:true,
+
+            lat:lat,
+            lng:lng,
+
+            location:{
+                lat:lat,
+                lng:lng
+            },
+
+            locationUpdatedAt:
+                serverTimestamp(),
+
+            updatedAt:
+                serverTimestamp()
+        },
+        {
+            merge:true
+        }
+    );
+
+
+    await setDoc(
+        doc(
+            db,
+            "riderLocations",
+            currentUser.uid
+        ),
+        {
+            riderId:
+                currentUser.uid,
+
+            lat:lat,
+            lng:lng,
+
+            online:true,
+
+            updatedAt:
+                serverTimestamp()
+        },
+        {
+            merge:true
+        }
+    );
+
+
+    isOnline = true;
+
+    updatePosition(
+        position,
+        true
+    );
+
+    updateUI();
+
+    startLocationTracking();
+
+
+    showToast(
+        "You're now online"
+    );
+
+}
+
+
+/* =========================================================
+   GO OFFLINE
+========================================================= */
+
+async function setRiderOffline(){
+
+    stopLocationTracking();
+
+
+    await setDoc(
+        doc(
+            db,
+            "riders",
+            currentUser.uid
+        ),
+        {
+            online:false,
+            isOnline:false,
+
+            locationUpdatedAt:
+                serverTimestamp(),
+
+            updatedAt:
+                serverTimestamp()
+        },
+        {
+            merge:true
+        }
+    );
+
+
+    await setDoc(
+        doc(
+            db,
+            "riderLocations",
+            currentUser.uid
+        ),
+        {
+            riderId:
+                currentUser.uid,
+
+            online:false,
+
+            updatedAt:
+                serverTimestamp()
+        },
+        {
+            merge:true
+        }
+    );
+
+
+    isOnline = false;
+
+    updateUI();
+
+    showToast(
+        "You're now offline"
+    );
+
+}
+
+
+/* =========================================================
+   GET CURRENT POSITION
+========================================================= */
+
+function getCurrentPosition(){
+
+    return new Promise(
+        (resolve,reject)=>{
+
+            navigator.geolocation.getCurrentPosition(
+                resolve,
+                error => {
+
+                    let message =
+                        "Unable to get your location.";
+
+                    if(
+                        error.code ===
+                        error.PERMISSION_DENIED
+                    ){
+
+                        message =
+                            "Location permission denied. Please enable GPS permission.";
+
+                    }else if(
+                        error.code ===
+                        error.POSITION_UNAVAILABLE
+                    ){
+
+                        message =
+                            "Location unavailable. Please turn on GPS.";
+
+                    }else if(
+                        error.code ===
+                        error.TIMEOUT
+                    ){
+
+                        message =
+                            "GPS request timed out. Try again.";
+
+                    }
+
+                    reject(
+                        new Error(message)
+                    );
+
+                },
+                {
+                    enableHighAccuracy:true,
+                    timeout:15000,
+                    maximumAge:5000
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   START LIVE LOCATION
+========================================================= */
+
+function startLocationTracking(){
+
+    if(!navigator.geolocation){
+        return;
+    }
+
+
+    if(watchId !== null){
+
+        navigator.geolocation.clearWatch(
+            watchId
+        );
+
+    }
+
+
+    watchId =
+        navigator.geolocation.watchPosition(
+            position => {
+
+                if(!isOnline){
+                    return;
+                }
+
+
+                lastPosition =
+                    position;
+
+
+                updatePosition(
+                    position,
+                    false
+                );
+
+
+                saveLiveLocation(
+                    position
+                );
+
+            },
+            error => {
+
+                console.warn(
+                    "GPS watch error:",
+                    error
+                );
+
+                gpsValue.textContent =
+                    "GPS Error";
+
+            },
+            {
+                enableHighAccuracy:true,
+                timeout:15000,
+                maximumAge:3000
+            }
+        );
+
+}
+
+
+/* =========================================================
+   STOP LIVE LOCATION
+========================================================= */
+
+function stopLocationTracking(){
+
+    if(
+        watchId !== null &&
+        navigator.geolocation
+    ){
+
+        navigator.geolocation.clearWatch(
+            watchId
+        );
+
+        watchId = null;
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE MAP POSITION
+========================================================= */
+
+function updatePosition(
+    position,
+    centerMap
+){
+
+    const lat =
+        position.coords.latitude;
+
+    const lng =
+        position.coords.longitude;
+
+    const accuracy =
+        Math.round(
+            position.coords.accuracy || 0
+        );
+
+
+    latValue.textContent =
+        lat.toFixed(5);
+
+    lngValue.textContent =
+        lng.toFixed(5);
+
+
+    gpsValue.textContent =
+        accuracy
+        ? `${accuracy}m`
+        : "Active";
+
+
+    const latLng =
+        [lat,lng];
+
+
+    if(!riderMarker){
+
+        riderMarker =
+            L.marker(
+                latLng,
+                {
+                    icon:riderIcon
+                }
+            ).addTo(map);
+
+    }else{
+
+        riderMarker.setLatLng(
+            latLng
+        );
+
+    }
+
+
+    if(centerMap){
+
+        map.setView(
+            latLng,
+            16,
+            {
+                animate:true
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE LIVE LOCATION
+========================================================= */
+
+let lastSavedAt = 0;
+
+async function saveLiveLocation(
+    position
+){
+
+    if(
+        !currentUser ||
+        !isOnline
+    ){
+        return;
+    }
+
+
+    /*
+     * Prevent excessive Firestore writes.
+     * Maximum approximately one update
+     * every 4 seconds.
+     */
+
+    const now =
+        Date.now();
+
+    if(
+        now - lastSavedAt < 4000
+    ){
+        return;
+    }
+
+
+    lastSavedAt =
+        now;
+
+
+    const lat =
+        position.coords.latitude;
+
+    const lng =
+        position.coords.longitude;
+
+
+    try{
+
+        await setDoc(
+            doc(
+                db,
+                "riderLocations",
+                currentUser.uid
+            ),
+            {
+                riderId:
+                    currentUser.uid,
+
+                lat:lat,
+                lng:lng,
+
+                accuracy:
+                    position.coords.accuracy || null,
+
+                heading:
+                    position.coords.heading || null,
+
+                speed:
+                    position.coords.speed || null,
+
+                online:true,
+
+                updatedAt:
+                    serverTimestamp()
+            },
+            {
+                merge:true
+            }
+        );
+
+
+        await setDoc(
+            doc(
+                db,
+                "riders",
+                currentUser.uid
+            ),
+            {
+                online:true,
+                isOnline:true,
+
+                lat:lat,
+                lng:lng,
+
+                location:{
+                    lat:lat,
+                    lng:lng
+                },
+
+                locationUpdatedAt:
+                    serverTimestamp(),
+
+                updatedAt:
+                    serverTimestamp()
+            },
+            {
+                merge:true
+            }
+        );
+
+    }catch(error){
+
+        console.error(
+            "Live location save error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   MY LOCATION BUTTON
+========================================================= */
+
+document
+.getElementById("locationButton")
+.addEventListener(
+    "click",
+    async()=>{
+
+        try{
+
+            const position =
+                await getCurrentPosition();
+
+
+            lastPosition =
+                position;
+
+
+            updatePosition(
+                position,
+                true
+            );
+
+
+            if(isOnline){
+
+                await saveLiveLocation(
+                    position
+                );
+
+            }
+
+        }catch(error){
+
+            showError(
+                error.message
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+document
+.getElementById("backButton")
+.addEventListener(
+    "click",
+    ()=>{
+
+        if(history.length > 1){
+
+            history.back();
+
+        }else{
+
+            location.href =
+                "home.html";
+
+        }
+
+    }
+);
+
+
+document
+.getElementById("dashboardButton")
+.addEventListener(
+    "click",
+    ()=>{
+
+        location.href =
+            "home.html";
+
+    }
+);
+
+
+document
+.getElementById("requestsButton")
+.addEventListener(
+    "click",
+    ()=>{
+
+        location.href =
+            "requests.html";
+
+    }
+);
+
+
+document
+.getElementById("ridesButton")
+.addEventListener(
+    "click",
+    ()=>{
+
+        location.href =
+            "rides.html";
+
+    }
+);
+
+
+document
+.getElementById("profileButton")
+.addEventListener(
+    "click",
+    ()=>{
+
+        location.href =
+            "profile.html";
+
+    }
+);
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+function showError(message){
+
+    errorBox.textContent =
+        message;
+
+    errorBox.style.display =
+        "block";
+
+}
+
+
+function hideError(){
+
+    errorBox.style.display =
+        "none";
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(message){
+
+    const toast =
+        document.createElement("div");
+
+    toast.textContent =
+        message;
+
+    toast.style.position =
+        "fixed";
+
+    toast.style.left =
+        "50%";
+
+    toast.style.bottom =
+        "300px";
+
+    toast.style.transform =
+        "translateX(-50%)";
+
+    toast.style.zIndex =
+        "2000";
+
+    toast.style.padding =
+        "11px 17px";
+
+    toast.style.borderRadius =
+        "13px";
+
+    toast.style.background =
+        "#222";
+
+    toast.style.color =
+        "#fff";
+
+    toast.style.fontSize =
+        "11px";
+
+    toast.style.boxShadow =
+        "0 8px 30px rgba(0,0,0,.4)";
+
+    document.body.appendChild(
+        toast
+    );
+
+
+    setTimeout(
+        ()=>{
+            toast.remove();
+        },
+        2200
+    );
+
+}
+
+
+/* =========================================================
+   PAGE VISIBILITY
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    ()=>{
+
+        if(
+            document.visibilityState ===
+            "visible"
+        ){
+
+            if(
+                isOnline &&
+                watchId === null
+            ){
+
+                startLocationTracking();
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIAL MAP SIZE
+========================================================= */
+
+setTimeout(
+    ()=>{
+        if(map){
+            map.invalidateSize();
+        }
+    },
+    500
+);
+
+</script></body></html>
