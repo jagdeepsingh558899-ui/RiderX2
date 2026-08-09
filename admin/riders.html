@@ -1,220 +1,1972 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiderX Admin - Riders</title>
+<meta name="theme-color" content="#FFD400">
 
-<title>RiderX Manage Riders</title>
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
-
 :root{
---yellow:#FFE500;
---black:#050505;
---card:#111;
+    --yellow:#FFD400;
+    --bg:#080808;
+    --card:#151515;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#60a5fa;
+    --orange:#f59e0b;
 }
 
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
+html,body{
+    min-height:100%;
+    background:var(--bg);
+}
 
 body{
-background:var(--black);
-color:white;
-padding-bottom:50px;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-
-.header{
-
-height:70px;
-background:#111;
-display:flex;
-align-items:center;
-padding:0 20px;
+button,input,select{
+    font-family:inherit;
 }
-
-
-.logo{
-
-font-size:28px;
-font-weight:900;
-
-}
-
-
-.logo span{
-
-color:var(--yellow);
-
-}
-
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-
-.title{
-
-font-size:24px;
-font-weight:bold;
-margin-bottom:20px;
-
-}
-
-
-
-.rider-card{
-
-background:var(--card);
-border:1px solid #333;
-border-radius:18px;
-padding:18px;
-margin-bottom:15px;
-
-}
-
-
-
-.row{
-
-margin-bottom:8px;
-
-}
-
-
-.label{
-
-color:#999;
-
-}
-
-
-
-.status{
-
-margin-top:10px;
-font-weight:bold;
-
-}
-
-
 
 button{
-
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-background:var(--yellow);
-font-weight:bold;
-
+    cursor:pointer;
 }
 
-
-
-.block{
-
-background:#ff3333;
-color:white;
-
+.app{
+    min-height:100vh;
+    background:var(--bg);
 }
 
+/* HEADER */
 
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
 
-.back{
+    display:flex;
+    align-items:center;
+    gap:10px;
 
-margin-bottom:20px;
-background:#222;
-color:white;
+    padding:12px;
 
+    background:#0c0c0c;
+    border-bottom:1px solid #292929;
 }
 
+.back-btn{
+    width:40px;
+    height:40px;
 
+    border:1px solid #363636;
+    border-radius:11px;
+
+    background:#1b1b1b;
+    color:#fff;
+
+    font-size:20px;
+}
+
+.logo{
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:900;
+}
+
+.header-info{
+    flex:1;
+    min-width:0;
+}
+
+.header-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.header-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
+}
+
+/* MAIN */
+
+.main{
+    width:100%;
+    max-width:1250px;
+    margin:auto;
+    padding:15px;
+}
+
+.page-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:13px;
+}
+
+.page-title{
+    font-size:14px;
+    font-weight:900;
+}
+
+.page-description{
+    margin-top:4px;
+    color:#777;
+    font-size:6px;
+}
+
+.approve-btn{
+    height:38px;
+    padding:0 13px;
+
+    border:1px solid #5b4f00;
+    border-radius:10px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:9px;
+    margin-bottom:12px;
+}
+
+.stat{
+    padding:12px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    background:var(--card);
+}
+
+.stat-label{
+    color:#777;
+    font-size:5px;
+    font-weight:700;
+}
+
+.stat-value{
+    margin-top:6px;
+    font-size:15px;
+    font-weight:900;
+}
+
+.yellow{color:var(--yellow);}
+.green{color:var(--green);}
+.red{color:#ff7070;}
+.blue{color:var(--blue);}
+.orange{color:var(--orange);}
+
+/* CARD */
+
+.card{
+    overflow:hidden;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+}
+
+.card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+
+    padding:12px;
+
+    border-bottom:1px solid #292929;
+}
+
+.card-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.card-count{
+    color:#777;
+    font-size:5px;
+}
+
+/* TOOLBAR */
+
+.toolbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:10px;
+
+    border-bottom:1px solid #292929;
+}
+
+.search-box{
+    position:relative;
+    flex:1;
+}
+
+.search-icon{
+    position:absolute;
+    left:10px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#666;
+    font-size:10px;
+}
+
+.search{
+    width:100%;
+    height:38px;
+
+    padding:0 10px 0 30px;
+
+    outline:none;
+
+    border:1px solid #373737;
+    border-radius:10px;
+
+    background:#202020;
+    color:#fff;
+
+    font-size:6px;
+}
+
+.search:focus{
+    border-color:#6a5a00;
+}
+
+.filter{
+    height:38px;
+    min-width:120px;
+
+    padding:0 9px;
+
+    outline:none;
+
+    border:1px solid #373737;
+    border-radius:10px;
+
+    background:#202020;
+    color:#fff;
+
+    font-size:6px;
+}
+
+/* TABLE */
+
+.rider-list{
+    width:100%;
+}
+
+.rider-row{
+    display:grid;
+
+    grid-template-columns:
+        minmax(190px,1.5fr)
+        minmax(120px,1fr)
+        85px
+        85px
+        85px
+        70px;
+
+    align-items:center;
+    gap:10px;
+
+    padding:11px 12px;
+
+    border-bottom:1px solid #292929;
+}
+
+.rider-row:last-child{
+    border-bottom:0;
+}
+
+.rider-row:hover{
+    background:#191919;
+}
+
+.rider-info{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    min-width:0;
+}
+
+.avatar{
+    width:39px;
+    height:39px;
+    min-width:39px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:#252525;
+    color:var(--yellow);
+
+    font-size:10px;
+    font-weight:900;
+}
+
+.rider-details{
+    min-width:0;
+}
+
+.rider-name{
+    overflow:hidden;
+
+    font-size:6px;
+    font-weight:900;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.rider-phone{
+    margin-top:4px;
+    color:#666;
+    font-size:5px;
+}
+
+.cell{
+    color:#aaa;
+    font-size:5.5px;
+}
+
+.cell strong{
+    color:#fff;
+    font-size:6px;
+}
+
+.status{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:5px 7px;
+
+    border-radius:20px;
+
+    font-size:4.5px;
+    font-weight:900;
+}
+
+.status.online{
+    background:#102517;
+    color:var(--green);
+}
+
+.status.offline{
+    background:#252525;
+    color:#888;
+}
+
+.status.busy{
+    background:#292500;
+    color:var(--yellow);
+}
+
+.status.blocked{
+    background:#291414;
+    color:#ff7070;
+}
+
+.actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:5px;
+}
+
+.action{
+    width:29px;
+    height:29px;
+
+    border:1px solid #373737;
+    border-radius:8px;
+
+    background:#222;
+    color:#fff;
+
+    font-size:9px;
+}
+
+.action:hover{
+    border-color:#695c00;
+}
+
+.action.danger{
+    color:#ff7070;
+}
+
+/* EMPTY */
+
+.empty{
+    padding:35px 15px;
+    color:#666;
+    text-align:center;
+    font-size:6px;
+}
+
+/* PAGINATION */
+
+.pagination{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:10px 12px;
+
+    border-top:1px solid #292929;
+}
+
+.page-info{
+    color:#666;
+    font-size:5px;
+}
+
+.page-buttons{
+    display:flex;
+    gap:5px;
+}
+
+.page-btn{
+    width:30px;
+    height:30px;
+
+    border:1px solid #373737;
+    border-radius:8px;
+
+    background:#202020;
+    color:#fff;
+
+    font-size:7px;
+}
+
+.page-btn.active{
+    border-color:#665900;
+    background:var(--yellow);
+    color:#000;
+}
+
+/* MODAL */
+
+.modal{
+    position:fixed;
+    inset:0;
+
+    z-index:100;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    padding:15px;
+
+    background:rgba(0,0,0,.78);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:460px;
+
+    padding:17px;
+
+    border:1px solid #383838;
+    border-radius:17px;
+
+    background:#171717;
+}
+
+.modal-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.modal-text{
+    margin-top:7px;
+    color:#777;
+    font-size:6px;
+    line-height:1.6;
+}
+
+.modal-actions{
+    display:flex;
+    gap:8px;
+    margin-top:15px;
+}
+
+.modal-btn{
+    flex:1;
+    height:40px;
+
+    border-radius:10px;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+.cancel-btn{
+    border:1px solid #383838;
+    background:#222;
+    color:#fff;
+}
+
+.confirm-btn{
+    border:1px solid #5d5100;
+    background:var(--yellow);
+    color:#000;
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    z-index:150;
+
+    width:calc(100% - 30px);
+    max-width:450px;
+
+    padding:11px;
+
+    border:1px solid #373737;
+    border-radius:11px;
+
+    background:#222;
+    color:#fff;
+
+    text-align:center;
+
+    font-size:6px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translate(-50%,20px);
+
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:950px){
+
+    .stats{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+
+    .rider-row{
+        grid-template-columns:
+            minmax(180px,1.5fr)
+            100px
+            80px
+            80px
+            65px;
+    }
+
+    .rider-row .rating-cell{
+        display:none;
+    }
+}
+
+@media(max-width:650px){
+
+    .main{
+        padding:11px;
+    }
+
+    .stats{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .toolbar{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .filter{
+        width:100%;
+    }
+
+    .rider-row{
+        grid-template-columns:
+            minmax(0,1fr)
+            75px
+            65px;
+    }
+
+    .rider-row .phone-cell,
+    .rider-row .rides-cell,
+    .rider-row .rating-cell{
+        display:none;
+    }
+
+}
 </style>
-
-
 </head>
-
-
 
 <body>
 
-
+<div class="app">
 
 <header class="header">
 
+    <button
+        class="back-btn"
+        onclick="goBack()"
+        aria-label="Back"
+    >
+        ‹
+    </button>
 
-<div class="logo">
+    <div class="logo">
+        RX
+    </div>
 
-RID<span>ERX</span>
+    <div class="header-info">
 
-</div>
+        <div class="header-title">
+            Riders
+        </div>
 
+        <div class="header-subtitle">
+            RiderX rider management
+        </div>
+
+    </div>
 
 </header>
 
 
+<main class="main">
+
+<section class="page-top">
+
+    <div>
+        <div class="page-title">
+            Rider Management
+        </div>
+
+        <div class="page-description">
+            Monitor riders, online status, rides and performance.
+        </div>
+    </div>
+
+    <button
+        class="approve-btn"
+        onclick="openApproval()"
+    >
+        RIDER APPROVAL
+    </button>
+
+</section>
 
 
+<section class="stats">
 
-<div class="container">
+    <div class="stat">
+        <div class="stat-label">
+            TOTAL RIDERS
+        </div>
+
+        <div
+            class="stat-value yellow"
+            id="totalRiders"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-label">
+            ONLINE
+        </div>
+
+        <div
+            class="stat-value green"
+            id="onlineRiders"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-label">
+            OFFLINE
+        </div>
+
+        <div
+            class="stat-value"
+            id="offlineRiders"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-label">
+            BUSY
+        </div>
+
+        <div
+            class="stat-value orange"
+            id="busyRiders"
+        >
+            0
+        </div>
+    </div>
+
+    <div class="stat">
+        <div class="stat-label">
+            BLOCKED
+        </div>
+
+        <div
+            class="stat-value red"
+            id="blockedRiders"
+        >
+            0
+        </div>
+    </div>
+
+</section>
 
 
+<section class="card">
 
-<button class="back"
-onclick="history.back()">
+    <div class="card-header">
 
-← Back
+        <div class="card-title">
+            All Riders
+        </div>
 
-</button>
+        <div
+            class="card-count"
+            id="resultCount"
+        >
+            0 riders
+        </div>
+
+    </div>
 
 
+    <div class="toolbar">
+
+        <div class="search-box">
+
+            <span class="search-icon">
+                🔍
+            </span>
+
+            <input
+                class="search"
+                id="searchInput"
+                type="search"
+                placeholder="Search rider, phone or vehicle..."
+                autocomplete="off"
+            >
+
+        </div>
 
 
-<div class="title">
+        <select
+            class="filter"
+            id="statusFilter"
+        >
 
-Manage Riders
+            <option value="all">
+                All riders
+            </option>
+
+            <option value="online">
+                Online
+            </option>
+
+            <option value="offline">
+                Offline
+            </option>
+
+            <option value="busy">
+                Busy
+            </option>
+
+            <option value="blocked">
+                Blocked
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div
+        class="rider-list"
+        id="riderList"
+    >
+
+        <div class="empty">
+            Loading riders...
+        </div>
+
+    </div>
+
+
+    <div class="pagination">
+
+        <div
+            class="page-info"
+            id="pageInfo"
+        >
+            Showing 0 riders
+        </div>
+
+        <div class="page-buttons">
+
+            <button
+                class="page-btn"
+                onclick="previousPage()"
+            >
+                ‹
+            </button>
+
+            <button
+                class="page-btn active"
+                id="pageNumber"
+            >
+                1
+            </button>
+
+            <button
+                class="page-btn"
+                onclick="nextPage()"
+            >
+                ›
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
 
 </div>
 
 
+<div
+    class="modal"
+    id="confirmModal"
+>
 
-<div id="riderList">
+    <div class="modal-card">
 
-Loading Riders...
+        <div
+            class="modal-title"
+            id="confirmTitle"
+        >
+            Confirm action
+        </div>
+
+        <div
+            class="modal-text"
+            id="confirmText"
+        >
+            Are you sure?
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="modal-btn cancel-btn"
+                onclick="closeConfirm()"
+            >
+                CANCEL
+            </button>
+
+            <button
+                class="modal-btn confirm-btn"
+                onclick="executeConfirm()"
+            >
+                CONFIRM
+            </button>
+
+        </div>
+
+    </div>
 
 </div>
 
 
-
-</div>
-
-
-
-
-<script type="module"
-src="./js/riders.js"></script>
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
+<script>
+
+const STORAGE_KEY =
+    "riderxAdminRiders";
+
+const PAGE_SIZE =
+    10;
+
+let riders = [];
+
+let filteredRiders = [];
+
+let currentPage = 1;
+
+let confirmAction = null;
+
+let toastTimer;
+
+
+/* LOAD */
+
+function loadRiders(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+        if(raw){
+
+            const data =
+                JSON.parse(raw);
+
+            if(Array.isArray(data)){
+                riders = data;
+            }
+
+        }
+
+    }catch(error){
+
+        console.log(
+            "Rider data error:",
+            error
+        );
+
+    }
+
+    if(!Array.isArray(riders)){
+        riders = [];
+    }
+
+    applyFilters();
+
+}
+
+
+/* SAVE */
+
+function saveRiders(){
+
+    try{
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(riders)
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+}
+
+
+/* FILTER */
+
+function applyFilters(){
+
+    const search =
+        (
+            document.getElementById(
+                "searchInput"
+            )?.value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const status =
+        document.getElementById(
+            "statusFilter"
+        )?.value ||
+        "all";
+
+
+    filteredRiders =
+        riders.filter(
+            function(rider){
+
+                const name =
+                    String(
+                        rider.name ||
+                        rider.displayName ||
+                        ""
+                    ).toLowerCase();
+
+
+                const phone =
+                    String(
+                        rider.phone ||
+                        rider.mobile ||
+                        ""
+                    ).toLowerCase();
+
+
+                const vehicle =
+                    String(
+                        rider.vehicleNumber ||
+                        rider.vehicleNo ||
+                        rider.vehicle ||
+                        ""
+                    ).toLowerCase();
+
+
+                const matchesSearch =
+                    !search ||
+                    name.includes(search) ||
+                    phone.includes(search) ||
+                    vehicle.includes(search);
+
+
+                const riderStatus =
+                    String(
+                        rider.status ||
+                        "offline"
+                    ).toLowerCase();
+
+
+                const matchesStatus =
+                    status === "all" ||
+                    riderStatus === status;
+
+
+                return (
+                    matchesSearch &&
+                    matchesStatus
+                );
+
+            }
+        );
+
+
+    currentPage = 1;
+
+    render();
+
+}
+
+
+/* RENDER */
+
+function render(){
+
+    renderStats();
+
+    renderList();
+
+}
+
+
+/* STATS */
+
+function renderStats(){
+
+    const total =
+        riders.length;
+
+
+    const online =
+        riders.filter(
+            function(rider){
+
+                return String(
+                    rider.status ||
+                    ""
+                ).toLowerCase() ===
+                "online";
+
+            }
+        ).length;
+
+
+    const busy =
+        riders.filter(
+            function(rider){
+
+                return String(
+                    rider.status ||
+                    ""
+                ).toLowerCase() ===
+                "busy";
+
+            }
+        ).length;
+
+
+    const blocked =
+        riders.filter(
+            function(rider){
+
+                return String(
+                    rider.status ||
+                    ""
+                ).toLowerCase() ===
+                "blocked";
+
+            }
+        ).length;
+
+
+    const offline =
+        riders.filter(
+            function(rider){
+
+                return ![
+                    "online",
+                    "busy",
+                    "blocked"
+                ].includes(
+                    String(
+                        rider.status ||
+                        "offline"
+                    ).toLowerCase()
+                );
+
+            }
+        ).length;
+
+
+    setText(
+        "totalRiders",
+        total
+    );
+
+    setText(
+        "onlineRiders",
+        online
+    );
+
+    setText(
+        "offlineRiders",
+        offline
+    );
+
+    setText(
+        "busyRiders",
+        busy
+    );
+
+    setText(
+        "blockedRiders",
+        blocked
+    );
+
+}
+
+
+/* LIST */
+
+function renderList(){
+
+    const container =
+        document.getElementById(
+            "riderList"
+        );
+
+
+    if(!container){
+        return;
+    }
+
+
+    const total =
+        filteredRiders.length;
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                total /
+                PAGE_SIZE
+            )
+        );
+
+
+    if(
+        currentPage >
+        totalPages
+    ){
+
+        currentPage =
+            totalPages;
+
+    }
+
+
+    const start =
+        (
+            currentPage -
+            1
+        ) *
+        PAGE_SIZE;
+
+
+    const visible =
+        filteredRiders.slice(
+            start,
+            start +
+            PAGE_SIZE
+        );
+
+
+    container.innerHTML = "";
+
+
+    if(!visible.length){
+
+        container.innerHTML = `
+            <div class="empty">
+                No riders found.
+            </div>
+        `;
+
+    }
+    else{
+
+        visible.forEach(
+            function(rider){
+
+                container.appendChild(
+                    createRiderRow(
+                        rider
+                    )
+                );
+
+            }
+        );
+
+    }
+
+
+    setText(
+        "resultCount",
+        total +
+        " rider" +
+        (
+            total === 1
+                ? ""
+                : "s"
+        )
+    );
+
+
+    const end =
+        Math.min(
+            start +
+            visible.length,
+            total
+        );
+
+
+    setText(
+        "pageInfo",
+        total
+            ? "Showing " +
+              (start + 1) +
+              "-" +
+              end +
+              " of " +
+              total
+            : "Showing 0 riders"
+    );
+
+
+    setText(
+        "pageNumber",
+        currentPage
+    );
+
+}
+
+
+/* ROW */
+
+function createRiderRow(
+    rider
+){
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "rider-row";
+
+
+    const name =
+        rider.name ||
+        rider.displayName ||
+        "Rider";
+
+
+    const phone =
+        rider.phone ||
+        rider.mobile ||
+        "—";
+
+
+    const vehicle =
+        rider.vehicleNumber ||
+        rider.vehicleNo ||
+        rider.vehicle ||
+        "—";
+
+
+    const rides =
+        Number(
+            rider.rides ||
+            rider.totalRides ||
+            0
+        );
+
+
+    const rating =
+        Number(
+            rider.rating ||
+            0
+        );
+
+
+    const status =
+        String(
+            rider.status ||
+            "offline"
+        ).toLowerCase();
+
+
+    const statusClass =
+        [
+            "online",
+            "offline",
+            "busy",
+            "blocked"
+        ].includes(status)
+            ? status
+            : "offline";
+
+
+    const initial =
+        String(
+            name
+        )
+        .charAt(0)
+        .toUpperCase();
+
+
+    row.innerHTML = `
+
+        <div class="rider-info">
+
+            <div class="avatar">
+                ${escapeHtml(initial)}
+            </div>
+
+            <div class="rider-details">
+
+                <div class="rider-name">
+                    ${escapeHtml(name)}
+                </div>
+
+                <div class="rider-phone">
+                    ${escapeHtml(phone)}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="cell phone-cell">
+
+            <strong>
+                ${escapeHtml(vehicle)}
+            </strong>
+
+        </div>
+
+
+        <div class="cell rides-cell">
+
+            <strong>
+                ${rides}
+            </strong>
+
+            rides
+
+        </div>
+
+
+        <div class="cell rating-cell">
+
+            <strong>
+                ${rating
+                    ? rating.toFixed(1)
+                    : "—"}
+            </strong>
+
+            ⭐
+
+        </div>
+
+
+        <div>
+
+            <span class="status ${statusClass}">
+                ${escapeHtml(
+                    capitalize(status)
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="actions">
+
+            <button
+                class="action"
+                title="View"
+                onclick="viewRider('${escapeJs(
+                    rider.id || ""
+                )}')"
+            >
+                👁
+            </button>
+
+            <button
+                class="action danger"
+                title="Block / Unblock"
+                onclick="toggleRider('${escapeJs(
+                    rider.id || ""
+                )}')"
+            >
+                ${status === "blocked"
+                    ? "✓"
+                    : "⊘"}
+            </button>
+
+        </div>
+
+    `;
+
+
+    return row;
+
+}
+
+
+/* VIEW */
+
+function viewRider(
+    id
+){
+
+    const rider =
+        riders.find(
+            function(item){
+
+                return String(
+                    item.id || ""
+                ) ===
+                String(id);
+
+            }
+        );
+
+
+    if(!rider){
+
+        showToast(
+            "Rider details unavailable."
+        );
+
+        return;
+
+    }
+
+
+    const name =
+        rider.name ||
+        rider.displayName ||
+        "Rider";
+
+
+    showToast(
+        name +
+        " • " +
+        (
+            rider.phone ||
+            rider.mobile ||
+            "Rider"
+        )
+    );
+
+}
+
+
+/* BLOCK */
+
+function toggleRider(
+    id
+){
+
+    const rider =
+        riders.find(
+            function(item){
+
+                return String(
+                    item.id || ""
+                ) ===
+                String(id);
+
+            }
+        );
+
+
+    if(!rider){
+
+        showToast(
+            "Rider not found."
+        );
+
+        return;
+
+    }
+
+
+    const current =
+        String(
+            rider.status ||
+            "offline"
+        ).toLowerCase();
+
+
+    const block =
+        current !==
+        "blocked";
+
+
+    openConfirm(
+        block
+            ? "Block rider"
+            : "Unblock rider",
+
+        block
+            ? "This rider will be marked as blocked."
+            : "This rider will be marked as active.",
+
+        function(){
+
+            rider.status =
+                block
+                    ? "blocked"
+                    : "offline";
+
+
+            saveRiders();
+
+            applyFilters();
+
+
+            showToast(
+                block
+                    ? "Rider blocked."
+                    : "Rider unblocked."
+            );
+
+        }
+    );
+
+}
+
+
+/* APPROVAL */
+
+function openApproval(){
+
+    window.location.href =
+        "rider-approval.html";
+
+}
+
+
+/* PAGINATION */
+
+function previousPage(){
+
+    if(
+        currentPage >
+        1
+    ){
+
+        currentPage--;
+
+        renderList();
+
+    }
+
+}
+
+
+function nextPage(){
+
+    const pages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredRiders.length /
+                PAGE_SIZE
+            )
+        );
+
+
+    if(
+        currentPage <
+        pages
+    ){
+
+        currentPage++;
+
+        renderList();
+
+    }
+
+}
+
+
+/* CONFIRM */
+
+function openConfirm(
+    title,
+    text,
+    action
+){
+
+    document.getElementById(
+        "confirmTitle"
+    ).textContent =
+        title;
+
+    document.getElementById(
+        "confirmText"
+    ).textContent =
+        text;
+
+    confirmAction =
+        action;
+
+    document.getElementById(
+        "confirmModal"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+function closeConfirm(){
+
+    document.getElementById(
+        "confirmModal"
+    ).classList.remove(
+        "show"
+    );
+
+    confirmAction =
+        null;
+
+}
+
+
+function executeConfirm(){
+
+    const action =
+        confirmAction;
+
+    closeConfirm();
+
+    if(
+        typeof action ===
+        "function"
+    ){
+
+        action();
+
+    }
+
+}
+
+
+/* UTILITIES */
+
+function setText(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+    if(element){
+        element.textContent =
+            value;
+    }
+
+}
+
+
+function capitalize(
+    value
+){
+
+    const text =
+        String(
+            value || ""
+        );
+
+    return text.charAt(0).toUpperCase() +
+        text.slice(1);
+
+}
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeJs(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /\\/g,
+        "\\\\"
+    )
+    .replace(
+        /'/g,
+        "\\'"
+    );
+
+}
+
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        history.back();
+
+    }
+    else{
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+
+}
+
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+    if(!toast){
+        return;
+    }
+
+    toast.textContent =
+        message;
+
+    toast.classList.add(
+        "show"
+    );
+
+    clearTimeout(
+        toastTimer
+    );
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2200
+        );
+
+}
+
+
+/* EVENTS */
+
+document.getElementById(
+    "searchInput"
+).addEventListener(
+    "input",
+    applyFilters
+);
+
+
+document.getElementById(
+    "statusFilter"
+).addEventListener(
+    "change",
+    applyFilters
+);
+
+
+document.getElementById(
+    "confirmModal"
+).addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            this
+        ){
+
+            closeConfirm();
+
+        }
+
+    }
+);
+
+
+/* INIT */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadRiders();
+
+    }
+);
+
+</script>
 
 </body>
-
-</html>
+  </html>
