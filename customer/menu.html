@@ -4,65 +4,1863 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Customer Menu</title>
+<title>RiderX - Menu</title>
 
-<link rel="stylesheet" href="../css/style.css">
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
+
+<style>
+
+:root{
+    --yellow:#FFD400;
+    --black:#080808;
+    --bg:#101010;
+    --card:#191919;
+    --card2:#202020;
+    --border:#303030;
+    --muted:#858585;
+    --danger:#ef4444;
+    --green:#22c55e;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    width:100%;
+    min-height:100%;
+    background:#080808;
+}
+
+body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.app{
+    width:100%;
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:#101010;
+    overflow:hidden;
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:13px;
+    border-bottom:1px solid #252525;
+    background:rgba(10,10,10,.97);
+    backdrop-filter:blur(14px);
+}
+
+.back-btn{
+    width:41px;
+    height:41px;
+    min-width:41px;
+    border:1px solid #303030;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.header-title{
+    flex:1;
+}
+
+.header-main{
+    font-size:12px;
+    font-weight:900;
+}
+
+.header-sub{
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
+}
+
+
+/* =========================
+   PROFILE CARD
+========================= */
+
+.content{
+    padding:13px;
+    padding-bottom:30px;
+}
+
+.profile-card{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:14px;
+    border:1px solid #303030;
+    border-radius:18px;
+    background:
+        linear-gradient(
+            135deg,
+            #202020,
+            #151515
+        );
+    overflow:hidden;
+}
+
+.profile-card::after{
+    content:"";
+    position:absolute;
+    right:-45px;
+    top:-55px;
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:rgba(255,212,0,.08);
+}
+
+.avatar{
+    position:relative;
+    z-index:1;
+    width:52px;
+    height:52px;
+    min-width:52px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px solid var(--yellow);
+    border-radius:50%;
+    background:#292929;
+    color:var(--yellow);
+    font-size:17px;
+    font-weight:900;
+}
+
+.profile-info{
+    position:relative;
+    z-index:1;
+    flex:1;
+    min-width:0;
+}
+
+.profile-name{
+    font-size:11px;
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.profile-phone{
+    margin-top:4px;
+    color:#777;
+    font-size:7px;
+}
+
+.profile-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    margin-top:6px;
+    padding:4px 7px;
+    border-radius:20px;
+    background:#262300;
+    color:var(--yellow);
+    font-size:5px;
+    font-weight:900;
+}
+
+.profile-arrow{
+    position:relative;
+    z-index:2;
+    color:#777;
+    font-size:18px;
+}
+
+
+/* =========================
+   ONLINE STATUS
+========================= */
+
+.status-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:10px;
+    padding:12px;
+    border:1px solid #303030;
+    border-radius:14px;
+    background:#191919;
+}
+
+.status-icon{
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#242424;
+    font-size:13px;
+}
+
+.status-info{
+    flex:1;
+}
+
+.status-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.status-sub{
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
+}
+
+.status-switch{
+    position:relative;
+    width:45px;
+    height:25px;
+    border-radius:20px;
+    background:#333;
+    cursor:pointer;
+}
+
+.status-switch::after{
+    content:"";
+    position:absolute;
+    top:3px;
+    left:3px;
+    width:19px;
+    height:19px;
+    border-radius:50%;
+    background:#aaa;
+    transition:.2s;
+}
+
+.status-switch.online{
+    background:#295c39;
+}
+
+.status-switch.online::after{
+    left:23px;
+    background:var(--green);
+}
+
+
+/* =========================
+   SECTION
+========================= */
+
+.section-title{
+    margin:19px 2px 8px;
+    color:#666;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+}
+
+
+/* =========================
+   MENU CARD
+========================= */
+
+.menu-card{
+    border:1px solid #2b2b2b;
+    border-radius:16px;
+    background:#181818;
+    overflow:hidden;
+}
+
+.menu-item{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    min-height:58px;
+    padding:9px 12px;
+    border-bottom:1px solid #292929;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.menu-item:last-child{
+    border-bottom:0;
+}
+
+.menu-item:active{
+    background:#222;
+}
+
+.menu-icon{
+    width:36px;
+    height:36px;
+    min-width:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#242424;
+    color:#ddd;
+    font-size:14px;
+}
+
+.menu-info{
+    flex:1;
+    min-width:0;
+}
+
+.menu-name{
+    font-size:8px;
+    font-weight:900;
+}
+
+.menu-desc{
+    margin-top:3px;
+    color:#6f6f6f;
+    font-size:6px;
+    line-height:1.3;
+}
+
+.menu-arrow{
+    color:#666;
+    font-size:16px;
+}
+
+.menu-badge{
+    padding:4px 6px;
+    border-radius:10px;
+    background:#292400;
+    color:var(--yellow);
+    font-size:5px;
+    font-weight:900;
+}
+
+.menu-badge.green{
+    background:#173521;
+    color:#5ee28a;
+}
+
+.menu-badge.red{
+    background:#351717;
+    color:#ff7777;
+}
+
+
+/* =========================
+   QUICK GRID
+========================= */
+
+.quick-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
+
+.quick-card{
+    min-height:72px;
+    padding:11px;
+    border:1px solid #2b2b2b;
+    border-radius:14px;
+    background:#191919;
+    cursor:pointer;
+}
+
+.quick-icon{
+    width:31px;
+    height:31px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:9px;
+    background:#252525;
+    color:var(--yellow);
+    font-size:13px;
+}
+
+.quick-title{
+    margin-top:8px;
+    font-size:7px;
+    font-weight:900;
+}
+
+.quick-sub{
+    margin-top:3px;
+    color:#666;
+    font-size:5px;
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+.logout{
+    width:100%;
+    height:45px;
+    margin-top:18px;
+    border:1px solid #512020;
+    border-radius:12px;
+    background:#211313;
+    color:#ff6f6f;
+    font-size:8px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.version{
+    margin-top:15px;
+    color:#444;
+    text-align:center;
+    font-size:6px;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    z-index:100;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* =========================
+   MODAL
+========================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:200;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    background:rgba(0,0,0,.7);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:650px;
+    padding:18px 14px 25px;
+    border-radius:22px 22px 0 0;
+    border-top:1px solid #333;
+    background:#151515;
+}
+
+.modal-handle{
+    width:40px;
+    height:4px;
+    margin:0 auto 15px;
+    border-radius:10px;
+    background:#444;
+}
+
+.modal-title{
+    font-size:11px;
+    font-weight:900;
+}
+
+.modal-text{
+    margin-top:7px;
+    color:#777;
+    font-size:7px;
+    line-height:1.5;
+}
+
+.modal-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:15px;
+}
+
+.modal-btn{
+    height:42px;
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    font-size:7px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.modal-btn.danger{
+    border-color:#542020;
+    background:#241313;
+    color:#ff7070;
+}
+
+</style>
 
 </head>
 
-
 <body>
 
-
-<div class="splash">
-
-
-<img src="../assets/logo.png" class="logo">
+<div class="app">
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            ‹
+        </button>
+
+        <div class="header-title">
+
+            <div class="header-main">
+                Menu
+            </div>
+
+            <div class="header-sub">
+                Manage your RiderX account
+            </div>
+
+        </div>
+
+    </header>
 
 
-<h2>Customer Menu</h2>
+    <main class="content">
 
 
-<button onclick="go('home.html')">
-🏠 Home
-</button>
+        <!-- PROFILE -->
+
+        <div
+            class="profile-card"
+            onclick="openPage('profile.html')"
+        >
+
+            <div
+                class="avatar"
+                id="avatar"
+            >
+                R
+            </div>
+
+            <div class="profile-info">
+
+                <div
+                    class="profile-name"
+                    id="profileName"
+                >
+                    RiderX Customer
+                </div>
+
+                <div
+                    class="profile-phone"
+                    id="profilePhone"
+                >
+                    Welcome to RiderX
+                </div>
+
+                <div class="profile-badge">
+                    ★ RiderX Member
+                </div>
+
+            </div>
+
+            <div class="profile-arrow">
+                ›
+            </div>
+
+        </div>
 
 
-<button onclick="go('booking.html')">
-🚕 Book Ride
-</button>
+        <!-- ONLINE / ACCOUNT STATUS -->
+
+        <div class="status-card">
+
+            <div class="status-icon">
+                🚕
+            </div>
+
+            <div class="status-info">
+
+                <div
+                    class="status-title"
+                    id="statusTitle"
+                >
+                    RiderX Services
+                </div>
+
+                <div
+                    class="status-sub"
+                    id="statusSub"
+                >
+                    Bike, Cab, Parcel & Food
+                </div>
+
+            </div>
+
+            <div
+                class="status-switch"
+                id="statusSwitch"
+                onclick="toggleService()"
+            ></div>
+
+        </div>
 
 
-<button onclick="go('tracking.html')">
-📍 Track Ride
-</button>
+        <!-- QUICK ACTIONS -->
+
+        <div class="section-title">
+            Quick Access
+        </div>
+
+        <div class="quick-grid">
+
+            <div
+                class="quick-card"
+                onclick="openPage('booking.html')"
+            >
+
+                <div class="quick-icon">
+                    🚕
+                </div>
+
+                <div class="quick-title">
+                    Book Ride
+                </div>
+
+                <div class="quick-sub">
+                    Start a new trip
+                </div>
+
+            </div>
 
 
-<button onclick="go('notifications.html')">
-🔔 Notifications
-</button>
+            <div
+                class="quick-card"
+                onclick="openPage('history.html')"
+            >
+
+                <div class="quick-icon">
+                    🕘
+                </div>
+
+                <div class="quick-title">
+                    Ride History
+                </div>
+
+                <div class="quick-sub">
+                    View past rides
+                </div>
+
+            </div>
 
 
-<button onclick="logout()">
-Logout
-</button>
+            <div
+                class="quick-card"
+                onclick="openPage('wallet.html')"
+            >
 
+                <div class="quick-icon">
+                    ₹
+                </div>
+
+                <div class="quick-title">
+                    Wallet
+                </div>
+
+                <div class="quick-sub">
+                    Balance & payments
+                </div>
+
+            </div>
+
+
+            <div
+                class="quick-card"
+                onclick="openPage('notifications.html')"
+            >
+
+                <div class="quick-icon">
+                    🔔
+                </div>
+
+                <div class="quick-title">
+                    Notifications
+                </div>
+
+                <div class="quick-sub">
+                    Latest updates
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="section-title">
+            Account
+        </div>
+
+        <div class="menu-card">
+
+            <div
+                class="menu-item"
+                onclick="openPage('profile.html')"
+            >
+
+                <div class="menu-icon">
+                    👤
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        My Profile
+                    </div>
+
+                    <div class="menu-desc">
+                        Name, phone and account details
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('wallet.html')"
+            >
+
+                <div class="menu-icon">
+                    💳
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Wallet & Payments
+                    </div>
+
+                    <div class="menu-desc">
+                        Manage balance and payment methods
+                    </div>
+
+                </div>
+
+                <div
+                    class="menu-badge"
+                    id="walletBadge"
+                >
+                    ₹0
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('history.html')"
+            >
+
+                <div class="menu-icon">
+                    📋
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Ride History
+                    </div>
+
+                    <div class="menu-desc">
+                        Completed and cancelled rides
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('notifications.html')"
+            >
+
+                <div class="menu-icon">
+                    🔔
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Notifications
+                    </div>
+
+                    <div class="menu-desc">
+                        Ride and account notifications
+                    </div>
+
+                </div>
+
+                <div
+                    class="menu-badge green"
+                    id="notificationBadge"
+                >
+                    0
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SETTINGS -->
+
+        <div class="section-title">
+            Preferences
+        </div>
+
+        <div class="menu-card">
+
+            <div
+                class="menu-item"
+                onclick="openPage('settings.html')"
+            >
+
+                <div class="menu-icon">
+                    ⚙
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Settings
+                    </div>
+
+                    <div class="menu-desc">
+                        Language, notifications and app preferences
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('chat.html')"
+            >
+
+                <div class="menu-icon">
+                    💬
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Help & Support
+                    </div>
+
+                    <div class="menu-desc">
+                        Contact RiderX support
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SERVICES -->
+
+        <div class="section-title">
+            RiderX Services
+        </div>
+
+        <div class="menu-card">
+
+            <div
+                class="menu-item"
+                onclick="selectService('bike')"
+            >
+
+                <div class="menu-icon">
+                    🏍️
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Bike Taxi
+                    </div>
+
+                    <div class="menu-desc">
+                        Fast and affordable bike rides
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="selectService('cab')"
+            >
+
+                <div class="menu-icon">
+                    🚗
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Cab
+                    </div>
+
+                    <div class="menu-desc">
+                        Comfortable city rides
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="selectService('parcel')"
+            >
+
+                <div class="menu-icon">
+                    📦
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Parcel
+                    </div>
+
+                    <div class="menu-desc">
+                        Send packages across the city
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="selectService('food')"
+            >
+
+                <div class="menu-icon">
+                    🍔
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-name">
+                        Food Delivery
+                    </div>
+
+                    <div class="menu-desc">
+                        Order and track food delivery
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- LOGOUT -->
+
+        <button
+            class="logout"
+            onclick="confirmLogout()"
+        >
+            Logout
+        </button>
+
+
+        <div class="version">
+            RiderX Customer • Version 1.0
+        </div>
+
+    </main>
 
 </div>
 
 
+<!-- LOGOUT MODAL -->
 
-<script src="../js/menu.js"></script>
+<div
+    class="modal"
+    id="logoutModal"
+>
 
+    <div class="modal-card">
+
+        <div class="modal-handle"></div>
+
+        <div class="modal-title">
+            Logout from RiderX?
+        </div>
+
+        <div class="modal-text">
+            You can login again anytime using your RiderX account.
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="modal-btn"
+                onclick="closeLogout()"
+            >
+                Cancel
+            </button>
+
+            <button
+                class="modal-btn danger"
+                onclick="logout()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script>
+
+/* ==========================================
+   RIDERX CUSTOMER MENU
+========================================== */
+
+let toastTimer = null;
+
+
+/* ==========================================
+   OPEN PAGE
+========================================== */
+
+function openPage(
+    page
+){
+
+    if(
+        !page
+    ){
+
+        return;
+
+    }
+
+
+    window.location.href =
+        page;
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        window.location.href =
+            "home.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   USER DATA
+========================================== */
+
+function loadUserData(){
+
+    const possibleKeys = [
+
+        "riderxUser",
+        "user",
+        "currentUser",
+        "riderxCustomer",
+        "customerProfile"
+
+    ];
+
+
+    let user = null;
+
+
+    for(
+        const key of possibleKeys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(
+                raw
+            ){
+
+                user =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if(
+                    user
+                ){
+
+                    break;
+
+                }
+
+            }
+
+        }catch(error){
+
+            console.log(
+                "Invalid local data:",
+                key
+            );
+
+        }
+
+    }
+
+
+    if(
+        !user
+    ){
+
+        return;
+
+    }
+
+
+    const name =
+        user.name ||
+        user.displayName ||
+        user.fullName ||
+        user.username ||
+        "RiderX Customer";
+
+
+    const phone =
+        user.phone ||
+        user.mobile ||
+        user.phoneNumber ||
+        "RiderX account";
+
+
+    document.getElementById(
+        "profileName"
+    ).textContent =
+        name;
+
+
+    document.getElementById(
+        "profilePhone"
+    ).textContent =
+        phone;
+
+
+    document.getElementById(
+        "avatar"
+    ).textContent =
+        getInitials(
+            name
+        );
+
+}
+
+
+/* ==========================================
+   INITIALS
+========================================== */
+
+function getInitials(
+    name
+){
+
+    const parts =
+        String(
+            name ||
+            "R"
+        )
+        .trim()
+        .split(
+            /\s+/
+        );
+
+
+    if(
+        parts.length ===
+        1
+    ){
+
+        return parts[0]
+            .charAt(0)
+            .toUpperCase();
+
+    }
+
+
+    return (
+        parts[0].charAt(0) +
+        parts[1].charAt(0)
+    )
+    .toUpperCase();
+
+}
+
+
+/* ==========================================
+   WALLET
+========================================== */
+
+function loadWallet(){
+
+    const keys = [
+
+        "riderxWallet",
+        "walletBalance",
+        "customerWallet"
+
+    ];
+
+
+    let balance =
+        0;
+
+
+    for(
+        const key of keys
+    ){
+
+        const value =
+            localStorage.getItem(
+                key
+            );
+
+
+        if(
+            value !== null
+        ){
+
+            try{
+
+                if(
+                    key ===
+                    "riderxWallet" ||
+                    key ===
+                    "customerWallet"
+                ){
+
+                    const data =
+                        JSON.parse(
+                            value
+                        );
+
+
+                    balance =
+                        Number(
+                            data.balance ||
+                            data.amount ||
+                            0
+                        );
+
+                }else{
+
+                    balance =
+                        Number(
+                            value
+                        );
+
+                }
+
+            }catch(error){
+
+                balance =
+                    Number(
+                        value
+                    ) ||
+                    0;
+
+            }
+
+
+            break;
+
+        }
+
+    }
+
+
+    if(
+        !Number.isFinite(
+            balance
+        )
+    ){
+
+        balance =
+            0;
+
+    }
+
+
+    document.getElementById(
+        "walletBadge"
+    ).textContent =
+        "₹" +
+        balance.toFixed(0);
+
+}
+
+
+/* ==========================================
+   NOTIFICATIONS
+========================================== */
+
+function loadNotifications(){
+
+    const keys = [
+
+        "riderxNotifications",
+        "notifications",
+        "customerNotifications"
+
+    ];
+
+
+    let count =
+        0;
+
+
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(
+                raw
+            ){
+
+                const data =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if(
+                    Array.isArray(
+                        data
+                    )
+                ){
+
+                    count =
+                        data.filter(
+                            item =>
+                                !item.read
+                        ).length;
+
+                }
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                error
+            );
+
+        }
+
+    }
+
+
+    document.getElementById(
+        "notificationBadge"
+    ).textContent =
+        count > 99
+            ? "99+"
+            : String(
+                count
+            );
+
+}
+
+
+/* ==========================================
+   SERVICE TOGGLE
+========================================== */
+
+function toggleService(){
+
+    const switchEl =
+        document.getElementById(
+            "statusSwitch"
+        );
+
+
+    const isActive =
+        switchEl.classList.toggle(
+            "online"
+        );
+
+
+    localStorage.setItem(
+        "riderxServiceEnabled",
+        isActive
+            ? "true"
+            : "false"
+    );
+
+
+    if(
+        isActive
+    ){
+
+        document.getElementById(
+            "statusTitle"
+        ).textContent =
+            "RiderX Services Active";
+
+
+        document.getElementById(
+            "statusSub"
+        ).textContent =
+            "Ready to book your next ride";
+
+
+        showToast(
+            "RiderX services enabled.",
+            "success"
+        );
+
+    }else{
+
+        document.getElementById(
+            "statusTitle"
+        ).textContent =
+            "RiderX Services";
+
+
+        document.getElementById(
+            "statusSub"
+        ).textContent =
+            "Bike, Cab, Parcel & Food";
+
+
+        showToast(
+            "RiderX services paused."
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   LOAD SERVICE STATUS
+========================================== */
+
+function loadServiceStatus(){
+
+    const enabled =
+        localStorage.getItem(
+            "riderxServiceEnabled"
+        ) ===
+        "true";
+
+
+    if(
+        enabled
+    ){
+
+        document.getElementById(
+            "statusSwitch"
+        ).classList.add(
+            "online"
+        );
+
+
+        document.getElementById(
+            "statusTitle"
+        ).textContent =
+            "RiderX Services Active";
+
+
+        document.getElementById(
+            "statusSub"
+        ).textContent =
+            "Ready to book your next ride";
+
+    }
+
+}
+
+
+/* ==========================================
+   SERVICE SELECT
+========================================== */
+
+function selectService(
+    service
+){
+
+    localStorage.setItem(
+        "riderxSelectedService",
+        service
+    );
+
+
+    window.location.href =
+        "booking.html?service=" +
+        encodeURIComponent(
+            service
+        );
+
+}
+
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+function confirmLogout(){
+
+    document.getElementById(
+        "logoutModal"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+function closeLogout(){
+
+    document.getElementById(
+        "logoutModal"
+    ).classList.remove(
+        "show"
+    );
+
+}
+
+
+/* ==========================================
+   LOGOUT ACTION
+========================================== */
+
+async function logout(){
+
+    closeLogout();
+
+
+    /*
+      Clear RiderX session data.
+
+      Firebase auth, when available,
+      is also signed out.
+    */
+
+    const sessionKeys = [
+
+        "riderxUser",
+        "currentUser",
+        "user",
+        "riderxCustomer",
+        "customerProfile"
+
+    ];
+
+
+    sessionKeys.forEach(
+        key =>
+            localStorage.removeItem(
+                key
+            )
+    );
+
+
+    /*
+      Firebase signOut.
+    */
+
+    try{
+
+        if(
+            window.firebase &&
+            firebase.auth
+        ){
+
+            await firebase
+                .auth()
+                .signOut();
+
+        }
+
+    }catch(error){
+
+        console.log(
+            "Firebase logout:",
+            error
+        );
+
+    }
+
+
+    showToast(
+        "Logged out successfully."
+    );
+
+
+    setTimeout(
+        function(){
+
+            window.location.href =
+                "../auth/login.html";
+
+        },
+        600
+    );
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message,
+    type=""
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.style.borderColor =
+        type ===
+        "success"
+            ? "rgba(34,197,94,.5)"
+            : "#333";
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   CLOSE MODAL OUTSIDE
+========================================== */
+
+document.getElementById(
+    "logoutModal"
+).addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            this
+        ){
+
+            closeLogout();
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadUserData();
+
+        loadWallet();
+
+        loadNotifications();
+
+        loadServiceStatus();
+
+    }
+);
+
+</script>
 
 </body>
-
 </html>
