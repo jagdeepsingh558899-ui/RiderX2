@@ -1,53 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<meta
-    name="viewport"
-    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"
->
+<title>RiderX - Book a Ride</title>
 
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#FFD400">
 
-<title>RiderX | Book Ride</title>
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
->
-
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
->
-
-<link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
->
+/>
 
 <style>
+
 :root{
-    --yellow:#ffe500;
-    --black:#000;
-    --dark:#080808;
-    --card:#141414;
-    --card2:#1d1d1d;
-    --line:#2b2b2b;
-    --white:#fff;
-    --muted:#8d8d8d;
+    --yellow:#FFD400;
+    --black:#080808;
+    --dark:#111;
+    --card:#191919;
+    --border:#303030;
+    --muted:#777;
     --green:#22c55e;
     --red:#ef4444;
-    --blue:#3b82f6;
 }
 
 *{
+    box-sizing:border-box;
     margin:0;
     padding:0;
-    box-sizing:border-box;
-    font-family:Poppins,Arial,sans-serif;
-    -webkit-tap-highlight-color:transparent;
 }
 
 html,
@@ -55,626 +42,447 @@ body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#000;
-    color:#fff;
 }
 
 body{
-    position:fixed;
-    inset:0;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-button,
-input,
-select{
-    font:inherit;
+.booking-page{
+    width:100%;
+    max-width:650px;
+    height:100vh;
+    height:100dvh;
+    margin:auto;
+    position:relative;
+    overflow:hidden;
+    background:#111;
 }
 
-button{
-    cursor:pointer;
-}
-
-
-/* =========================================================
-   MAP
-========================================================= */
+/* MAP */
 
 #map{
-    position:fixed;
+    position:absolute;
     inset:0;
     width:100%;
     height:100%;
     z-index:1;
-    background:#ddd;
-}
-
-.leaflet-control-zoom{
-    display:none!important;
 }
 
 .leaflet-control-attribution{
-    font-size:8px!important;
-    padding:2px 4px!important;
+    font-size:7px !important;
 }
 
-.leaflet-container{
-    font-family:Poppins,Arial,sans-serif;
-}
-
-
-/* =========================================================
-   TOP BAR
-========================================================= */
+/* TOP BAR */
 
 .topbar{
-    position:fixed;
+    position:absolute;
     top:0;
     left:0;
     right:0;
-    z-index:1200;
-    padding:
-        max(10px,env(safe-area-inset-top))
-        14px
-        0;
-    pointer-events:none;
-}
-
-.topbar-inner{
-    height:54px;
+    z-index:20;
+    padding:12px;
     display:flex;
     align-items:center;
-    justify-content:space-between;
+    gap:8px;
+    pointer-events:none;
 }
 
 .top-btn{
-    width:45px;
-    height:45px;
+    width:43px;
+    height:43px;
     border:0;
     border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:rgba(10,10,10,.94);
-    color:#fff;
-    font-size:17px;
-    box-shadow:0 6px 24px rgba(0,0,0,.42);
-    pointer-events:auto;
-    transition:transform .15s ease;
-}
-
-.top-btn:active{
-    transform:scale(.91);
-}
-
-.logo{
-    padding:8px 17px;
-    border-radius:15px;
-    background:rgba(10,10,10,.94);
-    color:#fff;
-    font-size:17px;
-    font-weight:800;
-    letter-spacing:.4px;
-    box-shadow:0 6px 24px rgba(0,0,0,.42);
-}
-
-.logo span{
-    color:var(--yellow);
-}
-
-
-/* =========================================================
-   NOTIFICATION BUTTON
-========================================================= */
-
-.notification-btn{
-    position:relative;
-}
-
-.notification-dot{
-    position:absolute;
-    top:8px;
-    right:8px;
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:var(--yellow);
-    border:2px solid #111;
-    display:none;
-}
-
-.notification-dot.show{
-    display:block;
-}
-
-
-/* =========================================================
-   STATUS PILL
-========================================================= */
-
-.status-pill{
-    position:fixed;
-    top:
-        calc(
-            max(10px,env(safe-area-inset-top))
-            + 63px
-        );
-    left:50%;
-    transform:translateX(-50%);
-    z-index:1100;
-    max-width:88%;
-    padding:8px 15px;
-    border-radius:30px;
     background:rgba(15,15,15,.94);
     color:#fff;
-    font-size:10px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    box-shadow:0 5px 20px rgba(0,0,0,.35);
-    pointer-events:none;
+    font-size:21px;
+    box-shadow:0 3px 14px rgba(0,0,0,.3);
+    cursor:pointer;
+    pointer-events:auto;
 }
 
-
-/* =========================================================
-   CENTER PIN
-========================================================= */
-
-.center-pin{
-    position:fixed;
-    left:50%;
-    top:50%;
-    z-index:500;
-    transform:translate(-50%,-100%);
-    pointer-events:none;
-}
-
-.center-pin-icon{
-    width:45px;
-    height:45px;
+.top-title{
+    flex:1;
+    background:rgba(15,15,15,.94);
+    border-radius:22px;
+    height:43px;
     display:flex;
     align-items:center;
-    justify-content:center;
-    background:var(--yellow);
-    color:#000;
-    border-radius:50% 50% 50% 0;
-    transform:rotate(-45deg);
-    box-shadow:0 7px 20px rgba(0,0,0,.35);
+    padding:0 14px;
+    font-size:12px;
+    font-weight:900;
+    box-shadow:0 3px 14px rgba(0,0,0,.3);
 }
 
-.center-pin-icon i{
-    transform:rotate(45deg);
-}
-
-
-/* =========================================================
-   LOCATION BUTTON
-========================================================= */
+/* LOCATION BUTTON */
 
 .location-btn{
-    position:fixed;
-    right:15px;
-    bottom:calc(30vh + 18px);
-    z-index:1050;
-    width:48px;
-    height:48px;
+    position:absolute;
+    right:13px;
+    bottom:46%;
+    z-index:20;
+    width:45px;
+    height:45px;
     border:0;
     border-radius:50%;
-    background:#111;
-    color:var(--yellow);
-    font-size:18px;
-    box-shadow:0 5px 20px rgba(0,0,0,.45);
-    transition:
-        bottom .3s ease,
-        transform .15s ease;
+    background:#fff;
+    color:#000;
+    font-size:19px;
+    box-shadow:0 3px 15px rgba(0,0,0,.35);
+    cursor:pointer;
 }
 
-.location-btn:active{
-    transform:scale(.92);
-}
+/* SHEET */
 
-
-/* =========================================================
-   BOTTOM SHEET
-========================================================= */
-
-.sheet{
-    position:fixed;
+.booking-sheet{
+    position:absolute;
     left:0;
     right:0;
     bottom:0;
-    z-index:1000;
-
-    max-height:88vh;
-
-    padding:
-        8px
-        14px
-        max(14px,env(safe-area-inset-bottom));
-
-    background:rgba(8,8,8,.985);
-
-    border-radius:28px 28px 0 0;
-
-    box-shadow:0 -14px 42px rgba(0,0,0,.55);
-
-    overflow-y:auto;
-    overflow-x:hidden;
-
-    transform:translateY(calc(100% - 30vh));
-
-    transition:
-        transform .32s cubic-bezier(.22,.8,.22,1);
-
-    overscroll-behavior:contain;
-
-    touch-action:pan-y;
-
-    -webkit-overflow-scrolling:touch;
-}
-
-.sheet.dragging{
-    transition:none;
-}
-
-
-/* =========================================================
-   HANDLE
-========================================================= */
-
-.handle-area{
-    width:100%;
-    height:32px;
+    z-index:30;
+    height:42%;
+    min-height:330px;
+    max-height:88%;
+    background:#101010;
+    border-radius:25px 25px 0 0;
+    border-top:1px solid #292929;
+    box-shadow:0 -8px 30px rgba(0,0,0,.45);
     display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:grab;
+    flex-direction:column;
+    transition:height .28s ease;
     touch-action:none;
 }
 
-.handle-area:active{
-    cursor:grabbing;
+.booking-sheet.expanded{
+    height:82%;
 }
 
-.handle{
-    width:48px;
-    height:5px;
-    border-radius:10px;
+.sheet-handle-area{
+    height:34px;
+    flex:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:grab;
+}
+
+.sheet-handle{
+    width:42px;
+    height:4px;
     background:#555;
+    border-radius:10px;
 }
-
-.handle-area:active .handle{
-    width:58px;
-    background:#777;
-}
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
 
 .sheet-content{
-    padding-bottom:4px;
+    flex:1;
+    overflow-y:auto;
+    padding:0 14px 20px;
+    touch-action:pan-y;
 }
 
-.title{
-    font-size:20px;
-    line-height:1.2;
-    font-weight:800;
-    margin:0 0 13px;
+.sheet-content::-webkit-scrollbar{
+    width:3px;
 }
 
+.sheet-content::-webkit-scrollbar-thumb{
+    background:#333;
+    border-radius:10px;
+}
 
-/* =========================================================
-   LOCATION SEARCH
-========================================================= */
+/* LOCATION */
 
-.search-box{
-    background:#151515;
-    border-radius:17px;
+.location-box{
+    background:#191919;
+    border:1px solid var(--border);
+    border-radius:15px;
     overflow:hidden;
-    border:1px solid rgba(255,255,255,.045);
 }
 
-.search-row{
-    min-height:57px;
+.location-row{
     display:flex;
     align-items:center;
-    gap:10px;
-    padding:8px 10px;
+    min-height:54px;
+    padding:8px 11px;
 }
 
-.search-row + .search-row{
+.location-row + .location-row{
     border-top:1px solid #292929;
 }
 
-.location-dot{
-    width:27px;
-    height:27px;
-    min-width:27px;
+.location-marker{
+    width:30px;
+    min-width:30px;
+    height:30px;
+    border-radius:50%;
     display:flex;
     align-items:center;
     justify-content:center;
-    border-radius:50%;
-    font-size:9px;
+    margin-right:9px;
+    font-size:13px;
 }
 
-.pick-dot{
-    background:#12351f;
-    color:var(--green);
-}
-
-.drop-dot{
-    background:#3a3300;
+.pickup-marker{
+    background:rgba(255,212,0,.15);
     color:var(--yellow);
 }
 
-.location-input{
+.drop-marker{
+    background:rgba(255,255,255,.08);
+    color:#fff;
+}
+
+.location-input-wrap{
     flex:1;
-    width:100%;
     min-width:0;
+}
+
+.location-label{
+    color:#666;
+    font-size:7px;
+    text-transform:uppercase;
+    font-weight:800;
+    margin-bottom:3px;
+}
+
+.location-input{
+    width:100%;
     border:0;
-    outline:0;
+    outline:none;
     background:transparent;
     color:#fff;
-    font-size:13px;
+    font-size:10px;
+    font-family:inherit;
+    text-overflow:ellipsis;
 }
 
 .location-input::placeholder{
     color:#777;
 }
 
-.map-select-btn{
-    width:36px;
-    height:36px;
-    min-width:36px;
-    border:0;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#242424;
-    color:var(--yellow);
-}
-
-.map-select-btn:active{
-    transform:scale(.92);
-}
-
-
-/* =========================================================
-   RECENT / LOCATION SUGGESTIONS
-========================================================= */
-
-.suggestions{
-    display:none;
-    margin-top:8px;
-    background:#151515;
-    border-radius:15px;
-    overflow:hidden;
-    border:1px solid #292929;
-}
-
-.suggestions.show{
-    display:block;
-}
-
-.suggestion{
-    min-height:52px;
-    display:flex;
-    align-items:center;
-    gap:11px;
-    padding:8px 12px;
-    border:0;
-    border-bottom:1px solid #282828;
-    width:100%;
-    background:transparent;
-    color:#fff;
-    text-align:left;
-}
-
-.suggestion:last-child{
-    border-bottom:0;
-}
-
-.suggestion:active{
+.swap-btn{
+    width:29px;
+    height:29px;
+    border:1px solid #333;
+    border-radius:8px;
     background:#222;
+    color:#aaa;
+    cursor:pointer;
 }
 
-.suggestion-icon{
-    width:32px;
-    height:32px;
-    min-width:32px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#242424;
-    color:var(--yellow);
-}
-
-.suggestion-title{
-    font-size:12px;
-    font-weight:600;
-}
-
-.suggestion-subtitle{
-    font-size:9px;
-    color:#777;
-    margin-top:2px;
-}
-
-
-/* =========================================================
-   SERVICES
-========================================================= */
+/* SERVICE */
 
 .section-title{
-    margin-top:15px;
-    margin-bottom:8px;
-    color:#999;
     font-size:12px;
-    font-weight:500;
+    font-weight:900;
+    margin:16px 0 9px;
 }
 
 .services{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
+    display:flex;
     gap:8px;
+    overflow-x:auto;
+    padding-bottom:2px;
+}
+
+.services::-webkit-scrollbar{
+    display:none;
 }
 
 .service{
-    min-height:74px;
+    flex:1;
+    min-width:82px;
     border:1px solid #303030;
-    border-radius:15px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:5px;
-    background:#151515;
-    color:#aaa;
-    transition:
-        transform .15s ease,
-        background .2s ease,
-        color .2s ease,
-        border-color .2s ease;
-}
-
-.service:active{
-    transform:scale(.95);
-}
-
-.service i{
-    font-size:19px;
-}
-
-.service span{
-    font-size:10px;
+    background:#181818;
+    border-radius:14px;
+    padding:10px 7px;
+    color:#fff;
+    cursor:pointer;
+    text-align:center;
 }
 
 .service.active{
     background:var(--yellow);
-    border-color:var(--yellow);
     color:#000;
-    box-shadow:0 5px 16px rgba(255,229,0,.12);
+    border-color:var(--yellow);
 }
 
+.service-icon{
+    font-size:21px;
+    margin-bottom:5px;
+}
 
-/* =========================================================
-   FARE
-========================================================= */
+.service-name{
+    font-size:8px;
+    font-weight:900;
+}
+
+.service-price{
+    font-size:7px;
+    margin-top:4px;
+    opacity:.65;
+}
+
+/* FARE */
 
 .fare-card{
+    margin-top:13px;
+    padding:13px;
+    background:#191919;
+    border:1px solid var(--border);
+    border-radius:15px;
+}
+
+.fare-row{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    margin-top:14px;
-    padding:14px;
-    background:#151515;
-    border-radius:16px;
-    border:1px solid rgba(255,255,255,.04);
+    margin-bottom:8px;
 }
 
 .fare-label{
-    font-size:13px;
-    font-weight:600;
-}
-
-.fare-info{
-    margin-top:3px;
+    flex:1;
     color:#777;
-    font-size:10px;
+    font-size:8px;
 }
 
-.fare-price{
-    color:var(--yellow);
-    font-size:23px;
+.fare-value{
+    font-size:9px;
     font-weight:800;
-    white-space:nowrap;
 }
 
+.total-row{
+    padding-top:9px;
+    border-top:1px solid #2b2b2b;
+}
 
-/* =========================================================
-   DISTANCE
-========================================================= */
-
-.distance{
-    text-align:center;
-    margin-top:8px;
-    color:#777;
+.total-row .fare-label{
+    color:#fff;
     font-size:10px;
+    font-weight:900;
 }
 
+.total-row .fare-value{
+    color:var(--yellow);
+    font-size:19px;
+}
 
-/* =========================================================
-   PAYMENT
-========================================================= */
+/* PAYMENT */
 
 .payment-row{
     display:flex;
     align-items:center;
-    gap:9px;
-    margin-top:10px;
-    padding:13px;
-    background:#151515;
-    border-radius:15px;
+    gap:8px;
+    margin-top:11px;
 }
 
-.payment-icon{
+.payment-option{
+    flex:1;
+    height:42px;
+    border:1px solid #303030;
+    background:#181818;
+    color:#aaa;
+    border-radius:11px;
+    font-size:9px;
+    font-weight:800;
+    cursor:pointer;
+}
+
+.payment-option.active{
+    background:#222;
+    border-color:var(--yellow);
     color:var(--yellow);
 }
 
-#paymentMethod{
-    flex:1;
-    min-width:0;
-    border:0;
-    outline:0;
-    background:#151515;
-    color:#fff;
-    font-size:13px;
-}
-
-
-/* =========================================================
-   BOOK BUTTON
-========================================================= */
+/* BOOK BUTTON */
 
 .book-btn{
     width:100%;
-    min-height:54px;
-    margin-top:14px;
+    height:52px;
+    margin-top:13px;
     border:0;
-    border-radius:16px;
+    border-radius:14px;
     background:var(--yellow);
     color:#000;
-    font-size:16px;
-    font-weight:800;
-    box-shadow:0 5px 20px rgba(255,229,0,.12);
-    transition:transform .15s ease,background .2s ease;
-}
-
-.book-btn:active{
-    transform:scale(.985);
+    font-size:12px;
+    font-weight:900;
+    cursor:pointer;
 }
 
 .book-btn:disabled{
-    background:#3e3e3e;
-    color:#888;
-    box-shadow:none;
+    opacity:.45;
+    cursor:not-allowed;
 }
 
+/* SEARCH */
 
-/* =========================================================
-   LOADING
-========================================================= */
-
-.book-btn.loading{
-    pointer-events:none;
+.search-results{
+    display:none;
+    margin-top:6px;
+    background:#181818;
+    border:1px solid #303030;
+    border-radius:12px;
+    overflow:hidden;
 }
 
-.book-btn.loading i{
-    animation:spin .8s linear infinite;
+.search-results.show{
+    display:block;
+}
+
+.search-result{
+    padding:10px;
+    border-bottom:1px solid #292929;
+    font-size:9px;
+    color:#ccc;
+    cursor:pointer;
+}
+
+.search-result:last-child{
+    border-bottom:0;
+}
+
+.search-result:hover{
+    background:#222;
+}
+
+/* LOADING */
+
+.loading-overlay{
+    position:absolute;
+    inset:0;
+    z-index:100;
+    background:rgba(0,0,0,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+}
+
+.loading-overlay.show{
+    display:flex;
+}
+
+.loading-box{
+    width:150px;
+    padding:20px;
+    background:#181818;
+    border:1px solid #333;
+    border-radius:15px;
+    text-align:center;
+}
+
+.spinner{
+    width:28px;
+    height:28px;
+    border:3px solid #333;
+    border-top-color:var(--yellow);
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    margin:0 auto 10px;
+}
+
+.loading-text{
+    color:#aaa;
+    font-size:9px;
 }
 
 @keyframes spin{
@@ -683,1590 +491,2049 @@ button{
     }
 }
 
+/* TOAST */
 
-/* =========================================================
-   BOOKING STATUS
-========================================================= */
-
-#bookingStatus{
-    min-height:20px;
-    margin-top:9px;
+.toast{
+    position:absolute;
+    z-index:120;
+    left:50%;
+    bottom:20px;
+    transform:translateX(-50%) translateY(20px);
+    width:calc(100% - 30px);
+    padding:11px 13px;
+    border-radius:11px;
+    background:#222;
+    border:1px solid #333;
+    color:#fff;
     text-align:center;
-    color:var(--yellow);
-    font-size:11px;
+    font-size:9px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
 }
 
-
-/* =========================================================
-   ACTIVE RIDE
-========================================================= */
-
-.active-ride{
-    display:none;
-    margin-top:12px;
-    padding:13px;
-    background:#151515;
-    border-radius:16px;
-    border:1px solid rgba(255,255,255,.04);
+.toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
 }
 
-.active-ride.show{
-    display:block;
+.toast.error{
+    border-color:rgba(239,68,68,.5);
 }
 
-.active-ride-top{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
+.toast.success{
+    border-color:rgba(34,197,94,.5);
 }
 
-.active-title{
-    font-size:13px;
-    font-weight:700;
-}
+@media(max-width:390px){
 
-.active-status{
-    color:var(--yellow);
-    font-size:11px;
-    text-align:right;
-}
-
-.cancel-btn{
-    width:100%;
-    margin-top:10px;
-    padding:11px;
-    border:1px solid #3a2020;
-    border-radius:12px;
-    background:#170909;
-    color:#ff6b6b;
-    font-size:12px;
-    font-weight:600;
-}
-
-.cancel-btn:active{
-    transform:scale(.985);
-}
-
-
-/* =========================================================
-   SHEET STATES
-========================================================= */
-
-body.sheet-expanded .sheet{
-    transform:translateY(0);
-}
-
-body.sheet-expanded .location-btn{
-    bottom:calc(88vh + 12px);
-}
-
-body.sheet-collapsed .sheet{
-    transform:translateY(calc(100% - 30vh));
-}
-
-body.sheet-collapsed .location-btn{
-    bottom:calc(30vh + 18px);
-}
-
-
-/* =========================================================
-   DESKTOP / TABLET
-========================================================= */
-
-@media(min-width:700px){
-
-    .sheet{
-        left:50%;
-        right:auto;
-        width:520px;
-        transform:
-            translate(
-                -50%,
-                calc(100% - 30vh)
-            );
-    }
-
-    body.sheet-expanded .sheet{
-        transform:translate(-50%,0);
-    }
-}
-
-
-/* =========================================================
-   SMALL PHONES
-========================================================= */
-
-@media(max-width:380px){
-
-    .topbar{
-        padding-left:10px;
-        padding-right:10px;
-    }
-
-    .top-btn{
-        width:42px;
-        height:42px;
-    }
-
-    .logo{
-        padding:7px 14px;
-        font-size:15px;
-    }
-
-    .sheet{
-        padding-left:11px;
-        padding-right:11px;
-    }
-
-    .title{
-        font-size:18px;
+    .booking-sheet{
+        min-height:315px;
     }
 
     .service{
-        min-height:66px;
+        min-width:76px;
     }
 
-    .service i{
-        font-size:17px;
-    }
 }
 
-
-/* =========================================================
-   REDUCE MOTION
-========================================================= */
-
-@media(prefers-reduced-motion:reduce){
-
-    .sheet,
-    .service,
-    .top-btn,
-    .book-btn{
-        transition:none!important;
-    }
-}
 </style>
 </head>
 
+<body>
 
-<body class="sheet-collapsed">
+<div class="booking-page">
 
+    <div id="map"></div>
 
-<!-- =======================================================
-     MAP
-======================================================== -->
+    <!-- TOP -->
 
-<div id="map"></div>
-
-
-<!-- =======================================================
-     TOP BAR
-======================================================== -->
-
-<div class="topbar">
-
-    <div class="topbar-inner">
+    <div class="topbar">
 
         <button
             class="top-btn"
-            id="backButton"
-            type="button"
-            aria-label="Back"
+            onclick="goBack()"
         >
-            <i class="fa-solid fa-arrow-left"></i>
+            ‹
         </button>
 
-
-        <div class="logo">
-            RIDER<span>X</span>
+        <div class="top-title">
+            Book a Ride
         </div>
 
-
-        <button
-            class="top-btn notification-btn"
-            id="notificationButton"
-            type="button"
-            aria-label="Notifications"
-        >
-            <i class="fa-regular fa-bell"></i>
-
-            <span
-                id="notificationDot"
-                class="notification-dot"
-            ></span>
-        </button>
-
     </div>
 
-</div>
 
+    <!-- LOCATION -->
 
-<!-- =======================================================
-     STATUS
-======================================================== -->
-
-<div
-    id="status"
-    class="status-pill"
->
-    Select pickup location
-</div>
-
-
-<!-- =======================================================
-     CENTER PIN
-======================================================== -->
-
-<div class="center-pin">
-
-    <div class="center-pin-icon">
-        <i class="fa-solid fa-location-dot"></i>
-    </div>
-
-</div>
-
-
-<!-- =======================================================
-     CURRENT LOCATION
-======================================================== -->
-
-<button
-    id="floatingLocation"
-    class="location-btn"
-    type="button"
-    aria-label="Current location"
->
-    <i class="fa-solid fa-crosshairs"></i>
-</button>
-
-
-<!-- =======================================================
-     BOTTOM BOOKING SHEET
-======================================================== -->
-
-<div
-    id="bookingSheet"
-    class="sheet"
->
-
-    <div
-        id="sheetHandle"
-        class="handle-area"
-        aria-label="Drag booking panel"
+    <button
+        class="location-btn"
+        onclick="useCurrentLocation()"
+        title="My location"
     >
-        <div class="handle"></div>
-    </div>
+        ◎
+    </button>
 
 
-    <div class="sheet-content">
+    <!-- BOOKING SHEET -->
 
-
-        <div class="title">
-            Where are you going?
-        </div>
-
-
-        <!-- =================================================
-             LOCATION INPUTS
-        ================================================== -->
-
-        <div class="search-box">
-
-
-            <!-- PICKUP -->
-
-            <div class="search-row">
-
-                <div class="location-dot pick-dot">
-                    <i class="fa-solid fa-circle"></i>
-                </div>
-
-                <input
-                    id="pickupLocation"
-                    class="location-input"
-                    type="text"
-                    placeholder="Pickup location"
-                    autocomplete="off"
-                >
-
-                <button
-                    id="pickupMapBtn"
-                    class="map-select-btn"
-                    type="button"
-                    aria-label="Select pickup on map"
-                >
-                    <i class="fa-solid fa-map-pin"></i>
-                </button>
-
-            </div>
-
-
-            <!-- DROP -->
-
-            <div class="search-row">
-
-                <div class="location-dot drop-dot">
-                    <i class="fa-solid fa-location-dot"></i>
-                </div>
-
-                <input
-                    id="dropoffLocation"
-                    class="location-input"
-                    type="text"
-                    placeholder="Where to?"
-                    autocomplete="off"
-                >
-
-                <button
-                    id="dropMapBtn"
-                    class="map-select-btn"
-                    type="button"
-                    aria-label="Select destination on map"
-                >
-                    <i class="fa-solid fa-map-pin"></i>
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             SUGGESTIONS
-        ================================================== -->
+    <section
+        class="booking-sheet"
+        id="bookingSheet"
+    >
 
         <div
-            id="locationSuggestions"
-            class="suggestions"
-        ></div>
-
-
-        <!-- =================================================
-             SERVICES
-        ================================================== -->
-
-        <div class="section-title">
-            Choose your service
-        </div>
-
-
-        <div class="services">
-
-            <div
-                class="service active"
-                data-service="bike"
-                role="button"
-                tabindex="0"
-            >
-                <i class="fa-solid fa-motorcycle"></i>
-                <span>Bike</span>
-            </div>
-
-
-            <div
-                class="service"
-                data-service="cab"
-                role="button"
-                tabindex="0"
-            >
-                <i class="fa-solid fa-car"></i>
-                <span>Cab</span>
-            </div>
-
-
-            <div
-                class="service"
-                data-service="parcel"
-                role="button"
-                tabindex="0"
-            >
-                <i class="fa-solid fa-box"></i>
-                <span>Parcel</span>
-            </div>
-
-
-            <div
-                class="service"
-                data-service="food"
-                role="button"
-                tabindex="0"
-            >
-                <i class="fa-solid fa-utensils"></i>
-                <span>Food</span>
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             FARE
-        ================================================== -->
-
-        <div class="fare-card">
-
-            <div>
-
-                <div class="fare-label">
-                    Estimated fare
-                </div>
-
-                <div
-                    id="fareInfo"
-                    class="fare-info"
-                >
-                    Select pickup & drop
-                </div>
-
-            </div>
-
-
-            <div
-                id="fare"
-                class="fare-price"
-            >
-                ₹0
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             DISTANCE
-        ================================================== -->
-
-        <div
-            id="estimated-distance-display"
-            class="distance"
+            class="sheet-handle-area"
+            id="sheetHandle"
         >
-            0 KM
+            <div class="sheet-handle"></div>
         </div>
 
 
-        <!-- =================================================
-             PAYMENT
-        ================================================== -->
+        <div class="sheet-content">
 
-        <div class="payment-row">
+            <!-- LOCATIONS -->
 
-            <i
-                class="fa-solid fa-wallet payment-icon"
-            ></i>
+            <div class="location-box">
+
+                <div class="location-row">
+
+                    <div class="location-marker pickup-marker">
+                        ●
+                    </div>
+
+                    <div class="location-input-wrap">
+
+                        <div class="location-label">
+                            Pickup
+                        </div>
+
+                        <input
+                            id="pickupInput"
+                            class="location-input"
+                            type="text"
+                            placeholder="Where should we pick you up?"
+                            autocomplete="off"
+                        >
+
+                        <div
+                            id="pickupResults"
+                            class="search-results"
+                        ></div>
+
+                    </div>
+
+                    <button
+                        class="swap-btn"
+                        onclick="swapLocations()"
+                        title="Swap"
+                    >
+                        ⇅
+                    </button>
+
+                </div>
 
 
-            <select
-                id="paymentMethod"
-            >
+                <div class="location-row">
 
-                <option value="cash">
+                    <div class="location-marker drop-marker">
+                        ●
+                    </div>
+
+                    <div class="location-input-wrap">
+
+                        <div class="location-label">
+                            Drop
+                        </div>
+
+                        <input
+                            id="dropInput"
+                            class="location-input"
+                            type="text"
+                            placeholder="Where are you going?"
+                            autocomplete="off"
+                        >
+
+                        <div
+                            id="dropResults"
+                            class="search-results"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SERVICES -->
+
+            <div class="section-title">
+                Choose your ride
+            </div>
+
+            <div class="services">
+
+                <button
+                    class="service active"
+                    data-service="bike"
+                    onclick="selectService('bike',this)"
+                >
+
+                    <div class="service-icon">
+                        🏍️
+                    </div>
+
+                    <div class="service-name">
+                        Bike Taxi
+                    </div>
+
+                    <div class="service-price">
+                        From ₹8/km
+                    </div>
+
+                </button>
+
+
+                <button
+                    class="service"
+                    data-service="cab"
+                    onclick="selectService('cab',this)"
+                >
+
+                    <div class="service-icon">
+                        🚕
+                    </div>
+
+                    <div class="service-name">
+                        Cab
+                    </div>
+
+                    <div class="service-price">
+                        From ₹12/km
+                    </div>
+
+                </button>
+
+
+                <button
+                    class="service"
+                    data-service="parcel"
+                    onclick="selectService('parcel',this)"
+                >
+
+                    <div class="service-icon">
+                        📦
+                    </div>
+
+                    <div class="service-name">
+                        Parcel
+                    </div>
+
+                    <div class="service-price">
+                        From ₹10/km
+                    </div>
+
+                </button>
+
+
+                <button
+                    class="service"
+                    data-service="food"
+                    onclick="selectService('food',this)"
+                >
+
+                    <div class="service-icon">
+                        🍔
+                    </div>
+
+                    <div class="service-name">
+                        Food
+                    </div>
+
+                    <div class="service-price">
+                        Delivery
+                    </div>
+
+                </button>
+
+            </div>
+
+
+            <!-- FARE -->
+
+            <div class="fare-card">
+
+                <div class="fare-row">
+
+                    <div class="fare-label">
+                        Distance
+                    </div>
+
+                    <div
+                        class="fare-value"
+                        id="distanceText"
+                    >
+                        -- km
+                    </div>
+
+                </div>
+
+
+                <div class="fare-row">
+
+                    <div class="fare-label">
+                        Base fare
+                    </div>
+
+                    <div
+                        class="fare-value"
+                        id="baseFare"
+                    >
+                        ₹0
+                    </div>
+
+                </div>
+
+
+                <div class="fare-row">
+
+                    <div class="fare-label">
+                        Distance fare
+                    </div>
+
+                    <div
+                        class="fare-value"
+                        id="distanceFare"
+                    >
+                        ₹0
+                    </div>
+
+                </div>
+
+
+                <div class="fare-row">
+
+                    <div class="fare-label">
+                        Booking fee
+                    </div>
+
+                    <div
+                        class="fare-value"
+                        id="bookingFee"
+                    >
+                        ₹0
+                    </div>
+
+                </div>
+
+
+                <div class="fare-row total-row">
+
+                    <div class="fare-label">
+                        Estimated fare
+                    </div>
+
+                    <div
+                        class="fare-value"
+                        id="totalFare"
+                    >
+                        ₹0
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- PAYMENT -->
+
+            <div class="section-title">
+                Payment method
+            </div>
+
+            <div class="payment-row">
+
+                <button
+                    class="payment-option active"
+                    data-payment="cash"
+                    onclick="selectPayment('cash',this)"
+                >
                     💵 Cash
-                </option>
+                </button>
 
-                <option value="online">
-                    📱 UPI / Online
-                </option>
-
-                <option value="wallet">
-                    💳 RiderX Wallet
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <!-- =================================================
-             BOOK
-        ================================================== -->
-
-        <button
-            id="bookRide"
-            class="book-btn"
-            type="button"
-            disabled
-        >
-
-            <i class="fa-solid fa-paper-plane"></i>
-
-            <span>
-                Book RiderX
-            </span>
-
-        </button>
-
-
-        <!-- =================================================
-             STATUS
-        ================================================== -->
-
-        <div id="bookingStatus"></div>
-
-
-        <!-- =================================================
-             ACTIVE RIDE
-        ================================================== -->
-
-        <div
-            id="activeRide"
-            class="active-ride"
-        >
-
-            <div class="active-ride-top">
-
-                <div class="active-title">
-                    Your RiderX ride
-                </div>
-
-                <div
-                    id="activeRideStatus"
-                    class="active-status"
+                <button
+                    class="payment-option"
+                    data-payment="online"
+                    onclick="selectPayment('online',this)"
                 >
-                    Searching...
-                </div>
+                    💳 Online
+                </button>
+
+                <button
+                    class="payment-option"
+                    data-payment="wallet"
+                    onclick="selectPayment('wallet',this)"
+                >
+                    👛 Wallet
+                </button>
 
             </div>
 
+
+            <!-- BOOK -->
 
             <button
-                id="cancelRide"
-                class="cancel-btn"
-                type="button"
+                class="book-btn"
+                id="bookBtn"
+                onclick="bookRide()"
             >
-                Cancel Ride
+                Confirm & Book Ride
             </button>
 
         </div>
 
+    </section>
+
+
+    <!-- LOADING -->
+
+    <div
+        class="loading-overlay"
+        id="loadingOverlay"
+    >
+
+        <div class="loading-box">
+
+            <div class="spinner"></div>
+
+            <div
+                class="loading-text"
+                id="loadingText"
+            >
+                Booking your ride...
+            </div>
+
+        </div>
+
     </div>
+
+
+    <div
+        class="toast"
+        id="toast"
+    ></div>
 
 </div>
 
 
-<!-- =======================================================
-     LEAFLET
-======================================================== -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-></script>
+<script>
+
+/* ==========================================
+   RIDERX CUSTOMER BOOKING
+========================================== */
+
+const $ = id =>
+    document.getElementById(id);
+
+let map = null;
+
+let pickupMarker = null;
+let dropMarker = null;
+
+let pickupCoords = null;
+let dropCoords = null;
+
+let selectedService = "bike";
+let selectedPayment = "cash";
+
+let routeDistanceKm = 0;
+let routeDurationMin = 0;
+
+let pickupSearchTimer = null;
+let dropSearchTimer = null;
+
+let toastTimer = null;
+
+let sheetStartY = 0;
+let sheetStartHeight = 0;
+let draggingSheet = false;
 
 
-<!-- =======================================================
-     CUSTOMER ENGINE
-======================================================== -->
+/* ==========================================
+   MAP
+========================================== */
 
-<script
-    type="module"
-    src="../js/customer.js"
-></script>
+function initMap(){
+
+    const defaultCenter = [
+        30.7333,
+        76.7794
+    ];
+
+    map = L.map(
+        "map",
+        {
+            zoomControl:false,
+            attributionControl:true
+        }
+    ).setView(
+        defaultCenter,
+        13
+    );
 
 
-<!-- =======================================================
-     BOOKING PAGE CONTROLLER
-======================================================== -->
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom:19,
+            attribution:"© OpenStreetMap"
+        }
+    ).addTo(map);
 
-<script type="module">
+
+    L.control.zoom({
+        position:"bottomleft"
+    }).addTo(map);
+
+
+    map.on(
+        "click",
+        function(event){
+
+            if(
+                !pickupCoords
+            ){
+
+                setPickup(
+                    event.latlng.lat,
+                    event.latlng.lng
+                );
+
+            }else if(
+                !dropCoords
+            ){
+
+                setDrop(
+                    event.latlng.lat,
+                    event.latlng.lng
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   CURRENT LOCATION
+========================================== */
+
+function useCurrentLocation(){
+
+    if(!navigator.geolocation){
+
+        showToast(
+            "Location is not supported on this device.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    showToast(
+        "Finding your location..."
+    );
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        position => {
+
+            const lat =
+                position.coords.latitude;
+
+            const lng =
+                position.coords.longitude;
+
+
+            setPickup(
+                lat,
+                lng
+            );
+
+
+            map.setView(
+                [lat,lng],
+                16
+            );
+
+
+            reverseGeocode(
+                lat,
+                lng,
+                "pickup"
+            );
+
+        },
+
+        error => {
+
+            console.error(
+                error
+            );
+
+            showToast(
+                "Unable to get your location.",
+                "error"
+            );
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            timeout:10000,
+            maximumAge:30000
+        }
+
+    );
+
+}
+
+
+/* ==========================================
+   SET PICKUP
+========================================== */
+
+function setPickup(
+    lat,
+    lng
+){
+
+    pickupCoords = {
+        lat:lat,
+        lng:lng
+    };
+
+
+    if(pickupMarker){
+
+        pickupMarker.setLatLng(
+            [lat,lng]
+        );
+
+    }else{
+
+        pickupMarker =
+            L.marker(
+                [lat,lng],
+                {
+                    draggable:true
+                }
+            ).addTo(map);
+
+
+        pickupMarker.on(
+            "dragend",
+            function(){
+
+                const p =
+                    pickupMarker.getLatLng();
+
+                pickupCoords = {
+                    lat:p.lat,
+                    lng:p.lng
+                };
+
+                reverseGeocode(
+                    p.lat,
+                    p.lng,
+                    "pickup"
+                );
+
+                calculateFare();
+
+            }
+        );
+
+    }
+
+
+    reverseGeocode(
+        lat,
+        lng,
+        "pickup"
+    );
+
+}
+
+
+/* ==========================================
+   SET DROP
+========================================== */
+
+function setDrop(
+    lat,
+    lng
+){
+
+    dropCoords = {
+        lat:lat,
+        lng:lng
+    };
+
+
+    if(dropMarker){
+
+        dropMarker.setLatLng(
+            [lat,lng]
+        );
+
+    }else{
+
+        dropMarker =
+            L.marker(
+                [lat,lng],
+                {
+                    draggable:true
+                }
+            ).addTo(map);
+
+
+        dropMarker.on(
+            "dragend",
+            function(){
+
+                const p =
+                    dropMarker.getLatLng();
+
+                dropCoords = {
+                    lat:p.lat,
+                    lng:p.lng
+                };
+
+                reverseGeocode(
+                    p.lat,
+                    p.lng,
+                    "drop"
+                );
+
+                calculateFare();
+
+            }
+        );
+
+    }
+
+
+    reverseGeocode(
+        lat,
+        lng,
+        "drop"
+    );
+
+
+    calculateFare();
+
+}
+
+
+/* ==========================================
+   REVERSE GEOCODE
+========================================== */
+
+async function reverseGeocode(
+    lat,
+    lng,
+    type
+){
+
+    try{
+
+        const response =
+            await fetch(
+                "https://nominatim.openstreetmap.org/reverse?" +
+                new URLSearchParams({
+                    lat:lat,
+                    lon:lng,
+                    format:"json",
+                    zoom:18
+                }),
+                {
+                    headers:{
+                        "Accept-Language":"en"
+                    }
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        const address =
+            data.display_name ||
+            `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+
+        if(type === "pickup"){
+
+            $("pickupInput").value =
+                address;
+
+        }else{
+
+            $("dropInput").value =
+                address;
+
+        }
+
+
+        calculateFare();
+
+    }catch(error){
+
+        console.error(
+            "Reverse geocode:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   SEARCH LOCATION
+========================================== */
+
+async function searchLocation(
+    query,
+    type
+){
+
+    if(
+        !query ||
+        query.trim().length < 3
+    ){
+
+        hideSearchResults(type);
+
+        return;
+
+    }
+
+
+    try{
+
+        const response =
+            await fetch(
+                "https://nominatim.openstreetmap.org/search?" +
+                new URLSearchParams({
+                    q:query + ", Chandigarh",
+                    format:"json",
+                    limit:5
+                }),
+                {
+                    headers:{
+                        "Accept-Language":"en"
+                    }
+                }
+            );
+
+
+        const results =
+            await response.json();
+
+
+        showSearchResults(
+            results,
+            type
+        );
+
+    }catch(error){
+
+        console.error(
+            "Location search:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   SEARCH RESULTS
+========================================== */
+
+function showSearchResults(
+    results,
+    type
+){
+
+    const container =
+        type === "pickup"
+            ? $("pickupResults")
+            : $("dropResults");
+
+
+    if(!results.length){
+
+        hideSearchResults(type);
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        "";
+
+
+    results.forEach(
+        result => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "search-result";
+
+            item.textContent =
+                result.display_name;
+
+
+            item.onclick =
+                function(){
+
+                    const lat =
+                        Number(
+                            result.lat
+                        );
+
+                    const lon =
+                        Number(
+                            result.lon
+                        );
+
+
+                    if(type === "pickup"){
+
+                        setPickup(
+                            lat,
+                            lon
+                        );
+
+                    }else{
+
+                        setDrop(
+                            lat,
+                            lon
+                        );
+
+                    }
+
+
+                    container.classList.remove(
+                        "show"
+                    );
+
+
+                    map.setView(
+                        [lat,lon],
+                        15
+                    );
+
+                };
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
+
+    container.classList.add(
+        "show"
+    );
+
+}
+
+
+function hideSearchResults(
+    type
+){
+
+    const container =
+        type === "pickup"
+            ? $("pickupResults")
+            : $("dropResults");
+
+
+    container.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* ==========================================
+   INPUT SEARCH
+========================================== */
+
+$("pickupInput")
+    .addEventListener(
+        "input",
+        function(){
+
+            clearTimeout(
+                pickupSearchTimer
+            );
+
+
+            pickupSearchTimer =
+                setTimeout(
+                    () => {
+
+                        searchLocation(
+                            this.value,
+                            "pickup"
+                        );
+
+                    },
+                    500
+                );
+
+        }
+    );
+
+
+$("dropInput")
+    .addEventListener(
+        "input",
+        function(){
+
+            clearTimeout(
+                dropSearchTimer
+            );
+
+
+            dropSearchTimer =
+                setTimeout(
+                    () => {
+
+                        searchLocation(
+                            this.value,
+                            "drop"
+                        );
+
+                    },
+                    500
+                );
+
+        }
+    );
+
+
+/* ==========================================
+   SWAP
+========================================== */
+
+function swapLocations(){
+
+    const oldPickup =
+        $("pickupInput").value;
+
+    const oldDrop =
+        $("dropInput").value;
+
+
+    $("pickupInput").value =
+        oldDrop;
+
+    $("dropInput").value =
+        oldPickup;
+
+
+    const oldCoords =
+        pickupCoords;
+
+    pickupCoords =
+        dropCoords;
+
+    dropCoords =
+        oldCoords;
+
+
+    if(
+        pickupMarker &&
+        dropMarker
+    ){
+
+        pickupMarker.setLatLng([
+            pickupCoords.lat,
+            pickupCoords.lng
+        ]);
+
+        dropMarker.setLatLng([
+            dropCoords.lat,
+            dropCoords.lng
+        ]);
+
+    }
+
+
+    calculateFare();
+
+}
+
+
+/* ==========================================
+   SERVICE
+========================================== */
+
+function selectService(
+    service,
+    button
+){
+
+    selectedService =
+        service;
+
+
+    document
+        .querySelectorAll(
+            ".service"
+        )
+        .forEach(
+            el =>
+                el.classList.remove(
+                    "active"
+                )
+        );
+
+
+    button.classList.add(
+        "active"
+    );
+
+
+    calculateFare();
+
+}
+
+
+/* ==========================================
+   PAYMENT
+========================================== */
+
+function selectPayment(
+    payment,
+    button
+){
+
+    selectedPayment =
+        payment;
+
+
+    document
+        .querySelectorAll(
+            ".payment-option"
+        )
+        .forEach(
+            el =>
+                el.classList.remove(
+                    "active"
+                )
+        );
+
+
+    button.classList.add(
+        "active"
+    );
+
+}
+
+
+/* ==========================================
+   DISTANCE
+========================================== */
+
+function calculateDistance(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+){
+
+    const R =
+        6371;
+
+
+    const dLat =
+        (lat2-lat1) *
+        Math.PI /
+        180;
+
+
+    const dLon =
+        (lon2-lon1) *
+        Math.PI /
+        180;
+
+
+    const a =
+        Math.sin(dLat/2) *
+        Math.sin(dLat/2) +
+
+        Math.cos(
+            lat1 *
+            Math.PI /
+            180
+        ) *
+
+        Math.cos(
+            lat2 *
+            Math.PI /
+            180
+        ) *
+
+        Math.sin(dLon/2) *
+        Math.sin(dLon/2);
+
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(1-a)
+        );
+
+
+    return R*c;
+
+}
+
+
+/* ==========================================
+   FARE
+========================================== */
+
+function calculateFare(){
+
+    if(
+        !pickupCoords ||
+        !dropCoords
+    ){
+
+        routeDistanceKm =
+            0;
+
+        $("distanceText").textContent =
+            "-- km";
+
+        $("baseFare").textContent =
+            "₹0";
+
+        $("distanceFare").textContent =
+            "₹0";
+
+        $("bookingFee").textContent =
+            "₹0";
+
+        $("totalFare").textContent =
+            "₹0";
+
+        return;
+
+    }
+
+
+    routeDistanceKm =
+        calculateDistance(
+            pickupCoords.lat,
+            pickupCoords.lng,
+            dropCoords.lat,
+            dropCoords.lng
+        );
+
+
+    routeDurationMin =
+        Math.max(
+            5,
+            Math.round(
+                routeDistanceKm * 3
+            )
+        );
+
+
+    $("distanceText").textContent =
+        routeDistanceKm.toFixed(1) +
+        " km";
+
+
+    let rate =
+        8;
+
+
+    let base =
+        20;
+
+
+    if(
+        selectedService ===
+        "cab"
+    ){
+
+        rate =
+            12;
+
+        base =
+            40;
+
+    }else if(
+        selectedService ===
+        "parcel"
+    ){
+
+        rate =
+            10;
+
+        base =
+            25;
+
+    }else if(
+        selectedService ===
+        "food"
+    ){
+
+        rate =
+            10;
+
+        base =
+            20;
+
+    }
+
+
+    /*
+       RiderX pricing:
+       Day:
+       Up to 10 km = ₹8/km
+       Above 10 km = ₹9/km
+
+       Night:
+       10 PM - 6 AM = ₹11/km
+    */
+
+    const hour =
+        new Date().getHours();
+
+
+    if(
+        selectedService ===
+        "bike"
+    ){
+
+        if(
+            hour >= 22 ||
+            hour < 6
+        ){
+
+            rate =
+                11;
+
+        }else if(
+            routeDistanceKm > 10
+        ){
+
+            rate =
+                9;
+
+        }else{
+
+            rate =
+                8;
+
+        }
+
+    }
+
+
+    const distanceFare =
+        routeDistanceKm *
+        rate;
+
+
+    const bookingFee =
+        selectedService ===
+        "bike"
+            ? 5
+            : 10;
+
+
+    const total =
+        Math.max(
+            base +
+            distanceFare +
+            bookingFee,
+            base
+        );
+
+
+    $("baseFare").textContent =
+        "₹" +
+        Math.round(base);
+
+
+    $("distanceFare").textContent =
+        "₹" +
+        Math.round(
+            distanceFare
+        );
+
+
+    $("bookingFee").textContent =
+        "₹" +
+        bookingFee;
+
+
+    $("totalFare").textContent =
+        "₹" +
+        Math.round(total);
+
+}
+
+
+/* ==========================================
+   GET TOTAL
+========================================== */
+
+function getEstimatedFare(){
+
+    const text =
+        $("totalFare")
+        .textContent
+        .replace(
+            /[^0-9.]/g,
+            ""
+        );
+
+
+    return Number(text) || 0;
+
+}
+
+
+/* ==========================================
+   BOOK RIDE
+========================================== */
+
+async function bookRide(){
+
+    if(!pickupCoords){
+
+        showToast(
+            "Please select pickup location.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(!dropCoords){
+
+        showToast(
+            "Please select drop location.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        routeDistanceKm <= 0
+    ){
+
+        showToast(
+            "Unable to calculate route distance.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const rideData = {
+
+        serviceType:
+            selectedService,
+
+        pickup:{
+            lat:
+                pickupCoords.lat,
+
+            lng:
+                pickupCoords.lng,
+
+            address:
+                $("pickupInput").value.trim()
+        },
+
+        drop:{
+            lat:
+                dropCoords.lat,
+
+            lng:
+                dropCoords.lng,
+
+            address:
+                $("dropInput").value.trim()
+        },
+
+        distance:
+            Number(
+                routeDistanceKm.toFixed(2)
+            ),
+
+        duration:
+            routeDurationMin,
+
+        fare:
+            getEstimatedFare(),
+
+        paymentMethod:
+            selectedPayment,
+
+        status:
+            "searching",
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    setLoading(
+        true,
+        "Finding nearby riders..."
+    );
+
+
+    try{
+
+        let result = null;
+
+
+        /*
+          Existing Booking.js/Firebase
+          functions are preferred.
+        */
+
+        if(
+            typeof window.createRideBooking ===
+            "function"
+        ){
+
+            result =
+                await window.createRideBooking(
+                    rideData
+                );
+
+        }else if(
+            typeof window.bookRide ===
+            "function" &&
+            window.bookRide !== bookRide
+        ){
+
+            result =
+                await window.bookRide(
+                    rideData
+                );
+
+        }else if(
+            typeof window.createBooking ===
+            "function"
+        ){
+
+            result =
+                await window.createBooking(
+                    rideData
+                );
+
+        }else{
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "riderxCreateBooking",
+                    {
+                        detail:rideData
+                    }
+                )
+            );
+
+
+            /*
+              Fallback local state.
+              This keeps the page usable
+              until Booking.js handles it.
+            */
+
+            localStorage.setItem(
+                "riderxPendingBooking",
+                JSON.stringify(
+                    rideData
+                )
+            );
+
+            result = {
+                id:
+                    "local-" +
+                    Date.now()
+            };
+
+        }
+
+
+        if(result === false){
+
+            throw new Error(
+                "Booking failed."
+            );
+
+        }
+
+
+        const rideId =
+            result?.rideId ||
+            result?.id ||
+            result?.bookingId ||
+            "";
+
+
+        setLoading(
+            true,
+            "Ride request sent..."
+        );
+
+
+        setTimeout(
+            function(){
+
+                let url =
+                    "searching.html";
+
+
+                if(rideId){
+
+                    url +=
+                        "?rideId=" +
+                        encodeURIComponent(
+                            rideId
+                        );
+
+                }
+
+
+                window.location.href =
+                    url;
+
+            },
+            350
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Booking error:",
+            error
+        );
+
+
+        setLoading(
+            false
+        );
+
+
+        showToast(
+            error.message ||
+            "Unable to book ride.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   LOADING
+========================================== */
+
+function setLoading(
+    show,
+    text="Please wait..."
+){
+
+    $("loadingOverlay")
+        .classList.toggle(
+            "show",
+            show
+        );
+
+
+    $("loadingText")
+        .textContent =
+        text;
+
+
+    $("bookBtn").disabled =
+        show;
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message,
+    type=""
+){
+
+    const toast =
+        $("toast");
+
+
+    toast.textContent =
+        message;
+
+
+    toast.className =
+        "toast show " +
+        type;
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.className =
+                    "toast";
+
+            },
+            3000
+        );
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        history.length > 1
+    ){
+
+        history.back();
+
+    }else{
+
+        window.location.href =
+            "home.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   DRAGGABLE SHEET
+========================================== */
+
+const sheet =
+    $("bookingSheet");
+
+const handle =
+    $("sheetHandle");
+
+
+function startSheetDrag(
+    y
+){
+
+    draggingSheet =
+        true;
+
+    sheetStartY =
+        y;
+
+    sheetStartHeight =
+        sheet.getBoundingClientRect()
+            .height;
+
+}
+
+
+function moveSheetDrag(
+    y
+){
+
+    if(!draggingSheet)
+        return;
+
+
+    const delta =
+        sheetStartY - y;
+
+
+    const viewport =
+        window.innerHeight;
+
+
+    let newHeight =
+        sheetStartHeight +
+        delta;
+
+
+    const minHeight =
+        315;
+
+
+    const maxHeight =
+        viewport *
+        .88;
+
+
+    newHeight =
+        Math.max(
+            minHeight,
+            Math.min(
+                maxHeight,
+                newHeight
+            )
+        );
+
+
+    sheet.style.height =
+        newHeight +
+        "px";
+
+
+    sheet.classList.remove(
+        "expanded"
+    );
+
+}
+
+
+function endSheetDrag(){
+
+    if(!draggingSheet)
+        return;
+
+
+    draggingSheet =
+        false;
+
+
+    const height =
+        sheet.getBoundingClientRect()
+            .height;
+
+
+    const viewport =
+        window.innerHeight;
+
+
+    sheet.style.height =
+        "";
+
+
+    if(
+        height >
+        viewport * .58
+    ){
+
+        sheet.classList.add(
+            "expanded"
+        );
+
+    }else{
+
+        sheet.classList.remove(
+            "expanded"
+        );
+
+    }
+
+}
+
+
+handle.addEventListener(
+    "touchstart",
+    function(event){
+
+        startSheetDrag(
+            event.touches[0].clientY
+        );
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+handle.addEventListener(
+    "touchmove",
+    function(event){
+
+        moveSheetDrag(
+            event.touches[0].clientY
+        );
+
+    },
+    {
+        passive:true
+    }
+);
+
+
+handle.addEventListener(
+    "touchend",
+    endSheetDrag
+);
+
+
+handle.addEventListener(
+    "mousedown",
+    function(event){
+
+        startSheetDrag(
+            event.clientY
+        );
+
+    }
+);
+
+
+document.addEventListener(
+    "mousemove",
+    function(event){
+
+        moveSheetDrag(
+            event.clientY
+        );
+
+    }
+);
+
+
+document.addEventListener(
+    "mouseup",
+    endSheetDrag
+);
+
+
+/* ==========================================
+   SHEET TAP
+========================================== */
+
+handle.addEventListener(
+    "click",
+    function(){
+
+        sheet.classList.toggle(
+            "expanded"
+        );
+
+    }
+);
+
+
+/* ==========================================
+   INITIALIZE
+========================================== */
 
 document.addEventListener(
     "DOMContentLoaded",
     function(){
 
-        "use strict";
+        initMap();
 
+        calculateFare();
 
-        /* ==================================================
-           ELEMENTS
-        ================================================== */
+        /*
+          Automatically request location
+          when browser permits it.
+        */
 
-        const sheet =
-            document.getElementById(
-                "bookingSheet"
-            );
+        if(
+            navigator.geolocation
+        ){
 
-        const handle =
-            document.getElementById(
-                "sheetHandle"
-            );
+            navigator.geolocation.getCurrentPosition(
+                function(position){
 
-        const backButton =
-            document.getElementById(
-                "backButton"
-            );
+                    setPickup(
+                        position.coords.latitude,
+                        position.coords.longitude
+                    );
 
-        const locationButton =
-            document.getElementById(
-                "floatingLocation"
-            );
+                    map.setView(
+                        [
+                            position.coords.latitude,
+                            position.coords.longitude
+                        ],
+                        15
+                    );
 
-        const mainLocation =
-            document.getElementById(
-                "myLocation"
-            );
-
-        const notificationButton =
-            document.getElementById(
-                "notificationButton"
-            );
-
-
-        /* ==================================================
-           BACK
-        ================================================== */
-
-        if(backButton){
-
-            backButton.addEventListener(
-                "click",
-                function(){
-
-                    if(
-                        window.history.length > 1
-                    ){
-
-                        window.history.back();
-
-                    }else{
-
-                        window.location.href =
-                            "./Home.html";
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* ==================================================
-           CURRENT LOCATION
-        ================================================== */
-
-        if(locationButton){
-
-            locationButton.addEventListener(
-                "click",
-                function(){
-
-                    if(mainLocation){
-
-                        mainLocation.click();
-
-                        return;
-                    }
-
-
-                    if(
-                        navigator.geolocation
-                    ){
-
-                        navigator.geolocation.getCurrentPosition(
-                            function(position){
-
-                                window.dispatchEvent(
-                                    new CustomEvent(
-                                        "riderx:current-location",
-                                        {
-                                            detail:{
-                                                lat:
-                                                    position.coords.latitude,
-
-                                                lng:
-                                                    position.coords.longitude
-                                            }
-                                        }
-                                    )
-                                );
-
-                            },
-                            function(){
-
-                                console.warn(
-                                    "RiderX: Location permission unavailable."
-                                );
-
-                            },
-                            {
-                                enableHighAccuracy:true,
-                                timeout:10000,
-                                maximumAge:5000
-                            }
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* ==================================================
-           NOTIFICATION
-        ================================================== */
-
-        if(notificationButton){
-
-            notificationButton.addEventListener(
-                "click",
+                },
                 function(){
 
                     /*
-                     * If notification page exists,
-                     * open it. Otherwise trigger the
-                     * notification permission helper.
-                     */
-
-                    if(
-                        window.RiderX &&
-                        window.RiderX.enableNotification
-                    ){
-
-                        window.RiderX
-                            .enableNotification()
-                            .catch(
-                                function(error){
-                                    console.error(error);
-                                }
-                            );
-
-                    }else{
-
-                        window.dispatchEvent(
-                            new CustomEvent(
-                                "riderx:notification-open"
-                            )
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* ==================================================
-           ACTIVE RIDE
-        ================================================== */
-
-        const activeRide =
-            document.getElementById(
-                "activeRide"
-            );
-
-        const activeStatus =
-            document.getElementById(
-                "activeRideStatus"
-            );
-
-
-        window.addEventListener(
-            "riderx:ride-created",
-            function(){
-
-                if(activeRide){
-
-                    activeRide.classList.add(
-                        "show"
-                    );
-
-                }
-
-                if(activeStatus){
-
-                    activeStatus.textContent =
-                        "Searching...";
-
-                }
-
-                expandSheet();
-
-            }
-        );
-
-
-        window.addEventListener(
-            "riderx:ride-status",
-            function(event){
-
-                const status =
-                    event.detail &&
-                    event.detail.status
-                        ? event.detail.status
-                        : "REQUESTED";
-
-
-                if(activeRide){
-
-                    activeRide.classList.add(
-                        "show"
-                    );
-
-                }
-
-                if(activeStatus){
-
-                    activeStatus.textContent =
-                        String(status)
-                            .replace(
-                                /_/g,
-                                " "
-                            );
-
-                }
-
-
-                if(
-                    status === "ACCEPTED" ||
-                    status === "ARRIVING" ||
-                    status === "STARTED" ||
-                    status === "IN_PROGRESS"
-                ){
-
-                    expandSheet();
-
-                }
-
-            }
-        );
-
-
-        /* ==================================================
-           CANCEL RIDE
-        ================================================== */
-
-        const cancel =
-            document.getElementById(
-                "cancelRide"
-            );
-
-
-        if(cancel){
-
-            cancel.addEventListener(
-                "click",
-                function(){
-
-                    if(
-                        window.RiderXCustomer &&
-                        typeof
-                        window.RiderXCustomer
-                            .cancelRide ===
-                        "function"
-                    ){
-
-                        window.RiderXCustomer
-                            .cancelRide();
-
-                    }else{
-
-                        window.dispatchEvent(
-                            new CustomEvent(
-                                "riderx:cancel-ride"
-                            )
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /* ==================================================
-           BOTTOM SHEET
-        ================================================== */
-
-        if(!sheet || !handle){
-
-            return;
-        }
-
-
-        let dragging = false;
-
-        let startY = 0;
-
-        let startTranslate = 0;
-
-        let lastY = 0;
-
-        let moved = false;
-
-
-        function getTranslateY(){
-
-            const style =
-                window.getComputedStyle(
-                    sheet
-                );
-
-            const transform =
-                style.transform;
-
-
-            if(
-                !transform ||
-                transform === "none"
-            ){
-
-                return 0;
-            }
-
-
-            try{
-
-                const matrix =
-                    new DOMMatrixReadOnly(
-                        transform
-                    );
-
-                return matrix.m42 || 0;
-
-            }catch(error){
-
-                return 0;
-            }
-
-        }
-
-
-        function collapsedPosition(){
-
-            return Math.max(
-                0,
-                sheet.offsetHeight -
-                window.innerHeight * .30
-            );
-
-        }
-
-
-        function applyPosition(
-            value
-        ){
-
-            const max =
-                collapsedPosition();
-
-            const clamped =
-                Math.max(
-                    0,
-                    Math.min(
-                        max,
-                        value
-                    )
-                );
-
-
-            sheet.style.transform =
-                "translateY(" +
-                clamped +
-                "px)";
-
-        }
-
-
-        function expandSheet(){
-
-            document.body.classList.remove(
-                "sheet-collapsed"
-            );
-
-            document.body.classList.add(
-                "sheet-expanded"
-            );
-
-            sheet.classList.remove(
-                "dragging"
-            );
-
-            sheet.style.transform =
-                "translateY(0)";
-
-
-            invalidateMap();
-
-        }
-
-
-        function collapseSheet(){
-
-            document.body.classList.remove(
-                "sheet-expanded"
-            );
-
-            document.body.classList.add(
-                "sheet-collapsed"
-            );
-
-            sheet.classList.remove(
-                "dragging"
-            );
-
-
-            sheet.style.transform =
-                "translateY(" +
-                collapsedPosition() +
-                "px)";
-
-
-            invalidateMap();
-
-        }
-
-
-        function toggleSheet(){
-
-            if(
-                document.body.classList.contains(
-                    "sheet-expanded"
-                )
-            ){
-
-                collapseSheet();
-
-            }else{
-
-                expandSheet();
-
-            }
-
-        }
-
-
-        function invalidateMap(){
-
-            setTimeout(
-                function(){
-
-                    try{
-
-                        if(
-                            window.RiderXCustomer &&
-                            typeof
-                            window.RiderXCustomer
-                                .getState ===
-                            "function"
-                        ){
-
-                            const state =
-                                window.RiderXCustomer
-                                    .getState();
-
-                            const map =
-                                state &&
-                                state.map;
-
-                            if(map){
-
-                                map.invalidateSize();
-
-                            }
-
-                        }
-
-                    }catch(error){
-
-                        console.warn(
-                            "RiderX map resize:",
-                            error
-                        );
-
-                    }
+                      Permission denied:
+                      user can still select location
+                      manually from map/search.
+                    */
 
                 },
-                350
-            );
-
-        }
-
-
-        /* ==================================================
-           INITIAL STATE
-        ================================================== */
-
-        setTimeout(
-            function(){
-
-                collapseSheet();
-
-            },
-            120
-        );
-
-
-        /* ==================================================
-           TOUCH START
-        ================================================== */
-
-        handle.addEventListener(
-            "touchstart",
-            function(event){
-
-                if(
-                    !event.touches ||
-                    !event.touches.length
-                ){
-
-                    return;
-                }
-
-
-                dragging = true;
-
-                moved = false;
-
-                startY =
-                    event.touches[0].clientY;
-
-                lastY =
-                    startY;
-
-                startTranslate =
-                    getTranslateY();
-
-
-                sheet.classList.add(
-                    "dragging"
-                );
-
-            },
-            {
-                passive:true
-            }
-        );
-
-
-        /* ==================================================
-           TOUCH MOVE
-        ================================================== */
-
-        handle.addEventListener(
-            "touchmove",
-            function(event){
-
-                if(
-                    !dragging ||
-                    !event.touches ||
-                    !event.touches.length
-                ){
-
-                    return;
-                }
-
-
-                lastY =
-                    event.touches[0].clientY;
-
-
-                const delta =
-                    lastY -
-                    startY;
-
-
-                if(
-                    Math.abs(delta) > 5
-                ){
-
-                    moved = true;
-
-                }
-
-
-                applyPosition(
-                    startTranslate +
-                    delta
-                );
-
-            },
-            {
-                passive:true
-            }
-        );
-
-
-        /* ==================================================
-           TOUCH END
-        ================================================== */
-
-        handle.addEventListener(
-            "touchend",
-            function(){
-
-                if(!dragging){
-
-                    return;
-                }
-
-
-                dragging = false;
-
-                sheet.classList.remove(
-                    "dragging"
-                );
-
-
-                const finalY =
-                    getTranslateY();
-
-                const max =
-                    collapsedPosition();
-
-
-                if(!moved){
-
-                    toggleSheet();
-
-                    return;
-                }
-
-
-                if(
-                    finalY <
-                    max * .50
-                ){
-
-                    expandSheet();
-
-                }else{
-
-                    collapseSheet();
-
-                }
-
-            },
-            {
-                passive:true
-            }
-        );
-
-
-        /* ==================================================
-           DESKTOP MOUSE DRAG
-        ================================================== */
-
-        handle.addEventListener(
-            "mousedown",
-            function(event){
-
-                dragging = true;
-
-                moved = false;
-
-                startY =
-                    event.clientY;
-
-                lastY =
-                    startY;
-
-                startTranslate =
-                    getTranslateY();
-
-
-                sheet.classList.add(
-                    "dragging"
-                );
-
-
-                event.preventDefault();
-
-            }
-        );
-
-
-        document.addEventListener(
-            "mousemove",
-            function(event){
-
-                if(!dragging){
-
-                    return;
-                }
-
-
-                lastY =
-                    event.clientY;
-
-
-                const delta =
-                    lastY -
-                    startY;
-
-
-                if(
-                    Math.abs(delta) > 5
-                ){
-
-                    moved = true;
-
-                }
-
-
-                applyPosition(
-                    startTranslate +
-                    delta
-                );
-
-            }
-        );
-
-
-        document.addEventListener(
-            "mouseup",
-            function(){
-
-                if(!dragging){
-
-                    return;
-                }
-
-
-                dragging = false;
-
-                sheet.classList.remove(
-                    "dragging"
-                );
-
-
-                const finalY =
-                    getTranslateY();
-
-                const max =
-                    collapsedPosition();
-
-
-                if(!moved){
-
-                    toggleSheet();
-
-                    return;
-                }
-
-
-                if(
-                    finalY <
-                    max * .50
-                ){
-
-                    expandSheet();
-
-                }else{
-
-                    collapseSheet();
-
-                }
-
-            }
-        );
-
-
-        /* ==================================================
-           RESIZE
-        ================================================== */
-
-        let resizeTimer = null;
-
-
-        window.addEventListener(
-            "resize",
-            function(){
-
-                clearTimeout(
-                    resizeTimer
-                );
-
-
-                resizeTimer =
-                    setTimeout(
-                        function(){
-
-                            if(
-                                document.body
-                                    .classList
-                                    .contains(
-                                        "sheet-expanded"
-                                    )
-                            ){
-
-                                expandSheet();
-
-                            }else{
-
-                                collapseSheet();
-
-                            }
-
-                        },
-                        120
-                    );
-
-            }
-        );
-
-
-        /* ==================================================
-           NOTIFICATION EVENT
-        ================================================== */
-
-        window.addEventListener(
-            "riderx:notification",
-            function(){
-
-                const dot =
-                    document.getElementById(
-                        "notificationDot"
-                    );
-
-
-                if(dot){
-
-                    dot.classList.add(
-                        "show"
-                    );
-
-                }
-
-            }
-        );
-
-
-        /* ==================================================
-           LOCATION SUGGESTION INPUT SUPPORT
-        ================================================== */
-
-        const pickup =
-            document.getElementById(
-                "pickupLocation"
-            );
-
-        const dropoff =
-            document.getElementById(
-                "dropoffLocation"
-            );
-
-        const suggestions =
-            document.getElementById(
-                "locationSuggestions"
-            );
-
-
-        function hideSuggestions(){
-
-            if(suggestions){
-
-                suggestions.classList.remove(
-                    "show"
-                );
-
-                suggestions.innerHTML =
-                    "";
-
-            }
-
-        }
-
-
-        function dispatchLocationSearch(
-            type,
-            value
-        ){
-
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx:location-search",
-                    {
-                        detail:{
-                            type:type,
-                            value:value
-                        }
-                    }
-                )
-            );
-
-        }
-
-
-        if(pickup){
-
-            pickup.addEventListener(
-                "focus",
-                function(){
-
-                    expandSheet();
-
-                }
-            );
-
-
-            pickup.addEventListener(
-                "input",
-                function(){
-
-                    dispatchLocationSearch(
-                        "pickup",
-                        pickup.value.trim()
-                    );
-
+                {
+                    enableHighAccuracy:true,
+                    timeout:5000,
+                    maximumAge:60000
                 }
             );
 
         }
 
-
-        if(dropoff){
-
-            dropoff.addEventListener(
-                "focus",
-                function(){
-
-                    expandSheet();
-
-                }
-            );
-
-
-            dropoff.addEventListener(
-                "input",
-                function(){
-
-                    dispatchLocationSearch(
-                        "dropoff",
-                        dropoff.value.trim()
-                    );
-
-                }
-            );
-
-        }
-
-
-        document.addEventListener(
-            "click",
-            function(event){
-
-                if(
-                    suggestions &&
-                    !suggestions.contains(
-                        event.target
-                    ) &&
-                    event.target !== pickup &&
-                    event.target !== dropoff
-                ){
-
-                    hideSuggestions();
-
-                }
-
-            }
-        );
-
-
-    },
-    {
-        once:true
     }
 );
 
