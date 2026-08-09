@@ -1,549 +1,936 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+<!DOCTYPE html>
+<html lang="en">
 
-«»
+<head>
 
-<title>RiderX - Finding Rider</title><style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RiderX - Finding Rider</title>
+
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
+
+<style>
+
+:root{
+    --yellow:#FFD400;
+    --bg:#0d0d0d;
+    --card:#191919;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+}
 
 *{
     box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+    margin:0;
+    padding:0;
 }
 
 html,
 body{
-
-    margin:0;
-    padding:0;
-
-    width:100%;
     min-height:100%;
-
-    background:#000;
-
-    color:#fff;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    background:#080808;
 }
 
 body{
-
-    min-height:100vh;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    padding:20px;
-
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-.container{
+button{
+    font-family:inherit;
+}
 
+.app{
     width:100%;
-    max-width:460px;
-
-    text-align:center;
-
-}
-
-.logo{
-
-    font-size:30px;
-    font-weight:900;
-
-    margin-bottom:30px;
-
-}
-
-.logo span{
-
-    color:#FFD600;
-
-}
-
-.loader-wrap{
-
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:var(--bg);
     position:relative;
-
-    width:170px;
-    height:170px;
-
-    margin:0 auto 30px;
-
 }
 
-.loader{
 
-    position:absolute;
+/* =========================
+   HEADER
+========================= */
 
-    inset:0;
-
-    border-radius:50%;
-
-    border:
-        4px solid
-        #222;
-
-    border-top-color:#FFD600;
-
-    animation:
-        spin 1s linear infinite;
-
-}
-
-.loader-inner{
-
-    position:absolute;
-
-    inset:25px;
-
-    border-radius:50%;
-
-    border:
-        2px solid
-        #333;
-
-    border-bottom-color:#FFD600;
-
-    animation:
-        spinReverse 1.5s linear infinite;
-
-}
-
-.bike{
-
-    position:absolute;
-
-    inset:0;
-
+.header{
+    position:relative;
+    z-index:20;
     display:flex;
-
     align-items:center;
-
-    justify-content:center;
-
-    font-size:48px;
-
+    gap:10px;
+    padding:12px;
+    border-bottom:1px solid #252525;
+    background:rgba(10,10,10,.96);
+    backdrop-filter:blur(14px);
 }
 
-@keyframes spin{
-
-    to{
-        transform:rotate(360deg);
-    }
-
+.back-btn{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    border:1px solid #303030;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
 }
 
-@keyframes spinReverse{
-
-    to{
-        transform:rotate(-360deg);
-    }
-
+.title-box{
+    flex:1;
 }
 
 .title{
-
-    font-size:24px;
+    font-size:12px;
     font-weight:900;
-
-    margin-bottom:10px;
-
 }
 
 .subtitle{
-
-    color:#888;
-
-    font-size:14px;
-
-    line-height:1.5;
-
-    margin-bottom:25px;
-
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
 }
 
-.status{
 
-    display:inline-flex;
+/* =========================
+   MAP AREA
+========================= */
 
-    align-items:center;
-
-    gap:8px;
-
-    padding:9px 15px;
-
-    border-radius:30px;
-
-    background:#151515;
-
-    border:
-        1px solid
-        #292929;
-
-    color:#FFD600;
-
-    font-size:12px;
-    font-weight:900;
-
-}
-
-.status-dot{
-
-    width:8px;
-    height:8px;
-
-    border-radius:50%;
-
-    background:#FFD600;
-
-    box-shadow:
-        0 0 10px
-        rgba(255,214,0,.7);
-
-}
-
-.info{
-
-    margin-top:30px;
-
-    padding:18px;
-
-    border-radius:18px;
-
+.map-area{
+    position:relative;
+    height:48vh;
+    min-height:330px;
+    max-height:510px;
+    overflow:hidden;
     background:
         linear-gradient(
-            145deg,
-            #171717,
+            135deg,
+            #161616,
             #0d0d0d
         );
-
-    border:
-        1px solid
-        #252525;
-
-    text-align:left;
-
 }
 
-.info-row{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    gap:15px;
-
-    padding:10px 0;
-
-    border-bottom:
-        1px solid
-        #242424;
-
-    font-size:13px;
-
+.map-grid{
+    position:absolute;
+    inset:0;
+    opacity:.38;
+    background-image:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.07) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            rgba(255,255,255,.07) 1px,
+            transparent 1px
+        );
+    background-size:42px 42px;
+    transform:rotate(-8deg) scale(1.25);
 }
 
-.info-row:last-child{
-
-    border-bottom:0;
-
+.road{
+    position:absolute;
+    height:5px;
+    border-radius:20px;
+    background:#2a2a2a;
+    box-shadow:
+        0 0 0 1px #333;
 }
 
-.label{
-
-    color:#777;
-
+.road.r1{
+    width:115%;
+    top:24%;
+    left:-8%;
+    transform:rotate(17deg);
 }
 
-.value{
+.road.r2{
+    width:110%;
+    top:57%;
+    left:-6%;
+    transform:rotate(-22deg);
+}
 
+.road.r3{
+    width:95%;
+    top:78%;
+    left:5%;
+    transform:rotate(11deg);
+}
+
+.road.r4{
+    width:80%;
+    top:40%;
+    left:10%;
+    transform:rotate(70deg);
+}
+
+.map-label{
+    position:absolute;
+    color:#444;
+    font-size:6px;
     font-weight:800;
+}
 
-    text-align:right;
+.map-label.l1{
+    top:17%;
+    left:12%;
+}
+
+.map-label.l2{
+    top:34%;
+    right:12%;
+}
+
+.map-label.l3{
+    bottom:18%;
+    left:18%;
+}
+
+.map-label.l4{
+    bottom:29%;
+    right:18%;
+}
+
+
+/* =========================
+   PICKUP PIN
+========================= */
+
+.pickup-pin{
+    position:absolute;
+    left:42%;
+    top:47%;
+    width:38px;
+    height:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:rgba(255,212,0,.16);
+    animation:pickupPulse 2s infinite;
+}
+
+.pickup-pin::after{
+    content:"";
+    width:15px;
+    height:15px;
+    border:3px solid #111;
+    border-radius:50% 50% 50% 0;
+    background:var(--yellow);
+    transform:rotate(-45deg);
+}
+
+@keyframes pickupPulse{
+
+    0%{
+        transform:scale(.8);
+        opacity:.7;
+    }
+
+    70%{
+        transform:scale(1.45);
+        opacity:.1;
+    }
+
+    100%{
+        transform:scale(1.45);
+        opacity:0;
+    }
 
 }
 
-.cancel{
 
-    width:100%;
+/* =========================
+   SEARCHING RADAR
+========================= */
 
-    min-height:50px;
+.radar{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:180px;
+    height:180px;
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+}
 
-    margin-top:18px;
+.radar-ring{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:55px;
+    height:55px;
+    border:1px solid rgba(255,212,0,.45);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    animation:radar 3s infinite;
+}
 
-    border-radius:14px;
+.radar-ring:nth-child(2){
+    animation-delay:1s;
+}
 
-    border:
-        1px solid
-        rgba(255,80,80,.3);
+.radar-ring:nth-child(3){
+    animation-delay:2s;
+}
 
-    background:#171717;
+@keyframes radar{
 
-    color:#ff7070;
+    0%{
+        width:40px;
+        height:40px;
+        opacity:.9;
+    }
 
-    font-size:14px;
+    100%{
+        width:180px;
+        height:180px;
+        opacity:0;
+    }
 
+}
+
+
+/* =========================
+   RIDER SEARCH DOTS
+========================= */
+
+.search-dot{
+    position:absolute;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#777;
+    opacity:.8;
+}
+
+.search-dot.d1{
+    left:23%;
+    top:31%;
+    animation:dotMove 2.8s infinite;
+}
+
+.search-dot.d2{
+    right:24%;
+    top:27%;
+    animation:dotMove 3.4s infinite .5s;
+}
+
+.search-dot.d3{
+    right:18%;
+    bottom:25%;
+    animation:dotMove 3s infinite 1s;
+}
+
+.search-dot.d4{
+    left:20%;
+    bottom:24%;
+    animation:dotMove 3.8s infinite 1.4s;
+}
+
+@keyframes dotMove{
+
+    0%,
+    100%{
+        transform:translate(0,0);
+        opacity:.25;
+    }
+
+    50%{
+        transform:translate(10px,-7px);
+        opacity:1;
+    }
+
+}
+
+
+/* =========================
+   BOTTOM SHEET
+========================= */
+
+.sheet{
+    position:relative;
+    z-index:10;
+    margin-top:-20px;
+    min-height:390px;
+    padding:10px 13px 30px;
+    border-radius:24px 24px 0 0;
+    border:1px solid #303030;
+    background:#141414;
+    box-shadow:0 -15px 35px rgba(0,0,0,.35);
+}
+
+.handle{
+    width:38px;
+    height:4px;
+    margin:1px auto 15px;
+    border-radius:20px;
+    background:#4a4a4a;
+}
+
+
+/* =========================
+   SEARCH STATUS
+========================= */
+
+.search-status{
+    text-align:center;
+}
+
+.search-icon{
+    width:54px;
+    height:54px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #594e00;
+    border-radius:50%;
+    background:#282300;
+    color:var(--yellow);
+    font-size:21px;
+}
+
+.search-title{
+    margin-top:11px;
+    font-size:13px;
     font-weight:900;
+}
 
+.search-text{
+    max-width:330px;
+    margin:6px auto 0;
+    color:#777;
+    font-size:6px;
+    line-height:1.6;
+}
+
+
+/* =========================
+   LOADER
+========================= */
+
+.loader{
+    width:100%;
+    height:5px;
+    margin:16px 0 12px;
+    overflow:hidden;
+    border-radius:20px;
+    background:#292929;
+}
+
+.loader-bar{
+    width:35%;
+    height:100%;
+    border-radius:20px;
+    background:var(--yellow);
+    animation:loading 1.4s infinite ease-in-out;
+}
+
+@keyframes loading{
+
+    0%{
+        transform:translateX(-120%);
+    }
+
+    100%{
+        transform:translateX(330%);
+    }
+
+}
+
+
+/* =========================
+   RIDE SUMMARY
+========================= */
+
+.summary{
+    margin-top:13px;
+    padding:12px;
+    border:1px solid #303030;
+    border-radius:14px;
+    background:#1a1a1a;
+}
+
+.summary-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding:7px 0;
+    border-bottom:1px solid #292929;
+}
+
+.summary-row:last-child{
+    border-bottom:0;
+}
+
+.summary-label{
+    color:#777;
+    font-size:6px;
+}
+
+.summary-value{
+    max-width:65%;
+    color:#fff;
+    text-align:right;
+    font-size:6px;
+    font-weight:800;
+    word-break:break-word;
+}
+
+
+/* =========================
+   CANCEL BUTTON
+========================= */
+
+.cancel-btn{
+    width:100%;
+    height:45px;
+    margin-top:13px;
+    border:1px solid #542525;
+    border-radius:12px;
+    background:#211313;
+    color:#ff7070;
+    font-size:6px;
+    font-weight:900;
     cursor:pointer;
-
 }
 
-.cancel:disabled{
-
-    opacity:.5;
-
+.cancel-btn:active{
+    transform:scale(.98);
 }
 
-.error{
 
+/* =========================
+   ERROR STATE
+========================= */
+
+.error-state{
     display:none;
+    text-align:center;
+}
 
-    margin-top:20px;
+.error-state.show{
+    display:block;
+}
 
-    padding:15px;
+.error-icon{
+    font-size:34px;
+}
 
-    border-radius:15px;
+.error-title{
+    margin-top:10px;
+    font-size:11px;
+    font-weight:900;
+}
 
-    background:
-        rgba(255,70,70,.08);
+.error-text{
+    margin-top:6px;
+    color:#777;
+    font-size:6px;
+    line-height:1.6;
+}
 
-    border:
-        1px solid
-        rgba(255,70,70,.2);
 
-    color:#ff7777;
+/* =========================
+   TOAST
+========================= */
 
-    font-size:12px;
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    z-index:100;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
 
-    line-height:1.5;
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:420px){
+
+    .map-area{
+        height:44vh;
+        min-height:290px;
+    }
+
+    .sheet{
+        min-height:370px;
+    }
 
 }
 
-</style></head><body><div class="container"><div class="logo">
+</style>
 
-    Rider<span>X</span>
+</head>
 
-</div>
+<body>
 
-
-<div class="loader-wrap">
-
-    <div class="loader"></div>
-
-    <div class="loader-inner"></div>
-
-    <div class="bike">
-        🏍️
-    </div>
-
-</div>
+<div class="app">
 
 
-<div class="title">
+    <!-- HEADER -->
 
-    Finding your rider
+    <header class="header">
 
-</div>
+        <button
+            class="back-btn"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ‹
+        </button>
+
+        <div class="title-box">
+
+            <div class="title">
+                Finding your rider
+            </div>
+
+            <div class="subtitle">
+                RiderX is searching nearby
+            </div>
+
+        </div>
+
+    </header>
 
 
-<div class="subtitle">
+    <!-- MAP -->
 
-    We're looking for the nearest
-    available RiderX partner.
+    <section class="map-area">
 
-    <br>
+        <div class="map-grid"></div>
 
-    Please keep this screen open.
+        <div class="road r1"></div>
+        <div class="road r2"></div>
+        <div class="road r3"></div>
+        <div class="road r4"></div>
 
-</div>
+        <div class="map-label l1">
+            CHANDIGARH
+        </div>
+
+        <div class="map-label l2">
+            SECTOR
+        </div>
+
+        <div class="map-label l3">
+            ROAD
+        </div>
+
+        <div class="map-label l4">
+            CITY
+        </div>
 
 
-<div class="status">
+        <div class="radar">
 
-    <span class="status-dot"></span>
+            <div class="radar-ring"></div>
+            <div class="radar-ring"></div>
+            <div class="radar-ring"></div>
 
-    SEARCHING FOR RIDER
+        </div>
+
+
+        <div class="pickup-pin"></div>
+
+
+        <div class="search-dot d1"></div>
+        <div class="search-dot d2"></div>
+        <div class="search-dot d3"></div>
+        <div class="search-dot d4"></div>
+
+    </section>
+
+
+    <!-- SHEET -->
+
+    <section class="sheet">
+
+        <div class="handle"></div>
+
+
+        <!-- SEARCH STATE -->
+
+        <div
+            class="search-status"
+            id="searchState"
+        >
+
+            <div class="search-icon">
+                🔎
+            </div>
+
+            <div
+                class="search-title"
+                id="searchTitle"
+            >
+                Finding a nearby rider
+            </div>
+
+            <div
+                class="search-text"
+                id="searchText"
+            >
+                We're checking nearby RiderX partners. This usually takes a few seconds.
+            </div>
+
+            <div class="loader">
+
+                <div class="loader-bar"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUMMARY -->
+
+        <div class="summary">
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Service
+                </span>
+
+                <span
+                    class="summary-value"
+                    id="service"
+                >
+                    Bike Taxi
+                </span>
+
+            </div>
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Pickup
+                </span>
+
+                <span
+                    class="summary-value"
+                    id="pickup"
+                >
+                    Pickup location
+                </span>
+
+            </div>
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Destination
+                </span>
+
+                <span
+                    class="summary-value"
+                    id="destination"
+                >
+                    Destination location
+                </span>
+
+            </div>
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Estimated fare
+                </span>
+
+                <span
+                    class="summary-value"
+                    id="fare"
+                >
+                    —
+                </span>
+
+            </div>
+
+            <div class="summary-row">
+
+                <span class="summary-label">
+                    Payment
+                </span>
+
+                <span
+                    class="summary-value"
+                    id="payment"
+                >
+                    Cash
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="cancel-btn"
+            id="cancelBtn"
+            onclick="cancelSearch()"
+        >
+            ✕ CANCEL SEARCH
+        </button>
+
+
+        <!-- ERROR -->
+
+        <div
+            class="error-state"
+            id="errorState"
+        >
+
+            <div class="error-icon">
+                😕
+            </div>
+
+            <div class="error-title">
+                No rider found
+            </div>
+
+            <div class="error-text">
+                We couldn't find an available rider nearby. Please try again.
+            </div>
+
+        </div>
+
+    </section>
 
 </div>
 
 
 <div
-    id="rideInfo"
-    class="info"
-    style="display:none;"
->
-
-    <div class="info-row">
-
-        <span class="label">
-            Ride ID
-        </span>
-
-        <span
-            id="rideIdText"
-            class="value"
-        >
-            —
-        </span>
-
-    </div>
-
-
-    <div class="info-row">
-
-        <span class="label">
-            Service
-        </span>
-
-        <span
-            id="serviceText"
-            class="value"
-        >
-            —
-        </span>
-
-    </div>
-
-
-    <div class="info-row">
-
-        <span class="label">
-            Fare
-        </span>
-
-        <span
-            id="fareText"
-            class="value"
-        >
-            —
-        </span>
-
-    </div>
-
-</div>
-
-
-<button
-    id="cancelBtn"
-    class="cancel"
->
-    Cancel Ride
-</button>
-
-
-<div
-    id="errorBox"
-    class="error"
+    class="toast"
+    id="toast"
 ></div>
 
-</div><script type="module">
 
-import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
+<script>
 
+/* ==========================================
+   RIDERX CUSTOMER SEARCHING
+========================================== */
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-
-import {
-    doc,
-    onSnapshot,
-    updateDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+let rideData = {};
+let statusTimer = null;
+let toastTimer = null;
+let searching = true;
 
 
-// =========================================================
-// STATE
-// =========================================================
+/* ==========================================
+   DEFAULT RIDE
+========================================== */
 
-let currentUser = null;
+const defaultRide = {
 
-let rideId = null;
+    id:"",
+    service:"Bike Taxi",
 
-let unsubscribeRide = null;
+    status:"searching",
 
-let cancelling = false;
+    fare:0,
+    total:0,
+    amount:0,
 
+    paymentMethod:"Cash",
 
-// =========================================================
-// DOM
-// =========================================================
+    pickup:"",
+    destination:""
 
-const rideInfo =
-    document.getElementById(
-        "rideInfo"
-    );
-
-const rideIdText =
-    document.getElementById(
-        "rideIdText"
-    );
-
-const serviceText =
-    document.getElementById(
-        "serviceText"
-    );
-
-const fareText =
-    document.getElementById(
-        "fareText"
-    );
-
-const cancelBtn =
-    document.getElementById(
-        "cancelBtn"
-    );
-
-const errorBox =
-    document.getElementById(
-        "errorBox"
-    );
+};
 
 
-// =========================================================
-// GET RIDE ID
-// =========================================================
+/* ==========================================
+   GET URL PARAM
+========================================== */
 
-function getRideId(){
+function getParam(
+    name
+){
 
     const params =
         new URLSearchParams(
             window.location.search
         );
 
+    return params.get(
+        name
+    );
 
-    const fromUrl =
-        params.get(
+}
+
+
+/* ==========================================
+   LOAD RIDE
+========================================== */
+
+function loadRide(){
+
+    rideData = {
+        ...defaultRide
+    };
+
+
+    const urlId =
+        getParam(
             "rideId"
+        ) ||
+        getParam(
+            "id"
         );
 
 
-    if(fromUrl){
+    if(
+        urlId
+    ){
 
-        return fromUrl;
+        rideData.id =
+            urlId;
 
     }
 
 
     const keys = [
-        "activeRideId",
-        "rideId",
-        "riderx_active_ride"
+
+        "currentRide",
+        "activeRide",
+        "riderxCurrentRide",
+        "rideData",
+        "pendingRide",
+        "bookingData"
+
     ];
 
 
@@ -551,531 +938,907 @@ function getRideId(){
         const key of keys
     ){
 
-        const value =
-            localStorage.getItem(
-                key
-            );
-
-
-        if(value){
-
-            return value;
-
-        }
-
-    }
-
-
-    return null;
-
-}
-
-
-// =========================================================
-// SHOW ERROR
-// =========================================================
-
-function showError(
-    message
-){
-
-    errorBox.style.display =
-        "block";
-
-    errorBox.innerText =
-        message;
-
-}
-
-
-// =========================================================
-// CLEAR RIDE STORAGE
-// =========================================================
-
-function clearRideStorage(){
-
-    [
-        "activeRideId",
-        "rideId",
-        "riderx_active_ride"
-    ]
-    .forEach(
-        key => {
-
-            localStorage.removeItem(
-                key
-            );
-
-        }
-    );
-
-}
-
-
-// =========================================================
-// SAVE ACTIVE RIDE
-// =========================================================
-
-function saveActiveRide(
-    id
-){
-
-    localStorage.setItem(
-        "activeRideId",
-        id
-    );
-
-    localStorage.setItem(
-        "rideId",
-        id
-    );
-
-    localStorage.setItem(
-        "riderx_active_ride",
-        id
-    );
-
-}
-
-
-// =========================================================
-// OPEN RIDE STATUS
-// =========================================================
-
-function openRideStatus(
-    id
-){
-
-    saveActiveRide(
-        id
-    );
-
-
-    window.location.replace(
-        "ride-status.html?rideId=" +
-        encodeURIComponent(
-            id
-        )
-    );
-
-}
-
-
-// =========================================================
-// STATUS NORMALIZER
-// =========================================================
-
-function normalizedStatus(
-    value
-){
-
-    return String(
-        value || ""
-    )
-    .trim()
-    .toUpperCase();
-
-}
-
-
-// =========================================================
-// HANDLE RIDE SNAPSHOT
-// =========================================================
-
-function handleRide(
-    snapshot
-){
-
-    if(!snapshot.exists()){
-
-        showError(
-            "Ride not found. Please book the ride again."
-        );
-
-        cancelBtn.disabled =
-            true;
-
-        return;
-
-    }
-
-
-    const ride =
-        snapshot.data();
-
-
-    // Security check:
-    // customer can only monitor own ride.
-
-    if(
-        ride.customerId &&
-        ride.customerId !==
-        currentUser.uid
-    ){
-
-        showError(
-            "This ride does not belong to your account."
-        );
-
-        cancelBtn.disabled =
-            true;
-
-        return;
-
-    }
-
-
-    const status =
-        normalizedStatus(
-            ride.status
-        );
-
-
-    rideInfo.style.display =
-        "block";
-
-
-    rideIdText.innerText =
-        rideId.substring(
-            0,
-            12
-        );
-
-
-    serviceText.innerText =
-        ride.serviceType ||
-        ride.service ||
-        ride.rideType ||
-        "Bike Taxi";
-
-
-    fareText.innerText =
-        "₹" +
-        Number(
-            ride.fare || 0
-        );
-
-
-    // -------------------------------------------------------
-    // RIDER ACCEPTED
-    // -------------------------------------------------------
-
-    if(
-        status ===
-        "ACCEPTED"
-    ){
-
-        cancelBtn.disabled =
-            true;
-
-
-        openRideStatus(
-            rideId
-        );
-
-        return;
-
-    }
-
-
-    // -------------------------------------------------------
-    // RIDER ARRIVING / ON TRIP
-    // -------------------------------------------------------
-
-    if(
-        status ===
-        "ARRIVING" ||
-
-        status ===
-        "DRIVER_ARRIVING" ||
-
-        status ===
-        "RIDER_ARRIVING" ||
-
-        status ===
-        "ARRIVED" ||
-
-        status ===
-        "STARTED" ||
-
-        status ===
-        "ON_TRIP" ||
-
-        status ===
-        "COMPLETED"
-    ){
-
-        cancelBtn.disabled =
-            true;
-
-
-        openRideStatus(
-            rideId
-        );
-
-        return;
-
-    }
-
-
-    // -------------------------------------------------------
-    // CANCELLED
-    // -------------------------------------------------------
-
-    if(
-        status ===
-        "CANCELLED" ||
-
-        status ===
-        "CANCELED" ||
-
-        status ===
-        "REJECTED"
-    ){
-
-        clearRideStorage();
-
-        showError(
-            "This ride is no longer active."
-        );
-
-        cancelBtn.disabled =
-            true;
-
-        setTimeout(
-            () => {
-
-                window.location.replace(
-                    "home.html"
-                );
-
-            },
-            1800
-        );
-
-    }
-
-}
-
-
-// =========================================================
-// START RIDE LISTENER
-// =========================================================
-
-function startRideListener(){
-
-    if(
-        !rideId ||
-        !currentUser
-    ){
-
-        return;
-
-    }
-
-
-    if(unsubscribeRide){
-
-        unsubscribeRide();
-
-    }
-
-
-    const rideRef =
-        doc(
-            db,
-            "rides",
-            rideId
-        );
-
-
-    unsubscribeRide =
-        onSnapshot(
-
-            rideRef,
-
-            snapshot => {
-
-                handleRide(
-                    snapshot
-                );
-
-            },
-
-            error => {
-
-                console.error(
-                    "Ride listener:",
-                    error
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
                 );
 
 
-                showError(
-                    "Unable to track your ride: " +
-                    error.message
-                );
+            if(
+                !raw
+            ){
+
+                continue;
 
             }
 
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                data &&
+                typeof data ===
+                "object"
+            ){
+
+                rideData = {
+
+                    ...rideData,
+                    ...data
+
+                };
+
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                error
+            );
+
+        }
+
+    }
+
+
+    renderRide();
+
+    checkRideStatus();
+
+}
+
+
+/* ==========================================
+   RENDER RIDE
+========================================== */
+
+function renderRide(){
+
+    document.getElementById(
+        "service"
+    ).textContent =
+        rideData.service ||
+        rideData.type ||
+        "Bike Taxi";
+
+
+    document.getElementById(
+        "pickup"
+    ).textContent =
+        rideData.pickup ||
+        rideData.pickupAddress ||
+        rideData.from ||
+        "Pickup location";
+
+
+    document.getElementById(
+        "destination"
+    ).textContent =
+        rideData.destination ||
+        rideData.destinationAddress ||
+        rideData.to ||
+        "Destination location";
+
+
+    const fare =
+        getNumber(
+            rideData.fare,
+            rideData.total,
+            rideData.amount,
+            rideData.price
+        );
+
+
+    document.getElementById(
+        "fare"
+    ).textContent =
+        fare > 0
+            ? "₹" + Math.round(fare)
+            : "—";
+
+
+    document.getElementById(
+        "payment"
+    ).textContent =
+        formatPayment(
+            rideData.paymentMethod ||
+            rideData.payment ||
+            "Cash"
         );
 
 }
 
 
-// =========================================================
-// CANCEL RIDE
-// =========================================================
+/* ==========================================
+   CHECK STATUS
+========================================== */
 
-cancelBtn.addEventListener(
-    "click",
-    async () => {
+function checkRideStatus(){
 
-        if(
-            cancelling ||
-            !rideId ||
-            !currentUser
-        ){
-
-            return;
-
-        }
+    const status =
+        normalizeStatus(
+            rideData.status ||
+            rideData.rideStatus ||
+            rideData.state ||
+            "searching"
+        );
 
 
-        const confirmed =
-            window.confirm(
-                "Are you sure you want to cancel this ride?"
-            );
+    if(
+        status ===
+        "accepted" ||
+        status ===
+        "arriving" ||
+        status ===
+        "started" ||
+        status ===
+        "completed"
+    ){
+
+        searching =
+            false;
 
 
-        if(!confirmed){
-
-            return;
-
-        }
+        redirectToStatus(
+            status
+        );
 
 
-        cancelling = true;
+        return;
 
-        cancelBtn.disabled =
-            true;
-
-        cancelBtn.innerText =
-            "Cancelling...";
+    }
 
 
-        try{
+    if(
+        status ===
+        "cancelled"
+    ){
 
-            const rideRef =
-                doc(
-                    db,
-                    "rides",
-                    rideId
-                );
+        showCancelled();
+
+        return;
+
+    }
 
 
-            await updateDoc(
-                rideRef,
-                {
+    if(
+        status ===
+        "no rider" ||
+        status ===
+        "not found"
+    ){
 
-                    status:
-                        "CANCELLED",
+        showNoRider();
 
-                    cancelledBy:
-                        currentUser.uid,
+    }
 
-                    cancelledAt:
-                        serverTimestamp()
+}
+
+
+/* ==========================================
+   NORMALIZE STATUS
+========================================== */
+
+function normalizeStatus(
+    status
+){
+
+    const value =
+        String(
+            status
+        )
+        .toLowerCase()
+        .replace(
+            /[_-]/g,
+            " "
+        )
+        .trim();
+
+
+    if(
+        value.includes(
+            "cancel"
+        )
+    ){
+
+        return "cancelled";
+
+    }
+
+
+    if(
+        value.includes(
+            "complete"
+        ) ||
+        value.includes(
+            "finish"
+        )
+    ){
+
+        return "completed";
+
+    }
+
+
+    if(
+        value.includes(
+            "start"
+        ) ||
+        value.includes(
+            "ongoing"
+        ) ||
+        value.includes(
+            "in progress"
+        ) ||
+        value.includes(
+            "on trip"
+        )
+    ){
+
+        return "started";
+
+    }
+
+
+    if(
+        value.includes(
+            "arriv"
+        )
+    ){
+
+        return "arriving";
+
+    }
+
+
+    if(
+        value.includes(
+            "accept"
+        ) ||
+        value.includes(
+            "confirm"
+        ) ||
+        value === "assigned"
+    ){
+
+        return "accepted";
+
+    }
+
+
+    if(
+        value.includes(
+            "not found"
+        ) ||
+        value.includes(
+            "no rider"
+        )
+    ){
+
+        return "no rider";
+
+    }
+
+
+    return "searching";
+
+}
+
+
+/* ==========================================
+   REDIRECT
+========================================== */
+
+function redirectToStatus(
+    status
+){
+
+    const id =
+        rideData.id ||
+        rideData.rideId ||
+        "";
+
+
+    const url =
+        "ride-status.html" +
+        (
+            id
+                ? "?rideId=" +
+                  encodeURIComponent(
+                      id
+                  )
+                : ""
+        ) +
+        (
+            id
+                ? "&status=" +
+                  encodeURIComponent(
+                      status
+                  )
+                : "?status=" +
+                  encodeURIComponent(
+                      status
+                  )
+        );
+
+
+    window.location.replace(
+        url
+    );
+
+}
+
+
+/* ==========================================
+   SHOW NO RIDER
+========================================== */
+
+function showNoRider(){
+
+    searching =
+        false;
+
+
+    document.getElementById(
+        "searchState"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "errorState"
+    ).classList.add(
+        "show"
+    );
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).textContent =
+        "↻ TRY AGAIN";
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).onclick =
+        retrySearch;
+
+}
+
+
+/* ==========================================
+   SHOW CANCELLED
+========================================== */
+
+function showCancelled(){
+
+    searching =
+        false;
+
+
+    document.getElementById(
+        "searchTitle"
+    ).textContent =
+        "Search cancelled";
+
+
+    document.getElementById(
+        "searchText"
+    ).textContent =
+        "Your rider search has been cancelled.";
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).textContent =
+        "← BACK TO HOME";
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).onclick =
+        function(){
+
+            window.location.href =
+                "home.html";
+
+        };
+
+}
+
+
+/* ==========================================
+   CANCEL SEARCH
+========================================== */
+
+function cancelSearch(){
+
+    if(
+        !searching
+    ){
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Cancel your rider search?"
+        );
+
+
+    if(
+        !confirmed
+    ){
+
+        return;
+
+    }
+
+
+    searching =
+        false;
+
+
+    rideData.status =
+        "cancelled";
+
+
+    rideData.cancelledAt =
+        Date.now();
+
+
+    saveRide();
+
+
+    showCancelled();
+
+    showToast(
+        "Rider search cancelled."
+    );
+
+}
+
+
+/* ==========================================
+   RETRY
+========================================== */
+
+function retrySearch(){
+
+    searching =
+        true;
+
+
+    rideData.status =
+        "searching";
+
+
+    saveRide();
+
+
+    document.getElementById(
+        "errorState"
+    ).classList.remove(
+        "show"
+    );
+
+
+    document.getElementById(
+        "searchState"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).textContent =
+        "✕ CANCEL SEARCH";
+
+
+    document.getElementById(
+        "cancelBtn"
+    ).onclick =
+        cancelSearch;
+
+
+    showToast(
+        "Searching for a rider..."
+    );
+
+}
+
+
+/* ==========================================
+   SAVE RIDE
+========================================== */
+
+function saveRide(){
+
+    try{
+
+        localStorage.setItem(
+            "currentRide",
+            JSON.stringify(
+                rideData
+            )
+        );
+
+        localStorage.setItem(
+            "activeRide",
+            JSON.stringify(
+                rideData
+            )
+        );
+
+    }catch(error){
+
+        console.log(
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   LIVE LOCAL SYNC
+========================================== */
+
+function startStatusSync(){
+
+    clearInterval(
+        statusTimer
+    );
+
+
+    statusTimer =
+        setInterval(
+            function(){
+
+                if(
+                    !searching
+                ){
+
+                    return;
 
                 }
+
+
+                try{
+
+                    const raw =
+                        localStorage.getItem(
+                            "currentRide"
+                        );
+
+
+                    if(
+                        !raw
+                    ){
+
+                        return;
+
+                    }
+
+
+                    const latest =
+                        JSON.parse(
+                            raw
+                        );
+
+
+                    if(
+                        !latest ||
+                        typeof latest !==
+                        "object"
+                    ){
+
+                        return;
+
+                    }
+
+
+                    const latestId =
+                        latest.id ||
+                        latest.rideId;
+
+
+                    const currentId =
+                        rideData.id ||
+                        rideData.rideId;
+
+
+                    if(
+                        currentId &&
+                        latestId &&
+                        String(
+                            currentId
+                        ) !==
+                        String(
+                            latestId
+                        )
+                    ){
+
+                        return;
+
+                    }
+
+
+                    rideData = {
+
+                        ...rideData,
+                        ...latest
+
+                    };
+
+
+                    renderRide();
+
+                    checkRideStatus();
+
+                }catch(error){
+
+                    console.log(
+                        error
+                    );
+
+                }
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   NUMBER
+========================================== */
+
+function getNumber(
+    ...values
+){
+
+    for(
+        const value of values
+    ){
+
+        if(
+            value === null ||
+            value === undefined ||
+            value === ""
+        ){
+
+            continue;
+
+        }
+
+
+        const number =
+            Number(
+                String(
+                    value
+                )
+                .replace(
+                    /[^0-9.-]/g,
+                    ""
+                )
             );
 
 
-            clearRideStorage();
+        if(
+            Number.isFinite(
+                number
+            )
+        ){
 
-
-            window.location.replace(
-                "home.html"
-            );
-
-
-        }catch(error){
-
-            console.error(
-                "Cancel ride:",
-                error
-            );
-
-
-            cancelling =
-                false;
-
-
-            cancelBtn.disabled =
-                false;
-
-
-            cancelBtn.innerText =
-                "Cancel Ride";
-
-
-            showError(
-                "Ride cancel nahi hui: " +
-                error.message
-            );
+            return number;
 
         }
 
     }
-);
 
 
-// =========================================================
-// AUTH
-// =========================================================
+    return 0;
 
-onAuthStateChanged(
-    auth,
-    user => {
-
-        if(!user){
-
-            showError(
-                "Please login first."
-            );
-
-            cancelBtn.disabled =
-                true;
-
-            return;
-
-        }
+}
 
 
-        currentUser =
-            user;
+/* ==========================================
+   PAYMENT
+========================================== */
+
+function formatPayment(
+    value
+){
+
+    if(
+        typeof value ===
+        "object"
+    ){
+
+        value =
+            value.method ||
+            value.type ||
+            "Cash";
+
+    }
 
 
-        rideId =
-            getRideId();
+    const text =
+        String(
+            value
+        );
 
 
-        if(!rideId){
-
-            showError(
-                "Active ride nahi mili. Please book a new ride."
-            );
-
-            cancelBtn.disabled =
-                true;
-
-            return;
-
-        }
+    const lower =
+        text.toLowerCase();
 
 
-        startRideListener();
+    if(
+        lower.includes(
+            "cash"
+        )
+    ){
+
+        return "Cash";
+
+    }
+
+
+    if(
+        lower.includes(
+            "wallet"
+        )
+    ){
+
+        return "RiderX Wallet";
+
+    }
+
+
+    if(
+        lower.includes(
+            "upi"
+        )
+    ){
+
+        return "UPI";
+
+    }
+
+
+    return text;
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    const confirmed =
+        searching
+            ? window.confirm(
+                "Your rider search is still active. Go back and cancel the search?"
+              )
+            : true;
+
+
+    if(
+        !confirmed
+    ){
+
+        return;
+
+    }
+
+
+    if(
+        searching
+    ){
+
+        rideData.status =
+            "cancelled";
+
+        saveRide();
+
+    }
+
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        window.location.href =
+            "home.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadRide();
+
+        startStatusSync();
 
     }
 );
 
-</script></body></html>
+</script>
+
+</body>
+
+</html>
