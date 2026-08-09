@@ -1,33 +1,598 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Ride Details</title>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
-<link rel="stylesheet" href="../css/style.css">
+<title>RiderX • Ride Details</title>
+
+<meta name="theme-color" content="#050505">
 
 <style>
 
-.card{
-background:#111;
-padding:20px;
-border-radius:20px;
-margin:20px;
+:root{
+    --yellow:#FFE500;
+    --black:#050505;
+    --card:#111111;
+    --card2:#181818;
+    --border:#292929;
+    --text:#ffffff;
+    --muted:#999999;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#60a5fa;
 }
 
-button{
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Inter,Arial,Helvetica,sans-serif;
+}
 
-width:90%;
-margin:10px 5%;
-padding:15px;
-background:#FFD600;
-border:none;
-border-radius:12px;
-font-weight:bold;
+html,
+body{
+    min-height:100%;
+    background:var(--black);
+    color:var(--text);
+}
+
+body{
+    padding-bottom:105px;
+}
+
+/* HEADER */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+
+    height:64px;
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:0 16px;
+
+    background:rgba(5,5,5,.94);
+    backdrop-filter:blur(16px);
+
+    border-bottom:1px solid var(--border);
+}
+
+.back{
+    width:42px;
+    height:42px;
+
+    border-radius:13px;
+
+    border:1px solid #303030;
+    background:#151515;
+    color:#fff;
+
+    font-size:20px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+}
+
+.header-title{
+    flex:1;
+}
+
+.header-title h1{
+    font-size:17px;
+    font-weight:900;
+}
+
+.header-title p{
+    color:#777;
+    font-size:10px;
+    margin-top:2px;
+}
+
+.more{
+    width:40px;
+    height:40px;
+
+    border:0;
+    background:transparent;
+    color:#aaa;
+
+    font-size:21px;
+}
+
+/* PAGE */
+
+.container{
+    width:100%;
+    max-width:600px;
+    margin:auto;
+    padding:15px;
+}
+
+/* STATUS */
+
+.status-card{
+    padding:18px;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,229,0,.12),
+            rgba(255,229,0,.025)
+        ),
+        var(--card);
+
+    border:1px solid #393400;
+}
+
+.status-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.status-label{
+    color:#888;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.8px;
+}
+
+.status{
+    padding:7px 11px;
+    border-radius:999px;
+
+    background:#252100;
+    border:1px solid #4a4300;
+
+    color:var(--yellow);
+
+    font-size:11px;
+    font-weight:900;
+}
+
+.status.accepted{
+    color:var(--green);
+    background:#08200f;
+    border-color:#14532d;
+}
+
+.status.completed{
+    color:#60a5fa;
+    background:#071629;
+    border-color:#17385c;
+}
+
+.status.cancelled{
+    color:var(--red);
+    background:#210b0b;
+    border-color:#5a1616;
+}
+
+.ride-id{
+    margin-top:13px;
+
+    font-size:21px;
+    font-weight:1000;
+    letter-spacing:-.5px;
+}
+
+.ride-time{
+    margin-top:5px;
+    color:#777;
+    font-size:11px;
+}
+
+/* LOCATION CARD */
+
+.card{
+    margin-top:13px;
+
+    padding:17px;
+
+    border-radius:20px;
+
+    background:var(--card);
+    border:1px solid var(--border);
+}
+
+.card-title{
+    font-size:13px;
+    font-weight:900;
+    margin-bottom:16px;
+}
+
+/* ROUTE */
+
+.route{
+    position:relative;
+}
+
+.route-line{
+    position:absolute;
+
+    left:10px;
+    top:25px;
+    bottom:25px;
+
+    width:2px;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            #444 0,
+            #444 5px,
+            transparent 5px,
+            transparent 10px
+        );
+}
+
+.location{
+    display:flex;
+    gap:13px;
+    position:relative;
+}
+
+.location + .location{
+    margin-top:25px;
+}
+
+.location-dot{
+    width:21px;
+    height:21px;
+
+    flex:none;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:1000;
+
+    z-index:2;
+}
+
+.location-dot.drop{
+    background:#fff;
+}
+
+.location-info{
+    min-width:0;
+    flex:1;
+}
+
+.location-label{
+    color:#777;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    margin-bottom:4px;
+}
+
+.location-address{
+    font-size:13px;
+    line-height:1.4;
+    font-weight:700;
+}
+
+/* CUSTOMER */
+
+.customer{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.avatar{
+    width:48px;
+    height:48px;
+
+    flex:none;
+
+    border-radius:16px;
+
+    background:#292929;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:19px;
+    font-weight:900;
+}
+
+.customer-info{
+    flex:1;
+    min-width:0;
+}
+
+.customer-name{
+    font-size:14px;
+    font-weight:900;
+}
+
+.customer-rating{
+    color:#aaa;
+    font-size:11px;
+    margin-top:4px;
+}
+
+.customer-actions{
+    display:flex;
+    gap:7px;
+}
+
+.circle-btn{
+    width:40px;
+    height:40px;
+
+    border-radius:13px;
+
+    border:1px solid #333;
+    background:#1a1a1a;
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+    text-decoration:none;
+}
+
+/* FARE */
+
+.fare-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.fare-item{
+    padding:14px;
+
+    border-radius:15px;
+
+    background:var(--card2);
+    border:1px solid #262626;
+}
+
+.fare-label{
+    color:#777;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.fare-value{
+    margin-top:7px;
+
+    font-size:18px;
+    font-weight:1000;
+}
+
+.fare-value.yellow{
+    color:var(--yellow);
+}
+
+/* VEHICLE */
+
+.vehicle{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.vehicle-icon{
+    width:50px;
+    height:50px;
+
+    border-radius:15px;
+
+    background:#211f00;
+    color:var(--yellow);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:23px;
+}
+
+.vehicle-info{
+    flex:1;
+}
+
+.vehicle-name{
+    font-size:14px;
+    font-weight:900;
+}
+
+.vehicle-number{
+    color:#888;
+    font-size:11px;
+    margin-top:4px;
+}
+
+/* NOTES */
+
+.note{
+    display:flex;
+    gap:10px;
+
+    color:#aaa;
+
+    font-size:12px;
+    line-height:1.5;
+}
+
+.note-icon{
+    color:var(--yellow);
+}
+
+/* ACTION BAR */
+
+.bottom{
+    position:fixed;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    z-index:100;
+
+    padding:12px 15px;
+
+    background:
+        linear-gradient(
+            to top,
+            rgba(5,5,5,1),
+            rgba(5,5,5,.94)
+        );
+
+    border-top:1px solid var(--border);
+}
+
+.bottom-inner{
+    max-width:600px;
+    margin:auto;
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.btn{
+    height:52px;
+
+    border-radius:15px;
+
+    border:1px solid #333;
+
+    font-size:13px;
+    font-weight:900;
+
+    cursor:pointer;
+}
+
+.btn-secondary{
+    background:#1a1a1a;
+    color:#fff;
+}
+
+.btn-primary{
+    background:var(--yellow);
+    color:#000;
+    border-color:var(--yellow);
+}
+
+.btn-danger{
+    background:#241010;
+    color:#ff7777;
+    border-color:#552020;
+}
+
+.btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:82px;
+
+    transform:
+        translate(-50%,20px);
+
+    width:max-content;
+    max-width:90%;
+
+    padding:12px 15px;
+
+    border-radius:13px;
+
+    background:#222;
+    border:1px solid #3b3b3b;
+
+    color:#fff;
+
+    font-size:12px;
+    font-weight:700;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:.25s;
+
+    z-index:200;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+.empty{
+    text-align:center;
+    padding:60px 20px;
+    color:#777;
+}
+
+.empty-icon{
+    font-size:42px;
+    margin-bottom:15px;
+}
+
+.empty h2{
+    color:#fff;
+    font-size:18px;
+    margin-bottom:7px;
+}
+
+.empty p{
+    font-size:12px;
+    line-height:1.6;
+}
+
+@media(max-width:380px){
+
+    .container{
+        padding:11px;
+    }
+
+    .status-card,
+    .card{
+        border-radius:18px;
+    }
+
+    .ride-id{
+        font-size:19px;
+    }
 
 }
 
@@ -35,239 +600,1382 @@ font-weight:bold;
 
 </head>
 
-
 <body>
 
+<header class="header">
 
-<div class="header">
+    <button
+        class="back"
+        id="backBtn"
+        type="button"
+        aria-label="Go back"
+    >
+        ‹
+    </button>
 
-🏍 Ride Details
+    <div class="header-title">
+        <h1>Ride Details</h1>
+        <p>RiderX trip information</p>
+    </div>
+
+    <button
+        class="more"
+        id="moreBtn"
+        type="button"
+    >
+        ⋮
+    </button>
+
+</header>
+
+
+<main
+    class="container"
+    id="content"
+>
+
+    <div class="empty">
+
+        <div class="empty-icon">
+            ⏳
+        </div>
+
+        <h2>
+            Loading ride...
+        </h2>
+
+        <p>
+            Getting the latest ride information.
+        </p>
+
+    </div>
+
+</main>
+
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<div
+    class="bottom"
+    id="bottomBar"
+    style="display:none;"
+>
+
+    <div class="bottom-inner">
+
+        <button
+            class="btn btn-secondary"
+            id="secondaryBtn"
+            type="button"
+        >
+            Navigate
+        </button>
+
+        <button
+            class="btn btn-primary"
+            id="primaryBtn"
+            type="button"
+        >
+            Start Ride
+        </button>
+
+    </div>
 
 </div>
-
-
-
-<div class="card">
-
-
-<h2 id="service">
-Ride
-</h2>
-
-
-<p id="pickup">
-📍 Pickup:
-</p>
-
-
-<p id="drop">
-🏁 Drop:
-</p>
-
-
-<p id="distance">
-📏 Distance:
-</p>
-
-
-<p id="fare">
-💰 Fare:
-</p>
-
-
-<p id="status">
-Status:
-</p>
-
-
-
-</div>
-
-
-
-<button onclick="startRide()">
-
-▶ Start Ride
-
-</button>
-
-
-
-<button onclick="completeRide()">
-
-🏁 Complete Ride
-
-</button>
-
-
-
-
-
 
 
 <script type="module">
 
-
-import {db} from "../firebase/config.js";
-
-
 import {
+    auth,
+    db,
+    doc,
+    getDoc,
+    updateDoc,
+    serverTimestamp
+} from "../firebase/firebase-config.js";
 
-doc,
-getDoc,
-updateDoc,
-serverTimestamp
+
+const content =
+    document.getElementById("content");
+
+const bottomBar =
+    document.getElementById("bottomBar");
+
+const primaryBtn =
+    document.getElementById("primaryBtn");
+
+const secondaryBtn =
+    document.getElementById("secondaryBtn");
+
+const toast =
+    document.getElementById("toast");
+
+const backBtn =
+    document.getElementById("backBtn");
+
+const moreBtn =
+    document.getElementById("moreBtn");
+
+
+let rideData = null;
+let rideId = null;
+
+
+/* --------------------------------
+   HELPERS
+-------------------------------- */
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 
 }
 
-from
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+function getParam(name){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get(name);
+
+}
 
 
+function showToast(message){
+
+    toast.textContent =
+        message;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    },2500);
+
+}
 
 
-let rideId = localStorage.getItem("rideId");
+function normalizeStatus(status){
+
+    return String(
+        status || "pending"
+    )
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g," ");
+
+}
 
 
+function formatMoney(value){
+
+    const amount =
+        Number(value || 0);
+
+    return "₹" +
+        amount.toLocaleString(
+            "en-IN",
+            {
+                maximumFractionDigits:0
+            }
+        );
+
+}
 
 
+function formatDate(value){
+
+    if(!value){
+        return "—";
+    }
+
+    try{
+
+        if(
+            typeof value === "object" &&
+            typeof value.toDate === "function"
+        ){
+
+            value =
+                value.toDate();
+
+        }
+
+        const date =
+            new Date(value);
+
+        if(
+            Number.isNaN(
+                date.getTime()
+            )
+        ){
+
+            return "—";
+
+        }
+
+        return date.toLocaleString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short",
+                hour:"2-digit",
+                minute:"2-digit"
+            }
+        );
+
+    }
+    catch(error){
+
+        return "—";
+
+    }
+
+}
+
+
+/* --------------------------------
+   DATA HELPERS
+-------------------------------- */
+
+function pick(obj, keys, fallback=""){
+
+    for(
+        const key of keys
+    ){
+
+        if(
+            obj &&
+            obj[key] !== undefined &&
+            obj[key] !== null &&
+            obj[key] !== ""
+        ){
+
+            return obj[key];
+
+        }
+
+    }
+
+    return fallback;
+
+}
+
+
+function getPickup(data){
+
+    return pick(
+        data,
+        [
+            "pickupAddress",
+            "pickup",
+            "pickupLocation",
+            "fromAddress",
+            "from"
+        ],
+        "Pickup location"
+    );
+
+}
+
+
+function getDrop(data){
+
+    return pick(
+        data,
+        [
+            "dropAddress",
+            "drop",
+            "dropLocation",
+            "toAddress",
+            "destination",
+            "to"
+        ],
+        "Drop location"
+    );
+
+}
+
+
+function getCustomerName(data){
+
+    return pick(
+        data,
+        [
+            "customerName",
+            "riderName",
+            "userName",
+            "passengerName",
+            "customer"
+        ],
+        "Customer"
+    );
+
+}
+
+
+function getFare(data){
+
+    return pick(
+        data,
+        [
+            "fare",
+            "estimatedFare",
+            "totalFare",
+            "amount",
+            "price"
+        ],
+        0
+    );
+
+}
+
+
+function getDistance(data){
+
+    return pick(
+        data,
+        [
+            "distance",
+            "distanceKm",
+            "km",
+            "totalDistance"
+        ],
+        0
+    );
+
+}
+
+
+/* --------------------------------
+   LOAD RIDE
+-------------------------------- */
 
 async function loadRide(){
 
+    const user =
+        auth.currentUser;
 
-const snap = await getDoc(
+    if(!user){
 
-doc(db,"rides",rideId)
+        window.location.replace(
+            "../auth/login.html"
+        );
 
-);
+        return;
 
-
-
-if(!snap.exists()) return;
-
-
-
-let data=snap.data();
+    }
 
 
+    rideId =
+        getParam("rideId") ||
+        getParam("id") ||
+        getParam("requestId");
 
 
-document.getElementById("service").innerHTML=
+    if(!rideId){
 
-"🏍 "+data.service;
+        renderEmpty(
+            "Ride not selected",
+            "No ride ID was provided."
+        );
 
+        return;
 
-
-document.getElementById("pickup").innerHTML=
-
-"📍 Pickup: "+data.pickup;
-
-
-
-document.getElementById("drop").innerHTML=
-
-"🏁 Drop: "+data.drop;
+    }
 
 
+    try{
 
-document.getElementById("distance").innerHTML=
-
-"📏 Distance: "+(data.distance || 0)+" KM";
-
-
-
-document.getElementById("fare").innerHTML=
-
-"💰 Fare: ₹"+data.fare;
-
-
-
-document.getElementById("status").innerHTML=
-
-"Status: "+data.status;
+        const snap =
+            await getDoc(
+                doc(
+                    db,
+                    "rides",
+                    rideId
+                )
+            );
 
 
+        if(!snap.exists()){
+
+            renderEmpty(
+                "Ride not found",
+                "This ride may have been cancelled or removed."
+            );
+
+            return;
+
+        }
+
+
+        rideData =
+            {
+                id:rideId,
+                ...snap.data()
+            };
+
+
+        renderRide(
+            rideData
+        );
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Ride details error:",
+            error
+        );
+
+        renderEmpty(
+            "Unable to load ride",
+            "Please check your connection and try again."
+        );
+
+    }
 
 }
 
 
+/* --------------------------------
+   RENDER EMPTY
+-------------------------------- */
 
+function renderEmpty(
+    title,
+    text
+){
 
+    content.innerHTML = `
 
+        <div class="empty">
 
-window.startRide=async()=>{
+            <div class="empty-icon">
+                ⚠️
+            </div>
 
+            <h2>
+                ${escapeHtml(title)}
+            </h2>
 
-await updateDoc(
+            <p>
+                ${escapeHtml(text)}
+            </p>
 
-doc(db,"rides",rideId),
+        </div>
 
-{
+    `;
 
-status:"Started",
-
-startedAt:serverTimestamp()
-
-}
-
-);
-
-
-
-alert("Ride Started 🏍");
-
-loadRide();
-
-
-};
-
-
-
-
-
-
-
-window.completeRide=async()=>{
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-status:"Completed",
-
-completedAt:serverTimestamp()
+    bottomBar.style.display =
+        "none";
 
 }
 
+
+/* --------------------------------
+   RENDER RIDE
+-------------------------------- */
+
+function renderRide(data){
+
+    const status =
+        normalizeStatus(
+            data.status
+        );
+
+    const pickup =
+        getPickup(data);
+
+    const drop =
+        getDrop(data);
+
+    const customer =
+        getCustomerName(data);
+
+    const fare =
+        getFare(data);
+
+    const distance =
+        getDistance(data);
+
+    const phone =
+        pick(
+            data,
+            [
+                "customerPhone",
+                "phone",
+                "passengerPhone"
+            ],
+            ""
+        );
+
+    const vehicle =
+        pick(
+            data,
+            [
+                "vehicleType",
+                "serviceType",
+                "rideType"
+            ],
+            "Bike Taxi"
+        );
+
+    const created =
+        pick(
+            data,
+            [
+                "createdAt",
+                "created_at",
+                "timestamp"
+            ],
+            null
+        );
+
+
+    let statusClass = "";
+
+    if(
+        status.includes("accept")
+    ){
+
+        statusClass =
+            "accepted";
+
+    }
+
+    if(
+        status.includes("complete")
+    ){
+
+        statusClass =
+            "completed";
+
+    }
+
+    if(
+        status.includes("cancel")
+    ){
+
+        statusClass =
+            "cancelled";
+
+    }
+
+
+    content.innerHTML = `
+
+        <section class="status-card">
+
+            <div class="status-top">
+
+                <div class="status-label">
+                    Current status
+                </div>
+
+                <div class="status ${statusClass}">
+                    ${escapeHtml(
+                        data.status || "Pending"
+                    )}
+                </div>
+
+            </div>
+
+            <div class="ride-id">
+                #${escapeHtml(
+                    String(rideId).slice(-8).toUpperCase()
+                )}
+            </div>
+
+            <div class="ride-time">
+                ${formatDate(created)}
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <div class="card-title">
+                Trip Route
+            </div>
+
+            <div class="route">
+
+                <div class="route-line"></div>
+
+                <div class="location">
+
+                    <div class="location-dot">
+                        ●
+                    </div>
+
+                    <div class="location-info">
+
+                        <div class="location-label">
+                            Pickup
+                        </div>
+
+                        <div class="location-address">
+                            ${escapeHtml(pickup)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="location">
+
+                    <div class="location-dot drop">
+                        ●
+                    </div>
+
+                    <div class="location-info">
+
+                        <div class="location-label">
+                            Drop-off
+                        </div>
+
+                        <div class="location-address">
+                            ${escapeHtml(drop)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <div class="card-title">
+                Customer
+            </div>
+
+            <div class="customer">
+
+                <div class="avatar">
+                    ${escapeHtml(
+                        customer.charAt(0).toUpperCase()
+                    )}
+                </div>
+
+                <div class="customer-info">
+
+                    <div class="customer-name">
+                        ${escapeHtml(customer)}
+                    </div>
+
+                    <div class="customer-rating">
+                        ★ ${escapeHtml(
+                            pick(
+                                data,
+                                [
+                                    "customerRating",
+                                    "rating"
+                                ],
+                                "New"
+                            )
+                        )}
+                    </div>
+
+                </div>
+
+                <div class="customer-actions">
+
+                    ${
+                        phone
+                        ?
+                        `
+                        <a
+                            class="circle-btn"
+                            href="tel:${escapeHtml(phone)}"
+                            aria-label="Call customer"
+                        >
+                            ☎
+                        </a>
+                        `
+                        :
+                        `
+                        <button
+                            class="circle-btn"
+                            id="callBtn"
+                            type="button"
+                            aria-label="Call customer"
+                        >
+                            ☎
+                        </button>
+                        `
+                    }
+
+                    <button
+                        class="circle-btn"
+                        id="chatBtn"
+                        type="button"
+                        aria-label="Chat"
+                    >
+                        💬
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <div class="card-title">
+                Earnings
+            </div>
+
+            <div class="fare-grid">
+
+                <div class="fare-item">
+
+                    <div class="fare-label">
+                        Estimated Fare
+                    </div>
+
+                    <div class="fare-value yellow">
+                        ${formatMoney(fare)}
+                    </div>
+
+                </div>
+
+
+                <div class="fare-item">
+
+                    <div class="fare-label">
+                        Distance
+                    </div>
+
+                    <div class="fare-value">
+                        ${escapeHtml(
+                            distance
+                            ? `${distance} km`
+                            : "—"
+                        )}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <div class="card-title">
+                Service
+            </div>
+
+            <div class="vehicle">
+
+                <div class="vehicle-icon">
+                    🛵
+                </div>
+
+                <div class="vehicle-info">
+
+                    <div class="vehicle-name">
+                        ${escapeHtml(vehicle)}
+                    </div>
+
+                    <div class="vehicle-number">
+                        RiderX trip service
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <div class="card-title">
+                Ride Information
+            </div>
+
+            <div class="note">
+
+                <span class="note-icon">
+                    ●
+                </span>
+
+                <span>
+                    Keep the customer updated during
+                    pickup and complete the trip only
+                    after reaching the destination.
+                </span>
+
+            </div>
+
+        </section>
+
+    `;
+
+
+    setupInnerActions();
+
+    setupBottomActions(
+        status,
+        pickup,
+        drop
+    );
+
+}
+
+
+/* --------------------------------
+   INNER ACTIONS
+-------------------------------- */
+
+function setupInnerActions(){
+
+    const chatBtn =
+        document.getElementById("chatBtn");
+
+    if(chatBtn){
+
+        chatBtn.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    `chat.html?rideId=${encodeURIComponent(rideId)}`;
+
+            }
+        );
+
+    }
+
+
+    const callBtn =
+        document.getElementById("callBtn");
+
+    if(callBtn){
+
+        callBtn.addEventListener(
+            "click",
+            () => {
+
+                showToast(
+                    "Customer phone number is not available."
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+/* --------------------------------
+   BOTTOM ACTIONS
+-------------------------------- */
+
+function setupBottomActions(
+    status,
+    pickup,
+    drop
+){
+
+    bottomBar.style.display =
+        "block";
+
+
+    secondaryBtn.textContent =
+        "Navigate";
+
+    primaryBtn.className =
+        "btn btn-primary";
+
+
+    if(
+        status.includes("complete")
+    ){
+
+        primaryBtn.textContent =
+            "View Receipt";
+
+        secondaryBtn.textContent =
+            "Back to Rides";
+
+        primaryBtn.onclick =
+            () => {
+
+                window.location.href =
+                    `trip.html?rideId=${encodeURIComponent(rideId)}`;
+
+            };
+
+        secondaryBtn.onclick =
+            () => {
+
+                window.location.href =
+                    "rides.html";
+
+            };
+
+        return;
+
+    }
+
+
+    if(
+        status.includes("cancel")
+    ){
+
+        primaryBtn.textContent =
+            "Back to Rides";
+
+        secondaryBtn.textContent =
+            "Go Home";
+
+        primaryBtn.onclick =
+            () => {
+
+                window.location.href =
+                    "rides.html";
+
+            };
+
+        secondaryBtn.onclick =
+            () => {
+
+                window.location.href =
+                    "home.html";
+
+            };
+
+        return;
+
+    }
+
+
+    if(
+        status.includes("start") ||
+        status.includes("pickup")
+    ){
+
+        primaryBtn.textContent =
+            "Start Ride";
+
+        primaryBtn.onclick =
+            startRide;
+
+        secondaryBtn.onclick =
+            () => {
+
+                navigateTo(
+                    pickup
+                );
+
+            };
+
+        return;
+
+    }
+
+
+    if(
+        status.includes("accept")
+    ){
+
+        primaryBtn.textContent =
+            "Start Pickup";
+
+        primaryBtn.onclick =
+            startPickup;
+
+        secondaryBtn.onclick =
+            () => {
+
+                navigateTo(
+                    pickup
+                );
+
+            };
+
+        return;
+
+    }
+
+
+    primaryBtn.textContent =
+        "Accept Ride";
+
+    primaryBtn.onclick =
+        acceptRide;
+
+    secondaryBtn.onclick =
+        () => {
+
+            navigateTo(
+                pickup
+            );
+
+        };
+
+}
+
+
+/* --------------------------------
+   NAVIGATION
+-------------------------------- */
+
+function navigateTo(
+    address
+){
+
+    const destination =
+        encodeURIComponent(
+            address || ""
+        );
+
+    if(!destination){
+
+        showToast(
+            "Destination unavailable."
+        );
+
+        return;
+
+    }
+
+
+    window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${destination}`,
+        "_blank"
+    );
+
+}
+
+
+/* --------------------------------
+   ACCEPT
+-------------------------------- */
+
+async function acceptRide(){
+
+    if(!rideId){
+        return;
+    }
+
+
+    primaryBtn.disabled =
+        true;
+
+    primaryBtn.textContent =
+        "Accepting...";
+
+
+    try{
+
+        const user =
+            auth.currentUser;
+
+        if(!user){
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+            return;
+
+        }
+
+
+        await updateDoc(
+            doc(
+                db,
+                "rides",
+                rideId
+            ),
+            {
+                riderId:user.uid,
+                riderUid:user.uid,
+                status:"accepted",
+                acceptedAt:serverTimestamp()
+            }
+        );
+
+
+        rideData.status =
+            "accepted";
+
+        rideData.riderId =
+            user.uid;
+
+
+        showToast(
+            "Ride accepted successfully."
+        );
+
+
+        renderRide(
+            rideData
+        );
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Accept ride error:",
+            error
+        );
+
+        showToast(
+            "Ride could not be accepted."
+        );
+
+        primaryBtn.disabled =
+            false;
+
+        primaryBtn.textContent =
+            "Accept Ride";
+
+    }
+
+}
+
+
+/* --------------------------------
+   START PICKUP
+-------------------------------- */
+
+async function startPickup(){
+
+    primaryBtn.disabled =
+        true;
+
+    primaryBtn.textContent =
+        "Updating...";
+
+
+    try{
+
+        await updateDoc(
+            doc(
+                db,
+                "rides",
+                rideId
+            ),
+            {
+                status:"pickup",
+                pickupStartedAt:serverTimestamp()
+            }
+        );
+
+
+        rideData.status =
+            "pickup";
+
+
+        renderRide(
+            rideData
+        );
+
+        showToast(
+            "Pickup started."
+        );
+
+    }
+
+    catch(error){
+
+        console.error(
+            error
+        );
+
+        primaryBtn.disabled =
+            false;
+
+        showToast(
+            "Unable to start pickup."
+        );
+
+    }
+
+}
+
+
+/* --------------------------------
+   START RIDE
+-------------------------------- */
+
+async function startRide(){
+
+    primaryBtn.disabled =
+        true;
+
+    primaryBtn.textContent =
+        "Starting...";
+
+
+    try{
+
+        await updateDoc(
+            doc(
+                db,
+                "rides",
+                rideId
+            ),
+            {
+                status:"started",
+                rideStartedAt:serverTimestamp()
+            }
+        );
+
+
+        rideData.status =
+            "started";
+
+
+        showToast(
+            "Ride started."
+        );
+
+
+        setTimeout(() => {
+
+            window.location.href =
+                `trip.html?rideId=${encodeURIComponent(rideId)}`;
+
+        },500);
+
+    }
+
+    catch(error){
+
+        console.error(
+            "Start ride error:",
+            error
+        );
+
+        primaryBtn.disabled =
+            false;
+
+        primaryBtn.textContent =
+            "Start Ride";
+
+        showToast(
+            "Unable to start ride."
+        );
+
+    }
+
+}
+
+
+/* --------------------------------
+   BACK
+-------------------------------- */
+
+backBtn.addEventListener(
+    "click",
+    () => {
+
+        if(
+            window.history.length > 1
+        ){
+
+            window.history.back();
+
+        }
+        else{
+
+            window.location.href =
+                "rides.html";
+
+        }
+
+    }
 );
 
 
+/* --------------------------------
+   MORE
+-------------------------------- */
 
-alert("Ride Completed ✅");
+moreBtn.addEventListener(
+    "click",
+    () => {
 
+        showToast(
+            "More ride options coming soon."
+        );
 
-
-location.href="../customer/receipt.html";
-
-
-
-};
-
-
-
-
-
-loadRide();
+    }
+);
 
 
+/* --------------------------------
+   AUTH
+-------------------------------- */
+
+auth.onAuthStateChanged?.(
+    auth,
+    user => {
+
+        if(!user){
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+            return;
+
+        }
+
+        loadRide();
+
+    }
+);
+
+
+/*
+ * Compatibility fallback:
+ * Some Firebase config files expose
+ * onAuthStateChanged differently.
+ */
+
+if(
+    !auth.onAuthStateChanged
+){
+
+    loadRide();
+
+}
 
 </script>
 
-
 </body>
-
 </html>
