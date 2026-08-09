@@ -1099,4 +1099,1322 @@ body{
             </div>
 
 
-            <
+            <div class="field">
+
+                <label>
+                    Per Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="foodMinuteRate"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Waiting / Minute
+                </label>
+
+                <input
+                    type="number"
+                    id="foodWaitingRate"
+                    min="0"
+                    step="0.01"
+                    value="1"
+                >
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="actions">
+
+        <button
+            type="submit"
+            class="btn primary"
+        >
+            Save Fare Settings
+        </button>
+
+        <button
+            type="button"
+            class="btn"
+            id="resetBtn"
+        >
+            Reset Defaults
+        </button>
+
+    </div>
+
+    </form>
+
+</section>
+
+
+
+<section class="card">
+
+    <h2 class="card-title">
+        Additional Charges
+    </h2>
+
+
+    <div class="form-grid">
+
+
+        <div class="field">
+
+            <label>
+                Cancellation Fee
+            </label>
+
+            <input
+                type="number"
+                id="cancellationFee"
+                min="0"
+                step="0.01"
+                value="20"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Waiting Grace Period (Minutes)
+            </label>
+
+            <input
+                type="number"
+                id="waitingGrace"
+                min="0"
+                step="1"
+                value="3"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Platform Fee
+            </label>
+
+            <input
+                type="number"
+                id="platformFee"
+                min="0"
+                step="0.01"
+                value="0"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Surge Multiplier
+            </label>
+
+            <input
+                type="number"
+                id="surgeMultiplier"
+                min="1"
+                step="0.1"
+                value="1"
+            >
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<section class="card">
+
+    <h2 class="card-title">
+        Fare Controls
+    </h2>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <strong>
+                Fare Calculation
+            </strong>
+
+            <small>
+                Enable automatic fare calculation.
+            </small>
+
+        </div>
+
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="fareEnabled"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <strong>
+                Night Pricing
+            </strong>
+
+            <small>
+                Apply night rates during configured
+                night hours.
+            </small>
+
+        </div>
+
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="nightPricing"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <strong>
+                Long Distance Pricing
+            </strong>
+
+            <small>
+                Apply higher per-km rate after the
+                configured distance threshold.
+            </small>
+
+        </div>
+
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="longDistancePricing"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <strong>
+                Waiting Charges
+            </strong>
+
+            <small>
+                Apply waiting charges after the grace
+                period.
+            </small>
+
+        </div>
+
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="waitingCharges"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+</section>
+
+
+
+<section class="card">
+
+    <h2 class="card-title">
+        Fare Preview
+    </h2>
+
+
+    <div class="preview">
+
+        <div class="preview-row">
+
+            <span>
+                Service
+            </span>
+
+            <strong>
+                Bike Taxi
+            </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+            <span>
+                Distance
+            </span>
+
+            <strong>
+                10 KM
+            </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+            <span>
+                Base Fare
+            </span>
+
+            <strong id="previewBase">
+                ₹30
+            </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+            <span>
+                Distance Fare
+            </span>
+
+            <strong id="previewDistance">
+                ₹80
+            </strong>
+
+        </div>
+
+
+        <div class="preview-row">
+
+            <span>
+                Estimated Total
+            </span>
+
+            <strong id="previewTotal">
+                ₹110
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+</main>
+
+</div>
+
+
+
+<script>
+
+"use strict";
+
+
+const FARE_STORAGE_KEY =
+    "riderxFareSettings";
+
+
+const DEFAULT_FARES = {
+
+    currency:"INR",
+
+    minimumFare:30,
+
+    dayStart:"08:00",
+
+    dayEnd:"22:00",
+
+    longDistanceKm:10,
+
+    bookingFee:0,
+
+    cancellationFee:20,
+
+    waitingGrace:3,
+
+    platformFee:0,
+
+    surgeMultiplier:1,
+
+    fareEnabled:true,
+
+    nightPricing:true,
+
+    longDistancePricing:true,
+
+    waitingCharges:true,
+
+
+    bike:{
+        base:30,
+        dayRate:8,
+        longRate:9,
+        nightRate:11,
+        minuteRate:0,
+        waitingRate:1
+    },
+
+
+    cab:{
+        base:60,
+        dayRate:12,
+        longRate:14,
+        nightRate:16,
+        minuteRate:0,
+        waitingRate:2
+    },
+
+
+    parcel:{
+        base:40,
+        dayRate:9,
+        longRate:10,
+        nightRate:12,
+        minuteRate:0,
+        waitingRate:1
+    },
+
+
+    food:{
+        base:30,
+        dayRate:8,
+        longRate:9,
+        nightRate:11,
+        minuteRate:0,
+        waitingRate:1
+    }
+
+};
+
+
+let fareSettings =
+    cloneDefaults();
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadSettings();
+
+        renderSettings();
+
+        bindEvents();
+
+        updatePreview();
+
+    }
+);
+
+
+
+function cloneDefaults(){
+
+    return JSON.parse(
+        JSON.stringify(
+            DEFAULT_FARES
+        )
+    );
+
+}
+
+
+
+function loadSettings(){
+
+    try{
+
+        const saved =
+            localStorage.getItem(
+                FARE_STORAGE_KEY
+            );
+
+
+        if(saved){
+
+            const data =
+                JSON.parse(
+                    saved
+                );
+
+
+            fareSettings =
+                mergeSettings(
+                    cloneDefaults(),
+                    data
+                );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Fare settings load error:",
+            error
+        );
+
+        fareSettings =
+            cloneDefaults();
+
+    }
+
+}
+
+
+
+function mergeSettings(
+    defaults,
+    saved
+){
+
+    const result = {
+        ...defaults,
+        ...saved
+    };
+
+
+    ["bike","cab","parcel","food"]
+    .forEach(
+        function(service){
+
+            result[service] = {
+
+                ...defaults[service],
+
+                ...(saved[service] || {})
+
+            };
+
+        }
+    );
+
+
+    return result;
+
+}
+
+
+
+function saveSettings(){
+
+    localStorage.setItem(
+        FARE_STORAGE_KEY,
+        JSON.stringify(
+            fareSettings
+        )
+    );
+
+}
+
+
+
+function renderSettings(){
+
+    setValue(
+        "currency",
+        fareSettings.currency
+    );
+
+    setValue(
+        "minimumFare",
+        fareSettings.minimumFare
+    );
+
+    setValue(
+        "dayStart",
+        fareSettings.dayStart
+    );
+
+    setValue(
+        "dayEnd",
+        fareSettings.dayEnd
+    );
+
+    setValue(
+        "longDistanceKm",
+        fareSettings.longDistanceKm
+    );
+
+    setValue(
+        "bookingFee",
+        fareSettings.bookingFee
+    );
+
+    setValue(
+        "cancellationFee",
+        fareSettings.cancellationFee
+    );
+
+    setValue(
+        "waitingGrace",
+        fareSettings.waitingGrace
+    );
+
+    setValue(
+        "platformFee",
+        fareSettings.platformFee
+    );
+
+    setValue(
+        "surgeMultiplier",
+        fareSettings.surgeMultiplier
+    );
+
+
+    renderService(
+        "bike"
+    );
+
+    renderService(
+        "cab"
+    );
+
+    renderService(
+        "parcel"
+    );
+
+    renderService(
+        "food"
+    );
+
+
+    setChecked(
+        "fareEnabled",
+        fareSettings.fareEnabled
+    );
+
+    setChecked(
+        "nightPricing",
+        fareSettings.nightPricing
+    );
+
+    setChecked(
+        "longDistancePricing",
+        fareSettings.longDistancePricing
+    );
+
+    setChecked(
+        "waitingCharges",
+        fareSettings.waitingCharges
+    );
+
+
+    updatePreview();
+
+}
+
+
+
+function renderService(
+    service
+){
+
+    const data =
+        fareSettings[service];
+
+
+    setValue(
+        service + "Base",
+        data.base
+    );
+
+    setValue(
+        service + "DayRate",
+        data.dayRate
+    );
+
+    setValue(
+        service + "LongRate",
+        data.longRate
+    );
+
+    setValue(
+        service + "NightRate",
+        data.nightRate
+    );
+
+    setValue(
+        service + "MinuteRate",
+        data.minuteRate
+    );
+
+    setValue(
+        service + "WaitingRate",
+        data.waitingRate
+    );
+
+}
+
+
+
+function bindEvents(){
+
+    const form =
+        document.getElementById(
+            "fareForm"
+        );
+
+
+    if(form){
+
+        form.addEventListener(
+            "submit",
+            function(event){
+
+                event.preventDefault();
+
+                saveFareForm();
+
+            }
+        );
+
+    }
+
+
+    const reset =
+        document.getElementById(
+            "resetBtn"
+        );
+
+
+    if(reset){
+
+        reset.addEventListener(
+            "click",
+            resetDefaults
+        );
+
+    }
+
+
+    document
+    .querySelectorAll(
+        "input,select"
+    )
+    .forEach(
+        function(element){
+
+            element.addEventListener(
+                "input",
+                updatePreview
+            );
+
+            element.addEventListener(
+                "change",
+                updatePreview
+            );
+
+        }
+    );
+
+}
+
+
+
+function saveFareForm(){
+
+    fareSettings = {
+
+        currency:
+            getValue(
+                "currency"
+            ),
+
+        minimumFare:
+            getNumber(
+                "minimumFare"
+            ),
+
+        dayStart:
+            getValue(
+                "dayStart"
+            ),
+
+        dayEnd:
+            getValue(
+                "dayEnd"
+            ),
+
+        longDistanceKm:
+            getNumber(
+                "longDistanceKm"
+            ),
+
+        bookingFee:
+            getNumber(
+                "bookingFee"
+            ),
+
+        cancellationFee:
+            getNumber(
+                "cancellationFee"
+            ),
+
+        waitingGrace:
+            getNumber(
+                "waitingGrace"
+            ),
+
+        platformFee:
+            getNumber(
+                "platformFee"
+            ),
+
+        surgeMultiplier:
+            Math.max(
+                1,
+                getNumber(
+                    "surgeMultiplier"
+                )
+            ),
+
+        fareEnabled:
+            isChecked(
+                "fareEnabled"
+            ),
+
+        nightPricing:
+            isChecked(
+                "nightPricing"
+            ),
+
+        longDistancePricing:
+            isChecked(
+                "longDistancePricing"
+            ),
+
+        waitingCharges:
+            isChecked(
+                "waitingCharges"
+            ),
+
+
+        bike:
+            readService(
+                "bike"
+            ),
+
+        cab:
+            readService(
+                "cab"
+            ),
+
+        parcel:
+            readService(
+                "parcel"
+            ),
+
+        food:
+            readService(
+                "food"
+            )
+
+    };
+
+
+    saveSettings();
+
+    renderSettings();
+
+    showMessage(
+        "Fare settings saved successfully.",
+        "success"
+    );
+
+}
+
+
+
+function readService(
+    service
+){
+
+    return {
+
+        base:
+            getNumber(
+                service + "Base"
+            ),
+
+        dayRate:
+            getNumber(
+                service + "DayRate"
+            ),
+
+        longRate:
+            getNumber(
+                service + "LongRate"
+            ),
+
+        nightRate:
+            getNumber(
+                service + "NightRate"
+            ),
+
+        minuteRate:
+            getNumber(
+                service + "MinuteRate"
+            ),
+
+        waitingRate:
+            getNumber(
+                service + "WaitingRate"
+            )
+
+    };
+
+}
+
+
+
+function resetDefaults(){
+
+    if(
+        !confirm(
+            "Reset all fare settings to RiderX defaults?"
+        )
+    ){
+
+        return;
+
+    }
+
+
+    fareSettings =
+        cloneDefaults();
+
+
+    saveSettings();
+
+    renderSettings();
+
+    showMessage(
+        "Fare settings reset.",
+        "success"
+    );
+
+}
+
+
+
+function updatePreview(){
+
+    const base =
+        getNumber(
+            "bikeBase"
+        );
+
+
+    const dayRate =
+        getNumber(
+            "bikeDayRate"
+        );
+
+
+    const distance =
+        10;
+
+
+    const distanceFare =
+        dayRate *
+        distance;
+
+
+    const total =
+        Math.max(
+            getNumber(
+                "minimumFare"
+            ),
+            base +
+            distanceFare +
+            getNumber(
+                "bookingFee"
+            )
+        );
+
+
+    setText(
+        "bikeBasePreview",
+        "₹" +
+        formatMoney(
+            base
+        )
+    );
+
+
+    setText(
+        "dayRatePreview",
+        "₹" +
+        formatMoney(
+            dayRate
+        )
+    );
+
+
+    setText(
+        "longRatePreview",
+        "₹" +
+        formatMoney(
+            getNumber(
+                "bikeLongRate"
+            )
+        )
+    );
+
+
+    setText(
+        "nightRatePreview",
+        "₹" +
+        formatMoney(
+            getNumber(
+                "bikeNightRate"
+            )
+        )
+    );
+
+
+    setText(
+        "previewBase",
+        "₹" +
+        formatMoney(
+            base
+        )
+    );
+
+
+    setText(
+        "previewDistance",
+        "₹" +
+        formatMoney(
+            distanceFare
+        )
+    );
+
+
+    setText(
+        "previewTotal",
+        "₹" +
+        formatMoney(
+            total
+        )
+    );
+
+}
+
+
+
+function getValue(
+    id
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    return element
+        ? element.value
+        : "";
+
+}
+
+
+
+function getNumber(
+    id
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(!element){
+
+        return 0;
+
+    }
+
+
+    const number =
+        Number(
+            element.value
+        );
+
+
+    return Number.isFinite(
+        number
+    )
+        ? Math.max(
+            0,
+            number
+        )
+        : 0;
+
+}
+
+
+
+function setValue(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(element){
+
+        element.value =
+            value ?? "";
+
+    }
+
+}
+
+
+
+function setText(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(element){
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+
+function setChecked(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(element){
+
+        element.checked =
+            Boolean(
+                value
+            );
+
+    }
+
+}
+
+
+
+function isChecked(
+    id
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    return Boolean(
+        element &&
+        element.checked
+    );
+
+}
+
+
+
+function formatMoney(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN",
+        {
+            minimumFractionDigits:0,
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+
+function showMessage(
+    message,
+    type="info"
+){
+
+    const old =
+        document.getElementById(
+            "fareMessage"
+        );
+
+
+    if(old){
+
+        old.remove();
+
+    }
+
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+    box.id =
+        "fareMessage";
+
+
+    box.textContent =
+        message;
+
+
+    box.style.cssText = `
+
+        position:fixed;
+        left:50%;
+        bottom:22px;
+        transform:translateX(-50%);
+        z-index:99999;
+        max-width:calc(100% - 30px);
+        padding:12px 18px;
+        border-radius:10px;
+        font-size:13px;
+        font-weight:800;
+        text-align:center;
+        box-shadow:0 10px 30px rgba(0,0,0,.4);
+
+    `;
+
+
+    if(
+        type ===
+        "success"
+    ){
+
+        box.style.background =
+            "#16351f";
+
+        box.style.color =
+            "#4ade80";
+
+    }else{
+
+        box.style.background =
+            "#222";
+
+        box.style.color =
+            "#fff";
+
+    }
+
+
+    document.body.appendChild(
+        box
+    );
+
+
+    setTimeout(
+        function(){
+
+            if(
+                box.parentNode
+            ){
+
+                box.remove();
+
+            }
+
+        },
+        2800
+    );
+
+}
+
+</script>
+
+</body>
+
+                </html>
