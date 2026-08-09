@@ -1,1252 +1,1130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-  <title>Ride History - RiderX</title>
-
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-
-  <link rel="stylesheet" href="../css/Style.css">
-  <link rel="stylesheet" href="../css/Responsive.css">
-
-  <style>
-    :root {
-      --yellow: #ffd400;
-      --black: #050505;
-      --dark: #101010;
-      --card: #171717;
-      --border: #292929;
-      --white: #ffffff;
-      --gray: #a8a8a8;
-      --green: #35d07f;
-      --red: #ff4d4d;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: var(--black);
-      color: var(--white);
-      font-family: Arial, Helvetica, sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    button {
-      font-family: inherit;
-    }
-
-    .page {
-      min-height: 100vh;
-      padding-bottom: 90px;
-    }
-
-    /* HEADER */
-
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      height: 64px;
-      background: rgba(5, 5, 5, .96);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      backdrop-filter: blur(12px);
-    }
-
-    .back-btn {
-      width: 42px;
-      height: 42px;
-      border: 0;
-      border-radius: 50%;
-      background: #181818;
-      color: white;
-      font-size: 23px;
-      cursor: pointer;
-    }
-
-    .title-area {
-      flex: 1;
-      padding-left: 13px;
-    }
-
-    .title-area h1 {
-      font-size: 19px;
-      font-weight: 700;
-    }
-
-    .title-area p {
-      margin-top: 3px;
-      color: var(--gray);
-      font-size: 11px;
-    }
-
-    .refresh-btn {
-      width: 42px;
-      height: 42px;
-      border: 1px solid var(--border);
-      background: #141414;
-      color: var(--yellow);
-      border-radius: 50%;
-      font-size: 19px;
-      cursor: pointer;
-    }
-
-    .refresh-btn.loading {
-      animation: rotate .8s linear infinite;
-    }
-
-    @keyframes rotate {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    /* FILTERS */
-
-    .filters {
-      display: flex;
-      gap: 9px;
-      overflow-x: auto;
-      padding: 15px 16px 10px;
-      scrollbar-width: none;
-    }
-
-    .filters::-webkit-scrollbar {
-      display: none;
-    }
-
-    .filter-btn {
-      flex-shrink: 0;
-      border: 1px solid var(--border);
-      background: #111;
-      color: #aaa;
-      padding: 9px 15px;
-      border-radius: 22px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .filter-btn.active {
-      background: var(--yellow);
-      color: #000;
-      border-color: var(--yellow);
-      font-weight: 700;
-    }
-
-    /* SUMMARY */
-
-    .summary {
-      margin: 8px 16px 14px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .summary-card {
-      background: linear-gradient(145deg, #1b1b1b, #101010);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 15px;
-    }
-
-    .summary-card .label {
-      color: var(--gray);
-      font-size: 11px;
-      margin-bottom: 7px;
-    }
-
-    .summary-card .value {
-      font-size: 20px;
-      font-weight: 800;
-    }
-
-    .summary-card .value.yellow {
-      color: var(--yellow);
-    }
-
-    /* HISTORY */
-
-    .history-container {
-      padding: 0 16px;
-    }
-
-    .section-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 7px 0 12px;
-    }
-
-    .section-title h2 {
-      font-size: 16px;
-    }
-
-    .section-title span {
-      color: var(--gray);
-      font-size: 11px;
-    }
-
-    .ride-list {
-      display: flex;
-      flex-direction: column;
-      gap: 11px;
-    }
-
-    .ride-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 17px;
-      padding: 15px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .ride-card::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 3px;
-      background: var(--yellow);
-    }
-
-    .ride-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .ride-type {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .service-icon {
-      width: 39px;
-      height: 39px;
-      border-radius: 12px;
-      background: #242000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-
-    .ride-type h3 {
-      font-size: 14px;
-    }
-
-    .ride-type p {
-      color: var(--gray);
-      font-size: 10px;
-      margin-top: 3px;
-    }
-
-    .status {
-      padding: 6px 9px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: capitalize;
-    }
-
-    .status.completed {
-      background: rgba(53, 208, 127, .12);
-      color: var(--green);
-    }
-
-    .status.cancelled {
-      background: rgba(255, 77, 77, .12);
-      color: var(--red);
-    }
-
-    .status.pending {
-      background: rgba(255, 212, 0, .12);
-      color: var(--yellow);
-    }
-
-    .route {
-      margin: 15px 0;
-      padding-left: 4px;
-    }
-
-    .location-row {
-      display: flex;
-      gap: 11px;
-      min-height: 30px;
-    }
-
-    .location-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--yellow);
-      margin-top: 4px;
-      flex-shrink: 0;
-    }
-
-    .location-dot.destination {
-      background: white;
-      border: 2px solid var(--yellow);
-    }
-
-    .location-text {
-      color: #ddd;
-      font-size: 12px;
-      line-height: 17px;
-      word-break: break-word;
-    }
-
-    .route-line {
-      width: 1px;
-      height: 14px;
-      background: #4b4b4b;
-      margin: -2px 0 -2px 4px;
-    }
-
-    .ride-bottom {
-      border-top: 1px solid #282828;
-      padding-top: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .ride-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .ride-info small {
-      color: var(--gray);
-      font-size: 10px;
-    }
-
-    .ride-info strong {
-      font-size: 13px;
-    }
-
-    .earning {
-      text-align: right;
-    }
-
-    .earning span {
-      display: block;
-      color: var(--gray);
-      font-size: 10px;
-      margin-bottom: 3px;
-    }
-
-    .earning strong {
-      color: var(--yellow);
-      font-size: 18px;
-    }
-
-    /* EMPTY */
-
-    .empty {
-      display: none;
-      text-align: center;
-      padding: 70px 25px;
-      color: var(--gray);
-    }
-
-    .empty-icon {
-      width: 70px;
-      height: 70px;
-      margin: 0 auto 17px;
-      border-radius: 50%;
-      background: #171717;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-    }
-
-    .empty h3 {
-      color: white;
-      font-size: 16px;
-      margin-bottom: 7px;
-    }
-
-    .empty p {
-      font-size: 12px;
-      line-height: 18px;
-    }
-
-    /* LOADING */
-
-    .loading-box {
-      text-align: center;
-      padding: 55px 20px;
-      color: var(--gray);
-      font-size: 12px;
-    }
-
-    .loader {
-      width: 35px;
-      height: 35px;
-      border: 3px solid #292929;
-      border-top-color: var(--yellow);
-      border-radius: 50%;
-      animation: rotate .8s linear infinite;
-      margin: 0 auto 14px;
-    }
-
-    /* NAVIGATION */
-
-    .bottom-nav {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 72px;
-      z-index: 200;
-      background: rgba(10, 10, 10, .97);
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      padding-bottom: env(safe-area-inset-bottom);
-      backdrop-filter: blur(15px);
-    }
-
-    .nav-item {
-      border: 0;
-      background: transparent;
-      color: #777;
-      min-width: 60px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      font-size: 10px;
-      cursor: pointer;
-    }
-
-    .nav-item .icon {
-      font-size: 21px;
-      line-height: 22px;
-    }
-
-    .nav-item.active {
-      color: var(--yellow);
-    }
-
-    /* TOAST */
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 88px;
-      transform: translate(-50%, 20px);
-      background: #222;
-      border: 1px solid #333;
-      color: white;
-      padding: 11px 16px;
-      border-radius: 10px;
-      font-size: 12px;
-      opacity: 0;
-      pointer-events: none;
-      transition: .25s;
-      z-index: 500;
-      max-width: 85%;
-      text-align: center;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-
-    @media (min-width: 700px) {
-      .page {
-        max-width: 700px;
-        margin: auto;
-      }
-
-      .bottom-nav {
-        max-width: 700px;
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-<div class="page">
-
-  <!-- HEADER -->
-  <header class="topbar">
-    <button class="back-btn" id="backBtn" aria-label="Back">‹</button>
+<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>RiderX | Ride History</title><link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+
+:root{
+    --yellow:#ffe500;
+    --black:#000;
+    --dark:#0b0b0b;
+    --card:#151515;
+    --line:#282828;
+    --muted:#888;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,Poppins,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    min-height:100vh;
+    background:#000;
+    color:#fff;
+    padding-bottom:25px;
+}
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    padding:0 15px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:rgba(8,8,8,.97);
+    border-bottom:1px solid var(--line);
+    backdrop-filter:blur(12px);
+}
+
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.back{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:#181818;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:900;
+}
+
+.logo span{
+    color:var(--yellow);
+}
+
+.header-title{
+    color:#999;
+    font-size:11px;
+    margin-top:2px;
+}
+
+.header-icon{
+    color:var(--yellow);
+    font-size:18px;
+}
+
+.container{
+    width:100%;
+    max-width:680px;
+    margin:auto;
+    padding:16px 14px 30px;
+}
+
+.summary{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:16px;
+}
+
+.summary-card{
+    background:#131313;
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:14px 7px;
+    text-align:center;
+}
+
+.summary-card i{
+    color:var(--yellow);
+    font-size:16px;
+    margin-bottom:7px;
+}
+
+.summary-number{
+    font-size:19px;
+    font-weight:900;
+}
+
+.summary-label{
+    margin-top:3px;
+    color:#777;
+    font-size:9px;
+}
+
+.filters{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    margin-bottom:15px;
+    scrollbar-width:none;
+}
+
+.filters::-webkit-scrollbar{
+    display:none;
+}
+
+.filter{
+    min-width:85px;
+    padding:10px 14px;
+    border:1px solid var(--line);
+    border-radius:13px;
+    background:#121212;
+    color:#aaa;
+    font-size:11px;
+    font-weight:700;
+}
+
+.filter.active{
+    background:var(--yellow);
+    color:#000;
+    border-color:var(--yellow);
+}
+
+.history{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.ride-card{
+    background:#121212;
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px;
+    cursor:pointer;
+    transition:transform .15s ease,border-color .2s ease;
+}
+
+.ride-card:active{
+    transform:scale(.985);
+}
+
+.ride-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.service{
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.service-icon{
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    background:#202020;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--yellow);
+}
+
+.service-name{
+    font-size:13px;
+    font-weight:800;
+}
+
+.ride-date{
+    margin-top:4px;
+    color:#666;
+    font-size:9px;
+}
+
+.fare{
+    color:var(--yellow);
+    font-size:17px;
+    font-weight:900;
+    text-align:right;
+}
+
+.status{
+    display:inline-flex;
+    margin-top:5px;
+    padding:4px 8px;
+    border-radius:20px;
+    font-size:8px;
+    font-weight:800;
+}
+
+.status.completed{
+    background:#10301c;
+    color:var(--green);
+}
+
+.status.cancelled{
+    background:#321313;
+    color:#ff6b6b;
+}
+
+.status.other{
+    background:#292929;
+    color:#aaa;
+}
+
+.route{
+    position:relative;
+    margin-top:13px;
+    padding:11px 12px;
+    background:#0d0d0d;
+    border-radius:13px;
+}
+
+.route-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:27px;
+}
+
+.route-row + .route-row{
+    margin-top:4px;
+}
+
+.dot{
+    width:9px;
+    height:9px;
+    min-width:9px;
+    border-radius:50%;
+}
+
+.pickup{
+    background:var(--green);
+}
+
+.drop{
+    background:var(--yellow);
+}
+
+.route-text{
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    color:#bbb;
+    font-size:10px;
+}
+
+.ride-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    margin-top:11px;
+    padding-top:10px;
+    border-top:1px solid #242424;
+    color:#777;
+    font-size:9px;
+}
+
+.details{
+    color:var(--yellow);
+    font-weight:700;
+}
+
+.loading{
+    padding:40px 15px;
+    text-align:center;
+    color:#666;
+}
+
+.loading i{
+    color:var(--yellow);
+    font-size:25px;
+    margin-bottom:10px;
+}
+
+.empty{
+    display:none;
+    padding:45px 20px;
+    text-align:center;
+    background:#111;
+    border:1px solid #222;
+    border-radius:20px;
+    color:#666;
+}
+
+.empty i{
+    display:block;
+    color:#444;
+    font-size:34px;
+    margin-bottom:12px;
+}
+
+.empty-title{
+    color:#aaa;
+    font-size:14px;
+    font-weight:700;
+}
+
+.empty-text{
+    margin-top:5px;
+    font-size:10px;
+}
+
+.error{
+    display:none;
+    padding:20px;
+    text-align:center;
+    color:#ff6b6b;
+    background:#180909;
+    border:1px solid #3a1717;
+    border-radius:16px;
+    font-size:11px;
+}
+
+@media(max-width:380px){
+
+    .container{
+        padding-left:10px;
+        padding-right:10px;
+    }
+
+    .summary-card{
+        padding:12px 5px;
+    }
+
+    .summary-number{
+        font-size:17px;
+    }
+
+}
+
+</style></head><body><header class="header"><div class="header-left">
+
+    <button
+        class="back"
+        id="backBtn"
+        type="button"
+        aria-label="Back"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+
+    <div>
+
+        <div class="logo">
+            RIDER<span>X</span>
+        </div>
+
+        <div class="header-title">
+            Ride History
+        </div>
 
-    <div class="title-area">
-      <h1>Ride History</h1>
-      <p>Your completed and cancelled rides</p>
     </div>
 
-    <button class="refresh-btn" id="refreshBtn" aria-label="Refresh">↻</button>
-  </header>
-
-  <!-- FILTER -->
-  <div class="filters">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="completed">Completed</button>
-    <button class="filter-btn" data-filter="cancelled">Cancelled</button>
-  </div>
-
-  <!-- SUMMARY -->
-  <section class="summary">
-    <div class="summary-card">
-      <div class="label">Total Rides</div>
-      <div class="value" id="totalRides">0</div>
-    </div>
-
-    <div class="summary-card">
-      <div class="label">Total Earnings</div>
-      <div class="value yellow" id="totalEarnings">₹0</div>
-    </div>
-  </section>
-
-  <!-- HISTORY -->
-  <main class="history-container">
-
-    <div class="section-title">
-      <h2>Recent Rides</h2>
-      <span id="rideCount">0 rides</span>
-    </div>
-
-    <div class="loading-box" id="loadingBox">
-      <div class="loader"></div>
-      Loading ride history...
-    </div>
-
-    <div class="ride-list" id="rideList"></div>
-
-    <div class="empty" id="emptyBox">
-      <div class="empty-icon">🛵</div>
-      <h3>No rides found</h3>
-      <p>Your completed and cancelled rides will appear here.</p>
-    </div>
-
-  </main>
 </div>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
+<i class="fa-solid fa-clock-rotate-left header-icon"></i>
 
-  <button class="nav-item" data-page="home">
-    <span class="icon">⌂</span>
-    <span>Home</span>
-  </button>
+</header><main class="container"><!-- SUMMARY -->
 
-  <button class="nav-item active" data-page="history">
-    <span class="icon">▣</span>
-    <span>History</span>
-  </button>
+<section class="summary">
 
-  <button class="nav-item" data-page="wallet">
-    <span class="icon">₹</span>
-    <span>Wallet</span>
-  </button>
+    <div class="summary-card">
 
-  <button class="nav-item" data-page="profile">
-    <span class="icon">●</span>
-    <span>Profile</span>
-  </button>
+        <i class="fa-solid fa-road"></i>
 
-</nav>
+        <div
+            id="totalRides"
+            class="summary-number"
+        >
+            0
+        </div>
 
-<div class="toast" id="toast"></div>
+        <div class="summary-label">
+            Total Rides
+        </div>
 
-<script type="module">
+    </div>
 
-  import {
-    getAuth,
-    onAuthStateChanged
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  import {
-    getFirestore,
+    <div class="summary-card">
+
+        <i class="fa-solid fa-circle-check"></i>
+
+        <div
+            id="completedRides"
+            class="summary-number"
+        >
+            0
+        </div>
+
+        <div class="summary-label">
+            Completed
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <i class="fa-solid fa-indian-rupee-sign"></i>
+
+        <div
+            id="totalEarned"
+            class="summary-number"
+        >
+            ₹0
+        </div>
+
+        <div class="summary-label">
+            Earned
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FILTERS -->
+
+<div class="filters">
+
+    <button
+        class="filter active"
+        data-filter="all"
+        type="button"
+    >
+        All
+    </button>
+
+    <button
+        class="filter"
+        data-filter="completed"
+        type="button"
+    >
+        Completed
+    </button>
+
+    <button
+        class="filter"
+        data-filter="cancelled"
+        type="button"
+    >
+        Cancelled
+    </button>
+
+</div>
+
+
+<!-- HISTORY -->
+
+<section
+    id="history"
+    class="history"
+>
+
+    <div class="loading">
+
+        <i class="fa-solid fa-spinner fa-spin"></i>
+
+        <div>
+            Loading ride history...
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- EMPTY -->
+
+<div
+    id="empty"
+    class="empty"
+>
+
+    <i class="fa-solid fa-route"></i>
+
+    <div class="empty-title">
+        No rides found
+    </div>
+
+    <div class="empty-text">
+        Your ride history will appear here.
+    </div>
+
+</div>
+
+
+<!-- ERROR -->
+
+<div
+    id="error"
+    class="error"
+>
+    Unable to load ride history. Please try again.
+</div>
+
+</main><script type="module">
+
+import { auth, db } from "../firebase/config.js";
+
+import {
     collection,
     query,
     where,
-    orderBy,
     getDocs
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  import { app } from "../firebase/Firebase-config.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-  const auth = getAuth(app);
-  const db = getFirestore(app);
 
-  let currentUser = null;
-  let allRides = [];
-  let currentFilter = "all";
+const $ = id =>
+    document.getElementById(id);
 
-  const rideList = document.getElementById("rideList");
-  const loadingBox = document.getElementById("loadingBox");
-  const emptyBox = document.getElementById("emptyBox");
-  const totalRides = document.getElementById("totalRides");
-  const totalEarnings = document.getElementById("totalEarnings");
-  const rideCount = document.getElementById("rideCount");
-  const refreshBtn = document.getElementById("refreshBtn");
 
-  /* -----------------------------
-     AUTH
-  ----------------------------- */
+let allRides = [];
 
-  onAuthStateChanged(auth, async (user) => {
+let activeFilter = "all";
 
-    if (!user) {
-      window.location.href = "../auth/login.html";
-      return;
+
+/* =========================================
+   BACK
+========================================= */
+
+$("backBtn")?.addEventListener(
+    "click",
+    () => history.back()
+);
+
+
+/* =========================================
+   DATE
+========================================= */
+
+function getRideDate(data){
+
+    const value =
+        data.completedAt ||
+        data.updatedAt ||
+        data.createdAt;
+
+    if(!value) return null;
+
+    if(
+        typeof value.toDate ===
+        "function"
+    ){
+        return value.toDate();
     }
 
-    currentUser = user;
+    if(value.seconds){
+        return new Date(
+            value.seconds * 1000
+        );
+    }
 
-    await loadRideHistory();
-  });
+    const date = new Date(value);
+
+    return isNaN(date.getTime())
+        ? null
+        : date;
+}
 
 
-  /* -----------------------------
-     LOAD HISTORY
-  ----------------------------- */
+/* =========================================
+   STATUS
+========================================= */
 
-  async function loadRideHistory() {
+function normalizeStatus(value){
 
-    showLoading(true);
+    const status =
+        String(value || "")
+            .trim()
+            .toLowerCase();
 
-    try {
+    if(
+        status === "completed" ||
+        status === "complete" ||
+        status === "finished"
+    ){
+        return "completed";
+    }
 
-      /*
-       * RiderX Firestore structure:
-       *
-       * rides/{rideId}
-       *
-       * riderId
-       * customerId
-       * status
-       * pickup
-       * destination
-       * fare
-       * distance
-       * serviceType
-       * createdAt
-       */
+    if(
+        status === "cancelled" ||
+        status === "canceled" ||
+        status === "cancel"
+    ){
+        return "cancelled";
+    }
 
-      const ridesRef = collection(db, "rides");
+    return "other";
+}
 
-      let q;
 
-      try {
+/* =========================================
+   SERVICE ICON
+========================================= */
 
-        q = query(
-          ridesRef,
-          where("riderId", "==", currentUser.uid),
-          orderBy("createdAt", "desc")
+function serviceIcon(service){
+
+    const value =
+        String(service || "")
+            .toLowerCase();
+
+    if(
+        value.includes("cab") ||
+        value.includes("car")
+    ){
+        return "fa-car";
+    }
+
+    if(value.includes("parcel")){
+        return "fa-box";
+    }
+
+    if(value.includes("food")){
+        return "fa-utensils";
+    }
+
+    return "fa-motorcycle";
+}
+
+
+/* =========================================
+   FORMAT DATE
+========================================= */
+
+function formatDate(date){
+
+    if(!date){
+        return "Date unavailable";
+    }
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric",
+            hour:"2-digit",
+            minute:"2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================
+   LOAD
+========================================= */
+
+async function loadHistory(uid){
+
+    try{
+
+        $("error").style.display =
+            "none";
+
+        const q = query(
+            collection(db,"rides"),
+            where("riderId","==",uid)
         );
 
-        const snapshot = await getDocs(q);
+        const snapshot =
+            await getDocs(q);
 
         allRides = [];
 
-        snapshot.forEach((doc) => {
-          allRides.push({
-            id: doc.id,
-            ...doc.data()
-          });
-        });
+        snapshot.forEach(
+            rideDoc => {
 
-      } catch (indexError) {
+                allRides.push({
+                    id:rideDoc.id,
+                    ...rideDoc.data()
+                });
 
-        /*
-         * Fallback query if Firestore asks for an index.
-         */
-
-        q = query(
-          ridesRef,
-          where("riderId", "==", currentUser.uid)
+            }
         );
 
-        const snapshot = await getDocs(q);
 
-        allRides = [];
+        allRides.sort(
+            (a,b) => {
 
-        snapshot.forEach((doc) => {
-          allRides.push({
-            id: doc.id,
-            ...doc.data()
-          });
-        });
+                const da =
+                    getRideDate(a)?.getTime() || 0;
 
-        allRides.sort((a, b) => {
-          return getTime(b.createdAt) - getTime(a.createdAt);
-        });
-      }
+                const db =
+                    getRideDate(b)?.getTime() || 0;
 
-      updateSummary();
-      renderRides();
+                return db - da;
 
-    } catch (error) {
-
-      console.error("Ride history error:", error);
-
-      allRides = [];
-
-      showToast(
-        "Unable to load ride history. Please try again."
-      );
-
-      renderRides();
-
-    } finally {
-
-      showLoading(false);
-    }
-  }
+            }
+        );
 
 
-  /* -----------------------------
-     RENDER
-  ----------------------------- */
+        updateSummary();
 
-  function renderRides() {
+        render();
 
-    rideList.innerHTML = "";
 
-    let rides = allRides;
+    }catch(error){
 
-    if (currentFilter !== "all") {
-      rides = allRides.filter(
-        ride => normalizeStatus(ride.status) === currentFilter
-      );
+        console.error(
+            "History error:",
+            error
+        );
+
+        $("history").innerHTML = "";
+
+        $("empty").style.display =
+            "none";
+
+        $("error").style.display =
+            "block";
+
     }
 
-    rideCount.textContent =
-      `${rides.length} ${rides.length === 1 ? "ride" : "rides"}`;
+}
 
-    if (!rides.length) {
-      emptyBox.style.display = "block";
-      return;
-    }
 
-    emptyBox.style.display = "none";
+/* =========================================
+   SUMMARY
+========================================= */
 
-    rides.forEach(ride => {
+function updateSummary(){
 
-      const card = createRideCard(ride);
+    const completed =
+        allRides.filter(
+            ride =>
+                normalizeStatus(
+                    ride.status
+                ) === "completed"
+        );
 
-      rideList.appendChild(card);
-    });
-  }
 
+    let earned = 0;
 
-  /* -----------------------------
-     CREATE RIDE CARD
-  ----------------------------- */
 
-  function createRideCard(ride) {
+    completed.forEach(
+        ride => {
 
-    const card = document.createElement("article");
+            earned += Number(
+                ride.fare ??
+                ride.totalFare ??
+                ride.amount ??
+                0
+            );
 
-    card.className = "ride-card";
-
-    const status = normalizeStatus(ride.status);
-
-    const serviceType =
-      ride.serviceType ||
-      ride.service ||
-      ride.vehicleType ||
-      "Bike Taxi";
-
-    const pickup =
-      getLocationText(
-        ride.pickup ||
-        ride.pickupLocation ||
-        ride.from
-      );
-
-    const destination =
-      getLocationText(
-        ride.destination ||
-        ride.dropoff ||
-        ride.dropLocation ||
-        ride.to
-      );
-
-    const fare =
-      Number(
-        ride.fare ??
-        ride.amount ??
-        ride.earning ??
-        ride.totalFare ??
-        0
-      );
-
-    const distance =
-      ride.distance ??
-      ride.km ??
-      ride.totalDistance ??
-      0;
-
-    const date =
-      formatDate(ride.createdAt);
-
-    const time =
-      formatTime(ride.createdAt);
-
-    const icon =
-      getServiceIcon(serviceType);
-
-    card.innerHTML = `
-
-      <div class="ride-top">
-
-        <div class="ride-type">
-
-          <div class="service-icon">
-            ${icon}
-          </div>
-
-          <div>
-            <h3>${escapeHTML(serviceType)}</h3>
-            <p>${escapeHTML(date)} • ${escapeHTML(time)}</p>
-          </div>
-
-        </div>
-
-        <span class="status ${status}">
-          ${escapeHTML(status)}
-        </span>
-
-      </div>
-
-
-      <div class="route">
-
-        <div class="location-row">
-
-          <div class="location-dot"></div>
-
-          <div class="location-text">
-            ${escapeHTML(pickup)}
-          </div>
-
-        </div>
-
-        <div class="route-line"></div>
-
-        <div class="location-row">
-
-          <div class="location-dot destination"></div>
-
-          <div class="location-text">
-            ${escapeHTML(destination)}
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="ride-bottom">
-
-        <div class="ride-info">
-
-          <small>Distance</small>
-
-          <strong>
-            ${escapeHTML(formatDistance(distance))}
-          </strong>
-
-        </div>
-
-
-        <div class="ride-info">
-
-          <small>Ride ID</small>
-
-          <strong>
-            #${escapeHTML(
-              String(ride.id).slice(-7).toUpperCase()
-            )}
-          </strong>
-
-        </div>
-
-
-        <div class="earning">
-
-          <span>Earning</span>
-
-          <strong>
-            ${status === "cancelled" ? "₹0" : formatMoney(fare)}
-          </strong>
-
-        </div>
-
-      </div>
-    `;
-
-    return card;
-  }
-
-
-  /* -----------------------------
-     SUMMARY
-  ----------------------------- */
-
-  function updateSummary() {
-
-    const validRides = allRides.filter(ride => {
-      const status = normalizeStatus(ride.status);
-      return status === "completed";
-    });
-
-    let earnings = 0;
-
-    validRides.forEach(ride => {
-
-      earnings += Number(
-        ride.fare ??
-        ride.amount ??
-        ride.earning ??
-        ride.totalFare ??
-        0
-      ) || 0;
-
-    });
-
-    totalRides.textContent = validRides.length;
-
-    totalEarnings.textContent =
-      formatMoney(earnings);
-  }
-
-
-  /* -----------------------------
-     FILTER
-  ----------------------------- */
-
-  document.querySelectorAll(".filter-btn")
-    .forEach(button => {
-
-      button.addEventListener("click", () => {
-
-        document.querySelectorAll(".filter-btn")
-          .forEach(btn => btn.classList.remove("active"));
-
-        button.classList.add("active");
-
-        currentFilter =
-          button.dataset.filter || "all";
-
-        renderRides();
-      });
-
-    });
-
-
-  /* -----------------------------
-     REFRESH
-  ----------------------------- */
-
-  refreshBtn.addEventListener("click", async () => {
-
-    refreshBtn.classList.add("loading");
-
-    await loadRideHistory();
-
-    setTimeout(() => {
-      refreshBtn.classList.remove("loading");
-    }, 400);
-
-  });
-
-
-  /* -----------------------------
-     BACK
-  ----------------------------- */
-
-  document.getElementById("backBtn")
-    .addEventListener("click", () => {
-
-      if (document.referrer) {
-        history.back();
-      } else {
-        window.location.href = "./home.html";
-      }
-
-    });
-
-
-  /* -----------------------------
-     BOTTOM NAV
-  ----------------------------- */
-
-  document.querySelectorAll(".nav-item")
-    .forEach(item => {
-
-      item.addEventListener("click", () => {
-
-        const page = item.dataset.page;
-
-        if (page === "home") {
-          window.location.href = "./home.html";
         }
+    );
 
-        if (page === "history") {
-          window.location.href = "./history.html";
+
+    $("totalRides").innerText =
+        allRides.length;
+
+
+    $("completedRides").innerText =
+        completed.length;
+
+
+    $("totalEarned").innerText =
+        "₹" +
+        Math.round(earned)
+            .toLocaleString("en-IN");
+
+}
+
+
+/* =========================================
+   FILTER
+========================================= */
+
+function getFiltered(){
+
+    if(activeFilter === "all"){
+        return allRides;
+    }
+
+    return allRides.filter(
+        ride =>
+            normalizeStatus(
+                ride.status
+            ) === activeFilter
+    );
+
+}
+
+
+/* =========================================
+   RENDER
+========================================= */
+
+function render(){
+
+    const rides =
+        getFiltered();
+
+    const container =
+        $("history");
+
+    container.innerHTML = "";
+
+
+    if(!rides.length){
+
+        $("empty").style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    $("empty").style.display =
+        "none";
+
+
+    rides.forEach(
+        ride => {
+
+            const status =
+                normalizeStatus(
+                    ride.status
+                );
+
+
+            const service =
+                ride.serviceType ||
+                ride.service ||
+                "Bike";
+
+
+            const fare =
+                Number(
+                    ride.fare ??
+                    ride.totalFare ??
+                    ride.amount ??
+                    0
+                );
+
+
+            const distance =
+                Number(
+                    ride.distance ??
+                    ride.distanceKm ??
+                    0
+                );
+
+
+            const pickup =
+                ride.pickupLocation ||
+                ride.pickupAddress ||
+                ride.pickup ||
+                "Pickup location";
+
+
+            const drop =
+                ride.dropoffLocation ||
+                ride.dropLocation ||
+                ride.destination ||
+                ride.dropoffAddress ||
+                "Destination";
+
+
+            const date =
+                getRideDate(ride);
+
+
+            const payment =
+                ride.paymentMethod ||
+                ride.payment ||
+                "Cash";
+
+
+            const card =
+                document.createElement("div");
+
+
+            card.className =
+                "ride-card";
+
+
+            card.innerHTML = `
+
+                <div class="ride-head">
+
+                    <div class="service">
+
+                        <div class="service-icon">
+
+                            <i class="fa-solid ${serviceIcon(service)}"></i>
+
+                        </div>
+
+                        <div>
+
+                            <div class="service-name">
+                                ${escapeHtml(service)}
+                            </div>
+
+                            <div class="ride-date">
+                                ${escapeHtml(formatDate(date))}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="fare">
+                            ₹${Math.round(fare).toLocaleString("en-IN")}
+                        </div>
+
+                        <div class="status ${status}">
+                            ${escapeHtml(statusText(status))}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="route">
+
+                    <div class="route-row">
+
+                        <span class="dot pickup"></span>
+
+                        <span class="route-text">
+                            ${escapeHtml(pickup)}
+                        </span>
+
+                    </div>
+
+
+                    <div class="route-row">
+
+                        <span class="dot drop"></span>
+
+                        <span class="route-text">
+                            ${escapeHtml(drop)}
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="ride-footer">
+
+                    <span>
+                        <i class="fa-solid fa-route"></i>
+                        ${distance.toFixed(1)} KM
+                    </span>
+
+                    <span>
+                        <i class="fa-solid fa-wallet"></i>
+                        ${escapeHtml(payment)}
+                    </span>
+
+                    <span class="details">
+                        View details
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </span>
+
+                </div>
+
+            `;
+
+
+            card.addEventListener(
+                "click",
+                () => {
+
+                    sessionStorage.setItem(
+                        "riderxSelectedRide",
+                        JSON.stringify(ride)
+                    );
+
+                    location.href =
+                        `ride-details.html?id=${encodeURIComponent(ride.id)}`;
+
+                }
+            );
+
+
+            container.appendChild(card);
+
         }
+    );
 
-        if (page === "wallet") {
-          window.location.href = "./wallet.html";
-        }
-
-        if (page === "profile") {
-          window.location.href = "./profile.html";
-        }
-
-      });
-
-    });
+}
 
 
-  /* -----------------------------
-     HELPERS
-  ----------------------------- */
+/* =========================================
+   STATUS TEXT
+========================================= */
 
-  function normalizeStatus(status) {
+function statusText(status){
 
-    const value =
-      String(status || "")
-        .toLowerCase()
-        .trim();
-
-    if (
-      value === "complete" ||
-      value === "completed" ||
-      value === "finished" ||
-      value === "success"
-    ) {
-      return "completed";
+    if(status === "completed"){
+        return "COMPLETED";
     }
 
-    if (
-      value === "cancel" ||
-      value === "cancelled" ||
-      value === "canceled"
-    ) {
-      return "cancelled";
+    if(status === "cancelled"){
+        return "CANCELLED";
     }
 
-    return "pending";
-  }
+    return "RIDE";
+}
 
 
-  function getLocationText(location) {
+/* =========================================
+   SAFE HTML
+========================================= */
 
-    if (!location) {
-      return "Location unavailable";
-    }
-
-    if (typeof location === "string") {
-      return location;
-    }
-
-    if (typeof location === "object") {
-
-      return (
-        location.address ||
-        location.name ||
-        location.label ||
-        location.text ||
-        location.formattedAddress ||
-        "Location unavailable"
-      );
-    }
-
-    return "Location unavailable";
-  }
-
-
-  function getServiceIcon(service) {
-
-    const value =
-      String(service || "").toLowerCase();
-
-    if (value.includes("cab") ||
-        value.includes("car")) {
-      return "🚕";
-    }
-
-    if (value.includes("parcel") ||
-        value.includes("delivery")) {
-      return "📦";
-    }
-
-    if (value.includes("food")) {
-      return "🍔";
-    }
-
-    return "🛵";
-  }
-
-
-  function formatMoney(value) {
-
-    const amount =
-      Number(value) || 0;
-
-    return "₹" +
-      amount.toLocaleString("en-IN", {
-        maximumFractionDigits: 0
-      });
-  }
-
-
-  function formatDistance(value) {
-
-    if (
-      value === undefined ||
-      value === null ||
-      value === ""
-    ) {
-      return "—";
-    }
-
-    if (typeof value === "string") {
-      return value.includes("km")
-        ? value
-        : `${value} km`;
-    }
-
-    const km = Number(value);
-
-    if (Number.isNaN(km)) {
-      return "—";
-    }
-
-    return `${km.toFixed(km % 1 ? 1 : 0)} km`;
-  }
-
-
-  function getTime(value) {
-
-    if (!value) {
-      return 0;
-    }
-
-    if (
-      typeof value === "object" &&
-      typeof value.toMillis === "function"
-    ) {
-      return value.toMillis();
-    }
-
-    if (
-      typeof value === "object" &&
-      value.seconds
-    ) {
-      return value.seconds * 1000;
-    }
-
-    const time =
-      new Date(value).getTime();
-
-    return Number.isNaN(time) ? 0 : time;
-  }
-
-
-  function formatDate(value) {
-
-    const timestamp = getTime(value);
-
-    if (!timestamp) {
-      return "Date unavailable";
-    }
-
-    return new Intl.DateTimeFormat("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
-    }).format(timestamp);
-  }
-
-
-  function formatTime(value) {
-
-    const timestamp = getTime(value);
-
-    if (!timestamp) {
-      return "";
-    }
-
-    return new Intl.DateTimeFormat("en-IN", {
-      hour: "2-digit",
-      minute: "2-digit"
-    }).format(timestamp);
-  }
-
-
-  function escapeHTML(value) {
+function escapeHtml(value){
 
     return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
 
 
-  function showLoading(show) {
+/* =========================================
+   FILTER BUTTONS
+========================================= */
 
-    loadingBox.style.display =
-      show ? "block" : "none";
+document.querySelectorAll(
+    ".filter"
+).forEach(button => {
 
-    if (show) {
-      emptyBox.style.display = "none";
+    button.addEventListener(
+        "click",
+        () => {
+
+            document
+                .querySelectorAll(".filter")
+                .forEach(
+                    item =>
+                        item.classList.remove("active")
+                );
+
+
+            button.classList.add("active");
+
+
+            activeFilter =
+                button.dataset.filter ||
+                "all";
+
+
+            render();
+
+        }
+    );
+
+});
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(!user){
+
+            location.href =
+                "../auth/login.html";
+
+            return;
+
+        }
+
+
+        loadHistory(
+            user.uid
+        );
+
     }
-  }
+);
 
-
-  function showToast(message) {
-
-    const toast =
-      document.getElementById("toast");
-
-    toast.textContent = message;
-    toast.classList.add("show");
-
-    setTimeout(() => {
-      toast.classList.remove("show");
-    }, 3000);
-  }
-
-</script>
-
-</body>
+</script></body>
 </html>
