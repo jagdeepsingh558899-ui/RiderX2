@@ -6,17 +6,9 @@
 
 "use strict";
 
-
-/* =========================================================
-   CONFIG
-========================================================= */
-
-const FARE_STORAGE_KEY =
-    "riderxFareSettings";
-
+const FARE_STORAGE_KEY = "riderxFareSettings";
 
 const DEFAULT_FARE_SETTINGS = {
-
     bike: {
         dayRate: 8,
         longDistanceRate: 9,
@@ -54,40 +46,29 @@ const DEFAULT_FARE_SETTINGS = {
     },
 
     currency: "INR",
-
     city: "Chandigarh",
-
     enabled: true,
-
     updatedAt: null
-
 };
 
-
-let fareSettings =
-    clone(
-        DEFAULT_FARE_SETTINGS
-    );
+let fareSettings = clone(DEFAULT_FARE_SETTINGS);
 
 
 /* =========================================================
    INIT
 ========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-        loadFareSettings();
+    loadFareSettings();
 
-        bindFareEvents();
+    bindFareEvents();
 
-        renderFareSettings();
+    renderFareSettings();
 
-        updateFarePreview();
+    updateFarePreview();
 
-    }
-);
+});
 
 
 /* =========================================================
@@ -103,24 +84,12 @@ function loadFareSettings() {
                 FARE_STORAGE_KEY
             );
 
-
         if (!raw) {
-
-            fareSettings =
-                clone(
-                    DEFAULT_FARE_SETTINGS
-                );
-
             return;
-
         }
 
-
         const saved =
-            JSON.parse(
-                raw
-            );
-
+            JSON.parse(raw);
 
         if (
             saved &&
@@ -133,22 +102,14 @@ function loadFareSettings() {
                     saved
                 );
 
-        } else {
-
-            fareSettings =
-                clone(
-                    DEFAULT_FARE_SETTINGS
-                );
-
         }
 
     } catch (error) {
 
         console.error(
-            "RiderX fare settings load error:",
+            "Fare settings load error:",
             error
         );
-
 
         fareSettings =
             clone(
@@ -175,16 +136,14 @@ function saveFareSettings() {
             )
         );
 
-
         return true;
 
     } catch (error) {
 
         console.error(
-            "RiderX fare settings save error:",
+            "Fare settings save error:",
             error
         );
-
 
         return false;
 
@@ -209,35 +168,23 @@ function mergeFareSettings(
         ...saved,
 
         bike: {
-
             ...defaults.bike,
-
             ...(saved.bike || {})
-
         },
 
         cab: {
-
             ...defaults.cab,
-
             ...(saved.cab || {})
-
         },
 
         parcel: {
-
             ...defaults.parcel,
-
             ...(saved.parcel || {})
-
         },
 
         food: {
-
             ...defaults.food,
-
             ...(saved.food || {})
-
         }
 
     };
@@ -255,7 +202,6 @@ function bindFareEvents() {
         document.getElementById(
             "fareSettingsForm"
         );
-
 
     if (form) {
 
@@ -278,7 +224,6 @@ function bindFareEvents() {
             "saveFareSettings"
         );
 
-
     if (
         saveButton &&
         !form
@@ -297,7 +242,6 @@ function bindFareEvents() {
             "resetFareSettings"
         );
 
-
     if (resetButton) {
 
         resetButton.addEventListener(
@@ -312,7 +256,6 @@ function bindFareEvents() {
         document.getElementById(
             "calculateFare"
         );
-
 
     if (previewButton) {
 
@@ -335,7 +278,6 @@ function bindFareEvents() {
                     "input",
                     updateFarePreview
                 );
-
 
                 element.addEventListener(
                     "change",
@@ -489,7 +431,6 @@ function renderFareSettings() {
             "fareEnabled"
         );
 
-
     if (enabled) {
 
         enabled.checked =
@@ -558,9 +499,7 @@ function saveFromForm() {
         );
 
 
-    if (
-        !validation.valid
-    ) {
+    if (!validation.valid) {
 
         showMessage(
             validation.message,
@@ -576,9 +515,7 @@ function saveFromForm() {
         newSettings;
 
 
-    if (
-        !saveFareSettings()
-    ) {
+    if (!saveFareSettings()) {
 
         showMessage(
             "Unable to save fare settings.",
@@ -599,7 +536,6 @@ function saveFromForm() {
         "Fare settings saved successfully.",
         "success"
     );
-
 
     return true;
 
@@ -681,14 +617,45 @@ function validateFareSettings(
 
 
     for (
-        const service
-        of services
+        const service of services
     ) {
 
         const data =
-            settings[
-                service
-            ];
+            settings[service];
+
+
+        if (
+            !data ||
+            !Number.isFinite(
+                Number(data.dayRate)
+            ) ||
+            !Number.isFinite(
+                Number(data.longDistanceRate)
+            ) ||
+            !Number.isFinite(
+                Number(data.nightRate)
+            ) ||
+            !Number.isFinite(
+                Number(data.longDistanceKm)
+            ) ||
+            !Number.isFinite(
+                Number(data.baseFare)
+            ) ||
+            !Number.isFinite(
+                Number(data.minimumFare)
+            )
+        ) {
+
+            return {
+
+                valid: false,
+
+                message:
+                    "Please enter valid numeric fare values."
+
+            };
+
+        }
 
 
         if (
@@ -715,9 +682,7 @@ function validateFareSettings(
 
 
     return {
-
         valid: true
-
     };
 
 }
@@ -736,9 +701,7 @@ function resetFareSettings() {
 
 
     if (!confirmed) {
-
-        return false;
-
+        return;
     }
 
 
@@ -752,16 +715,14 @@ function resetFareSettings() {
         new Date().toISOString();
 
 
-    if (
-        !saveFareSettings()
-    ) {
+    if (!saveFareSettings()) {
 
         showMessage(
             "Unable to reset fare settings.",
             "error"
         );
 
-        return false;
+        return;
 
     }
 
@@ -775,9 +736,6 @@ function resetFareSettings() {
         "Fare settings reset successfully.",
         "success"
     );
-
-
-    return true;
 
 }
 
@@ -793,9 +751,7 @@ function calculateFare(
 ) {
 
     const km =
-        Number(
-            distance
-        );
+        Number(distance);
 
 
     const serviceKey =
@@ -836,6 +792,9 @@ function calculateFare(
     const settings =
         fareSettings[
             serviceKey
+        ] ||
+        DEFAULT_FARE_SETTINGS[
+            serviceKey
         ];
 
 
@@ -845,17 +804,9 @@ function calculateFare(
             : Number(hour);
 
 
-    const validHour =
-        Number.isFinite(
-            currentHour
-        )
-            ? currentHour
-            : new Date().getHours();
-
-
     const isNight =
-        validHour >= 22 ||
-        validHour < 6;
+        currentHour >= 22 ||
+        currentHour < 6;
 
 
     const longDistanceKm =
@@ -864,55 +815,37 @@ function calculateFare(
         ) || 10;
 
 
-    let rate;
-
-    let period;
-
-
-    if (isNight) {
-
-        rate =
-            Number(
+    const rate =
+        isNight
+            ? Number(
                 settings.nightRate
-            ) || 0;
+            )
+            : (
+                km >
+                longDistanceKm
+                    ? Number(
+                        settings.longDistanceRate
+                    )
+                    : Number(
+                        settings.dayRate
+                    )
+            );
 
-        period =
-            "night";
 
-    } else if (
-        km > longDistanceKm
-    ) {
-
-        rate =
-            Number(
-                settings.longDistanceRate
-            ) || 0;
-
-        period =
-            "long-distance";
-
-    } else {
-
-        rate =
-            Number(
-                settings.dayRate
-            ) || 0;
-
-        period =
-            "day";
-
-    }
+    const period =
+        isNight
+            ? "night"
+            : (
+                km >
+                longDistanceKm
+                    ? "long-distance"
+                    : "day"
+            );
 
 
     const baseFare =
         Number(
             settings.baseFare
-        ) || 0;
-
-
-    const minimumFare =
-        Number(
-            settings.minimumFare
         ) || 0;
 
 
@@ -922,6 +855,12 @@ function calculateFare(
             km *
             rate
         );
+
+
+    const minimumFare =
+        Number(
+            settings.minimumFare
+        ) || 0;
 
 
     const fare =
@@ -934,37 +873,25 @@ function calculateFare(
     return {
 
         distance:
-            roundMoney(
-                km
-            ),
+            roundMoney(km),
 
         service:
             serviceKey,
 
         rate:
-            roundMoney(
-                rate
-            ),
+            roundMoney(rate),
 
         baseFare:
-            roundMoney(
-                baseFare
-            ),
+            roundMoney(baseFare),
 
         subtotal:
-            roundMoney(
-                subtotal
-            ),
+            roundMoney(subtotal),
 
         minimumFare:
-            roundMoney(
-                minimumFare
-            ),
+            roundMoney(minimumFare),
 
         fare:
-            roundMoney(
-                fare
-            ),
+            roundMoney(fare),
 
         period:
             period
@@ -985,12 +912,10 @@ function updateFarePreview() {
             "previewDistance"
         );
 
-
     const serviceElement =
         document.getElementById(
             "previewService"
         );
-
 
     const resultElement =
         document.getElementById(
@@ -999,9 +924,7 @@ function updateFarePreview() {
 
 
     if (!resultElement) {
-
         return null;
-
     }
 
 
@@ -1034,7 +957,6 @@ function updateFarePreview() {
             </strong>
 
         </div>
-
 
         <div class="fare-preview-details">
 
@@ -1082,22 +1004,14 @@ function updateFarePreview() {
    HELPERS
 ========================================================= */
 
-function clone(
-    value
-) {
+function clone(value) {
 
     return JSON.parse(
-        JSON.stringify(
-            value
-        )
+        JSON.stringify(value)
     );
 
 }
 
-
-/* =========================================================
-   SET INPUT
-========================================================= */
 
 function setInput(
     id,
@@ -1111,9 +1025,7 @@ function setInput(
 
 
     if (!element) {
-
         return;
-
     }
 
 
@@ -1122,10 +1034,6 @@ function setInput(
 
 }
 
-
-/* =========================================================
-   READ NUMBER
-========================================================= */
 
 function readNumber(
     id,
@@ -1157,18 +1065,10 @@ function readNumber(
         value
     )
         ? value
-        : (
-            Number(
-                fallback
-            ) || 0
-        );
+        : Number(fallback) || 0;
 
 }
 
-
-/* =========================================================
-   READ TEXT
-========================================================= */
 
 function readText(
     id,
@@ -1184,8 +1084,7 @@ function readText(
     if (!element) {
 
         return String(
-            fallback ??
-            ""
+            fallback ?? ""
         );
 
     }
@@ -1199,10 +1098,6 @@ function readText(
 
 }
 
-
-/* =========================================================
-   READ CHECKBOX
-========================================================= */
 
 function readChecked(
     id,
@@ -1226,10 +1121,6 @@ function readChecked(
 }
 
 
-/* =========================================================
-   NORMALIZE SERVICE
-========================================================= */
-
 function normalizeService(
     service
 ) {
@@ -1244,27 +1135,16 @@ function normalizeService(
 
 
     return [
-
         "bike",
-
         "cab",
-
         "parcel",
-
         "food"
-
-    ].includes(
-        value
-    )
+    ].includes(value)
         ? value
         : "bike";
 
 }
 
-
-/* =========================================================
-   ROUND MONEY
-========================================================= */
 
 function roundMoney(
     value
@@ -1272,18 +1152,13 @@ function roundMoney(
 
     return Math.round(
         (
-            Number(
-                value
-            ) || 0
+            Number(value) ||
+            0
         ) * 100
     ) / 100;
 
 }
 
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
 
 function escapeHtml(
     value
@@ -1292,27 +1167,22 @@ function escapeHtml(
     return String(
         value ?? ""
     )
-
     .replaceAll(
         "&",
         "&amp;"
     )
-
     .replaceAll(
         "<",
         "&lt;"
     )
-
     .replaceAll(
         ">",
         "&gt;"
     )
-
     .replaceAll(
         '"',
         "&quot;"
     )
-
     .replaceAll(
         "'",
         "&#039;"
@@ -1341,10 +1211,8 @@ function showMessage(
         existing.textContent =
             message;
 
-
         existing.className =
             `fare-settings-message ${type}`;
-
 
         clearTimeout(
             existing._hideTimer
@@ -1364,7 +1232,6 @@ function showMessage(
                 },
                 4000
             );
-
 
         return;
 
@@ -1398,7 +1265,8 @@ function showMessage(
         function () {
 
             if (
-                messageElement.isConnected
+                messageElement &&
+                messageElement.parentNode
             ) {
 
                 messageElement.remove();
