@@ -3,318 +3,288 @@
    AUTHENTICATION ENGINE
    File: js/auth.js
 
-   Handles:
-   - Firebase Authentication
-   - Customer / Rider / Admin roles
-   - Login state
-   - Logout
-   - Session storage
-   - Auth guards
-   - Role guards
-   - Redirects
-   - Auth state events
-   ============================================================ */
+   Firebase v10 MODULAR compatible
+   Customer / Rider / Admin
+   Login / Register / OTP
+   Session / Guards / Logout
+============================================================ */
+
+"use strict";
 
 (function () {
-
-    "use strict";
 
     window.RiderX = window.RiderX || {};
 
     const RX = window.RiderX;
 
-    const AUTH =
-        RX.auth =
-        RX.auth || {};
+    const AUTH = RX.auth = RX.auth || {};
 
-
-    /* ========================================================
-       CONFIG
-       ======================================================== */
+    /* =========================================================
+       STORAGE
+    ========================================================= */
 
     const STORAGE = {
 
-        user:
-            "riderx_user",
+        user: "riderx_user",
+        role: "riderx_role",
+        session: "riderx_session",
 
-        role:
-            "riderx_role",
+        customer: "riderx_customer",
+        rider: "riderx_rider",
 
-        session:
-            "riderx_session",
+        admin: "riderx_admin_session",
 
-        adminSession:
-            "riderx_admin_session"
+        selectedRole: "riderx_selected_role"
+
     };
 
 
     const ROLES = {
 
-        CUSTOMER:
-            "customer",
+        CUSTOMER: "customer",
+        RIDER: "rider",
+        ADMIN: "admin",
+        SUPERADMIN: "superadmin"
 
-        RIDER:
-            "rider",
-
-        ADMIN:
-            "admin",
-
-        SUPERADMIN:
-            "superadmin"
     };
 
 
-    /* ========================================================
+    /* =========================================================
        STATE
-       ======================================================== */
+    ========================================================= */
 
     AUTH.state = {
 
-        initialized:
-            false,
+        initialized: false,
 
-        loading:
-            false,
+        loading: false,
 
-        user:
-            null,
+        user: null,
 
-        role:
-            null,
+        role: null,
 
-        firebaseUser:
-            null,
+        firebaseUser: null,
 
-        unsubscribe:
-            null
+        unsubscribe: null
+
     };
 
 
-    /* ========================================================
-       FIREBASE
-       ======================================================== */
+    AUTH.phoneConfirmation = null;
 
-    AUTH.firebaseAuth = function () {
+
+    /* =========================================================
+       FIREBASE MODULAR IMPORT
+    ========================================================= */
+
+    let Firebase = null;
+
+
+    async function loadFirebase() {
+
+        if (Firebase) {
+
+            return Firebase;
+
+        }
+
 
         try {
 
-            if (
-                window.firebase &&
-                typeof firebase.auth ===
-                "function"
-            ) {
-
-                return firebase.auth();
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX Firebase Auth error:",
-                error
-            );
-        }
-
-        return null;
-    };
+            Firebase =
+                await import(
+                    "../firebase/firebase-config.js"
+                );
 
 
-    AUTH.firestore = function () {
-
-        try {
-
-            if (
-                window.firebase &&
-                typeof firebase.firestore ===
-                "function"
-            ) {
-
-                return firebase.firestore();
-            }
+            return Firebase;
 
         } catch (error) {
 
-            console.warn(
-                "RiderX Firestore error:",
+            console.error(
+                "RiderX Firebase module load failed:",
                 error
             );
+
+            return null;
+
         }
 
-        return null;
-    };
+    }
 
 
-    AUTH.database = function () {
-
-        try {
-
-            if (
-                window.firebase &&
-                typeof firebase.database ===
-                "function"
-            ) {
-
-                return firebase.database();
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX RTDB error:",
-                error
-            );
-        }
-
-        return null;
-    };
-
-
-    /* ========================================================
+    /* =========================================================
        HELPERS
-       ======================================================== */
+    ========================================================= */
 
-    AUTH.normalizeRole = function (
-        role
-    ) {
+    AUTH.normalizeRole = function (role) {
 
-        role =
-            String(
-                role || ""
-            )
-            .trim()
-            .toLowerCase();
+        const value =
+            String(role || "")
+                .trim()
+                .toLowerCase();
 
 
-        if (
-            role ===
-            "customer"
-        ) {
-
-            return ROLES.CUSTOMER;
-        }
-
-
-        if (
-            role ===
-            "rider"
-        ) {
+        if (value === "driver") {
 
             return ROLES.RIDER;
+
         }
 
 
         if (
-            role ===
-            "driver"
+            value === "customer" ||
+            value === "rider" ||
+            value === "admin" ||
+            value === "superadmin" ||
+            value === "super_admin"
         ) {
 
-            return ROLES.RIDER;
-        }
+            return value === "super_admin"
+                ? ROLES.SUPERADMIN
+                : value;
 
-
-        if (
-            role ===
-            "admin"
-        ) {
-
-            return ROLES.ADMIN;
-        }
-
-
-        if (
-            role ===
-            "super_admin" ||
-            role ===
-            "superadmin"
-        ) {
-
-            return ROLES.SUPERADMIN;
         }
 
 
         return "";
+
     };
 
 
-    AUTH.isAdminRole = function (
-        role
-    ) {
+    AUTH.isAdminRole = function (role) {
 
         role =
-            AUTH.normalizeRole(
-                role
-            );
+            AUTH.normalizeRole(role);
 
 
         return (
             role === ROLES.ADMIN ||
             role === ROLES.SUPERADMIN
         );
+
     };
 
 
-    AUTH.isRiderRole = function (
-        role
-    ) {
+    AUTH.isRiderRole = function (role) {
 
         return (
-            AUTH.normalizeRole(
-                role
-            ) === ROLES.RIDER
+            AUTH.normalizeRole(role) ===
+            ROLES.RIDER
         );
+
     };
 
 
-    AUTH.isCustomerRole = function (
-        role
-    ) {
+    AUTH.isCustomerRole = function (role) {
 
         return (
-            AUTH.normalizeRole(
-                role
-            ) === ROLES.CUSTOMER
+            AUTH.normalizeRole(role) ===
+            ROLES.CUSTOMER
         );
+
     };
 
+
+    /* =========================================================
+       STORAGE HELPERS
+    ========================================================= */
 
     AUTH.getStoredUser = function () {
 
-        try {
+        const keys = [
 
-            const data =
-                localStorage.getItem(
-                    STORAGE.user
+            STORAGE.user,
+            STORAGE.customer,
+            STORAGE.rider
+
+        ];
+
+
+        for (const key of keys) {
+
+            try {
+
+                const raw =
+                    localStorage.getItem(key);
+
+
+                if (!raw) {
+
+                    continue;
+
+                }
+
+
+                const user =
+                    JSON.parse(raw);
+
+
+                if (
+                    user &&
+                    typeof user === "object"
+                ) {
+
+                    return user;
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Invalid RiderX session:",
+                    key
                 );
 
-
-            if (!data) {
-                return null;
             }
 
-
-            return JSON.parse(
-                data
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX stored user error:",
-                error
-            );
-
-            return null;
         }
+
+
+        return null;
+
     };
 
 
     AUTH.getStoredRole = function () {
 
-        return AUTH.normalizeRole(
+        const role =
             localStorage.getItem(
                 STORAGE.role
+            );
+
+
+        if (role) {
+
+            return AUTH.normalizeRole(
+                role
+            );
+
+        }
+
+
+        const user =
+            AUTH.getStoredUser();
+
+
+        if (user && user.role) {
+
+            return AUTH.normalizeRole(
+                user.role
+            );
+
+        }
+
+
+        return AUTH.normalizeRole(
+            localStorage.getItem(
+                "userRole"
+            ) ||
+            localStorage.getItem(
+                STORAGE.selectedRole
             )
         );
+
     };
 
 
@@ -325,6 +295,7 @@
             AUTH.getStoredUser() ||
             null
         );
+
     };
 
 
@@ -337,6 +308,7 @@
                 AUTH.getUser()?.role
             )
         );
+
     };
 
 
@@ -347,7 +319,9 @@
 
 
         if (!user) {
+
             return null;
+
         }
 
 
@@ -357,6 +331,7 @@
             user.userId ||
             null
         );
+
     };
 
 
@@ -366,31 +341,29 @@
             AUTH.getUser();
 
 
-        return (
-            user?.email ||
-            ""
-        );
+        return user?.email || "";
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        SAVE SESSION
-       ======================================================== */
+    ========================================================= */
 
     AUTH.saveSession = function (
         user,
         role
     ) {
 
-        role =
-            AUTH.normalizeRole(
-                role
-            );
-
-
         if (!user) {
-            return;
+
+            return null;
+
         }
+
+
+        role =
+            AUTH.normalizeRole(role);
 
 
         const sessionUser = {
@@ -431,21 +404,38 @@
                 "",
 
             role:
-                role,
+
+                role ||
+                AUTH.normalizeRole(
+                    user.role
+                ),
+
+            userRole:
+
+                role ||
+                AUTH.normalizeRole(
+                    user.role
+                ),
+
+            status:
+                user.status ||
+                "active",
 
             online:
                 user.online === true,
 
             updatedAt:
                 Date.now()
+
         };
 
 
         AUTH.state.user =
             sessionUser;
 
+
         AUTH.state.role =
-            role;
+            sessionUser.role;
 
 
         localStorage.setItem(
@@ -458,69 +448,101 @@
 
         localStorage.setItem(
             STORAGE.role,
-            role
+            sessionUser.role
         );
 
 
         localStorage.setItem(
             STORAGE.session,
-            JSON.stringify(
-                {
-                    uid:
-                        sessionUser.uid,
+            JSON.stringify({
 
-                    role:
-                        role,
+                uid:
+                    sessionUser.uid,
 
-                    loginAt:
-                        Date.now()
-                }
-            )
+                role:
+                    sessionUser.role,
+
+                loginAt:
+                    Date.now()
+
+            })
         );
 
 
         if (
+            sessionUser.role ===
+            ROLES.CUSTOMER
+        ) {
+
+            localStorage.setItem(
+                STORAGE.customer,
+                JSON.stringify(
+                    sessionUser
+                )
+            );
+
+        }
+
+
+        if (
+            sessionUser.role ===
+            ROLES.RIDER
+        ) {
+
+            localStorage.setItem(
+                STORAGE.rider,
+                JSON.stringify(
+                    sessionUser
+                )
+            );
+
+        }
+
+
+        if (
             AUTH.isAdminRole(
-                role
+                sessionUser.role
             )
         ) {
 
             localStorage.setItem(
-                STORAGE.adminSession,
-                JSON.stringify(
-                    {
-                        uid:
-                            sessionUser.uid,
+                STORAGE.admin,
+                JSON.stringify({
 
-                        email:
-                            sessionUser.email,
+                    uid:
+                        sessionUser.uid,
 
-                        role:
-                            role,
+                    email:
+                        sessionUser.email,
 
-                        loginAt:
-                            Date.now()
-                    }
-                )
+                    role:
+                        sessionUser.role,
+
+                    loginAt:
+                        Date.now()
+
+                })
             );
+
         }
+
+
+        return sessionUser;
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        CLEAR SESSION
-       ======================================================== */
+    ========================================================= */
 
     AUTH.clearSession = function () {
 
-        AUTH.state.user =
-            null;
+        AUTH.state.user = null;
 
-        AUTH.state.role =
-            null;
+        AUTH.state.role = null;
 
-        AUTH.state.firebaseUser =
-            null;
+        AUTH.state.firebaseUser = null;
 
 
         localStorage.removeItem(
@@ -536,292 +558,238 @@
         );
 
         localStorage.removeItem(
-            STORAGE.adminSession
+            STORAGE.customer
         );
+
+        localStorage.removeItem(
+            STORAGE.rider
+        );
+
+        localStorage.removeItem(
+            STORAGE.admin
+        );
+
     };
 
 
-    /* ========================================================
-       FIREBASE USER -> PROFILE
-       ======================================================== */
+    /* =========================================================
+       FIREBASE PROFILE
+    ========================================================= */
 
-    AUTH.firebaseUserProfile =
-        async function (
-            firebaseUser
-        ) {
+    AUTH.getProfile = async function (
+        firebaseUser
+    ) {
 
-            if (
-                !firebaseUser
-            ) {
-                return null;
-            }
+        if (!firebaseUser) {
 
+            return null;
 
-            let profile = {
-
-                uid:
-                    firebaseUser.uid,
-
-                email:
-                    firebaseUser.email ||
-                    "",
-
-                displayName:
-                    firebaseUser.displayName ||
-                    "",
-
-                phone:
-                    firebaseUser.phoneNumber ||
-                    "",
-
-                photoURL:
-                    firebaseUser.photoURL ||
-                    ""
-            };
+        }
 
 
-            /*
-             * Firestore profile.
-             */
+        const profile = {
 
-            const firestore =
-                AUTH.firestore();
+            uid:
+                firebaseUser.uid,
 
+            email:
+                firebaseUser.email ||
+                "",
 
-            if (firestore) {
+            displayName:
+                firebaseUser.displayName ||
+                "",
 
-                try {
+            name:
+                firebaseUser.displayName ||
+                "",
 
-                    const doc =
-                        await firestore
-                            .collection(
-                                "users"
-                            )
-                            .doc(
-                                firebaseUser.uid
-                            )
-                            .get();
+            phone:
+                firebaseUser.phoneNumber ||
+                "",
 
+            photoURL:
+                firebaseUser.photoURL ||
+                ""
 
-                    if (
-                        doc.exists
-                    ) {
-
-                        profile = {
-
-                            ...profile,
-
-                            ...doc.data()
-                        };
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "RiderX Firestore profile error:",
-                        error
-                    );
-                }
-            }
-
-
-            /*
-             * Realtime Database fallback.
-             */
-
-            const database =
-                AUTH.database();
-
-
-            if (
-                database &&
-                !profile.role
-            ) {
-
-                try {
-
-                    const snapshot =
-                        await database
-                            .ref(
-                                "users/" +
-                                firebaseUser.uid
-                            )
-                            .once(
-                                "value"
-                            );
-
-
-                    const data =
-                        snapshot.val();
-
-
-                    if (data) {
-
-                        profile = {
-
-                            ...profile,
-
-                            ...data
-                        };
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "RiderX RTDB profile error:",
-                        error
-                    );
-                }
-            }
-
-
-            return profile;
         };
 
 
-    /* ========================================================
-       GET ROLE FROM USER
-       ======================================================== */
-
-    AUTH.resolveRole =
-        async function (
-            user
-        ) {
-
-            if (!user) {
-                return "";
-            }
+        const FB =
+            await loadFirebase();
 
 
-            /*
-             * Existing profile role.
-             */
+        if (!FB) {
 
-            let role =
-                AUTH.normalizeRole(
-                    user.role ||
-                    user.userRole ||
-                    user.accountType
+            return profile;
+
+        }
+
+
+        try {
+
+            const userRef =
+                FB.doc(
+                    FB.db,
+                    "users",
+                    firebaseUser.uid
                 );
 
 
-            if (role) {
-                return role;
+            const snapshot =
+                await FB.getDoc(
+                    userRef
+                );
+
+
+            if (
+                snapshot.exists()
+            ) {
+
+                return {
+
+                    ...profile,
+
+                    ...snapshot.data()
+
+                };
+
             }
 
+        } catch (error) {
 
-            /*
-             * Firestore.
-             */
+            console.warn(
+                "RiderX profile read failed:",
+                error
+            );
 
-            const firestore =
-                AUTH.firestore();
-
-
-            if (firestore) {
-
-                try {
-
-                    const doc =
-                        await firestore
-                            .collection(
-                                "users"
-                            )
-                            .doc(
-                                user.uid
-                            )
-                            .get();
+        }
 
 
-                    if (
-                        doc.exists
-                    ) {
+        return profile;
 
-                        const data =
-                            doc.data() ||
-                            {};
+    };
 
 
-                        role =
-                            AUTH.normalizeRole(
-                                data.role ||
-                                data.userRole ||
-                                data.accountType
-                            );
+    /* =========================================================
+       RESOLVE ROLE
+    ========================================================= */
 
+    AUTH.resolveRole = async function (
+        user
+    ) {
 
-                        if (role) {
-                            return role;
-                        }
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "Role Firestore lookup failed:",
-                        error
-                    );
-                }
-            }
-
-
-            /*
-             * Realtime Database.
-             */
-
-            const database =
-                AUTH.database();
-
-
-            if (database) {
-
-                try {
-
-                    const snapshot =
-                        await database
-                            .ref(
-                                "users/" +
-                                user.uid
-                            )
-                            .once(
-                                "value"
-                            );
-
-
-                    const data =
-                        snapshot.val() ||
-                        {};
-
-
-                    role =
-                        AUTH.normalizeRole(
-                            data.role ||
-                            data.userRole ||
-                            data.accountType
-                        );
-
-
-                    if (role) {
-                        return role;
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "Role RTDB lookup failed:",
-                        error
-                    );
-                }
-            }
-
+        if (!user) {
 
             return "";
-        };
+
+        }
 
 
-    /* ========================================================
+        let role =
+            AUTH.normalizeRole(
+                user.role ||
+                user.userRole ||
+                user.accountType
+            );
+
+
+        if (role) {
+
+            return role;
+
+        }
+
+
+        const selectedRole =
+            AUTH.normalizeRole(
+                localStorage.getItem(
+                    STORAGE.selectedRole
+                )
+            );
+
+
+        if (
+            selectedRole ===
+            ROLES.CUSTOMER ||
+            selectedRole ===
+            ROLES.RIDER
+        ) {
+
+            return selectedRole;
+
+        }
+
+
+        const FB =
+            await loadFirebase();
+
+
+        if (!FB || !user.uid) {
+
+            return "";
+
+        }
+
+
+        try {
+
+            const userRef =
+                FB.doc(
+                    FB.db,
+                    "users",
+                    user.uid
+                );
+
+
+            const snapshot =
+                await FB.getDoc(
+                    userRef
+                );
+
+
+            if (
+                snapshot.exists()
+            ) {
+
+                const data =
+                    snapshot.data();
+
+
+                role =
+                    AUTH.normalizeRole(
+                        data.role ||
+                        data.userRole ||
+                        data.accountType
+                    );
+
+
+                if (role) {
+
+                    return role;
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX role lookup failed:",
+                error
+            );
+
+        }
+
+
+        return "";
+
+    };
+
+
+    /* =========================================================
        EMAIL LOGIN
-       ======================================================== */
+    ========================================================= */
 
     AUTH.loginEmail = async function (
         email,
@@ -832,7 +800,8 @@
             String(
                 email || ""
             )
-            .trim();
+            .trim()
+            .toLowerCase();
 
 
         password =
@@ -846,6 +815,7 @@
             throw new Error(
                 "Email is required."
             );
+
         }
 
 
@@ -854,40 +824,44 @@
             throw new Error(
                 "Password is required."
             );
+
         }
 
 
-        const auth =
-            AUTH.firebaseAuth();
+        const FB =
+            await loadFirebase();
 
 
-        if (!auth) {
+        if (!FB) {
 
             throw new Error(
-                "Firebase Authentication is not available."
+                "Firebase could not be loaded."
             );
+
         }
 
 
-        AUTH.state.loading =
-            true;
+        AUTH.state.loading = true;
 
 
         try {
 
             const result =
-                await auth
-                    .signInWithEmailAndPassword(
-                        email,
-                        password
-                    );
+                await FB.signInWithEmailAndPassword(
+                    FB.auth,
+                    email,
+                    password
+                );
+
+
+            const firebaseUser =
+                result.user;
 
 
             const profile =
-                await AUTH
-                    .firebaseUserProfile(
-                        result.user
-                    );
+                await AUTH.getProfile(
+                    firebaseUser
+                );
 
 
             const role =
@@ -898,13 +872,48 @@
 
             if (!role) {
 
-                await auth.signOut();
+                await FB.signOut(
+                    FB.auth
+                );
 
 
                 throw new Error(
-                    "Your RiderX account role is not configured."
+                    "Account role is not configured. Please contact RiderX support."
                 );
+
             }
+
+
+            if (
+                [
+                    "blocked",
+                    "suspended",
+                    "disabled"
+                ].includes(
+                    String(
+                        profile.status ||
+                        ""
+                    ).toLowerCase()
+                )
+            ) {
+
+                await FB.signOut(
+                    FB.auth
+                );
+
+
+                throw new Error(
+                    "This RiderX account has been disabled."
+                );
+
+            }
+
+
+            profile.role =
+                role;
+
+            profile.userRole =
+                role;
 
 
             AUTH.saveSession(
@@ -914,17 +923,19 @@
 
 
             AUTH.state.firebaseUser =
-                result.user;
+                firebaseUser;
 
 
             AUTH.emit(
                 "login",
                 {
+
                     user:
                         profile,
 
                     role:
                         role
+
                 }
             );
 
@@ -938,20 +949,23 @@
                     role,
 
                 firebaseUser:
-                    result.user
+                    firebaseUser
+
             };
 
         } finally {
 
             AUTH.state.loading =
                 false;
+
         }
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        REGISTER
-       ======================================================== */
+    ========================================================= */
 
     AUTH.register = async function (
         data
@@ -965,7 +979,8 @@
             String(
                 data.email || ""
             )
-            .trim();
+            .trim()
+            .toLowerCase();
 
 
         const password =
@@ -980,11 +995,30 @@
             );
 
 
+        const name =
+            String(
+                data.name ||
+                data.fullName ||
+                ""
+            )
+            .trim();
+
+
+        const phone =
+            String(
+                data.phone ||
+                data.mobile ||
+                ""
+            )
+            .trim();
+
+
         if (!email) {
 
             throw new Error(
                 "Email is required."
             );
+
         }
 
 
@@ -995,79 +1029,102 @@
             throw new Error(
                 "Password must contain at least 6 characters."
             );
+
         }
 
 
         if (
-            !role ||
             ![
                 ROLES.CUSTOMER,
                 ROLES.RIDER
-            ].includes(
-                role
-            )
+            ].includes(role)
         ) {
 
             throw new Error(
-                "A valid customer or rider role is required."
+                "Please select Customer or Rider."
             );
+
         }
 
 
-        const auth =
-            AUTH.firebaseAuth();
+        const FB =
+            await loadFirebase();
 
 
-        if (!auth) {
+        if (!FB) {
 
             throw new Error(
-                "Firebase Authentication is not available."
+                "Firebase could not be loaded."
             );
+
         }
 
 
-        AUTH.state.loading =
-            true;
+        AUTH.state.loading = true;
 
 
         try {
 
             const result =
-                await auth
-                    .createUserWithEmailAndPassword(
-                        email,
-                        password
+                await FB.createUserWithEmailAndPassword(
+                    FB.auth,
+                    email,
+                    password
+                );
+
+
+            const firebaseUser =
+                result.user;
+
+
+            if (name) {
+
+                try {
+
+                    await FB.updateProfile(
+                        firebaseUser,
+                        {
+                            displayName:
+                                name
+                        }
                     );
 
+                } catch (error) {
 
-            const uid =
-                result.user.uid;
+                    console.warn(
+                        "Firebase display name update failed:",
+                        error
+                    );
+
+                }
+
+            }
 
 
             const profile = {
 
                 uid:
-                    uid,
+                    firebaseUser.uid,
 
                 email:
                     email,
 
                 name:
-                    data.name ||
-                    "",
+                    name,
 
                 displayName:
-                    data.name ||
-                    "",
+                    name,
 
                 phone:
-                    data.phone ||
-                    "",
+                    phone,
 
                 role:
                     role,
 
                 userRole:
+                    role,
+
+                accountType:
                     role,
 
                 status:
@@ -1081,98 +1138,26 @@
 
                 updatedAt:
                     Date.now()
+
             };
 
 
-            /*
-             * Firebase profile.
-             */
-
-            try {
-
-                await result.user
-                    .updateProfile(
-                        {
-                            displayName:
-                                profile.name
-                        }
-                    );
-
-            } catch (error) {
-
-                console.warn(
-                    "Firebase display profile failed:",
-                    error
+            const userRef =
+                FB.doc(
+                    FB.db,
+                    "users",
+                    firebaseUser.uid
                 );
-            }
 
 
-            /*
-             * Firestore.
-             */
-
-            const firestore =
-                AUTH.firestore();
-
-
-            if (firestore) {
-
-                try {
-
-                    await firestore
-                        .collection(
-                            "users"
-                        )
-                        .doc(
-                            uid
-                        )
-                        .set(
-                            profile,
-                            {
-                                merge:
-                                    true
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Firestore registration profile failed:",
-                        error
-                    );
+            await FB.setDoc(
+                userRef,
+                profile,
+                {
+                    merge:
+                        true
                 }
-            }
-
-
-            /*
-             * Realtime Database.
-             */
-
-            const database =
-                AUTH.database();
-
-
-            if (database) {
-
-                try {
-
-                    await database
-                        .ref(
-                            "users/" +
-                            uid
-                        )
-                        .update(
-                            profile
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "RTDB registration profile failed:",
-                        error
-                    );
-                }
-            }
+            );
 
 
             AUTH.saveSession(
@@ -1182,17 +1167,19 @@
 
 
             AUTH.state.firebaseUser =
-                result.user;
+                firebaseUser;
 
 
             AUTH.emit(
                 "register",
                 {
+
                     user:
                         profile,
 
                     role:
                         role
+
                 }
             );
 
@@ -1206,28 +1193,27 @@
                     role,
 
                 firebaseUser:
-                    result.user
+                    firebaseUser
+
             };
 
         } finally {
 
             AUTH.state.loading =
                 false;
+
         }
+
     };
 
 
-    /* ========================================================
-       PHONE OTP
-       ======================================================== */
-
-    AUTH.phoneConfirmation =
-        null;
-
+    /* =========================================================
+       SEND OTP
+    ========================================================= */
 
     AUTH.sendOtp = async function (
         phoneNumber,
-        recaptchaContainer
+        container
     ) {
 
         phoneNumber =
@@ -1237,33 +1223,39 @@
             .trim();
 
 
-        if (!phoneNumber) {
-
-            throw new Error(
-                "Phone number is required."
-            );
-        }
-
-
-        const auth =
-            AUTH.firebaseAuth();
-
-
-        if (!auth) {
-
-            throw new Error(
-                "Firebase Authentication is not available."
-            );
-        }
-
-
         if (
-            !recaptchaContainer
+            !phoneNumber.startsWith("+")
         ) {
+
+            phoneNumber =
+                "+91" +
+                phoneNumber.replace(
+                    /\D/g,
+                    ""
+                );
+
+        }
+
+
+        const FB =
+            await loadFirebase();
+
+
+        if (!FB) {
+
+            throw new Error(
+                "Firebase could not be loaded."
+            );
+
+        }
+
+
+        if (!container) {
 
             throw new Error(
                 "OTP verification container is required."
             );
+
         }
 
 
@@ -1271,68 +1263,82 @@
 
 
         if (
-            typeof recaptchaContainer ===
-            "object" &&
-            recaptchaContainer.verify
+            typeof container ===
+            "object"
         ) {
 
             verifier =
-                recaptchaContainer;
+                container;
 
         } else {
 
             verifier =
-                new firebase.auth
-                    .RecaptchaVerifier(
-                        recaptchaContainer,
-                        {
-                            size:
-                                "invisible"
-                        }
-                    );
+                new FB.RecaptchaVerifier(
+                    FB.auth,
+                    container,
+                    {
+                        size:
+                            "invisible"
+                    }
+                );
+
         }
 
 
-        const provider =
-            new firebase.auth
-                .PhoneAuthProvider();
+        try {
 
-
-        const verificationId =
-            await provider
-                .verifyPhoneNumber(
+            const confirmation =
+                await FB.signInWithPhoneNumber(
+                    FB.auth,
                     phoneNumber,
                     verifier
                 );
 
 
-        AUTH.phoneConfirmation = {
-
-            verificationId:
-                verificationId,
-
-            phone:
-                phoneNumber,
-
-            createdAt:
-                Date.now()
-        };
+            AUTH.phoneConfirmation =
+                confirmation;
 
 
-        return {
-
-            verificationId:
-                verificationId,
-
-            phone:
+            localStorage.setItem(
+                "riderx_otp_phone",
                 phoneNumber
-        };
+            );
+
+
+            return {
+
+                phone:
+                    phoneNumber
+
+            };
+
+        } catch (error) {
+
+            try {
+
+                if (
+                    verifier &&
+                    typeof verifier.clear ===
+                    "function"
+                ) {
+
+                    verifier.clear();
+
+                }
+
+            } catch (_) {}
+
+
+            throw error;
+
+        }
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        VERIFY OTP
-       ======================================================== */
+    ========================================================= */
 
     AUTH.verifyOtp = async function (
         otp,
@@ -1347,219 +1353,173 @@
 
 
         if (
-            otp.length !== 6
+            !/^\d{6}$/.test(otp)
         ) {
 
             throw new Error(
                 "Enter the 6-digit OTP."
             );
+
         }
 
 
-        const confirmation =
-            AUTH.phoneConfirmation;
-
-
         if (
-            !confirmation
+            !AUTH.phoneConfirmation
         ) {
 
             throw new Error(
                 "Please request a new OTP."
             );
+
         }
 
 
-        const auth =
-            AUTH.firebaseAuth();
-
-
-        if (!auth) {
-
-            throw new Error(
-                "Firebase Authentication is not available."
-            );
-        }
-
-
-        const credential =
-            firebase.auth
-                .PhoneAuthProvider
-                .credential(
-                    confirmation.verificationId,
+        const result =
+            await AUTH
+                .phoneConfirmation
+                .confirm(
                     otp
                 );
 
 
-        AUTH.state.loading =
-            true;
+        const firebaseUser =
+            result.user;
 
 
-        try {
-
-            const result =
-                await auth
-                    .signInWithCredential(
-                        credential
-                    );
+        const profile =
+            await AUTH.getProfile(
+                firebaseUser
+            );
 
 
-            const profile =
-                await AUTH
-                    .firebaseUserProfile(
-                        result.user
-                    );
+        let resolvedRole =
+            await AUTH.resolveRole(
+                profile
+            );
 
 
-            let resolvedRole =
-                await AUTH.resolveRole(
-                    profile
+        if (!resolvedRole) {
+
+            resolvedRole =
+                AUTH.normalizeRole(
+                    role
                 );
 
+        }
 
-            /*
-             * For a brand-new phone account,
-             * use selected customer/rider role.
-             */
 
-            if (
-                !resolvedRole
-            ) {
+        if (!resolvedRole) {
 
-                resolvedRole =
-                    AUTH.normalizeRole(
-                        role
+            resolvedRole =
+                AUTH.normalizeRole(
+                    localStorage.getItem(
+                        STORAGE.selectedRole
+                    )
+                );
+
+        }
+
+
+        if (!resolvedRole) {
+
+            resolvedRole =
+                ROLES.CUSTOMER;
+
+        }
+
+
+        profile.phone =
+            profile.phone ||
+            firebaseUser.phoneNumber ||
+            localStorage.getItem(
+                "riderx_otp_phone"
+            ) ||
+            "";
+
+
+        profile.role =
+            resolvedRole;
+
+
+        profile.userRole =
+            resolvedRole;
+
+
+        profile.status =
+            profile.status ||
+            "active";
+
+
+        const FB =
+            await loadFirebase();
+
+
+        if (FB) {
+
+            try {
+
+                const userRef =
+                    FB.doc(
+                        FB.db,
+                        "users",
+                        firebaseUser.uid
                     );
+
+
+                await FB.setDoc(
+                    userRef,
+                    {
+
+                        ...profile,
+
+                        uid:
+                            firebaseUser.uid,
+
+                        role:
+                            resolvedRole,
+
+                        userRole:
+                            resolvedRole,
+
+                        updatedAt:
+                            Date.now()
+
+                    },
+                    {
+                        merge:
+                            true
+                    }
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "OTP profile save failed:",
+                    error
+                );
+
             }
 
-
-            if (
-                !resolvedRole
-            ) {
-
-                resolvedRole =
-                    ROLES.CUSTOMER;
-            }
+        }
 
 
-            profile.phone =
-                profile.phone ||
-                confirmation.phone;
+        AUTH.saveSession(
+            profile,
+            resolvedRole
+        );
 
 
-            profile.role =
-                resolvedRole;
+        AUTH.state.firebaseUser =
+            firebaseUser;
 
 
-            profile.userRole =
-                resolvedRole;
+        AUTH.phoneConfirmation =
+            null;
 
 
-            /*
-             * Save user profile if this is
-             * a newly created phone account.
-             */
-
-            const firestore =
-                AUTH.firestore();
-
-
-            if (firestore) {
-
-                try {
-
-                    await firestore
-                        .collection(
-                            "users"
-                        )
-                        .doc(
-                            result.user.uid
-                        )
-                        .set(
-                            {
-                                ...profile,
-
-                                updatedAt:
-                                    Date.now()
-                            },
-                            {
-                                merge:
-                                    true
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "OTP Firestore profile failed:",
-                        error
-                    );
-                }
-            }
-
-
-            const database =
-                AUTH.database();
-
-
-            if (database) {
-
-                try {
-
-                    await database
-                        .ref(
-                            "users/" +
-                            result.user.uid
-                        )
-                        .update(
-                            {
-                                ...profile,
-
-                                updatedAt:
-                                    Date.now()
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "OTP RTDB profile failed:",
-                        error
-                    );
-                }
-            }
-
-
-            AUTH.saveSession(
-                profile,
-                resolvedRole
-            );
-
-
-            AUTH.state.firebaseUser =
-                result.user;
-
-
-            AUTH.phoneConfirmation =
-                null;
-
-
-            AUTH.emit(
-                "login",
-                {
-                    user:
-                        profile,
-
-                    role:
-                        resolvedRole,
-
-                    method:
-                        "phone"
-                }
-            );
-
-
-            return {
+        AUTH.emit(
+            "login",
+            {
 
                 user:
                     profile,
@@ -1567,82 +1527,50 @@
                 role:
                     resolvedRole,
 
-                firebaseUser:
-                    result.user
-            };
+                method:
+                    "phone"
 
-        } finally {
+            }
+        );
 
-            AUTH.state.loading =
-                false;
-        }
+
+        return {
+
+            user:
+                profile,
+
+            role:
+                resolvedRole,
+
+            firebaseUser:
+                firebaseUser
+
+        };
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        LOGOUT
-       ======================================================== */
+    ========================================================= */
 
     AUTH.logout = async function () {
 
         try {
 
-            const user =
-                AUTH.getUser();
+            const FB =
+                await loadFirebase();
 
-
-            /*
-             * Rider offline state.
-             */
 
             if (
-                user &&
-                AUTH.isRiderRole(
-                    AUTH.getRole()
-                )
+                FB &&
+                FB.auth
             ) {
 
-                const database =
-                    AUTH.database();
+                await FB.signOut(
+                    FB.auth
+                );
 
-
-                if (database) {
-
-                    try {
-
-                        await database
-                            .ref(
-                                "users/" +
-                                AUTH.getUid()
-                            )
-                            .update(
-                                {
-                                    online:
-                                        false,
-
-                                    lastSeen:
-                                        Date.now()
-                                }
-                            );
-
-                    } catch (error) {
-
-                        console.warn(
-                            "Rider offline update failed:",
-                            error
-                        );
-                    }
-                }
-            }
-
-
-            const auth =
-                AUTH.firebaseAuth();
-
-
-            if (auth) {
-
-                await auth.signOut();
             }
 
         } catch (error) {
@@ -1657,39 +1585,54 @@
             AUTH.clearSession();
 
 
+            localStorage.removeItem(
+                "userRole"
+            );
+
+
+            localStorage.removeItem(
+                "riderx_selected_role"
+            );
+
+
             AUTH.emit(
                 "logout"
             );
+
         }
+
     };
 
 
-    /* ========================================================
-       AUTH STATE
-       ======================================================== */
+    /* =========================================================
+       AUTH STATE LISTENER
+    ========================================================= */
 
-    AUTH.startListener = function () {
+    AUTH.startListener = async function () {
 
         if (
             AUTH.state.unsubscribe
         ) {
 
             return;
+
         }
 
 
-        const auth =
-            AUTH.firebaseAuth();
+        const FB =
+            await loadFirebase();
 
 
-        if (!auth) {
+        if (!FB) {
 
             return;
+
         }
 
 
         AUTH.state.unsubscribe =
-            auth.onAuthStateChanged(
+            FB.onAuthStateChanged(
+                FB.auth,
                 async function (
                     firebaseUser
                 ) {
@@ -1698,37 +1641,32 @@
                         firebaseUser;
 
 
-                    if (
-                        !firebaseUser
-                    ) {
+                    if (!firebaseUser) {
 
                         AUTH.emit(
                             "signed-out"
                         );
 
                         return;
+
                     }
 
 
                     try {
 
                         const profile =
-                            await AUTH
-                                .firebaseUserProfile(
-                                    firebaseUser
-                                );
+                            await AUTH.getProfile(
+                                firebaseUser
+                            );
 
 
                         const role =
-                            await AUTH
-                                .resolveRole(
-                                    profile
-                                );
+                            await AUTH.resolveRole(
+                                profile
+                            );
 
 
-                        if (
-                            role
-                        ) {
+                        if (role) {
 
                             profile.role =
                                 role;
@@ -1741,78 +1679,70 @@
                                 profile,
                                 role
                             );
+
                         }
 
 
                         AUTH.emit(
                             "signed-in",
                             {
+
                                 user:
                                     profile,
 
                                 role:
                                     role
+
                             }
                         );
+
+
+                        AUTH.renderUser();
 
                     } catch (error) {
 
                         console.warn(
-                            "Auth state profile error:",
+                            "RiderX auth state error:",
                             error
                         );
+
                     }
+
                 }
             );
+
     };
 
 
-    /* ========================================================
-       CHECK LOGIN
-       ======================================================== */
+    /* =========================================================
+       LOGIN STATE
+    ========================================================= */
 
     AUTH.isLoggedIn = function () {
 
-        if (
-            AUTH.state.firebaseUser
-        ) {
-
-            return true;
-        }
-
-
         return Boolean(
+            AUTH.state.firebaseUser ||
             AUTH.getUser()
         );
+
     };
 
-
-    /* ========================================================
-       CHECK ROLE
-       ======================================================== */
 
     AUTH.hasRole = function (
         role
     ) {
 
-        const current =
-            AUTH.normalizeRole(
-                AUTH.getRole()
-            );
-
-
-        const wanted =
-            AUTH.normalizeRole(
-                role
-            );
-
-
         return (
-            current !== "" &&
-            current === wanted
+            AUTH.getRole() ===
+            AUTH.normalizeRole(role)
         );
+
     };
 
+
+    /* =========================================================
+       ROLE GUARD
+    ========================================================= */
 
     AUTH.requireRole = function (
         roles,
@@ -1824,12 +1754,12 @@
 
 
         const allowed =
-            Array.isArray(
-                roles
-            )
+            Array.isArray(roles)
+
                 ? roles.map(
                     AUTH.normalizeRole
                 )
+
                 : [
                     AUTH.normalizeRole(
                         roles
@@ -1845,31 +1775,31 @@
 
         if (
             AUTH.isLoggedIn() &&
-            allowed.includes(
-                current
-            )
+            allowed.includes(current)
         ) {
 
             return true;
+
         }
 
 
         if (
-            options.redirect !==
-            false
+            options.redirect !== false
         ) {
 
             AUTH.redirectByRole();
+
         }
 
 
         return false;
+
     };
 
 
-    /* ========================================================
-       REDIRECT BY ROLE
-       ======================================================== */
+    /* =========================================================
+       REDIRECT
+    ========================================================= */
 
     AUTH.redirectByRole = function () {
 
@@ -1880,10 +1810,8 @@
 
 
         if (
-            role ===
-            ROLES.ADMIN ||
-            role ===
-            ROLES.SUPERADMIN
+            role === ROLES.ADMIN ||
+            role === ROLES.SUPERADMIN
         ) {
 
             window.location.replace(
@@ -1891,12 +1819,12 @@
             );
 
             return;
+
         }
 
 
         if (
-            role ===
-            ROLES.RIDER
+            role === ROLES.RIDER
         ) {
 
             window.location.replace(
@@ -1904,12 +1832,12 @@
             );
 
             return;
+
         }
 
 
         if (
-            role ===
-            ROLES.CUSTOMER
+            role === ROLES.CUSTOMER
         ) {
 
             window.location.replace(
@@ -1917,22 +1845,28 @@
             );
 
             return;
+
         }
 
 
         window.location.replace(
-            "../auth/login.html"
+            "../auth/role.html"
         );
+
     };
 
 
-    /* ========================================================
-       CURRENT USER UPDATE
-       ======================================================== */
+    /* =========================================================
+       PROFILE UPDATE
+    ========================================================= */
 
     AUTH.updateProfile = async function (
         updates
     ) {
+
+        updates =
+            updates || {};
+
 
         const uid =
             AUTH.getUid();
@@ -1943,24 +1877,17 @@
             throw new Error(
                 "User is not logged in."
             );
+
         }
 
 
-        updates =
-            updates || {};
-
-
-        updates.updatedAt =
-            Date.now();
-
-
-        const auth =
-            AUTH.firebaseAuth();
+        const FB =
+            await loadFirebase();
 
 
         if (
-            auth &&
-            auth.currentUser
+            FB &&
+            FB.auth.currentUser
         ) {
 
             const firebaseUpdates = {};
@@ -1973,6 +1900,7 @@
 
                 firebaseUpdates.displayName =
                     updates.displayName;
+
             }
 
 
@@ -1983,6 +1911,7 @@
 
                 firebaseUpdates.photoURL =
                     updates.photoURL;
+
             }
 
 
@@ -1992,106 +1921,65 @@
                 ).length
             ) {
 
-                try {
+                await FB.updateProfile(
+                    FB.auth.currentUser,
+                    firebaseUpdates
+                );
 
-                    await auth.currentUser
-                        .updateProfile(
-                            firebaseUpdates
-                        );
+            }
 
-                } catch (error) {
+        }
 
-                    console.warn(
-                        "Firebase profile update failed:",
-                        error
-                    );
+
+        updates.updatedAt =
+            Date.now();
+
+
+        if (FB) {
+
+            const userRef =
+                FB.doc(
+                    FB.db,
+                    "users",
+                    uid
+                );
+
+
+            await FB.setDoc(
+                userRef,
+                updates,
+                {
+                    merge:
+                        true
                 }
-            }
-        }
+            );
 
-
-        const firestore =
-            AUTH.firestore();
-
-
-        if (firestore) {
-
-            try {
-
-                await firestore
-                    .collection(
-                        "users"
-                    )
-                    .doc(
-                        uid
-                    )
-                    .set(
-                        updates,
-                        {
-                            merge:
-                                true
-                        }
-                    );
-
-            } catch (error) {
-
-                console.warn(
-                    "Firestore profile update failed:",
-                    error
-                );
-            }
-        }
-
-
-        const database =
-            AUTH.database();
-
-
-        if (database) {
-
-            try {
-
-                await database
-                    .ref(
-                        "users/" +
-                        uid
-                    )
-                    .update(
-                        updates
-                    );
-
-            } catch (error) {
-
-                console.warn(
-                    "RTDB profile update failed:",
-                    error
-                );
-            }
         }
 
 
         const current =
-            AUTH.getUser() ||
-            {};
+            AUTH.getUser() || {};
 
 
-        const updatedUser = {
+        const updated =
+            {
 
-            ...current,
+                ...current,
 
-            ...updates,
+                ...updates,
 
-            uid:
-                current.uid ||
-                uid,
+                uid:
+                    current.uid ||
+                    uid,
 
-            role:
-                AUTH.getRole()
-        };
+                role:
+                    AUTH.getRole()
+
+            };
 
 
         AUTH.saveSession(
-            updatedUser,
+            updated,
             AUTH.getRole()
         );
 
@@ -2100,96 +1988,94 @@
             "profile-updated",
             {
                 user:
-                    updatedUser
+                    updated
             }
         );
 
 
-        return updatedUser;
+        AUTH.renderUser();
+
+
+        return updated;
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        PASSWORD RESET
-       ======================================================== */
+    ========================================================= */
 
-    AUTH.resetPassword =
-        async function (
+    AUTH.resetPassword = async function (
+        email
+    ) {
+
+        email =
+            String(
+                email || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (!email) {
+
+            throw new Error(
+                "Email is required."
+            );
+
+        }
+
+
+        const FB =
+            await loadFirebase();
+
+
+        if (!FB) {
+
+            throw new Error(
+                "Firebase could not be loaded."
+            );
+
+        }
+
+
+        await FB.sendPasswordResetEmail(
+            FB.auth,
             email
-        ) {
-
-            email =
-                String(
-                    email || ""
-                )
-                .trim();
+        );
 
 
-            if (!email) {
+        return true;
 
-                throw new Error(
-                    "Email is required."
-                );
-            }
+    };
 
 
-            const auth =
-                AUTH.firebaseAuth();
-
-
-            if (!auth) {
-
-                throw new Error(
-                    "Firebase Authentication is not available."
-                );
-            }
-
-
-            await auth
-                .sendPasswordResetEmail(
-                    email
-                );
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       EVENT SYSTEM
-       ======================================================== */
+    /* =========================================================
+       EVENTS
+    ========================================================= */
 
     AUTH.emit = function (
-        eventName,
+        name,
         detail
     ) {
 
-        try {
+        window.dispatchEvent(
 
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-auth-" +
-                    eventName,
-                    {
-                        detail:
-                            detail ||
-                            {}
-                    }
-                )
-            );
+            new CustomEvent(
+                "riderx-auth-" + name,
+                {
+                    detail:
+                        detail || {}
+                }
+            )
 
-        } catch (error) {
+        );
 
-            console.warn(
-                "RiderX auth event error:",
-                error
-            );
-        }
     };
 
 
     AUTH.on = function (
-        eventName,
+        name,
         callback
     ) {
 
@@ -2199,28 +2085,27 @@
         ) {
 
             return;
+
         }
 
 
         window.addEventListener(
-            "riderx-auth-" +
-            eventName,
-            function (
-                event
-            ) {
+            "riderx-auth-" + name,
+            function (event) {
 
                 callback(
-                    event.detail ||
-                    {}
+                    event.detail || {}
                 );
+
             }
         );
+
     };
 
 
-    /* ========================================================
-       AUTH UI
-       ======================================================== */
+    /* =========================================================
+       RENDER USER
+    ========================================================= */
 
     AUTH.renderUser = function () {
 
@@ -2229,7 +2114,9 @@
 
 
         if (!user) {
+
             return;
+
         }
 
 
@@ -2242,14 +2129,13 @@
                 "[data-user-name]"
             )
             .forEach(
-                function (
-                    element
-                ) {
+                function (element) {
 
                     element.textContent =
                         user.name ||
                         user.displayName ||
                         "User";
+
                 }
             );
 
@@ -2259,13 +2145,12 @@
                 "[data-user-email]"
             )
             .forEach(
-                function (
-                    element
-                ) {
+                function (element) {
 
                     element.textContent =
                         user.email ||
                         "";
+
                 }
             );
 
@@ -2275,13 +2160,12 @@
                 "[data-user-phone]"
             )
             .forEach(
-                function (
-                    element
-                ) {
+                function (element) {
 
                     element.textContent =
                         user.phone ||
                         "";
+
                 }
             );
 
@@ -2291,12 +2175,12 @@
                 "[data-user-role]"
             )
             .forEach(
-                function (
-                    element
-                ) {
+                function (element) {
 
                     element.textContent =
-                        role;
+                        role ||
+                        "";
+
                 }
             );
 
@@ -2306,9 +2190,7 @@
                 "[data-user-avatar]"
             )
             .forEach(
-                function (
-                    element
-                ) {
+                function (element) {
 
                     if (
                         user.photoURL
@@ -2316,68 +2198,87 @@
 
                         element.src =
                             user.photoURL;
+
                     }
+
                 }
             );
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        LOGOUT BUTTONS
-       ======================================================== */
+    ========================================================= */
 
-    AUTH.bindLogout =
-        function () {
+    AUTH.bindLogout = function () {
 
-            document.addEventListener(
-                "click",
-                function (
-                    event
-                ) {
+        if (
+            AUTH.state.logoutBound
+        ) {
 
-                    const button =
-                        event.target.closest(
-                            "[data-logout]"
-                        );
+            return;
+
+        }
 
 
-                    if (!button) {
-                        return;
-                    }
+        AUTH.state.logoutBound =
+            true;
 
 
-                    event.preventDefault();
+        document.addEventListener(
+            "click",
+            function (event) {
+
+                const button =
+                    event.target.closest(
+                        "[data-logout]"
+                    );
 
 
-                    AUTH.logout();
+                if (!button) {
+
+                    return;
+
                 }
-            );
-        };
 
 
-    /* ========================================================
+                event.preventDefault();
+
+
+                AUTH.logout();
+
+            }
+        );
+
+    };
+
+
+    /* =========================================================
        INIT
-       ======================================================== */
+    ========================================================= */
 
-    AUTH.init = function () {
+    AUTH.init = async function () {
 
         if (
             AUTH.state.initialized
         ) {
 
             return;
+
         }
 
 
-        AUTH.startListener();
+        AUTH.state.initialized =
+            true;
+
 
         AUTH.bindLogout();
 
         AUTH.renderUser();
 
 
-        AUTH.state.initialized =
-            true;
+        await AUTH.startListener();
 
 
         AUTH.emit(
@@ -2386,14 +2287,15 @@
 
 
         console.log(
-            "RiderX auth.js loaded."
+            "RiderX modular auth engine loaded."
         );
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        PUBLIC API
-       ======================================================== */
+    ========================================================= */
 
     RX.login =
         function (
@@ -2405,6 +2307,7 @@
                 email,
                 password
             );
+
         };
 
 
@@ -2416,6 +2319,7 @@
             return AUTH.register(
                 data
             );
+
         };
 
 
@@ -2429,6 +2333,7 @@
                 phone,
                 container
             );
+
         };
 
 
@@ -2442,6 +2347,7 @@
                 otp,
                 role
             );
+
         };
 
 
@@ -2449,6 +2355,7 @@
         function () {
 
             return AUTH.logout();
+
         };
 
 
@@ -2456,6 +2363,7 @@
         function () {
 
             return AUTH.getUser();
+
         };
 
 
@@ -2463,6 +2371,7 @@
         function () {
 
             return AUTH.getRole();
+
         };
 
 
@@ -2470,12 +2379,13 @@
         function () {
 
             return AUTH.isLoggedIn();
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        AUTO INIT
-       ======================================================== */
+    ========================================================= */
 
     if (
         document.readyState ===
@@ -2484,12 +2394,21 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            AUTH.init
+            function () {
+
+                AUTH.init();
+
+            },
+            {
+                once:
+                    true
+            }
         );
 
     } else {
 
         AUTH.init();
+
     }
 
 })();
