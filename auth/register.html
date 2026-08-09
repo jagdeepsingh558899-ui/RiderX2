@@ -2,2464 +2,2255 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
->
+    <meta
+        name="theme-color"
+        content="#FFD400"
+    >
 
-<meta
-    name="theme-color"
-    content="#FFD400"
->
+    <meta
+        name="description"
+        content="RiderX - Create Customer or Rider Account"
+    >
 
-<meta
-    name="description"
-    content="RiderX - Create Customer or Rider Account"
->
+    <title>RiderX - Create Account</title>
 
-<title>RiderX - Create Account</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/auth.css">
-<link rel="stylesheet" href="../css/responsive.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<style>
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+        }
 
-*{
-    box-sizing:border-box;
-}
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: #070707;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+        }
 
-html,
-body{
-    width:100%;
-    min-height:100%;
-    margin:0;
-}
+        button,
+        input,
+        select {
+            font: inherit;
+        }
 
-body{
-    min-height:100vh;
-    min-height:100dvh;
-    background:#070707;
-    color:#fff;
-    font-family:Arial,Helvetica,sans-serif;
-}
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
 
-button,
-input,
-select{
-    font:inherit;
-}
+        .auth-page {
+            min-height: 100vh;
+            min-height: 100dvh;
 
-button{
-    -webkit-tap-highlight-color:transparent;
-}
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-.auth-page{
-    min-height:100vh;
-    min-height:100dvh;
+            padding:
+                max(14px, env(safe-area-inset-top))
+                max(14px, env(safe-area-inset-right))
+                max(14px, env(safe-area-inset-bottom))
+                max(14px, env(safe-area-inset-left));
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            position: relative;
+            overflow: auto;
+        }
 
-    padding:
-        max(14px,env(safe-area-inset-top))
-        max(14px,env(safe-area-inset-right))
-        max(14px,env(safe-area-inset-bottom))
-        max(14px,env(safe-area-inset-left));
+        .auth-page::before {
+            content: "";
 
-    position:relative;
-    overflow:auto;
-}
+            position: absolute;
 
-.auth-page::before{
-    content:"";
+            width: 350px;
+            height: 350px;
 
-    position:absolute;
+            top: -180px;
+            right: -140px;
 
-    width:350px;
-    height:350px;
+            border-radius: 50%;
 
-    top:-180px;
-    right:-140px;
+            background: rgba(255, 212, 0, .08);
 
-    border-radius:50%;
+            pointer-events: none;
+        }
 
-    background:rgba(255,212,0,.08);
+        .auth-page::after {
+            content: "";
 
-    pointer-events:none;
-}
+            position: absolute;
 
-.auth-page::after{
-    content:"";
+            width: 310px;
+            height: 310px;
 
-    position:absolute;
+            bottom: -180px;
+            left: -140px;
 
-    width:310px;
-    height:310px;
+            border-radius: 50%;
 
-    bottom:-180px;
-    left:-140px;
+            background: rgba(255, 212, 0, .05);
 
-    border-radius:50%;
+            pointer-events: none;
+        }
 
-    background:rgba(255,212,0,.05);
+        .auth-card {
+            position: relative;
+            z-index: 2;
 
-    pointer-events:none;
-}
+            width: 100%;
+            max-width: 440px;
 
-.auth-card{
-    position:relative;
-    z-index:2;
+            margin: 15px 0;
 
-    width:100%;
-    max-width:440px;
+            padding: 27px 22px 22px;
 
-    margin:15px 0;
+            border: 1px solid #2a2a2a;
+            border-radius: 22px;
 
-    padding:27px 22px 22px;
+            background: #111;
 
-    border:1px solid #2a2a2a;
-    border-radius:22px;
+            box-shadow:
+                0 20px 70px rgba(0, 0, 0, .55);
+        }
 
-    background:#111;
+        .brand {
+            text-align: center;
+            margin-bottom: 22px;
+        }
 
-    box-shadow:
-        0 20px 70px rgba(0,0,0,.55);
-}
+        .logo-box {
+            width: 67px;
+            height: 67px;
 
-.brand{
-    text-align:center;
-    margin-bottom:22px;
-}
+            margin: 0 auto 12px;
 
-.logo-box{
-    width:67px;
-    height:67px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    margin:0 auto 12px;
+            border-radius: 19px;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            background: #FFD400;
+            color: #080808;
 
-    border-radius:19px;
+            font-size: 25px;
+            font-weight: 1000;
 
-    background:#FFD400;
-    color:#080808;
+            box-shadow:
+                0 8px 30px rgba(255, 212, 0, .14);
+        }
 
-    font-size:25px;
-    font-weight:1000;
+        .brand h1 {
+            margin: 0;
 
-    box-shadow:
-        0 8px 30px rgba(255,212,0,.14);
-}
+            font-size: 25px;
+            font-weight: 1000;
+        }
 
-.brand h1{
-    margin:0;
+        .brand h1 span {
+            color: #FFD400;
+        }
 
-    font-size:25px;
-    font-weight:1000;
-}
+        .brand p {
+            margin: 7px 0 0;
 
-.brand h1 span{
-    color:#FFD400;
-}
+            color: #777;
 
-.brand p{
-    margin:7px 0 0;
+            font-size: 10px;
+        }
 
-    color:#777;
+        .welcome {
+            margin-bottom: 18px;
+        }
 
-    font-size:10px;
-}
+        .welcome h2 {
+            margin: 0;
 
-.welcome{
-    margin-bottom:18px;
-}
+            font-size: 18px;
+            font-weight: 900;
+        }
 
-.welcome h2{
-    margin:0;
+        .welcome p {
+            margin: 6px 0 0;
 
-    font-size:18px;
-    font-weight:900;
-}
+            color: #777;
 
-.welcome p{
-    margin:6px 0 0;
+            font-size: 10px;
+            line-height: 1.5;
+        }
 
-    color:#777;
+        .message {
+            display: none;
 
-    font-size:10px;
-    line-height:1.5;
-}
+            margin-bottom: 13px;
 
-.message{
-    display:none;
+            padding: 10px;
 
-    margin-bottom:13px;
+            border-radius: 9px;
 
-    padding:10px;
+            font-size: 10px;
+            line-height: 1.5;
+        }
 
-    border-radius:9px;
+        .message.show {
+            display: block;
+        }
 
-    font-size:10px;
-    line-height:1.5;
-}
+        .error {
+            border: 1px solid #542828;
+            background: #241414;
+            color: #ff7777;
+        }
 
-.message.show{
-    display:block;
-}
+        .success {
+            border: 1px solid #275335;
+            background: #132319;
+            color: #65e58b;
+        }
 
-.error{
-    border:1px solid #542828;
-    background:#241414;
-    color:#ff7777;
-}
+        .role-title {
+            display: block;
 
-.success{
-    border:1px solid #275335;
-    background:#132319;
-    color:#65e58b;
-}
+            margin-bottom: 8px;
 
-.role-title{
-    display:block;
+            color: #999;
 
-    margin-bottom:8px;
+            font-size: 9px;
+            font-weight: 900;
 
-    color:#999;
+            text-transform: uppercase;
+        }
 
-    font-size:9px;
-    font-weight:900;
+        .role-grid {
+            display: grid;
 
-    text-transform:uppercase;
-}
+            grid-template-columns: 1fr 1fr;
 
-.role-grid{
-    display:grid;
+            gap: 8px;
 
-    grid-template-columns:1fr 1fr;
+            margin-bottom: 15px;
+        }
 
-    gap:8px;
+        .role-option {
+            position: relative;
+        }
 
-    margin-bottom:15px;
-}
+        .role-option input {
+            position: absolute;
 
-.role-option{
-    position:relative;
-}
+            opacity: 0;
 
-.role-option input{
-    position:absolute;
+            pointer-events: none;
+        }
 
-    opacity:0;
+        .role-label {
+            min-height: 75px;
 
-    pointer-events:none;
-}
+            display: flex;
+            flex-direction: column;
 
-.role-label{
-    min-height:75px;
+            align-items: center;
+            justify-content: center;
 
-    display:flex;
-    flex-direction:column;
+            gap: 4px;
 
-    align-items:center;
-    justify-content:center;
+            border: 1px solid #303030;
+            border-radius: 11px;
 
-    gap:4px;
+            background: #191919;
 
-    border:1px solid #303030;
-    border-radius:11px;
+            cursor: pointer;
 
-    background:#191919;
+            text-align: center;
 
-    cursor:pointer;
+            transition: .2s ease;
+        }
 
-    text-align:center;
+        .role-label:hover {
+            border-color: #555;
+        }
 
-    transition:.2s ease;
-}
+        .role-option input:checked + .role-label {
+            border-color: #FFD400;
 
-.role-label:hover{
-    border-color:#555;
-}
+            background: #211f12;
 
-.role-option input:checked + .role-label{
-    border-color:#FFD400;
+            box-shadow:
+                0 0 0 1px rgba(255, 212, 0, .08);
+        }
 
-    background:#211f12;
+        .role-icon {
+            font-size: 21px;
+        }
 
-    box-shadow:
-        0 0 0 1px
-        rgba(255,212,0,.08);
-}
+        .role-name {
+            color: #ddd;
 
-.role-icon{
-    font-size:21px;
-}
+            font-size: 10px;
+            font-weight: 900;
+        }
 
-.role-name{
-    color:#ddd;
+        .role-option input:checked + .role-label .role-name {
+            color: #FFD400;
+        }
 
-    font-size:10px;
-    font-weight:900;
-}
+        .form-group {
+            margin-bottom: 13px;
+        }
 
-.role-option input:checked + .role-label .role-name{
-    color:#FFD400;
-}
+        .form-group label {
+            display: block;
 
-.form-group{
-    margin-bottom:13px;
-}
+            margin-bottom: 7px;
 
-.form-group label{
-    display:block;
+            color: #999;
 
-    margin-bottom:7px;
+            font-size: 9px;
+            font-weight: 900;
 
-    color:#999;
+            text-transform: uppercase;
+        }
 
-    font-size:9px;
-    font-weight:900;
+        .input-wrap {
+            position: relative;
+        }
 
-    text-transform:uppercase;
-}
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            height: 47px;
 
-.input-wrap{
-    position:relative;
-}
+            padding: 0 13px;
 
-.form-group input,
-.form-group select{
-    width:100%;
-    height:47px;
+            border: 1px solid #333;
+            border-radius: 10px;
 
-    padding:0 13px;
+            outline: none;
 
-    border:1px solid #333;
-    border-radius:10px;
+            background: #1a1a1a;
+            color: #fff;
 
-    outline:none;
+            font-size: 12px;
 
-    background:#1a1a1a;
-    color:#fff;
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease;
+        }
 
-    font-size:12px;
+        .form-group input::placeholder {
+            color: #555;
+        }
 
-    transition:
-        border-color .2s ease,
-        box-shadow .2s ease;
-}
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #FFD400;
 
-.form-group input::placeholder{
-    color:#555;
-}
+            box-shadow:
+                0 0 0 2px rgba(255, 212, 0, .08);
+        }
 
-.form-group input:focus,
-.form-group select:focus{
-    border-color:#FFD400;
+        .phone-row {
+            display: flex;
+            gap: 8px;
+        }
 
-    box-shadow:
-        0 0 0 2px
-        rgba(255,212,0,.08);
-}
+        .country-code {
+            width: 82px;
+            min-width: 82px;
+            height: 47px;
 
-.phone-row{
-    display:flex;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    gap:8px;
-}
+            border: 1px solid #333;
+            border-radius: 10px;
 
-.country-code{
-    width:82px;
-    min-width:82px;
-    height:47px;
+            background: #1a1a1a;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            color: #FFD400;
 
-    border:1px solid #333;
-    border-radius:10px;
+            font-size: 11px;
+            font-weight: 900;
+        }
 
-    background:#1a1a1a;
+        .phone-row input {
+            flex: 1;
+            min-width: 0;
+        }
 
-    color:#FFD400;
+        .password-row {
+            position: relative;
+        }
 
-    font-size:11px;
-    font-weight:900;
-}
+        .password-row input {
+            padding-right: 45px;
+        }
 
-.phone-row input{
-    flex:1;
-    min-width:0;
-}
+        .eye-btn {
+            position: absolute;
 
-.password-row{
-    position:relative;
-}
+            right: 7px;
+            top: 50%;
 
-.password-row input{
-    padding-right:45px;
-}
+            width: 34px;
+            height: 34px;
 
-.eye-btn{
-    position:absolute;
+            transform: translateY(-50%);
 
-    right:7px;
-    top:50%;
+            border: 0;
+            border-radius: 7px;
 
-    width:34px;
-    height:34px;
+            background: transparent;
+            color: #777;
 
-    transform:translateY(-50%);
+            cursor: pointer;
+        }
 
-    border:0;
-    border-radius:7px;
+        .eye-btn:hover {
+            color: #FFD400;
+        }
 
-    background:transparent;
+        .password-hint {
+            margin-top: 5px;
 
-    color:#777;
+            color: #555;
 
-    cursor:pointer;
-}
+            font-size: 8px;
+        }
 
-.eye-btn:hover{
-    color:#FFD400;
-}
+        .checkbox-row {
+            display: flex;
 
-.password-hint{
-    margin-top:5px;
+            align-items: flex-start;
 
-    color:#555;
+            gap: 8px;
 
-    font-size:8px;
-}
+            margin: 4px 0 16px;
 
-.checkbox-row{
-    display:flex;
+            color: #777;
 
-    align-items:flex-start;
+            font-size: 9px;
+            line-height: 1.5;
+        }
 
-    gap:8px;
+        .checkbox-row input {
+            width: 14px;
+            height: 14px;
 
-    margin:4px 0 16px;
+            margin: 0;
 
-    color:#777;
+            flex: none;
 
-    font-size:9px;
+            accent-color: #FFD400;
+        }
 
-    line-height:1.5;
-}
+        .checkbox-row a {
+            color: #FFD400;
 
-.checkbox-row input{
-    width:14px;
-    height:14px;
+            text-decoration: none;
 
-    margin:0;
+            font-weight: 800;
+        }
 
-    flex:none;
+        .register-btn {
+            width: 100%;
+            min-height: 49px;
 
-    accent-color:#FFD400;
-}
+            border: 0;
+            border-radius: 10px;
 
-.checkbox-row a{
-    color:#FFD400;
+            background: #FFD400;
+            color: #111;
 
-    text-decoration:none;
+            cursor: pointer;
 
-    font-weight:800;
-}
+            font-size: 12px;
+            font-weight: 1000;
 
-.register-btn{
-    width:100%;
-    min-height:49px;
+            transition: .2s ease;
+        }
 
-    border:0;
-    border-radius:10px;
+        .register-btn:hover {
+            background: #ffe04a;
+            transform: translateY(-1px);
+        }
 
-    background:#FFD400;
-    color:#111;
+        .register-btn:active {
+            transform: scale(.99);
+        }
 
-    cursor:pointer;
+        .register-btn:disabled {
+            opacity: .6;
 
-    font-size:12px;
-    font-weight:1000;
+            cursor: not-allowed;
 
-    transition:.2s ease;
-}
+            transform: none;
+        }
 
-.register-btn:hover{
-    background:#ffe04a;
+        .loader {
+            display: inline-block;
 
-    transform:translateY(-1px);
-}
+            width: 13px;
+            height: 13px;
 
-.register-btn:active{
-    transform:scale(.99);
-}
+            margin-right: 7px;
 
-.register-btn:disabled{
-    opacity:.6;
+            vertical-align: -2px;
 
-    cursor:not-allowed;
+            border: 2px solid rgba(0, 0, 0, .25);
+            border-top-color: #111;
 
-    transform:none;
-}
+            border-radius: 50%;
 
-.loader{
-    display:inline-block;
+            animation: spin .7s linear infinite;
+        }
 
-    width:13px;
-    height:13px;
+        .login-link {
+            margin-top: 18px;
 
-    margin-right:7px;
+            text-align: center;
 
-    vertical-align:-2px;
+            color: #777;
 
-    border:2px solid rgba(0,0,0,.25);
+            font-size: 10px;
+        }
 
-    border-top-color:#111;
+        .login-link a {
+            color: #FFD400;
 
-    border-radius:50%;
+            text-decoration: none;
 
-    animation:spin .7s linear infinite;
-}
+            font-weight: 900;
+        }
 
-.login-link{
-    margin-top:18px;
+        .login-link a:hover {
+            text-decoration: underline;
+        }
 
-    text-align:center;
+        .back-role {
+            display: block;
 
-    color:#777;
+            width: 100%;
 
-    font-size:10px;
-}
+            margin-top: 11px;
 
-.login-link a{
-    color:#FFD400;
+            border: 0;
 
-    text-decoration:none;
+            background: transparent;
+            color: #666;
 
-    font-weight:900;
-}
+            cursor: pointer;
 
-.login-link a:hover{
-    text-decoration:underline;
-}
+            font-size: 9px;
+        }
 
-.back-role{
-    display:block;
+        .back-role:hover {
+            color: #FFD400;
+        }
 
-    width:100%;
+        .footer {
+            margin-top: 19px;
 
-    margin-top:11px;
+            padding-top: 13px;
 
-    border:0;
+            border-top: 1px solid #202020;
 
-    background:transparent;
+            text-align: center;
 
-    color:#666;
+            color: #444;
 
-    cursor:pointer;
+            font-size: 8px;
+        }
 
-    font-size:9px;
-}
+        .field-error {
+            border-color: #ff5555 !important;
 
-.back-role:hover{
-    color:#FFD400;
-}
+            box-shadow:
+                0 0 0 2px rgba(255, 80, 80, .08) !important;
+        }
 
-.footer{
-    margin-top:19px;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-    padding-top:13px;
+        @media (max-width: 480px) {
 
-    border-top:1px solid #202020;
+            .auth-page {
+                align-items: flex-start;
 
-    text-align:center;
+                padding-top: 16px;
+                padding-bottom: 16px;
+            }
 
-    color:#444;
+            .auth-card {
+                margin: 0;
 
-    font-size:8px;
-}
+                padding:
+                    24px 17px
+                    18px;
 
-@keyframes spin{
+                border-radius: 18px;
+            }
+        }
 
-    to{
-        transform:rotate(360deg);
-    }
+        @media (max-width: 340px) {
 
-}
+            .auth-card {
+                padding-left: 13px;
+                padding-right: 13px;
+            }
 
-@media(max-width:480px){
+            .country-code {
+                width: 70px;
+                min-width: 70px;
+            }
 
-    .auth-page{
-        align-items:flex-start;
-
-        padding-top:16px;
-        padding-bottom:16px;
-    }
-
-    .auth-card{
-        margin:0;
-
-        padding:
-            24px 17px
-            18px;
-
-        border-radius:18px;
-    }
-
-}
-
-@media(max-width:340px){
-
-    .auth-card{
-        padding-left:13px;
-        padding-right:13px;
-    }
-
-    .country-code{
-        width:70px;
-        min-width:70px;
-    }
-
-    .role-label{
-        min-height:68px;
-    }
-
-}
-
-</style>
-
+            .role-label {
+                min-height: 68px;
+            }
+        }
+    </style>
 </head>
 
 
 <body>
 
-
 <main class="auth-page">
 
+    <section class="auth-card">
 
-<section class="auth-card">
+        <div class="brand">
 
+            <div class="logo-box">
+                RX
+            </div>
 
-<div class="brand">
+            <h1>
+                Rider<span>X</span>
+            </h1>
 
-    <div class="logo-box">
-        RX
-    </div>
+            <p>
+                Your ride. Your journey. Your choice.
+            </p>
 
-    <h1>
-        Rider<span>X</span>
-    </h1>
-
-    <p>
-        Your ride. Your journey. Your choice.
-    </p>
-
-</div>
-
-
-<div class="welcome">
-
-    <h2>
-        Create RiderX Account
-    </h2>
-
-    <p>
-        Create your customer or rider account and start using RiderX.
-    </p>
-
-</div>
-
-
-<div
-    class="message error"
-    id="errorBox"
-    role="alert"
-    aria-live="polite"
-></div>
-
-
-<div
-    class="message success"
-    id="successBox"
-    role="status"
-    aria-live="polite"
-></div>
-
-
-<form
-    id="registerForm"
-    novalidate
->
-
-
-<label class="role-title">
-    Account Type
-</label>
-
-
-<div class="role-grid">
-
-
-<div class="role-option">
-
-    <input
-        type="radio"
-        name="role"
-        id="customerRole"
-        value="customer"
-    >
-
-    <label
-        class="role-label"
-        for="customerRole"
-    >
-
-        <span class="role-icon">
-            👤
-        </span>
-
-        <span class="role-name">
-            Customer
-        </span>
-
-    </label>
-
-</div>
-
-
-<div class="role-option">
-
-    <input
-        type="radio"
-        name="role"
-        id="riderRole"
-        value="rider"
-    >
-
-    <label
-        class="role-label"
-        for="riderRole"
-    >
-
-        <span class="role-icon">
-            🛵
-        </span>
-
-        <span class="role-name">
-            Rider
-        </span>
-
-    </label>
-
-</div>
-
-
-</div>
-
-
-<div class="form-group">
-
-    <label for="name">
-        Full Name
-    </label>
-
-    <input
-        type="text"
-        id="name"
-        autocomplete="name"
-        maxlength="60"
-        placeholder="Enter your full name"
-        required
-    >
-
-</div>
-
-
-<div class="form-group">
-
-    <label for="phone">
-        Mobile Number
-    </label>
-
-    <div class="phone-row">
-
-        <div class="country-code">
-            +91
         </div>
 
-        <input
-            type="tel"
-            id="phone"
-            inputmode="numeric"
-            autocomplete="tel"
-            maxlength="10"
-            placeholder="Enter mobile number"
-            required
+
+        <div class="welcome">
+
+            <h2>
+                Create RiderX Account
+            </h2>
+
+            <p>
+                Create your customer or rider account and start using RiderX.
+            </p>
+
+        </div>
+
+
+        <div
+            class="message error"
+            id="errorBox"
+            role="alert"
+            aria-live="polite"
+        ></div>
+
+
+        <div
+            class="message success"
+            id="successBox"
+            role="status"
+            aria-live="polite"
+        ></div>
+
+
+        <form
+            id="registerForm"
+            novalidate
         >
 
-    </div>
-
-</div>
-
-
-<div class="form-group">
-
-    <label for="email">
-        Email
-    </label>
-
-    <input
-        type="email"
-        id="email"
-        autocomplete="email"
-        maxlength="100"
-        placeholder="Enter email address"
-    >
-
-</div>
+            <label class="role-title">
+                Account Type
+            </label>
 
 
-<div class="form-group">
+            <div class="role-grid">
 
-    <label for="password">
-        Password
-    </label>
+                <div class="role-option">
 
-    <div class="password-row">
+                    <input
+                        type="radio"
+                        name="role"
+                        id="customerRole"
+                        value="customer"
+                    >
 
-        <input
-            type="password"
-            id="password"
-            autocomplete="new-password"
-            minlength="6"
-            maxlength="100"
-            placeholder="Create password"
-            required
-        >
+                    <label
+                        class="role-label"
+                        for="customerRole"
+                    >
+
+                        <span class="role-icon">
+                            👤
+                        </span>
+
+                        <span class="role-name">
+                            Customer
+                        </span>
+
+                    </label>
+
+                </div>
+
+
+                <div class="role-option">
+
+                    <input
+                        type="radio"
+                        name="role"
+                        id="riderRole"
+                        value="rider"
+                    >
+
+                    <label
+                        class="role-label"
+                        for="riderRole"
+                    >
+
+                        <span class="role-icon">
+                            🛵
+                        </span>
+
+                        <span class="role-name">
+                            Rider
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="name">
+                    Full Name
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    autocomplete="name"
+                    maxlength="60"
+                    placeholder="Enter your full name"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="phone">
+                    Mobile Number
+                </label>
+
+                <div class="phone-row">
+
+                    <div class="country-code">
+                        +91
+                    </div>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        inputmode="numeric"
+                        autocomplete="tel"
+                        maxlength="10"
+                        placeholder="Enter mobile number"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    autocomplete="email"
+                    maxlength="100"
+                    placeholder="Enter email address"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="password-row">
+
+                    <input
+                        type="password"
+                        id="password"
+                        autocomplete="new-password"
+                        minlength="6"
+                        maxlength="100"
+                        placeholder="Create password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="eye-btn"
+                        id="togglePassword"
+                        aria-label="Show password"
+                    >
+                        👁
+                    </button>
+
+                </div>
+
+                <div class="password-hint">
+                    Minimum 6 characters.
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+                <div class="password-row">
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        autocomplete="new-password"
+                        minlength="6"
+                        maxlength="100"
+                        placeholder="Confirm password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="eye-btn"
+                        id="toggleConfirmPassword"
+                        aria-label="Show confirm password"
+                    >
+                        👁
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="riderFields"
+                style="display:none;"
+            >
+
+                <div class="form-group">
+
+                    <label for="vehicleType">
+                        Vehicle Type
+                    </label>
+
+                    <select id="vehicleType">
+
+                        <option value="bike">
+                            Bike
+                        </option>
+
+                        <option value="scooter">
+                            Scooter
+                        </option>
+
+                        <option value="cab">
+                            Cab
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="vehicleNumber">
+                        Vehicle Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="vehicleNumber"
+                        maxlength="20"
+                        autocomplete="off"
+                        placeholder="Example: CH01AB1234"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <label class="checkbox-row">
+
+                <input
+                    type="checkbox"
+                    id="terms"
+                >
+
+                <span>
+
+                    I agree to the RiderX
+
+                    <a
+                        href="../terms.html"
+                        target="_blank"
+                    >
+                        Terms & Conditions
+                    </a>
+
+                    and
+
+                    <a
+                        href="../privacy.html"
+                        target="_blank"
+                    >
+                        Privacy Policy
+                    </a>.
+
+                </span>
+
+            </label>
+
+
+            <button
+                type="submit"
+                class="register-btn"
+                id="registerBtn"
+            >
+                Create Account
+            </button>
+
+        </form>
+
+
+        <div class="login-link">
+
+            Already have an account?
+
+            <a
+                href="./role.html"
+                id="loginLink"
+            >
+                Login
+            </a>
+
+        </div>
+
 
         <button
             type="button"
-            class="eye-btn"
-            id="togglePassword"
-            aria-label="Show password"
+            class="back-role"
+            id="backRole"
         >
-            👁
+            ← Choose account type
         </button>
 
-    </div>
 
-    <div class="password-hint">
-        Minimum 6 characters.
-    </div>
+        <div class="footer">
+            © 2026 RiderX • Secure Account Registration
+        </div>
 
-</div>
-
-
-<div class="form-group">
-
-    <label for="confirmPassword">
-        Confirm Password
-    </label>
-
-    <div class="password-row">
-
-        <input
-            type="password"
-            id="confirmPassword"
-            autocomplete="new-password"
-            minlength="6"
-            maxlength="100"
-            placeholder="Confirm password"
-            required
-        >
-
-        <button
-            type="button"
-            class="eye-btn"
-            id="toggleConfirmPassword"
-            aria-label="Show confirm password"
-        >
-            👁
-        </button>
-
-    </div>
-
-</div>
-
-
-<div
-    id="riderFields"
-    style="display:none;"
->
-
-
-<div class="form-group">
-
-    <label for="vehicleType">
-        Vehicle Type
-    </label>
-
-    <select id="vehicleType">
-
-        <option value="bike">
-            Bike
-        </option>
-
-        <option value="scooter">
-            Scooter
-        </option>
-
-        <option value="cab">
-            Cab
-        </option>
-
-    </select>
-
-</div>
-
-
-<div class="form-group">
-
-    <label for="vehicleNumber">
-        Vehicle Number
-    </label>
-
-    <input
-        type="text"
-        id="vehicleNumber"
-        maxlength="20"
-        autocomplete="off"
-        placeholder="Example: CH01AB1234"
-    >
-
-</div>
-
-
-</div>
-
-
-<label class="checkbox-row">
-
-    <input
-        type="checkbox"
-        id="terms"
-    >
-
-    <span>
-        I agree to the RiderX
-        <a href="../terms.html" target="_blank">
-            Terms & Conditions
-        </a>
-        and
-        <a href="../privacy.html" target="_blank">
-            Privacy Policy
-        </a>.
-    </span>
-
-</label>
-
-
-<button
-    type="submit"
-    class="register-btn"
-    id="registerBtn"
->
-    Create Account
-</button>
-
-
-</form>
-
-
-<div class="login-link">
-
-    Already have an account?
-
-    <a
-        href="./role.html"
-        id="loginLink"
-    >
-        Login
-    </a>
-
-</div>
-
-
-<button
-    type="button"
-    class="back-role"
-    id="backRole"
->
-    ← Choose account type
-</button>
-
-
-<div class="footer">
-    © 2026 RiderX • Secure Account Registration
-</div>
-
-
-</section>
-
+    </section>
 
 </main>
 
 
-<script>
+<script type="module">
 
-"use strict";
-
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const registerForm =
-    document.getElementById(
-        "registerForm"
-    );
-
-const customerRole =
-    document.getElementById(
-        "customerRole"
-    );
-
-const riderRole =
-    document.getElementById(
-        "riderRole"
-    );
-
-const nameInput =
-    document.getElementById(
-        "name"
-    );
-
-const phoneInput =
-    document.getElementById(
-        "phone"
-    );
-
-const emailInput =
-    document.getElementById(
-        "email"
-    );
-
-const passwordInput =
-    document.getElementById(
-        "password"
-    );
-
-const confirmPasswordInput =
-    document.getElementById(
-        "confirmPassword"
-    );
-
-const vehicleType =
-    document.getElementById(
-        "vehicleType"
-    );
-
-const vehicleNumber =
-    document.getElementById(
-        "vehicleNumber"
-    );
-
-const riderFields =
-    document.getElementById(
-        "riderFields"
-    );
-
-const terms =
-    document.getElementById(
-        "terms"
-    );
-
-const registerBtn =
-    document.getElementById(
-        "registerBtn"
-    );
-
-const errorBox =
-    document.getElementById(
-        "errorBox"
-    );
-
-const successBox =
-    document.getElementById(
-        "successBox"
-    );
+    "use strict";
 
 
-/* =========================================================
-   RESTORE SELECTED ROLE
-========================================================= */
+    /* =========================================================
+       FIREBASE
+    ========================================================= */
 
-const savedRole =
-    normalizeRole(
-        localStorage.getItem(
-            "riderx_selected_role"
-        )
-    );
-
-
-if(
-    savedRole === "customer"
-){
-
-    customerRole.checked =
-        true;
-
-}
+    import {
+        auth,
+        db,
+        createUserWithEmailAndPassword,
+        updateProfile,
+        doc,
+        setDoc,
+        serverTimestamp
+    } from "../firebase/firebase-config.js";
 
 
-if(
-    savedRole === "rider"
-){
+    /* =========================================================
+       ELEMENTS
+    ========================================================= */
 
-    riderRole.checked =
-        true;
+    const registerForm =
+        document.getElementById("registerForm");
 
-}
+    const customerRole =
+        document.getElementById("customerRole");
+
+    const riderRole =
+        document.getElementById("riderRole");
+
+    const nameInput =
+        document.getElementById("name");
+
+    const phoneInput =
+        document.getElementById("phone");
+
+    const emailInput =
+        document.getElementById("email");
+
+    const passwordInput =
+        document.getElementById("password");
+
+    const confirmPasswordInput =
+        document.getElementById("confirmPassword");
+
+    const vehicleType =
+        document.getElementById("vehicleType");
+
+    const vehicleNumber =
+        document.getElementById("vehicleNumber");
+
+    const riderFields =
+        document.getElementById("riderFields");
+
+    const terms =
+        document.getElementById("terms");
+
+    const registerBtn =
+        document.getElementById("registerBtn");
+
+    const errorBox =
+        document.getElementById("errorBox");
+
+    const successBox =
+        document.getElementById("successBox");
 
 
-updateRoleFields();
+    /* =========================================================
+       ROLE
+    ========================================================= */
 
-
-/* =========================================================
-   ROLE CHANGE
-========================================================= */
-
-customerRole.addEventListener(
-    "change",
-    function(){
-
-        localStorage.setItem(
-            "riderx_selected_role",
-            "customer"
+    const savedRole =
+        normalizeRole(
+            localStorage.getItem(
+                "riderx_selected_role"
+            )
         );
 
-        updateRoleFields();
 
-        hideMessages();
+    if (savedRole === "customer") {
 
-    }
-);
-
-
-riderRole.addEventListener(
-    "change",
-    function(){
-
-        localStorage.setItem(
-            "riderx_selected_role",
-            "rider"
-        );
-
-        updateRoleFields();
-
-        hideMessages();
-
-    }
-);
-
-
-/* =========================================================
-   ROLE FIELDS
-========================================================= */
-
-function updateRoleFields(){
-
-    if(
-        riderRole.checked
-    ){
-
-        riderFields.style.display =
-            "block";
-
-        vehicleType.required =
-            true;
-
-        vehicleNumber.required =
-            true;
-
-    }else{
-
-        riderFields.style.display =
-            "none";
-
-        vehicleType.required =
-            false;
-
-        vehicleNumber.required =
-            false;
-
-        vehicleNumber.value =
-            "";
+        customerRole.checked = true;
 
     }
 
-}
 
+    if (savedRole === "rider") {
 
-/* =========================================================
-   PHONE
-========================================================= */
-
-phoneInput.addEventListener(
-    "input",
-    function(){
-
-        this.value =
-            this.value
-                .replace(/\D/g,"")
-                .slice(0,10);
-
-        hideMessages();
+        riderRole.checked = true;
 
     }
-);
 
 
-/* =========================================================
-   NAME
-========================================================= */
+    updateRoleFields();
 
-nameInput.addEventListener(
-    "input",
-    function(){
 
-        this.value =
-            this.value
-                .replace(/\s+/g," ")
-                .replace(/^\s+/,"");
-
-    }
-);
-
-
-/* =========================================================
-   VEHICLE NUMBER
-========================================================= */
-
-vehicleNumber.addEventListener(
-    "input",
-    function(){
-
-        this.value =
-            this.value
-                .toUpperCase()
-                .replace(/\s+/g,"");
-
-    }
-);
-
-
-/* =========================================================
-   PASSWORD VISIBILITY
-========================================================= */
-
-document
-    .getElementById(
-        "togglePassword"
-    )
-    .addEventListener(
-        "click",
-        function(){
-
-            const visible =
-                passwordInput.type ===
-                "password";
-
-            passwordInput.type =
-                visible
-                    ? "text"
-                    : "password";
-
-            this.textContent =
-                visible
-                    ? "🙈"
-                    : "👁";
-
-        }
-    );
-
-
-document
-    .getElementById(
-        "toggleConfirmPassword"
-    )
-    .addEventListener(
-        "click",
-        function(){
-
-            const visible =
-                confirmPasswordInput.type ===
-                "password";
-
-            confirmPasswordInput.type =
-                visible
-                    ? "text"
-                    : "password";
-
-            this.textContent =
-                visible
-                    ? "🙈"
-                    : "👁";
-
-        }
-    );
-
-
-/* =========================================================
-   FORM SUBMIT
-========================================================= */
-
-registerForm.addEventListener(
-    "submit",
-    function(event){
-
-        event.preventDefault();
-
-        hideMessages();
-
-
-        const role =
-            getSelectedRole();
-
-        const name =
-            nameInput.value
-                .trim()
-                .replace(/\s+/g," ");
-
-        const mobile =
-            normalizePhone(
-                phoneInput.value
-            );
-
-        const email =
-            emailInput.value
-                .trim()
-                .toLowerCase();
-
-        const password =
-            passwordInput.value;
-
-        const confirmPassword =
-            confirmPasswordInput.value;
-
-
-        /* -----------------------------------------
-           ROLE
-        ----------------------------------------- */
-
-        if(
-            !role
-        ){
-
-            showError(
-                "Please select Customer or Rider account."
-            );
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           NAME
-        ----------------------------------------- */
-
-        if(
-            name.length < 2
-        ){
-
-            showError(
-                "Please enter your full name."
-            );
-
-            nameInput.focus();
-
-            return;
-
-        }
-
-
-        if(
-            !/^[A-Za-zÀ-ÿ\s.'-]{2,60}$/.test(
-                name
-            )
-        ){
-
-            showError(
-                "Please enter a valid name."
-            );
-
-            nameInput.focus();
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           PHONE
-        ----------------------------------------- */
-
-        if(
-            !/^[6-9]\d{9}$/.test(
-                mobile
-            )
-        ){
-
-            showError(
-                "Please enter a valid 10-digit Indian mobile number."
-            );
-
-            phoneInput.focus();
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           EMAIL
-        ----------------------------------------- */
-
-        if(
-            email &&
-            !isValidEmail(email)
-        ){
-
-            showError(
-                "Please enter a valid email address."
-            );
-
-            emailInput.focus();
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           PASSWORD
-        ----------------------------------------- */
-
-        if(
-            password.length < 6
-        ){
-
-            showError(
-                "Password must contain at least 6 characters."
-            );
-
-            passwordInput.focus();
-
-            return;
-
-        }
-
-
-        if(
-            password !==
-            confirmPassword
-        ){
-
-            showError(
-                "Passwords do not match."
-            );
-
-            confirmPasswordInput.focus();
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           RIDER VALIDATION
-        ----------------------------------------- */
-
-        let selectedVehicle =
-            "";
-
-        let selectedVehicleNumber =
-            "";
-
-
-        if(
-            role === "rider"
-        ){
-
-            selectedVehicle =
-                String(
-                    vehicleType.value ||
-                    "bike"
-                )
-                .trim()
-                .toLowerCase();
-
-
-            selectedVehicleNumber =
-                vehicleNumber.value
-                    .trim()
-                    .toUpperCase()
-                    .replace(/\s+/g,"");
-
-
-            if(
-                !selectedVehicleNumber
-            ){
-
-                showError(
-                    "Please enter your vehicle number."
-                );
-
-                vehicleNumber.focus();
-
-                return;
-
-            }
-
-
-            if(
-                !/^[A-Z0-9-]{4,20}$/.test(
-                    selectedVehicleNumber
-                )
-            ){
-
-                showError(
-                    "Please enter a valid vehicle number."
-                );
-
-                vehicleNumber.focus();
-
-                return;
-
-            }
-
-        }
-
-
-        /* -----------------------------------------
-           TERMS
-        ----------------------------------------- */
-
-        if(
-            !terms.checked
-        ){
-
-            showError(
-                "Please accept the Terms & Conditions and Privacy Policy."
-            );
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           CHECK DUPLICATE
-        ----------------------------------------- */
-
-        const users =
-            getUsers();
-
-
-        const duplicate =
-            users.find(
-                function(user){
-
-                    if(
-                        !user ||
-                        typeof user !==
-                        "object"
-                    ){
-
-                        return false;
-
-                    }
-
-
-                    return (
-                        normalizePhone(
-                            user.phone ||
-                            user.mobile ||
-                            user.phoneNumber
-                        ) === mobile
-                    );
-
-                }
-            );
-
-
-        if(
-            duplicate
-        ){
-
-            showError(
-                "An account with this mobile number already exists. Please login instead."
-            );
-
-            return;
-
-        }
-
-
-        /* -----------------------------------------
-           CREATE USER
-        ----------------------------------------- */
-
-        setLoading(true);
-
-
-        try{
-
-            const now =
-                new Date().toISOString();
-
-            const uid =
-                createUID(
-                    role,
-                    mobile
-                );
-
-
-            const user = {
-
-                uid:
-                    uid,
-
-                id:
-                    uid,
-
-                name:
-                    name,
-
-                fullName:
-                    name,
-
-                phone:
-                    mobile,
-
-                mobile:
-                    mobile,
-
-                email:
-                    email,
-
-                password:
-                    password,
-
-                role:
-                    role,
-
-                status:
-                    role === "rider"
-                        ? "pending"
-                        : "active",
-
-                vehicleType:
-                    role === "rider"
-                        ? selectedVehicle
-                        : "",
-
-                vehicleNumber:
-                    role === "rider"
-                        ? selectedVehicleNumber
-                        : "",
-
-                city:
-                    "Chandigarh",
-
-                walletBalance:
-                    0,
-
-                totalEarnings:
-                    0,
-
-                totalRides:
-                    0,
-
-                online:
-                    false,
-
-                createdAt:
-                    now,
-
-                updatedAt:
-                    now
-
-            };
-
-
-            /* -----------------------------------------
-               SAVE MAIN USER ARRAY
-            ----------------------------------------- */
-
-            users.push(
-                user
-            );
-
-
-            saveUsers(
-                users
-            );
-
-
-            /* -----------------------------------------
-               ROLE-SPECIFIC STORAGE
-            ----------------------------------------- */
-
-            if(
-                role === "customer"
-            ){
-
-                saveRoleUser(
-                    "riderx_customers",
-                    user
-                );
-
-            }else{
-
-                saveRoleUser(
-                    "riderx_riders",
-                    user
-                );
-
-            }
-
-
-            /* -----------------------------------------
-               SAVE BASIC SESSION
-               ONLY AFTER SUCCESS
-            ----------------------------------------- */
-
-            const session = {
-
-                uid:
-                    uid,
-
-                id:
-                    uid,
-
-                name:
-                    name,
-
-                fullName:
-                    name,
-
-                phone:
-                    mobile,
-
-                mobile:
-                    mobile,
-
-                email:
-                    email,
-
-                role:
-                    role,
-
-                status:
-                    user.status,
-
-                vehicleType:
-                    user.vehicleType,
-
-                vehicleNumber:
-                    user.vehicleNumber,
-
-                city:
-                    "Chandigarh",
-
-                loginAt:
-                    now
-
-            };
-
-
-            localStorage.setItem(
-                "riderx_user",
-                JSON.stringify(
-                    session
-                )
-            );
-
-
-            if(
-                role === "customer"
-            ){
-
-                localStorage.setItem(
-                    "riderx_customer",
-                    JSON.stringify(
-                        session
-                    )
-                );
-
-            }else{
-
-                localStorage.setItem(
-                    "riderx_rider",
-                    JSON.stringify(
-                        session
-                    )
-                );
-
-            }
-
-
-            localStorage.setItem(
-                "userRole",
-                role
-            );
+    customerRole.addEventListener(
+        "change",
+        function () {
 
             localStorage.setItem(
                 "riderx_selected_role",
-                role
+                "customer"
             );
 
-
-            /* -----------------------------------------
-               SUCCESS
-            ----------------------------------------- */
-
-            if(
-                role === "rider"
-            ){
-
-                showSuccess(
-                    "Rider account created. Your account is pending verification."
-                );
-
-            }else{
-
-                showSuccess(
-                    "Customer account created successfully."
-                );
-
-            }
-
-
-            setTimeout(
-                function(){
-
-                    if(
-                        role === "rider"
-                    ){
-
-                        window.location.replace(
-                            "../rider/home.html"
-                        );
-
-                    }else{
-
-                        window.location.replace(
-                            "../customer/home.html"
-                        );
-
-                    }
-
-                },
-                900
-            );
-
-
-        }catch(error){
-
-            console.error(
-                "Registration error:",
-                error
-            );
-
-            showError(
-                "Unable to create account right now. Please try again."
-            );
-
-            setLoading(false);
+            updateRoleFields();
+            hideMessages();
 
         }
-
-    }
-);
-
-
-/* =========================================================
-   GET SELECTED ROLE
-========================================================= */
-
-function getSelectedRole(){
-
-    if(
-        customerRole.checked
-    ){
-
-        return "customer";
-
-    }
-
-
-    if(
-        riderRole.checked
-    ){
-
-        return "rider";
-
-    }
-
-
-    return "";
-
-}
-
-
-/* =========================================================
-   GET USERS
-========================================================= */
-
-function getUsers(){
-
-    const users = [];
-
-
-    readArrayStorage(
-        "riderx_users",
-        users
     );
 
 
-    readArrayStorage(
-        "riderx_customers",
-        users
-    );
+    riderRole.addEventListener(
+        "change",
+        function () {
 
-
-    readArrayStorage(
-        "riderx_riders",
-        users
-    );
-
-
-    readArrayStorage(
-        "riderx_rider_users",
-        users
-    );
-
-
-    return removeDuplicates(
-        users
-    );
-
-}
-
-
-/* =========================================================
-   READ ARRAY
-========================================================= */
-
-function readArrayStorage(
-    key,
-    result
-){
-
-    try{
-
-        const raw =
-            localStorage.getItem(
-                key
+            localStorage.setItem(
+                "riderx_selected_role",
+                "rider"
             );
 
-
-        if(!raw){
-
-            return;
+            updateRoleFields();
+            hideMessages();
 
         }
-
-
-        const parsed =
-            JSON.parse(
-                raw
-            );
-
-
-        if(
-            Array.isArray(parsed)
-        ){
-
-            result.push(
-                ...parsed
-            );
-
-        }
-
-    }catch(error){
-
-        console.warn(
-            "Storage read error:",
-            key,
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   SAVE USERS
-========================================================= */
-
-function saveUsers(
-    users
-){
-
-    localStorage.setItem(
-        "riderx_users",
-        JSON.stringify(
-            users
-        )
     );
 
-}
 
+    function updateRoleFields() {
 
-/* =========================================================
-   SAVE ROLE USER
-========================================================= */
+        if (riderRole.checked) {
 
-function saveRoleUser(
-    key,
-    user
-){
+            riderFields.style.display =
+                "block";
 
-    let users = [];
+            vehicleType.required =
+                true;
 
+            vehicleNumber.required =
+                true;
 
-    try{
+        } else {
 
-        const raw =
-            localStorage.getItem(
-                key
-            );
+            riderFields.style.display =
+                "none";
 
+            vehicleType.required =
+                false;
 
-        if(raw){
+            vehicleNumber.required =
+                false;
 
-            const parsed =
-                JSON.parse(
-                    raw
-                );
-
-
-            if(
-                Array.isArray(parsed)
-            ){
-
-                users =
-                    parsed;
-
-            }
+            vehicleNumber.value = "";
 
         }
-
-    }catch(error){
-
-        users = [];
-
     }
 
 
-    const existingIndex =
-        users.findIndex(
-            function(item){
+    /* =========================================================
+       PHONE
+    ========================================================= */
 
-                return (
-                    item &&
-                    (
-                        item.uid ===
-                        user.uid ||
-                        normalizePhone(
-                            item.phone
-                        ) ===
-                        normalizePhone(
-                            user.phone
-                        )
-                    )
+    phoneInput.addEventListener(
+        "input",
+        function () {
+
+            this.value =
+                this.value
+                    .replace(/\D/g, "")
+                    .slice(0, 10);
+
+            clearFieldError(this);
+            hideMessages();
+
+        }
+    );
+
+
+    /* =========================================================
+       NAME
+    ========================================================= */
+
+    nameInput.addEventListener(
+        "input",
+        function () {
+
+            this.value =
+                this.value
+                    .replace(/\s+/g, " ")
+                    .replace(/^\s+/, "");
+
+            clearFieldError(this);
+
+        }
+    );
+
+
+    /* =========================================================
+       EMAIL
+    ========================================================= */
+
+    emailInput.addEventListener(
+        "input",
+        function () {
+
+            this.value =
+                this.value
+                    .trimStart()
+                    .toLowerCase();
+
+            clearFieldError(this);
+
+        }
+    );
+
+
+    /* =========================================================
+       VEHICLE NUMBER
+    ========================================================= */
+
+    vehicleNumber.addEventListener(
+        "input",
+        function () {
+
+            this.value =
+                this.value
+                    .toUpperCase()
+                    .replace(/\s+/g, "");
+
+            clearFieldError(this);
+
+        }
+    );
+
+
+    /* =========================================================
+       PASSWORD VISIBILITY
+    ========================================================= */
+
+    document
+        .getElementById("togglePassword")
+        .addEventListener(
+            "click",
+            function () {
+
+                const visible =
+                    passwordInput.type ===
+                    "password";
+
+                passwordInput.type =
+                    visible
+                        ? "text"
+                        : "password";
+
+                this.textContent =
+                    visible
+                        ? "🙈"
+                        : "👁";
+
+                this.setAttribute(
+                    "aria-label",
+                    visible
+                        ? "Hide password"
+                        : "Show password"
                 );
 
             }
         );
 
 
-    if(
-        existingIndex >= 0
-    ){
+    document
+        .getElementById("toggleConfirmPassword")
+        .addEventListener(
+            "click",
+            function () {
 
-        users[
-            existingIndex
-        ] = user;
+                const visible =
+                    confirmPasswordInput.type ===
+                    "password";
 
-    }else{
+                confirmPasswordInput.type =
+                    visible
+                        ? "text"
+                        : "password";
 
-        users.push(
-            user
+                this.textContent =
+                    visible
+                        ? "🙈"
+                        : "👁";
+
+                this.setAttribute(
+                    "aria-label",
+                    visible
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                );
+
+            }
         );
 
-    }
 
+    /* =========================================================
+       PASSWORD INPUT
+    ========================================================= */
 
-    localStorage.setItem(
-        key,
-        JSON.stringify(
-            users
-        )
-    );
+    passwordInput.addEventListener(
+        "input",
+        function () {
 
-}
-
-
-/* =========================================================
-   REMOVE DUPLICATES
-========================================================= */
-
-function removeDuplicates(
-    users
-){
-
-    const map =
-        new Map();
-
-
-    users.forEach(
-        function(user){
-
-            if(
-                !user ||
-                typeof user !==
-                "object"
-            ){
-
-                return;
-
-            }
-
-
-            const phone =
-                normalizePhone(
-                    user.phone ||
-                    user.mobile ||
-                    user.phoneNumber
-                );
-
-
-            const uid =
-                String(
-                    user.uid ||
-                    user.id ||
-                    phone
-                );
-
-
-            const key =
-                phone ||
-                uid;
-
-
-            if(
-                !map.has(key)
-            ){
-
-                map.set(
-                    key,
-                    user
-                );
-
-            }
+            clearFieldError(this);
+            hideMessages();
 
         }
     );
 
 
-    return Array.from(
-        map.values()
-    );
-
-}
-
-
-/* =========================================================
-   NORMALIZE ROLE
-========================================================= */
-
-function normalizeRole(
-    role
-){
-
-    const value =
-        String(
-            role || ""
-        )
-        .trim()
-        .toLowerCase();
-
-
-    if(
-        value === "driver"
-    ){
-
-        return "rider";
-
-    }
-
-
-    if(
-        value === "delivery"
-    ){
-
-        return "rider";
-
-    }
-
-
-    if(
-        value === "rider"
-    ){
-
-        return "rider";
-
-    }
-
-
-    if(
-        value === "customer"
-    ){
-
-        return "customer";
-
-    }
-
-
-    return "";
-
-}
-
-
-/* =========================================================
-   NORMALIZE PHONE
-========================================================= */
-
-function normalizePhone(
-    value
-){
-
-    return String(
-        value || ""
-    )
-    .replace(
-        /\D/g,
-        ""
-    )
-    .slice(
-        -10
-    );
-
-}
-
-
-/* =========================================================
-   VALID EMAIL
-========================================================= */
-
-function isValidEmail(
-    email
-){
-
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        .test(
-            email
-        );
-
-}
-
-
-/* =========================================================
-   CREATE UID
-========================================================= */
-
-function createUID(
-    role,
-    phone
-){
-
-    return (
-        "riderx_" +
-        role +
-        "_" +
-        phone +
-        "_" +
-        Date.now()
-    );
-
-}
-
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-function setLoading(
-    loading
-){
-
-    registerBtn.disabled =
-        loading;
-
-
-    if(loading){
-
-        registerBtn.innerHTML =
-            '<span class="loader"></span>Creating account...';
-
-    }else{
-
-        registerBtn.textContent =
-            "Create Account";
-
-    }
-
-}
-
-
-/* =========================================================
-   MESSAGES
-========================================================= */
-
-function hideMessages(){
-
-    errorBox.classList.remove(
-        "show"
-    );
-
-    successBox.classList.remove(
-        "show"
-    );
-
-    errorBox.textContent =
-        "";
-
-    successBox.textContent =
-        "";
-
-}
-
-
-function showError(
-    message
-){
-
-    successBox.classList.remove(
-        "show"
-    );
-
-    successBox.textContent =
-        "";
-
-    errorBox.textContent =
-        message;
-
-    errorBox.classList.add(
-        "show"
-    );
-
-}
-
-
-function showSuccess(
-    message
-){
-
-    errorBox.classList.remove(
-        "show"
-    );
-
-    errorBox.textContent =
-        "";
-
-    successBox.textContent =
-        message;
-
-    successBox.classList.add(
-        "show"
-    );
-
-}
-
-
-/* =========================================================
-   BACK TO ROLE
-========================================================= */
-
-document
-    .getElementById(
-        "backRole"
-    )
-    .addEventListener(
-        "click",
-        function(){
-
-            window.location.href =
-                "./role.html";
+    confirmPasswordInput.addEventListener(
+        "input",
+        function () {
+
+            clearFieldError(this);
+            hideMessages();
 
         }
     );
 
 
-/* =========================================================
-   LOGIN LINK
-========================================================= */
+    /* =========================================================
+       REGISTER
+    ========================================================= */
 
-document
-    .getElementById(
-        "loginLink"
-    )
-    .addEventListener(
-        "click",
-        function(){
+    registerForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            hideMessages();
+
+            clearAllFieldErrors();
+
 
             const role =
                 getSelectedRole();
 
+            const name =
+                nameInput.value
+                    .trim()
+                    .replace(/\s+/g, " ");
 
-            if(
-                role
-            ){
+            const mobile =
+                normalizePhone(
+                    phoneInput.value
+                );
+
+            const email =
+                emailInput.value
+                    .trim()
+                    .toLowerCase();
+
+            const password =
+                passwordInput.value;
+
+            const confirmPassword =
+                confirmPasswordInput.value;
+
+
+            /* -------------------------------------------------
+               ROLE
+            ------------------------------------------------- */
+
+            if (!role) {
+
+                showError(
+                    "Please select Customer or Rider account."
+                );
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               NAME
+            ------------------------------------------------- */
+
+            if (name.length < 2) {
+
+                showError(
+                    "Please enter your full name."
+                );
+
+                markFieldError(
+                    nameInput
+                );
+
+                nameInput.focus();
+
+                return;
+            }
+
+
+            if (
+                !/^[A-Za-zÀ-ÿ\u0900-\u097F\s.'-]{2,60}$/.test(
+                    name
+                )
+            ) {
+
+                showError(
+                    "Please enter a valid name."
+                );
+
+                markFieldError(
+                    nameInput
+                );
+
+                nameInput.focus();
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               PHONE
+            ------------------------------------------------- */
+
+            if (
+                !/^[6-9]\d{9}$/.test(
+                    mobile
+                )
+            ) {
+
+                showError(
+                    "Please enter a valid 10-digit Indian mobile number."
+                );
+
+                markFieldError(
+                    phoneInput
+                );
+
+                phoneInput.focus();
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               EMAIL
+            -------------------------------------------------
+               Email is required because this registration
+               flow uses Firebase Email/Password Auth.
+            ------------------------------------------------- */
+
+            if (!isValidEmail(email)) {
+
+                showError(
+                    "Please enter a valid email address."
+                );
+
+                markFieldError(
+                    emailInput
+                );
+
+                emailInput.focus();
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               PASSWORD
+            ------------------------------------------------- */
+
+            if (password.length < 6) {
+
+                showError(
+                    "Password must contain at least 6 characters."
+                );
+
+                markFieldError(
+                    passwordInput
+                );
+
+                passwordInput.focus();
+
+                return;
+            }
+
+
+            if (password !== confirmPassword) {
+
+                showError(
+                    "Passwords do not match."
+                );
+
+                markFieldError(
+                    confirmPasswordInput
+                );
+
+                confirmPasswordInput.focus();
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               RIDER VALIDATION
+            ------------------------------------------------- */
+
+            let selectedVehicle = "";
+            let selectedVehicleNumber = "";
+
+
+            if (role === "rider") {
+
+                selectedVehicle =
+                    String(
+                        vehicleType.value ||
+                        "bike"
+                    )
+                        .trim()
+                        .toLowerCase();
+
+
+                selectedVehicleNumber =
+                    vehicleNumber.value
+                        .trim()
+                        .toUpperCase()
+                        .replace(/\s+/g, "");
+
+
+                if (!selectedVehicleNumber) {
+
+                    showError(
+                        "Please enter your vehicle number."
+                    );
+
+                    markFieldError(
+                        vehicleNumber
+                    );
+
+                    vehicleNumber.focus();
+
+                    return;
+                }
+
+
+                if (
+                    !/^[A-Z0-9-]{4,20}$/.test(
+                        selectedVehicleNumber
+                    )
+                ) {
+
+                    showError(
+                        "Please enter a valid vehicle number."
+                    );
+
+                    markFieldError(
+                        vehicleNumber
+                    );
+
+                    vehicleNumber.focus();
+
+                    return;
+                }
+            }
+
+
+            /* -------------------------------------------------
+               TERMS
+            ------------------------------------------------- */
+
+            if (!terms.checked) {
+
+                showError(
+                    "Please accept the Terms & Conditions and Privacy Policy."
+                );
+
+                terms.focus();
+
+                return;
+            }
+
+
+            /* -------------------------------------------------
+               START FIREBASE REGISTRATION
+            ------------------------------------------------- */
+
+            setLoading(true);
+
+
+            try {
+
+                /*
+                 * Firebase creates the real authentication
+                 * account here.
+                 *
+                 * Password is NEVER written to Firestore or
+                 * localStorage.
+                 */
+
+                const credential =
+                    await createUserWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
+
+
+                const firebaseUser =
+                    credential.user;
+
+
+                if (!firebaseUser) {
+
+                    throw new Error(
+                        "Firebase did not return a user."
+                    );
+                }
+
+
+                /* -------------------------------------------------
+                   UPDATE AUTH PROFILE
+                ------------------------------------------------- */
+
+                await updateProfile(
+                    firebaseUser,
+                    {
+                        displayName: name
+                    }
+                );
+
+
+                /* -------------------------------------------------
+                   USER PROFILE
+                ------------------------------------------------- */
+
+                const userProfile = {
+
+                    uid:
+                        firebaseUser.uid,
+
+                    id:
+                        firebaseUser.uid,
+
+                    name:
+                        name,
+
+                    fullName:
+                        name,
+
+                    email:
+                        email,
+
+                    phone:
+                        mobile,
+
+                    mobile:
+                        mobile,
+
+                    role:
+                        role,
+
+                    status:
+                        role === "rider"
+                            ? "pending"
+                            : "active",
+
+                    city:
+                        "Chandigarh",
+
+                    vehicleType:
+                        role === "rider"
+                            ? selectedVehicle
+                            : "",
+
+                    vehicleNumber:
+                        role === "rider"
+                            ? selectedVehicleNumber
+                            : "",
+
+                    walletBalance:
+                        0,
+
+                    totalEarnings:
+                        0,
+
+                    totalRides:
+                        0,
+
+                    online:
+                        false,
+
+                    available:
+                        false,
+
+                    verified:
+                        false,
+
+                    rating:
+                        5,
+
+                    ratingCount:
+                        0,
+
+                    createdAt:
+                        serverTimestamp(),
+
+                    updatedAt:
+                        serverTimestamp()
+                };
+
+
+                /* -------------------------------------------------
+                   MAIN USERS COLLECTION
+                ------------------------------------------------- */
+
+                await setDoc(
+                    doc(
+                        db,
+                        "users",
+                        firebaseUser.uid
+                    ),
+                    userProfile
+                );
+
+
+                /* -------------------------------------------------
+                   ROLE COLLECTION
+                ------------------------------------------------- */
+
+                if (role === "customer") {
+
+                    await setDoc(
+                        doc(
+                            db,
+                            "customers",
+                            firebaseUser.uid
+                        ),
+                        userProfile
+                    );
+
+                } else {
+
+                    await setDoc(
+                        doc(
+                            db,
+                            "riders",
+                            firebaseUser.uid
+                        ),
+                        userProfile
+                    );
+                }
+
+
+                /* -------------------------------------------------
+                   LOCAL UI STATE ONLY
+                -------------------------------------------------
+                   No password is stored.
+                */
+
+                const localSession = {
+
+                    uid:
+                        firebaseUser.uid,
+
+                    id:
+                        firebaseUser.uid,
+
+                    name:
+                        name,
+
+                    fullName:
+                        name,
+
+                    email:
+                        email,
+
+                    phone:
+                        mobile,
+
+                    mobile:
+                        mobile,
+
+                    role:
+                        role,
+
+                    status:
+                        userProfile.status,
+
+                    vehicleType:
+                        userProfile.vehicleType,
+
+                    vehicleNumber:
+                        userProfile.vehicleNumber,
+
+                    city:
+                        "Chandigarh"
+                };
+
+
+                localStorage.setItem(
+                    "riderx_user",
+                    JSON.stringify(
+                        localSession
+                    )
+                );
+
+
+                localStorage.setItem(
+                    "userRole",
+                    role
+                );
+
 
                 localStorage.setItem(
                     "riderx_selected_role",
                     role
                 );
 
+
+                if (role === "customer") {
+
+                    localStorage.setItem(
+                        "riderx_customer",
+                        JSON.stringify(
+                            localSession
+                        )
+                    );
+
+                } else {
+
+                    localStorage.setItem(
+                        "riderx_rider",
+                        JSON.stringify(
+                            localSession
+                        )
+                    );
+                }
+
+
+                /* -------------------------------------------------
+                   SUCCESS
+                ------------------------------------------------- */
+
+                if (role === "rider") {
+
+                    showSuccess(
+                        "Rider account created successfully. Your account is pending verification."
+                    );
+
+                } else {
+
+                    showSuccess(
+                        "Customer account created successfully."
+                    );
+                }
+
+
+                /*
+                 * Firebase Auth has already established the
+                 * authenticated session.
+                 *
+                 * The next login/guard files will use
+                 * onAuthStateChanged instead of trusting
+                 * localStorage.
+                 */
+
+                setTimeout(
+                    function () {
+
+                        if (role === "rider") {
+
+                            window.location.replace(
+                                "../rider/home.html"
+                            );
+
+                        } else {
+
+                            window.location.replace(
+                                "../customer/home.html"
+                            );
+                        }
+
+                    },
+                    900
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "RiderX registration error:",
+                    error
+                );
+
+
+                /*
+                 * If Firestore fails after Auth creation,
+                 * the Firebase account may already exist.
+                 *
+                 * We do not store the password anywhere.
+                 */
+
+                showError(
+                    getFirebaseErrorMessage(
+                        error
+                    )
+                );
+
+
+                setLoading(false);
             }
 
         }
     );
 
-</script>
 
+    /* =========================================================
+       ROLE HELPERS
+    ========================================================= */
+
+    function getSelectedRole() {
+
+        if (customerRole.checked) {
+
+            return "customer";
+        }
+
+
+        if (riderRole.checked) {
+
+            return "rider";
+        }
+
+
+        return "";
+    }
+
+
+    function normalizeRole(role) {
+
+        const value =
+            String(
+                role || ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            value === "driver" ||
+            value === "delivery"
+        ) {
+
+            return "rider";
+        }
+
+
+        if (value === "rider") {
+
+            return "rider";
+        }
+
+
+        if (value === "customer") {
+
+            return "customer";
+        }
+
+
+        return "";
+    }
+
+
+    /* =========================================================
+       PHONE
+    ========================================================= */
+
+    function normalizePhone(value) {
+
+        return String(
+            value || ""
+        )
+            .replace(
+                /\D/g,
+                ""
+            )
+            .slice(
+                -10
+            );
+    }
+
+
+    /* =========================================================
+       EMAIL
+    ========================================================= */
+
+    function isValidEmail(email) {
+
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+            .test(email);
+    }
+
+
+    /* =========================================================
+       FIREBASE ERROR MESSAGES
+    ========================================================= */
+
+    function getFirebaseErrorMessage(error) {
+
+        const code =
+            String(
+                error?.code || ""
+            )
+                .toLowerCase();
+
+
+        switch (code) {
+
+            case "auth/email-already-in-use":
+
+                return "An account with this email already exists. Please login instead.";
+
+
+            case "auth/invalid-email":
+
+                return "Please enter a valid email address.";
+
+
+            case "auth/weak-password":
+
+                return "Password is too weak. Please use at least 6 characters.";
+
+
+            case "auth/network-request-failed":
+
+                return "Network error. Please check your internet connection and try again.";
+
+
+            case "auth/operation-not-allowed":
+
+                return "Email/password registration is not enabled in Firebase Authentication.";
+
+
+            case "auth/too-many-requests":
+
+                return "Too many attempts. Please wait a while and try again.";
+
+
+            case "permission-denied":
+
+                return "Firebase permission denied. Please check Firestore Security Rules.";
+
+
+            default:
+
+                if (
+                    error?.message &&
+                    /permission/i.test(
+                        error.message
+                    )
+                ) {
+
+                    return "Firebase permission denied. Please check Firestore Security Rules.";
+                }
+
+
+                return "Unable to create your account right now. Please try again.";
+        }
+    }
+
+
+    /* =========================================================
+       LOADING
+    ========================================================= */
+
+    function setLoading(loading) {
+
+        registerBtn.disabled =
+            loading;
+
+
+        if (loading) {
+
+            registerBtn.innerHTML =
+                '<span class="loader"></span>Creating account...';
+
+        } else {
+
+            registerBtn.textContent =
+                "Create Account";
+        }
+    }
+
+
+    /* =========================================================
+       MESSAGES
+    ========================================================= */
+
+    function hideMessages() {
+
+        errorBox.classList.remove(
+            "show"
+        );
+
+        successBox.classList.remove(
+            "show"
+        );
+
+        errorBox.textContent =
+            "";
+
+        successBox.textContent =
+            "";
+    }
+
+
+    function showError(message) {
+
+        successBox.classList.remove(
+            "show"
+        );
+
+        successBox.textContent =
+            "";
+
+        errorBox.textContent =
+            message;
+
+        errorBox.classList.add(
+            "show"
+        );
+    }
+
+
+    function showSuccess(message) {
+
+        errorBox.classList.remove(
+            "show"
+        );
+
+        errorBox.textContent =
+            "";
+
+        successBox.textContent =
+            message;
+
+        successBox.classList.add(
+            "show"
+        );
+    }
+
+
+    /* =========================================================
+       FIELD ERROR
+    ========================================================= */
+
+    function markFieldError(field) {
+
+        if (!field) {
+            return;
+        }
+
+        field.classList.add(
+            "field-error"
+        );
+    }
+
+
+    function clearFieldError(field) {
+
+        if (!field) {
+            return;
+        }
+
+        field.classList.remove(
+            "field-error"
+        );
+    }
+
+
+    function clearAllFieldErrors() {
+
+        [
+            nameInput,
+            phoneInput,
+            emailInput,
+            passwordInput,
+            confirmPasswordInput,
+            vehicleNumber
+        ].forEach(
+            clearFieldError
+        );
+    }
+
+
+    /* =========================================================
+       BACK TO ROLE
+    ========================================================= */
+
+    document
+        .getElementById("backRole")
+        .addEventListener(
+            "click",
+            function () {
+
+                window.location.href =
+                    "./role.html";
+
+            }
+        );
+
+
+    /* =========================================================
+       LOGIN LINK
+    ========================================================= */
+
+    document
+        .getElementById("loginLink")
+        .addEventListener(
+            "click",
+            function () {
+
+                const role =
+                    getSelectedRole();
+
+
+                if (role) {
+
+                    localStorage.setItem(
+                        "riderx_selected_role",
+                        role
+                    );
+                }
+
+            }
+        );
+
+
+</script>
 
 </body>
 
-</html>
+            </html>
