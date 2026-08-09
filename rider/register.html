@@ -1,203 +1,1193 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RiderX - Rider Registration</title>
 
-<title>RiderX Rider Registration</title>
+<meta name="theme-color" content="#FFD400">
 
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Auth.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
+:root{
+    --yellow:#FFD400;
+    --black:#080808;
+    --dark:#111111;
+    --card:#171717;
+    --border:#292929;
+    --text:#fff;
+    --muted:#929292;
+    --red:#ef4444;
+    --green:#22c55e;
+}
 
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
+html,
+body{
+    min-height:100%;
+}
 
 body{
-
-background:#000;
-color:white;
-
-height:100vh;
-
-display:flex;
-justify-content:center;
-align-items:center;
-
+    background:
+        radial-gradient(circle at top right,rgba(255,212,0,.10),transparent 32%),
+        radial-gradient(circle at bottom left,rgba(255,212,0,.05),transparent 30%),
+        var(--black);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-
-.box{
-
-width:90%;
-max-width:400px;
-
-background:#111;
-
-padding:25px;
-
-border-radius:20px;
-
-border:2px solid #FFD600;
-
-text-align:center;
-
+.register-page{
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    justify-content:center;
+    padding:22px 14px 35px;
 }
 
+.register-container{
+    width:100%;
+    max-width:520px;
+}
 
+/* LOGO */
+
+.logo-area{
+    text-align:center;
+    margin-bottom:22px;
+}
 
 .logo{
+    width:65px;
+    height:65px;
+    border-radius:20px;
+    background:var(--yellow);
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 10px;
+    font-size:27px;
+    font-weight:900;
+    box-shadow:0 8px 30px rgba(255,212,0,.16);
+}
 
-width:100px;
+.logo-title{
+    font-size:25px;
+    font-weight:900;
+    letter-spacing:-.5px;
+}
+
+.logo-title span{
+    color:var(--yellow);
+}
+
+.logo-subtitle{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:5px;
+}
+
+/* CARD */
+
+.register-card{
+    background:rgba(23,23,23,.96);
+    border:1px solid var(--border);
+    border-radius:24px;
+    padding:22px 18px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+
+.register-heading{
+    margin-bottom:20px;
+}
+
+.register-heading h1{
+    font-size:23px;
+    margin-bottom:6px;
+}
+
+.register-heading p{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.45;
+}
+
+/* PROGRESS */
+
+.progress{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:22px;
+}
+
+.progress-step{
+    height:4px;
+    flex:1;
+    border-radius:5px;
+    background:#292929;
+}
+
+.progress-step.active{
+    background:var(--yellow);
+}
+
+/* FORM */
+
+.form-group{
+    margin-bottom:15px;
+}
+
+.form-label{
+    display:block;
+    font-size:12px;
+    color:#d7d7d7;
+    font-weight:700;
+    margin-bottom:7px;
+}
+
+.input-wrap{
+    position:relative;
+}
+
+.form-input,
+.form-select{
+    width:100%;
+    height:48px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:#101010;
+    color:#fff;
+    outline:none;
+    padding:0 13px;
+    font-size:14px;
+    transition:.2s;
+}
+
+.form-select{
+    appearance:auto;
+}
+
+.form-input:focus,
+.form-select:focus{
+    border-color:var(--yellow);
+    box-shadow:0 0 0 2px rgba(255,212,0,.08);
+}
+
+.form-input::placeholder{
+    color:#666;
+}
+
+.password-input{
+    padding-right:48px;
+}
+
+.password-toggle{
+    position:absolute;
+    right:5px;
+    top:4px;
+    width:40px;
+    height:40px;
+    border:0;
+    border-radius:9px;
+    background:transparent;
+    color:#999;
+    cursor:pointer;
+    font-size:17px;
+}
+
+/* GRID */
+
+.two-column{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+/* VEHICLE */
+
+.section-title{
+    font-size:15px;
+    font-weight:800;
+    margin:22px 0 13px;
+    padding-top:19px;
+    border-top:1px solid #292929;
+}
+
+.section-title span{
+    color:var(--yellow);
+}
+
+/* DOCUMENT */
+
+.document-box{
+    border:1px dashed #3a3a3a;
+    background:#101010;
+    border-radius:12px;
+    padding:13px;
+}
+
+.document-box label{
+    display:block;
+    color:#ddd;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:8px;
+}
+
+.file-input{
+    width:100%;
+    color:#888;
+    font-size:11px;
+}
+
+.file-input::file-selector-button{
+    background:#292929;
+    color:#fff;
+    border:0;
+    border-radius:8px;
+    padding:8px 10px;
+    margin-right:8px;
+    cursor:pointer;
+}
+
+/* TERMS */
+
+.terms{
+    display:flex;
+    gap:9px;
+    align-items:flex-start;
+    margin:18px 0;
+}
+
+.terms input{
+    width:17px;
+    height:17px;
+    min-width:17px;
+    accent-color:var(--yellow);
+    margin-top:1px;
+}
+
+.terms label{
+    color:#999;
+    font-size:11px;
+    line-height:1.45;
+}
+
+.terms a{
+    color:var(--yellow);
+    text-decoration:none;
+}
+
+/* BUTTON */
+
+.register-btn{
+    width:100%;
+    height:50px;
+    border:0;
+    border-radius:13px;
+    background:var(--yellow);
+    color:#000;
+    font-size:15px;
+    font-weight:900;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.register-btn:active{
+    transform:scale(.98);
+}
+
+.register-btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+.loader{
+    display:none;
+    width:19px;
+    height:19px;
+    border:2px solid rgba(0,0,0,.25);
+    border-top-color:#000;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    margin:auto;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg)}
+}
+
+/* LOGIN */
+
+.login-link{
+    text-align:center;
+    margin-top:19px;
+    color:#888;
+    font-size:13px;
+}
+
+.login-link a{
+    color:var(--yellow);
+    font-weight:800;
+    text-decoration:none;
+}
+
+/* MESSAGE */
+
+.form-message{
+    display:none;
+    border-radius:11px;
+    padding:11px 12px;
+    font-size:12px;
+    line-height:1.4;
+    margin-bottom:14px;
+}
+
+.form-message.error{
+    display:block;
+    color:#ffb4b4;
+    background:rgba(239,68,68,.10);
+    border:1px solid rgba(239,68,68,.25);
+}
+
+.form-message.success{
+    display:block;
+    color:#b8f5cb;
+    background:rgba(34,197,94,.10);
+    border:1px solid rgba(34,197,94,.25);
+}
+
+/* MOBILE */
+
+@media(max-width:430px){
+
+    .register-page{
+        padding:16px 10px 25px;
+    }
+
+    .register-card{
+        padding:19px 14px;
+        border-radius:20px;
+    }
+
+    .logo{
+        width:58px;
+        height:58px;
+        border-radius:17px;
+        font-size:24px;
+    }
+
+    .logo-title{
+        font-size:23px;
+    }
+
+    .two-column{
+        grid-template-columns:1fr;
+        gap:0;
+    }
 
 }
 
+@media(min-width:700px){
 
+    .register-page{
+        padding-top:40px;
+    }
 
-h1{
-
-margin:15px 0;
-
-}
-
-
-
-h1 span{
-
-color:#FFD600;
+    .register-card{
+        padding:28px;
+    }
 
 }
-
-
-
-input{
-
-width:100%;
-
-padding:14px;
-
-margin-top:12px;
-
-border:none;
-
-border-radius:12px;
-
-font-size:16px;
-
-}
-
-
-
-button{
-
-width:100%;
-
-padding:15px;
-
-margin-top:20px;
-
-background:#FFD600;
-
-border:none;
-
-border-radius:12px;
-
-font-weight:bold;
-
-font-size:16px;
-
-}
-
-
-
-#message{
-
-margin-top:15px;
-
-}
-
-
-
 </style>
-
-
 </head>
-
-
 
 <body>
 
+<div class="register-page">
+
+<div class="register-container">
+
+    <!-- LOGO -->
+
+    <div class="logo-area">
+
+        <div class="logo">
+            RX
+        </div>
+
+        <div class="logo-title">
+            Rider<span>X</span>
+        </div>
+
+        <div class="logo-subtitle">
+            Ride. Earn. Grow.
+        </div>
+
+    </div>
 
 
-<div class="box">
+    <!-- CARD -->
+
+    <div class="register-card">
+
+        <div class="register-heading">
+
+            <h1>Become a Rider</h1>
+
+            <p>
+                Create your RiderX account and start accepting rides.
+            </p>
+
+        </div>
 
 
-<img src="../assets/logo.png" class="logo">
+        <!-- PROGRESS -->
+
+        <div class="progress">
+
+            <div class="progress-step active"></div>
+            <div class="progress-step active"></div>
+            <div class="progress-step active"></div>
+
+        </div>
 
 
-<h1>
-RIDER<span>X</span>
-</h1>
+        <!-- MESSAGE -->
+
+        <div id="formMessage" class="form-message"></div>
 
 
+        <!-- PERSONAL -->
 
-<h2>
-Rider Registration
-</h2>
+        <div class="form-group">
 
+            <label class="form-label" for="fullName">
+                Full Name
+            </label>
 
+            <input
+                type="text"
+                id="fullName"
+                class="form-input"
+                placeholder="Enter your full name"
+                autocomplete="name"
+                maxlength="80"
+            >
 
-<input id="name"
-placeholder="Full Name">
-
-
-
-<input id="bike"
-placeholder="Bike Model">
-
-
-
-<input id="number"
-placeholder="Vehicle Number">
-
+        </div>
 
 
-<input id="license"
-placeholder="Driving Licence Number">
+        <div class="form-group">
+
+            <label class="form-label" for="phone">
+                Mobile Number
+            </label>
+
+            <input
+                type="tel"
+                id="phone"
+                class="form-input"
+                placeholder="Enter 10 digit mobile number"
+                inputmode="numeric"
+                autocomplete="tel"
+                maxlength="10"
+            >
+
+        </div>
 
 
+        <div class="form-group">
 
-<button id="registerBtn">
+            <label class="form-label" for="email">
+                Email Address
+            </label>
 
-Submit Details
+            <input
+                type="email"
+                id="email"
+                class="form-input"
+                placeholder="Enter your email"
+                autocomplete="email"
+            >
 
-</button>
+        </div>
 
 
+        <!-- ACCOUNT -->
 
-<p id="message"></p>
+        <div class="section-title">
+            <span>01</span> Account Security
+        </div>
 
 
+        <div class="form-group">
+
+            <label class="form-label" for="password">
+                Password
+            </label>
+
+            <div class="input-wrap">
+
+                <input
+                    type="password"
+                    id="password"
+                    class="form-input password-input"
+                    placeholder="Create a strong password"
+                    autocomplete="new-password"
+                    minlength="6"
+                >
+
+                <button
+                    type="button"
+                    class="password-toggle"
+                    onclick="togglePassword('password',this)"
+                >
+                    👁
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label" for="confirmPassword">
+                Confirm Password
+            </label>
+
+            <div class="input-wrap">
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    class="form-input password-input"
+                    placeholder="Confirm your password"
+                    autocomplete="new-password"
+                    minlength="6"
+                >
+
+                <button
+                    type="button"
+                    class="password-toggle"
+                    onclick="togglePassword('confirmPassword',this)"
+                >
+                    👁
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- VEHICLE -->
+
+        <div class="section-title">
+            <span>02</span> Vehicle Details
+        </div>
+
+
+        <div class="form-group">
+
+            <label class="form-label" for="vehicleType">
+                Vehicle Type
+            </label>
+
+            <select id="vehicleType" class="form-select">
+
+                <option value="">Select vehicle type</option>
+                <option value="bike">Bike</option>
+                <option value="scooter">Scooter</option>
+                <option value="cab">Cab / Car</option>
+
+            </select>
+
+        </div>
+
+
+        <div class="two-column">
+
+            <div class="form-group">
+
+                <label class="form-label" for="vehicleModel">
+                    Vehicle Model
+                </label>
+
+                <input
+                    type="text"
+                    id="vehicleModel"
+                    class="form-input"
+                    placeholder="e.g. Splendor"
+                    maxlength="60"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label class="form-label" for="vehicleNumber">
+                    Vehicle Number
+                </label>
+
+                <input
+                    type="text"
+                    id="vehicleNumber"
+                    class="form-input"
+                    placeholder="PB00XX0000"
+                    maxlength="15"
+                    autocapitalize="characters"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- DOCUMENTS -->
+
+        <div class="section-title">
+            <span>03</span> Documents
+        </div>
+
+
+        <div class="form-group">
+
+            <div class="document-box">
+
+                <label for="license">
+                    Driving License
+                </label>
+
+                <input
+                    type="file"
+                    id="license"
+                    class="file-input"
+                    accept="image/*,.pdf"
+                >
+
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <div class="document-box">
+
+                <label for="vehicleDocument">
+                    RC / Vehicle Document
+                </label>
+
+                <input
+                    type="file"
+                    id="vehicleDocument"
+                    class="file-input"
+                    accept="image/*,.pdf"
+                >
+
+            </div>
+
+        </div>
+
+
+        <!-- TERMS -->
+
+        <div class="terms">
+
+            <input
+                type="checkbox"
+                id="terms"
+            >
+
+            <label for="terms">
+
+                I agree to RiderX
+                <a href="#" onclick="showTerms(event)">Terms & Conditions</a>
+                and
+                <a href="#" onclick="showPrivacy(event)">Privacy Policy</a>.
+
+            </label>
+
+        </div>
+
+
+        <!-- REGISTER -->
+
+        <button
+            type="button"
+            id="registerBtn"
+            class="register-btn"
+            onclick="registerRider()"
+        >
+
+            <span id="registerText">
+                Create Rider Account
+            </span>
+
+            <span id="registerLoader" class="loader"></span>
+
+        </button>
+
+
+        <!-- LOGIN -->
+
+        <div class="login-link">
+
+            Already have an account?
+
+            <a href="../auth/login.html">
+                Login
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
 
 </div>
 
 
+<script>
+/* ==========================================
+   RIDERX RIDER REGISTRATION
+========================================== */
+
+const $ = id => document.getElementById(id);
 
 
-<script type="module" src="../js/rider-register.js"></script>
+/* PASSWORD */
+
+function togglePassword(id,button){
+
+    const input = $(id);
+
+    if(input.type === "password"){
+
+        input.type = "text";
+        button.textContent = "🙈";
+
+    }else{
+
+        input.type = "password";
+        button.textContent = "👁";
+
+    }
+
+}
 
 
+/* MESSAGE */
+
+function showMessage(message,type="error"){
+
+    const box = $("formMessage");
+
+    box.textContent = message;
+
+    box.className = "form-message " + type;
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+}
+
+
+function clearMessage(){
+
+    const box = $("formMessage");
+
+    box.textContent = "";
+
+    box.className = "form-message";
+
+}
+
+
+/* PHONE */
+
+$("phone").addEventListener("input",function(){
+
+    this.value = this.value.replace(/\D/g,"").slice(0,10);
+
+});
+
+
+/* VEHICLE NUMBER */
+
+$("vehicleNumber").addEventListener("input",function(){
+
+    this.value = this.value
+        .toUpperCase()
+        .replace(/[^A-Z0-9 -]/g,"")
+        .slice(0,15);
+
+});
+
+
+/* PASSWORD VALIDATION */
+
+function validatePassword(password){
+
+    return password.length >= 6;
+
+}
+
+
+/* FORM VALIDATION */
+
+function validateForm(){
+
+    const name = $("fullName").value.trim();
+    const phone = $("phone").value.trim();
+    const email = $("email").value.trim();
+    const password = $("password").value;
+    const confirmPassword = $("confirmPassword").value;
+    const vehicleType = $("vehicleType").value;
+    const vehicleModel = $("vehicleModel").value.trim();
+    const vehicleNumber = $("vehicleNumber").value.trim();
+    const terms = $("terms").checked;
+
+
+    if(name.length < 2){
+
+        showMessage("Please enter your full name.");
+
+        $("fullName").focus();
+
+        return false;
+
+    }
+
+
+    if(!/^[0-9]{10}$/.test(phone)){
+
+        showMessage("Please enter a valid 10 digit mobile number.");
+
+        $("phone").focus();
+
+        return false;
+
+    }
+
+
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+
+        showMessage("Please enter a valid email address.");
+
+        $("email").focus();
+
+        return false;
+
+    }
+
+
+    if(!validatePassword(password)){
+
+        showMessage("Password must contain at least 6 characters.");
+
+        $("password").focus();
+
+        return false;
+
+    }
+
+
+    if(password !== confirmPassword){
+
+        showMessage("Passwords do not match.");
+
+        $("confirmPassword").focus();
+
+        return false;
+
+    }
+
+
+    if(!vehicleType){
+
+        showMessage("Please select your vehicle type.");
+
+        $("vehicleType").focus();
+
+        return false;
+
+    }
+
+
+    if(vehicleModel.length < 2){
+
+        showMessage("Please enter your vehicle model.");
+
+        $("vehicleModel").focus();
+
+        return false;
+
+    }
+
+
+    if(vehicleNumber.length < 4){
+
+        showMessage("Please enter your vehicle registration number.");
+
+        $("vehicleNumber").focus();
+
+        return false;
+
+    }
+
+
+    if(!terms){
+
+        showMessage("Please accept the Terms & Conditions and Privacy Policy.");
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* LOADING */
+
+function setLoading(loading){
+
+    const button = $("registerBtn");
+    const text = $("registerText");
+    const loader = $("registerLoader");
+
+    button.disabled = loading;
+
+    text.style.display = loading ? "none" : "inline";
+
+    loader.style.display = loading ? "block" : "none";
+
+}
+
+
+/* REGISTER */
+
+async function registerRider(){
+
+    clearMessage();
+
+    if(!validateForm()) return;
+
+    const data = {
+
+        name: $("fullName").value.trim(),
+
+        phone: $("phone").value.trim(),
+
+        email: $("email").value.trim(),
+
+        password: $("password").value,
+
+        vehicleType: $("vehicleType").value,
+
+        vehicleModel: $("vehicleModel").value.trim(),
+
+        vehicleNumber: $("vehicleNumber").value.trim(),
+
+        role: "rider",
+
+        status: "pending",
+
+        online: false,
+
+        createdAt: Date.now()
+
+    };
+
+
+    setLoading(true);
+
+
+    /*
+      First try to use the project's existing
+      registration function if it is available.
+    */
+
+    try{
+
+        if(typeof window.registerUser === "function"){
+
+            const result = await window.registerUser(data);
+
+            if(result !== false){
+
+                showMessage(
+                    "Registration successful. Your rider account is being reviewed.",
+                    "success"
+                );
+
+                setTimeout(() => {
+
+                    window.location.href = "index.html";
+
+                },1200);
+
+                return;
+
+            }
+
+        }
+
+
+        if(typeof window.registerRiderWithFirebase === "function"){
+
+            const result =
+                await window.registerRiderWithFirebase(data);
+
+            if(result !== false){
+
+                showMessage(
+                    "Registration successful. Your rider account is being reviewed.",
+                    "success"
+                );
+
+                setTimeout(() => {
+
+                    window.location.href = "index.html";
+
+                },1200);
+
+                return;
+
+            }
+
+        }
+
+
+        /*
+          If no existing auth function is exposed,
+          stop instead of creating fake/local accounts.
+        */
+
+        showMessage(
+            "Registration service is not connected yet. Please check the RiderX Firebase/auth setup."
+        );
+
+    }catch(error){
+
+        console.error("Rider registration error:",error);
+
+        let message = "Registration failed. Please try again.";
+
+        if(error && error.code){
+
+            if(error.code.includes("email-already-in-use")){
+
+                message = "This email is already registered.";
+
+            }else if(error.code.includes("weak-password")){
+
+                message = "Password is too weak.";
+
+            }else if(error.code.includes("invalid-email")){
+
+                message = "Please enter a valid email address.";
+
+            }else if(error.code.includes("network")){
+
+                message = "Network error. Please check your internet connection.";
+
+            }
+
+        }
+
+        showMessage(message);
+
+    }finally{
+
+        setLoading(false);
+
+    }
+
+}
+
+
+/* TERMS */
+
+function showTerms(event){
+
+    event.preventDefault();
+
+    alert(
+        "RiderX Terms & Conditions\n\n" +
+        "By registering as a RiderX rider, you agree to follow RiderX ride, safety, payment and service policies."
+    );
+
+}
+
+
+function showPrivacy(event){
+
+    event.preventDefault();
+
+    alert(
+        "RiderX Privacy Policy\n\n" +
+        "RiderX may use your account, vehicle and ride information to provide rider services and maintain platform security."
+    );
+
+}
+
+
+/* ENTER KEY */
+
+document.addEventListener("keydown",function(event){
+
+    if(event.key === "Enter"){
+
+        const active = document.activeElement;
+
+        if(active && active.tagName === "INPUT"){
+
+            event.preventDefault();
+
+            registerRider();
+
+        }
+
+    }
+
+});
+
+
+/* PAGE READY */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+    const params = new URLSearchParams(window.location.search);
+
+    if(params.get("message")){
+
+        showMessage(
+            params.get("message"),
+            "success"
+        );
+
+    }
+
+});
+</script>
 
 </body>
-
 </html>
