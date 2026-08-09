@@ -26,7 +26,6 @@
     <link rel="stylesheet" href="../css/auth.css">
     <link rel="stylesheet" href="../css/responsive.css">
 
-
     <style>
 
         * {
@@ -35,22 +34,17 @@
 
         html,
         body {
+            margin: 0;
             width: 100%;
             min-height: 100%;
-            margin: 0;
         }
 
         body {
             min-height: 100vh;
             min-height: 100dvh;
-
             background: #070707;
             color: #ffffff;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         button,
@@ -62,654 +56,395 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-
-        .auth-page {
-
+        .page {
             min-height: 100vh;
             min-height: 100dvh;
-
             display: flex;
-
             align-items: center;
             justify-content: center;
-
             padding:
-                max(15px, env(safe-area-inset-top))
-                max(15px, env(safe-area-inset-right))
-                max(15px, env(safe-area-inset-bottom))
-                max(15px, env(safe-area-inset-left));
-
+                max(18px, env(safe-area-inset-top))
+                max(18px, env(safe-area-inset-right))
+                max(18px, env(safe-area-inset-bottom))
+                max(18px, env(safe-area-inset-left));
             position: relative;
-
-            overflow: auto;
+            overflow: hidden;
         }
 
+        .page::before {
+            content: "";
+            position: absolute;
+            width: 390px;
+            height: 390px;
+            top: -210px;
+            right: -150px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, .08);
+            pointer-events: none;
+        }
 
-        .auth-card {
+        .page::after {
+            content: "";
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            bottom: -210px;
+            left: -170px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, .05);
+            pointer-events: none;
+        }
 
-            width: 100%;
-            max-width: 430px;
-
-            padding: 28px 22px 22px;
-
-            border:
-                1px solid #292929;
-
-            border-radius: 22px;
-
-            background: #111111;
-
-            box-shadow:
-                0 22px 70px rgba(0, 0, 0, .55);
-
+        .card {
             position: relative;
             z-index: 2;
+            width: 100%;
+            max-width: 430px;
+            padding: 30px 23px 22px;
+            border: 1px solid #292929;
+            border-radius: 23px;
+            background: #111111;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, .55);
         }
 
-
         .brand {
-
             text-align: center;
-
             margin-bottom: 25px;
         }
 
-
         .logo {
-
-            width: 66px;
-            height: 66px;
-
-            margin: 0 auto 12px;
-
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 13px;
             display: flex;
-
             align-items: center;
             justify-content: center;
-
-            border-radius: 18px;
-
+            border-radius: 19px;
             background: #ffd400;
-            color: #111111;
-
-            font-size: 24px;
+            color: #090909;
+            font-size: 23px;
             font-weight: 1000;
         }
-
 
         .brand h1 {
-
             margin: 0;
-
-            font-size: 26px;
+            font-size: 25px;
             font-weight: 1000;
         }
 
-
         .brand h1 span {
-
             color: #ffd400;
         }
 
-
         .brand p {
-
             margin: 6px 0 0;
-
             color: #777777;
-
             font-size: 10px;
         }
 
-
         .heading {
-
-            margin-bottom: 17px;
+            margin-bottom: 18px;
         }
 
-
         .heading h2 {
-
             margin: 0;
-
             font-size: 19px;
             font-weight: 900;
         }
 
-
         .heading p {
-
-            margin: 6px 0 0;
-
+            margin: 7px 0 0;
             color: #777777;
-
             font-size: 10px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            margin-top: 12px;
+            padding: 6px 10px;
+            border: 1px solid #343434;
+            border-radius: 8px;
+            background: #181818;
+            color: #ffd400;
+            font-size: 9px;
+            font-weight: 900;
+        }
 
         .message {
-
             display: none;
-
             margin-bottom: 13px;
-
-            padding: 11px;
-
+            padding: 10px;
             border-radius: 9px;
-
-            font-size: 10px;
-
+            font-size: 9px;
             line-height: 1.5;
         }
 
-
         .message.show {
-
             display: block;
         }
 
-
         .message.error {
-
-            border: 1px solid #522b2b;
-
-            background: #251515;
-
+            border: 1px solid #542828;
+            background: #241414;
             color: #ff7777;
         }
 
-
         .message.success {
-
-            border: 1px solid #285334;
-
-            background: #132318;
-
-            color: #69e48b;
+            border: 1px solid #275335;
+            background: #132319;
+            color: #65e58b;
         }
 
-
-        .role-box {
-
-            display: grid;
-
-            grid-template-columns:
-                1fr 1fr;
-
-            gap: 8px;
-
-            margin-bottom: 17px;
+        .field {
+            margin-bottom: 13px;
         }
 
-
-        .role-option {
-
-            position: relative;
-        }
-
-
-        .role-option input {
-
-            position: absolute;
-
-            opacity: 0;
-
-            pointer-events: none;
-        }
-
-
-        .role-label {
-
-            min-height: 70px;
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-            justify-content: center;
-
-            gap: 4px;
-
-            border:
-                1px solid #303030;
-
-            border-radius: 11px;
-
-            background: #191919;
-
-            cursor: pointer;
-
-            transition: .2s ease;
-        }
-
-
-        .role-label:hover {
-
-            border-color: #555555;
-        }
-
-
-        .role-option input:checked
-        + .role-label {
-
-            border-color: #ffd400;
-
-            background: #211f12;
-
-            box-shadow:
-                0 0 0 1px
-                rgba(255, 212, 0, .08);
-        }
-
-
-        .role-icon {
-
-            font-size: 20px;
-        }
-
-
-        .role-name {
-
-            color: #cccccc;
-
-            font-size: 10px;
-
-            font-weight: 900;
-        }
-
-
-        .role-option input:checked
-        + .role-label
-        .role-name {
-
-            color: #ffd400;
-        }
-
-
-        .form-group {
-
-            margin-bottom: 14px;
-        }
-
-
-        .form-group label {
-
+        .field label {
             display: block;
-
             margin-bottom: 7px;
-
-            color: #999999;
-
+            color: #aaaaaa;
             font-size: 9px;
-
-            font-weight: 900;
-
-            text-transform: uppercase;
-        }
-
-
-        .input-wrap {
-
-            position: relative;
-        }
-
-
-        .form-group input {
-
-            width: 100%;
-            height: 48px;
-
-            padding:
-                0 13px;
-
-            border:
-                1px solid #333333;
-
-            border-radius: 10px;
-
-            outline: none;
-
-            background: #1a1a1a;
-
-            color: #ffffff;
-
-            font-size: 12px;
-
-            transition:
-                border-color .2s ease,
-                box-shadow .2s ease;
-        }
-
-
-        .form-group input::placeholder {
-
-            color: #555555;
-        }
-
-
-        .form-group input:focus {
-
-            border-color: #ffd400;
-
-            box-shadow:
-                0 0 0 2px
-                rgba(255, 212, 0, .08);
-        }
-
-
-        .password-wrap input {
-
-            padding-right: 45px;
-        }
-
-
-        .eye-button {
-
-            position: absolute;
-
-            right: 6px;
-            top: 50%;
-
-            width: 35px;
-            height: 35px;
-
-            transform:
-                translateY(-50%);
-
-            border: 0;
-
-            border-radius: 7px;
-
-            background: transparent;
-
-            color: #777777;
-
-            cursor: pointer;
-        }
-
-
-        .eye-button:hover {
-
-            color: #ffd400;
-        }
-
-
-        .forgot {
-
-            display: flex;
-
-            justify-content: flex-end;
-
-            margin-top: -5px;
-            margin-bottom: 15px;
-        }
-
-
-        .forgot button {
-
-            padding: 0;
-
-            border: 0;
-
-            background: transparent;
-
-            color: #ffd400;
-
-            cursor: pointer;
-
-            font-size: 9px;
-
             font-weight: 800;
         }
 
+        .input-wrap {
+            position: relative;
+        }
 
-        .login-button {
-
+        .input {
             width: 100%;
-
-            min-height: 49px;
-
-            border: 0;
-
+            height: 48px;
+            padding: 0 13px;
+            border: 1px solid #333333;
             border-radius: 10px;
-
-            background: #ffd400;
-
-            color: #111111;
-
-            cursor: pointer;
-
+            outline: none;
+            background: #191919;
+            color: #ffffff;
             font-size: 12px;
-
-            font-weight: 1000;
-
             transition: .2s ease;
         }
 
-
-        .login-button:hover {
-
-            background: #ffe04b;
-
-            transform:
-                translateY(-1px);
+        .input::placeholder {
+            color: #555555;
         }
 
-
-        .login-button:active {
-
-            transform: scale(.99);
+        .input:focus {
+            border-color: #ffd400;
+            box-shadow: 0 0 0 2px rgba(255, 212, 0, .07);
         }
 
+        .password-input {
+            padding-right: 48px;
+        }
 
-        .login-button:disabled {
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 8px;
+            width: 35px;
+            height: 35px;
+            transform: translateY(-50%);
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #777777;
+            cursor: pointer;
+            font-size: 10px;
+        }
 
+        .password-toggle:hover {
+            color: #ffd400;
+        }
+
+        .options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 3px 0 17px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #777777;
+            font-size: 9px;
+            cursor: pointer;
+        }
+
+        .remember input {
+            accent-color: #ffd400;
+        }
+
+        .forgot {
+            border: 0;
+            background: transparent;
+            color: #ffd400;
+            cursor: pointer;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .primary-btn {
+            width: 100%;
+            height: 49px;
+            border: 0;
+            border-radius: 10px;
+            background: #ffd400;
+            color: #111111;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 1000;
+            transition: .2s ease;
+        }
+
+        .primary-btn:hover {
+            background: #ffe04a;
+        }
+
+        .primary-btn:disabled {
             opacity: .6;
-
             cursor: not-allowed;
-
-            transform: none;
         }
-
-
-        .loader {
-
-            display: inline-block;
-
-            width: 13px;
-            height: 13px;
-
-            margin-right: 7px;
-
-            vertical-align: -2px;
-
-            border:
-                2px solid
-                rgba(0, 0, 0, .25);
-
-            border-top-color: #111111;
-
-            border-radius: 50%;
-
-            animation:
-                spin .7s linear infinite;
-        }
-
 
         .divider {
-
             display: flex;
-
             align-items: center;
-
             gap: 10px;
-
-            margin: 18px 0;
+            margin: 19px 0;
+            color: #555555;
+            font-size: 8px;
         }
-
 
         .divider::before,
         .divider::after {
-
             content: "";
-
             flex: 1;
-
             height: 1px;
-
-            background: #252525;
+            background: #282828;
         }
 
-
-        .divider span {
-
-            color: #555555;
-
-            font-size: 8px;
-
-            font-weight: 800;
-        }
-
-
-        .secondary-button {
-
+        .secondary-btn {
             width: 100%;
-
-            min-height: 45px;
-
-            border:
-                1px solid #303030;
-
+            height: 46px;
+            border: 1px solid #353535;
             border-radius: 10px;
-
-            background: #181818;
-
-            color: #dddddd;
-
+            background: #171717;
+            color: #ffffff;
             cursor: pointer;
-
             font-size: 10px;
-
-            font-weight: 800;
-
-            transition: .2s ease;
-        }
-
-
-        .secondary-button:hover {
-
-            border-color: #ffd400;
-
-            color: #ffd400;
-        }
-
-
-        .register-link {
-
-            margin-top: 18px;
-
-            text-align: center;
-
-            color: #777777;
-
-            font-size: 10px;
-        }
-
-
-        .register-link a {
-
-            color: #ffd400;
-
-            text-decoration: none;
-
             font-weight: 900;
         }
 
+        .secondary-btn:hover {
+            border-color: #ffd400;
+            color: #ffd400;
+        }
+
+        .register {
+            margin-top: 18px;
+            text-align: center;
+            color: #666666;
+            font-size: 9px;
+        }
+
+        .register button {
+            border: 0;
+            padding: 0;
+            background: transparent;
+            color: #ffd400;
+            cursor: pointer;
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        .role-switch {
+            display: flex;
+            gap: 7px;
+            margin-top: 17px;
+        }
+
+        .role-btn {
+            flex: 1;
+            height: 39px;
+            border: 1px solid #303030;
+            border-radius: 9px;
+            background: #161616;
+            color: #777777;
+            cursor: pointer;
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        .role-btn.active {
+            border-color: #ffd400;
+            background: rgba(255, 212, 0, .08);
+            color: #ffd400;
+        }
+
+        .security {
+            margin-top: 17px;
+            padding: 10px;
+            border: 1px solid #252525;
+            border-radius: 9px;
+            background: #151515;
+            color: #666666;
+            font-size: 8px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .security strong {
+            color: #aaaaaa;
+        }
 
         .footer {
-
-            margin-top: 18px;
-
-            padding-top: 13px;
-
-            border-top:
-                1px solid #202020;
-
-            text-align: center;
-
+            margin-top: 17px;
             color: #444444;
-
             font-size: 8px;
+            text-align: center;
         }
 
-
-        .field-error {
-
-            border-color:
-                #ff5555 !important;
-
-            box-shadow:
-                0 0 0 2px
-                rgba(255, 80, 80, .08)
-                !important;
+        .loader {
+            display: inline-block;
+            width: 13px;
+            height: 13px;
+            margin-right: 7px;
+            vertical-align: -2px;
+            border: 2px solid rgba(0, 0, 0, .25);
+            border-top-color: #111111;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
         }
-
 
         @keyframes spin {
-
             to {
-                transform:
-                    rotate(360deg);
+                transform: rotate(360deg);
             }
         }
 
+        @media (max-width: 420px) {
 
-        @media (max-width: 480px) {
-
-            .auth-page {
-
-                align-items:
-                    flex-start;
-
-                padding-top: 16px;
-                padding-bottom: 16px;
+            .card {
+                padding: 25px 17px 19px;
+                border-radius: 19px;
             }
 
-
-            .auth-card {
-
-                padding:
-                    24px 17px 19px;
-
-                border-radius: 18px;
-            }
-        }
-
-
-        @media (max-width: 340px) {
-
-            .auth-card {
-
-                padding-left: 13px;
-                padding-right: 13px;
-            }
         }
 
     </style>
 
 </head>
 
-
 <body>
 
+<main class="page">
 
-<main class="auth-page">
-
-
-    <section class="auth-card">
-
+    <section class="card">
 
         <div class="brand">
 
@@ -722,7 +457,7 @@
             </h1>
 
             <p>
-                Your ride. Your journey. Your choice.
+                Your city. Your ride.
             </p>
 
         </div>
@@ -731,90 +466,37 @@
         <div class="heading">
 
             <h2>
-                Welcome Back
+                Welcome back
             </h2>
 
             <p>
-                Login to continue to your RiderX account.
+                Sign in to continue using RiderX.
             </p>
+
+            <div
+                class="role-badge"
+                id="roleBadge"
+            >
+                Customer Login
+            </div>
 
         </div>
 
 
         <div
-            id="errorBox"
             class="message error"
+            id="errorBox"
             role="alert"
             aria-live="polite"
         ></div>
 
 
         <div
-            id="successBox"
             class="message success"
+            id="successBox"
             role="status"
             aria-live="polite"
         ></div>
-
-
-        <div class="role-box">
-
-
-            <div class="role-option">
-
-                <input
-                    type="radio"
-                    name="role"
-                    id="customerRole"
-                    value="customer"
-                >
-
-                <label
-                    for="customerRole"
-                    class="role-label"
-                >
-
-                    <span class="role-icon">
-                        👤
-                    </span>
-
-                    <span class="role-name">
-                        Customer
-                    </span>
-
-                </label>
-
-            </div>
-
-
-            <div class="role-option">
-
-                <input
-                    type="radio"
-                    name="role"
-                    id="riderRole"
-                    value="rider"
-                >
-
-                <label
-                    for="riderRole"
-                    class="role-label"
-                >
-
-                    <span class="role-icon">
-                        🛵
-                    </span>
-
-                    <span class="role-name">
-                        Rider
-                    </span>
-
-                </label>
-
-            </div>
-
-
-        </div>
 
 
         <form
@@ -822,20 +504,18 @@
             novalidate
         >
 
-
-            <div class="form-group">
+            <div class="field">
 
                 <label for="email">
-                    Email Address
+                    Email address
                 </label>
 
                 <input
-                    type="email"
+                    class="input"
                     id="email"
                     name="email"
+                    type="email"
                     autocomplete="email"
-                    inputmode="email"
-                    maxlength="120"
                     placeholder="Enter your email"
                     required
                 >
@@ -843,33 +523,31 @@
             </div>
 
 
-            <div class="form-group">
+            <div class="field">
 
                 <label for="password">
                     Password
                 </label>
 
-
-                <div class="input-wrap password-wrap">
+                <div class="input-wrap">
 
                     <input
-                        type="password"
+                        class="input password-input"
                         id="password"
                         name="password"
+                        type="password"
                         autocomplete="current-password"
-                        maxlength="100"
                         placeholder="Enter your password"
                         required
                     >
 
-
                     <button
                         type="button"
-                        id="togglePassword"
-                        class="eye-button"
+                        class="password-toggle"
+                        id="passwordToggle"
                         aria-label="Show password"
                     >
-                        👁
+                        SHOW
                     </button>
 
                 </div>
@@ -877,13 +555,26 @@
             </div>
 
 
-            <div class="forgot">
+            <div class="options">
+
+                <label class="remember">
+
+                    <input
+                        type="checkbox"
+                        id="remember"
+                    >
+
+                    Remember me
+
+                </label>
+
 
                 <button
                     type="button"
-                    id="forgotPassword"
+                    class="forgot"
+                    id="forgotBtn"
                 >
-                    Forgot Password?
+                    Forgot password?
                 </button>
 
             </div>
@@ -891,93 +582,101 @@
 
             <button
                 type="submit"
-                id="loginButton"
-                class="login-button"
+                class="primary-btn"
+                id="loginBtn"
             >
                 Login
             </button>
-
 
         </form>
 
 
         <div class="divider">
-
-            <span>
-                OR
-            </span>
-
+            OR
         </div>
 
 
         <button
             type="button"
-            id="otpButton"
-            class="secondary-button"
+            class="secondary-btn"
+            id="otpBtn"
         >
             Login with Mobile OTP
         </button>
 
 
-        <div class="register-link">
+        <div class="role-switch">
+
+            <button
+                type="button"
+                class="role-btn active"
+                id="customerRoleBtn"
+            >
+                Customer
+            </button>
+
+            <button
+                type="button"
+                class="role-btn"
+                id="riderRoleBtn"
+            >
+                Rider
+            </button>
+
+        </div>
+
+
+        <div class="register">
 
             Don't have an account?
 
-            <a
-                href="./register.html"
-                id="registerLink"
+            <button
+                type="button"
+                id="registerBtn"
             >
-                Create Account
-            </a>
+                Create account
+            </button>
+
+        </div>
+
+
+        <div class="security">
+
+            <strong>Secure RiderX Login</strong><br>
+
+            Your account is authenticated using Firebase Authentication.
+            Rider accounts are also checked against RiderX approval status.
 
         </div>
 
 
         <div class="footer">
-
-            © 2026 RiderX • Secure Login
-
+            © 2026 RiderX • Chandigarh
         </div>
 
-
     </section>
-
 
 </main>
 
 
 <script type="module">
 
-
     "use strict";
 
-
-    /* ========================================================
-       FIREBASE
-    ======================================================== */
 
     import {
 
         auth,
-
         db,
 
         signInWithEmailAndPassword,
-
-        onAuthStateChanged,
-
         sendPasswordResetEmail,
 
         doc,
-
         getDoc
 
     } from "../firebase/firebase-config.js";
 
-
-    /* ========================================================
-       ELEMENTS
-    ======================================================== */
 
     const loginForm =
         document.getElementById(
@@ -997,21 +696,57 @@
         );
 
 
-    const loginButton =
+    const rememberInput =
         document.getElementById(
-            "loginButton"
+            "remember"
         );
 
 
-    const customerRole =
+    const loginBtn =
         document.getElementById(
-            "customerRole"
+            "loginBtn"
         );
 
 
-    const riderRole =
+    const forgotBtn =
         document.getElementById(
-            "riderRole"
+            "forgotBtn"
+        );
+
+
+    const otpBtn =
+        document.getElementById(
+            "otpBtn"
+        );
+
+
+    const registerBtn =
+        document.getElementById(
+            "registerBtn"
+        );
+
+
+    const passwordToggle =
+        document.getElementById(
+            "passwordToggle"
+        );
+
+
+    const customerRoleBtn =
+        document.getElementById(
+            "customerRoleBtn"
+        );
+
+
+    const riderRoleBtn =
+        document.getElementById(
+            "riderRoleBtn"
+        );
+
+
+    const roleBadge =
+        document.getElementById(
+            "roleBadge"
         );
 
 
@@ -1027,949 +762,153 @@
         );
 
 
-    const forgotPassword =
-        document.getElementById(
-            "forgotPassword"
-        );
-
-
-    const otpButton =
-        document.getElementById(
-            "otpButton"
-        );
-
-
-    /* ========================================================
-       EXISTING ROLE
-    ======================================================== */
-
-    const savedRole =
+    let selectedRole =
         normalizeRole(
             localStorage.getItem(
                 "riderx_selected_role"
             ) ||
             localStorage.getItem(
                 "userRole"
-            )
+            ) ||
+            "customer"
+        );
+
+
+    let loading =
+        false;
+
+
+    applyRoleUI();
+
+
+    const rememberedEmail =
+        localStorage.getItem(
+            "riderx_remember_email"
         );
 
 
     if (
-        savedRole === "customer"
+        rememberedEmail
     ) {
 
-        customerRole.checked =
+        emailInput.value =
+            rememberedEmail;
+
+        rememberInput.checked =
             true;
 
     }
 
 
-    if (
-        savedRole === "rider"
-    ) {
-
-        riderRole.checked =
-            true;
-
-    }
-
-
-    /* ========================================================
-       ROLE CHANGE
-    ======================================================== */
-
-    customerRole.addEventListener(
-        "change",
+    passwordToggle.addEventListener(
+        "click",
         function () {
 
-            localStorage.setItem(
-                "riderx_selected_role",
+            const isPassword =
+                passwordInput.type ===
+                "password";
+
+
+            passwordInput.type =
+                isPassword
+                    ? "text"
+                    : "password";
+
+
+            passwordToggle.textContent =
+                isPassword
+                    ? "HIDE"
+                    : "SHOW";
+
+
+            passwordToggle.setAttribute(
+                "aria-label",
+                isPassword
+                    ? "Hide password"
+                    : "Show password"
+            );
+
+        }
+    );
+
+
+    customerRoleBtn.addEventListener(
+        "click",
+        function () {
+
+            setRole(
                 "customer"
             );
 
-            hideMessages();
-
         }
     );
 
 
-    riderRole.addEventListener(
-        "change",
+    riderRoleBtn.addEventListener(
+        "click",
         function () {
 
-            localStorage.setItem(
-                "riderx_selected_role",
+            setRole(
                 "rider"
             );
 
-            hideMessages();
-
         }
     );
 
 
-    /* ========================================================
-       INPUT CLEANUP
-    ======================================================== */
+    function setRole(
+        role
+    ) {
 
-    emailInput.addEventListener(
-        "input",
-        function () {
-
-            this.value =
-                this.value
-                    .trimStart()
-                    .toLowerCase();
-
-            clearFieldError(
-                this
+        selectedRole =
+            normalizeRole(
+                role
             );
 
-            hideMessages();
 
-        }
-    );
-
-
-    passwordInput.addEventListener(
-        "input",
-        function () {
-
-            clearFieldError(
-                this
-            );
-
-            hideMessages();
-
-        }
-    );
-
-
-    /* ========================================================
-       PASSWORD VISIBILITY
-    ======================================================== */
-
-    document
-        .getElementById(
-            "togglePassword"
-        )
-        .addEventListener(
-            "click",
-            function () {
-
-                const visible =
-                    passwordInput.type ===
-                    "password";
-
-
-                passwordInput.type =
-                    visible
-                        ? "text"
-                        : "password";
-
-
-                this.textContent =
-                    visible
-                        ? "🙈"
-                        : "👁";
-
-
-                this.setAttribute(
-                    "aria-label",
-                    visible
-                        ? "Hide password"
-                        : "Show password"
-                );
-
-            }
+        localStorage.setItem(
+            "riderx_selected_role",
+            selectedRole
         );
 
 
-    /* ========================================================
-       LOGIN
-    ======================================================== */
+        applyRoleUI();
 
-    loginForm.addEventListener(
-        "submit",
-        async function (event) {
+        clearMessages();
 
-            event.preventDefault();
+    }
 
 
-            hideMessages();
+    function applyRoleUI() {
 
-            clearFieldError(
-                emailInput
-            );
+        const rider =
+            selectedRole ===
+            "rider";
 
-            clearFieldError(
-                passwordInput
-            );
 
-
-            const role =
-                getSelectedRole();
-
-
-            const email =
-                emailInput.value
-                    .trim()
-                    .toLowerCase();
-
-
-            const password =
-                passwordInput.value;
-
-
-            /* ------------------------------------------------
-               ROLE
-            ------------------------------------------------ */
-
-            if (!role) {
-
-                showError(
-                    "Please select Customer or Rider."
-                );
-
-                return;
-            }
-
-
-            /* ------------------------------------------------
-               EMAIL
-            ------------------------------------------------ */
-
-            if (
-                !isValidEmail(
-                    email
-                )
-            ) {
-
-                markFieldError(
-                    emailInput
-                );
-
-                showError(
-                    "Please enter a valid email address."
-                );
-
-                emailInput.focus();
-
-                return;
-            }
-
-
-            /* ------------------------------------------------
-               PASSWORD
-            ------------------------------------------------ */
-
-            if (
-                !password
-            ) {
-
-                markFieldError(
-                    passwordInput
-                );
-
-                showError(
-                    "Please enter your password."
-                );
-
-                passwordInput.focus();
-
-                return;
-            }
-
-
-            setLoading(
-                true
-            );
-
-
-            try {
-
-
-                /* --------------------------------------------
-                   FIREBASE AUTH
-                -------------------------------------------- */
-
-                const credential =
-                    await signInWithEmailAndPassword(
-                        auth,
-                        email,
-                        password
-                    );
-
-
-                const firebaseUser =
-                    credential.user;
-
-
-                if (!firebaseUser) {
-
-                    throw new Error(
-                        "Authentication failed."
-                    );
-                }
-
-
-                /* --------------------------------------------
-                   FIRESTORE PROFILE
-                -------------------------------------------- */
-
-                const userRef =
-                    doc(
-                        db,
-                        "users",
-                        firebaseUser.uid
-                    );
-
-
-                const userSnapshot =
-                    await getDoc(
-                        userRef
-                    );
-
-
-                let profile = null;
-
-
-                if (
-                    userSnapshot.exists()
-                ) {
-
-                    profile =
-                        userSnapshot.data();
-
-                }
-
-
-                /* --------------------------------------------
-                   DETERMINE ROLE
-                -------------------------------------------- */
-
-                let accountRole =
-                    normalizeRole(
-                        profile?.role
-                    );
-
-
-                /*
-                 * If Firestore profile doesn't contain role,
-                 * use selected login role temporarily.
-                 */
-
-                if (!accountRole) {
-
-                    accountRole =
-                        role;
-                }
-
-
-                /* --------------------------------------------
-                   SECURITY: SELECTED ROLE MUST MATCH
-                -------------------------------------------- */
-
-                if (
-                    accountRole !== role
-                ) {
-
-                    showError(
-                        "This account belongs to the " +
-                        formatRole(
-                            accountRole
-                        ) +
-                        " account. Please select the correct account type."
-                    );
-
-
-                    /*
-                     * Do not leave a wrong-role authenticated
-                     * session active.
-                     */
-
-                    await safeLogout();
-
-
-                    setLoading(
-                        false
-                    );
-
-                    return;
-                }
-
-
-                /* --------------------------------------------
-                   PROFILE FALLBACK
-                -------------------------------------------- */
-
-                const sessionData = {
-
-                    uid:
-                        firebaseUser.uid,
-
-                    id:
-                        firebaseUser.uid,
-
-                    name:
-                        profile?.name ||
-                        profile?.fullName ||
-                        firebaseUser.displayName ||
-                        "RiderX User",
-
-                    fullName:
-                        profile?.fullName ||
-                        profile?.name ||
-                        firebaseUser.displayName ||
-                        "RiderX User",
-
-                    email:
-                        firebaseUser.email ||
-                        profile?.email ||
-                        email,
-
-                    phone:
-                        profile?.phone ||
-                        profile?.mobile ||
-                        "",
-
-                    mobile:
-                        profile?.mobile ||
-                        profile?.phone ||
-                        "",
-
-                    role:
-                        accountRole,
-
-                    status:
-                        profile?.status ||
-                        (
-                            accountRole === "rider"
-                                ? "pending"
-                                : "active"
-                        ),
-
-                    city:
-                        profile?.city ||
-                        "Chandigarh",
-
-                    vehicleType:
-                        profile?.vehicleType ||
-                        "",
-
-                    vehicleNumber:
-                        profile?.vehicleNumber ||
-                        "",
-
-                    rating:
-                        Number(
-                            profile?.rating ?? 5
-                        ),
-
-                    ratingCount:
-                        Number(
-                            profile?.ratingCount ?? 0
-                        )
-
-                };
-
-
-                /* --------------------------------------------
-                   LOCAL UI SESSION
-                   NO PASSWORD
-                -------------------------------------------- */
-
-                localStorage.setItem(
-                    "riderx_user",
-                    JSON.stringify(
-                        sessionData
-                    )
-                );
-
-
-                localStorage.setItem(
-                    "userRole",
-                    accountRole
-                );
-
-
-                localStorage.setItem(
-                    "riderx_selected_role",
-                    accountRole
-                );
-
-
-                if (
-                    accountRole === "customer"
-                ) {
-
-                    localStorage.setItem(
-                        "riderx_customer",
-                        JSON.stringify(
-                            sessionData
-                        )
-                    );
-
-                }
-
-
-                if (
-                    accountRole === "rider"
-                ) {
-
-                    localStorage.setItem(
-                        "riderx_rider",
-                        JSON.stringify(
-                            sessionData
-                        )
-                    );
-
-                }
-
-
-                /* --------------------------------------------
-                   RIDER STATUS
-                -------------------------------------------- */
-
-                if (
-                    accountRole === "rider" &&
-                    normalizeStatus(
-                        sessionData.status
-                    ) === "blocked"
-                ) {
-
-                    showError(
-                        "Your rider account is currently blocked. Please contact RiderX support."
-                    );
-
-
-                    await safeLogout();
-
-
-                    setLoading(
-                        false
-                    );
-
-                    return;
-                }
-
-
-                /* --------------------------------------------
-                   SUCCESS
-                -------------------------------------------- */
-
-                showSuccess(
-                    "Login successful. Opening your RiderX app..."
-                );
-
-
-                setTimeout(
-                    function () {
-
-                        redirectByRole(
-                            accountRole,
-                            sessionData
-                        );
-
-                    },
-                    600
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "RiderX login error:",
-                    error
-                );
-
-
-                showError(
-                    getFirebaseErrorMessage(
-                        error
-                    )
-                );
-
-
-                setLoading(
-                    false
-                );
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       FORGOT PASSWORD
-    ======================================================== */
-
-    forgotPassword.addEventListener(
-        "click",
-        async function () {
-
-            hideMessages();
-
-            clearFieldError(
-                emailInput
-            );
-
-
-            const email =
-                emailInput.value
-                    .trim()
-                    .toLowerCase();
-
-
-            if (
-                !isValidEmail(
-                    email
-                )
-            ) {
-
-                markFieldError(
-                    emailInput
-                );
-
-                showError(
-                    "Enter your email address first, then tap Forgot Password."
-                );
-
-                emailInput.focus();
-
-                return;
-            }
-
-
-            forgotPassword.disabled =
-                true;
-
-
-            try {
-
-                await sendPasswordResetEmail(
-                    auth,
-                    email
-                );
-
-
-                showSuccess(
-                    "Password reset email sent. Check your inbox and spam folder."
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "Password reset error:",
-                    error
-                );
-
-
-                showError(
-                    getPasswordResetError(
-                        error
-                    )
-                );
-
-
-            } finally {
-
-                forgotPassword.disabled =
-                    false;
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       OTP
-    ======================================================== */
-
-    otpButton.addEventListener(
-        "click",
-        function () {
-
-            const role =
-                getSelectedRole();
-
-
-            if (role) {
-
-                localStorage.setItem(
-                    "riderx_selected_role",
-                    role
-                );
-
-            }
-
-
-            window.location.href =
-                "./otp-login.html";
-
-        }
-    );
-
-
-    /* ========================================================
-       REGISTER
-    ======================================================== */
-
-    document
-        .getElementById(
-            "registerLink"
-        )
-        .addEventListener(
-            "click",
-            function () {
-
-                const role =
-                    getSelectedRole();
-
-
-                if (role) {
-
-                    localStorage.setItem(
-                        "riderx_selected_role",
-                        role
-                    );
-
-                }
-
-            }
+        customerRoleBtn.classList.toggle(
+            "active",
+            !rider
         );
 
 
-    /* ========================================================
-       AUTH SESSION CHECK
-       If an authenticated Firebase user is already present,
-       do not force them through login again.
-    ======================================================== */
+        riderRoleBtn.classList.toggle(
+            "active",
+            rider
+        );
 
-    let initialAuthCheck =
-        true;
 
+        roleBadge.textContent =
+            rider
+                ? "Rider Login"
+                : "Customer Login";
 
-    onAuthStateChanged(
-        auth,
-        async function (firebaseUser) {
 
-            if (
-                !initialAuthCheck
-            ) {
+        registerBtn.textContent =
+            rider
+                ? "Create rider account"
+                : "Create customer account";
 
-                return;
-            }
-
-
-            initialAuthCheck =
-                false;
-
-
-            if (!firebaseUser) {
-
-                return;
-            }
-
-
-            /*
-             * Only redirect an already-authenticated user when
-             * no login form submission is currently happening.
-             */
-
-            if (
-                loginButton.disabled
-            ) {
-
-                return;
-            }
-
-
-            try {
-
-                const profileSnapshot =
-                    await getDoc(
-                        doc(
-                            db,
-                            "users",
-                            firebaseUser.uid
-                        )
-                    );
-
-
-                if (
-                    !profileSnapshot.exists()
-                ) {
-
-                    return;
-                }
-
-
-                const profile =
-                    profileSnapshot.data();
-
-
-                const profileRole =
-                    normalizeRole(
-                        profile?.role
-                    );
-
-
-                if (!profileRole) {
-
-                    return;
-                }
-
-
-                /*
-                 * Only automatically redirect if the user has
-                 * already selected the same role or no role.
-                 */
-
-                const selected =
-                    getSelectedRole();
-
-
-                if (
-                    selected &&
-                    selected !== profileRole
-                ) {
-
-                    return;
-                }
-
-
-                const sessionData = {
-
-                    uid:
-                        firebaseUser.uid,
-
-                    id:
-                        firebaseUser.uid,
-
-                    name:
-                        profile?.name ||
-                        profile?.fullName ||
-                        firebaseUser.displayName ||
-                        "RiderX User",
-
-                    fullName:
-                        profile?.fullName ||
-                        profile?.name ||
-                        firebaseUser.displayName ||
-                        "RiderX User",
-
-                    email:
-                        firebaseUser.email ||
-                        profile?.email ||
-                        "",
-
-                    phone:
-                        profile?.phone ||
-                        profile?.mobile ||
-                        "",
-
-                    mobile:
-                        profile?.mobile ||
-                        profile?.phone ||
-                        "",
-
-                    role:
-                        profileRole,
-
-                    status:
-                        profile?.status ||
-                        "active",
-
-                    city:
-                        profile?.city ||
-                        "Chandigarh",
-
-                    vehicleType:
-                        profile?.vehicleType ||
-                        "",
-
-                    vehicleNumber:
-                        profile?.vehicleNumber ||
-                        "",
-
-                    rating:
-                        Number(
-                            profile?.rating ?? 5
-                        ),
-
-                    ratingCount:
-                        Number(
-                            profile?.ratingCount ?? 0
-                        )
-
-                };
-
-
-                localStorage.setItem(
-                    "riderx_user",
-                    JSON.stringify(
-                        sessionData
-                    )
-                );
-
-
-                localStorage.setItem(
-                    "userRole",
-                    profileRole
-                );
-
-
-                localStorage.setItem(
-                    "riderx_selected_role",
-                    profileRole
-                );
-
-
-                redirectByRole(
-                    profileRole,
-                    sessionData
-                );
-
-
-            } catch (error) {
-
-                console.warn(
-                    "Existing session check failed:",
-                    error
-                );
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       HELPERS
-    ======================================================== */
-
-    function getSelectedRole() {
-
-        if (
-            customerRole.checked
-        ) {
-
-            return "customer";
-        }
-
-
-        if (
-            riderRole.checked
-        ) {
-
-            return "rider";
-        }
-
-
-        return "";
     }
 
 
@@ -1987,148 +926,26 @@
 
         if (
             value === "rider" ||
-            value === "driver" ||
-            value === "delivery"
+            value === "driver"
         ) {
 
             return "rider";
+
         }
 
 
-        if (
-            value === "customer"
-        ) {
-
-            return "customer";
-        }
-
-
-        return "";
-    }
-
-
-    function formatRole(
-        role
-    ) {
-
-        return normalizeRole(
-            role
-        ) === "rider"
-            ? "Rider"
-            : "Customer";
-    }
-
-
-    function normalizeStatus(
-        status
-    ) {
-
-        return String(
-            status || ""
-        )
-            .trim()
-            .toLowerCase();
-    }
-
-
-    function isValidEmail(
-        email
-    ) {
-
-        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-            .test(
-                email
-            );
-    }
-
-
-    /* ========================================================
-       REDIRECT
-    ======================================================== */
-
-    function redirectByRole(
-        role,
-        session
-    ) {
-
-        const normalizedRole =
-            normalizeRole(
-                role
-            );
-
-
-        if (
-            normalizedRole ===
-            "customer"
-        ) {
-
-            window.location.replace(
-                "../customer/home.html"
-            );
-
-            return;
-        }
-
-
-        if (
-            normalizedRole ===
-            "rider"
-        ) {
-
-            /*
-             * Rider approval is handled by the rider side.
-             * Pending riders can still enter their rider app,
-             * where later verification guards will control
-             * online/ride acceptance permissions.
-             */
-
-            window.location.replace(
-                "../rider/home.html"
-            );
-
-            return;
-        }
-
-
-        showError(
-            "Your account role could not be determined. Please contact RiderX support."
-        );
-    }
-
-
-    /* ========================================================
-       LOADING
-    ======================================================== */
-
-    function setLoading(
-        loading
-    ) {
-
-        loginButton.disabled =
-            loading;
-
-
-        if (
-            loading
-        ) {
-
-            loginButton.innerHTML =
-                '<span class="loader"></span>Logging in...';
-
-        } else {
-
-            loginButton.textContent =
-                "Login";
-        }
+        return "customer";
 
     }
 
 
-    /* ========================================================
-       MESSAGES
-    ======================================================== */
+    function clearMessages() {
 
-    function hideMessages() {
+        errorBox.textContent =
+            "";
+
+        successBox.textContent =
+            "";
 
         errorBox.classList.remove(
             "show"
@@ -2138,11 +955,6 @@
             "show"
         );
 
-        errorBox.textContent =
-            "";
-
-        successBox.textContent =
-            "";
     }
 
 
@@ -2163,6 +975,7 @@
         errorBox.classList.add(
             "show"
         );
+
     }
 
 
@@ -2183,71 +996,978 @@
         successBox.classList.add(
             "show"
         );
+
     }
 
 
-    /* ========================================================
-       FIELD ERRORS
-    ======================================================== */
-
-    function markFieldError(
-        field
+    function setLoading(
+        value
     ) {
 
-        if (!field) {
-            return;
+        loading =
+            value;
+
+
+        loginBtn.disabled =
+            value;
+
+
+        forgotBtn.disabled =
+            value;
+
+
+        otpBtn.disabled =
+            value;
+
+
+        customerRoleBtn.disabled =
+            value;
+
+
+        riderRoleBtn.disabled =
+            value;
+
+
+        if (
+            value
+        ) {
+
+            loginBtn.innerHTML =
+                '<span class="loader"></span>Signing in...';
+
+        } else {
+
+            loginBtn.textContent =
+                "Login";
+
         }
 
-        field.classList.add(
-            "field-error"
-        );
     }
 
 
-    function clearFieldError(
-        field
+    loginForm.addEventListener(
+        "submit",
+        async function (
+            event
+        ) {
+
+            event.preventDefault();
+
+
+            if (
+                loading
+            ) {
+
+                return;
+
+            }
+
+
+            clearMessages();
+
+
+            const email =
+                emailInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const password =
+                passwordInput.value;
+
+
+            if (
+                !email
+            ) {
+
+                showError(
+                    "Please enter your email address."
+                );
+
+                emailInput.focus();
+
+                return;
+
+            }
+
+
+            if (
+                !isValidEmail(
+                    email
+                )
+            ) {
+
+                showError(
+                    "Please enter a valid email address."
+                );
+
+                emailInput.focus();
+
+                return;
+
+            }
+
+
+            if (
+                !password
+            ) {
+
+                showError(
+                    "Please enter your password."
+                );
+
+                passwordInput.focus();
+
+                return;
+
+            }
+
+
+            if (
+                password.length < 6
+            ) {
+
+                showError(
+                    "Password must contain at least 6 characters."
+                );
+
+                passwordInput.focus();
+
+                return;
+
+            }
+
+
+            setLoading(
+                true
+            );
+
+
+            try {
+
+                const credential =
+                    await signInWithEmailAndPassword(
+                        auth,
+                        email,
+                        password
+                    );
+
+
+                const firebaseUser =
+                    credential.user;
+
+
+                if (
+                    !firebaseUser
+                ) {
+
+                    throw new Error(
+                        "Firebase did not return an authenticated user."
+                    );
+
+                }
+
+
+                const profile =
+                    await loadUserProfile(
+                        firebaseUser.uid,
+                        firebaseUser
+                    );
+
+
+                if (
+                    !profile
+                ) {
+
+                    showError(
+                        "Your Firebase account exists, but no RiderX profile was found. Please create your RiderX account first."
+                    );
+
+
+                    setLoading(
+                        false
+                    );
+
+
+                    return;
+
+                }
+
+
+                const actualRole =
+                    normalizeRole(
+                        profile.role ||
+                        profile.userRole ||
+                        profile.accountType
+                    );
+
+
+                if (
+                    actualRole !==
+                    selectedRole
+                ) {
+
+                    await auth.signOut();
+
+
+                    showError(
+                        "This account belongs to the " +
+                        (
+                            actualRole === "rider"
+                                ? "Rider"
+                                : "Customer"
+                        ) +
+                        " side. Please select the correct login type."
+                    );
+
+
+                    setLoading(
+                        false
+                    );
+
+
+                    return;
+
+                }
+
+
+                if (
+                    selectedRole ===
+                    "rider"
+                ) {
+
+                    const access =
+                        checkRiderAccess(
+                            profile
+                        );
+
+
+                    if (
+                        !access.allowed
+                    ) {
+
+                        await saveSession(
+                            firebaseUser,
+                            profile
+                        );
+
+
+                        await auth.signOut();
+
+
+                        showError(
+                            access.message
+                        );
+
+
+                        setLoading(
+                            false
+                        );
+
+
+                        return;
+
+                    }
+
+                }
+
+
+                await saveSession(
+                    firebaseUser,
+                    profile
+                );
+
+
+                if (
+                    rememberInput.checked
+                ) {
+
+                    localStorage.setItem(
+                        "riderx_remember_email",
+                        email
+                    );
+
+                } else {
+
+                    localStorage.removeItem(
+                        "riderx_remember_email"
+                    );
+
+                }
+
+
+                showSuccess(
+                    "Login successful. Opening RiderX..."
+                );
+
+
+                setTimeout(
+                    function () {
+
+                        redirectAfterLogin(
+                            selectedRole,
+                            profile
+                        );
+
+                    },
+                    600
+                );
+
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    "RiderX login error:",
+                    error
+                );
+
+
+                showError(
+                    firebaseErrorMessage(
+                        error
+                    )
+                );
+
+
+                setLoading(
+                    false
+                );
+
+            }
+
+        }
+    );
+
+
+    async function loadUserProfile(
+        uid,
+        firebaseUser
     ) {
 
-        if (!field) {
-            return;
+        const userSnapshot =
+            await getDoc(
+                doc(
+                    db,
+                    "users",
+                    uid
+                )
+            );
+
+
+        if (
+            userSnapshot.exists()
+        ) {
+
+            return userSnapshot.data();
+
         }
 
-        field.classList.remove(
-            "field-error"
-        );
+
+        /*
+         * Backward compatibility with existing
+         * RiderX role collections.
+         */
+
+        const customerSnapshot =
+            await getDoc(
+                doc(
+                    db,
+                    "customers",
+                    uid
+                )
+            );
+
+
+        if (
+            customerSnapshot.exists()
+        ) {
+
+            return customerSnapshot.data();
+
+        }
+
+
+        const riderSnapshot =
+            await getDoc(
+                doc(
+                    db,
+                    "riders",
+                    uid
+                )
+            );
+
+
+        if (
+            riderSnapshot.exists()
+        ) {
+
+            return riderSnapshot.data();
+
+        }
+
+
+        /*
+         * Do not silently create a profile during
+         * normal login. Registration should create it.
+         */
+
+        return null;
+
     }
 
 
-    /* ========================================================
-       FIREBASE ERROR
-    ======================================================== */
+    function checkRiderAccess(
+        profile
+    ) {
 
-    function getFirebaseErrorMessage(
+        const status =
+            String(
+                profile.approvalStatus ||
+                profile.applicationStatus ||
+                profile.verificationStatus ||
+                profile.status ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            profile.approved === false ||
+            profile.isApproved === false ||
+            status === "pending"
+        ) {
+
+            return {
+
+                allowed:
+                    false,
+
+                message:
+                    "Your RiderX rider account is still waiting for admin approval."
+
+            };
+
+        }
+
+
+        if (
+            status === "rejected" ||
+            status === "blocked" ||
+            status === "suspended"
+        ) {
+
+            return {
+
+                allowed:
+                    false,
+
+                message:
+                    "Your rider account is currently " +
+                    status +
+                    ". Please contact RiderX support."
+
+            };
+
+        }
+
+
+        return {
+
+            allowed:
+                true,
+
+            message:
+                ""
+
+        };
+
+    }
+
+
+    async function saveSession(
+        firebaseUser,
+        profile
+    ) {
+
+        const role =
+            normalizeRole(
+                profile.role ||
+                profile.userRole ||
+                profile.accountType ||
+                selectedRole
+            );
+
+
+        const phone =
+            normalizePhone(
+                profile.phone ||
+                profile.mobile ||
+                profile.phoneNumber ||
+                firebaseUser.phoneNumber ||
+                ""
+            );
+
+
+        const user = {
+
+            uid:
+                firebaseUser.uid,
+
+            id:
+                firebaseUser.uid,
+
+            name:
+                profile.name ||
+                profile.fullName ||
+                profile.displayName ||
+                firebaseUser.displayName ||
+                (
+                    role === "rider"
+                        ? "Rider"
+                        : "RiderX Customer"
+                ),
+
+            fullName:
+                profile.fullName ||
+                profile.name ||
+                profile.displayName ||
+                firebaseUser.displayName ||
+                "",
+
+            displayName:
+                profile.displayName ||
+                firebaseUser.displayName ||
+                "",
+
+            email:
+                profile.email ||
+                firebaseUser.email ||
+                "",
+
+            phone:
+                phone,
+
+            mobile:
+                phone,
+
+            phoneNumber:
+                firebaseUser.phoneNumber ||
+                profile.phoneNumber ||
+                "",
+
+            role:
+                role,
+
+            userRole:
+                role,
+
+            accountType:
+                role,
+
+            status:
+                profile.status ||
+                "active",
+
+            approvalStatus:
+                profile.approvalStatus ||
+                profile.applicationStatus ||
+                (
+                    role === "rider"
+                        ? "approved"
+                        : "approved"
+                ),
+
+            approved:
+                profile.approved !== false &&
+                profile.isApproved !== false,
+
+            city:
+                profile.city ||
+                "Chandigarh",
+
+            photoURL:
+                profile.photoURL ||
+                firebaseUser.photoURL ||
+                "",
+
+            rating:
+                Number(
+                    profile.rating ||
+                    5
+                ),
+
+            walletBalance:
+                Number(
+                    profile.walletBalance ||
+                    0
+                ),
+
+            totalRides:
+                Number(
+                    profile.totalRides ||
+                    0
+                ),
+
+            completedRides:
+                Number(
+                    profile.completedRides ||
+                    0
+                ),
+
+            currentRideId:
+                profile.currentRideId ||
+                null,
+
+            vehicleType:
+                profile.vehicleType ||
+                (
+                    role === "rider"
+                        ? "bike"
+                        : null
+                ),
+
+            vehicleNumber:
+                profile.vehicleNumber ||
+                "",
+
+            loginMethod:
+                "password",
+
+            loginAt:
+                new Date().toISOString()
+
+        };
+
+
+        localStorage.setItem(
+            "riderx_user",
+            JSON.stringify(
+                user
+            )
+        );
+
+
+        localStorage.setItem(
+            "userRole",
+            role
+        );
+
+
+        localStorage.setItem(
+            "riderx_role",
+            role
+        );
+
+
+        localStorage.setItem(
+            "riderx_selected_role",
+            role
+        );
+
+
+        if (
+            role === "rider"
+        ) {
+
+            localStorage.setItem(
+                "riderx_rider",
+                JSON.stringify(
+                    user
+                )
+            );
+
+
+            localStorage.setItem(
+                "riderx_rider_id",
+                firebaseUser.uid
+            );
+
+        } else {
+
+            localStorage.setItem(
+                "riderx_customer",
+                JSON.stringify(
+                    user
+                )
+            );
+
+
+            localStorage.setItem(
+                "riderx_customer_id",
+                firebaseUser.uid
+            );
+
+        }
+
+    }
+
+
+    function redirectAfterLogin(
+        role,
+        profile
+    ) {
+
+        if (
+            role === "rider"
+        ) {
+
+            const access =
+                checkRiderAccess(
+                    profile
+                );
+
+
+            if (
+                access.allowed
+            ) {
+
+                window.location.replace(
+                    "../rider/home.html"
+                );
+
+            } else {
+
+                window.location.replace(
+                    "./rider-login.html"
+                );
+
+            }
+
+
+            return;
+
+        }
+
+
+        window.location.replace(
+            "../customer/home.html"
+        );
+
+    }
+
+
+    otpBtn.addEventListener(
+        "click",
+        function () {
+
+            localStorage.setItem(
+                "riderx_selected_role",
+                selectedRole
+            );
+
+
+            if (
+                selectedRole ===
+                "rider"
+            ) {
+
+                window.location.href =
+                    "./rider-login.html";
+
+            } else {
+
+                window.location.href =
+                    "./otp-login.html";
+
+            }
+
+        }
+    );
+
+
+    registerBtn.addEventListener(
+        "click",
+        function () {
+
+            localStorage.setItem(
+                "riderx_selected_role",
+                selectedRole
+            );
+
+
+            window.location.href =
+                "./register.html";
+
+        }
+    );
+
+
+    forgotBtn.addEventListener(
+        "click",
+        async function () {
+
+            clearMessages();
+
+
+            const email =
+                emailInput.value
+                    .trim()
+                    .toLowerCase();
+
+
+            if (
+                !email
+            ) {
+
+                showError(
+                    "Enter your email address first, then tap Forgot password."
+                );
+
+
+                emailInput.focus();
+
+                return;
+
+            }
+
+
+            if (
+                !isValidEmail(
+                    email
+                )
+            ) {
+
+                showError(
+                    "Please enter a valid email address."
+                );
+
+
+                emailInput.focus();
+
+                return;
+
+            }
+
+
+            forgotBtn.disabled =
+                true;
+
+
+            try {
+
+                await sendPasswordResetEmail(
+                    auth,
+                    email
+                );
+
+
+                showSuccess(
+                    "Password reset email sent. Check your inbox and spam folder."
+                );
+
+
+            } catch (
+                error
+            ) {
+
+                console.error(
+                    "RiderX password reset error:",
+                    error
+                );
+
+
+                showError(
+                    passwordResetError(
+                        error
+                    )
+                );
+
+            } finally {
+
+                forgotBtn.disabled =
+                    false;
+
+            }
+
+        }
+    );
+
+
+    function isValidEmail(
+        email
+    ) {
+
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+            email
+        );
+
+    }
+
+
+    function normalizePhone(
+        value
+    ) {
+
+        let number =
+            String(
+                value || ""
+            )
+                .replace(
+                    /\D/g,
+                    ""
+                );
+
+
+        if (
+            number.startsWith("91") &&
+            number.length === 12
+        ) {
+
+            number =
+                number.substring(2);
+
+        }
+
+
+        if (
+            number.length > 10
+        ) {
+
+            number =
+                number.slice(
+                    -10
+                );
+
+        }
+
+
+        return number;
+
+    }
+
+
+    function firebaseErrorMessage(
         error
     ) {
 
         const code =
             String(
-                error?.code || ""
+                error?.code ||
+                ""
             )
                 .toLowerCase();
 
 
-        switch (code) {
+        switch (
+            code
+        ) {
 
             case "auth/invalid-email":
 
-                return "Please enter a valid email address.";
+                return "The email address is invalid.";
 
 
             case "auth/user-not-found":
 
-                return "No RiderX account was found with this email.";
+                return "No RiderX account was found with this email address.";
 
 
             case "auth/wrong-password":
 
-                return "Incorrect password. Please try again.";
+                return "Incorrect password. Please try again or reset your password.";
 
 
             case "auth/invalid-credential":
@@ -2257,7 +1977,7 @@
 
             case "auth/user-disabled":
 
-                return "This Firebase account has been disabled.";
+                return "This account has been disabled. Please contact RiderX support.";
 
 
             case "auth/too-many-requests":
@@ -2272,48 +1992,50 @@
 
             case "auth/operation-not-allowed":
 
-                return "Email/password login is not enabled in Firebase Authentication.";
+                return "Email/password authentication is not enabled in Firebase.";
 
 
-            case "permission-denied":
+            case "auth/invalid-api-key":
 
-                return "Firebase permission denied. Please check Firestore Security Rules.";
+                return "Firebase configuration is invalid. Please check the RiderX Firebase configuration.";
+
+
+            case "auth/app-not-authorized":
+
+                return "This RiderX domain is not authorized in Firebase.";
 
 
             default:
 
-                if (
-                    error?.message &&
-                    /permission/i.test(
-                        error.message
-                    )
-                ) {
+                return (
+                    error?.message ||
+                    "Login failed. Please try again."
+                );
 
-                    return "Firebase permission denied. Please check Firestore Security Rules.";
-                }
-
-
-                return "Login failed. Please check your details and try again.";
         }
+
     }
 
 
-    function getPasswordResetError(
+    function passwordResetError(
         error
     ) {
 
         const code =
             String(
-                error?.code || ""
+                error?.code ||
+                ""
             )
                 .toLowerCase();
 
 
-        switch (code) {
+        switch (
+            code
+        ) {
 
             case "auth/user-not-found":
 
-                return "No account was found with this email.";
+                return "No RiderX account was found with this email address.";
 
 
             case "auth/invalid-email":
@@ -2323,7 +2045,7 @@
 
             case "auth/too-many-requests":
 
-                return "Too many requests. Please wait and try again later.";
+                return "Too many reset requests. Please wait and try again later.";
 
 
             case "auth/network-request-failed":
@@ -2333,60 +2055,17 @@
 
             default:
 
-                return "Unable to send the password reset email. Please try again.";
-        }
-    }
+                return (
+                    error?.message ||
+                    "Unable to send password reset email."
+                );
 
-
-    /* ========================================================
-       SAFE LOGOUT
-    ======================================================== */
-
-    async function safeLogout() {
-
-        try {
-
-            const {
-                signOut
-            } = await import(
-                "../firebase/firebase-config.js"
-            );
-
-
-            await signOut(
-                auth
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "Logout cleanup failed:",
-                error
-            );
         }
 
-
-        localStorage.removeItem(
-            "riderx_user"
-        );
-
-        localStorage.removeItem(
-            "riderx_customer"
-        );
-
-        localStorage.removeItem(
-            "riderx_rider"
-        );
-
-        localStorage.removeItem(
-            "userRole"
-        );
     }
-
 
 </script>
 
-
 </body>
 
-    </html>
+</html>
