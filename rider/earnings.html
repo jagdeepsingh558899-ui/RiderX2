@@ -1,321 +1,1278 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE html><html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>RiderX | Earnings</title><link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+:root{
+    --yellow:#ffe500;
+    --black:#000;
+    --dark:#0b0b0b;
+    --card:#151515;
+    --muted:#8d8d8d;
+    --green:#22c55e;
+    --red:#ef4444;
+}
 
-<title>RiderX Earnings</title>
-
-<link rel="stylesheet" href="../css/style.css">
-
-
-<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,Poppins,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
 
 body{
-background:#000;
-color:white;
-font-family:Arial;
+    min-height:100vh;
+    background:#000;
+    color:#fff;
+    padding-bottom:30px;
 }
-
 
 .header{
-
-background:#111;
-padding:20px;
-font-size:22px;
-border-bottom:2px solid #FFD600;
-
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:rgba(8,8,8,.97);
+    border-bottom:1px solid #292929;
+    backdrop-filter:blur(12px);
 }
 
+.header-left{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.back{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:#181818;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:900;
+}
+
+.logo span{
+    color:var(--yellow);
+}
+
+.header-title{
+    font-size:15px;
+    color:#aaa;
+}
 
 .container{
-
-padding:20px;
-
+    width:100%;
+    max-width:650px;
+    margin:auto;
+    padding:18px 15px 30px;
 }
 
+.earnings-card{
+    background:linear-gradient(145deg,#181818,#0d0d0d);
+    border:1px solid #282828;
+    border-radius:24px;
+    padding:22px;
+    box-shadow:0 12px 35px rgba(0,0,0,.3);
+}
+
+.eyebrow{
+    color:#999;
+    font-size:12px;
+    margin-bottom:7px;
+}
 
 .total{
-
-background:#FFD600;
-color:#000;
-padding:20px;
-border-radius:20px;
-font-size:25px;
-font-weight:bold;
-margin-bottom:20px;
-
+    font-size:38px;
+    font-weight:900;
+    color:var(--yellow);
 }
 
-
-.card{
-
-background:#111;
-padding:20px;
-border-radius:18px;
-margin-bottom:15px;
-border:1px solid #333;
-
+.total-sub{
+    margin-top:7px;
+    color:#777;
+    font-size:11px;
 }
 
-
-h3{
-
-color:#FFD600;
-
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+    margin-top:20px;
 }
 
-</style>
+.stat{
+    background:#151515;
+    border:1px solid #262626;
+    border-radius:15px;
+    padding:14px 8px;
+    text-align:center;
+}
 
-</head>
+.stat i{
+    color:var(--yellow);
+    margin-bottom:7px;
+}
 
+.stat-value{
+    font-size:17px;
+    font-weight:800;
+}
 
-<body>
+.stat-label{
+    margin-top:4px;
+    color:#777;
+    font-size:9px;
+}
 
+.section{
+    margin-top:20px;
+}
 
-<div class="header">
+.section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
 
-💰 Rider Earnings
+.section-title h3{
+    font-size:16px;
+}
+
+.section-title span{
+    color:#777;
+    font-size:11px;
+}
+
+.periods{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:3px;
+}
+
+.period{
+    flex:1;
+    min-width:85px;
+    padding:11px 14px;
+    border:1px solid #292929;
+    border-radius:13px;
+    background:#121212;
+    color:#aaa;
+    font-size:12px;
+    font-weight:700;
+}
+
+.period.active{
+    background:var(--yellow);
+    color:#000;
+    border-color:var(--yellow);
+}
+
+.breakdown{
+    background:#111;
+    border:1px solid #252525;
+    border-radius:18px;
+    overflow:hidden;
+}
+
+.row{
+    min-height:55px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 15px;
+    border-bottom:1px solid #252525;
+}
+
+.row:last-child{
+    border-bottom:0;
+}
+
+.row-left{
+    display:flex;
+    align-items:center;
+    gap:11px;
+}
+
+.row-icon{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    background:#1c1c1c;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--yellow);
+}
+
+.row-label{
+    font-size:12px;
+    font-weight:600;
+}
+
+.row-small{
+    color:#666;
+    font-size:9px;
+    margin-top:3px;
+}
+
+.row-value{
+    font-size:13px;
+    font-weight:800;
+}
+
+.green{
+    color:var(--green);
+}
+
+.red{
+    color:var(--red);
+}
+
+.history{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.ride{
+    background:#121212;
+    border:1px solid #242424;
+    border-radius:16px;
+    padding:13px;
+}
+
+.ride-top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.ride-service{
+    font-size:12px;
+    font-weight:800;
+}
+
+.ride-date{
+    color:#666;
+    font-size:9px;
+    margin-top:4px;
+}
+
+.ride-fare{
+    color:var(--yellow);
+    font-size:16px;
+    font-weight:900;
+}
+
+.ride-bottom{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+    padding-top:9px;
+    border-top:1px solid #242424;
+    color:#777;
+    font-size:9px;
+}
+
+.empty{
+    display:none;
+    text-align:center;
+    padding:28px 15px;
+    color:#666;
+    background:#111;
+    border-radius:18px;
+    border:1px solid #222;
+}
+
+.empty i{
+    font-size:28px;
+    margin-bottom:9px;
+    color:#444;
+}
+
+.loading{
+    text-align:center;
+    color:#777;
+    padding:25px;
+}
+
+@media(max-width:380px){
+    .container{
+        padding-left:11px;
+        padding-right:11px;
+    }
+
+    .total{
+        font-size:34px;
+    }
+
+    .stats{
+        gap:6px;
+    }
+
+    .stat{
+        padding:12px 5px;
+    }
+}
+</style></head><body><header class="header"><div class="header-left">
+
+    <button
+        class="back"
+        id="backBtn"
+        type="button"
+        aria-label="Back"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+
+    <div>
+        <div class="logo">
+            RIDER<span>X</span>
+        </div>
+
+        <div class="header-title">
+            Earnings
+        </div>
+    </div>
 
 </div>
 
+<i class="fa-solid fa-chart-line" style="color:#ffe500"></i>
+
+</header><main class="container"><!-- TOTAL EARNINGS -->
+
+<section class="earnings-card">
+
+    <div class="eyebrow">
+        Today's earnings
+    </div>
+
+    <div class="total">
+        ₹<span id="todayEarnings">0</span>
+    </div>
+
+    <div class="total-sub" id="todaySubtitle">
+        Calculating your earnings...
+    </div>
+
+    <div class="stats">
+
+        <div class="stat">
+            <i class="fa-solid fa-road"></i>
+
+            <div
+                class="stat-value"
+                id="todayTrips"
+            >
+                0
+            </div>
+
+            <div class="stat-label">
+                Trips
+            </div>
+        </div>
 
 
+        <div class="stat">
+            <i class="fa-solid fa-route"></i>
 
-<div class="container">
+            <div
+                class="stat-value"
+                id="todayDistance"
+            >
+                0
+            </div>
 
-
-
-<div class="total">
-
-Total Earnings: ₹<span id="total">0</span>
-
-</div>
-
-
-
-
-<div id="rideList">
-
-Loading...
-
-</div>
+            <div class="stat-label">
+                KM
+            </div>
+        </div>
 
 
+        <div class="stat">
+            <i class="fa-solid fa-star"></i>
 
-</div>
+            <div
+                class="stat-value"
+                id="rating"
+            >
+                5.0
+            </div>
+
+            <div class="stat-label">
+                Rating
+            </div>
+        </div>
+
+    </div>
+
+</section>
 
 
+<!-- PERIOD -->
+
+<section class="section">
+
+    <div class="section-title">
+
+        <h3>
+            Earnings period
+        </h3>
+
+        <span id="periodLabel">
+            Today
+        </span>
+
+    </div>
+
+    <div class="periods">
+
+        <button
+            class="period active"
+            data-period="today"
+        >
+            Today
+        </button>
+
+        <button
+            class="period"
+            data-period="week"
+        >
+            This Week
+        </button>
+
+        <button
+            class="period"
+            data-period="month"
+        >
+            This Month
+        </button>
+
+    </div>
+
+</section>
 
 
+<!-- BREAKDOWN -->
+
+<section class="section">
+
+    <div class="section-title">
+
+        <h3>
+            Earnings breakdown
+        </h3>
+
+    </div>
+
+    <div class="breakdown">
+
+        <div class="row">
+
+            <div class="row-left">
+
+                <div class="row-icon">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+
+                <div>
+                    <div class="row-label">
+                        Ride earnings
+                    </div>
+
+                    <div class="row-small">
+                        Completed rides
+                    </div>
+                </div>
+
+            </div>
+
+            <div
+                class="row-value"
+                id="rideEarnings"
+            >
+                ₹0
+            </div>
+
+        </div>
 
 
+        <div class="row">
 
-<script type="module">
+            <div class="row-left">
+
+                <div class="row-icon">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+
+                <div>
+                    <div class="row-label">
+                        Incentives
+                    </div>
+
+                    <div class="row-small">
+                        Bonuses & incentives
+                    </div>
+                </div>
+
+            </div>
+
+            <div
+                class="row-value green"
+                id="incentives"
+            >
+                ₹0
+            </div>
+
+        </div>
 
 
-import {auth,db} from "../firebase/config.js";
+        <div class="row">
 
+            <div class="row-left">
+
+                <div class="row-icon">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+
+                <div>
+                    <div class="row-label">
+                        Tips
+                    </div>
+
+                    <div class="row-small">
+                        Customer tips
+                    </div>
+                </div>
+
+            </div>
+
+            <div
+                class="row-value green"
+                id="tips"
+            >
+                ₹0
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="row-left">
+
+                <div class="row-icon">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+
+                <div>
+                    <div class="row-label">
+                        Adjustments
+                    </div>
+
+                    <div class="row-small">
+                        Other adjustments
+                    </div>
+                </div>
+
+            </div>
+
+            <div
+                class="row-value"
+                id="adjustments"
+            >
+                ₹0
+            </div>
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="row-left">
+
+                <div class="row-icon">
+                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                </div>
+
+                <div>
+                    <div class="row-label">
+                        Net earnings
+                    </div>
+                </div>
+
+            </div>
+
+            <div
+                class="row-value"
+                id="netEarnings"
+            >
+                ₹0
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- RIDE HISTORY -->
+
+<section class="section">
+
+    <div class="section-title">
+
+        <h3>
+            Recent completed rides
+        </h3>
+
+        <span id="rideCount">
+            0 rides
+        </span>
+
+    </div>
+
+    <div
+        id="history"
+        class="history"
+    >
+        <div class="loading">
+            Loading rides...
+        </div>
+    </div>
+
+    <div
+        id="empty"
+        class="empty"
+    >
+        <i class="fa-solid fa-chart-column"></i>
+
+        <div>
+            No completed rides yet
+        </div>
+    </div>
+
+</section>
+
+</main><script type="module">
+
+import { auth, db } from "../firebase/config.js";
 
 import {
-
-collection,
-query,
-where,
-getDocs,
-orderBy
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
+    collection,
+    query,
+    where,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 import {
-
-onAuthStateChanged
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
+const $ = (id) =>
+    document.getElementById(id);
 
 
+let allRides = [];
+
+let selectedPeriod = "today";
 
 
+/* =========================================
+   BACK
+========================================= */
 
-
-onAuthStateChanged(auth,(user)=>{
-
-
-if(user){
-
-loadEarnings(user.uid);
-
-}
-
-else{
-
-location.href="../auth/login.html";
-
-}
-
-
-});
-
-
-
-
-
-
-
-async function loadEarnings(uid){
-
-
-
-let list=document.getElementById("rideList");
-
-
-let total=0;
-
-
-
-const q=query(
-
-collection(db,"rides"),
-
-where("riderId","==",uid),
-
-where("status","==","Completed")
-
+$("backBtn")?.addEventListener(
+    "click",
+    () => history.back()
 );
 
 
+/* =========================================
+   DATE HELPERS
+========================================= */
 
+function startOfToday(){
 
+    const d = new Date();
 
-const snap=await getDocs(q);
+    d.setHours(0,0,0,0);
 
-
-
-list.innerHTML="";
-
-
-
-
-
-if(snap.empty){
-
-
-list.innerHTML=
-
-"<p>No completed rides found</p>";
-
-
-document.getElementById("total").innerHTML=0;
-
-
-return;
-
+    return d;
 
 }
 
 
+function startOfWeek(){
+
+    const d = startOfToday();
+
+    const day = d.getDay();
+
+    const diff = day === 0 ? 6 : day - 1;
+
+    d.setDate(
+        d.getDate() - diff
+    );
+
+    return d;
+
+}
 
 
+function startOfMonth(){
+
+    const d = startOfToday();
+
+    d.setDate(1);
+
+    return d;
+
+}
 
 
-snap.forEach((ride)=>{
+function rideDate(data){
+
+    const value =
+        data.completedAt ||
+        data.updatedAt ||
+        data.createdAt;
+
+    if(!value) return null;
+
+    if(
+        typeof value.toDate ===
+        "function"
+    ){
+
+        return value.toDate();
+
+    }
+
+    if(value.seconds){
+
+        return new Date(
+            value.seconds * 1000
+        );
+
+    }
+
+    const d = new Date(value);
+
+    return isNaN(d.getTime())
+        ? null
+        : d;
+
+}
 
 
+/* =========================================
+   PERIOD FILTER
+========================================= */
 
-let data=ride.data();
+function getPeriodStart(){
 
+    if(selectedPeriod === "week"){
+        return startOfWeek();
+    }
 
+    if(selectedPeriod === "month"){
+        return startOfMonth();
+    }
 
-total += Number(data.fare || 0);
-
-
-
-
-list.innerHTML += `
-
-
-<div class="card">
-
-
-<h3>
-
-${data.service || "Ride"}
-
-</h3>
+    return startOfToday();
+}
 
 
+function getFilteredRides(){
 
-<p>
-📍 Pickup:
-<br>
-${data.pickup || "-"}
-</p>
+    const start =
+        getPeriodStart();
 
+    return allRides.filter(
+        ride => {
 
+            const date =
+                rideDate(ride);
 
-<p>
-🏁 Drop:
-<br>
-${data.drop || "-"}
-</p>
+            return date && date >= start;
 
+        }
+    );
 
-
-<p>
-💰 Fare:
-₹${data.fare || 0}
-</p>
+}
 
 
+/* =========================================
+   LOAD RIDES
+========================================= */
 
-<p>
-Payment:
-${data.paymentStatus || "Pending"}
-</p>
+async function loadEarnings(uid){
+
+    try{
+
+        const q = query(
+            collection(db,"rides"),
+            where("riderId","==",uid)
+        );
+
+        const snapshot =
+            await getDocs(q);
+
+        allRides = [];
+
+        snapshot.forEach(docSnap => {
+
+            const data =
+                docSnap.data();
+
+            const status =
+                String(
+                    data.status || ""
+                ).toLowerCase();
+
+            if(
+                status === "completed" ||
+                status === "complete"
+            ){
+
+                allRides.push({
+                    id:docSnap.id,
+                    ...data
+                });
+
+            }
+
+        });
 
 
+        allRides.sort(
+            (a,b) => {
 
-</div>
+                const da =
+                    rideDate(a)?.getTime() || 0;
+
+                const db =
+                    rideDate(b)?.getTime() || 0;
+
+                return db - da;
+
+            }
+        );
 
 
-`;
+        render();
 
 
+    }catch(error){
+
+        console.error(
+            "Earnings error:",
+            error
+        );
+
+        $("history").innerHTML = "";
+
+        $("empty").style.display =
+            "block";
+
+        $("todaySubtitle").innerText =
+            "Unable to load earnings";
+
+    }
+
+}
+
+
+/* =========================================
+   RENDER
+========================================= */
+
+function render(){
+
+    const rides =
+        getFilteredRides();
+
+
+    let earnings = 0;
+
+    let distance = 0;
+
+    let incentives = 0;
+
+    let tips = 0;
+
+    let adjustments = 0;
+
+
+    rides.forEach(
+        ride => {
+
+            earnings += Number(
+                ride.fare ??
+                ride.totalFare ??
+                ride.amount ??
+                0
+            );
+
+
+            distance += Number(
+                ride.distance ??
+                ride.distanceKm ??
+                0
+            );
+
+
+            incentives += Number(
+                ride.incentive ??
+                ride.incentives ??
+                0
+            );
+
+
+            tips += Number(
+                ride.tip ??
+                ride.tips ??
+                0
+            );
+
+
+            adjustments += Number(
+                ride.adjustment ??
+                ride.adjustments ??
+                0
+            );
+
+        }
+    );
+
+
+    const net =
+        earnings +
+        incentives +
+        tips +
+        adjustments;
+
+
+    $("todayEarnings").innerText =
+        Math.round(net).toLocaleString("en-IN");
+
+
+    $("todayTrips").innerText =
+        rides.length;
+
+
+    $("todayDistance").innerText =
+        distance.toFixed(1);
+
+
+    $("rideEarnings").innerText =
+        "₹" +
+        Math.round(earnings)
+            .toLocaleString("en-IN");
+
+
+    $("incentives").innerText =
+        "₹" +
+        Math.round(incentives)
+            .toLocaleString("en-IN");
+
+
+    $("tips").innerText =
+        "₹" +
+        Math.round(tips)
+            .toLocaleString("en-IN");
+
+
+    $("adjustments").innerText =
+        "₹" +
+        Math.round(adjustments)
+            .toLocaleString("en-IN");
+
+
+    $("netEarnings").innerText =
+        "₹" +
+        Math.round(net)
+            .toLocaleString("en-IN");
+
+
+    const labels = {
+
+        today:"Today",
+
+        week:"This Week",
+
+        month:"This Month"
+
+    };
+
+
+    $("periodLabel").innerText =
+        labels[selectedPeriod];
+
+
+    $("todaySubtitle").innerText =
+        `${rides.length} completed ride${rides.length === 1 ? "" : "s"} • ${distance.toFixed(1)} KM`;
+
+
+    renderHistory(rides);
+
+}
+
+
+/* =========================================
+   HISTORY
+========================================= */
+
+function renderHistory(rides){
+
+    const container =
+        $("history");
+
+    container.innerHTML = "";
+
+
+    $("rideCount").innerText =
+        `${rides.length} ride${rides.length === 1 ? "" : "s"}`;
+
+
+    if(!rides.length){
+
+        $("empty").style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    $("empty").style.display =
+        "none";
+
+
+    rides.slice(0,20).forEach(
+        ride => {
+
+            const fare =
+                Number(
+                    ride.fare ??
+                    ride.totalFare ??
+                    ride.amount ??
+                    0
+                );
+
+
+            const distance =
+                Number(
+                    ride.distance ??
+                    ride.distanceKm ??
+                    0
+                );
+
+
+            const date =
+                rideDate(ride);
+
+
+            const dateText =
+                date
+                ? date.toLocaleDateString(
+                    "en-IN",
+                    {
+                        day:"2-digit",
+                        month:"short",
+                        year:"numeric"
+                    }
+                )
+                : "Completed ride";
+
+
+            const service =
+                ride.serviceType ||
+                ride.service ||
+                "Bike";
+
+
+            const pickup =
+                ride.pickupLocation ||
+                ride.pickupAddress ||
+                "Pickup";
+
+
+            const drop =
+                ride.dropoffLocation ||
+                ride.dropLocation ||
+                ride.destination ||
+                "Destination";
+
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "ride";
+
+
+            item.innerHTML = `
+
+                <div class="ride-top">
+
+                    <div>
+
+                        <div class="ride-service">
+                            <i class="fa-solid fa-motorcycle"
+                               style="color:#ffe500;margin-right:5px"></i>
+                            ${escapeHtml(service)}
+                        </div>
+
+                        <div class="ride-date">
+                            ${dateText}
+                        </div>
+
+                    </div>
+
+                    <div class="ride-fare">
+                        ₹${Math.round(fare).toLocaleString("en-IN")}
+                    </div>
+
+                </div>
+
+
+                <div class="ride-bottom">
+
+                    <span>
+                        ${escapeHtml(shortText(pickup))}
+                    </span>
+
+                    <span>
+                        ${distance.toFixed(1)} KM
+                    </span>
+
+                    <span>
+                        ${escapeHtml(shortText(drop))}
+                    </span>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(item);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   SECURITY
+========================================= */
+
+function escapeHtml(value){
+
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+
+function shortText(value){
+
+    const text =
+        String(value || "");
+
+    if(text.length <= 24){
+        return text;
+    }
+
+    return text.slice(0,21) + "...";
+
+}
+
+
+/* =========================================
+   PERIOD BUTTONS
+========================================= */
+
+document.querySelectorAll(
+    ".period"
+).forEach(button => {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            document
+                .querySelectorAll(".period")
+                .forEach(
+                    b => b.classList.remove("active")
+                );
+
+
+            button.classList.add("active");
+
+
+            selectedPeriod =
+                button.dataset.period ||
+                "today";
+
+
+            render();
+
+        }
+    );
 
 });
 
 
+/* =========================================
+   AUTH
+========================================= */
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(!user){
+
+            location.href =
+                "../auth/login.html";
+
+            return;
+
+        }
 
 
+        loadEarnings(
+            user.uid
+        );
 
-document.getElementById("total").innerHTML=
+    }
+);
 
-total;
-
-
-
-}
-
-
-
-
-</script>
-
-
-
-</body>
-
+</script></body>
 </html>
