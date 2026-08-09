@@ -1,324 +1,1322 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE html><html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#000000"><title>RiderX | Notifications</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+:root{
+    --yellow:#ffe500;
+    --black:#000;
+    --dark:#0a0a0a;
+    --card:#151515;
+    --card2:#202020;
+    --white:#fff;
+    --muted:#8b8b8b;
+    --green:#22c55e;
+    --red:#ef4444;
+}
 
-<title>RiderX Notifications</title>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,Poppins,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
 
-<link rel="stylesheet" href="../css/style.css">
-
-<style>
+html,body{
+    min-height:100%;
+    background:var(--black);
+    color:var(--white);
+}
 
 body{
-
-background:#000;
-color:white;
-font-family:Arial;
-
+    padding-bottom:30px;
 }
 
+/* HEADER */
 
 .header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:68px;
+    padding:
+        max(10px,env(safe-area-inset-top))
+        14px
+        10px;
 
-background:#111;
-padding:20px;
-font-size:24px;
-font-weight:bold;
-border-bottom:2px solid #FFD600;
+    display:flex;
+    align-items:center;
+    gap:12px;
 
+    background:rgba(0,0,0,.96);
+    border-bottom:1px solid #292929;
 }
 
+.back-btn{
+    width:42px;
+    height:42px;
 
-.container{
+    border:0;
+    border-radius:50%;
 
-padding:20px;
+    background:#171717;
+    color:#fff;
 
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:17px;
 }
 
+.header-title{
+    flex:1;
+}
+
+.header-title h1{
+    font-size:19px;
+    font-weight:800;
+}
+
+.header-title p{
+    margin-top:3px;
+    color:#777;
+    font-size:10px;
+}
+
+.header-icon{
+    width:42px;
+    height:42px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#171717;
+    color:var(--yellow);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
+}
+
+.unread-badge{
+    position:absolute;
+    top:-2px;
+    right:-2px;
+
+    min-width:17px;
+    height:17px;
+
+    padding:0 4px;
+
+    border-radius:20px;
+
+    background:var(--red);
+    color:#fff;
+
+    font-size:9px;
+    font-weight:800;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    border:2px solid #000;
+}
+
+/* ACTIONS */
+
+.actions{
+    display:flex;
+    gap:9px;
+
+    padding:14px;
+}
+
+.action-btn{
+    flex:1;
+
+    min-height:43px;
+
+    border:1px solid #292929;
+    border-radius:12px;
+
+    background:#111;
+    color:#bbb;
+
+    font-size:11px;
+    font-weight:700;
+}
+
+.action-btn i{
+    margin-right:5px;
+}
+
+.action-btn.primary{
+    color:var(--yellow);
+}
+
+.action-btn.danger{
+    color:#ff6b6b;
+}
+
+/* NOTIFICATIONS */
+
+.notifications{
+    padding:0 14px;
+}
 
 .notification{
+    position:relative;
 
-background:#111;
-padding:18px;
-border-radius:15px;
-margin-bottom:15px;
-border-left:4px solid #FFD600;
+    display:flex;
+    gap:12px;
 
+    padding:14px;
+
+    margin-bottom:10px;
+
+    background:var(--card);
+
+    border:1px solid #242424;
+    border-radius:17px;
+
+    transition:.2s ease;
 }
 
+.notification.unread{
+    border-color:rgba(255,229,0,.28);
+    background:#171700;
+}
+
+.notification:active{
+    transform:scale(.985);
+}
+
+.icon{
+    width:43px;
+    height:43px;
+    min-width:43px;
+
+    border-radius:14px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#242424;
+    color:var(--yellow);
+
+    font-size:16px;
+}
+
+.icon.ride{
+    color:var(--green);
+}
+
+.icon.warning{
+    color:#ffb020;
+}
+
+.icon.danger{
+    color:#ff6262;
+}
+
+.icon.wallet{
+    color:#60a5fa;
+}
+
+.content{
+    flex:1;
+    min-width:0;
+}
+
+.notification-title{
+    font-size:13px;
+    font-weight:800;
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.notification-body{
+    margin-top:5px;
+
+    color:#999;
+
+    font-size:11px;
+    line-height:1.5;
+
+    word-break:break-word;
+}
 
 .time{
+    margin-top:7px;
 
-font-size:12px;
-color:#aaa;
-margin-top:8px;
-
+    color:#666;
+    font-size:9px;
 }
 
+.dot{
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:var(--yellow);
+
+    display:none;
+}
+
+.unread .dot{
+    display:inline-block;
+}
+
+.delete-one{
+    width:30px;
+    height:30px;
+
+    border:0;
+    border-radius:50%;
+
+    background:#202020;
+    color:#666;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+}
+
+.delete-one:active{
+    background:#351414;
+    color:#ff6b6b;
+}
+
+/* EMPTY */
 
 .empty{
+    display:none;
 
-text-align:center;
-margin-top:50px;
-color:#aaa;
+    text-align:center;
 
+    padding:65px 20px;
 }
 
+.empty-icon{
+    width:75px;
+    height:75px;
 
-</style>
+    margin:0 auto 17px;
 
-</head>
+    border-radius:50%;
 
+    background:#151515;
+    color:#555;
 
-<body>
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
+    font-size:29px;
+}
 
+.empty h2{
+    font-size:17px;
+}
 
-<div class="header">
+.empty p{
+    margin-top:7px;
 
-🔔 Notifications
+    color:#777;
+    font-size:11px;
+}
+
+/* LOADING */
+
+.loading{
+    padding:60px 20px;
+    text-align:center;
+    color:#777;
+    font-size:12px;
+}
+
+.spinner{
+    width:28px;
+    height:28px;
+
+    margin:0 auto 12px;
+
+    border:3px solid #333;
+    border-top-color:var(--yellow);
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+
+    transform:translate(-50%,20px);
+
+    z-index:999;
+
+    width:max-content;
+    max-width:90%;
+
+    padding:12px 17px;
+
+    border-radius:13px;
+
+    background:#222;
+    color:#fff;
+
+    font-size:11px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:.25s ease;
+
+    box-shadow:0 8px 30px rgba(0,0,0,.45);
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+@media(max-width:380px){
+    .actions{
+        padding:12px 10px;
+    }
+
+    .notifications{
+        padding:0 10px;
+    }
+
+    .notification{
+        padding:12px;
+    }
+}
+</style></head><body><header class="header"><button
+    id="backButton"
+    class="back-btn"
+    type="button"
+    aria-label="Back">
+    <i class="fa-solid fa-arrow-left"></i>
+</button>
+
+<div class="header-title">
+    <h1>Notifications</h1>
+    <p id="notificationCount">No notifications</p>
+</div>
+
+<button
+    id="refreshButton"
+    class="header-icon"
+    type="button"
+    aria-label="Refresh">
+    <i class="fa-solid fa-rotate"></i>
+
+    <span
+        id="unreadBadge"
+        class="unread-badge">
+        0
+    </span>
+</button>
+
+</header><div class="actions"><button
+    id="markAllRead"
+    class="action-btn primary"
+    type="button">
+    <i class="fa-solid fa-check-double"></i>
+    Mark all read
+</button>
+
+<button
+    id="deleteAll"
+    class="action-btn danger"
+    type="button">
+    <i class="fa-solid fa-trash"></i>
+    Clear all
+</button>
+
+</div><main id="notifications" class="notifications"><div id="loading" class="loading">
+
+    <div class="spinner"></div>
+
+    Loading notifications...
 
 </div>
 
-
-
-
-<div class="container">
-
-
-<div id="list">
-
-Loading...
-
+</main><div id="empty" class="empty"><div class="empty-icon">
+    <i class="fa-regular fa-bell-slash"></i>
 </div>
 
+<h2>No notifications</h2>
 
-</div>
+<p>
+    New ride requests, ride updates and RiderX alerts
+    will appear here.
+</p>
 
-
-
-
-
-
-
-<script type="module">
-
-
-import {auth,db} from "../firebase/config.js";
-
+</div><div id="toast" class="toast"></div><script type="module">
 
 import {
-
-collection,
-query,
-where,
-getDocs,
-orderBy
-
-}
-
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
+    auth,
+    db
+} from "../firebase/config.js";
 
 import {
+    collection,
+    query,
+    where,
+    orderBy,
+    onSnapshot,
+    doc,
+    updateDoc,
+    deleteDoc,
+    writeBatch,
+    getDocs,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-onAuthStateChanged
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
+
+const notificationContainer =
+    document.getElementById("notifications");
+
+const loading =
+    document.getElementById("loading");
+
+const empty =
+    document.getElementById("empty");
+
+const countText =
+    document.getElementById("notificationCount");
+
+const badge =
+    document.getElementById("unreadBadge");
+
+const toast =
+    document.getElementById("toast");
+
+
+let currentUser = null;
+let unsubscribe = null;
+let notificationData = [];
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+function showToast(message){
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    clearTimeout(
+        window.riderXToastTimer
+    );
+
+    window.riderXToastTimer =
+        setTimeout(
+            ()=>{
+                toast.classList.remove("show");
+            },
+            2200
+        );
 }
 
-from
 
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+/* =========================================
+   BACK
+========================================= */
 
-
-
-
-
-
-
-
-onAuthStateChanged(auth,(user)=>{
-
-
-if(user){
-
-loadNotifications(user.uid);
-
-}
-
-else{
-
-location.href="../auth/login.html";
-
-}
-
-
-});
-
-
-
-
-
-
-
-
-async function loadNotifications(uid){
-
-
-
-let box=document.getElementById("list");
-
-
-
-const q=query(
-
-collection(db,"notifications"),
-
-where("userId","==",uid),
-
-orderBy("createdAt","desc")
-
+document
+.getElementById("backButton")
+.addEventListener(
+    "click",
+    ()=>{
+        if(history.length > 1){
+            history.back();
+        }else{
+            location.href="home.html";
+        }
+    }
 );
 
 
+/* =========================================
+   FORMAT TIME
+========================================= */
+
+function formatTime(timestamp){
+
+    if(!timestamp){
+        return "Just now";
+    }
+
+    let date;
+
+    try{
+        date =
+            timestamp.toDate
+            ? timestamp.toDate()
+            : new Date(timestamp);
+    }catch{
+        return "Just now";
+    }
+
+    const diff =
+        Date.now() - date.getTime();
+
+    if(diff < 60000){
+        return "Just now";
+    }
+
+    if(diff < 3600000){
+        return Math.floor(diff / 60000) + " min ago";
+    }
+
+    if(diff < 86400000){
+        return Math.floor(diff / 3600000) + " hr ago";
+    }
+
+    if(diff < 604800000){
+        return Math.floor(diff / 86400000) + " day ago";
+    }
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
+}
 
 
-try{
+/* =========================================
+   ICON
+========================================= */
+
+function getNotificationIcon(data){
+
+    const type =
+        String(
+            data.type ||
+            data.category ||
+            ""
+        ).toLowerCase();
+
+    if(
+        type.includes("ride") ||
+        type.includes("request")
+    ){
+        return {
+            icon:"fa-motorcycle",
+            className:"ride"
+        };
+    }
+
+    if(
+        type.includes("wallet") ||
+        type.includes("payment") ||
+        type.includes("earning")
+    ){
+        return {
+            icon:"fa-wallet",
+            className:"wallet"
+        };
+    }
+
+    if(
+        type.includes("warning") ||
+        type.includes("alert")
+    ){
+        return {
+            icon:"fa-triangle-exclamation",
+            className:"warning"
+        };
+    }
+
+    if(
+        type.includes("cancel") ||
+        type.includes("danger")
+    ){
+        return {
+            icon:"fa-circle-exclamation",
+            className:"danger"
+        };
+    }
+
+    return {
+        icon:"fa-bell",
+        className:""
+    };
+}
 
 
-let snap=await getDocs(q);
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
 
 
+/* =========================================
+   RENDER
+========================================= */
 
-box.innerHTML="";
+function renderNotifications(){
+
+    loading.style.display="none";
+
+    notificationContainer
+        .querySelectorAll(".notification")
+        .forEach(
+            el=>el.remove()
+        );
+
+    if(!notificationData.length){
+
+        empty.style.display="block";
+
+        countText.textContent =
+            "No notifications";
+
+        badge.style.display="none";
+
+        return;
+    }
+
+    empty.style.display="none";
 
 
+    const unread =
+        notificationData.filter(
+            item =>
+                item.read !== true &&
+                item.isRead !== true
+        ).length;
 
 
+    countText.textContent =
+        `${notificationData.length} notification${
+            notificationData.length === 1 ? "" : "s"
+        }`;
 
-if(snap.empty){
+
+    if(unread > 0){
+
+        badge.textContent =
+            unread > 99 ? "99+" : unread;
+
+        badge.style.display="flex";
+
+    }else{
+
+        badge.style.display="none";
+
+    }
 
 
-box.innerHTML=
+    notificationData.forEach(
+        item => {
 
-`
+            const data =
+                item.data;
 
-<div class="empty">
+            const icon =
+                getNotificationIcon(data);
 
-No notifications 🔔
 
-</div>
+            const title =
+                data.title ||
+                data.heading ||
+                "RiderX Notification";
 
-`;
 
-return;
+            const body =
+                data.body ||
+                data.message ||
+                data.description ||
+                "You have a new notification.";
 
+
+            const isUnread =
+                data.read !== true &&
+                data.isRead !== true;
+
+
+            const element =
+                document.createElement("article");
+
+
+            element.className =
+                "notification" +
+                (isUnread ? " unread" : "");
+
+
+            element.dataset.id =
+                item.id;
+
+
+            element.innerHTML = `
+
+                <div class="icon ${icon.className}">
+                    <i class="fa-solid ${icon.icon}"></i>
+                </div>
+
+                <div class="content">
+
+                    <div class="notification-title">
+
+                        ${escapeHTML(title)}
+
+                        <span class="dot"></span>
+
+                    </div>
+
+                    <div class="notification-body">
+                        ${escapeHTML(body)}
+                    </div>
+
+                    <div class="time">
+                        ${formatTime(data.createdAt)}
+                    </div>
+
+                </div>
+
+                <button
+                    class="delete-one"
+                    type="button"
+                    aria-label="Delete notification">
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            `;
+
+
+            element.addEventListener(
+                "click",
+                async(event)=>{
+
+                    if(
+                        event.target.closest(
+                            ".delete-one"
+                        )
+                    ){
+                        return;
+                    }
+
+                    await markAsRead(
+                        item.id
+                    );
+
+                    /*
+                     * If notification contains
+                     * rideId, open ride details.
+                     */
+
+                    if(data.rideId){
+
+                        try{
+
+                            sessionStorage.setItem(
+                                "riderx_selected_ride",
+                                data.rideId
+                            );
+
+                        }catch{}
+
+                    }
+
+                }
+            );
+
+
+            element
+            .querySelector(".delete-one")
+            .addEventListener(
+                "click",
+                async(event)=>{
+
+                    event.stopPropagation();
+
+                    await deleteNotification(
+                        item.id
+                    );
+
+                }
+            );
+
+
+            notificationContainer
+                .appendChild(element);
+
+        }
+    );
+}
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(!user){
+
+            if(unsubscribe){
+                unsubscribe();
+                unsubscribe=null;
+            }
+
+            location.href =
+                "../auth/login.html";
+
+            return;
+        }
+
+        currentUser =
+            user;
+
+        listenNotifications(
+            user.uid
+        );
+
+    }
+);
+
+
+/* =========================================
+   LISTEN
+========================================= */
+
+function listenNotifications(uid){
+
+    if(unsubscribe){
+        unsubscribe();
+    }
+
+    loading.style.display="block";
+
+    empty.style.display="none";
+
+
+    /*
+     * Primary query.
+     *
+     * If Firestore asks for an index,
+     * fallback query below will be used.
+     */
+
+    const notificationsRef =
+        collection(
+            db,
+            "notifications"
+        );
+
+
+    let q;
+
+    try{
+
+        q =
+            query(
+                notificationsRef,
+                where(
+                    "userId",
+                    "==",
+                    uid
+                ),
+                orderBy(
+                    "createdAt",
+                    "desc"
+                )
+            );
+
+    }catch{
+
+        q =
+            query(
+                notificationsRef,
+                where(
+                    "userId",
+                    "==",
+                    uid
+                )
+            );
+
+    }
+
+
+    unsubscribe =
+        onSnapshot(
+            q,
+            snapshot => {
+
+                notificationData =
+                    snapshot.docs
+                    .map(
+                        item => ({
+                            id:item.id,
+                            data:item.data()
+                        })
+                    );
+
+
+                notificationData.sort(
+                    (a,b)=>{
+
+                        const aTime =
+                            a.data.createdAt
+                            ?.toMillis?.() || 0;
+
+                        const bTime =
+                            b.data.createdAt
+                            ?.toMillis?.() || 0;
+
+                        return bTime-aTime;
+
+                    }
+                );
+
+
+                renderNotifications();
+
+            },
+            error => {
+
+                console.error(
+                    "Notification listener error:",
+                    error
+                );
+
+                loading.style.display="none";
+
+                showToast(
+                    "Unable to load notifications"
+                );
+
+            }
+        );
 
 }
 
 
+/* =========================================
+   MARK READ
+========================================= */
 
+async function markAsRead(id){
 
+    if(!currentUser){
+        return;
+    }
 
+    try{
 
+        await updateDoc(
+            doc(
+                db,
+                "notifications",
+                id
+            ),
+            {
+                read:true,
+                isRead:true,
+                readAt:serverTimestamp()
+            }
+        );
 
-snap.forEach((n)=>{
+    }catch(error){
 
+        console.error(
+            "Mark read error:",
+            error
+        );
 
-let data=n.data();
-
-
-
-box.innerHTML +=
-
-`
-
-<div class="notification">
-
-
-<h3>
-
-${data.title || "RiderX"}
-
-</h3>
-
-
-<p>
-
-${data.message || ""}
-
-</p>
-
-
-<div class="time">
-
-${
-
-data.createdAt ?
-
-new Date(
-data.createdAt.toDate()
-).toLocaleString()
-
-:
-
-""
-
-}
-
-</div>
-
-
-
-</div>
-
-`;
-
-
-
-});
-
-
-
-}
-
-catch(error){
-
-
-console.log(error);
-
-
-box.innerHTML=
-
-`
-
-<div class="empty">
-
-No notifications found
-
-</div>
-
-`;
-
-
+    }
 }
 
 
+/* =========================================
+   MARK ALL READ
+========================================= */
 
+document
+.getElementById("markAllRead")
+.addEventListener(
+    "click",
+    async()=>{
+
+        if(!currentUser){
+            return;
+        }
+
+        const unread =
+            notificationData.filter(
+                item =>
+                    item.data.read !== true &&
+                    item.data.isRead !== true
+            );
+
+
+        if(!unread.length){
+
+            showToast(
+                "All notifications are already read"
+            );
+
+            return;
+        }
+
+
+        try{
+
+            const batch =
+                writeBatch(db);
+
+
+            unread.forEach(
+                item=>{
+
+                    batch.update(
+                        doc(
+                            db,
+                            "notifications",
+                            item.id
+                        ),
+                        {
+                            read:true,
+                            isRead:true,
+                            readAt:
+                                serverTimestamp()
+                        }
+                    );
+
+                }
+            );
+
+
+            await batch.commit();
+
+            showToast(
+                "All notifications marked as read"
+            );
+
+        }catch(error){
+
+            console.error(
+                "Mark all read error:",
+                error
+            );
+
+            showToast(
+                "Unable to update notifications"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   DELETE ONE
+========================================= */
+
+async function deleteNotification(id){
+
+    try{
+
+        await deleteDoc(
+            doc(
+                db,
+                "notifications",
+                id
+            )
+        );
+
+        showToast(
+            "Notification deleted"
+        );
+
+    }catch(error){
+
+        console.error(
+            "Delete notification error:",
+            error
+        );
+
+        showToast(
+            "Unable to delete notification"
+        );
+
+    }
 }
 
 
+/* =========================================
+   DELETE ALL
+========================================= */
+
+document
+.getElementById("deleteAll")
+.addEventListener(
+    "click",
+    async()=>{
+
+        if(!currentUser){
+            return;
+        }
+
+        if(!notificationData.length){
+
+            showToast(
+                "No notifications to clear"
+            );
+
+            return;
+        }
 
 
+        const confirmed =
+            confirm(
+                "Clear all notifications?"
+            );
 
-</script>
+
+        if(!confirmed){
+            return;
+        }
 
 
-</body>
+        try{
 
+            const batch =
+                writeBatch(db);
+
+
+            notificationData.forEach(
+                item=>{
+
+                    batch.delete(
+                        doc(
+                            db,
+                            "notifications",
+                            item.id
+                        )
+                    );
+
+                }
+            );
+
+
+            await batch.commit();
+
+            showToast(
+                "All notifications cleared"
+            );
+
+        }catch(error){
+
+            console.error(
+                "Delete all error:",
+                error
+            );
+
+            showToast(
+                "Unable to clear notifications"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   REFRESH
+========================================= */
+
+document
+.getElementById("refreshButton")
+.addEventListener(
+    "click",
+    ()=>{
+
+        const button =
+            document.getElementById(
+                "refreshButton"
+            );
+
+        button
+            .querySelector("i")
+            .classList.add("fa-spin");
+
+
+        setTimeout(
+            ()=>{
+
+                button
+                    .querySelector("i")
+                    .classList.remove("fa-spin");
+
+                if(currentUser){
+
+                    listenNotifications(
+                        currentUser.uid
+                    );
+
+                }
+
+            },
+            500
+        );
+
+    }
+);
+
+</script></body>
 </html>
