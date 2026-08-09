@@ -34,9 +34,9 @@
 
         html,
         body {
-            margin: 0;
             width: 100%;
             min-height: 100%;
+            margin: 0;
         }
 
         body {
@@ -63,9 +63,35 @@
                 max(18px, env(safe-area-inset-right))
                 max(18px, env(safe-area-inset-bottom))
                 max(18px, env(safe-area-inset-left));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page::before {
+            content: "";
+            position: absolute;
+            width: 420px;
+            height: 420px;
+            top: -270px;
+            right: -170px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, .08);
+        }
+
+        .page::after {
+            content: "";
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            bottom: -240px;
+            left: -180px;
+            border-radius: 50%;
+            background: rgba(255, 212, 0, .05);
         }
 
         .card {
+            position: relative;
+            z-index: 2;
             width: 100%;
             max-width: 430px;
             padding: 30px 23px 22px;
@@ -119,7 +145,7 @@
         .heading p {
             margin: 7px 0 0;
             color: #777777;
-            font-size: 10px;
+            font-size: 9px;
             line-height: 1.6;
         }
 
@@ -223,8 +249,8 @@
 
         .options {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
             margin: 14px 0 18px;
         }
@@ -242,8 +268,8 @@
         }
 
         .forgot {
-            padding: 0;
             border: 0;
+            padding: 0;
             background: transparent;
             color: #ffd400;
             cursor: pointer;
@@ -309,7 +335,8 @@
             font-size: 9px;
         }
 
-        .register button {
+        .register button,
+        .rider-link button {
             border: 0;
             padding: 0;
             background: transparent;
@@ -319,36 +346,17 @@
         }
 
         .rider-link {
-            margin-top: 15px;
+            margin-top: 14px;
             text-align: center;
         }
 
         .rider-link button {
-            border: 0;
-            background: transparent;
             color: #888888;
-            cursor: pointer;
             font-size: 9px;
         }
 
         .rider-link button:hover {
             color: #ffd400;
-        }
-
-        .security {
-            margin-top: 17px;
-            padding: 10px;
-            border: 1px solid #252525;
-            border-radius: 9px;
-            background: #151515;
-            color: #666666;
-            font-size: 8px;
-            line-height: 1.5;
-            text-align: center;
-        }
-
-        .security strong {
-            color: #aaaaaa;
         }
 
         .footer {
@@ -406,7 +414,7 @@
             </h1>
 
             <p>
-                Move smarter. Ride better.
+                Your ride. Your way.
             </p>
 
         </div>
@@ -419,8 +427,8 @@
             </h2>
 
             <p>
-                Login to book rides, track your rider,
-                manage payments and view your ride history.
+                Login to book rides, track your driver,
+                manage payments and view your trips.
             </p>
 
             <div class="badge">
@@ -545,19 +553,19 @@
             class="secondary"
             id="otpButton"
         >
-            Continue with Mobile OTP
+            Login with Mobile / OTP
         </button>
 
 
         <div class="register">
 
-            New to RiderX?
+            Don't have an account?
 
             <button
                 type="button"
                 id="registerButton"
             >
-                Create customer account
+                Create Account
             </button>
 
         </div>
@@ -569,18 +577,8 @@
                 type="button"
                 id="riderLoginButton"
             >
-                Are you a Rider? Login as Rider →
+                Are you a Rider? Login to Driver Partner →
             </button>
-
-        </div>
-
-
-        <div class="security">
-
-            <strong>Secure Login</strong><br>
-
-            RiderX uses Firebase Authentication to
-            securely protect your account.
 
         </div>
 
@@ -606,7 +604,6 @@
 
         signInWithEmailAndPassword,
         sendPasswordResetEmail,
-        signOut,
 
         doc,
         getDoc
@@ -644,6 +641,12 @@
         );
 
 
+    const togglePassword =
+        document.getElementById(
+            "togglePassword"
+        );
+
+
     const forgotPassword =
         document.getElementById(
             "forgotPassword"
@@ -668,12 +671,6 @@
         );
 
 
-    const togglePassword =
-        document.getElementById(
-            "togglePassword"
-        );
-
-
     const errorBox =
         document.getElementById(
             "errorBox"
@@ -690,29 +687,29 @@
         false;
 
 
-    const rememberedEmail =
+    localStorage.setItem(
+        "riderx_selected_role",
+        "customer"
+    );
+
+
+    const savedEmail =
         localStorage.getItem(
             "riderx_customer_email"
         );
 
 
     if (
-        rememberedEmail
+        savedEmail
     ) {
 
         emailInput.value =
-            rememberedEmail;
+            savedEmail;
 
         rememberInput.checked =
             true;
 
     }
-
-
-    localStorage.setItem(
-        "riderx_selected_role",
-        "customer"
-    );
 
 
     togglePassword.addEventListener(
@@ -821,7 +818,7 @@
                 true;
 
 
-            setButtonLoading(
+            setLoading(
                 true
             );
 
@@ -853,8 +850,7 @@
 
                 const profile =
                     await findCustomerProfile(
-                        firebaseUser.uid,
-                        firebaseUser
+                        firebaseUser.uid
                     );
 
 
@@ -862,15 +858,9 @@
                     !profile
                 ) {
 
-                    await signOut(
-                        auth
-                    );
-
-
                     showError(
-                        "This account is not registered as a RiderX customer."
+                        "This account does not have a RiderX Customer profile. Please use the correct account or create a Customer account."
                     );
-
 
                     return;
 
@@ -891,43 +881,43 @@
                     "customer"
                 ) {
 
-                    await signOut(
-                        auth
-                    );
-
-
                     showError(
-                        "This is a RiderX Rider account. Please use Rider Login."
+                        "This is not a Customer account. Please use Rider Login if this is a Rider account."
                     );
-
 
                     return;
 
                 }
+
+
+                const status =
+                    String(
+                        profile.status ||
+                        profile.accountStatus ||
+                        "active"
+                    )
+                        .trim()
+                        .toLowerCase();
 
 
                 if (
-                    isBlocked(
-                        profile
-                    )
+                    profile.blocked === true ||
+                    profile.disabled === true ||
+                    status === "blocked" ||
+                    status === "disabled" ||
+                    status === "suspended"
                 ) {
 
-                    await signOut(
-                        auth
-                    );
-
-
                     showError(
-                        "Your RiderX customer account is currently disabled or blocked. Please contact support."
+                        "Your RiderX Customer account is currently blocked or suspended. Please contact support."
                     );
-
 
                     return;
 
                 }
 
 
-                await createCustomerSession(
+                createCustomerSession(
                     firebaseUser,
                     profile
                 );
@@ -984,13 +974,14 @@
                     )
                 );
 
+
             } finally {
 
                 busy =
                     false;
 
 
-                setButtonLoading(
+                setLoading(
                     false
                 );
 
@@ -1001,21 +992,16 @@
 
 
     async function findCustomerProfile(
-        uid,
-        firebaseUser
+        uid
     ) {
-
-        const userRef =
-            doc(
-                db,
-                "users",
-                uid
-            );
-
 
         const userSnapshot =
             await getDoc(
-                userRef
+                doc(
+                    db,
+                    "users",
+                    uid
+                )
             );
 
 
@@ -1025,6 +1011,48 @@
 
             const data =
                 userSnapshot.data();
+
+
+            const role =
+                normalizeRole(
+                    data.role ||
+                    data.userRole ||
+                    data.accountType ||
+                    ""
+                );
+
+
+            if (
+                role ===
+                "customer"
+            ) {
+
+                return data;
+
+            }
+
+
+            return null;
+
+        }
+
+
+        const customerSnapshot =
+            await getDoc(
+                doc(
+                    db,
+                    "customers",
+                    uid
+                )
+            );
+
+
+        if (
+            customerSnapshot.exists()
+        ) {
+
+            const data =
+                customerSnapshot.data();
 
 
             const role =
@@ -1045,51 +1073,6 @@
 
             }
 
-
-            return {
-                ...data,
-                role:
-                    role
-            };
-
-        }
-
-
-        const customerRef =
-            doc(
-                db,
-                "customers",
-                uid
-            );
-
-
-        const customerSnapshot =
-            await getDoc(
-                customerRef
-            );
-
-
-        if (
-            customerSnapshot.exists()
-        ) {
-
-            return customerSnapshot.data();
-
-        }
-
-
-        /*
-         * Existing RiderX projects may have stored
-         * customer data under a different profile path.
-         * We intentionally do NOT create a profile here.
-         */
-
-        if (
-            firebaseUser?.email
-        ) {
-
-            return null;
-
         }
 
 
@@ -1098,7 +1081,7 @@
     }
 
 
-    async function createCustomerSession(
+    function createCustomerSession(
         firebaseUser,
         profile
     ) {
@@ -1139,6 +1122,14 @@
                 firebaseUser.displayName ||
                 "",
 
+            firstName:
+                profile.firstName ||
+                "",
+
+            lastName:
+                profile.lastName ||
+                "",
+
             email:
                 profile.email ||
                 firebaseUser.email ||
@@ -1171,12 +1162,6 @@
                     5
                 ),
 
-            walletBalance:
-                Number(
-                    profile.walletBalance ||
-                    0
-                ),
-
             totalRides:
                 Number(
                     profile.totalRides ||
@@ -1189,12 +1174,29 @@
                     0
                 ),
 
+            cancelledRides:
+                Number(
+                    profile.cancelledRides ||
+                    0
+                ),
+
+            walletBalance:
+                Number(
+                    profile.walletBalance ||
+                    0
+                ),
+
+            referralCode:
+                profile.referralCode ||
+                "",
+
             currentRideId:
                 profile.currentRideId ||
                 null,
 
             status:
                 profile.status ||
+                profile.accountStatus ||
                 "active",
 
             loginMethod:
@@ -1262,7 +1264,9 @@
 
         if (
             value === "rider" ||
-            value === "driver"
+            value === "driver" ||
+            value === "captain" ||
+            value === "partner"
         ) {
 
             return "rider";
@@ -1281,31 +1285,6 @@
 
 
         return "customer";
-
-    }
-
-
-    function isBlocked(
-        profile
-    ) {
-
-        const status =
-            String(
-                profile.status ||
-                profile.accountStatus ||
-                ""
-            )
-                .trim()
-                .toLowerCase();
-
-
-        return (
-            profile.disabled === true ||
-            profile.blocked === true ||
-            status === "blocked" ||
-            status === "disabled" ||
-            status === "suspended"
-        );
 
     }
 
@@ -1382,7 +1361,7 @@
     }
 
 
-    function setButtonLoading(
+    function setLoading(
         value
     ) {
 
@@ -1405,57 +1384,6 @@
         }
 
     }
-
-
-    otpButton.addEventListener(
-        "click",
-        function () {
-
-            localStorage.setItem(
-                "riderx_selected_role",
-                "customer"
-            );
-
-
-            window.location.href =
-                "./otp-login.html";
-
-        }
-    );
-
-
-    registerButton.addEventListener(
-        "click",
-        function () {
-
-            localStorage.setItem(
-                "riderx_selected_role",
-                "customer"
-            );
-
-
-            window.location.href =
-                "./register.html";
-
-        }
-    );
-
-
-    riderLoginButton.addEventListener(
-        "click",
-        function () {
-
-            localStorage.setItem(
-                "riderx_selected_role",
-                "rider"
-            );
-
-
-            window.location.href =
-                "./rider-login.html";
-
-        }
-    );
 
 
     forgotPassword.addEventListener(
@@ -1546,6 +1474,57 @@
     );
 
 
+    otpButton.addEventListener(
+        "click",
+        function () {
+
+            localStorage.setItem(
+                "riderx_selected_role",
+                "customer"
+            );
+
+
+            window.location.href =
+                "./otp-login.html";
+
+        }
+    );
+
+
+    registerButton.addEventListener(
+        "click",
+        function () {
+
+            localStorage.setItem(
+                "riderx_selected_role",
+                "customer"
+            );
+
+
+            window.location.href =
+                "./register.html";
+
+        }
+    );
+
+
+    riderLoginButton.addEventListener(
+        "click",
+        function () {
+
+            localStorage.setItem(
+                "riderx_selected_role",
+                "rider"
+            );
+
+
+            window.location.href =
+                "./rider-login.html";
+
+        }
+    );
+
+
     function firebaseMessage(
         error
     ) {
@@ -1584,12 +1563,12 @@
 
             case "auth/user-disabled":
 
-                return "This account has been disabled.";
+                return "This Firebase account has been disabled.";
 
 
             case "auth/too-many-requests":
 
-                return "Too many attempts. Please wait and try again later.";
+                return "Too many login attempts. Please wait and try again later.";
 
 
             case "auth/network-request-failed":
@@ -1599,14 +1578,35 @@
 
             case "auth/operation-not-allowed":
 
-                return "Email/password login is not enabled in Firebase.";
+                return "Email/password authentication is not enabled in Firebase.";
+
+
+            case "permission-denied":
+
+                return "Firebase permission denied. Check your Firestore security rules.";
 
 
             default:
 
+                if (
+                    String(
+                        error?.message ||
+                        ""
+                    )
+                        .toLowerCase()
+                        .includes(
+                            "permission"
+                        )
+                ) {
+
+                    return "Firebase permission denied. Check your Firestore security rules.";
+
+                }
+
+
                 return (
                     error?.message ||
-                    "Login failed. Please try again."
+                    "Customer login failed. Please try again."
                 );
 
         }
