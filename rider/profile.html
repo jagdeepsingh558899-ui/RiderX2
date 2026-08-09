@@ -1,1371 +1,1738 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-  <meta name="theme-color" content="#FFD000">
-  <title>RiderX - Rider Profile</title>
 
-  <link rel="stylesheet" href="../css/Style.css">
-  <link rel="stylesheet" href="../css/Responsive.css">
+<meta charset="UTF-8">
 
-  <style>
-    :root{
-      --yellow:#FFD000;
-      --yellow-dark:#e6b900;
-      --black:#080808;
-      --card:#151515;
-      --card2:#1d1d1d;
-      --text:#fff;
-      --muted:#a9a9a9;
-      --border:rgba(255,255,255,.09);
-      --green:#22c55e;
-      --red:#ef4444;
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>RiderX • Rider Profile</title>
+
+<meta name="theme-color" content="#050505">
+
+<style>
+
+:root{
+    --yellow:#FFE500;
+    --black:#050505;
+    --card:#111111;
+    --card2:#181818;
+    --border:#292929;
+    --muted:#888;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Inter,Arial,Helvetica,sans-serif;
+}
+
+html,
+body{
+    min-height:100%;
+    background:var(--black);
+    color:#fff;
+}
+
+body{
+    padding-bottom:30px;
+}
+
+/* HEADER */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+
+    height:65px;
+
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    padding:0 15px;
+
+    background:rgba(5,5,5,.94);
+    backdrop-filter:blur(16px);
+
+    border-bottom:1px solid var(--border);
+}
+
+.back{
+    width:41px;
+    height:41px;
+
+    border-radius:13px;
+
+    border:1px solid #303030;
+    background:#151515;
+
+    color:#fff;
+
+    font-size:21px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.header-title{
+    flex:1;
+}
+
+.header-title h1{
+    font-size:18px;
+    font-weight:1000;
+}
+
+.header-title p{
+    margin-top:2px;
+    color:#777;
+    font-size:10px;
+}
+
+.settings{
+    width:41px;
+    height:41px;
+
+    border-radius:13px;
+
+    border:1px solid #303030;
+    background:#151515;
+
+    color:#fff;
+
+    font-size:17px;
+}
+
+/* PAGE */
+
+.container{
+    width:100%;
+    max-width:620px;
+    margin:auto;
+    padding:14px;
+}
+
+/* PROFILE HERO */
+
+.profile-card{
+    position:relative;
+
+    padding:20px;
+
+    border-radius:23px;
+
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(255,229,0,.16),
+            transparent 42%
+        ),
+        linear-gradient(
+            135deg,
+            #161616,
+            #0d0d0d
+        );
+
+    border:1px solid #302f12;
+
+    overflow:hidden;
+}
+
+.profile-top{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.avatar{
+    position:relative;
+
+    width:72px;
+    height:72px;
+
+    flex:none;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #292929,
+            #151515
+        );
+
+    border:1px solid #3a3a3a;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:27px;
+    font-weight:1000;
+
+    overflow:hidden;
+}
+
+.avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:none;
+}
+
+.online-dot{
+    position:absolute;
+
+    right:3px;
+    bottom:3px;
+
+    width:15px;
+    height:15px;
+
+    border-radius:50%;
+
+    background:var(--green);
+
+    border:3px solid #151515;
+}
+
+.profile-info{
+    flex:1;
+    min-width:0;
+}
+
+.profile-name{
+    font-size:19px;
+    font-weight:1000;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.profile-phone{
+    margin-top:4px;
+
+    color:#888;
+
+    font-size:10px;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.verified{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+
+    margin-top:7px;
+
+    color:var(--green);
+
+    font-size:9px;
+    font-weight:900;
+}
+
+.edit-btn{
+    margin-top:18px;
+
+    width:100%;
+    height:45px;
+
+    border-radius:13px;
+
+    border:1px solid #3c3800;
+
+    background:#201e00;
+
+    color:var(--yellow);
+
+    font-size:11px;
+    font-weight:900;
+}
+
+/* STATS */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+
+    margin-top:12px;
+}
+
+.stat{
+    padding:14px 8px;
+
+    border-radius:16px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    text-align:center;
+}
+
+.stat-value{
+    font-size:17px;
+    font-weight:1000;
+}
+
+.stat-value.yellow{
+    color:var(--yellow);
+}
+
+.stat-label{
+    margin-top:5px;
+
+    color:#777;
+
+    font-size:8px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.5px;
+}
+
+/* ONLINE */
+
+.online-card{
+    margin-top:12px;
+
+    padding:15px 16px;
+
+    border-radius:18px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.online-icon{
+    width:42px;
+    height:42px;
+
+    border-radius:13px;
+
+    background:#092010;
+
+    color:var(--green);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:18px;
+}
+
+.online-info{
+    flex:1;
+}
+
+.online-title{
+    font-size:12px;
+    font-weight:900;
+}
+
+.online-sub{
+    margin-top:4px;
+
+    color:#777;
+
+    font-size:9px;
+}
+
+.toggle{
+    width:48px;
+    height:27px;
+
+    border-radius:999px;
+
+    padding:3px;
+
+    background:#333;
+
+    border:none;
+}
+
+.toggle span{
+    display:block;
+
+    width:21px;
+    height:21px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    transition:.2s;
+}
+
+.toggle.active{
+    background:var(--yellow);
+}
+
+.toggle.active span{
+    transform:translateX(21px);
+
+    background:#000;
+}
+
+/* SECTION */
+
+.section-title{
+    margin:20px 2px 10px;
+
+    color:#777;
+
+    font-size:10px;
+
+    font-weight:900;
+
+    text-transform:uppercase;
+
+    letter-spacing:.8px;
+}
+
+/* MENU */
+
+.menu{
+    border-radius:19px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+
+    overflow:hidden;
+}
+
+.menu-item{
+    width:100%;
+
+    min-height:62px;
+
+    padding:10px 15px;
+
+    display:flex;
+    align-items:center;
+
+    gap:12px;
+
+    background:none;
+
+    border:0;
+
+    border-bottom:1px solid #242424;
+
+    color:#fff;
+
+    text-align:left;
+}
+
+.menu-item:last-child{
+    border-bottom:0;
+}
+
+.menu-icon{
+    width:37px;
+    height:37px;
+
+    flex:none;
+
+    border-radius:12px;
+
+    background:#1b1b1b;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:16px;
+}
+
+.menu-content{
+    flex:1;
+}
+
+.menu-title{
+    font-size:11px;
+    font-weight:900;
+}
+
+.menu-sub{
+    margin-top:3px;
+
+    color:#777;
+
+    font-size:9px;
+}
+
+.menu-arrow{
+    color:#666;
+    font-size:16px;
+}
+
+/* VEHICLE */
+
+.vehicle{
+    padding:16px;
+
+    border-radius:19px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+}
+
+.vehicle-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.vehicle-icon{
+    width:48px;
+    height:48px;
+
+    border-radius:15px;
+
+    background:#211f00;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:var(--yellow);
+
+    font-size:22px;
+}
+
+.vehicle-info{
+    flex:1;
+}
+
+.vehicle-name{
+    font-size:13px;
+    font-weight:1000;
+}
+
+.vehicle-number{
+    margin-top:4px;
+
+    color:#888;
+
+    font-size:10px;
+}
+
+.vehicle-status{
+    padding:6px 9px;
+
+    border-radius:999px;
+
+    background:#08200f;
+
+    border:1px solid #14532d;
+
+    color:var(--green);
+
+    font-size:8px;
+
+    font-weight:900;
+}
+
+/* LOGOUT */
+
+.logout{
+    width:100%;
+    height:50px;
+
+    margin-top:18px;
+
+    border-radius:15px;
+
+    background:#1d0b0b;
+
+    border:1px solid #4b1919;
+
+    color:#ff7777;
+
+    font-size:12px;
+
+    font-weight:900;
+}
+
+/* FOOTER */
+
+.footer{
+    padding:20px 5px 5px;
+
+    text-align:center;
+
+    color:#555;
+
+    font-size:9px;
+}
+
+/* LOADING */
+
+.loading{
+    padding:70px 20px;
+
+    text-align:center;
+
+    color:#777;
+}
+
+.loader{
+    width:34px;
+    height:34px;
+
+    margin:0 auto 15px;
+
+    border-radius:50%;
+
+    border:3px solid #292929;
+    border-top-color:var(--yellow);
+
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:25px;
+
+    transform:translate(-50%,20px);
+
+    max-width:90%;
+
+    padding:11px 14px;
+
+    border-radius:13px;
+
+    background:#222;
+
+    border:1px solid #3b3b3b;
+
+    font-size:11px;
+    font-weight:700;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.25s;
+
+    z-index:100;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+@media(max-width:370px){
+
+    .container{
+        padding:10px;
     }
 
-    *{
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    html,body{
-      margin:0;
-      padding:0;
-      width:100%;
-      min-height:100%;
-      background:var(--black);
-      color:var(--text);
-      font-family:Arial,Helvetica,sans-serif;
-    }
-
-    body{
-      overflow-x:hidden;
-      padding-bottom:85px;
-    }
-
-    button,input,select{
-      font:inherit;
-    }
-
-    button{
-      border:0;
-      cursor:pointer;
-    }
-
-    .page{
-      width:100%;
-      max-width:600px;
-      margin:auto;
-      min-height:100vh;
-      background:#080808;
-    }
-
-    /* HEADER */
-    .header{
-      position:sticky;
-      top:0;
-      z-index:50;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:15px 16px;
-      background:rgba(8,8,8,.95);
-      border-bottom:1px solid var(--border);
-      backdrop-filter:blur(12px);
-    }
-
-    .header-left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-
-    .back-btn{
-      width:42px;
-      height:42px;
-      border-radius:13px;
-      background:#191919;
-      color:#fff;
-      font-size:22px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-
-    .back-btn:active{
-      transform:scale(.95);
-    }
-
-    .header-title{
-      font-size:20px;
-      font-weight:800;
-    }
-
-    .notification-btn{
-      position:relative;
-      width:42px;
-      height:42px;
-      border-radius:13px;
-      background:#191919;
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:20px;
-    }
-
-    .notification-dot{
-      position:absolute;
-      top:8px;
-      right:8px;
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:var(--yellow);
-      border:2px solid #191919;
-    }
-
-    /* PROFILE HERO */
-    .profile-hero{
-      padding:26px 18px 20px;
-      text-align:center;
-    }
-
-    .avatar-wrap{
-      position:relative;
-      width:105px;
-      height:105px;
-      margin:0 auto 14px;
-    }
-
-    .avatar{
-      width:105px;
-      height:105px;
-      border-radius:50%;
-      background:linear-gradient(145deg,#252525,#101010);
-      border:3px solid var(--yellow);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      box-shadow:0 0 0 5px rgba(255,208,0,.08);
-    }
-
-    .avatar img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:none;
-    }
-
-    .avatar-letter{
-      font-size:42px;
-      font-weight:900;
-      color:var(--yellow);
-    }
-
-    .camera-btn{
-      position:absolute;
-      right:-2px;
-      bottom:0;
-      width:34px;
-      height:34px;
-      border-radius:50%;
-      background:var(--yellow);
-      color:#000;
-      border:3px solid #080808;
-      font-size:15px;
+    .profile-card{
+        padding:16px;
     }
 
     .profile-name{
-      margin:0;
-      font-size:24px;
-      font-weight:900;
+        font-size:17px;
     }
 
-    .profile-phone{
-      margin:6px 0 0;
-      color:var(--muted);
-      font-size:14px;
-    }
+}
 
-    .online-status{
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      margin-top:12px;
-      padding:7px 12px;
-      border-radius:20px;
-      background:rgba(34,197,94,.10);
-      color:#54e37d;
-      font-size:12px;
-      font-weight:700;
-    }
+</style>
 
-    .online-status span{
-      width:8px;
-      height:8px;
-      background:var(--green);
-      border-radius:50%;
-    }
-
-    /* STATS */
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:9px;
-      padding:0 15px 18px;
-    }
-
-    .stat{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:15px;
-      padding:15px 7px;
-      text-align:center;
-    }
-
-    .stat-value{
-      font-size:18px;
-      font-weight:900;
-    }
-
-    .stat-label{
-      color:var(--muted);
-      font-size:11px;
-      margin-top:5px;
-    }
-
-    /* SECTION */
-    .section{
-      padding:0 15px;
-      margin-bottom:18px;
-    }
-
-    .section-title{
-      font-size:15px;
-      font-weight:800;
-      margin:0 0 9px 4px;
-    }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:17px;
-      overflow:hidden;
-    }
-
-    .menu-item{
-      width:100%;
-      min-height:60px;
-      padding:12px 15px;
-      background:transparent;
-      color:#fff;
-      display:flex;
-      align-items:center;
-      gap:13px;
-      text-align:left;
-      border-bottom:1px solid var(--border);
-    }
-
-    .menu-item:last-child{
-      border-bottom:0;
-    }
-
-    .menu-item:active{
-      background:#202020;
-    }
-
-    .menu-icon{
-      width:39px;
-      height:39px;
-      flex:0 0 39px;
-      border-radius:12px;
-      background:#222;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:18px;
-    }
-
-    .menu-content{
-      min-width:0;
-      flex:1;
-    }
-
-    .menu-title{
-      font-size:14px;
-      font-weight:800;
-    }
-
-    .menu-subtitle{
-      margin-top:3px;
-      color:var(--muted);
-      font-size:11px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .arrow{
-      color:#777;
-      font-size:20px;
-    }
-
-    .danger .menu-title{
-      color:#ff6262;
-    }
-
-    /* VEHICLE */
-    .vehicle-card{
-      padding:15px;
-    }
-
-    .vehicle-top{
-      display:flex;
-      align-items:center;
-      gap:13px;
-      margin-bottom:15px;
-    }
-
-    .vehicle-icon{
-      width:52px;
-      height:52px;
-      border-radius:15px;
-      background:rgba(255,208,0,.12);
-      color:var(--yellow);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:25px;
-    }
-
-    .vehicle-name{
-      font-weight:900;
-      font-size:16px;
-    }
-
-    .vehicle-number{
-      color:var(--muted);
-      font-size:12px;
-      margin-top:4px;
-    }
-
-    .vehicle-grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:9px;
-    }
-
-    .vehicle-info{
-      background:#1d1d1d;
-      border-radius:12px;
-      padding:11px;
-    }
-
-    .vehicle-info-label{
-      color:#888;
-      font-size:10px;
-    }
-
-    .vehicle-info-value{
-      margin-top:4px;
-      font-size:13px;
-      font-weight:700;
-    }
-
-    /* LOGOUT */
-    .logout{
-      margin:0 15px 25px;
-      width:calc(100% - 30px);
-      min-height:52px;
-      border-radius:15px;
-      background:#241313;
-      color:#ff6262;
-      border:1px solid rgba(255,80,80,.15);
-      font-weight:800;
-    }
-
-    .logout:active{
-      transform:scale(.98);
-    }
-
-    /* BOTTOM NAV */
-    .bottom-nav{
-      position:fixed;
-      z-index:100;
-      left:50%;
-      bottom:0;
-      transform:translateX(-50%);
-      width:100%;
-      max-width:600px;
-      height:72px;
-      padding:8px 8px calc(8px + env(safe-area-inset-bottom));
-      background:rgba(12,12,12,.97);
-      border-top:1px solid var(--border);
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      backdrop-filter:blur(15px);
-    }
-
-    .nav-item{
-      background:transparent;
-      color:#777;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-      border-radius:13px;
-      font-size:10px;
-      font-weight:700;
-    }
-
-    .nav-item .nav-icon{
-      font-size:19px;
-    }
-
-    .nav-item.active{
-      color:var(--yellow);
-      background:rgba(255,208,0,.07);
-    }
-
-    /* MODAL */
-    .modal{
-      position:fixed;
-      inset:0;
-      z-index:200;
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      background:rgba(0,0,0,.72);
-    }
-
-    .modal.show{
-      display:flex;
-    }
-
-    .modal-box{
-      width:100%;
-      max-width:600px;
-      max-height:92vh;
-      overflow-y:auto;
-      background:#111;
-      border-radius:24px 24px 0 0;
-      padding:20px 16px 30px;
-      animation:slideUp .25s ease;
-    }
-
-    @keyframes slideUp{
-      from{
-        transform:translateY(100%);
-      }
-      to{
-        transform:translateY(0);
-      }
-    }
-
-    .modal-handle{
-      width:42px;
-      height:4px;
-      background:#444;
-      border-radius:10px;
-      margin:0 auto 18px;
-    }
-
-    .modal-title{
-      font-size:20px;
-      font-weight:900;
-      margin-bottom:18px;
-    }
-
-    .form-group{
-      margin-bottom:14px;
-    }
-
-    .form-label{
-      display:block;
-      color:#aaa;
-      font-size:12px;
-      font-weight:700;
-      margin:0 0 7px 2px;
-    }
-
-    .input{
-      width:100%;
-      height:50px;
-      padding:0 14px;
-      border:1px solid #303030;
-      border-radius:13px;
-      background:#1a1a1a;
-      color:#fff;
-      outline:none;
-    }
-
-    .input:focus{
-      border-color:var(--yellow);
-    }
-
-    .modal-actions{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-      margin-top:18px;
-    }
-
-    .btn{
-      min-height:50px;
-      border-radius:13px;
-      font-weight:800;
-    }
-
-    .btn-cancel{
-      background:#252525;
-      color:#fff;
-    }
-
-    .btn-save{
-      background:var(--yellow);
-      color:#000;
-    }
-
-    /* TOAST */
-    .toast{
-      position:fixed;
-      z-index:500;
-      left:50%;
-      bottom:88px;
-      transform:translate(-50%,20px);
-      width:calc(100% - 35px);
-      max-width:480px;
-      padding:13px 16px;
-      background:#252525;
-      border:1px solid #383838;
-      border-radius:13px;
-      text-align:center;
-      font-size:13px;
-      font-weight:700;
-      opacity:0;
-      pointer-events:none;
-      transition:.25s;
-    }
-
-    .toast.show{
-      opacity:1;
-      transform:translate(-50%,0);
-    }
-
-    .hidden-file{
-      display:none;
-    }
-
-    @media(min-width:601px){
-      .bottom-nav{
-        border-left:1px solid var(--border);
-        border-right:1px solid var(--border);
-      }
-    }
-  </style>
 </head>
+
 
 <body>
 
-<div class="page">
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-left">
-      <button class="back-btn" id="backBtn" aria-label="Back">‹</button>
-      <div class="header-title">My Profile</div>
-    </div>
+<header class="header">
 
-    <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
-      🔔
-      <span class="notification-dot"></span>
+    <button
+        class="back"
+        id="backBtn"
+        type="button"
+    >
+        ‹
     </button>
-  </header>
 
-  <!-- PROFILE -->
-  <section class="profile-hero">
 
-    <div class="avatar-wrap">
-      <div class="avatar">
-        <img id="profileImage" alt="Profile">
-        <span class="avatar-letter" id="avatarLetter">R</span>
-      </div>
+    <div class="header-title">
 
-      <button class="camera-btn" id="cameraBtn" aria-label="Change photo">📷</button>
-      <input type="file" id="photoInput" class="hidden-file" accept="image/*">
-    </div>
+        <h1>
+            My Profile
+        </h1>
 
-    <h1 class="profile-name" id="profileName">Rider</h1>
-    <p class="profile-phone" id="profilePhone">Loading...</p>
-
-    <div class="online-status">
-      <span></span>
-      Rider Account Active
-    </div>
-  </section>
-
-  <!-- STATS -->
-  <section class="stats">
-    <div class="stat">
-      <div class="stat-value" id="ridesCount">0</div>
-      <div class="stat-label">Total Rides</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-value" id="ratingValue">5.0</div>
-      <div class="stat-label">Rating</div>
-    </div>
-
-    <div class="stat">
-      <div class="stat-value" id="earningsValue">₹0</div>
-      <div class="stat-label">Earnings</div>
-    </div>
-  </section>
-
-  <!-- ACCOUNT -->
-  <section class="section">
-    <h2 class="section-title">Account</h2>
-
-    <div class="card">
-
-      <button class="menu-item" id="editProfileBtn">
-        <div class="menu-icon">👤</div>
-        <div class="menu-content">
-          <div class="menu-title">Edit Profile</div>
-          <div class="menu-subtitle">Update your personal information</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
-
-      <button class="menu-item" id="vehicleBtn">
-        <div class="menu-icon">🏍️</div>
-        <div class="menu-content">
-          <div class="menu-title">Vehicle Details</div>
-          <div class="menu-subtitle" id="vehicleSummary">Add your vehicle information</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
-
-      <button class="menu-item" id="documentsBtn">
-        <div class="menu-icon">📄</div>
-        <div class="menu-content">
-          <div class="menu-title">Documents</div>
-          <div class="menu-subtitle">Driving licence and vehicle documents</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
-
-      <button class="menu-item" id="walletBtn">
-        <div class="menu-icon">💳</div>
-        <div class="menu-content">
-          <div class="menu-title">Wallet & Earnings</div>
-          <div class="menu-subtitle">View balance and earning history</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
+        <p>
+            RiderX rider account
+        </p>
 
     </div>
-  </section>
 
-  <!-- VEHICLE CARD -->
-  <section class="section">
-    <h2 class="section-title">My Vehicle</h2>
 
-    <div class="card vehicle-card">
+    <button
+        class="settings"
+        id="settingsBtn"
+        type="button"
+    >
+        ⚙
+    </button>
 
-      <div class="vehicle-top">
-        <div class="vehicle-icon">🏍️</div>
+</header>
 
-        <div>
-          <div class="vehicle-name" id="vehicleName">Bike</div>
-          <div class="vehicle-number" id="vehicleNumber">Vehicle number not added</div>
-        </div>
-      </div>
 
-      <div class="vehicle-grid">
+<main
+    class="container"
+    id="content"
+>
 
-        <div class="vehicle-info">
-          <div class="vehicle-info-label">MODEL</div>
-          <div class="vehicle-info-value" id="vehicleModel">Not added</div>
-        </div>
+    <div class="loading">
 
-        <div class="vehicle-info">
-          <div class="vehicle-info-label">COLOR</div>
-          <div class="vehicle-info-value" id="vehicleColor">Not added</div>
-        </div>
+        <div class="loader"></div>
 
-        <div class="vehicle-info">
-          <div class="vehicle-info-label">TYPE</div>
-          <div class="vehicle-info-value" id="vehicleType">Bike Taxi</div>
-        </div>
-
-        <div class="vehicle-info">
-          <div class="vehicle-info-label">STATUS</div>
-          <div class="vehicle-info-value" id="vehicleStatus">Active</div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- SETTINGS -->
-  <section class="section">
-    <h2 class="section-title">Preferences</h2>
-
-    <div class="card">
-
-      <button class="menu-item" id="settingsBtn">
-        <div class="menu-icon">⚙️</div>
-        <div class="menu-content">
-          <div class="menu-title">Settings</div>
-          <div class="menu-subtitle">App preferences and account settings</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
-
-      <button class="menu-item" id="languageBtn">
-        <div class="menu-icon">🌐</div>
-        <div class="menu-content">
-          <div class="menu-title">Language</div>
-          <div class="menu-subtitle" id="languageText">English</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
-
-      <button class="menu-item" id="helpBtn">
-        <div class="menu-icon">❓</div>
-        <div class="menu-content">
-          <div class="menu-title">Help & Support</div>
-          <div class="menu-subtitle">Get help with RiderX</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
-
-      <button class="menu-item" id="termsBtn">
-        <div class="menu-icon">🛡️</div>
-        <div class="menu-content">
-          <div class="menu-title">Terms & Privacy</div>
-          <div class="menu-subtitle">RiderX terms and privacy policy</div>
-        </div>
-        <div class="arrow">›</div>
-      </button>
+        Loading profile...
 
     </div>
-  </section>
 
-  <!-- LOGOUT -->
-  <button class="logout" id="logoutBtn">🚪 &nbsp; Logout</button>
+</main>
 
-</div>
 
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
+<div
+    class="toast"
+    id="toast"
+></div>
 
-  <button class="nav-item" data-page="home">
-    <span class="nav-icon">⌂</span>
-    <span>Home</span>
-  </button>
-
-  <button class="nav-item" data-page="rides">
-    <span class="nav-icon">🏍️</span>
-    <span>Rides</span>
-  </button>
-
-  <button class="nav-item" data-page="wallet">
-    <span class="nav-icon">₹</span>
-    <span>Wallet</span>
-  </button>
-
-  <button class="nav-item active" data-page="profile">
-    <span class="nav-icon">👤</span>
-    <span>Profile</span>
-  </button>
-
-</nav>
-
-<!-- EDIT PROFILE MODAL -->
-<div class="modal" id="profileModal">
-
-  <div class="modal-box">
-
-    <div class="modal-handle"></div>
-
-    <div class="modal-title">Edit Profile</div>
-
-    <div class="form-group">
-      <label class="form-label">FULL NAME</label>
-      <input class="input" id="editName" type="text" placeholder="Enter your name">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">PHONE NUMBER</label>
-      <input class="input" id="editPhone" type="tel" placeholder="Enter phone number">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">EMAIL</label>
-      <input class="input" id="editEmail" type="email" placeholder="Enter email">
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-cancel" id="cancelProfileBtn">Cancel</button>
-      <button class="btn btn-save" id="saveProfileBtn">Save Changes</button>
-    </div>
-
-  </div>
-</div>
-
-<!-- VEHICLE MODAL -->
-<div class="modal" id="vehicleModal">
-
-  <div class="modal-box">
-
-    <div class="modal-handle"></div>
-
-    <div class="modal-title">Vehicle Details</div>
-
-    <div class="form-group">
-      <label class="form-label">VEHICLE TYPE</label>
-      <select class="input" id="editVehicleType">
-        <option value="Bike Taxi">Bike Taxi</option>
-        <option value="Cab">Cab</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">VEHICLE MODEL</label>
-      <input class="input" id="editVehicleModel" type="text" placeholder="Example: Honda Shine">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">VEHICLE NUMBER</label>
-      <input class="input" id="editVehicleNumber" type="text" placeholder="Example: PB10AB1234">
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">COLOR</label>
-      <input class="input" id="editVehicleColor" type="text" placeholder="Example: Black">
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn btn-cancel" id="cancelVehicleBtn">Cancel</button>
-      <button class="btn btn-save" id="saveVehicleBtn">Save Vehicle</button>
-    </div>
-
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script type="module">
 
-  /*
-   * RiderX Rider Profile
-   * Complete standalone profile UI.
-   *
-   * Uses localStorage as a safe fallback so the page remains
-   * functional even if Firebase is not available.
-   *
-   * Existing Firebase/user data can be connected later without
-   * changing this page structure.
-   */
+import {
+    auth,
+    db,
+    doc,
+    getDoc,
+    updateDoc,
+    onAuthStateChanged,
+    signOut
+} from "../firebase/firebase-config.js";
 
-  const $ = (id) => document.getElementById(id);
 
-  const STORAGE_KEY = "riderx_rider_profile";
+const content =
+    document.getElementById("content");
 
-  const defaultProfile = {
-    name: "Rider",
-    phone: "",
-    email: "",
-    photo: "",
-    rides: 0,
-    rating: "5.0",
-    earnings: 0,
-    vehicle: {
-      type: "Bike Taxi",
-      model: "",
-      number: "",
-      color: ""
-    },
-    language: "English"
-  };
+const backBtn =
+    document.getElementById("backBtn");
 
-  function loadProfile(){
+const settingsBtn =
+    document.getElementById("settingsBtn");
 
-    try{
-      const saved = localStorage.getItem(STORAGE_KEY);
+const toast =
+    document.getElementById("toast");
 
-      if(!saved){
-        return structuredClone(defaultProfile);
-      }
 
-      const parsed = JSON.parse(saved);
+let currentUser = null;
+let riderData = {};
 
-      return {
-        ...defaultProfile,
-        ...parsed,
-        vehicle:{
-          ...defaultProfile.vehicle,
-          ...(parsed.vehicle || {})
-        }
-      };
 
-    }catch(error){
+/* --------------------------------
+   HELPERS
+-------------------------------- */
 
-      console.error("RiderX profile load error:", error);
-
-      return structuredClone(defaultProfile);
-    }
-  }
-
-  let profile = loadProfile();
-
-  function saveProfile(){
-
-    try{
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(profile)
-      );
-    }catch(error){
-      console.error("RiderX profile save error:", error);
-    }
-  }
-
-  function escapeText(value){
+function escapeHtml(value){
 
     return String(value ?? "")
-      .replace(/[&<>"']/g, char => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
-      }[char]));
-  }
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 
-  function showToast(message){
+}
 
-    const toast = $("toast");
 
-    toast.textContent = message;
+function pick(data,keys,fallback=""){
+
+    for(const key of keys){
+
+        if(
+            data &&
+            data[key] !== undefined &&
+            data[key] !== null &&
+            data[key] !== ""
+        ){
+
+            return data[key];
+
+        }
+
+    }
+
+    return fallback;
+
+}
+
+
+function money(value){
+
+    return "₹" +
+        Number(value || 0)
+        .toLocaleString(
+            "en-IN",
+            {
+                maximumFractionDigits:0
+            }
+        );
+
+}
+
+
+function showToast(message){
+
+    toast.textContent =
+        message;
+
     toast.classList.add("show");
 
-    clearTimeout(window.__riderxToastTimer);
-
-    window.__riderxToastTimer = setTimeout(() => {
-      toast.classList.remove("show");
-    }, 2200);
-  }
-
-  function render(){
-
-    const name = profile.name?.trim() || "Rider";
-
-    $("profileName").textContent = name;
-
-    $("profilePhone").textContent =
-      profile.phone?.trim() ||
-      profile.email?.trim() ||
-      "RiderX account";
-
-    $("avatarLetter").textContent =
-      name.charAt(0).toUpperCase();
-
-    $("ridesCount").textContent =
-      Number(profile.rides || 0).toLocaleString("en-IN");
-
-    $("ratingValue").textContent =
-      profile.rating || "5.0";
-
-    $("earningsValue").textContent =
-      "₹" + Number(profile.earnings || 0).toLocaleString("en-IN");
-
-    const vehicle = profile.vehicle || {};
-
-    $("vehicleName").textContent =
-      vehicle.type || "Bike Taxi";
-
-    $("vehicleNumber").textContent =
-      vehicle.number || "Vehicle number not added";
-
-    $("vehicleModel").textContent =
-      vehicle.model || "Not added";
-
-    $("vehicleColor").textContent =
-      vehicle.color || "Not added";
-
-    $("vehicleType").textContent =
-      vehicle.type || "Bike Taxi";
-
-    $("vehicleStatus").textContent = "Active";
-
-    $("vehicleSummary").textContent =
-      vehicle.number
-        ? `${vehicle.type || "Bike Taxi"} • ${vehicle.number}`
-        : "Add your vehicle information";
-
-    $("languageText").textContent =
-      profile.language || "English";
-
-    const image = $("profileImage");
-
-    if(profile.photo){
-
-      image.src = profile.photo;
-      image.style.display = "block";
-      $("avatarLetter").style.display = "none";
-
-    }else{
-
-      image.removeAttribute("src");
-      image.style.display = "none";
-      $("avatarLetter").style.display = "block";
-    }
-  }
-
-  /* BACK */
-  $("backBtn").addEventListener("click", () => {
-
-    if(history.length > 1){
-      history.back();
-    }else{
-      location.href = "home.html";
-    }
-
-  });
-
-  /* NOTIFICATIONS */
-  $("notificationBtn").addEventListener("click", () => {
-
-    location.href = "notifications.html";
-
-  });
-
-  /* PROFILE MODAL */
-  $("editProfileBtn").addEventListener("click", () => {
-
-    $("editName").value = profile.name || "";
-    $("editPhone").value = profile.phone || "";
-    $("editEmail").value = profile.email || "";
-
-    $("profileModal").classList.add("show");
-
-  });
-
-  $("cancelProfileBtn").addEventListener("click", () => {
-
-    $("profileModal").classList.remove("show");
-
-  });
-
-  $("profileModal").addEventListener("click", (event) => {
-
-    if(event.target === $("profileModal")){
-      $("profileModal").classList.remove("show");
-    }
-
-  });
-
-  $("saveProfileBtn").addEventListener("click", () => {
-
-    const name = $("editName").value.trim();
-
-    if(!name){
-
-      showToast("Please enter your name");
-      return;
-
-    }
-
-    profile.name = name;
-    profile.phone = $("editPhone").value.trim();
-    profile.email = $("editEmail").value.trim();
-
-    saveProfile();
-    render();
-
-    $("profileModal").classList.remove("show");
-
-    showToast("Profile updated successfully");
-
-  });
-
-  /* PHOTO */
-  $("cameraBtn").addEventListener("click", () => {
-
-    $("photoInput").click();
-
-  });
-
-  $("photoInput").addEventListener("change", (event) => {
-
-    const file = event.target.files?.[0];
-
-    if(!file) return;
-
-    if(!file.type.startsWith("image/")){
-
-      showToast("Please select an image");
-      return;
-
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-
-      profile.photo = reader.result;
-
-      saveProfile();
-      render();
-
-      showToast("Profile photo updated");
-
-    };
-
-    reader.readAsDataURL(file);
-
-  });
-
-  /* VEHICLE */
-  $("vehicleBtn").addEventListener("click", openVehicleModal);
-
-  function openVehicleModal(){
-
-    const vehicle = profile.vehicle || {};
-
-    $("editVehicleType").value =
-      vehicle.type || "Bike Taxi";
-
-    $("editVehicleModel").value =
-      vehicle.model || "";
-
-    $("editVehicleNumber").value =
-      vehicle.number || "";
-
-    $("editVehicleColor").value =
-      vehicle.color || "";
-
-    $("vehicleModal").classList.add("show");
-  }
-
-  $("cancelVehicleBtn").addEventListener("click", () => {
-
-    $("vehicleModal").classList.remove("show");
-
-  });
-
-  $("vehicleModal").addEventListener("click", (event) => {
-
-    if(event.target === $("vehicleModal")){
-      $("vehicleModal").classList.remove("show");
-    }
-
-  });
-
-  $("saveVehicleBtn").addEventListener("click", () => {
-
-    const type =
-      $("editVehicleType").value;
-
-    const model =
-      $("editVehicleModel").value.trim();
-
-    const number =
-      $("editVehicleNumber").value.trim().toUpperCase();
-
-    const color =
-      $("editVehicleColor").value.trim();
-
-    if(!model){
-
-      showToast("Please enter vehicle model");
-      return;
-
-    }
-
-    if(!number){
-
-      showToast("Please enter vehicle number");
-      return;
-
-    }
-
-    profile.vehicle = {
-      type,
-      model,
-      number,
-      color
-    };
-
-    saveProfile();
-    render();
-
-    $("vehicleModal").classList.remove("show");
-
-    showToast("Vehicle details saved");
-
-  });
-
-  /* DOCUMENTS */
-  $("documentsBtn").addEventListener("click", () => {
-
-    if(location.pathname.includes("/rider/")){
-      location.href = "documents.html";
-    }else{
-      showToast("Documents page is not available yet");
-    }
-
-  });
-
-  /* WALLET */
-  $("walletBtn").addEventListener("click", () => {
-
-    location.href = "wallet.html";
-
-  });
-
-  /* SETTINGS */
-  $("settingsBtn").addEventListener("click", () => {
-
-    location.href = "settings.html";
-
-  });
-
-  /* LANGUAGE */
-  $("languageBtn").addEventListener("click", () => {
-
-    const current =
-      profile.language || "English";
-
-    profile.language =
-      current === "English"
-        ? "Hindi"
-        : "English";
-
-    saveProfile();
-    render();
-
-    showToast(
-      "Language changed to " + profile.language
+    setTimeout(
+        () =>
+            toast.classList.remove("show"),
+        2200
     );
 
-  });
+}
 
-  /* HELP */
-  $("helpBtn").addEventListener("click", () => {
 
-    if(location.pathname.includes("/rider/")){
-      location.href = "support.html";
-    }else{
-      showToast("Support page is not available yet");
+/* --------------------------------
+   LOAD PROFILE
+-------------------------------- */
+
+async function loadProfile(user){
+
+    currentUser =
+        user;
+
+
+    try{
+
+        const snap =
+            await getDoc(
+                doc(
+                    db,
+                    "riders",
+                    user.uid
+                )
+            );
+
+
+        if(snap.exists()){
+
+            riderData =
+                snap.data();
+
+        }
+        else{
+
+            /*
+             * Fallback for projects where
+             * user information is stored
+             * in users collection.
+             */
+
+            const userSnap =
+                await getDoc(
+                    doc(
+                        db,
+                        "users",
+                        user.uid
+                    )
+                );
+
+
+            if(userSnap.exists()){
+
+                riderData =
+                    userSnap.data();
+
+            }
+
+        }
+
+
+        renderProfile();
+
+    }
+    catch(error){
+
+        console.error(
+            "Profile error:",
+            error
+        );
+
+
+        /*
+         * Still show profile using
+         * Firebase Auth data.
+         */
+
+        riderData = {};
+
+        renderProfile();
+
+        showToast(
+            "Some profile data could not load."
+        );
+
     }
 
-  });
+}
 
-  /* TERMS */
-  $("termsBtn").addEventListener("click", () => {
 
-    showToast("RiderX Terms & Privacy");
+/* --------------------------------
+   RENDER PROFILE
+-------------------------------- */
 
-    setTimeout(() => {
+function renderProfile(){
 
-      window.open(
-        "../index.html#terms",
-        "_self"
-      );
+    const user =
+        currentUser;
 
-    }, 500);
 
-  });
+    const name =
+        pick(
+            riderData,
+            [
+                "name",
+                "fullName",
+                "displayName"
+            ],
+            user?.displayName ||
+            "Rider"
+        );
 
-  /* LOGOUT */
-  $("logoutBtn").addEventListener("click", () => {
 
-    const confirmed =
-      window.confirm(
-        "Are you sure you want to logout?"
-      );
+    const phone =
+        pick(
+            riderData,
+            [
+                "phone",
+                "mobile",
+                "phoneNumber"
+            ],
+            user?.phoneNumber ||
+            "Mobile number not added"
+        );
 
-    if(!confirmed) return;
+
+    const email =
+        pick(
+            riderData,
+            [
+                "email"
+            ],
+            user?.email ||
+            ""
+        );
+
+
+    const rating =
+        pick(
+            riderData,
+            [
+                "rating",
+                "averageRating"
+            ],
+            "5.0"
+        );
+
+
+    const totalRides =
+        pick(
+            riderData,
+            [
+                "totalRides",
+                "completedRides",
+                "rides"
+            ],
+            0
+        );
+
+
+    const earnings =
+        pick(
+            riderData,
+            [
+                "totalEarnings",
+                "earnings"
+            ],
+            0
+        );
+
+
+    const vehicle =
+        pick(
+            riderData,
+            [
+                "vehicleType",
+                "vehicle"
+            ],
+            "Bike"
+        );
+
+
+    const vehicleNumber =
+        pick(
+            riderData,
+            [
+                "vehicleNumber",
+                "bikeNumber",
+                "registrationNumber",
+                "plateNumber"
+            ],
+            "Vehicle number not added"
+        );
+
+
+    const online =
+        Boolean(
+            riderData.isOnline ??
+            riderData.online ??
+            false
+        );
+
+
+    const photo =
+        pick(
+            riderData,
+            [
+                "photoURL",
+                "profileImage",
+                "photo",
+                "image"
+            ],
+            user?.photoURL ||
+            ""
+        );
+
+
+    const initial =
+        name
+            .trim()
+            .charAt(0)
+            .toUpperCase() ||
+            "R";
+
+
+    content.innerHTML = `
+
+        <section class="profile-card">
+
+            <div class="profile-top">
+
+                <div class="avatar">
+
+                    <span
+                        id="avatarInitial"
+                        ${photo ? 'style="display:none"' : ''}
+                    >
+                        ${escapeHtml(initial)}
+                    </span>
+
+                    <img
+                        id="avatarImage"
+                        src="${escapeHtml(photo)}"
+                        alt="Rider profile"
+                        ${photo ? '' : 'style="display:none"'}
+                    >
+
+                    <span
+                        class="online-dot"
+                        id="onlineDot"
+                        style="
+                            background:
+                            ${online
+                                ? "var(--green)"
+                                : "#666"
+                            };
+                        "
+                    ></span>
+
+                </div>
+
+
+                <div class="profile-info">
+
+                    <div class="profile-name">
+                        ${escapeHtml(name)}
+                    </div>
+
+                    <div class="profile-phone">
+                        ${escapeHtml(phone)}
+                    </div>
+
+                    ${
+                        email
+                        ?
+                        `
+                        <div class="profile-phone">
+                            ${escapeHtml(email)}
+                        </div>
+                        `
+                        :
+                        ""
+                    }
+
+                    <div class="verified">
+                        ✓ Verified Rider
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="edit-btn"
+                id="editBtn"
+                type="button"
+            >
+                ✎ Edit Profile
+            </button>
+
+        </section>
+
+
+        <section class="stats">
+
+            <div class="stat">
+
+                <div class="stat-value yellow">
+                    ★ ${escapeHtml(rating)}
+                </div>
+
+                <div class="stat-label">
+                    Rating
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-value">
+                    ${escapeHtml(totalRides)}
+                </div>
+
+                <div class="stat-label">
+                    Trips
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-value yellow">
+                    ${money(earnings)}
+                </div>
+
+                <div class="stat-label">
+                    Earnings
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="online-card">
+
+            <div class="online-icon">
+                ●
+            </div>
+
+            <div class="online-info">
+
+                <div class="online-title">
+                    Rider Availability
+                </div>
+
+                <div
+                    class="online-sub"
+                    id="onlineText"
+                >
+                    ${
+                        online
+                        ? "You are online and can receive rides."
+                        : "You are offline and won't receive rides."
+                    }
+                </div>
+
+            </div>
+
+
+            <button
+                class="toggle ${online ? "active" : ""}"
+                id="onlineToggle"
+                type="button"
+                aria-label="Toggle online status"
+            >
+                <span></span>
+            </button>
+
+        </section>
+
+
+        <div class="section-title">
+            Vehicle
+        </div>
+
+
+        <section class="vehicle">
+
+            <div class="vehicle-row">
+
+                <div class="vehicle-icon">
+                    ${
+                        String(vehicle)
+                            .toLowerCase()
+                            .includes("car")
+                        ? "🚗"
+                        : "🏍"
+                    }
+                </div>
+
+
+                <div class="vehicle-info">
+
+                    <div class="vehicle-name">
+                        ${escapeHtml(vehicle)}
+                    </div>
+
+                    <div class="vehicle-number">
+                        ${escapeHtml(vehicleNumber)}
+                    </div>
+
+                </div>
+
+
+                <div class="vehicle-status">
+                    ACTIVE
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <div class="section-title">
+            Account
+        </div>
+
+
+        <section class="menu">
+
+            <button
+                class="menu-item"
+                id="documentsBtn"
+                type="button"
+            >
+
+                <div class="menu-icon">
+                    📄
+                </div>
+
+                <div class="menu-content">
+
+                    <div class="menu-title">
+                        Documents
+                    </div>
+
+                    <div class="menu-sub">
+                        Driving licence & vehicle documents
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </button>
+
+
+            <button
+                class="menu-item"
+                id="paymentBtn"
+                type="button"
+            >
+
+                <div class="menu-icon">
+                    💳
+                </div>
+
+                <div class="menu-content">
+
+                    <div class="menu-title">
+                        Payment & Bank
+                    </div>
+
+                    <div class="menu-sub">
+                        Earnings and payout settings
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </button>
+
+
+            <button
+                class="menu-item"
+                id="notificationBtn"
+                type="button"
+            >
+
+                <div class="menu-icon">
+                    🔔
+                </div>
+
+                <div class="menu-content">
+
+                    <div class="menu-title">
+                        Notifications
+                    </div>
+
+                    <div class="menu-sub">
+                        Ride alerts and updates
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </button>
+
+
+            <button
+                class="menu-item"
+                id="settingsItem"
+                type="button"
+            >
+
+                <div class="menu-icon">
+                    ⚙
+                </div>
+
+                <div class="menu-content">
+
+                    <div class="menu-title">
+                        Settings
+                    </div>
+
+                    <div class="menu-sub">
+                        App preferences and account settings
+                    </div>
+
+                </div>
+
+                <div class="menu-arrow">
+                    ›
+                </div>
+
+            </button>
+
+        </section>
+
+
+        <button
+            class="logout"
+            id="logoutBtn"
+            type="button"
+        >
+            Log Out
+        </button>
+
+
+        <div class="footer">
+            RiderX • Rider Partner
+        </div>
+
+    `;
+
+
+    bindActions();
+
+}
+
+
+/* --------------------------------
+   ACTIONS
+-------------------------------- */
+
+function bindActions(){
+
+    document
+        .getElementById("editBtn")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "edit-profile.html";
+
+            }
+        );
+
+
+    document
+        .getElementById("onlineToggle")
+        ?.addEventListener(
+            "click",
+            toggleOnline
+        );
+
+
+    document
+        .getElementById("documentsBtn")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "documents.html";
+
+            }
+        );
+
+
+    document
+        .getElementById("paymentBtn")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "wallet.html";
+
+            }
+        );
+
+
+    document
+        .getElementById("notificationBtn")
+        ?.addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "notifications.html";
+
+            }
+        );
+
+
+    document
+        .getElementById("settingsItem")
+        ?.addEventListener(
+            "click",
+            openSettings
+        );
+
+
+    document
+        .getElementById("logoutBtn")
+        ?.addEventListener(
+            "click",
+            logout
+        );
+
+}
+
+
+/* --------------------------------
+   ONLINE TOGGLE
+-------------------------------- */
+
+async function toggleOnline(){
+
+    const button =
+        document.getElementById(
+            "onlineToggle"
+        );
+
+
+    if(!button || !currentUser){
+        return;
+    }
+
+
+    const current =
+        Boolean(
+            riderData.isOnline ??
+            riderData.online ??
+            false
+        );
+
+
+    button.disabled = true;
+
+
+    try{
+
+        const newStatus =
+            !current;
+
+
+        await updateDoc(
+            doc(
+                db,
+                "riders",
+                currentUser.uid
+            ),
+            {
+                isOnline:newStatus,
+                online:newStatus
+            }
+        );
+
+
+        riderData.isOnline =
+            newStatus;
+
+        riderData.online =
+            newStatus;
+
+
+        const onlineText =
+            document.getElementById(
+                "onlineText"
+            );
+
+        const onlineDot =
+            document.getElementById(
+                "onlineDot"
+            );
+
+
+        if(newStatus){
+
+            button.classList.add(
+                "active"
+            );
+
+            onlineText.textContent =
+                "You are online and can receive rides.";
+
+            if(onlineDot){
+
+                onlineDot.style.background =
+                    "var(--green)";
+
+            }
+
+            showToast(
+                "You are now online."
+            );
+
+        }
+        else{
+
+            button.classList.remove(
+                "active"
+            );
+
+            onlineText.textContent =
+                "You are offline and won't receive rides.";
+
+            if(onlineDot){
+
+                onlineDot.style.background =
+                    "#666";
+
+            }
+
+            showToast(
+                "You are now offline."
+            );
+
+        }
+
+    }
+    catch(error){
+
+        console.error(
+            "Online update error:",
+            error
+        );
+
+        showToast(
+            "Unable to change online status."
+        );
+
+    }
+    finally{
+
+        button.disabled =
+            false;
+
+    }
+
+}
+
+
+/* --------------------------------
+   SETTINGS
+-------------------------------- */
+
+function openSettings(){
 
     /*
-     * Clear only authentication/session keys that RiderX
-     * commonly uses. Profile data is intentionally preserved.
+     * If rider/settings.html exists,
+     * open it. Otherwise use menu.
      */
 
-    const keysToRemove = [
-      "riderx_user",
-      "riderx_current_user",
-      "riderx_auth",
-      "riderx_role",
-      "riderx_session"
-    ];
+    window.location.href =
+        "settings.html";
 
-    keysToRemove.forEach(key => {
+}
 
-      try{
-        localStorage.removeItem(key);
-        sessionStorage.removeItem(key);
-      }catch(error){}
-    });
 
-    showToast("Logged out");
+/* --------------------------------
+   LOGOUT
+-------------------------------- */
 
-    setTimeout(() => {
+async function logout(){
 
-      location.href = "../auth/login.html";
+    const confirmed =
+        window.confirm(
+            "Are you sure you want to log out?"
+        );
 
-    }, 600);
 
-  });
+    if(!confirmed){
+        return;
+    }
 
-  /* BOTTOM NAVIGATION */
-  document.querySelectorAll(".nav-item").forEach(item => {
 
-    item.addEventListener("click", () => {
+    try{
 
-      const page = item.dataset.page;
+        await signOut(auth);
 
-      if(page === "home"){
-        location.href = "home.html";
-      }
 
-      if(page === "rides"){
-        location.href = "rides.html";
-      }
+        window.location.replace(
+            "../auth/login.html"
+        );
 
-      if(page === "wallet"){
-        location.href = "wallet.html";
-      }
+    }
+    catch(error){
 
-      if(page === "profile"){
-        location.href = "profile.html";
-      }
+        console.error(
+            "Logout error:",
+            error
+        );
 
-    });
+        showToast(
+            "Logout failed. Please try again."
+        );
 
-  });
+    }
 
-  /* ESC KEY */
-  document.addEventListener("keydown", (event) => {
+}
 
-    if(event.key !== "Escape") return;
 
-    $("profileModal").classList.remove("show");
-    $("vehicleModal").classList.remove("show");
+/* --------------------------------
+   HEADER ACTIONS
+-------------------------------- */
 
-  });
+backBtn.addEventListener(
+    "click",
+    () => {
 
-  /* INITIAL */
-  render();
+        if(history.length > 1){
+
+            history.back();
+
+        }
+        else{
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+
+    }
+);
+
+
+settingsBtn.addEventListener(
+    "click",
+    openSettings
+);
+
+
+/* --------------------------------
+   AUTH
+-------------------------------- */
+
+onAuthStateChanged(
+    auth,
+    user => {
+
+        if(!user){
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+            return;
+
+        }
+
+        loadProfile(user);
+
+    }
+);
 
 </script>
 
 </body>
-  </html>
+
+</html>
