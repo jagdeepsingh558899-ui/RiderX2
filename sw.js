@@ -1,32 +1,61 @@
-const CACHE_NAME = "riderx-v2";
+"use strict";
+
+const CACHE_NAME = "riderx-v1.0.0";
 
 const APP_SHELL = [
-"/",
-"/index.html",
-"/manifest.json"
+"./",
+"./index.html",
+"./manifest.json",
+
+"./assets/app.css",
+"./assets/logo.png",
+"./assets/logo.svg",
+
+"./css/Style.css",
+"./css/Auth.css",
+"./css/Dashboard.css",
+"./css/Responsive.css",
+"./css/Animation.css"
+
 ];
 
-/* =========================================================
+/*
+|--------------------------------------------------------------------------
+
 INSTALL
-========================================================= */
+*/
 
 self.addEventListener(
 "install",
-event => {
+function(event){
 
     event.waitUntil(
 
-        caches
-            .open(CACHE_NAME)
-            .then(cache => {
+        caches.open(
+            CACHE_NAME
+        )
+        .then(
+            function(cache){
 
                 return cache.addAll(
                     APP_SHELL
                 );
 
-            })
+            }
+        )
+        .catch(
+            function(error){
+
+                console.warn(
+                    "RiderX cache install warning:",
+                    error
+                );
+
+            }
+        )
 
     );
+
 
     self.skipWaiting();
 
@@ -34,195 +63,55 @@ event => {
 
 );
 
-/* =========================================================
+/*
+|--------------------------------------------------------------------------
+
 ACTIVATE
-========================================================= */
+*/
 
 self.addEventListener(
 "activate",
-event => {
+function(event){
 
     event.waitUntil(
 
-        caches
-            .keys()
-            .then(cacheNames => {
+        caches.keys()
+            .then(
+                function(cacheNames){
 
-                return Promise.all(
+                    return Promise.all(
 
-                    cacheNames
-                        .filter(
-                            name =>
-                                name !== CACHE_NAME
-                        )
-                        .map(
-                            name =>
-                                caches.delete(name)
-                        )
+                        cacheNames
+                            .filter(
+                                function(cacheName){
 
-                );
+                                    return (
+                                        cacheName !==
+                                        CACHE_NAME
+                                    );
 
-            })
+                                }
+                            )
+                            .map(
+                                function(cacheName){
 
-    );
+                                    return caches.delete(
+                                        cacheName
+                                    );
 
-    self.clients.claim();
+                                }
+                            )
 
-}
-
-);
-
-/* =========================================================
-FETCH
-========================================================= */
-
-self.addEventListener(
-"fetch",
-event => {
-
-    const request =
-        event.request;
-
-
-    /*
-    Only handle GET requests.
-    */
-
-    if(
-        request.method !== "GET"
-    ){
-
-        return;
-
-    }
-
-
-    /*
-    Firebase / Firestore / Auth requests
-    should always go directly to network.
-    */
-
-    const url =
-        new URL(
-            request.url
-        );
-
-
-    if(
-        url.hostname.includes(
-            "googleapis.com"
-        ) ||
-
-        url.hostname.includes(
-            "firebaseio.com"
-        ) ||
-
-        url.hostname.includes(
-            "gstatic.com"
-        )
-    ){
-
-        return;
-
-    }
-
-
-    /*
-    CDN resources:
-    Network first, then cache.
-    */
-
-    if(
-        url.hostname !==
-        self.location.hostname
-    ){
-
-        event.respondWith(
-
-            fetch(request)
-                .then(response => {
-
-                    if(
-                        response &&
-                        response.status === 200
-                    ){
-
-                        const responseClone =
-                            response.clone();
-
-
-                        caches
-                            .open(CACHE_NAME)
-                            .then(cache => {
-
-                                cache.put(
-                                    request,
-                                    responseClone
-                                );
-
-                            });
-
-                    }
-
-
-                    return response;
-
-                })
-                .catch(
-                    () =>
-                        caches.match(request)
-                )
-
-        );
-
-        return;
-
-    }
-
-
-    /*
-    RiderX local files:
-    Network first.
-
-    This is important because
-    Firebase-powered pages must
-    always receive the latest code.
-    */
-
-    event.respondWith(
-
-        fetch(request)
-            .then(response => {
-
-                if(
-                    response &&
-                    response.status === 200
-                ){
-
-                    const responseClone =
-                        response.clone();
-
-
-                    caches
-                        .open(CACHE_NAME)
-                        .then(cache => {
-
-                            cache.put(
-                                request,
-                                responseClone
-                            );
-
-                        });
+                    );
 
                 }
+            )
+            .then(
+                function(){
 
+                    return self.clients.claim();
 
-                return response;
-
-            })
-            .catch(
-                () =>
-                    caches.match(request)
+                }
             )
 
     );
@@ -231,20 +120,206 @@ event => {
 
 );
 
-/* =========================================================
+/*
+|--------------------------------------------------------------------------
+
+FETCH
+*/
+
+self.addEventListener(
+"fetch",
+function(event){
+
+    const request =
+        event.request;
+
+
+    /*
+     * Only handle GET requests.
+     */
+
+    if(
+        request.method !==
+        "GET"
+    ){
+
+        return;
+
+    }
+
+
+    const url =
+        new URL(
+            request.url
+        );
+
+
+    /*
+     * Don't interfere with
+     * Firebase / external APIs.
+     */
+
+    if(
+        url.origin !==
+        self.location.origin
+    ){
+
+        return;
+
+    }
+
+
+    event.respondWith(
+
+        fetch(
+            request
+        )
+        .then(
+            function(response){
+
+                /*
+                 * Save successful responses
+                 * for offline use.
+                 */
+
+                if(
+                    response &&
+                    response.status === 200 &&
+                    response.type === "basic"
+                ){
+
+                    const copy =
+                        response.clone();
+
+
+                    caches.open(
+                        CACHE_NAME
+                    )
+                    .then(
+                        function(cache){
+
+                            cache.put(
+                                request,
+                                copy
+                            );
+
+                        }
+                    );
+
+                }
+
+
+                return response;
+
+            }
+        )
+        .catch(
+            function(){
+
+                /*
+                 * If network fails,
+                 * return cached version.
+                 */
+
+                return caches.match(
+                    request
+                )
+                .then(
+                    function(cached){
+
+                        if(cached){
+
+                            return cached;
+
+                        }
+
+
+                        /*
+                         * HTML navigation fallback.
+                         */
+
+                        if(
+                            request.mode ===
+                            "navigate"
+                        ){
+
+                            return caches.match(
+                                "./index.html"
+                            );
+
+                        }
+
+
+                        return new Response(
+                            "",
+                            {
+                                status: 503,
+                                statusText:
+                                    "RiderX Offline"
+                            }
+                        );
+
+                    }
+                );
+
+            }
+        )
+
+    );
+
+}
+
+);
+
+/*
+|--------------------------------------------------------------------------
+
 MESSAGE
-========================================================= */
+*/
 
 self.addEventListener(
 "message",
-event => {
+function(event){
 
     if(
-        event.data ===
+        !event.data
+    ){
+
+        return;
+
+    }
+
+
+    /*
+     * Force service worker update.
+     */
+
+    if(
+        event.data.type ===
         "SKIP_WAITING"
     ){
 
         self.skipWaiting();
+
+    }
+
+
+    /*
+     * Clear RiderX cache.
+     */
+
+    if(
+        event.data.type ===
+        "CLEAR_CACHE"
+    ){
+
+        event.waitUntil(
+
+            caches.delete(
+                CACHE_NAME
+            )
+
+        );
 
     }
 
