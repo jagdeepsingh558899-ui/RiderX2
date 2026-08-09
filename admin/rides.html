@@ -1,238 +1,2449 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX Manage Rides</title>
-
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-
-<style>
-
-:root{
-
---yellow:#FFE500;
---black:#050505;
---card:#111;
-
-}
-
+<meta name="theme-color" content="#FFD400"><title>RiderX Admin - Rides</title><link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css"><style>
 
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-
+    box-sizing:border-box;
 }
-
-
 
 body{
-
-background:var(--black);
-color:white;
-padding-bottom:50px;
-
+    margin:0;
+    min-height:100vh;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-
-.header{
-
-height:70px;
-background:#111;
-display:flex;
-align-items:center;
-padding:0 20px;
-
+.page{
+    min-height:100vh;
+    padding-bottom:60px;
 }
 
-
-
-.logo{
-
-font-size:28px;
-font-weight:900;
-
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:#111;
+    border-bottom:1px solid #292929;
 }
 
-
-
-.logo span{
-
-color:var(--yellow);
-
+.top-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
-
-
-.container{
-
-padding:20px;
-
+.back-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    cursor:pointer;
+    font-size:20px;
 }
-
-
-
-.back{
-
-width:100%;
-padding:12px;
-border:none;
-border-radius:12px;
-background:#222;
-color:white;
-margin-bottom:20px;
-
-}
-
-
 
 .title{
-
-font-size:24px;
-font-weight:bold;
-margin-bottom:20px;
-
+    font-size:17px;
+    font-weight:900;
 }
 
-
-
-.ride-card{
-
-background:var(--card);
-border:1px solid #333;
-border-radius:18px;
-padding:18px;
-margin-bottom:15px;
-
+.title span{
+    color:#FFD400;
 }
 
-
-
-.row{
-
-margin-bottom:8px;
-
+.logo{
+    color:#FFD400;
+    font-size:18px;
+    font-weight:1000;
 }
 
-
-
-.label{
-
-color:#999;
-
+.content{
+    width:100%;
+    max-width:1250px;
+    margin:auto;
+    padding:18px;
 }
 
+.hero{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:15px;
+    padding:18px;
+    border:1px solid #292929;
+    border-radius:18px;
+    background:linear-gradient(145deg,#181818,#101010);
+}
 
+.hero h1{
+    margin:0;
+    font-size:23px;
+}
+
+.hero p{
+    margin:7px 0 0;
+    color:#888;
+    font-size:12px;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+}
+
+.primary,
+.secondary{
+    height:42px;
+    padding:0 14px;
+    border-radius:9px;
+    cursor:pointer;
+    font-size:10px;
+    font-weight:900;
+}
+
+.primary{
+    border:0;
+    background:#FFD400;
+    color:#111;
+}
+
+.secondary{
+    border:1px solid #333;
+    background:#1c1c1c;
+    color:#aaa;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.stat{
+    padding:14px;
+    border:1px solid #292929;
+    border-radius:13px;
+    background:#141414;
+}
+
+.stat-label{
+    color:#777;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.stat-value{
+    margin-top:7px;
+    font-size:19px;
+    font-weight:1000;
+}
+
+.yellow{
+    color:#FFD400;
+}
+
+.green{
+    color:#61e58a;
+}
+
+.red{
+    color:#ff7474;
+}
+
+.blue{
+    color:#86b2ff;
+}
+
+.filters{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr 1fr 1fr auto;
+    align-items:end;
+    gap:9px;
+    margin-bottom:15px;
+    padding:14px;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:#121212;
+}
+
+.field label{
+    display:block;
+    margin-bottom:5px;
+    color:#777;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.field input,
+.field select{
+    width:100%;
+    height:39px;
+    padding:0 9px;
+    border:1px solid #333;
+    border-radius:8px;
+    outline:none;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:10px;
+}
+
+.field input:focus,
+.field select:focus{
+    border-color:#FFD400;
+}
+
+.table-card{
+    overflow:hidden;
+    border:1px solid #292929;
+    border-radius:16px;
+    background:#121212;
+}
+
+.table-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px;
+    border-bottom:1px solid #292929;
+}
+
+.table-head h2{
+    margin:0;
+    font-size:14px;
+}
+
+.table-head span{
+    color:#666;
+    font-size:9px;
+}
+
+.table-wrap{
+    width:100%;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    min-width:1050px;
+    border-collapse:collapse;
+}
+
+th{
+    padding:11px;
+    background:#181818;
+    color:#777;
+    font-size:8px;
+    font-weight:900;
+    text-align:left;
+    text-transform:uppercase;
+    white-space:nowrap;
+}
+
+td{
+    padding:12px 11px;
+    border-top:1px solid #242424;
+    color:#bbb;
+    font-size:10px;
+    white-space:nowrap;
+}
+
+tr:hover td{
+    background:#171717;
+}
+
+.ride-id{
+    color:#FFD400;
+    font-weight:1000;
+}
+
+.person{
+    color:#fff;
+    font-weight:800;
+}
+
+.sub{
+    margin-top:3px;
+    color:#666;
+    font-size:8px;
+}
+
+.service{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:5px 7px;
+    border-radius:6px;
+    background:#222;
+    color:#ddd;
+    font-size:8px;
+    font-weight:900;
+}
 
 .status{
+    display:inline-block;
+    padding:5px 7px;
+    border-radius:6px;
+    font-size:8px;
+    font-weight:900;
+    text-transform:capitalize;
+}
 
-font-weight:bold;
-color:var(--yellow);
+.status.completed{
+    background:#17351f;
+    color:#63e78a;
+}
+
+.status.ongoing{
+    background:#302a08;
+    color:#FFD400;
+}
+
+.status.pending{
+    background:#172a3a;
+    color:#82baff;
+}
+
+.status.cancelled{
+    background:#351919;
+    color:#ff7777;
+}
+
+.status.searching{
+    background:#24202f;
+    color:#c0a8ff;
+}
+
+.payment{
+    color:#aaa;
+    font-size:9px;
+    font-weight:800;
+}
+
+.payment.paid{
+    color:#63e78a;
+}
+
+.payment.pending{
+    color:#FFD400;
+}
+
+.view-btn{
+    height:29px;
+    padding:0 9px;
+    border:1px solid #333;
+    border-radius:7px;
+    background:#1d1d1d;
+    color:#aaa;
+    cursor:pointer;
+    font-size:8px;
+    font-weight:900;
+}
+
+.view-btn:hover{
+    border-color:#FFD400;
+    color:#FFD400;
+}
+
+.empty{
+    padding:45px 20px;
+    text-align:center;
+    color:#666;
+}
+
+.empty-icon{
+    margin-bottom:8px;
+    font-size:30px;
+}
+
+.empty-title{
+    color:#aaa;
+    font-size:13px;
+    font-weight:900;
+}
+
+.empty-text{
+    margin-top:5px;
+    font-size:9px;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:15px;
+    background:rgba(0,0,0,.8);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:600px;
+    max-height:92vh;
+    overflow-y:auto;
+    border:1px solid #333;
+    border-radius:18px;
+    background:#131313;
+}
+
+.modal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:17px;
+    border-bottom:1px solid #292929;
+}
+
+.modal-head h2{
+    margin:0;
+    font-size:17px;
+}
+
+.close{
+    width:34px;
+    height:34px;
+    border:1px solid #333;
+    border-radius:8px;
+    background:#1d1d1d;
+    color:#fff;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.modal-body{
+    padding:17px;
+}
+
+.detail-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+}
+
+.detail{
+    padding:11px;
+    border:1px solid #292929;
+    border-radius:9px;
+    background:#191919;
+}
+
+.detail.full{
+    grid-column:1/-1;
+}
+
+.detail label{
+    display:block;
+    margin-bottom:5px;
+    color:#666;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.detail strong{
+    color:#eee;
+    font-size:11px;
+}
+
+.route{
+    display:grid;
+    gap:8px;
+    margin-top:14px;
+}
+
+.location{
+    padding:12px;
+    border:1px solid #292929;
+    border-radius:10px;
+    background:#191919;
+}
+
+.location small{
+    display:block;
+    margin-bottom:5px;
+    color:#666;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.location div{
+    color:#ddd;
+    font-size:10px;
+    font-weight:700;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:15px;
+}
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    z-index:2000;
+    transform:translate(-50%,120px);
+    opacity:0;
+    padding:11px 16px;
+    border-radius:10px;
+    background:#17351f;
+    color:#65e58b;
+    font-size:11px;
+    font-weight:800;
+    transition:.25s;
+}
+
+.toast.show{
+    transform:translate(-50%,0);
+    opacity:1;
+}
+
+@media(max-width:1000px){
+
+    .stats{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .filters{
+        grid-template-columns:repeat(3,1fr);
+    }
 
 }
 
+@media(max-width:650px){
 
+    .content{
+        padding:12px;
+    }
 
-button{
+    .hero{
+        align-items:flex-start;
+        flex-direction:column;
+    }
 
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-background:var(--yellow);
-font-weight:bold;
+    .actions{
+        width:100%;
+    }
+
+    .actions button{
+        flex:1;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .filters{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .detail-grid{
+        grid-template-columns:1fr;
+    }
+
+    .detail.full{
+        grid-column:auto;
+    }
 
 }
 
+@media(max-width:420px){
 
-
-.cancel{
-
-background:#ff3333;
-color:white;
+    .filters{
+        grid-template-columns:1fr;
+    }
 
 }
 
+</style></head><body><div class="page"><header class="topbar"><div class="top-left">
 
+    <button
+        type="button"
+        class="back-btn"
+        onclick="history.back()"
+    >
+        ←
+    </button>
 
-</style>
+    <div class="title">
+        <span>RiderX</span> Rides
+    </div>
 
-</head>
-
-
-
-<body>
-
-
-
-<header class="header">
-
+</div>
 
 <div class="logo">
+    RX
+</div>
 
-RID<span>ERX</span>
+</header><main class="content"><section class="hero"><div>
+
+    <h1>
+        Ride Management
+    </h1>
+
+    <p>
+        Monitor bookings, active trips, completed rides
+        and cancelled rides.
+    </p>
 
 </div>
 
 
-</header>
+<div class="actions">
+
+    <button
+        type="button"
+        class="secondary"
+        id="refreshBtn"
+    >
+        Refresh
+    </button>
+
+    <button
+        type="button"
+        class="primary"
+        id="exportBtn"
+    >
+        Export CSV
+    </button>
+
+</div>
+
+</section><section class="stats"><div class="stat">
+
+    <div class="stat-label">
+        Total Rides
+    </div>
+
+    <div
+        class="stat-value yellow"
+        id="totalRides"
+    >
+        0
+    </div>
+
+</div>
 
 
+<div class="stat">
+
+    <div class="stat-label">
+        Completed
+    </div>
+
+    <div
+        class="stat-value green"
+        id="completedRides"
+    >
+        0
+    </div>
+
+</div>
 
 
-<div class="container">
+<div class="stat">
+
+    <div class="stat-label">
+        Ongoing
+    </div>
+
+    <div
+        class="stat-value blue"
+        id="ongoingRides"
+    >
+        0
+    </div>
+
+</div>
 
 
+<div class="stat">
 
-<button class="back"
-onclick="history.back()">
+    <div class="stat-label">
+        Cancelled
+    </div>
 
-← Back
+    <div
+        class="stat-value red"
+        id="cancelledRides"
+    >
+        0
+    </div>
 
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        Revenue
+    </div>
+
+    <div
+        class="stat-value yellow"
+        id="totalRevenue"
+    >
+        ₹0
+    </div>
+
+</div>
+
+</section><section class="filters"><div class="field">
+
+    <label>
+        Search
+    </label>
+
+    <input
+        type="search"
+        id="search"
+        placeholder="Ride ID, customer, rider..."
+    >
+
+</div>
+
+
+<div class="field">
+
+    <label>
+        Status
+    </label>
+
+    <select id="statusFilter">
+
+        <option value="all">
+            All Status
+        </option>
+
+        <option value="searching">
+            Searching
+        </option>
+
+        <option value="pending">
+            Pending
+        </option>
+
+        <option value="ongoing">
+            Ongoing
+        </option>
+
+        <option value="completed">
+            Completed
+        </option>
+
+        <option value="cancelled">
+            Cancelled
+        </option>
+
+    </select>
+
+</div>
+
+
+<div class="field">
+
+    <label>
+        Service
+    </label>
+
+    <select id="serviceFilter">
+
+        <option value="all">
+            All Services
+        </option>
+
+        <option value="Bike Taxi">
+            Bike Taxi
+        </option>
+
+        <option value="Cab">
+            Cab
+        </option>
+
+        <option value="Parcel">
+            Parcel
+        </option>
+
+        <option value="Food Delivery">
+            Food Delivery
+        </option>
+
+    </select>
+
+</div>
+
+
+<div class="field">
+
+    <label>
+        Payment
+    </label>
+
+    <select id="paymentFilter">
+
+        <option value="all">
+            All Payments
+        </option>
+
+        <option value="Cash">
+            Cash
+        </option>
+
+        <option value="Online">
+            Online
+        </option>
+
+        <option value="Wallet">
+            Wallet
+        </option>
+
+    </select>
+
+</div>
+
+
+<div class="field">
+
+    <label>
+        Date
+    </label>
+
+    <input
+        type="date"
+        id="dateFilter"
+    >
+
+</div>
+
+
+<button
+    type="button"
+    class="secondary"
+    id="clearBtn"
+>
+    Clear
 </button>
 
+</section><section class="table-card"><div class="table-head">
 
+    <h2>
+        All Rides
+    </h2>
 
-
-<div class="title">
-
-Manage Rides
-
-</div>
-
-
-
-
-<div id="rideList">
-
-Loading Rides...
+    <span id="resultCount">
+        0 rides
+    </span>
 
 </div>
 
 
+<div class="table-wrap">
 
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>
+                    Ride
+                </th>
+
+                <th>
+                    Customer
+                </th>
+
+                <th>
+                    Rider
+                </th>
+
+                <th>
+                    Service
+                </th>
+
+                <th>
+                    Route
+                </th>
+
+                <th>
+                    Fare
+                </th>
+
+                <th>
+                    Payment
+                </th>
+
+                <th>
+                    Status
+                </th>
+
+                <th>
+                    Date
+                </th>
+
+                <th>
+                    Action
+                </th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody
+            id="rideTable"
+        ></tbody>
+
+    </table>
+
+</div>
+
+</section></main></div><div
+    class="modal"
+    id="rideModal"
+><div class="modal-card"><div class="modal-head">
+
+    <h2>
+        Ride Details
+    </h2>
+
+    <button
+        type="button"
+        class="close"
+        id="closeModal"
+    >
+        ×
+    </button>
 
 </div>
 
 
+<div class="modal-body">
 
 
-<script type="module"
-src="./js/rides.js"></script>
+    <div class="detail-grid">
+
+
+        <div class="detail">
+
+            <label>
+                Ride ID
+            </label>
+
+            <strong id="dRideId">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <label>
+                Status
+            </label>
+
+            <strong id="dStatus">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <label>
+                Customer
+            </label>
+
+            <strong id="dCustomer">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <label>
+                Rider
+            </label>
+
+            <strong id="dRider">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <label>
+                Service
+            </label>
+
+            <strong id="dService">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <label>
+                Fare
+            </label>
+
+            <strong id="dFare">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <label>
+                Payment
+            </label>
+
+            <strong id="dPayment">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+            <label>
+                Date & Time
+            </label>
+
+            <strong id="dDate">
+                —
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="route">
+
+
+        <div class="location">
+
+            <small>
+                Pickup
+            </small>
+
+            <div id="dPickup">
+                —
+            </div>
+
+        </div>
+
+
+        <div class="location">
+
+            <small>
+                Destination
+            </small>
+
+            <div id="dDestination">
+                —
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            type="button"
+            class="secondary"
+            id="closeModalBtn"
+        >
+            Close
+        </button>
+
+    </div>
+
+
+</div>
+
+</div></div><div
+    class="toast"
+    id="toast"
+></div><script>
+
+"use strict";
+
+
+const STORAGE_KEY =
+    "riderx_admin_rides";
+
+
+const DEFAULT_RIDES = [
+
+    {
+        id:"RX100284",
+        customer:"Aman Kumar",
+        customerPhone:"98XXXXXX21",
+        rider:"Rohit Singh",
+        riderPhone:"97XXXXXX48",
+        service:"Bike Taxi",
+        pickup:"Sector 17, Chandigarh",
+        destination:"Mohali Phase 7",
+        fare:128,
+        payment:"Online",
+        status:"completed",
+        date:"2026-08-09",
+        time:"10:32 AM"
+    },
+
+    {
+        id:"RX100283",
+        customer:"Simran Kaur",
+        customerPhone:"95XXXXXX31",
+        rider:"Deepak Kumar",
+        riderPhone:"96XXXXXX72",
+        service:"Cab",
+        pickup:"ISBT Sector 43",
+        destination:"Zirakpur",
+        fare:286,
+        payment:"Cash",
+        status:"ongoing",
+        date:"2026-08-09",
+        time:"10:18 AM"
+    },
+
+    {
+        id:"RX100282",
+        customer:"Harpreet Singh",
+        customerPhone:"99XXXXXX17",
+        rider:"Manpreet Singh",
+        riderPhone:"98XXXXXX65",
+        service:"Bike Taxi",
+        pickup:"Sector 22",
+        destination:"Industrial Area",
+        fare:94,
+        payment:"Wallet",
+        status:"completed",
+        date:"2026-08-09",
+        time:"09:55 AM"
+    },
+
+    {
+        id:"RX100281",
+        customer:"Neha Sharma",
+        customerPhone:"97XXXXXX44",
+        rider:"—",
+        riderPhone:"",
+        service:"Parcel",
+        pickup:"Sector 35",
+        destination:"Sector 44",
+        fare:82,
+        payment:"Online",
+        status:"searching",
+        date:"2026-08-09",
+        time:"09:40 AM"
+    },
+
+    {
+        id:"RX100280",
+        customer:"Vikas Verma",
+        customerPhone:"94XXXXXX82",
+        rider:"Sandeep Kumar",
+        riderPhone:"99XXXXXX53",
+        service:"Food Delivery",
+        pickup:"Sector 8",
+        destination:"Sector 15",
+        fare:71,
+        payment:"Online",
+        status:"completed",
+        date:"2026-08-08",
+        time:"09:21 PM"
+    },
+
+    {
+        id:"RX100279",
+        customer:"Pooja",
+        customerPhone:"96XXXXXX26",
+        rider:"—",
+        riderPhone:"",
+        service:"Cab",
+        pickup:"Sector 34",
+        destination:"Panchkula",
+        fare:310,
+        payment:"Cash",
+        status:"cancelled",
+        date:"2026-08-08",
+        time:"08:42 PM"
+    },
+
+    {
+        id:"RX100278",
+        customer:"Rajveer Singh",
+        customerPhone:"98XXXXXX11",
+        rider:"Gurpreet Singh",
+        riderPhone:"97XXXXXX16",
+        service:"Bike Taxi",
+        pickup:"Manimajra",
+        destination:"Sector 17",
+        fare:116,
+        payment:"Online",
+        status:"completed",
+        date:"2026-08-08",
+        time:"07:16 PM"
+    },
+
+    {
+        id:"RX100277",
+        customer:"Karan",
+        customerPhone:"95XXXXXX09",
+        rider:"Amit Kumar",
+        riderPhone:"98XXXXXX73",
+        service:"Bike Taxi",
+        pickup:"Sector 15",
+        destination:"Kharar",
+        fare:178,
+        payment:"Cash",
+        status:"pending",
+        date:"2026-08-08",
+        time:"06:55 PM"
+    }
+
+];
+
+
+let rides = [];
+
+let filteredRides = [];
 
 
 
-</body>
+const table =
+    document.getElementById(
+        "rideTable"
+    );
 
-</html>
+const modal =
+    document.getElementById(
+        "rideModal"
+    );
+
+const toast =
+    document.getElementById(
+        "toast"
+    );
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadRides();
+
+        bindEvents();
+
+        applyFilters();
+
+    }
+);
+
+
+
+function loadRides(){
+
+    try{
+
+        const saved =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if(saved){
+
+            const parsed =
+                JSON.parse(
+                    saved
+                );
+
+
+            if(
+                Array.isArray(
+                    parsed
+                )
+            ){
+
+                rides =
+                    parsed;
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Ride load error:",
+            error
+        );
+
+    }
+
+
+    if(
+        !Array.isArray(
+            rides
+        ) ||
+        rides.length === 0
+    ){
+
+        rides =
+            JSON.parse(
+                JSON.stringify(
+                    DEFAULT_RIDES
+                )
+            );
+
+        saveRides();
+
+    }
+
+}
+
+
+
+function saveRides(){
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(
+            rides
+        )
+    );
+
+}
+
+
+
+function bindEvents(){
+
+    document
+        .getElementById(
+            "search"
+        )
+        .addEventListener(
+            "input",
+            applyFilters
+        );
+
+
+    document
+        .getElementById(
+            "statusFilter"
+        )
+        .addEventListener(
+            "change",
+            applyFilters
+        );
+
+
+    document
+        .getElementById(
+            "serviceFilter"
+        )
+        .addEventListener(
+            "change",
+            applyFilters
+        );
+
+
+    document
+        .getElementById(
+            "paymentFilter"
+        )
+        .addEventListener(
+            "change",
+            applyFilters
+        );
+
+
+    document
+        .getElementById(
+            "dateFilter"
+        )
+        .addEventListener(
+            "change",
+            applyFilters
+        );
+
+
+    document
+        .getElementById(
+            "clearBtn"
+        )
+        .addEventListener(
+            "click",
+            clearFilters
+        );
+
+
+    document
+        .getElementById(
+            "refreshBtn"
+        )
+        .addEventListener(
+            "click",
+            function(){
+
+                loadRides();
+
+                applyFilters();
+
+                showToast(
+                    "Rides refreshed."
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "exportBtn"
+        )
+        .addEventListener(
+            "click",
+            exportCSV
+        );
+
+
+    document
+        .getElementById(
+            "closeModal"
+        )
+        .addEventListener(
+            "click",
+            closeModal
+        );
+
+
+    document
+        .getElementById(
+            "closeModalBtn"
+        )
+        .addEventListener(
+            "click",
+            closeModal
+        );
+
+
+    modal.addEventListener(
+        "click",
+        function(event){
+
+            if(
+                event.target ===
+                modal
+            ){
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+}
+
+
+
+function applyFilters(){
+
+    const search =
+        document
+            .getElementById(
+                "search"
+            )
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    const status =
+        document
+            .getElementById(
+                "statusFilter"
+            )
+            .value;
+
+
+    const service =
+        document
+            .getElementById(
+                "serviceFilter"
+            )
+            .value;
+
+
+    const payment =
+        document
+            .getElementById(
+                "paymentFilter"
+            )
+            .value;
+
+
+    const date =
+        document
+            .getElementById(
+                "dateFilter"
+            )
+            .value;
+
+
+    filteredRides =
+        rides.filter(
+            function(ride){
+
+                const searchable =
+                    [
+                        ride.id,
+                        ride.customer,
+                        ride.customerPhone,
+                        ride.rider,
+                        ride.riderPhone,
+                        ride.pickup,
+                        ride.destination
+                    ]
+                    .join(" ")
+                    .toLowerCase();
+
+
+                if(
+                    search &&
+                    !searchable.includes(
+                        search
+                    )
+                ){
+
+                    return false;
+
+                }
+
+
+                if(
+                    status !== "all" &&
+                    ride.status !== status
+                ){
+
+                    return false;
+
+                }
+
+
+                if(
+                    service !== "all" &&
+                    ride.service !== service
+                ){
+
+                    return false;
+
+                }
+
+
+                if(
+                    payment !== "all" &&
+                    ride.payment !== payment
+                ){
+
+                    return false;
+
+                }
+
+
+                if(
+                    date &&
+                    ride.date !== date
+                ){
+
+                    return false;
+
+                }
+
+
+                return true;
+
+            }
+        );
+
+
+    renderTable();
+
+    updateStats();
+
+}
+
+
+
+function renderTable(){
+
+    table.innerHTML =
+        "";
+
+
+    document
+        .getElementById(
+            "resultCount"
+        )
+        .textContent =
+        filteredRides.length +
+        (
+            filteredRides.length === 1
+                ? " ride"
+                : " rides"
+        );
+
+
+    if(
+        filteredRides.length === 0
+    ){
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td colspan="10">
+
+                    <div class="empty">
+
+                        <div class="empty-icon">
+                            🚕
+                        </div>
+
+                        <div class="empty-title">
+                            No rides found
+                        </div>
+
+                        <div class="empty-text">
+                            Try changing your filters or search.
+                        </div>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    filteredRides.forEach(
+        function(ride){
+
+            const tr =
+                document.createElement(
+                    "tr"
+                );
+
+
+            tr.innerHTML = `
+
+                <td>
+
+                    <div class="ride-id">
+                        ${escapeHtml(ride.id)}
+                    </div>
+
+                    <div class="sub">
+                        ${escapeHtml(ride.time)}
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <div class="person">
+                        ${escapeHtml(ride.customer)}
+                    </div>
+
+                    <div class="sub">
+                        ${escapeHtml(ride.customerPhone)}
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <div class="person">
+                        ${escapeHtml(ride.rider)}
+                    </div>
+
+                    <div class="sub">
+                        ${escapeHtml(ride.riderPhone || "—")}
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <span class="service">
+                        ${serviceIcon(ride.service)}
+                        ${escapeHtml(ride.service)}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <div class="sub">
+                        ${escapeHtml(ride.pickup)}
+                    </div>
+
+                    <div class="sub">
+                        ↓ ${escapeHtml(ride.destination)}
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <strong style="color:#fff;">
+                        ₹${money(ride.fare)}
+                    </strong>
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="
+                            payment
+                            ${paymentClass(ride.payment)}
+                        "
+                    >
+                        ${escapeHtml(ride.payment)}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="
+                            status
+                            ${escapeHtml(ride.status)}
+                        "
+                    >
+                        ${escapeHtml(ride.status)}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(ride.date)}
+
+                </td>
+
+
+                <td>
+
+                    <button
+                        type="button"
+                        class="view-btn"
+                        data-id="${escapeHtml(ride.id)}"
+                    >
+                        View
+                    </button>
+
+                </td>
+
+            `;
+
+
+            table.appendChild(
+                tr
+            );
+
+        }
+    );
+
+
+    table
+        .querySelectorAll(
+            "[data-id]"
+        )
+        .forEach(
+            function(button){
+
+                button.addEventListener(
+                    "click",
+                    function(){
+
+                        openRide(
+                            button.dataset.id
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+
+function updateStats(){
+
+    const source =
+        filteredRides;
+
+
+    const total =
+        source.length;
+
+
+    const completed =
+        source.filter(
+            function(ride){
+
+                return ride.status ===
+                    "completed";
+
+            }
+        ).length;
+
+
+    const ongoing =
+        source.filter(
+            function(ride){
+
+                return [
+                    "ongoing",
+                    "searching",
+                    "pending"
+                ].includes(
+                    ride.status
+                );
+
+            }
+        ).length;
+
+
+    const cancelled =
+        source.filter(
+            function(ride){
+
+                return ride.status ===
+                    "cancelled";
+
+            }
+        ).length;
+
+
+    const revenue =
+        source
+            .filter(
+                function(ride){
+
+                    return ride.status !==
+                        "cancelled";
+
+                }
+            )
+            .reduce(
+                function(sum,ride){
+
+                    return sum +
+                        Number(
+                            ride.fare
+                        || 0
+                        );
+
+                },
+                0
+            );
+
+
+    document
+        .getElementById(
+            "totalRides"
+        )
+        .textContent =
+        number(total);
+
+
+    document
+        .getElementById(
+            "completedRides"
+        )
+        .textContent =
+        number(completed);
+
+
+    document
+        .getElementById(
+            "ongoingRides"
+        )
+        .textContent =
+        number(ongoing);
+
+
+    document
+        .getElementById(
+            "cancelledRides"
+        )
+        .textContent =
+        number(cancelled);
+
+
+    document
+        .getElementById(
+            "totalRevenue"
+        )
+        .textContent =
+        "₹" +
+        money(revenue);
+
+}
+
+
+
+function openRide(
+    id
+){
+
+    const ride =
+        rides.find(
+            function(item){
+
+                return item.id ===
+                    id;
+
+            }
+        );
+
+
+    if(!ride){
+
+        return;
+
+    }
+
+
+    setText(
+        "dRideId",
+        ride.id
+    );
+
+
+    setText(
+        "dStatus",
+        ride.status
+    );
+
+
+    setText(
+        "dCustomer",
+        ride.customer
+    );
+
+
+    setText(
+        "dRider",
+        ride.rider || "—"
+    );
+
+
+    setText(
+        "dService",
+        ride.service
+    );
+
+
+    setText(
+        "dFare",
+        "₹" + money(
+            ride.fare
+        )
+    );
+
+
+    setText(
+        "dPayment",
+        ride.payment
+    );
+
+
+    setText(
+        "dDate",
+        ride.date +
+        " • " +
+        ride.time
+    );
+
+
+    setText(
+        "dPickup",
+        ride.pickup
+    );
+
+
+    setText(
+        "dDestination",
+        ride.destination
+    );
+
+
+    modal.classList.add(
+        "show"
+    );
+
+}
+
+
+
+function closeModal(){
+
+    modal.classList.remove(
+        "show"
+    );
+
+}
+
+
+
+function clearFilters(){
+
+    document
+        .getElementById(
+            "search"
+        )
+        .value =
+        "";
+
+
+    document
+        .getElementById(
+            "statusFilter"
+        )
+        .value =
+        "all";
+
+
+    document
+        .getElementById(
+            "serviceFilter"
+        )
+        .value =
+        "all";
+
+
+    document
+        .getElementById(
+            "paymentFilter"
+        )
+        .value =
+        "all";
+
+
+    document
+        .getElementById(
+            "dateFilter"
+        )
+        .value =
+        "";
+
+
+    applyFilters();
+
+}
+
+
+
+function exportCSV(){
+
+    if(
+        filteredRides.length === 0
+    ){
+
+        showToast(
+            "No rides to export."
+        );
+
+        return;
+
+    }
+
+
+    const rows = [
+
+        [
+            "Ride ID",
+            "Customer",
+            "Customer Phone",
+            "Rider",
+            "Rider Phone",
+            "Service",
+            "Pickup",
+            "Destination",
+            "Fare",
+            "Payment",
+            "Status",
+            "Date",
+            "Time"
+        ]
+
+    ];
+
+
+    filteredRides.forEach(
+        function(ride){
+
+            rows.push(
+                [
+                    ride.id,
+                    ride.customer,
+                    ride.customerPhone,
+                    ride.rider,
+                    ride.riderPhone,
+                    ride.service,
+                    ride.pickup,
+                    ride.destination,
+                    ride.fare,
+                    ride.payment,
+                    ride.status,
+                    ride.date,
+                    ride.time
+                ]
+            );
+
+        }
+    );
+
+
+    const csv =
+        rows
+            .map(
+                function(row){
+
+                    return row
+                        .map(
+                            function(value){
+
+                                return '"' +
+                                    String(
+                                        value ?? ""
+                                    )
+                                    .replace(
+                                        /"/g,
+                                        '""'
+                                    ) +
+                                    '"';
+
+                            }
+                        )
+                        .join(",");
+
+                }
+            )
+            .join("\n");
+
+
+    const blob =
+        new Blob(
+            [
+                csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "riderx-rides-" +
+        new Date()
+            .toISOString()
+            .slice(
+                0,
+                10
+            ) +
+        ".csv";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+    link.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+
+    showToast(
+        "Rides exported successfully."
+    );
+
+}
+
+
+
+function serviceIcon(
+    service
+){
+
+    if(
+        service ===
+        "Bike Taxi"
+    ){
+
+        return "🏍️";
+
+    }
+
+
+    if(
+        service ===
+        "Cab"
+    ){
+
+        return "🚕";
+
+    }
+
+
+    if(
+        service ===
+        "Parcel"
+    ){
+
+        return "📦";
+
+    }
+
+
+    if(
+        service ===
+        "Food Delivery"
+    ){
+
+        return "🍔";
+
+    }
+
+
+    return "🚘";
+
+}
+
+
+
+function paymentClass(
+    payment
+){
+
+    if(
+        payment ===
+        "Online" ||
+        payment ===
+        "Wallet"
+    ){
+
+        return "paid";
+
+    }
+
+
+    return "";
+
+}
+
+
+
+function setText(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(element){
+
+        element.textContent =
+            value ?? "—";
+
+    }
+
+}
+
+
+
+function number(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN"
+    );
+
+}
+
+
+
+function money(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN",
+        {
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+
+function showToast(
+    message
+){
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        window.ridesToast
+    );
+
+
+    window.ridesToast =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+</script></body></html>
