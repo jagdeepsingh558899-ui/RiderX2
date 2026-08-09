@@ -34,9 +34,9 @@
 
         html,
         body {
-            margin: 0;
             width: 100%;
             min-height: 100%;
+            margin: 0;
         }
 
         body {
@@ -53,27 +53,27 @@
         }
 
         .page {
+            position: relative;
             min-height: 100vh;
             min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
             padding:
                 max(18px, env(safe-area-inset-top))
                 max(18px, env(safe-area-inset-right))
                 max(18px, env(safe-area-inset-bottom))
                 max(18px, env(safe-area-inset-left));
-            position: relative;
-            overflow: hidden;
         }
 
         .page::before {
             content: "";
             position: absolute;
-            width: 400px;
-            height: 400px;
-            top: -240px;
-            right: -160px;
+            width: 410px;
+            height: 410px;
+            top: -250px;
+            right: -165px;
             border-radius: 50%;
             background: rgba(255, 212, 0, .08);
         }
@@ -250,8 +250,8 @@
 
         .options {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
             margin: 14px 0 18px;
         }
@@ -276,6 +276,11 @@
             cursor: pointer;
             font-size: 9px;
             font-weight: 900;
+        }
+
+        .forgot:disabled {
+            opacity: .5;
+            cursor: not-allowed;
         }
 
         .primary {
@@ -352,6 +357,7 @@
 
         .customer-link button {
             border: 0;
+            padding: 0;
             background: transparent;
             color: #888888;
             cursor: pointer;
@@ -455,7 +461,7 @@
 
             <p>
                 Sign in to go online, receive rides,
-                navigate to customers and manage your earnings.
+                navigate to customers and manage earnings.
             </p>
 
             <div class="badge">
@@ -613,13 +619,24 @@
         <div class="requirements">
 
             <div class="requirement">
-                <strong>Approval</strong>
+
+                <strong>
+                    Approval
+                </strong>
+
                 Admin verification required
+
             </div>
 
+
             <div class="requirement">
-                <strong>Documents</strong>
+
+                <strong>
+                    Documents
+                </strong>
+
                 Valid rider documents
+
             </div>
 
         </div>
@@ -730,11 +747,19 @@
         false;
 
 
-    localStorage.setItem(
-        "riderx_selected_role",
+    /*
+     * This page is strictly the Rider / Driver Partner
+     * authentication gateway.
+     */
+
+    setRole(
         "rider"
     );
 
+
+    /*
+     * Restore remembered rider email.
+     */
 
     const rememberedEmail =
         localStorage.getItem(
@@ -754,6 +779,10 @@
 
     }
 
+
+    /*
+     * Password visibility.
+     */
 
     togglePassword.addEventListener(
         "click",
@@ -778,6 +807,10 @@
         }
     );
 
+
+    /*
+     * Rider email/password login.
+     */
 
     form.addEventListener(
         "submit",
@@ -901,15 +934,12 @@
                     !profile
                 ) {
 
-                    await signOut(
-                        auth
-                    );
+                    await safeSignOut();
 
 
                     showError(
                         "This Firebase account does not have a RiderX rider profile. Please register as a rider first."
                     );
-
 
                     return;
 
@@ -930,20 +960,23 @@
                     "rider"
                 ) {
 
-                    await signOut(
-                        auth
-                    );
+                    await safeSignOut();
 
 
                     showError(
                         "This account belongs to the Customer side. Please use Customer Login."
                     );
 
-
                     return;
 
                 }
 
+
+                /*
+                 * IMPORTANT:
+                 * Do NOT create a local rider session until
+                 * the rider has passed the access checks.
+                 */
 
                 const access =
                     riderAccess(
@@ -955,28 +988,27 @@
                     !access.allowed
                 ) {
 
-                    await createSession(
-                        firebaseUser,
-                        profile
-                    );
+                    await safeSignOut();
 
 
-                    await signOut(
-                        auth
-                    );
+                    clearRiderSession();
 
 
                     showError(
                         access.message
                     );
 
-
                     return;
 
                 }
 
 
-                await createSession(
+                /*
+                 * Approved rider:
+                 * create the complete local session.
+                 */
+
+                createSession(
                     firebaseUser,
                     profile
                 );
@@ -1033,6 +1065,7 @@
                     )
                 );
 
+
             } finally {
 
                 busy =
@@ -1048,6 +1081,16 @@
         }
     );
 
+
+    /*
+     * Find rider profile.
+     *
+     * Primary:
+     * users/{uid}
+     *
+     * Compatibility fallback:
+     * riders/{uid}
+     */
 
     async function findRiderProfile(
         uid
@@ -1109,7 +1152,45 @@
             riderSnapshot.exists()
         ) {
 
-            return riderSnapshot.data();
+            const data =
+                riderSnapshot.data();
+
+
+            /*
+             * Older RiderX rider documents may not have
+             * an explicit role field. Keep compatibility
+             * with that existing structure.
+             */
+
+            const roleValue =
+                data.role ||
+                data.userRole ||
+                data.accountType;
+
+
+            if (
+                roleValue
+            ) {
+
+                const role =
+                    normalizeRole(
+                        roleValue
+                    );
+
+
+                if (
+                    role !==
+                    "rider"
+                ) {
+
+                    return null;
+
+                }
+
+            }
+
+
+            return data;
 
         }
 
@@ -1118,6 +1199,10 @@
 
     }
 
+
+    /*
+     * Rider access control.
+     */
 
     function riderAccess(
         profile
@@ -1197,9 +1282,8 @@
 
 
         /*
-         * If an existing RiderX profile has no explicit
-         * approval field, preserve compatibility with
-         * older approved rider accounts.
+         * Existing RiderX accounts without explicit
+         * approval fields remain compatible.
          */
 
         return {
@@ -1215,7 +1299,12 @@
     }
 
 
-    async function createSession(
+    /*
+     * Create the local RiderX session only after
+     * authentication and access checks pass.
+     */
+
+    function createSession(
         firebaseUser,
         profile
     ) {
@@ -1256,6 +1345,14 @@
                 firebaseUser.displayName ||
                 "",
 
+            firstName:
+                profile.firstName ||
+                "",
+
+            lastName:
+                profile.lastName ||
+                "",
+
             email:
                 profile.email ||
                 firebaseUser.email ||
@@ -1283,26 +1380,32 @@
                 "",
 
             rating:
-                Number(
-                    profile.rating ||
+                numberValue(
+                    profile.rating,
                     5
                 ),
 
             walletBalance:
-                Number(
-                    profile.walletBalance ||
+                numberValue(
+                    profile.walletBalance,
                     0
                 ),
 
             totalRides:
-                Number(
-                    profile.totalRides ||
+                numberValue(
+                    profile.totalRides,
                     0
                 ),
 
             completedRides:
-                Number(
-                    profile.completedRides ||
+                numberValue(
+                    profile.completedRides,
+                    0
+                ),
+
+            cancelledRides:
+                numberValue(
+                    profile.cancelledRides,
                     0
                 ),
 
@@ -1316,6 +1419,14 @@
 
             vehicleNumber:
                 profile.vehicleNumber ||
+                "",
+
+            vehicleModel:
+                profile.vehicleModel ||
+                "",
+
+            vehicleBrand:
+                profile.vehicleBrand ||
                 "",
 
             approvalStatus:
@@ -1388,6 +1499,74 @@
     }
 
 
+    /*
+     * Remove stale Rider session data.
+     */
+
+    function clearRiderSession() {
+
+        localStorage.removeItem(
+            "riderx_user"
+        );
+
+        localStorage.removeItem(
+            "riderx_rider"
+        );
+
+        localStorage.removeItem(
+            "riderx_rider_id"
+        );
+
+        localStorage.removeItem(
+            "userRole"
+        );
+
+        localStorage.removeItem(
+            "riderx_role"
+        );
+
+    }
+
+
+    async function safeSignOut() {
+
+        try {
+
+            await signOut(
+                auth
+            );
+
+        } catch (
+            error
+        ) {
+
+            console.warn(
+                "RiderX sign-out warning:",
+                error
+            );
+
+        }
+
+    }
+
+
+    function setRole(
+        role
+    ) {
+
+        localStorage.setItem(
+            "riderx_selected_role",
+            role
+        );
+
+        localStorage.setItem(
+            "riderx_role",
+            role
+        );
+
+    }
+
+
     function normalizeRole(
         role
     ) {
@@ -1423,6 +1602,26 @@
 
 
         return "customer";
+
+    }
+
+
+    function numberValue(
+        value,
+        fallback
+    ) {
+
+        const number =
+            Number(
+                value
+            );
+
+
+        return Number.isFinite(
+            number
+        )
+            ? number
+            : fallback;
 
     }
 
@@ -1524,12 +1723,15 @@
     }
 
 
+    /*
+     * OTP login.
+     */
+
     otpButton.addEventListener(
         "click",
         function () {
 
-            localStorage.setItem(
-                "riderx_selected_role",
+            setRole(
                 "rider"
             );
 
@@ -1541,12 +1743,15 @@
     );
 
 
+    /*
+     * Rider registration.
+     */
+
     registerButton.addEventListener(
         "click",
         function () {
 
-            localStorage.setItem(
-                "riderx_selected_role",
+            setRole(
                 "rider"
             );
 
@@ -1558,12 +1763,15 @@
     );
 
 
+    /*
+     * Customer login.
+     */
+
     customerLoginButton.addEventListener(
         "click",
         function () {
 
-            localStorage.setItem(
-                "riderx_selected_role",
+            setRole(
                 "customer"
             );
 
@@ -1574,6 +1782,10 @@
         }
     );
 
+
+    /*
+     * Password reset.
+     */
 
     forgotPassword.addEventListener(
         "click",
@@ -1612,6 +1824,8 @@
                 showError(
                     "Please enter a valid email address."
                 );
+
+                emailInput.focus();
 
                 return;
 
@@ -1662,6 +1876,10 @@
         }
     );
 
+
+    /*
+     * Firebase error translator.
+     */
 
     function firebaseMessage(
         error
@@ -1724,7 +1942,28 @@
                 return "This RiderX domain is not authorized in Firebase.";
 
 
+            case "permission-denied":
+
+                return "Firebase permission denied. Please check Firestore security rules.";
+
+
             default:
+
+                if (
+                    String(
+                        error?.message ||
+                        ""
+                    )
+                        .toLowerCase()
+                        .includes(
+                            "permission"
+                        )
+                ) {
+
+                    return "Firebase permission denied. Please check Firestore security rules.";
+
+                }
+
 
                 return (
                     error?.message ||
