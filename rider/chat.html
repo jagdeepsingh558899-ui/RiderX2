@@ -1,1032 +1,878 @@
-<!DOCTYPE html><html lang="en">
-<head><meta charset="UTF-8"><meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-«»
+<title>RiderX - Chat</title>
 
-<meta name="theme-color" content="#000000"><title>RiderX | Chat</title><link
-    rel="stylesheet"
-    href="../css/style.css"
-><link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-><link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-><style>
+<meta name="theme-color" content="#FFD400">
 
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
+
+<style>
 :root{
-    --yellow:#ffe500;
-    --black:#000;
-    --dark:#090909;
-    --card:#151515;
-    --card2:#202020;
-    --line:#292929;
-    --white:#fff;
-    --muted:#858585;
+    --yellow:#FFD400;
+    --black:#090909;
+    --dark:#111111;
+    --card:#181818;
+    --border:#292929;
+    --text:#ffffff;
+    --muted:#9a9a9a;
     --green:#22c55e;
-    --red:#ef4444;
 }
 
 *{
     box-sizing:border-box;
     margin:0;
     padding:0;
-    font-family:Poppins,Arial,sans-serif;
-    -webkit-tap-highlight-color:transparent;
 }
 
-html,
 body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
     background:var(--black);
-    color:var(--white);
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+    min-height:100vh;
+    overflow:hidden;
 }
 
-body{
+.chat-app{
+    height:100vh;
+    height:100dvh;
     display:flex;
     flex-direction:column;
+    max-width:650px;
+    margin:auto;
+    background:#0d0d0d;
 }
 
-/* ================================
-   HEADER
-================================ */
+/* HEADER */
 
 .chat-header{
-
-    flex-shrink:0;
-
-    min-height:
-        calc(
-            64px +
-            env(safe-area-inset-top)
-        );
-
-    padding:
-        env(safe-area-inset-top)
-        14px
-        0;
-
-    background:#090909;
-
-    border-bottom:
-        1px solid
-        var(--line);
-
+    height:70px;
+    min-height:70px;
     display:flex;
     align-items:center;
     gap:12px;
-
-    z-index:20;
+    padding:10px 14px;
+    background:#111;
+    border-bottom:1px solid var(--border);
+    position:relative;
+    z-index:10;
 }
 
 .back-btn{
-
     width:42px;
     height:42px;
-
     border:0;
     border-radius:50%;
+    background:#1d1d1d;
+    color:white;
+    font-size:25px;
+    cursor:pointer;
+}
 
-    background:#191919;
-    color:#fff;
-
+.chat-user{
     display:flex;
     align-items:center;
-    justify-content:center;
-
-    font-size:17px;
-
-    flex-shrink:0;
+    gap:10px;
+    flex:1;
+    min-width:0;
 }
 
-.back-btn:active{
-    transform:scale(.92);
-}
-
-.customer-avatar{
-
+.user-avatar{
     width:43px;
     height:43px;
-
+    min-width:43px;
     border-radius:50%;
-
     background:var(--yellow);
     color:#000;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
-    font-size:17px;
+    font-size:18px;
     font-weight:800;
-
-    flex-shrink:0;
 }
 
-.customer-info{
+.user-info{
     min-width:0;
-    flex:1;
 }
 
-.customer-name{
-
-    font-size:14px;
+.user-name{
+    font-size:16px;
     font-weight:700;
-
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
 }
 
-.customer-status{
-
-    margin-top:2px;
-
-    display:flex;
-    align-items:center;
-    gap:5px;
-
+.user-status{
     color:var(--green);
-
-    font-size:10px;
-}
-
-.online-dot{
-
-    width:7px;
-    height:7px;
-
-    border-radius:50%;
-
-    background:var(--green);
+    font-size:12px;
+    margin-top:3px;
 }
 
 .header-action{
-
     width:40px;
     height:40px;
-
     border:0;
     border-radius:50%;
-
-    background:#191919;
-    color:#fff;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:15px;
+    background:#1d1d1d;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
 }
 
-.header-action:active{
-    transform:scale(.92);
-}
+/* MESSAGES */
 
-/* ================================
-   CHAT AREA
-================================ */
-
-.chat-wrapper{
-
+.chat-messages{
     flex:1;
-
-    min-height:0;
-
-    position:relative;
-
+    overflow-y:auto;
+    padding:18px 14px 12px;
     display:flex;
     flex-direction:column;
-
+    gap:10px;
     background:
-        radial-gradient(
-            circle at top,
-            #171717 0%,
-            #090909 55%,
-            #050505 100%
-        );
+        radial-gradient(circle at top,rgba(255,212,0,.05),transparent 35%),
+        #0d0d0d;
 }
 
-.chat-box{
-
-    flex:1;
-
-    min-height:0;
-
-    overflow-y:auto;
-    overflow-x:hidden;
-
-    padding:
-        18px
-        14px
-        18px;
-
-    scroll-behavior:smooth;
-
-    overscroll-behavior:contain;
-
-    -webkit-overflow-scrolling:touch;
+.chat-messages::-webkit-scrollbar{
+    width:4px;
 }
 
-/* scrollbar */
-
-.chat-box::-webkit-scrollbar{
-    width:3px;
-}
-
-.chat-box::-webkit-scrollbar-thumb{
-    background:#3b3b3b;
+.chat-messages::-webkit-scrollbar-thumb{
+    background:#333;
     border-radius:10px;
 }
 
-/* ================================
-   DATE DIVIDER
-================================ */
-
-.date-divider{
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    margin:
-        5px
-        0
-        16px;
-}
-
-.date-divider span{
-
-    padding:
-        5px
-        10px;
-
-    border-radius:20px;
-
+.date-label{
+    align-self:center;
     background:#1b1b1b;
-
-    color:#777;
-
-    font-size:9px;
+    color:#8f8f8f;
+    padding:6px 12px;
+    border-radius:20px;
+    font-size:11px;
+    margin:3px 0 8px;
 }
-
-/* ================================
-   MESSAGE
-================================ */
 
 .message{
-
     display:flex;
-
-    margin-bottom:10px;
-
-    width:100%;
-}
-
-.message.customer{
-    justify-content:flex-start;
+    max-width:82%;
 }
 
 .message.rider{
+    align-self:flex-end;
     justify-content:flex-end;
 }
 
-.message-content{
+.message.customer{
+    align-self:flex-start;
+}
 
-    max-width:78%;
-
-    padding:
-        10px
-        12px;
-
+.bubble{
+    padding:10px 13px;
     border-radius:17px;
-
-    font-size:12px;
-
-    line-height:1.45;
-
+    font-size:14px;
+    line-height:1.4;
     word-break:break-word;
+    position:relative;
 }
 
-.message.customer
-.message-content{
-
+.customer .bubble{
     background:#202020;
-
-    color:#fff;
-
     border-bottom-left-radius:5px;
+    color:#fff;
 }
 
-.message.rider
-.message-content{
-
+.rider .bubble{
     background:var(--yellow);
-
     color:#000;
-
     border-bottom-right-radius:5px;
 }
 
 .message-time{
-
-    margin-top:4px;
-
-    text-align:right;
-
-    font-size:8px;
-
-    opacity:.55;
-}
-
-/* ================================
-   SYSTEM MESSAGE
-================================ */
-
-.system-message{
-
-    display:flex;
-    justify-content:center;
-
-    margin:
-        10px
-        0;
-}
-
-.system-message span{
-
-    max-width:85%;
-
-    padding:
-        7px
-        12px;
-
-    border-radius:15px;
-
-    background:#151515;
-
-    color:#777;
-
+    display:block;
     font-size:9px;
-
-    text-align:center;
-}
-
-/* ================================
-   LOADING
-================================ */
-
-.chat-loading{
-
-    height:100%;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-    justify-content:center;
-
-    color:#777;
-
-    gap:10px;
-
-    font-size:11px;
-}
-
-.chat-loading i{
-
-    color:var(--yellow);
-
-    font-size:20px;
-}
-
-/* ================================
-   EMPTY
-================================ */
-
-.chat-empty{
-
-    height:100%;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-
-    color:#777;
-}
-
-.chat-empty i{
-
-    width:55px;
-    height:55px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:50%;
-
-    background:#191919;
-
-    color:var(--yellow);
-
-    font-size:21px;
-
-    margin-bottom:12px;
-}
-
-.chat-empty strong{
-
-    color:#fff;
-
-    font-size:13px;
-}
-
-.chat-empty p{
-
     margin-top:4px;
-
-    font-size:10px;
-
-    max-width:230px;
+    opacity:.6;
+    text-align:right;
 }
 
-/* ================================
-   INPUT AREA
-================================ */
+/* EMPTY */
 
-.composer{
-
-    flex-shrink:0;
-
-    padding:
-        9px
-        10px
-        max(
-            10px,
-            env(safe-area-inset-bottom)
-        );
-
-    background:#090909;
-
-    border-top:
-        1px solid
-        var(--line);
-
-    display:flex;
-
-    align-items:flex-end;
-
-    gap:8px;
-}
-
-.attach-btn{
-
-    width:43px;
-    height:43px;
-
-    min-width:43px;
-
-    border:0;
-    border-radius:50%;
-
-    background:#191919;
-
-    color:#aaa;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.attach-btn:active{
-    transform:scale(.92);
-}
-
-.input-container{
-
-    flex:1;
-
-    min-width:0;
-
-    display:flex;
-
-    align-items:center;
-
-    min-height:43px;
-
-    padding:
-        0
-        7px
-        0
-        14px;
-
-    background:#191919;
-
-    border:
-        1px solid
-        #252525;
-
-    border-radius:24px;
-}
-
-#messageInput{
-
-    flex:1;
-
-    min-width:0;
-
-    min-height:41px;
-
-    border:0;
-    outline:0;
-
-    resize:none;
-
-    background:transparent;
-
-    color:#fff;
-
-    font-size:12px;
-
-    line-height:1.4;
-
-    padding:
-        10px
-        0;
-}
-
-#messageInput::placeholder{
-    color:#666;
-}
-
-.send-btn{
-
-    width:36px;
-    height:36px;
-
-    min-width:36px;
-
-    border:0;
-    border-radius:50%;
-
-    background:var(--yellow);
-
-    color:#000;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:14px;
-
-    transition:
-        transform .15s ease,
-        opacity .2s ease;
-}
-
-.send-btn:active{
-    transform:scale(.9);
-}
-
-.send-btn:disabled{
-    opacity:.35;
-}
-
-/* ================================
-   RIDE QUICK ACTIONS
-================================ */
-
-.quick-actions{
-
-    display:flex;
-
-    gap:7px;
-
-    padding:
-        0
-        12px
-        8px;
-
-    overflow-x:auto;
-
-    background:#090909;
-}
-
-.quick-actions::-webkit-scrollbar{
+.empty-chat{
+    margin:auto;
+    text-align:center;
+    color:#777;
     display:none;
 }
 
-.quick-btn{
-
-    flex-shrink:0;
-
-    border:
-        1px solid
-        #292929;
-
-    border-radius:18px;
-
-    padding:
-        7px
-        11px;
-
-    background:#151515;
-
-    color:#bbb;
-
-    font-size:9px;
+.empty-icon{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    background:#181818;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 12px;
+    font-size:30px;
 }
 
-.quick-btn i{
-    margin-right:4px;
-    color:var(--yellow);
+.empty-chat h3{
+    color:#ddd;
+    margin-bottom:5px;
+    font-size:16px;
 }
 
-.quick-btn:active{
-    transform:scale(.96);
+.empty-chat p{
+    font-size:12px;
 }
 
-/* ================================
-   RESPONSIVE
-================================ */
+/* TYPING */
 
-@media(min-width:700px){
+.typing{
+    display:none;
+    align-self:flex-start;
+    background:#202020;
+    padding:9px 13px;
+    border-radius:17px;
+}
 
-    .chat-wrapper{
-        width:600px;
-        margin:auto;
+.typing span{
+    display:inline-block;
+    width:6px;
+    height:6px;
+    background:#888;
+    border-radius:50%;
+    margin:0 2px;
+    animation:typing 1.2s infinite;
+}
 
-        border-left:
-            1px solid
-            #1d1d1d;
+.typing span:nth-child(2){
+    animation-delay:.15s;
+}
 
-        border-right:
-            1px solid
-            #1d1d1d;
+.typing span:nth-child(3){
+    animation-delay:.3s;
+}
+
+@keyframes typing{
+    0%,60%,100%{transform:translateY(0);opacity:.5}
+    30%{transform:translateY(-4px);opacity:1}
+}
+
+/* INPUT */
+
+.chat-input-area{
+    padding:9px 10px;
+    background:#111;
+    border-top:1px solid var(--border);
+    padding-bottom:calc(9px + env(safe-area-inset-bottom));
+}
+
+.chat-input-row{
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.attach-btn,
+.send-btn{
+    width:43px;
+    height:43px;
+    min-width:43px;
+    border:0;
+    border-radius:50%;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.attach-btn{
+    background:#202020;
+    color:#ddd;
+    font-size:20px;
+}
+
+.send-btn{
+    background:var(--yellow);
+    color:#000;
+    font-size:19px;
+    font-weight:bold;
+}
+
+.message-input{
+    flex:1;
+    height:43px;
+    background:#1c1c1c;
+    border:1px solid #2a2a2a;
+    border-radius:23px;
+    color:#fff;
+    outline:none;
+    padding:0 15px;
+    font-size:14px;
+}
+
+.message-input:focus{
+    border-color:var(--yellow);
+}
+
+.message-input::placeholder{
+    color:#777;
+}
+
+/* ATTACHMENT MENU */
+
+.attach-menu{
+    display:none;
+    padding:10px 4px 4px;
+    gap:8px;
+}
+
+.attach-menu.show{
+    display:flex;
+}
+
+.attach-option{
+    flex:1;
+    background:#1d1d1d;
+    border:1px solid #292929;
+    border-radius:12px;
+    color:#ddd;
+    padding:10px 5px;
+    font-size:11px;
+    text-align:center;
+    cursor:pointer;
+}
+
+.attach-option span{
+    display:block;
+    font-size:19px;
+    margin-bottom:4px;
+}
+
+/* CALL SHEET */
+
+.call-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.7);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:100;
+}
+
+.call-sheet{
+    width:100%;
+    max-width:650px;
+    background:#171717;
+    border-radius:22px 22px 0 0;
+    padding:20px;
+    text-align:center;
+    border-top:1px solid #333;
+}
+
+.call-sheet h3{
+    margin-bottom:7px;
+}
+
+.call-sheet p{
+    color:#888;
+    font-size:13px;
+    margin-bottom:18px;
+}
+
+.call-actions{
+    display:flex;
+    gap:10px;
+}
+
+.call-actions button{
+    flex:1;
+    height:45px;
+    border:0;
+    border-radius:12px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.cancel-call{
+    background:#292929;
+    color:white;
+}
+
+.confirm-call{
+    background:var(--yellow);
+    color:#000;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:420px){
+    .chat-header{
+        height:64px;
+        min-height:64px;
+    }
+
+    .message{
+        max-width:88%;
+    }
+
+    .bubble{
+        font-size:13px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-app">
+
+    <!-- HEADER -->
+    <header class="chat-header">
+
+        <button class="back-btn" onclick="goBack()" aria-label="Back">
+            ‹
+        </button>
+
+        <div class="chat-user">
+
+            <div class="user-avatar" id="userAvatar">
+                C
+            </div>
+
+            <div class="user-info">
+                <div class="user-name" id="customerName">
+                    Customer
+                </div>
+
+                <div class="user-status" id="customerStatus">
+                    ● Online
+                </div>
+            </div>
+
+        </div>
+
+        <button class="header-action" onclick="openCall()" aria-label="Call">
+            ☎
+        </button>
+
+    </header>
+
+
+    <!-- MESSAGES -->
+    <main class="chat-messages" id="chatMessages">
+
+        <div class="date-label">
+            Today
+        </div>
+
+        <div class="message customer">
+
+            <div class="bubble">
+
+                Hello Rider 👋
+
+                <span class="message-time">
+                    10:20 AM
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="message rider">
+
+            <div class="bubble">
+
+                Hello! I'm your RiderX rider. 👍
+
+                <span class="message-time">
+                    10:21 AM
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="message customer">
+
+            <div class="bubble">
+
+                I'm waiting at the pickup location.
+
+                <span class="message-time">
+                    10:21 AM
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="message rider">
+
+            <div class="bubble">
+
+                I'm on my way. I'll reach you shortly.
+
+                <span class="message-time">
+                    10:22 AM
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="typing" id="typingIndicator">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+    </main>
+
+
+    <!-- INPUT -->
+    <section class="chat-input-area">
+
+        <div class="attach-menu" id="attachMenu">
+
+            <button class="attach-option" onclick="sendLocation()">
+                <span>📍</span>
+                Location
+            </button>
+
+            <button class="attach-option" onclick="selectImage()">
+                <span>🖼️</span>
+                Photo
+            </button>
+
+            <button class="attach-option" onclick="sendQuickMessage('I am arriving soon.')">
+                <span>⚡</span>
+                Quick
+            </button>
+
+        </div>
+
+        <div class="chat-input-row">
+
+            <button class="attach-btn" onclick="toggleAttach()" aria-label="Attachment">
+                ＋
+            </button>
+
+            <input
+                type="text"
+                id="messageInput"
+                class="message-input"
+                placeholder="Type a message..."
+                autocomplete="off"
+                maxlength="500"
+            >
+
+            <button class="send-btn" onclick="sendMessage()" aria-label="Send">
+                ➤
+            </button>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- CALL CONFIRMATION -->
+
+<div class="call-overlay" id="callOverlay">
+
+    <div class="call-sheet">
+
+        <h3>Call Customer?</h3>
+
+        <p>
+            You can contact the customer regarding this ride.
+        </p>
+
+        <div class="call-actions">
+
+            <button class="cancel-call" onclick="closeCall()">
+                Cancel
+            </button>
+
+            <button class="confirm-call" onclick="confirmCall()">
+                Call
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+/* ==========================================
+   RIDERX CHAT
+========================================== */
+
+const input = document.getElementById("messageInput");
+const messages = document.getElementById("chatMessages");
+const attachMenu = document.getElementById("attachMenu");
+
+function scrollToBottom(){
+    setTimeout(() => {
+        messages.scrollTop = messages.scrollHeight;
+    },50);
+}
+
+scrollToBottom();
+
+
+/* BACK */
+
+function goBack(){
+
+    if(history.length > 1){
+        history.back();
+    }else{
+        window.location.href = "home.html";
     }
 
 }
 
-</style></head><body><!-- =================================
-     HEADER
-================================= --><header class="chat-header"><button
-    id="backButton"
-    class="back-btn"
-    type="button"
-    aria-label="Back"
->
-    <i class="fa-solid fa-arrow-left"></i>
-</button>
 
+/* SEND MESSAGE */
 
-<div
-    id="customerAvatar"
-    class="customer-avatar"
->
-    <i class="fa-solid fa-user"></i>
-</div>
+function sendMessage(){
 
+    const text = input.value.trim();
 
-<div class="customer-info">
+    if(!text) return;
 
-    <div
-        id="customerName"
-        class="customer-name"
-    >
-        Customer
-    </div>
+    addMessage(text,"rider");
 
-    <div
-        id="customerStatus"
-        class="customer-status"
-    >
-        <span class="online-dot"></span>
-        Ride chat
-    </div>
+    input.value = "";
 
-</div>
+    attachMenu.classList.remove("show");
 
+    scrollToBottom();
 
-<button
-    id="callButton"
-    class="header-action"
-    type="button"
-    aria-label="Call customer"
->
-    <i class="fa-solid fa-phone"></i>
-</button>
+    /*
+      Existing RiderX chat/Firebase logic can hook
+      into this event without changing the UI.
+    */
 
-</header><!-- =================================
-     CHAT
-================================= --><main class="chat-wrapper"><div
-    id="chatBox"
-    class="chat-box"
-    aria-live="polite"
-    aria-label="Chat messages"
->
-
-    <div class="chat-loading">
-
-        <i class="fa-solid fa-spinner fa-spin"></i>
-
-        <span>
-            Loading messages...
-        </span>
-
-    </div>
-
-</div>
-
-
-<!-- QUICK ACTIONS -->
-
-<div class="quick-actions">
-
-    <button
-        class="quick-btn"
-        type="button"
-        data-message="I'm on my way."
-    >
-        <i class="fa-solid fa-motorcycle"></i>
-        On my way
-    </button>
-
-    <button
-        class="quick-btn"
-        type="button"
-        data-message="Please share your exact pickup location."
-    >
-        <i class="fa-solid fa-location-dot"></i>
-        Pickup location
-    </button>
-
-    <button
-        class="quick-btn"
-        type="button"
-        data-message="I have arrived at the pickup location."
-    >
-        <i class="fa-solid fa-flag-checkered"></i>
-        I've arrived
-    </button>
-
-</div>
-
-
-<!-- MESSAGE COMPOSER -->
-
-<div class="composer">
-
-    <button
-        id="attachButton"
-        class="attach-btn"
-        type="button"
-        aria-label="Attachment"
-    >
-        <i class="fa-solid fa-plus"></i>
-    </button>
-
-
-    <div class="input-container">
-
-        <input
-            id="messageInput"
-            type="text"
-            autocomplete="off"
-            maxlength="500"
-            placeholder="Type a message..."
-            aria-label="Message"
-        >
-
-
-        <button
-            id="sendBtn"
-            class="send-btn"
-            type="button"
-            aria-label="Send message"
-        >
-            <i class="fa-solid fa-paper-plane"></i>
-        </button>
-
-    </div>
-
-</div>
-
-</main><!-- =================================
-     PAGE CONTROLLER
-================================= --><script type="module">
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        /* ============================
-           BACK
-        ============================ */
-
-        const backButton =
-            document.getElementById(
-                "backButton"
-            );
-
-        backButton?.addEventListener(
-            "click",
-            () => {
-
-                if(
-                    window.history.length > 1
-                ){
-
-                    window.history.back();
-
-                }else{
-
-                    window.location.href =
-                        "./home.html";
-
-                }
-
+    document.dispatchEvent(
+        new CustomEvent("riderxMessageSent",{
+            detail:{
+                message:text,
+                sender:"rider",
+                timestamp:Date.now()
             }
-        );
+        })
+    );
+
+}
 
 
-        /* ============================
-           QUICK MESSAGES
-        ============================ */
+/* ENTER TO SEND */
 
-        const input =
-            document.getElementById(
-                "messageInput"
+input.addEventListener("keydown",function(e){
+
+    if(e.key === "Enter" && !e.shiftKey){
+
+        e.preventDefault();
+
+        sendMessage();
+
+    }
+
+});
+
+
+/* ADD MESSAGE */
+
+function addMessage(text,type){
+
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "message " + type;
+
+    const bubble = document.createElement("div");
+
+    bubble.className = "bubble";
+
+    const safeText = document.createTextNode(text);
+
+    bubble.appendChild(safeText);
+
+    const time = document.createElement("span");
+
+    time.className = "message-time";
+
+    time.textContent = new Date().toLocaleTimeString([],{
+        hour:"2-digit",
+        minute:"2-digit"
+    });
+
+    bubble.appendChild(time);
+
+    wrapper.appendChild(bubble);
+
+    const typing = document.getElementById("typingIndicator");
+
+    messages.insertBefore(wrapper,typing);
+
+}
+
+
+/* ATTACHMENT */
+
+function toggleAttach(){
+
+    attachMenu.classList.toggle("show");
+
+}
+
+
+function sendLocation(){
+
+    attachMenu.classList.remove("show");
+
+    addMessage("📍 I'm sharing my current location.", "rider");
+
+    scrollToBottom();
+
+}
+
+
+function selectImage(){
+
+    attachMenu.classList.remove("show");
+
+    const inputFile = document.createElement("input");
+
+    inputFile.type = "file";
+    inputFile.accept = "image/*";
+
+    inputFile.onchange = function(){
+
+        if(inputFile.files && inputFile.files.length){
+
+            addMessage(
+                "🖼️ Photo selected: " + inputFile.files[0].name,
+                "rider"
             );
 
-        const sendButton =
-            document.getElementById(
-                "sendBtn"
-            );
-
-
-        document
-            .querySelectorAll(
-                ".quick-btn"
-            )
-            .forEach(
-                button => {
-
-                    button.addEventListener(
-                        "click",
-                        () => {
-
-                            const message =
-                                button.dataset.message;
-
-                            if(!message){
-                                return;
-                            }
-
-                            input.value =
-                                message;
-
-                            input.focus();
-
-                        }
-                    );
-
-                }
-            );
-
-
-        /* ============================
-           ENTER TO SEND
-        ============================ */
-
-        input?.addEventListener(
-            "keydown",
-            event => {
-
-                if(
-                    event.key === "Enter" &&
-                    !event.shiftKey
-                ){
-
-                    event.preventDefault();
-
-                    sendButton?.click();
-
-                }
-
-            }
-        );
-
-
-        /* ============================
-           CALL
-        ============================ */
-
-        document
-            .getElementById(
-                "callButton"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    window.dispatchEvent(
-                        new CustomEvent(
-                            "riderx:call-customer"
-                        )
-                    );
-
-                }
-            );
-
-
-        /* ============================
-           ATTACHMENT
-        ============================ */
-
-        document
-            .getElementById(
-                "attachButton"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    window.dispatchEvent(
-                        new CustomEvent(
-                            "riderx:chat-attachment"
-                        )
-                    );
-
-                }
-            );
-
-
-        /* ============================
-           AUTO SCROLL
-        ============================ */
-
-        const chatBox =
-            document.getElementById(
-                "chatBox"
-            );
-
-        function scrollBottom(){
-
-            if(!chatBox){
-                return;
-            }
-
-            requestAnimationFrame(
-                () => {
-
-                    chatBox.scrollTop =
-                        chatBox.scrollHeight;
-
-                }
-            );
+            scrollToBottom();
 
         }
 
+    };
 
-        window.addEventListener(
-            "riderx:chat-updated",
-            scrollBottom
-        );
+    inputFile.click();
+
+}
 
 
-        /*
-         * Give Chat.js time to render
-         * existing messages.
-         */
+function sendQuickMessage(text){
 
-        setTimeout(
-            scrollBottom,
-            300
-        );
+    attachMenu.classList.remove("show");
 
-        setTimeout(
-            scrollBottom,
-            900
-        );
+    input.value = text;
+
+    sendMessage();
+
+}
+
+
+/* CALL */
+
+function openCall(){
+
+    document.getElementById("callOverlay").style.display = "flex";
+
+}
+
+
+function closeCall(){
+
+    document.getElementById("callOverlay").style.display = "none";
+
+}
+
+
+function confirmCall(){
+
+    closeCall();
+
+    /*
+      If a customer phone number is available from
+      the active ride data, existing RiderX JS can
+      handle the actual call.
+    */
+
+    document.dispatchEvent(
+        new CustomEvent("riderxCallCustomer")
+    );
+
+}
+
+
+/* CLOSE ATTACHMENT WHEN CLICKING MESSAGE AREA */
+
+messages.addEventListener("click",function(){
+
+    attachMenu.classList.remove("show");
+
+});
+
+
+/* DEMO CUSTOMER NAME FROM URL */
+
+try{
+
+    const params = new URLSearchParams(window.location.search);
+
+    const name = params.get("customer") || params.get("name");
+
+    if(name){
+
+        document.getElementById("customerName").textContent = name;
+
+        document.getElementById("userAvatar").textContent =
+            name.charAt(0).toUpperCase();
 
     }
-);
 
-</script><!-- =================================
-     RIDERX CHAT ENGINE
-================================= --><script
-    type="module"
-    src="../js/Chat.js"
-></script></body>
+}catch(error){
+
+    console.log("Chat params unavailable");
+
+}
+
+
+/* ESCAPE */
+
+document.addEventListener("keydown",function(e){
+
+    if(e.key === "Escape"){
+
+        closeCall();
+
+        attachMenu.classList.remove("show");
+
+    }
+
+});
+
+</script>
+
+</body>
 </html>
