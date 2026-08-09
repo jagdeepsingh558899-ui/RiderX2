@@ -1,109 +1,2107 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiderX - Chat</title>
+
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
+
+<style>
+
+:root{
+    --yellow:#FFD400;
+    --black:#080808;
+    --dark:#101010;
+    --card:#191919;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+body{
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.chat-app{
+    width:100%;
+    max-width:650px;
+    height:100vh;
+    height:100dvh;
+    margin:auto;
+    display:flex;
+    flex-direction:column;
+    background:#101010;
+    overflow:hidden;
+}
 
 
-<title>RiderX Chat</title>
+/* =========================
+   HEADER
+========================= */
+
+.chat-header{
+    height:68px;
+    min-height:68px;
+    background:#111;
+    border-bottom:1px solid #292929;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:8px 12px;
+    z-index:10;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+    border:0;
+    border-radius:50%;
+    background:#1d1d1d;
+    color:#fff;
+    font-size:23px;
+    cursor:pointer;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    min-width:42px;
+    border-radius:50%;
+    background:var(--yellow);
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    font-weight:900;
+    overflow:hidden;
+}
+
+.avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.header-info{
+    flex:1;
+    min-width:0;
+}
+
+.header-name{
+    font-size:12px;
+    font-weight:900;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.header-status{
+    margin-top:4px;
+    color:#777;
+    font-size:8px;
+}
+
+.status-online{
+    color:var(--green);
+}
+
+.header-actions{
+    display:flex;
+    gap:6px;
+}
+
+.header-action{
+    width:36px;
+    height:36px;
+    border:0;
+    border-radius:50%;
+    background:#1d1d1d;
+    color:#fff;
+    font-size:15px;
+    cursor:pointer;
+}
 
 
-<link rel="stylesheet" href="../css/style.css">
+/* =========================
+   RIDE BAR
+========================= */
 
+.ride-bar{
+    display:none;
+    min-height:48px;
+    background:#181818;
+    border-bottom:1px solid #2b2b2b;
+    padding:7px 12px;
+    align-items:center;
+    gap:9px;
+}
+
+.ride-bar.show{
+    display:flex;
+}
+
+.ride-icon{
+    width:32px;
+    height:32px;
+    border-radius:9px;
+    background:rgba(255,212,0,.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.ride-info{
+    flex:1;
+}
+
+.ride-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.ride-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:7px;
+}
+
+.ride-action{
+    border:1px solid #393939;
+    border-radius:8px;
+    padding:7px 9px;
+    background:#222;
+    color:var(--yellow);
+    font-size:7px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   MESSAGES
+========================= */
+
+.messages{
+    flex:1;
+    overflow-y:auto;
+    padding:15px 12px 12px;
+    background:
+        radial-gradient(
+            circle at top,
+            #181818 0,
+            #101010 45%,
+            #0d0d0d 100%
+        );
+    scroll-behavior:smooth;
+}
+
+.messages::-webkit-scrollbar{
+    width:3px;
+}
+
+.messages::-webkit-scrollbar-thumb{
+    background:#333;
+    border-radius:10px;
+}
+
+.date-divider{
+    text-align:center;
+    margin:5px 0 14px;
+    color:#666;
+    font-size:7px;
+}
+
+.message-row{
+    display:flex;
+    margin-bottom:10px;
+}
+
+.message-row.sent{
+    justify-content:flex-end;
+}
+
+.message-row.received{
+    justify-content:flex-start;
+}
+
+.message-bubble{
+    max-width:78%;
+    padding:9px 11px;
+    border-radius:14px;
+    position:relative;
+}
+
+.sent .message-bubble{
+    background:var(--yellow);
+    color:#000;
+    border-bottom-right-radius:4px;
+}
+
+.received .message-bubble{
+    background:#202020;
+    color:#fff;
+    border:1px solid #2d2d2d;
+    border-bottom-left-radius:4px;
+}
+
+.message-text{
+    font-size:10px;
+    line-height:1.45;
+    word-break:break-word;
+    white-space:pre-wrap;
+}
+
+.message-meta{
+    margin-top:4px;
+    font-size:6px;
+    opacity:.55;
+    text-align:right;
+}
+
+.typing{
+    display:none;
+    align-items:center;
+    gap:5px;
+    width:max-content;
+    padding:9px 12px;
+    margin-bottom:10px;
+    background:#202020;
+    border:1px solid #2d2d2d;
+    border-radius:14px;
+}
+
+.typing.show{
+    display:flex;
+}
+
+.typing span{
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#777;
+    animation:typing .9s infinite;
+}
+
+.typing span:nth-child(2){
+    animation-delay:.15s;
+}
+
+.typing span:nth-child(3){
+    animation-delay:.3s;
+}
+
+@keyframes typing{
+    0%,60%,100%{
+        transform:translateY(0);
+        opacity:.5;
+    }
+    30%{
+        transform:translateY(-3px);
+        opacity:1;
+    }
+}
+
+
+/* =========================
+   QUICK REPLIES
+========================= */
+
+.quick-replies{
+    display:flex;
+    gap:7px;
+    padding:7px 10px;
+    overflow-x:auto;
+    background:#111;
+    border-top:1px solid #292929;
+}
+
+.quick-replies::-webkit-scrollbar{
+    display:none;
+}
+
+.quick-btn{
+    flex:none;
+    border:1px solid #343434;
+    background:#1b1b1b;
+    color:#ccc;
+    border-radius:15px;
+    padding:7px 10px;
+    font-size:7px;
+    cursor:pointer;
+}
+
+
+/* =========================
+   COMPOSER
+========================= */
+
+.composer{
+    min-height:61px;
+    padding:8px 10px;
+    background:#111;
+    border-top:1px solid #292929;
+    display:flex;
+    align-items:center;
+    gap:7px;
+}
+
+.composer-btn{
+    width:37px;
+    height:37px;
+    min-width:37px;
+    border:0;
+    border-radius:50%;
+    background:#202020;
+    color:#ccc;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.message-input-wrap{
+    flex:1;
+    min-width:0;
+    min-height:40px;
+    display:flex;
+    align-items:center;
+    background:#1d1d1d;
+    border:1px solid #303030;
+    border-radius:21px;
+    padding:0 5px 0 12px;
+}
+
+.message-input{
+    flex:1;
+    min-width:0;
+    height:38px;
+    border:0;
+    outline:none;
+    background:transparent;
+    color:#fff;
+    font-family:inherit;
+    font-size:10px;
+}
+
+.message-input::placeholder{
+    color:#666;
+}
+
+.emoji-btn{
+    width:30px;
+    height:30px;
+    border:0;
+    background:transparent;
+    color:#aaa;
+    cursor:pointer;
+}
+
+.send-btn{
+    width:39px;
+    height:39px;
+    min-width:39px;
+    border:0;
+    border-radius:50%;
+    background:var(--yellow);
+    color:#000;
+    font-size:15px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.send-btn:disabled{
+    opacity:.35;
+}
+
+
+/* =========================
+   EMPTY / ERROR
+========================= */
+
+.empty-state{
+    display:none;
+    height:100%;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    text-align:center;
+    padding:30px;
+}
+
+.empty-state.show{
+    display:flex;
+}
+
+.empty-icon{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#1d1d1d;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:23px;
+    margin-bottom:12px;
+}
+
+.empty-title{
+    font-size:12px;
+    font-weight:900;
+}
+
+.empty-text{
+    margin-top:6px;
+    color:#666;
+    font-size:8px;
+    line-height:1.5;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    z-index:100;
+    left:50%;
+    bottom:82px;
+    transform:translate(-50%,20px);
+    width:calc(100% - 30px);
+    max-width:500px;
+    padding:10px 13px;
+    border-radius:10px;
+    background:#222;
+    border:1px solid #333;
+    color:#fff;
+    text-align:center;
+    font-size:8px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+.toast.error{
+    border-color:rgba(239,68,68,.5);
+}
+
+.toast.success{
+    border-color:rgba(34,197,94,.5);
+}
+
+
+/* =========================
+   FILE INPUT
+========================= */
+
+#fileInput{
+    display:none;
+}
+
+@media(max-width:390px){
+
+    .chat-header{
+        height:64px;
+        min-height:64px;
+    }
+
+    .header-action{
+        width:33px;
+        height:33px;
+    }
+
+    .message-bubble{
+        max-width:84%;
+    }
+
+}
+
+</style>
 
 </head>
 
-
-
 <body>
 
+<div class="chat-app">
 
 
-<div class="topbar">
+    <!-- HEADER -->
 
-<h2>
-💬 Chat with Rider
-</h2>
+    <header class="chat-header">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ‹
+        </button>
+
+
+        <div
+            class="avatar"
+            id="riderAvatar"
+        >
+            🏍️
+        </div>
+
+
+        <div class="header-info">
+
+            <div
+                class="header-name"
+                id="riderName"
+            >
+                RiderX Rider
+            </div>
+
+            <div
+                class="header-status"
+                id="riderStatus"
+            >
+                Rider
+            </div>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <button
+                class="header-action"
+                onclick="callRider()"
+                title="Call"
+            >
+                ☎
+            </button>
+
+            <button
+                class="header-action"
+                onclick="openRide()"
+                title="Ride"
+            >
+                🚕
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- RIDE INFO -->
+
+    <div
+        class="ride-bar"
+        id="rideBar"
+    >
+
+        <div class="ride-icon">
+            🏍️
+        </div>
+
+        <div class="ride-info">
+
+            <div
+                class="ride-title"
+                id="rideTitle"
+            >
+                Current Ride
+            </div>
+
+            <div
+                class="ride-subtitle"
+                id="rideSubtitle"
+            >
+                RiderX trip
+            </div>
+
+        </div>
+
+        <button
+            class="ride-action"
+            onclick="openRide()"
+        >
+            View Ride
+        </button>
+
+    </div>
+
+
+    <!-- MESSAGES -->
+
+    <main
+        class="messages"
+        id="messages"
+    >
+
+        <div
+            class="date-divider"
+            id="dateDivider"
+        >
+            Today
+        </div>
+
+
+        <div
+            class="empty-state"
+            id="emptyState"
+        >
+
+            <div class="empty-icon">
+                💬
+            </div>
+
+            <div class="empty-title">
+                Start a conversation
+            </div>
+
+            <div class="empty-text">
+                Send a message to your Rider.
+            </div>
+
+        </div>
+
+
+        <div
+            class="typing"
+            id="typingIndicator"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+    </main>
+
+
+    <!-- QUICK REPLIES -->
+
+    <div class="quick-replies">
+
+        <button
+            class="quick-btn"
+            onclick="quickMessage('I am waiting at pickup.')"
+        >
+            📍 I am at pickup
+        </button>
+
+        <button
+            class="quick-btn"
+            onclick="quickMessage('Please call me.')"
+        >
+            ☎ Please call me
+        </button>
+
+        <button
+            class="quick-btn"
+            onclick="quickMessage('Where are you?')"
+        >
+            📍 Where are you?
+        </button>
+
+        <button
+            class="quick-btn"
+            onclick="quickMessage('I am coming.')"
+        >
+            👍 I am coming
+        </button>
+
+    </div>
+
+
+    <!-- COMPOSER -->
+
+    <form
+        class="composer"
+        id="composer"
+        onsubmit="sendMessage(event)"
+    >
+
+        <button
+            type="button"
+            class="composer-btn"
+            onclick="document.getElementById('fileInput').click()"
+            title="Attachment"
+        >
+            ＋
+        </button>
+
+
+        <input
+            type="file"
+            id="fileInput"
+            accept="image/*"
+            onchange="handleAttachment(event)"
+        >
+
+
+        <div class="message-input-wrap">
+
+            <input
+                type="text"
+                id="messageInput"
+                class="message-input"
+                placeholder="Type a message..."
+                autocomplete="off"
+                maxlength="1000"
+            >
+
+            <button
+                type="button"
+                class="emoji-btn"
+                onclick="insertEmoji('😊')"
+            >
+                ☺
+            </button>
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="send-btn"
+            id="sendBtn"
+            disabled
+            aria-label="Send"
+        >
+            ➤
+        </button>
+
+    </form>
+
 
 </div>
 
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
+<script>
+
+/* ==========================================
+   RIDERX CUSTOMER CHAT
+========================================== */
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const rideId =
+    params.get("rideId") ||
+    localStorage.getItem(
+        "riderxCurrentRideId"
+    ) ||
+    "";
+
+let currentUser = null;
+let riderData = null;
+
+let unsubscribeMessages = null;
+let unsubscribeRide = null;
+
+let messagesLoaded = false;
+let toastTimer = null;
 
 
-<div class="container">
+/* ==========================================
+   HELPERS
+========================================== */
+
+const $ =
+    id => document.getElementById(id);
 
 
+function escapeHTML(value){
 
-<div class="card" id="chatBox" style="height:400px; overflow-y:auto;">
+    return String(value || "")
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
-
-
-<p>
-Loading messages...
-</p>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<input
-
-id="messageInput"
-
-class="input"
-
-placeholder="Type message..."
-
->
+}
 
 
+function formatTime(
+    value
+){
 
-<button
+    let date;
 
-id="sendBtn"
+    if(
+        value &&
+        typeof value.toDate ===
+        "function"
+    ){
 
-class="btn">
+        date =
+            value.toDate();
 
-Send Message
+    }else{
 
-</button>
+        date =
+            value
+                ? new Date(value)
+                : new Date();
 
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
+    }
 
 
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
 
-<script type="module" src="../js/Chat.js"></script>
+        date =
+            new Date();
+
+    }
 
 
+    return date.toLocaleTimeString(
+        [],
+        {
+            hour:"2-digit",
+            minute:"2-digit"
+        }
+    );
+
+}
+
+
+/* ==========================================
+   CURRENT USER
+========================================== */
+
+async function getCurrentUser(){
+
+    try{
+
+        if(
+            window.firebase &&
+            firebase.auth
+        ){
+
+            return new Promise(
+                resolve => {
+
+                    const unsubscribe =
+                        firebase.auth()
+                        .onAuthStateChanged(
+                            user => {
+
+                                unsubscribe();
+
+                                resolve(
+                                    user || null
+                                );
+
+                            }
+                        );
+
+                }
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+    }
+
+
+    return null;
+
+}
+
+
+/* ==========================================
+   RIDER DATA
+========================================== */
+
+function applyRiderData(
+    data
+){
+
+    if(!data)
+        return;
+
+
+    riderData =
+        data;
+
+
+    const name =
+        data.name ||
+        data.displayName ||
+        data.fullName ||
+        "RiderX Rider";
+
+
+    $("riderName")
+        .textContent =
+        name;
+
+
+    const status =
+        data.online === false
+            ? "Offline"
+            : "Online";
+
+
+    $("riderStatus")
+        .textContent =
+        status;
+
+
+    $("riderStatus")
+        .classList.toggle(
+            "status-online",
+            status === "Online"
+        );
+
+
+    if(
+        data.photoURL ||
+        data.photo
+    ){
+
+        $("riderAvatar").innerHTML =
+            `<img src="${
+                escapeHTML(
+                    data.photoURL ||
+                    data.photo
+                )
+            }" alt="Rider">`;
+
+    }else{
+
+        const first =
+            name
+                .trim()
+                .charAt(0)
+                .toUpperCase();
+
+
+        $("riderAvatar")
+            .textContent =
+            first || "R";
+
+    }
+
+}
+
+
+/* ==========================================
+   RIDE DATA
+========================================== */
+
+function applyRideData(
+    ride
+){
+
+    if(!ride)
+        return;
+
+
+    $("rideBar")
+        .classList.add(
+            "show"
+        );
+
+
+    const status =
+        ride.status ||
+        "Ride";
+
+
+    $("rideTitle")
+        .textContent =
+        "Ride • " +
+        status;
+
+
+    const pickup =
+        ride.pickup?.address ||
+        ride.pickupAddress ||
+        "Pickup";
+
+
+    const drop =
+        ride.drop?.address ||
+        ride.dropAddress ||
+        "Destination";
+
+
+    $("rideSubtitle")
+        .textContent =
+        pickup +
+        " → " +
+        drop;
+
+
+    const rider =
+        ride.rider ||
+        ride.driver ||
+        {};
+
+
+    applyRiderData(
+        rider
+    );
+
+}
+
+
+/* ==========================================
+   LOAD CHAT
+========================================== */
+
+async function initChat(){
+
+    currentUser =
+        await getCurrentUser();
+
+
+    loadFromLocalState();
+
+
+    /*
+      Preferred integration:
+      existing Chat.js can expose
+      initializeCustomerChat().
+    */
+
+    try{
+
+        if(
+            typeof window.initializeCustomerChat ===
+            "function"
+        ){
+
+            const result =
+                await window.initializeCustomerChat({
+                    rideId:rideId,
+                    user:currentUser,
+                    onMessage:addIncomingMessage,
+                    onRider:updateRider,
+                    onRide:updateRide,
+                    onTyping:setTyping
+                });
+
+
+            if(result){
+
+                if(result.rider){
+
+                    applyRiderData(
+                        result.rider
+                    );
+
+                }
+
+                if(result.ride){
+
+                    applyRideData(
+                        result.ride
+                    );
+
+                }
+
+            }
+
+            return;
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Chat.js integration:",
+            error
+        );
+
+    }
+
+
+    /*
+      Firebase fallback.
+    */
+
+    initializeFirebaseChat();
+
+}
+
+
+/* ==========================================
+   FIREBASE CHAT FALLBACK
+========================================== */
+
+function initializeFirebaseChat(){
+
+    if(
+        !window.firebase ||
+        !firebase.firestore ||
+        !rideId
+    ){
+
+        showEmpty();
+
+        return;
+
+    }
+
+
+    try{
+
+        const db =
+            firebase.firestore();
+
+
+        unsubscribeMessages =
+            db.collection("rides")
+            .doc(rideId)
+            .collection("messages")
+            .orderBy(
+                "createdAt",
+                "asc"
+            )
+            .onSnapshot(
+                snapshot => {
+
+                    snapshot.docChanges()
+                    .forEach(
+                        change => {
+
+                            if(
+                                change.type ===
+                                "added"
+                            ){
+
+                                addIncomingMessage(
+                                    {
+                                        id:
+                                            change.doc.id,
+                                        ...change.doc.data()
+                                    }
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                    messagesLoaded =
+                        true;
+
+                    updateEmptyState();
+
+                },
+                error => {
+
+                    console.error(
+                        "Messages:",
+                        error
+                    );
+
+                    showEmpty();
+
+                }
+            );
+
+
+        unsubscribeRide =
+            db.collection("rides")
+            .doc(rideId)
+            .onSnapshot(
+                snapshot => {
+
+                    if(
+                        snapshot.exists
+                    ){
+
+                        applyRideData(
+                            snapshot.data()
+                        );
+
+                    }
+
+                }
+            );
+
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+        showEmpty();
+
+    }
+
+}
+
+
+/* ==========================================
+   ADD MESSAGE
+========================================== */
+
+function addIncomingMessage(
+    message
+){
+
+    if(!message)
+        return;
+
+
+    const id =
+        message.id ||
+        message.messageId ||
+        (
+            Date.now() +
+            "-" +
+            Math.random()
+        );
+
+
+    if(
+        document.querySelector(
+            `[data-message-id="${CSS.escape(String(id))}"]`
+        )
+    ){
+
+        return;
+
+    }
+
+
+    const senderId =
+        message.senderId ||
+        message.userId ||
+        message.uid ||
+        "";
+
+
+    const isMine =
+        (
+            currentUser &&
+            senderId ===
+            currentUser.uid
+        ) ||
+        message.sender ===
+        "customer" ||
+        message.from ===
+        "customer";
+
+
+    const text =
+        message.text ||
+        message.message ||
+        "";
+
+
+    if(!text)
+        return;
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        "message-row " +
+        (
+            isMine
+                ? "sent"
+                : "received"
+        );
+
+
+    row.dataset.messageId =
+        String(id);
+
+
+    row.innerHTML = `
+
+        <div class="message-bubble">
+
+            <div class="message-text">
+                ${escapeHTML(text)}
+            </div>
+
+            <div class="message-meta">
+                ${formatTime(
+                    message.createdAt ||
+                    message.timestamp
+                )}
+                ${
+                    isMine
+                        ? " ✓"
+                        : ""
+                }
+            </div>
+
+        </div>
+
+    `;
+
+
+    const typing =
+        $("typingIndicator");
+
+
+    $("messages")
+        .insertBefore(
+            row,
+            typing
+        );
+
+
+    updateEmptyState();
+
+
+    scrollToBottom();
+
+}
+
+
+/* ==========================================
+   SEND MESSAGE
+========================================== */
+
+async function sendMessage(
+    event
+){
+
+    event.preventDefault();
+
+
+    const input =
+        $("messageInput");
+
+
+    const text =
+        input.value.trim();
+
+
+    if(!text)
+        return;
+
+
+    input.value =
+        "";
+
+    updateSendButton();
+
+
+    const message = {
+
+        rideId:
+            rideId,
+
+        text:
+            text,
+
+        sender:
+            "customer",
+
+        senderId:
+            currentUser?.uid ||
+            "",
+
+        createdAt:
+            new Date().toISOString(),
+
+        type:
+            "text"
+
+    };
+
+
+    /*
+      Preferred Chat.js integration.
+    */
+
+    try{
+
+        if(
+            typeof window.sendCustomerMessage ===
+            "function"
+        ){
+
+            await window.sendCustomerMessage(
+                message
+            );
+
+            return;
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Chat send:",
+            error
+        );
+
+        showToast(
+            "Message could not be sent.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /*
+      Firebase fallback.
+    */
+
+    if(
+        window.firebase &&
+        firebase.firestore &&
+        rideId
+    ){
+
+        try{
+
+            await firebase
+                .firestore()
+                .collection("rides")
+                .doc(rideId)
+                .collection("messages")
+                .add({
+                    ...message,
+                    createdAt:
+                        firebase.firestore.FieldValue
+                        .serverTimestamp()
+                });
+
+
+            return;
+
+        }catch(error){
+
+            console.error(
+                "Firebase send:",
+                error
+            );
+
+            showToast(
+                "Message could not be sent.",
+                "error"
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /*
+      Local fallback.
+    */
+
+    addIncomingMessage({
+        id:
+            "local-" +
+            Date.now(),
+        ...message
+    });
+
+    saveLocalMessage(
+        message
+    );
+
+}
+
+
+/* ==========================================
+   QUICK MESSAGE
+========================================== */
+
+function quickMessage(
+    text
+){
+
+    $("messageInput")
+        .value =
+        text;
+
+
+    updateSendButton();
+
+
+    $("messageInput")
+        .focus();
+
+}
+
+
+/* ==========================================
+   EMOJI
+========================================== */
+
+function insertEmoji(
+    emoji
+){
+
+    const input =
+        $("messageInput");
+
+
+    input.value +=
+        emoji;
+
+
+    updateSendButton();
+
+
+    input.focus();
+
+}
+
+
+/* ==========================================
+   ATTACHMENT
+========================================== */
+
+async function handleAttachment(
+    event
+){
+
+    const file =
+        event.target.files?.[0];
+
+
+    if(!file)
+        return;
+
+
+    if(
+        !file.type.startsWith(
+            "image/"
+        )
+    ){
+
+        showToast(
+            "Please select an image.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /*
+      Existing Chat.js upload hook.
+    */
+
+    try{
+
+        if(
+            typeof window.sendCustomerAttachment ===
+            "function"
+        ){
+
+            await window.sendCustomerAttachment(
+                file,
+                {
+                    rideId:
+                        rideId,
+                    user:
+                        currentUser
+                }
+            );
+
+            showToast(
+                "Image sent.",
+                "success"
+            );
+
+            return;
+
+        }
+
+
+        showToast(
+            "Image attachment is not available yet.",
+            "error"
+        );
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+        showToast(
+            "Unable to send image.",
+            "error"
+        );
+
+    }
+
+
+    event.target.value =
+        "";
+
+}
+
+
+/* ==========================================
+   RIDER CALL
+========================================== */
+
+function callRider(){
+
+    const phone =
+        riderData?.phone ||
+        riderData?.phoneNumber ||
+        localStorage.getItem(
+            "riderxRiderPhone"
+        );
+
+
+    if(!phone){
+
+        showToast(
+            "Rider phone number is not available.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "tel:" +
+        phone;
+
+}
+
+
+/* ==========================================
+   OPEN RIDE
+========================================== */
+
+function openRide(){
+
+    if(!rideId){
+
+        showToast(
+            "Ride information is unavailable.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "ride-status.html?rideId=" +
+        encodeURIComponent(
+            rideId
+        );
+
+}
+
+
+/* ==========================================
+   TYPING
+========================================== */
+
+function setTyping(
+    isTyping
+){
+
+    $("typingIndicator")
+        .classList.toggle(
+            "show",
+            Boolean(isTyping)
+        );
+
+
+    if(isTyping){
+
+        scrollToBottom();
+
+    }
+
+}
+
+
+/* ==========================================
+   SEND BUTTON
+========================================== */
+
+$("messageInput")
+    .addEventListener(
+        "input",
+        updateSendButton
+    );
+
+
+$("messageInput")
+    .addEventListener(
+        "keydown",
+        function(event){
+
+            if(
+                event.key ===
+                "Enter" &&
+                !event.shiftKey
+            ){
+
+                event.preventDefault();
+
+                $("composer")
+                    .requestSubmit();
+
+            }
+
+        }
+    );
+
+
+function updateSendButton(){
+
+    const hasText =
+        $("messageInput")
+            .value
+            .trim()
+            .length > 0;
+
+
+    $("sendBtn").disabled =
+        !hasText;
+
+}
+
+
+/* ==========================================
+   EMPTY STATE
+========================================== */
+
+function showEmpty(){
+
+    $("emptyState")
+        .classList.add(
+            "show"
+        );
+
+}
+
+
+function updateEmptyState(){
+
+    const hasMessages =
+        document.querySelector(
+            ".message-row"
+        );
+
+
+    $("emptyState")
+        .classList.toggle(
+            "show",
+            !hasMessages
+        );
+
+}
+
+
+/* ==========================================
+   SCROLL
+========================================== */
+
+function scrollToBottom(){
+
+    requestAnimationFrame(
+        function(){
+
+            const container =
+                $("messages");
+
+
+            container.scrollTop =
+                container.scrollHeight;
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   LOCAL FALLBACK
+========================================== */
+
+function loadFromLocalState(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                "riderxChatMessages_" +
+                rideId
+            );
+
+
+        if(!raw)
+            return;
+
+
+        const saved =
+            JSON.parse(raw);
+
+
+        if(!Array.isArray(saved))
+            return;
+
+
+        saved.forEach(
+            message =>
+                addIncomingMessage(
+                    {
+                        id:
+                            message.id ||
+                            (
+                                "saved-" +
+                                Math.random()
+                            ),
+                        ...message
+                    }
+                )
+        );
+
+    }catch(error){
+
+        console.error(
+            "Local chat:",
+            error
+        );
+
+    }
+
+}
+
+
+function saveLocalMessage(
+    message
+){
+
+    try{
+
+        const key =
+            "riderxChatMessages_" +
+            rideId;
+
+
+        const old =
+            JSON.parse(
+                localStorage.getItem(
+                    key
+                ) ||
+                "[]"
+            );
+
+
+        old.push({
+            id:
+                "local-" +
+                Date.now(),
+            ...message
+        });
+
+
+        localStorage.setItem(
+            key,
+            JSON.stringify(
+                old.slice(-100)
+            )
+        );
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message,
+    type=""
+){
+
+    const toast =
+        $("toast");
+
+
+    toast.textContent =
+        message;
+
+
+    toast.className =
+        "toast show " +
+        type;
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.className =
+                    "toast";
+
+            },
+            3000
+        );
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        history.length > 1
+    ){
+
+        history.back();
+
+    }else{
+
+        window.location.href =
+            "home.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   CLEANUP
+========================================== */
+
+window.addEventListener(
+    "beforeunload",
+    function(){
+
+        if(
+            typeof unsubscribeMessages ===
+            "function"
+        ){
+
+            unsubscribeMessages();
+
+        }
+
+
+        if(
+            typeof unsubscribeRide ===
+            "function"
+        ){
+
+            unsubscribeRide();
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        updateSendButton();
+
+        initChat();
+
+    }
+);
+
+</script>
 
 </body>
-
-
-</html>
+  </html>
