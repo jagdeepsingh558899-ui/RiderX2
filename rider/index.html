@@ -1,138 +1,327 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RiderX - Rider Console</title>
-  
-  <link rel="stylesheet" href="../css/app.css">
+<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta name="theme-color" content="#000000"><title>RiderX | Rider</title><link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="../firebase/firebase-config.js"></script>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,Poppins,sans-serif;
+}
 
-  <style>
-    body {
-      margin: 0;
-      background-color: #121212;
-      color: #FFF;
-      font-family: sans-serif;
-      padding: 15px;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #333;
-    }
-    .status-toggle {
-      padding: 10px 20px;
-      border-radius: 20px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .status-online { background-color: #28a745; color: #FFF; }
-    .status-offline { background-color: #dc3545; color: #FFF; }
-    .ride-card {
-      background-color: #1E1E1E;
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 15px;
-      border-left: 5px solid #FFC107;
-    }
-    .btn-accept {
-      background-color: #FFC107;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      width: 100%;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
+html,
+body{
+    width:100%;
+    height:100%;
+    background:#000;
+    color:#fff;
+    overflow:hidden;
+}
 
-  <div class="header">
-    <h2>Rider Dashboard</h2>
-    <button id="statusBtn" class="status-toggle status-offline" onclick="toggleStatus()">OFFLINE</button>
-  </div>
+body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
 
-  <h3>Available Ride Requests</h3>
-  <div id="requestsContainer">
-    <p>Go ONLINE to receive nearby requests.</p>
-  </div>
+.loader{
+    width:100%;
+    max-width:420px;
+    padding:30px;
+    text-align:center;
+}
 
-  <script>
-    let isOnline = false;
-    let unsubscribeRides = null;
+.logo{
+    font-size:42px;
+    font-weight:900;
+    letter-spacing:-1px;
+}
 
-    function toggleStatus() {
-      isOnline = !isOnline;
-      const btn = document.getElementById('statusBtn');
-      if (isOnline) {
-        btn.innerText = "ONLINE";
-        btn.className = "status-toggle status-online";
-        listenForRides();
-      } else {
-        btn.innerText = "OFFLINE";
-        btn.className = "status-toggle status-offline";
-        if (unsubscribeRides) unsubscribeRides();
-        document.getElementById('requestsContainer').innerHTML = "<p>Go ONLINE to receive nearby requests.</p>";
-      }
+.logo span{
+    color:#ffe500;
+}
+
+.bike{
+    width:74px;
+    height:74px;
+    margin:30px auto 20px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#151515;
+    border:1px solid #292929;
+    color:#ffe500;
+    font-size:29px;
+    box-shadow:0 0 35px rgba(255,229,0,.08);
+}
+
+.text{
+    color:#999;
+    font-size:12px;
+}
+
+.progress{
+    width:180px;
+    height:4px;
+    margin:18px auto 0;
+    background:#222;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    width:40%;
+    height:100%;
+    background:#ffe500;
+    border-radius:20px;
+    animation:loading 1.2s infinite ease-in-out;
+}
+
+@keyframes loading{
+
+    0%{
+        transform:translateX(-120%);
     }
 
-    function listenForRides() {
-      const container = document.getElementById('requestsContainer');
-      container.innerHTML = "<p>Listening for active ride requests...</p>";
+    100%{
+        transform:translateX(450%);
+    }
 
-      unsubscribeRides = db.collection('rides')
-        .where('status', '==', 'SEARCHING')
-        .onSnapshot((snapshot) => {
-          if (snapshot.empty) {
-            container.innerHTML = "<p>No rides available in your area right now.</p>";
+}
+
+.error{
+    display:none;
+    margin-top:18px;
+    padding:12px;
+    border-radius:12px;
+    background:#180909;
+    border:1px solid #3b1717;
+    color:#ff7070;
+    font-size:11px;
+}
+
+.retry{
+    display:none;
+    margin:12px auto 0;
+    width:100%;
+    max-width:180px;
+    padding:12px;
+    border:0;
+    border-radius:12px;
+    background:#ffe500;
+    color:#000;
+    font-weight:800;
+}
+
+</style></head><body><div class="loader"><div class="logo">
+    RIDER<span>X</span>
+</div>
+
+<div class="bike">
+    <i class="fa-solid fa-motorcycle"></i>
+</div>
+
+<div
+    id="loadingText"
+    class="text"
+>
+    Checking rider account...
+</div>
+
+<div class="progress">
+    <div class="progress-bar"></div>
+</div>
+
+<div
+    id="error"
+    class="error"
+>
+    Unable to open RiderX.
+</div>
+
+<button
+    id="retry"
+    class="retry"
+    type="button"
+>
+    Try Again
+</button>
+
+</div><script type="module">
+
+import { auth, db } from "../firebase/config.js";
+
+import {
+    doc,
+    getDoc
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+
+const loadingText =
+    document.getElementById("loadingText");
+
+const errorBox =
+    document.getElementById("error");
+
+const retry =
+    document.getElementById("retry");
+
+
+let handled = false;
+
+
+/* =========================================
+   OPEN RIDER HOME
+========================================= */
+
+function openHome(){
+
+    if(handled) return;
+
+    handled = true;
+
+    loadingText.innerText =
+        "Opening RiderX...";
+
+    setTimeout(
+        () => {
+
+            location.replace(
+                "home.html"
+            );
+
+        },
+        250
+    );
+
+}
+
+
+/* =========================================
+   AUTH
+========================================= */
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(!user){
+
+            loadingText.innerText =
+                "Please login as a rider...";
+
+            setTimeout(
+                () => {
+
+                    location.replace(
+                        "../auth/login.html?role=rider"
+                    );
+
+                },
+                700
+            );
+
             return;
-          }
 
-          container.innerHTML = "";
-          snapshot.forEach((doc) => {
-            const ride = doc.data();
-            const card = document.createElement('div');
-            card.className = 'ride-card';
-            card.innerHTML = `
-              <strong>Service: ${ride.serviceType.toUpperCase()}</strong>
-              <p>Pickup: ${ride.pickup.address}</p>
-              <p>Drop: ${ride.drop.address}</p>
-              <p><strong>Fare: ₹${ride.fare}</strong> (${ride.distanceKm} km)</p>
-              <button class="btn-accept" onclick="acceptRide('${doc.id}')">Accept Ride</button>
-            `;
-            container.appendChild(card);
-          });
-        });
+        }
+
+
+        try{
+
+            loadingText.innerText =
+                "Verifying rider account...";
+
+
+            const userSnap =
+                await getDoc(
+                    doc(
+                        db,
+                        "users",
+                        user.uid
+                    )
+                );
+
+
+            if(
+                userSnap.exists()
+            ){
+
+                const data =
+                    userSnap.data();
+
+
+                const role =
+                    String(
+                        data.role || ""
+                    ).toLowerCase();
+
+
+                if(
+                    role &&
+                    role !== "rider" &&
+                    data.isRider !== true
+                ){
+
+                    throw new Error(
+                        "This account is not registered as a rider."
+                    );
+
+                }
+
+            }
+
+
+            openHome();
+
+
+        }catch(error){
+
+            console.error(
+                "Rider entry error:",
+                error
+            );
+
+
+            loadingText.innerText =
+                "Rider verification failed";
+
+
+            errorBox.innerText =
+                error.message ||
+                "Unable to verify rider account.";
+
+
+            errorBox.style.display =
+                "block";
+
+
+            retry.style.display =
+                "block";
+
+        }
+
     }
+);
 
-    function acceptRide(rideId) {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("Please log in as a rider.");
-        return;
-      }
 
-      db.collection('rides').doc(rideId).update({
-        riderId: user.uid,
-        status: 'ACCEPTED',
-        acceptedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }).then(() => {
-        alert("Ride accepted successfully!");
-      }).catch(err => {
-        console.error("Acceptance error: ", err);
-      });
+/* =========================================
+   RETRY
+========================================= */
+
+retry.addEventListener(
+    "click",
+    () => {
+
+        location.reload();
+
     }
-  </script>
-</body>
+);
+
+</script></body>
 </html>
