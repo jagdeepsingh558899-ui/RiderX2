@@ -6,324 +6,1707 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Rating</title>
+<title>RiderX - Rate Your Ride</title>
 
-<link rel="stylesheet" href="../css/style.css">
+<meta name="theme-color" content="#FFD400">
 
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
-.box{
-
-background:#111;
-padding:25px;
-border-radius:20px;
-border:2px solid #FFD600;
-text-align:center;
-
+:root{
+    --yellow:#FFD400;
+    --bg:#0d0d0d;
+    --card:#191919;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
 }
 
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    min-height:100%;
+    background:#080808;
+}
+
+body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.app{
+    width:100%;
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:var(--bg);
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border-bottom:1px solid #252525;
+    background:rgba(10,10,10,.97);
+    backdrop-filter:blur(14px);
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    border:1px solid #303030;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.title-box{
+    flex:1;
+}
+
+.title{
+    font-size:12px;
+    font-weight:900;
+}
+
+.subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+
+.content{
+    padding:13px;
+    padding-bottom:40px;
+}
+
+
+/* =========================
+   RIDE CARD
+========================= */
+
+.ride-card{
+    padding:14px;
+    border:1px solid #333;
+    border-radius:17px;
+    background:var(--card);
+}
+
+.ride-top{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.ride-icon{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+    background:#282300;
+    color:var(--yellow);
+    font-size:17px;
+}
+
+.ride-info{
+    flex:1;
+    min-width:0;
+}
+
+.ride-title{
+    font-size:9px;
+    font-weight:900;
+}
+
+.ride-id{
+    margin-top:4px;
+    color:#666;
+    font-size:5px;
+}
+
+.ride-status{
+    padding:5px 7px;
+    border-radius:20px;
+    background:#15301f;
+    color:#54dc82;
+    font-size:5px;
+    font-weight:900;
+}
+
+
+/* =========================
+   RIDER
+========================= */
+
+.rider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:13px;
+    padding-top:12px;
+    border-top:1px solid #282828;
+}
+
+.rider-avatar{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border-radius:50%;
+    background:#292929;
+    color:var(--yellow);
+    font-size:13px;
+    font-weight:900;
+}
+
+.rider-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:none;
+}
+
+.rider-info{
+    flex:1;
+}
+
+.rider-name{
+    font-size:8px;
+    font-weight:900;
+}
+
+.rider-meta{
+    margin-top:4px;
+    color:#666;
+    font-size:5px;
+}
+
+
+/* =========================
+   RATING
+========================= */
+
+.rating-card{
+    margin-top:11px;
+    padding:20px 14px;
+    border:1px solid #333;
+    border-radius:17px;
+    background:var(--card);
+    text-align:center;
+}
+
+.rating-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.rating-sub{
+    margin-top:6px;
+    color:#777;
+    font-size:6px;
+    line-height:1.5;
+}
+
+.stars{
+    display:flex;
+    justify-content:center;
+    gap:7px;
+    margin-top:18px;
+}
 
 .star{
-
-font-size:40px;
-cursor:pointer;
-
+    width:45px;
+    height:45px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #383838;
+    border-radius:12px;
+    background:#202020;
+    color:#555;
+    font-size:23px;
+    cursor:pointer;
+    transition:.15s;
 }
 
+.star:active{
+    transform:scale(.94);
+}
+
+.star.active{
+    border-color:#796700;
+    background:#302a00;
+    color:var(--yellow);
+}
+
+
+/* =========================
+   RATING LABEL
+========================= */
+
+.rating-label{
+    min-height:16px;
+    margin-top:11px;
+    color:var(--yellow);
+    font-size:7px;
+    font-weight:900;
+}
+
+
+/* =========================
+   QUICK TAGS
+========================= */
+
+.tags-title{
+    margin-top:18px;
+    color:#666;
+    font-size:6px;
+    font-weight:900;
+}
+
+.tags{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:7px;
+    margin-top:8px;
+}
+
+.tag{
+    padding:7px 9px;
+    border:1px solid #333;
+    border-radius:20px;
+    background:#1d1d1d;
+    color:#777;
+    font-size:5px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.tag.active{
+    border-color:#786700;
+    background:#292400;
+    color:var(--yellow);
+}
+
+
+/* =========================
+   COMMENT
+========================= */
+
+.comment{
+    margin-top:14px;
+    text-align:left;
+}
+
+.comment-label{
+    display:block;
+    margin-bottom:6px;
+    color:#777;
+    font-size:6px;
+    font-weight:900;
+}
 
 textarea{
+    width:100%;
+    min-height:85px;
+    padding:10px;
+    resize:none;
+    border:1px solid #343434;
+    border-radius:11px;
+    outline:none;
+    background:#202020;
+    color:#fff;
+    font-family:inherit;
+    font-size:7px;
+    line-height:1.5;
+}
 
-width:100%;
-height:100px;
-margin-top:20px;
-border-radius:12px;
-padding:10px;
+textarea:focus{
+    border-color:#806b00;
+}
 
+.counter{
+    margin-top:4px;
+    color:#505050;
+    text-align:right;
+    font-size:5px;
 }
 
 
-button{
+/* =========================
+   SUBMIT
+========================= */
 
-width:100%;
-padding:15px;
-margin-top:15px;
-background:#FFD600;
-border:none;
-border-radius:12px;
-font-weight:bold;
-
+.submit-btn{
+    width:100%;
+    height:46px;
+    margin-top:14px;
+    border:0;
+    border-radius:12px;
+    background:var(--yellow);
+    color:#000;
+    font-size:7px;
+    font-weight:900;
+    cursor:pointer;
 }
 
+.submit-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+
+/* =========================
+   SKIP
+========================= */
+
+.skip-btn{
+    display:block;
+    margin:11px auto 0;
+    border:0;
+    background:none;
+    color:#666;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   SUCCESS
+========================= */
+
+.success{
+    display:none;
+    padding:35px 20px;
+    text-align:center;
+}
+
+.success.show{
+    display:block;
+}
+
+.success-icon{
+    width:70px;
+    height:70px;
+    margin:0 auto 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#15301f;
+    color:#59e187;
+    font-size:30px;
+}
+
+.success-title{
+    font-size:12px;
+    font-weight:900;
+}
+
+.success-text{
+    max-width:280px;
+    margin:8px auto 0;
+    color:#777;
+    font-size:6px;
+    line-height:1.6;
+}
+
+.done-btn{
+    width:100%;
+    max-width:300px;
+    height:43px;
+    margin-top:20px;
+    border:0;
+    border-radius:11px;
+    background:var(--yellow);
+    color:#000;
+    font-size:7px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    z-index:200;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
 
 </style>
 
 </head>
 
-
 <body>
 
+<div class="app">
 
 
-<div class="header">
+    <!-- HEADER -->
 
-⭐ Rate Rider
+    <header class="header">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ‹
+        </button>
+
+        <div class="title-box">
+
+            <div class="title">
+                Rate Your Ride
+            </div>
+
+            <div class="subtitle">
+                Help us improve RiderX
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="content">
+
+
+        <!-- RIDE DETAILS -->
+
+        <section class="ride-card">
+
+            <div class="ride-top">
+
+                <div
+                    class="ride-icon"
+                    id="rideIcon"
+                >
+                    🛵
+                </div>
+
+                <div class="ride-info">
+
+                    <div
+                        class="ride-title"
+                        id="rideTitle"
+                    >
+                        RiderX Ride
+                    </div>
+
+                    <div
+                        class="ride-id"
+                        id="rideId"
+                    >
+                        Ride ID: —
+                    </div>
+
+                </div>
+
+                <div class="ride-status">
+                    COMPLETED
+                </div>
+
+            </div>
+
+
+            <div class="rider">
+
+                <div class="rider-avatar">
+
+                    <span id="riderInitial">
+                        R
+                    </span>
+
+                    <img
+                        id="riderPhoto"
+                        alt="Rider"
+                    >
+
+                </div>
+
+                <div class="rider-info">
+
+                    <div
+                        class="rider-name"
+                        id="riderName"
+                    >
+                        Rider
+                    </div>
+
+                    <div
+                        class="rider-meta"
+                        id="riderMeta"
+                    >
+                        Thank you for riding with RiderX
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RATING AREA -->
+
+        <section
+            class="rating-card"
+            id="ratingCard"
+        >
+
+            <div class="rating-title">
+                How was your ride?
+            </div>
+
+            <div class="rating-sub">
+                Rate your experience with the rider
+            </div>
+
+
+            <div
+                class="stars"
+                id="stars"
+            >
+
+                <button
+                    class="star"
+                    data-rating="1"
+                    onclick="selectRating(1)"
+                    aria-label="1 star"
+                >
+                    ★
+                </button>
+
+                <button
+                    class="star"
+                    data-rating="2"
+                    onclick="selectRating(2)"
+                    aria-label="2 stars"
+                >
+                    ★
+                </button>
+
+                <button
+                    class="star"
+                    data-rating="3"
+                    onclick="selectRating(3)"
+                    aria-label="3 stars"
+                >
+                    ★
+                </button>
+
+                <button
+                    class="star"
+                    data-rating="4"
+                    onclick="selectRating(4)"
+                    aria-label="4 stars"
+                >
+                    ★
+                </button>
+
+                <button
+                    class="star"
+                    data-rating="5"
+                    onclick="selectRating(5)"
+                    aria-label="5 stars"
+                >
+                    ★
+                </button>
+
+            </div>
+
+
+            <div
+                class="rating-label"
+                id="ratingLabel"
+            >
+                Select a rating
+            </div>
+
+
+            <!-- QUICK TAGS -->
+
+            <div class="tags-title">
+                What did you like?
+            </div>
+
+            <div class="tags">
+
+                <button
+                    class="tag"
+                    data-tag="Safe driving"
+                    onclick="toggleTag(this)"
+                >
+                    🛡️ Safe driving
+                </button>
+
+                <button
+                    class="tag"
+                    data-tag="Polite rider"
+                    onclick="toggleTag(this)"
+                >
+                    😊 Polite rider
+                </button>
+
+                <button
+                    class="tag"
+                    data-tag="Clean vehicle"
+                    onclick="toggleTag(this)"
+                >
+                    ✨ Clean vehicle
+                </button>
+
+                <button
+                    class="tag"
+                    data-tag="On time"
+                    onclick="toggleTag(this)"
+                >
+                    ⏱️ On time
+                </button>
+
+                <button
+                    class="tag"
+                    data-tag="Good route"
+                    onclick="toggleTag(this)"
+                >
+                    🗺️ Good route
+                </button>
+
+                <button
+                    class="tag"
+                    data-tag="Friendly"
+                    onclick="toggleTag(this)"
+                >
+                    👍 Friendly
+                </button>
+
+            </div>
+
+
+            <!-- COMMENT -->
+
+            <div class="comment">
+
+                <label
+                    class="comment-label"
+                    for="comment"
+                >
+                    Add a comment (optional)
+                </label>
+
+                <textarea
+                    id="comment"
+                    maxlength="300"
+                    placeholder="Tell us about your experience..."
+                ></textarea>
+
+                <div class="counter">
+                    <span id="counter">0</span>/300
+                </div>
+
+            </div>
+
+
+            <button
+                class="submit-btn"
+                id="submitBtn"
+                onclick="submitRating()"
+                disabled
+            >
+                SUBMIT RATING
+            </button>
+
+
+            <button
+                class="skip-btn"
+                onclick="skipRating()"
+            >
+                Skip for now
+            </button>
+
+        </section>
+
+
+        <!-- SUCCESS -->
+
+        <section
+            class="success"
+            id="success"
+        >
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <div class="success-title">
+                Thank you for your feedback!
+            </div>
+
+            <div class="success-text">
+                Your rating helps RiderX maintain a better
+                experience for every customer.
+            </div>
+
+            <button
+                class="done-btn"
+                onclick="goHome()"
+            >
+                DONE
+            </button>
+
+        </section>
+
+    </main>
 
 </div>
 
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
-<div class="container">
 
+<script>
 
-<div class="box">
+/* ==========================================
+   RIDERX CUSTOMER RATING
+========================================== */
 
+let selectedRating = 0;
+let selectedTags = [];
+let toastTimer = null;
 
-<h2>
+let rideData = {};
 
-How was your ride?
 
-</h2>
+/* ==========================================
+   DEFAULT DATA
+========================================== */
 
+const defaultRide = {
 
-
-<div>
-
-
-<span class="star" onclick="rate(1)">☆</span>
-<span class="star" onclick="rate(2)">☆</span>
-<span class="star" onclick="rate(3)">☆</span>
-<span class="star" onclick="rate(4)">☆</span>
-<span class="star" onclick="rate(5)">☆</span>
-
-
-</div>
-
-
-
-
-<textarea id="review" placeholder="Write your review"></textarea>
-
-
-
-
-<button onclick="submitRating()">
-
-Submit Rating
-
-</button>
-
-
-
-<p id="msg"></p>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-collection,
-addDoc,
-doc,
-getDoc,
-updateDoc,
-serverTimestamp
-
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-
-let rating=0;
-
-
-let rideId=
-
-localStorage.getItem("rideId");
-
-
-
-
-
-
-
-function rate(value){
-
-
-rating=value;
-
-
-document.querySelectorAll(".star")
-.forEach((star,index)=>{
-
-
-star.innerHTML=
-
-index < value
-
-?
-
-"★"
-
-:
-
-"☆";
-
-
-});
-
-
-}
-
-
-
-window.rate=rate;
-
-
-
-
-
-
-
-window.submitRating=async()=>{
-
-
-
-if(rating===0){
-
-
-document.getElementById("msg").innerHTML=
-
-"Please select stars ⭐";
-
-
-return;
-
-
-}
-
-
-
-
-
-let rideSnap=
-
-await getDoc(
-
-doc(db,"rides",rideId)
-
-);
-
-
-
-if(!rideSnap.exists()) return;
-
-
-
-let data=
-
-rideSnap.data();
-
-
-
-
-
-
-await addDoc(
-
-collection(db,"reviews"),
-
-{
-
-
-rideId:rideId,
-
-
-riderId:data.riderId || "",
-
-
-rating:rating,
-
-
-review:
-
-document.getElementById("review").value,
-
-
-createdAt:serverTimestamp()
-
-
-}
-
-);
-
-
-
-
-
-
-await updateDoc(
-
-doc(db,"rides",rideId),
-
-{
-
-
-rated:true
-
-}
-
-);
-
-
-
-
-
-
-document.getElementById("msg").innerHTML=
-
-"Thank you for rating ⭐";
-
-
-
-
-
-setTimeout(()=>{
-
-
-location.href="history.html";
-
-
-},1500);
-
-
+    id:"",
+    service:"Bike Taxi",
+    riderName:"Rider",
+    riderPhone:"",
+    riderPhoto:"",
+    vehicle:"",
+    vehicleNumber:""
 
 };
 
 
+/* ==========================================
+   GET PARAM
+========================================== */
+
+function getParam(
+    name
+){
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    return params.get(
+        name
+    );
+
+}
+
+
+/* ==========================================
+   LOAD RIDE
+========================================== */
+
+function loadRide(){
+
+    rideData = {
+        ...defaultRide
+    };
+
+
+    /*
+      First read URL parameters.
+    */
+
+    rideData.id =
+        getParam(
+            "rideId"
+        ) ||
+        getParam(
+            "id"
+        ) ||
+        "";
+
+
+    rideData.service =
+        getParam(
+            "service"
+        ) ||
+        getParam(
+            "type"
+        ) ||
+        "Bike Taxi";
+
+
+    rideData.riderName =
+        getParam(
+            "riderName"
+        ) ||
+        "Rider";
+
+
+    /*
+      Try local ride records.
+    */
+
+    const keys = [
+
+        "currentRide",
+        "activeRide",
+        "riderxCurrentRide",
+        "lastRide",
+        "rideData"
+
+    ];
+
+
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(
+                !raw
+            ){
+
+                continue;
+
+            }
+
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                data &&
+                typeof data ===
+                "object"
+            ){
+
+                rideData = {
+
+                    ...rideData,
+                    ...data
+
+                };
+
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                error
+            );
+
+        }
+
+    }
+
+
+    renderRide();
+
+}
+
+
+/* ==========================================
+   RENDER RIDE
+========================================== */
+
+function renderRide(){
+
+    const service =
+        String(
+            rideData.service ||
+            rideData.type ||
+            "Bike Taxi"
+        );
+
+
+    document.getElementById(
+        "rideTitle"
+    ).textContent =
+        service;
+
+
+    document.getElementById(
+        "rideId"
+    ).textContent =
+        "Ride ID: " +
+        (
+            rideData.id ||
+            "—"
+        );
+
+
+    const riderName =
+        rideData.riderName ||
+        rideData.driverName ||
+        rideData.name ||
+        "Rider";
+
+
+    document.getElementById(
+        "riderName"
+    ).textContent =
+        riderName;
+
+
+    let meta =
+        "RiderX partner";
+
+
+    if(
+        rideData.vehicleNumber
+    ){
+
+        meta =
+            rideData.vehicleNumber;
+
+    }else if(
+        rideData.vehicle
+    ){
+
+        meta =
+            rideData.vehicle;
+
+    }
+
+
+    document.getElementById(
+        "riderMeta"
+    ).textContent =
+        meta;
+
+
+    setRideIcon(
+        service
+    );
+
+
+    if(
+        rideData.riderPhoto ||
+        rideData.driverPhoto ||
+        rideData.photoURL
+    ){
+
+        const image =
+            document.getElementById(
+                "riderPhoto"
+            );
+
+
+        image.src =
+            rideData.riderPhoto ||
+            rideData.driverPhoto ||
+            rideData.photoURL;
+
+
+        image.style.display =
+            "block";
+
+
+        document.getElementById(
+            "riderInitial"
+        ).style.display =
+            "none";
+
+    }else{
+
+        document.getElementById(
+            "riderInitial"
+        ).textContent =
+            riderName
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+/* ==========================================
+   ICON
+========================================== */
+
+function setRideIcon(
+    service
+){
+
+    const value =
+        String(
+            service
+        ).toLowerCase();
+
+
+    let icon =
+        "🛵";
+
+
+    if(
+        value.includes(
+            "cab"
+        ) ||
+        value.includes(
+            "car"
+        )
+    ){
+
+        icon =
+            "🚕";
+
+    }else if(
+        value.includes(
+            "parcel"
+        )
+    ){
+
+        icon =
+            "📦";
+
+    }else if(
+        value.includes(
+            "food"
+        )
+    ){
+
+        icon =
+            "🍔";
+
+    }
+
+
+    document.getElementById(
+        "rideIcon"
+    ).textContent =
+        icon;
+
+}
+
+
+/* ==========================================
+   RATING
+========================================== */
+
+function selectRating(
+    rating
+){
+
+    selectedRating =
+        rating;
+
+
+    document
+        .querySelectorAll(
+            ".star"
+        )
+        .forEach(
+            star => {
+
+                const value =
+                    Number(
+                        star.dataset.rating
+                    );
+
+
+                star.classList.toggle(
+                    "active",
+                    value <=
+                    rating
+                );
+
+            }
+        );
+
+
+    const labels = {
+
+        1:"Very poor",
+        2:"Poor",
+        3:"Okay",
+        4:"Good",
+        5:"Excellent"
+
+    };
+
+
+    document.getElementById(
+        "ratingLabel"
+    ).textContent =
+        labels[rating];
+
+
+    document.getElementById(
+        "submitBtn"
+    ).disabled =
+        false;
+
+}
+
+
+/* ==========================================
+   TAGS
+========================================== */
+
+function toggleTag(
+    element
+){
+
+    const tag =
+        element.dataset.tag;
+
+
+    if(
+        element.classList.contains(
+            "active"
+        )
+    ){
+
+        element.classList.remove(
+            "active"
+        );
+
+
+        selectedTags =
+            selectedTags.filter(
+                item =>
+                    item !==
+                    tag
+            );
+
+    }else{
+
+        element.classList.add(
+            "active"
+        );
+
+
+        if(
+            !selectedTags.includes(
+                tag
+            )
+        ){
+
+            selectedTags.push(
+                tag
+            );
+
+        }
+
+    }
+
+}
+
+
+/* ==========================================
+   COMMENT COUNTER
+========================================== */
+
+document.getElementById(
+    "comment"
+).addEventListener(
+    "input",
+    function(){
+
+        document.getElementById(
+            "counter"
+        ).textContent =
+            this.value.length;
+
+    }
+);
+
+
+/* ==========================================
+   SUBMIT
+========================================== */
+
+function submitRating(){
+
+    if(
+        selectedRating <
+        1
+    ){
+
+        showToast(
+            "Please select a rating first."
+        );
+
+        return;
+
+    }
+
+
+    const button =
+        document.getElementById(
+            "submitBtn"
+        );
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "SUBMITTING...";
+
+
+    const review = {
+
+        id:
+            "REV" +
+            Date.now(),
+
+        rideId:
+            rideData.id ||
+            "",
+
+        riderId:
+            rideData.riderId ||
+            rideData.driverId ||
+            "",
+
+        riderName:
+            rideData.riderName ||
+            rideData.driverName ||
+            "Rider",
+
+        rating:
+            selectedRating,
+
+        tags:
+            [...selectedTags],
+
+        comment:
+            document.getElementById(
+                "comment"
+            ).value.trim(),
+
+        service:
+            rideData.service ||
+            "Bike Taxi",
+
+        createdAt:
+            Date.now()
+
+    };
+
+
+    saveReview(
+        review
+    );
+
+
+    markRideRated(
+        review
+    );
+
+
+    document.getElementById(
+        "ratingCard"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "success"
+    ).classList.add(
+        "show"
+    );
+
+
+    showToast(
+        "Thank you for your rating!"
+    );
+
+}
+
+
+/* ==========================================
+   SAVE REVIEW
+========================================== */
+
+function saveReview(
+    review
+){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                "riderxRatings"
+            );
+
+
+        let ratings = [];
+
+
+        if(
+            raw
+        ){
+
+            const parsed =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                Array.isArray(
+                    parsed
+                )
+            ){
+
+                ratings =
+                    parsed;
+
+            }
+
+        }
+
+
+        ratings.unshift(
+            review
+        );
+
+
+        localStorage.setItem(
+            "riderxRatings",
+            JSON.stringify(
+                ratings.slice(
+                    0,
+                    200
+                )
+            )
+        );
+
+
+        localStorage.setItem(
+            "lastRiderXRating",
+            JSON.stringify(
+                review
+            )
+        );
+
+    }catch(error){
+
+        console.error(
+            "Rating save error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   MARK RIDE RATED
+========================================== */
+
+function markRideRated(
+    review
+){
+
+    const keys = [
+
+        "currentRide",
+        "activeRide",
+        "riderxCurrentRide",
+        "lastRide",
+        "rideData"
+
+    ];
+
+
+    keys.forEach(
+        key => {
+
+            try{
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if(
+                    !raw
+                ){
+
+                    return;
+
+                }
+
+
+                const data =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if(
+                    !data ||
+                    typeof data !==
+                    "object"
+                ){
+
+                    return;
+
+                }
+
+
+                const rideId =
+                    data.id ||
+                    data.rideId;
+
+
+                if(
+                    !review.rideId ||
+                    !rideId ||
+                    String(rideId) !==
+                    String(review.rideId)
+                ){
+
+                    return;
+
+                }
+
+
+                data.rated =
+                    true;
+
+
+                data.rating =
+                    review.rating;
+
+
+                data.reviewId =
+                    review.id;
+
+
+                localStorage.setItem(
+                    key,
+                    JSON.stringify(
+                        data
+                    )
+                );
+
+            }catch(error){
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   SKIP
+========================================== */
+
+function skipRating(){
+
+    const confirmed =
+        window.confirm(
+            "Skip rating for this ride?"
+        );
+
+
+    if(
+        !confirmed
+    ){
+
+        return;
+
+    }
+
+
+    goHome();
+
+}
+
+
+/* ==========================================
+   HOME
+========================================== */
+
+function goHome(){
+
+    window.location.href =
+        "home.html";
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        window.location.href =
+            "history.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadRide();
+
+    }
+);
 
 </script>
 
-
-
 </body>
-
-</html>
+  </html>
