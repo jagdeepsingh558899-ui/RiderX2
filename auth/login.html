@@ -1,440 +1,1171 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>RiderX Login</title>
-
-<link
-    rel="stylesheet"
-    href="../assets/app.css"
->
-
-<link
-    rel="manifest"
-    href="../manifest.json"
->
-
-<meta
-    name="theme-color"
-    content="#000000"
->
-
-<style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFD400"><title>RiderX - Login</title><link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Auth.css">
+<link rel="stylesheet" href="../css/Responsive.css"><style>
 
 *{
     box-sizing:border-box;
 }
 
-html,
 body{
     margin:0;
-    padding:0;
-    min-height:100%;
-}
-
-body{
-
     min-height:100vh;
-
-    background:#000;
-
+    background:#070707;
     color:#fff;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    font-family:Arial,sans-serif;
-
-    padding:20px;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-.auth-card{
+.page{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    position:relative;
+    overflow:hidden;
+}
 
+.page::before{
+    content:"";
+    position:absolute;
+    width:360px;
+    height:360px;
+    top:-190px;
+    right:-140px;
+    border-radius:50%;
+    background:rgba(255,212,0,.07);
+}
+
+.page::after{
+    content:"";
+    position:absolute;
+    width:320px;
+    height:320px;
+    bottom:-190px;
+    left:-150px;
+    border-radius:50%;
+    background:rgba(255,212,0,.05);
+}
+
+.card{
+    position:relative;
+    z-index:2;
     width:100%;
-
-    max-width:420px;
-
+    max-width:430px;
+    padding:28px 22px 22px;
+    border:1px solid #292929;
+    border-radius:22px;
     background:#111;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
 
-    padding:30px;
-
-    border-radius:25px;
-
-    border:1px solid #333;
-
-    box-shadow:
-        0 20px 60px rgba(0,0,0,.55);
+.brand{
+    text-align:center;
+    margin-bottom:23px;
 }
 
 .logo{
-
-    text-align:center;
-
-    font-size:38px;
-
-    font-weight:900;
-
-    margin-bottom:8px;
+    width:68px;
+    height:68px;
+    margin:0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:19px;
+    background:#FFD400;
+    color:#090909;
+    font-size:24px;
+    font-weight:1000;
 }
 
-.logo span{
-
-    color:#FFD600;
+.brand h1{
+    margin:0;
+    font-size:25px;
+    font-weight:1000;
 }
 
-.subtitle{
-
-    text-align:center;
-
-    color:#888;
-
-    font-size:13px;
-
-    margin-bottom:25px;
+.brand h1 span{
+    color:#FFD400;
 }
 
-h2{
-
-    text-align:center;
-
-    color:#FFD600;
-
-    margin:0 0 25px;
+.brand p{
+    margin:6px 0 0;
+    color:#777;
+    font-size:10px;
 }
 
-.input-box{
-
-    margin-bottom:18px;
+.heading{
+    margin-bottom:17px;
 }
 
-label{
+.heading h2{
+    margin:0;
+    font-size:18px;
+}
 
-    color:#aaa;
+.heading p{
+    margin:6px 0 0;
+    color:#777;
+    font-size:10px;
+    line-height:1.5;
+}
 
-    font-size:14px;
+.message{
+    display:none;
+    margin-bottom:13px;
+    padding:10px;
+    border-radius:9px;
+    font-size:9px;
+    line-height:1.5;
+}
 
+.message.show{
     display:block;
-
-    margin-bottom:7px;
 }
 
-input{
+.message.error{
+    border:1px solid #542828;
+    background:#241414;
+    color:#ff7777;
+}
 
+.message.success{
+    border:1px solid #275335;
+    background:#132319;
+    color:#65e58b;
+}
+
+.field{
+    margin-bottom:14px;
+}
+
+.field label{
+    display:block;
+    margin-bottom:6px;
+    color:#999;
+    font-size:9px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.input{
     width:100%;
-
-    padding:14px;
-
-    background:#000;
-
-    border:1px solid #444;
-
-    border-radius:12px;
-
-    color:#fff;
-
-    font-size:15px;
-
+    height:48px;
+    padding:0 13px;
+    border:1px solid #333;
+    border-radius:10px;
     outline:none;
+    background:#1a1a1a;
+    color:#fff;
+    font-size:12px;
 }
 
-input:focus{
-
-    border-color:#FFD600;
-
-    box-shadow:
-        0 0 0 2px rgba(255,214,0,.08);
+.input:focus{
+    border-color:#FFD400;
+    box-shadow:0 0 0 2px rgba(255,212,0,.08);
 }
 
-input::placeholder{
-
-    color:#666;
+.input::placeholder{
+    color:#555;
 }
 
-.btn{
+.password{
+    position:relative;
+}
 
-    width:100%;
+.password .input{
+    padding-right:45px;
+}
 
-    padding:15px;
-
-    background:#FFD600;
-
-    color:#000;
-
-    border:none;
-
-    border-radius:12px;
-
-    font-weight:bold;
-
-    font-size:17px;
-
+.eye{
+    position:absolute;
+    right:7px;
+    top:50%;
+    width:34px;
+    height:34px;
+    transform:translateY(-50%);
+    border:0;
+    background:transparent;
+    color:#777;
     cursor:pointer;
 }
 
-.btn:disabled{
+.eye:hover{
+    color:#FFD400;
+}
 
-    opacity:.5;
+.phone{
+    display:flex;
+    gap:8px;
+}
 
+.code{
+    width:80px;
+    flex:none;
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1a1a1a;
+    color:#FFD400;
+    font-size:11px;
+    font-weight:900;
+}
+
+.phone .input{
+    flex:1;
+}
+
+.options{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:2px 0 17px;
+}
+
+.remember{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:#777;
+    font-size:9px;
+}
+
+.remember input{
+    width:14px;
+    height:14px;
+    accent-color:#FFD400;
+}
+
+.link{
+    border:0;
+    background:none;
+    padding:0;
+    color:#FFD400;
+    cursor:pointer;
+    font-size:9px;
+    font-weight:800;
+}
+
+.submit{
+    width:100%;
+    height:49px;
+    border:0;
+    border-radius:10px;
+    background:#FFD400;
+    color:#111;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:1000;
+}
+
+.submit:disabled{
+    opacity:.6;
     cursor:not-allowed;
 }
 
-.error-msg{
-
-    color:#ff4444;
-
-    margin-bottom:15px;
-
-    display:none;
-
-    line-height:1.5;
-
-    font-size:14px;
+.divider{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:19px 0;
+    color:#555;
+    font-size:9px;
 }
 
-.auth-links{
-
-    text-align:center;
-
-    margin-top:20px;
-
-    color:#aaa;
-
-    font-size:14px;
+.divider::before,
+.divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:#292929;
 }
 
-.auth-links a{
-
-    color:#FFD600;
-
-    text-decoration:none;
-
-    font-weight:bold;
-}
-
-.mode{
-
-    text-align:center;
-
-    margin-bottom:20px;
-
-    padding:10px;
-
-    background:#080808;
-
-    border:1px solid #222;
-
+.alt{
+    width:100%;
+    height:45px;
+    border:1px solid #333;
     border-radius:10px;
-
-    color:#aaa;
-
-    font-size:12px;
-
-    display:none;
+    background:#191919;
+    color:#ddd;
+    cursor:pointer;
+    font-size:10px;
+    font-weight:900;
 }
 
-.mode strong{
-
-    color:#FFD600;
+.alt:hover{
+    border-color:#FFD400;
+    color:#FFD400;
 }
 
-</style>
+.register{
+    margin-top:20px;
+    text-align:center;
+    color:#777;
+    font-size:10px;
+}
 
-</head>
+.register a{
+    color:#FFD400;
+    text-decoration:none;
+    font-weight:900;
+}
 
+.role{
+    display:block;
+    width:100%;
+    margin-top:12px;
+    border:0;
+    background:transparent;
+    color:#666;
+    cursor:pointer;
+    font-size:9px;
+}
 
-<body>
+.role:hover{
+    color:#FFD400;
+}
 
+.footer{
+    margin-top:20px;
+    text-align:center;
+    color:#444;
+    font-size:8px;
+}
 
-<div class="auth-card">
+.loader{
+    display:inline-block;
+    width:13px;
+    height:13px;
+    margin-right:7px;
+    vertical-align:-2px;
+    border:2px solid rgba(0,0,0,.25);
+    border-top-color:#111;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+}
 
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
 
-    <div class="logo">
-        RID<span>ERX</span>
+@media(max-width:480px){
+
+    .page{
+        padding:10px;
+    }
+
+    .card{
+        padding:24px 17px 18px;
+        border-radius:18px;
+    }
+
+}
+
+</style></head><body><main class="page"><section class="card"><div class="brand"><div class="logo">
+    RX
+</div>
+
+<h1>
+    Rider<span>X</span>
+</h1>
+
+<p>
+    Your ride. Your journey. Your choice.
+</p>
+
+</div><div class="heading"><h2>
+    Welcome back
+</h2>
+
+<p>
+    Login to continue to your RiderX account.
+</p>
+
+</div><div
+    class="message error"
+    id="errorBox"
+></div><div
+    class="message success"
+    id="successBox"
+></div><form
+    id="loginForm"
+    novalidate
+><div class="field"><label>
+    Mobile Number
+</label>
+
+<div class="phone">
+
+    <div class="code">
+        +91
     </div>
 
-
-    <div class="subtitle">
-        Secure RiderX Account Login
-    </div>
-
-
-    <h2>
-        Login
-    </h2>
-
-
-    <div
-        id="loginMode"
-        class="mode">
-    </div>
-
-
-    <div
-        id="error-message"
-        class="error-msg">
-    </div>
-
-
-    <form id="login-form">
-
-
-        <div class="input-box">
-
-            <label for="email">
-                Email
-            </label>
-
-            <input
-                id="email"
-                type="email"
-                required
-                autocomplete="username"
-                inputmode="email"
-                placeholder="Email Address"
-            >
-
-        </div>
-
-
-        <div class="input-box">
-
-            <label for="password">
-                Password
-            </label>
-
-            <input
-                id="password"
-                type="password"
-                required
-                autocomplete="current-password"
-                placeholder="Password"
-            >
-
-        </div>
-
-
-        <button
-            class="btn"
-            id="login-btn"
-            type="submit">
-
-            Login
-
-        </button>
-
-
-    </form>
-
-
-    <div class="auth-links">
-
-        Don't have an account?
-
-        <a
-            id="registerLink"
-            href="register.html">
-
-            Register
-
-        </a>
-
-    </div>
-
+    <input
+        class="input"
+        id="phone"
+        type="tel"
+        inputmode="numeric"
+        autocomplete="tel"
+        maxlength="10"
+        placeholder="10-digit mobile number"
+        required
+    >
 
 </div>
 
+</div><div class="field"><label>
+    Password
+</label>
 
-<script>
+<div class="password">
+
+    <input
+        class="input"
+        id="password"
+        type="password"
+        autocomplete="current-password"
+        minlength="6"
+        placeholder="Enter password"
+        required
+    >
+
+    <button
+        type="button"
+        class="eye"
+        id="eyeBtn"
+        aria-label="Show password"
+    >
+        👁
+    </button>
+
+</div>
+
+</div><div class="options"><label class="remember">
+
+    <input
+        type="checkbox"
+        id="remember"
+    >
+
+    Remember me
+
+</label>
 
 
-// ============================================================
-// LOGIN PAGE ROLE
-// ============================================================
+<button
+    type="button"
+    class="link"
+    id="forgotBtn"
+>
+    Forgot password?
+</button>
 
-const params =
-    new URLSearchParams(
-        window.location.search
+</div><button
+type="submit"
+class="submit"
+id="submitBtn"
+
+«»
+
+Login
+
+</button></form><div class="divider">
+    OR
+</div><button
+type="button"
+class="alt"
+id="otpBtn"
+
+«»
+
+Login with OTP
+
+</button><div class="register">New to RiderX?
+
+<a href="./register.html">
+    Create an account
+</a>
+
+</div><button
+type="button"
+class="role"
+id="roleBtn"
+
+«»
+
+← Choose login type
+
+</button><div class="footer">
+    © 2026 RiderX • Secure Login
+</div></section></main><script>
+
+"use strict";
+
+
+const form =
+    document.getElementById(
+        "loginForm"
+    );
+
+const phone =
+    document.getElementById(
+        "phone"
+    );
+
+const password =
+    document.getElementById(
+        "password"
+    );
+
+const submitBtn =
+    document.getElementById(
+        "submitBtn"
+    );
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
+
+const successBox =
+    document.getElementById(
+        "successBox"
     );
 
 
-const role =
-    (
-        params.get("role") || ""
+
+phone.addEventListener(
+    "input",
+    function(){
+
+        this.value =
+            this.value
+                .replace(
+                    /\D/g,
+                    ""
+                )
+                .slice(
+                    0,
+                    10
+                );
+
+    }
+);
+
+
+
+document
+    .getElementById(
+        "eyeBtn"
     )
-    .trim()
-    .toLowerCase();
+    .addEventListener(
+        "click",
+        function(){
+
+            const show =
+                password.type ===
+                "password";
 
 
-const mode =
-    document.getElementById("loginMode");
+            password.type =
+                show
+                    ? "text"
+                    : "password";
 
 
-const registerLink =
-    document.getElementById("registerLink");
+            this.textContent =
+                show
+                    ? "🙈"
+                    : "👁";
+
+        }
+    );
 
 
-// ============================================================
-// RIDER LOGIN
-// ============================================================
 
-if (role === "rider") {
+form.addEventListener(
+    "submit",
+    async function(event){
 
-    mode.style.display = "block";
+        event.preventDefault();
 
-    mode.innerHTML =
-        "Login as <strong>Rider</strong>";
+        hideMessages();
 
-    registerLink.href =
-        "register.html?role=rider";
+
+        const mobile =
+            phone.value.trim();
+
+
+        const pass =
+            password.value;
+
+
+        if(
+            !/^[6-9]\d{9}$/.test(
+                mobile
+            )
+        ){
+
+            showError(
+                "Enter a valid 10-digit Indian mobile number."
+            );
+
+            phone.focus();
+
+            return;
+
+        }
+
+
+        if(
+            pass.length < 6
+        ){
+
+            showError(
+                "Password must be at least 6 characters."
+            );
+
+            password.focus();
+
+            return;
+
+        }
+
+
+        setLoading(
+            true
+        );
+
+
+        try{
+
+            const user =
+                findUser(
+                    mobile,
+                    pass
+                );
+
+
+            if(!user){
+
+                showError(
+                    "Invalid mobile number or password."
+                );
+
+                setLoading(
+                    false
+                );
+
+                return;
+
+            }
+
+
+            const role =
+                normalizeRole(
+                    user.role
+                );
+
+
+            const session = {
+
+                uid:
+                    user.uid ||
+                    "user_" +
+                    mobile,
+
+                name:
+                    user.name ||
+                    "RiderX User",
+
+                phone:
+                    mobile,
+
+                role:
+                    role,
+
+                loginAt:
+                    new Date().toISOString()
+
+            };
+
+
+            localStorage.setItem(
+                "riderx_user",
+                JSON.stringify(
+                    session
+                )
+            );
+
+
+            localStorage.setItem(
+                "userRole",
+                role
+            );
+
+
+            if(
+                document.getElementById(
+                    "remember"
+                ).checked
+            ){
+
+                localStorage.setItem(
+                    "riderx_remember",
+                    "true"
+                );
+
+            }
+
+
+            showSuccess(
+                "Login successful. Redirecting..."
+            );
+
+
+            setTimeout(
+                function(){
+
+                    redirectByRole(
+                        role
+                    );
+
+                },
+                650
+            );
+
+
+        }catch(error){
+
+            console.error(
+                error
+            );
+
+            showError(
+                "Something went wrong. Please try again."
+            );
+
+            setLoading(
+                false
+            );
+
+        }
+
+    }
+);
+
+
+
+document
+    .getElementById(
+        "otpBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            const mobile =
+                phone.value.trim();
+
+
+            if(
+                mobile &&
+                !/^[6-9]\d{9}$/.test(
+                    mobile
+                )
+            ){
+
+                showError(
+                    "Enter a valid mobile number."
+                );
+
+                return;
+
+            }
+
+
+            if(mobile){
+
+                localStorage.setItem(
+                    "riderx_otp_phone",
+                    mobile
+                );
+
+            }
+
+
+            window.location.href =
+                "./otp-login.html";
+
+        }
+    );
+
+
+
+document
+    .getElementById(
+        "forgotBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            const mobile =
+                phone.value.trim();
+
+
+            if(
+                mobile &&
+                !/^[6-9]\d{9}$/.test(
+                    mobile
+                )
+            ){
+
+                showError(
+                    "Enter a valid mobile number."
+                );
+
+                return;
+
+            }
+
+
+            localStorage.setItem(
+                "riderx_reset_role",
+                "customer"
+            );
+
+
+            if(mobile){
+
+                localStorage.setItem(
+                    "riderx_reset_phone",
+                    mobile
+                );
+
+            }
+
+
+            window.location.href =
+                "./otp-login.html";
+
+        }
+    );
+
+
+
+document
+    .getElementById(
+        "roleBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            window.location.href =
+                "./role.html";
+
+        }
+    );
+
+
+
+function findUser(
+    mobile,
+    pass
+){
+
+    const users =
+        getUsers();
+
+
+    const match =
+        users.find(
+            function(user){
+
+                const userPhone =
+                    normalizePhone(
+                        user.phone
+                    );
+
+
+                const userPassword =
+                    String(
+                        user.password ||
+                        ""
+                    );
+
+
+                return (
+                    userPhone ===
+                    mobile &&
+                    userPassword ===
+                    pass
+                );
+
+            }
+        );
+
+
+    return match ||
+        null;
+
 }
 
 
-// ============================================================
-// CUSTOMER LOGIN
-// ============================================================
 
-else if (role === "customer") {
+function getUsers(){
 
-    mode.style.display = "block";
+    const keys = [
 
-    mode.innerHTML =
-        "Login as <strong>Customer</strong>";
+        "riderx_users",
 
-    registerLink.href =
-        "register.html?role=customer";
+        "users",
+
+        "riderx_customers",
+
+        "riderx_riders"
+
+    ];
+
+
+    const result = [];
+
+
+    keys.forEach(
+        function(key){
+
+            try{
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if(!raw){
+
+                    return;
+
+                }
+
+
+                const parsed =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if(
+                    Array.isArray(
+                        parsed
+                    )
+                ){
+
+                    parsed.forEach(
+                        function(user){
+
+                            result.push(
+                                user
+                            );
+
+                        }
+                    );
+
+                }else if(parsed){
+
+                    result.push(
+                        parsed
+                    );
+
+                }
+
+            }catch(error){
+
+                console.error(
+                    key,
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    return result;
+
 }
 
 
-// ============================================================
-// NORMAL LOGIN
-// ============================================================
 
-else {
+function normalizePhone(
+    value
+){
 
-    registerLink.href =
-        "register.html";
+    return String(
+        value || ""
+    )
+    .replace(
+        /\D/g,
+        ""
+    )
+    .slice(
+        -10
+    );
+
 }
 
-</script>
 
 
-<script
-    type="module"
-    src="../js/login.js">
-</script>
+function normalizeRole(
+    role
+){
+
+    const value =
+        String(
+            role || "customer"
+        )
+        .toLowerCase();
 
 
-</body>
+    if(
+        value ===
+        "rider" ||
+        value ===
+        "driver"
+    ){
 
-</html>
+        return "rider";
+
+    }
+
+
+    if(
+        value ===
+        "admin"
+    ){
+
+        return "admin";
+
+    }
+
+
+    return "customer";
+
+}
+
+
+
+function redirectByRole(
+    role
+){
+
+    if(role === "rider"){
+
+        window.location.href =
+            "../rider/home.html";
+
+        return;
+
+    }
+
+
+    if(role === "admin"){
+
+        window.location.href =
+            "../admin/dashboard.html";
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "../customer/home.html";
+
+}
+
+
+
+function setLoading(
+    loading
+){
+
+    submitBtn.disabled =
+        loading;
+
+
+    if(loading){
+
+        submitBtn.innerHTML =
+            '<span class="loader"></span>Logging in...';
+
+    }else{
+
+        submitBtn.textContent =
+            "Login";
+
+    }
+
+}
+
+
+
+function hideMessages(){
+
+    errorBox.classList.remove(
+        "show"
+    );
+
+    successBox.classList.remove(
+        "show"
+    );
+
+}
+
+
+
+function showError(
+    message
+){
+
+    successBox.classList.remove(
+        "show"
+    );
+
+    errorBox.textContent =
+        message;
+
+    errorBox.classList.add(
+        "show"
+    );
+
+}
+
+
+
+function showSuccess(
+    message
+){
+
+    errorBox.classList.remove(
+        "show"
+    );
+
+    successBox.textContent =
+        message;
+
+    successBox.classList.add(
+        "show"
+    );
+
+}
+
+</script></body></html>
