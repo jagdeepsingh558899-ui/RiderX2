@@ -1,313 +1,1414 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Service Settings</title>
+<title>RiderX Admin - Service Settings</title>
 
-<link rel="stylesheet" href="../css/style.css">
+<meta name="theme-color" content="#FFD400">
 
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
+:root{
+    --yellow:#FFD400;
+    --bg:#080808;
+    --card:#151515;
+    --card2:#1c1c1c;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#60a5fa;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
 body{
-
-background:#000;
-color:white;
-font-family:Arial;
-
+    min-height:100%;
+    background:var(--bg);
 }
 
-
-.header{
-
-background:#111;
-padding:20px;
-font-size:24px;
-font-weight:bold;
-border-bottom:2px solid #FFD600;
-
+body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-
-.container{
-
-padding:20px;
-
+button,
+input,
+select,
+textarea{
+    font-family:inherit;
 }
-
-
-
-.box{
-
-background:#111;
-padding:20px;
-border-radius:20px;
-
-}
-
-
-
-.row{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-
-background:#222;
-padding:15px;
-margin-top:15px;
-border-radius:12px;
-
-}
-
-
-
-input{
-
-width:22px;
-height:22px;
-
-}
-
-
 
 button{
+    cursor:pointer;
+}
 
-width:100%;
-padding:15px;
-margin-top:25px;
-border:none;
-border-radius:12px;
-background:#FFD600;
-font-weight:bold;
-
+.app{
+    min-height:100vh;
+    background:var(--bg);
 }
 
 
+/* HEADER */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:12px;
+
+    background:#0c0c0c;
+    border-bottom:1px solid #292929;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+
+    border:1px solid #363636;
+    border-radius:11px;
+
+    background:#1b1b1b;
+    color:#fff;
+
+    font-size:20px;
+}
+
+.logo{
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:900;
+}
+
+.header-info{
+    flex:1;
+    min-width:0;
+}
+
+.header-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.header-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
+}
+
+
+/* MAIN */
+
+.main{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    padding:15px;
+}
+
+.page-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+
+    margin-bottom:13px;
+}
+
+.page-title{
+    font-size:14px;
+    font-weight:900;
+}
+
+.page-description{
+    margin-top:4px;
+    color:#777;
+    font-size:6px;
+}
+
+.save-btn{
+    height:38px;
+    padding:0 15px;
+
+    border:1px solid #625500;
+    border-radius:10px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* SERVICES */
+
+.services{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:12px;
+}
+
+.service-card{
+    padding:15px;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+}
+
+.service-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    margin-bottom:14px;
+}
+
+.service-icon{
+    width:45px;
+    height:45px;
+    min-width:45px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:13px;
+
+    background:#262300;
+
+    font-size:19px;
+}
+
+.service-info{
+    flex:1;
+}
+
+.service-name{
+    font-size:8px;
+    font-weight:900;
+}
+
+.service-desc{
+    margin-top:4px;
+    color:#777;
+    font-size:5px;
+    line-height:1.4;
+}
+
+
+/* SWITCH */
+
+.switch{
+    position:relative;
+
+    width:42px;
+    height:24px;
+
+    flex-shrink:0;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+
+    border-radius:30px;
+
+    background:#333;
+
+    transition:.2s;
+}
+
+.slider:before{
+    content:"";
+
+    position:absolute;
+
+    width:18px;
+    height:18px;
+
+    left:3px;
+    top:3px;
+
+    border-radius:50%;
+
+    background:#999;
+
+    transition:.2s;
+}
+
+.switch input:checked + .slider{
+    background:var(--yellow);
+}
+
+.switch input:checked + .slider:before{
+    transform:translateX(18px);
+    background:#000;
+}
+
+
+/* FIELDS */
+
+.fields{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:9px;
+}
+
+.field{
+    padding:10px;
+
+    border:1px solid #2e2e2e;
+    border-radius:10px;
+
+    background:var(--card2);
+}
+
+.field.full{
+    grid-column:1 / -1;
+}
+
+.label{
+    display:block;
+
+    margin-bottom:6px;
+
+    color:#777;
+
+    font-size:5px;
+    font-weight:800;
+}
+
+.input,
+.select{
+    width:100%;
+    height:36px;
+
+    padding:0 9px;
+
+    outline:none;
+
+    border:1px solid #383838;
+    border-radius:8px;
+
+    background:#111;
+    color:#fff;
+
+    font-size:6px;
+}
+
+.input:focus,
+.select:focus{
+    border-color:#756500;
+}
+
+
+/* INFO */
+
+.info-box{
+    margin-top:12px;
+
+    padding:12px;
+
+    border:1px solid #3c3500;
+    border-radius:12px;
+
+    background:#171500;
+
+    color:#b7aa4d;
+
+    font-size:5.5px;
+    line-height:1.6;
+}
+
+
+/* QUICK SETTINGS */
+
+.quick{
+    margin-top:12px;
+
+    padding:15px;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+}
+
+.quick-title{
+    margin-bottom:11px;
+
+    font-size:8px;
+    font-weight:900;
+}
+
+.quick-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,minmax(0,1fr));
+
+    gap:9px;
+}
+
+.quick-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+
+    padding:11px;
+
+    border:1px solid #2e2e2e;
+    border-radius:10px;
+
+    background:var(--card2);
+}
+
+.quick-text{
+    color:#bbb;
+    font-size:5.5px;
+}
+
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    z-index:150;
+
+    width:calc(100% - 30px);
+    max-width:450px;
+
+    padding:11px;
+
+    border:1px solid #373737;
+    border-radius:11px;
+
+    background:#222;
+    color:#fff;
+
+    text-align:center;
+
+    font-size:6px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translate(-50%,20px);
+
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:800px){
+
+    .services{
+        grid-template-columns:1fr;
+    }
+
+    .quick-grid{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+}
+
+@media(max-width:520px){
+
+    .main{
+        padding:11px;
+    }
+
+    .page-top{
+        align-items:flex-start;
+    }
+
+    .fields{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+    .quick-grid{
+        grid-template-columns:1fr;
+    }
+
+}
 
 </style>
-
 
 </head>
 
 
 <body>
 
+<div class="app">
 
 
-<div class="header">
+<header class="header">
 
-⚙️ Service Control
+    <button
+        class="back-btn"
+        onclick="goBack()"
+        aria-label="Back"
+    >
+        ‹
+    </button>
+
+    <div class="logo">
+        RX
+    </div>
+
+    <div class="header-info">
+
+        <div class="header-title">
+            Service Settings
+        </div>
+
+        <div class="header-subtitle">
+            Manage RiderX services and availability
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="main">
+
+
+<section class="page-top">
+
+    <div>
+
+        <div class="page-title">
+            Service Management
+        </div>
+
+        <div class="page-description">
+            Enable or disable Bike Taxi, Cab, Parcel and Food services.
+        </div>
+
+    </div>
+
+    <button
+        class="save-btn"
+        onclick="saveSettings()"
+    >
+        SAVE CHANGES
+    </button>
+
+</section>
+
+
+<section class="services">
+
+
+<!-- BIKE -->
+
+<div class="service-card">
+
+    <div class="service-head">
+
+        <div class="service-icon">
+            🛵
+        </div>
+
+        <div class="service-info">
+
+            <div class="service-name">
+                Bike Taxi
+            </div>
+
+            <div class="service-desc">
+                Fast two-wheeler rides for city travel.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="bikeEnabled"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="fields">
+
+        <div class="field">
+
+            <label class="label">
+                BASE FARE
+            </label>
+
+            <input
+                class="input"
+                id="bikeBase"
+                type="number"
+                min="0"
+                step="1"
+                value="30"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label class="label">
+                PER KM
+            </label>
+
+            <input
+                class="input"
+                id="bikeKm"
+                type="number"
+                min="0"
+                step="0.5"
+                value="8"
+            >
+
+        </div>
+
+    </div>
 
 </div>
 
 
+<!-- CAB -->
 
-<div class="container">
+<div class="service-card">
+
+    <div class="service-head">
+
+        <div class="service-icon">
+            🚕
+        </div>
+
+        <div class="service-info">
+
+            <div class="service-name">
+                Cab
+            </div>
+
+            <div class="service-desc">
+                Comfortable car rides for customers.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="cabEnabled"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
 
 
-<div class="box">
+    <div class="fields">
+
+        <div class="field">
+
+            <label class="label">
+                BASE FARE
+            </label>
+
+            <input
+                class="input"
+                id="cabBase"
+                type="number"
+                min="0"
+                step="1"
+                value="60"
+            >
+
+        </div>
 
 
+        <div class="field">
 
-<div class="row">
+            <label class="label">
+                PER KM
+            </label>
 
-<span>🏍 Bike Taxi</span>
+            <input
+                class="input"
+                id="cabKm"
+                type="number"
+                min="0"
+                step="0.5"
+                value="12"
+            >
 
-<input type="checkbox" id="bike">
+        </div>
+
+    </div>
 
 </div>
 
 
+<!-- PARCEL -->
+
+<div class="service-card">
+
+    <div class="service-head">
+
+        <div class="service-icon">
+            📦
+        </div>
+
+        <div class="service-info">
+
+            <div class="service-name">
+                Parcel
+            </div>
+
+            <div class="service-desc">
+                Local parcel and package delivery.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="parcelEnabled"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
 
 
-<div class="row">
+    <div class="fields">
 
-<span>🚕 Cab</span>
+        <div class="field">
 
-<input type="checkbox" id="cab">
+            <label class="label">
+                BASE FARE
+            </label>
+
+            <input
+                class="input"
+                id="parcelBase"
+                type="number"
+                min="0"
+                step="1"
+                value="40"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label class="label">
+                PER KM
+            </label>
+
+            <input
+                class="input"
+                id="parcelKm"
+                type="number"
+                min="0"
+                step="0.5"
+                value="9"
+            >
+
+        </div>
+
+    </div>
 
 </div>
 
 
+<!-- FOOD -->
+
+<div class="service-card">
+
+    <div class="service-head">
+
+        <div class="service-icon">
+            🍔
+        </div>
+
+        <div class="service-info">
+
+            <div class="service-name">
+                Food Delivery
+            </div>
+
+            <div class="service-desc">
+                Food delivery from restaurants to customers.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="foodEnabled"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
 
 
-<div class="row">
+    <div class="fields">
 
-<span>📦 Parcel</span>
+        <div class="field">
 
-<input type="checkbox" id="parcel">
+            <label class="label">
+                BASE FARE
+            </label>
+
+            <input
+                class="input"
+                id="foodBase"
+                type="number"
+                min="0"
+                step="1"
+                value="35"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label class="label">
+                PER KM
+            </label>
+
+            <input
+                class="input"
+                id="foodKm"
+                type="number"
+                min="0"
+                step="0.5"
+                value="8"
+            >
+
+        </div>
+
+    </div>
 
 </div>
 
 
+</section>
 
 
-<div class="row">
+<div class="info-box">
 
-<span>🍔 Food</span>
-
-<input type="checkbox" id="food">
-
-</div>
-
-
-
-
-<button id="save">
-
-Save Settings
-
-</button>
-
-
-
-<p id="msg"></p>
-
-
+    RiderX currently uses Chandigarh as the primary service city.
+    Service availability can be changed independently for each service.
+    Save the settings after making changes.
 
 </div>
 
 
+<section class="quick">
+
+    <div class="quick-title">
+        Quick Service Controls
+    </div>
+
+
+    <div class="quick-grid">
+
+
+        <div class="quick-item">
+
+            <div class="quick-text">
+                All services
+            </div>
+
+            <label class="switch">
+
+                <input
+                    type="checkbox"
+                    id="allServices"
+                    checked
+                    onchange="toggleAllServices(this.checked)"
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+
+        <div class="quick-item">
+
+            <div class="quick-text">
+                Customer booking
+            </div>
+
+            <label class="switch">
+
+                <input
+                    type="checkbox"
+                    id="bookingEnabled"
+                    checked
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+
+        <div class="quick-item">
+
+            <div class="quick-text">
+                Rider requests
+            </div>
+
+            <label class="switch">
+
+                <input
+                    type="checkbox"
+                    id="requestsEnabled"
+                    checked
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+</main>
+
 </div>
 
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
+<script>
 
+const STORAGE_KEY =
+    "riderxServiceSettings";
 
-<script type="module">
 
+const DEFAULT_SETTINGS = {
 
-import { db } from "../firebase/config.js";
+    bikeEnabled:true,
+    bikeBase:30,
+    bikeKm:8,
 
+    cabEnabled:true,
+    cabBase:60,
+    cabKm:12,
 
-import {
+    parcelEnabled:true,
+    parcelBase:40,
+    parcelKm:9,
 
-doc,
-setDoc,
-getDoc
+    foodEnabled:true,
+    foodBase:35,
+    foodKm:8,
 
-}
-
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
-
-
-
-const ref = doc(
-
-db,
-
-"settings",
-
-"services"
-
-);
-
-
-
-
-
-async function load(){
-
-
-const snap = await getDoc(ref);
-
-
-
-if(snap.exists()){
-
-
-let data=snap.data();
-
-
-bike.checked=data.bike;
-
-cab.checked=data.cab;
-
-parcel.checked=data.parcel;
-
-food.checked=data.food;
-
-
-}
-
-else{
-
-
-bike.checked=true;
-
-cab.checked=true;
-
-parcel.checked=true;
-
-food.checked=true;
-
-
-}
-
-
-
-}
-
-
-
-
-save.onclick=async()=>{
-
-
-
-await setDoc(
-
-ref,
-
-{
-
-
-bike:bike.checked,
-
-
-cab:cab.checked,
-
-
-parcel:parcel.checked,
-
-
-food:food.checked
-
-
-
-}
-
-);
-
-
-
-msg.innerHTML=
-
-"Services Updated ✅";
-
-
+    bookingEnabled:true,
+    requestsEnabled:true
 
 };
 
 
+/* LOAD */
+
+function loadSettings(){
+
+    let settings =
+        {};
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+        if(raw){
+
+            settings =
+                JSON.parse(
+                    raw
+                );
+
+        }
+
+    }catch(error){
+
+        console.log(
+            "Settings load error:",
+            error
+        );
+
+    }
 
 
-load();
+    settings =
+        Object.assign(
+            {},
+            DEFAULT_SETTINGS,
+            settings
+        );
 
 
+    Object.keys(settings)
+        .forEach(
+            function(key){
+
+                const element =
+                    document.getElementById(
+                        key
+                    );
+
+                if(!element){
+                    return;
+                }
+
+
+                if(
+                    element.type ===
+                    "checkbox"
+                ){
+
+                    element.checked =
+                        Boolean(
+                            settings[key]
+                        );
+
+                }
+                else{
+
+                    element.value =
+                        settings[key];
+
+                }
+
+            }
+        );
+
+
+    updateAllSwitch();
+
+}
+
+
+/* SAVE */
+
+function saveSettings(){
+
+    const ids = [
+
+        "bikeEnabled",
+        "bikeBase",
+        "bikeKm",
+
+        "cabEnabled",
+        "cabBase",
+        "cabKm",
+
+        "parcelEnabled",
+        "parcelBase",
+        "parcelKm",
+
+        "foodEnabled",
+        "foodBase",
+        "foodKm",
+
+        "bookingEnabled",
+        "requestsEnabled"
+
+    ];
+
+
+    const settings =
+        {};
+
+
+    ids.forEach(
+        function(id){
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if(!element){
+                return;
+            }
+
+
+            if(
+                element.type ===
+                "checkbox"
+            ){
+
+                settings[id] =
+                    element.checked;
+
+            }
+            else{
+
+                settings[id] =
+                    Number(
+                        element.value
+                    ) || 0;
+
+            }
+
+        }
+    );
+
+
+    try{
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+                settings
+            )
+        );
+
+
+        /*
+         * Keep a simple global copy
+         * so other RiderX pages can
+         * read service settings.
+         */
+
+        localStorage.setItem(
+            "riderx_services",
+            JSON.stringify(
+                settings
+            )
+        );
+
+
+        updateAllSwitch();
+
+        showToast(
+            "Service settings saved successfully."
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+        showToast(
+            "Unable to save settings."
+        );
+
+    }
+
+}
+
+
+/* ALL SERVICES */
+
+function toggleAllServices(
+    enabled
+){
+
+    [
+        "bikeEnabled",
+        "cabEnabled",
+        "parcelEnabled",
+        "foodEnabled"
+    ]
+    .forEach(
+        function(id){
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+            if(element){
+
+                element.checked =
+                    enabled;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* UPDATE MASTER */
+
+function updateAllSwitch(){
+
+    const services = [
+
+        document.getElementById(
+            "bikeEnabled"
+        ),
+
+        document.getElementById(
+            "cabEnabled"
+        ),
+
+        document.getElementById(
+            "parcelEnabled"
+        ),
+
+        document.getElementById(
+            "foodEnabled"
+        )
+
+    ];
+
+
+    const valid =
+        services.filter(
+            Boolean
+        );
+
+
+    const allOn =
+        valid.length &&
+        valid.every(
+            function(item){
+
+                return item.checked;
+
+            }
+        );
+
+
+    const master =
+        document.getElementById(
+            "allServices"
+        );
+
+
+    if(master){
+
+        master.checked =
+            Boolean(
+                allOn
+            );
+
+    }
+
+}
+
+
+/* NAVIGATION */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        history.back();
+
+    }
+    else{
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+
+}
+
+
+/* TOAST */
+
+let toastTimer;
+
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    if(!toast){
+        return;
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* SERVICE SWITCH SYNC */
+
+[
+    "bikeEnabled",
+    "cabEnabled",
+    "parcelEnabled",
+    "foodEnabled"
+]
+.forEach(
+    function(id){
+
+        const element =
+            document.getElementById(
+                id
+            );
+
+
+        if(element){
+
+            element.addEventListener(
+                "change",
+                updateAllSwitch
+            );
+
+        }
+
+    }
+);
+
+
+/* INIT */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadSettings();
+
+    }
+);
 
 </script>
 
-
-
 </body>
-
 </html>
