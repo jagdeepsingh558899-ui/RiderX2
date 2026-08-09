@@ -1,319 +1,1422 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX App Settings</title>
+<title>RiderX Admin - Settings</title>
 
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
 :root{
-
---yellow:#FFE500;
---black:#050505;
---card:#111;
-
+    --yellow:#FFD400;
+    --bg:#080808;
+    --card:#151515;
+    --card2:#1d1d1d;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
 }
-
-
 
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
-
+html,
+body{
+    min-height:100%;
+    background:var(--bg);
+}
 
 body{
-
-background:var(--black);
-color:white;
-padding:20px;
-
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-
-.logo{
-
-font-size:28px;
-font-weight:900;
-margin-bottom:25px;
-
+button,
+input,
+select{
+    font-family:inherit;
 }
-
-
-.logo span{
-
-color:var(--yellow);
-
-}
-
-
-
-.card{
-
-background:var(--card);
-border:1px solid #333;
-border-radius:20px;
-padding:20px;
-
-}
-
-
-
-label{
-
-display:block;
-margin-top:15px;
-margin-bottom:7px;
-color:#999;
-
-}
-
-
-
-input{
-
-width:100%;
-padding:14px;
-border-radius:12px;
-border:1px solid #444;
-background:#222;
-color:white;
-
-}
-
-
-
-.switch{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:#222;
-padding:12px;
-border-radius:12px;
-margin-top:10px;
-
-}
-
-
-
-input[type="checkbox"]{
-
-width:25px;
-height:25px;
-
-}
-
-
 
 button{
+    cursor:pointer;
+}
 
-width:100%;
-padding:15px;
-margin-top:20px;
-border:none;
-border-radius:12px;
-background:var(--yellow);
-font-weight:bold;
-
+.app{
+    min-height:100vh;
 }
 
 
+/* HEADER */
 
-.back{
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
 
-background:#222;
-color:white;
+    display:flex;
+    align-items:center;
+    gap:10px;
 
+    padding:12px;
+
+    background:#0c0c0c;
+    border-bottom:1px solid #292929;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+
+    border:1px solid #363636;
+    border-radius:11px;
+
+    background:#1b1b1b;
+    color:#fff;
+
+    font-size:20px;
+}
+
+.logo{
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:900;
+}
+
+.header-info{
+    flex:1;
+}
+
+.header-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.header-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
 }
 
 
+/* MAIN */
 
-#status{
+.main{
+    width:100%;
+    max-width:1050px;
 
-margin-top:15px;
-text-align:center;
-color:#00ff66;
+    margin:auto;
+    padding:15px;
+}
+
+.page-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+
+    margin-bottom:13px;
+}
+
+.page-title{
+    font-size:14px;
+    font-weight:900;
+}
+
+.page-description{
+    margin-top:4px;
+    color:#777;
+    font-size:6px;
+}
+
+.save-btn{
+    height:38px;
+    padding:0 15px;
+
+    border:1px solid #665900;
+    border-radius:10px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* GRID */
+
+.settings-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:12px;
+}
+
+.card{
+    padding:15px;
+
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+}
+
+.card.full{
+    grid-column:1 / -1;
+}
+
+.card-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.card-description{
+    margin-top:4px;
+    margin-bottom:13px;
+
+    color:#777;
+
+    font-size:5px;
+    line-height:1.5;
+}
+
+
+/* FIELDS */
+
+.fields{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:9px;
+}
+
+.field{
+    padding:10px;
+
+    border:1px solid #2e2e2e;
+    border-radius:10px;
+
+    background:var(--card2);
+}
+
+.field.full{
+    grid-column:1 / -1;
+}
+
+.label{
+    display:block;
+
+    margin-bottom:6px;
+
+    color:#777;
+
+    font-size:5px;
+    font-weight:800;
+}
+
+.input,
+.select{
+    width:100%;
+    height:37px;
+
+    padding:0 9px;
+
+    border:1px solid #383838;
+    border-radius:8px;
+
+    outline:none;
+
+    background:#111;
+    color:#fff;
+
+    font-size:6px;
+}
+
+.input:focus,
+.select:focus{
+    border-color:#776800;
+}
+
+
+/* SWITCH ROW */
+
+.switch-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+
+    padding:11px;
+
+    margin-bottom:8px;
+
+    border:1px solid #2e2e2e;
+    border-radius:10px;
+
+    background:var(--card2);
+}
+
+.switch-row:last-child{
+    margin-bottom:0;
+}
+
+.switch-info{
+    flex:1;
+}
+
+.switch-title{
+    font-size:6px;
+    font-weight:800;
+}
+
+.switch-description{
+    margin-top:3px;
+
+    color:#666;
+
+    font-size:4.8px;
+}
+
+
+/* SWITCH */
+
+.switch{
+    position:relative;
+
+    width:42px;
+    height:24px;
+
+    flex-shrink:0;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+
+    border-radius:30px;
+
+    background:#333;
+
+    transition:.2s;
+}
+
+.slider:before{
+    content:"";
+
+    position:absolute;
+
+    width:18px;
+    height:18px;
+
+    top:3px;
+    left:3px;
+
+    border-radius:50%;
+
+    background:#999;
+
+    transition:.2s;
+}
+
+.switch input:checked + .slider{
+    background:var(--yellow);
+}
+
+.switch input:checked + .slider:before{
+    transform:translateX(18px);
+    background:#000;
+}
+
+
+/* DANGER */
+
+.danger-zone{
+    margin-top:12px;
+
+    padding:15px;
+
+    border:1px solid #522525;
+    border-radius:16px;
+
+    background:#171010;
+}
+
+.danger-title{
+    color:#ff7070;
+
+    font-size:8px;
+    font-weight:900;
+}
+
+.danger-description{
+    margin-top:5px;
+
+    color:#8c6666;
+
+    font-size:5px;
+    line-height:1.5;
+}
+
+.danger-btn{
+    height:37px;
+
+    margin-top:11px;
+    padding:0 13px;
+
+    border:1px solid #702525;
+    border-radius:9px;
+
+    background:#2a1414;
+    color:#ff7777;
+
+    font-size:5.5px;
+    font-weight:900;
+}
+
+
+/* FOOTER */
+
+.footer-note{
+    margin-top:12px;
+
+    padding:12px;
+
+    border:1px solid #343000;
+    border-radius:11px;
+
+    background:#171500;
+
+    color:#aaa04b;
+
+    font-size:5px;
+    line-height:1.6;
+}
+
+
+/* TOAST */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    z-index:100;
+
+    width:calc(100% - 30px);
+    max-width:450px;
+
+    padding:11px;
+
+    border:1px solid #383838;
+    border-radius:11px;
+
+    background:#222;
+    color:#fff;
+
+    text-align:center;
+
+    font-size:6px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translate(-50%,20px);
+
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* RESPONSIVE */
+
+@media(max-width:800px){
+
+    .settings-grid{
+        grid-template-columns:1fr;
+    }
+
+    .card.full{
+        grid-column:auto;
+    }
 
 }
 
+@media(max-width:520px){
+
+    .main{
+        padding:11px;
+    }
+
+    .page-top{
+        align-items:flex-start;
+    }
+
+    .fields{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+}
 
 </style>
-
 
 </head>
 
 
-
 <body>
 
+<div class="app">
 
 
-<div class="logo">
+<header class="header">
 
-RID<span>ERX</span>
+    <button
+        class="back-btn"
+        onclick="goBack()"
+        aria-label="Back"
+    >
+        ‹
+    </button>
 
-</div>
+    <div class="logo">
+        RX
+    </div>
+
+    <div class="header-info">
+
+        <div class="header-title">
+            Admin Settings
+        </div>
+
+        <div class="header-subtitle">
+            Manage RiderX platform configuration
+        </div>
+
+    </div>
+
+</header>
 
 
-
-<button class="back"
-onclick="history.back()">
-
-← Back
-
-</button>
+<main class="main">
 
 
+<section class="page-top">
 
+    <div>
+
+        <div class="page-title">
+            Platform Settings
+        </div>
+
+        <div class="page-description">
+            Configure general RiderX application settings.
+        </div>
+
+    </div>
+
+    <button
+        class="save-btn"
+        onclick="saveSettings()"
+    >
+        SAVE CHANGES
+    </button>
+
+</section>
+
+
+<section class="settings-grid">
+
+
+<!-- GENERAL -->
 
 <div class="card">
 
+    <div class="card-title">
+        General
+    </div>
 
-<h2>
-
-App Settings
-
-</h2>
-
-
-
-<label>
-
-App Name
-
-</label>
+    <div class="card-description">
+        Basic information displayed throughout RiderX.
+    </div>
 
 
-<input id="appName"
-placeholder="RiderX">
+    <div class="fields">
+
+        <div class="field full">
+
+            <label class="label">
+                APP NAME
+            </label>
+
+            <input
+                class="input"
+                id="appName"
+                type="text"
+                value="RiderX"
+            >
+
+        </div>
 
 
+        <div class="field">
+
+            <label class="label">
+                SERVICE CITY
+            </label>
+
+            <input
+                class="input"
+                id="serviceCity"
+                type="text"
+                value="Chandigarh"
+            >
+
+        </div>
 
 
+        <div class="field">
 
-<label>
+            <label class="label">
+                CURRENCY
+            </label>
 
-Support Number
+            <select
+                class="select"
+                id="currency"
+            >
 
-</label>
+                <option value="INR">INR ₹</option>
+                <option value="USD">USD $</option>
+                <option value="AED">AED د.إ</option>
 
+            </select>
 
-<input id="support"
-placeholder="Support Number">
+        </div>
 
-
-
-
-
-<label>
-
-Referral Bonus
-
-</label>
-
-
-<input id="referral"
-type="number"
-placeholder="Referral Amount">
-
-
-
-
-
-
-<div class="switch">
-
-Bike Taxi
-
-<input id="bike"
-type="checkbox">
-
-</div>
-
-
-
-<div class="switch">
-
-Cab Service
-
-<input id="cab"
-type="checkbox">
+    </div>
 
 </div>
 
 
+<!-- CONTACT -->
 
-<div class="switch">
+<div class="card">
 
-Parcel Service
+    <div class="card-title">
+        Support & Contact
+    </div>
 
-<input id="parcel"
-type="checkbox">
+    <div class="card-description">
+        Customer and rider support contact information.
+    </div>
+
+
+    <div class="fields">
+
+        <div class="field full">
+
+            <label class="label">
+                SUPPORT EMAIL
+            </label>
+
+            <input
+                class="input"
+                id="supportEmail"
+                type="email"
+                placeholder="support@example.com"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label class="label">
+                SUPPORT PHONE
+            </label>
+
+            <input
+                class="input"
+                id="supportPhone"
+                type="tel"
+                placeholder="+91"
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label class="label">
+                SUPPORT HOURS
+            </label>
+
+            <input
+                class="input"
+                id="supportHours"
+                type="text"
+                value="24/7"
+            >
+
+        </div>
+
+    </div>
 
 </div>
 
 
+<!-- PLATFORM -->
 
-<div class="switch">
+<div class="card">
 
-Food Delivery
+    <div class="card-title">
+        Platform Controls
+    </div>
 
-<input id="food"
-type="checkbox">
+    <div class="card-description">
+        Control important RiderX platform features.
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <div class="switch-title">
+                Customer Registration
+            </div>
+
+            <div class="switch-description">
+                Allow new customers to create accounts.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="customerRegistration"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <div class="switch-title">
+                Rider Registration
+            </div>
+
+            <div class="switch-description">
+                Allow new riders to submit applications.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="riderRegistration"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <div class="switch-title">
+                Ride Booking
+            </div>
+
+            <div class="switch-description">
+                Allow customers to request new rides.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="rideBooking"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <div class="switch-title">
+                Maintenance Mode
+            </div>
+
+            <div class="switch-description">
+                Temporarily disable normal app access.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="maintenanceMode"
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
 
 </div>
 
 
+<!-- NOTIFICATIONS -->
 
-<div class="switch">
+<div class="card">
 
-Maintenance Mode
+    <div class="card-title">
+        Notifications
+    </div>
 
-<input id="maintenance"
-type="checkbox">
+    <div class="card-description">
+        Control platform notification behavior.
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <div class="switch-title">
+                Push Notifications
+            </div>
+
+            <div class="switch-description">
+                Enable app push notifications.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="pushNotifications"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <div class="switch-title">
+                Ride Alerts
+            </div>
+
+            <div class="switch-description">
+                Notify riders and customers about ride updates.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="rideAlerts"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
+
+
+    <div class="switch-row">
+
+        <div class="switch-info">
+
+            <div class="switch-title">
+                Sound Alerts
+            </div>
+
+            <div class="switch-description">
+                Play sound for important ride events.
+            </div>
+
+        </div>
+
+        <label class="switch">
+
+            <input
+                type="checkbox"
+                id="soundAlerts"
+                checked
+            >
+
+            <span class="slider"></span>
+
+        </label>
+
+    </div>
 
 </div>
 
 
+<!-- SECURITY -->
+
+<div class="card full">
+
+    <div class="card-title">
+        Security
+    </div>
+
+    <div class="card-description">
+        Configure basic authentication and session settings.
+    </div>
 
 
-<button id="save">
+    <div class="fields">
 
-Save Settings
+        <div class="field">
 
-</button>
+            <label class="label">
+                SESSION TIMEOUT
+            </label>
+
+            <select
+                class="select"
+                id="sessionTimeout"
+            >
+
+                <option value="30">30 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="120">2 hours</option>
+                <option value="360">6 hours</option>
+                <option value="720">12 hours</option>
+                <option value="1440">24 hours</option>
+
+            </select>
+
+        </div>
 
 
+        <div class="field">
 
-<div id="status"></div>
+            <label class="label">
+                OTP EXPIRY
+            </label>
 
+            <select
+                class="select"
+                id="otpExpiry"
+            >
 
+                <option value="60">1 minute</option>
+                <option value="120">2 minutes</option>
+                <option value="300">5 minutes</option>
+                <option value="600">10 minutes</option>
+
+            </select>
+
+        </div>
+
+    </div>
 
 </div>
 
 
+</section>
 
 
+<!-- DANGER -->
+
+<section class="danger-zone">
+
+    <div class="danger-title">
+        ⚠ Danger Zone
+    </div>
+
+    <div class="danger-description">
+        Resetting settings will restore RiderX admin settings
+        to their default values. This does not delete Firebase
+        users, rides or other application data.
+    </div>
+
+    <button
+        class="danger-btn"
+        onclick="resetSettings()"
+    >
+        RESET SETTINGS
+    </button>
+
+</section>
 
 
-<script type="module"
-src="./js/settings.js"></script>
+<div class="footer-note">
+
+    RiderX Admin settings are stored locally in this browser.
+    Connect these controls to your Firebase admin configuration
+    when server-side settings synchronization is enabled.
+
+</div>
 
 
+</main>
+
+</div>
+
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script>
+
+const STORAGE_KEY =
+    "riderxAdminSettings";
+
+
+const DEFAULT_SETTINGS = {
+
+    appName:"RiderX",
+
+    serviceCity:"Chandigarh",
+
+    currency:"INR",
+
+    supportEmail:"",
+
+    supportPhone:"",
+
+    supportHours:"24/7",
+
+    customerRegistration:true,
+
+    riderRegistration:true,
+
+    rideBooking:true,
+
+    maintenanceMode:false,
+
+    pushNotifications:true,
+
+    rideAlerts:true,
+
+    soundAlerts:true,
+
+    sessionTimeout:"60",
+
+    otpExpiry:"120"
+
+};
+
+
+/* =========================================
+   LOAD SETTINGS
+========================================= */
+
+function loadSettings(){
+
+    let stored = {};
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+        if(raw){
+
+            stored =
+                JSON.parse(
+                    raw
+                );
+
+        }
+
+    }catch(error){
+
+        console.log(
+            "Settings load error:",
+            error
+        );
+
+    }
+
+
+    const settings =
+        Object.assign(
+            {},
+            DEFAULT_SETTINGS,
+            stored
+        );
+
+
+    Object.keys(
+        settings
+    ).forEach(
+        function(key){
+
+            const element =
+                document.getElementById(
+                    key
+                );
+
+            if(!element){
+                return;
+            }
+
+
+            if(
+                element.type ===
+                "checkbox"
+            ){
+
+                element.checked =
+                    Boolean(
+                        settings[key]
+                    );
+
+            }
+            else{
+
+                element.value =
+                    settings[key];
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   SAVE SETTINGS
+========================================= */
+
+function saveSettings(){
+
+    const ids = [
+
+        "appName",
+        "serviceCity",
+        "currency",
+
+        "supportEmail",
+        "supportPhone",
+        "supportHours",
+
+        "customerRegistration",
+        "riderRegistration",
+        "rideBooking",
+        "maintenanceMode",
+
+        "pushNotifications",
+        "rideAlerts",
+        "soundAlerts",
+
+        "sessionTimeout",
+        "otpExpiry"
+
+    ];
+
+
+    const settings = {};
+
+
+    ids.forEach(
+        function(id){
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+            if(!element){
+                return;
+            }
+
+
+            if(
+                element.type ===
+                "checkbox"
+            ){
+
+                settings[id] =
+                    element.checked;
+
+            }
+            else{
+
+                settings[id] =
+                    element.value;
+
+            }
+
+        }
+    );
+
+
+    try{
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+                settings
+            )
+        );
+
+
+        /*
+         * Keep a shared copy so
+         * RiderX pages can read
+         * platform controls.
+         */
+
+        localStorage.setItem(
+            "riderx_platform_settings",
+            JSON.stringify(
+                settings
+            )
+        );
+
+
+        showToast(
+            "Admin settings saved successfully."
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+        showToast(
+            "Unable to save settings."
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   RESET
+========================================= */
+
+function resetSettings(){
+
+    const confirmed =
+        window.confirm(
+            "Reset all RiderX admin settings to their default values?"
+        );
+
+
+    if(!confirmed){
+        return;
+    }
+
+
+    try{
+
+        localStorage.removeItem(
+            STORAGE_KEY
+        );
+
+        localStorage.removeItem(
+            "riderx_platform_settings"
+        );
+
+
+        loadSettings();
+
+
+        showToast(
+            "Settings restored to default."
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+        showToast(
+            "Unable to reset settings."
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        history.back();
+
+    }
+    else{
+
+        window.location.href =
+            "dashboard.html";
+
+    }
+
+}
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+let toastTimer;
+
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    if(!toast){
+        return;
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* =========================================
+   INIT
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadSettings();
+
+    }
+);
+
+</script>
 
 </body>
-
 </html>
