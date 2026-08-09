@@ -4,7 +4,6 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
@@ -12,1542 +11,1740 @@
 
 <title>RiderX Admin Dashboard</title>
 
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+<meta
+    name="theme-color"
+    content="#FFD400"
 >
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
 :root{
-    --yellow:#FFE500;
-    --black:#050505;
-    --card:#111;
-    --card2:#151515;
-    --border:#292929;
-    --gray:#999;
-    --green:#19d36b;
-    --red:#ff4444;
-    --orange:#ffad1f;
-    --blue:#4da3ff;
+    --yellow:#FFD400;
+    --black:#080808;
+    --card:#151515;
+    --card2:#1d1d1d;
+    --border:#303030;
+    --text:#fff;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#3b82f6;
+    --orange:#f59e0b;
 }
 
 *{
+    box-sizing:border-box;
     margin:0;
     padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
+}
+
+html,
+body{
+    min-height:100%;
+    background:var(--black);
 }
 
 body{
-    background:var(--black);
-    color:#fff;
-    min-height:100vh;
-    padding-bottom:50px;
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-button{
+button,
+input{
     font-family:inherit;
 }
 
-.header{
-    height:70px;
-    background:#111;
-    border-bottom:1px solid #222;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 20px;
-    position:sticky;
-    top:0;
-    z-index:100;
-}
-
-.logo{
-    font-size:28px;
-    font-weight:900;
-}
-
-.logo span{
-    color:var(--yellow);
-}
-
-.header-right{
-    display:flex;
-    align-items:center;
-    gap:15px;
-}
-
-.admin-badge{
-    font-size:12px;
-    background:#1c1c1c;
-    border:1px solid #333;
-    padding:7px 10px;
-    border-radius:20px;
-    color:var(--yellow);
-}
-
-.logout{
-    font-size:21px;
-    color:var(--red);
+button{
     cursor:pointer;
 }
 
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:20px;
+.app{
+    width:100%;
+    min-height:100vh;
+    background:#080808;
 }
 
-.welcome{
-    font-size:28px;
-    font-weight:bold;
-    margin-bottom:6px;
-}
 
-.subtitle{
-    color:var(--gray);
-    font-size:14px;
-    margin-bottom:20px;
-}
+/* =========================================
+   HEADER
+========================================= */
 
-.status{
-    background:#101010;
-    border:1px solid #252525;
-    border-radius:14px;
-    padding:12px 15px;
-    margin-bottom:20px;
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+
     display:flex;
     align-items:center;
     gap:10px;
-}
 
-.status-dot{
-    width:9px;
-    height:9px;
-    border-radius:50%;
-    background:var(--yellow);
-    flex-shrink:0;
-}
+    padding:12px;
 
-.status.success .status-dot{
-    background:var(--green);
-}
-
-.status.error .status-dot{
-    background:var(--red);
-}
-
-.status-text{
-    color:#ccc;
-}
-
-.error{
-    display:none;
-    background:#210d0d;
-    border:1px solid #662222;
-    color:#ff7777;
-    padding:14px;
-    border-radius:12px;
-    margin-bottom:18px;
-    font-size:14px;
-    line-height:1.5;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-}
-
-.card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:18px;
-    min-height:125px;
-}
-
-.card i{
-    font-size:24px;
-    color:var(--yellow);
-}
-
-.number{
-    font-size:29px;
-    font-weight:bold;
-    margin-top:12px;
-}
-
-.title{
-    font-size:13px;
-    color:var(--gray);
-    margin-top:5px;
-}
-
-.section{
-    margin-top:30px;
-}
-
-.section-title{
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:12px;
-}
-
-.approval-box{
-    background:#111;
-    border:1px solid #333;
-    border-radius:18px;
-    overflow:hidden;
-}
-
-.approval-head{
-    padding:16px 18px;
+    background:#0c0c0c;
     border-bottom:1px solid #292929;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
 }
 
-.approval-head h3{
+.menu-btn{
+    width:40px;
+    height:40px;
+    min-width:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #363636;
+    border-radius:11px;
+
+    background:#1b1b1b;
+    color:#fff;
+
     font-size:18px;
 }
 
-.count{
-    background:#2a2300;
-    color:var(--yellow);
-    border:1px solid #695d00;
-    padding:5px 9px;
-    border-radius:20px;
-    font-size:12px;
-}
+.logo{
+    width:38px;
+    height:38px;
 
-.request{
-    padding:16px 18px;
-    border-bottom:1px solid #252525;
     display:flex;
-    justify-content:space-between;
     align-items:center;
-    gap:15px;
+    justify-content:center;
+
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:9px;
+    font-weight:900;
 }
 
-.request:last-child{
-    border-bottom:0;
-}
-
-.request-info{
+.header-info{
+    flex:1;
     min-width:0;
 }
 
-.request-name{
-    font-weight:bold;
-    font-size:17px;
-}
-
-.request-meta{
-    color:#999;
-    font-size:13px;
-    line-height:1.6;
-    margin-top:4px;
-    word-break:break-word;
-}
-
-.request-status{
-    display:inline-block;
-    margin-top:7px;
-    padding:4px 8px;
-    border-radius:12px;
-    font-size:11px;
-    font-weight:bold;
-    text-transform:uppercase;
-}
-
-.pending-status{
-    color:var(--orange);
-    background:#2d2108;
-    border:1px solid #71510c;
-}
-
-.actions{
-    display:flex;
-    gap:8px;
-    flex-shrink:0;
-}
-
-.btn{
-    border:0;
-    border-radius:10px;
-    padding:10px 13px;
-    font-weight:bold;
-    cursor:pointer;
-    min-width:100px;
-}
-
-.btn:disabled{
-    opacity:.55;
-    cursor:not-allowed;
-}
-
-.approve{
-    background:var(--green);
-    color:#06170d;
-}
-
-.reject{
-    background:#301010;
-    color:#ff7777;
-    border:1px solid #6d2222;
-}
-
-.view{
-    background:#222;
-    color:#fff;
-    border:1px solid #444;
-}
-
-.empty,
-.loading{
-    padding:22px;
-    color:#999;
-    text-align:center;
-}
-
-.menu-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
-}
-
-.menu button{
-    width:100%;
-    padding:17px;
-    background:#111;
-    border:1px solid #333;
-    border-radius:15px;
-    color:#fff;
-    font-size:16px;
-    text-align:left;
-    cursor:pointer;
-}
-
-.menu i{
-    width:35px;
-    color:var(--yellow);
-}
-
-.footer{
-    text-align:center;
-    color:#666;
-    font-size:12px;
-    margin-top:35px;
-}
-
-.modal{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.78);
-    z-index:500;
-    padding:20px;
-    overflow:auto;
-}
-
-.modal.show{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.modal-card{
-    width:min(600px,100%);
-    background:#121212;
-    border:1px solid #333;
-    border-radius:20px;
-    padding:20px;
-    box-shadow:0 20px 70px #000;
-}
-
-.modal-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    margin-bottom:15px;
-}
-
-.modal-head h3{
-    font-size:20px;
-}
-
-.close-modal{
-    background:#222;
-    color:#fff;
-    border:1px solid #444;
-    border-radius:10px;
-    padding:8px 12px;
-    cursor:pointer;
-}
-
-.detail-row{
-    padding:10px 0;
-    border-bottom:1px solid #252525;
-}
-
-.detail-label{
-    color:#999;
-    font-size:12px;
-}
-
-.detail-value{
-    margin-top:3px;
-    word-break:break-word;
-}
-
-.access-screen{
-    position:fixed;
-    inset:0;
-    z-index:1000;
-    background:#050505;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
-
-.access-card{
-    width:min(390px,100%);
-    text-align:center;
-    background:#111;
-    border:1px solid #292929;
-    border-radius:22px;
-    padding:30px 20px;
-}
-
-.access-logo{
-    font-size:34px;
+.header-title{
+    font-size:10px;
     font-weight:900;
-    margin-bottom:15px;
 }
 
-.access-logo span{
-    color:var(--yellow);
+.header-subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:5px;
 }
 
-.access-spinner{
-    color:var(--yellow);
-    font-size:28px;
-    margin-bottom:15px;
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:6px;
 }
 
-.access-text{
-    color:#aaa;
+.icon-btn{
+    width:37px;
+    height:37px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #363636;
+    border-radius:10px;
+
+    background:#1b1b1b;
+    color:#fff;
+
+    font-size:13px;
+}
+
+.notification-wrap{
+    position:relative;
+}
+
+.notification-dot{
+    position:absolute;
+
+    top:5px;
+    right:5px;
+
+    width:6px;
+    height:6px;
+
+    border-radius:50%;
+
+    background:var(--yellow);
+}
+
+
+/* =========================================
+   MAIN
+========================================= */
+
+.main{
+    width:100%;
+    max-width:1250px;
+
+    margin:auto;
+
+    padding:15px;
+}
+
+
+/* =========================================
+   WELCOME
+========================================= */
+
+.welcome{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+
+    margin-bottom:14px;
+}
+
+.welcome-title{
     font-size:14px;
+    font-weight:900;
 }
+
+.welcome-subtitle{
+    margin-top:4px;
+    color:#777;
+    font-size:6px;
+}
+
+.refresh-btn{
+    height:36px;
+
+    padding:0 12px;
+
+    border:1px solid #3b3500;
+    border-radius:10px;
+
+    background:#191600;
+    color:var(--yellow);
+
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* =========================================
+   STATS
+========================================= */
+
+.stats-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+
+    gap:9px;
+}
+
+.stat-card{
+    position:relative;
+
+    min-height:105px;
+
+    padding:13px;
+
+    overflow:hidden;
+
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    background:var(--card);
+}
+
+.stat-card::after{
+    content:"";
+
+    position:absolute;
+
+    right:-18px;
+    bottom:-20px;
+
+    width:65px;
+    height:65px;
+
+    border-radius:50%;
+
+    background:rgba(255,212,0,.04);
+}
+
+.stat-icon{
+    width:34px;
+    height:34px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:10px;
+
+    background:#232323;
+
+    color:var(--yellow);
+
+    font-size:13px;
+}
+
+.stat-label{
+    margin-top:9px;
+
+    color:#777;
+
+    font-size:5px;
+    font-weight:700;
+}
+
+.stat-value{
+    margin-top:5px;
+
+    font-size:15px;
+    font-weight:900;
+}
+
+.stat-value.green{
+    color:var(--green);
+}
+
+.stat-value.red{
+    color:#ff7070;
+}
+
+.stat-value.yellow{
+    color:var(--yellow);
+}
+
+.stat-value.blue{
+    color:#60a5fa;
+}
+
+
+/* =========================================
+   CONTENT GRID
+========================================= */
+
+.dashboard-grid{
+    display:grid;
+
+    grid-template-columns:
+        minmax(0,1.5fr)
+        minmax(300px,1fr);
+
+    gap:12px;
+
+    margin-top:12px;
+}
+
+.card{
+    border:1px solid var(--border);
+    border-radius:16px;
+
+    background:var(--card);
+
+    overflow:hidden;
+}
+
+.card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:13px;
+
+    border-bottom:1px solid #292929;
+}
+
+.card-title{
+    font-size:8px;
+    font-weight:900;
+}
+
+.card-action{
+    border:0;
+
+    background:transparent;
+
+    color:var(--yellow);
+
+    font-size:5px;
+    font-weight:900;
+}
+
+.card-body{
+    padding:13px;
+}
+
+
+/* =========================================
+   QUICK ACTIONS
+========================================= */
+
+.quick-actions{
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+
+    gap:8px;
+}
+
+.quick-action{
+    min-height:75px;
+
+    padding:10px 7px;
+
+    border:1px solid #303030;
+    border-radius:12px;
+
+    background:#1b1b1b;
+
+    color:#fff;
+
+    text-align:center;
+}
+
+.quick-action:hover{
+    border-color:#635800;
+}
+
+.quick-icon{
+    width:31px;
+    height:31px;
+
+    margin:auto;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:9px;
+
+    background:#252525;
+
+    color:var(--yellow);
+
+    font-size:12px;
+}
+
+.quick-label{
+    margin-top:8px;
+
+    font-size:5px;
+    font-weight:800;
+}
+
+
+/* =========================================
+   LIVE STATUS
+========================================= */
+
+.live-row{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    padding:10px 0;
+
+    border-bottom:1px solid #292929;
+}
+
+.live-row:last-child{
+    border-bottom:0;
+}
+
+.live-icon{
+    width:34px;
+    height:34px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:9px;
+
+    background:#222;
+    color:var(--yellow);
+
+    font-size:12px;
+}
+
+.live-info{
+    flex:1;
+}
+
+.live-title{
+    font-size:6px;
+    font-weight:800;
+}
+
+.live-subtitle{
+    margin-top:3px;
+
+    color:#666;
+
+    font-size:5px;
+}
+
+.live-value{
+    font-size:8px;
+    font-weight:900;
+}
+
+.live-value.green{
+    color:var(--green);
+}
+
+
+/* =========================================
+   RECENT RIDES
+========================================= */
+
+.ride-row{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    padding:10px 0;
+
+    border-bottom:1px solid #292929;
+}
+
+.ride-row:last-child{
+    border-bottom:0;
+}
+
+.ride-avatar{
+    width:35px;
+    height:35px;
+    min-width:35px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:10px;
+
+    background:#252525;
+
+    color:var(--yellow);
+
+    font-size:11px;
+    font-weight:900;
+}
+
+.ride-info{
+    flex:1;
+    min-width:0;
+}
+
+.ride-id{
+    font-size:6px;
+    font-weight:900;
+}
+
+.ride-route{
+    margin-top:3px;
+
+    overflow:hidden;
+
+    color:#666;
+
+    font-size:5px;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.ride-amount{
+    font-size:7px;
+    font-weight:900;
+}
+
+.ride-status{
+    margin-top:3px;
+
+    font-size:4.5px;
+    font-weight:900;
+    text-align:right;
+}
+
+.status-completed{
+    color:var(--green);
+}
+
+.status-progress{
+    color:var(--yellow);
+}
+
+.status-cancelled{
+    color:#ff7070;
+}
+
+
+/* =========================================
+   EARNINGS
+========================================= */
+
+.earnings-card{
+    min-height:225px;
+}
+
+.earning-summary{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:10px;
+
+    margin-bottom:17px;
+}
+
+.earning-main{
+    font-size:20px;
+    font-weight:900;
+    color:var(--yellow);
+}
+
+.earning-label{
+    margin-bottom:4px;
+
+    color:#666;
+
+    font-size:5px;
+}
+
+.earning-change{
+    padding:5px 8px;
+
+    border-radius:20px;
+
+    background:#102517;
+    color:var(--green);
+
+    font-size:5px;
+    font-weight:900;
+}
+
+
+/* =========================================
+   CHART
+========================================= */
+
+.chart{
+    height:125px;
+
+    display:flex;
+    align-items:flex-end;
+    gap:7px;
+
+    padding:5px 2px 0;
+}
+
+.bar-wrap{
+    flex:1;
+    height:100%;
+
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+}
+
+.bar{
+    width:100%;
+    max-width:34px;
+
+    min-height:5px;
+
+    border-radius:6px 6px 2px 2px;
+
+    background:var(--yellow);
+
+    opacity:.82;
+}
+
+.bar-label{
+    margin-top:6px;
+
+    color:#555;
+
+    font-size:4px;
+
+    text-align:center;
+}
+
+
+/* =========================================
+   ALERTS
+========================================= */
+
+.alert{
+    display:flex;
+    align-items:center;
+    gap:9px;
+
+    padding:10px;
+
+    margin-bottom:7px;
+
+    border:1px solid #333;
+    border-radius:11px;
+
+    background:#1c1c1c;
+}
+
+.alert:last-child{
+    margin-bottom:0;
+}
+
+.alert-icon{
+    width:31px;
+    height:31px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:9px;
+
+    background:#282828;
+
+    color:var(--yellow);
+
+    font-size:11px;
+}
+
+.alert-info{
+    flex:1;
+}
+
+.alert-title{
+    font-size:6px;
+    font-weight:800;
+}
+
+.alert-text{
+    margin-top:3px;
+
+    color:#666;
+
+    font-size:5px;
+}
+
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.empty{
+    padding:24px 10px;
+
+    color:#666;
+
+    text-align:center;
+
+    font-size:6px;
+}
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:20px;
+
+    z-index:100;
+
+    width:calc(100% - 30px);
+    max-width:450px;
+
+    padding:11px 13px;
+
+    border:1px solid #373737;
+    border-radius:11px;
+
+    background:#222;
+    color:#fff;
+
+    text-align:center;
+
+    font-size:6px;
+
+    opacity:0;
+    pointer-events:none;
+
+    transform:translate(-50%,20px);
+
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
 
 @media(max-width:900px){
 
-    .grid{
-        grid-template-columns:repeat(2,1fr);
+    .stats-grid{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
     }
 
 }
 
-@media(max-width:600px){
+@media(max-width:520px){
 
-    .header{
-        padding:0 15px;
+    .main{
+        padding:12px;
     }
 
-    .logo{
-        font-size:24px;
+    .stats-grid{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
     }
 
-    .admin-badge{
+    .quick-actions{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .header-subtitle{
         display:none;
-    }
-
-    .container{
-        padding:15px;
-    }
-
-    .welcome{
-        font-size:25px;
-    }
-
-    .grid{
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-    }
-
-    .card{
-        padding:15px;
-        min-height:110px;
-    }
-
-    .number{
-        font-size:23px;
-    }
-
-    .menu-grid{
-        grid-template-columns:1fr;
-    }
-
-    .request{
-        align-items:flex-start;
-        flex-direction:column;
-    }
-
-    .actions{
-        width:100%;
-    }
-
-    .btn{
-        flex:1;
-        min-width:0;
     }
 
 }
 
 </style>
+
 </head>
+
 
 <body>
 
+<div class="app">
 
-<!-- ============================================================
-     SECURITY SCREEN
-============================================================ -->
 
-<div
-    id="accessScreen"
-    class="access-screen"
->
+    <!-- HEADER -->
 
-    <div class="access-card">
+    <header class="header">
 
-        <div class="access-logo">
-            RID<span>ERX</span>
-        </div>
-
-        <div class="access-spinner">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-        </div>
-
-        <div
-            id="accessText"
-            class="access-text"
+        <button
+            class="menu-btn"
+            onclick="openMenu()"
+            aria-label="Open menu"
         >
-            Checking administrator access...
+            ☰
+        </button>
+
+        <div class="logo">
+            RX
         </div>
 
-    </div>
+        <div class="header-info">
 
-</div>
+            <div class="header-title">
+                RiderX Admin
+            </div>
 
+            <div class="header-subtitle">
+                Operations & Management Dashboard
+            </div>
 
-<!-- ============================================================
-     HEADER
-============================================================ -->
-
-<header class="header">
-
-    <div class="logo">
-        RID<span>ERX</span>
-    </div>
-
-    <div class="header-right">
-
-        <div class="admin-badge">
-            <i class="fa-solid fa-shield-halved"></i>
-            ADMIN
         </div>
 
-        <i
-            id="logoutBtn"
-            class="fa-solid fa-right-from-bracket logout"
-            title="Logout"
-        ></i>
+        <div class="header-actions">
 
-    </div>
+            <div class="notification-wrap">
 
-</header>
-
-
-<div class="container">
-
-
-    <div class="welcome">
-        Admin Dashboard
-    </div>
-
-    <div class="subtitle">
-        RiderX management, rider approvals & statistics
-    </div>
-
-
-    <div
-        id="statusBox"
-        class="status"
-    >
-
-        <div class="status-dot"></div>
-
-        <div
-            id="statusText"
-            class="status-text"
-        >
-            Verifying administrator...
-        </div>
-
-    </div>
-
-
-    <div
-        id="errorBox"
-        class="error"
-    ></div>
-
-
-    <!-- ========================================================
-         STATISTICS
-    ========================================================= -->
-
-    <div class="grid">
-
-        <div class="card">
-            <i class="fa-solid fa-users"></i>
-            <div
-                id="customers"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Customers
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-motorcycle"></i>
-            <div
-                id="riders"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Riders
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-clock"></i>
-            <div
-                id="pending"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Pending Riders
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-signal"></i>
-            <div
-                id="online"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Online Riders
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-route"></i>
-            <div
-                id="rides"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Total Rides
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-spinner"></i>
-            <div
-                id="active"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Active Rides
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-circle-check"></i>
-            <div
-                id="completed"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Completed
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-xmark"></i>
-            <div
-                id="cancelled"
-                class="number">
-                0
-            </div>
-            <div class="title">
-                Cancelled
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-indian-rupee-sign"></i>
-            <div
-                id="revenue"
-                class="number">
-                ₹0
-            </div>
-            <div class="title">
-                Revenue
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-calendar-day"></i>
-            <div
-                id="todayRevenue"
-                class="number">
-                ₹0
-            </div>
-            <div class="title">
-                Today Revenue
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-percent"></i>
-            <div
-                id="commission"
-                class="number">
-                ₹0
-            </div>
-            <div class="title">
-                Admin Commission
-            </div>
-        </div>
-
-
-        <div class="card">
-            <i class="fa-solid fa-wallet"></i>
-            <div
-                id="riderEarn"
-                class="number">
-                ₹0
-            </div>
-            <div class="title">
-                Rider Earnings
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- ========================================================
-         RIDER APPROVAL
-    ========================================================= -->
-
-    <div class="section">
-
-        <div class="section-title">
-            Rider Registration Requests
-        </div>
-
-        <div class="approval-box">
-
-            <div class="approval-head">
-
-                <h3>
-
-                    <i
-                        class="fa-solid fa-user-check"
-                        style="color:#ffe500">
-                    </i>
-
-                    Pending Approval
-
-                </h3>
-
-                <div
-                    id="pendingCount"
-                    class="count"
+                <button
+                    class="icon-btn"
+                    onclick="openNotifications()"
+                    aria-label="Notifications"
                 >
-                    0 pending
+                    🔔
+                </button>
+
+                <span class="notification-dot"></span>
+
+            </div>
+
+            <button
+                class="icon-btn"
+                onclick="openSettings()"
+                aria-label="Settings"
+            >
+                ⚙
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- WELCOME -->
+
+        <section class="welcome">
+
+            <div>
+
+                <div class="welcome-title">
+                    Admin Dashboard
+                </div>
+
+                <div class="welcome-subtitle">
+                    Monitor RiderX rides, riders, customers and earnings.
                 </div>
 
             </div>
 
-            <div
-                id="approvalList"
-                class="loading"
+            <button
+                class="refresh-btn"
+                onclick="refreshDashboard()"
             >
-                Loading rider requests...
+                ↻ REFRESH
+            </button>
+
+        </section>
+
+
+        <!-- STATS -->
+
+        <section class="stats-grid">
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🚕
+                </div>
+
+                <div class="stat-label">
+                    TODAY'S RIDES
+                </div>
+
+                <div
+                    class="stat-value yellow"
+                    id="todayRides"
+                >
+                    0
+                </div>
+
             </div>
 
-        </div>
 
-    </div>
+            <div class="stat-card">
 
+                <div class="stat-icon">
+                    👥
+                </div>
 
-    <!-- ========================================================
-         MANAGEMENT
-    ========================================================= -->
+                <div class="stat-label">
+                    CUSTOMERS
+                </div>
 
-    <div class="section">
+                <div
+                    class="stat-value blue"
+                    id="customersCount"
+                >
+                    0
+                </div>
 
-        <div class="section-title">
-            Management
-        </div>
-
-        <div class="menu-grid">
-
-            <button
-                onclick="openPage('riders.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-motorcycle"></i>
-                Manage Riders
-            </button>
+            </div>
 
 
-            <button
-                onclick="openPage('customers.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-users"></i>
-                Manage Customers
-            </button>
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🛵
+                </div>
+
+                <div class="stat-label">
+                    ACTIVE RIDERS
+                </div>
+
+                <div
+                    class="stat-value green"
+                    id="activeRiders"
+                >
+                    0
+                </div>
+
+            </div>
 
 
-            <button
-                onclick="openPage('rides.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-route"></i>
-                Manage Rides
-            </button>
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    ₹
+                </div>
+
+                <div class="stat-label">
+                    TODAY'S REVENUE
+                </div>
+
+                <div
+                    class="stat-value yellow"
+                    id="todayRevenue"
+                >
+                    ₹0
+                </div>
+
+            </div>
 
 
-            <button
-                onclick="openPage('rider-approval.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-user-check"></i>
-                Rider Approval
-            </button>
+        </section>
 
 
-            <button
-                onclick="openPage('fare-settings.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-money-bill"></i>
-                Fare Settings
-            </button>
+        <!-- DASHBOARD GRID -->
+
+        <section class="dashboard-grid">
 
 
-            <button
-                onclick="openPage('commission.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-percent"></i>
-                Commission Settings
-            </button>
+            <!-- LEFT -->
+
+            <div>
 
 
-            <button
-                onclick="openPage('settings.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-gear"></i>
-                App Settings
-            </button>
+                <!-- QUICK ACTIONS -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div class="card-title">
+                            Quick actions
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="quick-actions">
 
 
-            <button
-                onclick="openPage('supports.html')"
-                class="menu"
-            >
-                <i class="fa-solid fa-headset"></i>
-                Support
-            </button>
+                            <button
+                                class="quick-action"
+                                onclick="openPage('rides.html')"
+                            >
 
-        </div>
+                                <div class="quick-icon">
+                                    🚕
+                                </div>
 
-    </div>
+                                <div class="quick-label">
+                                    Rides
+                                </div>
+
+                            </button>
 
 
-    <div class="footer">
-        RiderX Admin Panel • Authorized Access Only
-    </div>
+                            <button
+                                class="quick-action"
+                                onclick="openPage('riders.html')"
+                            >
+
+                                <div class="quick-icon">
+                                    🛵
+                                </div>
+
+                                <div class="quick-label">
+                                    Riders
+                                </div>
+
+                            </button>
+
+
+                            <button
+                                class="quick-action"
+                                onclick="openPage('customers.html')"
+                            >
+
+                                <div class="quick-icon">
+                                    👥
+                                </div>
+
+                                <div class="quick-label">
+                                    Customers
+                                </div>
+
+                            </button>
+
+
+                            <button
+                                class="quick-action"
+                                onclick="openPage('reports.html')"
+                            >
+
+                                <div class="quick-icon">
+                                    📊
+                                </div>
+
+                                <div class="quick-label">
+                                    Reports
+                                </div>
+
+                            </button>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- RECENT RIDES -->
+
+                <div
+                    class="card"
+                    style="margin-top:12px;"
+                >
+
+                    <div class="card-header">
+
+                        <div class="card-title">
+                            Recent rides
+                        </div>
+
+                        <button
+                            class="card-action"
+                            onclick="openPage('rides.html')"
+                        >
+                            VIEW ALL
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="card-body"
+                        id="recentRides"
+                    >
+
+                        <div class="empty">
+                            Loading rides...
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EARNINGS -->
+
+                <div
+                    class="card earnings-card"
+                    style="margin-top:12px;"
+                >
+
+                    <div class="card-header">
+
+                        <div class="card-title">
+                            Revenue overview
+                        </div>
+
+                        <button
+                            class="card-action"
+                            onclick="openPage('reports.html')"
+                        >
+                            REPORTS
+                        </button>
+
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="earning-summary">
+
+                            <div>
+
+                                <div class="earning-label">
+                                    TODAY
+                                </div>
+
+                                <div
+                                    class="earning-main"
+                                    id="earningMain"
+                                >
+                                    ₹0
+                                </div>
+
+                            </div>
+
+                            <div class="earning-change">
+                                LIVE DATA
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="chart"
+                            id="revenueChart"
+                        ></div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- RIGHT -->
+
+            <div>
+
+
+                <!-- LIVE STATUS -->
+
+                <div class="card">
+
+                    <div class="card-header">
+
+                        <div class="card-title">
+                            Live operations
+                        </div>
+
+                        <div
+                            class="card-action"
+                            style="color:#22c55e;"
+                        >
+                            ● LIVE
+                        </div>
+
+                    </div>
+
+                    <div class="card-body">
+
+
+                        <div class="live-row">
+
+                            <div class="live-icon">
+                                🛵
+                            </div>
+
+                            <div class="live-info">
+
+                                <div class="live-title">
+                                    Online riders
+                                </div>
+
+                                <div class="live-subtitle">
+                                    Riders currently available
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="live-value green"
+                                id="onlineRiders"
+                            >
+                                0
+                            </div>
+
+                        </div>
+
+
+                        <div class="live-row">
+
+                            <div class="live-icon">
+                                🚕
+                            </div>
+
+                            <div class="live-info">
+
+                                <div class="live-title">
+                                    Active rides
+                                </div>
+
+                                <div class="live-subtitle">
+                                    Trips currently in progress
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="live-value"
+                                id="activeRides"
+                            >
+                                0
+                            </div>
+
+                        </div>
+
+
+                        <div class="live-row">
+
+                            <div class="live-icon">
+                                ⏳
+                            </div>
+
+                            <div class="live-info">
+
+                                <div class="live-title">
+                                    Pending requests
+                                </div>
+
+                                <div class="live-subtitle">
+                                    Waiting for rider acceptance
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="live-value"
+                                id="pendingRequests"
+                            >
+                                0
+                            </div>
+
+                        </div>
+
+
+                        <div class="live-row">
+
+                            <div class="live-icon">
+                                ⚠
+                            </div>
+
+                            <div class="live-info">
+
+                                <div class="live-title">
+                                    Support tickets
+                                </div>
+
+                                <div class="live-subtitle">
+                                    Open customer/rider issues
+                                </div>
+
+                            </div>
+
+                            <div
+                                class="live-value"
+                                id="supportTickets"
+                            >
+                                0
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ALERTS -->
+
+                <div
+                    class="card"
+                    style="margin-top:12px;"
+                >
+
+                    <div class="card-header">
+
+                        <div class="card-title">
+                            Admin alerts
+                        </div>
+
+                        <button
+                            class="card-action"
+                            onclick="openPage('notifications.html')"
+                        >
+                            ALL
+                        </button>
+
+                    </div>
+
+                    <div class="card-body">
+
+
+                        <div class="alert">
+
+                            <div class="alert-icon">
+                                🛵
+                            </div>
+
+                            <div class="alert-info">
+
+                                <div class="alert-title">
+                                    Rider approvals
+                                </div>
+
+                                <div
+                                    class="alert-text"
+                                    id="approvalAlert"
+                                >
+                                    No pending approvals
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="alert">
+
+                            <div class="alert-icon">
+                                ₹
+                            </div>
+
+                            <div class="alert-info">
+
+                                <div class="alert-title">
+                                    Payments
+                                </div>
+
+                                <div
+                                    class="alert-text"
+                                    id="paymentAlert"
+                                >
+                                    Payment system operational
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="alert">
+
+                            <div class="alert-icon">
+                                🔔
+                            </div>
+
+                            <div class="alert-info">
+
+                                <div class="alert-title">
+                                    System
+                                </div>
+
+                                <div
+                                    class="alert-text"
+                                    id="systemAlert"
+                                >
+                                    RiderX admin system ready
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+        </section>
+
+
+    </main>
 
 </div>
 
-
-<!-- ============================================================
-     RIDER DETAILS MODAL
-============================================================ -->
 
 <div
-    id="detailsModal"
-    class="modal"
->
-
-    <div class="modal-card">
-
-        <div class="modal-head">
-
-            <h3>
-                Rider Application
-            </h3>
-
-            <button
-                id="closeModal"
-                class="close-modal"
-            >
-                Close
-            </button>
-
-        </div>
-
-        <div id="detailsBody"></div>
-
-    </div>
-
-</div>
+    class="toast"
+    id="toast"
+></div>
 
 
-<script type="module">
+<script>
 
-import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
+/* =========================================
+   RIDERX ADMIN DASHBOARD
+========================================= */
 
-import {
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+const ADMIN_DATA_KEY =
+    "riderxAdminDashboardData";
 
-import {
-    collection,
-    getDocs,
-    doc,
-    getDoc,
-    updateDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+let dashboardData = {
 
+    todayRides:0,
 
-/* ============================================================
-   HELPERS
-============================================================ */
+    customers:0,
 
-const $ =
-    id => document.getElementById(id);
+    activeRiders:0,
 
+    todayRevenue:0,
 
-const accessScreen =
-    $("accessScreen");
+    onlineRiders:0,
 
-const accessText =
-    $("accessText");
+    activeRides:0,
 
-const statusBox =
-    $("statusBox");
+    pendingRequests:0,
 
-const statusText =
-    $("statusText");
+    supportTickets:0,
 
-const errorBox =
-    $("errorBox");
+    pendingApprovals:0,
 
-const approvalList =
-    $("approvalList");
+    recentRides:[],
 
-const pendingCount =
-    $("pendingCount");
+    revenue:[0,0,0,0,0,0,0]
 
-const detailsModal =
-    $("detailsModal");
+};
 
-const detailsBody =
-    $("detailsBody");
+let toastTimer;
 
 
-let currentRequests = [];
+/* =========================================
+   FORMAT MONEY
+========================================= */
 
-let adminVerified = false;
-
-let redirecting = false;
-
-
-/* ============================================================
-   STATUS
-============================================================ */
-
-function setStatus(
-    text,
-    type = ""
+function formatMoney(
+    value
 ){
 
-    statusText.textContent =
-        text;
-
-    statusBox.className =
-        "status " + type;
-}
-
-
-function showError(text){
-
-    errorBox.style.display =
-        "block";
-
-    errorBox.textContent =
-        text;
-}
-
-
-function hideError(){
-
-    errorBox.style.display =
-        "none";
-
-}
-
-
-function setAccessText(text){
-
-    accessText.textContent =
-        text;
-
-}
-
-
-function hideAccessScreen(){
-
-    accessScreen.style.display =
-        "none";
-
-}
-
-
-function redirectToAdminLogin(){
-
-    if(redirecting){
-        return;
-    }
-
-    redirecting =
-        true;
-
-    window.location.replace(
-        "./login.html"
-    );
-
-}
-
-
-/* ============================================================
-   ADMIN ROLE CHECK
-============================================================ */
-
-function isAdmin(data){
-
-    if(!data){
-        return false;
-    }
-
-    const role =
-        String(
-            data.role ??
-            data.userType ??
-            data.type ??
-            ""
-        )
-        .trim()
-        .toLowerCase();
-
-    return (
-        role === "admin" ||
-        role === "administrator" ||
-        data.isAdmin === true
-    );
-
-}
-
-
-/* ============================================================
-   BASIC HELPERS
-============================================================ */
-
-function roleOf(data){
-
-    return String(
-        data?.role ??
-        data?.userType ??
-        data?.type ??
-        ""
-    )
-    .trim()
-    .toLowerCase();
-
-}
-
-
-function statusOf(data){
-
-    return String(
-        data?.status ??
-        data?.approvalStatus ??
-        data?.riderStatus ??
-        ""
-    )
-    .trim()
-    .toLowerCase();
-
-}
-
-
-function isApproved(data){
-
-    const status =
-        statusOf(data);
-
-    return (
-        data?.approved === true ||
-        data?.isApproved === true ||
-        [
-            "approved",
-            "active",
-            "verified"
-        ].includes(status)
-    );
-
-}
-
-
-function isRejected(data){
-
-    const status =
-        statusOf(data);
-
-    return (
-        [
-            "rejected",
-            "declined",
-            "blocked"
-        ].includes(status)
-    );
-
-}
-
-
-function isPendingRider(data){
-
-    if(
-        roleOf(data) !== "rider"
-    ){
-
-        return false;
-
-    }
-
-
-    if(
-        isApproved(data) ||
-        isRejected(data)
-    ){
-
-        return false;
-
-    }
-
-
-    const status =
-        statusOf(data);
-
-
-    if(
-        [
-            "pending",
-            "pending_approval",
-            "pending-approval",
-            "under_review",
-            "under-review",
-            "verifying",
-            "verification",
-            "review",
-            "submitted",
-            "application_submitted"
-        ].includes(status)
-    ){
-
-        return true;
-
-    }
-
-
-    return (
-        data?.applicationSubmitted === true ||
-        data?.registrationCompleted === true ||
-        data?.documentsUploaded === true ||
-        data?.documentsSubmitted === true ||
-        String(
-            data?.verificationStatus ?? ""
-        ).toLowerCase() === "pending"
-    );
-
-}
-
-
-function money(value){
+    const amount =
+        Number(value) || 0;
 
     return "₹" +
-        (
-            Number(value) || 0
-        ).toLocaleString("en-IN");
-
-}
-
-
-function amountOf(data){
-
-    return Number(
-        data?.fare ??
-        data?.amount ??
-        data?.price ??
-        data?.totalFare ??
-        data?.totalAmount ??
-        0
-    ) || 0;
-
-}
-
-
-function dateOf(value){
-
-    if(!value){
-        return null;
-    }
-
-    try{
-
-        if(
-            typeof value?.toDate ===
-            "function"
-        ){
-
-            return value.toDate();
-
-        }
-
-        if(
-            typeof value?.seconds ===
-            "number"
-        ){
-
-            return new Date(
-                value.seconds * 1000
-            );
-
-        }
-
-        const date =
-            new Date(value);
-
-        return Number.isNaN(
-            date.getTime()
-        )
-            ? null
-            : date;
-
-    }catch{
-
-        return null;
-
-    }
-
-}
-
-
-function isToday(data){
-
-    const date =
-        dateOf(
-            data?.createdAt ??
-            data?.timestamp ??
-            data?.date ??
-            data?.createdDate
+        amount.toLocaleString(
+            "en-IN",
+            {
+                maximumFractionDigits:0
+            }
         );
 
-
-    if(!date){
-        return false;
-    }
-
-
-    const now =
-        new Date();
-
-
-    return (
-        date.getDate() === now.getDate() &&
-        date.getMonth() === now.getMonth() &&
-        date.getFullYear() === now.getFullYear()
-    );
-
 }
 
 
-function escapeHtml(value){
+/* =========================================
+   LOAD LOCAL DATA
+========================================= */
 
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /[&<>"']/g,
-        char => ({
-            "&":"&amp;",
-            "<":"&lt;",
-            ">":"&gt;",
-            '"':"&quot;",
-            "'":"&#039;"
-        }[char])
-    );
-
-}
-
-
-/* ============================================================
-   SAFE COLLECTION
-============================================================ */
-
-async function safeCollection(name){
+function loadDashboardData(){
 
     try{
 
-        const snap =
-            await getDocs(
-                collection(
-                    db,
-                    name
-                )
+        const raw =
+            localStorage.getItem(
+                ADMIN_DATA_KEY
             );
 
+        if(
+            raw
+        ){
 
-        return snap.docs.map(
-            item => ({
-                id:item.id,
-                ...item.data()
-            })
+            const saved =
+                JSON.parse(
+                    raw
+                );
+
+            if(
+                saved &&
+                typeof saved ===
+                "object"
+            ){
+
+                dashboardData = {
+                    ...dashboardData,
+                    ...saved
+                };
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.log(
+            "Dashboard data error:",
+            error
+        );
+
+    }
+
+
+    renderDashboard();
+
+}
+
+
+/* =========================================
+   SAVE LOCAL DATA
+========================================= */
+
+function saveDashboardData(){
+
+    try{
+
+        localStorage.setItem(
+            ADMIN_DATA_KEY,
+            JSON.stringify(
+                dashboardData
+            )
         );
 
     }catch(error){
 
-        console.warn(
-            "Collection read failed:",
-            name,
+        console.log(
             error
         );
 
-        return [];
-
     }
 
 }
 
 
-/* ============================================================
-   BUILD RIDERS
-============================================================ */
+/* =========================================
+   RENDER DASHBOARD
+========================================= */
 
-function buildAllRiders(
-    riders,
-    users
-){
+function renderDashboard(){
 
-    const map =
-        new Map();
+    setText(
+        "todayRides",
+        dashboardData.todayRides
+    );
 
+    setText(
+        "customersCount",
+        dashboardData.customers
+    );
 
-    function key(data){
+    setText(
+        "activeRiders",
+        dashboardData.activeRiders
+    );
 
-        return String(
-            data?.uid ??
-            data?.userId ??
-            data?.riderId ??
-            data?.email ??
-            data?.phone ??
-            data?.mobile ??
-            data?.id ??
-            ""
+    setText(
+        "todayRevenue",
+        formatMoney(
+            dashboardData.todayRevenue
         )
-        .trim()
-        .toLowerCase();
+    );
 
-    }
-
-
-    users
-        .filter(
-            u =>
-                roleOf(u) === "rider"
+    setText(
+        "earningMain",
+        formatMoney(
+            dashboardData.todayRevenue
         )
-        .forEach(
-            u => {
+    );
 
-                const k =
-                    key(u);
+    setText(
+        "onlineRiders",
+        dashboardData.onlineRiders
+    );
 
-                if(!k){
-                    return;
-                }
+    setText(
+        "activeRides",
+        dashboardData.activeRides
+    );
 
-                map.set(
-                    k,
-                    {
-                        ...u,
-                        userDocId:u.id
-                    }
-                );
+    setText(
+        "pendingRequests",
+        dashboardData.pendingRequests
+    );
 
-            }
-        );
-
-
-    riders.forEach(
-        r => {
-
-            const k =
-                key(r);
-
-            if(!k){
-                return;
-            }
-
-
-            const existing =
-                map.get(k);
-
-
-            if(existing){
-
-                map.set(
-                    k,
-                    {
-                        ...existing,
-                        ...r,
-                        userDocId:
-                            existing.userDocId,
-                        riderDocId:r.id
-                    }
-                );
-
-            }else{
-
-                map.set(
-                    k,
-                    {
-                        ...r,
-                        riderDocId:r.id
-                    }
-                );
-
-            }
-
-        }
+    setText(
+        "supportTickets",
+        dashboardData.supportTickets
     );
 
 
-    return [
-        ...map.values()
-    ];
+    renderRides();
+
+    renderRevenue();
+
+    renderAlerts();
 
 }
 
 
-/* ============================================================
-   LOAD RIDER REQUESTS
-============================================================ */
+/* =========================================
+   SET TEXT
+========================================= */
 
-async function loadRiderRequests(){
+function setText(
+    id,
+    value
+){
 
-    approvalList.innerHTML = `
-        <div class="loading">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-            Loading rider requests...
-        </div>
-    `;
+    const element =
+        document.getElementById(
+            id
+        );
+
+    if(
+        element
+    ){
+
+        element.textContent =
+            value;
+
+    }
+
+}
 
 
-    const [
-        riders,
-        users
-    ] =
-        await Promise.all([
-            safeCollection("riders"),
-            safeCollection("users")
-        ]);
+/* =========================================
+   RECENT RIDES
+========================================= */
 
+function renderRides(){
 
-    currentRequests =
-        buildAllRiders(
-            riders,
-            users
-        )
-        .filter(
-            isPendingRider
+    const container =
+        document.getElementById(
+            "recentRides"
         );
 
 
-    pendingCount.textContent =
-        currentRequests.length +
-        " pending";
+    if(
+        !container
+    ){
+
+        return;
+
+    }
+
+
+    const rides =
+        Array.isArray(
+            dashboardData.recentRides
+        )
+            ? dashboardData.recentRides
+            : [];
 
 
     if(
-        !currentRequests.length
+        !rides.length
     ){
 
-        approvalList.innerHTML = `
+        container.innerHTML = `
+
             <div class="empty">
-                <i class="fa-solid fa-circle-check"></i>
-                <br><br>
-                No pending rider registration requests.
+                No recent rides available.
             </div>
+
         `;
 
         return;
@@ -1555,122 +1752,284 @@ async function loadRiderRequests(){
     }
 
 
-    approvalList.innerHTML =
-        "";
+    container.innerHTML = "";
 
 
-    currentRequests.forEach(
-        (rider,index) => {
+    rides
+        .slice(
+            0,
+            6
+        )
+        .forEach(
+            function(ride){
 
-            const name =
-                rider.name ||
-                rider.fullName ||
-                rider.displayName ||
-                "Rider";
+                const row =
+                    document.createElement(
+                        "div"
+                    );
 
-
-            const phone =
-                rider.phone ||
-                rider.mobile ||
-                rider.phoneNumber ||
-                "No phone";
-
-
-            const email =
-                rider.email ||
-                "No email";
+                row.className =
+                    "ride-row";
 
 
-            const vehicle =
-                rider.vehicleType ||
-                rider.vehicle ||
-                "Vehicle details not provided";
+                const status =
+                    String(
+                        ride.status ||
+                        "completed"
+                    ).toLowerCase();
 
 
-            const row =
+                let statusClass =
+                    "status-completed";
+
+
+                if(
+                    status.includes(
+                        "cancel"
+                    )
+                ){
+
+                    statusClass =
+                        "status-cancelled";
+
+                }
+                else if(
+                    status.includes(
+                        "progress"
+                    ) ||
+                    status.includes(
+                        "accepted"
+                    ) ||
+                    status.includes(
+                        "started"
+                    )
+                ){
+
+                    statusClass =
+                        "status-progress";
+
+                }
+
+
+                row.innerHTML = `
+
+                    <div class="ride-avatar">
+                        ${escapeHtml(
+                            String(
+                                ride.customer ||
+                                "C"
+                            )
+                            .charAt(0)
+                            .toUpperCase()
+                        )}
+                    </div>
+
+                    <div class="ride-info">
+
+                        <div class="ride-id">
+                            ${escapeHtml(
+                                ride.id ||
+                                "RiderX Ride"
+                            )}
+                        </div>
+
+                        <div class="ride-route">
+                            ${escapeHtml(
+                                ride.route ||
+                                "Ride route unavailable"
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div class="ride-amount">
+                            ${formatMoney(
+                                ride.amount || 0
+                            )}
+                        </div>
+
+                        <div class="ride-status ${statusClass}">
+                            ${escapeHtml(
+                                ride.status ||
+                                "Completed"
+                            )}
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                container.appendChild(
+                    row
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================
+   REVENUE CHART
+========================================= */
+
+function renderRevenue(){
+
+    const chart =
+        document.getElementById(
+            "revenueChart"
+        );
+
+
+    if(
+        !chart
+    ){
+
+        return;
+
+    }
+
+
+    let values =
+        Array.isArray(
+            dashboardData.revenue
+        )
+            ? dashboardData.revenue
+            : [];
+
+
+    if(
+        !values.length
+    ){
+
+        values =
+            [0,0,0,0,0,0,0];
+
+    }
+
+
+    const max =
+        Math.max(
+            ...values.map(
+                function(value){
+
+                    return Number(
+                        value
+                    ) || 0;
+
+                }
+            ),
+            1
+        );
+
+
+    chart.innerHTML = "";
+
+
+    values.forEach(
+        function(value,index){
+
+            const wrap =
                 document.createElement(
                     "div"
                 );
 
-
-            row.className =
-                "request";
-
-
-            row.innerHTML = `
-
-                <div class="request-info">
-
-                    <div class="request-name">
-                        ${escapeHtml(name)}
-                    </div>
-
-                    <div class="request-meta">
-
-                        Rider ID:
-                        ${escapeHtml(
-                            rider.riderId ||
-                            rider.uid ||
-                            rider.id
-                        )}
-
-                        <br>
-
-                        ${escapeHtml(phone)}
-                        •
-                        ${escapeHtml(email)}
-
-                        <br>
-
-                        Vehicle:
-                        ${escapeHtml(vehicle)}
-
-                    </div>
-
-                    <span class="request-status pending-status">
-                        Pending Admin Approval
-                    </span>
-
-                </div>
-
-                <div class="actions">
-
-                    <button
-                        class="btn view"
-                        data-index="${index}"
-                        data-action="view">
-
-                        <i class="fa-solid fa-eye"></i>
-                        View
-
-                    </button>
-
-                    <button
-                        class="btn approve"
-                        data-index="${index}"
-                        data-action="approve">
-
-                        <i class="fa-solid fa-check"></i>
-                        Approve
-
-                    </button>
-
-                    <button
-                        class="btn reject"
-                        data-index="${index}"
-                        data-action="reject">
-
-                        <i class="fa-solid fa-xmark"></i>
-                        Reject
-
-                    </button>
-
-                </div>
-            `;
+            wrap.className =
+                "bar-wrap";
 
 
-            approvalList.appendChild(
-                row
+            const column =
+                document.createElement(
+                    "div"
+                );
+
+            column.style.width =
+                "100%";
+
+            column.style.height =
+                "100%";
+
+            column.style.display =
+                "flex";
+
+            column.style.flexDirection =
+                "column";
+
+            column.style.alignItems =
+                "center";
+
+            column.style.justifyContent =
+                "flex-end";
+
+
+            const bar =
+                document.createElement(
+                    "div"
+                );
+
+            bar.className =
+                "bar";
+
+
+            const percentage =
+                (
+                    (
+                        Number(value) ||
+                        0
+                    ) /
+                    max
+                ) * 100;
+
+
+            bar.style.height =
+                Math.max(
+                    percentage,
+                    4
+                ) + "%";
+
+
+            const label =
+                document.createElement(
+                    "div"
+                );
+
+            label.className =
+                "bar-label";
+
+
+            const labels = [
+                "M",
+                "T",
+                "W",
+                "T",
+                "F",
+                "S",
+                "S"
+            ];
+
+
+            label.textContent =
+                labels[index] ||
+                "";
+
+
+            column.appendChild(
+                bar
+            );
+
+            column.appendChild(
+                label
+            );
+
+            wrap.appendChild(
+                column
+            );
+
+            chart.appendChild(
+                wrap
             );
 
         }
@@ -1679,1045 +2038,226 @@ async function loadRiderRequests(){
 }
 
 
-/* ============================================================
-   RIDER DETAILS
-============================================================ */
+/* =========================================
+   ALERTS
+========================================= */
 
-function showRiderDetails(
-    rider
+function renderAlerts(){
+
+    const approvals =
+        Number(
+            dashboardData.pendingApprovals
+        ) || 0;
+
+
+    setText(
+        "approvalAlert",
+        approvals > 0
+            ? approvals +
+              " rider approval request(s) pending"
+            : "No pending approvals"
+    );
+
+
+    const support =
+        Number(
+            dashboardData.supportTickets
+        ) || 0;
+
+
+    setText(
+        "paymentAlert",
+        "Payment system operational"
+    );
+
+
+    setText(
+        "systemAlert",
+        support > 0
+            ? support +
+              " support ticket(s) require attention"
+            : "RiderX admin system ready"
+    );
+
+}
+
+
+/* =========================================
+   REFRESH
+========================================= */
+
+function refreshDashboard(){
+
+    loadDashboardData();
+
+    showToast(
+        "Dashboard refreshed."
+    );
+
+}
+
+
+/* =========================================
+   PAGE NAVIGATION
+========================================= */
+
+function openPage(
+    page
 ){
 
-    const fields = [
+    window.location.href =
+        page;
 
-        [
-            "Name",
-            rider.name ||
-            rider.fullName ||
-            rider.displayName ||
-            "—"
-        ],
-
-        [
-            "Email",
-            rider.email || "—"
-        ],
-
-        [
-            "Phone",
-            rider.phone ||
-            rider.mobile ||
-            rider.phoneNumber ||
-            "—"
-        ],
-
-        [
-            "Rider ID",
-            rider.riderId ||
-            rider.uid ||
-            rider.id ||
-            "—"
-        ],
-
-        [
-            "Vehicle",
-            rider.vehicleType ||
-            rider.vehicle ||
-            "—"
-        ],
-
-        [
-            "Vehicle Number",
-            rider.vehicleNumber ||
-            "—"
-        ],
-
-        [
-            "License",
-            rider.licenseNumber ||
-            rider.drivingLicense ||
-            "—"
-        ],
-
-        [
-            "Status",
-            statusOf(rider) ||
-            "pending"
-        ]
-
-    ];
+}
 
 
-    detailsBody.innerHTML =
-        fields
-            .map(
-                ([label,value]) => `
-                    <div class="detail-row">
+function openMenu(){
 
-                        <div class="detail-label">
-                            ${escapeHtml(label)}
-                        </div>
+    window.location.href =
+        "menu.html";
 
-                        <div class="detail-value">
-                            ${escapeHtml(value)}
-                        </div>
-
-                    </div>
-                `
-            )
-            .join("");
+}
 
 
-    detailsModal.classList.add(
+function openNotifications(){
+
+    window.location.href =
+        "notifications.html";
+
+}
+
+
+function openSettings(){
+
+    window.location.href =
+        "settings.html";
+
+}
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================
+   TOAST
+========================================= */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    if(
+        !toast
+    ){
+
+        return;
+
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
         "show"
     );
 
-}
 
-
-/* ============================================================
-   UPDATE RIDER
-============================================================ */
-
-async function updateRiderApplication(
-    rider,
-    action
-){
-
-    if(!adminVerified){
-
-        throw new Error(
-            "Admin verification required."
-        );
-
-    }
-
-
-    const payload =
-        action === "approve"
-
-        ? {
-
-            status:"approved",
-
-            approvalStatus:"approved",
-
-            riderStatus:"approved",
-
-            verificationStatus:"approved",
-
-            approved:true,
-
-            isApproved:true,
-
-            online:false,
-
-            isOnline:false,
-
-            accountStatus:"active",
-
-            approvedAt:
-                serverTimestamp()
-
-        }
-
-        : {
-
-            status:"rejected",
-
-            approvalStatus:"rejected",
-
-            riderStatus:"rejected",
-
-            verificationStatus:"rejected",
-
-            approved:false,
-
-            isApproved:false,
-
-            online:false,
-
-            isOnline:false,
-
-            accountStatus:"rejected",
-
-            rejectedAt:
-                serverTimestamp()
-
-        };
-
-
-    const documents = [];
-
-
-    if(
-        rider.userDocId
-    ){
-
-        documents.push(
-            [
-                "users",
-                rider.userDocId
-            ]
-        );
-
-    }
-
-
-    if(
-        rider.riderDocId
-    ){
-
-        documents.push(
-            [
-                "riders",
-                rider.riderDocId
-            ]
-        );
-
-    }
-
-
-    if(
-        !documents.length &&
-        rider.id
-    ){
-
-        documents.push(
-            [
-                "users",
-                rider.id
-            ]
-        );
-
-    }
-
-
-    if(
-        !documents.length
-    ){
-
-        throw new Error(
-            "Rider document not found."
-        );
-
-    }
-
-
-    let updated = 0;
-
-
-    for(
-        const [
-            collectionName,
-            id
-        ]
-        of documents
-    ){
-
-        const ref =
-            doc(
-                db,
-                collectionName,
-                id
-            );
-
-
-        const snap =
-            await getDoc(ref);
-
-
-        if(
-            snap.exists()
-        ){
-
-            await updateDoc(
-                ref,
-                payload
-            );
-
-            updated++;
-
-        }
-
-    }
-
-
-    if(
-        updated === 0
-    ){
-
-        throw new Error(
-            "Rider document could not be updated."
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   APPROVAL EVENTS
-============================================================ */
-
-approvalList.addEventListener(
-    "click",
-    async event => {
-
-        const button =
-            event.target.closest(
-                "button[data-action]"
-            );
-
-
-        if(!button){
-            return;
-        }
-
-
-        if(!adminVerified){
-            return;
-        }
-
-
-        const index =
-            Number(
-                button.dataset.index
-            );
-
-
-        const action =
-            button.dataset.action;
-
-
-        const rider =
-            currentRequests[index];
-
-
-        if(!rider){
-            return;
-        }
-
-
-        if(
-            action === "view"
-        ){
-
-            showRiderDetails(
-                rider
-            );
-
-            return;
-
-        }
-
-
-        const riderName =
-            rider.name ||
-            rider.fullName ||
-            rider.displayName ||
-            "this rider";
-
-
-        const confirmed =
-            confirm(
-                action === "approve"
-                    ? `Approve ${riderName}?`
-                    : `Reject ${riderName}?`
-            );
-
-
-        if(!confirmed){
-            return;
-        }
-
-
-        const row =
-            button.closest(
-                ".request"
-            );
-
-
-        const buttons =
-            row.querySelectorAll(
-                "button"
-            );
-
-
-        buttons.forEach(
-            b =>
-                b.disabled = true
-        );
-
-
-        button.textContent =
-            action === "approve"
-                ? "Approving..."
-                : "Rejecting...";
-
-
-        try{
-
-            await updateRiderApplication(
-                rider,
-                action
-            );
-
-
-            alert(
-                action === "approve"
-                    ? "Rider approved successfully."
-                    : "Rider registration rejected successfully."
-            );
-
-
-            await Promise.all([
-                loadRiderRequests(),
-                loadStatistics()
-            ]);
-
-        }catch(error){
-
-            console.error(
-                "Rider action error:",
-                error
-            );
-
-
-            alert(
-                "Action failed.\n\n" +
-                (
-                    error.message ||
-                    "Please check Firestore Rules."
-                )
-            );
-
-
-            buttons.forEach(
-                b =>
-                    b.disabled = false
-            );
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   STATISTICS
-============================================================ */
-
-async function loadStatistics(){
-
-    const [
-        users,
-        ridersData,
-        rides
-    ] =
-        await Promise.all([
-            safeCollection("users"),
-            safeCollection("riders"),
-            safeCollection("rides")
-        ]);
-
-
-    const customers =
-        users.filter(
-            user =>
-                [
-                    "customer",
-                    "user"
-                ].includes(
-                    roleOf(user)
-                )
-        ).length;
-
-
-    const allRiders =
-        buildAllRiders(
-            ridersData,
-            users
-        );
-
-
-    const riders =
-        allRiders.length;
-
-
-    const pending =
-        allRiders.filter(
-            isPendingRider
-        ).length;
-
-
-    const online =
-        allRiders.filter(
-            rider =>
-                isApproved(rider) &&
-                (
-                    rider.online === true ||
-                    rider.isOnline === true ||
-                    statusOf(rider) === "online"
-                )
-        ).length;
-
-
-    let active = 0;
-
-    let completed = 0;
-
-    let cancelled = 0;
-
-    let revenue = 0;
-
-    let today = 0;
-
-
-    rides.forEach(
-        ride => {
-
-            const status =
-                String(
-                    ride.status ??
-                    ride.rideStatus ??
-                    ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            const amount =
-                amountOf(ride);
-
-
-            if(
-                [
-                    "accepted",
-                    "ongoing",
-                    "started",
-                    "arriving",
-                    "in_progress",
-                    "in-progress",
-                    "active"
-                ].includes(status)
-            ){
-
-                active++;
-
-            }
-
-
-            if(
-                [
-                    "completed",
-                    "complete",
-                    "finished",
-                    "success"
-                ].includes(status)
-            ){
-
-                completed++;
-
-                revenue +=
-                    amount;
-
-
-                if(
-                    isToday(ride)
-                ){
-
-                    today +=
-                        amount;
-
-                }
-
-            }
-
-
-            if(
-                [
-                    "cancelled",
-                    "canceled",
-                    "rejected"
-                ].includes(status)
-            ){
-
-                cancelled++;
-
-            }
-
-        }
+    clearTimeout(
+        toastTimer
     );
 
 
-    $("customers").textContent =
-        customers.toLocaleString(
-            "en-IN"
-        );
+    toastTimer =
+        setTimeout(
+            function(){
 
+                toast.classList.remove(
+                    "show"
+                );
 
-    $("riders").textContent =
-        riders.toLocaleString(
-            "en-IN"
-        );
-
-
-    $("pending").textContent =
-        pending.toLocaleString(
-            "en-IN"
-        );
-
-
-    $("online").textContent =
-        online.toLocaleString(
-            "en-IN"
-        );
-
-
-    $("rides").textContent =
-        rides.length.toLocaleString(
-            "en-IN"
-        );
-
-
-    $("active").textContent =
-        active.toLocaleString(
-            "en-IN"
-        );
-
-
-    $("completed").textContent =
-        completed.toLocaleString(
-            "en-IN"
-        );
-
-
-    $("cancelled").textContent =
-        cancelled.toLocaleString(
-            "en-IN"
-        );
-
-
-    $("revenue").textContent =
-        money(revenue);
-
-
-    $("todayRevenue").textContent =
-        money(today);
-
-
-    const commission =
-        revenue * 0.20;
-
-
-    $("commission").textContent =
-        money(commission);
-
-
-    $("riderEarn").textContent =
-        money(
-            revenue - commission
+            },
+            2200
         );
 
 }
 
 
-/* ============================================================
-   ADMIN AUTH SECURITY
-============================================================ */
-
-onAuthStateChanged(
-    auth,
-    async user => {
-
-        /*
-         * NEVER hide access screen before
-         * administrator verification.
-         */
-
-        if(!user){
-
-            adminVerified =
-                false;
-
-
-            setAccessText(
-                "Admin login required..."
-            );
-
-
-            setStatus(
-                "Admin login required.",
-                "error"
-            );
-
-
-            setTimeout(
-                redirectToAdminLogin,
-                250
-            );
-
-
-            return;
-
-        }
-
-
-        setAccessText(
-            "Verifying administrator..."
-        );
-
-
-        setStatus(
-            "Verifying administrator..."
-        );
-
-
-        try{
-
-            const adminRef =
-                doc(
-                    db,
-                    "users",
-                    user.uid
-                );
-
-
-            const adminSnap =
-                await getDoc(
-                    adminRef
-                );
-
-
-            /*
-             * No profile
-             */
-
-            if(
-                !adminSnap.exists()
-            ){
-
-                adminVerified =
-                    false;
-
-
-                await signOut(
-                    auth
-                );
-
-
-                setAccessText(
-                    "Administrator profile not found."
-                );
-
-
-                setStatus(
-                    "Admin profile not found.",
-                    "error"
-                );
-
-
-                showError(
-                    "Firebase Auth UID ke liye users/{UID} admin profile nahi mila."
-                );
-
-
-                setTimeout(
-                    redirectToAdminLogin,
-                    700
-                );
-
-
-                return;
-
-            }
-
-
-            const adminData =
-                adminSnap.data();
-
-
-            /*
-             * HARD ADMIN CHECK
-             */
-
-            if(
-                !isAdmin(adminData)
-            ){
-
-                adminVerified =
-                    false;
-
-
-                await signOut(
-                    auth
-                );
-
-
-                setAccessText(
-                    "Access denied."
-                );
-
-
-                setStatus(
-                    "Access denied.",
-                    "error"
-                );
-
-
-                showError(
-                    "Ye account RiderX administrator nahi hai."
-                );
-
-
-                setTimeout(
-                    redirectToAdminLogin,
-                    700
-                );
-
-
-                return;
-
-            }
-
-
-            /*
-             * ADMIN VERIFIED
-             */
-
-            adminVerified =
-                true;
-
-
-            setAccessText(
-                "Admin verified. Opening dashboard..."
-            );
-
-
-            setStatus(
-                "Admin verified • Dashboard ready",
-                "success"
-            );
-
-
-            hideError();
-
-
-            hideAccessScreen();
-
-
-            /*
-             * ONLY NOW load dashboard data
-             */
-
-            try{
-
-                await Promise.all([
-                    loadStatistics(),
-                    loadRiderRequests()
-                ]);
-
-            }catch(dataError){
-
-                console.error(
-                    "Dashboard data error:",
-                    dataError
-                );
-
-
-                showError(
-                    "Dashboard data load nahi ho paya. Firestore Rules check karein."
-                );
-
-            }
-
-        }catch(error){
-
-            console.error(
-                "Admin verification error:",
-                error
-            );
-
-
-            adminVerified =
-                false;
-
-
-            setStatus(
-                "Admin verification failed.",
-                "error"
-            );
-
-
-            if(
-                error?.code ===
-                "permission-denied"
-            ){
-
-                showError(
-                    "Firestore permission denied. Admin users document read permission check karein."
-                );
-
-            }else{
-
-                showError(
-                    "Admin verification failed."
-                );
-
-            }
-
-
-            try{
-
-                await signOut(
-                    auth
-                );
-
-            }catch{}
-
-
-            setTimeout(
-                redirectToAdminLogin,
-                1000
-            );
-
-        }
+/* =========================================
+   INITIAL DATA
+========================================= */
+
+function prepareDemoData(){
+
+    /*
+      Only creates empty dashboard data.
+      Real Firebase data can overwrite it
+      without changing the UI.
+    */
+
+    if(
+        !localStorage.getItem(
+            ADMIN_DATA_KEY
+        )
+    ){
+
+        saveDashboardData();
 
     }
-);
+
+}
 
 
-/* ============================================================
-   PAGE NAVIGATION
-============================================================ */
+/* =========================================
+   INIT
+========================================= */
 
-window.openPage =
-    function(page){
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
 
-        if(
-            !adminVerified
-        ){
+        prepareDemoData();
 
-            return;
-
-        }
-
-
-        window.location.href =
-            page;
-
-    };
-
-
-/* ============================================================
-   LOGOUT
-============================================================ */
-
-$("logoutBtn")
-.addEventListener(
-    "click",
-    async () => {
-
-        if(!adminVerified){
-            return;
-        }
-
-
-        const confirmed =
-            confirm(
-                "Are you sure you want to logout?"
-            );
-
-
-        if(!confirmed){
-            return;
-        }
-
-
-        try{
-
-            adminVerified =
-                false;
-
-
-            await signOut(
-                auth
-            );
-
-
-            window.location.replace(
-                "./login.html"
-            );
-
-        }catch(error){
-
-            console.error(
-                "Admin logout error:",
-                error
-            );
-
-
-            alert(
-                "Logout failed. Please try again."
-            );
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   MODAL
-============================================================ */
-
-$("closeModal")
-.addEventListener(
-    "click",
-    () => {
-
-        detailsModal.classList.remove(
-            "show"
-        );
-
-    }
-);
-
-
-detailsModal.addEventListener(
-    "click",
-    event => {
-
-        if(
-            event.target ===
-            detailsModal
-        ){
-
-            detailsModal.classList.remove(
-                "show"
-            );
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   BROWSER BACK / PAGE CACHE PROTECTION
-============================================================ */
-
-window.addEventListener(
-    "pageshow",
-    event => {
-
-        if(
-            event.persisted
-        ){
-
-            window.location.reload();
-
-        }
+        loadDashboardData();
 
     }
 );
@@ -2725,4 +2265,5 @@ window.addEventListener(
 </script>
 
 </body>
-  </html>
+
+    </html>
