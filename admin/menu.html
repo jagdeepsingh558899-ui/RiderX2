@@ -1,182 +1,1157 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFD400"><title>RiderX Admin Menu</title><link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css"><style>
 
-<title>RiderX Admin Menu</title>
+*{
+    box-sizing:border-box;
+}
 
-<link rel="stylesheet" href="../css/style.css">
+body{
+    margin:0;
+    min-height:100vh;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
 
+.page{
+    min-height:100vh;
+    padding-bottom:80px;
+}
 
-<style>
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:#111;
+    border-bottom:1px solid #292929;
+}
 
-button{
+.top-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
 
-width:90%;
-margin:10px 5%;
-padding:15px;
-border:none;
-border-radius:15px;
-background:#FFD600;
-font-weight:bold;
+.back-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.title{
+    font-size:17px;
+    font-weight:900;
+}
+
+.title span{
+    color:#FFD400;
+}
+
+.logo{
+    color:#FFD400;
+    font-size:18px;
+    font-weight:1000;
+}
+
+.content{
+    width:100%;
+    max-width:1050px;
+    margin:auto;
+    padding:18px;
+}
+
+.profile-card{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    padding:18px;
+    margin-bottom:18px;
+    border:1px solid #292929;
+    border-radius:18px;
+    background:linear-gradient(145deg,#181818,#101010);
+}
+
+.avatar{
+    width:58px;
+    height:58px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:16px;
+    background:#FFD400;
+    color:#111;
+    font-size:21px;
+    font-weight:1000;
+}
+
+.profile-info{
+    flex:1;
+    min-width:0;
+}
+
+.profile-name{
+    font-size:16px;
+    font-weight:900;
+}
+
+.profile-email{
+    margin-top:5px;
+    color:#777;
+    font-size:11px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.admin-badge{
+    padding:6px 9px;
+    border-radius:20px;
+    background:#282309;
+    color:#FFD400;
+    font-size:9px;
+    font-weight:1000;
+}
+
+.section{
+    margin-bottom:18px;
+}
+
+.section-title{
+    margin:0 0 9px 4px;
+    color:#777;
+    font-size:10px;
+    font-weight:1000;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+}
+
+.menu-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+}
+
+.menu-item{
+    min-height:72px;
+    display:flex;
+    align-items:center;
+    gap:13px;
+    padding:13px;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:#141414;
+    color:#fff;
+    text-decoration:none;
+    transition:.18s;
+}
+
+.menu-item:hover{
+    border-color:#555;
+    transform:translateY(-1px);
+}
+
+.icon{
+    width:42px;
+    height:42px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#202020;
+    font-size:19px;
+}
+
+.menu-info{
+    min-width:0;
+    flex:1;
+}
+
+.menu-name{
+    font-size:13px;
+    font-weight:900;
+}
+
+.menu-desc{
+    margin-top:4px;
+    color:#777;
+    font-size:10px;
+    line-height:1.35;
+}
+
+.arrow{
+    color:#666;
+    font-size:18px;
+}
+
+.menu-item.active{
+    border-color:#5a4d00;
+    background:#181707;
+}
+
+.menu-item.active .icon{
+    background:#FFD400;
+    color:#111;
+}
+
+.menu-item.active .arrow{
+    color:#FFD400;
+}
+
+.logout{
+    width:100%;
+    min-height:48px;
+    border:1px solid #5b2c2c;
+    border-radius:12px;
+    background:#251313;
+    color:#ff7777;
+    font-size:13px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.footer{
+    padding:20px 0;
+    text-align:center;
+    color:#555;
+    font-size:10px;
+}
+
+@media(max-width:650px){
+
+    .content{
+        padding:12px;
+    }
+
+    .menu-grid{
+        grid-template-columns:1fr;
+    }
+
+    .profile-card{
+        padding:15px;
+    }
+
+    .admin-badge{
+        display:none;
+    }
 
 }
 
-</style>
+</style></head><body><div class="page"><header class="topbar"><div class="top-left">
+
+    <button
+        class="back-btn"
+        type="button"
+        onclick="history.back()"
+        aria-label="Back"
+    >
+        ←
+    </button>
+
+    <div class="title">
+        <span>RiderX</span> Admin
+    </div>
+
+</div>
+
+<div class="logo">
+    RX
+</div>
+
+</header><main class="content"><section class="profile-card"><div
+    class="avatar"
+    id="avatar"
+>
+    RX
+</div>
+
+<div class="profile-info">
+
+    <div
+        class="profile-name"
+        id="adminName"
+    >
+        RiderX Admin
+    </div>
+
+    <div
+        class="profile-email"
+        id="adminEmail"
+    >
+        Administrator
+    </div>
+
+</div>
+
+<div class="admin-badge">
+    ADMIN
+</div>
+
+</section><section class="section"><h2 class="section-title">
+    Overview
+</h2>
 
 
-</head>
+<div class="menu-grid">
 
 
-<body>
+    <a
+        class="menu-item active"
+        href="dashboard.html"
+    >
 
+        <div class="icon">
+            📊
+        </div>
 
+        <div class="menu-info">
 
-<div class="splash">
+            <div class="menu-name">
+                Dashboard
+            </div>
 
+            <div class="menu-desc">
+                Platform overview and statistics
+            </div>
 
-<img src="../assets/logo.png" class="logo">
+        </div>
 
+        <div class="arrow">
+            ›
+        </div>
 
-<h1>
-Rider<span>X</span>
-</h1>
-
-
-<h2>⚡ Admin Panel</h2>
-
-
-
-
-<button onclick="go('dashboard.html')">
-
-📊 Dashboard
-
-</button>
-
-
-
-
-<button onclick="go('users.html')">
-
-👥 Users
-
-</button>
-
-
-
-
-<button onclick="go('customers.html')">
-
-👤 Customers
-
-</button>
-
-
-
-
-<button onclick="go('riders.html')">
-
-🏍 Riders
-
-</button>
-
-
-
-
-<button onclick="go('rides.html')">
-
-🚕 Rides
-
-</button>
-
-
-
-
-<button onclick="go('payments.html')">
-
-💳 Payments
-
-</button>
-
-
-
-
-<button onclick="go('settings.html')">
-
-⚙️ Settings
-
-</button>
-
+    </a>
 
 
 
-<button onclick="logout()">
+    <a
+        class="menu-item"
+        href="rides.html"
+    >
 
-🚪 Logout
+        <div class="icon">
+            🛵
+        </div>
 
-</button>
+        <div class="menu-info">
 
+            <div class="menu-name">
+                Rides
+            </div>
 
+            <div class="menu-desc">
+                Monitor active and completed rides
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
 
 
 </div>
 
+</section><section class="section"><h2 class="section-title">
+    Users & Riders
+</h2>
+
+
+<div class="menu-grid">
+
+
+    <a
+        class="menu-item"
+        href="customers.html"
+    >
+
+        <div class="icon">
+            👤
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Customers
+            </div>
+
+            <div class="menu-desc">
+                Manage RiderX customers
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
 
 
 
+    <a
+        class="menu-item"
+        href="riders.html"
+    >
 
-<script type="module">
+        <div class="icon">
+            🧑‍✈️
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Riders
+            </div>
+
+            <div class="menu-desc">
+                View and manage riders
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
 
 
-import {auth} from "../firebase/config.js";
+
+    <a
+        class="menu-item"
+        href="rider-approval.html"
+    >
+
+        <div class="icon">
+            ✅
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Rider Approval
+            </div>
+
+            <div class="menu-desc">
+                Review pending rider applications
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
 
 
-import {
 
-signOut
+    <a
+        class="menu-item"
+        href="users.html"
+    >
+
+        <div class="icon">
+            👥
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Users
+            </div>
+
+            <div class="menu-desc">
+                Manage platform accounts
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+</div>
+
+</section><section class="section"><h2 class="section-title">
+    Finance
+</h2>
+
+
+<div class="menu-grid">
+
+
+    <a
+        class="menu-item"
+        href="payments.html"
+    >
+
+        <div class="icon">
+            💳
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Payments
+            </div>
+
+            <div class="menu-desc">
+                Transactions and payment activity
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+
+    <a
+        class="menu-item"
+        href="commission.html"
+    >
+
+        <div class="icon">
+            💰
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Commission
+            </div>
+
+            <div class="menu-desc">
+                Manage rider commission rules
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+
+    <a
+        class="menu-item"
+        href="pricing.html"
+    >
+
+        <div class="icon">
+            🏷️
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Pricing
+            </div>
+
+            <div class="menu-desc">
+                Manage platform pricing
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+
+    <a
+        class="menu-item"
+        href="fare-settings.html"
+    >
+
+        <div class="icon">
+            🧮
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Fare Settings
+            </div>
+
+            <div class="menu-desc">
+                Configure fare calculation
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+</div>
+
+</section><section class="section"><h2 class="section-title">
+    Growth
+</h2>
+
+
+<div class="menu-grid">
+
+
+    <a
+        class="menu-item"
+        href="offers.html"
+    >
+
+        <div class="icon">
+            🎁
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Offers
+            </div>
+
+            <div class="menu-desc">
+                Manage promotional offers
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+
+    <a
+        class="menu-item"
+        href="coupons.html"
+    >
+
+        <div class="icon">
+            🎟️
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Coupons
+            </div>
+
+            <div class="menu-desc">
+                Create and manage coupons
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+</div>
+
+</section><section class="section"><h2 class="section-title">
+    Reports & Support
+</h2>
+
+
+<div class="menu-grid">
+
+
+    <a
+        class="menu-item"
+        href="reports.html"
+    >
+
+        <div class="icon">
+            📈
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Reports
+            </div>
+
+            <div class="menu-desc">
+                Platform performance reports
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+
+    <a
+        class="menu-item"
+        href="supports.html"
+    >
+
+        <div class="icon">
+            🎧
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Support
+            </div>
+
+            <div class="menu-desc">
+                Customer and rider support
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+
+    <a
+        class="menu-item"
+        href="notifications.html"
+    >
+
+        <div class="icon">
+            🔔
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Notifications
+            </div>
+
+            <div class="menu-desc">
+                Platform notifications
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+</div>
+
+</section><section class="section"><h2 class="section-title">
+    System
+</h2>
+
+
+<div class="menu-grid">
+
+
+    <a
+        class="menu-item"
+        href="service-settings.html"
+    >
+
+        <div class="icon">
+            ⚙️
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Service Settings
+            </div>
+
+            <div class="menu-desc">
+                Configure available RiderX services
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+
+    <a
+        class="menu-item"
+        href="settings.html"
+    >
+
+        <div class="icon">
+            🔧
+        </div>
+
+        <div class="menu-info">
+
+            <div class="menu-name">
+                Settings
+            </div>
+
+            <div class="menu-desc">
+                Admin and platform settings
+            </div>
+
+        </div>
+
+        <div class="arrow">
+            ›
+        </div>
+
+    </a>
+
+
+</div>
+
+</section><section class="section"><button
+    type="button"
+    class="logout"
+    id="logoutBtn"
+>
+    🚪 &nbsp; Logout Admin
+</button>
+
+</section><div class="footer">RiderX Admin Panel<br>
+Secure Management System
+
+</div></main></div><script type="module">
+
+"use strict";
+
+
+const adminName =
+    document.getElementById(
+        "adminName"
+    );
+
+const adminEmail =
+    document.getElementById(
+        "adminEmail"
+    );
+
+const avatar =
+    document.getElementById(
+        "avatar"
+    );
+
+const logoutBtn =
+    document.getElementById(
+        "logoutBtn"
+    );
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
+
+        await loadAdminProfile();
+
+    }
+);
+
+
+
+async function loadAdminProfile(){
+
+    /*
+     * Read currently authenticated Firebase
+     * user when Firebase-config.js exposes auth.
+     */
+
+    try{
+
+        const config =
+            await import(
+                "../firebase/Firebase-config.js"
+            );
+
+
+        let user =
+            config.currentUser ||
+            null;
+
+
+        if(
+            !user &&
+            config.auth
+        ){
+
+            user =
+                config.auth.currentUser;
+
+        }
+
+
+        if(
+            !user &&
+            window.firebase &&
+            typeof window.firebase.auth ===
+            "function"
+        ){
+
+            user =
+                window.firebase
+                    .auth()
+                    .currentUser;
+
+        }
+
+
+        if(user){
+
+            const name =
+                user.displayName ||
+                "RiderX Admin";
+
+
+            const email =
+                user.email ||
+                "Administrator";
+
+
+            adminName.textContent =
+                name;
+
+
+            adminEmail.textContent =
+                email;
+
+
+            avatar.textContent =
+                getInitials(
+                    name
+                );
+
+            return;
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Admin profile load:",
+            error
+        );
+
+    }
+
+
+    /*
+     * Fallback to session/local information.
+     */
+
+    const remembered =
+        localStorage.getItem(
+            "riderx_admin_remember"
+        );
+
+
+    if(remembered){
+
+        adminEmail.textContent =
+            remembered;
+
+        avatar.textContent =
+            getInitials(
+                remembered
+            );
+
+    }
 
 }
 
-from
-
-"https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
+logoutBtn.addEventListener(
+    "click",
+    async function(){
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to logout?"
+            );
+
+
+        if(!confirmed){
+
+            return;
+
+        }
+
+
+        logoutBtn.disabled =
+            true;
+
+        logoutBtn.textContent =
+            "Logging out...";
+
+
+        try{
+
+            const config =
+                await import(
+                    "../firebase/Firebase-config.js"
+                );
+
+
+            let auth =
+                config.auth ||
+                null;
+
+
+            if(
+                !auth &&
+                window.firebase &&
+                typeof window.firebase.auth ===
+                "function"
+            ){
+
+                auth =
+                    window.firebase.auth();
+
+            }
+
+
+            if(
+                auth &&
+                typeof auth.signOut ===
+                "function"
+            ){
+
+                await auth.signOut();
+
+            }
+
+
+        }catch(error){
+
+            console.warn(
+                "Firebase logout:",
+                error
+            );
+
+        }
+
+
+        sessionStorage.removeItem(
+            "riderx_admin_login"
+        );
+
+
+        localStorage.removeItem(
+            "riderx_admin_session"
+        );
+
+
+        window.location.href =
+            "login.html";
+
+    }
+);
 
 
 
-window.go=function(page){
+function getInitials(
+    text
+){
 
-location.href=page;
+    if(!text){
 
-};
+        return "RX";
 
-
-
-
-
-window.logout=async function(){
+    }
 
 
-await signOut(auth);
+    const clean =
+        String(
+            text
+        )
+        .trim();
 
 
-location.href="../auth/login.html";
+    if(
+        clean.includes("@")
+    ){
+
+        return clean
+            .substring(
+                0,
+                2
+            )
+            .toUpperCase();
+
+    }
 
 
-};
+    const parts =
+        clean.split(
+            /\s+/
+        );
 
 
+    if(parts.length >= 2){
 
-</script>
+        return (
+            parts[0][0] +
+            parts[1][0]
+        ).toUpperCase();
+
+    }
 
 
+    return clean
+        .substring(
+            0,
+            2
+        )
+        .toUpperCase();
 
-</body>
+}
 
-</html>
+</script></body></html>
