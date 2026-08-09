@@ -1,438 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="theme-color" content="#090A0F">
-<title>RiderX • Rider Settings</title>
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>RiderX • Settings</title>
+
+<meta name="theme-color" content="#050505">
 
 <style>
+
 :root{
-    --bg:#090A0F;
-    --card:#12141C;
-    --card2:#181B25;
-    --border:#292D39;
     --yellow:#FFE500;
-    --text:#fff;
-    --muted:#9298A7;
-    --danger:#ff4050;
-    --green:#16c784;
+    --black:#050505;
+    --card:#111;
+    --card2:#181818;
+    --border:#292929;
+    --muted:#888;
+    --green:#22c55e;
+    --red:#ef4444;
 }
 
 *{
+    box-sizing:border-box;
     margin:0;
     padding:0;
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+    font-family:Inter,Arial,Helvetica,sans-serif;
 }
 
-html{
-    background:var(--bg);
+html,
+body{
+    min-height:100%;
+    background:var(--black);
+    color:#fff;
 }
 
 body{
-    min-height:100vh;
-    background:
-        radial-gradient(circle at top right,rgba(255,229,0,.08),transparent 28%),
-        var(--bg);
-    color:var(--text);
-    font-family:Arial,Helvetica,sans-serif;
     padding-bottom:30px;
 }
 
-button,
-select{
-    font:inherit;
-}
-
-button{
-    cursor:pointer;
-}
+/* HEADER */
 
 .header{
     position:sticky;
     top:0;
     z-index:50;
-    height:68px;
-    background:rgba(9,10,15,.94);
-    backdrop-filter:blur(16px);
-    border-bottom:1px solid var(--border);
-    display:flex;
-    align-items:center;
-    padding:0 17px;
-}
 
-.header-inner{
-    width:100%;
-    max-width:700px;
-    margin:auto;
+    height:65px;
+
     display:flex;
     align-items:center;
-    gap:15px;
+    gap:11px;
+
+    padding:0 15px;
+
+    background:rgba(5,5,5,.95);
+    backdrop-filter:blur(16px);
+
+    border-bottom:1px solid var(--border);
 }
 
 .back{
-    width:42px;
-    height:42px;
-    border-radius:14px;
-    border:1px solid var(--border);
-    background:var(--card);
+    width:41px;
+    height:41px;
+
+    border-radius:13px;
+
+    border:1px solid #303030;
+    background:#151515;
+
     color:#fff;
+
+    font-size:21px;
+
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:17px;
-}
-
-.back:active{
-    transform:scale(.95);
-}
-
-.logo{
-    font-size:23px;
-    font-weight:900;
-    letter-spacing:-1px;
-}
-
-.logo span{
-    color:var(--yellow);
 }
 
 .header-title{
-    margin-left:auto;
-    color:var(--muted);
-    font-size:12px;
-    font-weight:700;
+    flex:1;
 }
+
+.header-title h1{
+    font-size:18px;
+    font-weight:1000;
+}
+
+.header-title p{
+    margin-top:2px;
+    color:#777;
+    font-size:10px;
+}
+
+.header-icon{
+    width:41px;
+    height:41px;
+
+    border-radius:13px;
+
+    border:1px solid #303030;
+    background:#151515;
+
+    color:#fff;
+
+    font-size:17px;
+}
+
+/* PAGE */
 
 .container{
     width:100%;
-    max-width:700px;
+    max-width:620px;
     margin:auto;
-    padding:18px 15px 30px;
+    padding:14px;
 }
 
-.profile-mini{
-    display:flex;
-    align-items:center;
-    gap:13px;
-    padding:16px;
-    margin-bottom:17px;
-    background:linear-gradient(135deg,#171A23,#101219);
-    border:1px solid var(--border);
-    border-radius:20px;
-}
+/* SECTION */
 
-.profile-mini img{
-    width:54px;
-    height:54px;
-    border-radius:50%;
-    object-fit:cover;
-    border:2px solid var(--yellow);
-}
+.section-title{
+    margin:19px 3px 9px;
 
-.profile-mini h2{
-    font-size:16px;
-    margin-bottom:4px;
-}
+    color:#777;
 
-.profile-mini p{
-    color:var(--muted);
-    font-size:12px;
-}
-
-.profile-mini .arrow{
-    margin-left:auto;
-    color:var(--muted);
-}
-
-.card{
-    background:linear-gradient(145deg,rgba(24,27,37,.97),rgba(15,17,24,.98));
-    border:1px solid var(--border);
-    border-radius:20px;
-    padding:17px;
-    margin-bottom:15px;
-    overflow:hidden;
-}
-
-.title{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    color:var(--yellow);
-    font-size:13px;
+    font-size:10px;
     font-weight:900;
+
     text-transform:uppercase;
-    letter-spacing:.7px;
-    margin-bottom:4px;
+
+    letter-spacing:.8px;
 }
 
-.title i{
-    width:27px;
-    height:27px;
-    border-radius:9px;
-    background:rgba(255,229,0,.1);
+/* CARD */
+
+.settings-card{
+    overflow:hidden;
+
+    border-radius:19px;
+
+    background:var(--card);
+
+    border:1px solid var(--border);
+}
+
+/* ROW */
+
+.setting-row{
+    width:100%;
+    min-height:63px;
+
+    padding:10px 15px;
+
     display:flex;
     align-items:center;
-    justify-content:center;
-    font-size:13px;
+    gap:12px;
+
+    border:0;
+    border-bottom:1px solid #242424;
+
+    background:transparent;
+    color:#fff;
+
+    text-align:left;
 }
 
-.subtitle{
-    color:var(--muted);
-    font-size:11px;
-    margin:0 0 8px 37px;
-}
-
-.option{
-    min-height:58px;
-    display:flex;
-    align-items:center;
-    gap:13px;
-    border-bottom:1px solid rgba(255,255,255,.06);
-}
-
-.option:last-child{
+.setting-row:last-child{
     border-bottom:0;
 }
 
-.option.clickable{
-    cursor:pointer;
-}
-
-.option.clickable:active{
-    background:rgba(255,255,255,.035);
-}
-
-.left{
-    min-width:0;
-    display:flex;
-    align-items:center;
-    gap:13px;
-    flex:1;
-}
-
-.option-icon{
+.setting-icon{
     width:38px;
     height:38px;
-    flex:0 0 38px;
+
+    flex:none;
+
     border-radius:12px;
-    background:#1D202A;
+
+    background:#1b1b1b;
+
     display:flex;
     align-items:center;
     justify-content:center;
-    color:#fff;
+
+    font-size:16px;
 }
 
-.option-text{
+.setting-content{
+    flex:1;
     min-width:0;
 }
 
-.option-text strong{
-    display:block;
-    font-size:13px;
-    font-weight:700;
+.setting-name{
+    font-size:11px;
+    font-weight:900;
 }
 
-.option-text small{
-    display:block;
-    margin-top:4px;
-    color:var(--muted);
+.setting-description{
+    margin-top:3px;
+
+    color:#777;
+
+    font-size:9px;
+
+    line-height:1.4;
+}
+
+.setting-value{
+    color:#777;
     font-size:10px;
 }
 
-.chevron{
-    color:#676D7C;
-    font-size:12px;
+.arrow{
+    color:#666;
+    font-size:16px;
 }
 
-select{
-    appearance:none;
-    -webkit-appearance:none;
-    min-width:105px;
-    background:#20232D;
-    color:#fff;
-    border:1px solid var(--border);
-    padding:10px 28px 10px 11px;
-    border-radius:11px;
-    outline:none;
-    font-size:12px;
-    font-weight:700;
-}
-
-.select-wrap{
-    position:relative;
-}
-
-.select-wrap i{
-    position:absolute;
-    right:9px;
-    top:50%;
-    transform:translateY(-50%);
-    pointer-events:none;
-    color:var(--yellow);
-    font-size:10px;
-}
+/* SWITCH */
 
 .switch{
-    position:relative;
-    width:50px;
-    height:28px;
-    flex:0 0 50px;
-}
+    width:48px;
+    height:27px;
 
-.switch input{
-    opacity:0;
-    width:0;
-    height:0;
-}
+    padding:3px;
 
-.slider{
-    position:absolute;
-    inset:0;
-    background:#343845;
-    border:1px solid #454A58;
-    border-radius:30px;
-    transition:.25s;
-}
-
-.slider:before{
-    content:"";
-    position:absolute;
-    width:20px;
-    height:20px;
-    left:3px;
-    top:3px;
-    border-radius:50%;
-    background:#fff;
-    transition:.25s;
-}
-
-.switch input:checked + .slider{
-    background:var(--yellow);
-    border-color:var(--yellow);
-}
-
-.switch input:checked + .slider:before{
-    transform:translateX(22px);
-    background:#090A0F;
-}
-
-.install-banner{
-    display:none;
-    align-items:center;
-    gap:12px;
-    padding:13px;
-    margin-bottom:15px;
-    border-radius:17px;
-    background:rgba(255,229,0,.08);
-    border:1px solid rgba(255,229,0,.22);
-}
-
-.install-banner.show{
-    display:flex;
-}
-
-.install-banner .install-icon{
-    width:38px;
-    height:38px;
-    border-radius:12px;
-    background:var(--yellow);
-    color:#000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.install-banner div:nth-child(2){
-    flex:1;
-}
-
-.install-banner strong{
-    display:block;
-    font-size:12px;
-}
-
-.install-banner small{
-    display:block;
-    color:var(--muted);
-    font-size:10px;
-    margin-top:3px;
-}
-
-.install-btn{
     border:0;
+    border-radius:999px;
+
+    background:#333;
+
+    flex:none;
+}
+
+.switch span{
+    display:block;
+
+    width:21px;
+    height:21px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    transition:.2s;
+}
+
+.switch.active{
     background:var(--yellow);
-    color:#000;
-    font-weight:900;
-    border-radius:10px;
-    padding:10px 12px;
-    font-size:11px;
 }
 
-.action-btn{
-    width:100%;
-    border:1px solid var(--border);
-    background:#181B24;
-    color:#fff;
-    border-radius:14px;
-    padding:14px;
-    margin-top:9px;
-    font-size:13px;
-    font-weight:800;
+.switch.active span{
+    transform:translateX(21px);
+    background:#000;
+}
+
+/* LANGUAGE */
+
+.language-options{
     display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:9px;
+    gap:6px;
 }
 
-.action-btn:active{
-    transform:scale(.985);
+.language{
+    padding:7px 10px;
+
+    border-radius:9px;
+
+    border:1px solid #333;
+
+    background:#171717;
+
+    color:#888;
+
+    font-size:9px;
+    font-weight:900;
 }
 
-.action-btn.primary{
+.language.active{
     background:var(--yellow);
     color:#000;
     border-color:var(--yellow);
 }
 
-.action-btn.danger{
-    background:rgba(255,64,80,.08);
-    color:#ff6875;
-    border-color:rgba(255,64,80,.25);
+/* DANGER */
+
+.danger{
+    color:#ff7777;
 }
 
-.version{
-    text-align:center;
-    color:#5F6470;
-    font-size:10px;
-    padding:12px 0 4px;
+.danger .setting-icon{
+    background:#250d0d;
+    color:#ff7777;
 }
+
+/* APP INFO */
+
+.app-card{
+    padding:17px;
+
+    border-radius:19px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,229,0,.08),
+            rgba(255,229,0,.01)
+        ),
+        var(--card);
+
+    border:1px solid var(--border);
+
+    text-align:center;
+}
+
+.logo{
+    width:52px;
+    height:52px;
+
+    margin:0 auto 10px;
+
+    border-radius:17px;
+
+    background:var(--yellow);
+
+    color:#000;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:20px;
+    font-weight:1000;
+}
+
+.app-name{
+    font-size:14px;
+    font-weight:1000;
+}
+
+.app-version{
+    margin-top:4px;
+
+    color:#777;
+
+    font-size:9px;
+}
+
+.app-copy{
+    margin-top:10px;
+
+    color:#666;
+
+    font-size:9px;
+    line-height:1.6;
+}
+
+/* TOAST */
 
 .toast{
     position:fixed;
+
     left:50%;
     bottom:24px;
+
     transform:translate(-50%,20px);
-    width:calc(100% - 30px);
-    max-width:450px;
-    padding:13px 15px;
-    border-radius:14px;
-    background:#20232D;
-    border:1px solid var(--border);
-    box-shadow:0 12px 35px rgba(0,0,0,.45);
-    display:flex;
-    align-items:center;
-    gap:10px;
+
+    max-width:90%;
+
+    padding:11px 14px;
+
+    border-radius:13px;
+
+    background:#222;
+
+    border:1px solid #3b3b3b;
+
+    color:#fff;
+
+    font-size:11px;
+    font-weight:700;
+
     opacity:0;
     pointer-events:none;
+
     transition:.25s;
+
     z-index:100;
-    font-size:12px;
-    font-weight:700;
 }
 
 .toast.show{
@@ -440,942 +397,1086 @@ select{
     transform:translate(-50%,0);
 }
 
-.toast i{
-    color:var(--yellow);
-}
+@media(max-width:370px){
 
-.modal{
-    position:fixed;
-    inset:0;
-    z-index:90;
-    display:none;
-    align-items:flex-end;
-    justify-content:center;
-    background:rgba(0,0,0,.65);
-    backdrop-filter:blur(5px);
-}
-
-.modal.show{
-    display:flex;
-}
-
-.sheet{
-    width:100%;
-    max-width:700px;
-    max-height:82vh;
-    overflow:auto;
-    background:#12141C;
-    border:1px solid var(--border);
-    border-bottom:0;
-    border-radius:24px 24px 0 0;
-    padding:18px;
-    animation:sheetUp .22s ease;
-}
-
-@keyframes sheetUp{
-    from{
-        transform:translateY(100%);
-    }
-    to{
-        transform:translateY(0);
-    }
-}
-
-.handle{
-    width:42px;
-    height:4px;
-    background:#424754;
-    border-radius:10px;
-    margin:0 auto 17px;
-}
-
-.sheet h3{
-    font-size:17px;
-    margin-bottom:12px;
-}
-
-.sheet p{
-    color:#A0A5B2;
-    font-size:12px;
-    line-height:1.7;
-    margin-bottom:10px;
-}
-
-.close-btn{
-    width:100%;
-    padding:13px;
-    margin-top:8px;
-    border:0;
-    border-radius:13px;
-    background:#242833;
-    color:#fff;
-    font-weight:800;
-}
-
-body.light-mode{
-    --bg:#F4F5F7;
-    --card:#fff;
-    --card2:#fff;
-    --border:#E1E4EA;
-    --text:#12141C;
-    --muted:#707785;
-}
-
-body.light-mode{
-    background:var(--bg);
-}
-
-body.light-mode .header{
-    background:rgba(244,245,247,.94);
-}
-
-body.light-mode .card,
-body.light-mode .profile-mini{
-    background:#fff;
-}
-
-body.light-mode .option-icon,
-body.light-mode select,
-body.light-mode .action-btn{
-    background:#F1F2F5;
-    color:#12141C;
-}
-
-body.light-mode .sheet{
-    background:#fff;
-}
-
-@media(max-width:380px){
     .container{
-        padding-left:12px;
-        padding-right:12px;
+        padding:10px;
     }
 
-    .header-title{
-        display:none;
-    }
-
-    select{
-        min-width:92px;
-    }
 }
+
 </style>
+
 </head>
 
 <body>
 
+
 <header class="header">
-    <div class="header-inner">
-        <button class="back" id="backBtn" aria-label="Back">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
 
-        <div class="logo">
-            RID<span>ERX</span>
-        </div>
+    <button
+        class="back"
+        id="backBtn"
+        type="button"
+    >
+        ‹
+    </button>
 
-        <div class="header-title">RIDER SETTINGS</div>
+
+    <div class="header-title">
+
+        <h1>
+            Settings
+        </h1>
+
+        <p>
+            RiderX preferences
+        </p>
+
     </div>
+
+
+    <button
+        class="header-icon"
+        id="refreshBtn"
+        type="button"
+    >
+        ↻
+    </button>
+
 </header>
+
 
 <main class="container">
 
-    <div class="profile-mini clickable" id="profileCard">
-        <img id="riderPhoto"
-             src="https://ui-avatars.com/api/?name=Rider&background=FFE500&color=090A0F"
-             alt="Rider">
-        <div>
-            <h2 id="riderName">Rider</h2>
-            <p id="riderEmail">Rider account</p>
-        </div>
-        <i class="fa-solid fa-chevron-right arrow"></i>
-    </div>
-
-    <div class="install-banner" id="installBanner">
-        <div class="install-icon">
-            <i class="fa-solid fa-download"></i>
-        </div>
-        <div>
-            <strong>Install RiderX</strong>
-            <small>Use RiderX like a mobile app.</small>
-        </div>
-        <button class="install-btn" id="installBtn">INSTALL</button>
-    </div>
 
     <!-- APP -->
-    <section class="card">
-        <div class="title">
-            <i class="fa-solid fa-mobile-screen-button"></i>
-            Application
-        </div>
-        <div class="subtitle">App and language preferences</div>
 
-        <div class="option">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-language"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Language</strong>
-                    <small>Choose your preferred language</small>
-                </div>
+    <div class="section-title">
+        App Preferences
+    </div>
+
+
+    <section class="settings-card">
+
+
+        <button
+            class="setting-row"
+            id="notificationSetting"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                🔔
             </div>
 
-            <div class="select-wrap">
-                <select id="languageSelect">
-                    <option value="en">English</option>
-                    <option value="hi">हिंदी</option>
-                </select>
-                <i class="fa-solid fa-chevron-down"></i>
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Ride Notifications
+                </div>
+
+                <div class="setting-description">
+                    Receive new ride and trip alerts
+                </div>
+
             </div>
+
+            <button
+                class="switch active"
+                id="notificationSwitch"
+                type="button"
+                aria-label="Ride notifications"
+            >
+                <span></span>
+            </button>
+
+        </button>
+
+
+        <div class="setting-row">
+
+            <div class="setting-icon">
+                🔊
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Ride Request Sound
+                </div>
+
+                <div class="setting-description">
+                    Play sound when a new ride arrives
+                </div>
+
+            </div>
+
+            <button
+                class="switch active"
+                id="soundSwitch"
+                type="button"
+                aria-label="Ride request sound"
+            >
+                <span></span>
+            </button>
+
         </div>
 
-        <div class="option clickable" id="installRow">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-download"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Install RiderX App</strong>
-                    <small>Add RiderX to your home screen</small>
-                </div>
+
+        <div class="setting-row">
+
+            <div class="setting-icon">
+                📳
             </div>
-            <i class="fa-solid fa-chevron-right chevron"></i>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Vibration
+                </div>
+
+                <div class="setting-description">
+                    Vibrate for important ride alerts
+                </div>
+
+            </div>
+
+            <button
+                class="switch active"
+                id="vibrationSwitch"
+                type="button"
+                aria-label="Vibration"
+            >
+                <span></span>
+            </button>
+
         </div>
+
+
+        <div class="setting-row">
+
+            <div class="setting-icon">
+                🌙
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Dark Mode
+                </div>
+
+                <div class="setting-description">
+                    Use RiderX dark appearance
+                </div>
+
+            </div>
+
+            <button
+                class="switch active"
+                id="darkSwitch"
+                type="button"
+                aria-label="Dark mode"
+            >
+                <span></span>
+            </button>
+
+        </div>
+
+
+        <div class="setting-row">
+
+            <div class="setting-icon">
+                🌐
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Language
+                </div>
+
+                <div class="setting-description">
+                    Choose your preferred language
+                </div>
+
+            </div>
+
+            <div class="language-options">
+
+                <button
+                    class="language active"
+                    data-language="en"
+                    type="button"
+                >
+                    EN
+                </button>
+
+                <button
+                    class="language"
+                    data-language="hi"
+                    type="button"
+                >
+                    HI
+                </button>
+
+            </div>
+
+        </div>
+
     </section>
 
-    <!-- NOTIFICATIONS -->
-    <section class="card">
-        <div class="title">
-            <i class="fa-solid fa-bell"></i>
-            Notifications
-        </div>
-        <div class="subtitle">Control rider alerts and sounds</div>
 
-        <div class="option">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-motorcycle"></i>
-                </div>
-                <div class="option-text">
-                    <strong>New Ride Requests</strong>
-                    <small>Receive new booking alerts</small>
-                </div>
+    <!-- RIDE -->
+
+    <div class="section-title">
+        Ride Preferences
+    </div>
+
+
+    <section class="settings-card">
+
+
+        <div class="setting-row">
+
+            <div class="setting-icon">
+                📍
             </div>
 
-            <label class="switch">
-                <input type="checkbox" id="rideAlerts">
-                <span class="slider"></span>
-            </label>
-        </div>
+            <div class="setting-content">
 
-        <div class="option">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-wallet"></i>
+                <div class="setting-name">
+                    Location Access
                 </div>
-                <div class="option-text">
-                    <strong>Earnings Alerts</strong>
-                    <small>Get notified about earnings</small>
+
+                <div class="setting-description">
+                    Required for live rider tracking
                 </div>
+
             </div>
 
-            <label class="switch">
-                <input type="checkbox" id="earningAlerts">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="option">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-volume-high"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Ride Request Sound</strong>
-                    <small>Play sound for incoming requests</small>
-                </div>
+            <div
+                class="setting-value"
+                id="locationStatus"
+            >
+                Checking...
             </div>
 
-            <label class="switch">
-                <input type="checkbox" id="rideSound">
-                <span class="slider"></span>
-            </label>
         </div>
+
+
+        <button
+            class="setting-row"
+            id="onlinePageBtn"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                🟢
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Online Mode
+                </div>
+
+                <div class="setting-description">
+                    Manage your availability for rides
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </button>
+
+
+        <button
+            class="setting-row"
+            id="mapSettingBtn"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                🗺️
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Map Settings
+                </div>
+
+                <div class="setting-description">
+                    Live location and navigation
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </button>
+
+
     </section>
 
-    <!-- PREFERENCES -->
-    <section class="card">
-        <div class="title">
-            <i class="fa-solid fa-sliders"></i>
-            Preferences
-        </div>
-        <div class="subtitle">Personalize your RiderX experience</div>
-
-        <div class="option">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-moon"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Dark Mode</strong>
-                    <small>Use the RiderX dark interface</small>
-                </div>
-            </div>
-
-            <label class="switch">
-                <input type="checkbox" id="darkMode">
-                <span class="slider"></span>
-            </label>
-        </div>
-
-        <div class="option">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-location-crosshairs"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Location Sharing</strong>
-                    <small>Allow RiderX to update your live location</small>
-                </div>
-            </div>
-
-            <label class="switch">
-                <input type="checkbox" id="locationSharing">
-                <span class="slider"></span>
-            </label>
-        </div>
-    </section>
-
-    <!-- SUPPORT -->
-    <section class="card">
-        <div class="title">
-            <i class="fa-solid fa-headset"></i>
-            Help & Safety
-        </div>
-        <div class="subtitle">Rider support and important information</div>
-
-        <div class="option clickable" id="supportBtn">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-headset"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Help & Support</strong>
-                    <small>Get help with rides and your account</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-right chevron"></i>
-        </div>
-
-        <div class="option clickable" id="privacyBtn">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Privacy Policy</strong>
-                    <small>How RiderX handles your information</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-right chevron"></i>
-        </div>
-
-        <div class="option clickable" id="termsBtn">
-            <div class="left">
-                <div class="option-icon">
-                    <i class="fa-solid fa-file-contract"></i>
-                </div>
-                <div class="option-text">
-                    <strong>Terms & Conditions</strong>
-                    <small>RiderX service terms</small>
-                </div>
-            </div>
-            <i class="fa-solid fa-chevron-right chevron"></i>
-        </div>
-    </section>
 
     <!-- ACCOUNT -->
-    <section class="card">
-        <div class="title">
-            <i class="fa-solid fa-user-gear"></i>
-            Account
-        </div>
 
-        <button class="action-btn primary" id="profileBtn">
-            <i class="fa-solid fa-user"></i>
-            Manage Profile
+    <div class="section-title">
+        Account & Support
+    </div>
+
+
+    <section class="settings-card">
+
+
+        <button
+            class="setting-row"
+            id="profileBtn"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                👤
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Profile
+                </div>
+
+                <div class="setting-description">
+                    Personal information and rider details
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
         </button>
 
-        <button class="action-btn" id="homeBtn">
-            <i class="fa-solid fa-house"></i>
-            Rider Home
+
+        <button
+            class="setting-row"
+            id="documentsBtn"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                📄
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Documents
+                </div>
+
+                <div class="setting-description">
+                    Driving licence and vehicle documents
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
         </button>
 
-        <button class="action-btn danger" id="logoutBtn">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            Logout
+
+        <button
+            class="setting-row"
+            id="supportBtn"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                🎧
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Help & Support
+                </div>
+
+                <div class="setting-description">
+                    Get help with rides and account
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
         </button>
+
+
+        <button
+            class="setting-row"
+            id="termsBtn"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                📃
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Terms & Privacy
+                </div>
+
+                <div class="setting-description">
+                    RiderX terms and privacy information
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </button>
+
+
     </section>
 
-    <div class="version">
-        RiderX Rider • Version 2.0
+
+    <!-- DANGER -->
+
+    <div class="section-title">
+        Account Actions
     </div>
+
+
+    <section class="settings-card">
+
+
+        <button
+            class="setting-row danger"
+            id="logoutBtn"
+            type="button"
+        >
+
+            <div class="setting-icon">
+                ↪
+            </div>
+
+            <div class="setting-content">
+
+                <div class="setting-name">
+                    Log Out
+                </div>
+
+                <div class="setting-description">
+                    Sign out from this RiderX account
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </button>
+
+
+    </section>
+
+
+    <!-- APP INFO -->
+
+    <div class="section-title">
+        About RiderX
+    </div>
+
+
+    <section class="app-card">
+
+        <div class="logo">
+            RX
+        </div>
+
+        <div class="app-name">
+            RiderX
+        </div>
+
+        <div class="app-version">
+            Rider Partner • Version 1.0.0
+        </div>
+
+        <div class="app-copy">
+            Ride smart. Earn more. Move with RiderX.
+        </div>
+
+    </section>
+
 
 </main>
 
-<!-- INFORMATION MODAL -->
-<div class="modal" id="infoModal">
-    <div class="sheet">
-        <div class="handle"></div>
 
-        <h3 id="modalTitle">RiderX</h3>
+<div
+    class="toast"
+    id="toast"
+></div>
 
-        <div id="modalContent"></div>
-
-        <button class="close-btn" id="closeModal">
-            Close
-        </button>
-    </div>
-</div>
-
-<div class="toast" id="toast">
-    <i class="fa-solid fa-circle-check"></i>
-    <span id="toastText">Saved</span>
-</div>
 
 <script type="module">
 
 import {
-    auth
+    auth,
+    db,
+    doc,
+    getDoc,
+    updateDoc,
+    signOut,
+    onAuthStateChanged
 } from "../firebase/firebase-config.js";
 
-import {
-    onAuthStateChanged,
-    signOut
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+const backBtn =
+    document.getElementById("backBtn");
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+const refreshBtn =
+    document.getElementById("refreshBtn");
 
-const $ = id => document.getElementById(id);
+const toast =
+    document.getElementById("toast");
 
-const languageSelect = $("languageSelect");
-const rideAlerts = $("rideAlerts");
-const earningAlerts = $("earningAlerts");
-const rideSound = $("rideSound");
-const darkMode = $("darkMode");
-const locationSharing = $("locationSharing");
-
-let deferredPrompt = null;
-
-
-/* =========================================================
-   DEFAULT SETTINGS
-========================================================= */
-
-const DEFAULT_SETTINGS = {
-    language:"en",
-    rideAlerts:true,
-    earningAlerts:true,
-    rideSound:true,
-    darkMode:true,
-    locationSharing:true
-};
-
-
-/* =========================================================
-   LOAD SETTINGS
-========================================================= */
-
-function loadSettings(){
-
-    let saved = {};
-
-    try{
-        saved = JSON.parse(
-            localStorage.getItem("riderx_rider_settings") || "{}"
-        );
-    }catch(e){
-        saved = {};
-    }
-
-    const settings = {
-        ...DEFAULT_SETTINGS,
-        ...saved
-    };
-
-    languageSelect.value = settings.language;
-
-    rideAlerts.checked = !!settings.rideAlerts;
-    earningAlerts.checked = !!settings.earningAlerts;
-    rideSound.checked = !!settings.rideSound;
-    darkMode.checked = !!settings.darkMode;
-    locationSharing.checked = !!settings.locationSharing;
-
-    applyTheme(settings.darkMode);
-}
-
-
-/* =========================================================
-   SAVE SETTINGS
-========================================================= */
-
-function saveSettings(showMessage = true){
-
-    const settings = {
-        language:languageSelect.value,
-        rideAlerts:rideAlerts.checked,
-        earningAlerts:earningAlerts.checked,
-        rideSound:rideSound.checked,
-        darkMode:darkMode.checked,
-        locationSharing:locationSharing.checked
-    };
-
-    localStorage.setItem(
-        "riderx_rider_settings",
-        JSON.stringify(settings)
+const locationStatus =
+    document.getElementById(
+        "locationStatus"
     );
 
-    /* Shared keys for other RiderX pages */
-    localStorage.setItem(
-        "riderx_language",
-        settings.language
-    );
 
-    localStorage.setItem(
-        "riderx_notifications",
-        JSON.stringify({
-            rideAlerts:settings.rideAlerts,
-            earningAlerts:settings.earningAlerts,
-            rideSound:settings.rideSound
-        })
-    );
-
-    localStorage.setItem(
-        "riderx_location_sharing",
-        settings.locationSharing ? "enabled" : "disabled"
-    );
-
-    if(showMessage){
-        showToast("Settings saved");
-    }
-}
+let currentUser = null;
 
 
-/* =========================================================
-   THEME
-========================================================= */
-
-function applyTheme(isDark){
-
-    if(isDark){
-        document.body.classList.remove("light-mode");
-    }else{
-        document.body.classList.add("light-mode");
-    }
-}
-
-
-/* =========================================================
+/* --------------------------------
    TOAST
-========================================================= */
-
-let toastTimer;
+-------------------------------- */
 
 function showToast(message){
 
-    $("toastText").textContent = message;
+    toast.textContent =
+        message;
 
-    $("toast").classList.add("show");
+    toast.classList.add("show");
 
-    clearTimeout(toastTimer);
+    clearTimeout(
+        window.__toastTimer
+    );
 
-    toastTimer = setTimeout(()=>{
-        $("toast").classList.remove("show");
-    },2200);
+    window.__toastTimer =
+        setTimeout(
+            () =>
+                toast.classList.remove(
+                    "show"
+                ),
+            2200
+        );
+
 }
 
 
-/* =========================================================
-   AUTH USER
-========================================================= */
+/* --------------------------------
+   LOCAL SETTINGS
+-------------------------------- */
 
-onAuthStateChanged(auth,(user)=>{
+const defaultSettings = {
 
-    if(user){
+    notifications:true,
 
-        const name =
-            user.displayName ||
-            localStorage.getItem("riderName") ||
-            "Rider";
+    sound:true,
 
-        const email =
-            user.email ||
-            "Rider account";
+    vibration:true,
 
-        $("riderName").textContent = name;
-        $("riderEmail").textContent = email;
+    dark:true,
 
-        const photo =
-            user.photoURL ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=FFE500&color=090A0F`;
+    language:"en"
 
-        $("riderPhoto").src = photo;
+};
 
-    }else{
 
-        /*
-         * Do not instantly redirect.
-         * This prevents page flicker during Firebase auth restore.
-         */
-        $("riderName").textContent =
-            localStorage.getItem("riderName") || "Rider";
+function getSettings(){
 
-        $("riderEmail").textContent =
-            "Rider account";
+    try{
+
+        const saved =
+            localStorage.getItem(
+                "riderXSettings"
+            );
+
+        return {
+            ...defaultSettings,
+            ...(saved
+                ? JSON.parse(saved)
+                : {})
+        };
+
+    }
+    catch(error){
+
+        return {
+            ...defaultSettings
+        };
+
     }
 
-});
+}
 
 
-/* =========================================================
-   INSTALL APP
-========================================================= */
+function saveSettings(settings){
 
-window.addEventListener(
-    "beforeinstallprompt",
-    event => {
+    localStorage.setItem(
+        "riderXSettings",
+        JSON.stringify(settings)
+    );
 
-        event.preventDefault();
-
-        deferredPrompt = event;
-
-        $("installBanner").classList.add("show");
-    }
-);
+}
 
 
-async function installApp(){
+/* --------------------------------
+   SWITCH
+-------------------------------- */
 
-    if(!deferredPrompt){
+function setupSwitch(
+    id,
+    key
+){
 
-        showToast(
-            "Chrome menu → Add to Home screen / Install app"
-        );
+    const button =
+        document.getElementById(id);
 
+    if(!button){
         return;
     }
 
-    deferredPrompt.prompt();
 
-    try{
-        await deferredPrompt.userChoice;
-    }catch(e){
-        console.log(e);
-    }
-
-    deferredPrompt = null;
-
-    $("installBanner").classList.remove("show");
-}
+    const settings =
+        getSettings();
 
 
-$("installBtn").addEventListener(
-    "click",
-    installApp
-);
-
-$("installRow").addEventListener(
-    "click",
-    installApp
-);
+    setSwitch(
+        button,
+        Boolean(settings[key])
+    );
 
 
-/* =========================================================
-   SETTINGS EVENTS
-========================================================= */
+    button.addEventListener(
+        "click",
+        event => {
 
-languageSelect.addEventListener(
-    "change",
-    ()=>{
-
-        saveSettings(false);
-
-        const lang = languageSelect.value;
-
-        showToast(
-            lang === "hi"
-                ? "हिंदी भाषा चुनी गई"
-                : "English selected"
-        );
-    }
-);
+            event.stopPropagation();
 
 
-rideAlerts.addEventListener(
-    "change",
-    ()=>saveSettings()
-);
-
-earningAlerts.addEventListener(
-    "change",
-    ()=>saveSettings()
-);
-
-rideSound.addEventListener(
-    "change",
-    ()=>saveSettings()
-);
-
-locationSharing.addEventListener(
-    "change",
-    ()=>saveSettings()
-);
-
-darkMode.addEventListener(
-    "change",
-    ()=>{
-
-        applyTheme(darkMode.checked);
-
-        saveSettings();
-    }
-);
+            const latest =
+                getSettings();
 
 
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-$("backBtn").addEventListener(
-    "click",
-    ()=>{
-
-        if(history.length > 1){
-            history.back();
-        }else{
-            location.href="profile.html";
-        }
-    }
-);
-
-$("profileCard").addEventListener(
-    "click",
-    ()=>{
-        location.href="profile.html";
-    }
-);
-
-$("profileBtn").addEventListener(
-    "click",
-    ()=>{
-        location.href="profile.html";
-    }
-);
-
-$("homeBtn").addEventListener(
-    "click",
-    ()=>{
-        location.href="home.html";
-    }
-);
+            latest[key] =
+                !Boolean(
+                    latest[key]
+                );
 
 
-/* =========================================================
-   MODAL
-========================================================= */
-
-function openModal(title,html){
-
-    $("modalTitle").textContent = title;
-
-    $("modalContent").innerHTML = html;
-
-    $("infoModal").classList.add("show");
-}
-
-function closeModal(){
-
-    $("infoModal").classList.remove("show");
-}
-
-$("closeModal").addEventListener(
-    "click",
-    closeModal
-);
-
-$("infoModal").addEventListener(
-    "click",
-    event => {
-
-        if(event.target === $("infoModal")){
-            closeModal();
-        }
-    }
-);
-
-
-/* =========================================================
-   SUPPORT
-========================================================= */
-
-$("supportBtn").addEventListener(
-    "click",
-    ()=>{
-
-        openModal(
-            "RiderX Help & Support",
-            `
-            <p><strong>Need help with a ride?</strong></p>
-            <p>
-                For an active ride, use the support option from the
-                ride details screen. Keep your ride ID ready when
-                contacting support.
-            </p>
-            <p>
-                RiderX support will be connected to the admin support
-                system as the support module is enabled.
-            </p>
-            `
-        );
-    }
-);
-
-
-/* =========================================================
-   PRIVACY
-========================================================= */
-
-$("privacyBtn").addEventListener(
-    "click",
-    ()=>{
-
-        openModal(
-            "Privacy Policy",
-            `
-            <p>
-                RiderX uses account, ride and location information
-                to provide rider services and manage trips.
-            </p>
-            <p>
-                Live location is used during rider duty and active
-                ride operations when location sharing is enabled.
-            </p>
-            <p>
-                Do not share your password, OTP or sensitive account
-                information with another person.
-            </p>
-            `
-        );
-    }
-);
-
-
-/* =========================================================
-   TERMS
-========================================================= */
-
-$("termsBtn").addEventListener(
-    "click",
-    ()=>{
-
-        openModal(
-            "Terms & Conditions",
-            `
-            <p>
-                Riders must provide accurate profile and vehicle
-                information and follow applicable traffic and safety
-                requirements.
-            </p>
-            <p>
-                Ride acceptance, cancellation, earnings and account
-                actions are subject to RiderX service rules.
-            </p>
-            <p>
-                Additional platform terms can be published through
-                the RiderX admin system.
-            </p>
-            `
-        );
-    }
-);
-
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-$("logoutBtn").addEventListener(
-    "click",
-    async ()=>{
-
-        const confirmed =
-            confirm(
-                "Are you sure you want to logout from RiderX?"
+            saveSettings(
+                latest
             );
 
-        if(!confirmed){
-            return;
-        }
 
-        try{
+            setSwitch(
+                button,
+                latest[key]
+            );
 
-            await signOut(auth);
-
-            /*
-             * Keep app preferences,
-             * remove temporary rider state.
-             */
-
-            localStorage.removeItem("riderx_active_ride");
-            localStorage.removeItem("riderx_current_request");
-
-            location.href="../auth/login.html";
-
-        }catch(error){
-
-            console.error(error);
 
             showToast(
-                "Logout failed. Please try again."
+                latest[key]
+                    ? "Enabled"
+                    : "Disabled"
             );
+
         }
+    );
+
+}
+
+
+function setSwitch(
+    button,
+    active
+){
+
+    button.classList.toggle(
+        "active",
+        Boolean(active)
+    );
+
+}
+
+
+/* --------------------------------
+   LANGUAGE
+-------------------------------- */
+
+function setupLanguage(){
+
+    const settings =
+        getSettings();
+
+
+    document
+        .querySelectorAll(
+            ".language"
+        )
+        .forEach(
+            button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.language ===
+                    settings.language
+                );
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const latest =
+                            getSettings();
+
+
+                        latest.language =
+                            button.dataset.language;
+
+
+                        saveSettings(
+                            latest
+                        );
+
+
+                        document
+                            .querySelectorAll(
+                                ".language"
+                            )
+                            .forEach(
+                                item =>
+                                    item.classList.toggle(
+                                        "active",
+                                        item.dataset.language ===
+                                        latest.language
+                                    )
+                            );
+
+
+                        showToast(
+                            latest.language === "hi"
+                                ? "Hindi selected"
+                                : "English selected"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* --------------------------------
+   LOCATION
+-------------------------------- */
+
+function checkLocation(){
+
+    if(!navigator.geolocation){
+
+        locationStatus.textContent =
+            "Unavailable";
+
+        return;
+
+    }
+
+
+    navigator.geolocation.getCurrentPosition(
+
+        () => {
+
+            locationStatus.textContent =
+                "Allowed";
+
+            locationStatus.style.color =
+                "var(--green)";
+
+        },
+
+        error => {
+
+            locationStatus.textContent =
+                "Permission needed";
+
+            locationStatus.style.color =
+                "var(--yellow)";
+
+        },
+
+        {
+            enableHighAccuracy:false,
+            timeout:5000,
+            maximumAge:60000
+        }
+
+    );
+
+}
+
+
+/* --------------------------------
+   NAVIGATION
+-------------------------------- */
+
+document
+    .getElementById("profileBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "profile.html";
+
+        }
+    );
+
+
+document
+    .getElementById("documentsBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "documents.html";
+
+        }
+    );
+
+
+document
+    .getElementById("onlinePageBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "online.html";
+
+        }
+    );
+
+
+document
+    .getElementById("mapSettingBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "map.html";
+
+        }
+    );
+
+
+document
+    .getElementById("supportBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "support.html";
+
+        }
+    );
+
+
+document
+    .getElementById("termsBtn")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "../terms.html";
+
+        }
+    );
+
+
+/* --------------------------------
+   LOGOUT
+-------------------------------- */
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener(
+        "click",
+        async () => {
+
+            const confirmed =
+                window.confirm(
+                    "Are you sure you want to log out?"
+                );
+
+
+            if(!confirmed){
+                return;
+            }
+
+
+            try{
+
+                await signOut(
+                    auth
+                );
+
+
+                window.location.replace(
+                    "../auth/login.html"
+                );
+
+            }
+            catch(error){
+
+                console.error(
+                    error
+                );
+
+                showToast(
+                    "Logout failed. Please try again."
+                );
+
+            }
+
+        }
+    );
+
+
+/* --------------------------------
+   BACK
+-------------------------------- */
+
+backBtn.addEventListener(
+    "click",
+    () => {
+
+        if(history.length > 1){
+
+            history.back();
+
+        }
+        else{
+
+            window.location.href =
+                "profile.html";
+
+        }
+
     }
 );
 
 
-/* =========================================================
-   SERVICE WORKER
-========================================================= */
+/* --------------------------------
+   REFRESH
+-------------------------------- */
 
-if("serviceWorker" in navigator){
+refreshBtn.addEventListener(
+    "click",
+    () => {
 
-    window.addEventListener(
-        "load",
-        ()=>{
-            navigator.serviceWorker
-                .register("../sw.js")
-                .catch(error=>{
-                    console.log(
-                        "Service worker:",
-                        error
-                    );
-                });
+        checkLocation();
+
+        showToast(
+            "Settings refreshed."
+        );
+
+    }
+);
+
+
+/* --------------------------------
+   AUTH
+-------------------------------- */
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if(!user){
+
+            window.location.replace(
+                "../auth/login.html"
+            );
+
+            return;
+
         }
-    );
-}
 
 
-/* =========================================================
-   START
-========================================================= */
+        currentUser =
+            user;
 
-loadSettings();
+
+        checkLocation();
+
+    }
+);
+
+
+/* --------------------------------
+   INIT
+-------------------------------- */
+
+setupSwitch(
+    "notificationSwitch",
+    "notifications"
+);
+
+setupSwitch(
+    "soundSwitch",
+    "sound"
+);
+
+setupSwitch(
+    "vibrationSwitch",
+    "vibration"
+);
+
+setupSwitch(
+    "darkSwitch",
+    "dark"
+);
+
+setupLanguage();
 
 </script>
 
 </body>
-  </html>
+    </html>
