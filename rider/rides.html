@@ -1,1517 +1,588 @@
-<!DOCTYPE html><html lang="en" class="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#090A0F">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 
-<title>RiderX Captain | Active Ride</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>RiderX - My Rides</title>
+
+<meta name="theme-color" content="#FFD400">
 
 <link rel="stylesheet" href="../css/Style.css">
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<script>
-    tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                colors: {
-                    brand: {
-                        black: "#090A0F",
-                        dark: "#12141C",
-                        card: "#1A1D29",
-                        yellow: "#FFE500",
-                        gray: "#8A8F9E",
-                        border: "#2A2E3D",
-                        emerald: "#10B981",
-                        rose: "#F43F5E",
-                        blue: "#3B82F6"
-                    }
-                }
-            }
-        }
-    };
-</script>
-
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
->
-
-<link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
->
-
-<link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
->
-
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
-    :root{
-        --rx-yellow:#FFE500;
-        --rx-black:#090A0F;
-        --rx-dark:#12141C;
-        --rx-card:#1A1D29;
-        --rx-border:#2A2E3D;
-        --rx-gray:#8A8F9E;
-        --rx-green:#10B981;
-        --rx-red:#F43F5E;
-        --rx-blue:#3B82F6;
+:root{
+    --yellow:#FFD400;
+    --black:#080808;
+    --dark:#111;
+    --card:#181818;
+    --border:#2b2b2b;
+    --muted:#858585;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#60a5fa;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    min-height:100%;
+}
+
+body{
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.rides-page{
+    min-height:100vh;
+    min-height:100dvh;
+    max-width:650px;
+    margin:auto;
+    background:#0d0d0d;
+    padding-bottom:25px;
+}
+
+/* HEADER */
+
+.page-header{
+    height:68px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 14px;
+    background:#111;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:30;
+}
+
+.back-btn{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:#202020;
+    color:#fff;
+    font-size:25px;
+    cursor:pointer;
+}
+
+.header-info{
+    flex:1;
+}
+
+.header-info h1{
+    font-size:18px;
+    font-weight:900;
+}
+
+.header-info p{
+    color:#777;
+    font-size:10px;
+    margin-top:3px;
+}
+
+.refresh-btn{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:#202020;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.refresh-btn.loading{
+    animation:rotate .8s linear infinite;
+}
+
+@keyframes rotate{
+    to{
+        transform:rotate(360deg);
     }
+}
 
-    *{
-        box-sizing:border-box;
-        -webkit-tap-highlight-color:transparent;
+/* SUMMARY */
+
+.summary{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    padding:13px 14px 3px;
+}
+
+.summary-card{
+    background:#181818;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:12px 5px;
+    text-align:center;
+}
+
+.summary-value{
+    font-size:17px;
+    font-weight:900;
+}
+
+.summary-label{
+    color:#666;
+    font-size:8px;
+    margin-top:4px;
+}
+
+/* FILTER */
+
+.filter-row{
+    display:flex;
+    gap:7px;
+    padding:11px 14px 5px;
+    overflow-x:auto;
+}
+
+.filter-row::-webkit-scrollbar{
+    display:none;
+}
+
+.filter-btn{
+    white-space:nowrap;
+    border:1px solid #292929;
+    background:#171717;
+    color:#aaa;
+    padding:8px 13px;
+    border-radius:20px;
+    font-size:11px;
+    cursor:pointer;
+}
+
+.filter-btn.active{
+    background:var(--yellow);
+    color:#000;
+    border-color:var(--yellow);
+    font-weight:800;
+}
+
+/* LIST */
+
+.rides-list{
+    padding:9px 14px 20px;
+}
+
+/* RIDE CARD */
+
+.ride-card{
+    background:#181818;
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    margin-bottom:11px;
+}
+
+.ride-head{
+    display:flex;
+    align-items:center;
+    padding:13px 14px;
+    border-bottom:1px solid #292929;
+}
+
+.service-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    background:var(--yellow);
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:19px;
+    margin-right:10px;
+}
+
+.ride-main{
+    flex:1;
+    min-width:0;
+}
+
+.ride-title{
+    font-size:14px;
+    font-weight:800;
+}
+
+.ride-date{
+    color:#777;
+    font-size:9px;
+    margin-top:4px;
+}
+
+.ride-fare{
+    text-align:right;
+}
+
+.fare-value{
+    font-size:17px;
+    font-weight:900;
+}
+
+.status{
+    display:inline-block;
+    margin-top:4px;
+    padding:4px 7px;
+    border-radius:7px;
+    font-size:8px;
+    font-weight:800;
+    text-transform:uppercase;
+}
+
+.status.completed{
+    background:rgba(34,197,94,.12);
+    color:var(--green);
+}
+
+.status.cancelled{
+    background:rgba(239,68,68,.12);
+    color:var(--red);
+}
+
+.status.pending{
+    background:rgba(255,212,0,.12);
+    color:var(--yellow);
+}
+
+.status.accepted,
+.status.ongoing{
+    background:rgba(96,165,250,.12);
+    color:var(--blue);
+}
+
+/* ROUTE */
+
+.route{
+    padding:13px 14px;
+}
+
+.route-row{
+    display:flex;
+    gap:10px;
+    position:relative;
+}
+
+.route-row:first-child{
+    padding-bottom:15px;
+}
+
+.route-row:first-child::after{
+    content:"";
+    position:absolute;
+    left:6px;
+    top:16px;
+    bottom:-2px;
+    width:2px;
+    background:#333;
+}
+
+.route-dot{
+    width:13px;
+    height:13px;
+    min-width:13px;
+    border-radius:50%;
+    margin-top:2px;
+    position:relative;
+    z-index:2;
+}
+
+.pickup{
+    background:var(--yellow);
+}
+
+.drop{
+    background:var(--green);
+}
+
+.route-content{
+    min-width:0;
+}
+
+.route-label{
+    color:#777;
+    font-size:8px;
+    text-transform:uppercase;
+    margin-bottom:3px;
+}
+
+.route-address{
+    color:#ddd;
+    font-size:11px;
+    line-height:1.4;
+}
+
+/* DETAILS */
+
+.ride-details{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+    padding:0 14px 13px;
+}
+
+.detail{
+    background:#101010;
+    border:1px solid #242424;
+    border-radius:10px;
+    text-align:center;
+    padding:9px 4px;
+}
+
+.detail-value{
+    font-size:11px;
+    font-weight:800;
+}
+
+.detail-label{
+    color:#666;
+    font-size:8px;
+    margin-top:3px;
+}
+
+/* FOOTER */
+
+.ride-footer{
+    border-top:1px solid #292929;
+    padding:10px 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.payment{
+    flex:1;
+    color:#888;
+    font-size:9px;
+}
+
+.payment strong{
+    color:#ddd;
+    font-size:10px;
+}
+
+.view-btn{
+    height:35px;
+    padding:0 13px;
+    border:0;
+    border-radius:9px;
+    background:#292929;
+    color:#fff;
+    font-size:10px;
+    font-weight:800;
+    cursor:pointer;
+}
+
+/* EMPTY */
+
+.empty-state{
+    display:none;
+    text-align:center;
+    padding:65px 25px;
+}
+
+.empty-icon{
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    background:#181818;
+    border:1px solid #292929;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 15px;
+    font-size:30px;
+}
+
+.empty-state h2{
+    font-size:18px;
+    margin-bottom:7px;
+}
+
+.empty-state p{
+    color:#777;
+    font-size:11px;
+    line-height:1.5;
+}
+
+/* LOADING */
+
+.loading-state{
+    text-align:center;
+    padding:45px 20px;
+    color:#777;
+}
+
+.spinner{
+    width:30px;
+    height:30px;
+    border:3px solid #303030;
+    border-top-color:var(--yellow);
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    margin:0 auto 12px;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
     }
+}
 
-    html,
-    body{
-        margin:0;
-        padding:0;
-        width:100%;
-        min-height:100%;
-        background:var(--rx-black);
-        color:#fff;
-        font-family:"Plus Jakarta Sans",Arial,sans-serif;
-    }
+/* TOAST */
 
-    body{
-        overflow-x:hidden;
-        padding-bottom:90px;
-    }
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    transform:translateX(-50%) translateY(20px);
+    width:calc(100% - 30px);
+    max-width:600px;
+    background:#202020;
+    border:1px solid #333;
+    border-radius:12px;
+    padding:12px 14px;
+    text-align:center;
+    color:#fff;
+    font-size:12px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:100;
+}
 
-    button,
-    a,
-    input{
-        -webkit-tap-highlight-color:transparent;
-    }
+.toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+}
 
-    button{
-        cursor:pointer;
-    }
+.toast.error{
+    border-color:rgba(239,68,68,.45);
+}
 
-    .glass-card{
-        background:
-            linear-gradient(
-                135deg,
-                rgba(26,29,41,.96),
-                rgba(18,20,28,.98)
-            );
+.toast.success{
+    border-color:rgba(34,197,94,.45);
+}
 
-        border:1px solid rgba(255,229,0,.10);
+/* RESPONSIVE */
 
-        box-shadow:
-            0 15px 40px rgba(0,0,0,.20);
+@media(max-width:390px){
 
-        backdrop-filter:blur(16px);
-        -webkit-backdrop-filter:blur(16px);
-    }
-
-    .top-header{
-        position:sticky;
-        top:0;
-        z-index:1000;
-
-        background:rgba(9,10,15,.94);
-
-        border-bottom:
-            1px solid
-            rgba(42,46,61,.8);
-
-        backdrop-filter:blur(18px);
-        -webkit-backdrop-filter:blur(18px);
-    }
-
-    .status-online{
-        color:#34d399!important;
-    }
-
-    .status-offline{
-        color:#fb7185!important;
-    }
-
-    .online-dot{
-        box-shadow:
-            0 0 0 0
-            rgba(16,185,129,.65);
-
-        animation:
-            onlinePulse 2s infinite;
-    }
-
-    @keyframes onlinePulse{
-        0%{
-            box-shadow:
-                0 0 0 0
-                rgba(16,185,129,.65);
-        }
-
-        70%{
-            box-shadow:
-                0 0 0 9px
-                rgba(16,185,129,0);
-        }
-
-        100%{
-            box-shadow:
-                0 0 0 0
-                rgba(16,185,129,0);
-        }
-    }
-
-    .map-shell{
-        position:relative;
-        width:100%;
-        min-height:520px;
-        overflow:hidden;
-        border-radius:18px;
-        border:1px solid var(--rx-border);
-        background:#111;
-    }
-
-    #dispatchMap{
-        position:absolute;
-        inset:0;
-        width:100%;
-        height:100%;
-        min-height:520px;
-        z-index:1;
-    }
-
-    .map-overlay{
-        position:absolute;
-        z-index:20;
-        left:12px;
-        right:12px;
-        top:12px;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:8px;
-        pointer-events:none;
-    }
-
-    .map-pill{
-        pointer-events:auto;
-        display:flex;
-        align-items:center;
-        gap:7px;
-        min-height:38px;
-        padding:8px 11px;
-        border-radius:12px;
-        background:rgba(9,10,15,.90);
-        border:1px solid rgba(255,229,0,.20);
-        backdrop-filter:blur(12px);
-        font-size:10px;
-        font-weight:800;
-    }
-
-    .map-actions{
-        display:flex;
-        gap:7px;
-    }
-
-    .map-action{
-        pointer-events:auto;
-        width:38px;
-        height:38px;
-        border:1px solid var(--rx-border);
-        border-radius:12px;
-        background:rgba(9,10,15,.92);
-        color:#fff;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-    }
-
-    .map-action.yellow{
-        background:var(--rx-yellow);
-        color:#000;
-        border-color:var(--rx-yellow);
-    }
-
-    .nav-banner{
-        position:absolute;
-        left:12px;
-        right:12px;
-        bottom:12px;
-        z-index:20;
-
-        display:flex;
-        align-items:center;
-        gap:10px;
-
-        padding:12px;
-
-        border-radius:15px;
-
-        background:rgba(9,10,15,.94);
-
-        border:
-            1px solid
-            rgba(255,229,0,.35);
-
-        backdrop-filter:blur(15px);
-        -webkit-backdrop-filter:blur(15px);
-    }
-
-    .nav-icon{
-        width:42px;
-        min-width:42px;
-        height:42px;
-        border-radius:12px;
-        background:var(--rx-yellow);
-        color:#000;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:17px;
-    }
-
-    .nav-text{
-        flex:1;
-        min-width:0;
-    }
-
-    .nav-title{
-        font-size:11px;
-        font-weight:800;
-        color:#fff;
-        line-height:1.35;
-    }
-
-    .nav-sub{
-        margin-top:2px;
-        color:var(--rx-gray);
-        font-size:9px;
-        line-height:1.4;
-    }
-
-    .nav-distance{
-        color:var(--rx-yellow);
-        font-size:13px;
-        font-weight:800;
-        white-space:nowrap;
-    }
-
-    .pipeline{
-        overflow-x:auto;
-        scrollbar-width:none;
-    }
-
-    .pipeline::-webkit-scrollbar{
-        display:none;
-    }
-
-    .step{
-        flex-shrink:0;
-        display:flex;
-        align-items:center;
-        gap:7px;
-        color:var(--rx-gray);
-        font-size:9px;
-        font-weight:700;
-        white-space:nowrap;
-    }
-
-    .step-number{
-        width:26px;
-        height:26px;
-        border-radius:50%;
-        background:var(--rx-border);
-        color:#fff;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:10px;
-        font-weight:800;
-    }
-
-    .step.active{
-        color:var(--rx-yellow);
-    }
-
-    .step.active .step-number{
-        background:var(--rx-yellow);
-        color:#000;
-    }
-
-    .step.done{
-        color:#34d399;
-    }
-
-    .step.done .step-number{
-        background:var(--rx-green);
-        color:#000;
-    }
-
-    .request-card{
-        border:
-            1px solid
-            rgba(255,229,0,.45);
-
-        box-shadow:
-            0 0 35px
-            rgba(255,229,0,.08);
-    }
-
-    .pulse-request{
-        animation:requestPulse 1.8s infinite ease-in-out;
-    }
-
-    @keyframes requestPulse{
-        0%{
-            transform:scale(1);
-        }
-
-        50%{
-            transform:scale(1.01);
-        }
-
-        100%{
-            transform:scale(1);
-        }
-    }
-
-    .otp-input{
-        width:52px;
-        height:52px;
-        text-align:center;
-        font-size:20px;
-        font-weight:800;
-        color:var(--rx-yellow);
-        background:#090A0F;
-        border:1px solid var(--rx-border);
-        border-radius:13px;
-        outline:none;
-    }
-
-    .otp-input:focus{
-        border-color:var(--rx-yellow);
-        box-shadow:
-            0 0 0 2px
-            rgba(255,229,0,.08);
-    }
-
-    .bottom-nav{
-        position:fixed;
-        left:0;
-        right:0;
-        bottom:0;
-        z-index:2000;
-
-        padding:
-            9px
-            15px
-            max(10px,env(safe-area-inset-bottom));
-
-        background:
-            rgba(9,10,15,.97);
-
-        border-top:
-            1px solid
-            var(--rx-border);
-
-        backdrop-filter:blur(18px);
-        -webkit-backdrop-filter:blur(18px);
-    }
-
-    .bottom-nav-inner{
-        max-width:480px;
-        margin:auto;
-        display:grid;
-        grid-template-columns:repeat(4,1fr);
+    .summary{
         gap:5px;
     }
 
-    .bottom-item{
-        min-height:49px;
-        color:var(--rx-gray);
-        text-decoration:none;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        gap:4px;
-        border-radius:12px;
-        font-size:9px;
-        font-weight:700;
-    }
-
-    .bottom-item i{
+    .summary-value{
         font-size:15px;
     }
 
-    .bottom-item.active{
-        color:var(--rx-yellow);
-        background:rgba(255,229,0,.07);
+    .ride-details{
+        gap:4px;
     }
 
-    .hide{
-        display:none!important;
-    }
-
-    .action-btn{
-        width:100%;
-        min-height:50px;
-        border:0;
-        border-radius:14px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        gap:8px;
-        font-size:11px;
-        font-weight:800;
-        transition:
-            transform .15s ease,
-            opacity .15s ease;
-    }
-
-    .action-btn:active{
-        transform:scale(.985);
-    }
-
-    .yellow-btn{
-        background:var(--rx-yellow);
-        color:#000;
-    }
-
-    .blue-btn{
-        background:var(--rx-blue);
-        color:#fff;
-    }
-
-    .green-btn{
-        background:var(--rx-green);
-        color:#000;
-    }
-
-    .red-btn{
-        background:rgba(244,63,94,.10);
-        color:#fb7185;
-        border:1px solid rgba(244,63,94,.28);
-    }
-
-    .dark-btn{
-        background:#12141C;
-        color:#fff;
-        border:1px solid var(--rx-border);
-    }
-
-    .metric{
-        padding:11px 6px;
-        border-radius:12px;
-        background:#12141C;
-        border:1px solid var(--rx-border);
-        text-align:center;
-    }
-
-    .metric-label{
-        color:var(--rx-gray);
-        font-size:8px;
-        font-weight:700;
-        text-transform:uppercase;
-    }
-
-    .metric-value{
-        margin-top:3px;
-        color:#fff;
-        font-size:13px;
-        font-weight:800;
-    }
-
-    .metric-value.yellow{
-        color:var(--rx-yellow);
-    }
-
-    .metric-value.green{
-        color:#34d399;
-    }
-
-    .location-line{
-        display:flex;
-        align-items:flex-start;
-        gap:10px;
-    }
-
-    .location-icon{
-        width:27px;
-        min-width:27px;
-        height:27px;
-        border-radius:50%;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:9px;
-    }
-
-    .pickup-icon{
-        color:#34d399;
-        background:rgba(16,185,129,.12);
-    }
-
-    .drop-icon{
-        color:var(--rx-yellow);
-        background:rgba(255,229,0,.10);
-    }
-
-    .location-label{
-        color:var(--rx-gray);
-        font-size:8px;
-        font-weight:800;
-        text-transform:uppercase;
-    }
-
-    .location-value{
-        margin-top:2px;
-        color:#fff;
-        font-size:11px;
-        font-weight:700;
-        line-height:1.4;
-    }
-
-    .safe-area{
-        padding-bottom:
-            max(100px,calc(80px + env(safe-area-inset-bottom)));
-    }
-
-    @media(max-width:640px){
-
-        body{
-            padding-bottom:85px;
-        }
-
-        .map-shell{
-            min-height:430px;
-        }
-
-        #dispatchMap{
-            min-height:430px;
-        }
-
-        .otp-input{
-            width:48px;
-            height:48px;
-        }
-
-        .map-pill span{
-            max-width:130px;
-            overflow:hidden;
-            white-space:nowrap;
-            text-overflow:ellipsis;
-        }
-    }
+}
 
 </style>
+</head>
 
-</head><body><!-- ======================================================
-     HEADER
-====================================================== --><header class="top-header px-3 sm:px-5 py-3"><div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+<body>
 
-    <div class="flex items-center gap-2">
+<div class="rides-page">
 
-        <a href="./Home.html"
-           class="flex items-center gap-2">
+    <!-- HEADER -->
 
-            <img
-                src="../assets/Logo/RiderX-logo.png"
-                alt="RiderX"
-                class="h-8 w-auto object-contain"
-                onerror="this.style.display='none'"
-            >
+    <header class="page-header">
 
-            <span class="font-extrabold text-white tracking-tight">
-                RIDER<span class="text-brand-yellow">X</span>
-            </span>
+        <button
+            class="back-btn"
+            onclick="goBack()"
+        >
+            ‹
+        </button>
 
-        </a>
+        <div class="header-info">
 
-        <span class="hidden sm:inline-block text-[9px]
-                     bg-brand-yellow/10
-                     text-brand-yellow
-                     border border-brand-yellow/20
-                     rounded-full
-                     px-2.5 py-1
-                     font-bold">
-            ACTIVE RIDE
-        </span>
+            <h1>My Rides</h1>
 
-    </div>
-
-
-    <div class="flex items-center gap-2">
-
-        <div class="flex items-center gap-2
-                    bg-brand-dark
-                    border border-brand-border
-                    rounded-full
-                    px-2.5 py-1.5">
-
-            <span
-                id="statusIndicator"
-                class="w-2.5 h-2.5 rounded-full bg-red-500">
-            </span>
-
-            <span
-                id="statusText"
-                class="text-[9px] font-extrabold text-red-400">
-                OFFLINE
-            </span>
-
-            <label class="relative inline-flex
-                          items-center cursor-pointer">
-
-                <input
-                    type="checkbox"
-                    id="toggleOnline"
-                    class="sr-only peer"
-                    onchange="toggleDutyStatus(this.checked)"
-                >
-
-                <div class="
-                    w-9 h-5
-                    bg-brand-border
-                    peer-focus:outline-none
-                    rounded-full
-                    peer
-                    peer-checked:bg-emerald-500
-                    after:content-['']
-                    after:absolute
-                    after:top-[2px]
-                    after:left-[2px]
-                    after:bg-white
-                    after:rounded-full
-                    after:h-4
-                    after:w-4
-                    after:transition-all
-                    peer-checked:after:translate-x-4
-                "></div>
-
-            </label>
-
-        </div>
-
-
-        <a href="./Profile.html"
-           class="flex items-center">
-
-            <img
-                id="navRiderPhoto"
-                src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F"
-                alt="Rider"
-                class="w-9 h-9 rounded-full object-cover border border-brand-yellow"
-            >
-
-        </a>
-
-    </div>
-
-</div>
-
-</header><!-- ======================================================
-     MAIN
-====================================================== --><main class="max-w-7xl mx-auto w-full px-3 sm:px-5 py-4 safe-area"><!-- RIDER INFO -->
-
-<div class="glass-card rounded-2xl p-4 mb-4">
-
-    <div class="flex items-center justify-between gap-3">
-
-        <div class="flex items-center gap-3">
-
-            <img
-                id="riderProfilePhoto"
-                src="https://ui-avatars.com/api/?name=Captain&background=FFE500&color=090A0F"
-                class="w-12 h-12 rounded-2xl object-cover border border-brand-yellow"
-                alt="Rider"
-            >
-
-            <div>
-
-                <h1
-                    id="navRiderName"
-                    class="text-sm font-extrabold text-white">
-                    Captain Rider
-                </h1>
-
-                <p class="text-[10px] text-brand-gray mt-1">
-                    <i class="fa-solid fa-star text-amber-400"></i>
-                    <span id="navRiderRating">4.92</span>
-                    <span class="mx-1">•</span>
-                    Chandigarh Captain
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div class="text-right">
-
-            <p class="text-[8px] text-brand-gray uppercase font-bold">
-                Today's Status
-            </p>
-
-            <p
-                id="rideStateLabel"
-                class="text-xs font-extrabold text-brand-yellow mt-1">
-                Searching
+            <p id="rideCount">
+                Loading ride history...
             </p>
 
         </div>
 
-    </div>
-
-</div>
-
-
-<!-- ==================================================
-     PIPELINE
-================================================== -->
-
-<div class="glass-card rounded-2xl p-3 mb-4">
-
-    <div class="pipeline flex items-center gap-4">
-
-        <div id="stepSearching" class="step active">
-            <span class="step-number">1</span>
-            <span>Searching</span>
-        </div>
-
-        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
-
-        <div id="stepAccepted" class="step">
-            <span class="step-number">2</span>
-            <span>Accepted</span>
-        </div>
-
-        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
-
-        <div id="stepArrived" class="step">
-            <span class="step-number">3</span>
-            <span>Arrived</span>
-        </div>
-
-        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
-
-        <div id="stepInProgress" class="step">
-            <span class="step-number">4</span>
-            <span>Trip</span>
-        </div>
-
-        <i class="fa-solid fa-chevron-right text-[8px] text-brand-gray"></i>
-
-        <div id="stepCompleted" class="step">
-            <span class="step-number">5</span>
-            <span>Done</span>
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- ==================================================
-     WORKSPACE
-================================================== -->
-
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-
-
-    <!-- ==============================================
-         LEFT / CONTROL
-    =============================================== -->
-
-    <section class="lg:col-span-5 space-y-4">
-
-
-        <!-- QUEUE -->
-
-        <div
-            id="panelQueue"
-            class="glass-card rounded-2xl p-4"
+        <button
+            class="refresh-btn"
+            id="refreshBtn"
+            onclick="loadRides()"
         >
+            ↻
+        </button>
 
-            <div class="flex items-center justify-between pb-3 border-b border-brand-border">
+    </header>
 
-                <div>
 
-                    <h2 class="text-sm font-extrabold">
-                        Ride Requests
-                    </h2>
+    <!-- SUMMARY -->
 
-                    <p class="text-[9px] text-brand-gray mt-1">
-                        Nearby customer requests
-                    </p>
+    <section class="summary">
 
-                </div>
-
-                <span
-                    id="queueCountBadge"
-                    class="text-[9px] font-bold
-                           text-brand-yellow
-                           bg-brand-yellow/10
-                           border border-brand-yellow/20
-                           rounded-full
-                           px-2.5 py-1">
-                    0 Available
-                </span>
-
-            </div>
-
+        <div class="summary-card">
 
             <div
-                id="emptyQueueNotice"
-                class="py-10 text-center"
+                class="summary-value"
+                id="totalRides"
             >
-
-                <div class="w-14 h-14 mx-auto
-                            rounded-full
-                            bg-brand-dark
-                            border border-brand-border
-                            flex items-center justify-center">
-
-                    <i class="fa-solid fa-radar
-                              text-brand-yellow
-                              text-xl">
-                    </i>
-
-                </div>
-
-                <h3 class="mt-3 text-xs font-bold">
-                    Searching for rides
-                </h3>
-
-                <p class="mt-1 text-[9px] text-brand-gray">
-                    Go online to receive nearby ride requests.
-                </p>
-
+                0
             </div>
 
-
-            <!-- REQUEST CARD -->
-
-            <div
-                id="queueCard"
-                class="request-card pulse-request
-                       bg-brand-dark
-                       rounded-2xl
-                       p-4
-                       mt-3
-                       hidden"
-            >
-
-                <div class="flex items-start justify-between gap-3">
-
-                    <div class="flex items-center gap-3">
-
-                        <img
-                            id="qCustomerPhoto"
-                            src="https://ui-avatars.com/api/?name=Customer&background=FFE500&color=090A0F"
-                            class="w-11 h-11 rounded-xl object-cover border border-brand-yellow"
-                            alt="Customer"
-                        >
-
-                        <div>
-
-                            <h3
-                                id="qCustomerName"
-                                class="text-xs font-extrabold">
-                                Customer
-                            </h3>
-
-                            <p class="text-[9px] text-brand-gray mt-1">
-
-                                <i class="fa-solid fa-star text-amber-400"></i>
-
-                                <span id="qCustomerRating">
-                                    5.0
-                                </span>
-
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        id="qFare"
-                        class="text-lg font-extrabold text-brand-yellow">
-                        ₹0
-                    </div>
-
-                </div>
-
-
-                <div class="mt-4
-                            bg-brand-black
-                            border border-brand-border
-                            rounded-xl
-                            p-3
-                            space-y-3">
-
-                    <div class="location-line">
-
-                        <div class="location-icon pickup-icon">
-                            <i class="fa-solid fa-circle"></i>
-                        </div>
-
-                        <div class="min-w-0">
-
-                            <p class="location-label">
-                                Pickup
-                            </p>
-
-                            <p
-                                id="qPickupAddr"
-                                class="location-value truncate">
-                                Pickup location
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="border-l
-                                border-dashed
-                                border-brand-border
-                                h-3
-                                ml-3">
-                    </div>
-
-
-                    <div class="location-line">
-
-                        <div class="location-icon drop-icon">
-                            <i class="fa-solid fa-location-dot"></i>
-                        </div>
-
-                        <div class="min-w-0">
-
-                            <p class="location-label">
-                                Destination
-                            </p>
-
-                            <p
-                                id="qDropAddr"
-                                class="location-value truncate">
-                                Destination
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="grid grid-cols-2 gap-2 mt-3">
-
-                    <div class="metric">
-
-                        <p class="metric-label">
-                            Pickup
-                        </p>
-
-                        <p
-                            id="qPickupDist"
-                            class="metric-value">
-                            --
-                        </p>
-
-                    </div>
-
-                    <div class="metric">
-
-                        <p class="metric-label">
-                            Trip
-                        </p>
-
-                        <p
-                            id="qTripDist"
-                            class="metric-value">
-                            --
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    onclick="acceptIncomingRide()"
-                    class="action-btn yellow-btn mt-3"
-                >
-
-                    <i class="fa-solid fa-check"></i>
-
-                    Accept Ride Request
-
-                </button>
-
+            <div class="summary-label">
+                Total Rides
             </div>
 
         </div>
 
 
-        <!-- ==================================================
-             ACTIVE RIDE
-        =================================================== -->
-
-        <div
-            id="panelActiveRide"
-            class="glass-card rounded-2xl p-4 hidden"
-        >
-
-            <!-- CUSTOMER -->
-
-            <div class="flex items-center justify-between pb-4 border-b border-brand-border">
-
-                <div class="flex items-center gap-3">
-
-                    <div class="relative">
-
-                        <img
-                            id="activeCustPhoto"
-                            src="https://ui-avatars.com/api/?name=Customer&background=FFE500&color=090A0F"
-                            class="w-12 h-12 rounded-2xl object-cover border-2 border-brand-yellow"
-                            alt="Customer"
-                        >
-
-                        <span class="absolute
-                                     -bottom-1
-                                     -right-1
-                                     w-4
-                                     h-4
-                                     rounded-full
-                                     bg-emerald-500
-                                     border-2
-                                     border-brand-black">
-                        </span>
-
-                    </div>
-
-
-                    <div>
-
-                        <h3
-                            id="activeCustName"
-                            class="text-sm font-extrabold">
-                            Customer
-                        </h3>
-
-                        <p class="text-[9px] text-brand-gray mt-1">
-
-                            <i class="fa-solid fa-star text-amber-400"></i>
-
-                            <span id="activeCustRating">
-                                5.0
-                            </span>
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="flex gap-2">
-
-                    <a
-                        id="btnCallCustomer"
-                        href="#"
-                        class="w-10 h-10
-                               rounded-xl
-                               bg-emerald-500/10
-                               border border-emerald-500/20
-                               text-emerald-400
-                               flex items-center justify-center"
-                    >
-
-                        <i class="fa-solid fa-phone"></i>
-
-                    </a>
-
-                    <button
-                        type="button"
-                        onclick="openCustomerChat()"
-                        class="w-10 h-10
-                               rounded-xl
-                               bg-brand-yellow/10
-                               border border-brand-yellow/20
-                               text-brand-yellow
-                               flex items-center justify-center"
-                    >
-
-                        <i class="fa-solid fa-message"></i>
-
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- LOCATIONS -->
-
-            <div class="mt-4
-                        bg-brand-dark
-                        border border-brand-border
-                        rounded-xl
-                        p-3
-                        space-y-3">
-
-                <div class="location-line">
-
-                    <div class="location-icon pickup-icon">
-                        <i class="fa-solid fa-circle"></i>
-                    </div>
-
-                    <div>
-
-                        <p class="location-label">
-                            Pickup
-                        </p>
-
-                        <p
-                            id="activePickupText"
-                            class="location-value">
-                            Pickup location
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="border-l
-                            border-dashed
-                            border-brand-border
-                            h-3
-                            ml-3">
-                </div>
-
-
-                <div class="location-line">
-
-                    <div class="location-icon drop-icon">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-
-                    <div>
-
-                        <p class="location-label">
-                            Destination
-                        </p>
-
-                        <p
-                            id="activeDropText"
-                            class="location-value">
-                            Destination
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- METRICS -->
-
-            <div class="grid grid-cols-3 gap-2 mt-3">
-
-                <div class="metric">
-
-                    <p class="metric-label">
-                        Fare
-                    </p>
-
-                    <p
-                        id="activeFareText"
-                        class="metric-value yellow">
-                        ₹0
-                    </p>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <p class="metric-label">
-                        Distance
-                    </p>
-
-                    <p
-                        id="activeDistText"
-                        class="metric-value">
-                        --
-                    </p>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <p class="metric-label">
-                        ETA
-                    </p>
-
-                    <p
-                        id="activeETAText"
-                        class="metric-value green">
-                        --
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- FARE -->
+        <div class="summary-card">
 
             <div
-                class="mt-3
-                       bg-brand-dark
-                       border border-brand-border
-                       rounded-xl
-                       p-3
-                       space-y-2"
+                class="summary-value"
+                id="completedRides"
             >
-
-                <div class="flex justify-between text-[10px]">
-
-                    <span class="text-brand-gray">
-                        Base Fare
-                    </span>
-
-                    <span
-                        id="fareBase"
-                        class="font-bold">
-                        ₹0
-                    </span>
-
-                </div>
-
-
-                <div class="flex justify-between text-[10px]">
-
-                    <span class="text-brand-gray">
-                        Surge
-                    </span>
-
-                    <span
-                        id="fareSurge"
-                        class="font-bold">
-                        ₹0
-                    </span>
-
-                </div>
-
-
-                <div class="flex justify-between items-center text-[10px]">
-
-                    <span class="text-brand-gray">
-                        Toll / Extra
-                    </span>
-
-                    <div class="flex items-center gap-1">
-
-                        <span class="text-brand-gray">
-                            ₹
-                        </span>
-
-                        <input
-                            id="inputTollCharge"
-                            type="number"
-                            min="0"
-                            value="0"
-                            onchange="recalculateFare()"
-                            class="w-16
-                                   bg-brand-black
-                                   border border-brand-border
-                                   rounded-lg
-                                   px-2 py-1
-                                   text-right
-                                   text-brand-yellow
-                                   outline-none"
-                        >
-
-                    </div>
-
-                </div>
-
-
-                <div class="flex justify-between text-[10px]">
-
-                    <span class="text-brand-gray">
-                        Waiting
-                    </span>
-
-                    <span
-                        id="fareWaiting"
-                        class="font-bold">
-                        ₹0
-                    </span>
-
-                </div>
-
+                0
             </div>
 
+            <div class="summary-label">
+                Completed
+            </div>
 
-            <!-- OTP -->
+        </div>
+
+
+        <div class="summary-card">
 
             <div
-                id="boxOTPVerification"
-                class="hidden
-                       mt-3
-                       bg-brand-dark
-                       border border-brand-yellow/30
-                       rounded-xl
-                       p-4"
+                class="summary-value"
+                id="totalEarnings"
             >
-
-                <div class="flex items-center justify-between">
-
-                    <p class="text-[10px]
-                              font-extrabold
-                              text-brand-yellow
-                              uppercase">
-
-                        <i class="fa-solid fa-key mr-1"></i>
-                        Customer OTP
-
-                    </p>
-
-                    <span class="text-[8px] text-brand-gray">
-                        Ask passenger
-                    </span>
-
-                </div>
-
-
-                <div class="flex justify-center gap-2 mt-4">
-
-                    <input
-                        type="number"
-                        maxlength="1"
-                        inputmode="numeric"
-                        class="otp-input"
-                        onkeyup="moveOTPFocus(this,1)"
-                    >
-
-                    <input
-                        type="number"
-                        maxlength="1"
-                        inputmode="numeric"
-                        class="otp-input"
-                        onkeyup="moveOTPFocus(this,2)"
-                    >
-
-                    <input
-                        type="number"
-                        maxlength="1"
-                        inputmode="numeric"
-                        class="otp-input"
-                        onkeyup="moveOTPFocus(this,3)"
-                    >
-
-                    <input
-                        type="number"
-                        maxlength="1"
-                        inputmode="numeric"
-                        class="otp-input"
-                        onkeyup="moveOTPFocus(this,4)"
-                    >
-
-                </div>
-
+                ₹0
             </div>
 
-
-            <!-- ACTIONS -->
-
-            <div class="mt-4 space-y-2.5">
-
-                <button
-                    id="btnArrivedPickup"
-                    onclick="actionArrivedAtPickup()"
-                    class="action-btn blue-btn"
-                >
-
-                    <i class="fa-solid fa-location-crosshairs"></i>
-
-                    Arrived At Pickup
-
-                </button>
-
-
-                <button
-                    id="btnStartRide"
-                    onclick="actionStartRide()"
-                    class="action-btn yellow-btn hidden"
-                >
-
-                    <i class="fa-solid fa-play"></i>
-
-                    Verify OTP & Start Ride
-
-                </button>
-
-
-                <button
-                    id="btnCompleteRide"
-                    onclick="actionCompleteRide()"
-                    class="action-btn green-btn hidden"
-                >
-
-                    <i class="fa-solid fa-flag-checkered"></i>
-
-                    Complete Trip
-
-                </button>
-
-
-                <div class="grid grid-cols-2 gap-2">
-
-                    <button
-                        onclick="cancelActiveRide()"
-                        class="action-btn red-btn"
-                    >
-
-                        <i class="fa-solid fa-xmark"></i>
-
-                        Cancel
-
-                    </button>
-
-
-                    <button
-                        onclick="triggerSOSAlert()"
-                        class="action-btn"
-                        style="
-                            background:#dc2626;
-                            color:#fff;
-                        "
-                    >
-
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-
-                        SOS
-
-                    </button>
-
-                </div>
-
+            <div class="summary-label">
+                Earnings
             </div>
 
         </div>
@@ -1519,1651 +590,970 @@
     </section>
 
 
-    <!-- ==============================================
-         MAP
-    =============================================== -->
+    <!-- FILTER -->
 
-    <section class="lg:col-span-7">
+    <div class="filter-row">
 
-        <div class="glass-card rounded-2xl p-3">
+        <button
+            class="filter-btn active"
+            onclick="setFilter('all',this)"
+        >
+            All
+        </button>
 
-            <div class="map-shell">
+        <button
+            class="filter-btn"
+            onclick="setFilter('completed',this)"
+        >
+            Completed
+        </button>
 
-                <div class="map-overlay">
+        <button
+            class="filter-btn"
+            onclick="setFilter('ongoing',this)"
+        >
+            Ongoing
+        </button>
 
-                    <div class="map-pill">
+        <button
+            class="filter-btn"
+            onclick="setFilter('cancelled',this)"
+        >
+            Cancelled
+        </button>
 
-                        <span
-                            class="w-2.5 h-2.5
-                                   rounded-full
-                                   bg-emerald-400
-                                   animate-pulse">
-                        </span>
-
-                        <span>
-                            Live RiderX Navigation
-                        </span>
-
-                    </div>
-
-
-                    <div class="map-actions">
-
-                        <button
-                            onclick="recenterMap()"
-                            class="map-action"
-                            title="Recenter"
-                        >
-
-                            <i class="fa-solid fa-crosshairs
-                                      text-brand-yellow">
-                            </i>
-
-                        </button>
+    </div>
 
 
-                        <button
-                            onclick="launchGoogleMapsExternal()"
-                            class="map-action yellow"
-                            title="Google Maps"
-                        >
+    <!-- LIST -->
 
-                            <i class="fa-solid fa-diamond-turn-right"></i>
+    <main
+        class="rides-list"
+        id="ridesList"
+    >
 
-                        </button>
+        <div
+            class="loading-state"
+            id="loadingState"
+        >
 
-                    </div>
+            <div class="spinner"></div>
 
-                </div>
-
-
-                <div id="dispatchMap"></div>
-
-
-                <div
-                    id="navInstructionBanner"
-                    class="nav-banner"
-                >
-
-                    <div class="nav-icon">
-
-                        <i class="fa-solid fa-location-arrow"></i>
-
-                    </div>
-
-                    <div class="nav-text">
-
-                        <p
-                            id="navStepTitle"
-                            class="nav-title">
-                            Waiting for a ride request
-                        </p>
-
-                        <p
-                            id="navStepSub"
-                            class="nav-sub">
-                            Your live location will appear here.
-                        </p>
-
-                    </div>
-
-                    <span
-                        id="navStepDist"
-                        class="nav-distance">
-                        --
-                    </span>
-
-                </div>
-
-            </div>
+            Loading your rides...
 
         </div>
 
-    </section>
+
+        <div
+            class="empty-state"
+            id="emptyState"
+        >
+
+            <div class="empty-icon">
+                🏍
+            </div>
+
+            <h2>No rides found</h2>
+
+            <p>
+                Your ride history will appear here
+                after you complete a ride.
+            </p>
+
+        </div>
+
+    </main>
 
 </div>
 
-</main><!-- ======================================================
-     MOBILE NAVIGATION
-====================================================== --><nav class="bottom-nav"><div class="bottom-nav-inner">
 
-    <a
-        href="./Home.html"
-        class="bottom-item"
-    >
-
-        <i class="fa-solid fa-house"></i>
-
-        <span>
-            Home
-        </span>
-
-    </a>
+<div
+    class="toast"
+    id="toast"
+></div>
 
 
-    <a
-        href="./Rides.html"
-        class="bottom-item active"
-    >
+<script>
+/* ==========================================
+   RIDERX RIDES
+========================================== */
 
-        <i class="fa-solid fa-route"></i>
+const $ = id => document.getElementById(id);
 
-        <span>
-            Ride
-        </span>
-
-    </a>
+let allRides = [];
+let currentFilter = "all";
+let toastTimer;
 
 
-    <a
-        href="./Earnings.html"
-        class="bottom-item"
-    >
+/* BACK */
 
-        <i class="fa-solid fa-wallet"></i>
+function goBack(){
 
-        <span>
-            Earnings
-        </span>
+    if(history.length > 1){
 
-    </a>
+        history.back();
 
+    }else{
 
-    <a
-        href="./Profile.html"
-        class="bottom-item"
-    >
-
-        <i class="fa-solid fa-user"></i>
-
-        <span>
-            Profile
-        </span>
-
-    </a>
-
-</div>
-
-</nav><!-- ======================================================
-     FIREBASE / RIDER MODULES
-====================================================== --><script type="module" src="../firebase/firebase-config.js"></script><script type="module" src="../js/App.js"></script><script type="module" src="../js/Map.js"></script><script type="module" src="../js/Notification.js"></script><!-- ======================================================
-     RIDER RIDE CONTROLLER
-====================================================== --><script type="module">
-
-import {
-    auth,
-    db
-} from "../firebase/firebase-config.js";
-
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-import {
-    doc,
-    getDoc,
-    updateDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-
-let currentRider = null;
-
-let map = null;
-let riderMarker = null;
-let pickupMarker = null;
-let dropMarker = null;
-let routePolyline = null;
-
-let riderPosition = null;
-
-let pickupPosition = null;
-let dropPosition = null;
-
-let currentRideState = "SEARCHING";
-
-let currentRideId = null;
-
-
-/* ======================================================
-   CHANDIGARH DEFAULT
-====================================================== */
-
-const CHANDIGARH_CENTER = [
-    30.7333,
-    76.7794
-];
-
-
-/* ======================================================
-   INITIALIZATION
-====================================================== */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        initMap();
-
-        onAuthStateChanged(
-            auth,
-            async user => {
-
-                if(!user){
-
-                    window.location.href =
-                        "../auth/rider-login.html";
-
-                    return;
-                }
-
-                currentRider = user;
-
-                await loadRiderDetails(
-                    user.uid
-                );
-
-                startLiveLocation();
-
-            }
-        );
+        window.location.href = "home.html";
 
     }
-);
-
-
-/* ======================================================
-   MAP
-====================================================== */
-
-function initMap(){
-
-    const mapElement =
-        document.getElementById("dispatchMap");
-
-    if(!mapElement){
-        return;
-    }
-
-    map =
-        L.map(
-            "dispatchMap",
-            {
-                zoomControl:false,
-                attributionControl:true
-            }
-        ).setView(
-            CHANDIGARH_CENTER,
-            13
-        );
-
-
-    L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            maxZoom:19,
-            attribution:"© OpenStreetMap contributors"
-        }
-    ).addTo(map);
-
-
-    L.control.zoom({
-        position:"bottomright"
-    }).addTo(map);
-
-
-    const riderIcon =
-        L.divIcon({
-
-            className:"rider-marker",
-
-            html:`
-                <div style="
-                    width:40px;
-                    height:40px;
-                    border-radius:50%;
-                    background:#FFE500;
-                    color:#000;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    border:3px solid #090A0F;
-                    box-shadow:0 5px 20px rgba(0,0,0,.45);
-                    font-size:17px;
-                ">
-                    <i class="fa-solid fa-motorcycle"></i>
-                </div>
-            `,
-
-            iconSize:[40,40],
-            iconAnchor:[20,20]
-
-        });
-
-
-    riderMarker =
-        L.marker(
-            CHANDIGARH_CENTER,
-            {
-                icon:riderIcon
-            }
-        ).addTo(map);
-
-
-    riderPosition =
-        CHANDIGARH_CENTER;
-
-
-    setTimeout(
-        () => map.invalidateSize(),
-        400
-    );
 
 }
 
 
-/* ======================================================
-   RIDER DETAILS
-====================================================== */
+/* TOAST */
 
-async function loadRiderDetails(uid){
+function showToast(message,type=""){
+
+    const toast = $("toast");
+
+    toast.textContent = message;
+
+    toast.className =
+        "toast show " + type;
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+
+        toast.className = "toast";
+
+    },3000);
+
+}
+
+
+/* FILTER */
+
+function setFilter(filter,button){
+
+    currentFilter = filter;
+
+    document
+        .querySelectorAll(".filter-btn")
+        .forEach(btn => {
+
+            btn.classList.remove("active");
+
+        });
+
+    button.classList.add("active");
+
+    renderRides();
+
+}
+
+
+/* NORMALIZE */
+
+function normalizeRide(ride,index=0){
+
+    const status =
+        String(
+            ride.status ||
+            ride.rideStatus ||
+            "completed"
+        ).toLowerCase();
+
+
+    const fare =
+        ride.fare ??
+        ride.amount ??
+        ride.earnings ??
+        ride.totalFare ??
+        ride.price ??
+        0;
+
+
+    return {
+
+        ...ride,
+
+        id:
+            ride.id ||
+            ride.rideId ||
+            String(index),
+
+        status:status,
+
+        customerName:
+            ride.customerName ||
+            ride.userName ||
+            ride.customer?.name ||
+            "Customer",
+
+        serviceType:
+            ride.serviceType ||
+            ride.rideType ||
+            ride.service ||
+            "Bike",
+
+        fare:Number(fare) || 0,
+
+        pickupAddress:
+            ride.pickupAddress ||
+            ride.pickup?.address ||
+            ride.from ||
+            "Pickup location",
+
+        dropAddress:
+            ride.dropAddress ||
+            ride.destinationAddress ||
+            ride.drop?.address ||
+            ride.to ||
+            "Drop-off location",
+
+        distance:
+            ride.distance ??
+            ride.distanceKm ??
+            0,
+
+        duration:
+            ride.duration ??
+            ride.durationMin ??
+            0,
+
+        paymentMethod:
+            ride.paymentMethod ||
+            ride.payment ||
+            "Cash",
+
+        createdAt:
+            ride.createdAt ||
+            ride.timestamp ||
+            ride.date ||
+            null
+
+    };
+
+}
+
+
+/* LOAD RIDES */
+
+async function loadRides(){
+
+    const refresh =
+        $("refreshBtn");
+
+    refresh.classList.add("loading");
+
+
+    $("loadingState").style.display =
+        "block";
+
+    $("emptyState").style.display =
+        "none";
+
 
     try{
 
-        const riderRef =
-            doc(
-                db,
-                "riders",
-                uid
-            );
-
-        const snapshot =
-            await getDoc(
-                riderRef
-            );
+        let rides = null;
 
 
-        if(!snapshot.exists()){
-            return;
-        }
+        if(typeof window.getRiderRides === "function"){
 
+            rides =
+                await window.getRiderRides();
 
-        const data =
-            snapshot.data();
+        }else if(typeof window.getRideHistory === "function"){
 
+            rides =
+                await window.getRideHistory();
 
-        const name =
-            data.fullName ||
-            data.name ||
-            "Captain Rider";
+        }else if(typeof window.loadRiderRides === "function"){
 
-
-        const rating =
-            data.rating ||
-            "4.92";
-
-
-        document.getElementById(
-            "navRiderName"
-        ).textContent =
-            name;
-
-
-        document.getElementById(
-            "navRiderRating"
-        ).textContent =
-            rating;
-
-
-        const photo =
-            data.photoURL ||
-            data.profilePhoto;
-
-
-        if(photo){
-
-            document.getElementById(
-                "navRiderPhoto"
-            ).src = photo;
-
-
-            document.getElementById(
-                "riderProfilePhoto"
-            ).src = photo;
+            rides =
+                await window.loadRiderRides();
 
         }
 
 
-        const online =
-            data.isOnline === true;
+        if(Array.isArray(rides)){
+
+            allRides =
+                rides.map(normalizeRide);
+
+        }else if(
+            rides &&
+            typeof rides === "object"
+        ){
+
+            allRides =
+                Object.entries(rides)
+                .map(([id,data]) =>
+                    normalizeRide({
+                        ...data,
+                        id:id
+                    })
+                );
+
+        }else{
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "riderxRidesPageReady"
+                )
+            );
+
+        }
 
 
-        document.getElementById(
-            "toggleOnline"
-        ).checked =
-            online;
+        sortRides();
 
+        updateSummary();
 
-        updateDutyUI(
-            online
-        );
+        renderRides();
+
 
     }catch(error){
 
         console.error(
-            "Rider details:",
+            "Load rides error:",
             error
         );
 
-    }
+        $("loadingState").style.display =
+            "none";
 
-}
-
-
-/* ======================================================
-   ONLINE / OFFLINE
-====================================================== */
-
-window.toggleDutyStatus =
-    async function(isOnline){
-
-        updateDutyUI(
-            isOnline
+        showToast(
+            "Unable to load rides.",
+            "error"
         );
 
+    }finally{
 
-        if(!currentRider){
-            return;
-        }
-
-
-        try{
-
-            await updateDoc(
-                doc(
-                    db,
-                    "riders",
-                    currentRider.uid
-                ),
-                {
-                    isOnline:
-                        isOnline,
-
-                    updatedAt:
-                        serverTimestamp()
-                }
-            );
-
-        }catch(error){
-
-            console.error(
-                "Duty status:",
-                error
-            );
-
-        }
-
-    };
-
-
-function updateDutyUI(
-    isOnline
-){
-
-    const indicator =
-        document.getElementById(
-            "statusIndicator"
+        refresh.classList.remove(
+            "loading"
         );
-
-    const text =
-        document.getElementById(
-            "statusText"
-        );
-
-
-    if(isOnline){
-
-        indicator.className =
-            "w-2.5 h-2.5 rounded-full bg-emerald-400 online-dot";
-
-        text.className =
-            "text-[9px] font-extrabold text-emerald-400";
-
-        text.textContent =
-            "ONLINE";
-
-    }else{
-
-        indicator.className =
-            "w-2.5 h-2.5 rounded-full bg-red-500";
-
-        text.className =
-            "text-[9px] font-extrabold text-red-400";
-
-        text.textContent =
-            "OFFLINE";
 
     }
 
 }
 
 
-/* ======================================================
-   LIVE LOCATION
-====================================================== */
+/* SORT */
 
-function startLiveLocation(){
+function sortRides(){
 
-    if(!navigator.geolocation){
+    allRides.sort(
+        (a,b) => {
 
-        return;
-    }
+            const dateA =
+                getDateValue(a.createdAt);
 
+            const dateB =
+                getDateValue(b.createdAt);
 
-    navigator.geolocation.watchPosition(
+            return dateB - dateA;
 
-        async position => {
-
-            const lat =
-                position.coords.latitude;
-
-            const lng =
-                position.coords.longitude;
-
-
-            riderPosition =
-                [lat,lng];
-
-
-            if(riderMarker){
-
-                riderMarker.setLatLng(
-                    riderPosition
-                );
-
-            }
-
-
-            if(
-                currentRideState ===
-                "SEARCHING"
-            ){
-
-                map.setView(
-                    riderPosition,
-                    15,
-                    {
-                        animate:true
-                    }
-                );
-
-            }
-
-
-            if(currentRider){
-
-                try{
-
-                    await updateDoc(
-                        doc(
-                            db,
-                            "riders",
-                            currentRider.uid
-                        ),
-                        {
-                            latitude:lat,
-                            longitude:lng,
-                            updatedAt:
-                                serverTimestamp()
-                        }
-                    );
-
-                }catch(error){
-
-                    console.warn(
-                        "Location update:",
-                        error
-                    );
-
-                }
-
-            }
-
-        },
-
-        error => {
-
-            console.warn(
-                "GPS:",
-                error
-            );
-
-        },
-
-        {
-            enableHighAccuracy:true,
-            maximumAge:5000,
-            timeout:15000
         }
-
     );
 
 }
 
 
-/* ======================================================
-   ACCEPT RIDE
-====================================================== */
+/* DATE VALUE */
 
-window.acceptIncomingRide =
-    async function(){
+function getDateValue(value){
 
-        currentRideState =
-            "ACCEPTED";
+    if(!value)
+        return 0;
 
-
-        currentRideId =
-            currentRideId ||
-            null;
-
-
-        document.getElementById(
-            "panelQueue"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "panelActiveRide"
-        ).classList.remove(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "rideStateLabel"
-        ).textContent =
-            "Accepted";
-
-
-        updatePipelineStep(
-            2
-        );
-
-
-        document.getElementById(
-            "navStepTitle"
-        ).textContent =
-            "Head to pickup";
-
-
-        document.getElementById(
-            "navStepSub"
-        ).textContent =
-            "Navigate to the customer pickup point.";
-
-
-        if(
-            riderPosition &&
-            pickupPosition
-        ){
-
-            drawRouteOnMap(
-                riderPosition,
-                pickupPosition,
-                "#10B981"
-            );
-
-        }
-
-    };
-
-
-/* ======================================================
-   ARRIVED
-====================================================== */
-
-window.actionArrivedAtPickup =
-    function(){
-
-        currentRideState =
-            "ARRIVED";
-
-
-        updatePipelineStep(
-            3
-        );
-
-
-        document.getElementById(
-            "rideStateLabel"
-        ).textContent =
-            "Arrived";
-
-
-        document.getElementById(
-            "btnArrivedPickup"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "btnStartRide"
-        ).classList.remove(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "boxOTPVerification"
-        ).classList.remove(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "navStepTitle"
-        ).textContent =
-            "Waiting for customer";
-
-
-        document.getElementById(
-            "navStepSub"
-        ).textContent =
-            "Ask the customer for the 4-digit OTP.";
-
-
-        document.getElementById(
-            "navStepDist"
-        ).textContent =
-            "OTP";
-
-
-        const firstOTP =
-            document.querySelector(
-                ".otp-input"
-            );
-
-
-        firstOTP?.focus();
-
-    };
-
-
-/* ======================================================
-   START RIDE
-====================================================== */
-
-window.actionStartRide =
-    function(){
-
-        const inputs =
-            document.querySelectorAll(
-                ".otp-input"
-            );
-
-
-        let otp = "";
-
-
-        inputs.forEach(
-            input => {
-                otp +=
-                    input.value
-                    .trim();
-            }
-        );
-
-
-        if(otp.length !== 4){
-
-            alert(
-                "Please enter the complete 4-digit customer OTP."
-            );
-
-            return;
-        }
-
-
-        currentRideState =
-            "IN_PROGRESS";
-
-
-        updatePipelineStep(
-            4
-        );
-
-
-        document.getElementById(
-            "rideStateLabel"
-        ).textContent =
-            "Trip In Progress";
-
-
-        document.getElementById(
-            "boxOTPVerification"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "btnStartRide"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "btnCompleteRide"
-        ).classList.remove(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "navStepTitle"
-        ).textContent =
-            "Trip in progress";
-
-
-        document.getElementById(
-            "navStepSub"
-        ).textContent =
-            "Follow the route to the customer's destination.";
-
-
-        if(
-            pickupPosition &&
-            dropPosition
-        ){
-
-            drawRouteOnMap(
-                pickupPosition,
-                dropPosition,
-                "#FFE500"
-            );
-
-        }
-
-    };
-
-
-/* ======================================================
-   COMPLETE
-====================================================== */
-
-window.actionCompleteRide =
-    function(){
-
-        currentRideState =
-            "COMPLETED";
-
-
-        updatePipelineStep(
-            5
-        );
-
-
-        document.getElementById(
-            "rideStateLabel"
-        ).textContent =
-            "Completed";
-
-
-        const fare =
-            document.getElementById(
-                "activeFareText"
-            ).textContent;
-
-
-        document.getElementById(
-            "btnCompleteRide"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "navStepTitle"
-        ).textContent =
-            "Ride completed";
-
-
-        document.getElementById(
-            "navStepSub"
-        ).textContent =
-            "Payment and ride completion recorded.";
-
-
-        document.getElementById(
-            "navStepDist"
-        ).textContent =
-            "DONE";
-
-
-        setTimeout(
-            () => {
-
-                document.getElementById(
-                    "panelActiveRide"
-                ).classList.add(
-                    "hidden"
-                );
-
-
-                document.getElementById(
-                    "panelQueue"
-                ).classList.remove(
-                    "hidden"
-                );
-
-
-                document.getElementById(
-                    "emptyQueueNotice"
-                ).classList.remove(
-                    "hidden"
-                );
-
-
-                document.getElementById(
-                    "queueCard"
-                ).classList.add(
-                    "hidden"
-                );
-
-
-                currentRideState =
-                    "SEARCHING";
-
-
-                updatePipelineStep(
-                    1
-                );
-
-
-                document.getElementById(
-                    "rideStateLabel"
-                ).textContent =
-                    "Searching";
-
-
-                if(routePolyline){
-
-                    map.removeLayer(
-                        routePolyline
-                    );
-
-                    routePolyline =
-                        null;
-
-                }
-
-            },
-            900
-        );
-
-    };
-
-
-/* ======================================================
-   CANCEL
-====================================================== */
-
-window.cancelActiveRide =
-    function(){
-
-        const ok =
-            confirm(
-                "Are you sure you want to cancel this ride?"
-            );
-
-
-        if(!ok){
-            return;
-        }
-
-
-        currentRideState =
-            "SEARCHING";
-
-
-        document.getElementById(
-            "panelActiveRide"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "panelQueue"
-        ).classList.remove(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "emptyQueueNotice"
-        ).classList.remove(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "queueCard"
-        ).classList.add(
-            "hidden"
-        );
-
-
-        document.getElementById(
-            "rideStateLabel"
-        ).textContent =
-            "Searching";
-
-
-        document.getElementById(
-            "navStepTitle"
-        ).textContent =
-            "Searching for rides";
-
-
-        document.getElementById(
-            "navStepSub"
-        ).textContent =
-            "You are ready to receive another request.";
-
-
-        document.getElementById(
-            "navStepDist"
-        ).textContent =
-            "--";
-
-
-        updatePipelineStep(
-            1
-        );
-
-
-        if(routePolyline){
-
-            map.removeLayer(
-                routePolyline
-            );
-
-            routePolyline =
-                null;
-
-        }
-
-    };
-
-
-/* ======================================================
-   FARE
-====================================================== */
-
-window.recalculateFare =
-    function(){
-
-        const base =
-            parseFloat(
-                document.getElementById(
-                    "fareBase"
-                ).textContent
-                .replace(/[^\d.]/g,"")
-            ) || 0;
-
-
-        const surge =
-            parseFloat(
-                document.getElementById(
-                    "fareSurge"
-                ).textContent
-                .replace(/[^\d.]/g,"")
-            ) || 0;
-
-
-        const toll =
-            parseFloat(
-                document.getElementById(
-                    "inputTollCharge"
-                ).value
-            ) || 0;
-
-
-        const waiting =
-            parseFloat(
-                document.getElementById(
-                    "fareWaiting"
-                ).textContent
-                .replace(/[^\d.]/g,"")
-            ) || 0;
-
-
-        const total =
-            base +
-            surge +
-            toll +
-            waiting;
-
-
-        document.getElementById(
-            "activeFareText"
-        ).textContent =
-            `₹${total.toFixed(2)}`;
-
-    };
-
-
-/* ======================================================
-   OTP
-====================================================== */
-
-window.moveOTPFocus =
-    function(
-        element,
-        index
+    if(
+        typeof value === "object" &&
+        typeof value.toMillis === "function"
     ){
 
-        element.value =
-            element.value
-                .replace(/\D/g,"")
-                .slice(0,1);
+        return value.toMillis();
+
+    }
+
+    if(
+        typeof value === "object" &&
+        value.seconds
+    ){
+
+        return value.seconds * 1000;
+
+    }
+
+    const date =
+        new Date(value);
+
+    return isNaN(date.getTime())
+        ? 0
+        : date.getTime();
+
+}
 
 
-        if(
-            element.value &&
-            index < 4
-        ){
+/* DATE FORMAT */
 
-            const inputs =
-                document.querySelectorAll(
-                    ".otp-input"
-                );
+function formatDate(value){
 
+    const timestamp =
+        getDateValue(value);
 
-            inputs[index]?.focus();
+    if(!timestamp)
+        return "Recent ride";
 
+    const date =
+        new Date(timestamp);
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
         }
-
-    };
-
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if(
-            event.key !==
-            "Backspace"
-        ){
-            return;
+    ) +
+    " · " +
+    date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour:"2-digit",
+            minute:"2-digit"
         }
+    );
+
+}
 
 
-        const active =
-            document.activeElement;
+/* STATUS */
+
+function normalizeStatus(status){
+
+    const value =
+        String(status || "")
+        .toLowerCase();
+
+    if(
+        value.includes("cancel")
+    )
+        return "cancelled";
+
+    if(
+        value.includes("complete") ||
+        value.includes("finish") ||
+        value === "done"
+    )
+        return "completed";
+
+    if(
+        value.includes("ongoing") ||
+        value.includes("started") ||
+        value.includes("progress")
+    )
+        return "ongoing";
+
+    if(
+        value.includes("accept")
+    )
+        return "accepted";
+
+    return "pending";
+
+}
 
 
-        if(
-            !active.classList.contains(
-                "otp-input"
-            )
-        ){
-            return;
-        }
+/* STATUS LABEL */
+
+function statusLabel(status){
+
+    const normalized =
+        normalizeStatus(status);
+
+    if(normalized === "completed")
+        return "Completed";
+
+    if(normalized === "cancelled")
+        return "Cancelled";
+
+    if(normalized === "ongoing")
+        return "Ongoing";
+
+    if(normalized === "accepted")
+        return "Accepted";
+
+    return "Pending";
+
+}
 
 
-        if(
-            active.value === ""
-        ){
+/* SERVICE ICON */
 
-            const inputs =
-                [
-                    ...document.querySelectorAll(
-                        ".otp-input"
-                    )
-                ];
+function serviceIcon(service){
+
+    const value =
+        String(service || "")
+        .toLowerCase();
+
+    if(value.includes("bike"))
+        return "🏍";
+
+    if(
+        value.includes("cab") ||
+        value.includes("car")
+    )
+        return "🚕";
+
+    if(value.includes("parcel"))
+        return "📦";
+
+    if(value.includes("food"))
+        return "🍔";
+
+    return "🚕";
+
+}
 
 
-            const index =
-                inputs.indexOf(
-                    active
-                );
+/* UPDATE SUMMARY */
+
+function updateSummary(){
+
+    const total =
+        allRides.length;
+
+    const completed =
+        allRides.filter(
+            ride =>
+                normalizeStatus(
+                    ride.status
+                ) === "completed"
+        ).length;
+
+    const earnings =
+        allRides
+        .filter(
+            ride =>
+                normalizeStatus(
+                    ride.status
+                ) === "completed"
+        )
+        .reduce(
+            (sum,ride) =>
+                sum + Number(
+                    ride.fare || 0
+                ),
+            0
+        );
 
 
-            if(index > 0){
+    $("totalRides").textContent =
+        total;
 
-                inputs[
-                    index - 1
-                ].focus();
+    $("completedRides").textContent =
+        completed;
+
+    $("totalEarnings").textContent =
+        "₹" +
+        earnings.toFixed(0);
+
+}
+
+
+/* RENDER */
+
+function renderRides(){
+
+    const list =
+        $("ridesList");
+
+    const loading =
+        $("loadingState");
+
+    const empty =
+        $("emptyState");
+
+
+    list
+        .querySelectorAll(".ride-card")
+        .forEach(card => card.remove());
+
+
+    loading.style.display =
+        "none";
+
+
+    const filtered =
+        allRides.filter(ride => {
+
+            if(currentFilter === "all")
+                return true;
+
+            return normalizeStatus(
+                ride.status
+            ) === currentFilter;
+
+        });
+
+
+    $("rideCount").textContent =
+        `${filtered.length} ${
+            filtered.length === 1
+                ? "ride"
+                : "rides"
+        }`;
+
+
+    if(filtered.length === 0){
+
+        empty.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    empty.style.display =
+        "none";
+
+
+    filtered.forEach(ride => {
+
+        list.appendChild(
+            createRideCard(ride)
+        );
+
+    });
+
+}
+
+
+/* CARD */
+
+function createRideCard(ride){
+
+    const card =
+        document.createElement("article");
+
+    card.className =
+        "ride-card";
+
+
+    const status =
+        normalizeStatus(
+            ride.status
+        );
+
+
+    const payment =
+        ride.paymentMethod ||
+        "Cash";
+
+
+    card.innerHTML = `
+
+        <div class="ride-head">
+
+            <div class="service-icon">
+                ${serviceIcon(ride.serviceType)}
+            </div>
+
+            <div class="ride-main">
+
+                <div class="ride-title">
+                    ${escapeHTML(
+                        ride.customerName
+                    )}
+                </div>
+
+                <div class="ride-date">
+                    ${formatDate(
+                        ride.createdAt
+                    )}
+                </div>
+
+            </div>
+
+            <div class="ride-fare">
+
+                <div class="fare-value">
+                    ₹${Number(
+                        ride.fare || 0
+                    ).toFixed(0)}
+                </div>
+
+                <div class="status ${status}">
+                    ${statusLabel(
+                        ride.status
+                    )}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="route">
+
+            <div class="route-row">
+
+                <div class="route-dot pickup"></div>
+
+                <div class="route-content">
+
+                    <div class="route-label">
+                        Pickup
+                    </div>
+
+                    <div class="route-address">
+                        ${escapeHTML(
+                            ride.pickupAddress
+                        )}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="route-row">
+
+                <div class="route-dot drop"></div>
+
+                <div class="route-content">
+
+                    <div class="route-label">
+                        Drop-off
+                    </div>
+
+                    <div class="route-address">
+                        ${escapeHTML(
+                            ride.dropAddress
+                        )}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="ride-details">
+
+            <div class="detail">
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        String(
+                            ride.distance || "--"
+                        )
+                    )} km
+                </div>
+
+                <div class="detail-label">
+                    Distance
+                </div>
+
+            </div>
+
+
+            <div class="detail">
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        String(
+                            ride.duration || "--"
+                        )
+                    )} min
+                </div>
+
+                <div class="detail-label">
+                    Duration
+                </div>
+
+            </div>
+
+
+            <div class="detail">
+
+                <div class="detail-value">
+                    ${escapeHTML(
+                        String(payment)
+                    )}
+                </div>
+
+                <div class="detail-label">
+                    Payment
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="ride-footer">
+
+            <div class="payment">
+                Service:
+                <strong>
+                    ${escapeHTML(
+                        String(
+                            ride.serviceType ||
+                            "Ride"
+                        )
+                    )}
+                </strong>
+            </div>
+
+            <button
+                class="view-btn"
+                data-id="${escapeHTML(
+                    String(ride.id)
+                )}"
+            >
+                View Details
+            </button>
+
+        </div>
+
+    `;
+
+
+    card
+        .querySelector(".view-btn")
+        .addEventListener(
+            "click",
+            () => {
+
+                window.location.href =
+                    "ride-details.html?rideId=" +
+                    encodeURIComponent(
+                        ride.id
+                    );
 
             }
+        );
 
-        }
+
+    return card;
+
+}
+
+
+/* ESCAPE */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+/* REALTIME */
+
+document.addEventListener(
+    "riderxRidesUpdated",
+    function(event){
+
+        if(!event.detail)
+            return;
+
+        const rides =
+            Array.isArray(event.detail)
+                ? event.detail
+                : Object.entries(event.detail)
+                    .map(([id,data]) => ({
+                        ...data,
+                        id:id
+                    }));
+
+        allRides =
+            rides.map(normalizeRide);
+
+        sortRides();
+
+        updateSummary();
+
+        renderRides();
 
     }
 );
 
 
-/* ======================================================
-   PIPELINE
-====================================================== */
+/* NEW RIDE */
 
-function updatePipelineStep(
-    stepNumber
-){
+document.addEventListener(
+    "riderxRideCompleted",
+    function(event){
 
-    const ids = [
-        "stepSearching",
-        "stepAccepted",
-        "stepArrived",
-        "stepInProgress",
-        "stepCompleted"
-    ];
+        if(!event.detail)
+            return;
 
-
-    ids.forEach(
-        (
-            id,
-            index
-        ) => {
-
-            const element =
-                document.getElementById(
-                    id
-                );
-
-
-            if(!element){
-                return;
-            }
-
-
-            const number =
-                index + 1;
-
-
-            element.classList.remove(
-                "active",
-                "done"
+        const ride =
+            normalizeRide(
+                event.detail
             );
 
+        const existing =
+            allRides.findIndex(
+                item =>
+                    item.id === ride.id
+            );
 
-            if(
-                number ===
-                stepNumber
-            ){
+        if(existing >= 0){
 
-                element.classList.add(
-                    "active"
-                );
+            allRides[existing] =
+                ride;
 
-            }else if(
-                number <
-                stepNumber
-            ){
+        }else{
 
-                element.classList.add(
-                    "done"
-                );
-
-            }
+            allRides.unshift(
+                ride
+            );
 
         }
-    );
 
-}
+        sortRides();
 
+        updateSummary();
 
-/* ======================================================
-   ROUTE
-====================================================== */
+        renderRides();
 
-function drawRouteOnMap(
-    start,
-    end,
-    color
-){
-
-    if(!map){
-        return;
     }
+);
 
 
-    if(routePolyline){
+/* READY */
 
-        map.removeLayer(
-            routePolyline
-        );
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadRides();
+
+    }
+);
+
+
+/* AUTO REFRESH */
+
+setInterval(() => {
+
+    if(
+        document.visibilityState ===
+        "visible"
+    ){
+
+        loadRides();
 
     }
 
+},60000);
 
-    const midLat =
-        (
-            start[0] +
-            end[0]
-        ) / 2;
+</script>
 
-
-    const midLng =
-        (
-            start[1] +
-            end[1]
-        ) / 2;
-
-
-    const points = [
-
-        start,
-
-        [
-            midLat + 0.006,
-            midLng - 0.004
-        ],
-
-        [
-            midLat - 0.002,
-            midLng + 0.005
-        ],
-
-        end
-
-    ];
-
-
-    routePolyline =
-        L.polyline(
-            points,
-            {
-                color:color,
-                weight:5,
-                opacity:.9,
-                lineCap:"round",
-                lineJoin:"round",
-                dashArray:"10 8"
-            }
-        ).addTo(map);
-
-
-    map.fitBounds(
-        routePolyline.getBounds(),
-        {
-            padding:[
-                60,
-                60
-            ]
-        }
-    );
-
-}
-
-
-/* ======================================================
-   RECENTER
-====================================================== */
-
-window.recenterMap =
-    function(){
-
-        if(
-            !map ||
-            !riderPosition
-        ){
-            return;
-        }
-
-
-        map.setView(
-            riderPosition,
-            16,
-            {
-                animate:true
-            }
-        );
-
-    };
-
-
-/* ======================================================
-   GOOGLE MAPS
-====================================================== */
-
-window.launchGoogleMapsExternal =
-    function(){
-
-        const destination =
-            dropPosition ||
-            pickupPosition;
-
-
-        if(!destination){
-
-            alert(
-                "Ride destination is not available yet."
-            );
-
-            return;
-        }
-
-
-        const url =
-            "https://www.google.com/maps/dir/?api=1" +
-            "&destination=" +
-            encodeURIComponent(
-                `${destination[0]},${destination[1]}`
-            );
-
-
-        window.open(
-            url,
-            "_blank"
-        );
-
-    };
-
-
-/* ======================================================
-   CHAT
-====================================================== */
-
-window.openCustomerChat =
-    function(){
-
-        if(currentRideId){
-
-            window.location.href =
-                `../customer/Chat.html?rideId=${encodeURIComponent(currentRideId)}`;
-
-            return;
-
-        }
-
-
-        alert(
-            "Customer chat will be available after the ride is connected."
-        );
-
-    };
-
-
-/* ======================================================
-   SOS
-====================================================== */
-
-window.triggerSOSAlert =
-    function(){
-
-        const confirmed =
-            confirm(
-                "Activate RiderX SOS? Your current location will be used for emergency assistance."
-            );
-
-
-        if(!confirmed){
-            return;
-        }
-
-
-        const phone =
-            "112";
-
-
-        window.location.href =
-            `tel:${phone}`;
-
-    };
-
-
-/* ======================================================
-   DEMO / REQUEST HELPER
-   Existing Firebase logic can populate these IDs.
-====================================================== */
-
-window.RiderXRides =
-    {
-
-        setRideData(data = {}){
-
-            currentRideId =
-                data.id ||
-                null;
-
-
-            if(data.pickup){
-
-                document.getElementById(
-                    "qPickupAddr"
-                ).textContent =
-                    data.pickup.address ||
-                    data.pickupAddress ||
-                    "Pickup location";
-
-
-                if(
-                    data.pickup.lat != null &&
-                    data.pickup.lng != null
-                ){
-
-                    pickupPosition = [
-                        Number(data.pickup.lat),
-                        Number(data.pickup.lng)
-                    ];
-
-                }
-
-            }
-
-
-            if(data.drop){
-
-                document.getElementById(
-                    "qDropAddr"
-                ).textContent =
-                    data.drop.address ||
-                    data.dropAddress ||
-                    "Destination";
-
-
-                if(
-                    data.drop.lat != null &&
-                    data.drop.lng != null
-                ){
-
-                    dropPosition = [
-                        Number(data.drop.lat),
-                        Number(data.drop.lng)
-                    ];
-
-                }
-
-            }
-
-
-            const customer =
-                data.customer ||
-                {};
-
-
-            document.getElementById(
-                "qCustomerName"
-            ).textContent =
-                customer.name ||
-                data.customerName ||
-                "Customer";
-
-
-            document.getElementById(
-                "activeCustName"
-            ).textContent =
-                customer.name ||
-                data.customerName ||
-                "Customer";
-
-
-            const fare =
-                Number(
-                    data.fare ||
-                    data.estimatedFare ||
-                    0
-                );
-
-
-            document.getElementById(
-                "qFare"
-            ).textContent =
-                `₹${fare.toFixed(0)}`;
-
-
-            document.getElementById(
-                "activeFareText"
-            ).textContent =
-                `₹${fare.toFixed(2)}`;
-
-
-            document.getElementById(
-                "activeDistText"
-            ).textContent =
-                data.distance
-                    ? `${data.distance} km`
-                    : "--";
-
-
-            document.getElementById(
-                "qTripDist"
-            ).textContent =
-                data.distance
-                    ? `${data.distance} km`
-                    : "--";
-
-
-            document.getElementById(
-                "queueCard"
-            ).classList.remove(
-                "hidden"
-            );
-
-
-            document.getElementById(
-                "emptyQueueNotice"
-            ).classList.add(
-                "hidden"
-            );
-
-
-            document.getElementById(
-                "queueCountBadge"
-            ).textContent =
-                "1 Available";
-
-        }
-
-    };
-
-
-</script></body>
-    </html>
+</body>
+</html>
