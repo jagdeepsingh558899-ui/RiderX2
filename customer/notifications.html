@@ -4,49 +4,1745 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Customer Notifications</title>
+<title>RiderX - Notifications</title>
 
-<link rel="stylesheet" href="../css/style.css">
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
+
+<style>
+
+:root{
+    --yellow:#FFD400;
+    --bg:#0d0d0d;
+    --card:#181818;
+    --card2:#202020;
+    --border:#2d2d2d;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#3b82f6;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    min-height:100%;
+    background:#080808;
+}
+
+body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.app{
+    width:100%;
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:var(--bg);
+}
+
+
+/* =========================
+   HEADER
+========================= */
+
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border-bottom:1px solid #252525;
+    background:rgba(10,10,10,.96);
+    backdrop-filter:blur(14px);
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #303030;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.title-box{
+    flex:1;
+}
+
+.title{
+    font-size:12px;
+    font-weight:900;
+}
+
+.subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
+}
+
+.header-action{
+    border:0;
+    background:none;
+    color:var(--yellow);
+    font-size:7px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   CONTENT
+========================= */
+
+.content{
+    padding:13px;
+    padding-bottom:35px;
+}
+
+
+/* =========================
+   TOP BAR
+========================= */
+
+.topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+}
+
+.unread-text{
+    color:#777;
+    font-size:7px;
+}
+
+.unread-text strong{
+    color:#fff;
+}
+
+.clear-btn{
+    padding:7px 10px;
+    border:1px solid #343434;
+    border-radius:9px;
+    background:#191919;
+    color:#aaa;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   FILTERS
+========================= */
+
+.filters{
+    display:flex;
+    gap:7px;
+    margin-bottom:12px;
+    overflow-x:auto;
+    scrollbar-width:none;
+}
+
+.filters::-webkit-scrollbar{
+    display:none;
+}
+
+.filter{
+    flex:0 0 auto;
+    padding:7px 11px;
+    border:1px solid #303030;
+    border-radius:20px;
+    background:#181818;
+    color:#777;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.filter.active{
+    border-color:#806b00;
+    background:#2a2500;
+    color:var(--yellow);
+}
+
+
+/* =========================
+   NOTIFICATION LIST
+========================= */
+
+.notification-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.notification{
+    position:relative;
+    display:flex;
+    gap:10px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:var(--card);
+    cursor:pointer;
+    transition:.15s;
+}
+
+.notification:active{
+    transform:scale(.99);
+    background:#202020;
+}
+
+.notification.unread{
+    border-color:#3a350f;
+    background:
+        linear-gradient(
+            135deg,
+            #1b1b17,
+            #171717
+        );
+}
+
+.notification.unread::before{
+    content:"";
+    position:absolute;
+    top:12px;
+    right:12px;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--yellow);
+}
+
+.notification-icon{
+    width:38px;
+    height:38px;
+    min-width:38px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#252525;
+    font-size:14px;
+}
+
+.notification-icon.yellow{
+    background:#302b05;
+}
+
+.notification-icon.green{
+    background:#15301f;
+}
+
+.notification-icon.red{
+    background:#301616;
+}
+
+.notification-icon.blue{
+    background:#151f31;
+}
+
+.notification-content{
+    flex:1;
+    min-width:0;
+    padding-right:8px;
+}
+
+.notification-title{
+    padding-right:10px;
+    font-size:8px;
+    font-weight:900;
+    line-height:1.3;
+}
+
+.notification-message{
+    margin-top:5px;
+    color:#858585;
+    font-size:6px;
+    line-height:1.45;
+}
+
+.notification-time{
+    margin-top:7px;
+    color:#505050;
+    font-size:5px;
+}
+
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.empty{
+    display:none;
+    padding:60px 20px;
+    text-align:center;
+}
+
+.empty.show{
+    display:block;
+}
+
+.empty-icon{
+    width:65px;
+    height:65px;
+    margin:0 auto 13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#191919;
+    font-size:25px;
+}
+
+.empty-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.empty-text{
+    max-width:260px;
+    margin:7px auto 0;
+    color:#666;
+    font-size:6px;
+    line-height:1.5;
+}
+
+
+/* =========================
+   DATE GROUP
+========================= */
+
+.date-label{
+    margin:14px 2px 7px;
+    color:#555;
+    font-size:6px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+
+/* =========================
+   DETAIL MODAL
+========================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    background:rgba(0,0,0,.72);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:650px;
+    max-height:75vh;
+    overflow:auto;
+    padding:18px 14px 25px;
+    border-top:1px solid #333;
+    border-radius:22px 22px 0 0;
+    background:#151515;
+}
+
+.handle{
+    width:40px;
+    height:4px;
+    margin:0 auto 15px;
+    border-radius:20px;
+    background:#444;
+}
+
+.modal-icon{
+    width:48px;
+    height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:11px;
+    border-radius:14px;
+    background:#292929;
+    font-size:18px;
+}
+
+.modal-title{
+    font-size:11px;
+    font-weight:900;
+}
+
+.modal-time{
+    margin-top:4px;
+    color:#666;
+    font-size:6px;
+}
+
+.modal-message{
+    margin-top:13px;
+    color:#999;
+    font-size:7px;
+    line-height:1.6;
+}
+
+.modal-close{
+    width:100%;
+    height:42px;
+    margin-top:17px;
+    border:0;
+    border-radius:11px;
+    background:var(--yellow);
+    color:#000;
+    font-size:7px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    z-index:200;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+</style>
 
 </head>
 
-
 <body>
 
-
-<div class="splash">
-
-
-<img src="../assets/logo.png" class="logo">
+<div class="app">
 
 
-<h1>
-Rider<span>X</span>
-</h1>
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ‹
+        </button>
+
+        <div class="title-box">
+
+            <div class="title">
+                Notifications
+            </div>
+
+            <div class="subtitle">
+                RiderX updates and ride alerts
+            </div>
+
+        </div>
+
+        <button
+            class="header-action"
+            onclick="markAllRead()"
+        >
+            Mark all read
+        </button>
+
+    </header>
 
 
-<h2>
-Notifications
-</h2>
+    <main class="content">
 
 
-<div id="notifications">
+        <!-- TOP -->
 
-Loading...
+        <div class="topbar">
+
+            <div class="unread-text">
+                <strong id="unreadCount">0</strong>
+                unread notifications
+            </div>
+
+            <button
+                class="clear-btn"
+                onclick="clearNotifications()"
+            >
+                Clear all
+            </button>
+
+        </div>
+
+
+        <!-- FILTERS -->
+
+        <div class="filters">
+
+            <button
+                class="filter active"
+                data-filter="all"
+                onclick="setFilter('all',this)"
+            >
+                All
+            </button>
+
+            <button
+                class="filter"
+                data-filter="ride"
+                onclick="setFilter('ride',this)"
+            >
+                Rides
+            </button>
+
+            <button
+                class="filter"
+                data-filter="payment"
+                onclick="setFilter('payment',this)"
+            >
+                Payments
+            </button>
+
+            <button
+                class="filter"
+                data-filter="promo"
+                onclick="setFilter('promo',this)"
+            >
+                Offers
+            </button>
+
+            <button
+                class="filter"
+                data-filter="system"
+                onclick="setFilter('system',this)"
+            >
+                Updates
+            </button>
+
+        </div>
+
+
+        <!-- LIST -->
+
+        <div
+            id="notificationList"
+            class="notification-list"
+        ></div>
+
+
+        <!-- EMPTY -->
+
+        <div
+            id="emptyState"
+            class="empty"
+        >
+
+            <div class="empty-icon">
+                🔔
+            </div>
+
+            <div class="empty-title">
+                No notifications
+            </div>
+
+            <div class="empty-text">
+                You're all caught up. New RiderX ride
+                and account updates will appear here.
+            </div>
+
+        </div>
+
+    </main>
 
 </div>
 
 
+<!-- DETAIL MODAL -->
+
+<div
+    class="modal"
+    id="detailModal"
+>
+
+    <div class="modal-card">
+
+        <div class="handle"></div>
+
+        <div
+            class="modal-icon"
+            id="modalIcon"
+        >
+            🔔
+        </div>
+
+        <div
+            class="modal-title"
+            id="modalTitle"
+        >
+            Notification
+        </div>
+
+        <div
+            class="modal-time"
+            id="modalTime"
+        >
+            Just now
+        </div>
+
+        <div
+            class="modal-message"
+            id="modalMessage"
+        ></div>
+
+        <button
+            class="modal-close"
+            onclick="closeModal()"
+        >
+            Done
+        </button>
+
+    </div>
+
 </div>
 
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
-<script type="module" src="../js/notification.js"></script>
 
+<script>
+
+/* ==========================================
+   RIDERX CUSTOMER NOTIFICATIONS
+========================================== */
+
+let notifications = [];
+let currentFilter = "all";
+let toastTimer = null;
+
+
+/* ==========================================
+   DEFAULT NOTIFICATIONS
+========================================== */
+
+const defaultNotifications = [
+
+    {
+        id:"welcome",
+        type:"system",
+        icon:"👋",
+        title:"Welcome to RiderX",
+        message:"Welcome to RiderX. Book Bike Taxi, Cab, Parcel and Food Delivery from one app.",
+        time:Date.now(),
+        read:false
+    },
+
+    {
+        id:"payment-ready",
+        type:"payment",
+        icon:"💳",
+        title:"Payments are ready",
+        message:"You can now manage your RiderX wallet and payment methods from the Wallet section.",
+        time:Date.now() - 3600000,
+        read:false
+    }
+
+];
+
+
+/* ==========================================
+   LOAD
+========================================== */
+
+function loadNotifications(){
+
+    const keys = [
+
+        "riderxNotifications",
+        "notifications",
+        "customerNotifications"
+
+    ];
+
+    let loaded = null;
+
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+            if(
+                raw
+            ){
+
+                const data =
+                    JSON.parse(
+                        raw
+                    );
+
+                if(
+                    Array.isArray(data)
+                ){
+
+                    loaded = data;
+
+                    break;
+
+                }
+
+            }
+
+        }catch(error){
+
+            console.log(
+                "Notification load error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    if(
+        loaded &&
+        loaded.length
+    ){
+
+        notifications =
+            normalizeNotifications(
+                loaded
+            );
+
+    }else{
+
+        notifications =
+            defaultNotifications.map(
+                item => ({
+                    ...item
+                })
+            );
+
+    }
+
+
+    saveNotifications();
+
+    renderNotifications();
+
+}
+
+
+/* ==========================================
+   NORMALIZE
+========================================== */
+
+function normalizeNotifications(
+    data
+){
+
+    return data.map(
+        (item,index) => {
+
+            const type =
+                item.type ||
+                item.category ||
+                "system";
+
+            let icon =
+                item.icon;
+
+            if(
+                !icon
+            ){
+
+                icon =
+                    getIcon(
+                        type
+                    );
+
+            }
+
+            return {
+
+                id:
+                    item.id ||
+                    "notification-" +
+                    index,
+
+                type:
+                    type,
+
+                icon:
+                    icon,
+
+                title:
+                    item.title ||
+                    item.heading ||
+                    "RiderX Notification",
+
+                message:
+                    item.message ||
+                    item.body ||
+                    item.text ||
+                    "",
+
+                time:
+                    Number(
+                        item.time ||
+                        item.createdAt ||
+                        Date.now()
+                    ),
+
+                read:
+                    Boolean(
+                        item.read
+                    )
+
+            };
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   ICON
+========================================== */
+
+function getIcon(
+    type
+){
+
+    switch(
+        type
+    ){
+
+        case "ride":
+            return "🚕";
+
+        case "payment":
+            return "💳";
+
+        case "promo":
+            return "🎁";
+
+        case "system":
+            return "⚙️";
+
+        default:
+            return "🔔";
+
+    }
+
+}
+
+
+/* ==========================================
+   SAVE
+========================================== */
+
+function saveNotifications(){
+
+    try{
+
+        localStorage.setItem(
+            "riderxNotifications",
+            JSON.stringify(
+                notifications
+            )
+        );
+
+    }catch(error){
+
+        console.log(
+            "Notification save error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   RENDER
+========================================== */
+
+function renderNotifications(){
+
+    const list =
+        document.getElementById(
+            "notificationList"
+        );
+
+    const empty =
+        document.getElementById(
+            "emptyState"
+        );
+
+
+    list.innerHTML = "";
+
+
+    let filtered =
+        notifications.filter(
+            item => {
+
+                if(
+                    currentFilter ===
+                    "all"
+                ){
+
+                    return true;
+
+                }
+
+                return (
+                    item.type ===
+                    currentFilter
+                );
+
+            }
+        );
+
+
+    filtered.sort(
+        (
+            a,
+            b
+        ) =>
+            Number(b.time) -
+            Number(a.time)
+    );
+
+
+    if(
+        !filtered.length
+    ){
+
+        empty.classList.add(
+            "show"
+        );
+
+    }else{
+
+        empty.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    const groups =
+        groupByDate(
+            filtered
+        );
+
+
+    Object.keys(groups)
+        .forEach(
+            group => {
+
+                const label =
+                    document.createElement(
+                        "div"
+                    );
+
+                label.className =
+                    "date-label";
+
+                label.textContent =
+                    group;
+
+                list.appendChild(
+                    label
+                );
+
+
+                groups[group]
+                    .forEach(
+                        notification => {
+
+                            list.appendChild(
+                                createNotificationElement(
+                                    notification
+                                )
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+
+    updateUnreadCount();
+
+}
+
+
+/* ==========================================
+   CREATE ITEM
+========================================== */
+
+function createNotificationElement(
+    item
+){
+
+    const el =
+        document.createElement(
+            "div"
+        );
+
+
+    el.className =
+        "notification" +
+        (
+            item.read
+                ? ""
+                : " unread"
+        );
+
+
+    const iconClass =
+        getIconClass(
+            item.type
+        );
+
+
+    el.innerHTML = `
+
+        <div class="notification-icon ${iconClass}">
+            ${escapeHtml(item.icon)}
+        </div>
+
+        <div class="notification-content">
+
+            <div class="notification-title">
+                ${escapeHtml(item.title)}
+            </div>
+
+            <div class="notification-message">
+                ${escapeHtml(item.message)}
+            </div>
+
+            <div class="notification-time">
+                ${formatTime(item.time)}
+            </div>
+
+        </div>
+
+    `;
+
+
+    el.addEventListener(
+        "click",
+        function(){
+
+            openNotification(
+                item.id
+            );
+
+        }
+    );
+
+
+    return el;
+
+}
+
+
+/* ==========================================
+   ICON CLASS
+========================================== */
+
+function getIconClass(
+    type
+){
+
+    if(
+        type ===
+        "ride"
+    ){
+
+        return "yellow";
+
+    }
+
+    if(
+        type ===
+        "payment"
+    ){
+
+        return "green";
+
+    }
+
+    if(
+        type ===
+        "promo"
+    ){
+
+        return "blue";
+
+    }
+
+    if(
+        type ===
+        "system"
+    ){
+
+        return "yellow";
+
+    }
+
+    return "";
+
+}
+
+
+/* ==========================================
+   GROUP DATES
+========================================== */
+
+function groupByDate(
+    list
+){
+
+    const groups = {};
+
+
+    list.forEach(
+        item => {
+
+            const label =
+                getDateLabel(
+                    item.time
+                );
+
+
+            if(
+                !groups[label]
+            ){
+
+                groups[label] = [];
+
+            }
+
+
+            groups[label].push(
+                item
+            );
+
+        }
+    );
+
+
+    return groups;
+
+}
+
+
+/* ==========================================
+   DATE LABEL
+========================================== */
+
+function getDateLabel(
+    timestamp
+){
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+    const now =
+        new Date();
+
+
+    const today =
+        new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate()
+        );
+
+
+    const yesterday =
+        new Date(
+            today
+        );
+
+    yesterday.setDate(
+        yesterday.getDate() -
+        1
+    );
+
+
+    const target =
+        new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        );
+
+
+    if(
+        target.getTime() ===
+        today.getTime()
+    ){
+
+        return "Today";
+
+    }
+
+
+    if(
+        target.getTime() ===
+        yesterday.getTime()
+    ){
+
+        return "Yesterday";
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"numeric",
+            month:"short",
+            year:"numeric"
+        }
+    );
+
+}
+
+
+/* ==========================================
+   FORMAT TIME
+========================================== */
+
+function formatTime(
+    timestamp
+){
+
+    const date =
+        new Date(
+            timestamp
+        );
+
+
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        return "Recently";
+
+    }
+
+
+    const now =
+        Date.now();
+
+
+    const diff =
+        Math.max(
+            0,
+            now -
+            date.getTime()
+        );
+
+
+    const minute =
+        60000;
+
+    const hour =
+        minute *
+        60;
+
+    const day =
+        hour *
+        24;
+
+
+    if(
+        diff <
+        minute
+    ){
+
+        return "Just now";
+
+    }
+
+
+    if(
+        diff <
+        hour
+    ){
+
+        const value =
+            Math.floor(
+                diff /
+                minute
+            );
+
+        return value +
+            (
+                value === 1
+                    ? " minute ago"
+                    : " minutes ago"
+            );
+
+    }
+
+
+    if(
+        diff <
+        day
+    ){
+
+        const value =
+            Math.floor(
+                diff /
+                hour
+            );
+
+        return value +
+            (
+                value === 1
+                    ? " hour ago"
+                    : " hours ago"
+            );
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"numeric",
+            month:"short"
+        }
+    ) +
+    " • " +
+    date.toLocaleTimeString(
+        "en-IN",
+        {
+            hour:"numeric",
+            minute:"2-digit"
+        }
+    );
+
+}
+
+
+/* ==========================================
+   FILTER
+========================================== */
+
+function setFilter(
+    filter,
+    button
+){
+
+    currentFilter =
+        filter;
+
+
+    document
+        .querySelectorAll(
+            ".filter"
+        )
+        .forEach(
+            item =>
+                item.classList.remove(
+                    "active"
+                )
+        );
+
+
+    button.classList.add(
+        "active"
+    );
+
+
+    renderNotifications();
+
+}
+
+
+/* ==========================================
+   OPEN NOTIFICATION
+========================================== */
+
+function openNotification(
+    id
+){
+
+    const item =
+        notifications.find(
+            notification =>
+                notification.id ===
+                id
+        );
+
+
+    if(
+        !item
+    ){
+
+        return;
+
+    }
+
+
+    item.read =
+        true;
+
+
+    saveNotifications();
+
+    renderNotifications();
+
+
+    document.getElementById(
+        "modalIcon"
+    ).textContent =
+        item.icon;
+
+
+    document.getElementById(
+        "modalTitle"
+    ).textContent =
+        item.title;
+
+
+    document.getElementById(
+        "modalTime"
+    ).textContent =
+        formatTime(
+            item.time
+        );
+
+
+    document.getElementById(
+        "modalMessage"
+    ).textContent =
+        item.message;
+
+
+    document.getElementById(
+        "detailModal"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+/* ==========================================
+   CLOSE MODAL
+========================================== */
+
+function closeModal(){
+
+    document.getElementById(
+        "detailModal"
+    ).classList.remove(
+        "show"
+    );
+
+}
+
+
+/* ==========================================
+   MARK ALL READ
+========================================== */
+
+function markAllRead(){
+
+    notifications.forEach(
+        item => {
+
+            item.read =
+                true;
+
+        }
+    );
+
+
+    saveNotifications();
+
+    renderNotifications();
+
+    showToast(
+        "All notifications marked as read."
+    );
+
+}
+
+
+/* ==========================================
+   CLEAR
+========================================== */
+
+function clearNotifications(){
+
+    if(
+        !notifications.length
+    ){
+
+        showToast(
+            "No notifications to clear."
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Clear all RiderX notifications?"
+        );
+
+
+    if(
+        !confirmed
+    ){
+
+        return;
+
+    }
+
+
+    notifications = [];
+
+    saveNotifications();
+
+    renderNotifications();
+
+    showToast(
+        "Notifications cleared."
+    );
+
+}
+
+
+/* ==========================================
+   UNREAD COUNT
+========================================== */
+
+function updateUnreadCount(){
+
+    const count =
+        notifications.filter(
+            item =>
+                !item.read
+        ).length;
+
+
+    document.getElementById(
+        "unreadCount"
+    ).textContent =
+        count;
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        window.location.href =
+            "home.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   ESCAPE HTML
+========================================== */
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   MODAL OUTSIDE CLICK
+========================================== */
+
+document.getElementById(
+    "detailModal"
+).addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            this
+        ){
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadNotifications();
+
+    }
+);
+
+</script>
 
 </body>
-
 </html>
