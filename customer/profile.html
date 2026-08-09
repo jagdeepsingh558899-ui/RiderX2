@@ -4,910 +4,2237 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Customer Profile</title>
+<title>RiderX - Profile</title>
 
+<meta name="theme-color" content="#FFD400">
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
 :root{
-
---yellow:#FFE500;
---black:#050505;
---card:#121212;
---gray:#999;
---danger:#ff3030;
-
+    --yellow:#FFD400;
+    --bg:#0d0d0d;
+    --card:#191919;
+    --card2:#202020;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
 }
-
 
 *{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
-
+html,
+body{
+    min-height:100%;
+    background:#080808;
+}
 
 body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
 
-background:var(--black);
-color:white;
-padding-bottom:80px;
-
+.app{
+    width:100%;
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:var(--bg);
 }
 
 
-
-
+/* =========================
+   HEADER
+========================= */
 
 .header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border-bottom:1px solid #252525;
+    background:rgba(10,10,10,.97);
+    backdrop-filter:blur(14px);
+}
 
-height:70px;
+.back-btn{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    border:1px solid #303030;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
 
-display:flex;
+.title-box{
+    flex:1;
+}
 
-align-items:center;
+.title{
+    font-size:12px;
+    font-weight:900;
+}
 
-justify-content:space-between;
+.subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
+}
 
-padding:0 20px;
-
-background:#111;
-
-border-bottom:1px solid #222;
-
+.edit-header-btn{
+    height:34px;
+    padding:0 11px;
+    border:1px solid #665700;
+    border-radius:9px;
+    background:#282300;
+    color:var(--yellow);
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
 }
 
 
+/* =========================
+   CONTENT
+========================= */
 
-
-.logo{
-
-font-size:30px;
-font-weight:900;
-
+.content{
+    padding:13px;
+    padding-bottom:40px;
 }
 
 
-
-.logo span{
-
-color:var(--yellow);
-
-}
-
-
-
-.back{
-
-color:var(--yellow);
-font-size:22px;
-
-}
-
-
-
-
-
-.container{
-
-padding:20px;
-
-}
-
-
-
-
+/* =========================
+   PROFILE HERO
+========================= */
 
 .profile-card{
+    position:relative;
+    overflow:hidden;
+    padding:18px 14px;
+    border:1px solid #393300;
+    border-radius:20px;
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(255,212,0,.14),
+            transparent 35%
+        ),
+        linear-gradient(
+            145deg,
+            #211f0e,
+            #171717
+        );
+}
 
-background:linear-gradient(145deg,#171717,#0d0d0d);
+.profile-top{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
 
-border-radius:25px;
+.avatar-wrap{
+    position:relative;
+}
 
-padding:25px;
+.avatar{
+    width:68px;
+    height:68px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border:2px solid var(--yellow);
+    border-radius:50%;
+    background:#292929;
+    color:var(--yellow);
+    font-size:24px;
+    font-weight:900;
+}
 
-border:1px solid rgba(255,229,0,.3);
+.avatar img{
+    width:100%;
+    height:100%;
+    display:none;
+    object-fit:cover;
+}
 
+.camera-btn{
+    position:absolute;
+    right:-2px;
+    bottom:-2px;
+    width:25px;
+    height:25px;
+    border:2px solid #171717;
+    border-radius:50%;
+    background:var(--yellow);
+    color:#000;
+    font-size:11px;
+    cursor:pointer;
+}
+
+.profile-info{
+    flex:1;
+    min-width:0;
+}
+
+.profile-name{
+    font-size:13px;
+    font-weight:900;
+    word-break:break-word;
+}
+
+.profile-phone{
+    margin-top:5px;
+    color:#999;
+    font-size:7px;
+}
+
+.profile-email{
+    margin-top:4px;
+    color:#666;
+    font-size:6px;
+    word-break:break-all;
+}
+
+.verified{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    margin-top:7px;
+    padding:4px 7px;
+    border-radius:20px;
+    background:#17301f;
+    color:#58df86;
+    font-size:5px;
+    font-weight:900;
 }
 
 
+/* =========================
+   STATS
+========================= */
 
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+    margin-top:13px;
+}
 
+.stat{
+    padding:10px 7px;
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:11px;
+    background:rgba(0,0,0,.18);
+    text-align:center;
+}
 
-.profile-section{
+.stat-value{
+    font-size:9px;
+    font-weight:900;
+}
 
-text-align:center;
-
+.stat-label{
+    margin-top:4px;
+    color:#666;
+    font-size:5px;
 }
 
 
+/* =========================
+   SECTIONS
+========================= */
 
-
-
-.profile-img{
-
-width:120px;
-
-height:120px;
-
-border-radius:50%;
-
-object-fit:cover;
-
-border:4px solid var(--yellow);
-
+.section-title{
+    margin:19px 2px 8px;
+    color:#666;
+    font-size:7px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.4px;
 }
 
 
+/* =========================
+   PROFILE FORM
+========================= */
 
+.form-card{
+    padding:13px;
+    border:1px solid var(--border);
+    border-radius:16px;
+    background:var(--card);
+}
 
-.change-photo{
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+}
 
-display:inline-block;
+.input-group{
+    margin-bottom:10px;
+}
 
-margin-top:15px;
+.input-group:last-child{
+    margin-bottom:0;
+}
 
-background:var(--yellow);
+.label{
+    display:block;
+    margin-bottom:5px;
+    color:#777;
+    font-size:6px;
+    font-weight:900;
+}
 
-color:#000;
+.input{
+    width:100%;
+    height:40px;
+    padding:0 10px;
+    border:1px solid #343434;
+    border-radius:10px;
+    outline:none;
+    background:#202020;
+    color:#fff;
+    font-size:8px;
+}
 
-padding:10px 20px;
+.input:focus{
+    border-color:#8c7500;
+}
 
-border-radius:12px;
-
-font-weight:bold;
-
+.input:disabled{
+    color:#777;
+    background:#181818;
 }
 
 
+/* =========================
+   SAVE BUTTON
+========================= */
 
+.save-btn{
+    width:100%;
+    height:43px;
+    margin-top:11px;
+    border:0;
+    border-radius:11px;
+    background:var(--yellow);
+    color:#000;
+    font-size:7px;
+    font-weight:900;
+    cursor:pointer;
+}
 
-
-#photoInput{
-
-display:none;
-
+.save-btn:disabled{
+    opacity:.5;
 }
 
 
+/* =========================
+   MENU
+========================= */
 
+.menu{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
 
+.menu-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-height:55px;
+    padding:9px 11px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--card);
+    cursor:pointer;
+}
 
-.input-box{
+.menu-item:active{
+    transform:scale(.99);
+}
 
-margin-top:18px;
+.menu-icon{
+    width:35px;
+    height:35px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:#252525;
+    font-size:14px;
+}
 
+.menu-info{
+    flex:1;
+    min-width:0;
+}
+
+.menu-title{
+    font-size:7px;
+    font-weight:900;
+}
+
+.menu-sub{
+    margin-top:4px;
+    color:#666;
+    font-size:5px;
+}
+
+.arrow{
+    color:#555;
+    font-size:16px;
 }
 
 
-
-.input-box label{
-
-display:block;
-
-color:var(--gray);
-
-margin-bottom:8px;
-
-font-size:14px;
-
-}
-
-
-
-.input-box input,
-.input-box select{
-
-
-width:100%;
-
-padding:14px;
-
-background:#222;
-
-border:none;
-
-outline:none;
-
-border-radius:12px;
-
-color:white;
-
-font-size:15px;
-
-}
-
-
-
-
-.btn{
-
-width:100%;
-
-padding:15px;
-
-margin-top:15px;
-
-border:none;
-
-border-radius:14px;
-
-font-size:16px;
-
-font-weight:bold;
-
-background:var(--yellow);
-
-color:#000;
-
-}
-
-
-
-
-
-.setting-btn{
-
-background:#1c1c1c;
-
-color:white;
-
-border:1px solid #333;
-
-}
-
-
-
+/* =========================
+   LOGOUT
+========================= */
 
 .logout{
+    color:#ff6868;
+}
 
-background:var(--danger);
-
-color:white;
-
+.logout .menu-icon{
+    background:#301717;
 }
 
 
+/* =========================
+   IMAGE INPUT
+========================= */
 
-
-
-.bottom-nav{
-
-position:fixed;
-
-bottom:0;
-
-left:0;
-
-right:0;
-
-height:70px;
-
-background:#111;
-
-display:flex;
-
-justify-content:space-around;
-
-align-items:center;
-
-border-top:1px solid #222;
-
+#photoInput{
+    display:none;
 }
 
 
+/* =========================
+   TOAST
+========================= */
 
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    z-index:200;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
 
-
-.bottom-nav a{
-
-text-decoration:none;
-
-color:#777;
-
-font-size:12px;
-
-text-align:center;
-
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
 }
 
 
+/* =========================
+   RESPONSIVE
+========================= */
 
-.bottom-nav i{
+@media(max-width:420px){
 
-display:block;
+    .profile-name{
+        font-size:11px;
+    }
 
-font-size:20px;
+    .avatar{
+        width:60px;
+        height:60px;
+    }
 
-margin-bottom:5px;
+    .form-row{
+        grid-template-columns:1fr;
+        gap:0;
+    }
 
 }
-
-
-
-.active{
-
-color:var(--yellow)!important;
-
-}
-
-
 
 </style>
 
 </head>
 
-
 <body>
 
-
-<header class="header">
-
-
-<a href="home.html" class="back">
-
-<i class="fa-solid fa-arrow-left"></i>
-
-</a>
+<div class="app">
 
 
+    <!-- HEADER -->
 
-<div class="logo">
+    <header class="header">
 
-RID<span>ERX</span>
+        <button
+            class="back-btn"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ‹
+        </button>
+
+        <div class="title-box">
+
+            <div class="title">
+                My Profile
+            </div>
+
+            <div class="subtitle">
+                Manage your RiderX account
+            </div>
+
+        </div>
+
+        <button
+            class="edit-header-btn"
+            id="headerEditBtn"
+            onclick="toggleEdit()"
+        >
+            EDIT
+        </button>
+
+    </header>
+
+
+    <main class="content">
+
+
+        <!-- PROFILE CARD -->
+
+        <section class="profile-card">
+
+            <div class="profile-top">
+
+                <div class="avatar-wrap">
+
+                    <div
+                        class="avatar"
+                        id="avatar"
+                    >
+
+                        <span id="avatarText">
+                            U
+                        </span>
+
+                        <img
+                            id="avatarImage"
+                            alt="Profile"
+                        >
+
+                    </div>
+
+                    <button
+                        class="camera-btn"
+                        onclick="choosePhoto()"
+                        aria-label="Change profile photo"
+                    >
+                        📷
+                    </button>
+
+                </div>
+
+
+                <div class="profile-info">
+
+                    <div
+                        class="profile-name"
+                        id="displayName"
+                    >
+                        RiderX User
+                    </div>
+
+                    <div
+                        class="profile-phone"
+                        id="displayPhone"
+                    >
+                        Phone not added
+                    </div>
+
+                    <div
+                        class="profile-email"
+                        id="displayEmail"
+                    >
+                        Email not added
+                    </div>
+
+                    <div class="verified">
+                        ✓ Account verified
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STATS -->
+
+            <div class="stats">
+
+                <div class="stat">
+
+                    <div
+                        class="stat-value"
+                        id="totalRides"
+                    >
+                        0
+                    </div>
+
+                    <div class="stat-label">
+                        Rides
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div
+                        class="stat-value"
+                        id="totalSpent"
+                    >
+                        ₹0
+                    </div>
+
+                    <div class="stat-label">
+                        Spent
+                    </div>
+
+                </div>
+
+                <div class="stat">
+
+                    <div
+                        class="stat-value"
+                        id="memberSince"
+                    >
+                        2026
+                    </div>
+
+                    <div class="stat-label">
+                        Member since
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PERSONAL INFORMATION -->
+
+        <div class="section-title">
+            Personal information
+        </div>
+
+        <section class="form-card">
+
+            <div class="form-row">
+
+                <div class="input-group">
+
+                    <label class="label">
+                        First name
+                    </label>
+
+                    <input
+                        class="input"
+                        id="firstName"
+                        type="text"
+                        placeholder="First name"
+                        disabled
+                    >
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label class="label">
+                        Last name
+                    </label>
+
+                    <input
+                        class="input"
+                        id="lastName"
+                        type="text"
+                        placeholder="Last name"
+                        disabled
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label class="label">
+                    Phone number
+                </label>
+
+                <input
+                    class="input"
+                    id="phone"
+                    type="tel"
+                    inputmode="tel"
+                    placeholder="+91 XXXXX XXXXX"
+                    disabled
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label class="label">
+                    Email address
+                </label>
+
+                <input
+                    class="input"
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    disabled
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label class="label">
+                    City
+                </label>
+
+                <input
+                    class="input"
+                    id="city"
+                    type="text"
+                    value="Chandigarh"
+                    disabled
+                >
+
+            </div>
+
+
+            <button
+                class="save-btn"
+                id="saveBtn"
+                onclick="saveProfile()"
+                style="display:none;"
+            >
+                SAVE CHANGES
+            </button>
+
+        </section>
+
+
+        <!-- ACCOUNT -->
+
+        <div class="section-title">
+            Account
+        </div>
+
+        <div class="menu">
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('settings.html')"
+            >
+
+                <div class="menu-icon">
+                    ⚙️
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-title">
+                        Account settings
+                    </div>
+
+                    <div class="menu-sub">
+                        Security, language and preferences
+                    </div>
+
+                </div>
+
+                <div class="arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('wallet.html')"
+            >
+
+                <div class="menu-icon">
+                    👛
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-title">
+                        Wallet
+                    </div>
+
+                    <div class="menu-sub">
+                        Manage balance and payments
+                    </div>
+
+                </div>
+
+                <div class="arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('history.html')"
+            >
+
+                <div class="menu-icon">
+                    🧾
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-title">
+                        Ride history
+                    </div>
+
+                    <div class="menu-sub">
+                        View your previous trips
+                    </div>
+
+                </div>
+
+                <div class="arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item"
+                onclick="openPage('notifications.html')"
+            >
+
+                <div class="menu-icon">
+                    🔔
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-title">
+                        Notifications
+                    </div>
+
+                    <div class="menu-sub">
+                        Ride and account alerts
+                    </div>
+
+                </div>
+
+                <div class="arrow">
+                    ›
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SUPPORT -->
+
+        <div class="section-title">
+            Support
+        </div>
+
+        <div class="menu">
+
+            <div
+                class="menu-item"
+                onclick="showToast('RiderX Help & Support coming soon.')"
+            >
+
+                <div class="menu-icon">
+                    💬
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-title">
+                        Help & Support
+                    </div>
+
+                    <div class="menu-sub">
+                        Get help with your RiderX account
+                    </div>
+
+                </div>
+
+                <div class="arrow">
+                    ›
+                </div>
+
+            </div>
+
+
+            <div
+                class="menu-item logout"
+                onclick="logout()"
+            >
+
+                <div class="menu-icon">
+                    🚪
+                </div>
+
+                <div class="menu-info">
+
+                    <div class="menu-title">
+                        Logout
+                    </div>
+
+                    <div class="menu-sub">
+                        Sign out of this account
+                    </div>
+
+                </div>
+
+                <div class="arrow">
+                    ›
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
 
 </div>
 
 
+<input
+    type="file"
+    id="photoInput"
+    accept="image/*"
+>
 
-<div></div>
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
-</header>
 
+<script>
 
+/* ==========================================
+   RIDERX CUSTOMER PROFILE
+========================================== */
 
+let editMode = false;
+let toastTimer = null;
 
 
-<div class="container">
+/* ==========================================
+   STORAGE KEYS
+========================================== */
 
+const PROFILE_KEY =
+    "riderxCustomerProfile";
 
-<div class="profile-card">
 
+/* ==========================================
+   DEFAULT PROFILE
+========================================== */
 
+const defaultProfile = {
 
-<div class="profile-section">
-
-
-<img id="profileImage"
-
-src="../assets/Logo/RiderX-logo.png"
-
-class="profile-img">
-
-
-
-<br>
-
-
-
-<label for="photoInput" class="change-photo">
-
-<i class="fa-solid fa-camera"></i>
-
-Change Photo
-
-</label>
-
-
-
-<input type="file"
-
-id="photoInput"
-
-accept="image/*">
-
-
-</div>
-
-
-
-
-
-<div class="input-box">
-
-<label>Name</label>
-
-<input id="name"
-placeholder="Enter Name">
-
-</div>
-
-
-
-
-<div class="input-box">
-
-<label>Email</label>
-
-<input id="email"
-readonly>
-
-</div>
-
-
-
-
-
-<div class="input-box">
-
-<label>Mobile Number</label>
-
-<input id="phone"
-placeholder="Mobile Number">
-
-</div>
-
-
-
-
-
-<div class="input-box">
-
-<label>Address</label>
-
-<input id="address"
-placeholder="Address">
-
-</div>
-
-
-
-
-
-<button class="btn"
-
-onclick="saveProfile()">
-
-<i class="fa-solid fa-floppy-disk"></i>
-
-Save Profile
-
-</button>
-
-
-
-
-
-<button class="btn setting-btn"
-
-onclick="openSettings()">
-
-<i class="fa-solid fa-gear"></i>
-
-Settings
-
-</button>
-
-
-
-
-
-<button class="btn logout"
-
-onclick="logout()">
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-Logout
-
-</button>
-
-
-
-</div>
-
-
-</div>
-<script type="module">
-
-import {
-
-auth,
-db,
-storage
-
-}
-
-from "../firebase/firebase-config.js";
-
-
-import {
-
-onAuthStateChanged,
-signOut
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-
-import {
-
-doc,
-getDoc,
-setDoc
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-import {
-
-ref,
-uploadBytes,
-getDownloadURL
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-
-
-
-let currentUser=null;
-
-let selectedPhoto=null;
-
-
-
-
-
-// ===============================
-// LOAD PROFILE
-// ===============================
-
-
-onAuthStateChanged(auth,async(user)=>{
-
-
-if(!user){
-
-location.href="../auth/login.html";
-
-return;
-
-}
-
-
-
-currentUser=user;
-
-
-
-email.value=user.email || "";
-
-
-
-const snap =
-await getDoc(
-doc(db,"users",user.uid)
-);
-
-
-
-if(snap.exists()){
-
-
-let data=snap.data();
-
-
-
-name.value=data.name || "";
-
-phone.value=data.phone || "";
-
-address.value=data.address || "";
-
-
-
-if(data.photoURL){
-
-profileImage.src=data.photoURL;
-
-}
-
-
-
-}
-
-
-
-});
-
-
-
-
-
-
-
-// ===============================
-// PHOTO SELECT
-// ===============================
-
-
-photoInput.addEventListener("change",(e)=>{
-
-
-selectedPhoto=e.target.files[0];
-
-
-
-if(selectedPhoto){
-
-
-let reader=new FileReader();
-
-
-
-reader.onload=()=>{
-
-
-profileImage.src=reader.result;
-
+    firstName:"",
+    lastName:"",
+    phone:"",
+    email:"",
+    city:"Chandigarh",
+    photo:"",
+    createdAt:Date.now()
 
 };
 
 
+/* ==========================================
+   LOAD PROFILE
+========================================== */
 
-reader.readAsDataURL(selectedPhoto);
+function loadProfile(){
 
+    let profile = {
+        ...defaultProfile
+    };
+
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                PROFILE_KEY
+            );
+
+
+        if(
+            raw
+        ){
+
+            const saved =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                saved &&
+                typeof saved ===
+                "object"
+            ){
+
+                profile = {
+                    ...profile,
+                    ...saved
+                };
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.log(
+            "Profile load error:",
+            error
+        );
+
+    }
+
+
+    /*
+      Try existing user/customer data.
+    */
+
+    const external =
+        findExternalUser();
+
+
+    if(
+        external
+    ){
+
+        profile =
+            mergeExternalProfile(
+                profile,
+                external
+            );
+
+    }
+
+
+    /*
+      Keep profile locally available.
+    */
+
+    try{
+
+        localStorage.setItem(
+            PROFILE_KEY,
+            JSON.stringify(
+                profile
+            )
+        );
+
+    }catch(error){
+
+        console.log(error);
+
+    }
+
+
+    fillProfile(
+        profile
+    );
+
+
+    loadRideStats();
 
 }
 
 
+/* ==========================================
+   EXTERNAL USER
+========================================== */
 
-});
+function findExternalUser(){
 
+    const keys = [
 
+        "riderxUser",
+        "currentUser",
+        "user",
+        "customer",
+        "userData",
+        "riderxCustomer"
 
-
-
-
-
-// ===============================
-// SAVE PROFILE
-// ===============================
-
-
-window.saveProfile=async()=>{
-
-
-try{
+    ];
 
 
-let photoURL="";
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
 
 
+            if(
+                !raw
+            ){
 
-if(selectedPhoto){
+                continue;
+
+            }
 
 
-const imageRef =
-ref(
-storage,
-"users/profile/"+currentUser.uid
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                data &&
+                typeof data ===
+                "object"
+            ){
+
+                return data;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                error
+            );
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* ==========================================
+   MERGE EXTERNAL
+========================================== */
+
+function mergeExternalProfile(
+    profile,
+    external
+){
+
+    const merged = {
+        ...profile
+    };
+
+
+    merged.firstName =
+        external.firstName ||
+        external.firstname ||
+        external.name?.split(" ")[0] ||
+        profile.firstName;
+
+
+    merged.lastName =
+        external.lastName ||
+        external.lastname ||
+        external.name?.split(" ").slice(1).join(" ") ||
+        profile.lastName;
+
+
+    merged.phone =
+        external.phone ||
+        external.mobile ||
+        external.phoneNumber ||
+        profile.phone;
+
+
+    merged.email =
+        external.email ||
+        profile.email;
+
+
+    merged.city =
+        external.city ||
+        "Chandigarh";
+
+
+    merged.photo =
+        external.photo ||
+        external.photoURL ||
+        external.profileImage ||
+        profile.photo;
+
+
+    merged.createdAt =
+        external.createdAt ||
+        profile.createdAt;
+
+
+    return merged;
+
+}
+
+
+/* ==========================================
+   FILL UI
+========================================== */
+
+function fillProfile(
+    profile
+){
+
+    document.getElementById(
+        "firstName"
+    ).value =
+        profile.firstName ||
+        "";
+
+
+    document.getElementById(
+        "lastName"
+    ).value =
+        profile.lastName ||
+        "";
+
+
+    document.getElementById(
+        "phone"
+    ).value =
+        profile.phone ||
+        "";
+
+
+    document.getElementById(
+        "email"
+    ).value =
+        profile.email ||
+        "";
+
+
+    document.getElementById(
+        "city"
+    ).value =
+        "Chandigarh";
+
+
+    const fullName =
+        [
+            profile.firstName,
+            profile.lastName
+        ]
+        .filter(Boolean)
+        .join(" ");
+
+
+    document.getElementById(
+        "displayName"
+    ).textContent =
+        fullName ||
+        "RiderX User";
+
+
+    document.getElementById(
+        "displayPhone"
+    ).textContent =
+        profile.phone ||
+        "Phone not added";
+
+
+    document.getElementById(
+        "displayEmail"
+    ).textContent =
+        profile.email ||
+        "Email not added";
+
+
+    setAvatar(
+        profile
+    );
+
+
+    setMemberSince(
+        profile.createdAt
+    );
+
+}
+
+
+/* ==========================================
+   AVATAR
+========================================== */
+
+function setAvatar(
+    profile
+){
+
+    const image =
+        document.getElementById(
+            "avatarImage"
+        );
+
+    const text =
+        document.getElementById(
+            "avatarText"
+        );
+
+
+    const name =
+        [
+            profile.firstName,
+            profile.lastName
+        ]
+        .filter(Boolean)
+        .join(" ");
+
+
+    const initial =
+        name
+            ? name.charAt(0).toUpperCase()
+            : "U";
+
+
+    text.textContent =
+        initial;
+
+
+    if(
+        profile.photo
+    ){
+
+        image.src =
+            profile.photo;
+
+        image.style.display =
+            "block";
+
+        text.style.display =
+            "none";
+
+    }else{
+
+        image.removeAttribute(
+            "src"
+        );
+
+        image.style.display =
+            "none";
+
+        text.style.display =
+            "block";
+
+    }
+
+}
+
+
+/* ==========================================
+   MEMBER SINCE
+========================================== */
+
+function setMemberSince(
+    createdAt
+){
+
+    const date =
+        new Date(
+            Number(
+                createdAt
+            )
+        );
+
+
+    const year =
+        Number.isNaN(
+            date.getTime()
+        )
+            ? new Date().getFullYear()
+            : date.getFullYear();
+
+
+    document.getElementById(
+        "memberSince"
+    ).textContent =
+        year;
+
+}
+
+
+/* ==========================================
+   EDIT
+========================================== */
+
+function toggleEdit(){
+
+    editMode =
+        !editMode;
+
+
+    const fields = [
+
+        "firstName",
+        "lastName",
+        "phone",
+        "email"
+
+    ];
+
+
+    fields.forEach(
+        id => {
+
+            document.getElementById(
+                id
+            ).disabled =
+                !editMode;
+
+        }
+    );
+
+
+    const saveBtn =
+        document.getElementById(
+            "saveBtn"
+        );
+
+
+    saveBtn.style.display =
+        editMode
+            ? "block"
+            : "none";
+
+
+    document.getElementById(
+        "headerEditBtn"
+    ).textContent =
+        editMode
+            ? "CANCEL"
+            : "EDIT";
+
+
+    if(
+        editMode
+    ){
+
+        document.getElementById(
+            "firstName"
+        ).focus();
+
+    }
+
+}
+
+
+/* ==========================================
+   SAVE PROFILE
+========================================== */
+
+function saveProfile(){
+
+    const profile =
+        getStoredProfile();
+
+
+    profile.firstName =
+        document.getElementById(
+            "firstName"
+        ).value.trim();
+
+
+    profile.lastName =
+        document.getElementById(
+            "lastName"
+        ).value.trim();
+
+
+    profile.phone =
+        document.getElementById(
+            "phone"
+        ).value.trim();
+
+
+    profile.email =
+        document.getElementById(
+            "email"
+        ).value.trim();
+
+
+    profile.city =
+        "Chandigarh";
+
+
+    if(
+        !profile.firstName
+    ){
+
+        showToast(
+            "Please enter your first name."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        profile.email &&
+        !isValidEmail(
+            profile.email
+        )
+    ){
+
+        showToast(
+            "Please enter a valid email address."
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        localStorage.setItem(
+            PROFILE_KEY,
+            JSON.stringify(
+                profile
+            )
+        );
+
+
+        /*
+          Keep common user storage
+          synchronized for the RiderX
+          frontend.
+        */
+
+        syncUserStorage(
+            profile
+        );
+
+
+        fillProfile(
+            profile
+        );
+
+
+        if(
+            editMode
+        ){
+
+            toggleEdit();
+
+        }
+
+
+        showToast(
+            "Profile updated successfully."
+        );
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+        showToast(
+            "Unable to save profile."
+
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   GET STORED
+========================================== */
+
+function getStoredProfile(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                PROFILE_KEY
+            );
+
+
+        if(
+            raw
+        ){
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                data &&
+                typeof data ===
+                "object"
+            ){
+
+                return {
+                    ...defaultProfile,
+                    ...data
+                };
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.log(
+            error
+        );
+
+    }
+
+
+    return {
+        ...defaultProfile
+    };
+
+}
+
+
+/* ==========================================
+   SYNC USER STORAGE
+========================================== */
+
+function syncUserStorage(
+    profile
+){
+
+    const fullName =
+        [
+            profile.firstName,
+            profile.lastName
+        ]
+        .filter(Boolean)
+        .join(" ");
+
+
+    const keys = [
+
+        "riderxUser",
+        "currentUser",
+        "customer"
+
+    ];
+
+
+    keys.forEach(
+        key => {
+
+            try{
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if(
+                    !raw
+                ){
+
+                    return;
+
+                }
+
+
+                const data =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if(
+                    data &&
+                    typeof data ===
+                    "object"
+                ){
+
+                    data.firstName =
+                        profile.firstName;
+
+                    data.lastName =
+                        profile.lastName;
+
+                    data.name =
+                        fullName;
+
+                    data.phone =
+                        profile.phone;
+
+                    data.email =
+                        profile.email;
+
+                    data.city =
+                        "Chandigarh";
+
+                    data.photoURL =
+                        profile.photo;
+
+
+                    localStorage.setItem(
+                        key,
+                        JSON.stringify(
+                            data
+                        )
+                    );
+
+                }
+
+            }catch(error){
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   VALIDATE EMAIL
+========================================== */
+
+function isValidEmail(
+    email
+){
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        .test(
+            email
+        );
+
+}
+
+
+/* ==========================================
+   PHOTO
+========================================== */
+
+function choosePhoto(){
+
+    document.getElementById(
+        "photoInput"
+    ).click();
+
+}
+
+
+document.getElementById(
+    "photoInput"
+).addEventListener(
+    "change",
+    function(){
+
+        const file =
+            this.files &&
+            this.files[0];
+
+
+        if(
+            !file
+        ){
+
+            return;
+
+        }
+
+
+        if(
+            !file.type.startsWith(
+                "image/"
+            )
+        ){
+
+            showToast(
+                "Please select an image."
+            );
+
+            return;
+
+        }
+
+
+        if(
+            file.size >
+            5 * 1024 * 1024
+        ){
+
+            showToast(
+                "Image must be smaller than 5 MB."
+            );
+
+            return;
+
+        }
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function(event){
+
+                const profile =
+                    getStoredProfile();
+
+
+                profile.photo =
+                    event.target.result;
+
+
+                try{
+
+                    localStorage.setItem(
+                        PROFILE_KEY,
+                        JSON.stringify(
+                            profile
+                        )
+                    );
+
+
+                    setAvatar(
+                        profile
+                    );
+
+
+                    syncUserStorage(
+                        profile
+                    );
+
+
+                    showToast(
+                        "Profile photo updated."
+                    );
+
+                }catch(error){
+
+                    console.error(
+                        error
+                    );
+
+                    showToast(
+                        "Unable to save this photo."
+                    );
+
+                }
+
+            };
+
+
+        reader.readAsDataURL(
+            file
+        );
+
+    }
 );
 
 
+/* ==========================================
+   RIDE STATS
+========================================== */
 
-await uploadBytes(
-imageRef,
-selectedPhoto
+function loadRideStats(){
+
+    let rides =
+        [];
+
+
+    const keys = [
+
+        "riderxRideHistory",
+        "rideHistory",
+        "customerRideHistory",
+        "riderxPayments"
+
+    ];
+
+
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(
+                !raw
+            ){
+
+                continue;
+
+            }
+
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                Array.isArray(
+                    data
+                )
+            ){
+
+                rides =
+                    data;
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                error
+            );
+
+        }
+
+    }
+
+
+    const completed =
+        rides.filter(
+            ride =>
+                isCompletedRide(
+                    ride
+                )
+        );
+
+
+    const totalSpent =
+        completed.reduce(
+            (
+                total,
+                ride
+            ) =>
+                total +
+                Number(
+                    ride.amount ||
+                    ride.fare ||
+                    ride.total ||
+                    ride.price ||
+                    0
+                ),
+            0
+        );
+
+
+    document.getElementById(
+        "totalRides"
+    ).textContent =
+        completed.length;
+
+
+    document.getElementById(
+        "totalSpent"
+    ).textContent =
+        "₹" +
+        Math.round(
+            totalSpent
+        );
+
+}
+
+
+/* ==========================================
+   COMPLETED RIDE
+========================================== */
+
+function isCompletedRide(
+    ride
+){
+
+    if(
+        !ride ||
+        typeof ride !==
+        "object"
+    ){
+
+        return false;
+
+    }
+
+
+    const status =
+        String(
+            ride.status ||
+            ride.rideStatus ||
+            ""
+        )
+        .toLowerCase();
+
+
+    if(
+        !status
+    ){
+
+        return true;
+
+    }
+
+
+    return [
+
+        "completed",
+        "complete",
+        "finished",
+        "paid",
+        "success"
+
+    ].includes(
+        status
+    );
+
+}
+
+
+/* ==========================================
+   OPEN PAGE
+========================================== */
+
+function openPage(
+    page
+){
+
+    window.location.href =
+        page;
+
+}
+
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+function logout(){
+
+    const confirmed =
+        window.confirm(
+            "Are you sure you want to logout?"
+        );
+
+
+    if(
+        !confirmed
+    ){
+
+        return;
+
+    }
+
+
+    /*
+      Clear only frontend session keys.
+      Persistent profile/preferences remain
+      available unless the auth system removes them.
+    */
+
+    const sessionKeys = [
+
+        "currentUser",
+        "riderxCurrentUser",
+        "riderxSession",
+        "userSession",
+        "firebaseUser"
+
+    ];
+
+
+    sessionKeys.forEach(
+        key =>
+            localStorage.removeItem(
+                key
+            )
+    );
+
+
+    showToast(
+        "Logged out successfully."
+    );
+
+
+    setTimeout(
+        function(){
+
+            window.location.href =
+                "../auth/login.html";
+
+        },
+        700
+    );
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        window.location.href =
+            "home.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadProfile();
+
+    }
 );
-
-
-
-photoURL =
-await getDownloadURL(imageRef);
-
-
-}
-
-
-
-
-let updateData={
-
-
-name:name.value.trim(),
-
-phone:phone.value.trim(),
-
-address:address.value.trim(),
-
-updatedAt:new Date()
-
-
-};
-
-
-
-
-
-if(photoURL){
-
-updateData.photoURL=photoURL;
-
-}
-
-
-
-
-
-await setDoc(
-
-doc(
-db,
-"users",
-currentUser.uid
-),
-
-updateData,
-
-{
-merge:true
-}
-
-);
-
-
-
-alert(
-"Profile Updated Successfully"
-);
-
-
-
-}
-
-
-catch(error){
-
-alert(error.message);
-
-}
-
-
-};
-
-
-
-
-
-
-
-
-
-// ===============================
-// SETTINGS
-// ===============================
-
-
-window.openSettings=()=>{
-
-
-location.href="settings.html";
-
-
-};
-
-
-
-
-
-
-
-
-// ===============================
-// LOGOUT
-// ===============================
-
-
-window.logout=async()=>{
-
-
-await signOut(auth);
-
-
-location.href="../auth/login.html";
-
-
-};
-
-
-
-
 
 </script>
 
-
-
-
-
-<!-- Bottom Navigation -->
-
-
-<nav class="bottom-nav">
-
-
-<a href="home.html">
-
-<i class="fa-solid fa-house"></i>
-
-Home
-
-</a>
-
-
-
-<a href="booking.html">
-
-<i class="fa-solid fa-motorcycle"></i>
-
-Book
-
-</a>
-
-
-
-<a href="history.html">
-
-<i class="fa-solid fa-clock"></i>
-
-History
-
-</a>
-
-
-
-
-<a href="wallet.html">
-
-<i class="fa-solid fa-wallet"></i>
-
-Wallet
-
-</a>
-
-
-
-
-<a href="profile.html" class="active">
-
-<i class="fa-solid fa-user"></i>
-
-Profile
-
-</a>
-
-
-
-</nav>
-
-
-
 </body>
-
 </html>
