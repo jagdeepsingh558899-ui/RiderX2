@@ -1,2251 +1,1225 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
->
-
-<meta
-    name="theme-color"
-    content="#050505"
->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>RiderX - Ride Requests</title>
 
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
+:root{
+    --yellow:#FFD400;
+    --black:#080808;
+    --dark:#111;
+    --card:#171717;
+    --border:#2b2b2b;
+    --muted:#909090;
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#60a5fa;
+}
+
 *{
     box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+    margin:0;
+    padding:0;
 }
 
 html,
 body{
-
-    margin:0;
-    padding:0;
-
     min-height:100%;
-
-    background:#050505;
-    color:#fff;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
 }
 
 body{
-
-    padding-bottom:
-        30px;
-
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.header{
-
-    position:sticky;
-
-    top:0;
-
-    z-index:1000;
-
-    padding:
-        calc(12px + env(safe-area-inset-top))
-        14px
-        12px;
-
-    background:
-        rgba(5,5,5,.94);
-
-    backdrop-filter:
-        blur(18px);
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.07);
-
+.requests-page{
+    min-height:100vh;
+    min-height:100dvh;
+    max-width:650px;
+    margin:auto;
+    background:#0d0d0d;
+    padding-bottom:25px;
 }
 
-.header-row{
+/* HEADER */
 
+.page-header{
+    height:68px;
     display:flex;
-
     align-items:center;
-
-    gap:10px;
-
+    gap:12px;
+    padding:10px 14px;
+    background:#111;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:30;
 }
 
-.back{
-
+.back-btn{
     width:42px;
     height:42px;
-
     border:0;
-
-    border-radius:13px;
-
-    background:#1b1b1b;
-
-    color:#fff;
-
-    font-size:22px;
-
-    cursor:pointer;
-
-}
-
-.logo{
-
-    flex:1;
-
-}
-
-.logo strong{
-
-    display:block;
-
-    font-size:20px;
-
-    font-weight:900;
-
-}
-
-.logo strong span{
-
-    color:#FFD600;
-
-}
-
-.logo small{
-
-    display:block;
-
-    margin-top:2px;
-
-    color:#777;
-
-    font-size:9px;
-
-    text-transform:uppercase;
-
-    letter-spacing:.5px;
-
-}
-
-.online-pill{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:6px;
-
-    padding:8px 10px;
-
-    border-radius:20px;
-
-    background:
-        rgba(54,220,117,.10);
-
-    color:#36dc75;
-
-    font-size:8px;
-
-    font-weight:900;
-
-}
-
-.online-dot{
-
-    width:7px;
-    height:7px;
-
     border-radius:50%;
-
-    background:#36dc75;
-
-}
-
-
-/* =========================================================
-   CONTENT
-========================================================= */
-
-.container{
-
-    width:100%;
-
-    max-width:680px;
-
-    margin:0 auto;
-
-    padding:14px;
-
-}
-
-
-/* =========================================================
-   SUMMARY
-========================================================= */
-
-.summary{
-
-    display:grid;
-
-    grid-template-columns:
-        1fr
-        1fr;
-
-    gap:9px;
-
-    margin-bottom:14px;
-
-}
-
-.summary-card{
-
-    padding:14px;
-
-    border-radius:17px;
-
-    background:#111;
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-}
-
-.summary-label{
-
-    color:#777;
-
-    font-size:8px;
-
-    font-weight:900;
-
-    text-transform:uppercase;
-
-}
-
-.summary-value{
-
-    margin-top:6px;
-
-    color:#FFD600;
-
-    font-size:24px;
-
-    font-weight:900;
-
-}
-
-
-/* =========================================================
-   TITLE
-========================================================= */
-
-.section-title{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin:
-        8px 2px
-        10px;
-
-}
-
-.section-title strong{
-
-    font-size:17px;
-
-    font-weight:900;
-
-}
-
-.refresh{
-
-    border:0;
-
-    border-radius:10px;
-
-    padding:8px 10px;
-
-    background:#1c1c1c;
-
-    color:#FFD600;
-
-    font-size:10px;
-
-    font-weight:900;
-
-    cursor:pointer;
-
-}
-
-
-/* =========================================================
-   REQUEST CARD
-========================================================= */
-
-.request-card{
-
-    position:relative;
-
-    margin-bottom:12px;
-
-    padding:15px;
-
-    border-radius:21px;
-
-    background:#111;
-
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
-    box-shadow:
-        0 12px 35px
-        rgba(0,0,0,.28);
-
-    overflow:hidden;
-
-}
-
-.request-card.new{
-
-    border-color:
-        rgba(255,214,0,.45);
-
-    box-shadow:
-        0 12px 40px
-        rgba(255,214,0,.08);
-
-}
-
-.new-badge{
-
-    position:absolute;
-
-    top:10px;
-
-    right:10px;
-
-    padding:5px 8px;
-
-    border-radius:8px;
-
-    background:#FFD600;
-
-    color:#000;
-
-    font-size:7px;
-
-    font-weight:900;
-
-}
-
-.request-top{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-}
-
-.service-icon{
-
-    width:48px;
-    height:48px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    border-radius:14px;
-
-    background:#1c1c1c;
-
-    font-size:23px;
-
-}
-
-.request-main{
-
-    flex:1;
-
-    min-width:0;
-
-}
-
-.service-name{
-
-    font-size:15px;
-
-    font-weight:900;
-
-}
-
-.request-time{
-
-    margin-top:4px;
-
-    color:#777;
-
-    font-size:9px;
-
-}
-
-.fare{
-
-    text-align:right;
-
-}
-
-.fare strong{
-
-    display:block;
-
-    color:#FFD600;
-
-    font-size:20px;
-
-    font-weight:900;
-
-}
-
-.fare span{
-
-    display:block;
-
-    margin-top:2px;
-
-    color:#777;
-
-    font-size:8px;
-
-}
-
-
-/* =========================================================
-   CUSTOMER
-========================================================= */
-
-.customer-row{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:9px;
-
-    margin-top:13px;
-
-    padding:9px 10px;
-
-    border-radius:12px;
-
-    background:#181818;
-
-}
-
-.customer-avatar{
-
-    width:34px;
-    height:34px;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    border-radius:50%;
-
-    background:#2a2a2a;
-
-    font-size:15px;
-
-}
-
-.customer-info{
-
-    flex:1;
-
-    min-width:0;
-
-}
-
-.customer-info strong{
-
-    display:block;
-
-    color:#eee;
-
-    font-size:10px;
-
-}
-
-.customer-info span{
-
-    display:block;
-
-    margin-top:2px;
-
-    color:#666;
-
-    font-size:8px;
-
-}
-
-
-/* =========================================================
-   ROUTE
-========================================================= */
-
-.route{
-
-    position:relative;
-
-    margin:
-        15px 0
-        13px;
-
-    padding-left:20px;
-
-}
-
-.route:before{
-
-    content:"";
-
-    position:absolute;
-
-    left:5px;
-
-    top:8px;
-
-    bottom:8px;
-
-    width:2px;
-
-    background:#333;
-
-}
-
-.route-row{
-
-    position:relative;
-
-    min-height:42px;
-
-}
-
-.route-row + .route-row{
-
-    margin-top:5px;
-
-}
-
-.route-dot{
-
-    position:absolute;
-
-    left:-20px;
-
-    top:5px;
-
-    width:12px;
-    height:12px;
-
-    border-radius:50%;
-
-    background:#FFD600;
-
-    border:
-        3px solid
-        #111;
-
-}
-
-.route-dot.drop{
-
-    background:#fff;
-
-}
-
-.route-label{
-
-    color:#777;
-
-    font-size:8px;
-
-    font-weight:900;
-
-    text-transform:uppercase;
-
-}
-
-.route-address{
-
-    margin-top:3px;
-
-    color:#eee;
-
-    font-size:11px;
-
-    line-height:1.35;
-
-    word-break:break-word;
-
-}
-
-
-/* =========================================================
-   META
-========================================================= */
-
-.meta{
-
-    display:grid;
-
-    grid-template-columns:
-        1fr
-        1fr
-        1fr;
-
-    gap:7px;
-
-    margin-bottom:12px;
-
-}
-
-.meta-box{
-
-    padding:9px;
-
-    border-radius:12px;
-
-    background:#191919;
-
-    text-align:center;
-
-}
-
-.meta-box span{
-
-    display:block;
-
-    color:#666;
-
-    font-size:7px;
-
-    font-weight:900;
-
-    text-transform:uppercase;
-
-}
-
-.meta-box strong{
-
-    display:block;
-
-    margin-top:4px;
-
-    color:#eee;
-
-    font-size:10px;
-
-}
-
-
-/* =========================================================
-   TIMER
-========================================================= */
-
-.timer{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    margin-bottom:10px;
-
-    padding:9px 11px;
-
-    border-radius:11px;
-
-    background:
-        rgba(255,214,0,.07);
-
-    border:
-        1px solid
-        rgba(255,214,0,.12);
-
-}
-
-.timer-label{
-
-    color:#888;
-
-    font-size:8px;
-
-    font-weight:900;
-
-    text-transform:uppercase;
-
-}
-
-.timer-value{
-
-    color:#FFD600;
-
-    font-size:12px;
-
-    font-weight:900;
-
-}
-
-.timer-value.danger{
-
-    color:#ff5f5f;
-
-}
-
-
-/* =========================================================
-   ACTIONS
-========================================================= */
-
-.actions{
-
-    display:grid;
-
-    grid-template-columns:
-        .8fr
-        1.2fr;
-
-    gap:8px;
-
-}
-
-.btn{
-
-    min-height:47px;
-
-    border:0;
-
-    border-radius:13px;
-
-    font-size:12px;
-
-    font-weight:900;
-
-    cursor:pointer;
-
-}
-
-.btn-details{
-
     background:#202020;
-
     color:#fff;
-
+    font-size:25px;
+    cursor:pointer;
 }
 
-.btn-reject{
-
-    background:#202020;
-
-    color:#ff7d7d;
-
+.header-info{
+    flex:1;
 }
 
-.btn-accept{
-
-    background:#FFD600;
-
-    color:#000;
-
-}
-
-.btn:disabled{
-
-    opacity:.45;
-
-    cursor:not-allowed;
-
-}
-
-
-/* =========================================================
-   EMPTY
-========================================================= */
-
-.empty{
-
-    display:none;
-
-    padding:
-        45px 20px;
-
-    text-align:center;
-
-    border-radius:21px;
-
-    background:#111;
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-}
-
-.empty-icon{
-
-    font-size:42px;
-
-}
-
-.empty-title{
-
-    margin-top:12px;
-
+.header-info h1{
     font-size:18px;
-
     font-weight:900;
-
 }
 
-.empty-text{
-
-    margin-top:7px;
-
+.header-info p{
     color:#777;
-
-    font-size:10px;
-
-    line-height:1.5;
-
+    font-size:11px;
+    margin-top:3px;
 }
 
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-.error{
-
-    display:none;
-
-    margin-bottom:12px;
-
-    padding:12px;
-
-    border-radius:14px;
-
-    background:
-        rgba(120,30,30,.25);
-
-    border:
-        1px solid
-        rgba(255,80,80,.25);
-
-    color:#ff9d9d;
-
-    font-size:10px;
-
-    line-height:1.5;
-
-}
-
-
-/* =========================================================
-   LOADING
-========================================================= */
-
-.loading{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    flex-direction:column;
-
-    min-height:220px;
-
-    color:#777;
-
-    font-size:10px;
-
-}
-
-.spinner{
-
-    width:30px;
-    height:30px;
-
-    margin-bottom:12px;
-
-    border:
-        3px solid
-        #222;
-
-    border-top-color:#FFD600;
-
+.refresh-btn{
+    width:42px;
+    height:42px;
+    border:0;
     border-radius:50%;
-
-    animation:
-        spin .8s linear infinite;
-
+    background:#202020;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
 }
 
-@keyframes spin{
+.refresh-btn.loading{
+    animation:rotate .8s linear infinite;
+}
 
+@keyframes rotate{
     to{
         transform:rotate(360deg);
     }
-
 }
 
+/* ONLINE BAR */
 
-/* =========================================================
-   TOAST
-========================================================= */
+.online-bar{
+    margin:12px 14px 4px;
+    background:#171717;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:11px 13px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.online-dot{
+    width:9px;
+    height:9px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 0 4px rgba(34,197,94,.10);
+}
+
+.online-text{
+    flex:1;
+    font-size:12px;
+    color:#bbb;
+}
+
+.online-text strong{
+    color:#fff;
+}
+
+.online-toggle{
+    width:42px;
+    height:24px;
+    border:0;
+    border-radius:20px;
+    background:#333;
+    position:relative;
+    cursor:pointer;
+}
+
+.online-toggle::after{
+    content:"";
+    position:absolute;
+    top:3px;
+    left:3px;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:#777;
+    transition:.2s;
+}
+
+.online-toggle.active{
+    background:var(--yellow);
+}
+
+.online-toggle.active::after{
+    left:21px;
+    background:#000;
+}
+
+/* FILTER */
+
+.filter-row{
+    display:flex;
+    gap:7px;
+    padding:11px 14px 4px;
+    overflow-x:auto;
+}
+
+.filter-row::-webkit-scrollbar{
+    display:none;
+}
+
+.filter-btn{
+    white-space:nowrap;
+    border:1px solid #292929;
+    background:#171717;
+    color:#aaa;
+    padding:8px 13px;
+    border-radius:20px;
+    font-size:11px;
+    cursor:pointer;
+}
+
+.filter-btn.active{
+    background:var(--yellow);
+    color:#000;
+    border-color:var(--yellow);
+    font-weight:800;
+}
+
+/* REQUEST LIST */
+
+.requests-list{
+    padding:10px 14px 20px;
+}
+
+.request-card{
+    background:#171717;
+    border:1px solid var(--border);
+    border-radius:18px;
+    overflow:hidden;
+    margin-bottom:11px;
+    transition:.2s;
+}
+
+.request-card:active{
+    transform:scale(.99);
+}
+
+.request-head{
+    display:flex;
+    align-items:center;
+    padding:13px 14px;
+    border-bottom:1px solid #292929;
+}
+
+.service-icon{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+    background:var(--yellow);
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:19px;
+    margin-right:10px;
+}
+
+.request-main{
+    flex:1;
+    min-width:0;
+}
+
+.request-title{
+    font-size:14px;
+    font-weight:800;
+}
+
+.request-time{
+    color:#777;
+    font-size:10px;
+    margin-top:3px;
+}
+
+.request-fare{
+    text-align:right;
+}
+
+.fare-value{
+    font-size:18px;
+    font-weight:900;
+}
+
+.fare-label{
+    color:#777;
+    font-size:9px;
+    margin-top:2px;
+}
+
+/* ROUTE */
+
+.route{
+    padding:14px;
+}
+
+.route-row{
+    display:flex;
+    gap:10px;
+    position:relative;
+}
+
+.route-row:first-child{
+    padding-bottom:14px;
+}
+
+.route-row:first-child::after{
+    content:"";
+    position:absolute;
+    left:6px;
+    top:16px;
+    bottom:-2px;
+    width:2px;
+    background:#333;
+}
+
+.route-dot{
+    width:13px;
+    height:13px;
+    min-width:13px;
+    border-radius:50%;
+    margin-top:2px;
+    position:relative;
+    z-index:2;
+}
+
+.pickup{
+    background:var(--yellow);
+}
+
+.drop{
+    background:var(--green);
+}
+
+.route-content{
+    min-width:0;
+}
+
+.route-label{
+    font-size:9px;
+    color:#777;
+    text-transform:uppercase;
+    margin-bottom:3px;
+}
+
+.route-address{
+    color:#eee;
+    font-size:12px;
+    line-height:1.35;
+}
+
+/* DETAILS */
+
+.request-details{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+    padding:0 14px 13px;
+}
+
+.detail{
+    background:#101010;
+    border:1px solid #242424;
+    border-radius:10px;
+    text-align:center;
+    padding:9px 4px;
+}
+
+.detail-value{
+    font-size:11px;
+    font-weight:800;
+}
+
+.detail-label{
+    color:#666;
+    font-size:8px;
+    margin-top:3px;
+}
+
+/* ACTIONS */
+
+.request-actions{
+    display:flex;
+    gap:8px;
+    padding:0 14px 14px;
+}
+
+.action-btn{
+    height:43px;
+    border:0;
+    border-radius:11px;
+    font-size:12px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.details-btn{
+    width:30%;
+    background:#242424;
+    color:#fff;
+}
+
+.accept-btn{
+    flex:1;
+    background:var(--yellow);
+    color:#000;
+}
+
+.reject-btn{
+    width:25%;
+    background:#292929;
+    color:#ddd;
+}
+
+/* EMPTY */
+
+.empty-state{
+    display:none;
+    text-align:center;
+    padding:70px 25px;
+}
+
+.empty-icon{
+    width:75px;
+    height:75px;
+    border-radius:50%;
+    background:#181818;
+    border:1px solid #292929;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 15px;
+    font-size:30px;
+}
+
+.empty-state h2{
+    font-size:18px;
+    margin-bottom:7px;
+}
+
+.empty-state p{
+    color:#777;
+    font-size:12px;
+    line-height:1.5;
+}
+
+/* LOADING */
+
+.loading-state{
+    text-align:center;
+    padding:45px 20px;
+    color:#777;
+}
+
+.spinner{
+    width:30px;
+    height:30px;
+    border:3px solid #303030;
+    border-top-color:var(--yellow);
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    margin:0 auto 12px;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+/* TOAST */
 
 .toast{
-
     position:fixed;
-
-    left:14px;
-    right:14px;
-
-    bottom:
-        calc(14px + env(safe-area-inset-bottom));
-
-    z-index:5000;
-
-    display:none;
-
-    padding:13px 15px;
-
-    border-radius:14px;
-
-    background:#222;
-
-    border:
-        1px solid
-        #333;
-
-    color:#fff;
-
+    left:50%;
+    bottom:20px;
+    transform:translateX(-50%) translateY(20px);
+    width:calc(100% - 30px);
+    max-width:600px;
+    background:#202020;
+    border:1px solid #333;
+    border-radius:12px;
+    padding:12px 14px;
     text-align:center;
-
-    font-size:10px;
-
-    font-weight:900;
-
-    box-shadow:
-        0 15px 40px
-        rgba(0,0,0,.5);
-
+    color:#fff;
+    font-size:12px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+    z-index:100;
 }
 
+.toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+}
 
-/* =========================================================
-   DESKTOP
-========================================================= */
+.toast.success{
+    border-color:rgba(34,197,94,.45);
+}
 
-@media(min-width:700px){
+.toast.error{
+    border-color:rgba(239,68,68,.45);
+}
 
-    .container{
+/* RESPONSIVE */
 
-        padding-top:20px;
+@media(max-width:390px){
 
+    .request-details{
+        gap:4px;
+    }
+
+    .request-actions{
+        gap:5px;
+    }
+
+    .details-btn{
+        width:28%;
+    }
+
+    .reject-btn{
+        width:23%;
     }
 
 }
 
 </style>
-
 </head>
-
 
 <body>
 
+<div class="requests-page">
 
-<!-- =======================================================
-     HEADER
-======================================================= -->
+    <!-- HEADER -->
 
-<header class="header">
-
-    <div class="header-row">
+    <header class="page-header">
 
         <button
-            id="backBtn"
-            class="back"
-            type="button"
+            class="back-btn"
+            onclick="goBack()"
         >
             ‹
         </button>
 
+        <div class="header-info">
 
-        <div class="logo">
+            <h1>Ride Requests</h1>
 
-            <strong>
-                Rider<span>X</span>
+            <p id="requestCount">
+                Checking for new rides...
+            </p>
+
+        </div>
+
+        <button
+            class="refresh-btn"
+            id="refreshBtn"
+            onclick="loadRequests()"
+        >
+            ↻
+        </button>
+
+    </header>
+
+
+    <!-- ONLINE -->
+
+    <div class="online-bar">
+
+        <div class="online-dot"></div>
+
+        <div class="online-text">
+
+            <strong id="onlineStatus">
+                You're Online
             </strong>
 
-            <small>
-                Ride Requests
-            </small>
+            <br>
+
+            <span>
+                New ride requests will appear here
+            </span>
 
         </div>
 
-
-        <div class="online-pill">
-
-            <span class="online-dot"></span>
-
-            ONLINE
-
-        </div>
+        <button
+            class="online-toggle active"
+            id="onlineToggle"
+            onclick="toggleOnline()"
+        ></button>
 
     </div>
 
-</header>
 
+    <!-- FILTER -->
 
-<main class="container">
+    <div class="filter-row">
 
-
-<!-- ===================================================
-     SUMMARY
-==================================================== -->
-
-<div class="summary">
-
-    <div class="summary-card">
-
-        <div class="summary-label">
-            Available Requests
-        </div>
-
-        <div
-            id="requestCount"
-            class="summary-value"
+        <button
+            class="filter-btn active"
+            data-filter="all"
+            onclick="setFilter('all',this)"
         >
-            0
-        </div>
+            All
+        </button>
 
-    </div>
-
-
-    <div class="summary-card">
-
-        <div class="summary-label">
-            Today's Rides
-        </div>
-
-        <div
-            id="todayCount"
-            class="summary-value"
+        <button
+            class="filter-btn"
+            data-filter="bike"
+            onclick="setFilter('bike',this)"
         >
-            0
-        </div>
+            🏍 Bike
+        </button>
+
+        <button
+            class="filter-btn"
+            data-filter="cab"
+            onclick="setFilter('cab',this)"
+        >
+            🚕 Cab
+        </button>
+
+        <button
+            class="filter-btn"
+            data-filter="parcel"
+            onclick="setFilter('parcel',this)"
+        >
+            📦 Parcel
+        </button>
+
+        <button
+            class="filter-btn"
+            data-filter="food"
+            onclick="setFilter('food',this)"
+        >
+            🍔 Food
+        </button>
 
     </div>
 
-</div>
 
+    <!-- LIST -->
 
-<div
-    id="errorBox"
-    class="error"
-></div>
-
-
-<!-- ===================================================
-     TITLE
-==================================================== -->
-
-<div class="section-title">
-
-    <strong>
-        New Ride Requests
-    </strong>
-
-    <button
-        id="refreshBtn"
-        class="refresh"
-        type="button"
+    <main
+        class="requests-list"
+        id="requestsList"
     >
-        ↻ Refresh
-    </button>
+
+        <div
+            class="loading-state"
+            id="loadingState"
+        >
+
+            <div class="spinner"></div>
+
+            Loading ride requests...
+
+        </div>
+
+
+        <div
+            class="empty-state"
+            id="emptyState"
+        >
+
+            <div class="empty-icon">
+                🚕
+            </div>
+
+            <h2>No ride requests</h2>
+
+            <p>
+                Stay online and new ride requests
+                will appear here automatically.
+            </p>
+
+        </div>
+
+    </main>
 
 </div>
 
 
-<!-- ===================================================
-     LOADING
-==================================================== -->
+<!-- TOAST -->
 
 <div
-    id="loading"
-    class="loading"
->
-
-    <div class="spinner"></div>
-
-    Loading requests...
-
-</div>
-
-
-<!-- ===================================================
-     REQUESTS
-==================================================== -->
-
-<div
-    id="requestList"
-></div>
-
-
-<!-- ===================================================
-     EMPTY
-==================================================== -->
-
-<div
-    id="empty"
-    class="empty"
->
-
-    <div class="empty-icon">
-        🏍️
-    </div>
-
-    <div class="empty-title">
-        No New Requests
-    </div>
-
-    <div class="empty-text">
-        Abhi nearby koi new ride request
-        available nahi hai. Online raho,
-        new request aate hi yahan dikhegi.
-    </div>
-
-</div>
-
-
-</main>
-
-
-<div
-    id="toast"
     class="toast"
+    id="toast"
 ></div>
 
 
-<script type="module">
+<script>
+/* ==========================================
+   RIDERX REQUESTS
+========================================== */
 
+const $ = id => document.getElementById(id);
 
-/* =========================================================
-   RIDERX CENTRAL FIREBASE
-========================================================= */
+let allRequests = [];
+let currentFilter = "all";
+let isOnline = true;
+let toastTimer;
 
-import {
 
-    auth,
-    db,
+/* BACK */
 
-    doc,
-    getDoc,
-    collection,
-    query,
-    where,
-    onSnapshot
+function goBack(){
 
-} from "../firebase/firebase-config.js";
+    if(history.length > 1){
 
+        history.back();
 
-/* =========================================================
-   AUTH
-========================================================= */
+    }else{
 
-import {
-
-    onAuthStateChanged
-
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-
-/* =========================================================
-   MATCHING ENGINE
-========================================================= */
-
-import {
-
-    acceptRideRequest,
-    rejectRideRequest
-
-} from "../js/matching.js";
-
-
-/* =========================================================
-   STATE
-========================================================= */
-
-let currentUser =
-    null;
-
-let riderProfile =
-    null;
-
-let requests =
-    [];
-
-let unsubscribe =
-    null;
-
-let acceptingRide =
-    false;
-
-const timers =
-    new Map();
-
-
-/* =========================================================
-   DOM
-========================================================= */
-
-const loading =
-    document.getElementById(
-        "loading"
-    );
-
-const requestList =
-    document.getElementById(
-        "requestList"
-    );
-
-const empty =
-    document.getElementById(
-        "empty"
-    );
-
-const errorBox =
-    document.getElementById(
-        "errorBox"
-    );
-
-const requestCount =
-    document.getElementById(
-        "requestCount"
-    );
-
-const todayCount =
-    document.getElementById(
-        "todayCount"
-    );
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function toast(
-    message
-){
-
-    const el =
-        document.getElementById(
-            "toast"
-        );
-
-
-    el.innerText =
-        message;
-
-
-    el.style.display =
-        "block";
-
-
-    clearTimeout(
-        window.__riderxToastTimer
-    );
-
-
-    window.__riderxToastTimer =
-        setTimeout(
-
-            () => {
-
-                el.style.display =
-                    "none";
-
-            },
-
-            2800
-
-        );
-
-}
-
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-function showError(
-    message
-){
-
-    errorBox.innerText =
-        message;
-
-    errorBox.style.display =
-        "block";
-
-}
-
-
-/* =========================================================
-   CLEAR ERROR
-========================================================= */
-
-function clearError(){
-
-    errorBox.innerText =
-        "";
-
-    errorBox.style.display =
-        "none";
-
-}
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-function normalizeStatus(
-    status
-){
-
-    return String(
-        status || ""
-    )
-    .trim()
-    .toUpperCase();
-
-}
-
-
-/* =========================================================
-   OPEN LIVE RIDE
-========================================================= */
-
-function openLive(
-    rideId
-){
-
-    saveRide(
-        rideId
-    );
-
-
-    window.location.href =
-        "live.html?rideId=" +
-        encodeURIComponent(
-            rideId
-        );
-
-}
-
-
-/* =========================================================
-   SAVE ACTIVE RIDE
-========================================================= */
-
-function saveRide(
-    rideId
-){
-
-    localStorage.setItem(
-        "activeRideId",
-        String(
-            rideId
-        )
-    );
-
-    localStorage.setItem(
-        "rideId",
-        String(
-            rideId
-        )
-    );
-
-    localStorage.setItem(
-        "riderx_active_ride",
-        String(
-            rideId
-        )
-    );
-
-}
-
-
-/* =========================================================
-   SERVICE ICON
-========================================================= */
-
-function serviceIcon(
-    service
-){
-
-    const value =
-        String(
-            service || ""
-        )
-        .toLowerCase();
-
-
-    if(
-        value.includes(
-            "cab"
-        )
-        ||
-        value.includes(
-            "car"
-        )
-    ){
-
-        return "🚕";
+        window.location.href = "home.html";
 
     }
 
-
-    if(
-        value.includes(
-            "parcel"
-        )
-    ){
-
-        return "📦";
-
-    }
+}
 
 
-    if(
-        value.includes(
-            "food"
-        )
-    ){
+/* TOAST */
 
-        return "🍔";
+function showToast(message,type=""){
 
-    }
+    const toast = $("toast");
 
+    toast.textContent = message;
 
-    return "🏍️";
+    toast.className =
+        "toast show " + type;
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+
+        toast.className = "toast";
+
+    },3000);
 
 }
 
 
-/* =========================================================
-   SERVICE NAME
-========================================================= */
+/* FILTER */
 
-function serviceName(
-    ride
-){
+function setFilter(filter,button){
 
-    return (
+    currentFilter = filter;
 
-        ride.serviceType
+    document
+        .querySelectorAll(".filter-btn")
+        .forEach(btn => {
+            btn.classList.remove("active");
+        });
 
-        ||
+    button.classList.add("active");
 
-        ride.service
-
-        ||
-
-        ride.rideType
-
-        ||
-
-        "Bike Taxi"
-
-    );
+    renderRequests();
 
 }
 
 
-/* =========================================================
-   LOCATION TEXT
-========================================================= */
+/* ONLINE */
 
-function locationText(
-    value,
-    fallback
-){
+async function toggleOnline(){
 
-    if(
-        typeof value ===
-        "string"
-    ){
-
-        return value;
-
-    }
-
-
-    if(
-        value &&
-        typeof value ===
-        "object"
-    ){
-
-        return (
-
-            value.address
-
-            ||
-
-            value.name
-
-            ||
-
-            value.label
-
-            ||
-
-            (
-
-                value.lat !==
-                undefined
-
-                &&
-
-                value.lng !==
-                undefined
-
-                ?
-
-                Number(
-                    value.lat
-                ).toFixed(5)
-
-                +
-
-                ", "
-
-                +
-
-                Number(
-                    value.lng
-                ).toFixed(5)
-
-                :
-
-                fallback
-
-            )
-
-        );
-
-    }
-
-
-    return fallback;
-
-}
-
-
-/* =========================================================
-   PICKUP
-========================================================= */
-
-function pickupText(
-    ride
-){
-
-    return (
-
-        locationText(
-            ride.pickupAddress,
-            ""
-        )
-
-        ||
-
-        locationText(
-            ride.pickupLocation,
-            ""
-        )
-
-        ||
-
-        locationText(
-            ride.pickup,
-            ""
-        )
-
-        ||
-
-        ride.pickupText
-
-        ||
-
-        "Pickup location"
-
-    );
-
-}
-
-
-/* =========================================================
-   DROP
-========================================================= */
-
-function dropText(
-    ride
-){
-
-    return (
-
-        locationText(
-            ride.dropAddress,
-            ""
-        )
-
-        ||
-
-        locationText(
-            ride.dropLocation,
-            ""
-        )
-
-        ||
-
-        locationText(
-            ride.drop,
-            ""
-        )
-
-        ||
-
-        ride.destination
-
-        ||
-
-        ride.dropText
-
-        ||
-
-        "Destination"
-
-    );
-
-}
-
-
-/* =========================================================
-   TIME
-========================================================= */
-
-function formatTime(
-    value
-){
-
-    if(
-        !value
-    ){
-
-        return "Just now";
-
-    }
-
+    const nextStatus = !isOnline;
 
     try{
 
-        let date;
+        if(typeof window.setRiderOnlineStatus === "function"){
 
-
-        if(
-            value &&
-            typeof value.toDate ===
-            "function"
-        ){
-
-            date =
-                value.toDate();
-
-        }
-
-        else if(
-            value instanceof Date
-        ){
-
-            date =
-                value;
-
-        }
-
-        else if(
-            typeof value ===
-            "number"
-        ){
-
-            date =
-                new Date(
-                    value
+            const result =
+                await window.setRiderOnlineStatus(
+                    nextStatus
                 );
 
-        }
+            if(result === false){
 
-        else{
-
-            date =
-                new Date(
-                    value
-                );
-
-        }
-
-
-        if(
-            Number.isNaN(
-                date.getTime()
-            )
-        ){
-
-            return "Just now";
-
-        }
-
-
-        return date.toLocaleTimeString(
-
-            [],
-
-            {
-
-                hour:
-                    "numeric",
-
-                minute:
-                    "2-digit"
+                return;
 
             }
 
+        }else{
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "riderxOnlineStatusChange",
+                    {
+                        detail:{
+                            online:nextStatus
+                        }
+                    }
+                )
+            );
+
+        }
+
+        isOnline = nextStatus;
+
+        updateOnlineUI();
+
+        if(isOnline){
+
+            loadRequests();
+
+        }else{
+
+            allRequests = [];
+
+            renderRequests();
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Online status error:",
+            error
         );
 
-    }
-
-    catch{
-
-        return "Just now";
+        showToast(
+            "Unable to change online status.",
+            "error"
+        );
 
     }
 
 }
 
 
-/* =========================================================
-   FARE
-========================================================= */
+/* ONLINE UI */
 
-function fareValue(
-    ride
-){
+function updateOnlineUI(){
+
+    const toggle =
+        $("onlineToggle");
+
+    const status =
+        $("onlineStatus");
+
+    toggle.classList.toggle(
+        "active",
+        isOnline
+    );
+
+    status.textContent =
+        isOnline
+            ? "You're Online"
+            : "You're Offline";
+
+}
+
+
+/* SERVICE ICON */
+
+function serviceIcon(service){
+
+    const value =
+        String(service || "")
+        .toLowerCase();
+
+    if(value.includes("bike"))
+        return "🏍";
+
+    if(value.includes("cab") ||
+       value.includes("car"))
+        return "🚕";
+
+    if(value.includes("parcel"))
+        return "📦";
+
+    if(value.includes("food"))
+        return "🍔";
+
+    return "🚕";
+
+}
+
+
+/* SERVICE TYPE */
+
+function serviceType(service){
+
+    const value =
+        String(service || "")
+        .toLowerCase();
+
+    if(value.includes("bike"))
+        return "Bike";
+
+    if(value.includes("cab") ||
+       value.includes("car"))
+        return "Cab";
+
+    if(value.includes("parcel"))
+        return "Parcel";
+
+    if(value.includes("food"))
+        return "Food";
+
+    return "Ride";
+
+}
+
+
+/* NORMALIZE RIDE */
+
+function normalizeRide(ride,index=0){
+
+    const customer =
+        ride.customerName ||
+        ride.userName ||
+        ride.customer?.name ||
+        ride.user?.name ||
+        "Customer";
+
+    const service =
+        ride.serviceType ||
+        ride.rideType ||
+        ride.service ||
+        "Ride";
 
     const fare =
-        Number(
+        ride.fare ??
+        ride.amount ??
+        ride.estimatedFare ??
+        ride.price ??
+        0;
 
-            ride.fare
+    const pickup =
+        ride.pickupAddress ||
+        ride.pickup?.address ||
+        ride.pickupLocation ||
+        ride.from ||
+        "Pickup location";
 
-            ??
-
-            ride.estimatedFare
-
-            ??
-
-            ride.amount
-
-            ??
-
-            0
-
-        );
-
-
-    return (
-
-        "₹" +
-
-        (
-
-            Number.isFinite(
-                fare
-            )
-
-            ?
-
-            Math.round(
-                fare
-            )
-
-            :
-
-            0
-
-        )
-
-    );
-
-}
-
-
-/* =========================================================
-   DISTANCE
-========================================================= */
-
-function distanceValue(
-    ride
-){
+    const drop =
+        ride.dropAddress ||
+        ride.destinationAddress ||
+        ride.drop?.address ||
+        ride.dropLocation ||
+        ride.to ||
+        "Drop-off location";
 
     const distance =
-        Number(
+        ride.distance ??
+        ride.distanceKm ??
+        0;
 
-            ride.distance
+    const duration =
+        ride.duration ??
+        ride.durationMin ??
+        0;
 
-            ??
+    const payment =
+        ride.paymentMethod ||
+        ride.payment ||
+        "Cash";
 
-            ride.estimatedDistance
+    return {
 
-            ??
+        ...ride,
 
-            0
+        id:
+            ride.id ||
+            ride.rideId ||
+            ride.requestId ||
+            String(index),
 
-        );
+        customerName:customer,
 
+        serviceType:service,
 
-    if(
-        !Number.isFinite(
-            distance
-        )
-        ||
-        distance <= 0
-    ){
+        fare:Number(fare) || 0,
 
-        return "—";
+        pickupAddress:pickup,
 
-    }
+        dropAddress:drop,
 
+        distance:distance,
 
-    return (
+        duration:duration,
 
-        distance.toFixed(
-            1
-        )
+        paymentMethod:payment
 
-        +
-
-        " km"
-
-    );
-
-}
-
-
-/* =========================================================
-   PAYMENT
-========================================================= */
-
-function paymentValue(
-    ride
-){
-
-    return (
-
-        ride.paymentMethod
-
-        ||
-
-        ride.payment
-
-        ||
-
-        "Cash"
-
-    );
+    };
 
 }
 
 
-/* =========================================================
-   CUSTOMER NAME
-========================================================= */
+/* LOAD REQUESTS */
 
-function customerName(
-    ride
-){
+async function loadRequests(){
 
-    return (
+    const refresh =
+        $("refreshBtn");
 
-        ride.customerName
+    refresh.classList.add("loading");
 
-        ||
+    $("loadingState").style.display = "block";
+    $("emptyState").style.display = "none";
 
-        ride.userName
+    try{
 
-        ||
-
-        ride.customerDisplayName
-
-        ||
-
-        "Customer"
-
-    );
-
-}
+        let requests = null;
 
 
-/* =========================================================
-   REQUEST EXPIRY
-========================================================= */
+        if(typeof window.getPendingRideRequests === "function"){
 
-function getExpiry(
-    ride
-){
+            requests =
+                await window.getPendingRideRequests();
 
-    if(
-        typeof ride.expiresAt ===
-        "number"
-    ){
+        }else if(typeof window.loadRideRequests === "function"){
 
-        return ride.expiresAt;
+            requests =
+                await window.loadRideRequests();
 
-    }
+        }else if(typeof window.getRideRequests === "function"){
 
-
-    if(
-        ride.expiresAt &&
-        typeof ride.expiresAt.toMillis ===
-        "function"
-    ){
-
-        return ride.expiresAt.toMillis();
-
-    }
-
-
-    if(
-        ride.createdAt &&
-        typeof ride.createdAt.toMillis ===
-        "function"
-    ){
-
-        return (
-
-            ride.createdAt.toMillis()
-
-            +
-
-            15000
-
-        );
-
-    }
-
-
-    return (
-
-        Date.now()
-
-        +
-
-        15000
-
-    );
-
-}
-
-
-/* =========================================================
-   TIMER
-========================================================= */
-
-function startTimer(
-    rideId,
-    element,
-    expiresAt
-){
-
-    stopTimer(
-        rideId
-    );
-
-
-    function update(){
-
-        const remaining =
-            Math.max(
-
-                0,
-
-                expiresAt -
-                Date.now()
-
-            );
-
-
-        const seconds =
-            Math.ceil(
-                remaining / 1000
-            );
-
-
-        element.innerText =
-            seconds +
-            "s";
-
-
-        if(
-            seconds <= 5
-        ){
-
-            element.classList.add(
-                "danger"
-            );
+            requests =
+                await window.getRideRequests();
 
         }
 
 
-        if(
-            remaining <= 0
-        ){
+        if(Array.isArray(requests)){
 
-            stopTimer(
-                rideId
-            );
+            allRequests =
+                requests.map(normalizeRide);
 
+        }else if(requests && typeof requests === "object"){
 
-            const card =
-                document.querySelector(
-                    `[data-id="${CSS.escape(
-                        String(
-                            rideId
-                        )
-                    )}"]`
+            allRequests =
+                Object.entries(requests)
+                .map(([id,data]) =>
+                    normalizeRide({
+                        ...data,
+                        id:id
+                    })
                 );
 
+        }else{
 
-            if(
-                card
-            ){
+            /*
+              Existing Firebase listener can provide
+              requests later through the event below.
+            */
 
-                card.remove();
-
-            }
-
-
-            updateSummary();
+            document.dispatchEvent(
+                new CustomEvent(
+                    "riderxRequestsPageReady"
+                )
+            );
 
         }
 
-    }
+
+        renderRequests();
 
 
-    update();
+    }catch(error){
 
-
-    const timer =
-        setInterval(
-            update,
-            500
+        console.error(
+            "Load requests error:",
+            error
         );
 
-
-    timers.set(
-        String(
-            rideId
-        ),
-        timer
-    );
-
-}
-
-
-/* =========================================================
-   STOP TIMER
-========================================================= */
-
-function stopTimer(
-    rideId
-){
-
-    const key =
-        String(
-            rideId
+        showToast(
+            "Unable to load ride requests.",
+            "error"
         );
 
+        $("loadingState").style.display =
+            "none";
 
-    const timer =
-        timers.get(
-            key
-        );
+    }finally{
 
-
-    if(
-        timer
-    ){
-
-        clearInterval(
-            timer
-        );
-
-        timers.delete(
-            key
-        );
+        refresh.classList.remove("loading");
 
     }
 
 }
 
 
-/* =========================================================
-   CREATE CARD
-========================================================= */
+/* RENDER */
 
-function createCard(
-    ride
-){
+function renderRequests(){
+
+    const list =
+        $("requestsList");
+
+    const loading =
+        $("loadingState");
+
+    const empty =
+        $("emptyState");
+
+
+    list
+        .querySelectorAll(".request-card")
+        .forEach(card => card.remove());
+
+
+    loading.style.display = "none";
+
+
+    if(!isOnline){
+
+        empty.style.display = "block";
+
+        empty.querySelector("h2").textContent =
+            "You're Offline";
+
+        empty.querySelector("p").textContent =
+            "Go online to receive new ride requests.";
+
+        updateCount(0);
+
+        return;
+
+    }
+
+
+    const filtered =
+        allRequests.filter(ride => {
+
+            if(currentFilter === "all")
+                return true;
+
+            return serviceType(
+                ride.serviceType
+            ).toLowerCase() ===
+            currentFilter;
+
+        });
+
+
+    if(filtered.length === 0){
+
+        empty.style.display = "block";
+
+        empty.querySelector("h2").textContent =
+            "No ride requests";
+
+        empty.querySelector("p").textContent =
+            "Stay online and new ride requests will appear here automatically.";
+
+        updateCount(0);
+
+        return;
+
+    }
+
+
+    empty.style.display = "none";
+
+    updateCount(filtered.length);
+
+
+    filtered.forEach(ride => {
+
+        list.appendChild(
+            createRequestCard(ride)
+        );
+
+    });
+
+}
+
+
+/* COUNT */
+
+function updateCount(count){
+
+    $("requestCount").textContent =
+        count === 0
+            ? "No new requests"
+            : `${count} new ${count === 1 ? "request" : "requests"}`;
+
+}
+
+
+/* CREATE CARD */
+
+function createRequestCard(ride){
 
     const card =
-        document.createElement(
-            "article"
+        document.createElement("article");
+
+    card.className = "request-card";
+
+    const service =
+        serviceType(
+            ride.serviceType
         );
 
-
-    card.className =
-        "request-card new";
-
-
-    card.dataset.id =
-        ride.id;
-
+    const payment =
+        String(
+            ride.paymentMethod || "Cash"
+        );
 
     card.innerHTML = `
 
-        <div class="new-badge">
-            NEW
-        </div>
-
-
-        <div class="request-top">
+        <div class="request-head">
 
             <div class="service-icon">
-                ${serviceIcon(
-                    serviceName(
-                        ride
-                    )
-                )}
+                ${serviceIcon(ride.serviceType)}
             </div>
-
 
             <div class="request-main">
 
-                <div class="service-name">
-                    ${escapeHtml(
-                        serviceName(
-                            ride
-                        )
-                    )}
+                <div class="request-title">
+                    ${escapeHTML(ride.customerName)}
                 </div>
 
                 <div class="request-time">
-                    ${formatTime(
-                        ride.createdAt
-                    )}
+                    ${service} · ${escapeHTML(payment)}
                 </div>
 
             </div>
 
+            <div class="request-fare">
 
-            <div class="fare">
+                <div class="fare-value">
+                    ₹${Number(ride.fare || 0).toFixed(0)}
+                </div>
 
-                <strong>
-                    ${fareValue(
-                        ride
-                    )}
-                </strong>
-
-                <span>
-                    estimated fare
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="customer-row">
-
-            <div class="customer-avatar">
-                👤
-            </div>
-
-
-            <div class="customer-info">
-
-                <strong>
-                    ${escapeHtml(
-                        customerName(
-                            ride
-                        )
-                    )}
-                </strong>
-
-                <span>
-                    ${escapeHtml(
-                        ride.customerRating
-                        ||
-                        ride.userRating
-                        ||
-                        "5.0"
-                    )}
-                    ★ Customer
-                </span>
+                <div class="fare-label">
+                    Estimated
+                </div>
 
             </div>
 
@@ -2256,18 +1230,18 @@ function createCard(
 
             <div class="route-row">
 
-                <div class="route-dot"></div>
+                <div class="route-dot pickup"></div>
 
-                <div class="route-label">
-                    Pickup
-                </div>
+                <div class="route-content">
 
-                <div class="route-address">
-                    ${escapeHtml(
-                        pickupText(
-                            ride
-                        )
-                    )}
+                    <div class="route-label">
+                        Pickup
+                    </div>
+
+                    <div class="route-address">
+                        ${escapeHTML(ride.pickupAddress)}
+                    </div>
+
                 </div>
 
             </div>
@@ -2277,16 +1251,16 @@ function createCard(
 
                 <div class="route-dot drop"></div>
 
-                <div class="route-label">
-                    Drop
-                </div>
+                <div class="route-content">
 
-                <div class="route-address">
-                    ${escapeHtml(
-                        dropText(
-                            ride
-                        )
-                    )}
+                    <div class="route-label">
+                        Drop-off
+                    </div>
+
+                    <div class="route-address">
+                        ${escapeHTML(ride.dropAddress)}
+                    </div>
+
                 </div>
 
             </div>
@@ -2294,92 +1268,70 @@ function createCard(
         </div>
 
 
-        <div class="meta">
+        <div class="request-details">
 
-            <div class="meta-box">
+            <div class="detail">
 
-                <span>
+                <div class="detail-value">
+                    ${escapeHTML(String(ride.distance || "--"))} km
+                </div>
+
+                <div class="detail-label">
                     Distance
-                </span>
-
-                <strong>
-                    ${distanceValue(
-                        ride
-                    )}
-                </strong>
+                </div>
 
             </div>
 
 
-            <div class="meta-box">
+            <div class="detail">
 
-                <span>
+                <div class="detail-value">
+                    ${escapeHTML(String(ride.duration || "--"))} min
+                </div>
+
+                <div class="detail-label">
+                    Duration
+                </div>
+
+            </div>
+
+
+            <div class="detail">
+
+                <div class="detail-value">
+                    ${escapeHTML(payment)}
+                </div>
+
+                <div class="detail-label">
                     Payment
-                </span>
-
-                <strong>
-                    ${escapeHtml(
-                        paymentValue(
-                            ride
-                        )
-                    )}
-                </strong>
-
-            </div>
-
-
-            <div class="meta-box">
-
-                <span>
-                    Service
-                </span>
-
-                <strong>
-                    ${escapeHtml(
-                        serviceName(
-                            ride
-                        )
-                    )}
-                </strong>
+                </div>
 
             </div>
 
         </div>
 
 
-        <div class="timer">
-
-            <span class="timer-label">
-                Request expires
-            </span>
-
-            <span
-                class="timer-value"
-                data-timer
-            >
-                15s
-            </span>
-
-        </div>
-
-
-        <div class="actions">
+        <div class="request-actions">
 
             <button
-                class="btn btn-details"
-                data-action="details"
-                type="button"
+                class="action-btn details-btn"
+                data-id="${escapeHTML(String(ride.id))}"
             >
                 Details
             </button>
 
+            <button
+                class="action-btn reject-btn"
+                data-id="${escapeHTML(String(ride.id))}"
+            >
+                Reject
+            </button>
 
             <button
-                class="btn btn-accept"
-                data-action="accept"
-                type="button"
+                class="action-btn accept-btn"
+                data-id="${escapeHTML(String(ride.id))}"
             >
-                ✓ Accept Ride
+                Accept
             </button>
 
         </div>
@@ -2387,73 +1339,28 @@ function createCard(
     `;
 
 
-    const detailsButton =
-        card.querySelector(
-            '[data-action="details"]'
+    card
+        .querySelector(".details-btn")
+        .addEventListener(
+            "click",
+            () => openRequest(ride.id)
         );
 
 
-    const acceptButton =
-        card.querySelector(
-            '[data-action="accept"]'
+    card
+        .querySelector(".accept-btn")
+        .addEventListener(
+            "click",
+            () => acceptRequest(ride)
         );
 
 
-    detailsButton.addEventListener(
-
-        "click",
-
-        () => {
-
-            saveRide(
-                ride.id
-            );
-
-
-            window.location.href =
-                "request.html?rideId=" +
-                encodeURIComponent(
-                    ride.id
-                );
-
-        }
-
-    );
-
-
-    acceptButton.addEventListener(
-
-        "click",
-
-        () => {
-
-            acceptRide(
-                ride,
-                acceptButton
-            );
-
-        }
-
-    );
-
-
-    const timerElement =
-        card.querySelector(
-            "[data-timer]"
+    card
+        .querySelector(".reject-btn")
+        .addEventListener(
+            "click",
+            () => rejectRequest(ride)
         );
-
-
-    startTimer(
-
-        ride.id,
-
-        timerElement,
-
-        getExpiry(
-            ride
-        )
-
-    );
 
 
     return card;
@@ -2461,1266 +1368,327 @@ function createCard(
 }
 
 
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
+/* ESCAPE */
 
-function escapeHtml(
-    value
-){
+function escapeHTML(value){
 
-    return String(
-        value ??
-        ""
-    )
-
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-
-    .replace(
-        /</g,
-        "&lt;"
-    )
-
-    .replace(
-        />/g,
-        "&gt;"
-    )
-
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-
-    .replace(
-        /'/g,
-        "&#039;"
-    );
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 
 }
 
 
-/* =========================================================
-   FILTER VALID REQUESTS
-========================================================= */
+/* OPEN REQUEST */
 
-function validRequests(){
+function openRequest(id){
 
-    return requests.filter(
-
-        request => {
-
-            const status =
-                normalizeStatus(
-                    request.status
-                );
-
-
-            return (
-
-                status ===
-                "PENDING"
-
-                &&
-
-                String(
-                    request.riderId
-                )
-                ===
-                String(
-                    currentUser?.uid
-                )
-
-            );
-
-        }
-
-    );
+    window.location.href =
+        "request.html?rideId=" +
+        encodeURIComponent(id);
 
 }
 
 
-/* =========================================================
-   RENDER
-========================================================= */
+/* ACCEPT */
 
-function render(){
+async function acceptRequest(ride){
 
-    requestList.innerHTML =
-        "";
+    const confirmed =
+        confirm(
+            `Accept this ride for ₹${Number(ride.fare || 0).toFixed(0)}?`
+        );
 
-
-    timers.forEach(
-        timer => {
-
-            clearInterval(
-                timer
-            );
-
-        }
-    );
+    if(!confirmed) return;
 
 
-    timers.clear();
+    try{
+
+        let result = false;
 
 
-    const active =
-        validRequests();
+        if(typeof window.acceptRideRequest === "function"){
 
-
-    requestCount.innerText =
-        active.length;
-
-
-    if(
-        active.length === 0
-    ){
-
-        empty.style.display =
-            "block";
-
-        return;
-
-    }
-
-
-    empty.style.display =
-        "none";
-
-
-    active.forEach(
-
-        ride => {
-
-            requestList.appendChild(
-
-                createCard(
+            result =
+                await window.acceptRideRequest(
+                    ride.id,
                     ride
-                )
-
-            );
-
-        }
-
-    );
-
-}
-
-
-/* =========================================================
-   SUMMARY
-========================================================= */
-
-function updateSummary(){
-
-    const active =
-        validRequests();
-
-
-    requestCount.innerText =
-        active.length;
-
-
-    if(
-        active.length === 0
-    ){
-
-        empty.style.display =
-            "block";
-
-    }
-
-    else{
-
-        empty.style.display =
-            "none";
-
-    }
-
-}
-
-
-/* =========================================================
-   ACCEPT RIDE
-========================================================= */
-
-async function acceptRide(
-    ride,
-    button
-){
-
-    if(
-        acceptingRide
-    ){
-
-        return;
-
-    }
-
-
-    if(
-        !currentUser
-    ){
-
-        toast(
-            "Please login as rider."
-        );
-
-        return;
-
-    }
-
-
-    acceptingRide =
-        true;
-
-
-    button.disabled =
-        true;
-
-
-    button.innerText =
-        "Accepting...";
-
-
-    try{
-
-        /*
-         * FIRST:
-         * Confirm request still belongs
-         * to this rider.
-         */
-
-        const requestRef =
-            doc(
-
-                db,
-
-                "rideRequests",
-
-                `${ride.id}_${currentUser.uid}`
-
-            );
-
-
-        const requestSnapshot =
-            await getDoc(
-                requestRef
-            );
-
-
-        if(
-            !requestSnapshot.exists()
-        ){
-
-            throw new Error(
-                "Ride request expire ho chuki hai."
-            );
-
-        }
-
-
-        const request =
-            requestSnapshot.data();
-
-
-        if(
-            normalizeStatus(
-                request.status
-            )
-            !==
-            "PENDING"
-        ){
-
-            throw new Error(
-                "Ride request already closed hai."
-            );
-
-        }
-
-
-        /*
-         * ATOMIC ACCEPTANCE
-         *
-         * matching.js transaction makes
-         * sure only ONE rider wins.
-         */
-
-        const accepted =
-            await acceptRideRequest(
-
-                ride.id,
-
-                currentUser.uid
-
-            );
-
-
-        if(
-            !accepted
-        ){
-
-            throw new Error(
-                "Ride kisi aur rider ne accept kar li ya request expire ho gayi."
-            );
-
-        }
-
-
-        saveRide(
-            ride.id
-        );
-
-
-        /*
-         * Update today's counter.
-         */
-
-        const todayKey =
-            getTodayKey();
-
-
-        const counterKey =
-            "riderx_today_rides_" +
-            currentUser.uid +
-            "_" +
-            todayKey;
-
-
-        const currentCount =
-            Number(
-                localStorage.getItem(
-                    counterKey
-                )
-                ||
-                0
-            );
-
-
-        localStorage.setItem(
-
-            counterKey,
-
-            String(
-                currentCount +
-                1
-            )
-
-        );
-
-
-        todayCount.innerText =
-            currentCount +
-            1;
-
-
-        toast(
-            "✓ Ride accepted! Customer ko notify kar diya."
-        );
-
-
-        /*
-         * Remove accepted request.
-         */
-
-        requests =
-            requests.filter(
-
-                item =>
-                    item.id !==
-                    ride.id
-
-            );
-
-
-        render();
-
-
-        /*
-         * Open rider live ride page.
-         */
-
-        setTimeout(
-
-            () => {
-
-                openLive(
-                    ride.id
                 );
 
-            },
-
-            500
-
-        );
-
-    }
-
-    catch(error){
-
-        console.error(
-            "RiderX accept error:",
-            error
-        );
-
-
-        button.disabled =
-            false;
-
-
-        button.innerText =
-            "✓ Accept Ride";
-
-
-        toast(
-            error.message ||
-            "Ride accept nahi hui."
-        );
-
-    }
-
-    finally{
-
-        acceptingRide =
-            false;
-
-    }
-
-}
-
-
-/* =========================================================
-   REJECT RIDE
-========================================================= */
-
-async function rejectRide(
-    ride,
-    button
-){
-
-    if(
-        !currentUser
-    ){
-
-        return;
-
-    }
-
-
-    button.disabled =
-        true;
-
-
-    button.innerText =
-        "Rejecting...";
-
-
-    try{
-
-        const success =
-            await rejectRideRequest(
-
-                ride.id,
-
-                currentUser.uid
-
-            );
-
-
-        if(
-            !success
-        ){
-
-            throw new Error(
-                "Request reject nahi hui."
-            );
-
-        }
-
-
-        requests =
-            requests.filter(
-
-                item =>
-                    item.id !==
-                    ride.id
-
-            );
-
-
-        stopTimer(
-            ride.id
-        );
-
-
-        render();
-
-
-        toast(
-            "Ride request rejected."
-        );
-
-    }
-
-    catch(error){
-
-        console.error(
-            "Reject ride:",
-            error
-        );
-
-
-        button.disabled =
-            false;
-
-
-        button.innerText =
-            "Reject";
-
-
-        toast(
-            error.message ||
-            "Reject failed."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   TODAY KEY
-========================================================= */
-
-function getTodayKey(){
-
-    const date =
-        new Date();
-
-
-    return (
-
-        date.getFullYear()
-
-        +
-
-        "-" +
-
-        String(
-            date.getMonth() + 1
-        )
-        .padStart(
-            2,
-            "0"
-        )
-
-        +
-
-        "-" +
-
-        String(
-            date.getDate()
-        )
-        .padStart(
-            2,
-            "0"
-        )
-
-    );
-
-}
-
-
-/* =========================================================
-   LOAD TODAY COUNT
-========================================================= */
-
-function loadTodayCount(){
-
-    if(
-        !currentUser
-    ){
-
-        todayCount.innerText =
-            "0";
-
-        return;
-
-    }
-
-
-    const key =
-        "riderx_today_rides_" +
-
-        currentUser.uid +
-
-        "_" +
-
-        getTodayKey();
-
-
-    todayCount.innerText =
-        Number(
-            localStorage.getItem(
-                key
-            )
-            ||
-            0
-        );
-
-}
-
-
-/* =========================================================
-   PLAY REQUEST SOUND
-========================================================= */
-
-function playRequestSound(){
-
-    try{
-
-        const audio =
-            new Audio(
-                "../assets/sounds/ride-request.mp3"
-            );
-
-
-        audio.volume =
-            1;
-
-
-        audio.play()
-            .catch(
-                () => {}
-            );
-
-    }
-
-    catch(error){
-
-        console.warn(
-            "Ride request sound unavailable:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   REQUEST NOTIFICATION
-========================================================= */
-
-async function showBrowserNotification(
-    request
-){
-
-    try{
-
-        if(
-            !("Notification" in window)
-        ){
-
-            return;
-
-        }
-
-
-        if(
-            Notification.permission ===
-            "default"
-        ){
-
-            await Notification.requestPermission();
-
-        }
-
-
-        if(
-            Notification.permission !==
-            "granted"
-        ){
-
-            return;
-
-        }
-
-
-        new Notification(
-            "RiderX - New Ride Request",
-            {
-
-                body:
-                    `${serviceName(
-                        request
-                    )} • ${fareValue(
-                        request
-                    )}`,
-
-                icon:
-                    "../assets/images/logo.png",
-
-                tag:
-                    "riderx-ride-" +
-                    request.id
-
-            }
-        );
-
-    }
-
-    catch(error){
-
-        console.warn(
-            "Notification:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   START REQUEST LISTENER
-========================================================= */
-
-function startListener(){
-
-    clearError();
-
-
-    if(
-        unsubscribe
-    ){
-
-        unsubscribe();
-
-        unsubscribe =
-            null;
-
-    }
-
-
-    if(
-        !currentUser
-    ){
-
-        return;
-
-    }
-
-
-    /*
-     * IMPORTANT:
-     *
-     * We listen to rideRequests,
-     * NOT the complete rides collection.
-     *
-     * This means rider only receives
-     * requests specifically assigned
-     * to that rider.
-     */
-
-    const requestsRef =
-        collection(
-
-            db,
-
-            "rideRequests"
-
-        );
-
-
-    const requestQuery =
-        query(
-
-            requestsRef,
-
-            where(
-                "riderId",
-                "==",
-                currentUser.uid
-            ),
-
-            where(
-                "status",
-                "==",
-                "PENDING"
-            )
-
-        );
-
-
-    unsubscribe =
-        onSnapshot(
-
-            requestQuery,
-
-            snapshot => {
-
-                loading.style.display =
-                    "none";
-
-
-                const previousIds =
-                    new Set(
-
-                        requests.map(
-                            item =>
-                                String(
-                                    item.id
-                                )
-                        )
-
-                    );
-
-
-                requests =
-                    snapshot.docs.map(
-
-                        item => ({
-
-                            id:
-                                item.id,
-
-                            ...item.data()
-
-                        })
-
-                    );
-
-
-                /*
-                 * New request detection.
-                 */
-
-                const newRequests =
-                    requests.filter(
-
-                        request =>
-                            !previousIds.has(
-                                String(
-                                    request.id
-                                )
-                            )
-
-                    );
-
-
-                if(
-                    newRequests.length
-                ){
-
-                    playRequestSound();
-
-
-                    newRequests.forEach(
-
-                        request => {
-
-                            showBrowserNotification(
-                                request
-                            );
-
+        }else if(typeof window.acceptRide === "function"){
+
+            result =
+                await window.acceptRide(
+                    ride.id,
+                    ride
+                );
+
+        }else{
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "riderxAcceptRide",
+                    {
+                        detail:{
+                            rideId:ride.id,
+                            ride:ride
                         }
-
-                    );
-
-
-                    toast(
-                        "🔔 New ride request received!"
-                    );
-
-                }
-
-
-                /*
-                 * Newest first.
-                 */
-
-                requests.sort(
-
-                    (
-                        a,
-                        b
-                    ) => {
-
-                        const aTime =
-                            getMillis(
-                                a.createdAt
-                            );
-
-
-                        const bTime =
-                            getMillis(
-                                b.createdAt
-                            );
-
-
-                        return (
-                            bTime -
-                            aTime
-                        );
-
                     }
+                )
+            );
 
-                );
+            await new Promise(
+                resolve => setTimeout(resolve,400)
+            );
 
-
-                render();
-
-            },
-
-            error => {
-
-                console.error(
-                    "RiderX request listener:",
-                    error
-                );
-
-
-                loading.style.display =
-                    "none";
-
-
-                showError(
-
-                    "Ride requests load nahi ho rahi: " +
-
-                    error.message
-
-                );
-
-            }
-
-        );
-
-}
-
-
-/* =========================================================
-   MILLIS
-========================================================= */
-
-function getMillis(
-    value
-){
-
-    if(
-        value &&
-        typeof value.toMillis ===
-        "function"
-    ){
-
-        return value.toMillis();
-
-    }
-
-
-    if(
-        value instanceof Date
-    ){
-
-        return value.getTime();
-
-    }
-
-
-    const numeric =
-        Number(
-            value
-        );
-
-
-    if(
-        Number.isFinite(
-            numeric
-        )
-    ){
-
-        return numeric;
-
-    }
-
-
-    return 0;
-
-}
-
-
-/* =========================================================
-   REFRESH
-========================================================= */
-
-document
-    .getElementById(
-        "refreshBtn"
-    )
-    .addEventListener(
-
-        "click",
-
-        () => {
-
-            if(
-                currentUser
-            ){
-
-                startListener();
-
-                toast(
-                    "Requests refreshed."
-                );
-
-            }
+            result = true;
 
         }
 
-    );
+
+        if(result === false){
+
+            throw new Error(
+                "Ride could not be accepted."
+            );
+
+        }
 
 
-/* =========================================================
-   BACK
-========================================================= */
+        showToast(
+            "Ride accepted successfully.",
+            "success"
+        );
 
-document
-    .getElementById(
-        "backBtn"
-    )
-    .addEventListener(
 
-        "click",
+        allRequests =
+            allRequests.filter(
+                item => item.id !== ride.id
+            );
 
-        () => {
+
+        renderRequests();
+
+
+        setTimeout(() => {
 
             window.location.href =
-                "home.html";
+                "ride-details.html?rideId=" +
+                encodeURIComponent(ride.id);
 
-        }
+        },700);
 
-    );
 
+    }catch(error){
 
-/* =========================================================
-   GLOBAL CLICK
-   Handles dynamically-created buttons
-========================================================= */
+        console.error(
+            "Accept request error:",
+            error
+        );
 
-requestList.addEventListener(
-
-    "click",
-
-    event => {
-
-        const rejectButton =
-            event.target.closest(
-                '[data-action="reject"]'
-            );
-
-
-        if(
-            !rejectButton
-        ){
-
-            return;
-
-        }
-
-
-        const card =
-            rejectButton.closest(
-                ".request-card"
-            );
-
-
-        if(
-            !card
-        ){
-
-            return;
-
-        }
-
-
-        const ride =
-            requests.find(
-
-                item =>
-                    String(
-                        item.id
-                    )
-                    ===
-                    String(
-                        card.dataset.id
-                    )
-
-            );
-
-
-        if(
-            ride
-        ){
-
-            rejectRide(
-                ride,
-                rejectButton
-            );
-
-        }
-
-    }
-
-);
-
-
-/* =========================================================
-   AUTH
-========================================================= */
-
-onAuthStateChanged(
-
-    auth,
-
-    async user => {
-
-        if(
-            !user
-        ){
-
-            currentUser =
-                null;
-
-
-            loading.style.display =
-                "none";
-
-
-            showError(
-                "Please login as rider to see ride requests."
-            );
-
-
-            return;
-
-        }
-
-
-        currentUser =
-            user;
-
-
-        /*
-         * Load rider profile.
-         */
-
-        try{
-
-            const riderRef =
-                doc(
-
-                    db,
-
-                    "riders",
-
-                    user.uid
-
-                );
-
-
-            const riderSnapshot =
-                await getDoc(
-                    riderRef
-                );
-
-
-            if(
-                riderSnapshot.exists()
-            ){
-
-                riderProfile =
-                    riderSnapshot.data();
-
-            }
-
-        }
-
-        catch(error){
-
-            console.warn(
-                "Rider profile:",
-                error
-            );
-
-        }
-
-
-        loadTodayCount();
-
-
-        startListener();
-
-    }
-
-);
-
-
-/* =========================================================
-   CLEANUP
-========================================================= */
-
-window.addEventListener(
-
-    "beforeunload",
-
-    () => {
-
-        if(
-            unsubscribe
-        ){
-
-            unsubscribe();
-
-        }
-
-
-        timers.forEach(
-
-            timer => {
-
-                clearInterval(
-                    timer
-                );
-
-            }
-
+        showToast(
+            error.message ||
+            "Unable to accept ride.",
+            "error"
         );
 
     }
 
+}
+
+
+/* REJECT */
+
+async function rejectRequest(ride){
+
+    const confirmed =
+        confirm(
+            "Reject this ride request?"
+        );
+
+    if(!confirmed) return;
+
+
+    try{
+
+        let result = false;
+
+
+        if(typeof window.rejectRideRequest === "function"){
+
+            result =
+                await window.rejectRideRequest(
+                    ride.id,
+                    ride
+                );
+
+        }else if(typeof window.rejectRide === "function"){
+
+            result =
+                await window.rejectRide(
+                    ride.id,
+                    ride
+                );
+
+        }else{
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "riderxRejectRide",
+                    {
+                        detail:{
+                            rideId:ride.id,
+                            ride:ride
+                        }
+                    }
+                )
+            );
+
+            await new Promise(
+                resolve => setTimeout(resolve,300)
+            );
+
+            result = true;
+
+        }
+
+
+        if(result === false){
+
+            throw new Error(
+                "Ride could not be rejected."
+            );
+
+        }
+
+
+        allRequests =
+            allRequests.filter(
+                item => item.id !== ride.id
+            );
+
+        renderRequests();
+
+        showToast(
+            "Ride request rejected.",
+            "success"
+        );
+
+
+    }catch(error){
+
+        console.error(
+            "Reject request error:",
+            error
+        );
+
+        showToast(
+            error.message ||
+            "Unable to reject ride.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* REALTIME REQUEST EVENT */
+
+document.addEventListener(
+    "riderxNewRideRequest",
+    function(event){
+
+        if(!event.detail) return;
+
+        const ride =
+            normalizeRide(
+                event.detail
+            );
+
+        const exists =
+            allRequests.some(
+                item => item.id === ride.id
+            );
+
+        if(!exists){
+
+            allRequests.unshift(ride);
+
+            if(isOnline){
+
+                renderRequests();
+
+                showToast(
+                    "New ride request received.",
+                    "success"
+                );
+
+            }
+
+        }
+
+    }
 );
 
 
-/* =========================================================
-   GLOBAL RIDERX API
-========================================================= */
+/* BULK REQUEST EVENT */
 
-window.RiderXRequests = {
+document.addEventListener(
+    "riderxRideRequestsLoaded",
+    function(event){
 
-    refresh:
-        startListener,
+        if(!event.detail) return;
 
-    getRequests:
-        () =>
-            [
-                ...requests
-            ]
+        const data =
+            Array.isArray(event.detail)
+                ? event.detail
+                : Object.entries(event.detail)
+                    .map(([id,ride]) => ({
+                        ...ride,
+                        id:id
+                    }));
 
-};
+        allRequests =
+            data.map(normalizeRide);
 
+        renderRequests();
+
+    }
+);
+
+
+/* INITIALIZE */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        updateOnlineUI();
+
+        loadRequests();
+
+    }
+);
+
+
+/* AUTO REFRESH */
+
+setInterval(() => {
+
+    if(
+        document.visibilityState === "visible" &&
+        isOnline
+    ){
+
+        loadRequests();
+
+    }
+
+},30000);
 
 </script>
 
