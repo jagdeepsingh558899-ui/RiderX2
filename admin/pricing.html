@@ -1,297 +1,1933 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFD400"><title>RiderX Admin - Pricing</title><link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css"><style>
 
-
-<title>RiderX Pricing Control</title>
-
-
-<link rel="stylesheet" href="../css/style.css">
-
-
-
-<style>
-
+*{
+    box-sizing:border-box;
+}
 
 body{
-
-margin:0;
-
-background:#000;
-
-color:white;
-
-font-family:Arial,sans-serif;
-
+    margin:0;
+    min-height:100vh;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-
-.header{
-
-background:#111;
-
-padding:20px;
-
-font-size:25px;
-
-font-weight:bold;
-
-color:#FFD600;
-
+.page{
+    min-height:100vh;
+    padding-bottom:70px;
 }
 
-
-
-.container{
-
-padding:20px;
-
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:#111;
+    border-bottom:1px solid #292929;
 }
 
-
-
-.card{
-
-background:#111;
-
-padding:20px;
-
-border-radius:20px;
-
-margin-bottom:20px;
-
+.top-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
-
-
-input{
-
-width:100%;
-
-padding:15px;
-
-margin:8px 0;
-
-background:#222;
-
-border:none;
-
-border-radius:12px;
-
-color:white;
-
-font-size:16px;
-
-box-sizing:border-box;
-
+.back-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    cursor:pointer;
+    font-size:20px;
 }
-
-
-
-button{
-
-width:100%;
-
-padding:16px;
-
-background:#FFD600;
-
-color:#000;
-
-border:none;
-
-border-radius:15px;
-
-font-weight:bold;
-
-font-size:17px;
-
-}
-
-
 
 .title{
+    font-size:17px;
+    font-weight:900;
+}
 
-color:#FFD600;
+.title span{
+    color:#FFD400;
+}
 
-font-size:20px;
+.logo{
+    color:#FFD400;
+    font-size:18px;
+    font-weight:1000;
+}
 
-font-weight:bold;
+.content{
+    width:100%;
+    max-width:1100px;
+    margin:auto;
+    padding:18px;
+}
+
+.hero{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:16px;
+    padding:18px;
+    border:1px solid #292929;
+    border-radius:18px;
+    background:linear-gradient(145deg,#181818,#101010);
+}
+
+.hero h1{
+    margin:0;
+    font-size:23px;
+}
+
+.hero p{
+    margin:7px 0 0;
+    color:#888;
+    font-size:12px;
+    line-height:1.5;
+}
+
+.primary{
+    height:44px;
+    padding:0 15px;
+    border:0;
+    border-radius:10px;
+    background:#FFD400;
+    color:#111;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:1000;
+    white-space:nowrap;
+}
+
+.info{
+    display:flex;
+    gap:10px;
+    margin-bottom:16px;
+    padding:13px 15px;
+    border:1px solid #3a3408;
+    border-radius:12px;
+    background:#171707;
+    color:#aaa;
+    font-size:10px;
+    line-height:1.5;
+}
+
+.info-icon{
+    color:#FFD400;
+    font-size:16px;
+}
+
+.pricing-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+
+.card{
+    padding:17px;
+    border:1px solid #292929;
+    border-radius:16px;
+    background:#141414;
+}
+
+.card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:15px;
+}
+
+.service{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.service-icon{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:11px;
+    background:#242424;
+    font-size:20px;
+}
+
+.service-name{
+    font-size:14px;
+    font-weight:1000;
+}
+
+.service-desc{
+    margin-top:4px;
+    color:#666;
+    font-size:9px;
+}
+
+.status{
+    padding:5px 8px;
+    border-radius:6px;
+    background:#17351f;
+    color:#63e78a;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.rate-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:9px;
+}
+
+.rate{
+    padding:11px;
+    border:1px solid #292929;
+    border-radius:10px;
+    background:#191919;
+}
+
+.rate-label{
+    color:#666;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.rate-value{
+    margin-top:5px;
+    font-size:16px;
+    font-weight:1000;
+}
+
+.rate-value span{
+    color:#777;
+    font-size:9px;
+    font-weight:700;
+}
+
+.card-actions{
+    display:flex;
+    gap:7px;
+    margin-top:14px;
+}
+
+.action{
+    height:35px;
+    padding:0 11px;
+    border:1px solid #333;
+    border-radius:8px;
+    background:#1c1c1c;
+    color:#aaa;
+    cursor:pointer;
+    font-size:9px;
+    font-weight:800;
+}
+
+.action:hover{
+    color:#FFD400;
+    border-color:#FFD400;
+}
+
+.extra-card{
+    margin-top:14px;
+    padding:17px;
+    border:1px solid #292929;
+    border-radius:16px;
+    background:#141414;
+}
+
+.extra-card h2{
+    margin:0 0 13px;
+    font-size:15px;
+}
+
+.extra-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+
+.extra{
+    padding:12px;
+    border:1px solid #292929;
+    border-radius:10px;
+    background:#191919;
+}
+
+.extra label{
+    display:block;
+    color:#777;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.extra strong{
+    display:block;
+    margin-top:6px;
+    font-size:14px;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:15px;
+    background:rgba(0,0,0,.78);
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-card{
+    width:100%;
+    max-width:550px;
+    max-height:92vh;
+    overflow-y:auto;
+    padding:20px;
+    border:1px solid #333;
+    border-radius:18px;
+    background:#131313;
+}
+
+.modal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:17px;
+}
+
+.modal-head h2{
+    margin:0;
+    font-size:18px;
+}
+
+.close{
+    width:35px;
+    height:35px;
+    border:1px solid #333;
+    border-radius:9px;
+    background:#1e1e1e;
+    color:#fff;
+    cursor:pointer;
+    font-size:18px;
+}
+
+.field{
+    margin-bottom:13px;
+}
+
+.field label{
+    display:block;
+    margin-bottom:6px;
+    color:#999;
+    font-size:9px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.field input,
+.field select{
+    width:100%;
+    height:43px;
+    padding:0 11px;
+    border:1px solid #333;
+    border-radius:9px;
+    outline:none;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:12px;
+}
+
+.field input:focus,
+.field select:focus{
+    border-color:#FFD400;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:17px;
+}
+
+.secondary{
+    height:43px;
+    padding:0 13px;
+    border:1px solid #333;
+    border-radius:9px;
+    background:#1d1d1d;
+    color:#aaa;
+    cursor:pointer;
+    font-weight:800;
+}
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    z-index:2000;
+    transform:translate(-50%,120px);
+    opacity:0;
+    padding:11px 16px;
+    border-radius:10px;
+    background:#17351f;
+    color:#65e58b;
+    font-size:11px;
+    font-weight:800;
+    transition:.25s;
+}
+
+.toast.show{
+    transform:translate(-50%,0);
+    opacity:1;
+}
+
+@media(max-width:750px){
+
+    .content{
+        padding:12px;
+    }
+
+    .hero{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .pricing-grid{
+        grid-template-columns:1fr;
+    }
+
+    .extra-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:480px){
+
+    .row{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style></head><body><div class="page"><header class="topbar"><div class="top-left">
+
+    <button
+        class="back-btn"
+        type="button"
+        onclick="history.back()"
+    >
+        ←
+    </button>
+
+    <div class="title">
+        <span>RiderX</span> Pricing
+    </div>
+
+</div>
+
+<div class="logo">
+    RX
+</div>
+
+</header><main class="content"><section class="hero"><div>
+
+    <h1>
+        Pricing
+    </h1>
+
+    <p>
+        Configure RiderX service fares, per-kilometre
+        rates and night pricing.
+    </p>
+
+</div>
+
+
+<button
+    type="button"
+    class="primary"
+    id="saveAllBtn"
+>
+    Save Pricing
+</button>
+
+</section><div class="info"><div class="info-icon">
+    ₹
+</div>
+
+<div>
+    Current default pricing is configured for Chandigarh.
+    Day pricing applies from <strong>8:00 AM</strong> to
+    <strong>10:00 PM</strong>. Night pricing applies from
+    <strong>10:00 PM</strong> to <strong>6:00 AM</strong>.
+</div>
+
+</div><section
+    class="pricing-grid"
+    id="pricingGrid"
+></section><section class="extra-card"><h2>
+    General Fare Rules
+</h2>
+
+
+<div class="extra-grid">
+
+    <div class="extra">
+
+        <label>
+            Booking Fee
+        </label>
+
+        <strong id="bookingFeeText">
+            ₹0
+        </strong>
+
+    </div>
+
+
+    <div class="extra">
+
+        <label>
+            Cancellation Fee
+        </label>
+
+        <strong id="cancelFeeText">
+            ₹20
+        </strong>
+
+    </div>
+
+
+    <div class="extra">
+
+        <label>
+            Waiting Per Minute
+        </label>
+
+        <strong id="waitingFeeText">
+            ₹2
+        </strong>
+
+    </div>
+
+</div>
+
+
+<div class="card-actions">
+
+    <button
+        type="button"
+        class="action"
+        id="generalEditBtn"
+    >
+        Edit General Rules
+    </button>
+
+</div>
+
+</section></main></div><div
+    class="modal"
+    id="modal"
+><div class="modal-card"><div class="modal-head">
+
+    <h2 id="modalTitle">
+        Edit Pricing
+    </h2>
+
+    <button
+        type="button"
+        class="close"
+        id="closeBtn"
+    >
+        ×
+    </button>
+
+</div>
+
+
+<form id="pricingForm">
+
+    <input
+        type="hidden"
+        id="serviceId"
+    >
+
+
+    <div class="field">
+
+        <label>
+            Service
+        </label>
+
+        <input
+            id="serviceName"
+            readonly
+        >
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="field">
+
+            <label>
+                Day Base Fare
+            </label>
+
+            <input
+                id="dayBase"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Day Per KM
+            </label>
+
+            <input
+                id="dayPerKm"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="field">
+
+            <label>
+                Night Base Fare
+            </label>
+
+            <input
+                id="nightBase"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Night Per KM
+            </label>
+
+            <input
+                id="nightPerKm"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="field">
+
+            <label>
+                Minimum Fare
+            </label>
+
+            <input
+                id="minimumFare"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Extra KM Rate
+            </label>
+
+            <input
+                id="extraKmRate"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="field">
+
+        <label>
+            Status
+        </label>
+
+        <select id="serviceStatus">
+
+            <option value="active">
+                Active
+            </option>
+
+            <option value="inactive">
+                Inactive
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            type="button"
+            class="secondary"
+            id="cancelBtn"
+        >
+            Cancel
+        </button>
+
+        <button
+            type="submit"
+            class="primary"
+        >
+            Save Changes
+        </button>
+
+    </div>
+
+</form>
+
+</div></div><div
+    class="modal"
+    id="generalModal"
+><div class="modal-card"><div class="modal-head">
+
+    <h2>
+        General Fare Rules
+    </h2>
+
+    <button
+        type="button"
+        class="close"
+        id="generalClose"
+    >
+        ×
+    </button>
+
+</div>
+
+
+<form id="generalForm">
+
+    <div class="row">
+
+        <div class="field">
+
+            <label>
+                Booking Fee
+            </label>
+
+            <input
+                id="bookingFee"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+
+        <div class="field">
+
+            <label>
+                Cancellation Fee
+            </label>
+
+            <input
+                id="cancelFee"
+                type="number"
+                min="0"
+                step="0.01"
+                required
+            >
+
+        </div>
+
+    </div>
+
+
+    <div class="field">
+
+        <label>
+            Waiting Fee Per Minute
+        </label>
+
+        <input
+            id="waitingFee"
+            type="number"
+            min="0"
+            step="0.01"
+            required
+        >
+
+    </div>
+
+
+    <div class="modal-actions">
+
+        <button
+            type="button"
+            class="secondary"
+            id="generalCancel"
+        >
+            Cancel
+        </button>
+
+        <button
+            type="submit"
+            class="primary"
+        >
+            Save Rules
+        </button>
+
+    </div>
+
+</form>
+
+</div></div><div
+    class="toast"
+    id="toast"
+></div><script>
+
+"use strict";
+
+
+const STORAGE_KEY =
+    "riderx_admin_pricing";
+
+
+const GENERAL_KEY =
+    "riderx_admin_general_fares";
+
+
+const DEFAULT_PRICING = [
+
+    {
+        id:"bike",
+        name:"Bike Taxi",
+        icon:"🏍️",
+        description:"Two-wheeler passenger rides",
+        dayBase:30,
+        dayPerKm:8,
+        nightBase:40,
+        nightPerKm:11,
+        minimumFare:30,
+        extraKmRate:9,
+        status:"active"
+    },
+
+    {
+        id:"cab",
+        name:"Cab",
+        icon:"🚕",
+        description:"Car taxi service",
+        dayBase:60,
+        dayPerKm:14,
+        nightBase:80,
+        nightPerKm:18,
+        minimumFare:60,
+        extraKmRate:16,
+        status:"active"
+    },
+
+    {
+        id:"parcel",
+        name:"Parcel",
+        icon:"📦",
+        description:"Local parcel delivery",
+        dayBase:40,
+        dayPerKm:10,
+        nightBase:55,
+        nightPerKm:13,
+        minimumFare:40,
+        extraKmRate:12,
+        status:"active"
+    },
+
+    {
+        id:"food",
+        name:"Food Delivery",
+        icon:"🍔",
+        description:"Restaurant food delivery",
+        dayBase:30,
+        dayPerKm:8,
+        nightBase:40,
+        nightPerKm:11,
+        minimumFare:30,
+        extraKmRate:9,
+        status:"active"
+    }
+
+];
+
+
+const DEFAULT_GENERAL = {
+
+    bookingFee:0,
+
+    cancellationFee:20,
+
+    waitingFee:2
+
+};
+
+
+let pricing = [];
+
+let generalRules = {};
+
+
+
+const grid =
+    document.getElementById(
+        "pricingGrid"
+    );
+
+const modal =
+    document.getElementById(
+        "modal"
+    );
+
+const generalModal =
+    document.getElementById(
+        "generalModal"
+    );
+
+const pricingForm =
+    document.getElementById(
+        "pricingForm"
+    );
+
+const generalForm =
+    document.getElementById(
+        "generalForm"
+    );
+
+const toast =
+    document.getElementById(
+        "toast"
+    );
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadData();
+
+        render();
+
+    }
+);
+
+
+
+function loadData(){
+
+    try{
+
+        const savedPricing =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if(savedPricing){
+
+            const parsed =
+                JSON.parse(
+                    savedPricing
+                );
+
+
+            if(
+                Array.isArray(
+                    parsed
+                )
+            ){
+
+                pricing =
+                    parsed;
+
+            }
+
+        }
+
+
+        const savedGeneral =
+            localStorage.getItem(
+                GENERAL_KEY
+            );
+
+
+        if(savedGeneral){
+
+            generalRules =
+                JSON.parse(
+                    savedGeneral
+                );
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
+    }
+
+
+    if(
+        !Array.isArray(
+            pricing
+        ) ||
+        !pricing.length
+    ){
+
+        pricing =
+            [...DEFAULT_PRICING];
+
+    }
+
+
+    if(
+        !generalRules ||
+        typeof generalRules !== "object" ||
+        Array.isArray(generalRules)
+    ){
+
+        generalRules =
+            {...DEFAULT_GENERAL};
+
+    }
+
+
+    if(
+        generalRules.bookingFee === undefined
+    ){
+
+        generalRules.bookingFee =
+            DEFAULT_GENERAL.bookingFee;
+
+    }
+
+
+    if(
+        generalRules.cancellationFee === undefined
+    ){
+
+        generalRules.cancellationFee =
+            DEFAULT_GENERAL.cancellationFee;
+
+    }
+
+
+    if(
+        generalRules.waitingFee === undefined
+    ){
+
+        generalRules.waitingFee =
+            DEFAULT_GENERAL.waitingFee;
+
+    }
+
+
+    saveData();
 
 }
 
 
 
-</style>
+function saveData(){
 
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(
+            pricing
+        )
+    );
 
-</head>
 
+    localStorage.setItem(
+        GENERAL_KEY,
+        JSON.stringify(
+            generalRules
+        )
+    );
 
+}
 
-<body>
 
 
+function render(){
 
-<div class="header">
+    grid.innerHTML =
+        "";
 
-💰 Pricing Control
 
-</div>
+    pricing.forEach(
+        function(item){
 
+            grid.appendChild(
+                createCard(
+                    item
+                )
+            );
 
+        }
+    );
 
 
-<div class="container">
+    document
+        .getElementById(
+            "bookingFeeText"
+        )
+        .textContent =
+        "₹" +
+        money(
+            generalRules.bookingFee
+        );
 
 
+    document
+        .getElementById(
+            "cancelFeeText"
+        )
+        .textContent =
+        "₹" +
+        money(
+            generalRules.cancellationFee
+        );
 
-<div class="card">
 
+    document
+        .getElementById(
+            "waitingFeeText"
+        )
+        .textContent =
+        "₹" +
+        money(
+            generalRules.waitingFee
+        );
 
-<div class="title">
+}
 
-Bike Taxi
 
-</div>
 
+function createCard(
+    item
+){
 
-<input id="bikeRate" placeholder="Day Rate Per KM">
+    const card =
+        document.createElement(
+            "article"
+        );
 
 
-<input id="bikeLongRate" placeholder="Above 10 KM Rate">
+    card.className =
+        "card";
 
 
-<input id="bikeNightRate" placeholder="Night Rate">
+    card.innerHTML = `
 
+        <div class="card-head">
 
-</div>
+            <div class="service">
 
+                <div class="service-icon">
+                    ${escapeHtml(item.icon)}
+                </div>
 
+                <div>
 
+                    <div class="service-name">
+                        ${escapeHtml(item.name)}
+                    </div>
 
+                    <div class="service-desc">
+                        ${escapeHtml(item.description)}
+                    </div>
 
+                </div>
 
+            </div>
 
-<div class="card">
 
+            <span class="status"
+                style="
+                    ${
+                        item.status === "inactive"
+                        ? "background:#321919;color:#ff7777;"
+                        : ""
+                    }
+                "
+            >
+                ${escapeHtml(item.status)}
+            </span>
 
-<div class="title">
+        </div>
 
-Cab
 
-</div>
+        <div class="rate-grid">
 
+            <div class="rate">
 
-<input id="cabRate" placeholder="Cab Rate Per KM">
+                <div class="rate-label">
+                    Day Base
+                </div>
 
+                <div class="rate-value">
+                    ₹${money(item.dayBase)}
+                </div>
 
-</div>
+            </div>
 
 
+            <div class="rate">
 
+                <div class="rate-label">
+                    Day / KM
+                </div>
 
+                <div class="rate-value">
+                    ₹${money(item.dayPerKm)}
+                    <span>/km</span>
+                </div>
 
+            </div>
 
 
-<div class="card">
+            <div class="rate">
 
+                <div class="rate-label">
+                    Night Base
+                </div>
 
-<div class="title">
+                <div class="rate-value">
+                    ₹${money(item.nightBase)}
+                </div>
 
-Other Services
+            </div>
 
-</div>
 
+            <div class="rate">
 
-<input id="parcelRate" placeholder="Parcel Starting Charge">
+                <div class="rate-label">
+                    Night / KM
+                </div>
 
+                <div class="rate-value">
+                    ₹${money(item.nightPerKm)}
+                    <span>/km</span>
+                </div>
 
-<input id="foodRate" placeholder="Food Delivery Charge">
+            </div>
 
 
-</div>
+            <div class="rate">
 
+                <div class="rate-label">
+                    Minimum Fare
+                </div>
 
+                <div class="rate-value">
+                    ₹${money(item.minimumFare)}
+                </div>
 
+            </div>
 
 
+            <div class="rate">
 
+                <div class="rate-label">
+                    Extra KM
+                </div>
 
+                <div class="rate-value">
+                    ₹${money(item.extraKmRate)}
+                    <span>/km</span>
+                </div>
 
-<div class="card">
+            </div>
 
+        </div>
 
-<div class="title">
 
-Commission
+        <div class="card-actions">
 
-</div>
+            <button
+                type="button"
+                class="action"
+                data-edit="${escapeHtml(item.id)}"
+            >
+                Edit Pricing
+            </button>
 
 
-<input id="platformCommission" placeholder="Platform Commission %">
+            <button
+                type="button"
+                class="action"
+                data-toggle="${escapeHtml(item.id)}"
+            >
+                ${
+                    item.status === "active"
+                    ? "Disable"
+                    : "Enable"
+                }
+            </button>
 
+        </div>
 
-<input id="riderCommission" placeholder="Rider Commission %">
+    `;
 
 
-</div>
+    return card;
 
+}
 
 
 
+grid.addEventListener(
+    "click",
+    function(event){
 
+        const edit =
+            event.target.closest(
+                "[data-edit]"
+            );
 
 
-<div class="card">
+        const toggle =
+            event.target.closest(
+                "[data-toggle]"
+            );
 
 
-<div class="title">
+        if(edit){
 
-Minimum Fare
+            openPricingModal(
+                edit.dataset.edit
+            );
 
-</div>
+        }
 
 
-<input id="minimumFare" placeholder="Minimum Fare">
+        if(toggle){
 
+            toggleService(
+                toggle.dataset.toggle
+            );
 
-</div>
+        }
 
+    }
+);
 
 
 
+function openPricingModal(
+    id
+){
 
+    const item =
+        pricing.find(
+            function(service){
 
+                return service.id ===
+                    id;
 
-<button id="savePricing">
+            }
+        );
 
-Save Pricing
 
-</button>
+    if(!item){
 
+        return;
 
+    }
 
 
+    document
+        .getElementById(
+            "serviceId"
+        )
+        .value =
+        item.id;
 
-</div>
 
+    document
+        .getElementById(
+            "serviceName"
+        )
+        .value =
+        item.name;
 
 
+    document
+        .getElementById(
+            "dayBase"
+        )
+        .value =
+        item.dayBase;
 
 
+    document
+        .getElementById(
+            "dayPerKm"
+        )
+        .value =
+        item.dayPerKm;
 
 
-<script type="module" src="../js/pricing.js"></script>
+    document
+        .getElementById(
+            "nightBase"
+        )
+        .value =
+        item.nightBase;
 
 
+    document
+        .getElementById(
+            "nightPerKm"
+        )
+        .value =
+        item.nightPerKm;
 
-</body>
 
-</html>
+    document
+        .getElementById(
+            "minimumFare"
+        )
+        .value =
+        item.minimumFare;
+
+
+    document
+        .getElementById(
+            "extraKmRate"
+        )
+        .value =
+        item.extraKmRate;
+
+
+    document
+        .getElementById(
+            "serviceStatus"
+        )
+        .value =
+        item.status;
+
+
+    modal.classList.add(
+        "show"
+    );
+
+}
+
+
+
+pricingForm.addEventListener(
+    "submit",
+    function(event){
+
+        event.preventDefault();
+
+
+        const id =
+            document
+                .getElementById(
+                    "serviceId"
+                )
+                .value;
+
+
+        const item =
+            pricing.find(
+                function(service){
+
+                    return service.id ===
+                        id;
+
+                }
+            );
+
+
+        if(!item){
+
+            return;
+
+        }
+
+
+        item.dayBase =
+            numberValue(
+                "dayBase"
+            );
+
+
+        item.dayPerKm =
+            numberValue(
+                "dayPerKm"
+            );
+
+
+        item.nightBase =
+            numberValue(
+                "nightBase"
+            );
+
+
+        item.nightPerKm =
+            numberValue(
+                "nightPerKm"
+            );
+
+
+        item.minimumFare =
+            numberValue(
+                "minimumFare"
+            );
+
+
+        item.extraKmRate =
+            numberValue(
+                "extraKmRate"
+            );
+
+
+        item.status =
+            document
+                .getElementById(
+                    "serviceStatus"
+                )
+                .value;
+
+
+        saveData();
+
+        closePricingModal();
+
+        render();
+
+        showToast(
+            "Pricing updated successfully."
+        );
+
+    }
+);
+
+
+
+function toggleService(
+    id
+){
+
+    const item =
+        pricing.find(
+            function(service){
+
+                return service.id ===
+                    id;
+
+            }
+        );
+
+
+    if(!item){
+
+        return;
+
+    }
+
+
+    item.status =
+        item.status === "active"
+            ? "inactive"
+            : "active";
+
+
+    saveData();
+
+    render();
+
+    showToast(
+        item.name +
+        (
+            item.status === "active"
+                ? " enabled."
+                : " disabled."
+        )
+    );
+
+}
+
+
+
+document
+    .getElementById(
+        "saveAllBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            saveData();
+
+            render();
+
+            showToast(
+                "All pricing saved."
+            );
+
+        }
+    );
+
+
+
+document
+    .getElementById(
+        "closeBtn"
+    )
+    .addEventListener(
+        "click",
+        closePricingModal
+    );
+
+
+document
+    .getElementById(
+        "cancelBtn"
+    )
+    .addEventListener(
+        "click",
+        closePricingModal
+    );
+
+
+modal.addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            modal
+        ){
+
+            closePricingModal();
+
+        }
+
+    }
+);
+
+
+
+function closePricingModal(){
+
+    modal.classList.remove(
+        "show"
+    );
+
+}
+
+
+
+document
+    .getElementById(
+        "generalEditBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            document
+                .getElementById(
+                    "bookingFee"
+                )
+                .value =
+                generalRules.bookingFee;
+
+
+            document
+                .getElementById(
+                    "cancelFee"
+                )
+                .value =
+                generalRules.cancellationFee;
+
+
+            document
+                .getElementById(
+                    "waitingFee"
+                )
+                .value =
+                generalRules.waitingFee;
+
+
+            generalModal.classList.add(
+                "show"
+            );
+
+        }
+    );
+
+
+
+generalForm.addEventListener(
+    "submit",
+    function(event){
+
+        event.preventDefault();
+
+
+        generalRules.bookingFee =
+            numberValue(
+                "bookingFee"
+            );
+
+
+        generalRules.cancellationFee =
+            numberValue(
+                "cancelFee"
+            );
+
+
+        generalRules.waitingFee =
+            numberValue(
+                "waitingFee"
+            );
+
+
+        saveData();
+
+        closeGeneralModal();
+
+        render();
+
+        showToast(
+            "General fare rules updated."
+        );
+
+    }
+);
+
+
+
+function closeGeneralModal(){
+
+    generalModal.classList.remove(
+        "show"
+    );
+
+}
+
+
+
+document
+    .getElementById(
+        "generalClose"
+    )
+    .addEventListener(
+        "click",
+        closeGeneralModal
+    );
+
+
+document
+    .getElementById(
+        "generalCancel"
+    )
+    .addEventListener(
+        "click",
+        closeGeneralModal
+    );
+
+
+generalModal.addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            generalModal
+        ){
+
+            closeGeneralModal();
+
+        }
+
+    }
+);
+
+
+
+function numberValue(
+    id
+){
+
+    return Math.max(
+        0,
+        Number(
+            document
+                .getElementById(
+                    id
+                )
+                .value
+        ) || 0
+    );
+
+}
+
+
+
+function money(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN",
+        {
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+
+function showToast(
+    message
+){
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        window.pricingToast
+    );
+
+
+    window.pricingToast =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+</script></body></html>
