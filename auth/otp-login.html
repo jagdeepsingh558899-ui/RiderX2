@@ -1,58 +1,1455 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFD400"><title>RiderX - OTP Login</title><link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Auth.css">
+<link rel="stylesheet" href="../css/Responsive.css"><style>
 
-<head>
+*{
+    box-sizing:border-box;
+}
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+body{
+    margin:0;
+    min-height:100vh;
+    background:#070707;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
 
-<title>RiderX OTP Login</title>
+.page{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    position:relative;
+    overflow:hidden;
+}
 
-<link rel="stylesheet" href="../css/style.css">
+.page::before{
+    content:"";
+    position:absolute;
+    width:350px;
+    height:350px;
+    top:-180px;
+    right:-140px;
+    border-radius:50%;
+    background:rgba(255,212,0,.07);
+}
 
-</head>
+.page::after{
+    content:"";
+    position:absolute;
+    width:320px;
+    height:320px;
+    bottom:-190px;
+    left:-150px;
+    border-radius:50%;
+    background:rgba(255,212,0,.05);
+}
 
-<body>
+.card{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width:420px;
+    padding:28px 22px 22px;
+    border:1px solid #292929;
+    border-radius:22px;
+    background:#111;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
 
+.brand{
+    text-align:center;
+    margin-bottom:24px;
+}
 
-<div class="splash">
+.logo{
+    width:68px;
+    height:68px;
+    margin:0 auto 12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:19px;
+    background:#FFD400;
+    color:#090909;
+    font-size:24px;
+    font-weight:1000;
+}
 
+.brand h1{
+    margin:0;
+    font-size:25px;
+    font-weight:1000;
+}
 
-<img src="../assets/logo.png" class="logo">
+.brand h1 span{
+    color:#FFD400;
+}
 
+.brand p{
+    margin:6px 0 0;
+    color:#777;
+    font-size:10px;
+}
+
+.heading{
+    margin-bottom:18px;
+}
+
+.heading h2{
+    margin:0;
+    font-size:18px;
+}
+
+.heading p{
+    margin:6px 0 0;
+    color:#777;
+    font-size:10px;
+    line-height:1.5;
+}
+
+.message{
+    display:none;
+    margin-bottom:13px;
+    padding:10px;
+    border-radius:9px;
+    font-size:9px;
+    line-height:1.5;
+}
+
+.message.show{
+    display:block;
+}
+
+.error{
+    border:1px solid #542828;
+    background:#241414;
+    color:#ff7777;
+}
+
+.success{
+    border:1px solid #275335;
+    background:#132319;
+    color:#65e58b;
+}
+
+.field{
+    margin-bottom:14px;
+}
+
+.field label{
+    display:block;
+    margin-bottom:7px;
+    color:#999;
+    font-size:9px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.phone-row{
+    display:flex;
+    gap:8px;
+}
+
+.code{
+    width:80px;
+    height:48px;
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1a1a1a;
+    color:#FFD400;
+    font-size:11px;
+    font-weight:900;
+}
+
+.input{
+    width:100%;
+    height:48px;
+    padding:0 13px;
+    border:1px solid #333;
+    border-radius:10px;
+    outline:none;
+    background:#1a1a1a;
+    color:#fff;
+    font-size:12px;
+}
+
+.phone-row .input{
+    flex:1;
+}
+
+.input:focus{
+    border-color:#FFD400;
+    box-shadow:0 0 0 2px rgba(255,212,0,.08);
+}
+
+.input::placeholder{
+    color:#555;
+}
+
+.primary{
+    width:100%;
+    height:49px;
+    border:0;
+    border-radius:10px;
+    background:#FFD400;
+    color:#111;
+    cursor:pointer;
+    font-size:12px;
+    font-weight:1000;
+}
+
+.primary:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+}
+
+.otp-section{
+    display:none;
+}
+
+.otp-section.show{
+    display:block;
+}
+
+.otp-info{
+    margin:2px 0 14px;
+    padding:10px;
+    border:1px solid #292929;
+    border-radius:9px;
+    background:#171717;
+    color:#888;
+    font-size:9px;
+    line-height:1.5;
+    text-align:center;
+}
+
+.otp-info strong{
+    color:#FFD400;
+}
+
+.otp-inputs{
+    display:flex;
+    justify-content:center;
+    gap:7px;
+    margin:16px 0;
+}
+
+.otp-input{
+    width:43px;
+    height:48px;
+    border:1px solid #333;
+    border-radius:9px;
+    outline:none;
+    background:#1a1a1a;
+    color:#FFD400;
+    text-align:center;
+    font-size:19px;
+    font-weight:1000;
+}
+
+.otp-input:focus{
+    border-color:#FFD400;
+    box-shadow:0 0 0 2px rgba(255,212,0,.08);
+}
+
+.timer-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:0 0 14px;
+    color:#666;
+    font-size:9px;
+}
+
+.resend{
+    border:0;
+    background:none;
+    color:#FFD400;
+    cursor:pointer;
+    font-size:9px;
+    font-weight:900;
+}
+
+.resend:disabled{
+    color:#555;
+    cursor:not-allowed;
+}
+
+.change{
+    width:100%;
+    margin-top:11px;
+    border:0;
+    background:transparent;
+    color:#777;
+    cursor:pointer;
+    font-size:9px;
+}
+
+.change:hover{
+    color:#FFD400;
+}
+
+.back{
+    width:100%;
+    margin-top:14px;
+    border:0;
+    background:transparent;
+    color:#555;
+    cursor:pointer;
+    font-size:9px;
+}
+
+.back:hover{
+    color:#FFD400;
+}
+
+.footer{
+    margin-top:20px;
+    text-align:center;
+    color:#444;
+    font-size:8px;
+}
+
+.loader{
+    display:inline-block;
+    width:13px;
+    height:13px;
+    margin-right:7px;
+    vertical-align:-2px;
+    border:2px solid rgba(0,0,0,.25);
+    border-top-color:#111;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@media(max-width:430px){
+
+    .page{
+        padding:10px;
+    }
+
+    .card{
+        padding:24px 17px 18px;
+        border-radius:18px;
+    }
+
+    .otp-input{
+        width:39px;
+        height:46px;
+    }
+
+}
+
+@media(max-width:350px){
+
+    .otp-inputs{
+        gap:4px;
+    }
+
+    .otp-input{
+        width:35px;
+    }
+
+}
+
+</style></head><body><main class="page"><section class="card"><div class="brand"><div class="logo">
+    RX
+</div>
 
 <h1>
-Rider<span>X</span>
+    Rider<span>X</span>
 </h1>
 
+<p>
+    Fast. Safe. Reliable.
+</p>
 
-<h2>
-Mobile Login
+</div><div class="heading"><h2>
+    Login with OTP
 </h2>
 
+<p>
+    Enter your mobile number and verify the OTP.
+</p>
 
-<input id="phone"
-placeholder="+91XXXXXXXXXX"
-type="tel">
+</div><div
+    class="message error"
+    id="errorBox"
+></div><div
+    class="message success"
+    id="successBox"
+></div><div id="phoneSection"><div class="field"><label>
+    Mobile Number
+</label>
 
+<div class="phone-row">
 
-<div id="recaptcha-container"></div>
+    <div class="code">
+        +91
+    </div>
 
-
-<button onclick="sendOTP()">
-Send OTP
-</button>
-
-
-<p id="message"></p>
-
+    <input
+        class="input"
+        id="phone"
+        type="tel"
+        inputmode="numeric"
+        autocomplete="tel"
+        maxlength="10"
+        placeholder="10-digit mobile number"
+    >
 
 </div>
 
+</div><button
+type="button"
+class="primary"
+id="sendBtn"
 
-<script type="module" src="../js/otp.js"></script>
+«»
+
+Send OTP
+
+</button></div><div
+    class="otp-section"
+    id="otpSection"
+><div class="otp-info">OTP sent to
+<strong id="maskedPhone">
+    +91 XXXXX XXXXX
+</strong>
+
+</div><div class="otp-inputs"><input
+    class="otp-input"
+    maxlength="1"
+    inputmode="numeric"
+    autocomplete="one-time-code"
+    id="otp1"
+>
+
+<input
+    class="otp-input"
+    maxlength="1"
+    inputmode="numeric"
+    id="otp2"
+>
+
+<input
+    class="otp-input"
+    maxlength="1"
+    inputmode="numeric"
+    id="otp3"
+>
+
+<input
+    class="otp-input"
+    maxlength="1"
+    inputmode="numeric"
+    id="otp4"
+>
+
+<input
+    class="otp-input"
+    maxlength="1"
+    inputmode="numeric"
+    id="otp5"
+>
+
+<input
+    class="otp-input"
+    maxlength="1"
+    inputmode="numeric"
+    id="otp6"
+>
+
+</div><div class="timer-row"><span id="timer">
+    Resend in 30s
+</span>
+
+<button
+    type="button"
+    class="resend"
+    id="resendBtn"
+    disabled
+>
+    Resend OTP
+</button>
+
+</div><button
+type="button"
+class="primary"
+id="verifyBtn"
+
+«»
+
+Verify & Login
+
+</button><button
+type="button"
+class="change"
+id="changeBtn"
+
+«»
+
+Change mobile number
+
+</button></div><button
+type="button"
+class="back"
+id="backBtn"
+
+«»
+
+← Back to login
+
+</button><div class="footer">
+    © 2026 RiderX • Secure OTP Login
+</div></section></main><script>
+
+"use strict";
 
 
-</body>
+const phone =
+    document.getElementById(
+        "phone"
+    );
 
-</html>
+const sendBtn =
+    document.getElementById(
+        "sendBtn"
+    );
+
+const verifyBtn =
+    document.getElementById(
+        "verifyBtn"
+    );
+
+const resendBtn =
+    document.getElementById(
+        "resendBtn"
+    );
+
+const phoneSection =
+    document.getElementById(
+        "phoneSection"
+    );
+
+const otpSection =
+    document.getElementById(
+        "otpSection"
+    );
+
+const timer =
+    document.getElementById(
+        "timer"
+    );
+
+const maskedPhone =
+    document.getElementById(
+        "maskedPhone"
+    );
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
+
+const successBox =
+    document.getElementById(
+        "successBox"
+    );
+
+
+const otpInputs = [
+
+    document.getElementById("otp1"),
+    document.getElementById("otp2"),
+    document.getElementById("otp3"),
+    document.getElementById("otp4"),
+    document.getElementById("otp5"),
+    document.getElementById("otp6")
+
+];
+
+
+let countdown = null;
+
+let currentOTP = null;
+
+let currentPhone = null;
+
+
+
+phone.value =
+    normalizePhone(
+        localStorage.getItem(
+            "riderx_otp_phone"
+        ) || ""
+    );
+
+
+
+phone.addEventListener(
+    "input",
+    function(){
+
+        this.value =
+            normalizePhone(
+                this.value
+            );
+
+    }
+);
+
+
+
+otpInputs.forEach(
+    function(input,index){
+
+        input.addEventListener(
+            "input",
+            function(){
+
+                this.value =
+                    this.value
+                        .replace(
+                            /\D/g,
+                            ""
+                        )
+                        .slice(
+                            0,
+                            1
+                        );
+
+
+                if(
+                    this.value &&
+                    index <
+                    otpInputs.length - 1
+                ){
+
+                    otpInputs[
+                        index + 1
+                    ].focus();
+
+                }
+
+            }
+        );
+
+
+        input.addEventListener(
+            "keydown",
+            function(event){
+
+                if(
+                    event.key ===
+                    "Backspace" &&
+                    !this.value &&
+                    index > 0
+                ){
+
+                    otpInputs[
+                        index - 1
+                    ].focus();
+
+                }
+
+            }
+        );
+
+
+        input.addEventListener(
+            "paste",
+            function(event){
+
+                event.preventDefault();
+
+
+                const pasted =
+                    (
+                        event.clipboardData ||
+                        window.clipboardData
+                    )
+                    .getData(
+                        "text"
+                    )
+                    .replace(
+                        /\D/g,
+                        ""
+                    )
+                    .slice(
+                        0,
+                        6
+                    );
+
+
+                pasted
+                    .split("")
+                    .forEach(
+                        function(char,i){
+
+                            if(
+                                otpInputs[i]
+                            ){
+
+                                otpInputs[i].value =
+                                    char;
+
+                            }
+
+                        }
+                    );
+
+
+                if(
+                    pasted.length
+                ){
+
+                    otpInputs[
+                        Math.min(
+                            pasted.length,
+                            6
+                        ) - 1
+                    ].focus();
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+
+sendBtn.addEventListener(
+    "click",
+    function(){
+
+        sendOTP();
+
+    }
+);
+
+
+
+resendBtn.addEventListener(
+    "click",
+    function(){
+
+        sendOTP();
+
+    }
+);
+
+
+
+verifyBtn.addEventListener(
+    "click",
+    function(){
+
+        verifyOTP();
+
+    }
+);
+
+
+
+document
+    .getElementById(
+        "changeBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            showPhoneSection();
+
+        }
+    );
+
+
+
+document
+    .getElementById(
+        "backBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            window.location.href =
+                "./login.html";
+
+        }
+    );
+
+
+
+function sendOTP(){
+
+    clearMessages();
+
+
+    const mobile =
+        normalizePhone(
+            phone.value
+        );
+
+
+    if(
+        !/^[6-9]\d{9}$/.test(
+            mobile
+        )
+    ){
+
+        showError(
+            "Please enter a valid 10-digit Indian mobile number."
+        );
+
+        phone.focus();
+
+        return;
+
+    }
+
+
+    currentPhone =
+        mobile;
+
+
+    /*
+     * Production Firebase Phone Auth:
+     *
+     * Firebase phone authentication can be
+     * connected here without changing the UI.
+     *
+     * The local fallback below is intentionally
+     * used when Firebase Auth is not initialized.
+     */
+
+
+    currentOTP =
+        generateOTP();
+
+
+    sessionStorage.setItem(
+        "riderx_demo_otp",
+        currentOTP
+    );
+
+
+    sessionStorage.setItem(
+        "riderx_demo_otp_phone",
+        mobile
+    );
+
+
+    localStorage.setItem(
+        "riderx_otp_phone",
+        mobile
+    );
+
+
+    maskedPhone.textContent =
+        maskPhone(
+            mobile
+        );
+
+
+    phoneSection.style.display =
+        "none";
+
+
+    otpSection.classList.add(
+        "show"
+    );
+
+
+    clearOTPInputs();
+
+
+    startTimer();
+
+
+    /*
+     * Development/demo feedback.
+     * The OTP is shown in console only.
+     * Real SMS delivery should be handled
+     * by Firebase Phone Authentication.
+     */
+
+    console.log(
+        "RiderX demo OTP:",
+        currentOTP
+    );
+
+
+    showSuccess(
+        "OTP sent successfully. Enter the 6-digit OTP."
+    );
+
+
+    otpInputs[0].focus();
+
+}
+
+
+
+function verifyOTP(){
+
+    clearMessages();
+
+
+    const entered =
+        otpInputs
+            .map(
+                function(input){
+
+                    return input.value;
+
+                }
+            )
+            .join("");
+
+
+    if(
+        entered.length !== 6
+    ){
+
+        showError(
+            "Please enter the complete 6-digit OTP."
+        );
+
+        return;
+
+    }
+
+
+    const savedOTP =
+        currentOTP ||
+        sessionStorage.getItem(
+            "riderx_demo_otp"
+        );
+
+
+    const savedPhone =
+        currentPhone ||
+        sessionStorage.getItem(
+            "riderx_demo_otp_phone"
+        );
+
+
+    if(
+        entered !==
+        savedOTP
+    ){
+
+        showError(
+            "Invalid OTP. Please check the OTP and try again."
+        );
+
+        return;
+
+    }
+
+
+    verifyBtn.disabled =
+        true;
+
+    verifyBtn.textContent =
+        "Verifying...";
+
+
+    const user =
+        findUser(
+            savedPhone
+        );
+
+
+    const role =
+        getSelectedRole(
+            user
+        );
+
+
+    const session = {
+
+        uid:
+            user?.uid ||
+            "customer_" +
+            savedPhone,
+
+        name:
+            user?.name ||
+            "RiderX Customer",
+
+        phone:
+            savedPhone,
+
+        role:
+            role,
+
+        loginMethod:
+            "otp",
+
+        loginAt:
+            new Date().toISOString()
+
+    };
+
+
+    localStorage.setItem(
+        "riderx_user",
+        JSON.stringify(
+            session
+        )
+    );
+
+
+    localStorage.setItem(
+        "userRole",
+        role
+    );
+
+
+    sessionStorage.removeItem(
+        "riderx_demo_otp"
+    );
+
+
+    sessionStorage.removeItem(
+        "riderx_demo_otp_phone"
+    );
+
+
+    showSuccess(
+        "OTP verified successfully. Opening RiderX..."
+    );
+
+
+    setTimeout(
+        function(){
+
+            redirectByRole(
+                role
+            );
+
+        },
+        650
+    );
+
+}
+
+
+
+function findUser(
+    mobile
+){
+
+    const users =
+        getUsers();
+
+
+    return (
+        users.find(
+            function(user){
+
+                return (
+                    normalizePhone(
+                        user.phone
+                    ) ===
+                    mobile
+                );
+
+            }
+        ) ||
+        null
+    );
+
+}
+
+
+
+function getUsers(){
+
+    const result = [];
+
+
+    const keys = [
+
+        "riderx_users",
+        "users",
+        "riderx_customers",
+        "riderx_riders"
+
+    ];
+
+
+    keys.forEach(
+        function(key){
+
+            try{
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if(!raw){
+
+                    return;
+
+                }
+
+
+                const parsed =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                if(
+                    Array.isArray(
+                        parsed
+                    )
+                ){
+
+                    parsed.forEach(
+                        function(item){
+
+                            result.push(
+                                item
+                            );
+
+                        }
+                    );
+
+                }else if(parsed){
+
+                    result.push(
+                        parsed
+                    );
+
+                }
+
+            }catch(error){
+
+                console.error(
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    return result;
+
+}
+
+
+
+function getSelectedRole(
+    user
+){
+
+    const savedRole =
+        localStorage.getItem(
+            "riderx_selected_role"
+        );
+
+
+    const role =
+        String(
+            user?.role ||
+            savedRole ||
+            "customer"
+        )
+        .toLowerCase();
+
+
+    if(
+        role === "rider" ||
+        role === "driver"
+    ){
+
+        return "rider";
+
+    }
+
+
+    if(
+        role === "admin"
+    ){
+
+        return "admin";
+
+    }
+
+
+    return "customer";
+
+}
+
+
+
+function redirectByRole(
+    role
+){
+
+    if(
+        role === "rider"
+    ){
+
+        window.location.href =
+            "../rider/home.html";
+
+        return;
+
+    }
+
+
+    if(
+        role === "admin"
+    ){
+
+        window.location.href =
+            "../admin/dashboard.html";
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "../customer/home.html";
+
+}
+
+
+
+function generateOTP(){
+
+    return String(
+        Math.floor(
+            100000 +
+            Math.random() *
+            900000
+        )
+    );
+
+}
+
+
+
+function normalizePhone(
+    value
+){
+
+    return String(
+        value || ""
+    )
+    .replace(
+        /\D/g,
+        ""
+    )
+    .slice(
+        -10
+    );
+
+}
+
+
+
+function maskPhone(
+    mobile
+){
+
+    if(
+        mobile.length !== 10
+    ){
+
+        return "+91 XXXXX XXXXX";
+
+    }
+
+
+    return (
+        "+91 " +
+        mobile.slice(0,2) +
+        "XXXXX" +
+        mobile.slice(7)
+    );
+
+}
+
+
+
+function clearOTPInputs(){
+
+    otpInputs.forEach(
+        function(input){
+
+            input.value =
+                "";
+
+        }
+    );
+
+}
+
+
+
+function startTimer(){
+
+    clearInterval(
+        countdown
+    );
+
+
+    let seconds =
+        30;
+
+
+    resendBtn.disabled =
+        true;
+
+
+    timer.textContent =
+        "Resend in " +
+        seconds +
+        "s";
+
+
+    countdown =
+        setInterval(
+            function(){
+
+                seconds--;
+
+
+                if(
+                    seconds <= 0
+                ){
+
+                    clearInterval(
+                        countdown
+                    );
+
+
+                    timer.textContent =
+                        "You can resend OTP";
+
+
+                    resendBtn.disabled =
+                        false;
+
+
+                    return;
+
+                }
+
+
+                timer.textContent =
+                    "Resend in " +
+                    seconds +
+                    "s";
+
+            },
+            1000
+        );
+
+}
+
+
+
+function showPhoneSection(){
+
+    clearMessages();
+
+
+    clearOTPInputs();
+
+
+    otpSection.classList.remove(
+        "show"
+    );
+
+
+    phoneSection.style.display =
+        "block";
+
+
+    phone.focus();
+
+}
+
+
+
+function clearMessages(){
+
+    errorBox.classList.remove(
+        "show"
+    );
+
+    successBox.classList.remove(
+        "show"
+    );
+
+}
+
+
+
+function showError(
+    message
+){
+
+    successBox.classList.remove(
+        "show"
+    );
+
+    errorBox.textContent =
+        message;
+
+    errorBox.classList.add(
+        "show"
+    );
+
+}
+
+
+
+function showSuccess(
+    message
+){
+
+    errorBox.classList.remove(
+        "show"
+    );
+
+    successBox.textContent =
+        message;
+
+    successBox.classList.add(
+        "show"
+    );
+
+}
+
+</script></body></html>
