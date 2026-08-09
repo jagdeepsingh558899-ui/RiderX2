@@ -5,140 +5,384 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-<title>RiderX Coupon Management</title>
+<meta
+    name="theme-color"
+    content="#FFD400"
+>
 
+<title>RiderX Admin - Coupons</title>
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link
+    rel="stylesheet"
+    href="../css/Style.css"
+>
 
+<link
+    rel="stylesheet"
+    href="../css/Dashboard.css"
+>
+
+<link
+    rel="stylesheet"
+    href="../css/Responsive.css"
+>
 
 <style>
 
 *{
-box-sizing:border-box;
-font-family:Arial;
+    box-sizing:border-box;
 }
-
 
 body{
-
-margin:0;
-background:#050505;
-color:white;
-
+    margin:0;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
 }
 
-
-.header{
-
-background:#111;
-height:70px;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:20px;
-
+.page{
+    min-height:100vh;
+    padding-bottom:80px;
 }
 
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:#111;
+    border-bottom:1px solid #292929;
+}
+
+.top-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.title{
+    font-size:17px;
+    font-weight:900;
+}
+
+.title span{
+    color:#FFD400;
+}
 
 .logo{
-
-font-size:28px;
-font-weight:900;
-
+    color:#FFD400;
+    font-weight:900;
+    font-size:18px;
 }
 
-
-.logo span{
-
-color:#FFE500;
-
+.content{
+    width:100%;
+    max-width:1150px;
+    margin:auto;
+    padding:18px;
 }
 
-
-
-.container{
-
-padding:20px;
-
+.hero{
+    padding:18px;
+    border:1px solid #292929;
+    border-radius:18px;
+    background:
+        linear-gradient(
+            145deg,
+            #1a1a1a,
+            #0d0d0d
+        );
+    margin-bottom:16px;
 }
 
+.hero h1{
+    margin:0 0 7px;
+    font-size:24px;
+}
 
+.hero p{
+    margin:0;
+    color:#999;
+    font-size:13px;
+    line-height:1.5;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:
+        repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:16px;
+}
+
+.stat{
+    padding:16px;
+    background:#151515;
+    border:1px solid #292929;
+    border-radius:15px;
+}
+
+.stat-label{
+    color:#888;
+    font-size:10px;
+    text-transform:uppercase;
+    font-weight:900;
+}
+
+.stat-value{
+    margin-top:7px;
+    color:#FFD400;
+    font-size:23px;
+    font-weight:900;
+}
 
 .card{
-
-background:#111;
-border:1px solid #333;
-border-radius:20px;
-padding:20px;
-margin-bottom:20px;
-
+    padding:18px;
+    margin-bottom:16px;
+    background:#121212;
+    border:1px solid #292929;
+    border-radius:17px;
 }
 
-
-
-input,
-select{
-
-width:100%;
-padding:14px;
-margin:8px 0;
-background:#000;
-border:1px solid #444;
-border-radius:12px;
-color:white;
-
+.card-title{
+    margin:0 0 15px;
+    font-size:16px;
+    font-weight:900;
 }
 
-
-
-button{
-
-width:100%;
-padding:14px;
-background:#FFE500;
-border:0;
-border-radius:12px;
-font-weight:bold;
-
+.form-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+    gap:13px;
 }
 
-
-
-.coupon{
-
-background:#0c0c0c;
-border:1px solid #333;
-border-radius:15px;
-padding:15px;
-margin-top:15px;
-
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
 }
 
-
-
-.yellow{
-
-color:#FFE500;
-
+.field.full{
+    grid-column:1/-1;
 }
 
-
-
-.delete{
-
-background:#ff3333;
-color:white;
-margin-top:10px;
-
+.field label{
+    color:#aaa;
+    font-size:10px;
+    font-weight:900;
+    text-transform:uppercase;
 }
 
+.field input,
+.field select{
+    width:100%;
+    height:45px;
+    padding:0 12px;
+    border:1px solid #363636;
+    border-radius:10px;
+    outline:none;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:13px;
+}
 
+.field textarea{
+    width:100%;
+    min-height:85px;
+    padding:12px;
+    border:1px solid #363636;
+    border-radius:10px;
+    outline:none;
+    resize:vertical;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:13px;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus{
+    border-color:#FFD400;
+}
+
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:16px;
+}
+
+.btn{
+    min-height:44px;
+    padding:0 16px;
+    border:1px solid #383838;
+    border-radius:10px;
+    background:#1d1d1d;
+    color:#fff;
+    cursor:pointer;
+    font-weight:900;
+}
+
+.btn.primary{
+    background:#FFD400;
+    color:#111;
+    border-color:#FFD400;
+}
+
+.btn.danger{
+    background:#321717;
+    color:#ff7777;
+    border-color:#713131;
+}
+
+.btn.small{
+    min-height:34px;
+    padding:0 10px;
+    font-size:10px;
+}
+
+.toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:15px;
+}
+
+.search{
+    flex:1;
+    min-width:180px;
+    height:43px;
+    padding:0 13px;
+    border:1px solid #363636;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    outline:none;
+}
+
+.filter{
+    min-width:145px;
+    height:43px;
+    padding:0 10px;
+    border:1px solid #363636;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    outline:none;
+}
+
+.table-wrap{
+    width:100%;
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    min-width:850px;
+    border-collapse:collapse;
+}
+
+th,
+td{
+    padding:12px 10px;
+    text-align:left;
+    border-bottom:1px solid #292929;
+    font-size:12px;
+}
+
+th{
+    color:#888;
+    font-size:10px;
+    text-transform:uppercase;
+}
+
+.code{
+    display:inline-flex;
+    padding:6px 9px;
+    border-radius:7px;
+    background:#26220b;
+    color:#FFD400;
+    font-weight:900;
+    letter-spacing:.5px;
+}
+
+.badge{
+    display:inline-flex;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:900;
+}
+
+.badge.active{
+    background:#14351f;
+    color:#4ade80;
+}
+
+.badge.inactive{
+    background:#321717;
+    color:#ff7777;
+}
+
+.badge.expired{
+    background:#292929;
+    color:#999;
+}
+
+.empty{
+    padding:25px;
+    text-align:center;
+    color:#777;
+    font-size:13px;
+}
+
+@media(max-width:700px){
+
+    .content{
+        padding:12px;
+    }
+
+    .stats{
+        grid-template-columns:
+            repeat(2,minmax(0,1fr));
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+    .hero h1{
+        font-size:21px;
+    }
+
+}
 
 </style>
-
 
 </head>
 
@@ -146,400 +390,2092 @@ margin-top:10px;
 <body>
 
 
+<div class="page">
 
-<div class="header">
+
+<header class="topbar">
+
+    <div class="top-left">
+
+        <button
+            class="back-btn"
+            type="button"
+            onclick="history.back()"
+        >
+            ←
+        </button>
+
+        <div class="title">
+            <span>RiderX</span> Coupons
+        </div>
+
+    </div>
+
+    <div class="logo">
+        RX
+    </div>
+
+</header>
 
 
-<div class="logo">
 
-RID<span>ERX</span>
+<main class="content">
+
+
+<section class="hero">
+
+    <h1>
+        Coupon Management
+    </h1>
+
+    <p>
+        Create promotional coupons, control
+        discount limits and manage active
+        customer offers.
+    </p>
+
+</section>
+
+
+
+<section class="stats">
+
+    <div class="stat">
+
+        <div class="stat-label">
+            Total Coupons
+        </div>
+
+        <div
+            class="stat-value"
+            id="totalCoupons"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            Active
+        </div>
+
+        <div
+            class="stat-value"
+            id="activeCoupons"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            Used
+        </div>
+
+        <div
+            class="stat-value"
+            id="usedCoupons"
+        >
+            0
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            Discount Given
+        </div>
+
+        <div
+            class="stat-value"
+            id="discountGiven"
+        >
+            ₹0
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<section class="card">
+
+    <h2 class="card-title">
+        Create Coupon
+    </h2>
+
+
+    <form id="couponForm">
+
+        <div class="form-grid">
+
+
+            <div class="field">
+
+                <label>
+                    Coupon Code
+                </label>
+
+                <input
+                    type="text"
+                    id="couponCode"
+                    placeholder="WELCOME50"
+                    maxlength="30"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Coupon Status
+                </label>
+
+                <select id="couponStatus">
+
+                    <option value="active">
+                        Active
+                    </option>
+
+                    <option value="inactive">
+                        Inactive
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Discount Type
+                </label>
+
+                <select id="discountType">
+
+                    <option value="percentage">
+                        Percentage
+                    </option>
+
+                    <option value="fixed">
+                        Fixed Amount
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Discount Value
+                </label>
+
+                <input
+                    type="number"
+                    id="discountValue"
+                    min="0"
+                    step="0.01"
+                    placeholder="50"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Minimum Fare
+                </label>
+
+                <input
+                    type="number"
+                    id="minimumFare"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Maximum Discount
+                </label>
+
+                <input
+                    type="number"
+                    id="maximumDiscount"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Usage Limit
+                </label>
+
+                <input
+                    type="number"
+                    id="usageLimit"
+                    min="0"
+                    step="1"
+                    value="100"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Per User Limit
+                </label>
+
+                <input
+                    type="number"
+                    id="perUserLimit"
+                    min="1"
+                    step="1"
+                    value="1"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Start Date
+                </label>
+
+                <input
+                    type="date"
+                    id="startDate"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Expiry Date
+                </label>
+
+                <input
+                    type="date"
+                    id="expiryDate"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Service
+                </label>
+
+                <select id="couponService">
+
+                    <option value="all">
+                        All Services
+                    </option>
+
+                    <option value="bike">
+                        Bike Taxi
+                    </option>
+
+                    <option value="cab">
+                        Cab
+                    </option>
+
+                    <option value="parcel">
+                        Parcel
+                    </option>
+
+                    <option value="food">
+                        Food Delivery
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Payment Method
+                </label>
+
+                <select id="couponPayment">
+
+                    <option value="all">
+                        All Payments
+                    </option>
+
+                    <option value="cash">
+                        Cash
+                    </option>
+
+                    <option value="online">
+                        Online
+                    </option>
+
+                    <option value="upi">
+                        UPI
+                    </option>
+
+                    <option value="card">
+                        Card
+                    </option>
+
+                    <option value="wallet">
+                        Wallet
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field full">
+
+                <label>
+                    Description
+                </label>
+
+                <textarea
+                    id="couponDescription"
+                    placeholder="Welcome offer for new RiderX customers..."
+                ></textarea>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="actions">
+
+            <button
+                type="submit"
+                class="btn primary"
+            >
+                Create Coupon
+            </button>
+
+            <button
+                type="button"
+                class="btn"
+                id="clearCoupon"
+            >
+                Clear
+            </button>
+
+        </div>
+
+    </form>
+
+</section>
+
+
+
+<section class="card">
+
+    <h2 class="card-title">
+        Coupons
+    </h2>
+
+
+    <div class="toolbar">
+
+        <input
+            type="search"
+            id="couponSearch"
+            class="search"
+            placeholder="Search coupon..."
+        >
+
+
+        <select
+            id="statusFilter"
+            class="filter"
+        >
+
+            <option value="all">
+                All Status
+            </option>
+
+            <option value="active">
+                Active
+            </option>
+
+            <option value="inactive">
+                Inactive
+            </option>
+
+            <option value="expired">
+                Expired
+            </option>
+
+        </select>
+
+
+        <button
+            type="button"
+            class="btn"
+            id="refreshCoupons"
+        >
+            Refresh
+        </button>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Code
+                    </th>
+
+                    <th>
+                        Discount
+                    </th>
+
+                    <th>
+                        Min Fare
+                    </th>
+
+                    <th>
+                        Usage
+                    </th>
+
+                    <th>
+                        Service
+                    </th>
+
+                    <th>
+                        Validity
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="couponTable">
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="empty"
+                    >
+                        No coupons found.
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+</main>
 
 </div>
 
 
-<a href="dashboard.html"
-style="color:#FFE500">
 
-⬅
+<script>
 
-</a>
+"use strict";
 
 
-</div>
+const COUPON_STORAGE_KEY =
+    "riderxCoupons";
 
+let coupons = [];
 
+let editingCouponId = null;
 
 
+/* =====================================================
+   INIT
+===================================================== */
 
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
 
-<div class="container">
+        loadCoupons();
 
+        bindEvents();
 
-<h2>
+        renderCoupons();
 
-Coupon & Referral
+        renderStats();
 
-</h2>
-
-
-
-
-
-<div class="card">
-
-
-<h3 class="yellow">
-
-Create Coupon
-
-</h3>
-
-
-
-<input id="code"
-placeholder="Coupon Code">
-
-
-<select id="type">
-
-
-<option value="flat">
-
-Flat Discount ₹
-
-</option>
-
-
-<option value="percent">
-
-Percentage %
-
-</option>
-
-
-</select>
-
-
-
-<input id="discount"
-type="number"
-placeholder="Discount Value">
-
-
-
-<input id="minimum"
-type="number"
-placeholder="Minimum Ride Amount">
-
-
-
-<input id="expiry"
-type="date">
-
-
-
-<input id="limit"
-type="number"
-placeholder="Usage Limit">
-
-
-
-<button id="saveBtn">
-
-Create Coupon
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-<h3>
-
-Active Coupons
-
-</h3>
-
-
-
-<div id="couponList">
-
-Loading...
-
-</div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<script type="module">
-
-
-import {
-
-db
-
-}
-
-from "../firebase/firebase-config.js";
-
-
-
-import {
-
-collection,
-addDoc,
-getDocs,
-deleteDoc,
-doc,
-serverTimestamp
-
-}
-
-from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-
-
-
-
-
-
-const list =
-document.getElementById("couponList");
-
-
-
-
-
-
-
-async function loadCoupons(){
-
-
-list.innerHTML="";
-
-
-
-const snap =
-await getDocs(
-collection(db,"coupons")
+    }
 );
 
 
+/* =====================================================
+   LOAD
+===================================================== */
 
-if(snap.empty){
+function loadCoupons(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                COUPON_STORAGE_KEY
+            );
 
 
-list.innerHTML="No Coupons";
+        if(
+            raw
+        ){
+
+            const data =
+                JSON.parse(raw);
 
 
-return;
+            coupons =
+                Array.isArray(data)
+                    ? data
+                    : [];
 
+        }
+
+    }catch(error){
+
+        console.error(
+            "Coupon load error:",
+            error
+        );
+
+        coupons = [];
+
+    }
 
 }
 
 
-
-
-
-snap.forEach(item=>{
-
-
-let c=item.data();
-
-
-
-let div=document.createElement("div");
-
-
-
-div.className="coupon";
-
-
-
-div.innerHTML=`
-
-
-<h3 class="yellow">
-
-${c.code}
-
-</h3>
-
-
-
-<p>
-
-Discount:
-${c.discount}
-${c.type==="percent"?"%":"₹"}
-
-</p>
-
-
-
-<p>
-
-Minimum:
-₹${c.minimum}
-
-</p>
-
-
-
-<p>
-
-Expiry:
-${c.expiry}
-
-</p>
-
-
-
-<p>
-
-Limit:
-${c.limit}
-
-</p>
-
-
-
-<button class="delete">
-
-Delete
-
-</button>
-
-
-`;
-
-
-
-
-div.querySelector(".delete")
-.onclick=async()=>{
-
-
-await deleteDoc(
-doc(db,"coupons",item.id)
-);
-
-
-
-loadCoupons();
-
-
-};
-
-
-
-
-list.appendChild(div);
-
-
-
-});
-
-
+/* =====================================================
+   SAVE
+===================================================== */
+
+function saveCoupons(){
+
+    localStorage.setItem(
+        COUPON_STORAGE_KEY,
+        JSON.stringify(
+            coupons
+        )
+    );
 
 }
 
 
+/* =====================================================
+   EVENTS
+===================================================== */
+
+function bindEvents(){
+
+    const form =
+        document.getElementById(
+            "couponForm"
+        );
 
 
+    if(form){
+
+        form.addEventListener(
+            "submit",
+            function(event){
+
+                event.preventDefault();
+
+                createCoupon();
+
+            }
+        );
+
+    }
 
 
+    const clear =
+        document.getElementById(
+            "clearCoupon"
+        );
 
 
-saveBtn.onclick=async()=>{
+    if(clear){
+
+        clear.addEventListener(
+            "click",
+            clearForm
+        );
+
+    }
 
 
+    const search =
+        document.getElementById(
+            "couponSearch"
+        );
 
-if(!code.value){
+
+    if(search){
+
+        search.addEventListener(
+            "input",
+            renderCoupons
+        );
+
+    }
 
 
-alert("Enter Coupon Code");
+    const filter =
+        document.getElementById(
+            "statusFilter"
+        );
 
-return;
+
+    if(filter){
+
+        filter.addEventListener(
+            "change",
+            renderCoupons
+        );
+
+    }
+
+
+    const refresh =
+        document.getElementById(
+            "refreshCoupons"
+        );
+
+
+    if(refresh){
+
+        refresh.addEventListener(
+            "click",
+            function(){
+
+                loadCoupons();
+
+                renderCoupons();
+
+                renderStats();
+
+                showMessage(
+                    "Coupons refreshed.",
+                    "success"
+                );
+
+            }
+        );
+
+    }
 
 }
 
 
+/* =====================================================
+   CREATE
+===================================================== */
+
+function createCoupon(){
+
+    const code =
+        String(
+            document.getElementById(
+                "couponCode"
+            ).value
+        )
+        .trim()
+        .toUpperCase();
 
 
-
-await addDoc(
-
-collection(db,"coupons"),
-
-{
+    const discountType =
+        document.getElementById(
+            "discountType"
+        ).value;
 
 
-code:code.value.toUpperCase(),
+    const discountValue =
+        Number(
+            document.getElementById(
+                "discountValue"
+            ).value
+        );
 
-type:type.value,
 
-discount:Number(discount.value),
+    const minimumFare =
+        Number(
+            document.getElementById(
+                "minimumFare"
+            ).value
+        ) || 0;
 
-minimum:Number(minimum.value),
 
-expiry:expiry.value,
+    const maximumDiscount =
+        Number(
+            document.getElementById(
+                "maximumDiscount"
+            ).value
+        ) || 0;
 
-limit:Number(limit.value),
 
-active:true,
+    const usageLimit =
+        Number(
+            document.getElementById(
+                "usageLimit"
+            ).value
+        ) || 0;
 
-createdAt:serverTimestamp()
 
+    const perUserLimit =
+        Number(
+            document.getElementById(
+                "perUserLimit"
+            ).value
+        ) || 1;
+
+
+    const startDate =
+        document.getElementById(
+            "startDate"
+        ).value;
+
+
+    const expiryDate =
+        document.getElementById(
+            "expiryDate"
+        ).value;
+
+
+    const service =
+        document.getElementById(
+            "couponService"
+        ).value;
+
+
+    const payment =
+        document.getElementById(
+            "couponPayment"
+        ).value;
+
+
+    const status =
+        document.getElementById(
+            "couponStatus"
+        ).value;
+
+
+    const description =
+        document.getElementById(
+            "couponDescription"
+        ).value.trim();
+
+
+    if(!code){
+
+        showMessage(
+            "Enter coupon code.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        !Number.isFinite(
+            discountValue
+        ) ||
+        discountValue <= 0
+    ){
+
+        showMessage(
+            "Enter a valid discount.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        discountType ===
+        "percentage" &&
+        discountValue > 100
+    ){
+
+        showMessage(
+            "Percentage discount cannot exceed 100%.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        startDate &&
+        expiryDate &&
+        new Date(startDate)
+        >
+        new Date(expiryDate)
+    ){
+
+        showMessage(
+            "Expiry date must be after start date.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const duplicate =
+        coupons.some(
+            coupon =>
+                coupon.code ===
+                code &&
+                coupon.id !==
+                editingCouponId
+        );
+
+
+    if(duplicate){
+
+        showMessage(
+            "Coupon code already exists.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(editingCouponId){
+
+        const coupon =
+            coupons.find(
+                item =>
+                    item.id ===
+                    editingCouponId
+            );
+
+
+        if(coupon){
+
+            coupon.code =
+                code;
+
+            coupon.discountType =
+                discountType;
+
+            coupon.discountValue =
+                discountValue;
+
+            coupon.minimumFare =
+                minimumFare;
+
+            coupon.maximumDiscount =
+                maximumDiscount;
+
+            coupon.usageLimit =
+                usageLimit;
+
+            coupon.perUserLimit =
+                perUserLimit;
+
+            coupon.startDate =
+                startDate;
+
+            coupon.expiryDate =
+                expiryDate;
+
+            coupon.service =
+                service;
+
+            coupon.payment =
+                payment;
+
+            coupon.status =
+                status;
+
+            coupon.description =
+                description;
+
+            coupon.updatedAt =
+                new Date().toISOString();
+
+        }
+
+    }else{
+
+        coupons.unshift({
+
+            id:
+                createId(),
+
+            code,
+
+            discountType,
+
+            discountValue,
+
+            minimumFare,
+
+            maximumDiscount,
+
+            usageLimit,
+
+            perUserLimit,
+
+            usedCount:0,
+
+            discountGiven:0,
+
+            startDate,
+
+            expiryDate,
+
+            service,
+
+            payment,
+
+            status,
+
+            description,
+
+            createdAt:
+                new Date().toISOString(),
+
+            updatedAt:
+                new Date().toISOString()
+
+        });
+
+    }
+
+
+    saveCoupons();
+
+    clearForm();
+
+    renderCoupons();
+
+    renderStats();
+
+
+    showMessage(
+        editingCouponId
+            ? "Coupon updated successfully."
+            : "Coupon created successfully.",
+        "success"
+    );
+
+
+    editingCouponId =
+        null;
 
 }
 
-);
+
+/* =====================================================
+   RENDER
+===================================================== */
+
+function renderCoupons(){
+
+    const table =
+        document.getElementById(
+            "couponTable"
+        );
 
 
+    if(!table){
+
+        return;
+
+    }
 
 
-alert("Coupon Created");
+    const search =
+        String(
+            document.getElementById(
+                "couponSearch"
+            )?.value ||
+            ""
+        )
+        .toLowerCase()
+        .trim();
 
 
-
-code.value="";
-discount.value="";
-minimum.value="";
-expiry.value="";
-limit.value="";
-
+    const filter =
+        document.getElementById(
+            "statusFilter"
+        )?.value ||
+        "all";
 
 
-loadCoupons();
+    const filtered =
+        coupons.filter(
+            function(coupon){
+
+                const status =
+                    getCouponStatus(
+                        coupon
+                    );
 
 
-};
+                if(
+                    filter !==
+                    "all" &&
+                    status !==
+                    filter
+                ){
+
+                    return false;
+
+                }
 
 
+                if(!search){
+
+                    return true;
+
+                }
 
 
+                return (
+
+                    String(
+                        coupon.code ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(
+                        search
+                    )
+
+                    ||
+
+                    String(
+                        coupon.description ||
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(
+                        search
+                    )
+
+                );
+
+            }
+        );
 
 
-loadCoupons();
+    table.innerHTML = "";
 
 
+    if(!filtered.length){
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty"
+                >
+                    No coupons found.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    filtered.forEach(
+        function(coupon){
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const status =
+                getCouponStatus(
+                    coupon
+                );
+
+
+            row.innerHTML = `
+
+                <td>
+
+                    <span class="code">
+
+                        ${escapeHtml(
+                            coupon.code
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    ${
+                        coupon.discountType ===
+                        "percentage"
+
+                        ?
+
+                        escapeHtml(
+                            coupon.discountValue
+                        ) + "%"
+
+                        :
+
+                        "₹" +
+                        formatMoney(
+                            coupon.discountValue
+                        )
+
+                    }
+
+                </td>
+
+
+                <td>
+
+                    ₹${formatMoney(
+                        coupon.minimumFare
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${
+                        Number(
+                            coupon.usedCount
+                        ) || 0
+                    }
+
+                    /
+
+                    ${
+                        Number(
+                            coupon.usageLimit
+                        ) || "∞"
+                    }
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        serviceName(
+                            coupon.service
+                        )
+                    )}
+
+                </td>
+
+
+                <td>
+
+                    ${escapeHtml(
+                        formatDate(
+                            coupon.startDate
+                        )
+                    )}
+
+                    <br>
+
+                    <small>
+                        to
+                        ${escapeHtml(
+                            formatDate(
+                                coupon.expiryDate
+                            )
+                        )}
+                    </small>
+
+                </td>
+
+
+                <td>
+
+                    <span
+                        class="badge ${status}"
+                    >
+                        ${escapeHtml(
+                            capitalize(
+                                status
+                            )
+                        )}
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <div
+                        style="
+                            display:flex;
+                            gap:6px;
+                        "
+                    >
+
+                        <button
+                            type="button"
+                            class="btn small"
+                            onclick="editCoupon('${escapeJs(
+                                coupon.id
+                            )}')"
+                        >
+                            Edit
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="btn small danger"
+                            onclick="deleteCoupon('${escapeJs(
+                                coupon.id
+                            )}')"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            table.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   STATS
+===================================================== */
+
+function renderStats(){
+
+    const active =
+        coupons.filter(
+            coupon =>
+                getCouponStatus(
+                    coupon
+                ) ===
+                "active"
+        );
+
+
+    const used =
+        coupons.reduce(
+            (
+                total,
+                coupon
+            ) => {
+
+                return total +
+                    (
+                        Number(
+                            coupon.usedCount
+                        ) || 0
+                    );
+
+            },
+            0
+        );
+
+
+    const discount =
+        coupons.reduce(
+            (
+                total,
+                coupon
+            ) => {
+
+                return total +
+                    (
+                        Number(
+                            coupon.discountGiven
+                        ) || 0
+                    );
+
+            },
+            0
+        );
+
+
+    setText(
+        "totalCoupons",
+        coupons.length
+    );
+
+    setText(
+        "activeCoupons",
+        active.length
+    );
+
+    setText(
+        "usedCoupons",
+        used
+    );
+
+    setText(
+        "discountGiven",
+        "₹" +
+        formatMoney(
+            discount
+        )
+    );
+
+}
+
+
+/* =====================================================
+   EDIT
+===================================================== */
+
+function editCoupon(
+    id
+){
+
+    const coupon =
+        coupons.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(id)
+        );
+
+
+    if(!coupon){
+
+        return;
+
+    }
+
+
+    editingCouponId =
+        coupon.id;
+
+
+    setValue(
+        "couponCode",
+        coupon.code
+    );
+
+    setValue(
+        "couponStatus",
+        coupon.status
+    );
+
+    setValue(
+        "discountType",
+        coupon.discountType
+    );
+
+    setValue(
+        "discountValue",
+        coupon.discountValue
+    );
+
+    setValue(
+        "minimumFare",
+        coupon.minimumFare
+    );
+
+    setValue(
+        "maximumDiscount",
+        coupon.maximumDiscount
+    );
+
+    setValue(
+        "usageLimit",
+        coupon.usageLimit
+    );
+
+    setValue(
+        "perUserLimit",
+        coupon.perUserLimit
+    );
+
+    setValue(
+        "startDate",
+        coupon.startDate
+    );
+
+    setValue(
+        "expiryDate",
+        coupon.expiryDate
+    );
+
+    setValue(
+        "couponService",
+        coupon.service
+    );
+
+    setValue(
+        "couponPayment",
+        coupon.payment
+    );
+
+    setValue(
+        "couponDescription",
+        coupon.description
+    );
+
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+
+
+    showMessage(
+        "Coupon loaded for editing.",
+        "success"
+    );
+
+}
+
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+function deleteCoupon(
+    id
+){
+
+    const coupon =
+        coupons.find(
+            item =>
+                String(
+                    item.id
+                ) ===
+                String(id)
+        );
+
+
+    if(!coupon){
+
+        return;
+
+    }
+
+
+    if(
+        !confirm(
+            `Delete coupon ${coupon.code}?`
+        )
+    ){
+
+        return;
+
+    }
+
+
+    coupons =
+        coupons.filter(
+            item =>
+                String(
+                    item.id
+                ) !==
+                String(id)
+        );
+
+
+    saveCoupons();
+
+    renderCoupons();
+
+    renderStats();
+
+
+    showMessage(
+        "Coupon deleted.",
+        "success"
+    );
+
+}
+
+
+/* =====================================================
+   CLEAR FORM
+===================================================== */
+
+function clearForm(){
+
+    const form =
+        document.getElementById(
+            "couponForm"
+        );
+
+
+    if(form){
+
+        form.reset();
+
+    }
+
+
+    document.getElementById(
+        "couponStatus"
+    ).value =
+        "active";
+
+
+    document.getElementById(
+        "discountType"
+    ).value =
+        "percentage";
+
+
+    document.getElementById(
+        "couponService"
+    ).value =
+        "all";
+
+
+    document.getElementById(
+        "couponPayment"
+    ).value =
+        "all";
+
+
+    document.getElementById(
+        "usageLimit"
+    ).value =
+        "100";
+
+
+    document.getElementById(
+        "perUserLimit"
+    ).value =
+        "1";
+
+
+    editingCouponId =
+        null;
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+function getCouponStatus(
+    coupon
+){
+
+    if(
+        coupon.status ===
+        "inactive"
+    ){
+
+        return "inactive";
+
+    }
+
+
+    if(
+        coupon.expiryDate
+    ){
+
+        const expiry =
+            new Date(
+                coupon.expiryDate +
+                "T23:59:59"
+            );
+
+
+        if(
+            expiry <
+            new Date()
+        ){
+
+            return "expired";
+
+        }
+
+    }
+
+
+    if(
+        coupon.usageLimit > 0 &&
+        Number(
+            coupon.usedCount
+        ) >=
+        Number(
+            coupon.usageLimit
+        )
+    ){
+
+        return "inactive";
+
+    }
+
+
+    return "active";
+
+}
+
+
+/* =====================================================
+   SERVICE
+===================================================== */
+
+function serviceName(
+    value
+){
+
+    const service =
+        String(
+            value ||
+            "all"
+        )
+        .toLowerCase();
+
+
+    if(
+        service ===
+        "bike"
+    ){
+
+        return "Bike Taxi";
+
+    }
+
+
+    if(
+        service ===
+        "cab"
+    ){
+
+        return "Cab";
+
+    }
+
+
+    if(
+        service ===
+        "parcel"
+    ){
+
+        return "Parcel";
+
+    }
+
+
+    if(
+        service ===
+        "food"
+    ){
+
+        return "Food Delivery";
+
+    }
+
+
+    return "All Services";
+
+}
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function createId(){
+
+    return (
+        "CPN-" +
+        Date.now() +
+        "-" +
+        Math.random()
+        .toString(36)
+        .slice(2,7)
+        .toUpperCase()
+    );
+
+}
+
+
+function setValue(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(element){
+
+        element.value =
+            value ??
+            "";
+
+    }
+
+}
+
+
+function setText(
+    id,
+    value
+){
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if(element){
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+function formatMoney(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN",
+        {
+            minimumFractionDigits:2,
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+function formatDate(
+    value
+){
+
+    if(!value){
+
+        return "—";
+
+    }
+
+
+    try{
+
+        return new Date(
+            value
+        )
+        .toLocaleDateString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short",
+                year:"numeric"
+            }
+        );
+
+    }catch(error){
+
+        return "—";
+
+    }
+
+}
+
+
+function capitalize(
+    value
+){
+
+    const text =
+        String(
+            value ||
+            ""
+        );
+
+
+    return text.charAt(0)
+        .toUpperCase()
+        +
+        text.slice(1);
+
+}
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeJs(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /\\/g,
+        "\\\\"
+    )
+    .replace(
+        /'/g,
+        "\\'"
+    )
+    .replace(
+        /"/g,
+        '\\"'
+    );
+
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showMessage(
+    message,
+    type="info"
+){
+
+    const old =
+        document.getElementById(
+            "couponMessage"
+        );
+
+
+    if(old){
+
+        old.remove();
+
+    }
+
+
+    const box =
+        document.createElement(
+            "div"
+        );
+
+
+    box.id =
+        "couponMessage";
+
+
+    box.textContent =
+        message;
+
+
+    box.style.cssText = `
+
+        position:fixed;
+        left:50%;
+        bottom:22px;
+        transform:translateX(-50%);
+        z-index:99999;
+        max-width:calc(100% - 30px);
+        padding:12px 18px;
+        border-radius:10px;
+        font-size:13px;
+        font-weight:800;
+        text-align:center;
+        box-shadow:
+            0 10px 30px
+            rgba(0,0,0,.4);
+
+    `;
+
+
+    if(
+        type ===
+        "success"
+    ){
+
+        box.style.background =
+            "#16351f";
+
+        box.style.color =
+            "#4ade80";
+
+        box.style.border =
+            "1px solid #28683a";
+
+    }
+    else if(
+        type ===
+        "error"
+    ){
+
+        box.style.background =
+            "#351616";
+
+        box.style.color =
+            "#ff7777";
+
+        box.style.border =
+            "1px solid #713131";
+
+    }
+    else{
+
+        box.style.background =
+            "#222";
+
+        box.style.color =
+            "#fff";
+
+        box.style.border =
+            "1px solid #444";
+
+    }
+
+
+    document.body.appendChild(
+        box
+    );
+
+
+    setTimeout(
+        function(){
+
+            if(
+                box.parentNode
+            ){
+
+                box.remove();
+
+            }
+
+        },
+        2800
+    );
+
+}
 
 </script>
-
 
 
 </body>
