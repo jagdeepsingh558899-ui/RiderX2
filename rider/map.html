@@ -1,355 +1,948 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 
-<title>RiderX Live Route</title>
+<title>RiderX | Rider Map</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
-
-body{
-
-margin:0;
-background:#000;
-color:white;
-font-family:Arial;
-
+:root{
+    --yellow:#ffe500;
+    --black:#000;
+    --dark:#0b0b0b;
+    --card:#151515;
+    --muted:#999;
+    --green:#22c55e;
+    --red:#ef4444;
 }
 
-
-.header{
-
-padding:20px;
-background:#111;
-text-align:center;
-font-size:22px;
-border-bottom:2px solid #FFD600;
-
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
 }
 
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    color:#fff;
+}
 
 #map{
-
-height:75vh;
-width:100%;
-
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:1;
 }
 
-
-.info{
-
-padding:15px;
-background:#111;
-
+.leaflet-control-zoom{
+    display:none;
 }
 
+.leaflet-control-attribution{
+    font-size:8px!important;
+}
 
+/* TOP BAR */
+
+.topbar{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:1000;
+    padding:14px;
+    pointer-events:none;
+}
+
+.topbar-inner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.top-btn{
+    width:46px;
+    height:46px;
+    border:0;
+    border-radius:50%;
+    background:rgba(10,10,10,.94);
+    color:#fff;
+    font-size:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 5px 20px rgba(0,0,0,.4);
+    pointer-events:auto;
+}
+
+.top-btn:active{
+    transform:scale(.92);
+}
+
+.logo{
+    padding:10px 18px;
+    border-radius:15px;
+    background:rgba(10,10,10,.94);
+    font-size:18px;
+    font-weight:900;
+    box-shadow:0 5px 20px rgba(0,0,0,.4);
+}
+
+.logo span{
+    color:var(--yellow);
+}
+
+/* STATUS */
+
+.status{
+    position:fixed;
+    top:75px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:900;
+    padding:8px 16px;
+    border-radius:30px;
+    background:rgba(10,10,10,.94);
+    font-size:11px;
+    white-space:nowrap;
+    box-shadow:0 5px 20px rgba(0,0,0,.35);
+}
+
+.status.online{
+    color:var(--green);
+}
+
+.status.offline{
+    color:#ff7777;
+}
+
+/* LOCATION BUTTON */
+
+.location-btn{
+    position:fixed;
+    right:15px;
+    bottom:150px;
+    z-index:900;
+    width:50px;
+    height:50px;
+    border:0;
+    border-radius:50%;
+    background:#111;
+    color:var(--yellow);
+    font-size:19px;
+    box-shadow:0 6px 20px rgba(0,0,0,.45);
+}
+
+.location-btn:active{
+    transform:scale(.92);
+}
+
+/* ONLINE BUTTON */
+
+.online-btn{
+    position:fixed;
+    left:15px;
+    bottom:150px;
+    z-index:900;
+    border:0;
+    border-radius:25px;
+    padding:13px 18px;
+    background:#111;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    box-shadow:0 6px 20px rgba(0,0,0,.45);
+}
+
+.online-btn.online{
+    color:#000;
+    background:var(--green);
+}
+
+/* BOTTOM PANEL */
+
+.panel{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:1000;
+    padding:14px 15px 20px;
+    background:rgba(10,10,10,.97);
+    border-radius:25px 25px 0 0;
+    box-shadow:0 -10px 35px rgba(0,0,0,.5);
+}
+
+.handle{
+    width:45px;
+    height:5px;
+    border-radius:10px;
+    background:#555;
+    margin:0 auto 15px;
+}
+
+.panel-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+}
+
+.panel-title h3{
+    font-size:17px;
+}
+
+.badge{
+    padding:5px 9px;
+    border-radius:20px;
+    background:#222;
+    color:var(--yellow);
+    font-size:10px;
+}
+
+.location-info{
+    background:#151515;
+    border-radius:15px;
+    padding:12px;
+    margin-bottom:10px;
+}
+
+.location-line{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:12px;
+}
+
+.location-line + .location-line{
+    margin-top:10px;
+}
+
+.dot{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--green);
+}
+
+.dot.drop{
+    background:var(--yellow);
+}
+
+.coordinates{
+    margin-top:8px;
+    color:#777;
+    font-size:10px;
+}
+
+.actions{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:9px;
+}
+
+.action{
+    min-height:45px;
+    border:0;
+    border-radius:13px;
+    background:#202020;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+}
+
+.action.primary{
+    background:var(--yellow);
+    color:#000;
+}
+
+.action:active{
+    transform:scale(.97);
+}
+
+/* RIDER MARKER */
+
+.rider-marker{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:var(--yellow);
+    border:4px solid #000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#000;
+    font-size:18px;
+    box-shadow:0 4px 15px rgba(0,0,0,.4);
+}
+
+/* MOBILE */
+
+@media(max-width:380px){
+
+    .topbar{
+        padding:10px;
+    }
+
+    .top-btn{
+        width:42px;
+        height:42px;
+    }
+
+    .logo{
+        font-size:15px;
+        padding:8px 14px;
+    }
+
+    .panel{
+        padding-left:11px;
+        padding-right:11px;
+    }
+}
 </style>
-
 </head>
-
 
 <body>
 
-
-
-<div class="header">
-
-🏍 Rider Navigation
-
-</div>
-
-
-
-<div class="info" id="info">
-
-Loading Ride...
-
-</div>
-
-
-
 <div id="map"></div>
 
+<!-- TOP -->
 
+<div class="topbar">
+    <div class="topbar-inner">
 
+        <button
+            id="backBtn"
+            class="top-btn"
+            type="button"
+            aria-label="Back">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
 
+        <div class="logo">
+            RIDER<span>X</span>
+        </div>
+
+        <button
+            id="menuBtn"
+            class="top-btn"
+            type="button"
+            aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </div>
+</div>
+
+<!-- STATUS -->
+
+<div id="status" class="status offline">
+    ● Offline
+</div>
+
+<!-- LOCATION -->
+
+<button
+    id="locationBtn"
+    class="location-btn"
+    type="button"
+    aria-label="My location">
+    <i class="fa-solid fa-location-crosshairs"></i>
+</button>
+
+<!-- ONLINE -->
+
+<button
+    id="onlineBtn"
+    class="online-btn"
+    type="button">
+    <i class="fa-solid fa-power-off"></i>
+    Go Online
+</button>
+
+<!-- PANEL -->
+
+<div class="panel">
+
+    <div class="handle"></div>
+
+    <div class="panel-title">
+
+        <h3>Rider Map</h3>
+
+        <div id="gpsBadge" class="badge">
+            GPS Ready
+        </div>
+
+    </div>
+
+    <div class="location-info">
+
+        <div class="location-line">
+
+            <div class="dot"></div>
+
+            <div>
+                <strong>Your Location</strong>
+            </div>
+
+        </div>
+
+        <div
+            id="coordinates"
+            class="coordinates">
+            Waiting for GPS location...
+        </div>
+
+    </div>
+
+    <div class="actions">
+
+        <button
+            id="centerBtn"
+            class="action primary"
+            type="button">
+            <i class="fa-solid fa-crosshairs"></i>
+            Center Map
+        </button>
+
+        <button
+            id="requestsBtn"
+            class="action"
+            type="button">
+            <i class="fa-solid fa-bell"></i>
+            Ride Requests
+        </button>
+
+    </div>
+
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-
-
 <script type="module">
 
-
-import {db,auth} from "../firebase/config.js";
-
+import { auth, db } from "../firebase/config.js";
 
 import {
+    doc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-doc,
-getDoc,
-onSnapshot
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-}
+/* =====================================================
+   MAP
+===================================================== */
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+const CHANDIGARH = [30.7333,76.7794];
 
-
-
-
-
-let rideId=
-
-localStorage.getItem("rideId");
-
-
-
-let map=L.map("map");
-
-
+const map = L.map("map",{
+    zoomControl:false,
+    attributionControl:true
+}).setView(CHANDIGARH,13);
 
 L.tileLayer(
-
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-{
-
-maxZoom:19
-
-}
-
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom:19,
+        attribution:"© OpenStreetMap"
+    }
 ).addTo(map);
 
+/* =====================================================
+   RIDER MARKER
+===================================================== */
 
+const riderIcon = L.divIcon({
+    className:"",
+    html:`
+        <div class="rider-marker">
+            <i class="fa-solid fa-motorcycle"></i>
+        </div>
+    `,
+    iconSize:[42,42],
+    iconAnchor:[21,21]
+});
 
+let riderMarker = null;
+let accuracyCircle = null;
+let watchId = null;
+let currentPosition = null;
+let currentUser = null;
 
-let riderMarker=null;
+/* =====================================================
+   ELEMENTS
+===================================================== */
 
-let pickupMarker=null;
+const statusEl =
+    document.getElementById("status");
 
-let dropMarker=null;
+const onlineBtn =
+    document.getElementById("onlineBtn");
 
-let route=null;
+const coordinatesEl =
+    document.getElementById("coordinates");
 
+const gpsBadge =
+    document.getElementById("gpsBadge");
 
+/* =====================================================
+   UPDATE MAP LOCATION
+===================================================== */
 
+async function updateLocation(position){
 
+    const lat =
+        position.coords.latitude;
 
-async function loadRide(){
+    const lng =
+        position.coords.longitude;
 
+    const accuracy =
+        position.coords.accuracy || 0;
 
+    currentPosition = {
+        lat,
+        lng,
+        accuracy
+    };
 
-let snap=
+    if(!riderMarker){
 
-await getDoc(
+        riderMarker =
+            L.marker(
+                [lat,lng],
+                {
+                    icon:riderIcon
+                }
+            ).addTo(map);
 
-doc(db,"rides",rideId)
+    }else{
 
+        riderMarker.setLatLng(
+            [lat,lng]
+        );
+
+    }
+
+    if(!accuracyCircle){
+
+        accuracyCircle =
+            L.circle(
+                [lat,lng],
+                {
+                    radius:accuracy,
+                    color:"#ffe500",
+                    fillOpacity:.08,
+                    weight:1
+                }
+            ).addTo(map);
+
+    }else{
+
+        accuracyCircle.setLatLng(
+            [lat,lng]
+        );
+
+        accuracyCircle.setRadius(
+            accuracy
+        );
+
+    }
+
+    coordinatesEl.innerText =
+        `${lat.toFixed(6)}, ${lng.toFixed(6)}
+        • Accuracy ${Math.round(accuracy)}m`;
+
+    gpsBadge.innerText =
+        "GPS Active";
+
+    gpsBadge.style.color =
+        "#22c55e";
+
+    if(currentUser){
+
+        try{
+
+            await setDoc(
+                doc(
+                    db,
+                    "riderLocations",
+                    currentUser.uid
+                ),
+                {
+                    lat:lat,
+                    lng:lng,
+                    accuracy:accuracy,
+                    online:true,
+                    updatedAt:serverTimestamp()
+                },
+                {
+                    merge:true
+                }
+            );
+
+        }catch(error){
+
+            console.error(
+                "Location save error:",
+                error
+            );
+
+        }
+
+    }
+
+}
+
+/* =====================================================
+   GPS ERROR
+===================================================== */
+
+function locationError(error){
+
+    console.error(
+        "GPS error:",
+        error
+    );
+
+    gpsBadge.innerText =
+        "GPS Error";
+
+    gpsBadge.style.color =
+        "#ff7777";
+
+    coordinatesEl.innerText =
+        "Unable to get current location.";
+
+}
+
+/* =====================================================
+   START GPS
+===================================================== */
+
+function startTracking(){
+
+    if(!navigator.geolocation){
+
+        alert(
+            "Location service is not supported on this device."
+        );
+
+        return;
+
+    }
+
+    if(watchId !== null){
+
+        navigator.geolocation.clearWatch(
+            watchId
+        );
+
+    }
+
+    watchId =
+        navigator.geolocation.watchPosition(
+            updateLocation,
+            locationError,
+            {
+                enableHighAccuracy:true,
+                maximumAge:5000,
+                timeout:15000
+            }
+        );
+
+}
+
+/* =====================================================
+   STOP GPS
+===================================================== */
+
+async function stopTracking(){
+
+    if(watchId !== null){
+
+        navigator.geolocation.clearWatch(
+            watchId
+        );
+
+        watchId = null;
+
+    }
+
+    if(currentUser){
+
+        try{
+
+            await setDoc(
+                doc(
+                    db,
+                    "riderLocations",
+                    currentUser.uid
+                ),
+                {
+                    online:false,
+                    updatedAt:serverTimestamp()
+                },
+                {
+                    merge:true
+                }
+            );
+
+        }catch(error){
+
+            console.error(error);
+
+        }
+
+    }
+
+}
+
+/* =====================================================
+   ONLINE TOGGLE
+===================================================== */
+
+let online = false;
+
+onlineBtn.addEventListener(
+    "click",
+    async()=>{
+
+        online = !online;
+
+        if(online){
+
+            onlineBtn.classList.add(
+                "online"
+            );
+
+            onlineBtn.innerHTML =
+                `<i class="fa-solid fa-power-off"></i> Online`;
+
+            statusEl.innerText =
+                "● Online";
+
+            statusEl.classList.remove(
+                "offline"
+            );
+
+            statusEl.classList.add(
+                "online"
+            );
+
+            startTracking();
+
+        }else{
+
+            onlineBtn.classList.remove(
+                "online"
+            );
+
+            onlineBtn.innerHTML =
+                `<i class="fa-solid fa-power-off"></i> Go Online`;
+
+            statusEl.innerText =
+                "● Offline";
+
+            statusEl.classList.remove(
+                "online"
+            );
+
+            statusEl.classList.add(
+                "offline"
+            );
+
+            await stopTracking();
+
+        }
+
+    }
 );
 
+/* =====================================================
+   CENTER LOCATION
+===================================================== */
 
+async function centerLocation(){
 
-if(!snap.exists()) return;
+    if(currentPosition){
 
+        map.setView(
+            [
+                currentPosition.lat,
+                currentPosition.lng
+            ],
+            16,
+            {
+                animate:true
+            }
+        );
 
+        return;
 
+    }
 
-let data=snap.data();
+    if(!navigator.geolocation){
 
+        alert(
+            "Location is not supported."
+        );
 
+        return;
 
+    }
 
+    navigator.geolocation.getCurrentPosition(
+        position=>{
 
-let pickup=data.pickupCoords;
+            updateLocation(position);
 
-let drop=data.dropCoords;
+            map.setView(
+                [
+                    position.coords.latitude,
+                    position.coords.longitude
+                ],
+                16,
+                {
+                    animate:true
+                }
+            );
 
+        },
+        locationError,
+        {
+            enableHighAccuracy:true,
+            timeout:15000,
+            maximumAge:0
+        }
+    );
 
+}
 
+document
+    .getElementById("locationBtn")
+    .addEventListener(
+        "click",
+        centerLocation
+    );
 
+document
+    .getElementById("centerBtn")
+    .addEventListener(
+        "click",
+        centerLocation
+    );
 
-document.getElementById("info").innerHTML=
+/* =====================================================
+   NAVIGATION
+===================================================== */
 
-`
+document
+    .getElementById("backBtn")
+    .addEventListener(
+        "click",
+        ()=>{
+            history.back();
+        }
+    );
 
-🏍 ${data.service}
+document
+    .getElementById("menuBtn")
+    .addEventListener(
+        "click",
+        ()=>{
+            location.href =
+                "menu.html";
+        }
+    );
 
-<br>
+document
+    .getElementById("requestsBtn")
+    .addEventListener(
+        "click",
+        ()=>{
+            location.href =
+                "requests.html";
+        }
+    );
 
-💰 Fare ₹${data.fare}
+/* =====================================================
+   AUTH
+===================================================== */
 
-<br>
+onAuthStateChanged(
+    auth,
+    user=>{
 
-📍 Pickup → ${data.pickup}
+        if(!user){
 
-<br>
+            location.href =
+                "../auth/login.html";
 
-🏁 Drop → ${data.drop}
+            return;
 
-`;
+        }
 
+        currentUser = user;
 
+        /*
+         * Get initial GPS.
+         */
 
+        centerLocation();
 
-
-pickupMarker=L.marker(
-
-[pickup.lat,pickup.lng]
-
-)
-
-.addTo(map)
-
-.bindPopup("📍 Customer Pickup");
-
-
-
-
-
-dropMarker=L.marker(
-
-[drop.lat,drop.lng]
-
-)
-
-.addTo(map)
-
-.bindPopup("🏁 Drop Location");
-
-
-
-
-
-route=L.polyline(
-
-[
-
-[pickup.lat,pickup.lng],
-
-[drop.lat,drop.lng]
-
-]
-
-)
-
-.addTo(map);
-
-
-
-
-
-map.fitBounds(
-
-route.getBounds()
-
+    }
 );
 
+/* =====================================================
+   CLEANUP
+===================================================== */
 
+window.addEventListener(
+    "beforeunload",
+    ()=>{
+        if(watchId !== null){
 
+            navigator.geolocation.clearWatch(
+                watchId
+            );
 
-
-startRiderTracking();
-
-
-
-}
-
-
-
-
-
-
-
-function startRiderTracking(){
-
-
-
-let riderId=
-
-auth.currentUser.uid;
-
-
-
-onSnapshot(
-
-doc(db,"riderLocations",riderId),
-
-(snap)=>{
-
-
-if(!snap.exists()) return;
-
-
-
-
-let data=snap.data();
-
-
-
-
-if(riderMarker){
-
-
-riderMarker.setLatLng(
-
-[data.lat,data.lng]
-
+        }
+    }
 );
 
+/* =====================================================
+   RESIZE
+===================================================== */
 
-}
-
-else{
-
-
-riderMarker=L.marker(
-
-[data.lat,data.lng]
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-"🏍 You"
-
-)
-
-.openPopup();
-
-
-}
-
-
-
-
-}
-
+window.addEventListener(
+    "resize",
+    ()=>{
+        setTimeout(
+            ()=>{
+                map.invalidateSize();
+            },
+            200
+        );
+    }
 );
-
-
-
-}
-
-
-
-
-loadRide();
-
-
 
 </script>
 
-
-
 </body>
-
 </html>
