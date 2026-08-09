@@ -1,1225 +1,1724 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta
+
+<meta charset="UTF-8">
+
+<meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-  >
+    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
+>
 
-  <meta name="theme-color" content="#FFD000">
-  <title>RiderX - Rider Menu</title>
+<meta name="theme-color" content="#000000">
 
-  <link rel="stylesheet" href="../css/Style.css">
-  <link rel="stylesheet" href="../css/Responsive.css">
+<title>RiderX | Rider Menu</title>
 
-  <style>
-    :root {
-      --yellow: #ffd000;
-      --yellow-dark: #e6b900;
-      --black: #080808;
-      --dark: #111111;
-      --card: #171717;
-      --card2: #202020;
-      --text: #ffffff;
-      --muted: #9b9b9b;
-      --border: rgba(255,255,255,.08);
-      --danger: #ff4d4d;
-      --green: #31d158;
-    }
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+<style>
 
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      min-height: 100%;
-      background: var(--black);
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
-    }
+:root{
+    --yellow:#ffe500;
+    --black:#000;
+    --dark:#090909;
+    --card:#151515;
+    --card2:#202020;
+    --white:#fff;
+    --muted:#8b8b8b;
+    --green:#22c55e;
+    --red:#ef4444;
+}
 
-    body {
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
 
-    button,
-    a {
-      font: inherit;
-    }
+html,
+body{
+    width:100%;
+    min-height:100%;
+    background:#000;
+    color:#fff;
+}
 
-    button {
-      border: 0;
-      outline: 0;
-    }
+body{
+    min-height:100vh;
+    padding-bottom:
+        max(20px,env(safe-area-inset-bottom));
+}
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+/* =====================================================
+   HEADER
+===================================================== */
 
-    .page {
-      width: 100%;
-      min-height: 100vh;
-      padding-bottom: 30px;
-      background:
-        radial-gradient(circle at 90% 0%, rgba(255,208,0,.12), transparent 28%),
-        var(--black);
-    }
+.header{
 
-    /* HEADER */
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 68px;
-      padding: 12px 16px;
-      background: rgba(8,8,8,.94);
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(14px);
-    }
+    position:sticky;
+    top:0;
+    z-index:100;
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 
-    .back-btn {
-      width: 42px;
-      height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      background: var(--card);
-      color: #fff;
-      cursor: pointer;
-      font-size: 22px;
-    }
+    padding:
+        max(14px,env(safe-area-inset-top))
+        16px
+        14px;
 
-    .back-btn:active {
-      transform: scale(.94);
-    }
+    background:
+        rgba(0,0,0,.96);
 
-    .header-title {
-      font-size: 20px;
-      font-weight: 800;
-    }
+    border-bottom:
+        1px solid #292929;
 
-    .header-subtitle {
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 11px;
-    }
+    backdrop-filter:blur(12px);
+}
 
-    .brand {
-      color: var(--yellow);
-      font-weight: 900;
-      letter-spacing: .5px;
-    }
+.header-left{
 
-    /* PROFILE */
-    .profile-card {
-      margin: 18px 16px 12px;
-      padding: 18px;
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      background:
-        linear-gradient(145deg, rgba(255,208,0,.12), transparent 55%),
-        var(--card);
-      box-shadow: 0 10px 35px rgba(0,0,0,.25);
-    }
+    display:flex;
+    align-items:center;
+    gap:12px;
 
-    .profile-main {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
+}
 
-    .avatar {
-      width: 64px;
-      height: 64px;
-      flex: 0 0 64px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      overflow: hidden;
-      background: var(--yellow);
-      color: #000;
-      font-size: 25px;
-      font-weight: 900;
-      border: 3px solid rgba(255,255,255,.12);
-    }
+.back-btn{
 
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: none;
-    }
+    width:42px;
+    height:42px;
 
-    .profile-info {
-      min-width: 0;
-      flex: 1;
-    }
+    border:0;
+    border-radius:50%;
 
-    .profile-name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-size: 18px;
-      font-weight: 800;
-    }
+    background:#171717;
+    color:#fff;
 
-    .profile-phone {
-      margin-top: 5px;
-      color: var(--muted);
-      font-size: 13px;
-    }
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-    .verified {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 8px;
-      padding: 5px 9px;
-      border-radius: 20px;
-      background: rgba(49,209,88,.12);
-      color: var(--green);
-      font-size: 11px;
-      font-weight: 700;
-    }
+    font-size:16px;
 
-    .profile-arrow {
-      color: var(--muted);
-      font-size: 23px;
-    }
+}
 
-    /* ONLINE STATUS */
-    .status-card {
-      margin: 12px 16px;
-      padding: 15px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: var(--card);
-    }
+.back-btn:active{
+    transform:scale(.92);
+}
 
-    .status-left {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-    }
+.logo{
 
-    .status-dot {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      background: #777;
-      box-shadow: 0 0 0 5px rgba(255,255,255,.04);
-    }
+    font-size:21px;
+    font-weight:900;
+    letter-spacing:.5px;
 
-    .status-dot.online {
-      background: var(--green);
-      box-shadow: 0 0 0 5px rgba(49,209,88,.10);
-    }
+}
 
-    .status-title {
-      font-size: 14px;
-      font-weight: 800;
-    }
+.logo span{
+    color:var(--yellow);
+}
 
-    .status-text {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 11px;
-    }
+.header-title{
 
-    .status-btn {
-      min-width: 82px;
-      padding: 9px 12px;
-      border-radius: 12px;
-      background: var(--yellow);
-      color: #000;
-      font-size: 12px;
-      font-weight: 800;
-      cursor: pointer;
-    }
+    color:#999;
+    font-size:11px;
+    margin-top:3px;
 
-    .status-btn.offline {
-      background: var(--card2);
-      color: #fff;
-      border: 1px solid var(--border);
-    }
+}
 
-    /* SECTION */
-    .section {
-      margin: 22px 16px 0;
-    }
+.header-icon{
 
-    .section-title {
-      margin-bottom: 10px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .7px;
-    }
+    width:42px;
+    height:42px;
 
-    /* MENU */
-    .menu-card {
-      overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background: var(--card);
-    }
+    border:0;
+    border-radius:50%;
 
-    .menu-item {
-      width: 100%;
-      min-height: 62px;
-      display: flex;
-      align-items: center;
-      gap: 13px;
-      padding: 11px 15px;
-      background: transparent;
-      color: #fff;
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      text-align: left;
-    }
+    background:#171717;
+    color:var(--yellow);
 
-    .menu-item:last-child {
-      border-bottom: 0;
-    }
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-    .menu-item:active {
-      background: rgba(255,255,255,.05);
-    }
+}
 
-    .menu-icon {
-      width: 39px;
-      height: 39px;
-      flex: 0 0 39px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 12px;
-      background: #242424;
-      font-size: 18px;
-    }
+/* =====================================================
+   PROFILE
+===================================================== */
 
-    .menu-content {
-      min-width: 0;
-      flex: 1;
-    }
+.profile-card{
 
-    .menu-title {
-      font-size: 14px;
-      font-weight: 700;
-    }
+    margin:16px;
 
-    .menu-description {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.35;
-    }
+    padding:18px;
 
-    .menu-arrow {
-      color: #777;
-      font-size: 21px;
-    }
+    background:
+        linear-gradient(
+            145deg,
+            #1b1b1b,
+            #101010
+        );
 
-    .badge {
-      min-width: 21px;
-      height: 21px;
-      padding: 0 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 20px;
-      background: var(--yellow);
-      color: #000;
-      font-size: 10px;
-      font-weight: 900;
-    }
+    border:
+        1px solid #292929;
 
-    /* EARNINGS */
-    .quick-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
+    border-radius:22px;
 
-    .quick-card {
-      min-height: 94px;
-      padding: 15px;
-      border: 1px solid var(--border);
-      border-radius: 17px;
-      background: var(--card);
-    }
+}
 
-    .quick-icon {
-      font-size: 19px;
-    }
+.profile-main{
 
-    .quick-label {
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 11px;
-    }
+    display:flex;
+    align-items:center;
+    gap:13px;
 
-    .quick-value {
-      margin-top: 4px;
-      font-size: 18px;
-      font-weight: 900;
-    }
+}
 
-    /* LOGOUT */
-    .logout-btn {
-      width: 100%;
-      min-height: 55px;
-      margin-top: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: 1px solid rgba(255,77,77,.22);
-      border-radius: 16px;
-      background: rgba(255,77,77,.07);
-      color: var(--danger);
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-    }
+.avatar{
 
-    .logout-btn:active {
-      transform: scale(.985);
-    }
+    width:58px;
+    height:58px;
 
-    .version {
-      padding: 24px 0 8px;
-      text-align: center;
-      color: #555;
-      font-size: 10px;
-    }
+    border-radius:50%;
 
-    /* LOADING */
-    .loading {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,.72);
-      backdrop-filter: blur(5px);
-    }
+    background:var(--yellow);
+    color:#000;
 
-    .loading-box {
-      width: 110px;
-      padding: 20px 12px;
-      border-radius: 18px;
-      background: #171717;
-      text-align: center;
-    }
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-    .spinner {
-      width: 30px;
-      height: 30px;
-      margin: 0 auto 10px;
-      border: 3px solid rgba(255,255,255,.15);
-      border-top-color: var(--yellow);
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
+    font-size:22px;
+    font-weight:900;
 
-    .loading-text {
-      color: #aaa;
-      font-size: 11px;
-    }
+    overflow:hidden;
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+}
 
-    /* TOAST */
-    .toast {
-      position: fixed;
-      left: 16px;
-      right: 16px;
-      bottom: 20px;
-      z-index: 10000;
-      padding: 14px 16px;
-      display: none;
-      border-radius: 14px;
-      background: #242424;
-      color: #fff;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      font-size: 13px;
-      font-weight: 600;
-    }
+.avatar img{
 
-    @media (min-width: 700px) {
-      .page {
-        max-width: 600px;
-        margin: 0 auto;
-        border-left: 1px solid var(--border);
-        border-right: 1px solid var(--border);
-      }
-    }
-  </style>
+    width:100%;
+    height:100%;
+    object-fit:cover;
+
+    display:none;
+
+}
+
+.profile-info{
+    flex:1;
+    min-width:0;
+}
+
+.profile-name{
+
+    font-size:17px;
+    font-weight:800;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+
+}
+
+.profile-role{
+
+    margin-top:4px;
+
+    color:#888;
+    font-size:11px;
+
+}
+
+.profile-status{
+
+    margin-top:8px;
+
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    padding:5px 9px;
+
+    border-radius:20px;
+
+    background:#102517;
+
+    color:var(--green);
+
+    font-size:10px;
+    font-weight:700;
+
+}
+
+.status-dot{
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:var(--green);
+
+}
+
+.edit-profile{
+
+    width:38px;
+    height:38px;
+
+    border:0;
+    border-radius:12px;
+
+    background:#242424;
+    color:var(--yellow);
+
+}
+
+/* =====================================================
+   STATS
+===================================================== */
+
+.stats{
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,1fr);
+
+    gap:8px;
+
+    margin-top:16px;
+
+}
+
+.stat{
+
+    text-align:center;
+
+    padding:11px 5px;
+
+    background:#111;
+
+    border-radius:14px;
+
+}
+
+.stat-number{
+
+    color:var(--yellow);
+
+    font-size:17px;
+
+    font-weight:900;
+
+}
+
+.stat-label{
+
+    margin-top:4px;
+
+    color:#777;
+
+    font-size:9px;
+
+}
+
+/* =====================================================
+   SECTION
+===================================================== */
+
+.section{
+
+    margin:
+        18px
+        16px
+        0;
+
+}
+
+.section-title{
+
+    margin-bottom:9px;
+
+    color:#777;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    letter-spacing:.8px;
+
+}
+
+/* =====================================================
+   MENU
+===================================================== */
+
+.menu{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:7px;
+
+}
+
+.menu-item{
+
+    width:100%;
+
+    min-height:57px;
+
+    padding:10px 12px;
+
+    display:flex;
+    align-items:center;
+
+    gap:13px;
+
+    border:
+        1px solid #202020;
+
+    border-radius:16px;
+
+    background:#121212;
+
+    color:#fff;
+
+    text-decoration:none;
+
+    cursor:pointer;
+
+}
+
+.menu-item:active{
+
+    transform:scale(.985);
+
+    background:#1a1a1a;
+
+}
+
+.menu-icon{
+
+    width:38px;
+    height:38px;
+
+    min-width:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:12px;
+
+    background:#202020;
+
+    color:var(--yellow);
+
+    font-size:15px;
+
+}
+
+.menu-text{
+
+    flex:1;
+
+    min-width:0;
+
+}
+
+.menu-title{
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+.menu-sub{
+
+    margin-top:3px;
+
+    color:#666;
+
+    font-size:9px;
+
+}
+
+.menu-arrow{
+
+    color:#555;
+
+    font-size:11px;
+
+}
+
+/* =====================================================
+   ONLINE CARD
+===================================================== */
+
+.online-card{
+
+    margin-top:18px;
+
+    padding:16px;
+
+    border-radius:18px;
+
+    background:#121212;
+
+    border:1px solid #242424;
+
+}
+
+.online-top{
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+}
+
+.online-title{
+
+    font-size:13px;
+    font-weight:800;
+
+}
+
+.online-status{
+
+    color:#777;
+    font-size:10px;
+
+}
+
+.toggle{
+
+    position:relative;
+
+    width:51px;
+    height:29px;
+
+    border:0;
+    border-radius:30px;
+
+    background:#333;
+
+}
+
+.toggle::after{
+
+    content:"";
+
+    position:absolute;
+
+    top:4px;
+    left:4px;
+
+    width:21px;
+    height:21px;
+
+    border-radius:50%;
+
+    background:#aaa;
+
+    transition:.2s;
+
+}
+
+.toggle.active{
+
+    background:var(--yellow);
+
+}
+
+.toggle.active::after{
+
+    left:26px;
+
+    background:#000;
+
+}
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+.logout{
+
+    width:100%;
+
+    margin-top:18px;
+
+    min-height:52px;
+
+    border:
+        1px solid #3a2020;
+
+    border-radius:15px;
+
+    background:#150909;
+
+    color:#ff6b6b;
+
+    font-size:13px;
+
+    font-weight:800;
+
+}
+
+.logout:active{
+
+    transform:scale(.98);
+
+}
+
+/* =====================================================
+   VERSION
+===================================================== */
+
+.version{
+
+    text-align:center;
+
+    margin-top:20px;
+
+    color:#444;
+
+    font-size:9px;
+
+}
+
+</style>
+
 </head>
 
 <body>
 
-<div class="page">
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-  <!-- HEADER -->
-  <header class="header">
+<header class="header">
+
     <div class="header-left">
-      <button class="back-btn" id="backBtn" aria-label="Back">‹</button>
 
-      <div>
-        <div class="header-title">Rider Menu</div>
-        <div class="header-subtitle">
-          <span class="brand">RiderX</span> Rider Account
+        <button
+            id="backBtn"
+            class="back-btn"
+            type="button"
+            aria-label="Back"
+        >
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+        </button>
+
+        <div>
+
+            <div class="logo">
+                RIDER<span>X</span>
+            </div>
+
+            <div class="header-title">
+                Rider Menu
+            </div>
+
         </div>
-      </div>
-    </div>
-  </header>
 
-  <!-- PROFILE -->
-  <a class="profile-card" href="profile.html">
+    </div>
+
+    <button
+        id="notificationBtn"
+        class="header-icon"
+        type="button"
+        aria-label="Notifications"
+    >
+
+        <i class="fa-solid fa-bell"></i>
+
+    </button>
+
+</header>
+
+
+<!-- =====================================================
+     PROFILE
+===================================================== -->
+
+<section class="profile-card">
 
     <div class="profile-main">
 
-      <div class="avatar" id="avatar">
-        <img id="avatarImage" alt="Profile">
-        <span id="avatarText">R</span>
-      </div>
+        <div class="avatar" id="avatar">
 
-      <div class="profile-info">
-        <div class="profile-name" id="riderName">
-          Rider
+            <span id="avatarLetter">
+                R
+            </span>
+
+            <img
+                id="avatarImage"
+                alt="Rider profile"
+            >
+
         </div>
 
-        <div class="profile-phone" id="riderPhone">
-          Loading...
+
+        <div class="profile-info">
+
+            <div
+                id="profileName"
+                class="profile-name"
+            >
+                Rider
+            </div>
+
+            <div
+                id="profileRole"
+                class="profile-role"
+            >
+                RiderX Driver Partner
+            </div>
+
+            <div class="profile-status">
+
+                <span class="status-dot"></span>
+
+                <span id="profileStatus">
+                    Ready to ride
+                </span>
+
+            </div>
+
         </div>
 
-        <div class="verified">
-          ✓ Rider Account
-        </div>
-      </div>
 
-      <div class="profile-arrow">›</div>
+        <button
+            id="editProfile"
+            class="edit-profile"
+            type="button"
+            aria-label="Edit profile"
+        >
+
+            <i class="fa-solid fa-pen"></i>
+
+        </button>
 
     </div>
 
-  </a>
 
-  <!-- ONLINE STATUS -->
-  <div class="status-card">
+    <div class="stats">
 
-    <div class="status-left">
-      <div class="status-dot" id="statusDot"></div>
+        <div class="stat">
 
-      <div>
-        <div class="status-title" id="statusTitle">
-          You're Offline
+            <div
+                id="tripCount"
+                class="stat-number"
+            >
+                0
+            </div>
+
+            <div class="stat-label">
+                Trips
+            </div>
+
         </div>
 
-        <div class="status-text" id="statusText">
-          Go online to receive ride requests
+
+        <div class="stat">
+
+            <div
+                id="earningAmount"
+                class="stat-number"
+            >
+                ₹0
+            </div>
+
+            <div class="stat-label">
+                Earnings
+            </div>
+
         </div>
-      </div>
+
+
+        <div class="stat">
+
+            <div
+                id="ratingValue"
+                class="stat-number"
+            >
+                5.0
+            </div>
+
+            <div class="stat-label">
+                Rating
+            </div>
+
+        </div>
+
     </div>
 
-    <button class="status-btn" id="statusBtn">
-      Go Online
+</section>
+
+
+<!-- =====================================================
+     RIDING
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        Riding
+    </div>
+
+    <div class="menu">
+
+        <a
+            class="menu-item"
+            href="home.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-house"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Dashboard
+                </div>
+
+                <div class="menu-sub">
+                    Rider home and daily overview
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="online.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-location-dot"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Online Map
+                </div>
+
+                <div class="menu-sub">
+                    Go online and receive rides
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="requests.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Ride Requests
+                </div>
+
+                <div class="menu-sub">
+                    View nearby customer requests
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="ride-request.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-motorcycle"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Current Request
+                </div>
+
+                <div class="menu-sub">
+                    Manage the active ride request
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="trip.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-route"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Current Trip
+                </div>
+
+                <div class="menu-sub">
+                    Navigate and manage current trip
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="live-map.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-map-location-dot"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Live Map
+                </div>
+
+                <div class="menu-sub">
+                    Live rider location tracking
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     MONEY
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        Money
+    </div>
+
+    <div class="menu">
+
+        <a
+            class="menu-item"
+            href="earnings.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Earnings
+                </div>
+
+                <div class="menu-sub">
+                    Daily and total ride earnings
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="wallet.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Wallet
+                </div>
+
+                <div class="menu-sub">
+                    Balance, payments and transactions
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="history.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Ride History
+                </div>
+
+                <div class="menu-sub">
+                    Completed and cancelled rides
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ACCOUNT
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        Account
+    </div>
+
+    <div class="menu">
+
+        <a
+            class="menu-item"
+            href="profile.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-user"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    My Profile
+                </div>
+
+                <div class="menu-sub">
+                    Personal and vehicle information
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="settings.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-gear"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Settings
+                </div>
+
+                <div class="menu-sub">
+                    App and rider preferences
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="notifications.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Notifications
+                </div>
+
+                <div class="menu-sub">
+                    Ride and account alerts
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+
+        <a
+            class="menu-item"
+            href="chat.html"
+        >
+
+            <div class="menu-icon">
+                <i class="fa-solid fa-comments"></i>
+            </div>
+
+            <div class="menu-text">
+
+                <div class="menu-title">
+                    Customer Chat
+                </div>
+
+                <div class="menu-sub">
+                    Chat with an active customer
+                </div>
+
+            </div>
+
+            <i class="fa-solid fa-chevron-right menu-arrow"></i>
+
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     ONLINE STATUS
+===================================================== -->
+
+<section class="section">
+
+    <div class="online-card">
+
+        <div class="online-top">
+
+            <div>
+
+                <div class="online-title">
+                    Rider Availability
+                </div>
+
+                <div
+                    id="onlineText"
+                    class="online-status"
+                >
+                    Currently offline
+                </div>
+
+            </div>
+
+
+            <button
+                id="onlineToggle"
+                class="toggle"
+                type="button"
+                aria-label="Toggle online status"
+            ></button>
+
+        </div>
+
+    </div>
+
+
+    <button
+        id="logoutBtn"
+        class="logout"
+        type="button"
+    >
+
+        <i class="fa-solid fa-right-from-bracket"></i>
+
+        Logout
+
     </button>
 
-  </div>
-
-  <!-- QUICK STATS -->
-  <section class="section">
-
-    <div class="section-title">
-      Overview
-    </div>
-
-    <div class="quick-grid">
-
-      <a class="quick-card" href="earnings.html">
-        <div class="quick-icon">₹</div>
-        <div class="quick-label">Today's Earnings</div>
-        <div class="quick-value" id="todayEarnings">₹0</div>
-      </a>
-
-      <a class="quick-card" href="rides.html">
-        <div class="quick-icon">🚕</div>
-        <div class="quick-label">Today's Rides</div>
-        <div class="quick-value" id="todayRides">0</div>
-      </a>
-
-    </div>
-
-  </section>
-
-  <!-- RIDES -->
-  <section class="section">
-
-    <div class="section-title">
-      Rides
-    </div>
-
-    <div class="menu-card">
-
-      <button class="menu-item" data-page="home.html">
-        <div class="menu-icon">⌂</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Rider Home</div>
-          <div class="menu-description">
-            Go back to your rider dashboard
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-      <button class="menu-item" data-page="rides.html">
-        <div class="menu-icon">🚕</div>
-
-        <div class="menu-content">
-          <div class="menu-title">My Rides</div>
-          <div class="menu-description">
-            View current and completed rides
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-      <button class="menu-item" data-page="history.html">
-        <div class="menu-icon">🕘</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Ride History</div>
-          <div class="menu-description">
-            Check your previous ride records
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-    </div>
-
-  </section>
-
-  <!-- MONEY -->
-  <section class="section">
-
-    <div class="section-title">
-      Money
-    </div>
-
-    <div class="menu-card">
-
-      <button class="menu-item" data-page="wallet.html">
-        <div class="menu-icon">💳</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Wallet</div>
-          <div class="menu-description">
-            Balance, transactions and wallet activity
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-      <button class="menu-item" data-page="earnings.html">
-        <div class="menu-icon">₹</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Earnings</div>
-          <div class="menu-description">
-            Daily, weekly and monthly earnings
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-    </div>
-
-  </section>
-
-  <!-- ACCOUNT -->
-  <section class="section">
-
-    <div class="section-title">
-      Account
-    </div>
-
-    <div class="menu-card">
-
-      <button class="menu-item" data-page="profile.html">
-        <div class="menu-icon">👤</div>
-
-        <div class="menu-content">
-          <div class="menu-title">My Profile</div>
-          <div class="menu-description">
-            Edit your rider profile and personal details
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-      <button class="menu-item" data-page="settings.html">
-        <div class="menu-icon">⚙️</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Settings</div>
-          <div class="menu-description">
-            Notifications, language and app preferences
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-      <button class="menu-item" data-page="notifications.html">
-        <div class="menu-icon">🔔</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Notifications</div>
-          <div class="menu-description">
-            Ride updates and important alerts
-          </div>
-        </div>
-
-        <div class="badge" id="notificationBadge" style="display:none;">
-          0
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-    </div>
-
-  </section>
-
-  <!-- SUPPORT -->
-  <section class="section">
-
-    <div class="section-title">
-      Help & Support
-    </div>
-
-    <div class="menu-card">
-
-      <button class="menu-item" id="supportBtn">
-        <div class="menu-icon">❓</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Help & Support</div>
-          <div class="menu-description">
-            Get help with rides, payments or your account
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-      <button class="menu-item" id="termsBtn">
-        <div class="menu-icon">📄</div>
-
-        <div class="menu-content">
-          <div class="menu-title">Terms & Conditions</div>
-          <div class="menu-description">
-            RiderX terms and service information
-          </div>
-        </div>
-
-        <div class="menu-arrow">›</div>
-      </button>
-
-    </div>
-
-  </section>
-
-  <!-- LOGOUT -->
-  <section class="section">
-
-    <button class="logout-btn" id="logoutBtn">
-      <span>↪</span>
-      <span>Logout</span>
-    </button>
 
     <div class="version">
-      RiderX Rider • Version 1.0.0
+        RiderX Rider App • v2.0
     </div>
 
-  </section>
+</section>
 
-</div>
 
-<!-- LOADING -->
-<div class="loading" id="loading" style="display:none;">
-  <div class="loading-box">
-    <div class="spinner"></div>
-    <div class="loading-text">Please wait...</div>
-  </div>
-</div>
+<!-- =====================================================
+     FIREBASE
+===================================================== -->
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- Firebase -->
 <script type="module">
 
-  import {
-    getAuth,
-    onAuthStateChanged,
-    signOut
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+    auth,
+    db
+} from "../firebase/config.js";
 
-  import {
-    getFirestore,
+import {
     doc,
     getDoc,
     collection,
-    query,
-    where,
     getDocs,
-    onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    query,
+    where
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-  import { app } from "../firebase/Firebase-config.js";
+import {
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-  const auth = getAuth(app);
-  const db = getFirestore(app);
 
-  const $ = (id) => document.getElementById(id);
+/* =====================================================
+   ELEMENTS
+===================================================== */
 
-  let currentUser = null;
-  let riderData = null;
+const profileName =
+    document.getElementById("profileName");
 
-  /* -----------------------------------------
-     HELPERS
-  ----------------------------------------- */
+const avatarLetter =
+    document.getElementById("avatarLetter");
 
-  function showLoading(show = true) {
-    $("loading").style.display = show ? "flex" : "none";
-  }
+const avatarImage =
+    document.getElementById("avatarImage");
 
-  function showToast(message) {
-    const toast = $("toast");
+const tripCount =
+    document.getElementById("tripCount");
 
-    toast.textContent = message;
-    toast.style.display = "block";
+const earningAmount =
+    document.getElementById("earningAmount");
 
-    clearTimeout(window.__toastTimer);
+const ratingValue =
+    document.getElementById("ratingValue");
 
-    window.__toastTimer = setTimeout(() => {
-      toast.style.display = "none";
-    }, 2600);
-  }
+const onlineToggle =
+    document.getElementById("onlineToggle");
 
-  function safeText(value, fallback = "") {
-    if (value === undefined || value === null || value === "") {
-      return fallback;
-    }
+const onlineText =
+    document.getElementById("onlineText");
 
-    return String(value);
-  }
+let currentUser = null;
+let riderOnline = false;
 
-  function getRiderName(data, user) {
-    return (
-      data?.name ||
-      data?.fullName ||
-      data?.displayName ||
-      user?.displayName ||
-      "Rider"
-    );
-  }
 
-  function getRiderPhone(data, user) {
-    return (
-      data?.phone ||
-      data?.mobile ||
-      user?.phoneNumber ||
-      "Phone not available"
-    );
-  }
+/* =====================================================
+   LOAD RIDER
+===================================================== */
 
-  function updateProfileUI(data = {}) {
+async function loadRider(uid){
 
-    const name = getRiderName(data, currentUser);
-    const phone = getRiderPhone(data, currentUser);
+    try{
 
-    $("riderName").textContent = name;
-    $("riderPhone").textContent = phone;
+        let userData = {};
 
-    const firstLetter =
-      name.trim().charAt(0).toUpperCase() || "R";
-
-    $("avatarText").textContent = firstLetter;
-
-    const photo =
-      data.photoURL ||
-      data.photo ||
-      data.profileImage ||
-      currentUser?.photoURL ||
-      "";
-
-    if (photo) {
-      $("avatarImage").src = photo;
-      $("avatarImage").style.display = "block";
-      $("avatarText").style.display = "none";
-    } else {
-      $("avatarImage").style.display = "none";
-      $("avatarText").style.display = "block";
-    }
-  }
-
-  /* -----------------------------------------
-     LOAD RIDER PROFILE
-  ----------------------------------------- */
-
-  async function loadRiderProfile(user) {
-
-    if (!user) return;
-
-    currentUser = user;
-
-    let data = {};
-
-    try {
-
-      const riderRef = doc(db, "riders", user.uid);
-      const riderSnap = await getDoc(riderRef);
-
-      if (riderSnap.exists()) {
-        data = riderSnap.data();
-      } else {
-
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (userSnap.exists()) {
-          data = userSnap.data();
-        }
-      }
-
-    } catch (error) {
-      console.error("Profile load error:", error);
-    }
-
-    riderData = data;
-
-    updateProfileUI(data);
-
-    updateOnlineStatus(
-      data.online === true ||
-      data.isOnline === true ||
-      data.status === "online"
-    );
-
-    await loadTodayStats();
-  }
-
-  /* -----------------------------------------
-     ONLINE STATUS
-  ----------------------------------------- */
-
-  function updateOnlineStatus(isOnline) {
-
-    const dot = $("statusDot");
-    const title = $("statusTitle");
-    const text = $("statusText");
-    const button = $("statusBtn");
-
-    if (isOnline) {
-
-      dot.classList.add("online");
-
-      title.textContent = "You're Online";
-
-      text.textContent =
-        "You can receive new ride requests";
-
-      button.textContent = "Go Offline";
-
-      button.classList.add("offline");
-
-    } else {
-
-      dot.classList.remove("online");
-
-      title.textContent = "You're Offline";
-
-      text.textContent =
-        "Go online to receive ride requests";
-
-      button.textContent = "Go Online";
-
-      button.classList.remove("offline");
-    }
-
-    button.dataset.online = isOnline ? "true" : "false";
-  }
-
-  /* -----------------------------------------
-     ONLINE BUTTON
-  ----------------------------------------- */
-
-  async function toggleOnlineStatus() {
-
-    if (!currentUser) {
-      showToast("Please login again.");
-      return;
-    }
-
-    /*
-      Actual online/offline switching is normally
-      handled by rider/home.js or rider online
-      controller so ride listeners remain centralized.
-
-      This menu only redirects the rider to Home.
-    */
-
-    window.location.href = "home.html";
-  }
-
-  /* -----------------------------------------
-     TODAY'S STATS
-  ----------------------------------------- */
-
-  async function loadTodayStats() {
-
-    if (!currentUser) return;
-
-    try {
-
-      const today = new Date();
-
-      today.setHours(0, 0, 0, 0);
-
-      const ridesRef = collection(db, "rides");
-
-      const q = query(
-        ridesRef,
-        where("riderId", "==", currentUser.uid)
-      );
-
-      const snapshot = await getDocs(q);
-
-      let rideCount = 0;
-      let earnings = 0;
-
-      snapshot.forEach((item) => {
-
-        const ride = item.data();
-
-        let dateValue =
-          ride.completedAt ||
-          ride.updatedAt ||
-          ride.createdAt;
-
-        let rideDate = null;
-
-        if (dateValue?.toDate) {
-          rideDate = dateValue.toDate();
-        } else if (dateValue) {
-          rideDate = new Date(dateValue);
-        }
-
-        if (!rideDate || isNaN(rideDate.getTime())) {
-          return;
-        }
-
-        rideDate.setHours(0, 0, 0, 0);
-
-        if (rideDate.getTime() !== today.getTime()) {
-          return;
-        }
-
-        const status =
-          String(ride.status || "").toLowerCase();
-
-        if (
-          status === "completed" ||
-          status === "complete" ||
-          status === "finished"
-        ) {
-
-          rideCount++;
-
-          const amount =
-            Number(
-              ride.riderEarning ??
-              ride.riderEarnings ??
-              ride.earnings ??
-              ride.fare ??
-              ride.amount ??
-              0
+        const userSnap =
+            await getDoc(
+                doc(
+                    db,
+                    "users",
+                    uid
+                )
             );
 
-          earnings += isNaN(amount) ? 0 : amount;
+        if(userSnap.exists()){
+
+            userData =
+                userSnap.data();
+
         }
 
-      });
 
-      $("todayRides").textContent = rideCount;
+        let riderData = {};
 
-      $("todayEarnings").textContent =
-        "₹" + Math.round(earnings).toLocaleString("en-IN");
+        const riderSnap =
+            await getDoc(
+                doc(
+                    db,
+                    "riders",
+                    uid
+                )
+            );
 
-    } catch (error) {
+        if(riderSnap.exists()){
 
-      console.error("Stats error:", error);
+            riderData =
+                riderSnap.data();
 
-      $("todayRides").textContent = "0";
-      $("todayEarnings").textContent = "₹0";
+        }
+
+
+        const name =
+            riderData.name ||
+            userData.name ||
+            userData.displayName ||
+            "Rider";
+
+
+        profileName.innerText =
+            name;
+
+
+        avatarLetter.innerText =
+            name
+                .trim()
+                .charAt(0)
+                .toUpperCase() ||
+            "R";
+
+
+        const photo =
+            riderData.photoURL ||
+            riderData.photo ||
+            userData.photoURL ||
+            userData.photo;
+
+
+        if(photo){
+
+            avatarImage.src = photo;
+
+            avatarImage.style.display =
+                "block";
+
+            avatarLetter.style.display =
+                "none";
+
+        }
+
+
+        const status =
+            riderData.online ??
+            riderData.isOnline ??
+            false;
+
+
+        riderOnline =
+            status === true;
+
+
+        updateOnlineUI();
+
+
+        const rating =
+            riderData.rating ??
+            userData.rating ??
+            5;
+
+
+        ratingValue.innerText =
+            Number(rating).toFixed(1);
+
+
+        await loadRideStats(uid);
+
+    }catch(error){
+
+        console.error(
+            "Rider menu error:",
+            error
+        );
+
     }
-  }
 
-  /* -----------------------------------------
-     NAVIGATION
-  ----------------------------------------- */
+}
 
-  document.querySelectorAll("[data-page]").forEach((item) => {
 
-    item.addEventListener("click", () => {
+/* =====================================================
+   RIDE STATS
+===================================================== */
 
-      const page = item.dataset.page;
+async function loadRideStats(uid){
 
-      if (!page) return;
+    try{
 
-      window.location.href = page;
-    });
+        const q =
+            query(
+                collection(
+                    db,
+                    "rides"
+                ),
+                where(
+                    "riderId",
+                    "==",
+                    uid
+                )
+            );
 
-  });
 
-  /* -----------------------------------------
-     BACK
-  ----------------------------------------- */
+        const snap =
+            await getDocs(q);
 
-  $("backBtn").addEventListener("click", () => {
 
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = "home.html";
+        let trips = 0;
+        let earnings = 0;
+
+
+        snap.forEach(
+            rideSnap=>{
+
+                const data =
+                    rideSnap.data();
+
+
+                const status =
+                    String(
+                        data.status ||
+                        ""
+                    ).toLowerCase();
+
+
+                if(
+                    status === "completed"
+                ){
+
+                    trips++;
+
+                    earnings +=
+                        Number(
+                            data.fare ||
+                            data.amount ||
+                            data.totalFare ||
+                            0
+                        );
+
+                }
+
+            }
+        );
+
+
+        tripCount.innerText =
+            trips;
+
+
+        earningAmount.innerText =
+            "₹" +
+            Math.round(
+                earnings
+            );
+
+
+    }catch(error){
+
+        console.error(
+            "Ride stats error:",
+            error
+        );
+
     }
 
-  });
+}
 
-  /* -----------------------------------------
-     ONLINE
-  ----------------------------------------- */
 
-  $("statusBtn").addEventListener(
+/* =====================================================
+   ONLINE UI
+===================================================== */
+
+function updateOnlineUI(){
+
+    if(riderOnline){
+
+        onlineToggle.classList.add(
+            "active"
+        );
+
+        onlineText.innerText =
+            "Currently online • receiving rides";
+
+    }else{
+
+        onlineToggle.classList.remove(
+            "active"
+        );
+
+        onlineText.innerText =
+            "Currently offline";
+
+    }
+
+}
+
+
+/* =====================================================
+   TOGGLE ONLINE
+===================================================== */
+
+onlineToggle.addEventListener(
     "click",
-    toggleOnlineStatus
-  );
+    async()=>{
 
-  /* -----------------------------------------
-     SUPPORT
-  ----------------------------------------- */
+        if(!currentUser){
+            return;
+        }
 
-  $("supportBtn").addEventListener("click", () => {
 
-    /*
-      Supports page will be connected when the
-      rider-side support module is finalized.
-    */
+        riderOnline =
+            !riderOnline;
 
-    window.location.href = "../index.html#support";
-  });
 
-  $("termsBtn").addEventListener("click", () => {
+        updateOnlineUI();
 
-    window.location.href = "../index.html#terms";
-  });
 
-  /* -----------------------------------------
-     LOGOUT
-  ----------------------------------------- */
+        try{
 
-  $("logoutBtn").addEventListener("click", async () => {
+            /*
+             * The dedicated online page/map
+             * remains responsible for continuous
+             * GPS tracking.
+             */
 
-    const confirmLogout = confirm(
-      "Are you sure you want to logout?"
+            const riderRef =
+                doc(
+                    db,
+                    "riders",
+                    currentUser.uid
+                );
+
+
+            const existing =
+                await getDoc(
+                    riderRef
+                );
+
+
+            const oldData =
+                existing.exists()
+                    ? existing.data()
+                    : {};
+
+
+            const {
+                setDoc
+            } =
+                await import(
+                    "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js"
+                );
+
+
+            await setDoc(
+                riderRef,
+                {
+                    ...oldData,
+                    online:riderOnline,
+                    isOnline:riderOnline,
+                    updatedAt:new Date()
+                },
+                {
+                    merge:true
+                }
+            );
+
+
+        }catch(error){
+
+            console.error(
+                "Online status error:",
+                error
+            );
+
+            riderOnline =
+                !riderOnline;
+
+            updateOnlineUI();
+
+            alert(
+                "Unable to update online status."
+            );
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+document
+    .getElementById("backBtn")
+    .addEventListener(
+        "click",
+        ()=>{
+            history.back();
+        }
     );
 
-    if (!confirmLogout) return;
 
-    try {
+document
+    .getElementById("notificationBtn")
+    .addEventListener(
+        "click",
+        ()=>{
+            location.href =
+                "notifications.html";
+        }
+    );
 
-      showLoading(true);
 
-      await signOut(auth);
+document
+    .getElementById("editProfile")
+    .addEventListener(
+        "click",
+        ()=>{
+            location.href =
+                "profile.html";
+        }
+    );
 
-      window.location.replace(
-        "../auth/login.html"
-      );
 
-    } catch (error) {
+/* =====================================================
+   LOGOUT
+===================================================== */
 
-      console.error("Logout error:", error);
+document
+    .getElementById("logoutBtn")
+    .addEventListener(
+        "click",
+        async()=>{
 
-      showLoading(false);
+            const confirmed =
+                confirm(
+                    "Are you sure you want to logout?"
+                );
 
-      showToast(
-        "Logout failed. Please try again."
-      );
+
+            if(!confirmed){
+                return;
+            }
+
+
+            try{
+
+                await signOut(auth);
+
+                location.href =
+                    "../auth/login.html";
+
+            }catch(error){
+
+                console.error(
+                    "Logout error:",
+                    error
+                );
+
+                alert(
+                    "Logout failed. Please try again."
+                );
+
+            }
+
+        }
+    );
+
+
+/* =====================================================
+   AUTH
+===================================================== */
+
+onAuthStateChanged(
+    auth,
+    async user=>{
+
+        if(!user){
+
+            location.href =
+                "../auth/login.html";
+
+            return;
+
+        }
+
+
+        currentUser =
+            user;
+
+
+        await loadRider(
+            user.uid
+        );
+
     }
-
-  });
-
-  /* -----------------------------------------
-     AUTH
-  ----------------------------------------- */
-
-  onAuthStateChanged(auth, async (user) => {
-
-    if (!user) {
-
-      window.location.replace(
-        "../auth/login.html"
-      );
-
-      return;
-    }
-
-    await loadRiderProfile(user);
-
-  });
+);
 
 </script>
 
 </body>
-</html>
+
+  </html>
