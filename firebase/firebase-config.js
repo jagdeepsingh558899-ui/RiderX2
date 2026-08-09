@@ -1,13 +1,35 @@
 // ============================================================
-// RiderX Firebase Configuration
-// FINAL MASTER CONFIGURATION
-// Firebase v10 Modular SDK
+// RiderX2
+// FIREBASE MASTER CONFIGURATION
+// File: firebase/firebase-config.js
+// Firebase Web SDK v10.8.0
+//
+// This file is the central Firebase service layer for RiderX2.
+//
+// Services:
+// - Firebase Authentication
+// - Cloud Firestore
+// - Firebase Realtime Database
+// - Firebase Storage
+//
+// IMPORTANT:
+// Keep this file as the single Firebase import source throughout
+// the RiderX2 project.
+// ============================================================
+
+
+// ============================================================
+// FIREBASE APP
 // ============================================================
 
 import {
     initializeApp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
+
+// ============================================================
+// FIREBASE AUTHENTICATION
+// ============================================================
 
 import {
     getAuth,
@@ -25,6 +47,10 @@ import {
     deleteUser
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+
+// ============================================================
+// FIRESTORE
+// ============================================================
 
 import {
     getFirestore,
@@ -47,6 +73,45 @@ import {
     writeBatch
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+
+// ============================================================
+// REALTIME DATABASE
+//
+// Used for:
+// - live rider location
+// - live customer location
+// - online/offline status
+// - active ride state
+// - nearby rider discovery
+// - real-time ride tracking
+// ============================================================
+
+import {
+    getDatabase,
+    ref as rtdbRef,
+    set as rtdbSet,
+    update as rtdbUpdate,
+    get as rtdbGet,
+    remove as rtdbRemove,
+    push as rtdbPush,
+    onValue,
+    onChildAdded,
+    onChildChanged,
+    onChildRemoved,
+    onDisconnect,
+    serverTimestamp as rtdbServerTimestamp
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+
+// ============================================================
+// FIREBASE STORAGE
+//
+// Used for:
+// - profile photos
+// - rider documents
+// - vehicle documents
+// - other approved uploads
+// ============================================================
 
 import {
     getStorage,
@@ -87,12 +152,11 @@ const firebaseConfig = {
 
     measurementId:
         "G-SM8KLBVPWN"
-
 };
 
 
 // ============================================================
-// INITIALIZE FIREBASE
+// INITIALIZE FIREBASE APP
 // ============================================================
 
 const app =
@@ -102,7 +166,7 @@ const app =
 
 
 // ============================================================
-// FIREBASE SERVICES
+// INITIALIZE FIREBASE SERVICES
 // ============================================================
 
 const auth =
@@ -117,6 +181,12 @@ const db =
     );
 
 
+const realtimeDb =
+    getDatabase(
+        app
+    );
+
+
 const storage =
     getStorage(
         app
@@ -125,20 +195,26 @@ const storage =
 
 // ============================================================
 // MASTER EXPORTS
+//
+// Existing RiderX2 code can continue importing the existing
+// Firebase services while new ride/location modules can use
+// the Realtime Database exports below.
 // ============================================================
 
 export {
 
-    // Core
+    // ----------------------------------------------------------
+    // Firebase core
+    // ----------------------------------------------------------
+
     app,
-    auth,
-    db,
-    storage,
 
 
-    // -------------------------
+    // ----------------------------------------------------------
     // Authentication
-    // -------------------------
+    // ----------------------------------------------------------
+
+    auth,
 
     createUserWithEmailAndPassword,
 
@@ -165,9 +241,11 @@ export {
     deleteUser,
 
 
-    // -------------------------
-    // Firestore
-    // -------------------------
+    // ----------------------------------------------------------
+    // Cloud Firestore
+    // ----------------------------------------------------------
+
+    db,
 
     doc,
 
@@ -204,9 +282,42 @@ export {
     writeBatch,
 
 
-    // -------------------------
+    // ----------------------------------------------------------
+    // Realtime Database
+    // ----------------------------------------------------------
+
+    realtimeDb,
+
+    rtdbRef,
+
+    rtdbSet,
+
+    rtdbUpdate,
+
+    rtdbGet,
+
+    rtdbRemove,
+
+    rtdbPush,
+
+    onValue,
+
+    onChildAdded,
+
+    onChildChanged,
+
+    onChildRemoved,
+
+    onDisconnect,
+
+    rtdbServerTimestamp,
+
+
+    // ----------------------------------------------------------
     // Firebase Storage
-    // -------------------------
+    // ----------------------------------------------------------
+
+    storage,
 
     ref,
 
@@ -217,5 +328,4 @@ export {
     getDownloadURL,
 
     deleteObject
-
 };
