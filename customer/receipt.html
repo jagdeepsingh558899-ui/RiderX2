@@ -6,348 +6,1980 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RiderX Receipt</title>
+<title>RiderX - Ride Receipt</title>
 
+<meta name="theme-color" content="#FFD400">
+
+<link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css">
 
 <style>
 
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-
+:root{
+    --yellow:#FFD400;
+    --bg:#0d0d0d;
+    --card:#191919;
+    --border:#303030;
+    --muted:#777;
+    --green:#22c55e;
+    --red:#ef4444;
 }
 
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html,
+body{
+    min-height:100%;
+    background:#080808;
+}
 
 body{
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
 
-background:#000;
-color:white;
-padding:20px;
-
+.app{
+    width:100%;
+    max-width:650px;
+    min-height:100vh;
+    margin:auto;
+    background:var(--bg);
 }
 
 
+/* =========================
+   HEADER
+========================= */
 
-.box{
+.header{
+    position:sticky;
+    top:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border-bottom:1px solid #252525;
+    background:rgba(10,10,10,.97);
+    backdrop-filter:blur(14px);
+}
 
-background:#111;
-border:2px solid #FFD600;
-border-radius:20px;
-padding:25px;
+.back-btn{
+    width:40px;
+    height:40px;
+    min-width:40px;
+    border:1px solid #303030;
+    border-radius:50%;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+}
 
+.title-box{
+    flex:1;
+}
+
+.title{
+    font-size:12px;
+    font-weight:900;
+}
+
+.subtitle{
+    margin-top:3px;
+    color:#777;
+    font-size:6px;
+}
+
+.header-action{
+    width:36px;
+    height:36px;
+    border:1px solid #3a3500;
+    border-radius:10px;
+    background:#282300;
+    color:var(--yellow);
+    font-size:15px;
+    cursor:pointer;
 }
 
 
+/* =========================
+   CONTENT
+========================= */
 
-h1 span{
-
-color:#FFD600;
-
+.content{
+    padding:13px;
+    padding-bottom:40px;
 }
 
 
+/* =========================
+   RECEIPT
+========================= */
 
-.item{
+.receipt{
+    overflow:hidden;
+    border:1px solid #343434;
+    border-radius:19px;
+    background:var(--card);
+}
 
-margin-top:15px;
-background:#222;
-padding:15px;
-border-radius:12px;
+.receipt-head{
+    padding:18px 14px;
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(255,212,0,.16),
+            transparent 40%
+        ),
+        #191919;
+    text-align:center;
+}
 
+.logo{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:43px;
+    height:43px;
+    border-radius:13px;
+    background:var(--yellow);
+    color:#000;
+    font-size:14px;
+    font-weight:900;
+}
+
+.receipt-title{
+    margin-top:10px;
+    font-size:11px;
+    font-weight:900;
+}
+
+.receipt-sub{
+    margin-top:4px;
+    color:#777;
+    font-size:6px;
+}
+
+.receipt-status{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    margin-top:10px;
+    padding:6px 9px;
+    border-radius:20px;
+    background:#15301f;
+    color:#5be187;
+    font-size:5px;
+    font-weight:900;
 }
 
 
+/* =========================
+   AMOUNT
+========================= */
 
-button{
+.amount-box{
+    padding:18px 14px;
+    border-top:1px dashed #3b3b3b;
+    border-bottom:1px dashed #3b3b3b;
+    text-align:center;
+}
 
-width:100%;
-padding:15px;
-margin-top:15px;
-background:#FFD600;
-border:none;
-border-radius:12px;
-font-weight:bold;
+.amount-label{
+    color:#777;
+    font-size:6px;
+}
 
+.amount{
+    margin-top:6px;
+    font-size:27px;
+    font-weight:900;
+}
+
+.payment-method{
+    margin-top:6px;
+    color:#999;
+    font-size:6px;
 }
 
 
+/* =========================
+   SECTION
+========================= */
+
+.section{
+    padding:14px;
+    border-bottom:1px solid #292929;
+}
+
+.section:last-child{
+    border-bottom:0;
+}
+
+.section-title{
+    margin-bottom:10px;
+    color:#666;
+    font-size:6px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+}
+
+
+/* =========================
+   INFO ROW
+========================= */
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:7px 0;
+}
+
+.info-label{
+    color:#777;
+    font-size:6px;
+}
+
+.info-value{
+    max-width:60%;
+    color:#fff;
+    text-align:right;
+    font-size:6px;
+    font-weight:800;
+    word-break:break-word;
+}
+
+
+/* =========================
+   ROUTE
+========================= */
+
+.route{
+    position:relative;
+    padding-left:25px;
+}
+
+.route-line{
+    position:absolute;
+    left:7px;
+    top:12px;
+    bottom:12px;
+    width:1px;
+    background:#4b4b4b;
+}
+
+.location{
+    position:relative;
+    padding-bottom:15px;
+}
+
+.location:last-child{
+    padding-bottom:0;
+}
+
+.dot{
+    position:absolute;
+    left:-22px;
+    top:2px;
+    width:10px;
+    height:10px;
+    border:2px solid #111;
+    border-radius:50%;
+    background:var(--yellow);
+    box-shadow:0 0 0 1px var(--yellow);
+}
+
+.destination .dot{
+    background:#fff;
+    box-shadow:0 0 0 1px #fff;
+}
+
+.location-label{
+    color:#666;
+    font-size:5px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.location-name{
+    margin-top:4px;
+    color:#fff;
+    font-size:7px;
+    font-weight:800;
+    line-height:1.4;
+}
+
+
+/* =========================
+   FARE BREAKDOWN
+========================= */
+
+.fare-row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    color:#aaa;
+    font-size:6px;
+}
+
+.fare-row strong{
+    color:#fff;
+    font-weight:800;
+}
+
+.fare-total{
+    display:flex;
+    justify-content:space-between;
+    margin-top:6px;
+    padding-top:10px;
+    border-top:1px solid #333;
+    color:#fff;
+    font-size:8px;
+    font-weight:900;
+}
+
+.fare-total span:last-child{
+    color:var(--yellow);
+}
+
+
+/* =========================
+   DRIVER
+========================= */
+
+.driver{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.driver-avatar{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    border-radius:50%;
+    background:#282828;
+    color:var(--yellow);
+    font-size:13px;
+    font-weight:900;
+}
+
+.driver-avatar img{
+    width:100%;
+    height:100%;
+    display:none;
+    object-fit:cover;
+}
+
+.driver-info{
+    flex:1;
+}
+
+.driver-name{
+    font-size:8px;
+    font-weight:900;
+}
+
+.driver-meta{
+    margin-top:4px;
+    color:#666;
+    font-size:5px;
+}
+
+.rating{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    color:var(--yellow);
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* =========================
+   ACTIONS
+========================= */
+
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:12px;
+}
+
+.action-btn{
+    height:42px;
+    border:1px solid #373737;
+    border-radius:11px;
+    background:#202020;
+    color:#fff;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.action-btn.primary{
+    border-color:#776700;
+    background:var(--yellow);
+    color:#000;
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+    padding:17px 10px;
+    color:#555;
+    text-align:center;
+    font-size:5px;
+    line-height:1.6;
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    z-index:200;
+    width:calc(100% - 28px);
+    max-width:500px;
+    padding:11px 13px;
+    transform:translate(-50%,20px);
+    border:1px solid #333;
+    border-radius:11px;
+    background:#222;
+    color:#fff;
+    text-align:center;
+    font-size:7px;
+    opacity:0;
+    pointer-events:none;
+    transition:.25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* =========================
+   PRINT
+========================= */
+
+@media print{
+
+    body{
+        background:#fff;
+        color:#000;
+    }
+
+    .app{
+        max-width:none;
+        background:#fff;
+    }
+
+    .header,
+    .actions,
+    .footer,
+    .toast{
+        display:none !important;
+    }
+
+    .receipt{
+        border:1px solid #ddd;
+        background:#fff;
+    }
+
+    .receipt-head,
+    .section,
+    .amount-box{
+        background:#fff;
+    }
+
+    .receipt-title,
+    .amount,
+    .info-value,
+    .location-name,
+    .fare-total,
+    .fare-row strong{
+        color:#000;
+    }
+
+    .info-label,
+    .section-title,
+    .receipt-sub,
+    .payment-method,
+    .footer{
+        color:#666;
+    }
+
+}
 
 </style>
 
-
 </head>
-
 
 <body>
 
+<div class="app">
 
 
-<div class="box">
+    <!-- HEADER -->
+
+    <header class="header">
+
+        <button
+            class="back-btn"
+            onclick="goBack()"
+            aria-label="Back"
+        >
+            ‹
+        </button>
+
+        <div class="title-box">
+
+            <div class="title">
+                Ride Receipt
+            </div>
+
+            <div class="subtitle">
+                Your RiderX trip summary
+            </div>
+
+        </div>
+
+        <button
+            class="header-action"
+            onclick="printReceipt()"
+            aria-label="Print receipt"
+        >
+            🖨️
+        </button>
+
+    </header>
 
 
-<h1>
+    <main class="content">
 
-RIDER<span>X</span>
-
-</h1>
+        <section class="receipt" id="receipt">
 
 
+            <!-- RECEIPT HEADER -->
 
-<h2>
+            <div class="receipt-head">
 
-🧾 Ride Receipt
+                <div class="logo">
+                    RX
+                </div>
 
-</h2>
+                <div class="receipt-title">
+                    RiderX
+                </div>
+
+                <div class="receipt-sub">
+                    Ride completed successfully
+                </div>
+
+                <div class="receipt-status">
+                    ✓ PAID
+                </div>
+
+            </div>
 
 
+            <!-- TOTAL -->
 
-<div class="item">
+            <div class="amount-box">
 
-Receipt ID:
+                <div class="amount-label">
+                    TOTAL PAID
+                </div>
 
-<span id="id">
+                <div
+                    class="amount"
+                    id="totalAmount"
+                >
+                    ₹0
+                </div>
 
--
+                <div
+                    class="payment-method"
+                    id="paymentMethod"
+                >
+                    Cash
+                </div>
 
-</span>
+            </div>
+
+
+            <!-- RIDE DETAILS -->
+
+            <div class="section">
+
+                <div class="section-title">
+                    Ride details
+                </div>
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Ride ID
+                    </span>
+
+                    <span
+                        class="info-value"
+                        id="rideId"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Service
+                    </span>
+
+                    <span
+                        class="info-value"
+                        id="service"
+                    >
+                        Bike Taxi
+                    </span>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Date
+                    </span>
+
+                    <span
+                        class="info-value"
+                        id="rideDate"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Time
+                    </span>
+
+                    <span
+                        class="info-value"
+                        id="rideTime"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Distance
+                    </span>
+
+                    <span
+                        class="info-value"
+                        id="distance"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+                <div class="info-row">
+
+                    <span class="info-label">
+                        Duration
+                    </span>
+
+                    <span
+                        class="info-value"
+                        id="duration"
+                    >
+                        —
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ROUTE -->
+
+            <div class="section">
+
+                <div class="section-title">
+                    Trip route
+                </div>
+
+                <div class="route">
+
+                    <div class="route-line"></div>
+
+
+                    <div class="location">
+
+                        <div class="dot"></div>
+
+                        <div class="location-label">
+                            Pickup
+                        </div>
+
+                        <div
+                            class="location-name"
+                            id="pickup"
+                        >
+                            Pickup location
+                        </div>
+
+                    </div>
+
+
+                    <div class="location destination">
+
+                        <div class="dot"></div>
+
+                        <div class="location-label">
+                            Destination
+                        </div>
+
+                        <div
+                            class="location-name"
+                            id="destination"
+                        >
+                            Destination location
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FARE -->
+
+            <div class="section">
+
+                <div class="section-title">
+                    Fare breakdown
+                </div>
+
+                <div class="fare-row">
+
+                    <span>
+                        Base fare
+                    </span>
+
+                    <strong
+                        id="baseFare"
+                    >
+                        ₹0
+                    </strong>
+
+                </div>
+
+                <div class="fare-row">
+
+                    <span>
+                        Distance fare
+                    </span>
+
+                    <strong
+                        id="distanceFare"
+                    >
+                        ₹0
+                    </strong>
+
+                </div>
+
+                <div class="fare-row">
+
+                    <span>
+                        Time / waiting
+                    </span>
+
+                    <strong
+                        id="timeFare"
+                    >
+                        ₹0
+                    </strong>
+
+                </div>
+
+                <div class="fare-row">
+
+                    <span>
+                        Discount
+                    </span>
+
+                    <strong
+                        id="discount"
+                    >
+                        -₹0
+                    </strong>
+
+                </div>
+
+                <div class="fare-row">
+
+                    <span>
+                        Taxes & fees
+                    </span>
+
+                    <strong
+                        id="tax"
+                    >
+                        ₹0
+                    </strong>
+
+                </div>
+
+                <div class="fare-total">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <span id="fareTotal">
+                        ₹0
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- DRIVER -->
+
+            <div class="section">
+
+                <div class="section-title">
+                    Rider
+                </div>
+
+                <div class="driver">
+
+                    <div class="driver-avatar">
+
+                        <span
+                            id="driverInitial"
+                        >
+                            R
+                        </span>
+
+                        <img
+                            id="driverPhoto"
+                            alt="Rider"
+                        >
+
+                    </div>
+
+                    <div class="driver-info">
+
+                        <div
+                            class="driver-name"
+                            id="driverName"
+                        >
+                            RiderX Partner
+                        </div>
+
+                        <div
+                            class="driver-meta"
+                            id="driverVehicle"
+                        >
+                            Rider
+                        </div>
+
+                    </div>
+
+                    <div class="rating">
+                        ★
+                        <span
+                            id="driverRating"
+                        >
+                            —
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ACTIONS -->
+
+        <div class="actions">
+
+            <button
+                class="action-btn primary"
+                onclick="printReceipt()"
+            >
+                🖨️ PRINT RECEIPT
+            </button>
+
+            <button
+                class="action-btn"
+                onclick="shareReceipt()"
+            >
+                ↗️ SHARE
+            </button>
+
+        </div>
+
+
+        <div class="footer">
+            Thank you for choosing RiderX.<br>
+            Safe rides. Better journeys.
+        </div>
+
+    </main>
 
 </div>
 
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
-<div class="item">
 
-Service:
+<script>
 
-<span id="service">
+/* ==========================================
+   RIDERX CUSTOMER RECEIPT
+========================================== */
 
--
+let rideData = {};
+let toastTimer = null;
 
-</span>
 
-</div>
+/* ==========================================
+   DEFAULT RIDE
+========================================== */
 
+const defaultRide = {
 
+    id:"",
+    service:"Bike Taxi",
 
-<div class="item">
+    amount:0,
+    total:0,
+    fare:0,
 
-Pickup:
+    baseFare:0,
+    distanceFare:0,
+    timeFare:0,
+    discount:0,
+    tax:0,
 
-<span id="pickup">
+    distance:"",
+    duration:"",
 
--
+    pickup:"",
+    destination:"",
 
-</span>
+    paymentMethod:"Cash",
 
-</div>
+    riderName:"RiderX Partner",
+    riderPhoto:"",
+    vehicle:"",
+    vehicleNumber:"",
+    riderRating:"",
 
+    createdAt:Date.now()
 
+};
 
-<div class="item">
 
-Drop:
+/* ==========================================
+   URL PARAM
+========================================== */
 
-<span id="drop">
+function getParam(
+    name
+){
 
--
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
 
-</span>
-
-</div>
-
-
-
-<div class="item">
-
-Fare:
-
-₹<span id="fare">
-
-0
-
-</span>
-
-</div>
-
-
-
-<div class="item">
-
-Payment:
-
-<span id="payment">
-
-Pending
-
-</span>
-
-</div>
-
-
-
-<div class="item">
-
-Date:
-
-<span id="date">
-
--
-
-</span>
-
-</div>
-
-
-
-
-<button onclick="window.print()">
-
-🖨 Print Receipt
-
-</button>
-
-
-
-
-<button onclick="rateRide()">
-
-⭐ Rate Rider
-
-</button>
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<script type="module">
-
-
-import {db} from "../firebase/config.js";
-
-
-import {
-
-doc,
-getDoc
+    return params.get(
+        name
+    );
 
 }
 
-from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+/* ==========================================
+   LOAD RIDE
+========================================== */
+
+function loadRide(){
+
+    rideData = {
+        ...defaultRide
+    };
 
 
+    const urlId =
+        getParam(
+            "rideId"
+        ) ||
+        getParam(
+            "id"
+        );
 
 
+    if(
+        urlId
+    ){
 
-let rideId=
+        rideData.id =
+            urlId;
 
-localStorage.getItem("rideId");
-
-
-
-
-
-async function loadReceipt(){
+    }
 
 
+    const keys = [
 
-let snap=
+        "currentRide",
+        "activeRide",
+        "riderxCurrentRide",
+        "lastRide",
+        "rideData",
+        "completedRide",
+        "lastCompletedRide"
 
-await getDoc(
+    ];
 
-doc(db,"rides",rideId)
 
+    for(
+        const key of keys
+    ){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(
+                !raw
+            ){
+
+                continue;
+
+            }
+
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                data &&
+                typeof data ===
+                "object"
+            ){
+
+                rideData = {
+
+                    ...rideData,
+                    ...data
+
+                };
+
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.log(
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+      Support common nested fare structures.
+    */
+
+    if(
+        rideData.fareDetails &&
+        typeof rideData.fareDetails ===
+        "object"
+    ){
+
+        rideData = {
+
+            ...rideData,
+            ...rideData.fareDetails
+
+        };
+
+    }
+
+
+    if(
+        rideData.payment &&
+        typeof rideData.payment ===
+        "object"
+    ){
+
+        rideData.paymentMethod =
+            rideData.payment.method ||
+            rideData.paymentMethod;
+
+    }
+
+
+    renderReceipt();
+
+}
+
+
+/* ==========================================
+   RENDER RECEIPT
+========================================== */
+
+function renderReceipt(){
+
+    const total =
+        getNumber(
+            rideData.total,
+            rideData.amount,
+            rideData.fare,
+            rideData.price,
+            0
+        );
+
+
+    document.getElementById(
+        "totalAmount"
+    ).textContent =
+        money(
+            total
+        );
+
+
+    document.getElementById(
+        "fareTotal"
+    ).textContent =
+        money(
+            total
+        );
+
+
+    document.getElementById(
+        "rideId"
+    ).textContent =
+        rideData.id ||
+        rideData.rideId ||
+        "—";
+
+
+    document.getElementById(
+        "service"
+    ).textContent =
+        rideData.service ||
+        rideData.type ||
+        "Bike Taxi";
+
+
+    const dateValue =
+        rideData.completedAt ||
+        rideData.createdAt ||
+        rideData.timestamp ||
+        Date.now();
+
+
+    const date =
+        new Date(
+            Number(
+                dateValue
+            )
+        );
+
+
+    if(
+        !Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        document.getElementById(
+            "rideDate"
+        ).textContent =
+            date.toLocaleDateString(
+                "en-IN",
+                {
+                    day:"2-digit",
+                    month:"short",
+                    year:"numeric"
+                }
+            );
+
+
+        document.getElementById(
+            "rideTime"
+        ).textContent =
+            date.toLocaleTimeString(
+                "en-IN",
+                {
+                    hour:"2-digit",
+                    minute:"2-digit"
+                }
+            );
+
+    }
+
+
+    document.getElementById(
+        "distance"
+    ).textContent =
+        formatDistance(
+            rideData.distance ||
+            rideData.distanceKm
+        );
+
+
+    document.getElementById(
+        "duration"
+    ).textContent =
+        formatDuration(
+            rideData.duration ||
+            rideData.durationMinutes
+        );
+
+
+    document.getElementById(
+        "pickup"
+    ).textContent =
+        rideData.pickup ||
+        rideData.pickupAddress ||
+        rideData.from ||
+        "Pickup location";
+
+
+    document.getElementById(
+        "destination"
+    ).textContent =
+        rideData.destination ||
+        rideData.destinationAddress ||
+        rideData.to ||
+        "Destination location";
+
+
+    document.getElementById(
+        "paymentMethod"
+    ).textContent =
+        formatPayment(
+            rideData.paymentMethod ||
+            rideData.payment ||
+            "Cash"
+        );
+
+
+    renderFare(
+        total
+    );
+
+
+    renderDriver();
+
+}
+
+
+/* ==========================================
+   FARE
+========================================== */
+
+function renderFare(
+    total
+){
+
+    let base =
+        getNumber(
+            rideData.baseFare,
+            0
+        );
+
+
+    let distance =
+        getNumber(
+            rideData.distanceFare,
+            0
+        );
+
+
+    let time =
+        getNumber(
+            rideData.timeFare,
+            rideData.waitingFare,
+            0
+        );
+
+
+    let discount =
+        getNumber(
+            rideData.discount,
+            0
+        );
+
+
+    let tax =
+        getNumber(
+            rideData.tax,
+            rideData.taxes,
+            rideData.fees,
+            0
+        );
+
+
+    /*
+      If detailed fare values are not available,
+      show the total under base fare.
+    */
+
+    const hasBreakdown =
+        base ||
+        distance ||
+        time ||
+        discount ||
+        tax;
+
+
+    if(
+        !hasBreakdown
+    ){
+
+        base =
+            total;
+
+    }
+
+
+    document.getElementById(
+        "baseFare"
+    ).textContent =
+        money(
+            base
+        );
+
+
+    document.getElementById(
+        "distanceFare"
+    ).textContent =
+        money(
+            distance
+        );
+
+
+    document.getElementById(
+        "timeFare"
+    ).textContent =
+        money(
+            time
+        );
+
+
+    document.getElementById(
+        "discount"
+    ).textContent =
+        "-₹" +
+        Math.max(
+            0,
+            Math.round(
+                discount
+            )
+        );
+
+
+    document.getElementById(
+        "tax"
+    ).textContent =
+        money(
+            tax
+        );
+
+}
+
+
+/* ==========================================
+   DRIVER
+========================================== */
+
+function renderDriver(){
+
+    const name =
+        rideData.riderName ||
+        rideData.driverName ||
+        rideData.name ||
+        "RiderX Partner";
+
+
+    document.getElementById(
+        "driverName"
+    ).textContent =
+        name;
+
+
+    const vehicle =
+        rideData.vehicleNumber ||
+        rideData.vehicle ||
+        rideData.vehicleType ||
+        "Rider";
+
+
+    document.getElementById(
+        "driverVehicle"
+    ).textContent =
+        vehicle;
+
+
+    document.getElementById(
+        "driverRating"
+    ).textContent =
+        rideData.riderRating ||
+        rideData.driverRating ||
+        "—";
+
+
+    const photo =
+        rideData.riderPhoto ||
+        rideData.driverPhoto ||
+        rideData.photoURL ||
+        "";
+
+
+    if(
+        photo
+    ){
+
+        const image =
+            document.getElementById(
+                "driverPhoto"
+            );
+
+
+        image.src =
+            photo;
+
+
+        image.style.display =
+            "block";
+
+
+        document.getElementById(
+            "driverInitial"
+        ).style.display =
+            "none";
+
+    }else{
+
+        document.getElementById(
+            "driverInitial"
+        ).textContent =
+            name
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+/* ==========================================
+   NUMBER
+========================================== */
+
+function getNumber(
+    ...values
+){
+
+    for(
+        const value of values
+    ){
+
+        if(
+            value === null ||
+            value === undefined ||
+            value === ""
+        ){
+
+            continue;
+
+        }
+
+
+        const number =
+            Number(
+                String(
+                    value
+                )
+                .replace(
+                    /[^0-9.-]/g,
+                    ""
+                )
+            );
+
+
+        if(
+            Number.isFinite(
+                number
+            )
+        ){
+
+            return number;
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* ==========================================
+   MONEY
+========================================== */
+
+function money(
+    amount
+){
+
+    return (
+        "₹" +
+        Math.round(
+            Number(
+                amount
+            ) || 0
+        )
+    );
+
+}
+
+
+/* ==========================================
+   DISTANCE
+========================================== */
+
+function formatDistance(
+    value
+){
+
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
+
+        return "—";
+
+    }
+
+
+    const number =
+        Number(
+            String(
+                value
+            )
+            .replace(
+                /[^0-9.]/g,
+                ""
+            )
+        );
+
+
+    if(
+        !Number.isFinite(
+            number
+        )
+    ){
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return number.toFixed(
+        number < 10 ? 1 : 0
+    ) +
+    " km";
+
+}
+
+
+/* ==========================================
+   DURATION
+========================================== */
+
+function formatDuration(
+    value
+){
+
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
+
+        return "—";
+
+    }
+
+
+    if(
+        typeof value ===
+        "string" &&
+        /min|hour|hr/i.test(
+            value
+        )
+    ){
+
+        return value;
+
+    }
+
+
+    const minutes =
+        Number(
+            value
+        );
+
+
+    if(
+        !Number.isFinite(
+            minutes
+        )
+    ){
+
+        return String(
+            value
+        );
+
+    }
+
+
+    if(
+        minutes < 60
+    ){
+
+        return Math.round(
+            minutes
+        ) +
+        " min";
+
+    }
+
+
+    const hours =
+        Math.floor(
+            minutes / 60
+        );
+
+
+    const mins =
+        Math.round(
+            minutes % 60
+        );
+
+
+    return hours +
+        "h " +
+        mins +
+        "m";
+
+}
+
+
+/* ==========================================
+   PAYMENT
+========================================== */
+
+function formatPayment(
+    value
+){
+
+    if(
+        typeof value ===
+        "object"
+    ){
+
+        value =
+            value.method ||
+            value.type ||
+            "Cash";
+
+    }
+
+
+    const text =
+        String(
+            value
+        );
+
+
+    const lower =
+        text.toLowerCase();
+
+
+    if(
+        lower.includes(
+            "cash"
+        )
+    ){
+
+        return "Cash";
+
+    }
+
+
+    if(
+        lower.includes(
+            "wallet"
+        )
+    ){
+
+        return "RiderX Wallet";
+
+    }
+
+
+    if(
+        lower.includes(
+            "upi"
+        )
+    ){
+
+        return "UPI";
+
+    }
+
+
+    return text;
+
+}
+
+
+/* ==========================================
+   PRINT
+========================================== */
+
+function printReceipt(){
+
+    window.print();
+
+}
+
+
+/* ==========================================
+   SHARE
+========================================== */
+
+async function shareReceipt(){
+
+    const total =
+        document.getElementById(
+            "totalAmount"
+        ).textContent;
+
+
+    const rideId =
+        document.getElementById(
+            "rideId"
+        ).textContent;
+
+
+    const text =
+        "RiderX Ride Receipt\n" +
+        "Ride ID: " +
+        rideId +
+        "\nTotal Paid: " +
+        total;
+
+
+    if(
+        navigator.share
+    ){
+
+        try{
+
+            await navigator.share({
+
+                title:
+                    "RiderX Ride Receipt",
+
+                text:
+                    text
+
+            });
+
+            return;
+
+        }catch(error){
+
+            if(
+                error.name ===
+                "AbortError"
+            ){
+
+                return;
+
+            }
+
+        }
+
+    }
+
+
+    try{
+
+        await navigator.clipboard.writeText(
+            text
+        );
+
+
+        showToast(
+            "Receipt copied to clipboard."
+        );
+
+    }catch(error){
+
+        showToast(
+            "Sharing is not available."
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   BACK
+========================================== */
+
+function goBack(){
+
+    if(
+        document.referrer &&
+        document.referrer.includes(
+            window.location.host
+        )
+    ){
+
+        window.history.back();
+
+    }else{
+
+        window.location.href =
+            "history.html";
+
+    }
+
+}
+
+
+/* ==========================================
+   TOAST
+========================================== */
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+
+/* ==========================================
+   INIT
+========================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadRide();
+
+    }
 );
-
-
-
-if(!snap.exists()) return;
-
-
-
-let data=snap.data();
-
-
-
-
-
-document.getElementById("id").innerHTML=
-
-rideId;
-
-
-
-document.getElementById("service").innerHTML=
-
-data.service || "-";
-
-
-
-document.getElementById("pickup").innerHTML=
-
-data.pickup || "-";
-
-
-
-document.getElementById("drop").innerHTML=
-
-data.drop || "-";
-
-
-
-document.getElementById("fare").innerHTML=
-
-data.fare || 0;
-
-
-
-document.getElementById("payment").innerHTML=
-
-data.paymentStatus || "Pending";
-
-
-
-
-document.getElementById("date").innerHTML=
-
-new Date().toLocaleString();
-
-
-
-}
-
-
-
-
-
-window.rateRide=function(){
-
-
-location.href="rating.html";
-
-
-}
-
-
-
-
-
-loadReceipt();
-
-
 
 </script>
 
-
 </body>
-
-</html>
+  </html>
