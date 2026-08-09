@@ -87,7 +87,6 @@ button{
 
 .page::before{
     content:"";
-
     position:absolute;
 
     width:360px;
@@ -98,15 +97,13 @@ button{
 
     border-radius:50%;
 
-    background:
-        rgba(255,212,0,.08);
+    background:rgba(255,212,0,.08);
 
     pointer-events:none;
 }
 
 .page::after{
     content:"";
-
     position:absolute;
 
     width:320px;
@@ -117,8 +114,7 @@ button{
 
     border-radius:50%;
 
-    background:
-        rgba(255,212,0,.05);
+    background:rgba(255,212,0,.05);
 
     pointer-events:none;
 }
@@ -242,9 +238,7 @@ button{
 
 .role-box{
     display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
+    grid-template-columns:1fr 1fr;
 
     gap:10px;
 
@@ -259,7 +253,6 @@ button{
     position:absolute;
 
     opacity:0;
-
     pointer-events:none;
 }
 
@@ -280,7 +273,6 @@ button{
     background:#171717;
 
     cursor:pointer;
-
     text-align:center;
 
     transition:
@@ -296,7 +288,6 @@ button{
 
 .role-option input:checked + .role-label{
     border-color:#FFD400;
-
     background:#211f12;
 
     box-shadow:
@@ -357,33 +348,11 @@ button{
     text-transform:uppercase;
 }
 
-.input-wrap{
-    position:relative;
-}
-
-.input-icon{
-    position:absolute;
-
-    left:12px;
-    top:50%;
-
-    transform:
-        translateY(-50%);
-
-    color:#777;
-
-    font-size:14px;
-
-    pointer-events:none;
-}
-
 .form-group input{
     width:100%;
     height:48px;
 
-    padding:
-        0 13px
-        0 38px;
+    padding:0 13px;
 
     border:1px solid #333;
     border-radius:10px;
@@ -414,7 +383,6 @@ button{
 
 .phone-row{
     display:flex;
-
     gap:8px;
 }
 
@@ -441,8 +409,6 @@ button{
 .phone-row input{
     flex:1;
     min-width:0;
-
-    padding-left:13px;
 }
 
 .password-wrap{
@@ -462,8 +428,7 @@ button{
     width:35px;
     height:35px;
 
-    transform:
-        translateY(-50%);
+    transform:translateY(-50%);
 
     border:0;
     border-radius:7px;
@@ -487,9 +452,7 @@ button{
 
     gap:10px;
 
-    margin:
-        2px 0
-        17px;
+    margin:2px 0 17px;
 }
 
 .remember{
@@ -668,9 +631,7 @@ button{
 
     vertical-align:-2px;
 
-    border:2px solid
-        rgba(0,0,0,.25);
-
+    border:2px solid rgba(0,0,0,.25);
     border-top-color:#111;
 
     border-radius:50%;
@@ -747,6 +708,7 @@ button{
 
 </head>
 
+
 <body>
 
 <main class="page">
@@ -798,8 +760,6 @@ button{
     aria-live="polite"
 ></div>
 
-
-<!-- ROLE -->
 
 <div class="role-box">
 
@@ -863,7 +823,6 @@ button{
     id="loginForm"
     novalidate
 >
-
 
 <div class="form-group">
 
@@ -1012,49 +971,31 @@ button{
 ========================================================= */
 
 const form =
-    document.getElementById(
-        "loginForm"
-    );
+    document.getElementById("loginForm");
 
 const phoneInput =
-    document.getElementById(
-        "phone"
-    );
+    document.getElementById("phone");
 
 const passwordInput =
-    document.getElementById(
-        "password"
-    );
+    document.getElementById("password");
 
 const loginButton =
-    document.getElementById(
-        "loginBtn"
-    );
+    document.getElementById("loginBtn");
 
 const errorBox =
-    document.getElementById(
-        "errorBox"
-    );
+    document.getElementById("errorBox");
 
 const successBox =
-    document.getElementById(
-        "successBox"
-    );
+    document.getElementById("successBox");
 
 const rememberInput =
-    document.getElementById(
-        "remember"
-    );
+    document.getElementById("remember");
 
 const customerRole =
-    document.getElementById(
-        "customerRole"
-    );
+    document.getElementById("customerRole");
 
 const riderRole =
-    document.getElementById(
-        "riderRole"
-    );
+    document.getElementById("riderRole");
 
 
 /* =========================================================
@@ -1068,9 +1009,7 @@ function getRole(){
             'input[name="role"]:checked'
         );
 
-    if(
-        !checked
-    ){
+    if(!checked){
 
         return "";
 
@@ -1085,9 +1024,7 @@ function getRole(){
 }
 
 
-function saveRole(
-    role
-){
+function saveRole(role){
 
     if(
         role !== "customer" &&
@@ -1098,13 +1035,13 @@ function saveRole(
 
     }
 
-    localStorage.setItem(
-        "riderx_selected_role",
-        role
-    );
+    /*
+     * This is only the selected role.
+     * It is NOT an authentication session.
+     */
 
     localStorage.setItem(
-        "userRole",
+        "riderx_selected_role",
         role
     );
 
@@ -1121,24 +1058,21 @@ function saveRole(
         String(
             localStorage.getItem(
                 "riderx_selected_role"
-            ) ||
-            ""
+            ) || ""
         )
         .trim()
         .toLowerCase();
 
-    if(
-        saved === "customer"
-    ){
+
+    if(saved === "customer"){
 
         customerRole.checked =
             true;
 
     }
 
-    if(
-        saved === "rider"
-    ){
+
+    if(saved === "rider"){
 
         riderRole.checked =
             true;
@@ -1158,9 +1092,7 @@ customerRole.addEventListener(
 
         if(this.checked){
 
-            saveRole(
-                "customer"
-            );
+            saveRole("customer");
 
             clearMessages();
 
@@ -1176,9 +1108,7 @@ riderRole.addEventListener(
 
         if(this.checked){
 
-            saveRole(
-                "rider"
-            );
+            saveRole("rider");
 
             clearMessages();
 
@@ -1198,14 +1128,8 @@ phoneInput.addEventListener(
 
         this.value =
             this.value
-                .replace(
-                    /\D/g,
-                    ""
-                )
-                .slice(
-                    0,
-                    10
-                );
+                .replace(/\D/g,"")
+                .slice(0,10);
 
     }
 );
@@ -1216,9 +1140,7 @@ phoneInput.addEventListener(
 ========================================================= */
 
 document
-    .getElementById(
-        "togglePassword"
-    )
+    .getElementById("togglePassword")
     .addEventListener(
         "click",
         function(){
@@ -1227,15 +1149,18 @@ document
                 passwordInput.type ===
                 "password";
 
+
             passwordInput.type =
                 isPassword
                     ? "text"
                     : "password";
 
+
             this.textContent =
                 isPassword
                     ? "🙈"
                     : "👁";
+
 
             this.setAttribute(
                 "aria-label",
@@ -1264,18 +1189,20 @@ form.addEventListener(
         const role =
             getRole();
 
+
         const mobile =
             normalizePhone(
                 phoneInput.value
             );
 
+
         const password =
-            passwordInput.value;
+            String(
+                passwordInput.value || ""
+            );
 
 
-        if(
-            !role
-        ){
+        if(!role){
 
             showError(
                 "Please select Customer or Rider."
@@ -1318,14 +1245,9 @@ form.addEventListener(
         }
 
 
-        saveRole(
-            role
-        );
+        saveRole(role);
 
-
-        setLoading(
-            true
-        );
+        setLoading(true);
 
 
         try{
@@ -1343,17 +1265,13 @@ form.addEventListener(
                 );
 
 
-            if(
-                !user
-            ){
+            if(!user){
 
                 showError(
                     "Invalid mobile number or password."
                 );
 
-                setLoading(
-                    false
-                );
+                setLoading(false);
 
                 return;
 
@@ -1374,23 +1292,25 @@ form.addEventListener(
                     "blocked",
                     "suspended",
                     "disabled"
-                ].includes(
-                    status
-                )
+                ].includes(status)
             ){
 
                 showError(
                     "Your account is currently disabled. Please contact RiderX support."
                 );
 
-                setLoading(
-                    false
-                );
+                setLoading(false);
 
                 return;
 
             }
 
+
+            /*
+             * =================================================
+             * CREATE REAL AUTHENTICATED SESSION
+             * =================================================
+             */
 
             const session = {
 
@@ -1442,6 +1362,17 @@ form.addEventListener(
                 status:
                     status,
 
+                /*
+                 * These two flags are REQUIRED
+                 * for the new secure index routing.
+                 */
+
+                loggedIn:
+                    true,
+
+                authenticated:
+                    true,
+
                 loginAt:
                     new Date().toISOString()
 
@@ -1449,7 +1380,7 @@ form.addEventListener(
 
 
             /*
-             * Main session.
+             * Main authenticated session.
              */
 
             localStorage.setItem(
@@ -1461,7 +1392,7 @@ form.addEventListener(
 
 
             /*
-             * Role-specific session.
+             * Role-specific profile/session.
              */
 
             localStorage.setItem(
@@ -1475,7 +1406,10 @@ form.addEventListener(
 
 
             /*
-             * Common role keys.
+             * Role information.
+             *
+             * These are NOT used by index.html
+             * as proof of authentication.
              */
 
             localStorage.setItem(
@@ -1541,9 +1475,7 @@ form.addEventListener(
                 "Unable to login right now. Please try again."
             );
 
-            setLoading(
-                false
-            );
+            setLoading(false);
 
         }
 
@@ -1602,11 +1534,6 @@ function findUser(
             .toLowerCase();
 
 
-        /*
-         * If a user has no role stored,
-         * allow it for the selected role.
-         */
-
         if(
             itemRole &&
             itemRole !== role &&
@@ -1629,8 +1556,7 @@ function findUser(
 
 
         if(
-            itemPassword !==
-            password
+            itemPassword !== password
         ){
 
             continue;
@@ -1657,10 +1583,6 @@ function getUsers(){
     const users = [];
 
 
-    /*
-     * Main users collection.
-     */
-
     readArrayStorage(
         "riderx_users",
         users
@@ -1668,7 +1590,14 @@ function getUsers(){
 
 
     /*
-     * Customer legacy storage.
+     * IMPORTANT:
+     *
+     * riderx_customer / riderx_rider may contain
+     * the current profile, but they are NOT used
+     * as login proof.
+     *
+     * They are read only for compatibility with
+     * the current project login system.
      */
 
     readObjectStorage(
@@ -1677,19 +1606,11 @@ function getUsers(){
     );
 
 
-    /*
-     * Rider legacy storage.
-     */
-
     readObjectStorage(
         "riderx_rider",
         users
     );
 
-
-    /*
-     * Additional legacy key.
-     */
 
     readArrayStorage(
         "users",
@@ -1716,14 +1637,10 @@ function readArrayStorage(
     try{
 
         const raw =
-            localStorage.getItem(
-                key
-            );
+            localStorage.getItem(key);
 
 
-        if(
-            !raw
-        ){
+        if(!raw){
 
             return;
 
@@ -1731,15 +1648,11 @@ function readArrayStorage(
 
 
         const parsed =
-            JSON.parse(
-                raw
-            );
+            JSON.parse(raw);
 
 
         if(
-            Array.isArray(
-                parsed
-            )
+            Array.isArray(parsed)
         ){
 
             target.push(
@@ -1773,14 +1686,10 @@ function readObjectStorage(
     try{
 
         const raw =
-            localStorage.getItem(
-                key
-            );
+            localStorage.getItem(key);
 
 
-        if(
-            !raw
-        ){
+        if(!raw){
 
             return;
 
@@ -1788,9 +1697,7 @@ function readObjectStorage(
 
 
         const parsed =
-            JSON.parse(
-                raw
-            );
+            JSON.parse(raw);
 
 
         if(
@@ -1822,13 +1729,12 @@ function readObjectStorage(
    DEDUPLICATE
 ========================================================= */
 
-function deduplicateUsers(
-    users
-){
+function deduplicateUsers(users){
 
     const result = [];
 
-    const seen = new Set();
+    const seen =
+        new Set();
 
 
     users.forEach(
@@ -1878,20 +1784,14 @@ function deduplicateUsers(
             }
 
 
-            if(
-                key
-            ){
+            if(key){
 
-                seen.add(
-                    key
-                );
+                seen.add(key);
 
             }
 
 
-            result.push(
-                user
-            );
+            result.push(user);
 
         }
     );
@@ -1906,9 +1806,7 @@ function deduplicateUsers(
    PHONE NORMALIZER
 ========================================================= */
 
-function normalizePhone(
-    value
-){
+function normalizePhone(value){
 
     return String(
         value || ""
@@ -1917,9 +1815,7 @@ function normalizePhone(
         /\D/g,
         ""
     )
-    .slice(
-        -10
-    );
+    .slice(-10);
 
 }
 
@@ -1929,9 +1825,7 @@ function normalizePhone(
 ========================================================= */
 
 document
-    .getElementById(
-        "otpBtn"
-    )
+    .getElementById("otpBtn")
     .addEventListener(
         "click",
         function(){
@@ -1943,9 +1837,7 @@ document
                 getRole();
 
 
-            if(
-                !role
-            ){
+            if(!role){
 
                 showError(
                     "Please select Customer or Rider first."
@@ -1980,14 +1872,10 @@ document
             }
 
 
-            saveRole(
-                role
-            );
+            saveRole(role);
 
 
-            if(
-                mobile
-            ){
+            if(mobile){
 
                 localStorage.setItem(
                     "riderx_otp_phone",
@@ -2015,9 +1903,7 @@ document
 ========================================================= */
 
 document
-    .getElementById(
-        "forgotBtn"
-    )
+    .getElementById("forgotBtn")
     .addEventListener(
         "click",
         function(){
@@ -2029,9 +1915,7 @@ document
                 getRole();
 
 
-            if(
-                !role
-            ){
+            if(!role){
 
                 showError(
                     "Please select Customer or Rider first."
@@ -2072,9 +1956,7 @@ document
             );
 
 
-            if(
-                mobile
-            ){
+            if(mobile){
 
                 localStorage.setItem(
                     "riderx_reset_phone",
@@ -2092,13 +1974,11 @@ document
 
 
 /* =========================================================
-   BACK TO ROLE
+   BACK
 ========================================================= */
 
 document
-    .getElementById(
-        "backBtn"
-    )
+    .getElementById("backBtn")
     .addEventListener(
         "click",
         function(){
@@ -2106,6 +1986,7 @@ document
             localStorage.removeItem(
                 "riderx_selected_role"
             );
+
 
             window.location.href =
                 "./role.html";
@@ -2118,17 +1999,13 @@ document
    LOADING
 ========================================================= */
 
-function setLoading(
-    loading
-){
+function setLoading(loading){
 
     loginButton.disabled =
         loading;
 
 
-    if(
-        loading
-    ){
+    if(loading){
 
         loginButton.innerHTML =
             '<span class="loader"></span>Logging in...';
@@ -2166,9 +2043,7 @@ function clearMessages(){
 }
 
 
-function showError(
-    message
-){
+function showError(message){
 
     successBox.classList.remove(
         "show"
@@ -2187,9 +2062,7 @@ function showError(
 }
 
 
-function showSuccess(
-    message
-){
+function showSuccess(message){
 
     errorBox.classList.remove(
         "show"
