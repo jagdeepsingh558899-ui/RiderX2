@@ -3,1005 +3,935 @@
 
 <head>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
-
-    <meta
-        name="theme-color"
-        content="#FFD400"
-    >
-
-    <meta
-        name="description"
-        content="RiderX - Chandigarh Bike Taxi, Cab, Parcel and Food Delivery"
-    >
-
-    <meta
-        name="mobile-web-app-capable"
-        content="yes"
-    >
-
-    <meta
-        name="apple-mobile-web-app-capable"
-        content="yes"
-    >
-
-    <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="black-translucent"
-    >
-
-    <meta
-        name="apple-mobile-web-app-title"
-        content="RiderX"
-    >
-
-    <title>RiderX</title>
-
-    <link
-        rel="manifest"
-        href="./manifest.json"
-    >
-
-    <link
-        rel="stylesheet"
-        href="./css/style.css"
-    >
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            overflow: hidden;
-            background: #070707;
-            color: #ffffff;
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-        }
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
+
+<meta
+    name="theme-color"
+    content="#FFD400"
+>
+
+<meta
+    name="description"
+    content="RiderX - Chandigarh Bike Taxi, Cab, Parcel and Food Delivery"
+>
+
+<meta
+    name="mobile-web-app-capable"
+    content="yes"
+>
+
+<meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+>
+
+<meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+>
+
+<meta
+    name="apple-mobile-web-app-title"
+    content="RiderX"
+>
+
+<title>RiderX</title>
+
+<link
+    rel="manifest"
+    href="./manifest.json"
+>
+
+<link
+    rel="stylesheet"
+    href="./css/style.css"
+>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
+}
+
+body{
+    overflow:hidden;
+    background:#070707;
+    color:#fff;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
 
-        /* =====================================================
-           SPLASH
-        ===================================================== */
+.splash{
+    position:fixed;
+    inset:0;
+    z-index:99999;
 
-        .splash {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    background:#070707;
 
-            background: #070707;
+    transition:
+        opacity .35s ease,
+        visibility .35s ease;
+}
 
-            transition:
-                opacity .35s ease,
-                visibility .35s ease;
-        }
+.splash.hide{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
 
-        .splash.hide {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
+.splash-content{
+    width:100%;
+    max-width:360px;
+    padding:25px;
 
-        .splash-content {
-            width: 100%;
-            max-width: 360px;
-            padding: 25px;
+    text-align:center;
+}
 
-            text-align: center;
-        }
+.logo{
+    width:88px;
+    height:88px;
 
-        /* =====================================================
-           LOGO
-        ===================================================== */
+    margin:0 auto 20px;
 
-        .logo {
-            width: 88px;
-            height: 88px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-            margin: 0 auto 20px;
+    border-radius:25px;
 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+    background:#FFD400;
+    color:#080808;
 
-            border-radius: 25px;
+    font-size:29px;
+    font-weight:1000;
 
-            background: #FFD400;
-            color: #080808;
+    box-shadow:
+        0 15px 45px rgba(255,212,0,.16);
 
-            font-size: 29px;
-            font-weight: 1000;
+    animation:
+        logoIn .65s ease both;
+}
 
-            box-shadow:
-                0 15px 45px rgba(255, 212, 0, .16);
+.brand{
+    margin:0;
 
-            animation:
-                logoIn .65s ease both;
-        }
+    font-size:31px;
+    line-height:1;
 
-        .brand {
-            margin: 0;
+    font-weight:1000;
+    letter-spacing:-1px;
 
-            font-size: 31px;
-            line-height: 1;
+    animation:
+        textIn .65s .08s ease both;
+}
 
-            font-weight: 1000;
-            letter-spacing: -1px;
+.brand span{
+    color:#FFD400;
+}
 
-            animation:
-                textIn .65s .08s ease both;
-        }
+.tagline{
+    margin:10px 0 0;
 
-        .brand span {
-            color: #FFD400;
-        }
+    color:#777;
 
-        .tagline {
-            margin: 10px 0 0;
+    font-size:10px;
 
-            color: #777777;
+    animation:
+        textIn .65s .15s ease both;
+}
 
-            font-size: 10px;
+.loader-wrap{
+    margin-top:32px;
 
-            animation:
-                textIn .65s .15s ease both;
-        }
+    animation:
+        textIn .65s .22s ease both;
+}
 
-        /* =====================================================
-           LOADER
-        ===================================================== */
+.loader{
+    width:34px;
+    height:34px;
 
-        .loader-wrap {
-            margin-top: 32px;
+    margin:0 auto;
 
-            animation:
-                textIn .65s .22s ease both;
-        }
+    border:3px solid #292929;
+    border-top-color:#FFD400;
 
-        .loader {
-            width: 34px;
-            height: 34px;
+    border-radius:50%;
 
-            margin: 0 auto;
+    animation:
+        spin .75s linear infinite;
+}
 
-            border: 3px solid #292929;
-            border-top-color: #FFD400;
+.loading-text{
+    margin-top:11px;
 
-            border-radius: 50%;
+    color:#555;
 
-            animation:
-                spin .75s linear infinite;
-        }
+    font-size:8px;
+}
 
-        .loading-text {
-            margin-top: 11px;
+.status{
+    min-height:15px;
 
-            color: #555555;
+    margin-top:13px;
 
-            font-size: 8px;
-        }
+    color:#666;
 
-        .status {
-            min-height: 15px;
+    font-size:8px;
+}
 
-            margin-top: 13px;
+@keyframes spin{
 
-            color: #666666;
+    to{
+        transform:rotate(360deg);
+    }
 
-            font-size: 8px;
-        }
+}
 
-        /* =====================================================
-           ANIMATIONS
-        ===================================================== */
+@keyframes logoIn{
 
-        @keyframes spin {
+    from{
+        opacity:0;
+        transform:
+            translateY(20px)
+            scale(.8);
+    }
 
-            to {
-                transform: rotate(360deg);
-            }
+    to{
+        opacity:1;
+        transform:
+            translateY(0)
+            scale(1);
+    }
 
-        }
+}
 
-        @keyframes logoIn {
+@keyframes textIn{
 
-            from {
-                opacity: 0;
-                transform:
-                    translateY(20px)
-                    scale(.8);
-            }
+    from{
+        opacity:0;
+        transform:
+            translateY(10px);
+    }
 
-            to {
-                opacity: 1;
-                transform:
-                    translateY(0)
-                    scale(1);
-            }
+    to{
+        opacity:1;
+        transform:
+            translateY(0);
+    }
 
-        }
+}
 
-        @keyframes textIn {
+.fallback{
+    display:none;
 
-            from {
-                opacity: 0;
-                transform:
-                    translateY(10px);
-            }
+    position:fixed;
+    inset:0;
 
-            to {
-                opacity: 1;
-                transform:
-                    translateY(0);
-            }
+    z-index:100000;
 
-        }
+    align-items:center;
+    justify-content:center;
 
-        /* =====================================================
-           FALLBACK
-        ===================================================== */
+    padding:20px;
 
-        .fallback {
-            display: none;
+    background:#070707;
+}
 
-            position: fixed;
-            inset: 0;
+.fallback.show{
+    display:flex;
+}
 
-            z-index: 100000;
+.fallback-card{
+    width:100%;
+    max-width:390px;
 
-            align-items: center;
-            justify-content: center;
+    padding:25px;
 
-            padding: 20px;
+    border:1px solid #292929;
+    border-radius:18px;
 
-            background: #070707;
-        }
+    background:#111;
 
-        .fallback.show {
-            display: flex;
-        }
+    text-align:center;
+}
 
-        .fallback-card {
-            width: 100%;
-            max-width: 390px;
+.fallback-card h2{
+    margin:0 0 8px;
 
-            padding: 25px;
+    font-size:20px;
+}
 
-            border: 1px solid #292929;
-            border-radius: 18px;
+.fallback-card p{
+    margin:0;
 
-            background: #111111;
+    color:#777;
 
-            text-align: center;
-        }
+    font-size:11px;
+    line-height:1.6;
+}
 
-        .fallback-card h2 {
-            margin: 0 0 8px;
+.fallback-btn{
+    width:100%;
+    min-height:48px;
 
-            font-size: 20px;
-        }
+    margin-top:17px;
 
-        .fallback-card p {
-            margin: 0;
+    border:0;
+    border-radius:12px;
 
-            color: #777777;
+    background:#FFD400;
+    color:#111;
 
-            font-size: 11px;
-            line-height: 1.6;
-        }
+    cursor:pointer;
 
-        .fallback-btn {
-            width: 100%;
-            min-height: 48px;
+    font-size:13px;
+    font-weight:800;
+}
 
-            margin-top: 17px;
+.fallback-btn:active{
+    transform:scale(.98);
+}
 
-            border: 0;
-            border-radius: 12px;
-
-            background: #FFD400;
-            color: #111111;
-
-            cursor: pointer;
-
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .fallback-btn:active {
-            transform: scale(.98);
-        }
-
-    </style>
+</style>
 
 </head>
 
 
 <body>
 
-    <!-- =====================================================
-         SPLASH
-    ===================================================== -->
+<div
+    class="splash"
+    id="splash"
+>
 
-    <div
-        class="splash"
-        id="splash"
-    >
+    <div class="splash-content">
 
-        <div class="splash-content">
-
-            <div class="logo">
-                RX
-            </div>
-
-            <h1 class="brand">
-                Rider<span>X</span>
-            </h1>
-
-            <p class="tagline">
-                Your ride. Your journey. Your choice.
-            </p>
-
-            <div class="loader-wrap">
-
-                <div class="loader"></div>
-
-                <div class="loading-text">
-                    Starting RiderX...
-                </div>
-
-                <div
-                    class="status"
-                    id="status"
-                >
-                    Preparing RiderX
-                </div>
-
-            </div>
-
+        <div class="logo">
+            RX
         </div>
 
-    </div>
+        <h1 class="brand">
+            Rider<span>X</span>
+        </h1>
 
+        <p class="tagline">
+            Your ride. Your journey. Your choice.
+        </p>
 
-    <!-- =====================================================
-         FALLBACK
-    ===================================================== -->
+        <div class="loader-wrap">
 
-    <div
-        class="fallback"
-        id="fallback"
-    >
+            <div class="loader"></div>
 
-        <div class="fallback-card">
+            <div class="loading-text">
+                Starting RiderX...
+            </div>
 
-            <h2>
-                RiderX
-            </h2>
-
-            <p>
-                We could not open the RiderX account screen
-                automatically.
-            </p>
-
-            <button
-                type="button"
-                class="fallback-btn"
-                id="fallbackBtn"
+            <div
+                class="status"
+                id="status"
             >
-                Continue to RiderX
-            </button>
+                Preparing RiderX
+            </div>
 
         </div>
 
     </div>
 
-
-    <script>
-
-        "use strict";
+</div>
 
 
-        /* =====================================================
-           ELEMENTS
-        ===================================================== */
+<div
+    class="fallback"
+    id="fallback"
+>
 
-        const splash =
-            document.getElementById("splash");
+    <div class="fallback-card">
 
-        const fallback =
-            document.getElementById("fallback");
+        <h2>
+            RiderX
+        </h2>
 
-        const statusText =
-            document.getElementById("status");
+        <p>
+            We could not open the RiderX account screen
+            automatically.
+        </p>
 
-        const fallbackBtn =
-            document.getElementById("fallbackBtn");
+        <button
+            type="button"
+            class="fallback-btn"
+            id="fallbackBtn"
+        >
+            Continue to RiderX
+        </button>
 
+    </div>
 
-        let redirectStarted = false;
-
-
-        /* =====================================================
-           STATUS
-        ===================================================== */
-
-        function setStatus(text) {
-
-            if (statusText) {
-
-                statusText.textContent =
-                    text;
-
-            }
-
-        }
+</div>
 
 
-        /* =====================================================
-           SAFE JSON
-        ===================================================== */
+<script>
 
-        function readJSON(key) {
-
-            try {
-
-                const raw =
-                    localStorage.getItem(key);
-
-                if (!raw) {
-                    return null;
-                }
-
-                const parsed =
-                    JSON.parse(raw);
-
-                if (
-                    parsed &&
-                    typeof parsed === "object"
-                ) {
-
-                    return parsed;
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX invalid storage:",
-                    key
-                );
-
-            }
-
-            return null;
-
-        }
+"use strict";
 
 
-        /* =====================================================
-           GET SAVED USER
-        ===================================================== */
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-        function getStoredUser() {
+const splash =
+    document.getElementById("splash");
 
-            const keys = [
+const fallback =
+    document.getElementById("fallback");
 
-                "riderx_user",
-                "riderx_customer",
-                "riderx_rider"
+const statusText =
+    document.getElementById("status");
 
-            ];
+const fallbackBtn =
+    document.getElementById("fallbackBtn");
 
-            for (
-                const key of keys
-            ) {
 
-                const user =
-                    readJSON(key);
+let redirectStarted = false;
 
-                if (
-                    user &&
-                    typeof user === "object"
-                ) {
 
-                    return user;
+/* =========================================================
+   STATUS
+========================================================= */
 
-                }
+function setStatus(text){
 
-            }
+    if(statusText){
+
+        statusText.textContent =
+            text;
+
+    }
+
+}
+
+
+/* =========================================================
+   READ JSON
+========================================================= */
+
+function readJSON(key){
+
+    try{
+
+        const raw =
+            localStorage.getItem(key);
+
+        if(!raw){
 
             return null;
 
         }
 
+        const parsed =
+            JSON.parse(raw);
 
-        /* =====================================================
-           NORMALIZE ROLE
-        ===================================================== */
+        if(
+            parsed &&
+            typeof parsed === "object"
+        ){
 
-        function normalizeRole(role) {
-
-            const value =
-                String(role || "")
-                    .trim()
-                    .toLowerCase();
-
-            if (value === "driver") {
-                return "rider";
-            }
-
-            if (
-                value === "customer" ||
-                value === "rider" ||
-                value === "admin"
-            ) {
-
-                return value;
-
-            }
-
-            return "";
+            return parsed;
 
         }
 
-
-        /* =====================================================
-           GET USER ROLE
-        ===================================================== */
-
-        function getUserRole(user) {
-
-            if (
-                user &&
-                user.role
-            ) {
-
-                const role =
-                    normalizeRole(user.role);
-
-                if (role) {
-                    return role;
-                }
-
-            }
-
-
-            const userRole =
-                normalizeRole(
-                    localStorage.getItem("userRole")
-                );
-
-            if (userRole) {
-                return userRole;
-            }
-
-
-            return "";
-
-        }
-
-
-        /* =====================================================
-           CHECK ACTIVE SESSION
-        ===================================================== */
-
-        function hasValidSession(user) {
-
-            if (!user) {
-                return false;
-            }
-
-
-            const status =
-                String(
-                    user.status || ""
-                )
-                .trim()
-                .toLowerCase();
-
-
-            if (
-                status === "blocked" ||
-                status === "suspended" ||
-                status === "disabled"
-            ) {
-
-                return false;
-
-            }
-
-
-            /*
-             * Do not treat an old selected role
-             * as a logged-in session.
-             */
-
-            const loggedFlags = [
-
-                user.loggedIn,
-                user.isLoggedIn,
-                user.authenticated
-
-            ];
-
-
-            /*
-             * If any explicit login flag exists,
-             * respect it.
-             */
-
-            for (
-                const flag of loggedFlags
-            ) {
-
-                if (
-                    typeof flag === "boolean"
-                ) {
-
-                    return flag;
-
-                }
-
-            }
-
-
-            /*
-             * Existing stored user is considered
-             * an active session for compatibility
-             * with the current RiderX project.
-             */
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           DESTINATION
-        ===================================================== */
-
-        function getDestination() {
-
-            const user =
-                getStoredUser();
-
-            const role =
-                getUserRole(user);
-
-
-            /*
-             * Only redirect to dashboard when
-             * there is a real stored user.
-             */
-
-            if (
-                user &&
-                hasValidSession(user)
-            ) {
-
-                if (
-                    role === "admin"
-                ) {
-
-                    return "./admin/dashboard.html";
-
-                }
-
-
-                if (
-                    role === "rider"
-                ) {
-
-                    return "./rider/home.html";
-
-                }
-
-
-                if (
-                    role === "customer"
-                ) {
-
-                    return "./customer/home.html";
-
-                }
-
-            }
-
-
-            /*
-             * New users always go to
-             * Customer/Rider selection.
-             */
-
-            return "./auth/role.html";
-
-        }
-
-
-        /* =====================================================
-           CHECK PAGE
-        ===================================================== */
-
-        function pageExistsPath(path) {
-
-            return (
-                typeof path === "string" &&
-                path.length > 0
-            );
-
-        }
-
-
-        /* =====================================================
-           REDIRECT
-        ===================================================== */
-
-        function redirectToRiderX() {
-
-            if (redirectStarted) {
-                return;
-            }
-
-            redirectStarted = true;
-
-
-            const destination =
-                getDestination();
-
-
-            if (
-                !pageExistsPath(destination)
-            ) {
-
-                showFallback();
-
-                return;
-
-            }
-
-
-            setStatus(
-                "Opening RiderX..."
-            );
-
-
-            /*
-             * Small delay allows the splash
-             * animation to complete cleanly.
-             */
-
-            window.setTimeout(
-                function () {
-
-                    window.location.replace(
-                        destination
-                    );
-
-                },
-                250
-            );
-
-        }
-
-
-        /* =====================================================
-           FALLBACK
-        ===================================================== */
-
-        function showFallback() {
-
-            if (splash) {
-
-                splash.classList.add(
-                    "hide"
-                );
-
-            }
-
-            if (fallback) {
-
-                fallback.classList.add(
-                    "show"
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           MANUAL CONTINUE
-        ===================================================== */
-
-        if (fallbackBtn) {
-
-            fallbackBtn.addEventListener(
-                "click",
-                function () {
-
-                    window.location.href =
-                        "./auth/role.html";
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           GLOBAL ERROR HANDLING
-        ===================================================== */
-
-        window.addEventListener(
-            "error",
-            function (event) {
-
-                console.error(
-                    "RiderX startup error:",
-                    event.error || event.message
-                );
-
-                /*
-                 * Do not leave the user stuck
-                 * on an infinite splash.
-                 */
-
-                if (!redirectStarted) {
-
-                    showFallback();
-
-                }
-
-            }
+    }catch(error){
+
+        console.warn(
+            "RiderX storage read failed:",
+            key,
+            error
+        );
+
+    }
+
+    return null;
+
+}
+
+
+/* =========================================================
+   GET REAL LOGIN SESSION
+========================================================= */
+
+/*
+ * IMPORTANT:
+ *
+ * Do NOT use:
+ *
+ * riderx_customer
+ * riderx_rider
+ * userRole
+ * riderx_selected_role
+ *
+ * as proof of login.
+ *
+ * Those keys can contain profile/selection data.
+ *
+ * Only riderx_user with loggedIn === true
+ * is treated as an authenticated local session.
+ */
+
+function getAuthenticatedUser(){
+
+    const user =
+        readJSON(
+            "riderx_user"
         );
 
 
-        window.addEventListener(
-            "unhandledrejection",
-            function (event) {
+    if(
+        !user ||
+        typeof user !== "object"
+    ){
 
-                console.error(
-                    "RiderX startup rejection:",
-                    event.reason
-                );
+        return null;
 
-                if (!redirectStarted) {
+    }
 
-                    showFallback();
 
-                }
+    const loggedIn =
+        user.loggedIn === true;
 
-            }
+
+    const authenticated =
+        user.authenticated === true;
+
+
+    /*
+     * Current RiderX session must explicitly
+     * say that the user is logged in.
+     */
+
+    if(
+        !loggedIn &&
+        !authenticated
+    ){
+
+        return null;
+
+    }
+
+
+    const status =
+        String(
+            user.status || "active"
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        [
+            "blocked",
+            "suspended",
+            "disabled"
+        ].includes(
+            status
+        )
+    ){
+
+        return null;
+
+    }
+
+
+    const role =
+        normalizeRole(
+            user.role
         );
 
 
-        /* =====================================================
-           SERVICE WORKER
-        ===================================================== */
+    if(
+        ![
+            "customer",
+            "rider",
+            "admin"
+        ].includes(
+            role
+        )
+    ){
 
-        /*
-         * Service worker failure must NEVER
-         * block RiderX navigation.
-         */
+        return null;
 
-        if (
-            "serviceWorker" in navigator
-        ) {
+    }
 
-            window.addEventListener(
-                "load",
-                function () {
 
-                    navigator.serviceWorker
-                        .register("./sw.js")
-                        .then(
-                            function () {
+    return user;
 
-                                console.log(
-                                    "RiderX service worker ready."
-                                );
+}
 
-                            }
-                        )
-                        .catch(
-                            function (error) {
 
-                                console.warn(
-                                    "Service worker registration failed:",
-                                    error
-                                );
+/* =========================================================
+   NORMALIZE ROLE
+========================================================= */
 
-                            }
-                        );
+function normalizeRole(role){
 
-                }
+    const value =
+        String(
+            role || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        value === "driver"
+    ){
+
+        return "rider";
+
+    }
+
+
+    if(
+        value === "superadmin" ||
+        value === "super_admin"
+    ){
+
+        return "admin";
+
+    }
+
+
+    if(
+        [
+            "customer",
+            "rider",
+            "admin"
+        ].includes(
+            value
+        )
+    ){
+
+        return value;
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   DESTINATION
+========================================================= */
+
+function getDestination(){
+
+    /*
+     * FIRST:
+     * Check only the real authenticated session.
+     */
+
+    const user =
+        getAuthenticatedUser();
+
+
+    /*
+     * No authenticated session:
+     * ALWAYS go to role selection.
+     */
+
+    if(!user){
+
+        return "./auth/role.html";
+
+    }
+
+
+    const role =
+        normalizeRole(
+            user.role
+        );
+
+
+    if(
+        role === "admin"
+    ){
+
+        return "./admin/dashboard.html";
+
+    }
+
+
+    if(
+        role === "rider"
+    ){
+
+        return "./rider/home.html";
+
+    }
+
+
+    if(
+        role === "customer"
+    ){
+
+        return "./customer/home.html";
+
+    }
+
+
+    /*
+     * Safety fallback.
+     */
+
+    return "./auth/role.html";
+
+}
+
+
+/* =========================================================
+   REDIRECT
+========================================================= */
+
+function redirectToRiderX(){
+
+    if(redirectStarted){
+
+        return;
+
+    }
+
+
+    redirectStarted = true;
+
+
+    const destination =
+        getDestination();
+
+
+    setStatus(
+        destination === "./auth/role.html"
+            ? "Opening account selection..."
+            : "Restoring your RiderX account..."
+    );
+
+
+    window.setTimeout(
+        function(){
+
+            window.location.replace(
+                destination
+            );
+
+        },
+        250
+    );
+
+}
+
+
+/* =========================================================
+   FALLBACK
+========================================================= */
+
+function showFallback(){
+
+    if(splash){
+
+        splash.classList.add(
+            "hide"
+        );
+
+    }
+
+
+    if(fallback){
+
+        fallback.classList.add(
+            "show"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   MANUAL CONTINUE
+========================================================= */
+
+if(fallbackBtn){
+
+    fallbackBtn.addEventListener(
+        "click",
+        function(){
+
+            window.location.replace(
+                "./auth/role.html"
             );
 
         }
+    );
+
+}
 
 
-        /* =====================================================
-           START RIDERX
-        ===================================================== */
+/* =========================================================
+   ERROR HANDLING
+========================================================= */
 
-        function startRiderX() {
+window.addEventListener(
+    "error",
+    function(event){
 
-            setStatus(
-                "Preparing account selection"
-            );
-
-
-            /*
-             * Give the browser enough time
-             * to initialize localStorage and
-             * the page itself.
-             */
-
-            window.setTimeout(
-                function () {
-
-                    const user =
-                        getStoredUser();
+        console.error(
+            "RiderX startup error:",
+            event.error ||
+            event.message
+        );
 
 
-                    if (
-                        user &&
-                        hasValidSession(user)
-                    ) {
+        if(!redirectStarted){
 
-                        setStatus(
-                            "Restoring your RiderX account"
-                        );
+            showFallback();
 
-                    } else {
+        }
 
-                        setStatus(
-                            "Opening Customer / Rider"
+    }
+);
+
+
+window.addEventListener(
+    "unhandledrejection",
+    function(event){
+
+        console.error(
+            "RiderX startup rejection:",
+            event.reason
+        );
+
+
+        if(!redirectStarted){
+
+            showFallback();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
+
+if(
+    "serviceWorker" in navigator
+){
+
+    window.addEventListener(
+        "load",
+        function(){
+
+            navigator.serviceWorker
+                .register("./sw.js")
+                .then(
+                    function(){
+
+                        console.log(
+                            "RiderX service worker ready."
                         );
 
                     }
+                )
+                .catch(
+                    function(error){
+
+                        console.warn(
+                            "Service worker registration failed:",
+                            error
+                        );
+
+                    }
+                );
+
+        }
+    );
+
+}
 
 
-                    window.setTimeout(
-                        redirectToRiderX,
-                        300
-                    );
+/* =========================================================
+   START
+========================================================= */
 
-                },
+function startRiderX(){
+
+    setStatus(
+        "Checking RiderX session..."
+    );
+
+
+    window.setTimeout(
+        function(){
+
+            const user =
+                getAuthenticatedUser();
+
+
+            if(user){
+
+                setStatus(
+                    "Restoring your RiderX account..."
+                );
+
+            }else{
+
+                setStatus(
+                    "Opening Customer / Rider..."
+                );
+
+            }
+
+
+            window.setTimeout(
+                redirectToRiderX,
                 300
             );
 
-        }
+        },
+        350
+    );
+
+}
 
 
-        /* =====================================================
-           START
-        ===================================================== */
+/* =========================================================
+   START RIDERX
+========================================================= */
 
-        startRiderX();
+startRiderX();
 
-    </script>
+</script>
 
 </body>
 
