@@ -1,336 +1,1927 @@
-<!DOCTYPE html>
-<html lang="en" class="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>RiderX | Analytics & Financial Reports</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFD400"><title>RiderX Admin - Reports</title><link rel="stylesheet" href="../css/Style.css">
+<link rel="stylesheet" href="../css/Dashboard.css">
+<link rel="stylesheet" href="../css/Responsive.css"><style>
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+*{
+    box-sizing:border-box;
+}
 
-  <!-- FontAwesome 6 Pro CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+body{
+    margin:0;
+    min-height:100vh;
+    background:#080808;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+}
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              yellow: '#FACC15',
-              yellowHover: '#EAB308',
-              gold: '#EAB308',
-              dark: '#090D16',
-              card: '#111827',
-              border: 'rgba(255, 255, 255, 0.08)',
-              glass: 'rgba(17, 24, 39, 0.75)'
-            }
-          },
-          fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
-          },
-          boxShadow: {
-            'glow-yellow': '0 0 25px -5px rgba(250, 204, 21, 0.35)',
-            'glow-card': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
-          }
+.page{
+    min-height:100vh;
+    padding-bottom:60px;
+}
+
+.topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 16px;
+    background:#111;
+    border-bottom:1px solid #292929;
+}
+
+.top-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.back-btn{
+    width:40px;
+    height:40px;
+    border:1px solid #333;
+    border-radius:10px;
+    background:#1b1b1b;
+    color:#fff;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.title{
+    font-size:17px;
+    font-weight:900;
+}
+
+.title span{
+    color:#FFD400;
+}
+
+.logo{
+    color:#FFD400;
+    font-size:18px;
+    font-weight:1000;
+}
+
+.content{
+    width:100%;
+    max-width:1200px;
+    margin:auto;
+    padding:18px;
+}
+
+.hero{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:16px;
+    padding:18px;
+    border:1px solid #292929;
+    border-radius:18px;
+    background:linear-gradient(145deg,#181818,#101010);
+}
+
+.hero h1{
+    margin:0;
+    font-size:23px;
+}
+
+.hero p{
+    margin:7px 0 0;
+    color:#888;
+    font-size:12px;
+    line-height:1.5;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+}
+
+.primary{
+    height:43px;
+    padding:0 14px;
+    border:0;
+    border-radius:9px;
+    background:#FFD400;
+    color:#111;
+    cursor:pointer;
+    font-size:11px;
+    font-weight:1000;
+}
+
+.secondary{
+    height:43px;
+    padding:0 14px;
+    border:1px solid #333;
+    border-radius:9px;
+    background:#1b1b1b;
+    color:#aaa;
+    cursor:pointer;
+    font-size:11px;
+    font-weight:800;
+}
+
+.filters{
+    display:flex;
+    align-items:end;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:16px;
+    padding:14px;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:#121212;
+}
+
+.filter{
+    min-width:145px;
+}
+
+.filter label{
+    display:block;
+    margin-bottom:6px;
+    color:#777;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.filter input,
+.filter select{
+    width:100%;
+    height:40px;
+    padding:0 10px;
+    border:1px solid #333;
+    border-radius:8px;
+    outline:none;
+    background:#1b1b1b;
+    color:#fff;
+    font-size:11px;
+}
+
+.filter input:focus,
+.filter select:focus{
+    border-color:#FFD400;
+}
+
+.report-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:16px;
+}
+
+.stat{
+    padding:15px;
+    border:1px solid #292929;
+    border-radius:14px;
+    background:#141414;
+}
+
+.stat-label{
+    color:#777;
+    font-size:8px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.stat-value{
+    margin-top:7px;
+    font-size:20px;
+    font-weight:1000;
+}
+
+.stat-value.yellow{
+    color:#FFD400;
+}
+
+.stat-value.green{
+    color:#63e78a;
+}
+
+.stat-value.blue{
+    color:#8db8ff;
+}
+
+.stat-value.red{
+    color:#ff7777;
+}
+
+.panel{
+    margin-bottom:16px;
+    padding:17px;
+    border:1px solid #292929;
+    border-radius:16px;
+    background:#141414;
+}
+
+.panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:15px;
+}
+
+.panel-head h2{
+    margin:0;
+    font-size:15px;
+}
+
+.panel-head span{
+    color:#666;
+    font-size:9px;
+}
+
+.chart{
+    position:relative;
+    width:100%;
+    height:250px;
+}
+
+canvas{
+    width:100%;
+    height:100%;
+    display:block;
+}
+
+.bottom-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:14px;
+}
+
+.service-list{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.service-row{
+    display:grid;
+    grid-template-columns:1fr 80px 100px;
+    align-items:center;
+    gap:10px;
+    padding:11px;
+    border:1px solid #292929;
+    border-radius:10px;
+    background:#191919;
+}
+
+.service-name{
+    font-size:11px;
+    font-weight:900;
+}
+
+.service-sub{
+    margin-top:3px;
+    color:#666;
+    font-size:8px;
+}
+
+.service-rides{
+    text-align:right;
+    color:#aaa;
+    font-size:10px;
+    font-weight:800;
+}
+
+.service-revenue{
+    text-align:right;
+    color:#FFD400;
+    font-size:11px;
+    font-weight:1000;
+}
+
+.progress{
+    width:100%;
+    height:5px;
+    margin-top:6px;
+    overflow:hidden;
+    border-radius:5px;
+    background:#292929;
+}
+
+.progress span{
+    display:block;
+    height:100%;
+    border-radius:5px;
+    background:#FFD400;
+}
+
+.summary{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.summary-row{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    padding:11px 0;
+    border-bottom:1px solid #292929;
+}
+
+.summary-row:last-child{
+    border-bottom:0;
+}
+
+.summary-label{
+    color:#777;
+    font-size:10px;
+}
+
+.summary-value{
+    font-size:11px;
+    font-weight:1000;
+}
+
+.summary-value.green{
+    color:#63e78a;
+}
+
+.summary-value.yellow{
+    color:#FFD400;
+}
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    z-index:2000;
+    transform:translate(-50%,120px);
+    opacity:0;
+    padding:11px 16px;
+    border-radius:10px;
+    background:#17351f;
+    color:#65e58b;
+    font-size:11px;
+    font-weight:800;
+    transition:.25s;
+}
+
+.toast.show{
+    transform:translate(-50%,0);
+    opacity:1;
+}
+
+@media(max-width:850px){
+
+    .report-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .bottom-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:600px){
+
+    .content{
+        padding:12px;
+    }
+
+    .hero{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .actions{
+        width:100%;
+    }
+
+    .actions button{
+        flex:1;
+    }
+
+    .filters{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+    }
+
+    .filter{
+        min-width:0;
+    }
+
+    .service-row{
+        grid-template-columns:1fr 70px;
+    }
+
+    .service-revenue{
+        display:none;
+    }
+
+}
+
+@media(max-width:420px){
+
+    .report-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .filters{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style></head><body><div class="page"><header class="topbar"><div class="top-left">
+
+    <button
+        type="button"
+        class="back-btn"
+        onclick="history.back()"
+    >
+        ←
+    </button>
+
+    <div class="title">
+        <span>RiderX</span> Reports
+    </div>
+
+</div>
+
+<div class="logo">
+    RX
+</div>
+
+</header><main class="content"><section class="hero"><div>
+
+    <h1>
+        Reports & Analytics
+    </h1>
+
+    <p>
+        Monitor rides, revenue, riders, customers
+        and service performance.
+    </p>
+
+</div>
+
+
+<div class="actions">
+
+    <button
+        type="button"
+        class="secondary"
+        id="refreshBtn"
+    >
+        Refresh
+    </button>
+
+    <button
+        type="button"
+        class="primary"
+        id="exportBtn"
+    >
+        Export Report
+    </button>
+
+</div>
+
+</section><section class="filters"><div class="filter">
+
+    <label>
+        Period
+    </label>
+
+    <select id="period">
+
+        <option value="7">
+            Last 7 Days
+        </option>
+
+        <option value="14">
+            Last 14 Days
+        </option>
+
+        <option value="30" selected>
+            Last 30 Days
+        </option>
+
+    </select>
+
+</div>
+
+
+<div class="filter">
+
+    <label>
+        From
+    </label>
+
+    <input
+        type="date"
+        id="fromDate"
+    >
+
+</div>
+
+
+<div class="filter">
+
+    <label>
+        To
+    </label>
+
+    <input
+        type="date"
+        id="toDate"
+    >
+
+</div>
+
+
+<button
+    type="button"
+    class="primary"
+    id="applyBtn"
+>
+    Apply
+</button>
+
+</section><section class="report-grid"><div class="stat">
+
+    <div class="stat-label">
+        Total Rides
+    </div>
+
+    <div
+        class="stat-value yellow"
+        id="totalRides"
+    >
+        0
+    </div>
+
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        Revenue
+    </div>
+
+    <div
+        class="stat-value green"
+        id="totalRevenue"
+    >
+        ₹0
+    </div>
+
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        Active Riders
+    </div>
+
+    <div
+        class="stat-value blue"
+        id="activeRiders"
+    >
+        0
+    </div>
+
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        Completion Rate
+    </div>
+
+    <div
+        class="stat-value"
+        id="completionRate"
+    >
+        0%
+    </div>
+
+</div>
+
+</section><section class="panel"><div class="panel-head">
+
+    <h2>
+        Ride & Revenue Trend
+    </h2>
+
+    <span id="chartLabel">
+        Last 30 days
+    </span>
+
+</div>
+
+
+<div class="chart">
+
+    <canvas
+        id="reportChart"
+    ></canvas>
+
+</div>
+
+</section><section class="bottom-grid"><section class="panel"><div class="panel-head">
+
+    <h2>
+        Service Performance
+    </h2>
+
+    <span>
+        By service
+    </span>
+
+</div>
+
+
+<div
+    class="service-list"
+    id="serviceList"
+></div>
+
+</section><section class="panel"><div class="panel-head">
+
+    <h2>
+        Report Summary
+    </h2>
+
+    <span>
+        Overview
+    </span>
+
+</div>
+
+
+<div class="summary">
+
+    <div class="summary-row">
+
+        <span class="summary-label">
+            Completed Rides
+        </span>
+
+        <span
+            class="summary-value green"
+            id="completed"
+        >
+            0
+        </span>
+
+    </div>
+
+
+    <div class="summary-row">
+
+        <span class="summary-label">
+            Cancelled Rides
+        </span>
+
+        <span
+            class="summary-value"
+            id="cancelled"
+        >
+            0
+        </span>
+
+    </div>
+
+
+    <div class="summary-row">
+
+        <span class="summary-label">
+            Online Riders
+        </span>
+
+        <span
+            class="summary-value"
+            id="onlineRiders"
+        >
+            0
+        </span>
+
+    </div>
+
+
+    <div class="summary-row">
+
+        <span class="summary-label">
+            New Customers
+        </span>
+
+        <span
+            class="summary-value"
+            id="newCustomers"
+        >
+            0
+        </span>
+
+    </div>
+
+
+    <div class="summary-row">
+
+        <span class="summary-label">
+            Average Fare
+        </span>
+
+        <span
+            class="summary-value yellow"
+            id="averageFare"
+        >
+            ₹0
+        </span>
+
+    </div>
+
+
+    <div class="summary-row">
+
+        <span class="summary-label">
+            Rider Earnings
+        </span>
+
+        <span
+            class="summary-value green"
+            id="riderEarnings"
+        >
+            ₹0
+        </span>
+
+    </div>
+
+</div>
+
+</section></section></main></div><div
+    class="toast"
+    id="toast"
+></div><script>
+
+"use strict";
+
+
+const STORAGE_KEY =
+    "riderx_admin_reports";
+
+
+const DEFAULT_REPORT = {
+
+    rides: 842,
+
+    revenue: 126480,
+
+    activeRiders: 74,
+
+    completed: 768,
+
+    cancelled: 74,
+
+    onlineRiders: 38,
+
+    newCustomers: 126,
+
+    riderEarnings: 101184,
+
+    services:[
+        {
+            name:"Bike Taxi",
+            rides:512,
+            revenue:76800
+        },
+        {
+            name:"Cab",
+            rides:214,
+            revenue:42100
+        },
+        {
+            name:"Parcel",
+            rides:67,
+            revenue:5190
+        },
+        {
+            name:"Food Delivery",
+            rides:49,
+            revenue:2390
         }
-      }
+    ],
+
+    daily:[
+        18,22,27,20,31,25,34,
+        28,36,30,39,33,41,37,
+        44,38,47,42,51,46,54,
+        49,57,52,61,55,64,58,
+        68,63
+    ]
+
+};
+
+
+let reportData =
+    null;
+
+
+let filteredData =
+    null;
+
+
+
+const canvas =
+    document.getElementById(
+        "reportChart"
+    );
+
+
+const ctx =
+    canvas.getContext(
+        "2d"
+    );
+
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        loadReport();
+
+        setDefaultDates();
+
+        applyReport();
+
+        window.addEventListener(
+            "resize",
+            drawChart
+        );
+
     }
-  </script>
+);
 
-  <style>
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+
+
+function loadReport(){
+
+    try{
+
+        const saved =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if(saved){
+
+            const parsed =
+                JSON.parse(
+                    saved
+                );
+
+
+            if(parsed){
+
+                reportData =
+                    parsed;
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.error(
+            error
+        );
+
     }
-    ::-webkit-scrollbar-track {
-      background: #090D16;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1F2937;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #FACC15;
-    }
 
-    .glass-panel {
-      background: rgba(17, 24, 39, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+
+    if(!reportData){
+
+        reportData =
+            JSON.parse(
+                JSON.stringify(
+                    DEFAULT_REPORT
+                )
+            );
+
     }
 
-    .glass-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-    }
-  </style>
-</head>
+}
 
-<body class="bg-[#090D16] text-slate-100 font-sans antialiased selection:bg-yellow-400 selection:text-black min-h-screen flex flex-col overflow-x-hidden">
 
-  <!-- TOP HEADER / BAR -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-brand-border px-4 lg:px-8 py-3.5 flex items-center justify-between">
-    <div class="flex items-center space-x-4">
-      <button id="mobileMenuBtn" class="lg:hidden text-slate-400 hover:text-brand-yellow focus:outline-none p-2 rounded-lg bg-slate-900 border border-brand-border">
-        <i class="fa-solid fa-bars-staggered text-lg"></i>
-      </button>
-      <a href="dashboard.html" class="flex items-center space-x-3 group">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-yellow to-yellow-200 flex items-center justify-center shadow-glow-yellow group-hover:scale-105 transition-transform">
-          <i class="fa-solid fa-bolt text-slate-950 font-black text-xl"></i>
-        </div>
-        <div>
-          <span class="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
-            RIDER<span class="text-brand-yellow">X</span>
-            <span class="text-[10px] uppercase tracking-widest font-bold px-1.5 py-0.5 rounded bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20 ml-1">Admin</span>
-          </span>
-        </div>
-      </a>
-    </div>
 
-    <div class="flex items-center space-x-3 lg:space-x-5">
-      <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-        <span>Analytics Engine Active</span>
-      </div>
+function setDefaultDates(){
 
-      <div class="flex items-center space-x-3 border-l border-brand-border pl-4">
-        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" alt="Admin Avatar" class="w-9 h-9 rounded-xl object-cover ring-2 ring-brand-yellow/50" />
-        <div class="hidden md:block">
-          <h4 class="text-xs font-bold text-white leading-tight">Alex Vance</h4>
-          <p class="text-[10px] text-slate-400">Super Admin</p>
-        </div>
-      </div>
-    </div>
-  </header>
+    const today =
+        new Date();
 
-  <!-- MAIN LAYOUT -->
-  <div class="flex-1 flex overflow-hidden">
 
-    <!-- SIDE NAVIGATION -->
-    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-30 w-64 bg-[#0D131F] border-r border-brand-border transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between pt-16 lg:pt-0">
-      <div class="px-4 py-6 space-y-8 overflow-y-auto">
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Command Center</p>
-          <nav class="space-y-1">
-            <a href="dashboard.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-chart-pie text-base group-hover:text-brand-yellow"></i>
-              <span>Dashboard</span>
-            </a>
-            <a href="rides.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-route text-base group-hover:text-brand-yellow"></i>
-              <span>Trips & Live Map</span>
-            </a>
-            <a href="riders.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-motorcycle text-base group-hover:text-brand-yellow"></i>
-              <span>Riders</span>
-            </a>
-            <a href="rider-approval.html" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-user-check text-base group-hover:text-brand-yellow"></i>
-                <span>Rider Approvals</span>
-              </div>
-              <span class="px-2 py-0.5 text-[10px] font-bold bg-brand-yellow/20 text-brand-yellow rounded-full">5</span>
-            </a>
-            <a href="customers.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-users text-base group-hover:text-brand-yellow"></i>
-              <span>Customers</span>
-            </a>
-          </nav>
-        </div>
+    const from =
+        new Date();
 
-        <div>
-          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3 px-3">Finance & Operations</p>
-          <nav class="space-y-1">
-            <a href="fare-settings.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-calculator text-base group-hover:text-brand-yellow"></i>
-              <span>Fare & Pricing</span>
-            </a>
-            <a href="commission.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-percent text-base group-hover:text-brand-yellow"></i>
-              <span>Commission Rules</span>
-            </a>
-            <a href="payments.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-wallet text-base group-hover:text-brand-yellow"></i>
-              <span>Payouts & Wallet</span>
-            </a>
-            <a href="coupons.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all group">
-              <i class="fa-solid fa-ticket text-base group-hover:text-brand-yellow"></i>
-              <span>Coupons & Offers</span>
-            </a>
-            <a href="reports.html" class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl bg-brand-yellow text-slate-950 font-bold shadow-glow-yellow transition-all">
-              <i class="fa-solid fa-file-invoice-dollar text-base"></i>
-              <span>Financial Reports</span>
-            </a>
-          </nav>
-        </div>
-      </div>
-    </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 overflow-y-auto p-4 lg:p-8 space-y-6">
+    from.setDate(
+        today.getDate() - 29
+    );
 
-      <!-- HEADER ACTION BAR -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
-            <i class="fa-solid fa-chart-line text-brand-yellow"></i> Financial Reports & Business Intelligence
-          </h1>
-          <p class="text-xs text-slate-400">Generate statements, analyze gross booking volumes, and track platform profits.</p>
-        </div>
 
-        <div class="flex items-center space-x-3">
-          <select id="timeRange" onchange="updateReports()" class="bg-slate-900 border border-brand-border text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-brand-yellow font-bold">
-            <option value="this_month">This Month (August 2026)</option>
-            <option value="last_month">Last Month (July 2026)</option>
-            <option value="q2">Q2 2026 Summary</option>
-          </select>
-          <button onclick="exportCSV()" class="px-4 py-2 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-slate-950 text-xs font-extrabold transition-all shadow-glow-yellow flex items-center space-x-2">
-            <i class="fa-solid fa-download"></i>
-            <span>Export CSV</span>
-          </button>
-        </div>
-      </div>
+    document
+        .getElementById(
+            "fromDate"
+        )
+        .value =
+        formatDate(from);
 
-      <!-- METRICS GRID -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
-          <p class="text-xs text-slate-400 font-semibold">Gross Booking Volume (GBV)</p>
-          <p id="gbvValue" class="text-2xl font-extrabold text-white">₹ 42,85,900</p>
-          <p class="text-[10px] text-emerald-400 flex items-center gap-1 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +14.2% vs last period</p>
-        </div>
 
-        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
-          <p class="text-xs text-slate-400 font-semibold">Platform Net Revenue (18%)</p>
-          <p id="netRevenueValue" class="text-2xl font-extrabold text-brand-yellow">₹ 7,71,462</p>
-          <p class="text-[10px] text-emerald-400 flex items-center gap-1 font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +12.8% vs last period</p>
-        </div>
+    document
+        .getElementById(
+            "toDate"
+        )
+        .value =
+        formatDate(today);
 
-        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
-          <p class="text-xs text-slate-400 font-semibold">Total Driver Disbursements</p>
-          <p id="disbursementValue" class="text-2xl font-extrabold text-emerald-400">₹ 35,14,438</p>
-          <p class="text-[10px] text-slate-400 font-bold">82% of GBV Paid Out</p>
-        </div>
+}
 
-        <div class="glass-card p-5 rounded-2xl border border-brand-border space-y-1">
-          <p class="text-xs text-slate-400 font-semibold">Promotional Subsidies</p>
-          <p id="promoValue" class="text-2xl font-extrabold text-rose-400">₹ 1,84,300</p>
-          <p class="text-[10px] text-rose-400 flex items-center gap-1 font-bold"><i class="fa-solid fa-arrow-trend-down"></i> 4.3% of GBV</p>
-        </div>
-      </div>
 
-      <!-- BREAKDOWN BY CATEGORY -->
-      <div class="glass-panel rounded-2xl border border-brand-border overflow-hidden">
-        <div class="p-4 lg:p-6 border-b border-brand-border flex items-center justify-between">
-          <h2 class="text-sm font-extrabold text-white flex items-center gap-2">
-            <i class="fa-solid fa-layer-group text-brand-yellow"></i> Revenue Performance by Service Category
-          </h2>
-          <span class="text-[11px] text-slate-400 font-medium">Real-time ledger audit</span>
-        </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-300">
-            <thead class="bg-slate-900/80 uppercase text-[10px] font-bold text-slate-400 tracking-wider border-b border-brand-border">
-              <tr>
-                <th class="py-3.5 px-4">Service Category</th>
-                <th class="py-3.5 px-4">Total Trips</th>
-                <th class="py-3.5 px-4">Gross Revenue (GBV)</th>
-                <th class="py-3.5 px-4">Avg. Trip Fare</th>
-                <th class="py-3.5 px-4">Admin Commission</th>
-                <th class="py-3.5 px-4 text-right">Net Income</th>
-              </tr>
-            </thead>
-            <tbody id="reportsTableBody" class="divide-y divide-brand-border">
-              <!-- DYNAMIC ROWS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
+function formatDate(
+    date
+){
 
-    </main>
-  </div>
+    const y =
+        date.getFullYear();
 
-  <script>
-    const reportData = {
-      this_month: {
-        gbv: '₹ 42,85,900',
-        net: '₹ 7,71,462',
-        disbursed: '₹ 35,14,438',
-        promo: '₹ 1,84,300',
-        rows: [
-          { category: 'Bike Taxi', trips: '18,420', gbv: '₹ 14,73,600', avgFare: '₹ 80', comm: '15%', net: '₹ 2,21,040' },
-          { category: 'Sedan Cab', trips: '8,900', gbv: '₹ 19,58,000', avgFare: '₹ 220', comm: '20%', net: '₹ 3,91,600' },
-          { category: 'Parcel Express', trips: '6,100', gbv: '₹ 8,54,300', avgFare: '₹ 140', comm: '18%', net: '₹ 1,53,774' },
-        ]
-      },
-      last_month: {
-        gbv: '₹ 37,50,000',
-        net: '₹ 6,75,000',
-        disbursed: '₹ 30,75,000',
-        promo: '₹ 1,50,000',
-        rows: [
-          { category: 'Bike Taxi', trips: '16,200', gbv: '₹ 12,96,000', avgFare: '₹ 80', comm: '15%', net: '₹ 1,94,400' },
-          { category: 'Sedan Cab', trips: '7,800', gbv: '₹ 17,16,000', avgFare: '₹ 220', comm: '20%', net: '₹ 3,43,200' },
-          { category: 'Parcel Express', trips: '5,200', gbv: '₹ 7,38,000', avgFare: '₹ 142', comm: '18%', net: '₹ 1,32,840' },
-        ]
-      },
-      q2: {
-        gbv: '₹ 1,12,00,000',
-        net: '₹ 20,16,000',
-        disbursed: '₹ 91,84,000',
-        promo: '₹ 4,50,000',
-        rows: [
-          { category: 'Bike Taxi', trips: '48,000', gbv: '₹ 38,40,000', avgFare: '₹ 80', comm: '15%', net: '₹ 5,76,000' },
-          { category: 'Sedan Cab', trips: '23,500', gbv: '₹ 51,70,000', avgFare: '₹ 220', comm: '20%', net: '₹ 10,34,000' },
-          { category: 'Parcel Express', trips: '15,600', gbv: '₹ 21,90,000', avgFare: '₹ 140', comm: '18%', net: '₹ 3,94,200' },
-        ]
-      }
+
+    const m =
+        String(
+            date.getMonth()+1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const d =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        y +
+        "-" +
+        m +
+        "-" +
+        d
+    );
+
+}
+
+
+
+function applyReport(){
+
+    const period =
+        Number(
+            document
+                .getElementById(
+                    "period"
+                )
+                .value
+        );
+
+
+    const multiplier =
+        period / 30;
+
+
+    filteredData = {
+
+        rides:
+            Math.round(
+                reportData.rides *
+                multiplier
+            ),
+
+        revenue:
+            Math.round(
+                reportData.revenue *
+                multiplier
+            ),
+
+        activeRiders:
+            reportData.activeRiders,
+
+        completed:
+            Math.round(
+                reportData.completed *
+                multiplier
+            ),
+
+        cancelled:
+            Math.round(
+                reportData.cancelled *
+                multiplier
+            ),
+
+        onlineRiders:
+            reportData.onlineRiders,
+
+        newCustomers:
+            Math.round(
+                reportData.newCustomers *
+                multiplier
+            ),
+
+        riderEarnings:
+            Math.round(
+                reportData.riderEarnings *
+                multiplier
+            ),
+
+        services:
+            reportData.services.map(
+                function(service){
+
+                    return {
+
+                        name:
+                            service.name,
+
+                        rides:
+                            Math.round(
+                                service.rides *
+                                multiplier
+                            ),
+
+                        revenue:
+                            Math.round(
+                                service.revenue *
+                                multiplier
+                            )
+
+                    };
+
+                }
+            ),
+
+        daily:
+            reportData.daily.slice(
+                Math.max(
+                    0,
+                    reportData.daily.length -
+                    period
+                )
+            )
+
     };
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-        document.getElementById('sidebar').classList.toggle('-translate-x-full');
-      });
-      updateReports();
-    });
 
-    function updateReports() {
-      const selectedKey = document.getElementById('timeRange').value;
-      const data = reportData[selectedKey];
+    render();
 
-      document.getElementById('gbvValue').innerText = data.gbv;
-      document.getElementById('netRevenueValue').innerText = data.net;
-      document.getElementById('disbursementValue').innerText = data.disbursed;
-      document.getElementById('promoValue').innerText = data.promo;
+}
 
-      const tbody = document.getElementById('reportsTableBody');
-      tbody.innerHTML = '';
 
-      data.rows.forEach(r => {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-800/40 transition-colors";
-        tr.innerHTML = `
-          <td class="py-3.5 px-4 font-bold text-white">${r.category}</td>
-          <td class="py-3.5 px-4 font-mono">${r.trips}</td>
-          <td class="py-3.5 px-4 font-bold text-white">${r.gbv}</td>
-          <td class="py-3.5 px-4 font-mono text-slate-400">${r.avgFare}</td>
-          <td class="py-3.5 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/20">${r.comm}</span></td>
-          <td class="py-3.5 px-4 font-extrabold text-emerald-400 text-right">${r.net}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+
+function render(){
+
+    document
+        .getElementById(
+            "totalRides"
+        )
+        .textContent =
+        number(
+            filteredData.rides
+        );
+
+
+    document
+        .getElementById(
+            "totalRevenue"
+        )
+        .textContent =
+        "₹" +
+        money(
+            filteredData.revenue
+        );
+
+
+    document
+        .getElementById(
+            "activeRiders"
+        )
+        .textContent =
+        number(
+            filteredData.activeRiders
+        );
+
+
+    const completion =
+        filteredData.rides
+            ? (
+                filteredData.completed /
+                filteredData.rides
+            ) * 100
+            : 0;
+
+
+    document
+        .getElementById(
+            "completionRate"
+        )
+        .textContent =
+        Math.min(
+            100,
+            completion
+        ).toFixed(1) +
+        "%";
+
+
+    document
+        .getElementById(
+            "completed"
+        )
+        .textContent =
+        number(
+            filteredData.completed
+        );
+
+
+    document
+        .getElementById(
+            "cancelled"
+        )
+        .textContent =
+        number(
+            filteredData.cancelled
+        );
+
+
+    document
+        .getElementById(
+            "onlineRiders"
+        )
+        .textContent =
+        number(
+            filteredData.onlineRiders
+        );
+
+
+    document
+        .getElementById(
+            "newCustomers"
+        )
+        .textContent =
+        number(
+            filteredData.newCustomers
+        );
+
+
+    const average =
+        filteredData.rides
+            ? filteredData.revenue /
+              filteredData.rides
+            : 0;
+
+
+    document
+        .getElementById(
+            "averageFare"
+        )
+        .textContent =
+        "₹" +
+        money(
+            average
+        );
+
+
+    document
+        .getElementById(
+            "riderEarnings"
+        )
+        .textContent =
+        "₹" +
+        money(
+            filteredData.riderEarnings
+        );
+
+
+    renderServices();
+
+    drawChart();
+
+}
+
+
+
+function renderServices(){
+
+    const list =
+        document.getElementById(
+            "serviceList"
+        );
+
+
+    list.innerHTML =
+        "";
+
+
+    const maxRevenue =
+        Math.max(
+            ...filteredData.services.map(
+                function(item){
+
+                    return item.revenue;
+
+                }
+            ),
+            1
+        );
+
+
+    filteredData.services.forEach(
+        function(service){
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "service-row";
+
+
+            const percent =
+                (
+                    service.revenue /
+                    maxRevenue
+                ) * 100;
+
+
+            row.innerHTML = `
+
+                <div>
+
+                    <div class="service-name">
+                        ${escapeHtml(service.name)}
+                    </div>
+
+                    <div class="service-sub">
+                        ${number(service.rides)}
+                        rides
+
+                    </div>
+
+                    <div class="progress">
+
+                        <span
+                            style="
+                                width:${percent}%;
+                            "
+                        ></span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="service-rides">
+                    ${number(service.rides)}
+                </div>
+
+
+                <div class="service-revenue">
+                    ₹${money(service.revenue)}
+                </div>
+
+            `;
+
+
+            list.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+
+function drawChart(){
+
+    if(!filteredData){
+
+        return;
+
     }
 
-    function exportCSV() {
-      alert("Downloading financial statement CSV for selected date range...");
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+
+    const dpr =
+        window.devicePixelRatio ||
+        1;
+
+
+    canvas.width =
+        rect.width * dpr;
+
+
+    canvas.height =
+        rect.height * dpr;
+
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+
+    const width =
+        rect.width;
+
+
+    const height =
+        rect.height;
+
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const values =
+        filteredData.daily.length
+            ? filteredData.daily
+            : [0];
+
+
+    const max =
+        Math.max(
+            ...values,
+            1
+        );
+
+
+    const padding = {
+
+        left:30,
+
+        right:15,
+
+        top:15,
+
+        bottom:28
+
+    };
+
+
+    const chartWidth =
+        width -
+        padding.left -
+        padding.right;
+
+
+    const chartHeight =
+        height -
+        padding.top -
+        padding.bottom;
+
+
+    ctx.font =
+        "9px Arial";
+
+
+    ctx.fillStyle =
+        "#666";
+
+
+    ctx.strokeStyle =
+        "#292929";
+
+
+    ctx.lineWidth =
+        1;
+
+
+    for(
+        let i=0;
+        i<=4;
+        i++
+    ){
+
+        const y =
+            padding.top +
+            chartHeight -
+            (
+                chartHeight *
+                i /
+                4
+            );
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            padding.left,
+            y
+        );
+
+        ctx.lineTo(
+            width -
+            padding.right,
+            y
+        );
+
+        ctx.stroke();
+
+
+        ctx.fillText(
+            Math.round(
+                max * i / 4
+            ),
+            4,
+            y + 3
+        );
+
     }
-  </script>
-</body>
-</html>
+
+
+    const points =
+        values.map(
+            function(value,index){
+
+                const x =
+                    padding.left +
+                    (
+                        chartWidth *
+                        (
+                            values.length === 1
+                                ? .5
+                                : index /
+                                  (
+                                    values.length - 1
+                                  )
+                        )
+                    );
+
+
+                const y =
+                    padding.top +
+                    chartHeight -
+                    (
+                        value /
+                        max
+                    ) *
+                    chartHeight;
+
+
+                return {
+                    x,
+                    y
+                };
+
+            }
+        );
+
+
+    ctx.strokeStyle =
+        "#FFD400";
+
+    ctx.lineWidth =
+        2.5;
+
+    ctx.beginPath();
+
+
+    points.forEach(
+        function(point,index){
+
+            if(index === 0){
+
+                ctx.moveTo(
+                    point.x,
+                    point.y
+                );
+
+            }else{
+
+                ctx.lineTo(
+                    point.x,
+                    point.y
+                );
+
+            }
+
+        }
+    );
+
+
+    ctx.stroke();
+
+
+    points.forEach(
+        function(point){
+
+            ctx.beginPath();
+
+            ctx.arc(
+                point.x,
+                point.y,
+                3,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                "#FFD400";
+
+            ctx.fill();
+
+        }
+    );
+
+
+    document
+        .getElementById(
+            "chartLabel"
+        )
+        .textContent =
+        "Last " +
+        values.length +
+        " days";
+
+}
+
+
+
+document
+    .getElementById(
+        "applyBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            applyReport();
+
+            showToast(
+                "Report updated."
+            );
+
+        }
+    );
+
+
+
+document
+    .getElementById(
+        "period"
+    )
+    .addEventListener(
+        "change",
+        function(){
+
+            applyReport();
+
+        }
+    );
+
+
+
+document
+    .getElementById(
+        "refreshBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            loadReport();
+
+            applyReport();
+
+            showToast(
+                "Report refreshed."
+            );
+
+        }
+    );
+
+
+
+document
+    .getElementById(
+        "exportBtn"
+    )
+    .addEventListener(
+        "click",
+        exportReport
+    );
+
+
+
+function exportReport(){
+
+    if(!filteredData){
+
+        return;
+
+    }
+
+
+    const rows = [
+
+        [
+            "RiderX Report"
+        ],
+
+        [],
+
+        [
+            "Metric",
+            "Value"
+        ],
+
+        [
+            "Total Rides",
+            filteredData.rides
+        ],
+
+        [
+            "Revenue",
+            filteredData.revenue
+        ],
+
+        [
+            "Active Riders",
+            filteredData.activeRiders
+        ],
+
+        [
+            "Completed Rides",
+            filteredData.completed
+        ],
+
+        [
+            "Cancelled Rides",
+            filteredData.cancelled
+        ],
+
+        [
+            "New Customers",
+            filteredData.newCustomers
+        ],
+
+        [
+            "Average Fare",
+            filteredData.rides
+                ? (
+                    filteredData.revenue /
+                    filteredData.rides
+                ).toFixed(2)
+                : 0
+        ],
+
+        [
+            "Rider Earnings",
+            filteredData.riderEarnings
+        ],
+
+        [],
+
+        [
+            "Service",
+            "Rides",
+            "Revenue"
+        ]
+
+    ];
+
+
+    filteredData.services.forEach(
+        function(service){
+
+            rows.push(
+                [
+                    service.name,
+                    service.rides,
+                    service.revenue
+                ]
+            );
+
+        }
+    );
+
+
+    const csv =
+        rows
+            .map(
+                function(row){
+
+                    return row
+                        .map(
+                            function(value){
+
+                                return '"' +
+                                    String(
+                                        value
+                                    ).replace(
+                                        /"/g,
+                                        '""'
+                                    ) +
+                                    '"';
+
+                            }
+                        )
+                        .join(",");
+
+                }
+            )
+            .join("\n");
+
+
+    const blob =
+        new Blob(
+            [
+                csv
+            ],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(
+            blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+        "riderx-report-" +
+        formatDate(
+            new Date()
+        ) +
+        ".csv";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    URL.revokeObjectURL(
+        url
+    );
+
+
+    showToast(
+        "Report exported."
+    );
+
+}
+
+
+
+function number(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN"
+    );
+
+}
+
+
+
+function money(
+    value
+){
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-IN",
+        {
+            maximumFractionDigits:2
+        }
+    );
+
+}
+
+
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+
+function showToast(
+    message
+){
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        window.reportToast
+    );
+
+
+    window.reportToast =
+        setTimeout(
+            function(){
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2500
+        );
+
+}
+
+</script></body></html>
