@@ -15,8 +15,9 @@
    This is the SINGLE Firebase initialization point
    for the RiderX application.
 
-   Application modules should import Firebase services
-   from this file instead of initializing Firebase again.
+   All RiderX modules should use the Firebase services
+   exported from this file instead of initializing Firebase
+   again.
 ========================================================= */
 
 "use strict";
@@ -117,7 +118,12 @@ import {
 
 
 /* =========================================================
-   FIREBASE CONFIGURATION
+   RIDERX FIREBASE CONFIGURATION
+   ---------------------------------------------------------
+   Project:
+   riderx-1
+
+   This configuration was supplied for the RiderX project.
 ========================================================= */
 
 const firebaseConfig = Object.freeze({
@@ -152,28 +158,43 @@ const firebaseConfig = Object.freeze({
 /* =========================================================
    FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   Reuse an existing default Firebase app when available.
-   Otherwise initialize Firebase exactly once.
+   Firebase must only be initialized once per page.
+
+   If another RiderX module has already initialized the
+   default app, this file reuses that app.
+
+   Otherwise this file initializes it.
 ========================================================= */
 
 let app;
 
+
 try {
 
-    if (getApps().length > 0) {
+    const existingApps =
+        getApps();
 
-        app = getApp();
+
+    if (
+        existingApps.length > 0
+    ) {
+
+        app =
+            getApp();
 
     } else {
 
-        app = initializeApp(firebaseConfig);
+        app =
+            initializeApp(
+                firebaseConfig
+            );
 
     }
 
 } catch (error) {
 
     console.error(
-        "RiderX Firebase initialization failed.",
+        "RiderX Firebase initialization failed:",
         error
     );
 
@@ -183,23 +204,107 @@ try {
 
 
 /* =========================================================
-   FIREBASE SERVICES
+   FIREBASE AUTH
 ========================================================= */
 
-const auth =
-    getAuth(app);
+let auth;
 
 
-const db =
-    getFirestore(app);
+try {
+
+    auth =
+        getAuth(
+            app
+        );
+
+} catch (error) {
+
+    console.error(
+        "RiderX Firebase Authentication initialization failed:",
+        error
+    );
+
+    throw error;
+
+}
 
 
-const realtimeDb =
-    getDatabase(app);
+/* =========================================================
+   CLOUD FIRESTORE
+========================================================= */
+
+let db;
 
 
-const storage =
-    getStorage(app);
+try {
+
+    db =
+        getFirestore(
+            app
+        );
+
+} catch (error) {
+
+    console.error(
+        "RiderX Firestore initialization failed:",
+        error
+    );
+
+    throw error;
+
+}
+
+
+/* =========================================================
+   REALTIME DATABASE
+========================================================= */
+
+let realtimeDb;
+
+
+try {
+
+    realtimeDb =
+        getDatabase(
+            app
+        );
+
+} catch (error) {
+
+    console.error(
+        "RiderX Realtime Database initialization failed:",
+        error
+    );
+
+    throw error;
+
+}
+
+
+/* =========================================================
+   FIREBASE STORAGE
+========================================================= */
+
+let storage;
+
+
+try {
+
+    storage =
+        getStorage(
+            app
+        );
+
+} catch (error) {
+
+    console.error(
+        "RiderX Firebase Storage initialization failed:",
+        error
+    );
+
+    throw error;
+
+}
 
 
 /* =========================================================
@@ -225,21 +330,38 @@ googleProvider.setCustomParameters({
 const firebaseServices =
     Object.freeze({
 
+        /* Firebase application */
+
         app,
 
+
+        /* Authentication */
+
         auth,
+
+
+        /* Firestore */
 
         db,
 
         firestore:
             db,
 
+
+        /* Realtime Database */
+
         realtimeDb,
 
         database:
             realtimeDb,
 
+
+        /* Storage */
+
         storage,
+
+
+        /* Google Authentication */
 
         googleProvider
 
@@ -251,25 +373,18 @@ const firebaseServices =
 ========================================================= */
 
 let firebaseReady =
-    true;
-
-
-function isFirebaseReady() {
-
-    return (
-        firebaseReady === true
-    );
-
-}
+    false;
 
 
 /* =========================================================
-   FIREBASE READY EVENT
-   ---------------------------------------------------------
-   Dispatch after all Firebase services are initialized.
+   MARK FIREBASE READY
 ========================================================= */
 
-function dispatchFirebaseReady() {
+function markFirebaseReady() {
+
+    firebaseReady =
+        true;
+
 
     if (
         typeof window === "undefined"
@@ -295,7 +410,7 @@ function dispatchFirebaseReady() {
     } catch (error) {
 
         console.warn(
-            "RiderX Firebase ready event could not be dispatched.",
+            "RiderX Firebase ready event failed:",
             error
         );
 
@@ -305,21 +420,38 @@ function dispatchFirebaseReady() {
 
 
 /* =========================================================
-   GLOBAL RIDERX FIREBASE REFERENCE
+   FIREBASE READY CHECK
+========================================================= */
+
+function isFirebaseReady() {
+
+    return (
+        firebaseReady === true
+    );
+
+}
+
+
+/* =========================================================
+   GLOBAL RIDERX FIREBASE REFERENCES
    ---------------------------------------------------------
    These references DO NOT initialize Firebase again.
 
-   They expose the already initialized services for legacy
-   or non-module RiderX code that needs a global reference.
+   They expose the already initialized Firebase services
+   for legacy/non-module RiderX code.
 ========================================================= */
 
 if (
     typeof window !== "undefined"
 ) {
 
+    /* Main global reference */
+
     window.RiderXFirebase =
         firebaseServices;
 
+
+    /* RX namespace */
 
     window.RX =
         window.RX ||
@@ -330,6 +462,8 @@ if (
         firebaseServices;
 
 
+    /* RiderX namespace */
+
     window.RiderX =
         window.RiderX ||
         {};
@@ -339,6 +473,8 @@ if (
         firebaseServices;
 
 
+    /* Firebase getter */
+
     window.RiderX.getFirebase =
         function () {
 
@@ -346,6 +482,8 @@ if (
 
         };
 
+
+    /* Ready-state getter */
 
     window.RiderX.isFirebaseReady =
         function () {
@@ -355,6 +493,16 @@ if (
         };
 
 }
+
+
+/* =========================================================
+   FIREBASE READY
+   ---------------------------------------------------------
+   All core Firebase services have been initialized before
+   this function is called.
+========================================================= */
+
+markFirebaseReady();
 
 
 /* =========================================================
@@ -395,7 +543,7 @@ export {
 
 
     /* =====================================================
-       FIREBASE READY
+       FIREBASE STATE
     ===================================================== */
 
     isFirebaseReady,
@@ -431,7 +579,7 @@ export {
 
 
     /* =====================================================
-       CLOUD FIRESTORE
+       FIRESTORE
     ===================================================== */
 
     doc,
@@ -501,7 +649,7 @@ export {
 
 
     /* =====================================================
-       FIREBASE STORAGE
+       STORAGE
     ===================================================== */
 
     storageRef,
@@ -518,14 +666,9 @@ export {
 
 
 /* =========================================================
-   FIREBASE READY
-========================================================= */
-
-dispatchFirebaseReady();
-
-
-/* =========================================================
    DEBUG INFORMATION
+   ---------------------------------------------------------
+   Does not expose private credentials.
 ========================================================= */
 
 console.info(
