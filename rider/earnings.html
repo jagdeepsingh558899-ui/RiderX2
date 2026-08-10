@@ -1,8 +1,14 @@
-<!DOCTYPE html><html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>RiderX | Earnings</title><link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+
+«»
+
+<meta name="theme-color" content="#000000"><title>RiderX | Earnings</title><link rel="stylesheet" href="../css/style.css"><link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+><style>
+
 :root{
     --yellow:#ffe500;
     --black:#000;
@@ -11,6 +17,7 @@
     --muted:#8d8d8d;
     --green:#22c55e;
     --red:#ef4444;
+    --line:#282828;
 }
 
 *{
@@ -21,11 +28,22 @@
     -webkit-tap-highlight-color:transparent;
 }
 
+html,
 body{
-    min-height:100vh;
+    width:100%;
+    min-height:100%;
     background:#000;
     color:#fff;
+}
+
+body{
+    min-height:100vh;
     padding-bottom:30px;
+}
+
+button{
+    font:inherit;
+    cursor:pointer;
 }
 
 .header{
@@ -38,7 +56,7 @@ body{
     justify-content:space-between;
     padding:0 16px;
     background:rgba(8,8,8,.97);
-    border-bottom:1px solid #292929;
+    border-bottom:1px solid var(--line);
     backdrop-filter:blur(12px);
 }
 
@@ -61,6 +79,10 @@ body{
     font-size:17px;
 }
 
+.back:active{
+    transform:scale(.94);
+}
+
 .logo{
     font-size:20px;
     font-weight:900;
@@ -73,6 +95,7 @@ body{
 .header-title{
     font-size:15px;
     color:#aaa;
+    margin-top:1px;
 }
 
 .container{
@@ -84,7 +107,7 @@ body{
 
 .earnings-card{
     background:linear-gradient(145deg,#181818,#0d0d0d);
-    border:1px solid #282828;
+    border:1px solid var(--line);
     border-radius:24px;
     padding:22px;
     box-shadow:0 12px 35px rgba(0,0,0,.3);
@@ -100,6 +123,7 @@ body{
     font-size:38px;
     font-weight:900;
     color:var(--yellow);
+    word-break:break-word;
 }
 
 .total-sub{
@@ -124,8 +148,10 @@ body{
 }
 
 .stat i{
+    display:block;
     color:var(--yellow);
     margin-bottom:7px;
+    font-size:14px;
 }
 
 .stat-value{
@@ -147,6 +173,7 @@ body{
     display:flex;
     justify-content:space-between;
     align-items:center;
+    gap:10px;
     margin-bottom:10px;
 }
 
@@ -164,6 +191,11 @@ body{
     gap:8px;
     overflow-x:auto;
     padding-bottom:3px;
+    scrollbar-width:none;
+}
+
+.periods::-webkit-scrollbar{
+    display:none;
 }
 
 .period{
@@ -176,6 +208,10 @@ body{
     color:#aaa;
     font-size:12px;
     font-weight:700;
+}
+
+.period:active{
+    transform:scale(.97);
 }
 
 .period.active{
@@ -196,6 +232,7 @@ body{
     display:flex;
     align-items:center;
     justify-content:space-between;
+    gap:12px;
     padding:0 15px;
     border-bottom:1px solid #252525;
 }
@@ -208,11 +245,13 @@ body{
     display:flex;
     align-items:center;
     gap:11px;
+    min-width:0;
 }
 
 .row-icon{
     width:34px;
     height:34px;
+    min-width:34px;
     border-radius:10px;
     background:#1c1c1c;
     display:flex;
@@ -235,14 +274,11 @@ body{
 .row-value{
     font-size:13px;
     font-weight:800;
+    white-space:nowrap;
 }
 
 .green{
     color:var(--green);
-}
-
-.red{
-    color:var(--red);
 }
 
 .history{
@@ -261,6 +297,7 @@ body{
 .ride-top{
     display:flex;
     justify-content:space-between;
+    align-items:flex-start;
     gap:10px;
 }
 
@@ -279,16 +316,25 @@ body{
     color:var(--yellow);
     font-size:16px;
     font-weight:900;
+    white-space:nowrap;
 }
 
 .ride-bottom{
     display:flex;
     justify-content:space-between;
+    gap:8px;
     margin-top:10px;
     padding-top:9px;
     border-top:1px solid #242424;
     color:#777;
     font-size:9px;
+}
+
+.ride-bottom span{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .empty{
@@ -302,6 +348,7 @@ body{
 }
 
 .empty i{
+    display:block;
     font-size:28px;
     margin-bottom:9px;
     color:#444;
@@ -313,7 +360,35 @@ body{
     padding:25px;
 }
 
+.error-box{
+    display:none;
+    text-align:center;
+    padding:25px 15px;
+    color:#888;
+    background:#111;
+    border:1px solid #252525;
+    border-radius:18px;
+}
+
+.error-box i{
+    color:#666;
+    font-size:25px;
+    margin-bottom:9px;
+}
+
+.retry-btn{
+    margin-top:12px;
+    border:0;
+    background:var(--yellow);
+    color:#000;
+    padding:9px 16px;
+    border-radius:10px;
+    font-weight:800;
+    font-size:11px;
+}
+
 @media(max-width:380px){
+
     .container{
         padding-left:11px;
         padding-right:11px;
@@ -330,7 +405,13 @@ body{
     .stat{
         padding:12px 5px;
     }
+
+    .ride-bottom{
+        font-size:8px;
+    }
+
 }
+
 </style></head><body><header class="header"><div class="header-left">
 
     <button
@@ -343,6 +424,7 @@ body{
     </button>
 
     <div>
+
         <div class="logo">
             RIDER<span>X</span>
         </div>
@@ -350,331 +432,382 @@ body{
         <div class="header-title">
             Earnings
         </div>
+
     </div>
 
 </div>
 
-<i class="fa-solid fa-chart-line" style="color:#ffe500"></i>
+<i
+    class="fa-solid fa-chart-line"
+    style="color:#ffe500"
+    aria-hidden="true"
+></i>
 
-</header><main class="container"><!-- TOTAL EARNINGS -->
+</header><main class="container"><section class="earnings-card"><div class="eyebrow">
+    Earnings
+</div>
 
-<section class="earnings-card">
+<div class="total">
+    ₹<span id="todayEarnings">0</span>
+</div>
 
-    <div class="eyebrow">
-        Today's earnings
-    </div>
-
-    <div class="total">
-        ₹<span id="todayEarnings">0</span>
-    </div>
-
-    <div class="total-sub" id="todaySubtitle">
-        Calculating your earnings...
-    </div>
-
-    <div class="stats">
-
-        <div class="stat">
-            <i class="fa-solid fa-road"></i>
-
-            <div
-                class="stat-value"
-                id="todayTrips"
-            >
-                0
-            </div>
-
-            <div class="stat-label">
-                Trips
-            </div>
-        </div>
+<div
+    class="total-sub"
+    id="todaySubtitle"
+>
+    Loading your earnings...
+</div>
 
 
-        <div class="stat">
-            <i class="fa-solid fa-route"></i>
-
-            <div
-                class="stat-value"
-                id="todayDistance"
-            >
-                0
-            </div>
-
-            <div class="stat-label">
-                KM
-            </div>
-        </div>
+<div class="stats">
 
 
-        <div class="stat">
-            <i class="fa-solid fa-star"></i>
+    <div class="stat">
 
-            <div
-                class="stat-value"
-                id="rating"
-            >
-                5.0
-            </div>
+        <i class="fa-solid fa-road"></i>
 
-            <div class="stat-label">
-                Rating
-            </div>
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- PERIOD -->
-
-<section class="section">
-
-    <div class="section-title">
-
-        <h3>
-            Earnings period
-        </h3>
-
-        <span id="periodLabel">
-            Today
-        </span>
-
-    </div>
-
-    <div class="periods">
-
-        <button
-            class="period active"
-            data-period="today"
+        <div
+            class="stat-value"
+            id="todayTrips"
         >
-            Today
-        </button>
+            0
+        </div>
 
-        <button
-            class="period"
-            data-period="week"
+        <div class="stat-label">
+            Trips
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <i class="fa-solid fa-route"></i>
+
+        <div
+            class="stat-value"
+            id="todayDistance"
         >
-            This Week
-        </button>
+            0
+        </div>
 
-        <button
-            class="period"
-            data-period="month"
+        <div class="stat-label">
+            KM
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <i class="fa-solid fa-star"></i>
+
+        <div
+            class="stat-value"
+            id="rating"
         >
-            This Month
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- BREAKDOWN -->
-
-<section class="section">
-
-    <div class="section-title">
-
-        <h3>
-            Earnings breakdown
-        </h3>
-
-    </div>
-
-    <div class="breakdown">
-
-        <div class="row">
-
-            <div class="row-left">
-
-                <div class="row-icon">
-                    <i class="fa-solid fa-motorcycle"></i>
-                </div>
-
-                <div>
-                    <div class="row-label">
-                        Ride earnings
-                    </div>
-
-                    <div class="row-small">
-                        Completed rides
-                    </div>
-                </div>
-
-            </div>
-
-            <div
-                class="row-value"
-                id="rideEarnings"
-            >
-                ₹0
-            </div>
-
+            5.0
         </div>
 
-
-        <div class="row">
-
-            <div class="row-left">
-
-                <div class="row-icon">
-                    <i class="fa-solid fa-bolt"></i>
-                </div>
-
-                <div>
-                    <div class="row-label">
-                        Incentives
-                    </div>
-
-                    <div class="row-small">
-                        Bonuses & incentives
-                    </div>
-                </div>
-
-            </div>
-
-            <div
-                class="row-value green"
-                id="incentives"
-            >
-                ₹0
-            </div>
-
-        </div>
-
-
-        <div class="row">
-
-            <div class="row-left">
-
-                <div class="row-icon">
-                    <i class="fa-solid fa-wallet"></i>
-                </div>
-
-                <div>
-                    <div class="row-label">
-                        Tips
-                    </div>
-
-                    <div class="row-small">
-                        Customer tips
-                    </div>
-                </div>
-
-            </div>
-
-            <div
-                class="row-value green"
-                id="tips"
-            >
-                ₹0
-            </div>
-
-        </div>
-
-
-        <div class="row">
-
-            <div class="row-left">
-
-                <div class="row-icon">
-                    <i class="fa-solid fa-receipt"></i>
-                </div>
-
-                <div>
-                    <div class="row-label">
-                        Adjustments
-                    </div>
-
-                    <div class="row-small">
-                        Other adjustments
-                    </div>
-                </div>
-
-            </div>
-
-            <div
-                class="row-value"
-                id="adjustments"
-            >
-                ₹0
-            </div>
-
-        </div>
-
-
-        <div class="row">
-
-            <div class="row-left">
-
-                <div class="row-icon">
-                    <i class="fa-solid fa-indian-rupee-sign"></i>
-                </div>
-
-                <div>
-                    <div class="row-label">
-                        Net earnings
-                    </div>
-                </div>
-
-            </div>
-
-            <div
-                class="row-value"
-                id="netEarnings"
-            >
-                ₹0
-            </div>
-
+        <div class="stat-label">
+            Rating
         </div>
 
     </div>
 
-</section>
+
+</div>
+
+</section><section class="section"><div class="section-title">
+
+    <h3>
+        Earnings period
+    </h3>
+
+    <span id="periodLabel">
+        Today
+    </span>
+
+</div>
 
 
-<!-- RIDE HISTORY -->
+<div class="periods">
 
-<section class="section">
-
-    <div class="section-title">
-
-        <h3>
-            Recent completed rides
-        </h3>
-
-        <span id="rideCount">
-            0 rides
-        </span>
-
-    </div>
-
-    <div
-        id="history"
-        class="history"
+    <button
+        class="period active"
+        data-period="today"
+        type="button"
     >
-        <div class="loading">
-            Loading rides...
-        </div>
-    </div>
+        Today
+    </button>
 
-    <div
-        id="empty"
-        class="empty"
+    <button
+        class="period"
+        data-period="week"
+        type="button"
     >
-        <i class="fa-solid fa-chart-column"></i>
+        This Week
+    </button>
 
-        <div>
-            No completed rides yet
+    <button
+        class="period"
+        data-period="month"
+        type="button"
+    >
+        This Month
+    </button>
+
+</div>
+
+</section><section class="section"><div class="section-title">
+
+    <h3>
+        Earnings breakdown
+    </h3>
+
+</div>
+
+
+<div class="breakdown">
+
+
+    <div class="row">
+
+        <div class="row-left">
+
+            <div class="row-icon">
+                <i class="fa-solid fa-motorcycle"></i>
+            </div>
+
+            <div>
+
+                <div class="row-label">
+                    Ride earnings
+                </div>
+
+                <div class="row-small">
+                    Completed rides
+                </div>
+
+            </div>
+
         </div>
+
+        <div
+            class="row-value"
+            id="rideEarnings"
+        >
+            ₹0
+        </div>
+
     </div>
 
-</section>
 
-</main><script type="module">
+    <div class="row">
 
-import { auth, db } from "../firebase/config.js";
+        <div class="row-left">
+
+            <div class="row-icon">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+
+            <div>
+
+                <div class="row-label">
+                    Incentives
+                </div>
+
+                <div class="row-small">
+                    Bonuses & incentives
+                </div>
+
+            </div>
+
+        </div>
+
+        <div
+            class="row-value green"
+            id="incentives"
+        >
+            ₹0
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="row-left">
+
+            <div class="row-icon">
+                <i class="fa-solid fa-wallet"></i>
+            </div>
+
+            <div>
+
+                <div class="row-label">
+                    Tips
+                </div>
+
+                <div class="row-small">
+                    Customer tips
+                </div>
+
+            </div>
+
+        </div>
+
+        <div
+            class="row-value green"
+            id="tips"
+        >
+            ₹0
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="row-left">
+
+            <div class="row-icon">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+
+            <div>
+
+                <div class="row-label">
+                    Adjustments
+                </div>
+
+                <div class="row-small">
+                    Other adjustments
+                </div>
+
+            </div>
+
+        </div>
+
+        <div
+            class="row-value"
+            id="adjustments"
+        >
+            ₹0
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        <div class="row-left">
+
+            <div class="row-icon">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+            </div>
+
+            <div>
+
+                <div class="row-label">
+                    Net earnings
+                </div>
+
+            </div>
+
+        </div>
+
+        <div
+            class="row-value"
+            id="netEarnings"
+        >
+            ₹0
+        </div>
+
+    </div>
+
+
+</div>
+
+</section><section class="section"><div class="section-title">
+
+    <h3>
+        Recent completed rides
+    </h3>
+
+    <span id="rideCount">
+        0 rides
+    </span>
+
+</div>
+
+
+<div
+    id="history"
+    class="history"
+>
+
+    <div class="loading">
+        Loading rides...
+    </div>
+
+</div>
+
+
+<div
+    id="empty"
+    class="empty"
+>
+
+    <i class="fa-solid fa-chart-column"></i>
+
+    <div>
+        No completed rides in this period
+    </div>
+
+</div>
+
+
+<div
+    id="errorBox"
+    class="error-box"
+>
+
+    <i class="fa-solid fa-triangle-exclamation"></i>
+
+    <div>
+        Unable to load earnings.
+    </div>
+
+    <button
+        class="retry-btn"
+        id="retryBtn"
+        type="button"
+    >
+        Retry
+    </button>
+
+</div>
+
+</section></main><script type="module">
+
+
+/* ============================================================
+   RIDERX 2.0
+   RIDER EARNINGS ENGINE
+============================================================ */
+
+
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
+
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
 
 import {
     collection,
@@ -683,12 +816,8 @@ import {
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-
-const $ = (id) =>
+const $ = id =>
     document.getElementById(id);
 
 
@@ -696,79 +825,162 @@ let allRides = [];
 
 let selectedPeriod = "today";
 
+let currentUid = null;
 
-/* =========================================
+
+/* ============================================================
    BACK
-========================================= */
+============================================================ */
 
 $("backBtn")?.addEventListener(
     "click",
-    () => history.back()
+    () => {
+
+        if(
+            window.history.length > 1
+        ){
+
+            window.history.back();
+
+        }else{
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+
+    }
 );
 
 
-/* =========================================
-   DATE HELPERS
-========================================= */
+/* ============================================================
+   NUMBER HELPERS
+============================================================ */
 
-function startOfToday(){
+function safeNumber(value){
 
-    const d = new Date();
+    if(
+        value === null ||
+        value === undefined ||
+        value === ""
+    ){
 
-    d.setHours(0,0,0,0);
+        return 0;
 
-    return d;
+    }
+
+    const number =
+        Number(value);
+
+    return Number.isFinite(number)
+        ? number
+        : 0;
 
 }
 
 
-function startOfWeek(){
+function money(value){
 
-    const d = startOfToday();
-
-    const day = d.getDay();
-
-    const diff = day === 0 ? 6 : day - 1;
-
-    d.setDate(
-        d.getDate() - diff
+    return Math.round(
+        safeNumber(value)
+    ).toLocaleString(
+        "en-IN"
     );
 
-    return d;
+}
+
+
+function distanceNumber(value){
+
+    const number =
+        safeNumber(value);
+
+    return Math.max(
+        0,
+        number
+    );
 
 }
 
 
-function startOfMonth(){
+/* ============================================================
+   STATUS
+============================================================ */
 
-    const d = startOfToday();
+function normalizeStatus(value){
 
-    d.setDate(1);
-
-    return d;
+    return String(
+        value || ""
+    )
+    .trim()
+    .toLowerCase()
+    .replaceAll(
+        "-",
+        "_"
+    )
+    .replaceAll(
+        " ",
+        "_"
+    );
 
 }
 
+
+function isCompleted(status){
+
+    return [
+        "completed",
+        "complete",
+        "finished",
+        "ride_completed"
+    ].includes(
+        normalizeStatus(status)
+    );
+
+}
+
+
+/* ============================================================
+   FIREBASE DATE
+============================================================ */
 
 function rideDate(data){
 
     const value =
-        data.completedAt ||
-        data.updatedAt ||
+        data.completedAt ??
+        data.updatedAt ??
         data.createdAt;
 
-    if(!value) return null;
+
+    if(!value){
+
+        return null;
+
+    }
+
 
     if(
         typeof value.toDate ===
         "function"
     ){
 
-        return value.toDate();
+        try{
+
+            return value.toDate();
+
+        }catch{
+
+            return null;
+
+        }
 
     }
 
-    if(value.seconds){
+
+    if(
+        typeof value.seconds ===
+        "number"
+    ){
 
         return new Date(
             value.seconds * 1000
@@ -776,37 +988,129 @@ function rideDate(data){
 
     }
 
-    const d = new Date(value);
 
-    return isNaN(d.getTime())
+    if(
+        typeof value ===
+        "number"
+    ){
+
+        const milliseconds =
+            value < 10000000000
+                ? value * 1000
+                : value;
+
+        return new Date(
+            milliseconds
+        );
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    return Number.isNaN(
+        date.getTime()
+    )
         ? null
-        : d;
+        : date;
 
 }
 
 
-/* =========================================
-   PERIOD FILTER
-========================================= */
+/* ============================================================
+   PERIOD HELPERS
+============================================================ */
+
+function startOfToday(){
+
+    const date =
+        new Date();
+
+    date.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+    return date;
+
+}
+
+
+function startOfWeek(){
+
+    const date =
+        startOfToday();
+
+    const day =
+        date.getDay();
+
+    const difference =
+        day === 0
+            ? 6
+            : day - 1;
+
+    date.setDate(
+        date.getDate() -
+        difference
+    );
+
+    return date;
+
+}
+
+
+function startOfMonth(){
+
+    const date =
+        startOfToday();
+
+    date.setDate(1);
+
+    return date;
+
+}
+
 
 function getPeriodStart(){
 
-    if(selectedPeriod === "week"){
+    if(
+        selectedPeriod ===
+        "week"
+    ){
+
         return startOfWeek();
+
     }
 
-    if(selectedPeriod === "month"){
+
+    if(
+        selectedPeriod ===
+        "month"
+    ){
+
         return startOfMonth();
+
     }
+
 
     return startOfToday();
+
 }
 
+
+/* ============================================================
+   PERIOD FILTER
+============================================================ */
 
 function getFilteredRides(){
 
     const start =
         getPeriodStart();
+
 
     return allRides.filter(
         ride => {
@@ -814,7 +1118,15 @@ function getFilteredRides(){
             const date =
                 rideDate(ride);
 
-            return date && date >= start;
+
+            if(!date){
+
+                return false;
+
+            }
+
+
+            return date >= start;
 
         }
     );
@@ -822,63 +1134,167 @@ function getFilteredRides(){
 }
 
 
-/* =========================================
-   LOAD RIDES
-========================================= */
+/* ============================================================
+   RIDE VALUE HELPERS
+============================================================ */
+
+function getFare(ride){
+
+    return safeNumber(
+        ride.riderEarnings ??
+        ride.driverEarnings ??
+        ride.netFare ??
+        ride.fare ??
+        ride.totalFare ??
+        ride.amount ??
+        ride.estimatedFare ??
+        0
+    );
+
+}
+
+
+function getDistance(ride){
+
+    return distanceNumber(
+        ride.distanceKm ??
+        ride.distance ??
+        ride.tripDistance ??
+        0
+    );
+
+}
+
+
+function getIncentive(ride){
+
+    return safeNumber(
+        ride.incentive ??
+        ride.incentives ??
+        ride.bonus ??
+        ride.bonusAmount ??
+        0
+    );
+
+}
+
+
+function getTip(ride){
+
+    return safeNumber(
+        ride.tip ??
+        ride.tips ??
+        ride.tipAmount ??
+        0
+    );
+
+}
+
+
+function getAdjustment(ride){
+
+    return safeNumber(
+        ride.adjustment ??
+        ride.adjustments ??
+        ride.adjustmentAmount ??
+        0
+    );
+
+}
+
+
+/* ============================================================
+   LOAD EARNINGS
+============================================================ */
 
 async function loadEarnings(uid){
 
+    currentUid = uid;
+
+
+    showLoading();
+
+
     try{
 
-        const q = query(
-            collection(db,"rides"),
-            where("riderId","==",uid)
-        );
+        const ridesRef =
+            collection(
+                db,
+                "rides"
+            );
+
+
+        const rideQuery =
+            query(
+                ridesRef,
+                where(
+                    "riderId",
+                    "==",
+                    uid
+                )
+            );
+
 
         const snapshot =
-            await getDocs(q);
+            await getDocs(
+                rideQuery
+            );
+
 
         allRides = [];
 
-        snapshot.forEach(docSnap => {
 
-            const data =
-                docSnap.data();
+        snapshot.forEach(
+            rideSnapshot => {
 
-            const status =
-                String(
-                    data.status || ""
-                ).toLowerCase();
+                const data =
+                    rideSnapshot.data();
 
-            if(
-                status === "completed" ||
-                status === "complete"
-            ){
+
+                if(
+                    !isCompleted(
+                        data.status
+                    )
+                ){
+
+                    return;
+
+                }
+
 
                 allRides.push({
-                    id:docSnap.id,
+
+                    id:
+                        rideSnapshot.id,
+
                     ...data
+
                 });
 
             }
-
-        });
+        );
 
 
         allRides.sort(
             (a,b) => {
 
-                const da =
-                    rideDate(a)?.getTime() || 0;
+                const dateA =
+                    rideDate(a)?.getTime() ||
+                    0;
 
-                const db =
-                    rideDate(b)?.getTime() || 0;
+                const dateB =
+                    rideDate(b)?.getTime() ||
+                    0;
 
-                return db - da;
+
+                return dateB -
+                    dateA;
 
             }
         );
 
+
+        hideError();
 
         render();
 
@@ -886,26 +1302,21 @@ async function loadEarnings(uid){
     }catch(error){
 
         console.error(
-            "Earnings error:",
+            "RiderX earnings error:",
             error
         );
 
-        $("history").innerHTML = "";
 
-        $("empty").style.display =
-            "block";
-
-        $("todaySubtitle").innerText =
-            "Unable to load earnings";
+        showError();
 
     }
 
 }
 
 
-/* =========================================
+/* ============================================================
    RENDER
-========================================= */
+============================================================ */
 
 function render(){
 
@@ -913,7 +1324,7 @@ function render(){
         getFilteredRides();
 
 
-    let earnings = 0;
+    let rideEarnings = 0;
 
     let distance = 0;
 
@@ -927,131 +1338,123 @@ function render(){
     rides.forEach(
         ride => {
 
-            earnings += Number(
-                ride.fare ??
-                ride.totalFare ??
-                ride.amount ??
-                0
-            );
+            rideEarnings +=
+                getFare(ride);
 
 
-            distance += Number(
-                ride.distance ??
-                ride.distanceKm ??
-                0
-            );
+            distance +=
+                getDistance(ride);
 
 
-            incentives += Number(
-                ride.incentive ??
-                ride.incentives ??
-                0
-            );
+            incentives +=
+                getIncentive(ride);
 
 
-            tips += Number(
-                ride.tip ??
-                ride.tips ??
-                0
-            );
+            tips +=
+                getTip(ride);
 
 
-            adjustments += Number(
-                ride.adjustment ??
-                ride.adjustments ??
-                0
-            );
+            adjustments +=
+                getAdjustment(ride);
 
         }
     );
 
 
     const net =
-        earnings +
+        rideEarnings +
         incentives +
         tips +
         adjustments;
 
 
-    $("todayEarnings").innerText =
-        Math.round(net).toLocaleString("en-IN");
+    $("todayEarnings").textContent =
+        money(net);
 
 
-    $("todayTrips").innerText =
+    $("todayTrips").textContent =
         rides.length;
 
 
-    $("todayDistance").innerText =
+    $("todayDistance").textContent =
         distance.toFixed(1);
 
 
-    $("rideEarnings").innerText =
+    $("rideEarnings").textContent =
         "₹" +
-        Math.round(earnings)
-            .toLocaleString("en-IN");
+        money(rideEarnings);
 
 
-    $("incentives").innerText =
+    $("incentives").textContent =
         "₹" +
-        Math.round(incentives)
-            .toLocaleString("en-IN");
+        money(incentives);
 
 
-    $("tips").innerText =
+    $("tips").textContent =
         "₹" +
-        Math.round(tips)
-            .toLocaleString("en-IN");
+        money(tips);
 
 
-    $("adjustments").innerText =
+    $("adjustments").textContent =
         "₹" +
-        Math.round(adjustments)
-            .toLocaleString("en-IN");
+        money(adjustments);
 
 
-    $("netEarnings").innerText =
+    $("netEarnings").textContent =
         "₹" +
-        Math.round(net)
-            .toLocaleString("en-IN");
+        money(net);
 
 
     const labels = {
 
-        today:"Today",
+        today:
+            "Today",
 
-        week:"This Week",
+        week:
+            "This Week",
 
-        month:"This Month"
+        month:
+            "This Month"
 
     };
 
 
-    $("periodLabel").innerText =
-        labels[selectedPeriod];
+    $("periodLabel").textContent =
+        labels[
+            selectedPeriod
+        ];
 
 
-    $("todaySubtitle").innerText =
+    $("todaySubtitle").textContent =
         `${rides.length} completed ride${rides.length === 1 ? "" : "s"} • ${distance.toFixed(1)} KM`;
 
 
-    renderHistory(rides);
+    renderHistory(
+        rides
+    );
+
+
+    updateRating(
+        rides
+    );
 
 }
 
 
-/* =========================================
+/* ============================================================
    HISTORY
-========================================= */
+============================================================ */
 
 function renderHistory(rides){
 
     const container =
         $("history");
 
+
     container.innerHTML = "";
 
 
-    $("rideCount").innerText =
+    $("rideCount").textContent =
         `${rides.length} ride${rides.length === 1 ? "" : "s"}`;
 
 
@@ -1069,189 +1472,550 @@ function renderHistory(rides){
         "none";
 
 
-    rides.slice(0,20).forEach(
-        ride => {
+    rides
+        .slice(0,20)
+        .forEach(
+            ride => {
 
-            const fare =
-                Number(
-                    ride.fare ??
-                    ride.totalFare ??
-                    ride.amount ??
-                    0
-                );
+                const fare =
+                    getFare(ride);
 
 
-            const distance =
-                Number(
-                    ride.distance ??
-                    ride.distanceKm ??
-                    0
-                );
+                const distance =
+                    getDistance(ride);
 
 
-            const date =
-                rideDate(ride);
+                const date =
+                    rideDate(ride);
 
 
-            const dateText =
-                date
-                ? date.toLocaleDateString(
-                    "en-IN",
-                    {
-                        day:"2-digit",
-                        month:"short",
-                        year:"numeric"
-                    }
-                )
-                : "Completed ride";
+                const dateText =
+                    date
+                        ? date.toLocaleDateString(
+                            "en-IN",
+                            {
+                                day:
+                                    "2-digit",
+                                month:
+                                    "short",
+                                year:
+                                    "numeric"
+                            }
+                        )
+                        : "Completed ride";
 
 
-            const service =
-                ride.serviceType ||
-                ride.service ||
-                "Bike";
+                const service =
+                    ride.serviceType ||
+                    ride.service ||
+                    ride.rideType ||
+                    "Bike";
 
 
-            const pickup =
-                ride.pickupLocation ||
-                ride.pickupAddress ||
-                "Pickup";
+                const pickup =
+                    getAddress(
+                        ride,
+                        [
+                            "pickupAddress",
+                            "pickupLocation",
+                            "pickup",
+                            "pickupText"
+                        ]
+                    );
 
 
-            const drop =
-                ride.dropoffLocation ||
-                ride.dropLocation ||
-                ride.destination ||
-                "Destination";
+                const drop =
+                    getAddress(
+                        ride,
+                        [
+                            "dropoffAddress",
+                            "dropLocation",
+                            "dropoffLocation",
+                            "destinationAddress",
+                            "destination",
+                            "dropoff",
+                            "dropText"
+                        ]
+                    );
 
 
-            const item =
-                document.createElement("div");
+                const item =
+                    document.createElement(
+                        "div"
+                    );
 
-            item.className =
-                "ride";
+
+                item.className =
+                    "ride";
 
 
-            item.innerHTML = `
+                const serviceIcon =
+                    getServiceIcon(
+                        service
+                    );
 
-                <div class="ride-top">
 
-                    <div>
+                item.innerHTML = `
 
-                        <div class="ride-service">
-                            <i class="fa-solid fa-motorcycle"
-                               style="color:#ffe500;margin-right:5px"></i>
-                            ${escapeHtml(service)}
+                    <div class="ride-top">
+
+                        <div>
+
+                            <div class="ride-service">
+
+                                <i
+                                    class="${serviceIcon}"
+                                    style="color:#ffe500;margin-right:5px"
+                                ></i>
+
+                                ${escapeHtml(
+                                    formatService(
+                                        service
+                                    )
+                                )}
+
+                            </div>
+
+                            <div class="ride-date">
+                                ${escapeHtml(
+                                    dateText
+                                )}
+                            </div>
+
                         </div>
 
-                        <div class="ride-date">
-                            ${dateText}
+
+                        <div class="ride-fare">
+                            ₹${money(fare)}
                         </div>
 
                     </div>
 
-                    <div class="ride-fare">
-                        ₹${Math.round(fare).toLocaleString("en-IN")}
+
+                    <div class="ride-bottom">
+
+                        <span>
+                            ${escapeHtml(
+                                shortText(
+                                    pickup
+                                )
+                            )}
+                        </span>
+
+                        <span>
+                            ${distance.toFixed(1)} KM
+                        </span>
+
+                        <span>
+                            ${escapeHtml(
+                                shortText(
+                                    drop
+                                )
+                            )}
+                        </span>
+
                     </div>
 
-                </div>
+                `;
 
 
-                <div class="ride-bottom">
+                container.appendChild(
+                    item
+                );
 
-                    <span>
-                        ${escapeHtml(shortText(pickup))}
-                    </span>
+            }
+        );
 
-                    <span>
-                        ${distance.toFixed(1)} KM
-                    </span>
-
-                    <span>
-                        ${escapeHtml(shortText(drop))}
-                    </span>
-
-                </div>
-
-            `;
+}
 
 
-            container.appendChild(item);
+/* ============================================================
+   ADDRESS NORMALIZER
+============================================================ */
+
+function getAddress(
+    ride,
+    keys
+){
+
+    for(
+        const key of keys
+    ){
+
+        const value =
+            ride[key];
+
+
+        if(
+            typeof value ===
+            "string" &&
+            value.trim()
+        ){
+
+            return value;
 
         }
-    );
-
-}
 
 
-/* =========================================
-   SECURITY
-========================================= */
+        if(
+            value &&
+            typeof value ===
+            "object"
+        ){
 
-function escapeHtml(value){
-
-    return String(value)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-
-}
+            const address =
+                value.address ||
+                value.formattedAddress ||
+                value.name ||
+                value.label;
 
 
-function shortText(value){
+            if(address){
 
-    const text =
-        String(value || "");
+                return address;
 
-    if(text.length <= 24){
-        return text;
+            }
+
+        }
+
     }
 
-    return text.slice(0,21) + "...";
+
+    return "Location";
 
 }
 
 
-/* =========================================
-   PERIOD BUTTONS
-========================================= */
+/* ============================================================
+   SERVICE
+============================================================ */
 
-document.querySelectorAll(
-    ".period"
-).forEach(button => {
+function formatService(
+    service
+){
 
-    button.addEventListener(
-        "click",
-        () => {
+    const value =
+        String(
+            service ||
+            "Bike"
+        )
+        .replaceAll(
+            "_",
+            " "
+        );
 
-            document
-                .querySelectorAll(".period")
-                .forEach(
-                    b => b.classList.remove("active")
+
+    return value
+        .charAt(0)
+        .toUpperCase() +
+        value.slice(1);
+
+}
+
+
+function getServiceIcon(
+    service
+){
+
+    const value =
+        String(
+            service ||
+            ""
+        ).toLowerCase();
+
+
+    if(
+        value.includes(
+            "cab"
+        ) ||
+        value.includes(
+            "car"
+        )
+    ){
+
+        return "fa-solid fa-car";
+
+    }
+
+
+    if(
+        value.includes(
+            "parcel"
+        ) ||
+        value.includes(
+            "delivery"
+        )
+    ){
+
+        return "fa-solid fa-box";
+
+    }
+
+
+    if(
+        value.includes(
+            "food"
+        )
+    ){
+
+        return "fa-solid fa-utensils";
+
+    }
+
+
+    return "fa-solid fa-motorcycle";
+
+}
+
+
+/* ============================================================
+   SECURITY
+============================================================ */
+
+function escapeHtml(
+    value
+){
+
+    return String(
+        value ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
+
+}
+
+
+function shortText(
+    value
+){
+
+    const text =
+        String(
+            value || ""
+        );
+
+
+    if(
+        text.length <= 24
+    ){
+
+        return text;
+
+    }
+
+
+    return text.slice(
+        0,
+        21
+    ) + "...";
+
+}
+
+
+/* ============================================================
+   RATING
+============================================================ */
+
+function updateRating(
+    rides
+){
+
+    const ratings = [];
+
+
+    rides.forEach(
+        ride => {
+
+            const value =
+                ride.rating ??
+                ride.customerRating ??
+                ride.riderRating;
+
+
+            const rating =
+                safeNumber(
+                    value
                 );
 
 
-            button.classList.add("active");
+            if(
+                rating > 0 &&
+                rating <= 5
+            ){
 
+                ratings.push(
+                    rating
+                );
 
-            selectedPeriod =
-                button.dataset.period ||
-                "today";
-
-
-            render();
+            }
 
         }
     );
 
-});
+
+    if(!ratings.length){
+
+        $("rating").textContent =
+            "5.0";
+
+        return;
+
+    }
 
 
-/* =========================================
+    const average =
+        ratings.reduce(
+            (sum,value) =>
+                sum + value,
+            0
+        ) / ratings.length;
+
+
+    $("rating").textContent =
+        average.toFixed(1);
+
+}
+
+
+/* ============================================================
+   PERIOD BUTTONS
+============================================================ */
+
+document
+    .querySelectorAll(
+        ".period"
+    )
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    document
+                        .querySelectorAll(
+                            ".period"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList
+                                    .remove(
+                                        "active"
+                                    )
+                        );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    selectedPeriod =
+                        button.dataset.period ||
+                        "today";
+
+
+                    render();
+
+                }
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   LOADING / ERROR
+============================================================ */
+
+function showLoading(){
+
+    $("history").innerHTML = `
+        <div class="loading">
+            Loading rides...
+        </div>
+    `;
+
+
+    $("empty").style.display =
+        "none";
+
+
+    $("errorBox").style.display =
+        "none";
+
+}
+
+
+function showError(){
+
+    $("history").innerHTML =
+        "";
+
+
+    $("empty").style.display =
+        "none";
+
+
+    $("errorBox").style.display =
+        "block";
+
+
+    $("todaySubtitle").textContent =
+        "Unable to load earnings";
+
+}
+
+
+function hideError(){
+
+    $("errorBox").style.display =
+        "none";
+
+}
+
+
+/* ============================================================
+   RETRY
+============================================================ */
+
+$("retryBtn")?.addEventListener(
+    "click",
+    () => {
+
+        if(currentUid){
+
+            loadEarnings(
+                currentUid
+            );
+
+        }
+
+    }
+);
+
+
+/* ============================================================
    AUTH
-========================================= */
+============================================================ */
 
 onAuthStateChanged(
     auth,
@@ -1259,7 +2023,7 @@ onAuthStateChanged(
 
         if(!user){
 
-            location.href =
+            window.location.href =
                 "../auth/login.html";
 
             return;
@@ -1274,5 +2038,29 @@ onAuthStateChanged(
     }
 );
 
-</script></body>
-</html>
+
+/* ============================================================
+   PAGE VISIBILITY
+============================================================ */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if(
+            document.visibilityState ===
+            "visible" &&
+            currentUid
+        ){
+
+            loadEarnings(
+                currentUid
+            );
+
+        }
+
+    }
+);
+
+
+</script></body></html>
