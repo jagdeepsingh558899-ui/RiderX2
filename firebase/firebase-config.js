@@ -1,6 +1,6 @@
 /* =========================================================
-   RiderX 2.0
-   Firebase Configuration
+   RIDERX 2.0
+   FIREBASE CONFIGURATION
    File: firebase/firebase-config.js
 
    Firebase SDK: 10.8.0
@@ -12,8 +12,11 @@
    - Firebase Storage
 
    IMPORTANT:
-   This is the SINGLE Firebase initialization point for
-   the RiderX application.
+   This file is the SINGLE Firebase initialization point
+   for the RiderX application.
+
+   All application modules should import Firebase services
+   from this file instead of initializing Firebase again.
 ========================================================= */
 
 "use strict";
@@ -81,7 +84,7 @@ import {
 
 
 /* =========================================================
-   REALTIME DATABASE
+   FIREBASE REALTIME DATABASE
 ========================================================= */
 
 import {
@@ -117,7 +120,7 @@ import {
    FIREBASE CONFIGURATION
 ========================================================= */
 
-const firebaseConfig = {
+const firebaseConfig = Object.freeze({
 
     apiKey:
         "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
@@ -143,19 +146,36 @@ const firebaseConfig = {
     measurementId:
         "G-SM8KLBVPWN"
 
-};
+});
 
 
 /* =========================================================
-   INITIALIZE FIREBASE ONLY ONCE
+   INITIALIZE FIREBASE
+   ---------------------------------------------------------
+   Firebase must only be initialized once per page.
 ========================================================= */
 
-const app =
-    getApps().length > 0
-        ? getApp()
-        : initializeApp(
+let app;
+
+const existingApps =
+    getApps();
+
+
+if (
+    existingApps.length > 0
+) {
+
+    app =
+        getApp();
+
+} else {
+
+    app =
+        initializeApp(
             firebaseConfig
         );
+
+}
 
 
 /* =========================================================
@@ -195,8 +215,10 @@ const googleProvider =
 
 
 googleProvider.setCustomParameters({
+
     prompt:
         "select_account"
+
 });
 
 
@@ -204,36 +226,79 @@ googleProvider.setCustomParameters({
    SHARED RIDERX FIREBASE SERVICES
 ========================================================= */
 
-const firebaseServices = {
+const firebaseServices =
+    Object.freeze({
 
-    app,
+        app,
 
-    auth,
+        auth,
 
-    db,
-
-    firestore:
         db,
 
-    realtimeDb,
+        firestore:
+            db,
 
-    database:
         realtimeDb,
 
-    storage,
+        database:
+            realtimeDb,
 
-    googleProvider
+        storage,
 
-};
+        googleProvider
+
+    });
 
 
 /* =========================================================
-   GLOBAL COMPATIBILITY OBJECTS
-   ---------------------------------------------------------
-   These DO NOT initialize Firebase again.
+   FIREBASE READY STATE
+========================================================= */
 
-   They only expose the already initialized Firebase
-   services to older RiderX modules.
+let firebaseReady =
+    false;
+
+
+function markFirebaseReady() {
+
+    firebaseReady =
+        true;
+
+
+    if (
+        typeof window !== "undefined"
+    ) {
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "riderx:firebase-ready",
+                {
+                    detail:
+                        firebaseServices
+                }
+            )
+        );
+
+    }
+
+}
+
+
+function isFirebaseReady() {
+
+    return (
+        firebaseReady === true
+    );
+
+}
+
+
+/* =========================================================
+   GLOBAL RIDERX FIREBASE REFERENCE
+   ---------------------------------------------------------
+   These references DO NOT initialize Firebase again.
+
+   They only expose the already initialized services to
+   application modules that need a global reference.
 ========================================================= */
 
 if (
@@ -261,6 +326,22 @@ if (
     window.RiderX.firebase =
         firebaseServices;
 
+
+    window.RiderX.getFirebase =
+        function () {
+
+            return firebaseServices;
+
+        };
+
+
+    window.RiderX.isFirebaseReady =
+        function () {
+
+            return isFirebaseReady();
+
+        };
+
 }
 
 
@@ -287,8 +368,20 @@ export {
 
     googleProvider,
 
+    firebaseServices,
 
-    /* Auth */
+
+    /* Configuration */
+
+    firebaseConfig,
+
+
+    /* Firebase readiness */
+
+    isFirebaseReady,
+
+
+    /* Authentication */
 
     createUserWithEmailAndPassword,
 
@@ -391,37 +484,16 @@ export {
 
     getDownloadURL,
 
-    deleteObject,
-
-
-    /* Configuration */
-
-    firebaseConfig,
-
-    firebaseServices
+    deleteObject
 
 };
 
 
 /* =========================================================
-   FIREBASE READY EVENT
+   FIREBASE READY
 ========================================================= */
 
-if (
-    typeof window !== "undefined"
-) {
-
-    window.dispatchEvent(
-        new CustomEvent(
-            "riderx:firebase-ready",
-            {
-                detail:
-                    firebaseServices
-            }
-        )
-    );
-
-}
+markFirebaseReady();
 
 
 /* =========================================================
@@ -429,11 +501,14 @@ if (
 ========================================================= */
 
 console.info(
-    "RiderX Firebase initialized.",
+    "RiderX Firebase initialized successfully.",
     {
 
         projectId:
             firebaseConfig.projectId,
+
+        app:
+            Boolean(app),
 
         auth:
             Boolean(auth),
