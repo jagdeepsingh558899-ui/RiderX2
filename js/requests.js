@@ -1,24 +1,28 @@
 /* ============================================================
-   RIDERX - RIDE REQUEST CONTROLLER
+   RIDERX 2.0
+   RIDE REQUEST ENGINE
    File: js/requests.js
+
+   Firebase v10 MODULAR compatible
 
    Handles:
    - Rider incoming ride requests
-   - Realtime ride request listener
-   - Accept request
-   - Reject request
-   - Request expiry
-   - Request countdown
-   - Rider availability check
-   - Customer notification/status update
-   - Duplicate request protection
-   - Firebase Realtime Database
+   - Realtime Database listener
    - Firestore fallback
+   - Accept / Reject
+   - Atomic accept protection
+   - Request expiry
+   - Countdown
+   - Rider busy state
+   - Customer ride status
+   - Customer notification
+   - Local request cache
+   - Duplicate protection
    ============================================================ */
 
-(function () {
+"use strict";
 
-    "use strict";
+(function () {
 
     window.RiderX = window.RiderX || {};
 
@@ -29,9 +33,9 @@
         (RX.requests = {});
 
 
-    /* ========================================================
+    /* =========================================================
        CONFIG
-       ======================================================== */
+    ========================================================= */
 
     Requests.config = {
 
@@ -47,6 +51,9 @@
         customerCollection:
             "customers",
 
+        notificationCollection:
+            "notifications",
+
         requestTimeout:
             30000,
 
@@ -56,29 +63,44 @@
         storageKey:
             "riderx_active_requests",
 
-        acceptedStatuses:
-            [
-                "accepted",
-                "driver_assigned",
-                "arriving",
-                "arrived",
-                "started",
-                "in_progress"
-            ],
+        pendingStatuses: [
 
-        completedStatuses:
-            [
-                "completed",
-                "cancelled",
-                "rejected",
-                "expired"
-            ]
+            "pending",
+            "requested",
+            "searching",
+            "finding_rider",
+            "waiting_for_rider",
+            "new",
+            "request"
+
+        ],
+
+        activeStatuses: [
+
+            "accepted",
+            "driver_assigned",
+            "arriving",
+            "arrived",
+            "started",
+            "in_progress"
+
+        ],
+
+        completedStatuses: [
+
+            "completed",
+            "cancelled",
+            "rejected",
+            "expired"
+
+        ]
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
        STATE
-       ======================================================== */
+    ========================================================= */
 
     Requests.state = {
 
@@ -86,9 +108,6 @@
             false,
 
         listening:
-            false,
-
-        online:
             false,
 
         loading:
@@ -103,6 +122,9 @@
         listeners:
             {},
 
+        firestoreUnsubscribe:
+            null,
+
         timers:
             {},
 
@@ -114,12 +136,77 @@
 
         riderRole:
             "rider"
+
     };
 
 
-    /* ========================================================
+    /* =========================================================
+       FIREBASE MODULE
+    ========================================================= */
+
+    let FirebaseModule = null;
+
+    let firebaseLoading = null;
+
+
+    async function loadFirebase() {
+
+        if (FirebaseModule) {
+
+            return FirebaseModule;
+
+        }
+
+        if (firebaseLoading) {
+
+            return firebaseLoading;
+
+        }
+
+        firebaseLoading =
+            import(
+                "../firebase/firebase-config.js"
+            )
+            .then(
+                function (module) {
+
+                    FirebaseModule =
+                        module;
+
+                    return module;
+
+                }
+            )
+            .catch(
+                function (error) {
+
+                    console.error(
+                        "RiderX Requests Firebase load failed:",
+                        error
+                    );
+
+                    return null;
+
+                }
+            )
+            .finally(
+                function () {
+
+                    firebaseLoading =
+                        null;
+
+                }
+            );
+
+
+        return firebaseLoading;
+
+    }
+
+
+    /* =========================================================
        FIREBASE USER
-       ======================================================== */
+    ========================================================= */
 
     Requests.getFirebaseUser =
         function () {
@@ -127,61 +214,194 @@
             try {
 
                 if (
-                    window.firebase &&
-                    typeof firebase.auth ===
-                    "function"
+                    RX.auth &&
+                    RX.auth.state &&
+                    RX.auth.state.firebaseUser
                 ) {
 
-                    return firebase.auth()
-                        .currentUser;
+                    return (
+                        RX.auth.state
+                            .firebaseUser
+                    );
+
                 }
 
-            } catch (error) {}
-
-            return null;
-        };
-
-
-    Requests.getRiderId =
-        function () {
-
-            const user =
-                Requests.getFirebaseUser();
-
-
-            if (
-                user &&
-                user.uid
-            ) {
-
-                return user.uid;
-            }
+            } catch (_) {}
 
 
             try {
 
-                return (
-                    localStorage.getItem(
-                        "riderx_uid"
-                    ) ||
-                    localStorage.getItem(
-                        "uid"
-                    ) ||
-                    localStorage.getItem(
-                        "riderId"
-                    ) ||
-                    null
-                );
+                if (
+                    RX.auth &&
+                    typeof RX.auth
+                        .getUid ===
+                    "function"
+                ) {
 
-            } catch (error) {
+                    const uid =
+                        RX.auth.getUid();
 
-                return null;
-            }
+                    if (uid) {
+
+                        return {
+                            uid:
+                                uid
+                        };
+
+                    }
+
+                }
+
+            } catch (_) {}
+
+
+            return null;
+
         };
 
 
+    /* =========================================================
+       RIDER ID
+    ========================================================= */
+
+    Requests.getRiderId =
+        function () {
+
+            try {
+
+                const user =
+                    Requests.getFirebaseUser();
+
+                if (
+                    user &&
+                    user.uid
+                ) {
+
+                    return user.uid;
+
+                }
+
+            } catch (_) {}
+
+
+            try {
+
+                if (
+                    RX.auth &&
+                    typeof RX.auth.getUid ===
+                    "function"
+                ) {
+
+                    const uid =
+                        RX.auth.getUid();
+
+                    if (uid) {
+
+                        return uid;
+
+                    }
+
+                }
+
+            } catch (_) {}
+
+
+            try {
+
+                const stored =
+                    localStorage.getItem(
+                        "riderx_user"
+                    );
+
+
+                if (stored) {
+
+                    const user =
+                        JSON.parse(
+                            stored
+                        );
+
+
+                    return (
+                        user?.uid ||
+                        user?.id ||
+                        user?.userId ||
+                        null
+                    );
+
+                }
+
+            } catch (_) {}
+
+
+            const keys = [
+
+                "riderx_uid",
+                "riderId",
+                "uid"
+
+            ];
+
+
+            for (
+                const key of keys
+            ) {
+
+                try {
+
+                    const value =
+                        localStorage.getItem(
+                            key
+                        );
+
+                    if (value) {
+
+                        return value;
+
+                    }
+
+                } catch (_) {}
+
+            }
+
+
+            return null;
+
+        };
+
+
+    /* =========================================================
+       ROLE
+    ========================================================= */
+
     Requests.getRole =
         function () {
+
+            try {
+
+                if (
+                    RX.auth &&
+                    typeof RX.auth.getRole ===
+                    "function"
+                ) {
+
+                    const role =
+                        RX.auth.getRole();
+
+                    if (role) {
+
+                        return String(
+                            role
+                        )
+                        .trim()
+                        .toLowerCase();
+
+                    }
+
+                }
+
+            } catch (_) {}
+
 
             try {
 
@@ -191,97 +411,23 @@
                     );
 
 
-                if (
-                    role
-                ) {
+                if (role) {
 
                     return String(
                         role
-                    ).toLowerCase();
+                    )
+                    .trim()
+                    .toLowerCase();
+
                 }
 
-            } catch (error) {}
+            } catch (_) {}
 
 
-            return "rider";
+            return "";
+
         };
 
-
-    /* ========================================================
-       DATABASE
-       ======================================================== */
-
-    Requests.getDatabase =
-        function () {
-
-            try {
-
-                if (
-                    RX.firebase &&
-                    RX.firebase.database
-                ) {
-
-                    return RX.firebase.database;
-                }
-
-            } catch (error) {}
-
-
-            try {
-
-                if (
-                    window.firebase &&
-                    typeof firebase.database ===
-                    "function"
-                ) {
-
-                    return firebase.database();
-                }
-
-            } catch (error) {}
-
-
-            return null;
-        };
-
-
-    Requests.getFirestore =
-        function () {
-
-            try {
-
-                if (
-                    RX.firebase &&
-                    RX.firebase.firestore
-                ) {
-
-                    return RX.firebase.firestore;
-                }
-
-            } catch (error) {}
-
-
-            try {
-
-                if (
-                    window.firebase &&
-                    typeof firebase.firestore ===
-                    "function"
-                ) {
-
-                    return firebase.firestore();
-                }
-
-            } catch (error) {}
-
-
-            return null;
-        };
-
-
-    /* ========================================================
-       RIDER CHECK
-       ======================================================== */
 
     Requests.isRider =
         function () {
@@ -290,25 +436,249 @@
                 Requests.getRole() ===
                 "rider"
             );
+
         };
 
 
-    /* ========================================================
-       START LISTENER
-       ======================================================== */
+    /* =========================================================
+       FIREBASE DATABASE
+    ========================================================= */
+
+    Requests.getDatabase =
+        async function () {
+
+            const FB =
+                await loadFirebase();
+
+
+            if (
+                FB &&
+                FB.realtimeDb
+            ) {
+
+                return FB.realtimeDb;
+
+            }
+
+
+            return null;
+
+        };
+
+
+    Requests.getFirestore =
+        async function () {
+
+            const FB =
+                await loadFirebase();
+
+
+            if (
+                FB &&
+                FB.db
+            ) {
+
+                return FB.db;
+
+            }
+
+
+            return null;
+
+        };
+
+
+    /* =========================================================
+       NORMALIZE RIDE
+    ========================================================= */
+
+    Requests.normalizeRide =
+        function (
+            ride,
+            id
+        ) {
+
+            if (!ride) {
+
+                return null;
+
+            }
+
+
+            const normalized = {
+
+                ...ride
+
+            };
+
+
+            normalized.id =
+                normalized.id ||
+                id ||
+                normalized.rideId ||
+                normalized.bookingId ||
+                "";
+
+
+            normalized.customerId =
+                normalized.customerId ||
+                normalized.customerUid ||
+                normalized.userId ||
+                normalized.userUID ||
+                "";
+
+
+            normalized.riderId =
+                normalized.riderId ||
+                normalized.assignedRiderId ||
+                normalized.driverId ||
+                "";
+
+
+            normalized.driverId =
+                normalized.driverId ||
+                normalized.riderId ||
+                "";
+
+
+            normalized.status =
+                String(
+                    normalized.status ||
+                    normalized.rideStatus ||
+                    "pending"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            normalized.createdAt =
+                Requests.toMillis(
+                    normalized.createdAt ||
+                    normalized.requestedAt ||
+                    normalized.timestamp
+                );
+
+
+            normalized.requestedAt =
+                Requests.toMillis(
+                    normalized.requestedAt ||
+                    normalized.createdAt
+                );
+
+
+            return normalized;
+
+        };
+
+
+    /* =========================================================
+       TIMESTAMP HELPER
+    ========================================================= */
+
+    Requests.toMillis =
+        function (
+            value
+        ) {
+
+            if (
+                value ===
+                undefined ||
+                value ===
+                null
+            ) {
+
+                return Date.now();
+
+            }
+
+
+            if (
+                typeof value ===
+                "number"
+            ) {
+
+                return value < 10000000000
+                    ? value * 1000
+                    : value;
+
+            }
+
+
+            if (
+                value instanceof Date
+            ) {
+
+                return value.getTime();
+
+            }
+
+
+            if (
+                typeof value.toMillis ===
+                "function"
+            ) {
+
+                try {
+
+                    return value.toMillis();
+
+                } catch (_) {}
+
+            }
+
+
+            if (
+                typeof value.seconds ===
+                "number"
+            ) {
+
+                return (
+                    value.seconds *
+                    1000
+                ) +
+                Math.floor(
+                    (
+                        value.nanoseconds ||
+                        0
+                    ) /
+                    1000000
+                );
+
+            }
+
+
+            const parsed =
+                Date.parse(
+                    value
+                );
+
+
+            return Number.isFinite(
+                parsed
+            )
+                ? parsed
+                : Date.now();
+
+        };
+
+
+    /* =========================================================
+       START
+    ========================================================= */
 
     Requests.start =
-        function () {
+        async function () {
 
             if (
                 !Requests.isRider()
             ) {
 
                 console.warn(
-                    "RiderX Requests: current user is not a rider."
+                    "RiderX Requests: current account is not a rider."
                 );
 
                 return false;
+
             }
 
 
@@ -317,23 +687,27 @@
             ) {
 
                 return true;
+
+            }
+
+
+            const riderId =
+                Requests.getRiderId();
+
+
+            if (!riderId) {
+
+                console.warn(
+                    "RiderX Requests: rider UID not found."
+                );
+
+                return false;
+
             }
 
 
             Requests.state.riderId =
-                Requests.getRiderId();
-
-
-            if (
-                !Requests.state.riderId
-            ) {
-
-                console.warn(
-                    "RiderX Requests: rider ID not found."
-                );
-
-                return false;
-            }
+                riderId;
 
 
             Requests.state.listening =
@@ -343,83 +717,133 @@
             Requests.loadLocal();
 
 
-            const database =
-                Requests.getDatabase();
+            try {
+
+                const database =
+                    await Requests.getDatabase();
 
 
-            if (
-                database
-            ) {
+                if (database) {
 
-                Requests.listenRealtime(
-                    database
+                    Requests.listenRealtime(
+                        database
+                    );
+
+                }
+
+
+                const firestore =
+                    await Requests.getFirestore();
+
+
+                if (
+                    firestore &&
+                    !database
+                ) {
+
+                    Requests.listenFirestore(
+                        firestore
+                    );
+
+                }
+
+
+                Requests.emit(
+                    "started",
+                    {
+                        riderId:
+                            riderId
+                    }
                 );
 
-            } else {
 
-                Requests.listenFirestore();
+                return true;
+
+            } catch (error) {
+
+                Requests.state.listening =
+                    false;
+
+                console.error(
+                    "RiderX Requests start failed:",
+                    error
+                );
+
+                return false;
+
             }
 
-
-            Requests.emit(
-                "started",
-                {
-
-                    riderId:
-                        Requests.state.riderId
-                }
-            );
-
-
-            return true;
         };
 
 
-    /* ========================================================
-       STOP LISTENER
-       ======================================================== */
+    /* =========================================================
+       STOP
+    ========================================================= */
 
     Requests.stop =
-        function () {
+        async function () {
 
-            const database =
-                Requests.getDatabase();
+            try {
+
+                const database =
+                    await Requests.getDatabase();
 
 
-            if (
-                database
-            ) {
+                if (database) {
 
-                Object.keys(
-                    Requests.state.listeners
-                )
-                .forEach(
-                    function (
-                        key
-                    ) {
+                    Object.keys(
+                        Requests.state
+                            .listeners
+                    )
+                    .forEach(
+                        function (
+                            key
+                        ) {
 
-                        try {
+                            const item =
+                                Requests.state
+                                    .listeners[key];
 
-                            Requests.state
-                                .listeners[key]
-                                .ref
-                                .off(
-                                    Requests.state
-                                        .listeners[key]
-                                        .event,
-                                    Requests.state
-                                        .listeners[key]
-                                        .handler
+
+                            try {
+
+                                item.ref.off(
+                                    item.event,
+                                    item.handler
                                 );
 
-                        } catch (error) {}
-                    }
-                );
-            }
+                            } catch (_) {}
+
+                        }
+                    );
+
+                }
+
+            } catch (_) {}
 
 
             Requests.state.listeners =
                 {};
+
+
+            if (
+                Requests.state
+                    .firestoreUnsubscribe
+            ) {
+
+                try {
+
+                    Requests.state
+                        .firestoreUnsubscribe();
+
+                } catch (_) {}
+
+            }
+
+
+            Requests.state
+                .firestoreUnsubscribe =
+                null;
 
 
             Object.keys(
@@ -433,6 +857,7 @@
                     clearInterval(
                         Requests.state.timers[key]
                     );
+
                 }
             );
 
@@ -448,12 +873,16 @@
             Requests.emit(
                 "stopped"
             );
+
+
+            return true;
+
         };
 
 
-    /* ========================================================
-       REALTIME DATABASE LISTENER
-       ======================================================== */
+    /* =========================================================
+       REALTIME DATABASE LISTENERS
+    ========================================================= */
 
     Requests.listenRealtime =
         function (
@@ -464,12 +893,21 @@
                 Requests.state.riderId;
 
 
-            /*
-             * Primary query:
-             * rides assigned to this rider.
-             */
+            if (
+                !database ||
+                !riderId
+            ) {
 
-            const riderRef =
+                return false;
+
+            }
+
+
+            /* ---------------------------------------------
+               Assigned rides
+            --------------------------------------------- */
+
+            const ridesRef =
                 database
                     .ref(
                         Requests.config
@@ -483,7 +921,7 @@
                     );
 
 
-            const riderHandler =
+            const ridesHandler =
                 function (
                     snapshot
                 ) {
@@ -491,47 +929,43 @@
                     Requests.processSnapshot(
                         snapshot
                     );
+
                 };
 
 
-            riderRef.on(
+            ridesRef.on(
                 "value",
-                riderHandler
+                ridesHandler
             );
 
 
             Requests.state.listeners
-                .rider =
-                {
+                .rides = {
 
                     ref:
-                        riderRef,
+                        ridesRef,
 
                     event:
                         "value",
 
                     handler:
-                        riderHandler
+                        ridesHandler
+
                 };
 
 
-            /*
-             * Secondary request listener.
-             *
-             * Some RiderX ride flows create
-             * rideRequests/{rideId} before
-             * assigning riderId.
-             */
+            /* ---------------------------------------------
+               New ride requests
+            --------------------------------------------- */
 
-            const requestRef =
-                database
-                    .ref(
-                        Requests.config
-                            .requestCollection
-                    );
+            const requestsRef =
+                database.ref(
+                    Requests.config
+                        .requestCollection
+                );
 
 
-            const requestHandler =
+            const requestsHandler =
                 function (
                     snapshot
                 ) {
@@ -539,42 +973,46 @@
                     Requests.processRequestSnapshot(
                         snapshot
                     );
+
                 };
 
 
-            requestRef.on(
+            requestsRef.on(
                 "value",
-                requestHandler
+                requestsHandler
             );
 
 
             Requests.state.listeners
-                .requests =
-                {
+                .requests = {
 
                     ref:
-                        requestRef,
+                        requestsRef,
 
                     event:
                         "value",
 
                     handler:
-                        requestHandler
+                        requestsHandler
+
                 };
+
+
+            return true;
+
         };
 
 
-    /* ========================================================
-       PROCESS RIDE SNAPSHOT
-       ======================================================== */
+    /* =========================================================
+       PROCESS RIDES
+    ========================================================= */
 
     Requests.processSnapshot =
         function (
             snapshot
         ) {
 
-            const rides =
-                [];
+            const incoming = [];
 
 
             snapshot.forEach(
@@ -583,20 +1021,17 @@
                 ) {
 
                     const ride =
-                        child.val();
+                        Requests.normalizeRide(
+                            child.val(),
+                            child.key
+                        );
 
 
-                    if (
-                        !ride
-                    ) {
+                    if (!ride) {
 
                         return;
+
                     }
-
-
-                    ride.id =
-                        ride.id ||
-                        child.key;
 
 
                     if (
@@ -605,37 +1040,32 @@
                         )
                     ) {
 
-                        rides.push(
+                        incoming.push(
                             ride
                         );
+
                     }
+
                 }
             );
 
 
-            rides.sort(
+            incoming.sort(
                 function (
                     a,
                     b
                 ) {
 
                     return (
-                        Number(
-                            b.createdAt ||
-                            b.requestedAt ||
-                            0
-                        ) -
-                        Number(
-                            a.createdAt ||
-                            a.requestedAt ||
-                            0
-                        )
+                        b.createdAt -
+                        a.createdAt
                     );
+
                 }
             );
 
 
-            rides
+            incoming
                 .slice(
                     0,
                     Requests.config
@@ -649,25 +1079,26 @@
                         Requests.add(
                             ride
                         );
+
                     }
                 );
 
 
             Requests.render();
+
         };
 
 
-    /* ========================================================
-       PROCESS REQUEST SNAPSHOT
-       ======================================================== */
+    /* =========================================================
+       PROCESS RIDE REQUESTS
+    ========================================================= */
 
     Requests.processRequestSnapshot =
         function (
             snapshot
         ) {
 
-            const requests =
-                [];
+            const incoming = [];
 
 
             snapshot.forEach(
@@ -676,31 +1107,24 @@
                 ) {
 
                     const request =
-                        child.val();
+                        Requests.normalizeRide(
+                            child.val(),
+                            child.key
+                        );
 
 
-                    if (
-                        !request
-                    ) {
+                    if (!request) {
 
                         return;
+
                     }
 
-
-                    request.id =
-                        request.id ||
-                        child.key;
-
-
-                    /*
-                     * Accept only requests
-                     * intended for this rider.
-                     */
 
                     const targetRider =
                         request.riderId ||
                         request.assignedRiderId ||
-                        request.driverId;
+                        request.driverId ||
+                        "";
 
 
                     if (
@@ -710,6 +1134,20 @@
                     ) {
 
                         return;
+
+                    }
+
+
+                    if (
+                        request.rejectedRiders &&
+                        request.rejectedRiders[
+                            Requests.state
+                                .riderId
+                        ]
+                    ) {
+
+                        return;
+
                     }
 
 
@@ -719,44 +1157,47 @@
                         )
                     ) {
 
-                        requests.push(
+                        incoming.push(
                             request
                         );
+
                     }
+
                 }
             );
 
 
-            requests.forEach(
+            incoming.forEach(
                 function (
-                    request
+                    ride
                 ) {
 
                     Requests.add(
-                        request
+                        ride
                     );
+
                 }
             );
 
 
             Requests.render();
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        PENDING CHECK
-       ======================================================== */
+    ========================================================= */
 
     Requests.isPending =
         function (
             ride
         ) {
 
-            if (
-                !ride
-            ) {
+            if (!ride) {
 
                 return false;
+
             }
 
 
@@ -766,36 +1207,22 @@
                     ride.rideStatus ||
                     "pending"
                 )
+                .trim()
                 .toLowerCase();
 
 
-            const pendingStatuses =
-                [
-
-                    "pending",
-                    "requested",
-                    "searching",
-                    "finding_rider",
-                    "waiting_for_rider",
-                    "new",
-                    "request"
-
-                ];
-
-
             if (
-                !pendingStatuses.includes(
-                    status
-                )
+                !Requests.config
+                    .pendingStatuses
+                    .includes(
+                        status
+                    )
             ) {
 
                 return false;
+
             }
 
-
-            /*
-             * Don't show cancelled rides.
-             */
 
             if (
                 ride.cancelled ===
@@ -803,27 +1230,35 @@
             ) {
 
                 return false;
+
             }
 
 
-            /*
-             * Don't show rides already
-             * accepted by another rider.
-             */
+            const riderId =
+                Requests.state.riderId;
+
 
             if (
                 ride.riderId &&
                 ride.riderId !==
-                Requests.state.riderId
+                riderId
             ) {
 
                 return false;
+
             }
 
 
-            /*
-             * Expiry.
-             */
+            if (
+                ride.driverId &&
+                ride.driverId !==
+                riderId
+            ) {
+
+                return false;
+
+            }
+
 
             if (
                 Requests.isExpired(
@@ -836,28 +1271,36 @@
                 );
 
                 return false;
+
             }
 
 
             return true;
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        EXPIRY
-       ======================================================== */
+    ========================================================= */
 
     Requests.isExpired =
         function (
             ride
         ) {
 
+            if (!ride) {
+
+                return true;
+
+            }
+
+
             const created =
-                Number(
+                Requests.toMillis(
                     ride.requestedAt ||
                     ride.createdAt ||
-                    ride.timestamp ||
-                    Date.now()
+                    ride.timestamp
                 );
 
 
@@ -874,6 +1317,7 @@
                 created >
                 timeout
             );
+
         };
 
 
@@ -883,16 +1327,16 @@
         ) {
 
             const created =
-                Number(
-                    ride.requestedAt ||
-                    ride.createdAt ||
-                    Date.now()
+                Requests.toMillis(
+                    ride?.requestedAt ||
+                    ride?.createdAt ||
+                    ride?.timestamp
                 );
 
 
             const timeout =
                 Number(
-                    ride.requestTimeout ||
+                    ride?.requestTimeout ||
                     Requests.config
                         .requestTimeout
                 );
@@ -906,12 +1350,13 @@
                     created
                 )
             );
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        ADD REQUEST
-       ======================================================== */
+    ========================================================= */
 
     Requests.add =
         function (
@@ -924,10 +1369,27 @@
             ) {
 
                 return false;
+
             }
 
 
-            const existingIndex =
+            const normalized =
+                Requests.normalizeRide(
+                    ride,
+                    ride.id
+                );
+
+
+            if (
+                !normalized
+            ) {
+
+                return false;
+
+            }
+
+
+            const index =
                 Requests.state.active
                     .findIndex(
                         function (
@@ -936,76 +1398,73 @@
 
                             return (
                                 item.id ===
-                                ride.id
+                                normalized.id
                             );
+
                         }
                     );
 
 
             if (
-                existingIndex >=
-                0
+                index >= 0
             ) {
 
                 Requests.state.active[
-                    existingIndex
-                ] =
-                    {
+                    index
+                ] = {
 
-                        ...Requests.state.active[
-                            existingIndex
-                        ],
+                    ...Requests.state
+                        .active[index],
 
-                        ...ride
-                    };
+                    ...normalized
+
+                };
 
             } else {
 
-                Requests.state.active.push(
-                    ride
-                );
+                Requests.state.active
+                    .push(
+                        normalized
+                    );
+
             }
 
 
             Requests.saveLocal();
 
-
             Requests.startTimer(
-                ride
+                normalized
             );
-
 
             Requests.emit(
                 "new",
                 {
-
                     ride:
-                        ride
+                        normalized
                 }
             );
-
 
             Requests.render();
 
 
             return true;
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        REMOVE
-       ======================================================== */
+    ========================================================= */
 
     Requests.remove =
         function (
             rideId
         ) {
 
-            if (
-                !rideId
-            ) {
+            if (!rideId) {
 
                 return false;
+
             }
 
 
@@ -1020,6 +1479,7 @@
                                 ride.id !==
                                 rideId
                             );
+
                         }
                     );
 
@@ -1035,37 +1495,42 @@
 
 
             return true;
+
         };
 
 
-    /* ========================================================
-       GET REQUEST
-       ======================================================== */
+    /* =========================================================
+       GET
+    ========================================================= */
 
     Requests.get =
         function (
             rideId
         ) {
 
-            return Requests.state.active
-                .find(
-                    function (
-                        ride
-                    ) {
+            return (
+                Requests.state.active
+                    .find(
+                        function (
+                            ride
+                        ) {
 
-                        return (
-                            ride.id ===
-                            rideId
-                        );
-                    }
-                ) ||
-                null;
+                            return (
+                                ride.id ===
+                                rideId
+                            );
+
+                        }
+                    ) ||
+                null
+            );
+
         };
 
 
-    /* ========================================================
-       ACCEPT
-       ======================================================== */
+    /* =========================================================
+       ACCEPT RIDE
+    ========================================================= */
 
     Requests.accept =
         async function (
@@ -1077,13 +1542,12 @@
                 Requests.getRiderId();
 
 
-            if (
-                !riderId
-            ) {
+            if (!riderId) {
 
                 throw new Error(
                     "Rider login required."
                 );
+
             }
 
 
@@ -1092,6 +1556,7 @@
             ) {
 
                 return false;
+
             }
 
 
@@ -1101,13 +1566,12 @@
                 );
 
 
-            if (
-                !ride
-            ) {
+            if (!ride) {
 
                 throw new Error(
                     "Ride request no longer exists."
                 );
+
             }
 
 
@@ -1120,6 +1584,7 @@
                 throw new Error(
                     "This ride request is no longer available."
                 );
+
             }
 
 
@@ -1136,19 +1601,14 @@
                     );
 
 
-                if (
-                    !accepted
-                ) {
+                if (!accepted) {
 
                     throw new Error(
                         "Ride was already accepted by another rider."
                     );
+
                 }
 
-
-                /*
-                 * Update local request.
-                 */
 
                 ride.riderId =
                     riderId;
@@ -1166,6 +1626,10 @@
                     "accepted";
 
 
+                ride.customerStatus =
+                    "accepted";
+
+
                 ride.acceptedAt =
                     Date.now();
 
@@ -1179,21 +1643,10 @@
                 );
 
 
-                Requests.stop();
-
-
-                /*
-                 * Update rider status.
-                 */
-
                 await Requests.setRiderBusy(
                     riderId
                 );
 
-
-                /*
-                 * Customer notification.
-                 */
 
                 await Requests.notifyCustomer(
                     ride,
@@ -1210,6 +1663,7 @@
 
                         riderId:
                             riderId
+
                     }
                 );
 
@@ -1219,11 +1673,6 @@
                     "success"
                 );
 
-
-                /*
-                 * Redirect rider to
-                 * ride details/trip page.
-                 */
 
                 Requests.redirectAfterAccept(
                     ride
@@ -1236,13 +1685,18 @@
 
                 Requests.state.accepting =
                     false;
+
             }
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        ACCEPT REMOTE
-       ======================================================== */
+       ---------------------------------------------------------
+       Realtime Database transaction prevents two riders
+       from accepting the same ride at the same time.
+    ========================================================= */
 
     Requests.acceptRemote =
         async function (
@@ -1250,249 +1704,204 @@
             riderId
         ) {
 
-            const database =
-                Requests.getDatabase();
+            const FB =
+                await loadFirebase();
 
 
             if (
-                database
+                !FB ||
+                !FB.realtimeDb
             ) {
 
-                try {
+                throw new Error(
+                    "Firebase Realtime Database is unavailable."
+                );
 
-                    /*
-                     * Transaction prevents
-                     * two riders accepting
-                     * the same ride.
-                     */
-
-                    const ref =
-                        database
-                            .ref(
-                                Requests.config
-                                    .rideCollection +
-                                "/" +
-                                ride.id
-                            );
-
-
-                    const result =
-                        await ref.transaction(
-                            function (
-                                current
-                            ) {
-
-                                if (
-                                    !current
-                                ) {
-
-                                    return current;
-                                }
-
-
-                                const status =
-                                    String(
-                                        current.status ||
-                                        current.rideStatus ||
-                                        "pending"
-                                    )
-                                    .toLowerCase();
-
-
-                                const existingRider =
-                                    current.riderId ||
-                                    current.driverId;
-
-
-                                const pending =
-                                    [
-
-                                        "pending",
-                                        "requested",
-                                        "searching",
-                                        "finding_rider",
-                                        "waiting_for_rider",
-                                        "new",
-                                        "request"
-
-                                    ].includes(
-                                        status
-                                    );
-
-
-                                if (
-                                    !pending
-                                ) {
-
-                                    return;
-                                }
-
-
-                                if (
-                                    existingRider &&
-                                    existingRider !==
-                                    riderId
-                                ) {
-
-                                    return;
-                                }
-
-
-                                current.riderId =
-                                    riderId;
-
-
-                                current.driverId =
-                                    riderId;
-
-
-                                current.status =
-                                    "accepted";
-
-
-                                current.rideStatus =
-                                    "accepted";
-
-
-                                current.acceptedAt =
-                                    Date.now();
-
-
-                                current.updatedAt =
-                                    Date.now();
-
-
-                                return current;
-                            }
-                        );
-
-
-                    return Boolean(
-                        result.committed
-                    );
-
-                } catch (error) {
-
-                    console.error(
-                        "Ride accept transaction failed:",
-                        error
-                    );
-
-
-                    return false;
-                }
             }
 
 
-            /*
-             * Firestore fallback.
-             */
-
-            const firestore =
-                Requests.getFirestore();
+            const database =
+                FB.realtimeDb;
 
 
-            if (
-                firestore
-            ) {
-
-                try {
-
-                    const ref =
-                        firestore
-                            .collection(
-                                Requests.config
-                                    .rideCollection
-                            )
-                            .doc(
-                                ride.id
-                            );
+            const rideRef =
+                database.ref(
+                    Requests.config
+                        .rideCollection +
+                    "/" +
+                    ride.id
+                );
 
 
-                    const snapshot =
-                        await ref.get();
+            try {
+
+                const result =
+                    await FB.runTransaction(
+                        database,
+                        rideRef,
+                        function (
+                            current
+                        ) {
+
+                            if (
+                                !current
+                            ) {
+
+                                return;
+
+                            }
 
 
-                    if (
-                        !snapshot.exists
-                    ) {
-
-                        return false;
-                    }
-
-
-                    const current =
-                        snapshot.data();
+                            const status =
+                                String(
+                                    current.status ||
+                                    current.rideStatus ||
+                                    "pending"
+                                )
+                                .toLowerCase();
 
 
-                    const status =
-                        String(
-                            current.status ||
-                            "pending"
-                        )
-                        .toLowerCase();
+                            const riderAlreadyAssigned =
+                                current.riderId ||
+                                current.driverId ||
+                                "";
 
 
-                    if (
-                        ![
-                            "pending",
-                            "requested",
-                            "searching"
-                        ].includes(
-                            status
-                        )
-                    ) {
+                            if (
+                                riderAlreadyAssigned &&
+                                riderAlreadyAssigned !==
+                                riderId
+                            ) {
 
-                        return false;
-                    }
+                                return;
+
+                            }
 
 
-                    await ref.update(
-                        {
+                            if (
+                                !Requests.config
+                                    .pendingStatuses
+                                    .includes(
+                                        status
+                                    )
+                            ) {
 
-                            riderId:
-                                riderId,
+                                return;
 
-                            driverId:
-                                riderId,
+                            }
 
-                            status:
-                                "accepted",
 
-                            rideStatus:
-                                "accepted",
+                            if (
+                                current.cancelled ===
+                                true
+                            ) {
 
-                            acceptedAt:
-                                Date.now(),
+                                return;
 
-                            updatedAt:
-                                Date.now()
+                            }
+
+
+                            return {
+
+                                ...current,
+
+                                riderId:
+                                    riderId,
+
+                                driverId:
+                                    riderId,
+
+                                status:
+                                    "accepted",
+
+                                rideStatus:
+                                    "accepted",
+
+                                customerStatus:
+                                    "accepted",
+
+                                acceptedAt:
+                                    Date.now(),
+
+                                updatedAt:
+                                    Date.now()
+
+                            };
+
                         }
                     );
 
 
-                    return true;
-
-                } catch (error) {
-
-                    console.error(
-                        "Firestore ride accept failed:",
-                        error
-                    );
-
+                if (
+                    !result.committed
+                ) {
 
                     return false;
+
                 }
+
+
+                /*
+                 * Keep ride request mirror in sync.
+                 */
+
+                try {
+
+                    await database
+                        .ref(
+                            Requests.config
+                                .requestCollection +
+                            "/" +
+                            ride.id
+                        )
+                        .update(
+                            {
+
+                                riderId:
+                                    riderId,
+
+                                driverId:
+                                    riderId,
+
+                                status:
+                                    "accepted",
+
+                                rideStatus:
+                                    "accepted",
+
+                                acceptedAt:
+                                    Date.now(),
+
+                                updatedAt:
+                                    Date.now()
+
+                            }
+                        );
+
+                } catch (_) {}
+
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "RiderX ride acceptance failed:",
+                    error
+                );
+
+                throw new Error(
+                    "Unable to accept this ride. Please try again."
+                );
+
             }
 
-
-            return false;
         };
 
 
-    /* ========================================================
+    /* =========================================================
        REJECT
-       ======================================================== */
+    ========================================================= */
 
     Requests.reject =
         async function (
@@ -1500,54 +1909,64 @@
             reason
         ) {
 
+            const riderId =
+                Requests.state.riderId ||
+                Requests.getRiderId();
+
+
+            if (!riderId) {
+
+                throw new Error(
+                    "Rider login required."
+                );
+
+            }
+
+
             const ride =
                 Requests.get(
                     rideId
                 );
 
 
-            if (
-                !ride
-            ) {
+            if (!ride) {
 
                 return false;
+
             }
 
-
-            reason =
-                reason ||
-                "rider_declined";
-
-
-            const riderId =
-                Requests.state.riderId ||
-                Requests.getRiderId();
-
-
-            /*
-             * Remove from this rider's
-             * local list immediately.
-             */
 
             Requests.remove(
                 rideId
             );
 
 
-            const database =
-                Requests.getDatabase();
+            const FB =
+                await loadFirebase();
 
 
             if (
-                database
+                FB &&
+                FB.realtimeDb
             ) {
 
-                try {
+                const database =
+                    FB.realtimeDb;
 
-                    /*
-                     * Keep ride available for
-                     * other riders.
-                     */
+
+                const rejection = {
+
+                    reason:
+                        reason ||
+                        "rejected",
+
+                    rejectedAt:
+                        Date.now()
+
+                };
+
+
+                try {
 
                     await database
                         .ref(
@@ -1559,16 +1978,20 @@
                             riderId
                         )
                         .set(
-                            {
-
-                                reason:
-                                    reason,
-
-                                rejectedAt:
-                                    Date.now()
-                            }
+                            rejection
                         );
 
+                } catch (error) {
+
+                    console.warn(
+                        "Ride rejection save failed:",
+                        error
+                    );
+
+                }
+
+
+                try {
 
                     await database
                         .ref(
@@ -1576,44 +1999,15 @@
                                 .requestCollection +
                             "/" +
                             rideId +
-                            "/" +
-                            "rejectedRiders/" +
+                            "/rejectedRiders/" +
                             riderId
                         )
                         .set(
-                            {
-
-                                reason:
-                                    reason,
-
-                                rejectedAt:
-                                    Date.now()
-                            }
+                            rejection
                         );
 
+                } catch (_) {}
 
-                    Requests.emit(
-                        "rejected",
-                        {
-
-                            ride:
-                                ride,
-
-                            reason:
-                                reason
-                        }
-                    );
-
-
-                    return true;
-
-                } catch (error) {
-
-                    console.warn(
-                        "Ride reject save failed:",
-                        error
-                    );
-                }
             }
 
 
@@ -1625,18 +2019,27 @@
                         ride,
 
                     reason:
-                        reason
+                        reason ||
+                        "rejected"
+
                 }
             );
 
 
+            Requests.showMessage(
+                "Ride request rejected.",
+                "info"
+            );
+
+
             return true;
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        EXPIRE
-       ======================================================== */
+    ========================================================= */
 
     Requests.expire =
         async function (
@@ -1654,50 +2057,55 @@
             );
 
 
-            if (
-                !ride
-            ) {
+            if (!ride) {
 
                 return false;
+
             }
 
 
-            const database =
-                Requests.getDatabase();
+            const riderId =
+                Requests.state.riderId;
+
+
+            const FB =
+                await loadFirebase();
 
 
             if (
-                database
+                FB &&
+                FB.realtimeDb &&
+                riderId
             ) {
 
                 try {
 
-                    await database
+                    await FB.realtimeDb
                         .ref(
                             Requests.config
                                 .requestCollection +
                             "/" +
                             rideId +
                             "/expiredRiders/" +
-                            Requests.state
-                                .riderId
+                            riderId
                         )
                         .set(
                             {
 
                                 expiredAt:
                                     Date.now()
+
                             }
                         );
 
-                } catch (error) {}
+                } catch (_) {}
+
             }
 
 
             Requests.emit(
                 "expired",
                 {
-
                     ride:
                         ride
                 }
@@ -1705,12 +2113,13 @@
 
 
             return true;
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        TIMER
-       ======================================================== */
+    ========================================================= */
 
     Requests.startTimer =
         function (
@@ -1723,6 +2132,7 @@
             ) {
 
                 return;
+
             }
 
 
@@ -1743,15 +2153,14 @@
                             );
 
 
-                        if (
-                            !current
-                        ) {
+                        if (!current) {
 
                             Requests.stopTimer(
                                 ride.id
                             );
 
                             return;
+
                         }
 
 
@@ -1775,11 +2184,13 @@
                             Requests.expire(
                                 current.id
                             );
+
                         }
 
                     },
                     1000
                 );
+
         };
 
 
@@ -1788,29 +2199,30 @@
             rideId
         ) {
 
-            if (
+            const timer =
                 Requests.state.timers[
                     rideId
-                ]
-            ) {
+                ];
+
+
+            if (timer) {
 
                 clearInterval(
-                    Requests.state.timers[
-                        rideId
-                    ]
+                    timer
                 );
 
 
-                delete Requests.state.timers[
-                    rideId
-                ];
+                delete Requests.state
+                    .timers[rideId];
+
             }
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        COUNTDOWN
-       ======================================================== */
+    ========================================================= */
 
     Requests.updateCountdown =
         function (
@@ -1827,7 +2239,11 @@
 
             document
                 .querySelectorAll(
-                    `[data-request-countdown="${rideId}"]`
+                    "[data-request-countdown=\"" +
+                    Requests.escapeAttribute(
+                        rideId
+                    ) +
+                    "\"]"
                 )
                 .forEach(
                     function (
@@ -1838,36 +2254,40 @@
                             seconds > 0
                                 ? seconds + "s"
                                 : "Expired";
+
                     }
                 );
+
         };
 
 
-    /* ========================================================
-       RIDER BUSY STATUS
-       ======================================================== */
+    /* =========================================================
+       RIDER BUSY
+    ========================================================= */
 
     Requests.setRiderBusy =
         async function (
             riderId
         ) {
 
-            const database =
-                Requests.getDatabase();
+            const FB =
+                await loadFirebase();
 
 
             if (
-                !database ||
+                !FB ||
+                !FB.realtimeDb ||
                 !riderId
             ) {
 
                 return false;
+
             }
 
 
             try {
 
-                await database
+                await FB.realtimeDb
                     .ref(
                         Requests.config
                             .riderCollection +
@@ -1891,6 +2311,7 @@
 
                             updatedAt:
                                 Date.now()
+
                         }
                     );
 
@@ -1900,19 +2321,21 @@
             } catch (error) {
 
                 console.warn(
-                    "Rider busy update failed:",
+                    "Rider busy state update failed:",
                     error
                 );
 
 
                 return false;
+
             }
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        CUSTOMER NOTIFICATION
-       ======================================================== */
+    ========================================================= */
 
     Requests.notifyCustomer =
         async function (
@@ -1920,38 +2343,43 @@
             status
         ) {
 
-            if (
-                !ride
-            ) {
+            if (!ride) {
 
                 return false;
+
             }
 
 
             const customerId =
                 ride.customerId ||
+                ride.customerUid ||
                 ride.userId ||
-                ride.customerUid;
+                ride.userUID;
+
+
+            if (!customerId) {
+
+                return false;
+
+            }
+
+
+            const FB =
+                await loadFirebase();
 
 
             if (
-                !customerId
+                !FB ||
+                !FB.realtimeDb
             ) {
 
                 return false;
+
             }
 
 
             const database =
-                Requests.getDatabase();
-
-
-            if (
-                !database
-            ) {
-
-                return false;
-            }
+                FB.realtimeDb;
 
 
             const riderId =
@@ -1959,12 +2387,6 @@
 
 
             try {
-
-                /*
-                 * Ride status itself is
-                 * the primary customer
-                 * notification mechanism.
-                 */
 
                 await database
                     .ref(
@@ -1976,24 +2398,27 @@
                     .update(
                         {
 
-                            customerStatus:
-                                status,
-
                             riderId:
                                 riderId,
 
                             driverId:
                                 riderId,
 
+                            customerStatus:
+                                status,
+
+                            status:
+                                status,
+
+                            rideStatus:
+                                status,
+
                             updatedAt:
                                 Date.now()
+
                         }
                     );
 
-
-                /*
-                 * Rider notification record.
-                 */
 
                 const notificationId =
                     "ride_" +
@@ -2006,7 +2431,9 @@
 
                 await database
                     .ref(
-                        "notifications/" +
+                        Requests.config
+                            .notificationCollection +
+                        "/" +
                         customerId +
                         "/" +
                         notificationId
@@ -2030,7 +2457,7 @@
                                 status ===
                                 "accepted"
                                     ? "Your RiderX ride has been accepted."
-                                    : "Your ride status has been updated.",
+                                    : "Your RiderX ride status has been updated.",
 
                             rideId:
                                 ride.id,
@@ -2043,6 +2470,7 @@
 
                             createdAt:
                                 Date.now()
+
                         }
                     );
 
@@ -2058,74 +2486,52 @@
 
 
                 return false;
+
             }
+
         };
 
 
-    /* ========================================================
-       REDIRECT AFTER ACCEPT
-       ======================================================== */
+    /* =========================================================
+       REDIRECT
+    ========================================================= */
 
     Requests.redirectAfterAccept =
         function (
             ride
         ) {
 
-            /*
-             * Existing RiderX pages.
-             */
+            if (!ride?.id) {
 
-            const candidates =
-                [
+                return;
 
-                    "ride-details.html",
-                    "trip.html",
-                    "live.html",
-                    "rides.html"
+            }
 
-                ];
-
-
-            /*
-             * If already inside rider folder,
-             * use the first existing page.
-             */
 
             const currentPath =
-                window.location.pathname;
-
-
-            const isRiderFolder =
-                currentPath
-                    .toLowerCase()
-                    .includes(
-                        "/rider/"
-                    );
+                window.location.pathname
+                    .toLowerCase();
 
 
             if (
-                isRiderFolder
+                currentPath.includes(
+                    "/rider/"
+                )
             ) {
 
-                const url =
-                    "ride-details.html" +
-                    "?rideId=" +
-                    encodeURIComponent(
-                        ride.id
-                    );
-
-
                 /*
-                 * Do not force navigation if
-                 * ride-details doesn't exist.
-                 * Current project contains it.
+                 * Existing RiderX ride-details page.
                  */
 
-                setTimeout(
+                window.setTimeout(
                     function () {
 
                         window.location.href =
-                            url;
+                            "./ride-details.html" +
+                            "?rideId=" +
+                            encodeURIComponent(
+                                ride.id
+                            );
 
                     },
                     300
@@ -2133,30 +2539,26 @@
 
 
                 return;
+
             }
 
-
-            /*
-             * JS-only flow.
-             */
 
             Requests.emit(
                 "navigate",
                 {
 
                     ride:
-                        ride,
+                        ride
 
-                    pages:
-                        candidates
                 }
             );
+
         };
 
 
-    /* ========================================================
-       RENDER REQUESTS
-       ======================================================== */
+    /* =========================================================
+       RENDER
+    ========================================================= */
 
     Requests.render =
         function () {
@@ -2187,6 +2589,7 @@
                                         .isPending(
                                             ride
                                         );
+
                                 }
                             )
                             .sort(
@@ -2196,17 +2599,10 @@
                                 ) {
 
                                     return (
-                                        Number(
-                                            b.createdAt ||
-                                            b.requestedAt ||
-                                            0
-                                        ) -
-                                        Number(
-                                            a.createdAt ||
-                                            a.requestedAt ||
-                                            0
-                                        )
+                                        b.createdAt -
+                                        a.createdAt
                                     );
+
                                 }
                             );
 
@@ -2236,28 +2632,39 @@
 
 
                         return;
+
                     }
 
 
-                    active.forEach(
-                        function (
-                            ride
-                        ) {
+                    active
+                        .slice(
+                            0,
+                            Requests.config
+                                .maxVisibleRequests
+                        )
+                        .forEach(
+                            function (
+                                ride
+                            ) {
 
-                            container.appendChild(
-                                Requests.createCard(
-                                    ride
+                                container.appendChild(
+                                    Requests.createCard(
+                                        ride
+                                    )
                                 );
-                        }
-                    );
+
+                            }
+                        );
+
                 }
             );
+
         };
 
 
-    /* ========================================================
-       CREATE CARD
-       ======================================================== */
+    /* =========================================================
+       CARD
+    ========================================================= */
 
     Requests.createCard =
         function (
@@ -2322,26 +2729,20 @@
                 );
 
 
-            card.innerHTML =
-                `
+            card.innerHTML = `
 
                 <div class="ride-request-header">
 
                     <div class="ride-request-service">
-                        ${Requests.escape(
-                            service
-                        )}
+                        ${Requests.escape(service)}
                     </div>
 
                     <div
                         class="ride-request-time"
-                        data-request-countdown="${Requests.escape(
-                            ride.id
-                        )}"
+                        data-request-countdown="${Requests.escapeAttribute(ride.id)}"
                     >
                         ${Math.ceil(
-                            remaining /
-                            1000
+                            remaining / 1000
                         )}s
                     </div>
 
@@ -2356,12 +2757,12 @@
 
                         <div>
 
-                            <small>Pickup</small>
+                            <small>
+                                Pickup
+                            </small>
 
                             <strong>
-                                ${Requests.escape(
-                                    pickup
-                                )}
+                                ${Requests.escape(pickup)}
                             </strong>
 
                         </div>
@@ -2378,12 +2779,12 @@
 
                         <div>
 
-                            <small>Drop-off</small>
+                            <small>
+                                Drop-off
+                            </small>
 
                             <strong>
-                                ${Requests.escape(
-                                    destination
-                                )}
+                                ${Requests.escape(destination)}
                             </strong>
 
                         </div>
@@ -2397,7 +2798,9 @@
 
                     <div>
 
-                        <small>Fare</small>
+                        <small>
+                            Fare
+                        </small>
 
                         <strong>
                             ₹${fare.toFixed(0)}
@@ -2408,7 +2811,9 @@
 
                     <div>
 
-                        <small>Distance</small>
+                        <small>
+                            Distance
+                        </small>
 
                         <strong>
                             ${Requests.escape(
@@ -2428,9 +2833,7 @@
                     <button
                         type="button"
                         class="ride-request-reject"
-                        data-request-reject="${Requests.escape(
-                            ride.id
-                        )}"
+                        data-request-reject="${Requests.escapeAttribute(ride.id)}"
                     >
                         Reject
                     </button>
@@ -2439,28 +2842,42 @@
                     <button
                         type="button"
                         class="ride-request-accept"
-                        data-request-accept="${Requests.escape(
-                            ride.id
-                        )}"
+                        data-request-accept="${Requests.escapeAttribute(ride.id)}"
                     >
                         Accept
                     </button>
 
                 </div>
 
-                `;
+            `;
 
 
             return card;
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        BUTTON EVENTS
-       ======================================================== */
+    ========================================================= */
 
     Requests.bindButtons =
         function () {
+
+            if (
+                Requests.state
+                    .buttonsBound
+            ) {
+
+                return;
+
+            }
+
+
+            Requests.state
+                .buttonsBound =
+                true;
+
 
             document.addEventListener(
                 "click",
@@ -2474,9 +2891,7 @@
                         );
 
 
-                    if (
-                        accept
-                    ) {
+                    if (accept) {
 
                         event.preventDefault();
 
@@ -2484,14 +2899,6 @@
                         const rideId =
                             accept.dataset
                                 .requestAccept;
-
-
-                        if (
-                            accept.disabled
-                        ) {
-
-                            return;
-                        }
 
 
                         accept.disabled =
@@ -2515,10 +2922,12 @@
 
                             accept.disabled =
                                 false;
+
                         }
 
 
                         return;
+
                     }
 
 
@@ -2528,9 +2937,7 @@
                         );
 
 
-                    if (
-                        reject
-                    ) {
+                    if (reject) {
 
                         event.preventDefault();
 
@@ -2538,6 +2945,10 @@
                         const rideId =
                             reject.dataset
                                 .requestReject;
+
+
+                        reject.disabled =
+                            true;
 
 
                         try {
@@ -2549,19 +2960,28 @@
                         } catch (error) {
 
                             Requests.showMessage(
+                                error.message ||
                                 "Unable to reject request.",
                                 "error"
                             );
+
+
+                            reject.disabled =
+                                false;
+
                         }
+
                     }
+
                 }
             );
+
         };
 
 
-    /* ========================================================
-       LOCAL STORAGE
-       ======================================================== */
+    /* =========================================================
+       LOCAL CACHE
+    ========================================================= */
 
     Requests.loadLocal =
         function () {
@@ -2575,35 +2995,77 @@
                     );
 
 
+                if (!raw) {
+
+                    Requests.state.active =
+                        [];
+
+                    Requests.render();
+
+                    return;
+
+                }
+
+
+                const data =
+                    JSON.parse(
+                        raw
+                    );
+
+
                 if (
-                    raw
+                    Array.isArray(
+                        data
+                    )
                 ) {
 
-                    const data =
-                        JSON.parse(
-                            raw
-                        );
+                    Requests.state.active =
+                        data
+                            .map(
+                                function (
+                                    ride
+                                ) {
 
+                                    return Requests
+                                        .normalizeRide(
+                                            ride,
+                                            ride?.id
+                                        );
 
-                    if (
-                        Array.isArray(
-                            data
-                        )
-                    ) {
+                                }
+                            )
+                            .filter(
+                                Boolean
+                            )
+                            .filter(
+                                Requests.isPending
+                            );
 
-                        Requests.state.active =
-                            data;
-                    }
+                } else {
+
+                    Requests.state.active =
+                        [];
+
                 }
 
             } catch (error) {
 
+                console.warn(
+                    "RiderX request cache read failed:",
+                    error
+                );
+
+
                 Requests.state.active =
                     [];
+
             }
 
 
+            Requests.saveLocal();
+
             Requests.render();
+
         };
 
 
@@ -2620,20 +3082,26 @@
                     )
                 );
 
-            } catch (error) {}
+            } catch (error) {
+
+                console.warn(
+                    "RiderX request cache save failed:",
+                    error
+                );
+
+            }
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        FIRESTORE FALLBACK
-       ======================================================== */
+    ========================================================= */
 
     Requests.listenFirestore =
-        function () {
-
-            const firestore =
-                Requests.getFirestore();
-
+        function (
+            firestore
+        ) {
 
             const riderId =
                 Requests.state.riderId;
@@ -2645,41 +3113,54 @@
             ) {
 
                 return false;
+
             }
 
 
             try {
 
-                const query =
-                    firestore
-                        .collection(
-                            Requests.config
-                                .rideCollection
-                        )
-                        .where(
+                const FB =
+                    FirebaseModule;
+
+
+                const rideCollection =
+                    FB.collection(
+                        firestore,
+                        Requests.config
+                            .rideCollection
+                    );
+
+
+                const rideQuery =
+                    FB.query(
+                        rideCollection,
+                        FB.where(
                             "riderId",
                             "==",
                             riderId
-                        );
+                        )
+                    );
 
 
-                Requests.state.firestoreUnsubscribe =
-                    query.onSnapshot(
+                Requests.state
+                    .firestoreUnsubscribe =
+                    FB.onSnapshot(
+                        rideQuery,
                         function (
                             snapshot
                         ) {
 
                             snapshot.forEach(
                                 function (
-                                    doc
+                                    document
                                 ) {
 
                                     const ride =
-                                        doc.data();
-
-
-                                    ride.id =
-                                        doc.id;
+                                        Requests
+                                            .normalizeRide(
+                                                document.data(),
+                                                document.id
+                                            );
 
 
                                     if (
@@ -2692,21 +3173,31 @@
                                         Requests.add(
                                             ride
                                         );
+
+                                    } else {
+
+                                        Requests.remove(
+                                            ride?.id
+                                        );
+
                                     }
+
                                 }
                             );
 
 
                             Requests.render();
+
                         },
                         function (
                             error
                         ) {
 
                             console.warn(
-                                "Firestore request listener failed:",
+                                "RiderX Firestore request listener failed:",
                                 error
                             );
+
                         }
                     );
 
@@ -2716,19 +3207,21 @@
             } catch (error) {
 
                 console.warn(
-                    "Firestore listener failed:",
+                    "RiderX Firestore listener setup failed:",
                     error
                 );
 
 
                 return false;
+
             }
+
         };
 
 
-    /* ========================================================
-       ESCAPE HTML
-       ======================================================== */
+    /* =========================================================
+       ESCAPE
+    ========================================================= */
 
     Requests.escape =
         function (
@@ -2763,12 +3256,25 @@
                 /'/g,
                 "&#039;"
             );
+
         };
 
 
-    /* ========================================================
+    Requests.escapeAttribute =
+        function (
+            value
+        ) {
+
+            return Requests.escape(
+                value
+            );
+
+        };
+
+
+    /* =========================================================
        MESSAGE
-       ======================================================== */
+    ========================================================= */
 
     Requests.showMessage =
         function (
@@ -2782,9 +3288,7 @@
                 );
 
 
-            if (
-                target
-            ) {
+            if (target) {
 
                 target.textContent =
                     message;
@@ -2800,7 +3304,7 @@
                 );
 
 
-                setTimeout(
+                window.setTimeout(
                     function () {
 
                         target.classList.remove(
@@ -2813,6 +3317,7 @@
 
 
                 return;
+
             }
 
 
@@ -2832,13 +3337,15 @@
                     "RiderX:",
                     message
                 );
+
             }
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        EVENTS
-       ======================================================== */
+    ========================================================= */
 
     Requests.emit =
         function (
@@ -2855,15 +3362,17 @@
                         detail:
                             detail ||
                             {}
+
                     }
                 )
             );
+
         };
 
 
-    /* ========================================================
+    /* =========================================================
        PUBLIC API
-       ======================================================== */
+    ========================================================= */
 
     RX.requestsController =
         Requests;
@@ -2889,81 +3398,126 @@
         Requests.get;
 
 
-    /* ========================================================
-       INIT
-       ======================================================== */
+    /* =========================================================
+       AUTH EVENT RESTART
+    ========================================================= */
 
-    Requests.init =
-        function () {
+    window.addEventListener(
+        "riderx-auth-signed-in",
+        function (
+            event
+        ) {
+
+            const role =
+                event.detail?.role ||
+                Requests.getRole();
+
 
             if (
-                Requests.state.initialized
+                String(role)
+                    .toLowerCase() ===
+                "rider"
             ) {
 
-                return;
-            }
+                Requests.state.riderId =
+                    Requests.getRiderId();
 
-
-            Requests.state.initialized =
-                true;
-
-
-            Requests.state.riderId =
-                Requests.getRiderId();
-
-
-            Requests.bindButtons();
-
-
-            Requests.loadLocal();
-
-
-            /*
-             * Start only on rider pages.
-             */
-
-            if (
-                Requests.isRider()
-            ) {
 
                 Requests.start();
+
             }
 
-
-            console.log(
-                "RiderX requests.js loaded."
-            );
-        };
+        }
+    );
 
 
-    /* ========================================================
-       VISIBILITY HANDLING
-       ======================================================== */
+    window.addEventListener(
+        "riderx-auth-logout",
+        function () {
+
+            Requests.stop();
+
+        }
+    );
+
+
+    /* =========================================================
+       VISIBILITY
+    ========================================================= */
 
     document.addEventListener(
         "visibilitychange",
         function () {
 
             if (
-                document.visibilityState ===
+                document.visibilityState !==
                 "visible"
             ) {
 
-                if (
-                    Requests.isRider() &&
-                    !Requests.state.listening
-                ) {
+                return;
 
-                    Requests.start();
-                }
             }
+
+
+            if (
+                Requests.isRider() &&
+                !Requests.state.listening
+            ) {
+
+                Requests.start();
+
+            }
+
         }
     );
 
 
-    /* ========================================================
-       PAGE INIT
-       ======================================================== */
+    /* =========================================================
+       INIT
+    ========================================================= */
+
+    Requests.init =
+        async function () {
+
+            if (
+                Requests.state
+                    .initialized
+            ) {
+
+                return;
+
+            }
+
+
+            Requests.state
+                .initialized =
+                true;
+
+
+            Requests.bindButtons();
+
+            Requests.loadLocal();
+
+
+            if (
+                Requests.isRider()
+            ) {
+
+                await Requests.start();
+
+            }
+
+
+            console.log(
+                "RiderX modular requests engine loaded."
+            );
+
+        };
+
+
+    /* =========================================================
+       AUTO INIT
+    ========================================================= */
 
     if (
         document.readyState ===
@@ -2972,7 +3526,15 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            Requests.init
+            function () {
+
+                Requests.init();
+
+            },
+            {
+                once:
+                    true
+            }
         );
 
     } else {
