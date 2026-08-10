@@ -1,24 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>RiderX - Book a Ride</title>
-
-<meta name="theme-color" content="#FFD400">
-
-<link rel="stylesheet" href="../css/Style.css">
+<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>RiderX - Book a Ride</title><meta name="theme-color" content="#FFD400"><link rel="stylesheet" href="../css/Style.css">
 <link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
-
-<link
+<link rel="stylesheet" href="../css/Responsive.css"><link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-/>
-
-<style>
+/><style>
 
 :root{
     --yellow:#FFD400;
@@ -61,7 +48,9 @@ body{
     background:#111;
 }
 
-/* MAP */
+/* =========================================================
+   MAP
+========================================================= */
 
 #map{
     position:absolute;
@@ -75,7 +64,9 @@ body{
     font-size:7px !important;
 }
 
-/* TOP BAR */
+/* =========================================================
+   TOP BAR
+========================================================= */
 
 .topbar{
     position:absolute;
@@ -116,7 +107,9 @@ body{
     box-shadow:0 3px 14px rgba(0,0,0,.3);
 }
 
-/* LOCATION BUTTON */
+/* =========================================================
+   LOCATION BUTTON
+========================================================= */
 
 .location-btn{
     position:absolute;
@@ -134,7 +127,9 @@ body{
     cursor:pointer;
 }
 
-/* SHEET */
+/* =========================================================
+   SHEET
+========================================================= */
 
 .booking-sheet{
     position:absolute;
@@ -191,7 +186,9 @@ body{
     border-radius:10px;
 }
 
-/* LOCATION */
+/* =========================================================
+   LOCATION
+========================================================= */
 
 .location-box{
     background:#191919;
@@ -271,7 +268,42 @@ body{
     cursor:pointer;
 }
 
-/* SERVICE */
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.search-results{
+    display:none;
+    margin-top:6px;
+    background:#181818;
+    border:1px solid #303030;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.search-results.show{
+    display:block;
+}
+
+.search-result{
+    padding:10px;
+    border-bottom:1px solid #292929;
+    font-size:9px;
+    color:#ccc;
+    cursor:pointer;
+}
+
+.search-result:last-child{
+    border-bottom:0;
+}
+
+.search-result:hover{
+    background:#222;
+}
+
+/* =========================================================
+   SERVICE
+========================================================= */
 
 .section-title{
     font-size:12px;
@@ -324,7 +356,9 @@ body{
     opacity:.65;
 }
 
-/* FARE */
+/* =========================================================
+   FARE
+========================================================= */
 
 .fare-card{
     margin-top:13px;
@@ -367,7 +401,9 @@ body{
     font-size:19px;
 }
 
-/* PAYMENT */
+/* =========================================================
+   PAYMENT
+========================================================= */
 
 .payment-row{
     display:flex;
@@ -394,7 +430,9 @@ body{
     color:var(--yellow);
 }
 
-/* BOOK BUTTON */
+/* =========================================================
+   BOOK BUTTON
+========================================================= */
 
 .book-btn{
     width:100%;
@@ -414,38 +452,9 @@ body{
     cursor:not-allowed;
 }
 
-/* SEARCH */
-
-.search-results{
-    display:none;
-    margin-top:6px;
-    background:#181818;
-    border:1px solid #303030;
-    border-radius:12px;
-    overflow:hidden;
-}
-
-.search-results.show{
-    display:block;
-}
-
-.search-result{
-    padding:10px;
-    border-bottom:1px solid #292929;
-    font-size:9px;
-    color:#ccc;
-    cursor:pointer;
-}
-
-.search-result:last-child{
-    border-bottom:0;
-}
-
-.search-result:hover{
-    background:#222;
-}
-
-/* LOADING */
+/* =========================================================
+   LOADING
+========================================================= */
 
 .loading-overlay{
     position:absolute;
@@ -462,7 +471,7 @@ body{
 }
 
 .loading-box{
-    width:150px;
+    width:175px;
     padding:20px;
     background:#181818;
     border:1px solid #333;
@@ -491,7 +500,9 @@ body{
     }
 }
 
-/* TOAST */
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:absolute;
@@ -537,406 +548,341 @@ body{
 
 }
 
-</style>
-</head>
+</style></head><body><div class="booking-page"><div id="map"></div>
 
-<body>
-
-<div class="booking-page">
-
-    <div id="map"></div>
-
-    <!-- TOP -->
-
-    <div class="topbar">
-
-        <button
-            class="top-btn"
-            onclick="goBack()"
-        >
-            ‹
-        </button>
-
-        <div class="top-title">
-            Book a Ride
-        </div>
-
-    </div>
-
-
-    <!-- LOCATION -->
+<div class="topbar">
 
     <button
-        class="location-btn"
-        onclick="useCurrentLocation()"
-        title="My location"
+        class="top-btn"
+        type="button"
+        onclick="goBack()"
     >
-        ◎
+        ‹
     </button>
 
+    <div class="top-title">
+        Book a Ride
+    </div>
 
-    <!-- BOOKING SHEET -->
+</div>
 
-    <section
-        class="booking-sheet"
-        id="bookingSheet"
+<button
+    class="location-btn"
+    type="button"
+    onclick="useCurrentLocation()"
+    title="My location"
+>
+    ◎
+</button>
+
+<section
+    class="booking-sheet"
+    id="bookingSheet"
+>
+
+    <div
+        class="sheet-handle-area"
+        id="sheetHandle"
     >
+        <div class="sheet-handle"></div>
+    </div>
 
-        <div
-            class="sheet-handle-area"
-            id="sheetHandle"
-        >
-            <div class="sheet-handle"></div>
+    <div class="sheet-content">
+
+        <div class="location-box">
+
+            <div class="location-row">
+
+                <div class="location-marker pickup-marker">
+                    ●
+                </div>
+
+                <div class="location-input-wrap">
+
+                    <div class="location-label">
+                        Pickup
+                    </div>
+
+                    <input
+                        id="pickupInput"
+                        class="location-input"
+                        type="text"
+                        placeholder="Where should we pick you up?"
+                        autocomplete="off"
+                    >
+
+                    <div
+                        id="pickupResults"
+                        class="search-results"
+                    ></div>
+
+                </div>
+
+                <button
+                    class="swap-btn"
+                    type="button"
+                    onclick="swapLocations()"
+                    title="Swap"
+                >
+                    ⇅
+                </button>
+
+            </div>
+
+            <div class="location-row">
+
+                <div class="location-marker drop-marker">
+                    ●
+                </div>
+
+                <div class="location-input-wrap">
+
+                    <div class="location-label">
+                        Drop
+                    </div>
+
+                    <input
+                        id="dropInput"
+                        class="location-input"
+                        type="text"
+                        placeholder="Where are you going?"
+                        autocomplete="off"
+                    >
+
+                    <div
+                        id="dropResults"
+                        class="search-results"
+                    ></div>
+
+                </div>
+
+            </div>
+
         </div>
 
-
-        <div class="sheet-content">
-
-            <!-- LOCATIONS -->
-
-            <div class="location-box">
-
-                <div class="location-row">
-
-                    <div class="location-marker pickup-marker">
-                        ●
-                    </div>
-
-                    <div class="location-input-wrap">
-
-                        <div class="location-label">
-                            Pickup
-                        </div>
-
-                        <input
-                            id="pickupInput"
-                            class="location-input"
-                            type="text"
-                            placeholder="Where should we pick you up?"
-                            autocomplete="off"
-                        >
-
-                        <div
-                            id="pickupResults"
-                            class="search-results"
-                        ></div>
-
-                    </div>
-
-                    <button
-                        class="swap-btn"
-                        onclick="swapLocations()"
-                        title="Swap"
-                    >
-                        ⇅
-                    </button>
-
-                </div>
-
-
-                <div class="location-row">
-
-                    <div class="location-marker drop-marker">
-                        ●
-                    </div>
-
-                    <div class="location-input-wrap">
-
-                        <div class="location-label">
-                            Drop
-                        </div>
-
-                        <input
-                            id="dropInput"
-                            class="location-input"
-                            type="text"
-                            placeholder="Where are you going?"
-                            autocomplete="off"
-                        >
-
-                        <div
-                            id="dropResults"
-                            class="search-results"
-                        ></div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- SERVICES -->
-
-            <div class="section-title">
-                Choose your ride
-            </div>
-
-            <div class="services">
-
-                <button
-                    class="service active"
-                    data-service="bike"
-                    onclick="selectService('bike',this)"
-                >
-
-                    <div class="service-icon">
-                        🏍️
-                    </div>
-
-                    <div class="service-name">
-                        Bike Taxi
-                    </div>
-
-                    <div class="service-price">
-                        From ₹8/km
-                    </div>
-
-                </button>
-
-
-                <button
-                    class="service"
-                    data-service="cab"
-                    onclick="selectService('cab',this)"
-                >
-
-                    <div class="service-icon">
-                        🚕
-                    </div>
-
-                    <div class="service-name">
-                        Cab
-                    </div>
-
-                    <div class="service-price">
-                        From ₹12/km
-                    </div>
-
-                </button>
-
-
-                <button
-                    class="service"
-                    data-service="parcel"
-                    onclick="selectService('parcel',this)"
-                >
-
-                    <div class="service-icon">
-                        📦
-                    </div>
-
-                    <div class="service-name">
-                        Parcel
-                    </div>
-
-                    <div class="service-price">
-                        From ₹10/km
-                    </div>
-
-                </button>
-
-
-                <button
-                    class="service"
-                    data-service="food"
-                    onclick="selectService('food',this)"
-                >
-
-                    <div class="service-icon">
-                        🍔
-                    </div>
-
-                    <div class="service-name">
-                        Food
-                    </div>
-
-                    <div class="service-price">
-                        Delivery
-                    </div>
-
-                </button>
-
-            </div>
-
-
-            <!-- FARE -->
-
-            <div class="fare-card">
-
-                <div class="fare-row">
-
-                    <div class="fare-label">
-                        Distance
-                    </div>
-
-                    <div
-                        class="fare-value"
-                        id="distanceText"
-                    >
-                        -- km
-                    </div>
-
-                </div>
-
-
-                <div class="fare-row">
-
-                    <div class="fare-label">
-                        Base fare
-                    </div>
-
-                    <div
-                        class="fare-value"
-                        id="baseFare"
-                    >
-                        ₹0
-                    </div>
-
-                </div>
-
-
-                <div class="fare-row">
-
-                    <div class="fare-label">
-                        Distance fare
-                    </div>
-
-                    <div
-                        class="fare-value"
-                        id="distanceFare"
-                    >
-                        ₹0
-                    </div>
-
-                </div>
-
-
-                <div class="fare-row">
-
-                    <div class="fare-label">
-                        Booking fee
-                    </div>
-
-                    <div
-                        class="fare-value"
-                        id="bookingFee"
-                    >
-                        ₹0
-                    </div>
-
-                </div>
-
-
-                <div class="fare-row total-row">
-
-                    <div class="fare-label">
-                        Estimated fare
-                    </div>
-
-                    <div
-                        class="fare-value"
-                        id="totalFare"
-                    >
-                        ₹0
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- PAYMENT -->
-
-            <div class="section-title">
-                Payment method
-            </div>
-
-            <div class="payment-row">
-
-                <button
-                    class="payment-option active"
-                    data-payment="cash"
-                    onclick="selectPayment('cash',this)"
-                >
-                    💵 Cash
-                </button>
-
-                <button
-                    class="payment-option"
-                    data-payment="online"
-                    onclick="selectPayment('online',this)"
-                >
-                    💳 Online
-                </button>
-
-                <button
-                    class="payment-option"
-                    data-payment="wallet"
-                    onclick="selectPayment('wallet',this)"
-                >
-                    👛 Wallet
-                </button>
-
-            </div>
-
-
-            <!-- BOOK -->
+        <div class="section-title">
+            Choose your ride
+        </div>
+
+        <div class="services">
 
             <button
-                class="book-btn"
-                id="bookBtn"
-                onclick="bookRide()"
+                class="service active"
+                type="button"
+                data-service="bike"
+                onclick="selectService('bike',this)"
             >
-                Confirm & Book Ride
+                <div class="service-icon">🏍️</div>
+                <div class="service-name">Bike Taxi</div>
+                <div class="service-price">From ₹8/km</div>
+            </button>
+
+            <button
+                class="service"
+                type="button"
+                data-service="cab"
+                onclick="selectService('cab',this)"
+            >
+                <div class="service-icon">🚕</div>
+                <div class="service-name">Cab</div>
+                <div class="service-price">From ₹12/km</div>
+            </button>
+
+            <button
+                class="service"
+                type="button"
+                data-service="parcel"
+                onclick="selectService('parcel',this)"
+            >
+                <div class="service-icon">📦</div>
+                <div class="service-name">Parcel</div>
+                <div class="service-price">From ₹10/km</div>
+            </button>
+
+            <button
+                class="service"
+                type="button"
+                data-service="food"
+                onclick="selectService('food',this)"
+            >
+                <div class="service-icon">🍔</div>
+                <div class="service-name">Food</div>
+                <div class="service-price">Delivery</div>
             </button>
 
         </div>
 
-    </section>
+        <div class="fare-card">
 
+            <div class="fare-row">
+                <div class="fare-label">Distance</div>
+                <div class="fare-value" id="distanceText">-- km</div>
+            </div>
 
-    <!-- LOADING -->
+            <div class="fare-row">
+                <div class="fare-label">Base fare</div>
+                <div class="fare-value" id="baseFare">₹0</div>
+            </div>
 
-    <div
-        class="loading-overlay"
-        id="loadingOverlay"
-    >
+            <div class="fare-row">
+                <div class="fare-label">Distance fare</div>
+                <div class="fare-value" id="distanceFare">₹0</div>
+            </div>
 
-        <div class="loading-box">
+            <div class="fare-row">
+                <div class="fare-label">Booking fee</div>
+                <div class="fare-value" id="bookingFee">₹0</div>
+            </div>
 
-            <div class="spinner"></div>
-
-            <div
-                class="loading-text"
-                id="loadingText"
-            >
-                Booking your ride...
+            <div class="fare-row total-row">
+                <div class="fare-label">Estimated fare</div>
+                <div class="fare-value" id="totalFare">₹0</div>
             </div>
 
         </div>
 
+        <div class="section-title">
+            Payment method
+        </div>
+
+        <div class="payment-row">
+
+            <button
+                class="payment-option active"
+                type="button"
+                data-payment="cash"
+                onclick="selectPayment('cash',this)"
+            >
+                💵 Cash
+            </button>
+
+            <button
+                class="payment-option"
+                type="button"
+                data-payment="online"
+                onclick="selectPayment('online',this)"
+            >
+                💳 Online
+            </button>
+
+            <button
+                class="payment-option"
+                type="button"
+                data-payment="wallet"
+                onclick="selectPayment('wallet',this)"
+            >
+                👛 Wallet
+            </button>
+
+        </div>
+
+        <button
+            class="book-btn"
+            id="bookBtn"
+            type="button"
+            onclick="bookRide()"
+        >
+            Confirm & Book Ride
+        </button>
+
     </div>
 
+</section>
 
-    <div
-        class="toast"
-        id="toast"
-    ></div>
+<div
+    class="loading-overlay"
+    id="loadingOverlay"
+>
+    <div class="loading-box">
+        <div class="spinner"></div>
 
+        <div
+            class="loading-text"
+            id="loadingText"
+        >
+            Booking your ride...
+        </div>
+    </div>
 </div>
 
+<div
+    class="toast"
+    id="toast"
+></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><!-- =========================================================
+     RIDERX BOOKING ENGINE
+     IMPORTANT:
+     Firebase is initialized by firebase-config.js.
+     booking.js uses that same Firebase instance.
+========================================================= --><script type="module">
 
-<script>
+import {
+    auth
+} from "../firebase/firebase-config.js";
 
-/* ==========================================
-   RIDERX CUSTOMER BOOKING
-========================================== */
+import {
+    initBookingModule,
+    setService,
+    setPaymentMethod,
+    setPickupLocation,
+    setDropLocation,
+    calculateFareEstimate,
+    createRideRequest
+} from "../js/booking.js";
+
+
+window.RiderXBookingReady = false;
+
+window.RiderXBookingAPI = {
+
+    auth,
+
+    initBookingModule,
+
+    setService,
+
+    setPaymentMethod,
+
+    setPickupLocation,
+
+    setDropLocation,
+
+    calculateFareEstimate,
+
+    createRideRequest
+
+};
+
+
+try{
+
+    await initBookingModule();
+
+    window.RiderXBookingReady = true;
+
+    console.log(
+        "RiderX booking engine ready."
+    );
+
+}catch(error){
+
+    console.error(
+        "RiderX booking engine initialization failed:",
+        error
+    );
+
+}
+
+</script><script>
+
+/* =========================================================
+   RIDERX CUSTOMER BOOKING PAGE
+========================================================= */
 
 const $ = id =>
     document.getElementById(id);
+
 
 let map = null;
 
@@ -962,9 +908,9 @@ let sheetStartHeight = 0;
 let draggingSheet = false;
 
 
-/* ==========================================
+/* =========================================================
    MAP
-========================================== */
+========================================================= */
 
 function initMap(){
 
@@ -1003,18 +949,14 @@ function initMap(){
         "click",
         function(event){
 
-            if(
-                !pickupCoords
-            ){
+            if(!pickupCoords){
 
                 setPickup(
                     event.latlng.lat,
                     event.latlng.lng
                 );
 
-            }else if(
-                !dropCoords
-            ){
+            }else if(!dropCoords){
 
                 setDrop(
                     event.latlng.lat,
@@ -1029,9 +971,9 @@ function initMap(){
 }
 
 
-/* ==========================================
+/* =========================================================
    CURRENT LOCATION
-========================================== */
+========================================================= */
 
 function useCurrentLocation(){
 
@@ -1043,7 +985,6 @@ function useCurrentLocation(){
         );
 
         return;
-
     }
 
 
@@ -1074,18 +1015,12 @@ function useCurrentLocation(){
                 16
             );
 
-
-            reverseGeocode(
-                lat,
-                lng,
-                "pickup"
-            );
-
         },
 
         error => {
 
             console.error(
+                "Location error:",
                 error
             );
 
@@ -1107,9 +1042,9 @@ function useCurrentLocation(){
 }
 
 
-/* ==========================================
+/* =========================================================
    SET PICKUP
-========================================== */
+========================================================= */
 
 function setPickup(
     lat,
@@ -1117,8 +1052,8 @@ function setPickup(
 ){
 
     pickupCoords = {
-        lat:lat,
-        lng:lng
+        lat:Number(lat),
+        lng:Number(lng)
     };
 
 
@@ -1157,8 +1092,6 @@ function setPickup(
                     "pickup"
                 );
 
-                calculateFare();
-
             }
         );
 
@@ -1174,9 +1107,9 @@ function setPickup(
 }
 
 
-/* ==========================================
+/* =========================================================
    SET DROP
-========================================== */
+========================================================= */
 
 function setDrop(
     lat,
@@ -1184,8 +1117,8 @@ function setDrop(
 ){
 
     dropCoords = {
-        lat:lat,
-        lng:lng
+        lat:Number(lat),
+        lng:Number(lng)
     };
 
 
@@ -1224,8 +1157,6 @@ function setDrop(
                     "drop"
                 );
 
-                calculateFare();
-
             }
         );
 
@@ -1238,15 +1169,58 @@ function setDrop(
         "drop"
     );
 
+}
 
-    calculateFare();
+
+/* =========================================================
+   SYNC LOCATION WITH BOOKING ENGINE
+========================================================= */
+
+function syncBookingLocations(){
+
+    const api =
+        window.RiderXBookingAPI;
+
+    if(!api){
+
+        return false;
+    }
+
+
+    if(
+        pickupCoords
+    ){
+
+        api.setPickupLocation(
+            pickupCoords.lat,
+            pickupCoords.lng,
+            $("pickupInput").value.trim()
+        );
+
+    }
+
+
+    if(
+        dropCoords
+    ){
+
+        api.setDropLocation(
+            dropCoords.lat,
+            dropCoords.lng,
+            $("dropInput").value.trim()
+        );
+
+    }
+
+
+    return true;
 
 }
 
 
-/* ==========================================
+/* =========================================================
    REVERSE GEOCODE
-========================================== */
+========================================================= */
 
 async function reverseGeocode(
     lat,
@@ -1273,13 +1247,22 @@ async function reverseGeocode(
             );
 
 
+        if(!response.ok){
+
+            throw new Error(
+                "Reverse geocoding failed."
+            );
+
+        }
+
+
         const data =
             await response.json();
 
 
         const address =
             data.display_name ||
-            `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
 
 
         if(type === "pickup"){
@@ -1295,6 +1278,8 @@ async function reverseGeocode(
         }
 
 
+        syncBookingLocations();
+
         calculateFare();
 
     }catch(error){
@@ -1304,14 +1289,18 @@ async function reverseGeocode(
             error
         );
 
+        syncBookingLocations();
+
+        calculateFare();
+
     }
 
 }
 
 
-/* ==========================================
+/* =========================================================
    SEARCH LOCATION
-========================================== */
+========================================================= */
 
 async function searchLocation(
     query,
@@ -1326,7 +1315,6 @@ async function searchLocation(
         hideSearchResults(type);
 
         return;
-
     }
 
 
@@ -1346,6 +1334,15 @@ async function searchLocation(
                     }
                 }
             );
+
+
+        if(!response.ok){
+
+            throw new Error(
+                "Location search failed."
+            );
+
+        }
 
 
         const results =
@@ -1369,9 +1366,9 @@ async function searchLocation(
 }
 
 
-/* ==========================================
+/* =========================================================
    SEARCH RESULTS
-========================================== */
+========================================================= */
 
 function showSearchResults(
     results,
@@ -1384,12 +1381,14 @@ function showSearchResults(
             : $("dropResults");
 
 
-    if(!results.length){
+    if(
+        !Array.isArray(results) ||
+        !results.length
+    ){
 
         hideSearchResults(type);
 
         return;
-
     }
 
 
@@ -1405,8 +1404,10 @@ function showSearchResults(
                     "div"
                 );
 
+
             item.className =
                 "search-result";
+
 
             item.textContent =
                 result.display_name;
@@ -1488,9 +1489,9 @@ function hideSearchResults(
 }
 
 
-/* ==========================================
+/* =========================================================
    INPUT SEARCH
-========================================== */
+========================================================= */
 
 $("pickupInput")
     .addEventListener(
@@ -1546,24 +1547,33 @@ $("dropInput")
     );
 
 
-/* ==========================================
+/* =========================================================
    SWAP
-========================================== */
+========================================================= */
 
 function swapLocations(){
 
-    const oldPickup =
+    if(
+        !pickupCoords &&
+        !dropCoords
+    ){
+
+        return;
+    }
+
+
+    const oldPickupText =
         $("pickupInput").value;
 
-    const oldDrop =
+    const oldDropText =
         $("dropInput").value;
 
 
     $("pickupInput").value =
-        oldDrop;
+        oldDropText;
 
     $("dropInput").value =
-        oldPickup;
+        oldPickupText;
 
 
     const oldCoords =
@@ -1578,13 +1588,21 @@ function swapLocations(){
 
     if(
         pickupMarker &&
-        dropMarker
+        pickupCoords
     ){
 
         pickupMarker.setLatLng([
             pickupCoords.lat,
             pickupCoords.lng
         ]);
+
+    }
+
+
+    if(
+        dropMarker &&
+        dropCoords
+    ){
 
         dropMarker.setLatLng([
             dropCoords.lat,
@@ -1594,14 +1612,16 @@ function swapLocations(){
     }
 
 
+    syncBookingLocations();
+
     calculateFare();
 
 }
 
 
-/* ==========================================
+/* =========================================================
    SERVICE
-========================================== */
+========================================================= */
 
 function selectService(
     service,
@@ -1609,7 +1629,8 @@ function selectService(
 ){
 
     selectedService =
-        service;
+        String(service)
+        .toLowerCase();
 
 
     document
@@ -1629,14 +1650,26 @@ function selectService(
     );
 
 
+    if(
+        window.RiderXBookingAPI
+    ){
+
+        window.RiderXBookingAPI
+            .setService(
+                selectedService
+            );
+
+    }
+
+
     calculateFare();
 
 }
 
 
-/* ==========================================
+/* =========================================================
    PAYMENT
-========================================== */
+========================================================= */
 
 function selectPayment(
     payment,
@@ -1644,7 +1677,8 @@ function selectPayment(
 ){
 
     selectedPayment =
-        payment;
+        String(payment)
+        .toLowerCase();
 
 
     document
@@ -1663,12 +1697,24 @@ function selectPayment(
         "active"
     );
 
+
+    if(
+        window.RiderXBookingAPI
+    ){
+
+        window.RiderXBookingAPI
+            .setPaymentMethod(
+                selectedPayment
+            );
+
+    }
+
 }
 
 
-/* ==========================================
+/* =========================================================
    DISTANCE
-========================================== */
+========================================================= */
 
 function calculateDistance(
     lat1,
@@ -1726,9 +1772,9 @@ function calculateDistance(
 }
 
 
-/* ==========================================
+/* =========================================================
    FARE
-========================================== */
+========================================================= */
 
 function calculateFare(){
 
@@ -1756,7 +1802,6 @@ function calculateFare(){
             "₹0";
 
         return;
-
     }
 
 
@@ -1786,64 +1831,40 @@ function calculateFare(){
     let rate =
         8;
 
-
     let base =
         20;
 
 
     if(
-        selectedService ===
-        "cab"
+        selectedService === "cab"
     ){
 
-        rate =
-            12;
-
-        base =
-            40;
+        rate = 12;
+        base = 40;
 
     }else if(
-        selectedService ===
-        "parcel"
+        selectedService === "parcel"
     ){
 
-        rate =
-            10;
-
-        base =
-            25;
+        rate = 10;
+        base = 25;
 
     }else if(
-        selectedService ===
-        "food"
+        selectedService === "food"
     ){
 
-        rate =
-            10;
-
-        base =
-            20;
+        rate = 10;
+        base = 20;
 
     }
 
-
-    /*
-       RiderX pricing:
-       Day:
-       Up to 10 km = ₹8/km
-       Above 10 km = ₹9/km
-
-       Night:
-       10 PM - 6 AM = ₹11/km
-    */
 
     const hour =
         new Date().getHours();
 
 
     if(
-        selectedService ===
-        "bike"
+        selectedService === "bike"
     ){
 
         if(
@@ -1851,20 +1872,17 @@ function calculateFare(){
             hour < 6
         ){
 
-            rate =
-                11;
+            rate = 11;
 
         }else if(
             routeDistanceKm > 10
         ){
 
-            rate =
-                9;
+            rate = 9;
 
         }else{
 
-            rate =
-                8;
+            rate = 8;
 
         }
 
@@ -1877,8 +1895,7 @@ function calculateFare(){
 
 
     const bookingFee =
-        selectedService ===
-        "bike"
+        selectedService === "bike"
             ? 5
             : 10;
 
@@ -1899,9 +1916,7 @@ function calculateFare(){
 
     $("distanceFare").textContent =
         "₹" +
-        Math.round(
-            distanceFare
-        );
+        Math.round(distanceFare);
 
 
     $("bookingFee").textContent =
@@ -1913,12 +1928,31 @@ function calculateFare(){
         "₹" +
         Math.round(total);
 
+
+    /*
+     * Keep authoritative booking engine
+     * state synchronized with this UI.
+     */
+
+    if(
+        window.RiderXBookingAPI
+    ){
+
+        syncBookingLocations();
+
+        window.RiderXBookingAPI
+            .setService(
+                selectedService
+            );
+
+    }
+
 }
 
 
-/* ==========================================
+/* =========================================================
    GET TOTAL
-========================================== */
+========================================================= */
 
 function getEstimatedFare(){
 
@@ -1936,11 +1970,23 @@ function getEstimatedFare(){
 }
 
 
-/* ==========================================
+/* =========================================================
    BOOK RIDE
-========================================== */
+========================================================= */
 
 async function bookRide(){
+
+    const bookButton =
+        $("bookBtn");
+
+
+    if(
+        bookButton.disabled
+    ){
+
+        return;
+    }
+
 
     if(!pickupCoords){
 
@@ -1950,7 +1996,6 @@ async function bookRide(){
         );
 
         return;
-
     }
 
 
@@ -1962,7 +2007,6 @@ async function bookRide(){
         );
 
         return;
-
     }
 
 
@@ -1976,160 +2020,167 @@ async function bookRide(){
         );
 
         return;
-
     }
 
 
-    const rideData = {
+    if(
+        pickupCoords.lat === dropCoords.lat &&
+        pickupCoords.lng === dropCoords.lng
+    ){
 
-        serviceType:
-            selectedService,
+        showToast(
+            "Pickup and drop cannot be the same.",
+            "error"
+        );
 
-        pickup:{
-            lat:
-                pickupCoords.lat,
+        return;
+    }
 
-            lng:
-                pickupCoords.lng,
 
-            address:
-                $("pickupInput").value.trim()
-        },
+    const api =
+        window.RiderXBookingAPI;
 
-        drop:{
-            lat:
-                dropCoords.lat,
 
-            lng:
-                dropCoords.lng,
+    if(!api){
 
-            address:
-                $("dropInput").value.trim()
-        },
+        showToast(
+            "RiderX booking engine is not ready. Please reload.",
+            "error"
+        );
 
-        distance:
-            Number(
-                routeDistanceKm.toFixed(2)
-            ),
+        return;
+    }
 
-        duration:
-            routeDurationMin,
 
-        fare:
-            getEstimatedFare(),
+    const user =
+        api.auth?.currentUser;
 
-        paymentMethod:
-            selectedPayment,
 
-        status:
-            "searching",
+    if(!user){
 
-        createdAt:
-            new Date().toISOString()
+        showToast(
+            "Please login as customer first.",
+            "error"
+        );
 
-    };
+
+        setTimeout(
+            () => {
+
+                window.location.href =
+                    "../auth/login.html?role=customer";
+
+            },
+            900
+        );
+
+
+        return;
+    }
+
+
+    /*
+     * VERY IMPORTANT:
+     * Sync page state into the authoritative
+     * RiderX booking engine before creating
+     * the Firestore ride.
+     */
+
+    syncBookingLocations();
+
+
+    api.setService(
+        selectedService
+    );
+
+
+    api.setPaymentMethod(
+        selectedPayment
+    );
+
+
+    api.calculateFareEstimate();
 
 
     setLoading(
         true,
-        "Finding nearby riders..."
+        "Creating ride request..."
     );
 
 
     try{
 
-        let result = null;
-
-
         /*
-          Existing Booking.js/Firebase
-          functions are preferred.
-        */
+         * This is the real Firebase booking path.
+         *
+         * js/booking.js -> Firestore -> rides/{rideId}
+         */
 
-        if(
-            typeof window.createRideBooking ===
-            "function"
-        ){
-
-            result =
-                await window.createRideBooking(
-                    rideData
-                );
-
-        }else if(
-            typeof window.bookRide ===
-            "function" &&
-            window.bookRide !== bookRide
-        ){
-
-            result =
-                await window.bookRide(
-                    rideData
-                );
-
-        }else if(
-            typeof window.createBooking ===
-            "function"
-        ){
-
-            result =
-                await window.createBooking(
-                    rideData
-                );
-
-        }else{
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    "riderxCreateBooking",
-                    {
-                        detail:rideData
-                    }
-                )
+        const booking =
+            await api.createRideRequest(
+                selectedPayment
             );
 
 
-            /*
-              Fallback local state.
-              This keeps the page usable
-              until Booking.js handles it.
-            */
-
-            localStorage.setItem(
-                "riderxPendingBooking",
-                JSON.stringify(
-                    rideData
-                )
-            );
-
-            result = {
-                id:
-                    "local-" +
-                    Date.now()
-            };
-
-        }
-
-
-        if(result === false){
+        if(!booking){
 
             throw new Error(
-                "Booking failed."
+                "Ride request was not created."
             );
 
         }
 
 
         const rideId =
-            result?.rideId ||
-            result?.id ||
-            result?.bookingId ||
-            "";
+            typeof booking === "string"
+                ? booking
+                : (
+                    booking.id ||
+                    booking.rideId ||
+                    booking.bookingId ||
+                    ""
+                );
+
+
+        if(!rideId){
+
+            throw new Error(
+                "Firebase created the ride but no ride ID was returned."
+            );
+
+        }
+
+
+        /*
+         * Save only the real Firebase ride ID.
+         * No fake/local booking is created.
+         */
+
+        localStorage.setItem(
+            "riderx_active_ride_id",
+            rideId
+        );
+
+
+        localStorage.setItem(
+            "riderxPendingBooking",
+            JSON.stringify({
+                rideId:rideId,
+                customerId:user.uid,
+                status:"searching"
+            })
+        );
 
 
         setLoading(
             true,
             "Ride request sent..."
+        );
+
+
+        showToast(
+            "Ride request sent successfully.",
+            "success"
         );
 
 
@@ -2140,29 +2191,25 @@ async function bookRide(){
                     "searching.html";
 
 
-                if(rideId){
-
-                    url +=
-                        "?rideId=" +
-                        encodeURIComponent(
-                            rideId
-                        );
-
-                }
+                url +=
+                    "?rideId=" +
+                    encodeURIComponent(
+                        rideId
+                    );
 
 
                 window.location.href =
                     url;
 
             },
-            350
+            600
         );
 
 
     }catch(error){
 
         console.error(
-            "Booking error:",
+            "RiderX ride creation error:",
             error
         );
 
@@ -2172,9 +2219,40 @@ async function bookRide(){
         );
 
 
+        let message =
+            error?.message ||
+            "Unable to create ride.";
+
+
+        /*
+         * Make Firebase permission errors
+         * easier to understand.
+         */
+
+        if(
+            error?.code ===
+            "permission-denied"
+        ){
+
+            message =
+                "Firestore permission denied. Please publish the correct Firestore rules.";
+
+        }
+
+
+        if(
+            error?.code ===
+            "unauthenticated"
+        ){
+
+            message =
+                "Customer login expired. Please login again.";
+
+        }
+
+
         showToast(
-            error.message ||
-            "Unable to book ride.",
+            message,
             "error"
         );
 
@@ -2183,9 +2261,9 @@ async function bookRide(){
 }
 
 
-/* ==========================================
+/* =========================================================
    LOADING
-========================================== */
+========================================================= */
 
 function setLoading(
     show,
@@ -2210,9 +2288,9 @@ function setLoading(
 }
 
 
-/* ==========================================
+/* =========================================================
    TOAST
-========================================== */
+========================================================= */
 
 function showToast(
     message,
@@ -2245,15 +2323,15 @@ function showToast(
                     "toast";
 
             },
-            3000
+            3500
         );
 
 }
 
 
-/* ==========================================
+/* =========================================================
    BACK
-========================================== */
+========================================================= */
 
 function goBack(){
 
@@ -2273,9 +2351,9 @@ function goBack(){
 }
 
 
-/* ==========================================
+/* =========================================================
    DRAGGABLE SHEET
-========================================== */
+========================================================= */
 
 const sheet =
     $("bookingSheet");
@@ -2305,8 +2383,10 @@ function moveSheetDrag(
     y
 ){
 
-    if(!draggingSheet)
+    if(!draggingSheet){
+
         return;
+    }
 
 
     const delta =
@@ -2327,8 +2407,7 @@ function moveSheetDrag(
 
 
     const maxHeight =
-        viewport *
-        .88;
+        viewport * .88;
 
 
     newHeight =
@@ -2355,8 +2434,10 @@ function moveSheetDrag(
 
 function endSheetDrag(){
 
-    if(!draggingSheet)
+    if(!draggingSheet){
+
         return;
+    }
 
 
     draggingSheet =
@@ -2462,10 +2543,6 @@ document.addEventListener(
 );
 
 
-/* ==========================================
-   SHEET TAP
-========================================== */
-
 handle.addEventListener(
     "click",
     function(){
@@ -2478,9 +2555,9 @@ handle.addEventListener(
 );
 
 
-/* ==========================================
-   INITIALIZE
-========================================== */
+/* =========================================================
+   INITIALIZE PAGE
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
@@ -2490,22 +2567,46 @@ document.addEventListener(
 
         calculateFare();
 
+
         /*
-          Automatically request location
-          when browser permits it.
-        */
+         * Default service/payment.
+         */
+
+        if(
+            window.RiderXBookingAPI
+        ){
+
+            window.RiderXBookingAPI
+                .setService(
+                    "bike"
+                );
+
+            window.RiderXBookingAPI
+                .setPaymentMethod(
+                    "cash"
+                );
+
+        }
+
+
+        /*
+         * Automatically request current
+         * location.
+         */
 
         if(
             navigator.geolocation
         ){
 
             navigator.geolocation.getCurrentPosition(
+
                 function(position){
 
                     setPickup(
                         position.coords.latitude,
                         position.coords.longitude
                     );
+
 
                     map.setView(
                         [
@@ -2516,28 +2617,32 @@ document.addEventListener(
                     );
 
                 },
+
                 function(){
 
                     /*
-                      Permission denied:
-                      user can still select location
-                      manually from map/search.
-                    */
+                     * Permission denied.
+                     * Manual map/search selection
+                     * remains available.
+                     */
 
                 },
+
                 {
                     enableHighAccuracy:true,
                     timeout:5000,
                     maximumAge:60000
                 }
+
             );
 
         }
 
+    },
+    {
+        once:true
     }
 );
 
-</script>
-
-</body>
-    </html>
+</script></body>
+</html>
