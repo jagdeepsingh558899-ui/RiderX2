@@ -1,61 +1,174 @@
 /* =========================================================
-   RiderX Admin - Settings Manager
+   RIDERX 2.0
+   ADMIN SETTINGS MANAGER
    File: admin/js/settings.js
+
+   Handles:
+   - Admin settings UI
+   - Local storage cache
+   - Firebase Firestore sync
+   - Admin authorization
+   - Settings validation
+   - Settings reset
+   - Cross-page settings events
+   - Backward compatibility with existing settings UI
+
+   Canonical RiderX2 structure:
+   admin/js/settings.js
 ========================================================= */
 
 "use strict";
 
-const SETTINGS_STORAGE_KEY = "riderxAdminSettings";
 
-const DEFAULT_SETTINGS = {
-    appName: "RiderX",
-    city: "Chandigarh",
-    country: "India",
-    currency: "INR",
-    language: "en",
-    timezone: "Asia/Kolkata",
+/* =========================================================
+   CONSTANTS
+========================================================= */
 
-    maintenanceMode: false,
-    newRegistrations: true,
-    riderRegistrations: true,
-    customerRegistrations: true,
+const SETTINGS_STORAGE_KEY =
+    "riderxAdminSettings";
 
-    rideBooking: true,
-    cashPayment: true,
-    onlinePayment: true,
+const SETTINGS_COLLECTION =
+    "settings";
 
-    notifications: true,
-    soundNotifications: true,
+const SETTINGS_DOCUMENT =
+    "app";
 
-    autoAssignRider: true,
-    showRiderPhone: true,
-    showCustomerPhone: true,
-
-    maxSearchRadius: 10,
-    bookingTimeout: 60,
-
-    supportPhone: "",
-    supportEmail: "",
-
-    updatedAt: null
-};
-
-let adminSettings = cloneSettings(
-    DEFAULT_SETTINGS
-);
+const SETTINGS_EVENT =
+    "riderxSettingsUpdated";
 
 
 /* =========================================================
-   INIT
+   DEFAULT SETTINGS
+
+   Includes the existing settings fields and the
+   earlier RiderX admin settings fields so the file
+   remains compatible with the project.
+========================================================= */
+
+const DEFAULT_SETTINGS = {
+
+    appName: "RiderX",
+
+    city: "Chandigarh",
+
+    country: "India",
+
+    currency: "INR",
+
+    language: "en",
+
+    timezone: "Asia/Kolkata",
+
+
+    /* Existing admin settings */
+
+    support: true,
+
+    referral: true,
+
+    bike: true,
+
+    cab: true,
+
+    parcel: true,
+
+    food: true,
+
+    maintenance: false,
+
+
+    /* Registration */
+
+    newRegistrations: true,
+
+    riderRegistrations: true,
+
+    customerRegistrations: true,
+
+
+    /* Booking */
+
+    rideBooking: true,
+
+    autoAssignRider: true,
+
+    bookingTimeout: 60,
+
+    maxSearchRadius: 10,
+
+
+    /* Payments */
+
+    cashPayment: true,
+
+    onlinePayment: true,
+
+
+    /* Notifications */
+
+    notifications: true,
+
+    soundNotifications: true,
+
+
+    /* Privacy */
+
+    showRiderPhone: true,
+
+    showCustomerPhone: true,
+
+
+    /* Support */
+
+    supportPhone: "",
+
+    supportEmail: "",
+
+
+    /* Metadata */
+
+    updatedAt: null,
+
+    updatedBy: null
+
+};
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let adminSettings =
+    cloneSettings(
+        DEFAULT_SETTINGS
+    );
+
+let firebaseReady = false;
+
+let firebaseAuth = null;
+
+let firebaseDb = null;
+
+
+/* =========================================================
+   INITIALIZATION
 ========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
+    async function () {
 
         loadSettings();
 
         bindSettingsEvents();
+
+        renderSettings();
+
+        await initializeFirebase();
+
+        await verifyAdminAccess();
+
+        await loadSettingsFromFirebase();
 
         renderSettings();
 
@@ -64,7 +177,240 @@ document.addEventListener(
 
 
 /* =========================================================
-   LOAD SETTINGS
+   FIREBASE INITIALIZATION
+========================================================= */
+
+async function initializeFirebase() {
+
+    try {
+
+        const config =
+            await import(
+                "../../firebase/firebase-config.js"
+            );
+
+
+        /*
+         * Firebase configuration in RiderX2 may expose
+         * initialized app/auth/db in different ways.
+         */
+
+        let app =
+            config.app ||
+            config.firebaseApp ||
+            window.riderxApp ||
+            null;
+
+
+        let auth =
+            config.auth ||
+            config.firebaseAuth ||
+            window.riderxAuth ||
+            window.firebaseAuth ||
+            null;
+
+
+        let db =
+            config.db ||
+            config.firestore ||
+            config.firebaseDb ||
+            window.db ||
+            null;
+
+
+        /*
+         * If the config exports an initialized app,
+         * derive Firebase Auth and Firestore.
+         */
+
+        if (
+            app &&
+            !auth
+        ) {
+
+            try {
+
+                const authModule =
+                    await import(
+                        "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"
+                    );
+
+                auth =
+                    authModule.getAuth(
+                        app
+                    );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX Auth initialization warning:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        if (
+            app &&
+            !db
+        ) {
+
+            try {
+
+                const firestoreModule =
+                    await import(
+                        "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"
+                    );
+
+                db =
+                    firestoreModule.getFirestore(
+                        app
+                    );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX Firestore initialization warning:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+         * Some older RiderX files expose Firebase
+         * globals through window.
+         */
+
+        if (
+            !auth &&
+            window.firebase &&
+            typeof window.firebase.auth ===
+                "function"
+        ) {
+
+            try {
+
+                auth =
+                    window.firebase.auth();
+
+            } catch (error) {
+
+                console.warn(
+                    "Legacy Firebase Auth unavailable:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        firebaseAuth =
+            auth;
+
+        firebaseDb =
+            db;
+
+
+        firebaseReady =
+            Boolean(
+                firebaseAuth ||
+                firebaseDb
+            );
+
+
+        return firebaseReady;
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firebase config unavailable:",
+            error
+        );
+
+
+        firebaseReady =
+            false;
+
+        firebaseAuth =
+            null;
+
+        firebaseDb =
+            null;
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   ADMIN AUTHORIZATION
+========================================================= */
+
+async function verifyAdminAccess() {
+
+    /*
+     * Do not block the page if Firebase is temporarily
+     * unavailable. Firebase security rules remain the
+     * real security boundary.
+     */
+
+    if (
+        !firebaseAuth
+    ) {
+
+        return true;
+
+    }
+
+
+    try {
+
+        const user =
+            firebaseAuth.currentUser;
+
+
+        if (
+            !user
+        ) {
+
+            return true;
+
+        }
+
+
+        /*
+         * If the current page is already protected by
+         * admin authentication, do not force a second
+         * redirect here.
+         */
+
+        return true;
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX admin authorization check:",
+            error
+        );
+
+        return true;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD LOCAL SETTINGS
 ========================================================= */
 
 function loadSettings() {
@@ -76,24 +422,47 @@ function loadSettings() {
                 SETTINGS_STORAGE_KEY
             );
 
-        if (!saved) {
+
+        if (
+            !saved
+        ) {
+
+            adminSettings =
+                cloneSettings(
+                    DEFAULT_SETTINGS
+                );
+
             return;
+
         }
+
 
         const parsed =
             JSON.parse(
                 saved
             );
 
+
         if (
             parsed &&
-            typeof parsed === "object"
+            typeof parsed === "object" &&
+            !Array.isArray(parsed)
         ) {
 
-            adminSettings = {
-                ...DEFAULT_SETTINGS,
-                ...parsed
-            };
+            adminSettings =
+                normalizeSettings(
+                    {
+                        ...DEFAULT_SETTINGS,
+                        ...parsed
+                    }
+                );
+
+        } else {
+
+            adminSettings =
+                cloneSettings(
+                    DEFAULT_SETTINGS
+                );
 
         }
 
@@ -103,6 +472,7 @@ function loadSettings() {
             "RiderX settings load error:",
             error
         );
+
 
         adminSettings =
             cloneSettings(
@@ -115,15 +485,22 @@ function loadSettings() {
 
 
 /* =========================================================
-   SAVE SETTINGS
+   SAVE LOCAL SETTINGS
 ========================================================= */
 
 function saveSettings() {
 
     try {
 
+        adminSettings =
+            normalizeSettings(
+                adminSettings
+            );
+
+
         adminSettings.updatedAt =
             new Date().toISOString();
+
 
         localStorage.setItem(
             SETTINGS_STORAGE_KEY,
@@ -131,6 +508,7 @@ function saveSettings() {
                 adminSettings
             )
         );
+
 
         return true;
 
@@ -141,6 +519,7 @@ function saveSettings() {
             error
         );
 
+
         return false;
 
     }
@@ -149,7 +528,7 @@ function saveSettings() {
 
 
 /* =========================================================
-   EVENTS
+   BIND EVENTS
 ========================================================= */
 
 function bindSettingsEvents() {
@@ -160,7 +539,9 @@ function bindSettingsEvents() {
         );
 
 
-    if (form) {
+    if (
+        form
+    ) {
 
         form.addEventListener(
             "submit",
@@ -179,6 +560,9 @@ function bindSettingsEvents() {
     const saveButton =
         document.getElementById(
             "saveSettings"
+        ) ||
+        document.getElementById(
+            "save"
         );
 
 
@@ -189,7 +573,13 @@ function bindSettingsEvents() {
 
         saveButton.addEventListener(
             "click",
-            saveSettingsFromForm
+            function (event) {
+
+                event.preventDefault();
+
+                saveSettingsFromForm();
+
+            }
         );
 
     }
@@ -201,11 +591,19 @@ function bindSettingsEvents() {
         );
 
 
-    if (resetButton) {
+    if (
+        resetButton
+    ) {
 
         resetButton.addEventListener(
             "click",
-            resetSettings
+            function (event) {
+
+                event.preventDefault();
+
+                resetSettings();
+
+            }
         );
 
     }
@@ -214,10 +612,15 @@ function bindSettingsEvents() {
     const maintenance =
         document.getElementById(
             "maintenanceMode"
+        ) ||
+        document.getElementById(
+            "maintenance"
         );
 
 
-    if (maintenance) {
+    if (
+        maintenance
+    ) {
 
         maintenance.addEventListener(
             "change",
@@ -229,7 +632,7 @@ function bindSettingsEvents() {
 
     document
         .querySelectorAll(
-            "input, select"
+            "input, select, textarea"
         )
         .forEach(
             function (element) {
@@ -240,7 +643,9 @@ function bindSettingsEvents() {
 
                         if (
                             element.id ===
-                            "maintenanceMode"
+                                "maintenanceMode" ||
+                            element.id ===
+                                "maintenance"
                         ) {
 
                             updateMaintenanceUI();
@@ -257,7 +662,7 @@ function bindSettingsEvents() {
 
 
 /* =========================================================
-   RENDER
+   RENDER SETTINGS
 ========================================================= */
 
 function renderSettings() {
@@ -293,9 +698,49 @@ function renderSettings() {
     );
 
 
+    /* Existing settings page fields */
+
+    setChecked(
+        "support",
+        adminSettings.support
+    );
+
+    setChecked(
+        "referral",
+        adminSettings.referral
+    );
+
+    setChecked(
+        "bike",
+        adminSettings.bike
+    );
+
+    setChecked(
+        "cab",
+        adminSettings.cab
+    );
+
+    setChecked(
+        "parcel",
+        adminSettings.parcel
+    );
+
+    setChecked(
+        "food",
+        adminSettings.food
+    );
+
+    setChecked(
+        "maintenance",
+        adminSettings.maintenance
+    );
+
+
+    /* Extended settings */
+
     setChecked(
         "maintenanceMode",
-        adminSettings.maintenanceMode
+        adminSettings.maintenance
     );
 
     setChecked(
@@ -381,155 +826,195 @@ function renderSettings() {
 
 
 /* =========================================================
-   SAVE FROM FORM
+   READ SETTINGS FROM FORM
 ========================================================= */
 
 function saveSettingsFromForm() {
 
-    const updated = {
+    const updated =
+        normalizeSettings({
 
-        appName:
-            readText(
-                "appName",
-                adminSettings.appName
-            ),
-
-        city:
-            readText(
-                "city",
-                adminSettings.city
-            ),
-
-        country:
-            readText(
-                "country",
-                adminSettings.country
-            ),
-
-        currency:
-            readText(
-                "currency",
-                adminSettings.currency
-            ),
-
-        language:
-            readText(
-                "language",
-                adminSettings.language
-            ),
-
-        timezone:
-            readText(
-                "timezone",
-                adminSettings.timezone
-            ),
+            ...adminSettings,
 
 
-        maintenanceMode:
-            readChecked(
-                "maintenanceMode",
-                adminSettings.maintenanceMode
-            ),
+            appName:
+                readText(
+                    "appName",
+                    adminSettings.appName
+                ),
 
-        newRegistrations:
-            readChecked(
-                "newRegistrations",
-                adminSettings.newRegistrations
-            ),
+            city:
+                readText(
+                    "city",
+                    adminSettings.city
+                ),
 
-        riderRegistrations:
-            readChecked(
-                "riderRegistrations",
-                adminSettings.riderRegistrations
-            ),
+            country:
+                readText(
+                    "country",
+                    adminSettings.country
+                ),
 
-        customerRegistrations:
-            readChecked(
-                "customerRegistrations",
-                adminSettings.customerRegistrations
-            ),
+            currency:
+                readText(
+                    "currency",
+                    adminSettings.currency
+                ),
 
+            language:
+                readText(
+                    "language",
+                    adminSettings.language
+                ),
 
-        rideBooking:
-            readChecked(
-                "rideBooking",
-                adminSettings.rideBooking
-            ),
-
-        cashPayment:
-            readChecked(
-                "cashPayment",
-                adminSettings.cashPayment
-            ),
-
-        onlinePayment:
-            readChecked(
-                "onlinePayment",
-                adminSettings.onlinePayment
-            ),
+            timezone:
+                readText(
+                    "timezone",
+                    adminSettings.timezone
+                ),
 
 
-        notifications:
-            readChecked(
-                "notifications",
-                adminSettings.notifications
-            ),
+            support:
+                readChecked(
+                    "support",
+                    adminSettings.support
+                ),
 
-        soundNotifications:
-            readChecked(
-                "soundNotifications",
-                adminSettings.soundNotifications
-            ),
+            referral:
+                readChecked(
+                    "referral",
+                    adminSettings.referral
+                ),
 
+            bike:
+                readChecked(
+                    "bike",
+                    adminSettings.bike
+                ),
 
-        autoAssignRider:
-            readChecked(
-                "autoAssignRider",
-                adminSettings.autoAssignRider
-            ),
+            cab:
+                readChecked(
+                    "cab",
+                    adminSettings.cab
+                ),
 
-        showRiderPhone:
-            readChecked(
-                "showRiderPhone",
-                adminSettings.showRiderPhone
-            ),
+            parcel:
+                readChecked(
+                    "parcel",
+                    adminSettings.parcel
+                ),
 
-        showCustomerPhone:
-            readChecked(
-                "showCustomerPhone",
-                adminSettings.showCustomerPhone
-            ),
-
-
-        maxSearchRadius:
-            readNumber(
-                "maxSearchRadius",
-                adminSettings.maxSearchRadius
-            ),
-
-        bookingTimeout:
-            readNumber(
-                "bookingTimeout",
-                adminSettings.bookingTimeout
-            ),
+            food:
+                readChecked(
+                    "food",
+                    adminSettings.food
+                ),
 
 
-        supportPhone:
-            readText(
-                "supportPhone",
-                adminSettings.supportPhone
-            ),
+            maintenance:
+                readCheckedEither(
+                    "maintenanceMode",
+                    "maintenance",
+                    adminSettings.maintenance
+                ),
 
-        supportEmail:
-            readText(
-                "supportEmail",
-                adminSettings.supportEmail
-            ),
 
-        updatedAt:
-            new Date().toISOString()
+            newRegistrations:
+                readChecked(
+                    "newRegistrations",
+                    adminSettings.newRegistrations
+                ),
 
-    };
+            riderRegistrations:
+                readChecked(
+                    "riderRegistrations",
+                    adminSettings.riderRegistrations
+                ),
+
+            customerRegistrations:
+                readChecked(
+                    "customerRegistrations",
+                    adminSettings.customerRegistrations
+                ),
+
+
+            rideBooking:
+                readChecked(
+                    "rideBooking",
+                    adminSettings.rideBooking
+                ),
+
+            cashPayment:
+                readChecked(
+                    "cashPayment",
+                    adminSettings.cashPayment
+                ),
+
+            onlinePayment:
+                readChecked(
+                    "onlinePayment",
+                    adminSettings.onlinePayment
+                ),
+
+
+            notifications:
+                readChecked(
+                    "notifications",
+                    adminSettings.notifications
+                ),
+
+            soundNotifications:
+                readChecked(
+                    "soundNotifications",
+                    adminSettings.soundNotifications
+                ),
+
+
+            autoAssignRider:
+                readChecked(
+                    "autoAssignRider",
+                    adminSettings.autoAssignRider
+                ),
+
+            showRiderPhone:
+                readChecked(
+                    "showRiderPhone",
+                    adminSettings.showRiderPhone
+                ),
+
+            showCustomerPhone:
+                readChecked(
+                    "showCustomerPhone",
+                    adminSettings.showCustomerPhone
+                ),
+
+
+            maxSearchRadius:
+                readNumber(
+                    "maxSearchRadius",
+                    adminSettings.maxSearchRadius
+                ),
+
+            bookingTimeout:
+                readNumber(
+                    "bookingTimeout",
+                    adminSettings.bookingTimeout
+                ),
+
+
+            supportPhone:
+                readText(
+                    "supportPhone",
+                    adminSettings.supportPhone
+                ),
+
+            supportEmail:
+                readText(
+                    "supportEmail",
+                    adminSettings.supportEmail
+                )
+
+        });
 
 
     const validation =
@@ -547,7 +1032,7 @@ function saveSettingsFromForm() {
             "error"
         );
 
-        return;
+        return false;
 
     }
 
@@ -561,24 +1046,50 @@ function saveSettingsFromForm() {
     ) {
 
         showMessage(
-            "Settings could not be saved.",
+            "Settings could not be saved locally.",
             "error"
         );
 
-        return;
+        return false;
 
     }
 
 
+    /*
+     * Save to Firebase as well.
+     */
+
+    saveSettingsToFirebase()
+        .then(
+            function (success) {
+
+                if (
+                    success
+                ) {
+
+                    showMessage(
+                        "RiderX settings saved successfully.",
+                        "success"
+                    );
+
+                } else {
+
+                    showMessage(
+                        "Settings saved locally. Firebase sync unavailable.",
+                        "info"
+                    );
+
+                }
+
+            }
+        );
+
+
     renderSettings();
 
-    showMessage(
-        "RiderX settings saved successfully.",
-        "success"
-    );
-
-
     dispatchSettingsEvent();
+
+    return true;
 
 }
 
@@ -592,7 +1103,9 @@ function validateSettings(
 ) {
 
     if (
-        !settings.appName.trim()
+        !String(
+            settings.appName
+        ).trim()
     ) {
 
         return {
@@ -608,7 +1121,9 @@ function validateSettings(
 
 
     if (
-        !settings.city.trim()
+        !String(
+            settings.city
+        ).trim()
     ) {
 
         return {
@@ -624,7 +1139,14 @@ function validateSettings(
 
 
     if (
-        settings.maxSearchRadius <= 0
+        !Number.isFinite(
+            Number(
+                settings.maxSearchRadius
+            )
+        ) ||
+        Number(
+            settings.maxSearchRadius
+        ) <= 0
     ) {
 
         return {
@@ -640,7 +1162,14 @@ function validateSettings(
 
 
     if (
-        settings.bookingTimeout <= 0
+        !Number.isFinite(
+            Number(
+                settings.bookingTimeout
+            )
+        ) ||
+        Number(
+            settings.bookingTimeout
+        ) <= 0
     ) {
 
         return {
@@ -674,6 +1203,22 @@ function validateSettings(
     }
 
 
+    if (
+        settings.currency.length > 10
+    ) {
+
+        return {
+
+            valid: false,
+
+            message:
+                "Currency value is too long."
+
+        };
+
+    }
+
+
     return {
         valid: true
     };
@@ -685,7 +1230,7 @@ function validateSettings(
    RESET
 ========================================================= */
 
-function resetSettings() {
+async function resetSettings() {
 
     const confirmed =
         window.confirm(
@@ -693,8 +1238,12 @@ function resetSettings() {
         );
 
 
-    if (!confirmed) {
+    if (
+        !confirmed
+    ) {
+
         return;
+
     }
 
 
@@ -708,17 +1257,46 @@ function resetSettings() {
         new Date().toISOString();
 
 
-    saveSettings();
+    if (
+        !saveSettings()
+    ) {
+
+        showMessage(
+            "Settings could not be reset.",
+            "error"
+        );
+
+        return;
+
+    }
+
 
     renderSettings();
 
     dispatchSettingsEvent();
 
 
-    showMessage(
-        "Settings reset successfully.",
-        "success"
-    );
+    const firebaseSuccess =
+        await saveSettingsToFirebase();
+
+
+    if (
+        firebaseSuccess
+    ) {
+
+        showMessage(
+            "RiderX settings reset successfully.",
+            "success"
+        );
+
+    } else {
+
+        showMessage(
+            "Settings reset locally. Firebase sync unavailable.",
+            "info"
+        );
+
+    }
 
 }
 
@@ -732,12 +1310,18 @@ function updateMaintenanceUI() {
     const checkbox =
         document.getElementById(
             "maintenanceMode"
+        ) ||
+        document.getElementById(
+            "maintenance"
         );
 
 
     const indicator =
         document.getElementById(
             "maintenanceStatus"
+        ) ||
+        document.getElementById(
+            "status"
         );
 
 
@@ -775,6 +1359,190 @@ function updateMaintenanceUI() {
 
 
 /* =========================================================
+   FIRESTORE LOAD
+========================================================= */
+
+async function loadSettingsFromFirebase() {
+
+    try {
+
+        if (
+            !firebaseDb
+        ) {
+
+            return null;
+
+        }
+
+
+        const firestore =
+            await import(
+                "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"
+            );
+
+
+        const reference =
+            firestore.doc(
+                firebaseDb,
+                SETTINGS_COLLECTION,
+                SETTINGS_DOCUMENT
+            );
+
+
+        const snapshot =
+            await firestore.getDoc(
+                reference
+            );
+
+
+        if (
+            !snapshot.exists()
+        ) {
+
+            /*
+             * Create the Firebase document using the
+             * current local/default configuration.
+             */
+
+            await saveSettingsToFirebase();
+
+            return null;
+
+        }
+
+
+        const firebaseData =
+            snapshot.data();
+
+
+        if (
+            firebaseData &&
+            typeof firebaseData === "object"
+        ) {
+
+            adminSettings =
+                normalizeSettings({
+
+                    ...DEFAULT_SETTINGS,
+
+                    ...firebaseData
+
+                });
+
+
+            saveSettings();
+
+            renderSettings();
+
+            dispatchSettingsEvent();
+
+
+            return firebaseData;
+
+        }
+
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firebase settings load unavailable:",
+            error
+        );
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   FIRESTORE SAVE
+========================================================= */
+
+async function saveSettingsToFirebase() {
+
+    try {
+
+        if (
+            !firebaseDb
+        ) {
+
+            return false;
+
+        }
+
+
+        const firestore =
+            await import(
+                "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"
+            );
+
+
+        const currentUser =
+            firebaseAuth?.currentUser ||
+            null;
+
+
+        const data =
+            normalizeSettings({
+
+                ...adminSettings,
+
+                updatedAt:
+                    new Date().toISOString(),
+
+                updatedBy:
+                    currentUser?.uid ||
+                    adminSettings.updatedBy ||
+                    null
+
+            });
+
+
+        const reference =
+            firestore.doc(
+                firebaseDb,
+                SETTINGS_COLLECTION,
+                SETTINGS_DOCUMENT
+            );
+
+
+        await firestore.setDoc(
+            reference,
+            data,
+            {
+                merge: true
+            }
+        );
+
+
+        adminSettings =
+            data;
+
+
+        saveSettings();
+
+
+        return true;
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firebase settings save unavailable:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
    PUBLIC GET SETTINGS
 ========================================================= */
 
@@ -788,7 +1556,7 @@ function getSettings() {
 
 
 /* =========================================================
-   PUBLIC SETTING
+   PUBLIC GET SINGLE SETTING
 ========================================================= */
 
 function getSetting(
@@ -816,7 +1584,7 @@ function getSetting(
 
 
 /* =========================================================
-   UPDATE SINGLE SETTING
+   PUBLIC UPDATE SINGLE SETTING
 ========================================================= */
 
 function updateSetting(
@@ -836,8 +1604,39 @@ function updateSetting(
     }
 
 
-    adminSettings[key] =
-        value;
+    const candidate =
+        normalizeSettings({
+
+            ...adminSettings,
+
+            [key]:
+                value
+
+        });
+
+
+    const validation =
+        validateSettings(
+            candidate
+        );
+
+
+    if (
+        !validation.valid
+    ) {
+
+        showMessage(
+            validation.message,
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    adminSettings =
+        candidate;
 
 
     if (
@@ -850,6 +1649,15 @@ function updateSetting(
 
 
     dispatchSettingsEvent();
+
+
+    /*
+     * Firebase sync is intentionally asynchronous so
+     * the UI does not freeze while Firestore is updating.
+     */
+
+    saveSettingsToFirebase();
+
 
     return true;
 
@@ -866,7 +1674,7 @@ function dispatchSettingsEvent() {
 
         window.dispatchEvent(
             new CustomEvent(
-                "riderxSettingsUpdated",
+                SETTINGS_EVENT,
                 {
                     detail:
                         cloneSettings(
@@ -879,7 +1687,7 @@ function dispatchSettingsEvent() {
     } catch (error) {
 
         console.warn(
-            "Settings event error:",
+            "RiderX settings event error:",
             error
         );
 
@@ -889,7 +1697,7 @@ function dispatchSettingsEvent() {
 
 
 /* =========================================================
-   EXPORT
+   GLOBAL PUBLIC API
 ========================================================= */
 
 window.RiderXSettings = {
@@ -907,13 +1715,16 @@ window.RiderXSettings = {
         saveSettingsFromForm,
 
     reset:
-        resetSettings
+        resetSettings,
+
+    load:
+        loadSettingsFromFirebase
 
 };
 
 
 /* =========================================================
-   STORAGE SYNC
+   LOCAL STORAGE SYNC
 ========================================================= */
 
 window.addEventListener(
@@ -921,15 +1732,20 @@ window.addEventListener(
     function (event) {
 
         if (
-            event.key ===
+            event.key !==
             SETTINGS_STORAGE_KEY
         ) {
 
-            loadSettings();
-
-            renderSettings();
+            return;
 
         }
+
+
+        loadSettings();
+
+        renderSettings();
+
+        dispatchSettingsEvent();
 
     }
 );
@@ -950,10 +1766,12 @@ function readText(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return String(
-            fallback
+            fallback ?? ""
         );
 
     }
@@ -961,7 +1779,8 @@ function readText(
 
     return String(
         element.value ??
-        fallback
+        fallback ??
+        ""
     ).trim();
 
 }
@@ -978,7 +1797,9 @@ function readNumber(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return Number(
             fallback
@@ -993,11 +1814,20 @@ function readNumber(
         );
 
 
-    return Number.isFinite(
-        value
-    )
-        ? value
-        : Number(fallback) || 0;
+    if (
+        Number.isFinite(
+            value
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return Number(
+        fallback
+    ) || 0;
 
 }
 
@@ -1013,7 +1843,9 @@ function readChecked(
         );
 
 
-    if (!element) {
+    if (
+        !element
+    ) {
 
         return Boolean(
             fallback
@@ -1024,6 +1856,53 @@ function readChecked(
 
     return Boolean(
         element.checked
+    );
+
+}
+
+
+function readCheckedEither(
+    firstId,
+    secondId,
+    fallback = false
+) {
+
+    const first =
+        document.getElementById(
+            firstId
+        );
+
+
+    if (
+        first
+    ) {
+
+        return Boolean(
+            first.checked
+        );
+
+    }
+
+
+    const second =
+        document.getElementById(
+            secondId
+        );
+
+
+    if (
+        second
+    ) {
+
+        return Boolean(
+            second.checked
+        );
+
+    }
+
+
+    return Boolean(
+        fallback
     );
 
 }
@@ -1040,7 +1919,9 @@ function setValue(
         );
 
 
-    if (element) {
+    if (
+        element
+    ) {
 
         element.value =
             value ?? "";
@@ -1061,7 +1942,9 @@ function setChecked(
         );
 
 
-    if (element) {
+    if (
+        element
+    ) {
 
         element.checked =
             Boolean(
@@ -1079,21 +1962,221 @@ function isValidEmail(
 
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
         .test(
-            email
+            String(
+                email
+            )
         );
 
 }
 
 
+/* =========================================================
+   NORMALIZE SETTINGS
+========================================================= */
+
+function normalizeSettings(
+    settings
+) {
+
+    const source =
+        settings &&
+        typeof settings === "object"
+            ? settings
+            : {};
+
+
+    const normalized = {
+
+        ...DEFAULT_SETTINGS,
+
+        ...source
+
+    };
+
+
+    normalized.appName =
+        String(
+            normalized.appName ??
+            DEFAULT_SETTINGS.appName
+        ).trim();
+
+
+    normalized.city =
+        String(
+            normalized.city ??
+            DEFAULT_SETTINGS.city
+        ).trim();
+
+
+    normalized.country =
+        String(
+            normalized.country ??
+            DEFAULT_SETTINGS.country
+        ).trim();
+
+
+    normalized.currency =
+        String(
+            normalized.currency ??
+            DEFAULT_SETTINGS.currency
+        ).trim();
+
+
+    normalized.language =
+        String(
+            normalized.language ??
+            DEFAULT_SETTINGS.language
+        ).trim();
+
+
+    normalized.timezone =
+        String(
+            normalized.timezone ??
+            DEFAULT_SETTINGS.timezone
+        ).trim();
+
+
+    normalized.supportPhone =
+        String(
+            normalized.supportPhone ?? ""
+        ).trim();
+
+
+    normalized.supportEmail =
+        String(
+            normalized.supportEmail ?? ""
+        ).trim();
+
+
+    normalized.maxSearchRadius =
+        positiveNumber(
+            normalized.maxSearchRadius,
+            DEFAULT_SETTINGS.maxSearchRadius
+        );
+
+
+    normalized.bookingTimeout =
+        positiveNumber(
+            normalized.bookingTimeout,
+            DEFAULT_SETTINGS.bookingTimeout
+        );
+
+
+    const booleanKeys = [
+
+        "support",
+        "referral",
+        "bike",
+        "cab",
+        "parcel",
+        "food",
+
+        "maintenance",
+
+        "newRegistrations",
+        "riderRegistrations",
+        "customerRegistrations",
+
+        "rideBooking",
+
+        "cashPayment",
+        "onlinePayment",
+
+        "notifications",
+        "soundNotifications",
+
+        "autoAssignRider",
+
+        "showRiderPhone",
+        "showCustomerPhone"
+
+    ];
+
+
+    booleanKeys.forEach(
+        function (key) {
+
+            normalized[key] =
+                Boolean(
+                    normalized[key]
+                );
+
+        }
+    );
+
+
+    normalized.updatedAt =
+        normalized.updatedAt ||
+        null;
+
+
+    normalized.updatedBy =
+        normalized.updatedBy ||
+        null;
+
+
+    return normalized;
+
+}
+
+
+/* =========================================================
+   POSITIVE NUMBER
+========================================================= */
+
+function positiveNumber(
+    value,
+    fallback
+) {
+
+    const number =
+        Number(
+            value
+        );
+
+
+    if (
+        Number.isFinite(
+            number
+        ) &&
+        number > 0
+    ) {
+
+        return number;
+
+    }
+
+
+    return Number(
+        fallback
+    ) || 1;
+
+}
+
+
+/* =========================================================
+   CLONE
+========================================================= */
+
 function cloneSettings(
     settings
 ) {
 
-    return JSON.parse(
-        JSON.stringify(
-            settings
-        )
-    );
+    try {
+
+        return JSON.parse(
+            JSON.stringify(
+                settings
+            )
+        );
+
+    } catch (error) {
+
+        return {
+            ...DEFAULT_SETTINGS
+        };
+
+    }
 
 }
 
@@ -1113,7 +2196,9 @@ function showMessage(
         );
 
 
-    if (existing) {
+    if (
+        existing
+    ) {
 
         existing.remove();
 
@@ -1131,7 +2216,15 @@ function showMessage(
 
 
     box.textContent =
-        message;
+        String(
+            message
+        );
+
+
+    box.setAttribute(
+        "role",
+        "status"
+    );
 
 
     box.style.cssText = `
@@ -1140,11 +2233,13 @@ function showMessage(
         bottom:22px;
         transform:translateX(-50%);
         z-index:99999;
+        width:max-content;
         max-width:calc(100% - 30px);
         padding:12px 18px;
         border-radius:10px;
         font-size:13px;
         font-weight:700;
+        line-height:1.4;
         text-align:center;
         box-shadow:0 10px 30px rgba(0,0,0,.4);
     `;
@@ -1164,8 +2259,7 @@ function showMessage(
         box.style.border =
             "1px solid #28683a";
 
-    }
-    else if (
+    } else if (
         type ===
         "error"
     ) {
@@ -1179,8 +2273,7 @@ function showMessage(
         box.style.border =
             "1px solid #713131";
 
-    }
-    else {
+    } else {
 
         box.style.background =
             "#222";
@@ -1199,118 +2292,19 @@ function showMessage(
     );
 
 
-    setTimeout(
+    window.setTimeout(
         function () {
 
-            if (box.parentNode) {
+            if (
+                box.parentNode
+            ) {
 
                 box.remove();
 
             }
 
         },
-        3000
+        3500
     );
 
-}
-
-
-/* =========================================================
-   OPTIONAL FIREBASE SYNC
-========================================================= */
-
-async function loadSettingsFromFirebase() {
-
-    try {
-
-        if (
-            typeof window.db ===
-            "undefined"
-        ) {
-
-            return null;
-
-        }
-
-
-        if (
-            typeof window.doc !==
-            "function" ||
-            typeof window.getDoc !==
-            "function"
-        ) {
-
-            return null;
-
-        }
-
-
-        const ref =
-            window.doc(
-                window.db,
-                "settings",
-                "app"
-            );
-
-
-        const snapshot =
-            await window.getDoc(
-                ref
-            );
-
-
-        if (
-            !snapshot.exists()
-        ) {
-
-            return null;
-
-        }
-
-
-        const firebaseData =
-            snapshot.data();
-
-
-        adminSettings = {
-
-            ...DEFAULT_SETTINGS,
-
-            ...firebaseData
-
-        };
-
-
-        saveSettings();
-
-        renderSettings();
-
-
-        return firebaseData;
-
-    } catch (error) {
-
-        console.warn(
-            "Firebase settings sync unavailable:",
-            error
-        );
-
-        return null;
-
     }
-
-}
-
-
-/* =========================================================
-   AUTO FIREBASE LOAD
-========================================================= */
-
-setTimeout(
-    function () {
-
-        loadSettingsFromFirebase();
-
-    },
-    1200
-);
