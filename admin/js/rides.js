@@ -1,6 +1,25 @@
 /* =========================================================
-   RiderX Admin - Rides Manager
+   RIDERX 2.0
+   ADMIN - RIDES MANAGER
    File: admin/js/rides.js
+
+   Purpose:
+   - Load rides from Firebase Firestore
+   - Real-time admin ride monitoring
+   - LocalStorage fallback
+   - Ride search/filter
+   - Ride statistics
+   - Ride details
+   - Admin status updates
+   - Admin cancellation
+   - Customer/Rider ride compatibility
+
+   Firebase:
+   Uses the SINGLE Firebase initialization point:
+   firebase/firebase-config.js
+
+   IMPORTANT:
+   This file does NOT initialize Firebase itself.
 ========================================================= */
 
 "use strict";
@@ -11,16 +30,41 @@
 ========================================================= */
 
 const RIDES_STORAGE_KEYS = [
+
     "riderxRides",
+
     "riderxRideRequests",
+
     "riderxBookings",
+
     "rides",
+
     "rideRequests",
+
     "bookings"
+
 ];
+
 
 const RIDES_ADMIN_KEY =
     "riderxAdminRides";
+
+
+/* =========================================================
+   FIRESTORE COLLECTIONS
+   ---------------------------------------------------------
+   Primary collection is "rides".
+
+   "bookings" is supported as a compatibility fallback.
+========================================================= */
+
+const RIDES_FIRESTORE_COLLECTIONS = [
+
+    "rides",
+
+    "bookings"
+
+];
 
 
 /* =========================================================
@@ -31,6 +75,25 @@ let rides = [];
 
 let selectedRideId = null;
 
+let ridesInitialized = false;
+
+let firebaseLoaded = false;
+
+let firebaseUnsubscribers = [];
+
+let rideEventBound = false;
+
+let firestoreWriteInProgress = false;
+
+
+/* =========================================================
+   FIREBASE REFERENCES
+========================================================= */
+
+let firebaseModule = null;
+
+let firestoreDb = null;
+
 
 /* =========================================================
    INIT
@@ -38,30 +101,165 @@ let selectedRideId = null;
 
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
-
-        loadRides();
-
-        bindRideEvents();
-
-        renderRideStats();
-
-        renderRides();
-
-    }
+    initRidesManager
 );
 
 
+async function initRidesManager() {
+
+    if (
+        ridesInitialized
+    ) {
+
+        return;
+
+    }
+
+
+    ridesInitialized =
+        true;
+
+
+    /*
+     * Always load local data first.
+     * This gives the admin an immediate UI.
+     */
+
+    loadLocalRides();
+
+
+    bindRideEvents();
+
+
+    renderRideStats();
+
+    renderRides();
+
+
+    /*
+     * Then connect Firebase.
+     */
+
+    await connectFirebase();
+
+
+    /*
+     * If Firebase is available,
+     * use real-time Firestore.
+     */
+
+    if (
+        firebaseLoaded
+    ) {
+
+        subscribeToFirestore();
+
+    }
+
+}
+
+
 /* =========================================================
-   LOAD RIDES
+   FIREBASE CONNECT
 ========================================================= */
 
-function loadRides() {
+async function connectFirebase() {
+
+    try {
+
+        /*
+         * Reuse the existing RiderX Firebase module
+         * when it is already loaded.
+         */
+
+        if (
+            window.RiderXFirebase
+        ) {
+
+            firebaseModule =
+                window.RiderXFirebase;
+
+        }
+
+
+        /*
+         * Some pages may load this file without the Firebase
+         * module being loaded first.
+         *
+         * Dynamically import the single canonical config.
+         */
+
+        if (
+            !firebaseModule
+        ) {
+
+            firebaseModule =
+                await import(
+                    "../../firebase/firebase-config.js"
+                );
+
+        }
+
+
+        firestoreDb =
+            firebaseModule.db ||
+            firebaseModule.firestore ||
+            null;
+
+
+        if (
+            !firestoreDb
+        ) {
+
+            throw new Error(
+                "Firebase Firestore instance is unavailable."
+            );
+
+        }
+
+
+        firebaseLoaded =
+            true;
+
+
+        console.info(
+            "RiderX Admin Rides: Firebase connected."
+        );
+
+
+        return true;
+
+    } catch (error) {
+
+        firebaseLoaded =
+            false;
+
+
+        console.warn(
+            "RiderX Admin Rides: Firebase unavailable. Using local data.",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD LOCAL RIDES
+========================================================= */
+
+function loadLocalRides() {
 
     const collected = [];
 
 
-    /* Admin rides */
+    /*
+     * Admin rides first.
+     */
 
     readArray(
         RIDES_ADMIN_KEY
@@ -77,7 +275,9 @@ function loadRides() {
     );
 
 
-    /* Application rides */
+    /*
+     * Application local storage.
+     */
 
     RIDES_STORAGE_KEYS.forEach(
         function (key) {
@@ -107,9 +307,262 @@ function loadRides() {
 
     saveRides();
 
+
     renderRideStats();
 
     renderRides();
+
+}
+
+
+/* =========================================================
+   FIRESTORE REAL-TIME SUBSCRIPTION
+========================================================= */
+
+function subscribeToFirestore() {
+
+    unsubscribeFirestore();
+
+
+    if (
+        !firestoreDb
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Dynamically use the same Firebase module
+     * instead of initializing another Firebase app.
+     */
+
+    const onSnapshotFunction =
+        firebaseModule?.onSnapshot;
+
+
+    const collectionFunction =
+        firebaseModule?.collection;
+
+
+    if (
+        typeof onSnapshotFunction !==
+        "function" ||
+        typeof collectionFunction !==
+        "function"
+    ) {
+
+        console.warn(
+            "RiderX Admin Rides: Firestore helpers unavailable."
+        );
+
+        return;
+
+    }
+
+
+    RIDES_FIRESTORE_COLLECTIONS.forEach(
+        function (collectionName) {
+
+            try {
+
+                const collectionRef =
+                    collectionFunction(
+                        firestoreDb,
+                        collectionName
+                    );
+
+
+                const unsubscribe =
+                    onSnapshotFunction(
+                        collectionRef,
+                        function (snapshot) {
+
+                            handleFirestoreSnapshot(
+                                snapshot,
+                                collectionName
+                            );
+
+                        },
+                        function (error) {
+
+                            console.warn(
+                                "RiderX Admin Rides Firestore listener error:",
+                                collectionName,
+                                error
+                            );
+
+                        }
+                    );
+
+
+                if (
+                    typeof unsubscribe ===
+                    "function"
+                ) {
+
+                    firebaseUnsubscribers.push(
+                        unsubscribe
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Unable to subscribe to Firestore collection:",
+                    collectionName,
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FIRESTORE SNAPSHOT
+========================================================= */
+
+function handleFirestoreSnapshot(
+    snapshot,
+    collectionName
+) {
+
+    if (
+        !snapshot
+    ) {
+
+        return;
+
+    }
+
+
+    const firestoreRides = [];
+
+
+    snapshot.forEach(
+        function (documentSnapshot) {
+
+            const data =
+                documentSnapshot.data() ||
+                {};
+
+
+            const ride = {
+
+                ...data,
+
+                id:
+                    data.id ||
+                    data.rideId ||
+                    data.bookingId ||
+                    documentSnapshot.id,
+
+                _firestoreCollection:
+                    collectionName,
+
+                _firestoreDocumentId:
+                    documentSnapshot.id
+
+            };
+
+
+            firestoreRides.push(
+                normalizeRide(
+                    ride
+                )
+            );
+
+        }
+    );
+
+
+    /*
+     * Merge Firestore data with local data.
+     *
+     * Firestore is considered authoritative for rides
+     * that have the same ID.
+     */
+
+    const merged = new Map();
+
+
+    rides.forEach(
+        function (ride) {
+
+            merged.set(
+                String(
+                    ride.id
+                ),
+                ride
+            );
+
+        }
+    );
+
+
+    firestoreRides.forEach(
+        function (ride) {
+
+            merged.set(
+                String(
+                    ride.id
+                ),
+                ride
+            );
+
+        }
+    );
+
+
+    rides =
+        Array.from(
+            merged.values()
+        );
+
+
+    saveRides();
+
+
+    renderRideStats();
+
+    renderRides();
+
+}
+
+
+/* =========================================================
+   UNSUBSCRIBE FIRESTORE
+========================================================= */
+
+function unsubscribeFirestore() {
+
+    firebaseUnsubscribers.forEach(
+        function (unsubscribe) {
+
+            try {
+
+                unsubscribe();
+
+            } catch (error) {
+
+                console.warn(
+                    "Firestore unsubscribe error:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    firebaseUnsubscribers = [];
 
 }
 
@@ -130,7 +583,9 @@ function readArray(
             );
 
 
-        if (!raw) {
+        if (
+            !raw
+        ) {
 
             return [];
 
@@ -144,7 +599,9 @@ function readArray(
 
 
         if (
-            Array.isArray(data)
+            Array.isArray(
+                data
+            )
         ) {
 
             return data;
@@ -234,8 +691,17 @@ function addRide(
         );
 
 
-    const exists =
-        list.some(
+    if (
+        !normalized.id
+    ) {
+
+        return;
+
+    }
+
+
+    const index =
+        list.findIndex(
             function (item) {
 
                 return String(
@@ -249,13 +715,30 @@ function addRide(
         );
 
 
-    if (!exists) {
+    if (
+        index === -1
+    ) {
 
         list.push(
             normalized
         );
 
+        return;
+
     }
+
+
+    /*
+     * Merge newer information without creating duplicates.
+     */
+
+    list[index] = {
+
+        ...list[index],
+
+        ...normalized
+
+    };
 
 }
 
@@ -267,6 +750,17 @@ function addRide(
 function normalizeRide(
     ride
 ) {
+
+    if (
+        !ride ||
+        typeof ride !==
+        "object"
+    ) {
+
+        return null;
+
+    }
+
 
     const pickup =
         ride.pickup ||
@@ -289,8 +783,8 @@ function normalizeRide(
     const rider =
         ride.rider ||
         ride.driver ||
-        ride.driverName ||
-        ride.riderName ||
+        ride.driverInfo ||
+        ride.driverDetails ||
         {};
 
 
@@ -298,23 +792,36 @@ function normalizeRide(
         ride.customer ||
         ride.user ||
         ride.passenger ||
+        ride.customerInfo ||
+        ride.userInfo ||
         {};
+
+
+    const id =
+        ride.id ||
+        ride.rideId ||
+        ride.bookingId ||
+        ride.requestId ||
+        ride._firestoreDocumentId ||
+        "";
 
 
     return {
 
         id:
-            ride.id ||
-            ride.rideId ||
-            ride.bookingId ||
-            createRideId(),
+            String(
+                id ||
+                createRideId()
+            ),
 
 
         customerId:
             ride.customerId ||
             ride.userId ||
+            ride.passengerId ||
             customer.id ||
             customer.uid ||
+            customer.userId ||
             "",
 
 
@@ -328,6 +835,7 @@ function normalizeRide(
 
         customerPhone:
             ride.customerPhone ||
+            ride.phone ||
             customer.phone ||
             customer.phoneNumber ||
             "",
@@ -336,22 +844,27 @@ function normalizeRide(
         riderId:
             ride.riderId ||
             ride.driverId ||
+            ride.partnerId ||
             rider.id ||
             rider.uid ||
+            rider.userId ||
             "",
 
 
         riderName:
             ride.riderName ||
             ride.driverName ||
+            ride.partnerName ||
             rider.name ||
             rider.fullName ||
+            rider.displayName ||
             "Unassigned",
 
 
         riderPhone:
             ride.riderPhone ||
             ride.driverPhone ||
+            ride.partnerPhone ||
             rider.phone ||
             rider.phoneNumber ||
             "",
@@ -363,6 +876,7 @@ function normalizeRide(
                 ride.serviceType ||
                 ride.rideType ||
                 ride.vehicleType ||
+                ride.category ||
                 "bike"
             ),
 
@@ -371,7 +885,9 @@ function normalizeRide(
             normalizeStatus(
                 ride.status ||
                 ride.rideStatus ||
-                ride.bookingStatus
+                ride.bookingStatus ||
+                ride.requestStatus ||
+                "pending"
             ),
 
 
@@ -386,7 +902,9 @@ function normalizeRide(
 
         paymentStatus:
             normalizePaymentStatus(
-                ride.paymentStatus
+                ride.paymentStatus ||
+                ride.payment_state ||
+                ride.transactionStatus
             ),
 
 
@@ -402,29 +920,43 @@ function normalizeRide(
             ),
 
 
+        pickupData:
+            pickup && typeof pickup === "object"
+                ? pickup
+                : null,
+
+
+        dropData:
+            drop && typeof drop === "object"
+                ? drop
+                : null,
+
+
         distance:
             Number(
-                ride.distance ||
-                ride.distanceKm ||
-                ride.km ||
+                ride.distance ??
+                ride.distanceKm ??
+                ride.km ??
                 0
             ) || 0,
 
 
         fare:
             Number(
-                ride.fare ||
-                ride.amount ||
-                ride.totalFare ||
-                ride.price ||
+                ride.fare ??
+                ride.amount ??
+                ride.totalFare ??
+                ride.totalAmount ??
+                ride.price ??
                 0
             ) || 0,
 
 
         commission:
             Number(
-                ride.commission ||
-                ride.platformFee ||
+                ride.commission ??
+                ride.platformFee ??
+                ride.platformCommission ??
                 0
             ) || 0,
 
@@ -433,12 +965,24 @@ function normalizeRide(
             ride.createdAt ||
             ride.bookedAt ||
             ride.requestedAt ||
+            ride.created_at ||
             ride.date ||
             new Date().toISOString(),
 
 
         acceptedAt:
             ride.acceptedAt ||
+            null,
+
+
+        arrivedAt:
+            ride.arrivedAt ||
+            null,
+
+
+        startedAt:
+            ride.startedAt ||
+            ride.tripStartedAt ||
             null,
 
 
@@ -455,16 +999,29 @@ function normalizeRide(
         cancelReason:
             ride.cancelReason ||
             ride.cancellationReason ||
+            ride.cancelledReason ||
             "",
 
 
         notes:
             ride.notes ||
+            ride.note ||
             "",
 
 
         updatedAt:
             ride.updatedAt ||
+            ride.updated_at ||
+            null,
+
+
+        firestoreCollection:
+            ride._firestoreCollection ||
+            "rides",
+
+
+        firestoreDocumentId:
+            ride._firestoreDocumentId ||
             null
 
     };
@@ -487,6 +1044,7 @@ function saveRides() {
             )
         );
 
+
         return true;
 
     } catch (error) {
@@ -495,6 +1053,7 @@ function saveRides() {
             "Ride save error:",
             error
         );
+
 
         return false;
 
@@ -509,6 +1068,19 @@ function saveRides() {
 
 function bindRideEvents() {
 
+    if (
+        rideEventBound
+    ) {
+
+        return;
+
+    }
+
+
+    rideEventBound =
+        true;
+
+
     const search =
         document.getElementById(
             "rideSearch"
@@ -518,7 +1090,9 @@ function bindRideEvents() {
         );
 
 
-    if (search) {
+    if (
+        search
+    ) {
 
         search.addEventListener(
             "input",
@@ -537,7 +1111,9 @@ function bindRideEvents() {
         );
 
 
-    if (statusFilter) {
+    if (
+        statusFilter
+    ) {
 
         statusFilter.addEventListener(
             "change",
@@ -556,7 +1132,9 @@ function bindRideEvents() {
         );
 
 
-    if (serviceFilter) {
+    if (
+        serviceFilter
+    ) {
 
         serviceFilter.addEventListener(
             "change",
@@ -572,13 +1150,34 @@ function bindRideEvents() {
         );
 
 
-    if (refresh) {
+    if (
+        refresh
+    ) {
 
         refresh.addEventListener(
             "click",
-            function () {
+            async function () {
 
-                loadRides();
+                loadLocalRides();
+
+
+                if (
+                    !firebaseLoaded
+                ) {
+
+                    await connectFirebase();
+
+                }
+
+
+                if (
+                    firebaseLoaded
+                ) {
+
+                    subscribeToFirestore();
+
+                }
+
 
                 showMessage(
                     "Ride list refreshed.",
@@ -589,6 +1188,60 @@ function bindRideEvents() {
         );
 
     }
+
+
+    /*
+     * Close modal when clicking outside content.
+     */
+
+    const modal =
+        document.getElementById(
+            "rideModal"
+        );
+
+
+    if (
+        modal
+    ) {
+
+        modal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    modal
+                ) {
+
+                    closeRideModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Escape closes modal.
+     */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                closeRideModal();
+
+            }
+
+        }
+    );
 
 }
 
@@ -619,10 +1272,15 @@ function renderRideStats() {
             function (ride) {
 
                 return [
+
                     "accepted",
+
                     "arrived",
+
                     "started",
+
                     "ongoing"
+
                 ].includes(
                     ride.status
                 );
@@ -647,8 +1305,11 @@ function renderRideStats() {
             function (ride) {
 
                 return [
+
                     "cancelled",
+
                     "rejected"
+
                 ].includes(
                     ride.status
                 );
@@ -669,14 +1330,16 @@ function renderRideStats() {
             )
             .reduce(
                 function (
-                    total,
+                    totalAmount,
                     ride
                 ) {
 
-                    return total +
+                    return (
+                        totalAmount +
                         Number(
                             ride.fare
-                        );
+                        )
+                    );
 
                 },
                 0
@@ -688,30 +1351,36 @@ function renderRideStats() {
         total
     );
 
+
     setText(
         "rideCount",
         total
     );
+
 
     setText(
         "pendingRides",
         pending
     );
 
+
     setText(
         "activeRides",
         active
     );
+
 
     setText(
         "completedRides",
         completed
     );
 
+
     setText(
         "cancelledRides",
         cancelled
     );
+
 
     setText(
         "totalRevenue",
@@ -742,7 +1411,9 @@ function renderRides() {
         );
 
 
-    if (!container) {
+    if (
+        !container
+    ) {
 
         return;
 
@@ -789,37 +1460,46 @@ function renderRides() {
                 }
 
 
-                if (!search) {
+                if (
+                    !search
+                ) {
 
                     return true;
 
                 }
 
 
-                const text =
-                    [
+                const text = [
 
-                        ride.id,
+                    ride.id,
 
-                        ride.customerName,
+                    ride.customerName,
 
-                        ride.customerPhone,
+                    ride.customerPhone,
 
-                        ride.riderName,
+                    ride.riderName,
 
-                        ride.riderPhone,
+                    ride.riderPhone,
 
-                        ride.pickup,
+                    ride.pickup,
 
-                        ride.drop,
+                    ride.drop,
 
-                        ride.service,
+                    ride.service,
 
+                    ride.status,
+
+                    serviceLabel(
+                        ride.service
+                    ),
+
+                    statusLabel(
                         ride.status
+                    )
 
-                    ]
-                    .join(" ")
-                    .toLowerCase();
+                ]
+                .join(" ")
+                .toLowerCase();
 
 
                 return text.includes(
@@ -830,10 +1510,13 @@ function renderRides() {
         );
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
-    if (!filtered.length) {
+    if (
+        !filtered.length
+    ) {
 
         container.innerHTML = `
 
@@ -844,6 +1527,7 @@ function renderRides() {
             </div>
 
         `;
+
 
         return;
 
@@ -858,7 +1542,9 @@ function renderRides() {
     filtered.forEach(
         function (ride) {
 
-            if (isTable) {
+            if (
+                isTable
+            ) {
 
                 container.appendChild(
                     createRideRow(
@@ -960,8 +1646,10 @@ function createRideRow(
 
 
         <td>
-            ${serviceLabel(
-                ride.service
+            ${escapeHtml(
+                serviceLabel(
+                    ride.service
+                )
             )}
         </td>
 
@@ -1252,12 +1940,15 @@ function viewRide(
         );
 
 
-    if (!ride) {
+    if (
+        !ride
+    ) {
 
         showMessage(
             "Ride not found.",
             "error"
         );
+
 
         return;
 
@@ -1265,7 +1956,9 @@ function viewRide(
 
 
     selectedRideId =
-        id;
+        String(
+            id
+        );
 
 
     const modal =
@@ -1288,6 +1981,7 @@ function viewRide(
         showRideFallback(
             ride
         );
+
 
         return;
 
@@ -1394,6 +2088,39 @@ function viewRide(
         )}
 
         ${
+            ride.acceptedAt
+                ? detailRow(
+                    "Accepted At",
+                    formatDate(
+                        ride.acceptedAt
+                    )
+                )
+                : ""
+        }
+
+        ${
+            ride.startedAt
+                ? detailRow(
+                    "Started At",
+                    formatDate(
+                        ride.startedAt
+                    )
+                )
+                : ""
+        }
+
+        ${
+            ride.completedAt
+                ? detailRow(
+                    "Completed At",
+                    formatDate(
+                        ride.completedAt
+                    )
+                )
+                : ""
+        }
+
+        ${
             ride.cancelReason
                 ? detailRow(
                     "Cancel Reason",
@@ -1479,7 +2206,9 @@ function closeRideModal() {
         );
 
 
-    if (modal) {
+    if (
+        modal
+    ) {
 
         modal.classList.remove(
             "show"
@@ -1495,10 +2224,10 @@ function closeRideModal() {
 
 
 /* =========================================================
-   UPDATE STATUS
+   UPDATE RIDE STATUS
 ========================================================= */
 
-function updateRideStatus(
+async function updateRideStatus(
     id,
     newStatus
 ) {
@@ -1509,12 +2238,15 @@ function updateRideStatus(
         );
 
 
-    if (!ride) {
+    if (
+        !ride
+    ) {
 
         showMessage(
             "Ride not found.",
             "error"
         );
+
 
         return false;
 
@@ -1527,12 +2259,16 @@ function updateRideStatus(
         );
 
 
+    const now =
+        new Date().toISOString();
+
+
     ride.status =
         status;
 
 
     ride.updatedAt =
-        new Date().toISOString();
+        now;
 
 
     if (
@@ -1542,7 +2278,35 @@ function updateRideStatus(
 
         ride.acceptedAt =
             ride.acceptedAt ||
-            new Date().toISOString();
+            now;
+
+    }
+
+
+    if (
+        status ===
+        "arrived"
+    ) {
+
+        ride.arrivedAt =
+            ride.arrivedAt ||
+            now;
+
+    }
+
+
+    if (
+        [
+            "started",
+            "ongoing"
+        ].includes(
+            status
+        )
+    ) {
+
+        ride.startedAt =
+            ride.startedAt ||
+            now;
 
     }
 
@@ -1553,13 +2317,8 @@ function updateRideStatus(
     ) {
 
         ride.completedAt =
-            new Date().toISOString();
-
-        ride.paymentStatus =
-            ride.paymentStatus ===
-            "paid"
-                ? "paid"
-                : ride.paymentStatus;
+            ride.completedAt ||
+            now;
 
     }
 
@@ -1570,22 +2329,56 @@ function updateRideStatus(
     ) {
 
         ride.cancelledAt =
-            new Date().toISOString();
+            ride.cancelledAt ||
+            now;
 
     }
 
 
     saveRides();
 
+
     renderRideStats();
 
     renderRides();
 
 
-    showMessage(
-        "Ride status updated.",
-        "success"
-    );
+    /*
+     * Sync status to Firestore.
+     */
+
+    const synced =
+        await updateRideInFirestore(
+            ride
+        );
+
+
+    if (
+        synced
+    ) {
+
+        showMessage(
+            "Ride status updated.",
+            "success"
+        );
+
+    } else if (
+        firebaseLoaded
+    ) {
+
+        showMessage(
+            "Ride updated locally. Firebase sync failed.",
+            "error"
+        );
+
+    } else {
+
+        showMessage(
+            "Ride status updated locally.",
+            "success"
+        );
+
+    }
 
 
     return true;
@@ -1597,7 +2390,7 @@ function updateRideStatus(
    CANCEL RIDE
 ========================================================= */
 
-function cancelRide(
+async function cancelRide(
     id,
     reason = "Cancelled by admin"
 ) {
@@ -1608,16 +2401,23 @@ function cancelRide(
         );
 
 
-    if (!ride) {
+    if (
+        !ride
+    ) {
 
         showMessage(
             "Ride not found.",
             "error"
         );
 
+
         return false;
 
     }
+
+
+    const now =
+        new Date().toISOString();
 
 
     ride.status =
@@ -1625,31 +2425,328 @@ function cancelRide(
 
 
     ride.cancelReason =
-        reason;
+        String(
+            reason ||
+            "Cancelled by admin"
+        );
 
 
     ride.cancelledAt =
-        new Date().toISOString();
+        now;
 
 
     ride.updatedAt =
-        new Date().toISOString();
+        now;
 
 
     saveRides();
+
 
     renderRideStats();
 
     renderRides();
 
 
-    showMessage(
-        "Ride cancelled.",
-        "success"
-    );
+    const synced =
+        await updateRideInFirestore(
+            ride
+        );
+
+
+    if (
+        synced
+    ) {
+
+        showMessage(
+            "Ride cancelled.",
+            "success"
+        );
+
+    } else if (
+        firebaseLoaded
+    ) {
+
+        showMessage(
+            "Ride cancelled locally. Firebase sync failed.",
+            "error"
+        );
+
+    } else {
+
+        showMessage(
+            "Ride cancelled locally.",
+            "success"
+        );
+
+    }
 
 
     return true;
+
+}
+
+
+/* =========================================================
+   UPDATE RIDE IN FIRESTORE
+========================================================= */
+
+async function updateRideInFirestore(
+    ride
+) {
+
+    if (
+        !firebaseLoaded ||
+        !firestoreDb ||
+        !ride
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        firestoreWriteInProgress
+    ) {
+
+        return false;
+
+    }
+
+
+    const collectionFunction =
+        firebaseModule?.collection;
+
+
+    const docFunction =
+        firebaseModule?.doc;
+
+
+    const updateDocFunction =
+        firebaseModule?.updateDoc;
+
+
+    const setDocFunction =
+        firebaseModule?.setDoc;
+
+
+    const serverTimestampFunction =
+        firebaseModule?.serverTimestamp;
+
+
+    if (
+        typeof collectionFunction !==
+        "function" ||
+        typeof docFunction !==
+        "function"
+    ) {
+
+        return false;
+
+    }
+
+
+    firestoreWriteInProgress =
+        true;
+
+
+    try {
+
+        /*
+         * Prefer the collection where the ride originally
+         * came from.
+         */
+
+        const collectionNames = [
+
+            ride.firestoreCollection,
+
+            ...RIDES_FIRESTORE_COLLECTIONS
+
+        ]
+        .filter(
+            function (value, index, array) {
+
+                return (
+                    value &&
+                    array.indexOf(
+                        value
+                    ) === index
+                );
+
+            }
+        );
+
+
+        const documentId =
+            ride.firestoreDocumentId ||
+            ride.id;
+
+
+        const payload = {
+
+            status:
+                ride.status,
+
+            updatedAt:
+                typeof serverTimestampFunction ===
+                "function"
+                    ? serverTimestampFunction()
+                    : new Date().toISOString()
+
+        };
+
+
+        if (
+            ride.acceptedAt
+        ) {
+
+            payload.acceptedAt =
+                ride.acceptedAt;
+
+        }
+
+
+        if (
+            ride.arrivedAt
+        ) {
+
+            payload.arrivedAt =
+                ride.arrivedAt;
+
+        }
+
+
+        if (
+            ride.startedAt
+        ) {
+
+            payload.startedAt =
+                ride.startedAt;
+
+        }
+
+
+        if (
+            ride.completedAt
+        ) {
+
+            payload.completedAt =
+                ride.completedAt;
+
+        }
+
+
+        if (
+            ride.cancelledAt
+        ) {
+
+            payload.cancelledAt =
+                ride.cancelledAt;
+
+        }
+
+
+        if (
+            ride.cancelReason
+        ) {
+
+            payload.cancelReason =
+                ride.cancelReason;
+
+        }
+
+
+        /*
+         * If we know the original collection, update it first.
+         */
+
+        for (
+            const collectionName of collectionNames
+        ) {
+
+            try {
+
+                const rideRef =
+                    docFunction(
+                        firestoreDb,
+                        collectionName,
+                        String(
+                            documentId
+                        )
+                    );
+
+
+                if (
+                    typeof updateDocFunction ===
+                    "function"
+                ) {
+
+                    await updateDocFunction(
+                        rideRef,
+                        payload
+                    );
+
+                    firestoreWriteInProgress =
+                        false;
+
+                    return true;
+
+                }
+
+
+                if (
+                    typeof setDocFunction ===
+                    "function"
+                ) {
+
+                    await setDocFunction(
+                        rideRef,
+                        payload,
+                        {
+                            merge:true
+                        }
+                    );
+
+                    firestoreWriteInProgress =
+                        false;
+
+                    return true;
+
+                }
+
+            } catch (error) {
+
+                /*
+                 * Try the next compatible collection.
+                 */
+
+                console.warn(
+                    "Firestore ride update attempt failed:",
+                    collectionName,
+                    error
+                );
+
+            }
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Firestore ride update failed:",
+            error
+        );
+
+    }
+
+
+    firestoreWriteInProgress =
+        false;
+
+
+    return false;
 
 }
 
@@ -1668,7 +2765,9 @@ function findRide(
             return String(
                 ride.id
             ) ===
-            String(id);
+            String(
+                id
+            );
 
         }
     ) || null;
@@ -1753,13 +2852,21 @@ function normalizeService(
             "bike"
         )
         .toLowerCase()
-        .trim();
+        .trim()
+        .replace(
+            /\s+/g,
+            "_"
+        );
 
 
     if (
-        value === "cab" ||
-        value === "car" ||
-        value === "taxi"
+        [
+            "cab",
+            "car",
+            "taxi"
+        ].includes(
+            value
+        )
     ) {
 
         return "cab";
@@ -1768,8 +2875,14 @@ function normalizeService(
 
 
     if (
-        value === "parcel" ||
-        value === "delivery"
+        [
+            "parcel",
+            "delivery",
+            "parcel_delivery",
+            "parcel-delivery"
+        ].includes(
+            value
+        )
     ) {
 
         return "parcel";
@@ -1778,9 +2891,13 @@ function normalizeService(
 
 
     if (
-        value === "food" ||
-        value === "food_delivery" ||
-        value === "food-delivery"
+        [
+            "food",
+            "food_delivery",
+            "food-delivery"
+        ].includes(
+            value
+        )
     ) {
 
         return "food";
@@ -1803,12 +2920,19 @@ function normalizeStatus(
             "pending"
         )
         .toLowerCase()
-        .trim();
+        .trim()
+        .replace(
+            /\s+/g,
+            "_"
+        );
 
 
     const map = {
 
         requested:
+            "pending",
+
+        request:
             "pending",
 
         searching:
@@ -1817,16 +2941,31 @@ function normalizeStatus(
         waiting:
             "pending",
 
+        pending:
+            "pending",
+
         accepted:
             "accepted",
 
         confirmed:
             "accepted",
 
+        driver_assigned:
+            "accepted",
+
+        rider_assigned:
+            "accepted",
+
         arrived:
             "arrived",
 
+        rider_arrived:
+            "arrived",
+
         started:
+            "started",
+
+        start:
             "started",
 
         ongoing:
@@ -1842,6 +2981,9 @@ function normalizeStatus(
             "completed",
 
         complete:
+            "completed",
+
+        finished:
             "completed",
 
         cancelled:
@@ -1874,14 +3016,22 @@ function normalizePayment(
             "cash"
         )
         .toLowerCase()
-        .trim();
+        .trim()
+        .replace(
+            /\s+/g,
+            "_"
+        );
 
 
     if (
-        value === "online" ||
-        value === "upi" ||
-        value === "card" ||
-        value === "wallet"
+        [
+            "online",
+            "upi",
+            "card",
+            "wallet"
+        ].includes(
+            value
+        )
     ) {
 
         return value;
@@ -1911,7 +3061,8 @@ function normalizePaymentStatus(
         [
             "paid",
             "success",
-            "successful"
+            "successful",
+            "completed"
         ].includes(
             value
         )
@@ -1925,7 +3076,8 @@ function normalizePaymentStatus(
     if (
         [
             "failed",
-            "failure"
+            "failure",
+            "declined"
         ].includes(
             value
         )
@@ -2063,8 +3215,14 @@ function paymentStatusLabel(
     status
 ) {
 
+    const value =
+        normalizePaymentStatus(
+            status
+        );
+
+
     if (
-        status ===
+        value ===
         "paid"
     ) {
 
@@ -2074,7 +3232,7 @@ function paymentStatusLabel(
 
 
     if (
-        status ===
+        value ===
         "failed"
     ) {
 
@@ -2163,7 +3321,9 @@ function formatLocation(
     location
 ) {
 
-    if (!location) {
+    if (
+        !location
+    ) {
 
         return "—";
 
@@ -2186,16 +3346,37 @@ function formatLocation(
     ) {
 
         return (
+
             location.address ||
+
             location.name ||
+
             location.label ||
+
             location.formattedAddress ||
+
+            location.formatted_address ||
+
+            location.description ||
+
             (
-                location.lat !== undefined &&
-                location.lng !== undefined
+                location.lat !==
+                    undefined &&
+                location.lng !==
+                    undefined
+
                     ? `${location.lat}, ${location.lng}`
-                    : "Location"
+
+                    : location.latitude !==
+                        undefined &&
+                      location.longitude !==
+                        undefined
+
+                        ? `${location.latitude}, ${location.longitude}`
+
+                        : "Location"
             )
+
         );
 
     }
@@ -2244,6 +3425,7 @@ function detailRow(
                 style="
                     text-align:right;
                     max-width:65%;
+                    word-break:break-word;
                 "
             >
                 ${escapeHtml(
@@ -2265,13 +3447,21 @@ function detailRow(
 function createRideId() {
 
     return (
+
         "RX-" +
+
         Date.now() +
+
         "-" +
+
         Math.random()
             .toString(36)
-            .slice(2,7)
+            .slice(
+                2,
+                7
+            )
             .toUpperCase()
+
     );
 
 }
@@ -2281,11 +3471,13 @@ function formatMoney(
     value
 ) {
 
-    return (
+    const amount =
         Number(
             value
-        ) || 0
-    ).toLocaleString(
+        ) || 0;
+
+
+    return amount.toLocaleString(
         "en-IN",
         {
             minimumFractionDigits:2,
@@ -2307,14 +3499,18 @@ function formatDistance(
 
 
     return (
+
         distance
             .toFixed(2)
             .replace(
                 /\.00$/,
                 ""
             )
+
         +
+
         " km"
+
     );
 
 }
@@ -2324,7 +3520,9 @@ function formatDate(
     value
 ) {
 
-    if (!value) {
+    if (
+        !value
+    ) {
 
         return "—";
 
@@ -2333,9 +3531,63 @@ function formatDate(
 
     try {
 
-        return new Date(
-            value
-        ).toLocaleString(
+        /*
+         * Firebase Timestamp.
+         */
+
+        if (
+            typeof value ===
+            "object" &&
+            typeof value.toDate ===
+            "function"
+        ) {
+
+            value =
+                value.toDate();
+
+        }
+
+
+        /*
+         * Firestore timestamp object.
+         */
+
+        else if (
+            typeof value ===
+            "object" &&
+            typeof value.seconds ===
+            "number"
+        ) {
+
+            value =
+                new Date(
+                    value.seconds *
+                    1000
+                );
+
+        }
+
+
+        const date =
+            value instanceof Date
+                ? value
+                : new Date(
+                    value
+                );
+
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "—";
+
+        }
+
+
+        return date.toLocaleString(
             "en-IN",
             {
                 day:"2-digit",
@@ -2366,7 +3618,9 @@ function setText(
         );
 
 
-    if (element) {
+    if (
+        element
+    ) {
 
         element.textContent =
             value;
@@ -2376,6 +3630,10 @@ function setText(
 }
 
 
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
 function escapeHtml(
     value
 ) {
@@ -2383,22 +3641,27 @@ function escapeHtml(
     return String(
         value ?? ""
     )
+
     .replace(
         /&/g,
         "&amp;"
     )
+
     .replace(
         /</g,
         "&lt;"
     )
+
     .replace(
         />/g,
         "&gt;"
     )
+
     .replace(
         /"/g,
         "&quot;"
     )
+
     .replace(
         /'/g,
         "&#039;"
@@ -2407,6 +3670,10 @@ function escapeHtml(
 }
 
 
+/* =========================================================
+   JAVASCRIPT STRING ESCAPE
+========================================================= */
+
 function escapeJs(
     value
 ) {
@@ -2414,17 +3681,30 @@ function escapeJs(
     return String(
         value ?? ""
     )
+
     .replace(
         /\\/g,
         "\\\\"
     )
+
     .replace(
         /'/g,
         "\\'"
     )
+
     .replace(
         /"/g,
         '\\"'
+    )
+
+    .replace(
+        /\r/g,
+        "\\r"
+    )
+
+    .replace(
+        /\n/g,
+        "\\n"
     );
 
 }
@@ -2445,7 +3725,9 @@ function showMessage(
         );
 
 
-    if (old) {
+    if (
+        old
+    ) {
 
         old.remove();
 
@@ -2463,7 +3745,9 @@ function showMessage(
 
 
     box.textContent =
-        message;
+        String(
+            message
+        );
 
 
     box.style.cssText = `
@@ -2497,6 +3781,7 @@ function showMessage(
             "1px solid #28683a";
 
     }
+
     else if (
         type ===
         "error"
@@ -2512,6 +3797,7 @@ function showMessage(
             "1px solid #713131";
 
     }
+
     else {
 
         box.style.background =
@@ -2534,7 +3820,14 @@ function showMessage(
     setTimeout(
         function () {
 
-            box.remove();
+            if (
+                box &&
+                box.parentNode
+            ) {
+
+                box.remove();
+
+            }
 
         },
         2800
@@ -2570,7 +3863,34 @@ window.RiderXRides = {
 
 
     refresh:
-        loadRides,
+        async function () {
+
+            loadLocalRides();
+
+
+            if (
+                !firebaseLoaded
+            ) {
+
+                await connectFirebase();
+
+            }
+
+
+            if (
+                firebaseLoaded
+            ) {
+
+                subscribeToFirestore();
+
+            }
+
+
+            return [
+                ...rides
+            ];
+
+        },
 
 
     updateStatus:
@@ -2578,7 +3898,29 @@ window.RiderXRides = {
 
 
     cancel:
-        cancelRide
+        cancelRide,
+
+
+    isFirebaseConnected:
+        function () {
+
+            return firebaseLoaded;
+
+        },
+
+
+    destroy:
+        function () {
+
+            unsubscribeFirestore();
+
+            ridesInitialized =
+                false;
+
+            rideEventBound =
+                false;
+
+        }
 
 };
 
@@ -2599,9 +3941,23 @@ window.addEventListener(
             RIDES_ADMIN_KEY
         ) {
 
-            loadRides();
+            loadLocalRides();
 
         }
+
+    }
+);
+
+
+/* =========================================================
+   PAGE CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    function () {
+
+        unsubscribeFirestore();
 
     }
 );
