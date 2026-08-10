@@ -3,8 +3,7 @@
    Firebase Configuration
    File: firebase/firebase-config.js
 
-   Firebase SDK:
-   10.8.0
+   Firebase SDK: 10.8.0
 
    Services:
    - Firebase Authentication
@@ -13,8 +12,8 @@
    - Firebase Storage
 
    IMPORTANT:
-   This is the SINGLE Firebase initialization point
-   for the RiderX application.
+   This is the SINGLE Firebase initialization point for
+   the RiderX application.
 ========================================================= */
 
 "use strict";
@@ -148,9 +147,7 @@ const firebaseConfig = {
 
 
 /* =========================================================
-   INITIALIZE FIREBASE
-   ---------------------------------------------------------
-   Prevent duplicate Firebase app initialization.
+   INITIALIZE FIREBASE ONLY ONCE
 ========================================================= */
 
 const app =
@@ -204,11 +201,7 @@ googleProvider.setCustomParameters({
 
 
 /* =========================================================
-   FIREBASE SERVICE BUNDLE
-   ---------------------------------------------------------
-   Used by legacy RiderX modules through:
-       RX.firebase
-       RiderXFirebase
+   SHARED RIDERX FIREBASE SERVICES
 ========================================================= */
 
 const firebaseServices = {
@@ -219,7 +212,13 @@ const firebaseServices = {
 
     db,
 
+    firestore:
+        db,
+
     realtimeDb,
+
+    database:
+        realtimeDb,
 
     storage,
 
@@ -229,14 +228,12 @@ const firebaseServices = {
 
 
 /* =========================================================
-   LEGACY GLOBAL COMPATIBILITY
+   GLOBAL COMPATIBILITY OBJECTS
    ---------------------------------------------------------
-   Older RiderX files use:
-       window.RX.firebase
-       window.RiderXFirebase
+   These DO NOT initialize Firebase again.
 
-   Keep both working while the remaining project files
-   are migrated to the central ES-module architecture.
+   They only expose the already initialized Firebase
+   services to older RiderX modules.
 ========================================================= */
 
 if (
@@ -255,21 +252,30 @@ if (
     window.RX.firebase =
         firebaseServices;
 
+
+    window.RiderX =
+        window.RiderX ||
+        {};
+
+
+    window.RiderX.firebase =
+        firebaseServices;
+
 }
 
 
 /* =========================================================
-   AUTH EXPORTS
+   EXPORTS
 ========================================================= */
 
 export {
 
-    /* Firebase */
+    /* Firebase app */
 
     app,
 
 
-    /* Services */
+    /* Firebase services */
 
     auth,
 
@@ -388,7 +394,7 @@ export {
     deleteObject,
 
 
-    /* Config */
+    /* Configuration */
 
     firebaseConfig,
 
@@ -399,13 +405,6 @@ export {
 
 /* =========================================================
    FIREBASE READY EVENT
-   ---------------------------------------------------------
-   Other modules can listen for:
-
-       window.addEventListener(
-           "riderx:firebase-ready",
-           ...
-       );
 ========================================================= */
 
 if (
@@ -416,19 +415,8 @@ if (
         new CustomEvent(
             "riderx:firebase-ready",
             {
-                detail: {
-                    app,
-
-                    auth,
-
-                    db,
-
-                    realtimeDb,
-
-                    storage,
-
-                    googleProvider
-                }
+                detail:
+                    firebaseServices
             }
         )
     );
@@ -438,36 +426,26 @@ if (
 
 /* =========================================================
    DEBUG INFORMATION
-   ---------------------------------------------------------
-   Firebase public client configuration is not treated as
-   a secret. Security must be enforced through Firebase
-   Authentication and Firestore/Realtime Database rules.
 ========================================================= */
 
 console.info(
     "RiderX Firebase initialized.",
     {
+
         projectId:
             firebaseConfig.projectId,
 
         auth:
-            Boolean(
-                auth
-            ),
+            Boolean(auth),
 
         firestore:
-            Boolean(
-                db
-            ),
+            Boolean(db),
 
         realtimeDatabase:
-            Boolean(
-                realtimeDb
-            ),
+            Boolean(realtimeDb),
 
         storage:
-            Boolean(
-                storage
-            )
+            Boolean(storage)
+
     }
 );
