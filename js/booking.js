@@ -1,569 +1,474 @@
 /* ============================================================
-   RIDERX
+   RIDERX 2.0
    BOOKING ENGINE
    File: js/booking.js
 
-   RIDERX 2.0 - FINAL
-   ------------------------------------------------------------
+   ES MODULE VERSION
+
    Handles:
    - Pickup / destination
    - Service selection
-   - Route / distance / duration
    - Fare estimate
-   - Coupon / promo
    - Ride creation
-   - Firebase RTDB + Firestore mirror
-   - Rider matching trigger
+   - Firebase RTDB + Firestore
+   - Driver/rider matching trigger
    - Booking cancellation
    - Ride status
-   - Active ride restore
+   - Payment method
+   - Promo/coupon
    - Booking events
-   - Customer booking UI
+
+   IMPORTANT:
+   This file uses the SINGLE Firebase instance exported by
+   firebase/firebase-config.js.
+
+   DO NOT initialize Firebase again here.
    ============================================================ */
 
-(function () {
+import {
+    auth,
+    db,
+    realtimeDb,
+    ref,
+    set,
+    get,
+    update,
+    remove,
+    onValue,
+    off,
+    doc,
+    setDoc
+} from "../firebase/firebase-config.js";
 
-    "use strict";
 
-    window.RiderX = window.RiderX || {};
+/* ============================================================
+   RIDERX NAMESPACE
+   ============================================================ */
 
-    const RX = window.RiderX;
+const RX =
+    window.RiderX =
+    window.RiderX || {};
 
-    const BOOKING =
-        RX.booking =
-        RX.booking || {};
+RX.booking =
+    RX.booking || {};
+
+const BOOKING =
+    RX.booking;
 
 
-    /* ========================================================
-       CONFIG
-       ======================================================== */
+/* ============================================================
+   CONFIG
+   ============================================================ */
 
-    BOOKING.config = {
+BOOKING.config = {
 
-        city: "Chandigarh",
+    city:
+        "Chandigarh",
 
-        currency: "₹",
+    currency:
+        "₹",
 
-        defaultService: "bike",
+    defaultService:
+        "bike",
 
-        defaultPayment: "cash",
+    defaultPayment:
+        "cash",
 
-        requestTimeout: 120000,
+    requestTimeout:
+        120000,
 
-        services: {
+    services: {
 
-            bike: {
-                id: "bike",
-                name: "Bike Taxi",
-                icon: "🏍️",
-                baseFare: 30,
-                perKm: 8,
-                minimumFare: 30
-            },
+        bike: {
+            id: "bike",
+            name: "Bike Taxi",
+            icon: "🏍️",
+            baseFare: 30,
+            perKm: 8,
+            minimumFare: 30
+        },
 
-            cab: {
-                id: "cab",
-                name: "Cab",
-                icon: "🚕",
-                baseFare: 60,
-                perKm: 12,
-                minimumFare: 60
-            },
+        cab: {
+            id: "cab",
+            name: "Cab",
+            icon: "🚕",
+            baseFare: 60,
+            perKm: 12,
+            minimumFare: 60
+        },
 
-            parcel: {
-                id: "parcel",
-                name: "Parcel",
-                icon: "📦",
-                baseFare: 40,
-                perKm: 10,
-                minimumFare: 40
-            },
+        parcel: {
+            id: "parcel",
+            name: "Parcel",
+            icon: "📦",
+            baseFare: 40,
+            perKm: 10,
+            minimumFare: 40
+        },
 
-            food: {
-                id: "food",
-                name: "Food Delivery",
-                icon: "🍔",
-                baseFare: 35,
-                perKm: 9,
-                minimumFare: 35
-            }
+        food: {
+            id: "food",
+            name: "Food Delivery",
+            icon: "🍔",
+            baseFare: 35,
+            perKm: 9,
+            minimumFare: 35
         }
+
+    }
+
+};
+
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+BOOKING.state = {
+
+    initialized:
+        false,
+
+    loading:
+        false,
+
+    booking:
+        null,
+
+    pickup:
+        null,
+
+    destination:
+        null,
+
+    distanceKm:
+        0,
+
+    durationMinutes:
+        0,
+
+    service:
+        BOOKING.config.defaultService,
+
+    paymentMethod:
+        BOOKING.config.defaultPayment,
+
+    coupon:
+        null,
+
+    discount:
+        0,
+
+    fare:
+        0,
+
+    estimatedFare:
+        0,
+
+    rideStatus:
+        "idle",
+
+    matching:
+        false,
+
+    bookingListener:
+        null,
+
+    bookingListenerRef:
+        null
+
+};
+
+
+/* ============================================================
+   FIREBASE
+   ============================================================ */
+
+BOOKING.database =
+    function () {
+
+        return realtimeDb || null;
+
     };
 
 
-    /* ========================================================
-       STATE
-       ======================================================== */
+BOOKING.firestore =
+    function () {
 
-    BOOKING.state = BOOKING.state || {};
+        return db || null;
 
-    Object.assign(
-        BOOKING.state,
-        {
-
-            initialized:
-                BOOKING.state.initialized === true,
-
-            loading: false,
-
-            booking:
-                BOOKING.state.booking || null,
-
-            pickup:
-                BOOKING.state.pickup || null,
-
-            destination:
-                BOOKING.state.destination || null,
-
-            distanceKm:
-                BOOKING.number(
-                    BOOKING.state.distanceKm
-                ),
-
-            durationMinutes:
-                BOOKING.number(
-                    BOOKING.state.durationMinutes
-                ),
-
-            service:
-                BOOKING.state.service ||
-                BOOKING.config.defaultService,
-
-            paymentMethod:
-                BOOKING.state.paymentMethod ||
-                BOOKING.config.defaultPayment,
-
-            coupon:
-                BOOKING.state.coupon || null,
-
-            discount:
-                BOOKING.number(
-                    BOOKING.state.discount
-                ),
-
-            fare:
-                BOOKING.number(
-                    BOOKING.state.fare
-                ),
-
-            estimatedFare:
-                BOOKING.number(
-                    BOOKING.state.estimatedFare
-                ),
-
-            rideStatus:
-                BOOKING.state.rideStatus ||
-                "idle",
-
-            matching:
-                BOOKING.state.matching === true,
-
-            bookingListener:
-                BOOKING.state.bookingListener ||
-                null,
-
-            riderListener:
-                BOOKING.state.riderListener ||
-                null,
-
-            emittedStatuses:
-                BOOKING.state.emittedStatuses ||
-                {},
-
-            uiBound:
-                BOOKING.state.uiBound === true,
-
-            requestInProgress:
-                false
-        }
-    );
+    };
 
 
-    /* ========================================================
-       FIREBASE
-       ======================================================== */
+BOOKING.getAuth =
+    function () {
 
-    BOOKING.database = function () {
+        return auth || null;
+
+    };
+
+
+/* ============================================================
+   USER
+   ============================================================ */
+
+BOOKING.getUser =
+    function () {
 
         try {
 
+            const firebaseUser =
+                auth?.currentUser;
+
+            let savedUser =
+                null;
+
+            try {
+
+                savedUser =
+                    JSON.parse(
+                        localStorage.getItem(
+                            "riderx_user"
+                        ) || "null"
+                    );
+
+            } catch (error) {
+
+                savedUser =
+                    null;
+
+            }
+
+
             if (
-                window.firebase &&
-                typeof window.firebase.database ===
-                "function"
+                firebaseUser
             ) {
 
-                return window.firebase.database();
+                return {
+
+                    ...savedUser,
+
+                    uid:
+                        firebaseUser.uid,
+
+                    id:
+                        firebaseUser.uid,
+
+                    userId:
+                        firebaseUser.uid,
+
+                    email:
+                        firebaseUser.email ||
+                        savedUser?.email ||
+                        "",
+
+                    phone:
+                        firebaseUser.phoneNumber ||
+                        savedUser?.phone ||
+                        "",
+
+                    phoneNumber:
+                        firebaseUser.phoneNumber ||
+                        savedUser?.phoneNumber ||
+                        "",
+
+                    name:
+                        firebaseUser.displayName ||
+                        savedUser?.name ||
+                        "Customer",
+
+                    displayName:
+                        firebaseUser.displayName ||
+                        savedUser?.displayName ||
+                        savedUser?.name ||
+                        "Customer"
+
+                };
+
             }
+
+
+            return savedUser;
 
         } catch (error) {
 
             console.warn(
-                "RiderX booking database error:",
+                "RiderX user lookup failed:",
                 error
             );
+
+            return null;
+
         }
 
-        return null;
     };
 
 
-    BOOKING.firestore = function () {
-
-        try {
-
-            if (
-                window.firebase &&
-                typeof window.firebase.firestore ===
-                "function"
-            ) {
-
-                return window.firebase.firestore();
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX booking firestore error:",
-                error
-            );
-        }
-
-        return null;
-    };
-
-
-    /* ========================================================
-       USER
-       ======================================================== */
-
-    BOOKING.getUser = function () {
-
-        if (
-            RX.auth &&
-            typeof RX.auth.getUser === "function"
-        ) {
-
-            try {
-
-                const user =
-                    RX.auth.getUser();
-
-                if (user) {
-                    return user;
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX auth user lookup failed:",
-                    error
-                );
-            }
-        }
-
-
-        const keys = [
-            "riderx_user",
-            "riderx_customer"
-        ];
-
-
-        for (const key of keys) {
-
-            try {
-
-                const value =
-                    localStorage.getItem(key);
-
-                if (!value) {
-                    continue;
-                }
-
-
-                const user =
-                    JSON.parse(value);
-
-
-                if (user) {
-                    return user;
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX local user lookup failed:",
-                    error
-                );
-            }
-        }
-
-
-        return null;
-    };
-
-
-    BOOKING.getUid = function () {
+BOOKING.getUid =
+    function () {
 
         const user =
             BOOKING.getUser();
-
 
         return (
             user?.uid ||
             user?.id ||
             user?.userId ||
-            user?.customerId ||
             null
         );
+
     };
 
 
-    /* ========================================================
-       HELPERS
-       ======================================================== */
+/* ============================================================
+   HELPERS
+   ============================================================ */
 
-    BOOKING.id = function () {
+BOOKING.number =
+    function (value) {
+
+        const number =
+            Number(value);
+
+        return Number.isFinite(number)
+            ? number
+            : 0;
+
+    };
+
+
+BOOKING.round =
+    function (value) {
+
+        return Math.round(
+            BOOKING.number(value)
+        );
+
+    };
+
+
+BOOKING.now =
+    function () {
+
+        return Date.now();
+
+    };
+
+
+BOOKING.id =
+    function () {
 
         return (
             "RX-" +
-            Date.now().toString(36) +
+            Date.now()
+                .toString(36) +
             "-" +
             Math.random()
                 .toString(36)
                 .substring(2, 8)
         ).toUpperCase();
+
     };
 
 
-    BOOKING.number = function (value) {
+/* ============================================================
+   SERVICE
+   ============================================================ */
 
-        if (
-            value === null ||
-            value === undefined ||
-            value === ""
-        ) {
-            return 0;
-        }
-
-
-        const number =
-            Number(value);
-
-
-        return Number.isFinite(number)
-            ? number
-            : 0;
-    };
-
-
-    BOOKING.round = function (value) {
-
-        return Math.round(
-            BOOKING.number(value)
-        );
-    };
-
-
-    BOOKING.now = function () {
-
-        return Date.now();
-    };
-
-
-    BOOKING.normalizeStatus = function (
-        status
-    ) {
-
-        return String(
-            status || "idle"
-        )
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, "_");
-    };
-
-
-    BOOKING.isActiveStatus = function (
-        status
-    ) {
-
-        return [
-            "searching",
-            "requested",
-            "accepted",
-            "arriving",
-            "driver_arriving",
-            "started",
-            "ongoing",
-            "in_progress",
-            "picked_up"
-        ].includes(
-            BOOKING.normalizeStatus(status)
-        );
-    };
-
-
-    BOOKING.isCompletedStatus = function (
-        status
-    ) {
-
-        return [
-            "completed",
-            "complete",
-            "finished"
-        ].includes(
-            BOOKING.normalizeStatus(status)
-        );
-    };
-
-
-    BOOKING.isCancelledStatus = function (
-        status
-    ) {
-
-        return [
-            "cancelled",
-            "canceled",
-            "rejected",
-            "expired"
-        ].includes(
-            BOOKING.normalizeStatus(status)
-        );
-    };
-
-
-    BOOKING.isTerminalStatus = function (
-        status
-    ) {
-
-        return (
-            BOOKING.isCompletedStatus(status) ||
-            BOOKING.isCancelledStatus(status)
-        );
-    };
-
-
-    /* ========================================================
-       SERVICE
-       ======================================================== */
-
-    BOOKING.getService = function (
-        service
-    ) {
+BOOKING.getService =
+    function (service) {
 
         service =
             String(
                 service ||
                 BOOKING.state.service ||
-                BOOKING.config.defaultService
+                ""
             )
-                .trim()
-                .toLowerCase();
+            .toLowerCase()
+            .trim();
 
 
-        const aliases = {
+        if (
+            service === "bike taxi" ||
+            service === "bike_taxi" ||
+            service === "motorcycle"
+        ) {
 
-            "bike taxi": "bike",
+            service =
+                "bike";
 
-            "bike_taxi": "bike",
-
-            "motorcycle": "bike",
-
-            "motorbike": "bike",
-
-            "two_wheeler": "bike",
-
-            "two-wheeler": "bike",
-
-            "car": "cab",
-
-            "taxi": "cab",
-
-            "delivery": "parcel",
-
-            "package": "parcel",
-
-            "food_delivery": "food",
-
-            "food-delivery": "food"
-        };
+        }
 
 
-        service =
-            aliases[service] ||
-            service;
+        if (
+            service === "car"
+        ) {
+
+            service =
+                "cab";
+
+        }
 
 
         return (
-            BOOKING.config.services[service] ||
-            BOOKING.config.services.bike
+            BOOKING.config
+                .services[service] ||
+            BOOKING.config
+                .services.bike
         );
+
     };
 
 
-    BOOKING.setService = function (
-        service
-    ) {
+BOOKING.setService =
+    function (service) {
 
         const selected =
-            BOOKING.getService(service);
+            BOOKING.getService(
+                service
+            );
 
 
         BOOKING.state.service =
             selected.id;
 
 
-        if (document.body) {
+        if (
+            document.body
+        ) {
 
             document.body.dataset.service =
                 selected.id;
+
         }
 
 
         document
-            .querySelectorAll("[data-service]")
-            .forEach(function (element) {
+            .querySelectorAll(
+                "[data-service]"
+            )
+            .forEach(
+                function (element) {
 
-                const value =
-                    String(
-                        element.dataset.service || ""
-                    )
-                        .trim()
+                    const value =
+                        String(
+                            element.dataset.service ||
+                            ""
+                        )
                         .toLowerCase();
 
-
-                const normalized =
-                    BOOKING.getService(value).id;
-
-
-                const active =
-                    normalized === selected.id;
-
-
-                element.classList.toggle(
-                    "active",
-                    active
-                );
-
-
-                element.setAttribute(
-                    "aria-selected",
-                    String(active)
-                );
-
-
-                if (
-                    element.tagName === "BUTTON" ||
-                    element.tagName === "INPUT"
-                ) {
+                    element.classList.toggle(
+                        "active",
+                        value === selected.id
+                    );
 
                     element.setAttribute(
-                        "aria-pressed",
-                        String(active)
+                        "aria-selected",
+                        value === selected.id
                     );
+
                 }
-            });
+            );
 
 
         BOOKING.updateFare();
@@ -572,160 +477,120 @@
         BOOKING.emit(
             "service-changed",
             {
-                service: selected
+                service:
+                    selected
             }
         );
 
 
         return selected;
+
     };
 
 
-    /* ========================================================
-       PAYMENT
-       ======================================================== */
+/* ============================================================
+   PAYMENT
+   ============================================================ */
 
-    BOOKING.setPaymentMethod =
-        function (method) {
+BOOKING.setPaymentMethod =
+    function (method) {
+
+        method =
+            String(
+                method ||
+                "cash"
+            )
+            .toLowerCase()
+            .trim();
+
+
+        const allowed = [
+
+            "cash",
+            "online",
+            "wallet",
+            "upi"
+
+        ];
+
+
+        if (
+            !allowed.includes(
+                method
+            )
+        ) {
 
             method =
-                String(
-                    method || "cash"
-                )
-                    .trim()
-                    .toLowerCase();
+                "cash";
+
+        }
 
 
-            const aliases = {
-
-                "cod": "cash",
-
-                "card": "online",
-
-                "upi": "upi",
-
-                "wallet": "wallet"
-            };
+        BOOKING.state.paymentMethod =
+            method;
 
 
-            method =
-                aliases[method] ||
-                method;
-
-
-            const allowed = [
-                "cash",
-                "online",
-                "wallet",
-                "upi"
-            ];
-
-
-            if (!allowed.includes(method)) {
-                method = "cash";
-            }
-
-
-            BOOKING.state.paymentMethod =
-                method;
-
-
-            document
-                .querySelectorAll(
-                    "[data-payment-method]"
-                )
-                .forEach(function (element) {
+        document
+            .querySelectorAll(
+                "[data-payment-method]"
+            )
+            .forEach(
+                function (element) {
 
                     const value =
                         String(
-                            element.dataset
-                                .paymentMethod || ""
+                            element.dataset.paymentMethod ||
+                            ""
                         )
-                            .trim()
-                            .toLowerCase();
-
-
-                    const active =
-                        value === method;
-
+                        .toLowerCase();
 
                     element.classList.toggle(
                         "active",
-                        active
+                        value === method
                     );
 
-
-                    element.setAttribute(
-                        "aria-selected",
-                        String(active)
-                    );
-
-
-                    if (
-                        element.tagName === "BUTTON" ||
-                        element.tagName === "INPUT"
-                    ) {
-
-                        element.setAttribute(
-                            "aria-pressed",
-                            String(active)
-                        );
-                    }
-                });
-
-
-            BOOKING.emit(
-                "payment-method-changed",
-                {
-                    method: method
                 }
             );
 
 
-            return method;
-        };
+        BOOKING.emit(
+            "payment-method-changed",
+            {
+                method:
+                    method
+            }
+        );
 
 
-    /* ========================================================
-       LOCATION
-       ======================================================== */
+        return method;
 
-    BOOKING.normalizeLocation = function (
-        location,
-        fallbackName
-    ) {
+    };
 
-        if (!location) {
-            return null;
-        }
 
+/* ============================================================
+   LOCATION
+   ============================================================ */
+
+BOOKING.setPickup =
+    function (location) {
 
         if (
-            Array.isArray(location) &&
-            location.length >= 2
+            !location
         ) {
 
-            location = {
+            return null;
 
-                lat: location[0],
-
-                lng: location[1]
-            };
         }
 
 
         const lat =
             BOOKING.number(
-                location.lat ??
-                location.latitude
+                location.lat
             );
-
 
         const lng =
             BOOKING.number(
-                location.lng ??
-                location.lon ??
-                location.longitude
+                location.lng
             );
 
 
@@ -735,61 +600,34 @@
         ) {
 
             return null;
+
         }
 
 
-        const address =
-            String(
-                location.address ||
-                location.formattedAddress ||
-                location.display_name ||
-                location.name ||
-                fallbackName ||
-                ""
-            ).trim();
+        BOOKING.state.pickup = {
 
+            lat:
+                lat,
 
-        return {
-
-            lat: lat,
-
-            lng: lng,
+            lng:
+                lng,
 
             address:
-                address ||
-                fallbackName ||
-                "Location",
+                location.address ||
+                location.name ||
+                "Pickup location",
 
             name:
                 location.name ||
-                address ||
-                fallbackName ||
-                "Location"
-        };
-    };
-
-
-    BOOKING.setPickup = function (
-        location
-    ) {
-
-        const normalized =
-            BOOKING.normalizeLocation(
-                location,
+                location.address ||
                 "Pickup location"
-            );
 
-
-        if (!normalized) {
-            return null;
-        }
-
-
-        BOOKING.state.pickup =
-            normalized;
+        };
 
 
         BOOKING.updateLocationUI();
+
+        BOOKING.updateFare();
 
 
         BOOKING.emit(
@@ -801,3545 +639,2729 @@
         );
 
 
-        BOOKING.updateFare();
-
-
         return BOOKING.state.pickup;
+
     };
 
 
-    BOOKING.setDestination =
-        function (location) {
+BOOKING.setDestination =
+    function (location) {
 
-            const normalized =
-                BOOKING.normalizeLocation(
-                    location,
-                    "Destination"
-                );
+        if (
+            !location
+        ) {
+
+            return null;
+
+        }
 
 
-            if (!normalized) {
-                return null;
+        const lat =
+            BOOKING.number(
+                location.lat
+            );
+
+        const lng =
+            BOOKING.number(
+                location.lng
+            );
+
+
+        if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng)
+        ) {
+
+            return null;
+
+        }
+
+
+        BOOKING.state.destination = {
+
+            lat:
+                lat,
+
+            lng:
+                lng,
+
+            address:
+                location.address ||
+                location.name ||
+                "Destination",
+
+            name:
+                location.name ||
+                location.address ||
+                "Destination"
+
+        };
+
+
+        BOOKING.updateLocationUI();
+
+        BOOKING.updateFare();
+
+
+        BOOKING.emit(
+            "destination-changed",
+            {
+                destination:
+                    BOOKING.state.destination
             }
+        );
 
 
-            BOOKING.state.destination =
-                normalized;
+        return BOOKING.state.destination;
+
+    };
 
 
-            BOOKING.updateLocationUI();
+BOOKING.clearLocations =
+    function () {
+
+        BOOKING.state.pickup =
+            null;
+
+        BOOKING.state.destination =
+            null;
+
+        BOOKING.state.distanceKm =
+            0;
+
+        BOOKING.state.durationMinutes =
+            0;
 
 
-            BOOKING.emit(
-                "destination-changed",
-                {
-                    destination:
-                        BOOKING.state.destination
-                }
-            );
+        BOOKING.updateLocationUI();
+
+        BOOKING.updateFare();
+
+    };
 
 
-            BOOKING.updateFare();
+BOOKING.updateLocationUI =
+    function () {
+
+        const pickup =
+            BOOKING.state.pickup;
+
+        const destination =
+            BOOKING.state.destination;
 
 
-            return BOOKING.state.destination;
-        };
-
-
-    BOOKING.clearLocations =
-        function () {
-
-            BOOKING.state.pickup = null;
-
-            BOOKING.state.destination = null;
-
-            BOOKING.state.distanceKm = 0;
-
-            BOOKING.state.durationMinutes = 0;
-
-
-            BOOKING.updateLocationUI();
-
-            BOOKING.updateFare();
-
-
-            BOOKING.emit(
-                "locations-cleared"
-            );
-        };
-
-
-    BOOKING.updateLocationUI =
-        function () {
-
-            const pickup =
-                BOOKING.state.pickup;
-
-
-            const destination =
-                BOOKING.state.destination;
-
-
-            document
-                .querySelectorAll(
-                    "[data-pickup-address]"
-                )
-                .forEach(function (element) {
+        document
+            .querySelectorAll(
+                "[data-pickup-address]"
+            )
+            .forEach(
+                function (element) {
 
                     element.textContent =
                         pickup?.address ||
                         "Choose pickup location";
-                });
+
+                }
+            );
 
 
-            document
-                .querySelectorAll(
-                    "[data-destination-address]"
-                )
-                .forEach(function (element) {
+        document
+            .querySelectorAll(
+                "[data-destination-address]"
+            )
+            .forEach(
+                function (element) {
 
                     element.textContent =
                         destination?.address ||
                         "Choose destination";
-                });
+
+                }
+            );
 
 
-            const pickupInput =
-                document.querySelector(
-                    "#pickup"
-                );
+        const pickupInput =
+            document.querySelector(
+                "#pickup"
+            ) ||
+            document.querySelector(
+                "#pickupInput"
+            );
 
 
-            if (pickupInput) {
+        if (
+            pickupInput &&
+            pickup
+        ) {
 
-                pickupInput.value =
-                    pickup?.address || "";
-            }
+            pickupInput.value =
+                pickup.address;
 
-
-            const destinationInput =
-                document.querySelector(
-                    "#destination"
-                );
+        }
 
 
-            if (destinationInput) {
+        const destinationInput =
+            document.querySelector(
+                "#destination"
+            ) ||
+            document.querySelector(
+                "#dropInput"
+            );
 
-                destinationInput.value =
-                    destination?.address || "";
-            }
-        };
 
-
-    /* ========================================================
-       DISTANCE
-       ======================================================== */
-
-    BOOKING.calculateDistance =
-        function (
-            pickup,
+        if (
+            destinationInput &&
             destination
         ) {
 
-            if (
-                !pickup ||
-                !destination
-            ) {
+            destinationInput.value =
+                destination.address;
 
-                return 0;
-            }
+        }
 
+    };
 
-            const lat1 =
-                BOOKING.number(pickup.lat);
 
-            const lon1 =
-                BOOKING.number(pickup.lng);
+/* ============================================================
+   PUBLIC LOCATION API
+   ============================================================ */
 
-            const lat2 =
-                BOOKING.number(destination.lat);
+export function setPickupLocation(
+    lat,
+    lng,
+    address = ""
+) {
 
-            const lon2 =
-                BOOKING.number(destination.lng);
+    return BOOKING.setPickup({
 
+        lat:
+            lat,
 
-            if (
-                !Number.isFinite(lat1) ||
-                !Number.isFinite(lon1) ||
-                !Number.isFinite(lat2) ||
-                !Number.isFinite(lon2)
-            ) {
+        lng:
+            lng,
 
-                return 0;
-            }
+        address:
+            address ||
+            "Pickup location"
 
+    });
 
-            if (
-                lat1 === lat2 &&
-                lon1 === lon2
-            ) {
+}
 
-                return 0;
-            }
 
+export function setDropLocation(
+    lat,
+    lng,
+    address = ""
+) {
 
-            const R = 6371;
+    return BOOKING.setDestination({
 
-            const dLat =
-                (
-                    lat2 - lat1
-                ) *
-                Math.PI /
-                180;
+        lat:
+            lat,
 
-            const dLon =
-                (
-                    lon2 - lon1
-                ) *
-                Math.PI /
-                180;
+        lng:
+            lng,
 
+        address:
+            address ||
+            "Destination"
 
-            const a =
-                Math.sin(dLat / 2) ** 2 +
-                Math.cos(
-                    lat1 * Math.PI / 180
-                ) *
-                Math.cos(
-                    lat2 * Math.PI / 180
-                ) *
-                Math.sin(dLon / 2) ** 2;
+    });
 
+}
 
-            const c =
-                2 *
-                Math.atan2(
-                    Math.sqrt(a),
-                    Math.sqrt(
-                        Math.max(
-                            0,
-                            1 - a
-                        )
-                    )
-                );
 
+/* ============================================================
+   DISTANCE
+   ============================================================ */
 
-            return R * c;
-        };
+BOOKING.calculateDistance =
+    function (
+        pickup,
+        destination
+    ) {
 
-
-    BOOKING.normalizeDistance =
-        function (value) {
-
-            let distance =
-                BOOKING.number(value);
-
-
-            if (distance <= 0) {
-                return 0;
-            }
-
-
-            /*
-             * Values larger than 100 are assumed
-             * to be metres when coming from route
-             * APIs that return metres.
-             */
-
-            if (distance > 100) {
-                distance /= 1000;
-            }
-
-
-            return distance;
-        };
-
-
-    BOOKING.normalizeDuration =
-        function (value) {
-
-            let duration =
-                BOOKING.number(value);
-
-
-            if (duration <= 0) {
-                return 0;
-            }
-
-
-            /*
-             * Route APIs commonly return seconds.
-             * Large values are treated as seconds.
-             */
-
-            if (duration > 1000) {
-                duration /= 60;
-            }
-
-
-            return duration;
-        };
-
-
-    /* ========================================================
-       EXISTING DISTANCE MODULE
-       ======================================================== */
-
-    BOOKING.getDistance =
-        async function () {
-
-            if (
-                !BOOKING.state.pickup ||
-                !BOOKING.state.destination
-            ) {
-
-                return 0;
-            }
-
-
-            if (
-                RX.distance &&
-                typeof RX.distance.calculate ===
-                "function"
-            ) {
-
-                try {
-
-                    const result =
-                        await RX.distance.calculate(
-                            BOOKING.state.pickup,
-                            BOOKING.state.destination
-                        );
-
-
-                    const raw =
-                        result?.distanceKm ??
-                        result?.distance ??
-                        result?.meters ??
-                        result?.distanceMeters ??
-                        result;
-
-
-                    const distance =
-                        BOOKING.normalizeDistance(
-                            raw
-                        );
-
-
-                    if (distance > 0) {
-                        return distance;
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "RiderX distance module failed:",
-                        error
-                    );
-                }
-            }
-
-
-            return BOOKING.calculateDistance(
-                BOOKING.state.pickup,
-                BOOKING.state.destination
-            );
-        };
-
-
-    /* ========================================================
-       FARE
-       ======================================================== */
-
-    BOOKING.calculateFare =
-        function (
-            distanceKm,
-            service
+        if (
+            !pickup ||
+            !destination
         ) {
 
-            distanceKm =
-                Math.max(
-                    0,
-                    BOOKING.number(distanceKm)
-                );
+            return 0;
+
+        }
 
 
-            const selected =
-                BOOKING.getService(service);
+        const lat1 =
+            BOOKING.number(
+                pickup.lat
+            );
+
+        const lon1 =
+            BOOKING.number(
+                pickup.lng
+            );
+
+        const lat2 =
+            BOOKING.number(
+                destination.lat
+            );
+
+        const lon2 =
+            BOOKING.number(
+                destination.lng
+            );
 
 
-            const now =
-                new Date();
+        const R =
+            6371;
 
 
-            const hour =
-                now.getHours();
+        const dLat =
+            (
+                lat2 -
+                lat1
+            ) *
+            Math.PI /
+            180;
 
 
-            let fare = 0;
+        const dLon =
+            (
+                lon2 -
+                lon1
+            ) *
+            Math.PI /
+            180;
 
 
-            /*
-             * RIDERX BIKE PRICING
-             *
-             * 06:00 - 22:00
-             * First 10 km = ₹8/km
-             * Above 10 km = ₹9/km
-             *
-             * 22:00 - 06:00
-             * ₹11/km
-             *
-             * Base fare remains ₹30.
-             */
+        const a =
+            Math.sin(
+                dLat / 2
+            ) *
+            Math.sin(
+                dLat / 2
+            ) +
 
-            if (selected.id === "bike") {
+            Math.cos(
+                lat1 *
+                Math.PI /
+                180
+            ) *
 
-                if (
-                    hour >= 22 ||
-                    hour < 6
-                ) {
+            Math.cos(
+                lat2 *
+                Math.PI /
+                180
+            ) *
 
-                    fare =
-                        selected.baseFare +
-                        distanceKm * 11;
+            Math.sin(
+                dLon / 2
+            ) *
+            Math.sin(
+                dLon / 2
+            );
 
-                } else if (
-                    distanceKm > 10
-                ) {
 
-                    fare =
-                        selected.baseFare +
-                        10 * 8 +
+        const c =
+            2 *
+            Math.atan2(
+                Math.sqrt(a),
+                Math.sqrt(
+                    1 - a
+                )
+            );
+
+
+        return (
+            R * c
+        );
+
+    };
+
+
+/* ============================================================
+   FARE
+   ============================================================ */
+
+BOOKING.calculateFare =
+    function (
+        distanceKm,
+        service
+    ) {
+
+        distanceKm =
+            Math.max(
+                0,
+                BOOKING.number(
+                    distanceKm
+                )
+            );
+
+
+        const selected =
+            BOOKING.getService(
+                service
+            );
+
+
+        const hour =
+            new Date()
+                .getHours();
+
+
+        let fare;
+
+
+        /*
+         * Bike pricing:
+         *
+         * 06:00 - 22:00
+         * first 10 km = ₹8/km
+         * above 10 km = ₹9/km
+         *
+         * 22:00 - 06:00
+         * ₹11/km
+         */
+
+        if (
+            selected.id === "bike"
+        ) {
+
+            if (
+                hour >= 22 ||
+                hour < 6
+            ) {
+
+                fare =
+                    selected.baseFare +
+                    (
+                        distanceKm *
+                        11
+                    );
+
+            } else if (
+                distanceKm > 10
+            ) {
+
+                fare =
+                    selected.baseFare +
+
+                    (
+                        10 *
+                        8
+                    ) +
+
+                    (
                         (
-                            distanceKm - 10
-                        ) * 9;
-
-                } else {
-
-                    fare =
-                        selected.baseFare +
-                        distanceKm * 8;
-                }
+                            distanceKm -
+                            10
+                        ) *
+                        9
+                    );
 
             } else {
 
                 fare =
                     selected.baseFare +
-                    distanceKm *
-                    selected.perKm;
+                    (
+                        distanceKm *
+                        8
+                    );
+
             }
 
+        } else {
 
             fare =
-                Math.max(
-                    fare,
-                    selected.minimumFare
+                selected.baseFare +
+                (
+                    distanceKm *
+                    selected.perKm
                 );
 
+        }
 
-            return BOOKING.round(fare);
-        };
 
-
-    /* ========================================================
-       COUPON
-       ======================================================== */
-
-    BOOKING.applyCoupon =
-        async function (code) {
-
-            code =
-                String(code || "")
-                    .trim()
-                    .toUpperCase();
-
-
-            if (!code) {
-
-                throw new Error(
-                    "Enter a coupon code."
-                );
-            }
-
-
-            if (
-                BOOKING.state.distanceKm <= 0 ||
-                BOOKING.state.estimatedFare <= 0
-            ) {
-
-                await BOOKING.estimate();
-            }
-
-
-            /*
-             * Existing offers module.
-             */
-
-            if (
-                RX.offers &&
-                typeof RX.offers.validateCoupon ===
-                "function"
-            ) {
-
-                try {
-
-                    const result =
-                        await RX.offers.validateCoupon(
-                            code,
-                            {
-                                ...BOOKING.state,
-
-                                fare:
-                                    BOOKING.state
-                                        .estimatedFare
-                            }
-                        );
-
-
-                    if (
-                        result &&
-                        result.valid
-                    ) {
-
-                        let discount = 0;
-
-
-                        if (
-                            String(result.type)
-                                .toLowerCase() ===
-                            "percent"
-                        ) {
-
-                            discount =
-                                BOOKING.state
-                                    .estimatedFare *
-                                (
-                                    BOOKING.number(
-                                        result.value
-                                    ) / 100
-                                );
-
-                        } else {
-
-                            discount =
-                                BOOKING.number(
-                                    result.discount ??
-                                    result.value
-                                );
-                        }
-
-
-                        discount =
-                            Math.min(
-                                Math.max(0, discount),
-                                BOOKING.state
-                                    .estimatedFare
-                            );
-
-
-                        BOOKING.state.coupon = {
-
-                            ...result,
-
-                            code: code
-                        };
-
-
-                        BOOKING.state.discount =
-                            BOOKING.round(
-                                discount
-                            );
-
-
-                        BOOKING.updateFare();
-
-
-                        return BOOKING.state.coupon;
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "Offers coupon validation failed:",
-                        error
-                    );
-                }
-            }
-
-
-            /*
-             * Firebase RTDB fallback.
-             */
-
-            const database =
-                BOOKING.database();
-
-
-            if (database) {
-
-                try {
-
-                    const snapshot =
-                        await database
-                            .ref(
-                                "coupons/" + code
-                            )
-                            .once("value");
-
-
-                    if (snapshot.exists()) {
-
-                        const coupon =
-                            snapshot.val() || {};
-
-
-                        if (
-                            coupon.active === false
-                        ) {
-
-                            throw new Error(
-                                "This coupon is inactive."
-                            );
-                        }
-
-
-                        if (
-                            coupon.expiry &&
-                            Date.now() >
-                            BOOKING.number(
-                                coupon.expiry
-                            )
-                        ) {
-
-                            throw new Error(
-                                "This coupon has expired."
-                            );
-                        }
-
-
-                        let discount = 0;
-
-
-                        if (
-                            String(coupon.type)
-                                .toLowerCase() ===
-                            "percent"
-                        ) {
-
-                            discount =
-                                BOOKING.state
-                                    .estimatedFare *
-                                (
-                                    BOOKING.number(
-                                        coupon.value
-                                    ) / 100
-                                );
-
-                        } else {
-
-                            discount =
-                                BOOKING.number(
-                                    coupon.value
-                                );
-                        }
-
-
-                        discount =
-                            Math.min(
-                                Math.max(0, discount),
-                                BOOKING.state
-                                    .estimatedFare
-                            );
-
-
-                        BOOKING.state.coupon = {
-
-                            code: code,
-
-                            type:
-                                coupon.type ||
-                                "flat",
-
-                            value:
-                                coupon.value,
-
-                            valid: true
-                        };
-
-
-                        BOOKING.state.discount =
-                            BOOKING.round(
-                                discount
-                            );
-
-
-                        BOOKING.updateFare();
-
-
-                        return BOOKING.state.coupon;
-                    }
-
-                } catch (error) {
-
-                    if (
-                        error &&
-                        error.message &&
-                        (
-                            error.message.includes(
-                                "inactive"
-                            ) ||
-                            error.message.includes(
-                                "expired"
-                            )
-                        )
-                    ) {
-
-                        throw error;
-                    }
-
-
-                    console.warn(
-                        "Firebase coupon lookup failed:",
-                        error
-                    );
-                }
-            }
-
-
-            throw new Error(
-                "Invalid coupon code."
+        fare =
+            Math.max(
+                fare,
+                selected.minimumFare
             );
-        };
 
 
-    BOOKING.removeCoupon =
-        function () {
+        return BOOKING.round(
+            fare
+        );
 
-            BOOKING.state.coupon = null;
-
-            BOOKING.state.discount = 0;
-
-
-            BOOKING.updateFare();
+    };
 
 
-            BOOKING.emit(
-                "coupon-removed"
+/* ============================================================
+   FARE UPDATE
+   ============================================================ */
+
+BOOKING.updateFare =
+    function () {
+
+        const distance =
+            BOOKING.number(
+                BOOKING.state.distanceKm
             );
-        };
 
 
-    /* ========================================================
-       UPDATE FARE
-       ======================================================== */
-
-    BOOKING.updateFare =
-        function () {
-
-            const distance =
-                Math.max(
-                    0,
-                    BOOKING.number(
-                        BOOKING.state.distanceKm
-                    )
-                );
+        const base =
+            BOOKING.calculateFare(
+                distance,
+                BOOKING.state.service
+            );
 
 
-            const service =
-                BOOKING.getService();
-
-
-            const base =
-                BOOKING.calculateFare(
-                    distance,
-                    service
-                );
-
-
-            const discount =
-                Math.min(
-                    base,
-                    Math.max(
-                        0,
-                        BOOKING.number(
-                            BOOKING.state.discount
-                        )
-                    )
-                );
-
-
-            const total =
-                Math.max(
-                    0,
-                    base - discount
-                );
-
-
-            BOOKING.state.estimatedFare =
-                BOOKING.round(base);
-
-
-            BOOKING.state.fare =
-                BOOKING.round(total);
-
-
-            document
-                .querySelectorAll(
-                    "[data-fare]"
+        const discount =
+            Math.min(
+                base,
+                BOOKING.number(
+                    BOOKING.state.discount
                 )
-                .forEach(function (element) {
+            );
+
+
+        const total =
+            Math.max(
+                0,
+                base -
+                discount
+            );
+
+
+        BOOKING.state.estimatedFare =
+            base;
+
+
+        BOOKING.state.fare =
+            BOOKING.round(
+                total
+            );
+
+
+        document
+            .querySelectorAll(
+                "[data-fare]"
+            )
+            .forEach(
+                function (element) {
 
                     element.textContent =
-                        BOOKING.config.currency +
+                        "₹" +
                         BOOKING.state.fare;
-                });
+
+                }
+            );
 
 
-            document
-                .querySelectorAll(
-                    "[data-estimated-fare]"
-                )
-                .forEach(function (element) {
+        document
+            .querySelectorAll(
+                "[data-estimated-fare]"
+            )
+            .forEach(
+                function (element) {
 
                     element.textContent =
-                        BOOKING.config.currency +
+                        "₹" +
                         BOOKING.state.estimatedFare;
-                });
+
+                }
+            );
 
 
-            document
-                .querySelectorAll(
-                    "[data-discount]"
-                )
-                .forEach(function (element) {
+        document
+            .querySelectorAll(
+                "[data-discount]"
+            )
+            .forEach(
+                function (element) {
 
                     element.textContent =
-                        BOOKING.config.currency +
-                        BOOKING.round(discount);
-                });
+                        "₹" +
+                        discount;
+
+                }
+            );
 
 
-            document
-                .querySelectorAll(
-                    "[data-distance]"
-                )
-                .forEach(function (element) {
+        document
+            .querySelectorAll(
+                "[data-distance]"
+            )
+            .forEach(
+                function (element) {
 
                     element.textContent =
                         distance.toFixed(1) +
                         " km";
-                });
+
+                }
+            );
 
 
-            document
-                .querySelectorAll(
-                    "[data-duration]"
-                )
-                .forEach(function (element) {
-
-                    const duration =
-                        BOOKING.number(
-                            BOOKING.state
-                                .durationMinutes
-                        );
-
+        document
+            .querySelectorAll(
+                "[data-duration]"
+            )
+            .forEach(
+                function (element) {
 
                     element.textContent =
-                        Math.round(duration) +
+                        Math.round(
+                            BOOKING.state
+                                .durationMinutes
+                        ) +
                         " min";
-                });
 
-
-            BOOKING.emit(
-                "fare-updated",
-                {
-
-                    fare:
-                        BOOKING.state.fare,
-
-                    estimatedFare:
-                        BOOKING.state.estimatedFare,
-
-                    discount:
-                        BOOKING.round(discount),
-
-                    distanceKm:
-                        distance,
-
-                    durationMinutes:
-                        BOOKING.state
-                            .durationMinutes,
-
-                    service:
-                        service.id
                 }
             );
 
 
-            return BOOKING.state.fare;
-        };
-
-
-    /* ========================================================
-       ESTIMATE
-       ======================================================== */
-
-    BOOKING.estimate =
-        async function () {
-
-            if (
-                !BOOKING.state.pickup ||
-                !BOOKING.state.destination
-            ) {
-
-                BOOKING.state.distanceKm = 0;
-
-                BOOKING.state.durationMinutes = 0;
-
-                BOOKING.updateFare();
-
-
-                return {
-
-                    distanceKm: 0,
-
-                    durationMinutes: 0,
-
-                    fare: 0,
-
-                    service:
-                        BOOKING.state.service
-                };
-            }
-
-
-            let distance =
-                await BOOKING.getDistance();
-
-
-            let duration = 0;
-
-
-            /*
-             * Existing route module.
-             */
-
-            if (
-                RX.route &&
-                typeof RX.route.calculate ===
-                "function"
-            ) {
-
-                try {
-
-                    const route =
-                        await RX.route.calculate(
-                            BOOKING.state.pickup,
-                            BOOKING.state.destination
-                        );
-
-
-                    if (route) {
-
-                        const routeDistance =
-                            route.distanceKm ??
-                            route.distance ??
-                            route.meters ??
-                            route.distanceMeters ??
-                            0;
-
-
-                        const normalizedDistance =
-                            BOOKING.normalizeDistance(
-                                routeDistance
-                            );
-
-
-                        if (
-                            normalizedDistance > 0
-                        ) {
-
-                            distance =
-                                normalizedDistance;
-                        }
-
-
-                        const routeDuration =
-                            route.durationMinutes ??
-                            route.duration ??
-                            route.seconds ??
-                            0;
-
-
-                        duration =
-                            BOOKING.normalizeDuration(
-                                routeDuration
-                            );
-                    }
-
-                } catch (error) {
-
-                    console.warn(
-                        "RiderX route estimate failed:",
-                        error
-                    );
-                }
-            }
-
-
-            BOOKING.state.distanceKm =
-                BOOKING.number(distance);
-
-
-            BOOKING.state.durationMinutes =
-                BOOKING.number(duration);
-
-
-            const fare =
-                BOOKING.updateFare();
-
-
-            return {
-
-                distanceKm:
-                    BOOKING.state.distanceKm,
-
-                durationMinutes:
-                    BOOKING.state.durationMinutes,
-
-                fare: fare,
-
-                estimatedFare:
-                    BOOKING.state.estimatedFare,
-
-                discount:
-                    BOOKING.state.discount,
-
-                service:
-                    BOOKING.state.service
-            };
-        };
-
-
-    /* ========================================================
-       VALIDATE
-       ======================================================== */
-
-    BOOKING.validate =
-        function (requireDistance = true) {
-
-            const user =
-                BOOKING.getUser();
-
-
-            if (!user) {
-
-                return {
-
-                    valid: false,
-
-                    message:
-                        "Please login before booking a ride."
-                };
-            }
-
-
-            if (!BOOKING.getUid()) {
-
-                return {
-
-                    valid: false,
-
-                    message:
-                        "Your account information is incomplete. Please login again."
-                };
-            }
-
-
-            if (
-                !BOOKING.state.pickup
-            ) {
-
-                return {
-
-                    valid: false,
-
-                    message:
-                        "Please select your pickup location."
-                };
-            }
-
-
-            if (
-                !BOOKING.state.destination
-            ) {
-
-                return {
-
-                    valid: false,
-
-                    message:
-                        "Please select your destination."
-                };
-            }
-
-
-            const pickup =
-                BOOKING.state.pickup;
-
-
-            const destination =
-                BOOKING.state.destination;
-
-
-            if (
-                pickup.lat === destination.lat &&
-                pickup.lng === destination.lng
-            ) {
-
-                return {
-
-                    valid: false,
-
-                    message:
-                        "Pickup and destination cannot be the same."
-                };
-            }
-
-
-            if (requireDistance) {
-
-                if (
-                    BOOKING.state.distanceKm <= 0
-                ) {
-
-                    return {
-
-                        valid: false,
-
-                        message:
-                            "Unable to calculate the route distance."
-                    };
-                }
-
-
-                if (
-                    BOOKING.state.fare <= 0
-                ) {
-
-                    return {
-
-                        valid: false,
-
-                        message:
-                            "Unable to calculate the fare."
-                    };
-                }
-            }
-
-
-            return {
-
-                valid: true,
-
-                message: "Ready"
-            };
-        };
-
-
-    /* ========================================================
-       ACTIVE REQUEST GUARD
-       ======================================================== */
-
-    BOOKING.hasActiveRide =
-        function () {
-
-            const booking =
-                BOOKING.state.booking;
-
-
-            if (!booking) {
-                return false;
-            }
-
-
-            return BOOKING.isActiveStatus(
-                booking.status
-            );
-        };
-
-
-    /* ========================================================
-       CREATE BOOKING OBJECT
-       ======================================================== */
-
-    BOOKING.createObject =
-        function (extra) {
-
-            const user =
-                BOOKING.getUser();
-
-
-            const service =
-                BOOKING.getService();
-
-
-            const id =
-                BOOKING.id();
-
-
-            const now =
-                Date.now();
-
-
-            const customerId =
-                user?.uid ||
-                user?.id ||
-                user?.userId ||
-                user?.customerId ||
-                "";
-
-
-            return {
-
-                id: id,
-
-                bookingId: id,
-
-                customerId:
-                    customerId,
-
-                customerUid:
-                    customerId,
-
-                customerName:
-                    user?.name ||
-                    user?.displayName ||
-                    "Customer",
-
-                customerPhone:
-                    user?.phone ||
-                    user?.phoneNumber ||
-                    "",
-
-                service:
-                    service.id,
-
-                serviceName:
-                    service.name,
-
-                pickup:
-                    BOOKING.state.pickup,
-
-                destination:
-                    BOOKING.state.destination,
-
-                pickupAddress:
-                    BOOKING.state.pickup?.address ||
-                    "",
-
-                destinationAddress:
-                    BOOKING.state.destination?.address ||
-                    "",
-
-                distanceKm:
-                    BOOKING.number(
-                        BOOKING.state.distanceKm
-                    ),
-
-                durationMinutes:
-                    BOOKING.number(
-                        BOOKING.state.durationMinutes
-                    ),
-
-                estimatedFare:
-                    BOOKING.number(
-                        BOOKING.state.estimatedFare
-                    ),
-
-                discount:
-                    BOOKING.number(
-                        BOOKING.state.discount
-                    ),
+        BOOKING.emit(
+            "fare-updated",
+            {
 
                 fare:
-                    BOOKING.number(
-                        BOOKING.state.fare
-                    ),
+                    BOOKING.state.fare,
 
-                totalFare:
-                    BOOKING.number(
-                        BOOKING.state.fare
-                    ),
+                estimatedFare:
+                    BOOKING.state
+                        .estimatedFare,
 
-                currency: "INR",
+                discount:
+                    discount,
 
-                paymentMethod:
-                    BOOKING.state.paymentMethod,
+                distanceKm:
+                    distance
 
-                coupon:
-                    BOOKING.state.coupon?.code ||
-                    null,
+            }
+        );
 
-                status: "searching",
 
-                riderId: null,
+        return BOOKING.state.fare;
 
-                riderUid: null,
+    };
 
-                riderName: null,
 
-                riderPhone: null,
+/* ============================================================
+   ESTIMATE
+   ============================================================ */
 
-                riderPhoto: null,
+BOOKING.estimate =
+    async function () {
 
-                riderRating: null,
+        if (
+            !BOOKING.state.pickup ||
+            !BOOKING.state.destination
+        ) {
 
-                vehicle: null,
+            return {
 
-                vehicleModel: null,
+                distanceKm:
+                    0,
 
-                vehicleNumber: null,
+                durationMinutes:
+                    0,
 
-                plateNumber: null,
+                fare:
+                    0
 
-                otp: null,
-
-                createdAt: now,
-
-                requestedAt: now,
-
-                updatedAt: now,
-
-                city:
-                    BOOKING.config.city,
-
-                source: "riderx-web",
-
-                ...(extra || {})
             };
+
+        }
+
+
+        BOOKING.state.distanceKm =
+            BOOKING.calculateDistance(
+                BOOKING.state.pickup,
+                BOOKING.state.destination
+            );
+
+
+        BOOKING.state.durationMinutes =
+            Math.max(
+                5,
+                Math.round(
+                    BOOKING.state.distanceKm *
+                    3
+                )
+            );
+
+
+        const fare =
+            BOOKING.updateFare();
+
+
+        return {
+
+            distanceKm:
+                BOOKING.state.distanceKm,
+
+            durationMinutes:
+                BOOKING.state
+                    .durationMinutes,
+
+            fare:
+                fare,
+
+            service:
+                BOOKING.state.service
+
         };
 
+    };
 
-    /* ========================================================
-       SAVE BOOKING
-       ======================================================== */
 
-    BOOKING.saveBooking =
-        async function (booking) {
+/* ============================================================
+   PUBLIC FARE API
+   ============================================================ */
 
-            if (
-                !booking ||
-                !booking.id
-            ) {
+export async function calculateFareEstimate() {
 
-                throw new Error(
-                    "Invalid booking."
+    return await BOOKING.estimate();
+
+}
+
+
+/* ============================================================
+   COUPON
+   ============================================================ */
+
+BOOKING.applyCoupon =
+    async function (code) {
+
+        code =
+            String(
+                code || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        if (!code) {
+
+            throw new Error(
+                "Enter a coupon code."
+            );
+
+        }
+
+
+        /*
+         * Realtime Database coupons.
+         */
+
+        if (
+            realtimeDb
+        ) {
+
+            const couponRef =
+                ref(
+                    realtimeDb,
+                    "coupons/" +
+                    code
                 );
-            }
 
 
-            const database =
-                BOOKING.database();
-
-
-            const firestore =
-                BOOKING.firestore();
-
-
-            if (
-                !database &&
-                !firestore
-            ) {
-
-                throw new Error(
-                    "Firebase database is not available."
+            const snapshot =
+                await get(
+                    couponRef
                 );
-            }
-
-
-            let rtdbSaved = false;
-
-
-            /*
-             * RTDB is the primary live ride source.
-             */
-
-            if (database) {
-
-                await database
-                    .ref(
-                        "rides/" +
-                        booking.id
-                    )
-                    .set(booking);
-
-
-                rtdbSaved = true;
-
-
-                if (booking.customerId) {
-
-                    await database
-                        .ref(
-                            "customerRides/" +
-                            booking.customerId +
-                            "/" +
-                            booking.id
-                        )
-                        .set({
-
-                            bookingId:
-                                booking.id,
-
-                            status:
-                                booking.status,
-
-                            createdAt:
-                                booking.createdAt,
-
-                            updatedAt:
-                                booking.updatedAt,
-
-                            service:
-                                booking.service,
-
-                            pickupAddress:
-                                booking.pickupAddress,
-
-                            destinationAddress:
-                                booking.destinationAddress,
-
-                            fare:
-                                booking.fare
-                        });
-                }
-            }
-
-
-            /*
-             * Firestore is a mirror only.
-             * Failure here must not make a
-             * successfully-created RTDB ride fail.
-             */
-
-            if (firestore) {
-
-                try {
-
-                    await firestore
-                        .collection("rides")
-                        .doc(booking.id)
-                        .set(
-                            booking,
-                            {
-                                merge: true
-                            }
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Firestore booking mirror failed:",
-                        error
-                    );
-                }
-            }
 
 
             if (
-                !rtdbSaved &&
-                !firestore
+                snapshot.exists()
             ) {
 
-                throw new Error(
-                    "Unable to save booking."
-                );
-            }
-
-
-            return booking;
-        };
-
-
-    /* ========================================================
-       START BOOKING
-       ======================================================== */
-
-    BOOKING.requestRide =
-        async function (options) {
-
-            options =
-                options || {};
-
-
-            if (
-                BOOKING.state.requestInProgress ||
-                BOOKING.state.loading
-            ) {
-
-                throw new Error(
-                    "A booking request is already being processed."
-                );
-            }
-
-
-            /*
-             * Never create a second ride while
-             * an existing ride is active.
-             */
-
-            if (
-                BOOKING.hasActiveRide()
-            ) {
-
-                throw new Error(
-                    "You already have an active ride."
-                );
-            }
-
-
-            const basicValidation =
-                BOOKING.validate(false);
-
-
-            if (!basicValidation.valid) {
-
-                throw new Error(
-                    basicValidation.message
-                );
-            }
-
-
-            BOOKING.state.loading = true;
-
-            BOOKING.state.requestInProgress =
-                true;
-
-
-            try {
-
-                /*
-                 * Always calculate fresh route/fare.
-                 */
-
-                await BOOKING.estimate();
-
-
-                const validation =
-                    BOOKING.validate(true);
-
-
-                if (!validation.valid) {
-
-                    throw new Error(
-                        validation.message
-                    );
-                }
-
-
-                const booking =
-                    BOOKING.createObject({
-
-                        scheduled:
-                            options.scheduled === true,
-
-                        scheduledAt:
-                            options.scheduledAt ||
-                            null,
-
-                        notes:
-                            String(
-                                options.notes || ""
-                            )
-                                .trim()
-                    });
-
-
-                BOOKING.state.booking =
-                    booking;
-
-
-                BOOKING.state.rideStatus =
-                    "searching";
-
-
-                BOOKING.state.matching =
-                    true;
-
-
-                BOOKING.state.emittedStatuses =
+                const coupon =
+                    snapshot.val() ||
                     {};
 
 
-                /*
-                 * Save exactly once here.
-                 */
+                if (
+                    coupon.active ===
+                    false
+                ) {
 
-                await BOOKING.saveBooking(
-                    booking
-                );
+                    throw new Error(
+                        "This coupon is inactive."
+                    );
+
+                }
 
 
-                BOOKING.attachBookingListener(
+                if (
+                    coupon.expiry &&
+                    Date.now() >
+                    Number(
+                        coupon.expiry
+                    )
+                ) {
+
+                    throw new Error(
+                        "This coupon has expired."
+                    );
+
+                }
+
+
+                let discount =
+                    0;
+
+
+                if (
+                    coupon.type ===
+                    "percent"
+                ) {
+
+                    discount =
+                        BOOKING.state
+                            .estimatedFare *
+
+                        (
+                            BOOKING.number(
+                                coupon.value
+                            ) /
+                            100
+                        );
+
+                } else {
+
+                    discount =
+                        BOOKING.number(
+                            coupon.value
+                        );
+
+                }
+
+
+                discount =
+                    Math.min(
+                        discount,
+                        BOOKING.state
+                            .estimatedFare
+                    );
+
+
+                BOOKING.state.coupon = {
+
+                    code:
+                        code,
+
+                    type:
+                        coupon.type,
+
+                    value:
+                        coupon.value,
+
+                    valid:
+                        true
+
+                };
+
+
+                BOOKING.state.discount =
+                    BOOKING.round(
+                        discount
+                    );
+
+
+                BOOKING.updateFare();
+
+
+                return BOOKING.state.coupon;
+
+            }
+
+        }
+
+
+        throw new Error(
+            "Invalid coupon code."
+        );
+
+    };
+
+
+BOOKING.removeCoupon =
+    function () {
+
+        BOOKING.state.coupon =
+            null;
+
+        BOOKING.state.discount =
+            0;
+
+        BOOKING.updateFare();
+
+    };
+
+
+/* ============================================================
+   VALIDATE
+   ============================================================ */
+
+BOOKING.validate =
+    function () {
+
+        const user =
+            BOOKING.getUser();
+
+
+        if (
+            !user
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                message:
+                    "Please login before booking a ride."
+
+            };
+
+        }
+
+
+        if (
+            !BOOKING.state.pickup
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                message:
+                    "Please select your pickup location."
+
+            };
+
+        }
+
+
+        if (
+            !BOOKING.state.destination
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                message:
+                    "Please select your destination."
+
+            };
+
+        }
+
+
+        if (
+            BOOKING.state.pickup.lat ===
+                BOOKING.state.destination.lat &&
+            BOOKING.state.pickup.lng ===
+                BOOKING.state.destination.lng
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                message:
+                    "Pickup and destination cannot be the same."
+
+            };
+
+        }
+
+
+        if (
+            BOOKING.state.distanceKm <=
+            0
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                message:
+                    "Unable to calculate the route distance."
+
+            };
+
+        }
+
+
+        if (
+            BOOKING.state.fare <=
+            0
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                message:
+                    "Unable to calculate the fare."
+
+            };
+
+        }
+
+
+        return {
+
+            valid:
+                true,
+
+            message:
+                "Ready"
+
+        };
+
+    };
+
+
+/* ============================================================
+   CREATE BOOKING OBJECT
+   ============================================================ */
+
+BOOKING.createObject =
+    function (extra = {}) {
+
+        const user =
+            BOOKING.getUser();
+
+
+        const service =
+            BOOKING.getService();
+
+
+        const id =
+            BOOKING.id();
+
+
+        const timestamp =
+            Date.now();
+
+
+        return {
+
+            id:
+                id,
+
+            rideId:
+                id,
+
+            bookingId:
+                id,
+
+
+            customerId:
+                user?.uid ||
+                user?.id ||
+                "",
+
+            customerUid:
+                user?.uid ||
+                user?.id ||
+                "",
+
+
+            customerName:
+                user?.name ||
+                user?.displayName ||
+                "Customer",
+
+            customerPhone:
+                user?.phone ||
+                user?.phoneNumber ||
+                "",
+
+            customerEmail:
+                user?.email ||
+                "",
+
+
+            service:
+                service.id,
+
+            serviceName:
+                service.name,
+
+
+            pickup:
+                BOOKING.state.pickup,
+
+            destination:
+                BOOKING.state.destination,
+
+
+            pickupAddress:
+                BOOKING.state.pickup
+                    ?.address ||
+                "",
+
+            destinationAddress:
+                BOOKING.state.destination
+                    ?.address ||
+                "",
+
+
+            pickupLat:
+                BOOKING.state.pickup
+                    ?.lat ||
+                null,
+
+            pickupLng:
+                BOOKING.state.pickup
+                    ?.lng ||
+                null,
+
+            destinationLat:
+                BOOKING.state.destination
+                    ?.lat ||
+                null,
+
+            destinationLng:
+                BOOKING.state.destination
+                    ?.lng ||
+                null,
+
+
+            distanceKm:
+                BOOKING.state.distanceKm,
+
+            durationMinutes:
+                BOOKING.state
+                    .durationMinutes,
+
+
+            estimatedFare:
+                BOOKING.state
+                    .estimatedFare,
+
+            discount:
+                BOOKING.state
+                    .discount,
+
+            fare:
+                BOOKING.state.fare,
+
+            totalFare:
+                BOOKING.state.fare,
+
+
+            currency:
+                "INR",
+
+
+            paymentMethod:
+                BOOKING.state
+                    .paymentMethod,
+
+
+            paymentStatus:
+                "pending",
+
+
+            coupon:
+                BOOKING.state.coupon
+                    ?.code ||
+                null,
+
+
+            status:
+                "searching",
+
+
+            rideStatus:
+                "searching",
+
+
+            riderId:
+                null,
+
+            riderUid:
+                null,
+
+            riderName:
+                null,
+
+            riderPhone:
+                null,
+
+            riderRating:
+                null,
+
+
+            otp:
+                null,
+
+
+            city:
+                BOOKING.config.city,
+
+
+            source:
+                "riderx-web",
+
+
+            scheduled:
+                false,
+
+            scheduledAt:
+                null,
+
+
+            createdAt:
+                timestamp,
+
+            requestedAt:
+                timestamp,
+
+            updatedAt:
+                timestamp,
+
+
+            ...(extra || {})
+
+        };
+
+    };
+
+
+/* ============================================================
+   SAVE TO REALTIME DATABASE
+   ============================================================ */
+
+BOOKING.saveRealtime =
+    async function (booking) {
+
+        if (
+            !realtimeDb
+        ) {
+
+            throw new Error(
+                "RiderX Realtime Database is not available."
+            );
+
+        }
+
+
+        const rideReference =
+            ref(
+                realtimeDb,
+                "rides/" +
+                booking.id
+            );
+
+
+        await set(
+            rideReference,
+            booking
+        );
+
+
+        if (
+            booking.customerId
+        ) {
+
+            const customerRideReference =
+                ref(
+                    realtimeDb,
+                    "customerRides/" +
+                    booking.customerId +
+                    "/" +
                     booking.id
                 );
 
 
-                /*
-                 * Matching engine.
-                 *
-                 * This is a trigger only. If the
-                 * matching module owns request
-                 * creation, it is used here.
-                 */
+            await set(
+                customerRideReference,
+                {
+
+                    bookingId:
+                        booking.id,
+
+                    rideId:
+                        booking.id,
+
+                    status:
+                        booking.status,
+
+                    service:
+                        booking.service,
+
+                    fare:
+                        booking.fare,
+
+                    createdAt:
+                        booking.createdAt
+
+                }
+            );
+
+        }
+
+
+        return booking;
+
+    };
+
+
+/* ============================================================
+   SAVE FIRESTORE MIRROR
+   ============================================================ */
+
+BOOKING.saveFirestore =
+    async function (booking) {
+
+        if (
+            !db
+        ) {
+
+            return booking;
+
+        }
+
+
+        try {
+
+            await setDoc(
+                doc(
+                    db,
+                    "rides",
+                    booking.id
+                ),
+                booking,
+                {
+                    merge:
+                        true
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX Firestore mirror failed:",
+                error
+            );
+
+            /*
+             * RTDB is the primary ride transport.
+             * Firestore mirror failure should not
+             * make a valid ride disappear.
+             */
+
+        }
+
+
+        return booking;
+
+    };
+
+
+/* ============================================================
+   SAVE BOOKING
+   ============================================================ */
+
+BOOKING.saveBooking =
+    async function (booking) {
+
+        if (
+            !realtimeDb &&
+            !db
+        ) {
+
+            throw new Error(
+                "Firebase database is not available."
+            );
+
+        }
+
+
+        /*
+         * RTDB is authoritative for live ride flow.
+         */
+
+        if (
+            realtimeDb
+        ) {
+
+            await BOOKING.saveRealtime(
+                booking
+            );
+
+        }
+
+
+        /*
+         * Firestore mirror.
+         */
+
+        if (
+            db
+        ) {
+
+            await BOOKING.saveFirestore(
+                booking
+            );
+
+        }
+
+
+        return booking;
+
+    };
+
+
+/* ============================================================
+   ATTACH RIDE LISTENER
+   ============================================================ */
+
+BOOKING.removeBookingListener =
+    function () {
+
+        if (
+            BOOKING.bookingListener &&
+            BOOKING.bookingListenerRef &&
+            realtimeDb
+        ) {
+
+            try {
+
+                off(
+                    BOOKING.bookingListenerRef,
+                    "value",
+                    BOOKING.bookingListener
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX ride listener removal failed:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        BOOKING.bookingListener =
+            null;
+
+        BOOKING.bookingListenerRef =
+            null;
+
+    };
+
+
+BOOKING.attachBookingListener =
+    function (bookingId) {
+
+        if (
+            !realtimeDb ||
+            !bookingId
+        ) {
+
+            return null;
+
+        }
+
+
+        BOOKING.removeBookingListener();
+
+
+        const rideReference =
+            ref(
+                realtimeDb,
+                "rides/" +
+                bookingId
+            );
+
+
+        const listener =
+            function (snapshot) {
+
+                const ride =
+                    snapshot.val();
+
 
                 if (
-                    RX.matching &&
-                    typeof RX.matching.start ===
-                    "function"
+                    !ride
                 ) {
 
-                    try {
+                    return;
 
-                        await RX.matching.start(
-                            booking
-                        );
-
-                    } catch (error) {
-
-                        console.warn(
-                            "Matching engine start failed:",
-                            error
-                        );
-                    }
                 }
 
 
-                /*
-                 * Legacy request module.
-                 *
-                 * Do NOT call it if the matching
-                 * engine already declares ownership.
-                 */
+                BOOKING.state.booking =
+                    ride;
 
-                else if (
-                    RX.requests &&
-                    typeof RX.requests.create ===
-                    "function"
-                ) {
 
-                    try {
+                BOOKING.state.rideStatus =
+                    ride.status ||
+                    ride.rideStatus ||
+                    "searching";
 
-                        await RX.requests.create(
-                            booking
-                        );
 
-                    } catch (error) {
-
-                        console.warn(
-                            "Request module failed:",
-                            error
-                        );
-                    }
-                }
+                BOOKING.state.matching =
+                    [
+                        "searching",
+                        "requested",
+                        "pending"
+                    ].includes(
+                        BOOKING.state
+                            .rideStatus
+                    );
 
 
                 BOOKING.updateBookingUI();
 
 
                 BOOKING.emit(
-                    "ride-requested",
+                    "ride-updated",
                     {
-                        booking: booking
+                        booking:
+                            ride,
+
+                        status:
+                            BOOKING.state
+                                .rideStatus
+
                     }
                 );
 
 
-                return booking;
-
-            } catch (error) {
-
-                /*
-                 * If creation failed before a valid
-                 * booking reached Firebase, clear
-                 * local matching state.
-                 */
-
                 if (
-                    !BOOKING.state.booking ||
-                    !BOOKING.state.booking.id
+                    [
+                        "completed",
+                        "cancelled",
+                        "canceled",
+                        "rejected"
+                    ].includes(
+                        BOOKING.state
+                            .rideStatus
+                    )
                 ) {
 
                     BOOKING.state.matching =
                         false;
 
-                    BOOKING.state.rideStatus =
-                        "idle";
                 }
 
+            };
 
-                throw error;
 
-            } finally {
+        BOOKING.bookingListenerRef =
+            rideReference;
 
-                BOOKING.state.loading =
-                    false;
+        BOOKING.bookingListener =
+            listener;
 
-                BOOKING.state.requestInProgress =
-                    false;
-            }
-        };
 
+        onValue(
+            rideReference,
+            listener
+        );
 
-    /* ========================================================
-       BOOKING LISTENER
-       ======================================================== */
 
-    BOOKING.attachBookingListener =
-        function (bookingId) {
+        return listener;
 
-            const database =
-                BOOKING.database();
+    };
 
 
-            if (
-                !database ||
-                !bookingId
-            ) {
-                return;
-            }
+/* ============================================================
+   UPDATE BOOKING UI
+   ============================================================ */
 
+BOOKING.updateBookingUI =
+    function () {
 
-            BOOKING.removeBookingListener();
+        const booking =
+            BOOKING.state.booking;
 
+        const status =
+            booking?.status ||
+            booking?.rideStatus ||
+            BOOKING.state
+                .rideStatus;
 
-            const reference =
-                database.ref(
-                    "rides/" +
-                    bookingId
-                );
 
+        document
+            .querySelectorAll(
+                "[data-ride-status]"
+            )
+            .forEach(
+                function (element) {
 
-            const callback =
-                function (snapshot) {
+                    element.textContent =
+                        status ||
+                        "idle";
 
-                    const booking =
-                        snapshot.val();
-
-
-                    if (!booking) {
-                        return;
-                    }
-
-
-                    const previousBooking =
-                        BOOKING.state.booking;
-
-
-                    const previousStatus =
-                        BOOKING.normalizeStatus(
-                            previousBooking?.status
-                        );
-
-
-                    const currentStatus =
-                        BOOKING.normalizeStatus(
-                            booking.status
-                        );
-
-
-                    BOOKING.state.booking =
-                        booking;
-
-
-                    BOOKING.state.rideStatus =
-                        currentStatus;
-
-
-                    BOOKING.state.matching =
-                        [
-                            "searching",
-                            "requested"
-                        ].includes(
-                            currentStatus
-                        );
-
-
-                    if (
-                        booking.pickup
-                    ) {
-
-                        BOOKING.state.pickup =
-                            BOOKING.normalizeLocation(
-                                booking.pickup,
-                                "Pickup location"
-                            );
-                    }
-
-
-                    if (
-                        booking.destination
-                    ) {
-
-                        BOOKING.state.destination =
-                            BOOKING.normalizeLocation(
-                                booking.destination,
-                                "Destination"
-                            );
-                    }
-
-
-                    if (
-                        booking.distanceKm != null
-                    ) {
-
-                        BOOKING.state.distanceKm =
-                            BOOKING.number(
-                                booking.distanceKm
-                            );
-                    }
-
-
-                    if (
-                        booking.durationMinutes != null
-                    ) {
-
-                        BOOKING.state.durationMinutes =
-                            BOOKING.number(
-                                booking.durationMinutes
-                            );
-                    }
-
-
-                    if (
-                        booking.fare != null
-                    ) {
-
-                        BOOKING.state.fare =
-                            BOOKING.number(
-                                booking.fare
-                            );
-                    }
-
-
-                    if (
-                        booking.estimatedFare != null
-                    ) {
-
-                        BOOKING.state.estimatedFare =
-                            BOOKING.number(
-                                booking.estimatedFare
-                            );
-                    }
-
-
-                    if (
-                        booking.discount != null
-                    ) {
-
-                        BOOKING.state.discount =
-                            BOOKING.number(
-                                booking.discount
-                            );
-                    }
-
-
-                    if (
-                        booking.service
-                    ) {
-
-                        BOOKING.state.service =
-                            BOOKING.getService(
-                                booking.service
-                            ).id;
-                    }
-
-
-                    if (
-                        booking.paymentMethod
-                    ) {
-
-                        BOOKING.state.paymentMethod =
-                            booking.paymentMethod;
-                    }
-
-
-                    BOOKING.updateLocationUI();
-
-                    BOOKING.updateBookingUI();
-
-
-                    BOOKING.emit(
-                        "booking-updated",
-                        {
-
-                            booking: booking,
-
-                            previousStatus:
-                                previousStatus,
-
-                            status:
-                                currentStatus
-                        }
-                    );
-
-
-                    /*
-                     * Rider assigned.
-                     */
-
-                    if (
-                        (
-                            booking.riderId ||
-                            booking.riderUid
-                        ) &&
-                        [
-                            "accepted",
-                            "arriving",
-                            "driver_arriving",
-                            "started",
-                            "ongoing",
-                            "in_progress",
-                            "picked_up"
-                        ].includes(
-                            currentStatus
-                        )
-                    ) {
-
-                        BOOKING.emitOnce(
-                            "rider-assigned",
-                            booking.id,
-                            {
-                                booking: booking
-                            }
-                        );
-                    }
-
-
-                    /*
-                     * Ride started.
-                     */
-
-                    if (
-                        [
-                            "started",
-                            "ongoing",
-                            "in_progress",
-                            "picked_up"
-                        ].includes(
-                            currentStatus
-                        )
-                    ) {
-
-                        BOOKING.emitOnce(
-                            "ride-started",
-                            booking.id,
-                            {
-                                booking: booking
-                            }
-                        );
-                    }
-
-
-                    /*
-                     * Ride completed.
-                     */
-
-                    if (
-                        BOOKING.isCompletedStatus(
-                            currentStatus
-                        )
-                    ) {
-
-                        BOOKING.state.matching =
-                            false;
-
-
-                        BOOKING.emitOnce(
-                            "ride-completed",
-                            booking.id,
-                            {
-                                booking: booking
-                            }
-                        );
-
-
-                        BOOKING.removeBookingListener();
-                    }
-
-
-                    /*
-                     * Ride cancelled.
-                     */
-
-                    if (
-                        BOOKING.isCancelledStatus(
-                            currentStatus
-                        )
-                    ) {
-
-                        BOOKING.state.matching =
-                            false;
-
-
-                        BOOKING.emitOnce(
-                            "ride-cancelled",
-                            booking.id,
-                            {
-                                booking: booking
-                            }
-                        );
-
-
-                        BOOKING.removeBookingListener();
-                    }
-                };
-
-
-            reference.on(
-                "value",
-                callback
+                }
             );
 
 
-            BOOKING.state.bookingListener =
-                {
+        document
+            .querySelectorAll(
+                "[data-rider-name]"
+            )
+            .forEach(
+                function (element) {
 
-                    reference: reference,
+                    element.textContent =
+                        booking?.riderName ||
+                        "Finding rider...";
 
-                    callback: callback
-                };
-        };
-
-
-    BOOKING.removeBookingListener =
-        function () {
-
-            const listener =
-                BOOKING.state.bookingListener;
+                }
+            );
 
 
-            if (!listener) {
-                return;
-            }
+        document
+            .querySelectorAll(
+                "[data-rider-phone]"
+            )
+            .forEach(
+                function (element) {
+
+                    element.textContent =
+                        booking?.riderPhone ||
+                        "";
+
+                }
+            );
 
 
-            try {
+        document
+            .querySelectorAll(
+                "[data-rider-rating]"
+            )
+            .forEach(
+                function (element) {
 
-                listener.reference.off(
-                    "value",
-                    listener.callback
-                );
+                    element.textContent =
+                        booking?.riderRating ||
+                        "5.0";
 
-            } catch (error) {
-
-                console.warn(
-                    "Booking listener cleanup failed:",
-                    error
-                );
-            }
-
-
-            BOOKING.state.bookingListener =
-                null;
-        };
+                }
+            );
 
 
-    /* ========================================================
-       UPDATE BOOKING
-       ======================================================== */
+        document
+            .querySelectorAll(
+                "[data-ride-otp]"
+            )
+            .forEach(
+                function (element) {
 
-    BOOKING.updateBooking =
-        async function (
-            bookingId,
-            updates
+                    element.textContent =
+                        booking?.otp ||
+                        "----";
+
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                "[data-booking-fare]"
+            )
+            .forEach(
+                function (element) {
+
+                    element.textContent =
+                        "₹" +
+                        (
+                            booking?.fare ||
+                            BOOKING.state.fare ||
+                            0
+                        );
+
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                "[data-cancel-ride]"
+            )
+            .forEach(
+                function (element) {
+
+                    const canCancel =
+                        [
+                            "searching",
+                            "requested",
+                            "pending",
+                            "accepted",
+                            "arriving",
+                            "driver_arriving"
+                        ].includes(
+                            status
+                        );
+
+
+                    element.disabled =
+                        !canCancel;
+
+                }
+            );
+
+    };
+
+
+/* ============================================================
+   REQUEST RIDE
+   ============================================================ */
+
+BOOKING.requestRide =
+    async function (options = {}) {
+
+        if (
+            BOOKING.state.loading
         ) {
 
-            if (!bookingId) {
+            throw new Error(
+                "A booking request is already being processed."
+            );
 
-                throw new Error(
-                    "Booking ID is required."
-                );
-            }
-
-
-            const safeUpdates =
-                {
-
-                    ...(updates || {}),
-
-                    updatedAt:
-                        Date.now()
-                };
+        }
 
 
-            const database =
-                BOOKING.database();
+        const validation =
+            BOOKING.validate();
 
 
-            const firestore =
-                BOOKING.firestore();
+        if (
+            !validation.valid
+        ) {
 
+            throw new Error(
+                validation.message
+            );
+
+        }
+
+
+        BOOKING.state.loading =
+            true;
+
+
+        try {
+
+            /*
+             * Recalculate immediately before
+             * writing the ride.
+             */
+
+            await BOOKING.estimate();
+
+
+            const booking =
+                BOOKING.createObject({
+
+                    scheduled:
+                        options.scheduled ||
+                        false,
+
+                    scheduledAt:
+                        options.scheduledAt ||
+                        null,
+
+                    notes:
+                        options.notes ||
+                        "",
+
+                    paymentMethod:
+                        options.paymentMethod ||
+                        BOOKING.state.paymentMethod
+
+                });
+
+
+            BOOKING.state.booking =
+                booking;
+
+
+            BOOKING.state.rideStatus =
+                "searching";
+
+
+            BOOKING.state.matching =
+                true;
+
+
+            /*
+             * Real Firebase write.
+             */
+
+            await BOOKING.saveBooking(
+                booking
+            );
+
+
+            /*
+             * Attach real-time ride listener.
+             */
+
+            BOOKING.attachBookingListener(
+                booking.id
+            );
+
+
+            /*
+             * Optional matching module.
+             */
 
             if (
-                !database &&
-                !firestore
+                RX.matching &&
+                typeof RX.matching.start ===
+                "function"
             ) {
-
-                throw new Error(
-                    "Firebase is not available."
-                );
-            }
-
-
-            if (database) {
-
-                await database
-                    .ref(
-                        "rides/" +
-                        bookingId
-                    )
-                    .update(
-                        safeUpdates
-                    );
-
-
-                const customerId =
-                    BOOKING.state.booking?.customerId ||
-                    BOOKING.getUid();
-
-
-                if (customerId) {
-
-                    const summaryUpdates = {
-
-                        updatedAt:
-                            safeUpdates.updatedAt
-                    };
-
-
-                    if (
-                        safeUpdates.status
-                    ) {
-
-                        summaryUpdates.status =
-                            safeUpdates.status;
-                    }
-
-
-                    if (
-                        safeUpdates.fare != null
-                    ) {
-
-                        summaryUpdates.fare =
-                            safeUpdates.fare;
-                    }
-
-
-                    await database
-                        .ref(
-                            "customerRides/" +
-                            customerId +
-                            "/" +
-                            bookingId
-                        )
-                        .update(
-                            summaryUpdates
-                        );
-                }
-            }
-
-
-            if (firestore) {
 
                 try {
 
-                    await firestore
-                        .collection("rides")
-                        .doc(bookingId)
-                        .set(
-                            safeUpdates,
-                            {
-                                merge: true
-                            }
-                        );
+                    await RX.matching.start(
+                        booking
+                    );
 
                 } catch (error) {
 
                     console.warn(
-                        "Firestore ride update failed:",
+                        "RiderX matching module failed:",
                         error
                     );
+
                 }
+
             }
 
 
-            BOOKING.state.booking =
-                {
-
-                    ...(BOOKING.state.booking || {}),
-
-                    ...safeUpdates
-                };
-
+            /*
+             * Optional request module.
+             */
 
             if (
-                safeUpdates.status
+                RX.requests &&
+                typeof RX.requests.create ===
+                "function"
             ) {
 
-                BOOKING.state.rideStatus =
-                    BOOKING.normalizeStatus(
-                        safeUpdates.status
+                try {
+
+                    await RX.requests.create(
+                        booking
                     );
 
+                } catch (error) {
 
-                BOOKING.state.matching =
-                    [
-                        "searching",
-                        "requested"
-                    ].includes(
-                        BOOKING.state.rideStatus
+                    console.warn(
+                        "RiderX request module failed:",
+                        error
                     );
+
+                }
+
             }
 
 
             BOOKING.updateBookingUI();
 
 
-            return BOOKING.state.booking;
-        };
-
-
-    /* ========================================================
-       CANCEL RIDE
-       ======================================================== */
-
-    BOOKING.cancelRide =
-        async function (reason) {
-
-            const booking =
-                BOOKING.state.booking;
-
-
-            if (
-                !booking ||
-                !booking.id
-            ) {
-
-                throw new Error(
-                    "No active ride found."
-                );
-            }
-
-
-            const status =
-                BOOKING.normalizeStatus(
-                    booking.status
-                );
-
-
-            if (
-                BOOKING.isCompletedStatus(status) ||
-                BOOKING.isCancelledStatus(status)
-            ) {
-
-                return booking;
-            }
-
-
-            const allowedStatuses = [
-
-                "searching",
-
-                "requested",
-
-                "accepted",
-
-                "arriving",
-
-                "driver_arriving"
-            ];
-
-
-            if (
-                !allowedStatuses.includes(status)
-            ) {
-
-                throw new Error(
-                    "This ride cannot be cancelled now."
-                );
-            }
-
-
-            await BOOKING.updateBooking(
-                booking.id,
+            BOOKING.emit(
+                "ride-requested",
                 {
-
-                    status:
-                        "cancelled",
-
-                    cancelledBy:
-                        "customer",
-
-                    cancellationReason:
-                        String(
-                            reason ||
-                            "Cancelled by customer"
-                        ).trim(),
-
-                    cancelledAt:
-                        Date.now()
+                    booking:
+                        booking
                 }
             );
 
 
-            BOOKING.state.matching =
+            return booking;
+
+        } finally {
+
+            BOOKING.state.loading =
                 false;
 
+        }
 
-            BOOKING.emitOnce(
-                "ride-cancelled",
-                booking.id,
-                {
+    };
 
-                    booking:
-                        BOOKING.state.booking
-                }
+
+/* ============================================================
+   PUBLIC CREATE RIDE API
+   ============================================================ */
+
+export async function createRideRequest(
+    paymentMethod = null
+) {
+
+    if (
+        paymentMethod
+    ) {
+
+        BOOKING.setPaymentMethod(
+            paymentMethod
+        );
+
+    }
+
+
+    return await BOOKING.requestRide({
+
+        paymentMethod:
+            BOOKING.state.paymentMethod
+
+    });
+
+}
+
+
+/* ============================================================
+   CANCEL RIDE
+   ============================================================ */
+
+BOOKING.cancelRide =
+    async function (
+        reason = "Customer cancelled"
+    ) {
+
+        const booking =
+            BOOKING.state.booking;
+
+
+        if (
+            !booking?.id
+        ) {
+
+            throw new Error(
+                "No active ride found."
+            );
+
+        }
+
+
+        const uid =
+            BOOKING.getUid();
+
+
+        const timestamp =
+            Date.now();
+
+
+        const updates = {
+
+            status:
+                "cancelled",
+
+            rideStatus:
+                "cancelled",
+
+            cancellationReason:
+                reason,
+
+            cancelledBy:
+                "customer",
+
+            cancelledAt:
+                timestamp,
+
+            updatedAt:
+                timestamp
+
+        };
+
+
+        if (
+            realtimeDb
+        ) {
+
+            await update(
+                ref(
+                    realtimeDb,
+                    "rides/" +
+                    booking.id
+                ),
+                updates
             );
 
 
-            return BOOKING.state.booking;
-        };
+            if (
+                uid
+            ) {
 
+                await update(
+                    ref(
+                        realtimeDb,
+                        "customerRides/" +
+                        uid +
+                        "/" +
+                        booking.id
+                ),
+                    {
 
-    /* ========================================================
-       RIDER INFO
-       ======================================================== */
+                        status:
+                            "cancelled",
 
-    BOOKING.getRider =
-        function () {
+                        updatedAt:
+                            timestamp
 
-            const booking =
-                BOOKING.state.booking;
-
-
-            if (!booking) {
-                return null;
-            }
-
-
-            return {
-
-                id:
-                    booking.riderId ||
-                    booking.riderUid ||
-                    null,
-
-                name:
-                    booking.riderName ||
-                    "Rider",
-
-                phone:
-                    booking.riderPhone ||
-                    "",
-
-                photo:
-                    booking.riderPhoto ||
-                    "",
-
-                vehicle:
-                    booking.vehicle ||
-                    booking.vehicleModel ||
-                    "",
-
-                plate:
-                    booking.vehicleNumber ||
-                    booking.plateNumber ||
-                    "",
-
-                rating:
-                    BOOKING.number(
-                        booking.riderRating
-                    ) || 5,
-
-                otp:
-                    booking.otp ||
-                    ""
-            };
-        };
-
-
-    /* ========================================================
-       BOOKING UI
-       ======================================================== */
-
-    BOOKING.updateBookingUI =
-        function () {
-
-            const booking =
-                BOOKING.state.booking;
-
-
-            const status =
-                BOOKING.normalizeStatus(
-                    booking?.status ||
-                    BOOKING.state.rideStatus ||
-                    "idle"
+                    }
                 );
 
-
-            if (document.body) {
-
-                document.body.dataset.rideStatus =
-                    status;
             }
 
-
-            document
-                .querySelectorAll(
-                    "[data-ride-status]"
-                )
-                .forEach(function (element) {
-
-                    element.textContent =
-                        status;
-                });
+        }
 
 
-            document
-                .querySelectorAll(
-                    "[data-booking-id]"
-                )
-                .forEach(function (element) {
-
-                    element.textContent =
-                        booking?.id ||
-                        booking?.bookingId ||
-                        "";
-                });
-
-
-            const rider =
-                BOOKING.getRider();
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-name]"
-                )
-                .forEach(function (element) {
-
-                    element.textContent =
-                        rider?.name ||
-                        (
-                            [
-                                "searching",
-                                "requested"
-                            ].includes(status)
-                                ? "Finding rider..."
-                                : "Rider"
-                        );
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-phone]"
-                )
-                .forEach(function (element) {
-
-                    element.textContent =
-                        rider?.phone || "";
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-rating]"
-                )
-                .forEach(function (element) {
-
-                    element.textContent =
-                        rider?.rating
-                            ? Number(
-                                rider.rating
-                            ).toFixed(1)
-                            : "5.0";
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-ride-otp]"
-                )
-                .forEach(function (element) {
-
-                    element.textContent =
-                        rider?.otp ||
-                        "----";
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-booking-fare]"
-                )
-                .forEach(function (element) {
-
-                    element.textContent =
-                        BOOKING.config.currency +
-                        BOOKING.number(
-                            booking?.fare ??
-                            BOOKING.state.fare
-                        );
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-cancel-ride]"
-                )
-                .forEach(function (element) {
-
-                    const canCancel =
-                        [
-                            "searching",
-                            "requested",
-                            "accepted",
-                            "arriving",
-                            "driver_arriving"
-                        ].includes(status);
-
-
-                    element.disabled =
-                        !canCancel;
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-matching]"
-                )
-                .forEach(function (element) {
-
-                    element.hidden =
-                        ![
-                            "searching",
-                            "requested"
-                        ].includes(status);
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-rider-section]"
-                )
-                .forEach(function (element) {
-
-                    element.hidden =
-                        !(
-                            booking &&
-                            (
-                                booking.riderId ||
-                                booking.riderUid
-                            )
-                        );
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-booking-active]"
-                )
-                .forEach(function (element) {
-
-                    element.hidden =
-                        !BOOKING.isActiveStatus(
-                            status
-                        );
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-booking-completed]"
-                )
-                .forEach(function (element) {
-
-                    element.hidden =
-                        !BOOKING.isCompletedStatus(
-                            status
-                        );
-                });
-
-
-            document
-                .querySelectorAll(
-                    "[data-booking-cancelled]"
-                )
-                .forEach(function (element) {
-
-                    element.hidden =
-                        !BOOKING.isCancelledStatus(
-                            status
-                        );
-                });
-        };
-
-
-    /* ========================================================
-       ACTIVE RIDE RESTORE
-       ======================================================== */
-
-    BOOKING.restoreActiveRide =
-        async function () {
-
-            const uid =
-                BOOKING.getUid();
-
-
-            if (!uid) {
-                return null;
-            }
-
-
-            const database =
-                BOOKING.database();
-
-
-            if (!database) {
-                return null;
-            }
-
+        if (
+            db
+        ) {
 
             try {
 
-                const snapshot =
-                    await database
-                        .ref(
-                            "customerRides/" +
-                            uid
-                        )
-                        .once("value");
-
-
-                const rides =
-                    snapshot.val() || {};
-
-
-                const entries =
-                    Object.entries(rides);
-
-
-                if (!entries.length) {
-                    return null;
-                }
-
-
-                entries.sort(
-                    function (a, b) {
-
-                        const aTime =
-                            BOOKING.number(
-                                a[1]?.createdAt
-                            );
-
-                        const bTime =
-                            BOOKING.number(
-                                b[1]?.createdAt
-                            );
-
-
-                        return bTime - aTime;
+                await setDoc(
+                    doc(
+                        db,
+                        "rides",
+                        booking.id
+                    ),
+                    updates,
+                    {
+                        merge:
+                            true
                     }
                 );
 
+            } catch (error) {
 
-                for (
-                    const [id, summary]
-                    of entries
+                console.warn(
+                    "Firestore cancellation mirror failed:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        BOOKING.state.rideStatus =
+            "cancelled";
+
+        BOOKING.state.matching =
+            false;
+
+
+        BOOKING.updateBookingUI();
+
+
+        BOOKING.emit(
+            "ride-cancelled",
+            {
+                booking:
+                    booking,
+
+                reason:
+                    reason
+
+            }
+        );
+
+
+        return true;
+
+    };
+
+
+/* ============================================================
+   RESTORE ACTIVE RIDE
+   ============================================================ */
+
+BOOKING.restoreActiveRide =
+    async function () {
+
+        const uid =
+            BOOKING.getUid();
+
+
+        if (
+            !uid ||
+            !realtimeDb
+        ) {
+
+            return null;
+
+        }
+
+
+        try {
+
+            const customerReference =
+                ref(
+                    realtimeDb,
+                    "customerRides/" +
+                    uid
+                );
+
+
+            const snapshot =
+                await get(
+                    customerReference
+                );
+
+
+            const rides =
+                snapshot.val() ||
+                {};
+
+
+            const ids =
+                Object.keys(
+                    rides
+                );
+
+
+            if (
+                !ids.length
+            ) {
+
+                return null;
+
+            }
+
+
+            const activeStatuses = [
+
+                "searching",
+                "requested",
+                "pending",
+                "accepted",
+                "arriving",
+                "driver_arriving",
+                "started",
+                "ongoing",
+                "in_progress"
+
+            ];
+
+
+            /*
+             * Check newest rides first.
+             */
+
+            for (
+                let i =
+                    ids.length - 1;
+                i >= 0;
+                i--
+            ) {
+
+                const id =
+                    ids[i];
+
+
+                const rideSnapshot =
+                    await get(
+                        ref(
+                            realtimeDb,
+                            "rides/" +
+                            id
+                        )
+                    );
+
+
+                const ride =
+                    rideSnapshot.val();
+
+
+                if (
+                    !ride
                 ) {
 
-                    const summaryStatus =
-                        BOOKING.normalizeStatus(
-                            summary?.status
-                        );
+                    continue;
+
+                }
 
 
-                    if (
-                        !BOOKING.isActiveStatus(
-                            summaryStatus
-                        )
-                    ) {
-
-                        continue;
-                    }
-
-
-                    const rideSnapshot =
-                        await database
-                            .ref(
-                                "rides/" + id
-                            )
-                            .once("value");
-
-
-                    const ride =
-                        rideSnapshot.val();
-
-
-                    if (!ride) {
-                        continue;
-                    }
-
-
-                    const rideStatus =
-                        BOOKING.normalizeStatus(
-                            ride.status
-                        );
-
-
-                    if (
-                        !BOOKING.isActiveStatus(
-                            rideStatus
-                        )
-                    ) {
-
-                        continue;
-                    }
-
-
-                    /*
-                     * Safety check:
-                     * restore only the current user's ride.
-                     */
-
-                    const rideCustomer =
-                        ride.customerId ||
-                        ride.customerUid;
-
-
-                    if (
-                        rideCustomer &&
-                        String(rideCustomer) !==
-                        String(uid)
-                    ) {
-
-                        continue;
-                    }
-
+                if (
+                    activeStatuses.includes(
+                        ride.status ||
+                        ride.rideStatus
+                    )
+                ) {
 
                     BOOKING.state.booking =
                         ride;
 
 
                     BOOKING.state.rideStatus =
-                        rideStatus;
-
-
-                    BOOKING.state.matching =
-                        [
-                            "searching",
-                            "requested"
-                        ].includes(
-                            rideStatus
-                        );
-
-
-                    BOOKING.state.pickup =
-                        BOOKING.normalizeLocation(
-                            ride.pickup,
-                            ride.pickupAddress ||
-                            "Pickup location"
-                        );
-
-
-                    BOOKING.state.destination =
-                        BOOKING.normalizeLocation(
-                            ride.destination,
-                            ride.destinationAddress ||
-                            "Destination"
-                        );
-
-
-                    BOOKING.state.distanceKm =
-                        BOOKING.number(
-                            ride.distanceKm
-                        );
-
-
-                    BOOKING.state.durationMinutes =
-                        BOOKING.number(
-                            ride.durationMinutes
-                        );
-
-
-                    BOOKING.state.estimatedFare =
-                        BOOKING.number(
-                            ride.estimatedFare
-                        );
-
-
-                    BOOKING.state.discount =
-                        BOOKING.number(
-                            ride.discount
-                        );
-
-
-                    BOOKING.state.fare =
-                        BOOKING.number(
-                            ride.fare ||
-                            ride.totalFare
-                        );
-
-
-                    if (ride.service) {
-
-                        BOOKING.state.service =
-                            BOOKING.getService(
-                                ride.service
-                            ).id;
-                    }
-
-
-                    if (ride.paymentMethod) {
-
-                        BOOKING.state.paymentMethod =
-                            ride.paymentMethod;
-                    }
+                        ride.status ||
+                        ride.rideStatus;
 
 
                     BOOKING.attachBookingListener(
-                        ride.id
+                        ride.id ||
+                        id
                     );
 
-
-                    BOOKING.updateLocationUI();
-
-                    BOOKING.updateFare();
 
                     BOOKING.updateBookingUI();
 
 
-                    BOOKING.emit(
-                        "active-ride-restored",
-                        {
-                            booking: ride
-                        }
-                    );
-
-
                     return ride;
+
                 }
 
-            } catch (error) {
-
-                console.warn(
-                    "Active ride restore failed:",
-                    error
-                );
             }
 
-
-            return null;
-        };
-
-
-    /* ========================================================
-       FORM HANDLERS
-       ======================================================== */
-
-    BOOKING.bindUI =
-        function () {
-
-            if (BOOKING.state.uiBound) {
-                return;
-            }
-
-
-            BOOKING.state.uiBound = true;
-
-
-            document.addEventListener(
-                "click",
-                function (event) {
-
-                    const serviceButton =
-                        event.target.closest?.(
-                            "[data-service]"
-                        );
-
-
-                    if (serviceButton) {
-
-                        event.preventDefault();
-
-
-                        BOOKING.setService(
-                            serviceButton.dataset
-                                .service
-                        );
-
-
-                        return;
-                    }
-
-
-                    const paymentButton =
-                        event.target.closest?.(
-                            "[data-payment-method]"
-                        );
-
-
-                    if (paymentButton) {
-
-                        event.preventDefault();
-
-
-                        BOOKING.setPaymentMethod(
-                            paymentButton.dataset
-                                .paymentMethod
-                        );
-
-
-                        return;
-                    }
-
-
-                    const bookButton =
-                        event.target.closest?.(
-                            "[data-book-ride]"
-                        );
-
-
-                    if (bookButton) {
-
-                        event.preventDefault();
-
-
-                        BOOKING.handleBookButton(
-                            bookButton
-                        );
-
-
-                        return;
-                    }
-
-
-                    const cancelButton =
-                        event.target.closest?.(
-                            "[data-cancel-ride]"
-                        );
-
-
-                    if (cancelButton) {
-
-                        event.preventDefault();
-
-
-                        BOOKING.handleCancelButton(
-                            cancelButton
-                        );
-
-
-                        return;
-                    }
-
-
-                    const couponButton =
-                        event.target.closest?.(
-                            "[data-apply-coupon]"
-                        );
-
-
-                    if (couponButton) {
-
-                        event.preventDefault();
-
-
-                        BOOKING.handleCouponButton(
-                            couponButton
-                        );
-                    }
-                }
-            );
-        };
-
-
-    /* ========================================================
-       BOOK BUTTON
-       ======================================================== */
-
-    BOOKING.handleBookButton =
-        async function (button) {
-
-            if (
-                BOOKING.state.loading ||
-                BOOKING.state.requestInProgress
-            ) {
-
-                return null;
-            }
-
-
-            try {
-
-                button.disabled = true;
-
-
-                if (
-                    RX.app &&
-                    typeof RX.app.showLoading ===
-                    "function"
-                ) {
-
-                    RX.app.showLoading(
-                        "Finding a rider..."
-                    );
-                }
-
-
-                const booking =
-                    await BOOKING.requestRide();
-
-
-                if (
-                    RX.toast &&
-                    typeof RX.toast ===
-                    "function"
-                ) {
-
-                    RX.toast(
-                        "Ride request sent.",
-                        "success"
-                    );
-                }
-
-
-                return booking;
-
-            } catch (error) {
-
-                console.error(
-                    "RiderX booking failed:",
-                    error
-                );
-
-
-                if (
-                    RX.toast &&
-                    typeof RX.toast ===
-                    "function"
-                ) {
-
-                    RX.toast(
-                        error?.message ||
-                        "Unable to book ride.",
-                        "error"
-                    );
-                }
-
-
-                return null;
-
-            } finally {
-
-                button.disabled =
-                    false;
-
-
-                if (
-                    RX.app &&
-                    typeof RX.app.hideLoading ===
-                    "function"
-                ) {
-
-                    RX.app.hideLoading();
-                }
-            }
-        };
-
-
-    /* ========================================================
-       CANCEL BUTTON
-       ======================================================== */
-
-    BOOKING.handleCancelButton =
-        async function () {
-
-            try {
-
-                await BOOKING.cancelRide(
-                    "Cancelled by customer"
-                );
-
-
-                if (
-                    RX.toast &&
-                    typeof RX.toast ===
-                    "function"
-                ) {
-
-                    RX.toast(
-                        "Ride cancelled.",
-                        "success"
-                    );
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "RiderX cancellation failed:",
-                    error
-                );
-
-
-                if (
-                    RX.toast &&
-                    typeof RX.toast ===
-                    "function"
-                ) {
-
-                    RX.toast(
-                        error?.message ||
-                        "Unable to cancel ride.",
-                        "error"
-                    );
-                }
-            }
-        };
-
-
-    /* ========================================================
-       COUPON BUTTON
-       ======================================================== */
-
-    BOOKING.handleCouponButton =
-        async function () {
-
-            const input =
-                document.querySelector(
-                    "[data-coupon-input]"
-                ) ||
-                document.querySelector(
-                    "#coupon"
-                );
-
-
-            const code =
-                input?.value || "";
-
-
-            try {
-
-                await BOOKING.applyCoupon(
-                    code
-                );
-
-
-                if (
-                    RX.toast &&
-                    typeof RX.toast ===
-                    "function"
-                ) {
-
-                    RX.toast(
-                        "Coupon applied.",
-                        "success"
-                    );
-                }
-
-            } catch (error) {
-
-                console.error(
-                    "Coupon error:",
-                    error
-                );
-
-
-                if (
-                    RX.toast &&
-                    typeof RX.toast ===
-                    "function"
-                ) {
-
-                    RX.toast(
-                        error?.message ||
-                        "Coupon could not be applied.",
-                        "error"
-                    );
-                }
-            }
-        };
-
-
-    /* ========================================================
-       AUTH EVENTS
-       ======================================================== */
-
-    BOOKING.setupAuth =
-        function () {
-
-            if (
-                RX.auth &&
-                typeof RX.auth.on ===
-                "function"
-            ) {
-
-                RX.auth.on(
-                    "logout",
-                    function () {
-
-                        BOOKING.removeBookingListener();
-
-
-                        BOOKING.state.booking =
-                            null;
-
-
-                        BOOKING.state.rideStatus =
-                            "idle";
-
-
-                        BOOKING.state.matching =
-                            false;
-
-
-                        BOOKING.state.loading =
-                            false;
-
-
-                        BOOKING.state.requestInProgress =
-                            false;
-
-
-                        BOOKING.state.emittedStatuses =
-                            {};
-
-
-                        BOOKING.updateBookingUI();
-                    }
-                );
-            }
-        };
-
-
-    /* ========================================================
-       EVENTS
-       ======================================================== */
-
-    BOOKING.emit =
-        function (
-            eventName,
-            detail
-        ) {
-
-            try {
-
-                window.dispatchEvent(
-                    new CustomEvent(
-                        "riderx-booking-" +
-                        eventName,
-                        {
-                            detail:
-                                detail || {}
-                        }
-                    )
-                );
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX booking event failed:",
-                    error
-                );
-            }
-        };
-
-
-    BOOKING.emitOnce =
-        function (
-            eventName,
-            key,
-            detail
-        ) {
-
-            const eventKey =
-                eventName +
-                ":" +
-                String(
-                    key ||
-                    "default"
-                );
-
-
-            if (
-                BOOKING.state.emittedStatuses[
-                    eventKey
-                ]
-            ) {
-
-                return;
-            }
-
-
-            BOOKING.state.emittedStatuses[
-                eventKey
-            ] = true;
-
-
-            BOOKING.emit(
-                eventName,
-                detail
-            );
-        };
-
-
-    BOOKING.on =
-        function (
-            eventName,
-            callback
-        ) {
-
-            if (
-                typeof callback !==
-                "function"
-            ) {
-
-                return function () {};
-            }
-
-
-            const eventNameFull =
-                "riderx-booking-" +
-                eventName;
-
-
-            const handler =
-                function (event) {
-
-                    callback(
-                        event.detail || {}
-                    );
-                };
-
-
-            window.addEventListener(
-                eventNameFull,
-                handler
+        } catch (error) {
+
+            console.warn(
+                "RiderX active ride restore failed:",
+                error
             );
 
+        }
 
-            return function () {
 
-                window.removeEventListener(
-                    eventNameFull,
-                    handler
-                );
-            };
-        };
+        return null;
 
+    };
 
-    /* ========================================================
-       INITIALIZATION
-       ======================================================== */
 
-    BOOKING.init =
-        async function () {
+/* ============================================================
+   UI BINDINGS
+   ============================================================ */
 
-            if (
-                BOOKING.state.initialized
-            ) {
+BOOKING.bindUI =
+    function () {
 
-                return;
-            }
-
-
-            BOOKING.setService(
-                BOOKING.config.defaultService
-            );
-
-
-            BOOKING.setPaymentMethod(
-                BOOKING.config.defaultPayment
-            );
-
-
-            BOOKING.bindUI();
-
-            BOOKING.setupAuth();
-
-            BOOKING.updateLocationUI();
-
-            BOOKING.updateFare();
-
-            BOOKING.updateBookingUI();
-
-
-            /*
-             * Restore an active customer ride.
-             */
-
-            await BOOKING.restoreActiveRide();
-
-
-            BOOKING.state.initialized =
-                true;
-
-
-            BOOKING.emit(
-                "ready"
-            );
-
-
-            console.log(
-                "RiderX booking.js loaded."
-            );
-        };
-
-
-    /* ========================================================
-       PUBLIC API
-       ======================================================== */
-
-    RX.setPickup =
-        function (location) {
-
-            return BOOKING.setPickup(
-                location
-            );
-        };
-
-
-    RX.setDestination =
-        function (location) {
-
-            return BOOKING.setDestination(
-                location
-            );
-        };
-
-
-    RX.setService =
-        function (service) {
-
-            return BOOKING.setService(
-                service
-            );
-        };
-
-
-    RX.setPaymentMethod =
-        function (method) {
-
-            return BOOKING.setPaymentMethod(
-                method
-            );
-        };
-
-
-    RX.calculateFare =
-        function (
-            distance,
-            service
-        ) {
-
-            return BOOKING.calculateFare(
-                distance,
-                service
-            );
-        };
-
-
-    RX.estimateRide =
-        function () {
-
-            return BOOKING.estimate();
-        };
-
-
-    RX.requestRide =
-        function (options) {
-
-            return BOOKING.requestRide(
-                options
-            );
-        };
-
-
-    RX.cancelRide =
-        function (reason) {
-
-            return BOOKING.cancelRide(
-                reason
-            );
-        };
-
-
-    RX.getActiveBooking =
-        function () {
-
-            return BOOKING.state.booking;
-        };
-
-
-    RX.getBookingState =
-        function () {
-
-            return {
-                ...BOOKING.state
-            };
-        };
-
-
-    RX.applyCoupon =
-        function (code) {
-
-            return BOOKING.applyCoupon(
-                code
-            );
-        };
-
-
-    RX.removeCoupon =
-        function () {
-
-            return BOOKING.removeCoupon();
-        };
-
-
-    RX.hasActiveRide =
-        function () {
-
-            return BOOKING.hasActiveRide();
-        };
-
-
-    /* ========================================================
-       AUTO INIT
-       ======================================================== */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
+        /*
+         * Service buttons.
+         */
 
         document.addEventListener(
-            "DOMContentLoaded",
-            function () {
+            "click",
+            function (event) {
 
-                BOOKING.init();
+                const serviceButton =
+                    event.target.closest(
+                        "[data-service]"
+                    );
 
-            },
-            {
-                once: true
+
+                if (
+                    serviceButton
+                ) {
+
+                    /*
+                     * Do not interfere with
+                     * customer/booking.html's
+                     * own onclick handler.
+                     */
+
+                    BOOKING.setService(
+                        serviceButton.dataset.service
+                    );
+
+                    return;
+
+                }
+
+
+                const paymentButton =
+                    event.target.closest(
+                        "[data-payment-method]"
+                    );
+
+
+                if (
+                    paymentButton
+                ) {
+
+                    BOOKING.setPaymentMethod(
+                        paymentButton.dataset.paymentMethod
+                    );
+
+                }
+
             }
         );
 
-    } else {
 
-        BOOKING.init();
+        /*
+         * Cancel buttons.
+         */
+
+        document.addEventListener(
+            "click",
+            async function (event) {
+
+                const cancelButton =
+                    event.target.closest(
+                        "[data-cancel-ride]"
+                    );
+
+
+                if (
+                    !cancelButton
+                ) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                try {
+
+                    await BOOKING.cancelRide();
+
+                } catch (error) {
+
+                    console.error(
+                        "RiderX cancellation failed:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+    };
+
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+
+BOOKING.setupAuth =
+    function () {
+
+        if (
+            !auth
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Firebase modular Auth listener.
+         */
+
+        import(
+            "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+        )
+            .then(
+                function (module) {
+
+                    if (
+                        typeof module.onAuthStateChanged !==
+                        "function"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    module.onAuthStateChanged(
+                        auth,
+                        function (user) {
+
+                            if (
+                                !user
+                            ) {
+
+                                BOOKING
+                                    .removeBookingListener();
+
+                                BOOKING.state.booking =
+                                    null;
+
+                                BOOKING.state.rideStatus =
+                                    "idle";
+
+                                BOOKING.state.matching =
+                                    false;
+
+                            }
+
+                        }
+                    );
+
+                }
+            )
+            .catch(
+                function (error) {
+
+                    console.warn(
+                        "RiderX auth listener failed:",
+                        error
+                    );
+
+                }
+            );
+
+    };
+
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+
+BOOKING.emit =
+    function (
+        eventName,
+        detail = {}
+    ) {
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-booking-" +
+                    eventName,
+                    {
+                        detail:
+                            detail
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX booking event failed:",
+                error
+            );
+
+        }
+
+    };
+
+
+BOOKING.on =
+    function (
+        eventName,
+        callback
+    ) {
+
+        if (
+            typeof callback !==
+            "function"
+        ) {
+
+            return;
+
+        }
+
+
+        window.addEventListener(
+            "riderx-booking-" +
+            eventName,
+            function (event) {
+
+                callback(
+                    event.detail ||
+                    {}
+                );
+
+            }
+        );
+
+    };
+
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+
+export async function initBookingModule() {
+
+    if (
+        BOOKING.state.initialized
+    ) {
+
+        return BOOKING;
+
     }
 
-})();
+
+    if (
+        !auth
+    ) {
+
+        throw new Error(
+            "RiderX Firebase Authentication is not initialized."
+        );
+
+    }
+
+
+    if (
+        !realtimeDb &&
+        !db
+    ) {
+
+        throw new Error(
+            "RiderX Firebase database is not initialized."
+        );
+
+    }
+
+
+    BOOKING.setService(
+        BOOKING.config
+            .defaultService
+    );
+
+
+    BOOKING.setPaymentMethod(
+        BOOKING.config
+            .defaultPayment
+    );
+
+
+    BOOKING.bindUI();
+
+    BOOKING.setupAuth();
+
+
+    BOOKING.updateLocationUI();
+
+    BOOKING.updateFare();
+
+    BOOKING.updateBookingUI();
+
+
+    /*
+     * Restore an active ride if one exists.
+     */
+
+    try {
+
+        await BOOKING.restoreActiveRide();
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX active ride restore skipped:",
+            error
+        );
+
+    }
+
+
+    BOOKING.state.initialized =
+        true;
+
+
+    BOOKING.emit(
+        "ready"
+    );
+
+
+    /*
+     * Compatibility globals.
+     *
+     * customer/booking.html expects
+     * window.RiderXBookingAPI.
+     */
+
+    window.RiderXBookingReady =
+        true;
+
+
+    window.RiderXBookingAPI = {
+
+        auth:
+
+            auth,
+
+        initBookingModule:
+
+            initBookingModule,
+
+        setService:
+
+            BOOKING.setService,
+
+        setPaymentMethod:
+
+            BOOKING.setPaymentMethod,
+
+        setPickupLocation:
+
+            setPickupLocation,
+
+        setDropLocation:
+
+            setDropLocation,
+
+        calculateFareEstimate:
+
+            calculateFareEstimate,
+
+        createRideRequest:
+
+            createRideRequest,
+
+        cancelRide:
+
+            BOOKING.cancelRide,
+
+        getActiveBooking:
+
+            function () {
+
+                return BOOKING.state.booking;
+
+            },
+
+        state:
+
+            BOOKING.state
+
+    };
+
+
+    console.log(
+        "RiderX booking engine ready."
+    );
+
+
+    return BOOKING;
+
+}
+
+
+/* ============================================================
+   PUBLIC GLOBAL RIDERX API
+   ============================================================ */
+
+RX.booking =
+    BOOKING;
+
+
+RX.setPickup =
+    setPickupLocation;
+
+
+RX.setDestination =
+    setDropLocation;
+
+
+RX.setService =
+    BOOKING.setService;
+
+
+RX.setPaymentMethod =
+    BOOKING.setPaymentMethod;
+
+
+RX.calculateFare =
+    BOOKING.calculateFare;
+
+
+RX.requestRide =
+    BOOKING.requestRide;
+
+
+RX.cancelRide =
+    BOOKING.cancelRide;
+
+
+RX.getActiveBooking =
+    function () {
+
+        return BOOKING.state.booking;
+
+    };
+
+
+/* ============================================================
+   AUTO INITIALIZATION
+   ============================================================ */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            initBookingModule()
+                .catch(
+                    function (error) {
+
+                        console.error(
+                            "RiderX booking engine initialization failed:",
+                            error
+                        );
+
+                        window.RiderXBookingReady =
+                            false;
+
+                    }
+                );
+
+        },
+        {
+            once:
+                true
+        }
+    );
+
+} else {
+
+    initBookingModule()
+        .catch(
+            function (error) {
+
+                console.error(
+                    "RiderX booking engine initialization failed:",
+                    error
+                );
+
+                window.RiderXBookingReady =
+                    false;
+
+            }
+        );
+
+}
+
+
+/* ============================================================
+   MODULE READY
+   ============================================================ */
+
+export {
+
+    BOOKING
+
+};
