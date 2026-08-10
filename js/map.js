@@ -3,6 +3,32 @@
    MAP ENGINE
    File: js/map.js
 
+   RIDER FLOW
+   ------------------------------------------------------------
+   CUSTOMER:
+   Book Ride
+        ↓
+   RIDER:
+   Accept / Cancel
+        ↓
+   Accepted
+        ↓
+   Navigate to Customer Pickup
+        ↓
+   Live Rider GPS
+        ↓
+   Arrived at Pickup
+        ↓
+   Customer OTP Verification
+        ↓
+   OTP Verified
+        ↓
+   Start Ride
+        ↓
+   Destination Navigation
+        ↓
+   Complete Ride
+
    Features:
    - Leaflet / OpenStreetMap
    - Current GPS location
@@ -13,12 +39,13 @@
    - Map auto-fit
    - Rider live location
    - Customer live location
+   - Live rider → pickup navigation
+   - Live rider → destination navigation
+   - Pickup arrival detection
+   - Ride lifecycle state
    - Booking.js integration
    - Geolocation fallback
    - Mobile friendly
-   - Safe repeated initialization
-   - Safe repeated event binding
-   - Chandigarh focused geocoding
    ============================================================ */
 
 (function () {
@@ -57,11 +84,14 @@
         locationZoom:
             16,
 
+        navigationZoom:
+            17,
+
         tileUrl:
             "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 
         tileAttribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+            '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
 
         routingUrl:
             "https://router.project-osrm.org/route/v1/driving/",
@@ -81,11 +111,25 @@
         maxRoutePoints:
             1000,
 
-        routeFitPadding:
-            [50, 80],
+        /*
+         * Rider is considered to have reached
+         * customer pickup when within this radius.
+         */
+        pickupArrivalRadius:
+            100,
 
-        routeMaxZoom:
-            16
+        /*
+         * Rider is considered to have reached
+         * destination when within this radius.
+         */
+        destinationArrivalRadius:
+            100,
+
+        /*
+         * Minimum time between route refreshes.
+         */
+        routeRefreshInterval:
+            5000
     };
 
 
@@ -149,6 +193,12 @@
         routeDuration:
             0,
 
+        riderRouteDistance:
+            0,
+
+        riderRouteDuration:
+            0,
+
         locating:
             false,
 
@@ -158,13 +208,49 @@
         geocoding:
             false,
 
+        lastRouteUpdate:
+            0,
+
         mapSelectionBound:
             false,
 
         buttonsBound:
             false,
 
-        destroyed:
+        /*
+         * IMPORTANT:
+         *
+         * requested
+         * accepted
+         * heading_to_pickup
+         * arrived_pickup
+         * otp_verified
+         * in_progress
+         * completed
+         * cancelled
+         */
+        rideStatus:
+            "idle",
+
+        rideId:
+            null,
+
+        rideData:
+            null,
+
+        otpVerified:
+            false,
+
+        riderNavigationActive:
+            false,
+
+        destinationNavigationActive:
+            false,
+
+        pickupArrivalEmitted:
+            false,
+
+        destinationArrivalEmitted:
             false
     };
 
@@ -181,25 +267,16 @@
 
             return Number.isFinite(n)
                 ? n
-                : NaN;
+                : 0;
         };
 
 
     MAP.round =
         function (value) {
 
-            const number =
-                MAP.number(value);
-
-            if (
-                !Number.isFinite(number)
-            ) {
-
-                return 0;
-            }
-
             return Math.round(
-                number * 100
+                MAP.number(value) *
+                100
             ) / 100;
         };
 
@@ -215,58 +292,25 @@
 
 
     MAP.latLng =
-        function (location) {
+        function (
+            location
+        ) {
 
             if (!location) {
                 return null;
             }
 
-            let lat;
-            let lng;
 
-            if (
-                Array.isArray(location) &&
-                location.length >= 2
-            ) {
+            const lat =
+                Number(location.lat);
 
-                lat =
-                    MAP.number(
-                        location[0]
-                    );
-
-                lng =
-                    MAP.number(
-                        location[1]
-                    );
-
-            } else {
-
-                lat =
-                    MAP.number(
-                        location.lat
-                    );
-
-                lng =
-                    MAP.number(
-                        location.lng
-                    );
-            }
+            const lng =
+                Number(location.lng);
 
 
             if (
                 !Number.isFinite(lat) ||
                 !Number.isFinite(lng)
-            ) {
-
-                return null;
-            }
-
-
-            if (
-                lat < -90 ||
-                lat > 90 ||
-                lng < -180 ||
-                lng > 180
             ) {
 
                 return null;
@@ -289,31 +333,114 @@
         };
 
 
-    MAP.dispatch =
-        function (
-            eventName,
-            detail
-        ) {
+    MAP.getRole =
+        function () {
 
             try {
 
-                window.dispatchEvent(
-                    new CustomEvent(
-                        eventName,
-                        {
-                            detail:
-                                detail
-                        }
-                    )
-                );
+                const keys = [
+                    "riderx_user",
+                    "riderx_customer",
+                    "riderx_rider"
+                ];
+
+
+                for (
+                    const key of keys
+                ) {
+
+                    const raw =
+                        localStorage.getItem(
+                            key
+                        );
+
+
+                    if (!raw) {
+                        continue;
+                    }
+
+
+                    const user =
+                        JSON.parse(raw);
+
+
+                    if (
+                        user &&
+                        user.role
+                    ) {
+
+                        return String(
+                            user.role
+                        ).toLowerCase();
+                    }
+
+
+                    if (
+                        key ===
+                        "riderx_rider"
+                    ) {
+
+                        return "rider";
+                    }
+
+
+                    if (
+                        key ===
+                        "riderx_customer"
+                    ) {
+
+                        return "customer";
+                    }
+                }
 
             } catch (error) {
 
                 console.warn(
-                    "RiderX event error:",
+                    "Unable to detect RiderX role:",
                     error
                 );
             }
+
+
+            return "";
+        };
+
+
+    MAP.isRider =
+        function () {
+
+            return (
+                MAP.getRole() ===
+                "rider"
+            );
+        };
+
+
+    MAP.isCustomer =
+        function () {
+
+            return (
+                MAP.getRole() ===
+                "customer"
+            );
+        };
+
+
+    MAP.dispatch =
+        function (
+            name,
+            detail
+        ) {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    name,
+                    {
+                        detail:
+                            detail || {}
+                    }
+                )
+            );
         };
 
 
@@ -330,9 +457,9 @@
 
                 "#mapContainer",
 
-                ".map-container",
-
                 ".map",
+
+                ".map-container",
 
                 "[data-map]"
             ];
@@ -365,7 +492,9 @@
        ======================================================== */
 
     MAP.createIcon =
-        function (type) {
+        function (
+            type
+        ) {
 
             if (
                 !MAP.isLeafletAvailable()
@@ -375,36 +504,40 @@
             }
 
 
-            let symbol =
-                "●";
+            let emoji =
+                "📍";
 
 
             if (
-                type === "user"
+                type ===
+                "user"
             ) {
 
-                symbol =
+                emoji =
                     "●";
 
             } else if (
-                type === "pickup"
+                type ===
+                "pickup"
             ) {
 
-                symbol =
+                emoji =
                     "●";
 
             } else if (
-                type === "destination"
+                type ===
+                "destination"
             ) {
 
-                symbol =
+                emoji =
                     "◆";
 
             } else if (
-                type === "rider"
+                type ===
+                "rider"
             ) {
 
-                symbol =
+                emoji =
                     "🏍️";
             }
 
@@ -417,7 +550,7 @@
                 html:
                     `
                     <div class="riderx-marker riderx-marker-${type}">
-                        <span>${symbol}</span>
+                        <span>${emoji}</span>
                     </div>
                     `,
 
@@ -434,26 +567,24 @@
 
 
     /* ========================================================
-       INITIALIZE MAP
+       INITIALIZE
        ======================================================== */
 
     MAP.init =
-        function (element) {
+        function (
+            element
+        ) {
 
             if (
-                MAP.state.map &&
-                MAP.state.initialized
+                MAP.state.initialized &&
+                MAP.state.map
             ) {
 
                 setTimeout(
                     function () {
 
-                        try {
-
-                            MAP.state.map
-                                .invalidateSize();
-
-                        } catch (error) {}
+                        MAP.state.map
+                            .invalidateSize();
 
                     },
                     100
@@ -493,37 +624,6 @@
             }
 
 
-            /*
-             * Prevent duplicate Leaflet
-             * initialization on the same DOM element.
-             */
-
-            if (
-                mapElement._leaflet_id
-            ) {
-
-                try {
-
-                    MAP.state.map =
-                        L.map(
-                            mapElement
-                        );
-
-                    MAP.state.initialized =
-                        true;
-
-                    return MAP.state.map;
-
-                } catch (error) {
-
-                    console.warn(
-                        "Existing Leaflet map detected.",
-                        error
-                    );
-                }
-            }
-
-
             MAP.state.map =
                 L.map(
                     mapElement,
@@ -536,9 +636,6 @@
                             true,
 
                         preferCanvas:
-                            true,
-
-                        tap:
                             true
                     }
                 );
@@ -580,10 +677,6 @@
                 true;
 
 
-            MAP.state.destroyed =
-                false;
-
-
             setTimeout(
                 function () {
 
@@ -591,13 +684,8 @@
                         MAP.state.map
                     ) {
 
-                        try {
-
-                            MAP.state.map
-                                .invalidateSize();
-
-                        } catch (error) {}
-
+                        MAP.state.map
+                            .invalidateSize();
                     }
 
                 },
@@ -634,7 +722,7 @@
 
                         reject(
                             new Error(
-                                "Location is not supported on this device."
+                                "Location is not supported."
                             )
                         );
 
@@ -657,33 +745,37 @@
                                     false;
 
 
-                                const coords =
-                                    position.coords;
-
-
                                 const location = {
 
                                     lat:
-                                        coords.latitude,
+                                        position
+                                            .coords
+                                            .latitude,
 
                                     lng:
-                                        coords.longitude,
+                                        position
+                                            .coords
+                                            .longitude,
 
                                     accuracy:
-                                        coords.accuracy,
+                                        position
+                                            .coords
+                                            .accuracy,
 
                                     heading:
-                                        coords.heading,
+                                        position
+                                            .coords
+                                            .heading,
 
                                     speed:
-                                        coords.speed,
-
-                                    timestamp:
-                                        position.timestamp
+                                        position
+                                            .coords
+                                            .speed
                                 };
 
 
-                                MAP.state.userLocation =
+                                MAP.state
+                                    .userLocation =
                                     location;
 
 
@@ -703,7 +795,6 @@
                                 );
                             },
 
-
                             function (
                                 error
                             ) {
@@ -713,7 +804,7 @@
 
 
                                 console.warn(
-                                    "RiderX GPS error:",
+                                    "Location error:",
                                     error
                                 );
 
@@ -722,7 +813,6 @@
                                     error
                                 );
                             },
-
 
                             {
 
@@ -742,19 +832,11 @@
 
 
     /* ========================================================
-       START LOCATION WATCH
+       WATCH LOCATION
        ======================================================== */
 
     MAP.startLocationWatch =
         function () {
-
-            if (
-                !MAP.config.locationWatch
-            ) {
-
-                return false;
-            }
-
 
             if (
                 !navigator.geolocation
@@ -781,33 +863,37 @@
                             position
                         ) {
 
-                            const coords =
-                                position.coords;
-
-
                             const location = {
 
                                 lat:
-                                    coords.latitude,
+                                    position
+                                        .coords
+                                        .latitude,
 
                                 lng:
-                                    coords.longitude,
+                                    position
+                                        .coords
+                                        .longitude,
 
                                 accuracy:
-                                    coords.accuracy,
+                                    position
+                                        .coords
+                                        .accuracy,
 
                                 heading:
-                                    coords.heading,
+                                    position
+                                        .coords
+                                        .heading,
 
                                 speed:
-                                    coords.speed,
-
-                                timestamp:
-                                    position.timestamp
+                                    position
+                                        .coords
+                                        .speed
                             };
 
 
-                            MAP.state.userLocation =
+                            MAP.state
+                                .userLocation =
                                 location;
 
 
@@ -817,11 +903,17 @@
 
 
                             /*
-                             * Only use GPS as pickup
-                             * while no pickup exists.
+                             * Customer can use
+                             * current location
+                             * as pickup.
+                             *
+                             * Rider must NEVER
+                             * automatically turn
+                             * his own location
+                             * into pickup.
                              */
-
                             if (
+                                MAP.isCustomer() &&
                                 !MAP.state
                                     .pickupLocation
                             ) {
@@ -833,23 +925,40 @@
                             }
 
 
+                            /*
+                             * Rider live navigation.
+                             */
+                            if (
+                                MAP.isRider()
+                            ) {
+
+                                MAP.setRiderLocation(
+                                    location,
+                                    false
+                                );
+                            }
+
+
+                            MAP.checkRideProximity(
+                                location
+                            );
+
+
                             MAP.dispatch(
                                 "riderx-live-location",
                                 location
                             );
                         },
 
-
                         function (
                             error
                         ) {
 
                             console.warn(
-                                "RiderX GPS watch error:",
+                                "GPS watch error:",
                                 error
                             );
                         },
-
 
                         {
 
@@ -882,20 +991,10 @@
                 navigator.geolocation
             ) {
 
-                try {
-
-                    navigator.geolocation
-                        .clearWatch(
-                            MAP.state.watchId
-                        );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Unable to stop GPS watch:",
-                        error
+                navigator.geolocation
+                    .clearWatch(
+                        MAP.state.watchId
                     );
-                }
             }
 
 
@@ -909,7 +1008,9 @@
        ======================================================== */
 
     MAP.updateUserMarker =
-        function (location) {
+        function (
+            location
+        ) {
 
             const map =
                 MAP.state.map;
@@ -956,10 +1057,7 @@
                                 icon,
 
                             zIndexOffset:
-                                900,
-
-                            keyboard:
-                                false
+                                900
                         }
                     )
                     .addTo(
@@ -979,49 +1077,37 @@
 
 
             if (
-                Number.isFinite(
-                    Number(
-                        location.accuracy
-                    )
-                )
+                location.accuracy
             ) {
 
-                const accuracy =
-                    Number(
-                        location.accuracy
-                    );
-
-
                 if (
-                    MAP.state.accuracyCircle
+                    MAP.state
+                        .accuracyCircle
                 ) {
 
-                    MAP.state.accuracyCircle
+                    MAP.state
+                        .accuracyCircle
                         .setLatLng(
                             position
                         )
                         .setRadius(
-                            accuracy
+                            location.accuracy
                         );
 
                 } else {
 
-                    MAP.state.accuracyCircle =
+                    MAP.state
+                        .accuracyCircle =
                         L.circle(
                             position,
                             {
 
                                 radius:
-                                    accuracy,
+                                    location
+                                        .accuracy,
 
                                 interactive:
-                                    false,
-
-                                weight:
-                                    1,
-
-                                fillOpacity:
-                                    0.08
+                                    false
                             }
                         )
                         .addTo(
@@ -1049,7 +1135,6 @@
 
 
             if (!position) {
-
                 return null;
             }
 
@@ -1100,23 +1185,15 @@
 
             if (
                 RX.booking &&
-                typeof RX.booking.setPickup ===
+                typeof RX.booking
+                    .setPickup ===
                 "function"
             ) {
 
-                try {
-
-                    RX.booking.setPickup(
-                        MAP.state.pickupLocation
-                    );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Booking pickup integration error:",
-                        error
-                    );
-                }
+                RX.booking.setPickup(
+                    MAP.state
+                        .pickupLocation
+                );
             }
 
 
@@ -1126,7 +1203,30 @@
             );
 
 
-            return MAP.state.pickupLocation;
+            MAP.dispatch(
+                "riderx-pickup-changed",
+                MAP.state.pickupLocation
+            );
+
+
+            /*
+             * If rider has already accepted
+             * the ride, refresh navigation.
+             */
+            if (
+                MAP.isRider() &&
+                (
+                    MAP.state.rideStatus ===
+                    "heading_to_pickup"
+                )
+            ) {
+
+                MAP.drawRiderToPickupRoute();
+            }
+
+
+            return MAP.state
+                .pickupLocation;
         };
 
 
@@ -1147,7 +1247,6 @@
 
 
             if (!position) {
-
                 return null;
             }
 
@@ -1179,7 +1278,8 @@
             }
 
 
-            MAP.state.destinationLocation = {
+            MAP.state
+                .destinationLocation = {
 
                 lat:
                     position[0],
@@ -1198,23 +1298,15 @@
 
             if (
                 RX.booking &&
-                typeof RX.booking.setDestination ===
+                typeof RX.booking
+                    .setDestination ===
                 "function"
             ) {
 
-                try {
-
-                    RX.booking.setDestination(
-                        MAP.state.destinationLocation
-                    );
-
-                } catch (error) {
-
-                    console.warn(
-                        "Booking destination integration error:",
-                        error
-                    );
-                }
+                RX.booking.setDestination(
+                    MAP.state
+                        .destinationLocation
+                );
             }
 
 
@@ -1236,7 +1328,14 @@
             );
 
 
-            return MAP.state.destinationLocation;
+            MAP.dispatch(
+                "riderx-destination-changed",
+                MAP.state.destinationLocation
+            );
+
+
+            return MAP.state
+                .destinationLocation;
         };
 
 
@@ -1251,13 +1350,10 @@
                 MAP.state.map;
 
 
-            const pickup =
-                MAP.state.pickupLocation;
-
-
             const position =
                 MAP.latLng(
-                    pickup
+                    MAP.state
+                        .pickupLocation
                 );
 
 
@@ -1295,8 +1391,15 @@
                             icon:
                                 icon,
 
+                            /*
+                             * Customer can move
+                             * pickup.
+                             *
+                             * Rider pickup marker
+                             * should not be draggable.
+                             */
                             draggable:
-                                true,
+                                MAP.isCustomer(),
 
                             zIndexOffset:
                                 1000
@@ -1320,7 +1423,15 @@
                             event
                         ) {
 
-                            const point =
+                            if (
+                                !MAP.isCustomer()
+                            ) {
+
+                                return;
+                            }
+
+
+                            const position =
                                 event.target
                                     .getLatLng();
 
@@ -1329,13 +1440,14 @@
                                 {
 
                                     lat:
-                                        point.lat,
+                                        position
+                                            .lat,
 
                                     lng:
-                                        point.lng
+                                        position
+                                            .lng
 
-                                },
-                                true
+                                }
                             );
                         }
                     );
@@ -1344,7 +1456,9 @@
 
             MAP.state.pickupMarker
                 .bindTooltip(
-                    pickup.address ||
+                    MAP.state
+                        .pickupLocation
+                        .address ||
                     "Pickup",
                     {
                         direction:
@@ -1365,13 +1479,10 @@
                 MAP.state.map;
 
 
-            const destination =
-                MAP.state.destinationLocation;
-
-
             const position =
                 MAP.latLng(
-                    destination
+                    MAP.state
+                        .destinationLocation
                 );
 
 
@@ -1391,17 +1502,20 @@
 
 
             if (
-                MAP.state.destinationMarker
+                MAP.state
+                    .destinationMarker
             ) {
 
-                MAP.state.destinationMarker
+                MAP.state
+                    .destinationMarker
                     .setLatLng(
                         position
                     );
 
             } else {
 
-                MAP.state.destinationMarker =
+                MAP.state
+                    .destinationMarker =
                     L.marker(
                         position,
                         {
@@ -1410,7 +1524,7 @@
                                 icon,
 
                             draggable:
-                                true,
+                                MAP.isCustomer(),
 
                             zIndexOffset:
                                 1000
@@ -1421,44 +1535,59 @@
                     );
 
 
-                MAP.state.destinationMarker
+                MAP.state
+                    .destinationMarker
                     .bindPopup(
                         "Destination"
                     );
 
 
-                MAP.state.destinationMarker
+                MAP.state
+                    .destinationMarker
                     .on(
                         "dragend",
                         async function (
                             event
                         ) {
 
-                            const point =
+                            if (
+                                !MAP.isCustomer()
+                            ) {
+
+                                return;
+                            }
+
+
+                            const position =
                                 event.target
                                     .getLatLng();
 
 
-                            await MAP.setDestination(
-                                {
+                            await MAP
+                                .setDestination(
+                                    {
 
-                                    lat:
-                                        point.lat,
+                                        lat:
+                                            position
+                                                .lat,
 
-                                    lng:
-                                        point.lng
+                                        lng:
+                                            position
+                                                .lng
 
-                                },
-                                true
-                            );
+                                    }
+                                );
                         }
                     );
             }
 
 
-            MAP.state.destinationMarker
+            MAP.state
+                .destinationMarker
                 .bindTooltip(
-                    destination.address ||
+                    MAP.state
+                        .destinationLocation
+                        .address ||
                     "Destination",
                     {
                         direction:
@@ -1469,7 +1598,7 @@
 
 
     /* ========================================================
-       ROUTE
+       CUSTOMER ROUTE
        ======================================================== */
 
     MAP.drawRoute =
@@ -1492,7 +1621,14 @@
 
             if (
                 !start ||
-                !end ||
+                !end
+            ) {
+
+                return null;
+            }
+
+
+            if (
                 !MAP.state.map
             ) {
 
@@ -1520,11 +1656,7 @@
 
                 const response =
                     await fetch(
-                        url,
-                        {
-                            method:
-                                "GET"
-                        }
+                        url
                     );
 
 
@@ -1563,72 +1695,32 @@
 
                 MAP.state.routeDistance =
                     MAP.round(
-                        Number(route.distance || 0) /
+                        route.distance /
                         1000
                     );
 
 
                 MAP.state.routeDuration =
                     MAP.round(
-                        Number(route.duration || 0) /
+                        route.duration /
                         60
                     );
 
 
-                let coordinates =
-                    route.geometry &&
-                    route.geometry.coordinates
-                        ? route.geometry.coordinates
-                            .map(
-                                function (point) {
-
-                                    return [
-                                        point[1],
-                                        point[0]
-                                    ];
-                                }
-                            )
-                        : [];
-
-
-                if (
-                    MAP.config.maxRoutePoints &&
-                    coordinates.length >
-                    MAP.config.maxRoutePoints
-                ) {
-
-                    const step =
-                        Math.ceil(
-                            coordinates.length /
-                            MAP.config.maxRoutePoints
-                        );
-
-
-                    coordinates =
-                        coordinates.filter(
+                const coordinates =
+                    route.geometry
+                        .coordinates
+                        .map(
                             function (
-                                point,
-                                index
+                                point
                             ) {
 
-                                return (
-                                    index %
-                                    step ===
-                                    0
-                                );
+                                return [
+                                    point[1],
+                                    point[0]
+                                ];
                             }
                         );
-                }
-
-
-                if (
-                    !coordinates.length
-                ) {
-
-                    throw new Error(
-                        "Route geometry unavailable."
-                    );
-                }
 
 
                 if (
@@ -1669,38 +1761,30 @@
                 MAP.fitRoute();
 
 
-                /*
-                 * Booking integration.
-                 */
-
                 if (
                     RX.booking &&
                     RX.booking.state
                 ) {
 
-                    RX.booking.state.distanceKm =
-                        MAP.state.routeDistance;
+                    RX.booking.state
+                        .distanceKm =
+                        MAP.state
+                            .routeDistance;
 
-                    RX.booking.state.durationMin =
-                        MAP.state.routeDuration;
+                    RX.booking.state
+                        .durationMin =
+                        MAP.state
+                            .routeDuration;
 
 
                     if (
-                        typeof RX.booking.recalculate ===
+                        typeof RX.booking
+                            .recalculate ===
                         "function"
                     ) {
 
-                        try {
-
-                            RX.booking.recalculate();
-
-                        } catch (error) {
-
-                            console.warn(
-                                "Booking recalculation error:",
-                                error
-                            );
-                        }
+                        RX.booking
+                            .recalculate();
                     }
                 }
 
@@ -1710,10 +1794,12 @@
                     {
 
                         distanceKm:
-                            MAP.state.routeDistance,
+                            MAP.state
+                                .routeDistance,
 
                         durationMin:
-                            MAP.state.routeDuration,
+                            MAP.state
+                                .routeDuration,
 
                         route:
                             route
@@ -1726,7 +1812,7 @@
             } catch (error) {
 
                 console.warn(
-                    "RiderX route error:",
+                    "Route error:",
                     error
                 );
 
@@ -1838,47 +1924,27 @@
                 RX.booking.state
             ) {
 
-                RX.booking.state.distanceKm =
-                    MAP.state.routeDistance;
+                RX.booking.state
+                    .distanceKm =
+                    MAP.state
+                        .routeDistance;
 
-                RX.booking.state.durationMin =
-                    MAP.state.routeDuration;
+                RX.booking.state
+                    .durationMin =
+                    MAP.state
+                        .routeDuration;
 
 
                 if (
-                    typeof RX.booking.recalculate ===
+                    typeof RX.booking
+                        .recalculate ===
                     "function"
                 ) {
 
-                    try {
-
-                        RX.booking.recalculate();
-
-                    } catch (error) {
-
-                        console.warn(
-                            "Booking fallback recalculation error:",
-                            error
-                        );
-                    }
+                    RX.booking
+                        .recalculate();
                 }
             }
-
-
-            MAP.dispatch(
-                "riderx-route-updated",
-                {
-
-                    distanceKm:
-                        MAP.state.routeDistance,
-
-                    durationMin:
-                        MAP.state.routeDuration,
-
-                    fallback:
-                        true
-                }
-            );
 
 
             MAP.fitRoute();
@@ -1907,15 +1973,12 @@
                 MAP.state.pickupLocation
             ) {
 
-                const pickup =
+                points.push(
                     MAP.latLng(
-                        MAP.state.pickupLocation
-                    );
-
-
-                if (pickup) {
-                    points.push(pickup);
-                }
+                        MAP.state
+                            .pickupLocation
+                    )
+                );
             }
 
 
@@ -1923,15 +1986,12 @@
                 MAP.state.destinationLocation
             ) {
 
-                const destination =
+                points.push(
                     MAP.latLng(
-                        MAP.state.destinationLocation
-                    );
-
-
-                if (destination) {
-                    points.push(destination);
-                }
+                        MAP.state
+                            .destinationLocation
+                    )
+                );
             }
 
 
@@ -1939,26 +1999,30 @@
                 MAP.state.riderLocation
             ) {
 
-                const rider =
+                points.push(
                     MAP.latLng(
-                        MAP.state.riderLocation
-                    );
-
-
-                if (rider) {
-                    points.push(rider);
-                }
+                        MAP.state
+                            .riderLocation
+                    )
+                );
             }
 
 
+            const validPoints =
+                points.filter(
+                    Boolean
+                );
+
+
             if (
-                points.length === 1
+                validPoints.length === 1
             ) {
 
                 MAP.state.map
                     .setView(
-                        points[0],
-                        MAP.config.locationZoom
+                        validPoints[0],
+                        MAP.config
+                            .locationZoom
                     );
 
 
@@ -1967,22 +2031,21 @@
 
 
             if (
-                points.length > 1
+                validPoints.length > 1
             ) {
 
                 MAP.state.map
                     .fitBounds(
                         L.latLngBounds(
-                            points
+                            validPoints
                         ),
                         {
 
                             padding:
-                                MAP.config
-                                    .routeFitPadding,
+                                [50, 50],
 
                             maxZoom:
-                                MAP.config.routeMaxZoom
+                                16
                         }
                     );
             }
@@ -2000,30 +2063,6 @@
             lat2,
             lng2
         ) {
-
-            lat1 =
-                MAP.number(lat1);
-
-            lng1 =
-                MAP.number(lng1);
-
-            lat2 =
-                MAP.number(lat2);
-
-            lng2 =
-                MAP.number(lng2);
-
-
-            if (
-                !Number.isFinite(lat1) ||
-                !Number.isFinite(lng1) ||
-                !Number.isFinite(lat2) ||
-                !Number.isFinite(lng2)
-            ) {
-
-                return 0;
-            }
-
 
             const R =
                 6371;
@@ -2051,19 +2090,16 @@
                 Math.sin(
                     dLat / 2
                 ) ** 2 +
-
                 Math.cos(
                     lat1 *
                     Math.PI /
                     180
                 ) *
-
                 Math.cos(
                     lat2 *
                     Math.PI /
                     180
                 ) *
-
                 Math.sin(
                     dLng / 2
                 ) ** 2;
@@ -2073,9 +2109,7 @@
                 2 *
                 Math.atan2(
                     Math.sqrt(a),
-                    Math.sqrt(
-                        1 - a
-                    )
+                    Math.sqrt(1 - a)
                 );
 
 
@@ -2099,7 +2133,9 @@
                 .trim();
 
 
-            if (!query) {
+            if (
+                !query
+            ) {
 
                 return [];
             }
@@ -2111,22 +2147,16 @@
 
             try {
 
-                const searchQuery =
-                    query.toLowerCase()
-                        .includes("chandigarh")
-                        ? query
-                        : query +
-                          ", Chandigarh, India";
-
-
                 const url =
-                    MAP.config.geocodingUrl +
+                    MAP.config
+                        .geocodingUrl +
                     "?format=json" +
                     "&limit=5" +
                     "&countrycodes=in" +
                     "&q=" +
                     encodeURIComponent(
-                        searchQuery
+                        query +
+                        ", Chandigarh, India"
                     );
 
 
@@ -2134,9 +2164,6 @@
                     await fetch(
                         url,
                         {
-
-                            method:
-                                "GET",
 
                             headers: {
 
@@ -2185,25 +2212,12 @@
                                 item.display_name
                         };
                     }
-                )
-                .filter(
-                    function (item) {
-
-                        return (
-                            Number.isFinite(
-                                item.lat
-                            ) &&
-                            Number.isFinite(
-                                item.lng
-                            )
-                        );
-                    }
                 );
 
             } catch (error) {
 
                 console.error(
-                    "RiderX geocoding error:",
+                    "Geocoding error:",
                     error
                 );
 
@@ -2228,19 +2242,6 @@
             lng
         ) {
 
-            if (
-                !Number.isFinite(
-                    Number(lat)
-                ) ||
-                !Number.isFinite(
-                    Number(lng)
-                )
-            ) {
-
-                return "Selected location";
-            }
-
-
             try {
 
                 const url =
@@ -2248,18 +2249,19 @@
                         .reverseGeocodingUrl +
                     "?format=json" +
                     "&lat=" +
-                    encodeURIComponent(lat) +
+                    encodeURIComponent(
+                        lat
+                    ) +
                     "&lon=" +
-                    encodeURIComponent(lng);
+                    encodeURIComponent(
+                        lng
+                    );
 
 
                 const response =
                     await fetch(
                         url,
                         {
-
-                            method:
-                                "GET",
 
                             headers: {
 
@@ -2292,7 +2294,7 @@
             } catch (error) {
 
                 console.warn(
-                    "RiderX reverse geocoding error:",
+                    "Reverse geocoding error:",
                     error
                 );
 
@@ -2336,15 +2338,16 @@
                     position[1],
 
                 heading:
-                    Number.isFinite(
-                        Number(
-                            location.heading
-                        )
-                    )
-                    ? Number(
-                        location.heading
-                    )
-                    : null
+                    location.heading ||
+                    null,
+
+                speed:
+                    location.speed ||
+                    null,
+
+                accuracy:
+                    location.accuracy ||
+                    null
             };
 
 
@@ -2394,59 +2397,38 @@
 
 
             /*
-             * Update rider icon rotation
-             * when heading is available.
+             * During active navigation,
+             * keep rider map centered.
              */
-
             if (
-                location.heading !== null &&
-                location.heading !== undefined
+                follow ||
+                (
+                    MAP.isRider() &&
+                    (
+                        MAP.state.rideStatus ===
+                        "heading_to_pickup" ||
+                        MAP.state.rideStatus ===
+                        "otp_verified" ||
+                        MAP.state.rideStatus ===
+                        "in_progress"
+                    )
+                )
             ) {
-
-                const markerElement =
-                    MAP.state.riderMarker
-                        .getElement();
-
-
-                if (
-                    markerElement
-                ) {
-
-                    const marker =
-                        markerElement
-                            .querySelector(
-                                ".riderx-marker"
-                            );
-
-
-                    if (marker) {
-
-                        marker.style
-                            .transform =
-                            "rotate(" +
-                            Number(
-                                location.heading
-                            ) +
-                            "deg)";
-                    }
-                }
-            }
-
-
-            if (follow) {
 
                 MAP.state.map
                     .panTo(
                         position,
                         {
                             animate:
-                                true,
-
-                            duration:
-                                0.5
+                                true
                         }
                     );
             }
+
+
+            MAP.checkRideProximity(
+                MAP.state.riderLocation
+            );
 
 
             MAP.dispatch(
@@ -2457,10 +2439,10 @@
 
 
     /* ========================================================
-       DRAW RIDER → PICKUP ROUTE
+       RIDER → PICKUP ROUTE
        ======================================================== */
 
-    MAP.drawRiderRoute =
+    MAP.drawRiderToPickupRoute =
         async function () {
 
             const rider =
@@ -2502,6 +2484,26 @@
             }
 
 
+            const now =
+                Date.now();
+
+
+            if (
+                now -
+                MAP.state.lastRouteUpdate <
+                MAP.config
+                    .routeRefreshInterval
+            ) {
+
+                return MAP.state
+                    .riderCurrentRoute;
+            }
+
+
+            MAP.state.lastRouteUpdate =
+                now;
+
+
             try {
 
                 const url =
@@ -2527,7 +2529,7 @@
                 ) {
 
                     throw new Error(
-                        "Rider route unavailable."
+                        "Pickup route unavailable."
                     );
                 }
 
@@ -2549,90 +2551,67 @@
                     data.routes[0];
 
 
-                MAP.state.riderCurrentRoute =
+                MAP.state
+                    .riderCurrentRoute =
                     route;
 
 
-                let coordinates =
-                    route.geometry &&
-                    route.geometry.coordinates
-                        ? route.geometry.coordinates
-                            .map(
-                                function (
-                                    point
-                                ) {
-
-                                    return [
-                                        point[1],
-                                        point[0]
-                                    ];
-                                }
-                            )
-                        : [];
+                MAP.state
+                    .riderRouteDistance =
+                    MAP.round(
+                        route.distance /
+                        1000
+                    );
 
 
-                if (
-                    MAP.config.maxRoutePoints &&
-                    coordinates.length >
-                    MAP.config.maxRoutePoints
-                ) {
-
-                    const step =
-                        Math.ceil(
-                            coordinates.length /
-                            MAP.config.maxRoutePoints
-                        );
+                MAP.state
+                    .riderRouteDuration =
+                    MAP.round(
+                        route.duration /
+                        60
+                    );
 
 
-                    coordinates =
-                        coordinates.filter(
+                const coordinates =
+                    route.geometry
+                        .coordinates
+                        .map(
                             function (
-                                point,
-                                index
+                                point
                             ) {
 
-                                return (
-                                    index %
-                                    step ===
-                                    0
-                                );
+                                return [
+                                    point[1],
+                                    point[0]
+                                ];
                             }
                         );
-                }
 
 
                 if (
-                    !coordinates.length
+                    MAP.state
+                        .riderRouteLine
                 ) {
 
-                    return null;
-                }
-
-
-                if (
-                    MAP.state.riderRouteLine
-                ) {
-
-                    MAP.state.riderRouteLine
+                    MAP.state
+                        .riderRouteLine
                         .setLatLngs(
                             coordinates
                         );
 
                 } else {
 
-                    MAP.state.riderRouteLine =
+                    MAP.state
+                        .riderRouteLine =
                         L.polyline(
                             coordinates,
                             {
 
                                 weight:
-                                    4,
+                                    5,
 
                                 opacity:
-                                    0.75,
-
-                                dashArray:
-                                    "8 7",
+                                    0.9,
 
                                 lineCap:
                                     "round",
@@ -2648,20 +2627,16 @@
 
 
                 MAP.dispatch(
-                    "riderx-rider-route-updated",
+                    "riderx-pickup-navigation-updated",
                     {
 
                         distanceKm:
-                            MAP.round(
-                                route.distance /
-                                1000
-                            ),
+                            MAP.state
+                                .riderRouteDistance,
 
                         durationMin:
-                            MAP.round(
-                                route.duration /
-                                60
-                            ),
+                            MAP.state
+                                .riderRouteDuration,
 
                         route:
                             route
@@ -2674,13 +2649,1060 @@
             } catch (error) {
 
                 console.warn(
-                    "RiderX rider route failed:",
+                    "Rider → pickup route failed:",
                     error
                 );
 
 
                 return null;
             }
+        };
+
+
+    /* ========================================================
+       RIDER → DESTINATION ROUTE
+       ======================================================== */
+
+    MAP.drawRiderToDestinationRoute =
+        async function () {
+
+            const rider =
+                MAP.state.riderLocation;
+
+
+            const destination =
+                MAP.state.destinationLocation;
+
+
+            if (
+                !rider ||
+                !destination
+            ) {
+
+                return null;
+            }
+
+
+            const start =
+                MAP.latLng(
+                    rider
+                );
+
+
+            const end =
+                MAP.latLng(
+                    destination
+                );
+
+
+            if (
+                !start ||
+                !end ||
+                !MAP.state.map
+            ) {
+
+                return null;
+            }
+
+
+            try {
+
+                const url =
+                    MAP.config.routingUrl +
+                    start[1] +
+                    "," +
+                    start[0] +
+                    ";" +
+                    end[1] +
+                    "," +
+                    end[0] +
+                    "?overview=full&geometries=geojson";
+
+
+                const response =
+                    await fetch(
+                        url
+                    );
+
+
+                if (
+                    !response.ok
+                ) {
+
+                    throw new Error(
+                        "Destination route unavailable."
+                    );
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !data.routes ||
+                    !data.routes.length
+                ) {
+
+                    return null;
+                }
+
+
+                const route =
+                    data.routes[0];
+
+
+                MAP.state
+                    .riderCurrentRoute =
+                    route;
+
+
+                MAP.state
+                    .riderRouteDistance =
+                    MAP.round(
+                        route.distance /
+                        1000
+                    );
+
+
+                MAP.state
+                    .riderRouteDuration =
+                    MAP.round(
+                        route.duration /
+                        60
+                    );
+
+
+                const coordinates =
+                    route.geometry
+                        .coordinates
+                        .map(
+                            function (
+                                point
+                            ) {
+
+                                return [
+                                    point[1],
+                                    point[0]
+                                ];
+                            }
+                        );
+
+
+                if (
+                    MAP.state
+                        .riderRouteLine
+                ) {
+
+                    MAP.state
+                        .riderRouteLine
+                        .setLatLngs(
+                            coordinates
+                        );
+
+                } else {
+
+                    MAP.state
+                        .riderRouteLine =
+                        L.polyline(
+                            coordinates,
+                            {
+
+                                weight:
+                                    5,
+
+                                opacity:
+                                    0.9,
+
+                                lineCap:
+                                    "round",
+
+                                lineJoin:
+                                    "round"
+                            }
+                        )
+                        .addTo(
+                            MAP.state.map
+                        );
+                }
+
+
+                MAP.dispatch(
+                    "riderx-destination-navigation-updated",
+                    {
+
+                        distanceKm:
+                            MAP.state
+                                .riderRouteDistance,
+
+                        durationMin:
+                            MAP.state
+                                .riderRouteDuration,
+
+                        route:
+                            route
+                    }
+                );
+
+
+                return route;
+
+            } catch (error) {
+
+                console.warn(
+                    "Rider → destination route failed:",
+                    error
+                );
+
+
+                return null;
+            }
+        };
+
+
+    /* ========================================================
+       START RIDER PICKUP NAVIGATION
+       ======================================================== */
+
+    MAP.startPickupNavigation =
+        async function (
+            ride
+        ) {
+
+            MAP.state.rideData =
+                ride || {};
+
+            MAP.state.rideId =
+                ride &&
+                (
+                    ride.id ||
+                    ride.rideId ||
+                    ride.bookingId
+                ) ||
+                MAP.state.rideId;
+
+
+            MAP.state.rideStatus =
+                "heading_to_pickup";
+
+
+            MAP.state.otpVerified =
+                false;
+
+
+            MAP.state.riderNavigationActive =
+                true;
+
+
+            MAP.state
+                .destinationNavigationActive =
+                false;
+
+
+            MAP.state
+                .pickupArrivalEmitted =
+                false;
+
+
+            /*
+             * NEVER allow direct Start Ride
+             * immediately after accepting.
+             */
+            MAP.dispatch(
+                "riderx-ride-state-changed",
+                {
+
+                    status:
+                        "heading_to_pickup",
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            MAP.dispatch(
+                "riderx-navigation-started",
+                {
+
+                    navigation:
+                        "pickup",
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            /*
+             * If ride data contains pickup
+             * coordinates, set them.
+             */
+            if (
+                ride &&
+                ride.pickupLat !== undefined &&
+                ride.pickupLng !== undefined
+            ) {
+
+                await MAP.setPickup(
+                    {
+
+                        lat:
+                            ride.pickupLat,
+
+                        lng:
+                            ride.pickupLng,
+
+                        address:
+                            ride.pickupAddress ||
+                            ride.pickup ||
+                            "Customer pickup"
+                    },
+                    false
+                );
+            }
+
+
+            if (
+                ride &&
+                ride.destinationLat !== undefined &&
+                ride.destinationLng !== undefined
+            ) {
+
+                await MAP.setDestination(
+                    {
+
+                        lat:
+                            ride.destinationLat,
+
+                        lng:
+                            ride.destinationLng,
+
+                        address:
+                            ride.destinationAddress ||
+                            ride.destination ||
+                            "Destination"
+                    },
+                    false
+                );
+            }
+
+
+            /*
+             * Get rider GPS before drawing route.
+             */
+            if (
+                !MAP.state.riderLocation
+            ) {
+
+                try {
+
+                    await MAP.getCurrentLocation();
+
+                } catch (error) {
+
+                    console.warn(
+                        "Rider GPS unavailable:",
+                        error
+                    );
+                }
+            }
+
+
+            if (
+                MAP.state.riderLocation &&
+                MAP.state.pickupLocation
+            ) {
+
+                await MAP
+                    .drawRiderToPickupRoute();
+            }
+
+
+            MAP.dispatch(
+                "riderx-pickup-navigation-ready",
+                {
+
+                    ride:
+                        MAP.state.rideData,
+
+                    pickup:
+                        MAP.state
+                            .pickupLocation
+                }
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       MARK RIDER ARRIVED AT PICKUP
+       ======================================================== */
+
+    MAP.markArrivedAtPickup =
+        function () {
+
+            if (
+                MAP.state.rideStatus !==
+                "heading_to_pickup"
+            ) {
+
+                return false;
+            }
+
+
+            MAP.state.rideStatus =
+                "arrived_pickup";
+
+
+            MAP.state.riderNavigationActive =
+                false;
+
+
+            /*
+             * Do NOT set otpVerified here.
+             *
+             * Rider must receive and verify
+             * customer OTP first.
+             */
+            MAP.state.otpVerified =
+                false;
+
+
+            MAP.dispatch(
+                "riderx-ride-state-changed",
+                {
+
+                    status:
+                        "arrived_pickup",
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            MAP.dispatch(
+                "riderx-arrived-pickup",
+                {
+
+                    ride:
+                        MAP.state.rideData,
+
+                    pickup:
+                        MAP.state
+                            .pickupLocation,
+
+                    requiresOtp:
+                        true
+                }
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       VERIFY PICKUP OTP
+       ======================================================== */
+
+    MAP.verifyPickupOtp =
+        function (
+            otp
+        ) {
+
+            otp =
+                String(
+                    otp || ""
+                )
+                .trim();
+
+
+            /*
+             * Map engine does not know the
+             * Firebase OTP secret.
+             *
+             * booking/auth backend must verify it.
+             *
+             * This method is called only after
+             * backend verification succeeds.
+             */
+            if (
+                MAP.state.rideStatus !==
+                "arrived_pickup"
+            ) {
+
+                return false;
+            }
+
+
+            MAP.state.otpVerified =
+                true;
+
+
+            MAP.state.rideStatus =
+                "otp_verified";
+
+
+            MAP.dispatch(
+                "riderx-otp-verified",
+                {
+
+                    ride:
+                        MAP.state.rideData,
+
+                    otpVerified:
+                        true
+                }
+            );
+
+
+            MAP.dispatch(
+                "riderx-ride-state-changed",
+                {
+
+                    status:
+                        "otp_verified",
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            /*
+             * Only now is Start Ride allowed.
+             */
+            MAP.dispatch(
+                "riderx-start-ride-enabled",
+                {
+
+                    ride:
+                        MAP.state.rideData,
+
+                    allowed:
+                        true
+                }
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       START ACTIVE RIDE
+       ======================================================== */
+
+    MAP.startRide =
+        async function (
+            ride
+        ) {
+
+            /*
+             * HARD SAFETY CHECK:
+             *
+             * Start Ride is impossible until
+             * rider reached pickup and OTP
+             * has been verified.
+             */
+            if (
+                MAP.state.rideStatus !==
+                "otp_verified"
+            ) {
+
+                console.warn(
+                    "RiderX: Start Ride blocked. Pickup OTP is not verified."
+                );
+
+
+                MAP.dispatch(
+                    "riderx-start-ride-blocked",
+                    {
+
+                        reason:
+                            "OTP verification required.",
+
+                        status:
+                            MAP.state
+                                .rideStatus
+                    }
+                );
+
+
+                return false;
+            }
+
+
+            MAP.state.rideStatus =
+                "in_progress";
+
+
+            MAP.state.riderNavigationActive =
+                false;
+
+
+            MAP.state
+                .destinationNavigationActive =
+                true;
+
+
+            MAP.state
+                .destinationArrivalEmitted =
+                false;
+
+
+            if (ride) {
+
+                MAP.state.rideData =
+                    ride;
+            }
+
+
+            MAP.dispatch(
+                "riderx-ride-state-changed",
+                {
+
+                    status:
+                        "in_progress",
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            MAP.dispatch(
+                "riderx-ride-started",
+                {
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            /*
+             * Now route rider to destination.
+             */
+            if (
+                MAP.state.riderLocation &&
+                MAP.state.destinationLocation
+            ) {
+
+                await MAP
+                    .drawRiderToDestinationRoute();
+            }
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       COMPLETE RIDE
+       ======================================================== */
+
+    MAP.completeRide =
+        function (
+            ride
+        ) {
+
+            /*
+             * Ride can only be completed
+             * after it actually started.
+             */
+            if (
+                MAP.state.rideStatus !==
+                "in_progress"
+            ) {
+
+                return false;
+            }
+
+
+            MAP.state.rideStatus =
+                "completed";
+
+
+            MAP.state
+                .destinationNavigationActive =
+                false;
+
+
+            if (ride) {
+
+                MAP.state.rideData =
+                    ride;
+            }
+
+
+            MAP.dispatch(
+                "riderx-ride-state-changed",
+                {
+
+                    status:
+                        "completed",
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            MAP.dispatch(
+                "riderx-ride-completed",
+                {
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       CANCEL RIDE
+       ======================================================== */
+
+    MAP.cancelRide =
+        function (
+            ride
+        ) {
+
+            MAP.state.rideStatus =
+                "cancelled";
+
+
+            MAP.state.riderNavigationActive =
+                false;
+
+
+            MAP.state
+                .destinationNavigationActive =
+                false;
+
+
+            MAP.state.otpVerified =
+                false;
+
+
+            if (ride) {
+
+                MAP.state.rideData =
+                    ride;
+            }
+
+
+            MAP.dispatch(
+                "riderx-ride-state-changed",
+                {
+
+                    status:
+                        "cancelled",
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            MAP.dispatch(
+                "riderx-ride-cancelled",
+                {
+
+                    ride:
+                        MAP.state.rideData
+                }
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       ACCEPT RIDE
+       ======================================================== */
+
+    MAP.acceptRide =
+        async function (
+            ride
+        ) {
+
+            if (
+                !ride
+            ) {
+
+                return false;
+            }
+
+
+            /*
+             * Accept means ONLY accepted.
+             *
+             * It does NOT mean Start Ride.
+             */
+            MAP.state.rideData =
+                ride;
+
+
+            MAP.state.rideId =
+                ride.id ||
+                ride.rideId ||
+                ride.bookingId ||
+                null;
+
+
+            MAP.state.rideStatus =
+                "accepted";
+
+
+            MAP.state.otpVerified =
+                false;
+
+
+            MAP.dispatch(
+                "riderx-ride-accepted",
+                ride
+            );
+
+
+            MAP.dispatch(
+                "riderx-ride-state-changed",
+                {
+
+                    status:
+                        "accepted",
+
+                    ride:
+                        ride
+                }
+            );
+
+
+            /*
+             * Immediately move to
+             * customer pickup navigation.
+             */
+            await MAP.startPickupNavigation(
+                ride
+            );
+
+
+            return true;
+        };
+
+
+    /* ========================================================
+       CHECK PICKUP / DESTINATION PROXIMITY
+       ======================================================== */
+
+    MAP.checkRideProximity =
+        function (
+            location
+        ) {
+
+            const position =
+                MAP.latLng(
+                    location
+                );
+
+
+            if (!position) {
+                return;
+            }
+
+
+            /*
+             * RIDER → PICKUP
+             */
+            if (
+                MAP.state.rideStatus ===
+                "heading_to_pickup"
+            ) {
+
+                const pickup =
+                    MAP.latLng(
+                        MAP.state
+                            .pickupLocation
+                    );
+
+
+                if (pickup) {
+
+                    const distance =
+                        MAP.calculateDistance(
+                            position[0],
+                            position[1],
+                            pickup[0],
+                            pickup[1]
+                        ) *
+                        1000;
+
+
+                    MAP.dispatch(
+                        "riderx-pickup-distance-updated",
+                        {
+
+                            meters:
+                                Math.round(
+                                    distance
+                                ),
+
+                            kilometers:
+                                MAP.round(
+                                    distance /
+                                    1000
+                                )
+                        }
+                    );
+
+
+                    if (
+                        distance <=
+                        MAP.config
+                            .pickupArrivalRadius
+                    ) {
+
+                        if (
+                            !MAP.state
+                                .pickupArrivalEmitted
+                        ) {
+
+                            MAP.state
+                                .pickupArrivalEmitted =
+                                true;
+
+
+                            MAP.markArrivedAtPickup();
+                        }
+                    }
+                }
+            }
+
+
+            /*
+             * RIDER → DESTINATION
+             */
+            if (
+                MAP.state.rideStatus ===
+                "in_progress"
+            ) {
+
+                const destination =
+                    MAP.latLng(
+                        MAP.state
+                            .destinationLocation
+                    );
+
+
+                if (destination) {
+
+                    const distance =
+                        MAP.calculateDistance(
+                            position[0],
+                            position[1],
+                            destination[0],
+                            destination[1]
+                        ) *
+                        1000;
+
+
+                    MAP.dispatch(
+                        "riderx-destination-distance-updated",
+                        {
+
+                            meters:
+                                Math.round(
+                                    distance
+                                ),
+
+                            kilometers:
+                                MAP.round(
+                                    distance /
+                                    1000
+                                )
+                        }
+                    );
+
+
+                    if (
+                        distance <=
+                        MAP.config
+                            .destinationArrivalRadius
+                    ) {
+
+                        if (
+                            !MAP.state
+                                .destinationArrivalEmitted
+                        ) {
+
+                            MAP.state
+                                .destinationArrivalEmitted =
+                                true;
+
+
+                            MAP.dispatch(
+                                "riderx-near-destination",
+                                {
+
+                                    meters:
+                                        Math.round(
+                                            distance
+                                        ),
+
+                                    ride:
+                                        MAP.state
+                                            .rideData
+                                }
+                            );
+                        }
+                    }
+                }
+            }
+        };
+
+
+    /* ========================================================
+       DRAW LEGACY RIDER ROUTE
+       ======================================================== */
+
+    MAP.drawRiderRoute =
+        async function () {
+
+            if (
+                MAP.state.rideStatus ===
+                "heading_to_pickup"
+            ) {
+
+                return MAP
+                    .drawRiderToPickupRoute();
+            }
+
+
+            if (
+                MAP.state.rideStatus ===
+                "in_progress"
+            ) {
+
+                return MAP
+                    .drawRiderToDestinationRoute();
+            }
+
+
+            /*
+             * Legacy behavior:
+             * rider → pickup.
+             */
+            return MAP
+                .drawRiderToPickupRoute();
         };
 
 
@@ -2694,8 +3716,10 @@
             try {
 
                 const location =
-                    MAP.state.userLocation ||
-                    await MAP.getCurrentLocation();
+                    MAP.state
+                        .userLocation ||
+                    await MAP
+                        .getCurrentLocation();
 
 
                 const position =
@@ -2712,11 +3736,8 @@
                     MAP.state.map
                         .setView(
                             position,
-                            MAP.config.locationZoom,
-                            {
-                                animate:
-                                    true
-                            }
+                            MAP.config
+                                .locationZoom
                         );
                 }
 
@@ -2729,22 +3750,6 @@
                     "Unable to center user:",
                     error
                 );
-
-
-                /*
-                 * Fallback to Chandigarh.
-                 */
-
-                if (
-                    MAP.state.map
-                ) {
-
-                    MAP.state.map
-                        .setView(
-                            MAP.config.defaultCenter,
-                            MAP.config.defaultZoom
-                        );
-                }
 
 
                 return null;
@@ -2764,14 +3769,10 @@
                 MAP.state.map
             ) {
 
-                try {
-
-                    MAP.state.map
-                        .removeLayer(
-                            MAP.state.routeLine
-                        );
-
-                } catch (error) {}
+                MAP.state.map
+                    .removeLayer(
+                        MAP.state.routeLine
+                    );
             }
 
 
@@ -2789,96 +3790,76 @@
 
             MAP.state.routeDuration =
                 0;
-
-
-            MAP.dispatch(
-                "riderx-route-cleared"
-            );
         };
 
 
     /* ========================================================
-       CLEAR BOOKING
+       CLEAR ALL MARKERS / BOOKING
        ======================================================== */
 
     MAP.clearBooking =
         function () {
 
-            const map =
-                MAP.state.map;
-
-
             if (
-                map &&
-                MAP.state.pickupMarker
+                MAP.state.pickupMarker &&
+                MAP.state.map
             ) {
 
-                try {
-
-                    map.removeLayer(
-                        MAP.state.pickupMarker
+                MAP.state.map
+                    .removeLayer(
+                        MAP.state
+                            .pickupMarker
                     );
-
-                } catch (error) {}
             }
 
 
             if (
-                map &&
-                MAP.state.destinationMarker
+                MAP.state.destinationMarker &&
+                MAP.state.map
             ) {
 
-                try {
-
-                    map.removeLayer(
-                        MAP.state.destinationMarker
+                MAP.state.map
+                    .removeLayer(
+                        MAP.state
+                            .destinationMarker
                     );
-
-                } catch (error) {}
             }
 
 
             if (
-                map &&
-                MAP.state.riderMarker
+                MAP.state.riderMarker &&
+                MAP.state.map
             ) {
 
-                try {
-
-                    map.removeLayer(
-                        MAP.state.riderMarker
+                MAP.state.map
+                    .removeLayer(
+                        MAP.state
+                            .riderMarker
                     );
-
-                } catch (error) {}
             }
 
 
             if (
-                map &&
-                MAP.state.riderRouteLine
+                MAP.state.riderRouteLine &&
+                MAP.state.map
             ) {
 
-                try {
-
-                    map.removeLayer(
-                        MAP.state.riderRouteLine
+                MAP.state.map
+                    .removeLayer(
+                        MAP.state
+                            .riderRouteLine
                     );
-
-                } catch (error) {}
             }
 
 
             MAP.state.pickupMarker =
                 null;
 
-
             MAP.state.destinationMarker =
                 null;
 
-
             MAP.state.riderMarker =
                 null;
-
 
             MAP.state.riderRouteLine =
                 null;
@@ -2887,52 +3868,83 @@
             MAP.state.pickupLocation =
                 null;
 
-
             MAP.state.destinationLocation =
                 null;
-
 
             MAP.state.riderLocation =
                 null;
 
 
+            MAP.state.rideData =
+                null;
+
+            MAP.state.rideId =
+                null;
+
+            MAP.state.rideStatus =
+                "idle";
+
+            MAP.state.otpVerified =
+                false;
+
+            MAP.state.riderNavigationActive =
+                false;
+
+            MAP.state
+                .destinationNavigationActive =
+                false;
+
+            MAP.state.pickupArrivalEmitted =
+                false;
+
+            MAP.state
+                .destinationArrivalEmitted =
+                false;
+
             MAP.state.riderCurrentRoute =
                 null;
+
+            MAP.state.riderRouteDistance =
+                0;
+
+            MAP.state.riderRouteDuration =
+                0;
 
 
             MAP.clearRoute();
 
 
             MAP.dispatch(
-                "riderx-booking-map-cleared"
+                "riderx-map-booking-cleared"
             );
         };
 
 
     /* ========================================================
-       MAP CLICK SELECTION
+       MAP CLICK
        ======================================================== */
 
     MAP.enableMapSelection =
         function () {
 
             if (
-                !MAP.state.map
+                !MAP.state.map ||
+                MAP.state.mapSelectionBound
             ) {
 
-                return false;
+                return;
             }
 
 
             /*
-             * Prevent duplicate click listeners.
+             * Rider map must NOT create
+             * pickup/destination by clicking.
              */
-
             if (
-                MAP.state.mapSelectionBound
+                MAP.isRider()
             ) {
 
-                return true;
+                return;
             }
 
 
@@ -2947,52 +3959,41 @@
                 ) {
 
                     if (
-                        !event ||
-                        !event.latlng
-                    ) {
-
-                        return;
-                    }
-
-
-                    /*
-                     * First click = pickup.
-                     * Second click = destination.
-                     */
-
-                    if (
-                        !MAP.state.pickupLocation
+                        !MAP.state
+                            .pickupLocation
                     ) {
 
                         await MAP.setPickup(
                             {
 
                                 lat:
-                                    event.latlng.lat,
+                                    event.latlng
+                                        .lat,
 
                                 lng:
-                                    event.latlng.lng
+                                    event.latlng
+                                        .lng
                             }
                         );
 
                     } else {
 
-                        await MAP.setDestination(
-                            {
+                        await MAP
+                            .setDestination(
+                                {
 
-                                lat:
-                                    event.latlng.lat,
+                                    lat:
+                                        event.latlng
+                                            .lat,
 
-                                lng:
-                                    event.latlng.lng
-                            }
-                        );
+                                    lng:
+                                        event.latlng
+                                            .lng
+                                }
+                            );
                     }
                 }
             );
-
-
-            return true;
         };
 
 
@@ -3024,12 +4025,26 @@
                         button
                     ) {
 
+                        if (
+                            button.dataset
+                                .mapBound ===
+                            "true"
+                        ) {
+
+                            return;
+                        }
+
+
+                        button.dataset
+                            .mapBound =
+                            "true";
+
+
                         button.addEventListener(
                             "click",
                             function () {
 
                                 MAP.centerOnUser();
-
                             }
                         );
                     }
@@ -3045,55 +4060,51 @@
                         button
                     ) {
 
+                        if (
+                            button.dataset
+                                .mapBound ===
+                            "true"
+                        ) {
+
+                            return;
+                        }
+
+
+                        button.dataset
+                            .mapBound =
+                            "true";
+
+
                         button.addEventListener(
                             "click",
                             async function () {
 
-                                const location =
-                                    await MAP
-                                        .centerOnUser();
-
-
                                 if (
-                                    location
+                                    !MAP.isCustomer()
                                 ) {
 
-                                    await MAP.setPickup(
-                                        location
-                                    );
+                                    return;
+                                }
+
+
+                                await MAP
+                                    .centerOnUser();
+
+                                if (
+                                    MAP.state
+                                        .userLocation
+                                ) {
+
+                                    await MAP
+                                        .setPickup(
+                                            MAP.state
+                                                .userLocation
+                                        );
                                 }
                             }
                         );
                     }
                 );
-        };
-
-
-    /* ========================================================
-       RESIZE MAP
-       ======================================================== */
-
-    MAP.invalidateSize =
-        function () {
-
-            if (
-                MAP.state.map
-            ) {
-
-                setTimeout(
-                    function () {
-
-                        try {
-
-                            MAP.state.map
-                                .invalidateSize();
-
-                        } catch (error) {}
-
-                    },
-                    100
-                );
-            }
         };
 
 
@@ -3113,7 +4124,6 @@
 
 
             if (!map) {
-
                 return null;
             }
 
@@ -3123,43 +4133,33 @@
             MAP.enableMapSelection();
 
 
-            /*
-             * Try GPS.
-             */
-
             try {
 
-                await MAP.getCurrentLocation();
+                await MAP
+                    .getCurrentLocation();
 
 
-                MAP.startLocationWatch();
+                if (
+                    MAP.config
+                        .locationWatch
+                ) {
+
+                    MAP.startLocationWatch();
+                }
 
             } catch (error) {
 
                 console.warn(
-                    "RiderX GPS permission not available:",
+                    "GPS permission not available:",
                     error
                 );
 
 
                 /*
-                 * Map still works without GPS.
+                 * Still start watch if possible.
                  */
-
-                if (
-                    MAP.state.map
-                ) {
-
-                    MAP.state.map
-                        .setView(
-                            MAP.config.defaultCenter,
-                            MAP.config.defaultZoom
-                        );
-                }
+                MAP.startLocationWatch();
             }
-
-
-            MAP.invalidateSize();
 
 
             return map;
@@ -3180,7 +4180,8 @@
                 event.detail
             ) {
 
-                MAP.state.pickupLocation =
+                MAP.state
+                    .pickupLocation =
                     event.detail;
 
 
@@ -3188,13 +4189,12 @@
 
 
                 if (
-                    MAP.state.destinationLocation
+                    MAP.state
+                        .rideStatus ===
+                    "heading_to_pickup"
                 ) {
 
-                    MAP.drawRoute(
-                        MAP.state.pickupLocation,
-                        MAP.state.destinationLocation
-                    );
+                    MAP.drawRiderToPickupRoute();
                 }
             }
         }
@@ -3211,7 +4211,8 @@
                 event.detail
             ) {
 
-                MAP.state.destinationLocation =
+                MAP.state
+                    .destinationLocation =
                     event.detail;
 
 
@@ -3219,22 +4220,25 @@
 
 
                 if (
-                    MAP.state.pickupLocation
+                    MAP.state
+                        .rideStatus ===
+                    "in_progress"
                 ) {
 
-                    MAP.drawRoute(
-                        MAP.state.pickupLocation,
-                        MAP.state.destinationLocation
-                    );
+                    MAP.drawRiderToDestinationRoute();
                 }
             }
         }
     );
 
 
+    /* ========================================================
+       RIDE ACCEPTED
+       ======================================================== */
+
     window.addEventListener(
         "riderx-ride-accepted",
-        function (
+        async function (
             event
         ) {
 
@@ -3243,83 +4247,85 @@
 
 
             if (!ride) {
-
                 return;
             }
 
 
-            const riderLat =
-                ride.riderLat ??
-                ride.riderLatitude;
-
-
-            const riderLng =
-                ride.riderLng ??
-                ride.riderLongitude;
-
-
-            if (
-                riderLat !== undefined &&
-                riderLng !== undefined
-            ) {
-
-                MAP.setRiderLocation(
-                    {
-
-                        lat:
-                            riderLat,
-
-                        lng:
-                            riderLng,
-
-                        heading:
-                            ride.riderHeading
-                    },
-                    false
-                );
-
-
-                MAP.drawRiderRoute();
-            }
+            /*
+             * IMPORTANT:
+             *
+             * This does NOT start the ride.
+             *
+             * It starts rider → customer
+             * pickup navigation.
+             */
+            await MAP.startPickupNavigation(
+                ride
+            );
         }
     );
 
 
-    /*
-     * Firebase/live rider update compatibility.
-     */
+    /* ========================================================
+       RIDE START REQUEST
+       ======================================================== */
 
     window.addEventListener(
-        "riderx-rider-location",
+        "riderx-start-ride-request",
+        async function (
+            event
+        ) {
+
+            const ride =
+                event.detail ||
+                MAP.state.rideData;
+
+
+            await MAP.startRide(
+                ride
+            );
+        }
+    );
+
+
+    /* ========================================================
+       OTP VERIFIED
+       ======================================================== */
+
+    window.addEventListener(
+        "riderx-pickup-otp-verified",
         function (
             event
         ) {
 
-            if (
-                event.detail
-            ) {
-
-                MAP.setRiderLocation(
-                    event.detail,
-                    false
-                );
-
-
-                MAP.drawRiderRoute();
-            }
+            /*
+             * Backend/booking.js should dispatch
+             * this only AFTER actual OTP verification.
+             */
+            MAP.verifyPickupOtp(
+                event.detail &&
+                event.detail.otp
+            );
         }
     );
 
+
+    /* ========================================================
+       RIDE CANCELLED
+       ======================================================== */
 
     window.addEventListener(
         "riderx-ride-cancelled",
         function () {
 
             MAP.clearBooking();
-
         }
     );
 
+
+    /* ========================================================
+       RIDE COMPLETED
+       ======================================================== */
 
     window.addEventListener(
         "riderx-ride-completed",
@@ -3327,40 +4333,15 @@
 
             /*
              * Keep final route visible.
-             * Next booking clears it.
+             * Next booking can clear it.
              */
-
-            MAP.stopLocationWatch();
-
-        }
-    );
+            MAP.state.rideStatus =
+                "completed";
 
 
-    /* ========================================================
-       PAGE VISIBILITY
-       ======================================================== */
-
-    document.addEventListener(
-        "visibilitychange",
-        function () {
-
-            if (
-                document.visibilityState ===
-                "visible"
-            ) {
-
-                MAP.invalidateSize();
-            }
-        }
-    );
-
-
-    window.addEventListener(
-        "resize",
-        function () {
-
-            MAP.invalidateSize();
-
+            MAP.state
+                .destinationNavigationActive =
+                false;
         }
     );
 
@@ -3381,14 +4362,6 @@
         MAP.getCurrentLocation;
 
 
-    RX.startLocationWatch =
-        MAP.startLocationWatch;
-
-
-    RX.stopLocationWatch =
-        MAP.stopLocationWatch;
-
-
     RX.setPickupLocation =
         MAP.setPickup;
 
@@ -3399,10 +4372,6 @@
 
     RX.searchLocation =
         MAP.searchLocation;
-
-
-    RX.reverseGeocode =
-        MAP.reverseGeocode;
 
 
     RX.setRiderLocation =
@@ -3417,16 +4386,83 @@
         MAP.drawRiderRoute;
 
 
+    RX.drawRiderToPickupRoute =
+        MAP.drawRiderToPickupRoute;
+
+
+    RX.drawRiderToDestinationRoute =
+        MAP.drawRiderToDestinationRoute;
+
+
     RX.centerOnUser =
         MAP.centerOnUser;
 
 
-    RX.invalidateMap =
-        MAP.invalidateSize;
-
-
     RX.clearMapBooking =
         MAP.clearBooking;
+
+
+    /*
+     * New ride lifecycle API.
+     */
+    RX.acceptRide =
+        MAP.acceptRide;
+
+
+    RX.startPickupNavigation =
+        MAP.startPickupNavigation;
+
+
+    RX.markArrivedAtPickup =
+        MAP.markArrivedAtPickup;
+
+
+    RX.verifyPickupOtp =
+        MAP.verifyPickupOtp;
+
+
+    RX.startRide =
+        MAP.startRide;
+
+
+    RX.completeRide =
+        MAP.completeRide;
+
+
+    RX.cancelRide =
+        MAP.cancelRide;
+
+
+    RX.getRideStatus =
+        function () {
+
+            return MAP.state
+                .rideStatus;
+        };
+
+
+    RX.getRideState =
+        function () {
+
+            return {
+
+                status:
+                    MAP.state
+                        .rideStatus,
+
+                rideId:
+                    MAP.state
+                        .rideId,
+
+                otpVerified:
+                    MAP.state
+                        .otpVerified,
+
+                ride:
+                    MAP.state
+                        .rideData
+            };
+        };
 
 
     /* ========================================================
@@ -3435,14 +4471,13 @@
 
     function autoInit() {
 
+        /*
+         * Don't force map initialization
+         * on pages without a map.
+         */
         const mapElement =
             MAP.findMapElement();
 
-
-        /*
-         * Do not initialize on pages
-         * without a map.
-         */
 
         if (
             mapElement
@@ -3462,11 +4497,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            autoInit,
-            {
-                once:
-                    true
-            }
+            autoInit
         );
 
     } else {
@@ -3476,7 +4507,7 @@
 
 
     console.log(
-        "RiderX Map Engine 2.0 loaded."
+        "RiderX Map Engine loaded — ride lifecycle enabled."
     );
 
 })();
