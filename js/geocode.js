@@ -1,5 +1,6 @@
 /* ============================================================
-   RIDERX GEOCODING ENGINE
+   RIDERX 2.0
+   GEOCODING ENGINE
    File: js/geocode.js
 
    Handles:
@@ -10,12 +11,27 @@
    - Recent locations
    - Search suggestions
    - Chandigarh-focused results
+   - Current GPS location
    - OpenStreetMap Nominatim
+   - Request cancellation
+   - Search/reverse caching
+   - RiderX custom events
+
+   IMPORTANT:
+   This file is provider-independent from the rest of RiderX.
+   Existing RiderX.searchAddress(), reverseGeocode(),
+   getCurrentLocation(), getCurrentAddress() and
+   getAddressCoordinates() APIs are preserved.
    ============================================================ */
 
 (function () {
 
     "use strict";
+
+
+    /* ============================================================
+       RIDERX NAMESPACE
+       ============================================================ */
 
     window.RiderX =
         window.RiderX || {};
@@ -28,9 +44,9 @@
         RX.geocode || {};
 
 
-    /* ========================================================
-       CONFIG
-       ======================================================== */
+    /* ============================================================
+       CONFIGURATION
+       ============================================================ */
 
     Geo.config = {
 
@@ -62,19 +78,36 @@
             10000,
 
         debounce:
-            350,
+            450,
 
         minQueryLength:
             2,
 
         maxRecent:
-            10
+            10,
+
+        cacheLimit:
+            100,
+
+        /*
+         * Chandigarh approximate bounding box.
+         *
+         * Nominatim viewbox format:
+         * left,top,right,bottom
+         */
+        chandigarhViewBox:
+            [
+                76.68,
+                30.80,
+                76.95,
+                30.60
+            ]
     };
 
 
-    /* ========================================================
+    /* ============================================================
        STATE
-       ======================================================== */
+       ============================================================ */
 
     Geo.state = {
 
@@ -90,7 +123,13 @@
         loading:
             false,
 
+        activeSearchId:
+            0,
+
         controller:
+            null,
+
+        reverseController:
             null,
 
         cache:
@@ -101,9 +140,9 @@
     };
 
 
-    /* ========================================================
+    /* ============================================================
        STORAGE
-       ======================================================== */
+       ============================================================ */
 
     Geo.storageKey =
         "riderx_recent_locations";
@@ -120,22 +159,49 @@
                     );
 
 
-                const data =
-                    saved
-                        ? JSON.parse(saved)
-                        : [];
-
-
                 if (
-                    Array.isArray(data)
+                    !saved
                 ) {
 
                     Geo.state.recent =
-                        data.slice(
+                        [];
+
+                    return [];
+                }
+
+
+                const data =
+                    JSON.parse(
+                        saved
+                    );
+
+
+                if (
+                    !Array.isArray(
+                        data
+                    )
+                ) {
+
+                    Geo.state.recent =
+                        [];
+
+                    return [];
+                }
+
+
+                Geo.state.recent =
+                    data
+                        .map(
+                            Geo.normalizeResult
+                        )
+                        .filter(
+                            Boolean
+                        )
+                        .slice(
                             0,
                             Geo.config.maxRecent
                         );
-                }
+
 
             } catch (error) {
 
@@ -180,14 +246,6 @@
             location
         ) {
 
-            if (
-                !location
-            ) {
-
-                return;
-            }
-
-
             const normalized =
                 Geo.normalizeResult(
                     location
@@ -198,16 +256,15 @@
                 !normalized
             ) {
 
-                return;
+                return null;
             }
 
 
             const key =
-                [
+                Geo.coordinateKey(
                     normalized.lat,
                     normalized.lng
-                ]
-                .join(":");
+                );
 
 
             Geo.state.recent =
@@ -217,12 +274,10 @@
                     ) {
 
                         return (
-                            [
+                            Geo.coordinateKey(
                                 item.lat,
                                 item.lng
-                            ]
-                            .join(":") !==
-                            key
+                            ) !== key
                         );
                     }
                 );
@@ -242,6 +297,7 @@
 
             Geo.saveRecent();
 
+
             Geo.emit(
                 "recent-updated",
                 {
@@ -249,6 +305,9 @@
                         Geo.state.recent
                 }
             );
+
+
+            return normalized;
         };
 
 
@@ -265,18 +324,28 @@
                     Geo.storageKey
                 );
 
-            } catch (error) {}
+            } catch (error) {
+
+                console.warn(
+                    "RiderX recent locations could not be cleared.",
+                    error
+                );
+            }
 
 
             Geo.emit(
-                "recent-cleared"
+                "recent-cleared",
+                {
+                    locations:
+                        []
+                }
             );
         };
 
 
-    /* ========================================================
+    /* ============================================================
        NUMBER HELPERS
-       ======================================================== */
+       ============================================================ */
 
     Geo.number =
         function (
@@ -285,7 +354,9 @@
         ) {
 
             const number =
-                Number(value);
+                Number(
+                    value
+                );
 
 
             if (
@@ -305,9 +376,47 @@
         };
 
 
-    /* ========================================================
+    Geo.coordinateKey =
+        function (
+            lat,
+            lng
+        ) {
+
+            const latitude =
+                Number(
+                    lat
+                );
+
+            const longitude =
+                Number(
+                    lng
+                );
+
+
+            if (
+                !Number.isFinite(
+                    latitude
+                ) ||
+                !Number.isFinite(
+                    longitude
+                )
+            ) {
+
+                return "";
+            }
+
+
+            return (
+                latitude.toFixed(5) +
+                ":" +
+                longitude.toFixed(5)
+            );
+        };
+
+
+    /* ============================================================
        NORMALIZE RESULT
-       ======================================================== */
+       ============================================================ */
 
     Geo.normalizeResult =
         function (
@@ -315,7 +424,8 @@
         ) {
 
             if (
-                !item
+                !item ||
+                typeof item !== "object"
             ) {
 
                 return null;
@@ -334,35 +444,55 @@
 
 
             lat =
-                Number(lat);
+                Number(
+                    lat
+                );
 
             lng =
-                Number(lng);
+                Number(
+                    lng
+                );
 
 
             if (
-                !Number.isFinite(lat) ||
-                !Number.isFinite(lng)
+                !Number.isFinite(
+                    lat
+                ) ||
+                !Number.isFinite(
+                    lng
+                )
             ) {
 
                 return null;
             }
 
 
-            const address =
+            const addressObject =
+                item.address &&
+                typeof item.address === "object"
+                    ? item.address
+                    : {};
+
+
+            const displayName =
                 item.display_name ||
                 item.displayName ||
-                item.address ||
+                (
+                    typeof item.address === "string"
+                        ? item.address
+                        : ""
+                ) ||
                 item.name ||
                 "";
 
 
-            const addressObject =
-                item.address &&
-                typeof item.address ===
-                "object"
-                    ? item.address
-                    : {};
+            const countryCode =
+                String(
+                    addressObject.country_code ||
+                    item.countryCode ||
+                    "in"
+                )
+                .toLowerCase();
 
 
             return {
@@ -370,9 +500,8 @@
                 id:
                     item.place_id ||
                     item.id ||
-                    (
-                        lat +
-                        ":" +
+                    Geo.coordinateKey(
+                        lat,
                         lng
                     ),
 
@@ -390,7 +519,12 @@
 
                 displayName:
                     String(
-                        address
+                        displayName
+                    ),
+
+                address:
+                    String(
+                        displayName
                     ),
 
                 name:
@@ -406,15 +540,28 @@
                     item.category ||
                     "",
 
+                placeRank:
+                    item.place_rank ??
+                    null,
+
+                importance:
+                    item.importance ??
+                    null,
+
                 city:
                     addressObject.city ||
                     addressObject.town ||
                     addressObject.village ||
                     addressObject.municipality ||
+                    addressObject.city_district ||
                     "",
 
                 state:
                     addressObject.state ||
+                    "",
+
+                stateDistrict:
+                    addressObject.state_district ||
                     "",
 
                 postcode:
@@ -426,16 +573,26 @@
                     "India",
 
                 countryCode:
-                    addressObject.country_code ||
-                    "in",
+                    countryCode,
 
                 road:
                     addressObject.road ||
                     "",
 
+                houseNumber:
+                    addressObject.house_number ||
+                    "",
+
                 suburb:
                     addressObject.suburb ||
+                    "",
+
+                neighbourhood:
                     addressObject.neighbourhood ||
+                    "",
+
+                locality:
+                    addressObject.locality ||
                     "",
 
                 raw:
@@ -444,9 +601,9 @@
         };
 
 
-    /* ========================================================
+    /* ============================================================
        CHANDIGARH CHECK
-       ======================================================== */
+       ============================================================ */
 
     Geo.isChandigarh =
         function (
@@ -470,8 +627,11 @@
             const text =
                 [
                     item.displayName,
+                    item.name,
                     item.city,
-                    item.state
+                    item.state,
+                    item.suburb,
+                    item.neighbourhood
                 ]
                 .join(" ")
                 .toLowerCase();
@@ -480,18 +640,247 @@
             return (
                 text.includes(
                     "chandigarh"
+                ) ||
+                (
+                    item.countryCode === "in" &&
+                    (
+                        text.includes(
+                            "sector "
+                        ) &&
+                        (
+                            text.includes(
+                                "chandigarh"
+                            ) ||
+                            item.state
+                                .toLowerCase()
+                                .includes(
+                                    "chandigarh"
+                                )
+                        )
+                    )
                 )
             );
         };
 
 
-    /* ========================================================
-       URL BUILDER
-       ======================================================== */
+    /* ============================================================
+       CHANDIGARH BOUNDS CHECK
+       ============================================================ */
+
+    Geo.isInsideChandigarhBounds =
+        function (
+            lat,
+            lng
+        ) {
+
+            const latitude =
+                Number(
+                    lat
+                );
+
+            const longitude =
+                Number(
+                    lng
+                );
+
+
+            if (
+                !Number.isFinite(
+                    latitude
+                ) ||
+                !Number.isFinite(
+                    longitude
+                )
+            ) {
+
+                return false;
+            }
+
+
+            const box =
+                Geo.config
+                    .chandigarhViewBox;
+
+
+            const west =
+                box[0];
+
+            const north =
+                box[1];
+
+            const east =
+                box[2];
+
+            const south =
+                box[3];
+
+
+            return (
+                longitude >= west &&
+                longitude <= east &&
+                latitude <= north &&
+                latitude >= south
+            );
+        };
+
+
+    /* ============================================================
+       SEARCH URL BUILDER
+       ============================================================ */
 
     Geo.buildSearchURL =
         function (
             query,
+            options
+        ) {
+
+            options =
+                options ||
+                {};
+
+
+            const text =
+                String(
+                    query ||
+                    ""
+                )
+                .trim();
+
+
+            const params =
+                new URLSearchParams();
+
+
+            params.set(
+                "format",
+                "jsonv2"
+            );
+
+
+            params.set(
+                "q",
+                text
+            );
+
+
+            params.set(
+                "addressdetails",
+                "1"
+            );
+
+
+            params.set(
+                "limit",
+                String(
+                    Math.max(
+                        1,
+                        Math.min(
+                            20,
+                            Number(
+                                options.limit ??
+                                Geo.config.limit
+                            )
+                        )
+                    )
+                )
+            );
+
+
+            params.set(
+                "countrycodes",
+                String(
+                    options.countryCode ||
+                    Geo.config.countryCode
+                )
+            );
+
+
+            params.set(
+                "accept-language",
+                String(
+                    options.language ||
+                    Geo.config.language
+                )
+            );
+
+
+            /*
+             * Chandigarh-only mode:
+             *
+             * Instead of blindly appending
+             * ", Chandigarh, India" every time,
+             * use Nominatim's geographic viewbox.
+             */
+            if (
+                options.chandigarhOnly ===
+                true
+            ) {
+
+                const box =
+                    Geo.config
+                        .chandigarhViewBox;
+
+
+                params.set(
+                    "viewbox",
+                    box.join(",")
+                );
+
+
+                params.set(
+                    "bounded",
+                    "1"
+                );
+            }
+
+
+            /*
+             * Optional custom viewbox.
+             */
+            if (
+                Array.isArray(
+                    options.viewbox
+                ) &&
+                options.viewbox.length === 4
+            ) {
+
+                params.set(
+                    "viewbox",
+                    options.viewbox.join(",")
+                );
+
+
+                if (
+                    options.bounded !==
+                    undefined
+                ) {
+
+                    params.set(
+                        "bounded",
+                        options.bounded
+                            ? "1"
+                            : "0"
+                    );
+                }
+            }
+
+
+            return (
+                Geo.config.endpoint +
+                "/search?" +
+                params.toString()
+            );
+        };
+
+
+    /* ============================================================
+       REVERSE URL BUILDER
+       ============================================================ */
+
+    Geo.buildReverseURL =
+        function (
+            lat,
+            lng,
             options
         ) {
 
@@ -511,8 +900,18 @@
 
 
             params.set(
-                "q",
-                query
+                "lat",
+                String(
+                    lat
+                )
+            );
+
+
+            params.set(
+                "lon",
+                String(
+                    lng
+                )
             );
 
 
@@ -523,69 +922,34 @@
 
 
             params.set(
-                "limit",
+                "zoom",
                 String(
-                    options.limit ??
-                    Geo.config.limit
+                    options.zoom ??
+                    18
                 )
             );
 
 
             params.set(
-                "countrycodes",
-                options.countryCode ||
-                Geo.config.countryCode
-            );
-
-
-            params.set(
                 "accept-language",
-                options.language ||
-                Geo.config.language
-            );
-
-
-            /*
-             * Chandigarh preference.
-             *
-             * We don't force a strict bounding box
-             * because the user may search nearby areas,
-             * but we include Chandigarh in the query when
-             * the UI is configured for Chandigarh.
-             */
-
-            let finalQuery =
-                query;
-
-
-            if (
-                options.chandigarhOnly ===
-                true
-            ) {
-
-                finalQuery =
-                    query +
-                    ", Chandigarh, India";
-            }
-
-
-            params.set(
-                "q",
-                finalQuery
+                String(
+                    options.language ||
+                    Geo.config.language
+                )
             );
 
 
             return (
                 Geo.config.endpoint +
-                "/search?" +
+                "/reverse?" +
                 params.toString()
             );
         };
 
 
-    /* ========================================================
-       FETCH WITH TIMEOUT
-       ======================================================== */
+    /* ============================================================
+       FETCH HELPER
+       ============================================================ */
 
     Geo.fetch =
         async function (
@@ -599,22 +963,55 @@
 
 
             const controller =
+                options.controller ||
                 new AbortController();
 
 
-            const timeout =
-                setTimeout(
-                    function () {
-
-                        controller.abort();
-
-                    },
+            const timeoutMs =
+                Number(
                     options.timeout ??
                     Geo.config.timeout
                 );
 
 
+            let timeout =
+                null;
+
+
+            if (
+                timeoutMs > 0
+            ) {
+
+                timeout =
+                    setTimeout(
+                        function () {
+
+                            try {
+
+                                controller.abort();
+
+                            } catch (error) {}
+
+                        },
+                        timeoutMs
+                    );
+            }
+
+
             try {
+
+                const headers =
+                    {
+                        "Accept":
+                            "application/json",
+
+                        "Accept-Language":
+                            String(
+                                options.language ||
+                                Geo.config.language
+                            )
+                    };
+
 
                 const response =
                     await fetch(
@@ -624,17 +1021,14 @@
                                 options.method ||
                                 "GET",
 
-                            headers: {
-
-                                "Accept":
-                                    "application/json",
-
-                                "Accept-Language":
-                                    Geo.config.language
-                            },
+                            headers:
+                                headers,
 
                             signal:
-                                controller.signal
+                                controller.signal,
+
+                            cache:
+                                "no-store"
                         }
                     );
 
@@ -644,7 +1038,7 @@
                 ) {
 
                     throw new Error(
-                        "Geocoding request failed: " +
+                        "Geocoding request failed: HTTP " +
                         response.status
                     );
                 }
@@ -654,16 +1048,148 @@
 
             } finally {
 
-                clearTimeout(
+                if (
                     timeout
+                ) {
+
+                    clearTimeout(
+                        timeout
+                    );
+                }
+            }
+        };
+
+
+    /* ============================================================
+       SEARCH CACHE KEY
+       ============================================================ */
+
+    Geo.buildSearchCacheKey =
+        function (
+            query,
+            options
+        ) {
+
+            options =
+                options ||
+                {};
+
+
+            return [
+                "search",
+                String(
+                    query ||
+                    ""
+                )
+                .trim()
+                .toLowerCase(),
+
+                options.chandigarhOnly
+                    ? "chd"
+                    : "all",
+
+                options.limit ??
+                    Geo.config.limit,
+
+                options.language ||
+                    Geo.config.language,
+
+                options.countryCode ||
+                    Geo.config.countryCode
+            ].join("|");
+        };
+
+
+    /* ============================================================
+       REVERSE CACHE KEY
+       ============================================================ */
+
+    Geo.buildReverseCacheKey =
+        function (
+            lat,
+            lng,
+            options
+        ) {
+
+            options =
+                options ||
+                {};
+
+
+            return [
+                "reverse",
+                Number(
+                    lat
+                ).toFixed(5),
+
+                Number(
+                    lng
+                ).toFixed(5),
+
+                options.zoom ??
+                    18,
+
+                options.language ||
+                    Geo.config.language
+            ].join("|");
+        };
+
+
+    /* ============================================================
+       CACHE SET
+       ============================================================ */
+
+    Geo.setCache =
+        function (
+            key,
+            value
+        ) {
+
+            if (
+                !key
+            ) {
+
+                return;
+            }
+
+
+            Geo.state.cache.set(
+                key,
+                value
+            );
+
+
+            while (
+                Geo.state.cache.size >
+                Geo.config.cacheLimit
+            ) {
+
+                const firstKey =
+                    Geo.state.cache
+                        .keys()
+                        .next()
+                        .value;
+
+
+                if (
+                    firstKey ===
+                    undefined
+                ) {
+
+                    break;
+                }
+
+
+                Geo.state.cache.delete(
+                    firstKey
                 );
             }
         };
 
 
-    /* ========================================================
+    /* ============================================================
        SEARCH
-       ======================================================== */
+       ============================================================ */
 
     Geo.search =
         async function (
@@ -672,8 +1198,9 @@
         ) {
 
             options =
-                options ||
-                {};
+                {
+                    ...(options || {})
+                };
 
 
             const text =
@@ -684,33 +1211,27 @@
                 .trim();
 
 
-            if (
-                text.length <
-                (
+            const minLength =
+                Number(
                     options.minQueryLength ??
                     Geo.config.minQueryLength
-                )
+                );
+
+
+            if (
+                text.length <
+                minLength
             ) {
 
                 return [];
             }
 
 
-            /*
-             * Cache key.
-             */
-
             const cacheKey =
-                (
-                    text +
-                    "|" +
-                    (
-                        options.chandigarhOnly
-                            ? "chd"
-                            : "all"
-                    )
-                )
-                .toLowerCase();
+                Geo.buildSearchCacheKey(
+                    text,
+                    options
+                );
 
 
             if (
@@ -732,14 +1253,28 @@
                     cached;
 
 
+                Geo.emit(
+                    "search-success",
+                    {
+                        query:
+                            text,
+
+                        results:
+                            cached,
+
+                        cached:
+                            true
+                    }
+                );
+
+
                 return cached;
             }
 
 
             /*
-             * Cancel previous request.
+             * Cancel previous search.
              */
-
             if (
                 Geo.state.controller
             ) {
@@ -752,8 +1287,16 @@
             }
 
 
-            Geo.state.controller =
+            const controller =
                 new AbortController();
+
+
+            Geo.state.controller =
+                controller;
+
+
+            const searchId =
+                ++Geo.state.activeSearchId;
 
 
             Geo.state.loading =
@@ -768,73 +1311,75 @@
                 "search-start",
                 {
                     query:
-                        text
+                        text,
+
+                    searchId:
+                        searchId
                 }
             );
 
 
             try {
 
-                let url =
+                const url =
                     Geo.buildSearchURL(
                         text,
                         options
                     );
 
 
-                const response =
-                    await fetch(
+                const data =
+                    await Geo.fetch(
                         url,
                         {
-                            headers: {
+                            controller:
+                                controller,
 
-                                "Accept":
-                                    "application/json",
+                            timeout:
+                                options.timeout ??
+                                Geo.config.timeout,
 
-                                "Accept-Language":
-                                    Geo.config.language
-                            },
-
-                            signal:
-                                Geo.state
-                                    .controller
-                                    .signal
+                            language:
+                                options.language ||
+                                Geo.config.language
                         }
                     );
 
 
+                /*
+                 * Ignore stale responses.
+                 */
                 if (
-                    !response.ok
+                    searchId !==
+                    Geo.state.activeSearchId
                 ) {
 
-                    throw new Error(
-                        "Geocoding request failed."
-                    );
+                    return [];
                 }
 
 
-                const data =
-                    await response.json();
-
-
                 let results =
-                    Array.isArray(data)
-                        ? data.map(
-                            Geo.normalizeResult
-                        )
+                    Array.isArray(
+                        data
+                    )
+                        ? data
+                            .map(
+                                Geo.normalizeResult
+                            )
+                            .filter(
+                                Boolean
+                            )
                         : [];
 
 
-                results =
-                    results.filter(
-                        Boolean
-                    );
-
-
                 /*
-                 * Optional Chandigarh filtering.
+                 * Chandigarh-only filtering.
+                 *
+                 * Nominatim bounded search already limits
+                 * the result geographically. The additional
+                 * check protects against unexpected provider
+                 * results.
                  */
-
                 if (
                     options.chandigarhOnly ===
                     true
@@ -842,15 +1387,27 @@
 
                     results =
                         results.filter(
-                            Geo.isChandigarh
+                            function (
+                                item
+                            ) {
+
+                                return (
+                                    Geo.isChandigarh(
+                                        item
+                                    ) ||
+                                    Geo.isInsideChandigarhBounds(
+                                        item.lat,
+                                        item.lng
+                                    )
+                                );
+                            }
                         );
                 }
 
 
                 /*
-                 * Remove duplicates.
+                 * Remove duplicate coordinates.
                  */
-
                 const seen =
                     new Set();
 
@@ -862,16 +1419,14 @@
                         ) {
 
                             const key =
-                                item.lat.toFixed(
-                                    5
-                                ) +
-                                ":" +
-                                item.lng.toFixed(
-                                    5
+                                Geo.coordinateKey(
+                                    item.lat,
+                                    item.lng
                                 );
 
 
                             if (
+                                !key ||
                                 seen.has(
                                     key
                                 )
@@ -885,42 +1440,38 @@
                                 key
                             );
 
-
                             return true;
                         }
                     );
 
 
                 /*
-                 * Cache.
+                 * Keep requested result limit.
                  */
+                const requestedLimit =
+                    Math.max(
+                        1,
+                        Math.min(
+                            20,
+                            Number(
+                                options.limit ??
+                                Geo.config.limit
+                            )
+                        )
+                    );
 
-                Geo.state.cache.set(
+
+                results =
+                    results.slice(
+                        0,
+                        requestedLimit
+                    );
+
+
+                Geo.setCache(
                     cacheKey,
                     results
                 );
-
-
-                /*
-                 * Limit cache size.
-                 */
-
-                if (
-                    Geo.state.cache.size >
-                    100
-                ) {
-
-                    const firstKey =
-                        Geo.state.cache
-                            .keys()
-                            .next()
-                            .value;
-
-
-                    Geo.state.cache.delete(
-                        firstKey
-                    );
-                }
 
 
                 Geo.state.lastResults =
@@ -934,7 +1485,13 @@
                             text,
 
                         results:
-                            results
+                            results,
+
+                        cached:
+                            false,
+
+                        searchId:
+                            searchId
                     }
                 );
 
@@ -944,8 +1501,21 @@
             } catch (error) {
 
                 if (
+                    error &&
                     error.name ===
                     "AbortError"
+                ) {
+
+                    return [];
+                }
+
+
+                /*
+                 * Ignore stale errors.
+                 */
+                if (
+                    searchId !==
+                    Geo.state.activeSearchId
                 ) {
 
                     return [];
@@ -965,7 +1535,10 @@
                             text,
 
                         error:
-                            error
+                            error,
+
+                        searchId:
+                            searchId
                     }
                 );
 
@@ -974,15 +1547,34 @@
 
             } finally {
 
-                Geo.state.loading =
-                    false;
+                /*
+                 * Only the active request may change
+                 * the global loading state.
+                 */
+                if (
+                    searchId ===
+                    Geo.state.activeSearchId
+                ) {
+
+                    Geo.state.loading =
+                        false;
+
+                    if (
+                        Geo.state.controller ===
+                        controller
+                    ) {
+
+                        Geo.state.controller =
+                            null;
+                    }
+                }
             }
         };
 
 
-    /* ========================================================
-       REVERSE GEOCODE
-       ======================================================== */
+    /* ============================================================
+       REVERSE GEOCODING
+       ============================================================ */
 
     Geo.reverse =
         async function (
@@ -992,20 +1584,29 @@
         ) {
 
             options =
-                options ||
-                {};
+                {
+                    ...(options || {})
+                };
 
 
             lat =
-                Number(lat);
+                Number(
+                    lat
+                );
 
             lng =
-                Number(lng);
+                Number(
+                    lng
+                );
 
 
             if (
-                !Number.isFinite(lat) ||
-                !Number.isFinite(lng)
+                !Number.isFinite(
+                    lat
+                ) ||
+                !Number.isFinite(
+                    lng
+                )
             ) {
 
                 return null;
@@ -1013,10 +1614,11 @@
 
 
             const cacheKey =
-                "reverse:" +
-                lat.toFixed(5) +
-                ":" +
-                lng.toFixed(5);
+                Geo.buildReverseCacheKey(
+                    lat,
+                    lng,
+                    options
+                );
 
 
             if (
@@ -1025,68 +1627,68 @@
                 )
             ) {
 
-                return Geo.state.cache.get(
-                    cacheKey
-                );
+                const cached =
+                    Geo.state.cache.get(
+                        cacheKey
+                    );
+
+
+                Geo.state.lastReverse =
+                    cached;
+
+
+                return cached;
             }
+
+
+            /*
+             * Cancel previous reverse request.
+             */
+            if (
+                Geo.state.reverseController
+            ) {
+
+                try {
+
+                    Geo.state.reverseController.abort();
+
+                } catch (error) {}
+            }
+
+
+            const controller =
+                new AbortController();
+
+
+            Geo.state.reverseController =
+                controller;
 
 
             try {
 
-                const params =
-                    new URLSearchParams();
-
-
-                params.set(
-                    "format",
-                    "jsonv2"
-                );
-
-
-                params.set(
-                    "lat",
-                    String(lat)
-                );
-
-
-                params.set(
-                    "lon",
-                    String(lng)
-                );
-
-
-                params.set(
-                    "addressdetails",
-                    "1"
-                );
-
-
-                params.set(
-                    "zoom",
-                    String(
-                        options.zoom ??
-                        18
-                    )
-                );
-
-
-                params.set(
-                    "accept-language",
-                    options.language ||
-                    Geo.config.language
-                );
-
-
                 const url =
-                    Geo.config.endpoint +
-                    "/reverse?" +
-                    params.toString();
+                    Geo.buildReverseURL(
+                        lat,
+                        lng,
+                        options
+                    );
 
 
                 const response =
                     await Geo.fetch(
                         url,
-                        options
+                        {
+                            controller:
+                                controller,
+
+                            timeout:
+                                options.timeout ??
+                                Geo.config.timeout,
+
+                            language:
+                                options.language ||
+                                Geo.config.language
+                        }
                     );
 
 
@@ -1104,7 +1706,18 @@
                     result
                 ) {
 
-                    Geo.state.cache.set(
+                    /*
+                     * Add coordinate accuracy information
+                     * if provider returned it.
+                     */
+                    result.latitude =
+                        lat;
+
+                    result.longitude =
+                        lng;
+
+
+                    Geo.setCache(
                         cacheKey,
                         result
                     );
@@ -1124,6 +1737,16 @@
 
             } catch (error) {
 
+                if (
+                    error &&
+                    error.name ===
+                    "AbortError"
+                ) {
+
+                    return null;
+                }
+
+
                 console.error(
                     "RiderX reverse geocoding error:",
                     error
@@ -1134,19 +1757,36 @@
                     "reverse-error",
                     {
                         error:
-                            error
+                            error,
+
+                        lat:
+                            lat,
+
+                        lng:
+                            lng
                     }
                 );
 
 
                 return null;
+
+            } finally {
+
+                if (
+                    Geo.state.reverseController ===
+                    controller
+                ) {
+
+                    Geo.state.reverseController =
+                        null;
+                }
             }
         };
 
 
-    /* ========================================================
-       CURRENT LOCATION
-       ======================================================== */
+    /* ============================================================
+       CURRENT GPS LOCATION
+       ============================================================ */
 
     Geo.currentLocation =
         function (
@@ -1168,10 +1808,18 @@
                         !navigator.geolocation
                     ) {
 
-                        reject(
+                        const error =
                             new Error(
-                                "Geolocation is not supported."
-                            )
+                                "Geolocation is not supported by this device."
+                            );
+
+
+                        error.code =
+                            0;
+
+
+                        reject(
+                            error
                         );
 
                         return;
@@ -1180,41 +1828,65 @@
 
                     navigator.geolocation
                         .getCurrentPosition(
+
                             function (
                                 position
                             ) {
 
+                                const coords =
+                                    position.coords;
+
+
                                 resolve({
 
                                     lat:
-                                        position
-                                            .coords
-                                            .latitude,
+                                        Number(
+                                            coords.latitude
+                                        ),
 
                                     lng:
-                                        position
-                                            .coords
-                                            .longitude,
+                                        Number(
+                                            coords.longitude
+                                        ),
+
+                                    latitude:
+                                        Number(
+                                            coords.latitude
+                                        ),
+
+                                    longitude:
+                                        Number(
+                                            coords.longitude
+                                        ),
 
                                     accuracy:
-                                        position
-                                            .coords
-                                            .accuracy,
+                                        Number(
+                                            coords.accuracy
+                                        ),
 
                                     altitude:
-                                        position
-                                            .coords
-                                            .altitude,
+                                        coords.altitude !== null
+                                            ? Number(
+                                                coords.altitude
+                                            )
+                                            : null,
 
                                     heading:
-                                        position
-                                            .coords
-                                            .heading,
+                                        coords.heading !== null
+                                            ? Number(
+                                                coords.heading
+                                            )
+                                            : null,
 
                                     speed:
-                                        position
-                                            .coords
-                                            .speed
+                                        coords.speed !== null
+                                            ? Number(
+                                                coords.speed
+                                            )
+                                            : null,
+
+                                    timestamp:
+                                        position.timestamp
                                 });
 
                             },
@@ -1222,6 +1894,12 @@
                             function (
                                 error
                             ) {
+
+                                console.warn(
+                                    "RiderX GPS error:",
+                                    error
+                                );
+
 
                                 reject(
                                     error
@@ -1231,13 +1909,12 @@
                             {
 
                                 enableHighAccuracy:
-                                    options
-                                        .enableHighAccuracy ??
+                                    options.enableHighAccuracy ??
                                     true,
 
                                 timeout:
                                     options.timeout ??
-                                    10000,
+                                    12000,
 
                                 maximumAge:
                                     options.maximumAge ??
@@ -1249,14 +1926,185 @@
         };
 
 
-    /* ========================================================
+    /* ============================================================
+       WATCH CURRENT GPS LOCATION
+       ============================================================ */
+
+    Geo.watchLocation =
+        function (
+            success,
+            error,
+            options
+        ) {
+
+            options =
+                options ||
+                {};
+
+
+            if (
+                !navigator.geolocation
+            ) {
+
+                if (
+                    typeof error ===
+                    "function"
+                ) {
+
+                    error(
+                        new Error(
+                            "Geolocation is not supported."
+                        )
+                    );
+                }
+
+
+                return null;
+            }
+
+
+            return navigator.geolocation
+                .watchPosition(
+
+                    function (
+                        position
+                    ) {
+
+                        if (
+                            typeof success !==
+                            "function"
+                        ) {
+
+                            return;
+                        }
+
+
+                        const coords =
+                            position.coords;
+
+
+                        success({
+
+                            lat:
+                                Number(
+                                    coords.latitude
+                                ),
+
+                            lng:
+                                Number(
+                                    coords.longitude
+                                ),
+
+                            latitude:
+                                Number(
+                                    coords.latitude
+                                ),
+
+                            longitude:
+                                Number(
+                                    coords.longitude
+                                ),
+
+                            accuracy:
+                                Number(
+                                    coords.accuracy
+                                ),
+
+                            altitude:
+                                coords.altitude,
+
+                            heading:
+                                coords.heading,
+
+                            speed:
+                                coords.speed,
+
+                            timestamp:
+                                position.timestamp
+                        });
+                    },
+
+                    function (
+                        positionError
+                    ) {
+
+                        if (
+                            typeof error ===
+                            "function"
+                        ) {
+
+                            error(
+                                positionError
+                            );
+                        }
+                    },
+
+                    {
+
+                        enableHighAccuracy:
+                            options.enableHighAccuracy ??
+                            true,
+
+                        timeout:
+                            options.timeout ??
+                            15000,
+
+                        maximumAge:
+                            options.maximumAge ??
+                            3000
+                    }
+                );
+        };
+
+
+    /* ============================================================
+       CLEAR GPS WATCH
+       ============================================================ */
+
+    Geo.clearWatch =
+        function (
+            watchId
+        ) {
+
+            if (
+                watchId === null ||
+                watchId === undefined
+            ) {
+
+                return false;
+            }
+
+
+            if (
+                !navigator.geolocation
+            ) {
+
+                return false;
+            }
+
+
+            navigator.geolocation.clearWatch(
+                watchId
+            );
+
+
+            return true;
+        };
+
+
+    /* ============================================================
        CURRENT ADDRESS
-       ======================================================== */
+       ============================================================ */
 
     Geo.currentAddress =
         async function (
             options
         ) {
+
+            options =
+                options ||
+                {};
+
 
             try {
 
@@ -1280,6 +2128,12 @@
 
                     address.accuracy =
                         position.accuracy;
+
+                    address.latitude =
+                        position.lat;
+
+                    address.longitude =
+                        position.lng;
                 }
 
 
@@ -1293,14 +2147,23 @@
                 );
 
 
+                Geo.emit(
+                    "current-address-error",
+                    {
+                        error:
+                            error
+                    }
+                );
+
+
                 return null;
             }
         };
 
 
-    /* ========================================================
+    /* ============================================================
        AUTOCOMPLETE
-       ======================================================== */
+       ============================================================ */
 
     Geo.autocomplete =
         async function (
@@ -1308,22 +2171,32 @@
             options
         ) {
 
+            options =
+                {
+                    ...(options || {})
+                };
+
+
             return Geo.search(
                 query,
                 {
-                    ...(options || {}),
+                    ...options,
 
                     limit:
-                        options?.limit ??
-                        6
+                        options.limit ??
+                        6,
+
+                    debounce:
+                        options.debounce ??
+                        Geo.config.debounce
                 }
             );
         };
 
 
-    /* ========================================================
+    /* ============================================================
        FORMAT SHORT ADDRESS
-       ======================================================== */
+       ============================================================ */
 
     Geo.shortAddress =
         function (
@@ -1344,56 +2217,70 @@
             }
 
 
-            const parts = [];
+            const parts =
+                [];
 
 
-            if (
+            const add =
+                function (
+                    value
+                ) {
+
+                    const text =
+                        String(
+                            value ||
+                            ""
+                        )
+                        .trim();
+
+
+                    if (
+                        !text
+                    ) {
+
+                        return;
+                    }
+
+
+                    if (
+                        !parts.includes(
+                            text
+                        )
+                    ) {
+
+                        parts.push(
+                            text
+                        );
+                    }
+                };
+
+
+            add(
                 item.name
-            ) {
+            );
 
-                parts.push(
-                    item.name
-                );
-            }
+            add(
+                item.houseNumber &&
+                item.road
+                    ? (
+                        item.houseNumber +
+                        " " +
+                        item.road
+                    )
+                    : item.road
+            );
 
+            add(
+                item.suburb
+            );
 
-            if (
-                item.road &&
-                !parts.includes(
-                    item.road
-                )
-            ) {
+            add(
+                item.neighbourhood
+            );
 
-                parts.push(
-                    item.road
-                );
-            }
-
-
-            if (
-                item.suburb &&
-                !parts.includes(
-                    item.suburb
-                )
-            ) {
-
-                parts.push(
-                    item.suburb
-                );
-            }
-
-
-            if (
-                item.city &&
-                !parts.includes(
-                    item.city
-                )
-            ) {
-
-                parts.push(
-                    item.city
-                );
-            }
+            add(
+                item.city
+            );
 
 
             return parts
@@ -1407,9 +2294,9 @@
         };
 
 
-    /* ========================================================
-       FORMAT LOCATION
-       ======================================================== */
+    /* ============================================================
+       FORMAT FULL LOCATION
+       ============================================================ */
 
     Geo.format =
         function (
@@ -1439,9 +2326,9 @@
         };
 
 
-    /* ========================================================
+    /* ============================================================
        LOCATION OBJECT
-       ======================================================== */
+       ============================================================ */
 
     Geo.toLocation =
         function (
@@ -1464,6 +2351,9 @@
 
             return {
 
+                id:
+                    item.id,
+
                 lat:
                     item.lat,
 
@@ -1477,10 +2367,25 @@
                     item.lng,
 
                 address:
+                    item.displayName ||
+                    Geo.shortAddress(
+                        item
+                    ),
+
+                displayName:
                     item.displayName,
 
                 name:
                     item.name,
+
+                road:
+                    item.road,
+
+                suburb:
+                    item.suburb,
+
+                neighbourhood:
+                    item.neighbourhood,
 
                 city:
                     item.city,
@@ -1491,15 +2396,18 @@
                 country:
                     item.country,
 
+                countryCode:
+                    item.countryCode,
+
                 postcode:
                     item.postcode
             };
         };
 
 
-    /* ========================================================
+    /* ============================================================
        SEARCH INPUT BINDING
-       ======================================================== */
+       ============================================================ */
 
     Geo.bindSearch =
         function (
@@ -1533,6 +2441,10 @@
                 null;
 
 
+            let destroyed =
+                false;
+
+
             const onInput =
                 function () {
 
@@ -1542,8 +2454,11 @@
 
 
                     const query =
-                        element.value
-                            .trim();
+                        String(
+                            element.value ||
+                            ""
+                        )
+                        .trim();
 
 
                     if (
@@ -1557,6 +2472,9 @@
                         Geo.emit(
                             "suggestions",
                             {
+                                input:
+                                    element,
+
                                 query:
                                     query,
 
@@ -1574,11 +2492,27 @@
                         setTimeout(
                             async function () {
 
+                                if (
+                                    destroyed
+                                ) {
+
+                                    return;
+                                }
+
+
                                 const results =
                                     await Geo.autocomplete(
                                         query,
                                         options
                                     );
+
+
+                                if (
+                                    destroyed
+                                ) {
+
+                                    return;
+                                }
 
 
                                 Geo.emit(
@@ -1616,6 +2550,10 @@
                 destroy:
                     function () {
 
+                        destroyed =
+                            true;
+
+
                         clearTimeout(
                             timer
                         );
@@ -1630,9 +2568,9 @@
         };
 
 
-    /* ========================================================
-       PICKUP / DESTINATION BINDING
-       ======================================================== */
+    /* ============================================================
+       PICKUP / DESTINATION INPUT BINDING
+       ============================================================ */
 
     Geo.bindLocationInput =
         function (
@@ -1661,6 +2599,12 @@
             }
 
 
+            const eventName =
+                type === "pickup"
+                    ? "pickup-suggestions"
+                    : "destination-suggestions";
+
+
             const listener =
                 function (
                     event
@@ -1681,10 +2625,7 @@
 
 
                     Geo.emit(
-                        type ===
-                        "pickup"
-                            ? "pickup-suggestions"
-                            : "destination-suggestions",
+                        eventName,
                         detail
                     );
                 };
@@ -1715,9 +2656,9 @@
         };
 
 
-    /* ========================================================
+    /* ============================================================
        SELECT LOCATION
-       ======================================================== */
+       ============================================================ */
 
     Geo.select =
         function (
@@ -1792,13 +2733,17 @@
         };
 
 
-    /* ========================================================
+    /* ============================================================
        GET ADDRESS FROM COORDINATES
-       ======================================================== */
+       ============================================================ */
 
     Geo.getAddress =
         Geo.reverse;
 
+
+    /* ============================================================
+       GET COORDINATES FROM ADDRESS
+       ============================================================ */
 
     Geo.getCoordinates =
         async function (
@@ -1814,6 +2759,9 @@
 
 
             if (
+                !Array.isArray(
+                    results
+                ) ||
                 results.length ===
                 0
             ) {
@@ -1822,32 +2770,58 @@
             }
 
 
+            const first =
+                results[0];
+
+
             return {
 
                 lat:
-                    results[0].lat,
+                    first.lat,
 
                 lng:
-                    results[0].lng,
+                    first.lng,
 
                 latitude:
-                    results[0].lat,
+                    first.lat,
 
                 longitude:
-                    results[0].lng,
+                    first.lng,
 
                 address:
-                    results[0].displayName,
+                    first.displayName,
 
                 result:
-                    results[0]
+                    first
             };
         };
 
 
-    /* ========================================================
-       CACHE CONTROL
-       ======================================================== */
+    /* ============================================================
+       SEARCH CHANDIGARH
+       ============================================================ */
+
+    Geo.searchChandigarh =
+        async function (
+            query,
+            options
+        ) {
+
+            return Geo.search(
+                query,
+                {
+                    ...(options || {}),
+
+                    chandigarhOnly:
+                        true
+                }
+            );
+        };
+
+
+    /* ============================================================
+       CLEAR CACHE
+       ============================================================ */
 
     Geo.clearCache =
         function () {
@@ -1859,12 +2833,73 @@
 
             Geo.state.lastReverse =
                 null;
+
+
+            Geo.emit(
+                "cache-cleared",
+                {}
+            );
         };
 
 
-    /* ========================================================
+    /* ============================================================
+       CANCEL ACTIVE SEARCH
+       ============================================================ */
+
+    Geo.cancelSearch =
+        function () {
+
+            if (
+                Geo.state.controller
+            ) {
+
+                try {
+
+                    Geo.state.controller.abort();
+
+                } catch (error) {}
+            }
+
+
+            Geo.state.activeSearchId++;
+
+
+            Geo.state.controller =
+                null;
+
+
+            Geo.state.loading =
+                false;
+        };
+
+
+    /* ============================================================
+       CANCEL REVERSE REQUEST
+       ============================================================ */
+
+    Geo.cancelReverse =
+        function () {
+
+            if (
+                Geo.state.reverseController
+            ) {
+
+                try {
+
+                    Geo.state.reverseController.abort();
+
+                } catch (error) {}
+            }
+
+
+            Geo.state.reverseController =
+                null;
+        };
+
+
+    /* ============================================================
        EVENTS
-       ======================================================== */
+       ============================================================ */
 
     Geo.emit =
         function (
@@ -1872,23 +2907,61 @@
             data
         ) {
 
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-geocode-" +
-                    name,
-                    {
-                        detail:
-                            data ||
-                            {}
-                    }
-                )
-            );
+            try {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "riderx-geocode-" +
+                        name,
+                        {
+                            detail:
+                                data ||
+                                {}
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                /*
+                 * Very old browser fallback.
+                 */
+                try {
+
+                    const event =
+                        document.createEvent(
+                            "CustomEvent"
+                        );
+
+
+                    event.initCustomEvent(
+                        "riderx-geocode-" +
+                        name,
+                        false,
+                        false,
+                        data ||
+                        {}
+                    );
+
+
+                    window.dispatchEvent(
+                        event
+                    );
+
+                } catch (fallbackError) {
+
+                    console.warn(
+                        "RiderX geocode event failed:",
+                        fallbackError
+                    );
+                }
+            }
         };
 
 
-    /* ========================================================
+    /* ============================================================
        GLOBAL SHORTCUTS
-       ======================================================== */
+       ============================================================ */
 
     RX.searchAddress =
         Geo.search;
@@ -1910,30 +2983,58 @@
         Geo.getCoordinates;
 
 
-    /* ========================================================
+    RX.searchChandigarh =
+        Geo.searchChandigarh;
+
+
+    RX.watchLocation =
+        Geo.watchLocation;
+
+
+    RX.clearLocationWatch =
+        Geo.clearWatch;
+
+
+    /* ============================================================
        INIT
-       ======================================================== */
+       ============================================================ */
 
     Geo.loadRecent();
+
 
     Geo.ready =
         true;
 
 
-    Geo.emit(
-        "ready",
-        {
-            version:
-                "1.0.0",
+    Geo.version =
+        "2.0.0";
 
-            provider:
-                Geo.config.provider
-        }
+
+    /*
+     * Fire ready event after the current script has
+     * completely initialized.
+     */
+    setTimeout(
+        function () {
+
+            Geo.emit(
+                "ready",
+                {
+                    version:
+                        Geo.version,
+
+                    provider:
+                        Geo.config.provider
+                }
+            );
+
+        },
+        0
     );
 
 
     console.log(
-        "RiderX geocode.js loaded."
+        "RiderX geocode.js 2.0.0 loaded."
     );
 
 })();
