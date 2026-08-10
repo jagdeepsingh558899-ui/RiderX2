@@ -1,795 +1,1425 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 
-<head>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
-    <meta charset="UTF-8">
+<meta
+    name="theme-color"
+    content="#000000"
+>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
+<title>RiderX | Live Map</title>
 
-    <meta
-        name="theme-color"
-        content="#000000"
-    >
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
 
-    <title>RiderX | Live Map</title>
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
 
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
+<style>
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    >
+    :root {
+        --yellow: #ffe500;
+        --black: #000;
+        --dark: #0b0b0b;
+        --card: #151515;
+        --green: #22c55e;
+        --red: #ef4444;
+        --white: #fff;
+        --muted: #888;
+    }
 
-    <style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Poppins, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+    }
 
-        :root {
-            --yellow: #ffe500;
-            --black: #000;
-            --dark: #0b0b0b;
-            --card: #151515;
-            --green: #22c55e;
-            --red: #ef4444;
-            --white: #fff;
-            --muted: #888;
-        }
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+    }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, Poppins, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+    body {
+        position: relative;
+    }
 
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background: #000;
-        }
+    button {
+        font: inherit;
+    }
 
-        body {
-            position: relative;
-        }
+    #map {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        background: #ddd;
+    }
 
-        #map {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+    .leaflet-control-zoom {
+        display: none !important;
+    }
 
-        .leaflet-control-zoom {
-            display: none !important;
-        }
+    .leaflet-control-attribution {
+        font-size: 8px !important;
+        padding: 2px 4px !important;
+    }
 
-        .leaflet-control-attribution {
-            font-size: 8px !important;
-            padding: 2px 4px !important;
-        }
+    /* =====================================================
+       TOP BAR
+    ===================================================== */
 
-        /* =========================================
-           TOP BAR
-        ========================================= */
+    .topbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        padding:
+            max(12px, env(safe-area-inset-top))
+            14px
+            0;
+        pointer-events: none;
+    }
 
-        .topbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-            padding:
+    .topbar-inner {
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .icon-btn {
+        width: 44px;
+        height: 44px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(10, 10, 10, .94);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .35);
+        pointer-events: auto;
+        cursor: pointer;
+    }
+
+    .icon-btn:active {
+        transform: scale(.92);
+    }
+
+    .logo {
+        padding: 9px 17px;
+        border-radius: 15px;
+        background: rgba(10, 10, 10, .94);
+        color: #fff;
+        font-size: 17px;
+        font-weight: 900;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .35);
+    }
+
+    .logo span {
+        color: var(--yellow);
+    }
+
+    /* =====================================================
+       STATUS
+    ===================================================== */
+
+    .status {
+        position: fixed;
+        top:
+            calc(
                 max(12px, env(safe-area-inset-top))
-                14px
-                0;
-            pointer-events: none;
-        }
+                + 63px
+            );
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        padding: 8px 15px;
+        border-radius: 30px;
+        background: rgba(10, 10, 10, .94);
+        color: #aaa;
+        font-size: 10px;
+        white-space: nowrap;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .3);
+        pointer-events: none;
+    }
 
-        .topbar-inner {
-            height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .status.online {
+        color: var(--green);
+    }
 
-        .icon-btn {
-            width: 44px;
-            height: 44px;
-            border: 0;
-            border-radius: 50%;
-            background: rgba(10, 10, 10, .94);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, .35);
-            pointer-events: auto;
-            cursor: pointer;
-        }
+    .status.offline {
+        color: #ff6b6b;
+    }
 
-        .icon-btn:active {
-            transform: scale(.92);
-        }
+    /* =====================================================
+       MAP CONTROLS
+    ===================================================== */
 
-        .logo {
-            padding: 9px 17px;
-            border-radius: 15px;
-            background: rgba(10, 10, 10, .94);
-            color: #fff;
-            font-size: 17px;
-            font-weight: 900;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, .35);
-        }
+    .map-controls {
+        position: fixed;
+        right: 14px;
+        bottom: 170px;
+        z-index: 900;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
 
-        .logo span {
-            color: var(--yellow);
-        }
+    .map-btn {
+        width: 48px;
+        height: 48px;
+        border: 0;
+        border-radius: 50%;
+        background: #111;
+        color: #fff;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
+        font-size: 17px;
+        cursor: pointer;
+    }
 
-        /* =========================================
-           STATUS
-        ========================================= */
+    .map-btn.location {
+        color: var(--yellow);
+    }
 
-        .status {
-            position: fixed;
-            top:
-                calc(
-                    max(12px, env(safe-area-inset-top))
-                    + 63px
-                );
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            padding: 8px 15px;
-            border-radius: 30px;
-            background: rgba(10, 10, 10, .94);
-            color: #aaa;
-            font-size: 10px;
-            white-space: nowrap;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, .3);
-            pointer-events: none;
-        }
+    .map-btn:active {
+        transform: scale(.92);
+    }
 
-        .status.online {
-            color: var(--green);
-        }
+    /* =====================================================
+       BOTTOM PANEL
+    ===================================================== */
 
-        .status.offline {
-            color: #ff6b6b;
-        }
+    .panel {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1000;
+        padding:
+            12px
+            14px
+            max(15px, env(safe-area-inset-bottom));
+        background: rgba(8, 8, 8, .97);
+        border-radius: 25px 25px 0 0;
+        box-shadow: 0 -10px 35px rgba(0, 0, 0, .45);
+    }
 
-        /* =========================================
-           MAP CONTROLS
-        ========================================= */
+    .handle {
+        width: 45px;
+        height: 5px;
+        margin: 0 auto 13px;
+        border-radius: 10px;
+        background: #4b4b4b;
+    }
 
-        .map-controls {
-            position: fixed;
-            right: 14px;
-            bottom: 170px;
-            z-index: 900;
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-        }
+    .panel-title {
+        font-size: 17px;
+        font-weight: 800;
+    }
 
-        .map-btn {
-            width: 48px;
-            height: 48px;
-            border: 0;
-            border-radius: 50%;
-            background: #111;
-            color: #fff;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, .45);
-            font-size: 17px;
-            cursor: pointer;
-        }
+    .panel-subtitle {
+        margin-top: 4px;
+        color: #777;
+        font-size: 10px;
+    }
 
-        .map-btn.location {
-            color: var(--yellow);
-        }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 13px;
+    }
 
-        .map-btn:active {
-            transform: scale(.92);
-        }
+    .info {
+        background: #151515;
+        border: 1px solid #252525;
+        border-radius: 14px;
+        padding: 11px 6px;
+        text-align: center;
+    }
 
-        /* =========================================
-           BOTTOM PANEL
-        ========================================= */
+    .info i {
+        color: var(--yellow);
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .info-value {
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .info-label {
+        margin-top: 3px;
+        color: #666;
+        font-size: 8px;
+    }
+
+    .online-btn {
+        width: 100%;
+        min-height: 52px;
+        margin-top: 12px;
+        border: 0;
+        border-radius: 15px;
+        background: var(--yellow);
+        color: #000;
+        font-size: 15px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .online-btn.offline {
+        background: #252525;
+        color: #fff;
+    }
+
+    .online-btn:active {
+        transform: scale(.985);
+    }
+
+    .online-btn:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    .ride-status {
+        display: none;
+        margin-top: 11px;
+        padding: 11px;
+        border-radius: 13px;
+        background: #141414;
+        border: 1px solid #252525;
+        color: #aaa;
+        text-align: center;
+        font-size: 10px;
+    }
+
+    .ride-status.show {
+        display: block;
+    }
+
+    /* =====================================================
+       RIDER MARKER
+    ===================================================== */
+
+    .rider-marker {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--yellow);
+        border: 4px solid #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #000;
+        font-size: 19px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, .4);
+    }
+
+    /* =====================================================
+       DESTINATION MARKER
+    ===================================================== */
+
+    .destination-marker {
+        width: 42px;
+        height: 42px;
+        border-radius: 50% 50% 50% 0;
+        background: #111;
+        border: 3px solid var(--yellow);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--yellow);
+        transform: rotate(-45deg);
+    }
+
+    .destination-marker i {
+        transform: rotate(45deg);
+    }
+
+    /* =====================================================
+       DESKTOP
+    ===================================================== */
+
+    @media (min-width: 700px) {
 
         .panel {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 1000;
-            padding:
-                12px
-                14px
-                max(15px, env(safe-area-inset-bottom));
-            background: rgba(8, 8, 8, .97);
+            left: 50%;
+            right: auto;
+            width: 500px;
+            transform: translateX(-50%);
             border-radius: 25px 25px 0 0;
-            box-shadow: 0 -10px 35px rgba(0, 0, 0, .45);
         }
 
-        .handle {
-            width: 45px;
-            height: 5px;
-            margin: 0 auto 13px;
-            border-radius: 10px;
-            background: #4b4b4b;
-        }
+    }
 
-        .panel-title {
-            font-size: 17px;
-            font-weight: 800;
-        }
+</style>
 
-        .panel-subtitle {
-            margin-top: 4px;
-            color: #777;
-            font-size: 10px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 13px;
-        }
-
-        .info {
-            background: #151515;
-            border: 1px solid #252525;
-            border-radius: 14px;
-            padding: 11px 6px;
-            text-align: center;
-        }
-
-        .info i {
-            color: var(--yellow);
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .info-value {
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .info-label {
-            margin-top: 3px;
-            color: #666;
-            font-size: 8px;
-        }
-
-        .online-btn {
-            width: 100%;
-            min-height: 52px;
-            margin-top: 12px;
-            border: 0;
-            border-radius: 15px;
-            background: var(--yellow);
-            color: #000;
-            font-size: 15px;
-            font-weight: 900;
-            cursor: pointer;
-        }
-
-        .online-btn.offline {
-            background: #252525;
-            color: #fff;
-        }
-
-        .online-btn:active {
-            transform: scale(.985);
-        }
-
-        .online-btn:disabled {
-            opacity: .55;
-            cursor: not-allowed;
-        }
-
-        .ride-status {
-            display: none;
-            margin-top: 11px;
-            padding: 11px;
-            border-radius: 13px;
-            background: #141414;
-            border: 1px solid #252525;
-            color: #aaa;
-            text-align: center;
-            font-size: 10px;
-        }
-
-        .ride-status.show {
-            display: block;
-        }
-
-        /* =========================================
-           RIDER MARKER
-        ========================================= */
-
-        .rider-marker {
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: var(--yellow);
-            border: 4px solid #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #000;
-            font-size: 19px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, .4);
-        }
-
-        /* =========================================
-           DESTINATION MARKER
-        ========================================= */
-
-        .destination-marker {
-            width: 42px;
-            height: 42px;
-            border-radius: 50% 50% 50% 0;
-            background: #111;
-            border: 3px solid var(--yellow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--yellow);
-            transform: rotate(-45deg);
-        }
-
-        .destination-marker i {
-            transform: rotate(45deg);
-        }
-
-        /* =========================================
-           DESKTOP
-        ========================================= */
-
-        @media (min-width: 700px) {
-
-            .panel {
-                left: 50%;
-                right: auto;
-                width: 500px;
-                transform: translateX(-50%);
-                border-radius: 25px 25px 0 0;
-            }
-
-        }
-
-    </style>
-
-</head>
+</head><body><div id="map"></div>
 
 
-<body>
+<!-- =====================================================
+     TOP BAR
+===================================================== -->
 
-    <div id="map"></div>
+<div class="topbar">
 
+    <div class="topbar-inner">
 
-    <!-- TOP BAR -->
-
-    <div class="topbar">
-
-        <div class="topbar-inner">
-
-            <button
-                id="backBtn"
-                class="icon-btn"
-                type="button"
-                aria-label="Go back"
-            >
-                <i class="fa-solid fa-arrow-left"></i>
-            </button>
+        <button
+            id="backBtn"
+            class="icon-btn"
+            type="button"
+            aria-label="Go back"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
 
 
-            <div class="logo">
-                RIDER<span>X</span>
-            </div>
-
-
-            <button
-                id="notificationBtn"
-                class="icon-btn"
-                type="button"
-                aria-label="Notifications"
-            >
-                <i class="fa-solid fa-bell"></i>
-            </button>
-
+        <div class="logo">
+            RIDER<span>X</span>
         </div>
+
+
+        <button
+            id="notificationBtn"
+            class="icon-btn"
+            type="button"
+            aria-label="Notifications"
+        >
+            <i class="fa-solid fa-bell"></i>
+        </button>
 
     </div>
 
+</div>
 
-    <!-- STATUS -->
+
+<!-- =====================================================
+     STATUS
+===================================================== -->
+
+<div
+    id="status"
+    class="status"
+>
+    Getting location...
+</div>
+
+
+<!-- =====================================================
+     MAP CONTROLS
+===================================================== -->
+
+<div class="map-controls">
+
+    <button
+        id="centerBtn"
+        class="map-btn location"
+        type="button"
+        aria-label="My location"
+    >
+        <i class="fa-solid fa-location-crosshairs"></i>
+    </button>
+
+
+    <button
+        id="zoomIn"
+        class="map-btn"
+        type="button"
+        aria-label="Zoom in"
+    >
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+
+    <button
+        id="zoomOut"
+        class="map-btn"
+        type="button"
+        aria-label="Zoom out"
+    >
+        <i class="fa-solid fa-minus"></i>
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     PANEL
+===================================================== -->
+
+<div class="panel">
+
+    <div class="handle"></div>
+
+
+    <div class="panel-title">
+        Live Rider Location
+    </div>
+
 
     <div
-        id="status"
-        class="status"
+        id="panelSubtitle"
+        class="panel-subtitle"
     >
-        Getting location...
+        Your live GPS location
     </div>
 
 
-    <!-- MAP CONTROLS -->
+    <div class="info-grid">
 
-    <div class="map-controls">
+        <div class="info">
 
-        <button
-            id="centerBtn"
-            class="map-btn location"
-            type="button"
-            aria-label="My location"
-        >
-            <i class="fa-solid fa-location-crosshairs"></i>
-        </button>
+            <i class="fa-solid fa-signal"></i>
 
-
-        <button
-            id="zoomIn"
-            class="map-btn"
-            type="button"
-            aria-label="Zoom in"
-        >
-            <i class="fa-solid fa-plus"></i>
-        </button>
-
-
-        <button
-            id="zoomOut"
-            class="map-btn"
-            type="button"
-            aria-label="Zoom out"
-        >
-            <i class="fa-solid fa-minus"></i>
-        </button>
-
-    </div>
-
-
-    <!-- PANEL -->
-
-    <div class="panel">
-
-        <div class="handle"></div>
-
-
-        <div class="panel-title">
-            Live Rider Location
-        </div>
-
-
-        <div
-            id="panelSubtitle"
-            class="panel-subtitle"
-        >
-            Your live GPS location
-        </div>
-
-
-        <div class="info-grid">
-
-            <div class="info">
-
-                <i class="fa-solid fa-signal"></i>
-
-                <div
-                    id="gpsAccuracy"
-                    class="info-value"
-                >
-                    --
-                </div>
-
-                <div class="info-label">
-                    GPS Accuracy
-                </div>
-
+            <div
+                id="gpsAccuracy"
+                class="info-value"
+            >
+                --
             </div>
 
-
-            <div class="info">
-
-                <i class="fa-solid fa-gauge-high"></i>
-
-                <div
-                    id="speed"
-                    class="info-value"
-                >
-                    0 km/h
-                </div>
-
-                <div class="info-label">
-                    Speed
-                </div>
-
-            </div>
-
-
-            <div class="info">
-
-                <i class="fa-solid fa-location-dot"></i>
-
-                <div
-                    id="coordinates"
-                    class="info-value"
-                >
-                    --
-                </div>
-
-                <div class="info-label">
-                    Location
-                </div>
-
+            <div class="info-label">
+                GPS Accuracy
             </div>
 
         </div>
 
 
-        <button
-            id="onlineBtn"
-            class="online-btn"
-            type="button"
-        >
-            <i class="fa-solid fa-power-off"></i>
-            Go Online
-        </button>
+        <div class="info">
+
+            <i class="fa-solid fa-gauge-high"></i>
+
+            <div
+                id="speed"
+                class="info-value"
+            >
+                0 km/h
+            </div>
+
+            <div class="info-label">
+                Speed
+            </div>
+
+        </div>
 
 
-        <div
-            id="rideStatus"
-            class="ride-status"
-        >
-            No active ride
+        <div class="info">
+
+            <i class="fa-solid fa-location-dot"></i>
+
+            <div
+                id="coordinates"
+                class="info-value"
+            >
+                --
+            </div>
+
+            <div class="info-label">
+                Location
+            </div>
+
         </div>
 
     </div>
 
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <button
+        id="onlineBtn"
+        class="online-btn"
+        type="button"
+    >
+        <i class="fa-solid fa-power-off"></i>
+        Go Online
+    </button>
 
 
-    <script type="module">
+    <div
+        id="rideStatus"
+        class="ride-status"
+    >
+        No active ride
+    </div>
 
-        /*
-        ============================================================
-        RIDERX 2.0
-        LIVE MAP
-        File: rider/live-map.html
-        ============================================================
-        */
-
-
-        import {
-            auth,
-            db
-        } from "../firebase/firebase-config.js";
+</div>
 
 
-        import {
-            doc,
-            setDoc,
-            deleteDoc,
-            getDoc,
-            onSnapshot,
-            serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
-        import {
-            onAuthStateChanged
-        } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+<script type="module">
+
+    /*
+    ============================================================
+    RIDERX 2.0
+    LIVE MAP
+    File: rider/live-map.html
+    FINAL
+    ============================================================
+    */
+
+    import {
+        auth,
+        db
+    } from "../firebase/firebase-config.js";
 
 
-        /*
-        ============================================================
-        DOM
-        ============================================================
-        */
-
-        const statusEl =
-            document.getElementById("status");
-
-        const onlineBtn =
-            document.getElementById("onlineBtn");
-
-        const gpsAccuracy =
-            document.getElementById("gpsAccuracy");
-
-        const speedEl =
-            document.getElementById("speed");
-
-        const coordinates =
-            document.getElementById("coordinates");
-
-        const rideStatus =
-            document.getElementById("rideStatus");
-
-        const panelSubtitle =
-            document.getElementById("panelSubtitle");
+    import {
+        doc,
+        setDoc,
+        deleteDoc,
+        getDoc,
+        onSnapshot,
+        serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
-        /*
-        ============================================================
-        MAP
-        ============================================================
-        */
+    import {
+        onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
-        const map =
-            L.map(
-                "map",
+
+    /* ========================================================
+       DOM
+    ======================================================== */
+
+    const statusEl =
+        document.getElementById("status");
+
+    const onlineBtn =
+        document.getElementById("onlineBtn");
+
+    const gpsAccuracy =
+        document.getElementById("gpsAccuracy");
+
+    const speedEl =
+        document.getElementById("speed");
+
+    const coordinates =
+        document.getElementById("coordinates");
+
+    const rideStatus =
+        document.getElementById("rideStatus");
+
+    const panelSubtitle =
+        document.getElementById("panelSubtitle");
+
+
+    /* ========================================================
+       MAP
+    ======================================================== */
+
+    const defaultCenter = [
+        30.7333,
+        76.7794
+    ];
+
+    const map =
+        L.map(
+            "map",
+            {
+                zoomControl: false,
+                attributionControl: true
+            }
+        );
+
+
+    L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+            maxZoom: 19,
+            attribution: "© OpenStreetMap"
+        }
+    ).addTo(map);
+
+
+    map.setView(
+        defaultCenter,
+        13
+    );
+
+
+    /* ========================================================
+       ICON
+    ======================================================== */
+
+    const riderIcon =
+        L.divIcon({
+
+            className: "",
+
+            html: `
+                <div class="rider-marker">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+            `,
+
+            iconSize: [46, 46],
+
+            iconAnchor: [23, 23]
+
+        });
+
+
+    /* ========================================================
+       STATE
+    ======================================================== */
+
+    let currentUser = null;
+
+    let riderMarker = null;
+
+    let watchId = null;
+
+    let isOnline = false;
+
+    let currentPosition = null;
+
+    let userMovedMap = false;
+
+    let activeRideUnsubscribe = null;
+
+    let onlineStateLoading = true;
+
+    let lastLocationSave = 0;
+
+    let locationSaveInProgress = false;
+
+    const LOCATION_SAVE_INTERVAL = 4000;
+
+
+    /* ========================================================
+       STATUS
+    ======================================================== */
+
+    function setStatus(
+        text,
+        type = ""
+    ) {
+
+        statusEl.textContent =
+            text;
+
+        statusEl.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if (type) {
+
+            statusEl.classList.add(
+                type
+            );
+
+        }
+
+    }
+
+
+    function setRideStatus(
+        text,
+        show = true
+    ) {
+
+        rideStatus.textContent =
+            text;
+
+        rideStatus.classList.toggle(
+            "show",
+            show
+        );
+
+    }
+
+
+    /* ========================================================
+       UPDATE POSITION
+    ======================================================== */
+
+    function updatePosition(
+        position
+    ) {
+
+        currentPosition =
+            position;
+
+
+        const lat =
+            Number(
+                position.coords.latitude
+            );
+
+
+        const lng =
+            Number(
+                position.coords.longitude
+            );
+
+
+        if (
+            !Number.isFinite(lat) ||
+            !Number.isFinite(lng)
+        ) {
+
+            return;
+
+        }
+
+
+        const accuracy =
+            Math.round(
+                Number(
+                    position.coords.accuracy || 0
+                )
+            );
+
+
+        const speed =
+            Number(
+                position.coords.speed
+            );
+
+
+        gpsAccuracy.textContent =
+            accuracy > 0
+                ? `${accuracy} m`
+                : "--";
+
+
+        speedEl.textContent =
+            Number.isFinite(speed) &&
+            speed >= 0
+                ? `${Math.round(speed * 3.6)} km/h`
+                : "0 km/h";
+
+
+        coordinates.textContent =
+            `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
+
+        /* ----------------------------------------------------
+           RIDER MARKER
+        ---------------------------------------------------- */
+
+        if (!riderMarker) {
+
+            riderMarker =
+                L.marker(
+                    [lat, lng],
+                    {
+                        icon: riderIcon,
+                        zIndexOffset: 1000
+                    }
+                )
+                .addTo(map);
+
+        }
+        else {
+
+            riderMarker.setLatLng(
+                [lat, lng]
+            );
+
+        }
+
+
+        /* ----------------------------------------------------
+           CENTER MAP
+        ---------------------------------------------------- */
+
+        if (!userMovedMap) {
+
+            map.setView(
+                [lat, lng],
+                Math.max(
+                    map.getZoom(),
+                    15
+                ),
                 {
-                    zoomControl: false,
-                    attributionControl: true
+                    animate: true
+                }
+            );
+
+        }
+
+
+        /* ----------------------------------------------------
+           LIVE DATABASE UPDATE
+        ---------------------------------------------------- */
+
+        if (
+            isOnline &&
+            currentUser
+        ) {
+
+            saveLiveLocation(
+                lat,
+                lng,
+                accuracy,
+                position
+            );
+
+        }
+
+
+        if (
+            !isOnline &&
+            !onlineStateLoading
+        ) {
+
+            setStatus(
+                "GPS ready",
+                ""
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       GPS ERROR
+    ======================================================== */
+
+    function gpsError(
+        error
+    ) {
+
+        console.error(
+            "RiderX GPS error:",
+            error
+        );
+
+
+        let message =
+            "Location unavailable";
+
+
+        if (
+            error &&
+            error.code === 1
+        ) {
+
+            message =
+                "Allow location permission";
+
+        }
+        else if (
+            error &&
+            error.code === 2
+        ) {
+
+            message =
+                "GPS location unavailable";
+
+        }
+        else if (
+            error &&
+            error.code === 3
+        ) {
+
+            message =
+                "GPS request timed out";
+
+        }
+
+
+        setStatus(
+            message,
+            "offline"
+        );
+
+    }
+
+
+    /* ========================================================
+       GET CURRENT POSITION
+    ======================================================== */
+
+    function getCurrentPosition() {
+
+        return new Promise(
+            (
+                resolve,
+                reject
+            ) => {
+
+                if (
+                    !navigator.geolocation
+                ) {
+
+                    reject(
+                        new Error(
+                            "GPS is not supported on this device."
+                        )
+                    );
+
+                    return;
+
+                }
+
+
+                navigator.geolocation.getCurrentPosition(
+                    resolve,
+                    error => {
+
+                        let message =
+                            "Unable to get your location.";
+
+
+                        if (
+                            error.code === 1
+                        ) {
+
+                            message =
+                                "Location permission denied. Enable GPS permission.";
+
+                        }
+                        else if (
+                            error.code === 2
+                        ) {
+
+                            message =
+                                "GPS location unavailable. Turn on location services.";
+
+                        }
+                        else if (
+                            error.code === 3
+                        ) {
+
+                            message =
+                                "GPS request timed out. Try again.";
+
+                        }
+
+
+                        reject(
+                            new Error(message)
+                        );
+
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        maximumAge: 3000,
+                        timeout: 15000
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       START GPS
+    ======================================================== */
+
+    function startGPS() {
+
+        if (
+            !navigator.geolocation
+        ) {
+
+            gpsError({
+                code: 2,
+                message: "Geolocation unavailable"
+            });
+
+            return;
+
+        }
+
+
+        if (
+            watchId !== null
+        ) {
+
+            return;
+
+        }
+
+
+        setStatus(
+            "Getting live location..."
+        );
+
+
+        watchId =
+            navigator.geolocation.watchPosition(
+                updatePosition,
+                gpsError,
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 3000,
+                    timeout: 15000
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       STOP GPS
+    ======================================================== */
+
+    function stopGPS() {
+
+        if (
+            watchId === null
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            navigator.geolocation
+        ) {
+
+            navigator.geolocation.clearWatch(
+                watchId
+            );
+
+        }
+
+
+        watchId = null;
+
+    }
+
+
+    /* ========================================================
+       SAVE RIDER DATA
+    ======================================================== */
+
+    async function saveLiveLocation(
+        lat,
+        lng,
+        accuracy,
+        position
+    ) {
+
+        if (
+            !currentUser ||
+            !isOnline
+        ) {
+
+            return;
+
+        }
+
+
+        const now =
+            Date.now();
+
+
+        if (
+            locationSaveInProgress ||
+            now - lastLocationSave <
+                LOCATION_SAVE_INTERVAL
+        ) {
+
+            return;
+
+        }
+
+
+        locationSaveInProgress =
+            true;
+
+        lastLocationSave =
+            now;
+
+
+        const heading =
+            Number(
+                position?.coords?.heading
+            );
+
+
+        const speed =
+            Number(
+                position?.coords?.speed
+            );
+
+
+        try {
+
+            const locationData = {
+
+                riderId:
+                    currentUser.uid,
+
+                lat:
+                    Number(lat),
+
+                lng:
+                    Number(lng),
+
+                accuracy:
+                    Number(accuracy || 0),
+
+                heading:
+                    Number.isFinite(heading)
+                        ? heading
+                        : null,
+
+                speed:
+                    Number.isFinite(speed)
+                        ? speed
+                        : null,
+
+                online:
+                    true,
+
+                updatedAt:
+                    serverTimestamp()
+
+            };
+
+
+            /*
+            ----------------------------------------------------
+            RIDER LOCATIONS
+            ----------------------------------------------------
+            */
+
+            await setDoc(
+                doc(
+                    db,
+                    "riderLocations",
+                    currentUser.uid
+                ),
+                locationData,
+                {
+                    merge: true
                 }
             );
 
 
-        L.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                maxZoom: 19,
-                attribution: "© OpenStreetMap"
-            }
-        ).addTo(map);
+            /*
+            ----------------------------------------------------
+            RIDER PROFILE / ONLINE STATE
+            ----------------------------------------------------
+            */
+
+            await setDoc(
+                doc(
+                    db,
+                    "riders",
+                    currentUser.uid
+                ),
+                {
+
+                    online:
+                        true,
+
+                    isOnline:
+                        true,
+
+                    lat:
+                        Number(lat),
+
+                    lng:
+                        Number(lng),
+
+                    location: {
+                        lat:
+                            Number(lat),
+
+                        lng:
+                            Number(lng)
+                    },
+
+                    locationUpdatedAt:
+                        serverTimestamp(),
+
+                    updatedAt:
+                        serverTimestamp()
+
+                },
+                {
+                    merge: true
+                }
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "RiderX live location save error:",
+                error
+            );
+
+        }
+        finally {
+
+            locationSaveInProgress =
+                false;
+
+        }
+
+    }
 
 
-        /*
-        ============================================================
-        CHANDIGARH DEFAULT
-        ============================================================
-        */
+    /* ========================================================
+       SET ONLINE
+    ======================================================== */
 
-        const defaultCenter = [
-            30.7333,
-            76.7794
-        ];
+    function setOnlineUI() {
 
+        onlineBtn.disabled =
+            false;
 
-        map.setView(
-            defaultCenter,
-            13
+        onlineBtn.classList.add(
+            "offline"
         );
 
+        onlineBtn.innerHTML =
+            `
+            <i class="fa-solid fa-power-off"></i>
+            Go Offline
+            `;
 
-        /*
-        ============================================================
-        ICONS
-        ============================================================
-        */
+        setStatus(
+            "You are Online 🟢",
+            "online"
+        );
 
-        const riderIcon =
-            L.divIcon({
+        panelSubtitle.textContent =
+            "Your live GPS location is being shared";
 
-                className: "",
+        setRideStatus(
+            "Waiting for ride requests...",
+            true
+        );
 
-                html: `
-                    <div class="rider-marker">
-                        <i class="fa-solid fa-motorcycle"></i>
-                    </div>
-                `,
-
-                iconSize: [46, 46],
-
-                iconAnchor: [23, 23]
-
-            });
+    }
 
 
-        const destinationIcon =
-            L.divIcon({
+    /* ========================================================
+       SET OFFLINE
+    ======================================================== */
 
-                className: "",
+    function setOfflineUI() {
 
-                html: `
-                    <div class="destination-marker">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-                `,
+        onlineBtn.disabled =
+            false;
 
-                iconSize: [42, 42],
+        onlineBtn.classList.remove(
+            "offline"
+        );
 
-                iconAnchor: [15, 36]
+        onlineBtn.innerHTML =
+            `
+            <i class="fa-solid fa-power-off"></i>
+            Go Online
+            `;
 
-            });
+        setStatus(
+            "You are Offline",
+            "offline"
+        );
 
+        panelSubtitle.textContent =
+            "Your live GPS location";
 
-        /*
-        ============================================================
-        STATE
-        ============================================================
-        */
+        setRideStatus(
+            "You are offline",
+            true
+        );
 
-        let currentUser = null;
-
-        let riderMarker = null;
-
-        let destinationMarker = null;
-
-        let watchId = null;
-
-        let isOnline = false;
-
-        let currentPosition = null;
-
-        let userMovedMap = false;
-
-        let activeRideUnsubscribe = null;
-
-        let onlineStateLoading = true;
+    }
 
 
-        /*
-        ============================================================
-        STATUS HELPERS
-        ============================================================
-        */
+    /* ========================================================
+       GO ONLINE
+    ======================================================== */
 
-        function setStatus(
-            text,
-            type = ""
+    async function goOnline() {
+
+        if (
+            !currentUser
         ) {
 
-            statusEl.textContent =
-                text;
+            return;
 
-            statusEl.classList.remove(
-                "online",
+        }
+
+
+        if (
+            !navigator.geolocation
+        ) {
+
+            setStatus(
+                "GPS is not supported",
                 "offline"
             );
 
+            return;
 
-            if (type) {
+        }
 
-                statusEl.classList.add(
-                    type
+
+        onlineBtn.disabled =
+            true;
+
+
+        setStatus(
+            "Getting GPS location..."
+        );
+
+
+        try {
+
+            let position =
+                currentPosition;
+
+
+            /*
+            ----------------------------------------------------
+            GET FRESH GPS IF NEEDED
+            ----------------------------------------------------
+            */
+
+            if (
+                !position ||
+                (
+                    Date.now() -
+                    (
+                        position.timestamp || 0
+                    )
+                ) > 10000
+            ) {
+
+                position =
+                    await getCurrentPosition();
+
+                updatePosition(
+                    position
                 );
 
             }
-
-        }
-
-
-        function setRideStatus(
-            text,
-            show = true
-        ) {
-
-            rideStatus.textContent =
-                text;
-
-            rideStatus.classList.toggle(
-                "show",
-                show
-            );
-
-        }
-
-
-        /*
-        ============================================================
-        UPDATE POSITION
-        ============================================================
-        */
-
-        function updatePosition(
-            position
-        ) {
-
-            currentPosition =
-                position;
 
 
             const lat =
@@ -805,525 +1435,138 @@
 
 
             const accuracy =
-                Math.round(
-                    Number(
-                        position.coords.accuracy || 0
-                    )
-                );
-
-
-            const speed =
                 Number(
-                    position.coords.speed
+                    position.coords.accuracy || 0
                 );
 
 
-            gpsAccuracy.textContent =
-                accuracy > 0
-                    ? `${accuracy} m`
-                    : "--";
+            if (
+                !Number.isFinite(lat) ||
+                !Number.isFinite(lng)
+            ) {
 
-
-            speedEl.textContent =
-                Number.isFinite(speed) &&
-                speed >= 0
-                    ? `${Math.round(speed * 3.6)} km/h`
-                    : "0 km/h";
-
-
-            coordinates.textContent =
-                `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
-
-            /*
-            --------------------------------------------------------
-            RIDER MARKER
-            --------------------------------------------------------
-            */
-
-            if (!riderMarker) {
-
-                riderMarker =
-                    L.marker(
-                        [lat, lng],
-                        {
-                            icon: riderIcon,
-                            zIndexOffset: 1000
-                        }
-                    )
-                    .addTo(map);
-
-            }
-            else {
-
-                riderMarker.setLatLng(
-                    [lat, lng]
+                throw new Error(
+                    "Invalid GPS coordinates."
                 );
 
             }
 
 
             /*
-            --------------------------------------------------------
-            CENTER MAP
-            --------------------------------------------------------
+            ----------------------------------------------------
+            MARK ONLINE BEFORE SAVING
+            ----------------------------------------------------
             */
 
-            if (!userMovedMap) {
+            isOnline =
+                true;
 
-                map.setView(
-                    [lat, lng],
-                    Math.max(
-                        map.getZoom(),
-                        15
-                    ),
-                    {
-                        animate: true
-                    }
-                );
 
-            }
+            await saveLiveLocation(
+                lat,
+                lng,
+                accuracy,
+                position
+            );
 
 
             /*
-            --------------------------------------------------------
-            SAVE ONLINE LOCATION
-            --------------------------------------------------------
+            ----------------------------------------------------
+            FORCE RIDER STATE
+            ----------------------------------------------------
             */
 
-            if (
-                isOnline &&
-                currentUser
-            ) {
+            await setDoc(
+                doc(
+                    db,
+                    "riders",
+                    currentUser.uid
+                ),
+                {
 
-                saveLiveLocation(
-                    lat,
-                    lng,
-                    accuracy
-                );
+                    online:
+                        true,
 
-            }
+                    isOnline:
+                        true,
 
+                    lat:
+                        lat,
 
-            if (
-                !isOnline &&
-                !onlineStateLoading
-            ) {
+                    lng:
+                        lng,
 
-                setStatus(
-                    "GPS ready",
-                    ""
-                );
-
-            }
-
-        }
-
-
-        /*
-        ============================================================
-        GPS ERROR
-        ============================================================
-        */
-
-        function gpsError(
-            error
-        ) {
-
-            console.error(
-                "RiderX GPS error:",
-                error
-            );
-
-
-            let message =
-                "Location unavailable";
-
-
-            if (
-                error &&
-                error.code === 1
-            ) {
-
-                message =
-                    "Allow location permission";
-
-            }
-            else if (
-                error &&
-                error.code === 2
-            ) {
-
-                message =
-                    "GPS location unavailable";
-
-            }
-            else if (
-                error &&
-                error.code === 3
-            ) {
-
-                message =
-                    "GPS request timed out";
-
-            }
-
-
-            setStatus(
-                message,
-                "offline"
-            );
-
-        }
-
-
-        /*
-        ============================================================
-        START GPS
-        ============================================================
-        */
-
-        function startGPS() {
-
-            if (
-                !navigator.geolocation
-            ) {
-
-                gpsError({
-                    code: 2,
-                    message: "Geolocation unavailable"
-                });
-
-                return;
-
-            }
-
-
-            if (
-                watchId !== null
-            ) {
-
-                return;
-
-            }
-
-
-            setStatus(
-                "Getting live location..."
-            );
-
-
-            watchId =
-                navigator.geolocation.watchPosition(
-                    updatePosition,
-                    gpsError,
-                    {
-                        enableHighAccuracy: true,
-                        maximumAge: 3000,
-                        timeout: 15000
-                    }
-                );
-
-        }
-
-
-        /*
-        ============================================================
-        STOP GPS
-        ============================================================
-        */
-
-        function stopGPS() {
-
-            if (
-                watchId === null
-            ) {
-
-                return;
-
-            }
-
-
-            navigator.geolocation.clearWatch(
-                watchId
-            );
-
-
-            watchId = null;
-
-        }
-
-
-        /*
-        ============================================================
-        SAVE LIVE LOCATION
-        ============================================================
-        */
-
-        async function saveLiveLocation(
-            lat,
-            lng,
-            accuracy
-        ) {
-
-            if (
-                !currentUser ||
-                !isOnline
-            ) {
-
-                return;
-
-            }
-
-
-            try {
-
-                await setDoc(
-                    doc(
-                        db,
-                        "riderLocations",
-                        currentUser.uid
-                    ),
-                    {
-                        riderId:
-                            currentUser.uid,
-
+                    location: {
                         lat:
-                            Number(lat),
+                            lat,
 
                         lng:
-                            Number(lng),
-
-                        accuracy:
-                            Number(accuracy || 0),
-
-                        online:
-                            true,
-
-                        updatedAt:
-                            serverTimestamp()
+                            lng
                     },
-                    {
-                        merge: true
-                    }
-                );
 
-            }
-            catch (error) {
+                    locationUpdatedAt:
+                        serverTimestamp(),
 
-                console.error(
-                    "RiderX location save error:",
-                    error
-                );
+                    updatedAt:
+                        serverTimestamp()
 
-            }
+                },
+                {
+                    merge: true
+                }
+            );
+
+
+            /*
+            ----------------------------------------------------
+            FORCE LOCATION STATE
+            ----------------------------------------------------
+            */
+
+            await setDoc(
+                doc(
+                    db,
+                    "riderLocations",
+                    currentUser.uid
+                ),
+                {
+
+                    riderId:
+                        currentUser.uid,
+
+                    lat:
+                        lat,
+
+                    lng:
+                        lng,
+
+                    accuracy:
+                        accuracy,
+
+                    online:
+                        true,
+
+                    updatedAt:
+                        serverTimestamp()
+
+                },
+                {
+                    merge: true
+                }
+            );
+
+
+            setOnlineUI();
+
+            startGPS();
+
 
         }
-
-
-        /*
-        ============================================================
-        SET ONLINE UI
-        ============================================================
-        */
-
-        function setOnlineUI() {
-
-            onlineBtn.disabled =
-                false;
-
-
-            onlineBtn.classList.add(
-                "offline"
-            );
-
-
-            onlineBtn.innerHTML =
-                `
-                <i class="fa-solid fa-power-off"></i>
-                Go Offline
-                `;
-
-
-            setStatus(
-                "You are Online 🟢",
-                "online"
-            );
-
-
-            panelSubtitle.textContent =
-                "Your live GPS location is being shared";
-
-
-            setRideStatus(
-                "Waiting for ride requests...",
-                true
-            );
-
-        }
-
-
-        /*
-        ============================================================
-        SET OFFLINE UI
-        ============================================================
-        */
-
-        function setOfflineUI() {
-
-            onlineBtn.disabled =
-                false;
-
-
-            onlineBtn.classList.remove(
-                "offline"
-            );
-
-
-            onlineBtn.innerHTML =
-                `
-                <i class="fa-solid fa-power-off"></i>
-                Go Online
-                `;
-
-
-            setStatus(
-                "You are Offline",
-                "offline"
-            );
-
-
-            panelSubtitle.textContent =
-                "Your live GPS location";
-
-
-            setRideStatus(
-                "You are offline",
-                true
-            );
-
-        }
-
-
-        /*
-        ============================================================
-        GO ONLINE
-        ============================================================
-        */
-
-        async function goOnline() {
-
-            if (
-                !currentUser
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                !currentPosition
-            ) {
-
-                startGPS();
-
-
-                setStatus(
-                    "Waiting for GPS..."
-                );
-
-
-                return;
-
-            }
-
-
-            onlineBtn.disabled =
-                true;
-
-
-            setStatus(
-                "Going online..."
-            );
-
-
-            try {
-
-                isOnline =
-                    true;
-
-
-                const lat =
-                    currentPosition.coords.latitude;
-
-
-                const lng =
-                    currentPosition.coords.longitude;
-
-
-                const accuracy =
-                    currentPosition.coords.accuracy || 0;
-
-
-                await saveLiveLocation(
-                    lat,
-                    lng,
-                    accuracy
-                );
-
-
-                setOnlineUI();
-
-            }
-            catch (error) {
-
-                isOnline =
-                    false;
-
-
-                console.error(
-                    "RiderX go online error:",
-                    error
-                );
-
-
-                setOfflineUI();
-
-
-                setStatus(
-                    "Could not go online",
-                    "offline"
-                );
-
-            }
-
-        }
-
-
-        /*
-        ============================================================
-        GO OFFLINE
-        ============================================================
-        */
-
-        async function goOffline() {
-
-            if (
-                !currentUser
-            ) {
-
-                return;
-
-            }
-
-
-            onlineBtn.disabled =
-                true;
-
-
-            setStatus(
-                "Going offline..."
+        catch (error) {
+
+            console.error(
+                "RiderX go online error:",
+                error
             );
 
 
@@ -1331,225 +1574,166 @@
                 false;
 
 
-            try {
+            setOfflineUI();
 
-                await deleteDoc(
-                    doc(
-                        db,
-                        "riderLocations",
-                        currentUser.uid
-                    )
-                );
 
-            }
-            catch (error) {
+            setStatus(
+                error.message ||
+                "Could not go online",
+                "offline"
+            );
 
-                console.error(
-                    "RiderX offline error:",
-                    error
-                );
+        }
+        finally {
 
-            }
+            onlineBtn.disabled =
+                false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       GO OFFLINE
+    ======================================================== */
+
+    async function goOffline() {
+
+        if (
+            !currentUser
+        ) {
+
+            return;
+
+        }
+
+
+        onlineBtn.disabled =
+            true;
+
+
+        setStatus(
+            "Going offline..."
+        );
+
+
+        isOnline =
+            false;
+
+
+        stopGPS();
+
+
+        try {
+
+            /*
+            ----------------------------------------------------
+            RIDER PROFILE
+            ----------------------------------------------------
+            */
+
+            await setDoc(
+                doc(
+                    db,
+                    "riders",
+                    currentUser.uid
+                ),
+                {
+
+                    online:
+                        false,
+
+                    isOnline:
+                        false,
+
+                    updatedAt:
+                        serverTimestamp(),
+
+                    locationUpdatedAt:
+                        serverTimestamp()
+
+                },
+                {
+                    merge: true
+                }
+            );
+
+
+            /*
+            ----------------------------------------------------
+            RIDER LOCATION
+            ----------------------------------------------------
+            */
+
+            await setDoc(
+                doc(
+                    db,
+                    "riderLocations",
+                    currentUser.uid
+                ),
+                {
+
+                    riderId:
+                        currentUser.uid,
+
+                    online:
+                        false,
+
+                    updatedAt:
+                        serverTimestamp()
+
+                },
+                {
+                    merge: true
+                }
+            );
 
 
             setOfflineUI();
 
         }
+        catch (error) {
 
-
-        /*
-        ============================================================
-        ONLINE BUTTON
-        ============================================================
-        */
-
-        onlineBtn.addEventListener(
-            "click",
-            async () => {
-
-                if (
-                    isOnline
-                ) {
-
-                    await goOffline();
-
-                }
-                else {
-
-                    await goOnline();
-
-                }
-
-            }
-        );
-
-
-        /*
-        ============================================================
-        CENTER MAP
-        ============================================================
-        */
-
-        document
-            .getElementById("centerBtn")
-            .addEventListener(
-                "click",
-                () => {
-
-                    userMovedMap =
-                        false;
-
-
-                    if (
-                        currentPosition
-                    ) {
-
-                        map.setView(
-                            [
-                                currentPosition.coords.latitude,
-                                currentPosition.coords.longitude
-                            ],
-                            16,
-                            {
-                                animate: true
-                            }
-                        );
-
-                    }
-                    else {
-
-                        startGPS();
-
-                        setStatus(
-                            "Getting live location..."
-                        );
-
-                    }
-
-                }
+            console.error(
+                "RiderX offline error:",
+                error
             );
 
 
-        /*
-        ============================================================
-        ZOOM
-        ============================================================
-        */
+            /*
+            Even if the remote update fails,
+            local UI must not remain falsely online.
+            */
 
-        document
-            .getElementById("zoomIn")
-            .addEventListener(
-                "click",
-                () => {
+            setOfflineUI();
 
-                    map.zoomIn();
-
-                }
+            setStatus(
+                "You are offline",
+                "offline"
             );
 
+        }
+        finally {
 
-        document
-            .getElementById("zoomOut")
-            .addEventListener(
-                "click",
-                () => {
+            onlineBtn.disabled =
+                false;
 
-                    map.zoomOut();
+        }
 
-                }
-            );
+    }
 
 
-        /*
-        ============================================================
-        MAP MOVEMENT
-        ============================================================
-        */
+    /* ========================================================
+       ONLINE BUTTON
+    ======================================================== */
 
-        map.on(
-            "dragstart",
-            () => {
-
-                userMovedMap =
-                    true;
-
-            }
-        );
-
-
-        /*
-        ============================================================
-        BACK
-        ============================================================
-        */
-
-        document
-            .getElementById("backBtn")
-            .addEventListener(
-                "click",
-                () => {
-
-                    if (
-                        document.referrer
-                    ) {
-
-                        history.back();
-
-                    }
-                    else {
-
-                        location.href =
-                            "home.html";
-
-                    }
-
-                }
-            );
-
-
-        /*
-        ============================================================
-        NOTIFICATIONS
-        ============================================================
-        */
-
-        document
-            .getElementById("notificationBtn")
-            .addEventListener(
-                "click",
-                () => {
-
-                    location.href =
-                        "notifications.html";
-
-                }
-            );
-
-
-        /*
-        ============================================================
-        ACTIVE RIDE LISTENER
-        ============================================================
-        */
-
-        function listenForActiveRide(
-            user
-        ) {
+    onlineBtn.addEventListener(
+        "click",
+        async () => {
 
             if (
-                activeRideUnsubscribe
-            ) {
-
-                activeRideUnsubscribe();
-
-                activeRideUnsubscribe =
-                    null;
-
-            }
-
-
-            if (
-                !user
+                onlineBtn.disabled
             ) {
 
                 return;
@@ -1557,58 +1741,233 @@
             }
 
 
-            const activeRef =
-                doc(
-                    db,
-                    "riders",
-                    user.uid
-                );
+            if (
+                isOnline
+            ) {
 
+                await goOffline();
+
+            }
+            else {
+
+                await goOnline();
+
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       CENTER MAP
+    ======================================================== */
+
+    document
+        .getElementById("centerBtn")
+        .addEventListener(
+            "click",
+            async () => {
+
+                userMovedMap =
+                    false;
+
+
+                if (
+                    currentPosition
+                ) {
+
+                    map.setView(
+                        [
+                            currentPosition.coords.latitude,
+                            currentPosition.coords.longitude
+                        ],
+                        16,
+                        {
+                            animate: true
+                        }
+                    );
+
+                    return;
+
+                }
+
+
+                try {
+
+                    setStatus(
+                        "Getting live location..."
+                    );
+
+
+                    const position =
+                        await getCurrentPosition();
+
+
+                    updatePosition(
+                        position
+                    );
+
+
+                    map.setView(
+                        [
+                            position.coords.latitude,
+                            position.coords.longitude
+                        ],
+                        16,
+                        {
+                            animate: true
+                        }
+                    );
+
+                }
+                catch (error) {
+
+                    setStatus(
+                        error.message,
+                        "offline"
+                    );
+
+                }
+
+            }
+        );
+
+
+    /* ========================================================
+       ZOOM
+    ======================================================== */
+
+    document
+        .getElementById("zoomIn")
+        .addEventListener(
+            "click",
+            () => {
+
+                map.zoomIn();
+
+            }
+        );
+
+
+    document
+        .getElementById("zoomOut")
+        .addEventListener(
+            "click",
+            () => {
+
+                map.zoomOut();
+
+            }
+        );
+
+
+    /* ========================================================
+       MAP MOVEMENT
+    ======================================================== */
+
+    map.on(
+        "dragstart",
+        () => {
+
+            userMovedMap =
+                true;
+
+        }
+    );
+
+
+    /* ========================================================
+       BACK
+    ======================================================== */
+
+    document
+        .getElementById("backBtn")
+        .addEventListener(
+            "click",
+            () => {
+
+                if (
+                    history.length > 1
+                ) {
+
+                    history.back();
+
+                }
+                else {
+
+                    location.href =
+                        "home.html";
+
+                }
+
+            }
+        );
+
+
+    /* ========================================================
+       NOTIFICATIONS
+    ======================================================== */
+
+    document
+        .getElementById("notificationBtn")
+        .addEventListener(
+            "click",
+            () => {
+
+                location.href =
+                    "notifications.html";
+
+            }
+        );
+
+
+    /* ========================================================
+       ACTIVE RIDE LISTENER
+    ======================================================== */
+
+    function listenForActiveRide(
+        user
+    ) {
+
+        if (
+            activeRideUnsubscribe
+        ) {
+
+            activeRideUnsubscribe();
 
             activeRideUnsubscribe =
-                onSnapshot(
-                    activeRef,
-                    snapshot => {
+                null;
+
+        }
+
+
+        if (
+            !user
+        ) {
+
+            return;
+
+        }
+
+
+        const activeRef =
+            doc(
+                db,
+                "riders",
+                user.uid
+            );
+
+
+        activeRideUnsubscribe =
+            onSnapshot(
+                activeRef,
+                snapshot => {
+
+                    if (
+                        !snapshot.exists()
+                    ) {
 
                         if (
-                            !snapshot.exists()
-                        ) {
-
-                            if (
-                                isOnline
-                            ) {
-
-                                setRideStatus(
-                                    "Waiting for ride requests...",
-                                    true
-                                );
-
-                            }
-
-                            return;
-
-                        }
-
-
-                        const data =
-                            snapshot.data() || {};
-
-
-                        const rideId =
-                            data.activeRideId;
-
-
-                        if (
-                            rideId
-                        ) {
-
-                            setRideStatus(
-                                `Active ride: ${rideId}`,
-                                true
-                            );
-
-                        }
-                        else if (
                             isOnline
                         ) {
 
@@ -1619,208 +1978,329 @@
 
                         }
 
-                    },
-                    error => {
-
-                        console.warn(
-                            "RiderX active ride listener:",
-                            error
-                        );
+                        return;
 
                     }
-                );
-
-        }
 
 
-        /*
-        ============================================================
-        AUTH
-        ============================================================
-        */
+                    const data =
+                        snapshot.data() || {};
 
-        onAuthStateChanged(
-            auth,
-            async user => {
 
-                if (
-                    !user
-                ) {
-
-                    stopGPS();
+                    const rideId =
+                        data.activeRideId;
 
 
                     if (
-                        activeRideUnsubscribe
+                        rideId
                     ) {
 
-                        activeRideUnsubscribe();
+                        setRideStatus(
+                            `Active ride: ${rideId}`,
+                            true
+                        );
 
-                        activeRideUnsubscribe =
-                            null;
+                    }
+                    else if (
+                        isOnline
+                    ) {
+
+                        setRideStatus(
+                            "Waiting for ride requests...",
+                            true
+                        );
+
+                    }
+                    else {
+
+                        setRideStatus(
+                            "You are offline",
+                            true
+                        );
 
                     }
 
+                },
+                error => {
 
-                    location.replace(
-                        "../auth/login.html?role=rider"
+                    console.warn(
+                        "RiderX active ride listener:",
+                        error
                     );
 
-                    return;
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       AUTH
+    ======================================================== */
+
+    onAuthStateChanged(
+        auth,
+        async user => {
+
+            if (
+                !user
+            ) {
+
+                stopGPS();
+
+
+                if (
+                    activeRideUnsubscribe
+                ) {
+
+                    activeRideUnsubscribe();
+
+                    activeRideUnsubscribe =
+                        null;
 
                 }
 
 
                 currentUser =
-                    user;
+                    null;
+
+                isOnline =
+                    false;
 
 
-                startGPS();
+                location.replace(
+                    "../auth/login.html?role=rider"
+                );
+
+                return;
+
+            }
 
 
-                try {
-
-                    const locationSnap =
-                        await getDoc(
-                            doc(
-                                db,
-                                "riderLocations",
-                                user.uid
-                            )
-                        );
+            currentUser =
+                user;
 
 
-                    if (
-                        locationSnap.exists()
-                    ) {
-
-                        const data =
-                            locationSnap.data() || {};
+            startGPS();
 
 
-                        if (
-                            data.online === true
-                        ) {
+            try {
 
-                            isOnline =
-                                true;
+                /*
+                ------------------------------------------------
+                FIRST CHECK RIDER PROFILE
+                ------------------------------------------------
+                */
 
-                            setOnlineUI();
-
-                        }
-                        else {
-
-                            isOnline =
-                                false;
-
-                            setOfflineUI();
-
-                        }
-
-                    }
-                    else {
-
-                        isOnline =
-                            false;
-
-                        setOfflineUI();
-
-                    }
-
-                }
-                catch (error) {
-
-                    console.error(
-                        "RiderX online state error:",
-                        error
+                const riderSnap =
+                    await getDoc(
+                        doc(
+                            db,
+                            "riders",
+                            user.uid
+                        )
                     );
 
 
-                    isOnline =
-                        false;
+                /*
+                ------------------------------------------------
+                CHECK RIDER LOCATION
+                ------------------------------------------------
+                */
+
+                const locationSnap =
+                    await getDoc(
+                        doc(
+                            db,
+                            "riderLocations",
+                            user.uid
+                        )
+                    );
+
+
+                const riderData =
+                    riderSnap.exists()
+                        ? riderSnap.data() || {}
+                        : {};
+
+
+                const locationData =
+                    locationSnap.exists()
+                        ? locationSnap.data() || {}
+                        : {};
+
+
+                const riderOnline =
+                    riderData.online === true ||
+                    riderData.isOnline === true;
+
+
+                const locationOnline =
+                    locationData.online === true;
+
+
+                /*
+                ------------------------------------------------
+                EITHER SOURCE CAN RESTORE ONLINE STATE
+                ------------------------------------------------
+                */
+
+                isOnline =
+                    riderOnline ||
+                    locationOnline;
+
+
+                if (
+                    isOnline
+                ) {
+
+                    setOnlineUI();
+
+                }
+                else {
 
                     setOfflineUI();
 
                 }
-                finally {
 
-                    onlineStateLoading =
-                        false;
+            }
+            catch (error) {
 
-                }
-
-
-                listenForActiveRide(
-                    user
+                console.error(
+                    "RiderX online state error:",
+                    error
                 );
 
-            }
-        );
 
+                isOnline =
+                    false;
 
-        /*
-        ============================================================
-        PAGE VISIBILITY
-        ============================================================
-        */
-
-        document.addEventListener(
-            "visibilitychange",
-            () => {
-
-                if (
-                    document.hidden
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    currentUser
-                ) {
-
-                    startGPS();
-
-                }
+                setOfflineUI();
 
             }
-        );
+            finally {
+
+                onlineStateLoading =
+                    false;
+
+            }
 
 
-        /*
-        ============================================================
-        CLEANUP
-        ============================================================
-        */
+            listenForActiveRide(
+                user
+            );
 
-        window.addEventListener(
-            "beforeunload",
-            () => {
+        }
+    );
 
-                /*
-                Do not delete the Firestore location here.
-                beforeunload is unreliable on mobile browsers.
-                The online/offline button remains the authoritative
-                state.
-                */
+
+    /* ========================================================
+       PAGE VISIBILITY
+    ======================================================== */
+
+    document.addEventListener(
+        "visibilitychange",
+        () => {
+
+            if (
+                document.hidden
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                currentUser
+            ) {
+
+                startGPS();
+
 
                 if (
-                    watchId !== null
+                    isOnline &&
+                    currentPosition
                 ) {
 
-                    navigator.geolocation.clearWatch(
-                        watchId
+                    updatePosition(
+                        currentPosition
                     );
 
                 }
 
             }
-        );
 
-    </script>
+        }
+    );
 
-</body>
 
-</html>
+    /* ========================================================
+       PAGE SHOW
+    ======================================================== */
+
+    window.addEventListener(
+        "pageshow",
+        () => {
+
+            setTimeout(
+                () => {
+
+                    map.invalidateSize();
+
+                },
+                250
+            );
+
+
+            if (
+                currentUser
+            ) {
+
+                startGPS();
+
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       CLEANUP
+    ======================================================== */
+
+    window.addEventListener(
+        "beforeunload",
+        () => {
+
+            if (
+                watchId !== null &&
+                navigator.geolocation
+            ) {
+
+                navigator.geolocation.clearWatch(
+                    watchId
+                );
+
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       INITIAL MAP SIZE
+    ======================================================== */
+
+    setTimeout(
+        () => {
+
+            map.invalidateSize();
+
+        },
+        500
+    );
+
+</script>
+
+</body></html>
