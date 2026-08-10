@@ -1,1214 +1,575 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#FFD400">
 <title>RiderX Admin - Supports</title>
 
-<meta name="theme-color" content="#FFD400">
-
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/responsive.css">
 
 <style>
-
-:root{
-    --yellow:#FFD400;
-    --bg:#080808;
-    --card:#151515;
-    --card2:#1d1d1d;
-    --border:#303030;
-    --muted:#777;
-    --green:#22c55e;
-    --red:#ef4444;
-    --blue:#60a5fa;
-    --orange:#f59e0b;
-}
-
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-
-html,
-body{
-    min-height:100%;
-    background:var(--bg);
-}
-
-body{
-    color:#fff;
-    font-family:Arial,Helvetica,sans-serif;
-}
-
-button,
-input,
-select,
-textarea{
-    font-family:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-.app{
-    min-height:100vh;
-}
-
-
-/* HEADER */
-
-.header{
-    position:sticky;
-    top:0;
-    z-index:50;
-
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    padding:12px;
-
-    background:#0c0c0c;
-    border-bottom:1px solid #292929;
-}
-
-.back-btn{
-    width:40px;
-    height:40px;
-
-    border:1px solid #363636;
-    border-radius:11px;
-
-    background:#1b1b1b;
-    color:#fff;
-
-    font-size:20px;
-}
-
-.logo{
-    width:38px;
-    height:38px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:11px;
-
-    background:var(--yellow);
-    color:#000;
-
-    font-size:9px;
-    font-weight:900;
-}
-
-.header-info{
-    flex:1;
-}
-
-.header-title{
-    font-size:10px;
-    font-weight:900;
-}
-
-.header-subtitle{
-    margin-top:3px;
-    color:#777;
-    font-size:5px;
-}
-
-
-/* MAIN */
-
-.main{
-    width:100%;
-    max-width:1150px;
-    margin:auto;
-    padding:15px;
-}
-
-
-/* TOP */
-
-.page-top{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-
-    margin-bottom:13px;
-}
-
-.page-title{
-    font-size:14px;
-    font-weight:900;
-}
-
-.page-description{
-    margin-top:4px;
-    color:#777;
-    font-size:6px;
-}
-
-.refresh-btn{
-    height:38px;
-    padding:0 13px;
-
-    border:1px solid #5d5200;
-    border-radius:10px;
-
-    background:#1c1900;
-    color:var(--yellow);
-
-    font-size:6px;
-    font-weight:900;
-}
-
-
-/* STATS */
-
-.stats{
-    display:grid;
-
-    grid-template-columns:
-        repeat(4,minmax(0,1fr));
-
-    gap:9px;
-
-    margin-bottom:12px;
-}
-
-.stat{
-    padding:13px;
-
-    border:1px solid var(--border);
-    border-radius:14px;
-
-    background:var(--card);
-}
-
-.stat-label{
-    color:#777;
-    font-size:5px;
-    font-weight:800;
-}
-
-.stat-value{
-    margin-top:6px;
-    font-size:16px;
-    font-weight:900;
-}
-
-
-/* LAYOUT */
-
-.content{
-    display:grid;
-
-    grid-template-columns:
-        1.15fr .85fr;
-
-    gap:12px;
-}
-
-
-/* TICKET LIST */
-
-.ticket-panel,
-.detail-panel{
-    border:1px solid var(--border);
-    border-radius:16px;
-
-    background:var(--card);
-
-    overflow:hidden;
-}
-
-.panel-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    padding:13px;
-
-    border-bottom:1px solid #292929;
-}
-
-.panel-title{
-    font-size:8px;
-    font-weight:900;
-}
-
-.panel-count{
-    padding:5px 7px;
-
-    border-radius:20px;
-
-    background:#272300;
-    color:var(--yellow);
-
-    font-size:4.5px;
-    font-weight:900;
-}
-
-
-/* SEARCH */
-
-.search-box{
-    padding:10px;
-    border-bottom:1px solid #292929;
-}
-
-.search{
-    width:100%;
-    height:36px;
-
-    padding:0 10px;
-
-    border:1px solid #383838;
-    border-radius:9px;
-
-    outline:none;
-
-    background:#101010;
-    color:#fff;
-
-    font-size:6px;
-}
-
-.search:focus{
-    border-color:#766800;
-}
-
-
-/* FILTERS */
-
-.filters{
-    display:flex;
-    gap:6px;
-
-    padding:9px;
-
-    overflow-x:auto;
-
-    border-bottom:1px solid #292929;
-}
-
-.filter{
-    flex-shrink:0;
-
-    padding:7px 10px;
-
-    border:1px solid #353535;
-    border-radius:20px;
-
-    background:#202020;
-    color:#aaa;
-
-    font-size:5px;
-    font-weight:800;
-}
-
-.filter.active{
-    border-color:#665a00;
-    background:#282400;
-    color:var(--yellow);
-}
-
-
-/* TICKET */
-
-.ticket-list{
-    max-height:600px;
-    overflow-y:auto;
-}
-
-.ticket{
-    padding:12px;
-
-    border-bottom:1px solid #292929;
-
-    cursor:pointer;
-
-    transition:.15s;
-}
-
-.ticket:last-child{
-    border-bottom:0;
-}
-
-.ticket:hover{
-    background:#1b1b1b;
-}
-
-.ticket.selected{
-    background:#211e00;
-    border-left:3px solid var(--yellow);
-}
-
-.ticket-top{
-    display:flex;
-    align-items:center;
-    gap:9px;
-}
-
-.ticket-avatar{
-    width:34px;
-    height:34px;
-    min-width:34px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:10px;
-
-    background:#292929;
-    color:var(--yellow);
-
-    font-size:8px;
-    font-weight:900;
-}
-
-.ticket-info{
-    flex:1;
-    min-width:0;
-}
-
-.ticket-name{
-    font-size:6.5px;
-    font-weight:900;
-}
-
-.ticket-subject{
-    margin-top:3px;
-
-    overflow:hidden;
-
-    color:#777;
-
-    font-size:5px;
-
-    text-overflow:ellipsis;
-    white-space:nowrap;
-}
-
-.ticket-status{
-    padding:5px 7px;
-
-    border-radius:20px;
-
-    font-size:4px;
-    font-weight:900;
-}
-
-.status-open{
-    background:#2c2500;
-    color:var(--yellow);
-}
-
-.status-progress{
-    background:#14233a;
-    color:var(--blue);
-}
-
-.status-resolved{
-    background:#102719;
-    color:var(--green);
-}
-
-.status-closed{
-    background:#252525;
-    color:#888;
-}
-
-.ticket-bottom{
-    display:flex;
-    justify-content:space-between;
-
-    margin-top:8px;
-
-    color:#555;
-
-    font-size:4.5px;
-}
-
-
-/* DETAIL */
-
-.detail-body{
-    min-height:500px;
-}
-
-.no-ticket{
-    min-height:500px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    padding:20px;
-
-    color:#666;
-
-    text-align:center;
-
-    font-size:6px;
-}
-
-.customer{
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    padding:13px;
-
-    border-bottom:1px solid #292929;
-}
-
-.customer-avatar{
-    width:42px;
-    height:42px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    border-radius:12px;
-
-    background:#282828;
-    color:var(--yellow);
-
-    font-size:10px;
-    font-weight:900;
-}
-
-.customer-info{
-    flex:1;
-}
-
-.customer-name{
-    font-size:7px;
-    font-weight:900;
-}
-
-.customer-contact{
-    margin-top:4px;
-    color:#777;
-    font-size:5px;
-}
-
-
-/* CONVERSATION */
-
-.messages{
-    max-height:350px;
-
-    padding:13px;
-
-    overflow-y:auto;
-}
-
-.message{
-    max-width:82%;
-
-    padding:9px 10px;
-
-    margin-bottom:8px;
-
-    border-radius:11px;
-
-    font-size:5.5px;
-    line-height:1.5;
-}
-
-.message:last-child{
-    margin-bottom:0;
-}
-
-.message.user{
-    margin-right:auto;
-
-    background:#242424;
-    color:#ddd;
-
-    border-bottom-left-radius:3px;
-}
-
-.message.admin{
-    margin-left:auto;
-
-    background:#332d00;
-    color:#fff;
-
-    border-bottom-right-radius:3px;
-}
-
-.message-time{
-    margin-top:4px;
-
-    color:#666;
-
-    font-size:4px;
-}
-
-
-/* DETAIL CONTROLS */
-
-.detail-controls{
-    padding:11px;
-
-    border-top:1px solid #292929;
-    border-bottom:1px solid #292929;
-}
-
-.control-row{
-    display:flex;
-    gap:7px;
-}
-
-.select{
-    flex:1;
-
-    height:36px;
-
-    padding:0 8px;
-
-    border:1px solid #383838;
-    border-radius:8px;
-
-    outline:none;
-
-    background:#111;
-    color:#fff;
-
-    font-size:5.5px;
-}
-
-.control-btn{
-    height:36px;
-
-    padding:0 11px;
-
-    border:1px solid #5f5300;
-    border-radius:8px;
-
-    background:#292400;
-    color:var(--yellow);
-
-    font-size:5px;
-    font-weight:900;
-}
-
-
-/* REPLY */
-
-.reply{
-    padding:11px;
-}
-
-.reply textarea{
-    width:100%;
-    min-height:75px;
-
-    padding:9px;
-
-    resize:vertical;
-
-    border:1px solid #383838;
-    border-radius:9px;
-
-    outline:none;
-
-    background:#101010;
-    color:#fff;
-
-    font-size:5.5px;
-    line-height:1.5;
-}
-
-.reply textarea:focus{
-    border-color:#766800;
-}
-
-.reply-actions{
-    display:flex;
-    justify-content:flex-end;
-
-    gap:7px;
-
-    margin-top:7px;
-}
-
-.send-btn{
-    height:36px;
-
-    padding:0 14px;
-
-    border:1px solid #635700;
-    border-radius:9px;
-
-    background:var(--yellow);
-    color:#000;
-
-    font-size:5.5px;
-    font-weight:900;
-}
-
-
-/* EMPTY */
-
-.empty{
-    padding:45px 15px;
-
-    color:#666;
-
-    text-align:center;
-
-    font-size:6px;
-}
-
-
-/* TOAST */
-
-.toast{
-    position:fixed;
-
-    left:50%;
-    bottom:20px;
-
-    z-index:150;
-
-    width:calc(100% - 30px);
-    max-width:450px;
-
-    padding:11px;
-
-    border:1px solid #383838;
-    border-radius:11px;
-
-    background:#222;
-    color:#fff;
-
-    text-align:center;
-
-    font-size:6px;
-
-    opacity:0;
-    pointer-events:none;
-
-    transform:translate(-50%,20px);
-
-    transition:.25s;
-}
-
-.toast.show{
-    opacity:1;
-    transform:translate(-50%,0);
-}
-
-
-/* RESPONSIVE */
-
-@media(max-width:850px){
-
-    .content{
-        grid-template-columns:1fr;
-    }
-
-    .detail-panel{
-        min-height:400px;
-    }
-
-}
-
-@media(max-width:600px){
-
-    .stats{
-        grid-template-columns:
-            repeat(2,minmax(0,1fr));
-    }
-
-    .main{
-        padding:11px;
-    }
-
-}
-
+:root{--yellow:#FFD400;--bg:#080808;--card:#151515;--border:#303030;--muted:#777;--green:#22c55e;--red:#ef4444;--blue:#60a5fa}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg)}
+body{font-family:Arial,Helvetica,sans-serif;color:#fff}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+
+.header{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;padding:12px;background:#0c0c0c;border-bottom:1px solid #292929}
+.back-btn{width:40px;height:40px;border:1px solid #363636;border-radius:11px;background:#1b1b1b;color:#fff;font-size:20px}
+.logo{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:11px;background:var(--yellow);color:#000;font-size:9px;font-weight:900}
+.header-info{flex:1}.header-title{font-size:10px;font-weight:900}.header-subtitle{margin-top:3px;color:#777;font-size:5px}
+
+.main{width:100%;max-width:1150px;margin:auto;padding:15px}
+.page-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.page-title{font-size:14px;font-weight:900}.page-description{margin-top:4px;color:#777;font-size:6px}
+.refresh-btn{height:38px;padding:0 13px;border:1px solid #5d5200;border-radius:10px;background:#1c1900;color:var(--yellow);font-size:6px;font-weight:900}
+
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:12px}
+.stat{padding:13px;border:1px solid var(--border);border-radius:14px;background:var(--card)}
+.stat-label{color:#777;font-size:5px;font-weight:800}.stat-value{margin-top:6px;font-size:16px;font-weight:900}
+
+.content{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+.ticket-panel,.detail-panel{border:1px solid var(--border);border-radius:16px;background:var(--card);overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px;border-bottom:1px solid #292929}
+.panel-title{font-size:8px;font-weight:900}.panel-count{padding:5px 7px;border-radius:20px;background:#272300;color:var(--yellow);font-size:4.5px;font-weight:900}
+
+.search-box{padding:10px;border-bottom:1px solid #292929}
+.search{width:100%;height:36px;padding:0 10px;border:1px solid #383838;border-radius:9px;outline:none;background:#101010;color:#fff;font-size:6px}
+.search:focus{border-color:#766800}
+
+.filters{display:flex;gap:6px;padding:9px;overflow-x:auto;border-bottom:1px solid #292929}
+.filter{flex-shrink:0;padding:7px 10px;border:1px solid #353535;border-radius:20px;background:#202020;color:#aaa;font-size:5px;font-weight:800}
+.filter.active{border-color:#665a00;background:#282400;color:var(--yellow)}
+
+.ticket-list{max-height:600px;overflow-y:auto}
+.ticket{padding:12px;border-bottom:1px solid #292929;cursor:pointer}
+.ticket:hover{background:#1b1b1b}.ticket.selected{background:#211e00;border-left:3px solid var(--yellow)}
+.ticket-top{display:flex;align-items:center;gap:9px}
+.ticket-avatar,.customer-avatar{display:flex;align-items:center;justify-content:center;border-radius:10px;background:#292929;color:var(--yellow);font-weight:900}
+.ticket-avatar{width:34px;height:34px;min-width:34px;font-size:8px}
+.ticket-info{flex:1;min-width:0}.ticket-name{font-size:6.5px;font-weight:900}
+.ticket-subject{margin-top:3px;overflow:hidden;color:#777;font-size:5px;text-overflow:ellipsis;white-space:nowrap}
+.ticket-status{padding:5px 7px;border-radius:20px;font-size:4px;font-weight:900}
+.status-open{background:#2c2500;color:var(--yellow)}.status-progress{background:#14233a;color:var(--blue)}
+.status-resolved{background:#102719;color:var(--green)}.status-closed{background:#252525;color:#888}
+.ticket-bottom{display:flex;justify-content:space-between;margin-top:8px;color:#555;font-size:4.5px}
+
+.detail-body{min-height:500px}
+.no-ticket{min-height:500px;display:flex;align-items:center;justify-content:center;padding:20px;color:#666;text-align:center;font-size:6px}
+.customer{display:flex;align-items:center;gap:10px;padding:13px;border-bottom:1px solid #292929}
+.customer-avatar{width:42px;height:42px;font-size:10px}.customer-info{flex:1}
+.customer-name{font-size:7px;font-weight:900}.customer-contact{margin-top:4px;color:#777;font-size:5px}
+
+.messages{max-height:350px;padding:13px;overflow-y:auto}
+.message{max-width:82%;padding:9px 10px;margin-bottom:8px;border-radius:11px;font-size:5.5px;line-height:1.5}
+.message.user{margin-right:auto;background:#242424;color:#ddd;border-bottom-left-radius:3px}
+.message.admin{margin-left:auto;background:#332d00;color:#fff;border-bottom-right-radius:3px}
+.message-time{margin-top:4px;color:#666;font-size:4px}
+
+.detail-controls{padding:11px;border-top:1px solid #292929;border-bottom:1px solid #292929}
+.control-row{display:flex;gap:7px}.select{flex:1;height:36px;padding:0 8px;border:1px solid #383838;border-radius:8px;outline:none;background:#111;color:#fff;font-size:5.5px}
+.control-btn,.send-btn{height:36px;padding:0 11px;border:1px solid #5f5300;border-radius:8px;background:#292400;color:var(--yellow);font-size:5px;font-weight:900}
+.reply{padding:11px}.reply textarea{width:100%;min-height:75px;padding:9px;resize:vertical;border:1px solid #383838;border-radius:9px;outline:none;background:#101010;color:#fff;font-size:5.5px}
+.reply-actions{display:flex;justify-content:flex-end;margin-top:7px}.send-btn{padding:0 14px;background:var(--yellow);color:#000}
+.empty{padding:45px 15px;color:#666;text-align:center;font-size:6px}
+.toast{position:fixed;left:50%;bottom:20px;z-index:150;width:calc(100% - 30px);max-width:450px;padding:11px;border:1px solid #383838;border-radius:11px;background:#222;color:#fff;text-align:center;font-size:6px;opacity:0;pointer-events:none;transform:translate(-50%,20px);transition:.25s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:850px){.content{grid-template-columns:1fr}.detail-panel{min-height:400px}}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.main{padding:11px}}
 </style>
-
 </head>
 
-
 <body>
-
 <div class="app">
 
-
 <header class="header">
-
-    <button
-        class="back-btn"
-        onclick="goBack()"
-        aria-label="Back"
-    >
-        ‹
-    </button>
-
-    <div class="logo">
-        RX
-    </div>
-
-    <div class="header-info">
-
-        <div class="header-title">
-            RiderX Support
-        </div>
-
-        <div class="header-subtitle">
-            Customer and rider support tickets
-        </div>
-
-    </div>
-
+<button class="back-btn" onclick="goBack()" aria-label="Back">‹</button>
+<div class="logo">RX</div>
+<div class="header-info">
+<div class="header-title">RiderX Support</div>
+<div class="header-subtitle">Customer and rider support tickets</div>
+</div>
 </header>
-
 
 <main class="main">
 
-
 <section class="page-top">
-
-    <div>
-
-        <div class="page-title">
-            Support Center
-        </div>
-
-        <div class="page-description">
-            Manage support requests and respond to users.
-        </div>
-
-    </div>
-
-    <button
-        class="refresh-btn"
-        onclick="loadTickets()"
-    >
-        ↻ REFRESH
-    </button>
-
+<div>
+<div class="page-title">Support Center</div>
+<div class="page-description">Manage support requests and respond to users.</div>
+</div>
+<button class="refresh-btn" onclick="loadTickets(true)">↻ REFRESH</button>
 </section>
-
 
 <section class="stats">
-
-    <div class="stat">
-
-        <div class="stat-label">
-            OPEN
-        </div>
-
-        <div
-            class="stat-value"
-            id="openCount"
-            style="color:#FFD400"
-        >
-            0
-        </div>
-
-    </div>
-
-
-    <div class="stat">
-
-        <div class="stat-label">
-            IN PROGRESS
-        </div>
-
-        <div
-            class="stat-value"
-            id="progressCount"
-            style="color:#60a5fa"
-        >
-            0
-        </div>
-
-    </div>
-
-
-    <div class="stat">
-
-        <div class="stat-label">
-            RESOLVED
-        </div>
-
-        <div
-            class="stat-value"
-            id="resolvedCount"
-            style="color:#22c55e"
-        >
-            0
-        </div>
-
-    </div>
-
-
-    <div class="stat">
-
-        <div class="stat-label">
-            TOTAL
-        </div>
-
-        <div
-            class="stat-value"
-            id="totalCount"
-        >
-            0
-        </div>
-
-    </div>
-
+<div class="stat"><div class="stat-label">OPEN</div><div class="stat-value" id="openCount" style="color:#FFD400">0</div></div>
+<div class="stat"><div class="stat-label">IN PROGRESS</div><div class="stat-value" id="progressCount" style="color:#60a5fa">0</div></div>
+<div class="stat"><div class="stat-label">RESOLVED</div><div class="stat-value" id="resolvedCount" style="color:#22c55e">0</div></div>
+<div class="stat"><div class="stat-label">TOTAL</div><div class="stat-value" id="totalCount">0</div></div>
 </section>
-
 
 <section class="content">
 
-
-<!-- TICKET LIST -->
-
 <div class="ticket-panel">
-
-    <div class="panel-head">
-
-        <div class="panel-title">
-            Support Tickets
-        </div>
-
-        <div
-            class="panel-count"
-            id="ticketCount"
-        >
-            0
-        </div>
-
-    </div>
-
-
-    <div class="search-box">
-
-        <input
-            class="search"
-            id="searchInput"
-            type="search"
-            placeholder="Search tickets, names or subjects..."
-            oninput="renderTickets()"
-        >
-
-    </div>
-
-
-    <div class="filters">
-
-        <button
-            class="filter active"
-            data-filter="all"
-            onclick="setFilter('all',this)"
-        >
-            ALL
-        </button>
-
-        <button
-            class="filter"
-            data-filter="open"
-            onclick="setFilter('open',this)"
-        >
-            OPEN
-        </button>
-
-        <button
-            class="filter"
-            data-filter="progress"
-            onclick="setFilter('progress',this)"
-        >
-            IN PROGRESS
-        </button>
-
-        <button
-            class="filter"
-            data-filter="resolved"
-            onclick="setFilter('resolved',this)"
-        >
-            RESOLVED
-        </button>
-
-    </div>
-
-
-    <div
-        class="ticket-list"
-        id="ticketList"
-    >
-
-        <div class="empty">
-            Loading support tickets...
-        </div>
-
-    </div>
-
+<div class="panel-head">
+<div class="panel-title">Support Tickets</div>
+<div class="panel-count" id="ticketCount">0</div>
 </div>
 
+<div class="search-box">
+<input class="search" id="searchInput" type="search" placeholder="Search tickets, names or subjects..." autocomplete="off">
+</div>
 
-<!-- DETAIL -->
+<div class="filters">
+<button class="filter active" data-filter="all">ALL</button>
+<button class="filter" data-filter="open">OPEN</button>
+<button class="filter" data-filter="progress">IN PROGRESS</button>
+<button class="filter" data-filter="resolved">RESOLVED</button>
+</div>
+
+<div class="ticket-list" id="ticketList">
+<div class="empty">Loading support tickets...</div>
+</div>
+</div>
 
 <div class="detail-panel">
-
-    <div class="panel-head">
-
-        <div class="panel-title">
-            Ticket Details
-        </div>
-
-    </div>
-
-
-    <div
-        class="detail-body"
-        id="detailBody"
-    >
-
-        <div class="no-ticket">
-            Select a support ticket to view the conversation.
-        </div>
-
-    </div>
-
+<div class="panel-head">
+<div class="panel-title">Ticket Details</div>
 </div>
-
+<div class="detail-body" id="detailBody">
+<div class="no-ticket">Select a support ticket to view the conversation.</div>
+</div>
+</div>
 
 </section>
-
-
 </main>
-
 </div>
 
+<div class="toast" id="toast"></div>
 
-<div
-    class="toast"
-    id="toast"
-></div>
+<script type="module">
+/* ============================================================
+   RIDERX ADMIN SUPPORTS
+   Canonical file: admin/supports.html
 
+   Primary data source:
+   Firestore -> supports
 
-<script>
+   LocalStorage:
+   fallback/cache only
 
-const STORAGE_KEY =
-    "riderxSupportTickets";
+   Compatible with:
+   ../firebase/firebase-config.js
+============================================================ */
 
+const STORAGE_KEY="riderxSupportTickets";
+const COLLECTION="supports";
 
-let tickets = [];
-
-let selectedId = null;
-
-let currentFilter = "all";
-
-let toastTimer;
-
-
-/* =========================================
-   DEFAULT DATA
-========================================= */
-
-const DEFAULT_TICKETS = [
-
-    {
-        id:"RX-SUP-1001",
-        name:"Customer",
-        phone:"",
-        role:"customer",
-        subject:"Ride payment issue",
-        status:"open",
-        priority:"high",
-        createdAt:new Date().toISOString(),
-        messages:[
-            {
-                sender:"user",
-                text:"I completed my ride but I am having an issue with the payment.",
-                time:"Recently"
-            }
-        ]
-    },
-
-    {
-        id:"RX-SUP-1002",
-        name:"Rider",
-        phone:"",
-        role:"rider",
-        subject:"Unable to go online",
-        status:"progress",
-        priority:"normal",
-        createdAt:new Date().toISOString(),
-        messages:[
-            {
-                sender:"user",
-                text:"My rider account is approved but I cannot go online.",
-                time:"Recently"
-            },
-            {
-                sender:"admin",
-                text:"We are checking your account status.",
-                time:"Recently"
-            }
-        ]
-    }
-
-];
+let tickets=[];
+let selectedId=null;
+let currentFilter="all";
+let toastTimer=null;
+let firestore=null;
+let firebaseReady=false;
 
 
-/* =========================================
-   LOAD
-========================================= */
+/* ================= FIREBASE ================= */
 
-function loadTickets(){
+async function initFirebase(){
 
     try{
 
-        const raw =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
+        const module=await import("../firebase/firebase-config.js");
+
+        firestore=
+            module.db ||
+            module.firestore ||
+            module.default?.db ||
+            module.default?.firestore ||
+            window.db ||
+            null;
+
+        if(firestore){
+            firebaseReady=true;
+            return true;
+        }
+
+        if(window.firebase?.firestore){
+
+            firestore=
+                window.firebase.firestore();
+
+            firebaseReady=true;
+            return true;
+        }
+
+    }catch(error){
+
+        console.warn("RiderX Firebase support init:",error);
+
+    }
+
+    firebaseReady=false;
+    return false;
+}
 
 
-        if(raw){
+/* ================= FIRESTORE HELPERS ================= */
 
-            const parsed =
-                JSON.parse(
-                    raw
-                );
+function firebaseFns(){
+
+    return window.firebase?.firestore
+        ? window.firebase.firestore
+        : null;
+
+}
 
 
-            if(
-                Array.isArray(
-                    parsed
-                )
-            ){
+async function firestoreGetTickets(){
 
-                tickets =
-                    parsed;
+    if(!firebaseReady || !firestore){
+        return null;
+    }
 
-            }
+    try{
+
+        if(
+            typeof firestore.collection ===
+            "function"
+        ){
+
+            const snapshot=
+                await firestore
+                    .collection(COLLECTION)
+                    .orderBy("createdAt","desc")
+                    .get();
+
+            return snapshot.docs.map(doc=>({
+                id:doc.id,
+                ...doc.data()
+            }));
+
+        }
+
+        const fn=firebaseFns();
+
+        if(fn && firestore){
+
+            const snapshot=
+                await firestore
+                    .collection(COLLECTION)
+                    .get();
+
+            return snapshot.docs.map(doc=>({
+                id:doc.id,
+                ...doc.data()
+            }));
 
         }
 
     }catch(error){
 
-        console.log(
-            "Support load error:",
+        console.warn(
+            "Firestore ticket read failed:",
             error
         );
 
     }
 
+    return null;
+}
 
-    if(
-        !Array.isArray(
-            tickets
-        )
-    ){
 
-        tickets = [];
+async function firestoreUpdate(id,data){
 
+    if(!firebaseReady || !firestore || !id){
+        return false;
     }
 
+    try{
 
-    renderStats();
+        if(
+            typeof firestore.collection ===
+            "function"
+        ){
 
-    renderTickets();
+            await firestore
+                .collection(COLLECTION)
+                .doc(id)
+                .update(data);
 
-    if(selectedId){
+            return true;
+        }
 
-        selectTicket(
-            selectedId
+    }catch(error){
+
+        console.warn(
+            "Firestore ticket update failed:",
+            error
         );
 
     }
 
+    return false;
 }
 
 
-/* =========================================
-   SAVE
-========================================= */
+async function firestoreAddMessage(id,message){
 
-function saveTickets(){
+    if(!firebaseReady || !firestore || !id){
+        return false;
+    }
+
+    try{
+
+        const ticket=
+            tickets.find(
+                t=>String(t.id)===String(id)
+            );
+
+        const messages=
+            Array.isArray(ticket?.messages)
+                ? ticket.messages
+                : [];
+
+        const updated=[
+            ...messages,
+            message
+        ];
+
+        return await firestoreUpdate(
+            id,
+            {
+                messages:updated,
+                status:"progress",
+                updatedAt:new Date().toISOString()
+            }
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Firestore message update failed:",
+            error
+        );
+
+        return false;
+    }
+}
+
+
+/* ================= LOCAL FALLBACK ================= */
+
+function loadLocal(){
+
+    try{
+
+        const raw=
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+        if(!raw){
+            return [];
+        }
+
+        const parsed=
+            JSON.parse(raw);
+
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
+
+    }catch(error){
+
+        console.warn(
+            "Support local cache error:",
+            error
+        );
+
+        return [];
+
+    }
+}
+
+
+function saveLocal(){
 
     try{
 
         localStorage.setItem(
             STORAGE_KEY,
-            JSON.stringify(
-                tickets
-            )
+            JSON.stringify(tickets)
         );
 
     }catch(error){
 
-        console.log(error);
+        console.warn(error);
 
     }
 
 }
 
 
-/* =========================================
-   STATS
-========================================= */
+/* ================= LOAD ================= */
+
+async function loadTickets(showMessage=false){
+
+    const cached=
+        loadLocal();
+
+    tickets=
+        cached;
+
+    renderAll();
+
+    const firebaseOk=
+        await initFirebase();
+
+    if(firebaseOk){
+
+        const remote=
+            await firestoreGetTickets();
+
+        if(
+            Array.isArray(remote)
+        ){
+
+            tickets=
+                remote.map(normalizeTicket);
+
+            saveLocal();
+
+            renderAll();
+
+            if(
+                selectedId &&
+                getSelectedTicket()
+            ){
+
+                renderDetail(
+                    getSelectedTicket()
+                );
+
+            }
+
+        }
+
+    }
+
+    if(showMessage){
+
+        showToast(
+            firebaseReady
+                ? "Support tickets refreshed."
+                : "Support cache refreshed."
+        );
+
+    }
+
+}
+
+
+/* ================= NORMALIZE ================= */
+
+function normalizeTicket(ticket){
+
+    const item={
+        ...ticket
+    };
+
+    item.id=
+        item.id ||
+        item.ticketId ||
+        (
+            "RX-SUP-" +
+            Date.now()
+        );
+
+    item.name=
+        item.name ||
+        item.userName ||
+        item.customerName ||
+        item.riderName ||
+        "User";
+
+    item.subject=
+        item.subject ||
+        item.title ||
+        item.issue ||
+        "Support request";
+
+    item.role=
+        item.role ||
+        item.userRole ||
+        "user";
+
+    item.phone=
+        item.phone ||
+        item.mobile ||
+        "";
+
+    item.status=
+        normalizeStatus(
+            item.status
+        );
+
+    item.messages=
+        Array.isArray(item.messages)
+            ? item.messages
+            : (
+                item.message
+                    ? [{
+                        sender:"user",
+                        text:item.message,
+                        time:formatDateTime(
+                            item.createdAt
+                        )
+                    }]
+                    : []
+            );
+
+    return item;
+}
+
+
+/* ================= RENDER ================= */
+
+function renderAll(){
+
+    renderStats();
+    renderTickets();
+
+}
+
 
 function renderStats(){
 
-    const open =
-        tickets.filter(
-            t =>
-                normalizeStatus(t.status)
-                === "open"
-        ).length;
-
-
-    const progress =
-        tickets.filter(
-            t =>
-                normalizeStatus(t.status)
-                === "progress"
-        ).length;
-
-
-    const resolved =
-        tickets.filter(
-            t =>
-                normalizeStatus(t.status)
-                === "resolved"
-        ).length;
-
-
     setText(
         "openCount",
-        open
+        tickets.filter(
+            t=>normalizeStatus(t.status)==="open"
+        ).length
     );
 
     setText(
         "progressCount",
-        progress
+        tickets.filter(
+            t=>normalizeStatus(t.status)==="progress"
+        ).length
     );
 
     setText(
         "resolvedCount",
-        resolved
+        tickets.filter(
+            t=>normalizeStatus(t.status)==="resolved"
+        ).length
     );
 
     setText(
@@ -1219,178 +580,123 @@ function renderStats(){
 }
 
 
-/* =========================================
-   RENDER TICKETS
-========================================= */
+/* ================= TICKETS ================= */
 
 function renderTickets(){
 
-    const list =
+    const list=
         document.getElementById(
             "ticketList"
         );
-
 
     if(!list){
         return;
     }
 
-
-    const search =
+    const search=
         String(
             document.getElementById(
                 "searchInput"
-            )?.value || ""
+            )?.value ||
+            ""
         )
-        .toLowerCase()
-        .trim();
+        .trim()
+        .toLowerCase();
 
+    const filtered=
+        tickets
+            .map(normalizeTicket)
+            .filter(ticket=>{
 
-    let filtered =
-        tickets.filter(
-            function(ticket){
-
-                const status =
+                const status=
                     normalizeStatus(
                         ticket.status
                     );
 
-
                 if(
-                    currentFilter !==
-                    "all" &&
-                    status !==
-                    currentFilter
+                    currentFilter!=="all" &&
+                    status!==currentFilter
                 ){
-
                     return false;
-
                 }
-
 
                 if(!search){
                     return true;
                 }
 
+                return [
+                    ticket.id,
+                    ticket.name,
+                    ticket.subject,
+                    ticket.role,
+                    ticket.phone,
+                    ticket.email
+                ]
+                .join(" ")
+                .toLowerCase()
+                .includes(search);
 
-                const text =
-                    [
-                        ticket.id,
-                        ticket.name,
-                        ticket.subject,
-                        ticket.role,
-                        ticket.phone
-                    ]
-                    .join(" ")
-                    .toLowerCase();
+            })
+            .sort(
+                (a,b)=>
+                    getTime(b.createdAt)-
+                    getTime(a.createdAt)
+            );
 
+    setText(
+        "ticketCount",
+        filtered.length
+    );
 
-                return text.includes(
-                    search
-                );
-
-            }
-        );
-
-
-    document.getElementById(
-        "ticketCount"
-    ).textContent =
-        filtered.length;
-
-
-    list.innerHTML = "";
-
+    list.innerHTML="";
 
     if(!filtered.length){
 
-        list.innerHTML = `
-
-            <div class="empty">
-
-                No support tickets found.
-
-            </div>
-
-        `;
+        list.innerHTML=
+            `<div class="empty">No support tickets found.</div>`;
 
         return;
-
     }
 
-
-    filtered.forEach(
-        function(ticket){
-
-            list.appendChild(
-                createTicket(
-                    ticket
-                )
-            );
-
-        }
-    );
+    filtered.forEach(ticket=>{
+        list.appendChild(
+            createTicket(ticket)
+        );
+    });
 
 }
 
 
-/* =========================================
-   CREATE TICKET
-========================================= */
+function createTicket(ticket){
 
-function createTicket(
-    ticket
-){
+    const element=
+        document.createElement("div");
 
-    const element =
-        document.createElement(
-            "div"
-        );
-
-
-    const status =
+    const status=
         normalizeStatus(
             ticket.status
         );
 
-
-    const name =
+    const name=
         ticket.name ||
-        ticket.userName ||
         "User";
 
+    const initial=
+        name
+            .charAt(0)
+            .toUpperCase();
 
-    const initial =
-        String(
-            name
-        )
-        .charAt(0)
-        .toUpperCase();
-
-
-    element.className =
-        "ticket" +
+    element.className=
+        "ticket"+
         (
             selectedId &&
-            String(selectedId) ===
+            String(selectedId)===
             String(ticket.id)
                 ? " selected"
                 : ""
         );
 
-
-    element.onclick =
-        function(){
-
-            selectTicket(
-                ticket.id
-            );
-
-        };
-
-
-    element.innerHTML = `
-
+    element.innerHTML=`
         <div class="ticket-top">
 
             <div class="ticket-avatar">
@@ -1404,136 +710,81 @@ function createTicket(
                 </div>
 
                 <div class="ticket-subject">
-                    ${escapeHtml(
-                        ticket.subject ||
-                        "Support request"
-                    )}
+                    ${escapeHtml(ticket.subject)}
                 </div>
 
             </div>
 
-            <div class="
-                ticket-status
-                ${statusClass(status)}
-            ">
-                ${escapeHtml(
-                    statusLabel(status)
-                )}
+            <div class="ticket-status ${statusClass(status)}">
+                ${escapeHtml(statusLabel(status))}
             </div>
 
         </div>
 
-
         <div class="ticket-bottom">
-
-            <span>
-                ${escapeHtml(
-                    ticket.id ||
-                    "—"
-                )}
-            </span>
-
-            <span>
-                ${escapeHtml(
-                    formatDate(
-                        ticket.createdAt
-                    )
-                )}
-            </span>
-
+            <span>${escapeHtml(ticket.id)}</span>
+            <span>${escapeHtml(formatDate(ticket.createdAt))}</span>
         </div>
-
     `;
 
+    element.addEventListener(
+        "click",
+        ()=>selectTicket(ticket.id)
+    );
 
     return element;
-
 }
 
 
-/* =========================================
-   SELECT TICKET
-========================================= */
+/* ================= DETAIL ================= */
 
-function selectTicket(
-    id
-){
+function selectTicket(id){
 
-    const ticket =
+    const ticket=
         tickets.find(
-            function(item){
-
-                return String(
-                    item.id
-                ) ===
-                String(id);
-
-            }
+            item=>
+                String(item.id)===
+                String(id)
         );
 
-
     if(!ticket){
-
         return;
-
     }
 
-
-    selectedId =
-        id;
-
+    selectedId=id;
 
     renderTickets();
-
     renderDetail(
-        ticket
+        normalizeTicket(ticket)
     );
 
 }
 
 
-/* =========================================
-   DETAIL
-========================================= */
+function renderDetail(ticket){
 
-function renderDetail(
-    ticket
-){
-
-    const body =
+    const body=
         document.getElementById(
             "detailBody"
         );
-
 
     if(!body){
         return;
     }
 
-
-    const name =
+    const name=
         ticket.name ||
-        ticket.userName ||
         "User";
 
+    const initial=
+        name.charAt(0).toUpperCase();
 
-    const initial =
-        String(
-            name
-        )
-        .charAt(0)
-        .toUpperCase();
-
-
-    const messages =
-        Array.isArray(
-            ticket.messages
-        )
+    const messages=
+        Array.isArray(ticket.messages)
             ? ticket.messages
             : [];
 
-
-    body.innerHTML = `
+    body.innerHTML=`
 
         <div class="customer">
 
@@ -1549,109 +800,69 @@ function renderDetail(
 
                 <div class="customer-contact">
                     ${escapeHtml(
-                        ticket.role ||
-                        "user"
+                        ticket.role || "user"
                     )}
-                    ${ticket.phone
-                        ? " • " +
-                          escapeHtml(
-                              ticket.phone
-                          )
-                        : ""}
+                    ${
+                        ticket.phone
+                            ? " • "+
+                              escapeHtml(
+                                  ticket.phone
+                              )
+                            : ""
+                    }
                 </div>
 
             </div>
 
         </div>
 
-
-        <div
-            class="messages"
-            id="messages"
-        >
+        <div class="messages" id="messages">
 
             ${
                 messages.length
-                    ? messages.map(
-                        createMessage
-                      ).join("")
-                    : `
-                        <div class="empty">
-                            No messages yet.
-                        </div>
-                    `
+                    ? messages
+                        .map(createMessage)
+                        .join("")
+                    : `<div class="empty">No messages yet.</div>`
             }
 
         </div>
-
 
         <div class="detail-controls">
 
             <div class="control-row">
 
-                <select
-                    class="select"
-                    id="statusSelect"
-                >
+                <select class="select" id="statusSelect">
 
-                    <option
-                        value="open"
-                        ${
-                            normalizeStatus(
-                                ticket.status
-                            ) === "open"
-                                ? "selected"
-                                : ""
-                        }
-                    >
-                        Open
-                    </option>
+                    ${statusOption(
+                        "open",
+                        "Open",
+                        ticket.status
+                    )}
 
-                    <option
-                        value="progress"
-                        ${
-                            normalizeStatus(
-                                ticket.status
-                            ) === "progress"
-                                ? "selected"
-                                : ""
-                        }
-                    >
-                        In Progress
-                    </option>
+                    ${statusOption(
+                        "progress",
+                        "In Progress",
+                        ticket.status
+                    )}
 
-                    <option
-                        value="resolved"
-                        ${
-                            normalizeStatus(
-                                ticket.status
-                            ) === "resolved"
-                                ? "selected"
-                                : ""
-                        }
-                    >
-                        Resolved
-                    </option>
+                    ${statusOption(
+                        "resolved",
+                        "Resolved",
+                        ticket.status
+                    )}
 
-                    <option
-                        value="closed"
-                        ${
-                            normalizeStatus(
-                                ticket.status
-                            ) === "closed"
-                                ? "selected"
-                                : ""
-                        }
-                    >
-                        Closed
-                    </option>
+                    ${statusOption(
+                        "closed",
+                        "Closed",
+                        ticket.status
+                    )}
 
                 </select>
 
-
                 <button
                     class="control-btn"
-                    onclick="updateStatus()"
+                    id="updateStatusBtn"
                 >
                     UPDATE
                 </button>
@@ -1660,7 +871,6 @@ function renderDetail(
 
         </div>
 
-
         <div class="reply">
 
             <textarea
@@ -1668,12 +878,11 @@ function renderDetail(
                 placeholder="Write a reply to the user..."
             ></textarea>
 
-
             <div class="reply-actions">
 
                 <button
                     class="send-btn"
-                    onclick="sendReply()"
+                    id="sendReplyBtn"
                 >
                     SEND REPLY
                 </button>
@@ -1681,77 +890,89 @@ function renderDetail(
             </div>
 
         </div>
-
     `;
 
+    document
+        .getElementById("updateStatusBtn")
+        ?.addEventListener(
+            "click",
+            updateStatus
+        );
 
-    const messagesBox =
+    document
+        .getElementById("sendReplyBtn")
+        ?.addEventListener(
+            "click",
+            sendReply
+        );
+
+    const box=
         document.getElementById(
             "messages"
         );
 
-
-    if(messagesBox){
-
-        messagesBox.scrollTop =
-            messagesBox.scrollHeight;
-
+    if(box){
+        box.scrollTop=
+            box.scrollHeight;
     }
 
 }
 
 
-/* =========================================
-   MESSAGE
-========================================= */
-
-function createMessage(
-    message
+function statusOption(
+    value,
+    label,
+    selected
 ){
 
-    const sender =
-        message.sender ===
-        "admin"
+    return `
+        <option
+            value="${value}"
+            ${normalizeStatus(selected)===value?"selected":""}
+        >
+            ${label}
+        </option>
+    `;
+}
+
+
+function createMessage(message){
+
+    const sender=
+        message.sender==="admin"
             ? "admin"
             : "user";
 
-
     return `
-
-        <div
-            class="message ${sender}"
-        >
+        <div class="message ${sender}">
 
             ${escapeHtml(
                 message.text ||
+                message.message ||
                 ""
             )}
 
             <div class="message-time">
-
                 ${escapeHtml(
                     message.time ||
+                    formatDateTime(
+                        message.createdAt
+                    ) ||
                     "Now"
                 )}
-
             </div>
 
         </div>
-
     `;
-
 }
 
 
-/* =========================================
-   SEND REPLY
-========================================= */
+/* ================= REPLY ================= */
 
-function sendReply(){
+async function sendReply(){
 
-    const ticket =
+    const ticket=
         getSelectedTicket();
-
 
     if(!ticket){
 
@@ -1760,24 +981,19 @@ function sendReply(){
         );
 
         return;
-
     }
 
-
-    const input =
+    const input=
         document.getElementById(
             "replyText"
         );
-
 
     if(!input){
         return;
     }
 
-
-    const text =
+    const text=
         input.value.trim();
-
 
     if(!text){
 
@@ -1788,64 +1004,53 @@ function sendReply(){
         input.focus();
 
         return;
-
     }
 
-
-    if(
-        !Array.isArray(
-            ticket.messages
-        )
-    ){
-
-        ticket.messages = [];
-
-    }
-
-
-    ticket.messages.push({
-
+    const message={
         sender:"admin",
-
         text:text,
+        time:new Date().toLocaleString(
+            "en-IN"
+        ),
+        createdAt:new Date().toISOString()
+    };
 
-        time:new Date()
-            .toLocaleString()
+    if(!Array.isArray(ticket.messages)){
+        ticket.messages=[];
+    }
 
-    });
+    ticket.messages.push(message);
+    ticket.status="progress";
+    ticket.updatedAt=
+        new Date().toISOString();
 
+    saveLocal();
 
-    ticket.status =
-        "progress";
-
-
-    saveTickets();
+    const remoteSaved=
+        await firestoreAddMessage(
+            ticket.id,
+            message
+        );
 
     renderStats();
-
     renderTickets();
-
-    renderDetail(
-        ticket
-    );
-
+    renderDetail(ticket);
 
     showToast(
-        "Reply sent successfully."
+        remoteSaved
+            ? "Reply sent successfully."
+            : "Reply saved locally."
     );
 
 }
 
 
-/* =========================================
-   UPDATE STATUS
-========================================= */
+/* ================= STATUS ================= */
 
-function updateStatus(){
+async function updateStatus(){
 
-    const ticket =
+    const ticket=
         getSelectedTicket();
-
 
     if(!ticket){
 
@@ -1854,231 +1059,247 @@ function updateStatus(){
         );
 
         return;
-
     }
 
-
-    const select =
+    const select=
         document.getElementById(
             "statusSelect"
         );
-
 
     if(!select){
         return;
     }
 
-
-    ticket.status =
+    const status=
         normalizeStatus(
             select.value
         );
 
-
-    ticket.updatedAt =
+    ticket.status=status;
+    ticket.updatedAt=
         new Date().toISOString();
 
+    saveLocal();
 
-    saveTickets();
-
-    renderStats();
-
-    renderTickets();
-
-    renderDetail(
-        ticket
-    );
-
-
-    showToast(
-        "Ticket status updated."
-    );
-
-}
-
-
-/* =========================================
-   FILTER
-========================================= */
-
-function setFilter(
-    filter,
-    button
-){
-
-    currentFilter =
-        filter;
-
-
-    document
-        .querySelectorAll(
-            ".filter"
-        )
-        .forEach(
-            function(item){
-
-                item.classList.remove(
-                    "active"
-                );
-
+    const remoteSaved=
+        await firestoreUpdate(
+            ticket.id,
+            {
+                status:status,
+                updatedAt:ticket.updatedAt
             }
         );
 
+    renderStats();
+    renderTickets();
+    renderDetail(ticket);
 
-    if(button){
+    showToast(
+        remoteSaved
+            ? "Ticket status updated."
+            : "Status saved locally."
+    );
 
-        button.classList.add(
-            "active"
-        );
+}
 
-    }
 
+/* ================= FILTER ================= */
+
+function setFilter(filter){
+
+    currentFilter=filter;
+
+    document
+        .querySelectorAll(".filter")
+        .forEach(button=>{
+            button.classList.toggle(
+                "active",
+                button.dataset.filter===filter
+            );
+        });
 
     renderTickets();
 
 }
 
 
-/* =========================================
-   SELECTED
-========================================= */
+/* ================= HELPERS ================= */
 
 function getSelectedTicket(){
 
     if(!selectedId){
-
         return null;
-
     }
 
-
     return tickets.find(
-        function(ticket){
-
-            return String(
-                ticket.id
-            ) ===
-            String(
-                selectedId
-            );
-
-        }
+        ticket=>
+            String(ticket.id)===
+            String(selectedId)
     ) || null;
-
 }
 
 
-/* =========================================
-   STATUS
-========================================= */
+function normalizeStatus(status){
 
-function normalizeStatus(
-    status
-){
-
-    const value =
+    const value=
         String(
             status ||
             "open"
         )
-        .toLowerCase();
-
+        .toLowerCase()
+        .trim();
 
     if(
-        value ===
-        "in_progress" ||
-        value ===
-        "in-progress" ||
-        value ===
-        "pending"
+        value==="in_progress" ||
+        value==="in-progress" ||
+        value==="pending"
     ){
-
         return "progress";
-
     }
 
+    if(value==="done"){
+        return "resolved";
+    }
 
     if(
-        value ===
-        "done"
+        !["open","progress","resolved","closed"]
+            .includes(value)
     ){
-
-        return "resolved";
-
+        return "open";
     }
-
 
     return value;
-
 }
 
 
-function statusLabel(
-    status
-){
+function statusLabel(status){
 
-    const labels = {
-
+    return {
         open:"Open",
-
         progress:"In Progress",
-
         resolved:"Resolved",
-
         closed:"Closed"
-
-    };
-
-
-    return labels[
-        status
-    ] || "Open";
+    }[normalizeStatus(status)] || "Open";
 
 }
 
 
-function statusClass(
-    status
-){
+function statusClass(status){
 
-    if(
-        status ===
-        "progress"
-    ){
-
-        return "status-progress";
-
-    }
-
-
-    if(
-        status ===
-        "resolved"
-    ){
-
-        return "status-resolved";
-
-    }
-
-
-    if(
-        status ===
-        "closed"
-    ){
-
-        return "status-closed";
-
-    }
-
-
-    return "status-open";
+    return {
+        open:"status-open",
+        progress:"status-progress",
+        resolved:"status-resolved",
+        closed:"status-closed"
+    }[normalizeStatus(status)] || "status-open";
 
 }
 
 
-/* =========================================
-   NAVIGATION
-========================================= */
+function getTime(value){
+
+    if(
+        value &&
+        typeof value.toDate==="function"
+    ){
+        return value.toDate().getTime();
+    }
+
+    const time=
+        new Date(value || 0).getTime();
+
+    return Number.isNaN(time)
+        ? 0
+        : time;
+}
+
+
+function formatDate(value){
+
+    const time=getTime(value);
+
+    if(!time){
+        return "—";
+    }
+
+    return new Date(time)
+        .toLocaleDateString(
+            "en-IN",
+            {
+                day:"2-digit",
+                month:"short"
+            }
+        );
+}
+
+
+function formatDateTime(value){
+
+    const time=getTime(value);
+
+    if(!time){
+        return "Now";
+    }
+
+    return new Date(time)
+        .toLocaleString(
+            "en-IN"
+        );
+}
+
+
+function setText(id,value){
+
+    const element=
+        document.getElementById(id);
+
+    if(element){
+        element.textContent=value;
+    }
+
+}
+
+
+function escapeHtml(value){
+
+    return String(
+        value ?? ""
+    )
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function showToast(message){
+
+    const toast=
+        document.getElementById(
+            "toast"
+        );
+
+    if(!toast){
+        return;
+    }
+
+    toast.textContent=message;
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer=
+        setTimeout(
+            ()=>{
+                toast.classList.remove("show");
+            },
+            2500
+        );
+
+}
+
 
 function goBack(){
 
@@ -2088,166 +1309,44 @@ function goBack(){
             window.location.host
         )
     ){
-
         history.back();
-
-    }
-    else{
-
-        window.location.href =
-            "dashboard.html";
-
-    }
-
-}
-
-
-/* =========================================
-   HELPERS
-========================================= */
-
-function setText(
-    id,
-    value
-){
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if(element){
-
-        element.textContent =
-            value;
-
-    }
-
-}
-
-
-function formatDate(
-    value
-){
-
-    if(!value){
-
-        return "—";
-
-    }
-
-
-    try{
-
-        return new Date(
-            value
-        ).toLocaleDateString(
-            "en-IN",
-            {
-                day:"2-digit",
-                month:"short"
-            }
-        );
-
-    }catch(error){
-
-        return "—";
-
-    }
-
-}
-
-
-function escapeHtml(
-    value
-){
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
-/* =========================================
-   TOAST
-========================================= */
-
-function showToast(
-    message
-){
-
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    if(!toast){
         return;
     }
 
-
-    toast.textContent =
-        message;
-
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
-
-    toastTimer =
-        setTimeout(
-            function(){
-
-                toast.classList.remove(
-                    "show"
-                );
-
-            },
-            2500
-        );
-
+    window.location.href=
+        "dashboard.html";
 }
 
 
-/* =========================================
-   INIT
-========================================= */
+/* ================= EVENTS ================= */
+
+document
+    .getElementById("searchInput")
+    ?.addEventListener(
+        "input",
+        renderTickets
+    );
+
+document
+    .querySelectorAll(".filter")
+    .forEach(button=>{
+        button.addEventListener(
+            "click",
+            ()=>{
+                setFilter(
+                    button.dataset.filter
+                );
+            }
+        );
+    });
+
+
+/* ================= INIT ================= */
 
 document.addEventListener(
     "DOMContentLoaded",
-    function(){
-
-        loadTickets();
-
+    ()=>{
+        loadTickets(false);
     }
 );
 
