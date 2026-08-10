@@ -1,62 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0, viewport-fit=cover"
 
-<head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
->
+«»
 
 <meta
-    name="theme-color"
-    content="#FFD400"
->
+name="theme-color"
+content="#FFD400"
+
+«»
 
 <meta
-    name="description"
-    content="RiderX - Chandigarh Bike Taxi, Cab, Parcel and Food Delivery"
->
+name="description"
+content="RiderX - Chandigarh Bike Taxi, Cab, Parcel and Food Delivery"
+
+«»
 
 <meta
-    name="mobile-web-app-capable"
-    content="yes"
->
+name="mobile-web-app-capable"
+content="yes"
+
+«»
 
 <meta
-    name="apple-mobile-web-app-capable"
-    content="yes"
->
+name="apple-mobile-web-app-capable"
+content="yes"
+
+«»
 
 <meta
-    name="apple-mobile-web-app-status-bar-style"
-    content="black-translucent"
->
+name="apple-mobile-web-app-status-bar-style"
+content="black-translucent"
+
+«»
 
 <meta
-    name="apple-mobile-web-app-title"
-    content="RiderX"
->
+name="apple-mobile-web-app-title"
+content="RiderX"
 
-<title>RiderX</title>
+«»
 
-<link
+<title>RiderX</title><!-- =======================================================
+     PWA
+======================================================= --><link
     rel="manifest"
     href="./manifest.json"
->
-
-<link
+><!-- =======================================================
+     MAIN CSS
+======================================================= --><link
     rel="stylesheet"
     href="./css/style.css"
->
+><!-- =======================================================
+     APPLE ICON
+======================================================= --><link
+    rel="apple-touch-icon"
+    href="./assets/logo.png"
+><!-- =======================================================
+     FAVICON
+======================================================= --><link
+    rel="icon"
+    type="image/png"
+    href="./assets/logo.png"
+><style>
 
-<style>
+/* =========================================================
+   RESET
+========================================================= */
 
 *{
     box-sizing:border-box;
 }
+
 
 html,
 body{
@@ -66,19 +80,29 @@ body{
     padding:0;
 }
 
+
 body{
     overflow:hidden;
+
     background:#070707;
     color:#fff;
+
     font-family:
         Arial,
         Helvetica,
         sans-serif;
 }
 
+
+/* =========================================================
+   SPLASH
+========================================================= */
+
 .splash{
+
     position:fixed;
     inset:0;
+
     z-index:99999;
 
     display:flex;
@@ -90,25 +114,47 @@ body{
     transition:
         opacity .35s ease,
         visibility .35s ease;
+
 }
+
 
 .splash.hide{
+
     opacity:0;
+
     visibility:hidden;
+
     pointer-events:none;
+
 }
 
+
+/* =========================================================
+   SPLASH CONTENT
+========================================================= */
+
 .splash-content{
+
     width:100%;
     max-width:360px;
+
     padding:25px;
 
     text-align:center;
+
 }
 
+
+/* =========================================================
+   RIDERX LOGO
+========================================================= */
+
 .logo{
-    width:88px;
-    height:88px;
+
+    position:relative;
+
+    width:96px;
+    height:96px;
 
     margin:0 auto 20px;
 
@@ -116,39 +162,99 @@ body{
     align-items:center;
     justify-content:center;
 
+    overflow:hidden;
+
     border-radius:25px;
 
     background:#FFD400;
-    color:#080808;
-
-    font-size:29px;
-    font-weight:1000;
 
     box-shadow:
         0 15px 45px rgba(255,212,0,.16);
 
     animation:
         logoIn .65s ease both;
+
 }
 
+
+/*
+ * Actual RiderX logo image.
+ *
+ * File:
+ * assets/logo.png
+ */
+
+.logo img{
+
+    display:block;
+
+    width:100%;
+    height:100%;
+
+    object-fit:contain;
+
+    padding:5px;
+
+}
+
+
+/*
+ * If logo.png cannot be loaded,
+ * RX text will be displayed.
+ */
+
+.logo-fallback{
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    width:100%;
+    height:100%;
+
+    color:#080808;
+
+    font-size:29px;
+    font-weight:1000;
+
+}
+
+
+/* =========================================================
+   BRAND
+========================================================= */
+
 .brand{
+
     margin:0;
 
     font-size:31px;
     line-height:1;
 
     font-weight:1000;
+
     letter-spacing:-1px;
 
     animation:
         textIn .65s .08s ease both;
+
 }
+
 
 .brand span{
+
     color:#FFD400;
+
 }
 
+
+/* =========================================================
+   TAGLINE
+========================================================= */
+
 .tagline{
+
     margin:10px 0 0;
 
     color:#777;
@@ -157,39 +263,56 @@ body{
 
     animation:
         textIn .65s .15s ease both;
+
 }
 
+
+/* =========================================================
+   LOADER
+========================================================= */
+
 .loader-wrap{
+
     margin-top:32px;
 
     animation:
         textIn .65s .22s ease both;
+
 }
 
+
 .loader{
+
     width:34px;
     height:34px;
 
     margin:0 auto;
 
     border:3px solid #292929;
+
     border-top-color:#FFD400;
 
     border-radius:50%;
 
     animation:
         spin .75s linear infinite;
+
 }
 
+
 .loading-text{
+
     margin-top:11px;
 
     color:#555;
 
     font-size:8px;
+
 }
 
+
 .status{
+
     min-height:15px;
 
     margin-top:13px;
@@ -197,51 +320,80 @@ body{
     color:#666;
 
     font-size:8px;
+
 }
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
 
 @keyframes spin{
 
     to{
-        transform:rotate(360deg);
+
+        transform:
+            rotate(360deg);
+
     }
 
 }
+
 
 @keyframes logoIn{
 
     from{
+
         opacity:0;
+
         transform:
             translateY(20px)
             scale(.8);
+
     }
 
     to{
+
         opacity:1;
+
         transform:
             translateY(0)
             scale(1);
+
     }
 
 }
+
 
 @keyframes textIn{
 
     from{
+
         opacity:0;
+
         transform:
             translateY(10px);
+
     }
 
     to{
+
         opacity:1;
+
         transform:
             translateY(0);
+
     }
 
 }
 
+
+/* =========================================================
+   FALLBACK
+========================================================= */
+
 .fallback{
+
     display:none;
 
     position:fixed;
@@ -255,141 +407,223 @@ body{
     padding:20px;
 
     background:#070707;
+
 }
+
 
 .fallback.show{
+
     display:flex;
+
 }
 
+
 .fallback-card{
+
     width:100%;
     max-width:390px;
 
     padding:25px;
 
     border:1px solid #292929;
+
     border-radius:18px;
 
     background:#111;
 
     text-align:center;
+
 }
 
+
 .fallback-card h2{
+
     margin:0 0 8px;
 
     font-size:20px;
+
 }
 
+
 .fallback-card p{
+
     margin:0;
 
     color:#777;
 
     font-size:11px;
+
     line-height:1.6;
+
 }
 
+
 .fallback-btn{
+
     width:100%;
     min-height:48px;
 
     margin-top:17px;
 
     border:0;
+
     border-radius:12px;
 
     background:#FFD400;
+
     color:#111;
 
     cursor:pointer;
 
     font-size:13px;
+
     font-weight:800;
+
 }
+
 
 .fallback-btn:active{
+
     transform:scale(.98);
+
 }
 
-</style>
 
-</head>
+/* =========================================================
+   SMALL SCREENS
+========================================================= */
+
+@media(max-height:600px){
+
+    .logo{
+
+        width:76px;
+        height:76px;
+
+        margin-bottom:14px;
+
+        border-radius:20px;
+
+    }
 
 
-<body>
+    .brand{
 
-<div
+        font-size:27px;
+
+    }
+
+
+    .loader-wrap{
+
+        margin-top:22px;
+
+    }
+
+}
+
+</style></head><body><!-- =======================================================
+     RIDERX SPLASH SCREEN
+======================================================= --><div
     class="splash"
     id="splash"
->
+><div class="splash-content">
 
-    <div class="splash-content">
 
-        <div class="logo">
+    <!-- =================================================
+         REAL RIDERX LOGO
+    ================================================== -->
+
+    <div
+        class="logo"
+        id="logoBox"
+    >
+
+        <img
+            id="riderxLogo"
+            src="./assets/logo.png"
+            alt="RiderX"
+            draggable="false"
+        >
+
+        <div
+            class="logo-fallback"
+            id="logoFallback"
+        >
             RX
         </div>
 
-        <h1 class="brand">
-            Rider<span>X</span>
-        </h1>
+    </div>
 
-        <p class="tagline">
-            Your ride. Your journey. Your choice.
-        </p>
 
-        <div class="loader-wrap">
+    <!-- =================================================
+         BRAND
+    ================================================== -->
 
-            <div class="loader"></div>
+    <h1 class="brand">
+        Rider<span>X</span>
+    </h1>
 
-            <div class="loading-text">
-                Starting RiderX...
-            </div>
 
-            <div
-                class="status"
-                id="status"
-            >
-                Preparing RiderX
-            </div>
+    <!-- =================================================
+         TAGLINE
+    ================================================== -->
 
+    <p class="tagline">
+        Your ride. Your journey. Your choice.
+    </p>
+
+
+    <!-- =================================================
+         LOADING
+    ================================================== -->
+
+    <div class="loader-wrap">
+
+        <div class="loader"></div>
+
+        <div class="loading-text">
+            Starting RiderX...
+        </div>
+
+        <div
+            class="status"
+            id="status"
+        >
+            Preparing RiderX
         </div>
 
     </div>
 
 </div>
 
-
-<div
+</div><!-- =======================================================
+     STARTUP FALLBACK
+======================================================= --><div
     class="fallback"
     id="fallback"
->
+><div class="fallback-card">
 
-    <div class="fallback-card">
+    <h2>
+        RiderX
+    </h2>
 
-        <h2>
-            RiderX
-        </h2>
+    <p>
+        We could not open the RiderX account screen
+        automatically.
+    </p>
 
-        <p>
-            We could not open the RiderX account screen
-            automatically.
-        </p>
-
-        <button
-            type="button"
-            class="fallback-btn"
-            id="fallbackBtn"
-        >
-            Continue to RiderX
-        </button>
-
-    </div>
+    <button
+        type="button"
+        class="fallback-btn"
+        id="fallbackBtn"
+    >
+        Continue to RiderX
+    </button>
 
 </div>
 
-
-<script>
+</div><script>
 
 "use strict";
 
@@ -399,26 +633,96 @@ body{
 ========================================================= */
 
 const splash =
-    document.getElementById("splash");
+    document.getElementById(
+        "splash"
+    );
+
 
 const fallback =
-    document.getElementById("fallback");
+    document.getElementById(
+        "fallback"
+    );
+
 
 const statusText =
-    document.getElementById("status");
+    document.getElementById(
+        "status"
+    );
+
 
 const fallbackBtn =
-    document.getElementById("fallbackBtn");
+    document.getElementById(
+        "fallbackBtn"
+    );
 
 
-let redirectStarted = false;
+const riderxLogo =
+    document.getElementById(
+        "riderxLogo"
+    );
+
+
+const logoFallback =
+    document.getElementById(
+        "logoFallback"
+    );
+
+
+let redirectStarted =
+    false;
+
+
+/* =========================================================
+   LOGO ERROR FALLBACK
+========================================================= */
+
+if(riderxLogo){
+
+    riderxLogo.addEventListener(
+        "error",
+        function(){
+
+            console.warn(
+                "RiderX logo.png could not be loaded."
+            );
+
+
+            riderxLogo.style.display =
+                "none";
+
+
+            if(logoFallback){
+
+                logoFallback.style.display =
+                    "flex";
+
+            }
+
+        }
+    );
+
+
+    riderxLogo.addEventListener(
+        "load",
+        function(){
+
+            console.log(
+                "RiderX logo loaded successfully."
+            );
+
+        }
+    );
+
+}
 
 
 /* =========================================================
    STATUS
 ========================================================= */
 
-function setStatus(text){
+function setStatus(
+    text
+){
 
     if(statusText){
 
@@ -434,12 +738,17 @@ function setStatus(text){
    READ JSON
 ========================================================= */
 
-function readJSON(key){
+function readJSON(
+    key
+){
 
     try{
 
         const raw =
-            localStorage.getItem(key);
+            localStorage.getItem(
+                key
+            );
+
 
         if(!raw){
 
@@ -447,12 +756,17 @@ function readJSON(key){
 
         }
 
+
         const parsed =
-            JSON.parse(raw);
+            JSON.parse(
+                raw
+            );
+
 
         if(
             parsed &&
-            typeof parsed === "object"
+            typeof parsed ===
+            "object"
         ){
 
             return parsed;
@@ -469,32 +783,15 @@ function readJSON(key){
 
     }
 
+
     return null;
 
 }
 
 
 /* =========================================================
-   GET REAL LOGIN SESSION
+   AUTHENTICATED USER
 ========================================================= */
-
-/*
- * IMPORTANT:
- *
- * Do NOT use:
- *
- * riderx_customer
- * riderx_rider
- * userRole
- * riderx_selected_role
- *
- * as proof of login.
- *
- * Those keys can contain profile/selection data.
- *
- * Only riderx_user with loggedIn === true
- * is treated as an authenticated local session.
- */
 
 function getAuthenticatedUser(){
 
@@ -506,7 +803,8 @@ function getAuthenticatedUser(){
 
     if(
         !user ||
-        typeof user !== "object"
+        typeof user !==
+        "object"
     ){
 
         return null;
@@ -522,11 +820,6 @@ function getAuthenticatedUser(){
         user.authenticated === true;
 
 
-    /*
-     * Current RiderX session must explicitly
-     * say that the user is logged in.
-     */
-
     if(
         !loggedIn &&
         !authenticated
@@ -539,7 +832,8 @@ function getAuthenticatedUser(){
 
     const status =
         String(
-            user.status || "active"
+            user.status ||
+            "active"
         )
         .trim()
         .toLowerCase();
@@ -590,7 +884,9 @@ function getAuthenticatedUser(){
    NORMALIZE ROLE
 ========================================================= */
 
-function normalizeRole(role){
+function normalizeRole(
+    role
+){
 
     const value =
         String(
@@ -601,7 +897,8 @@ function normalizeRole(role){
 
 
     if(
-        value === "driver"
+        value ===
+        "driver"
     ){
 
         return "rider";
@@ -610,8 +907,10 @@ function normalizeRole(role){
 
 
     if(
-        value === "superadmin" ||
-        value === "super_admin"
+        value ===
+        "superadmin" ||
+        value ===
+        "super_admin"
     ){
 
         return "admin";
@@ -645,18 +944,13 @@ function normalizeRole(role){
 
 function getDestination(){
 
-    /*
-     * FIRST:
-     * Check only the real authenticated session.
-     */
-
     const user =
         getAuthenticatedUser();
 
 
     /*
-     * No authenticated session:
-     * ALWAYS go to role selection.
+     * No valid local session:
+     * open role selection.
      */
 
     if(!user){
@@ -673,7 +967,8 @@ function getDestination(){
 
 
     if(
-        role === "admin"
+        role ===
+        "admin"
     ){
 
         return "./admin/dashboard.html";
@@ -682,7 +977,8 @@ function getDestination(){
 
 
     if(
-        role === "rider"
+        role ===
+        "rider"
     ){
 
         return "./rider/home.html";
@@ -691,17 +987,14 @@ function getDestination(){
 
 
     if(
-        role === "customer"
+        role ===
+        "customer"
     ){
 
         return "./customer/home.html";
 
     }
 
-
-    /*
-     * Safety fallback.
-     */
 
     return "./auth/role.html";
 
@@ -721,7 +1014,8 @@ function redirectToRiderX(){
     }
 
 
-    redirectStarted = true;
+    redirectStarted =
+        true;
 
 
     const destination =
@@ -729,9 +1023,14 @@ function redirectToRiderX(){
 
 
     setStatus(
-        destination === "./auth/role.html"
+
+        destination ===
+        "./auth/role.html"
+
             ? "Opening account selection..."
+
             : "Restoring your RiderX account..."
+
     );
 
 
@@ -796,7 +1095,7 @@ if(fallbackBtn){
 
 
 /* =========================================================
-   ERROR HANDLING
+   GLOBAL ERROR HANDLING
 ========================================================= */
 
 window.addEventListener(
@@ -853,7 +1152,9 @@ if(
         function(){
 
             navigator.serviceWorker
-                .register("./sw.js")
+                .register(
+                    "./sw.js"
+                )
                 .then(
                     function(){
 
@@ -931,8 +1232,4 @@ function startRiderX(){
 
 startRiderX();
 
-</script>
-
-</body>
-
-</html>
+</script></body></html>
