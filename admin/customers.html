@@ -1,30 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
 
-<head>
+«»
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+name="theme-color"
+content="#FFD400"
 
-<title>RiderX Admin - Customers</title>
+«»
 
-<meta name="theme-color" content="#FFD400">
+<meta
+name="description"
+content="RiderX Admin customer management"
 
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
+«»
 
-<style>
+<title>RiderX Admin - Customers</title><link
+    rel="stylesheet"
+    href="../css/style.css"
+><link
+    rel="stylesheet"
+    href="../css/dashboard.css"
+><link
+    rel="stylesheet"
+    href="../css/responsive.css"
+><style>
 
 :root{
     --yellow:#FFD400;
     --bg:#080808;
     --card:#151515;
-    --card2:#1e1e1e;
+    --card2:#1d1d1d;
     --border:#303030;
-    --muted:#777;
+    --border-soft:#292929;
+    --muted:#858585;
+    --text:#fff;
     --green:#22c55e;
     --red:#ef4444;
+    --orange:#f59e0b;
 }
 
 *{
@@ -33,25 +47,34 @@
     padding:0;
 }
 
-html,
-body{
+html{
     min-height:100%;
     background:var(--bg);
 }
 
 body{
-    color:#fff;
-    font-family:Arial,Helvetica,sans-serif;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
 
 button,
 input,
 select{
-    font-family:inherit;
+    font:inherit;
 }
 
 button{
     cursor:pointer;
+}
+
+button:disabled{
+    opacity:.45;
+    cursor:not-allowed;
 }
 
 .app{
@@ -60,7 +83,9 @@ button{
 }
 
 
-/* HEADER */
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header{
     position:sticky;
@@ -69,113 +94,192 @@ button{
 
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:12px;
 
-    padding:12px;
+    min-height:64px;
+    padding:11px 14px;
 
     background:#0c0c0c;
-    border-bottom:1px solid #292929;
+    border-bottom:1px solid var(--border-soft);
+
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
 }
 
 .back-btn{
     width:40px;
     height:40px;
 
-    border:1px solid #363636;
+    flex:0 0 40px;
+
+    border:1px solid #383838;
     border-radius:11px;
 
     background:#1b1b1b;
     color:#fff;
 
-    font-size:20px;
+    font-size:24px;
+    line-height:1;
+}
+
+.back-btn:hover{
+    border-color:#665900;
+    color:var(--yellow);
 }
 
 .logo{
-    width:38px;
-    height:38px;
+    width:40px;
+    height:40px;
 
     display:flex;
     align-items:center;
     justify-content:center;
+
+    flex:0 0 40px;
 
     border-radius:11px;
 
     background:var(--yellow);
     color:#000;
 
-    font-size:9px;
+    font-size:12px;
     font-weight:900;
 }
 
 .header-info{
+    min-width:0;
     flex:1;
 }
 
 .header-title{
-    font-size:10px;
+    font-size:15px;
     font-weight:900;
 }
 
 .header-subtitle{
     margin-top:3px;
-    color:#777;
-    font-size:5px;
+    color:var(--muted);
+    font-size:11px;
 }
 
 
-/* MAIN */
+/* =========================================================
+   MAIN
+========================================================= */
 
 .main{
     width:100%;
-    max-width:1200px;
+    max-width:1250px;
 
-    margin:auto;
+    margin:0 auto;
 
-    padding:15px;
+    padding:20px 16px 35px;
 }
 
 
-/* TOP */
+/* =========================================================
+   PAGE TOP
+========================================================= */
 
 .page-top{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:10px;
+    gap:15px;
 
-    margin-bottom:13px;
+    margin-bottom:15px;
 }
 
 .page-title{
-    font-size:14px;
+    font-size:21px;
     font-weight:900;
 }
 
 .page-description{
-    margin-top:4px;
+    margin-top:5px;
 
-    color:#777;
+    color:var(--muted);
 
-    font-size:6px;
+    font-size:12px;
 }
 
 .add-btn{
-    height:38px;
+    min-height:40px;
 
-    padding:0 13px;
+    padding:0 15px;
 
-    border:1px solid #5d5100;
+    border:1px solid #665900;
     border-radius:10px;
 
     background:var(--yellow);
     color:#000;
 
-    font-size:6px;
+    font-size:12px;
     font-weight:900;
+
+    white-space:nowrap;
+}
+
+.add-btn:hover{
+    filter:brightness(1.04);
+    transform:translateY(-1px);
 }
 
 
-/* STATS */
+/* =========================================================
+   BACKEND STATUS
+========================================================= */
+
+.backend-status{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    width:max-content;
+    max-width:100%;
+
+    margin-bottom:14px;
+    padding:7px 10px;
+
+    border:1px solid #303030;
+    border-radius:999px;
+
+    background:#121212;
+
+    color:#888;
+
+    font-size:11px;
+}
+
+.backend-dot{
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#777;
+}
+
+.backend-status.online{
+    color:#65e58b;
+}
+
+.backend-status.online .backend-dot{
+    background:var(--green);
+}
+
+.backend-status.offline{
+    color:#ff9b9b;
+}
+
+.backend-status.offline .backend-dot{
+    background:var(--red);
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
 
 .stats{
     display:grid;
@@ -183,13 +287,15 @@ button{
     grid-template-columns:
         repeat(4,minmax(0,1fr));
 
-    gap:9px;
+    gap:10px;
 
-    margin-bottom:12px;
+    margin-bottom:14px;
 }
 
 .stat{
-    padding:12px;
+    min-width:0;
+
+    padding:15px;
 
     border:1px solid var(--border);
     border-radius:14px;
@@ -198,15 +304,16 @@ button{
 }
 
 .stat-label{
-    color:#777;
-    font-size:5px;
-    font-weight:700;
+    color:var(--muted);
+
+    font-size:10px;
+    font-weight:800;
 }
 
 .stat-value{
-    margin-top:6px;
+    margin-top:7px;
 
-    font-size:15px;
+    font-size:24px;
     font-weight:900;
 }
 
@@ -223,7 +330,9 @@ button{
 }
 
 
-/* CARD */
+/* =========================================================
+   CARD
+========================================================= */
 
 .card{
     overflow:hidden;
@@ -240,93 +349,110 @@ button{
     justify-content:space-between;
     gap:10px;
 
-    padding:12px;
+    padding:15px;
 
-    border-bottom:1px solid #292929;
+    border-bottom:1px solid var(--border-soft);
 }
 
 .card-title{
-    font-size:8px;
+    font-size:14px;
     font-weight:900;
 }
 
 .card-count{
-    color:#777;
-    font-size:5px;
+    color:var(--muted);
+    font-size:11px;
 }
 
 
-/* TOOLBAR */
+/* =========================================================
+   TOOLBAR
+========================================================= */
 
 .toolbar{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:9px;
 
-    padding:10px;
+    padding:12px;
 
-    border-bottom:1px solid #292929;
+    border-bottom:1px solid var(--border-soft);
 }
 
 .search-box{
     position:relative;
     flex:1;
+    min-width:0;
 }
 
 .search-icon{
     position:absolute;
 
-    left:10px;
+    left:11px;
     top:50%;
 
     transform:translateY(-50%);
 
-    color:#666;
+    color:#777;
 
-    font-size:10px;
+    font-size:14px;
+
+    pointer-events:none;
 }
 
 .search{
     width:100%;
-    height:38px;
+    height:40px;
 
-    padding:0 10px 0 30px;
+    padding:0 12px 0 35px;
 
     outline:none;
 
-    border:1px solid #373737;
+    border:1px solid #383838;
     border-radius:10px;
 
     background:#202020;
     color:#fff;
 
-    font-size:6px;
+    font-size:12px;
+}
+
+.search::placeholder{
+    color:#666;
 }
 
 .search:focus{
-    border-color:#6b5b00;
+    border-color:#776700;
+    box-shadow:
+        0 0 0 2px
+        rgba(255,212,0,.06);
 }
 
 .filter{
-    height:38px;
+    width:150px;
+    height:40px;
 
-    min-width:105px;
-
-    padding:0 9px;
+    padding:0 10px;
 
     outline:none;
 
-    border:1px solid #373737;
+    border:1px solid #383838;
     border-radius:10px;
 
     background:#202020;
     color:#fff;
 
-    font-size:6px;
+    font-size:12px;
+}
+
+.filter:focus{
+    border-color:#776700;
 }
 
 
-/* CUSTOMER LIST */
+/* =========================================================
+   CUSTOMER LIST
+========================================================= */
 
 .customer-list{
     width:100%;
@@ -336,18 +462,21 @@ button{
     display:grid;
 
     grid-template-columns:
-        minmax(170px,1.4fr)
-        minmax(130px,1fr)
-        100px
+        minmax(220px,1.5fr)
+        minmax(145px,1fr)
         90px
-        70px;
+        95px
+        110px;
 
     align-items:center;
-    gap:10px;
 
-    padding:11px 12px;
+    gap:12px;
 
-    border-bottom:1px solid #292929;
+    min-height:70px;
+
+    padding:12px 14px;
+
+    border-bottom:1px solid var(--border-soft);
 }
 
 .customer-row:last-child{
@@ -361,26 +490,26 @@ button{
 .customer-info{
     display:flex;
     align-items:center;
-    gap:9px;
+    gap:10px;
 
     min-width:0;
 }
 
 .avatar{
-    width:38px;
-    height:38px;
-    min-width:38px;
+    width:42px;
+    height:42px;
+    min-width:42px;
 
     display:flex;
     align-items:center;
     justify-content:center;
 
-    border-radius:11px;
+    border-radius:12px;
 
     background:#262626;
     color:var(--yellow);
 
-    font-size:10px;
+    font-size:13px;
     font-weight:900;
 }
 
@@ -391,7 +520,7 @@ button{
 .customer-name{
     overflow:hidden;
 
-    font-size:6px;
+    font-size:13px;
     font-weight:900;
 
     text-overflow:ellipsis;
@@ -403,22 +532,28 @@ button{
 
     overflow:hidden;
 
-    color:#666;
+    color:#777;
 
-    font-size:5px;
+    font-size:10px;
 
     text-overflow:ellipsis;
     white-space:nowrap;
 }
 
 .cell{
+    overflow:hidden;
+
     color:#aaa;
-    font-size:5.5px;
+
+    font-size:11px;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .cell strong{
     color:#fff;
-    font-size:6px;
+    font-size:12px;
 }
 
 .status{
@@ -426,17 +561,19 @@ button{
     align-items:center;
     justify-content:center;
 
-    padding:5px 7px;
+    min-width:60px;
 
-    border-radius:20px;
+    padding:6px 9px;
 
-    font-size:4.5px;
+    border-radius:999px;
+
+    font-size:10px;
     font-weight:900;
 }
 
 .status.active{
     background:#102517;
-    color:var(--green);
+    color:#4ade80;
 }
 
 .status.blocked{
@@ -449,6 +586,11 @@ button{
     color:var(--yellow);
 }
 
+.status.unknown{
+    background:#252525;
+    color:#aaa;
+}
+
 .actions{
     display:flex;
     justify-content:flex-end;
@@ -456,55 +598,79 @@ button{
 }
 
 .action{
-    width:29px;
-    height:29px;
+    width:31px;
+    height:31px;
 
-    border:1px solid #373737;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #383838;
     border-radius:8px;
 
     background:#222;
     color:#fff;
 
-    font-size:9px;
+    font-size:13px;
 }
 
 .action:hover{
     border-color:#685b00;
+    color:var(--yellow);
 }
 
 .action.danger{
     color:#ff7070;
 }
 
-
-/* EMPTY */
-
-.empty{
-    padding:35px 15px;
-
-    color:#666;
-
-    text-align:center;
-
-    font-size:6px;
+.action.danger:hover{
+    border-color:#713131;
 }
 
 
-/* PAGINATION */
+/* =========================================================
+   EMPTY / LOADING
+========================================================= */
+
+.empty{
+    padding:50px 15px;
+
+    color:#777;
+
+    text-align:center;
+
+    font-size:12px;
+}
+
+.empty strong{
+    display:block;
+
+    margin-bottom:6px;
+
+    color:#aaa;
+
+    font-size:14px;
+}
+
+
+/* =========================================================
+   PAGINATION
+========================================================= */
 
 .pagination{
     display:flex;
     align-items:center;
     justify-content:space-between;
+    gap:10px;
 
-    padding:10px 12px;
+    padding:12px 14px;
 
-    border-top:1px solid #292929;
+    border-top:1px solid var(--border-soft);
 }
 
 .page-info{
-    color:#666;
-    font-size:5px;
+    color:#777;
+    font-size:11px;
 }
 
 .page-buttons{
@@ -513,26 +679,35 @@ button{
 }
 
 .page-btn{
-    width:30px;
-    height:30px;
+    width:34px;
+    height:34px;
 
-    border:1px solid #373737;
+    border:1px solid #383838;
     border-radius:8px;
 
     background:#202020;
     color:#fff;
 
-    font-size:7px;
+    font-size:16px;
+}
+
+.page-btn:hover:not(:disabled){
+    border-color:#665900;
 }
 
 .page-btn.active{
     border-color:#665900;
     background:var(--yellow);
     color:#000;
+
+    font-size:11px;
+    font-weight:900;
 }
 
 
-/* MODAL */
+/* =========================================================
+   MODAL
+========================================================= */
 
 .modal{
     position:fixed;
@@ -546,7 +721,10 @@ button{
 
     padding:15px;
 
-    background:rgba(0,0,0,.78);
+    background:rgba(0,0,0,.80);
+
+    backdrop-filter:blur(5px);
+    -webkit-backdrop-filter:blur(5px);
 }
 
 .modal.show{
@@ -556,26 +734,33 @@ button{
 .modal-card{
     width:100%;
     max-width:450px;
+    max-height:calc(100vh - 30px);
 
-    padding:17px;
+    overflow:auto;
+
+    padding:20px;
 
     border:1px solid #383838;
     border-radius:17px;
 
     background:#171717;
+
+    box-shadow:
+        0 25px 80px
+        rgba(0,0,0,.55);
 }
 
 .modal-title{
-    font-size:10px;
+    font-size:16px;
     font-weight:900;
 }
 
 .modal-text{
-    margin-top:6px;
+    margin-top:7px;
 
-    color:#777;
+    color:#888;
 
-    font-size:6px;
+    font-size:12px;
     line-height:1.6;
 }
 
@@ -583,16 +768,17 @@ button{
     display:flex;
     gap:8px;
 
-    margin-top:15px;
+    margin-top:18px;
 }
 
 .modal-btn{
     flex:1;
-    height:40px;
+
+    min-height:42px;
 
     border-radius:10px;
 
-    font-size:6px;
+    font-size:11px;
     font-weight:900;
 }
 
@@ -602,35 +788,45 @@ button{
     color:#fff;
 }
 
+.cancel-btn:hover{
+    border-color:#555;
+}
+
 .confirm-btn{
     border:1px solid #5c5100;
     background:var(--yellow);
     color:#000;
 }
 
+.confirm-btn:hover{
+    filter:brightness(1.04);
+}
 
-/* FORM */
+
+/* =========================================================
+   FORM
+========================================================= */
 
 .form-group{
-    margin-top:11px;
+    margin-top:13px;
 }
 
 .form-label{
     display:block;
 
-    margin-bottom:5px;
+    margin-bottom:6px;
 
-    color:#888;
+    color:#999;
 
-    font-size:5px;
+    font-size:10px;
     font-weight:800;
 }
 
 .form-input{
     width:100%;
-    height:40px;
+    height:42px;
 
-    padding:0 10px;
+    padding:0 11px;
 
     outline:none;
 
@@ -640,15 +836,76 @@ button{
     background:#202020;
     color:#fff;
 
-    font-size:6px;
+    font-size:12px;
+}
+
+.form-input::placeholder{
+    color:#666;
 }
 
 .form-input:focus{
     border-color:#6b5c00;
+    box-shadow:
+        0 0 0 2px
+        rgba(255,212,0,.05);
+}
+
+.form-help{
+    margin-top:5px;
+
+    color:#666;
+
+    font-size:10px;
 }
 
 
-/* TOAST */
+/* =========================================================
+   CUSTOMER DETAILS
+========================================================= */
+
+.details-grid{
+    display:grid;
+
+    grid-template-columns:
+        repeat(2,minmax(0,1fr));
+
+    gap:10px;
+
+    margin-top:15px;
+}
+
+.detail-box{
+    padding:11px;
+
+    border:1px solid #303030;
+    border-radius:10px;
+
+    background:#202020;
+}
+
+.detail-label{
+    color:#666;
+    font-size:9px;
+    font-weight:800;
+}
+
+.detail-value{
+    margin-top:5px;
+
+    overflow:hidden;
+
+    color:#fff;
+
+    font-size:12px;
+
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:fixed;
@@ -661,7 +918,7 @@ button{
     width:calc(100% - 30px);
     max-width:450px;
 
-    padding:11px;
+    padding:12px 14px;
 
     border:1px solid #373737;
     border-radius:11px;
@@ -671,14 +928,17 @@ button{
 
     text-align:center;
 
-    font-size:6px;
+    font-size:12px;
+    font-weight:700;
 
     opacity:0;
     pointer-events:none;
 
     transform:translate(-50%,20px);
 
-    transition:.25s;
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
 }
 
 .toast.show{
@@ -686,10 +946,24 @@ button{
     transform:translate(-50%,0);
 }
 
+.toast.success{
+    border-color:#28683a;
+    background:#16351f;
+    color:#65e58b;
+}
 
-/* RESPONSIVE */
+.toast.error{
+    border-color:#713131;
+    background:#351616;
+    color:#ff8b8b;
+}
 
-@media(max-width:850px){
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:950px){
 
     .stats{
         grid-template-columns:
@@ -698,10 +972,23 @@ button{
 
     .customer-row{
         grid-template-columns:
-            minmax(180px,1.4fr)
-            90px
+            minmax(190px,1.5fr)
+            120px
             75px
-            65px;
+            95px
+            100px;
+    }
+
+}
+
+@media(max-width:800px){
+
+    .customer-row{
+        grid-template-columns:
+            minmax(180px,1.5fr)
+            105px
+            70px
+            90px;
     }
 
     .customer-row .email-cell{
@@ -710,18 +997,41 @@ button{
 
 }
 
-@media(max-width:600px){
+@media(max-width:650px){
+
+    .header{
+        min-height:58px;
+        padding:9px 11px;
+    }
+
+    .header-title{
+        font-size:14px;
+    }
+
+    .header-subtitle{
+        font-size:10px;
+    }
 
     .main{
-        padding:11px;
+        padding:15px 11px 30px;
     }
 
     .page-top{
         align-items:flex-start;
     }
 
+    .page-title{
+        font-size:18px;
+    }
+
+    .page-description{
+        font-size:11px;
+    }
+
     .add-btn{
-        padding:0 9px;
+        min-height:38px;
+        padding:0 10px;
+        font-size:10px;
     }
 
     .toolbar{
@@ -737,422 +1047,523 @@ button{
         grid-template-columns:
             minmax(0,1fr)
             70px
-            60px;
+            95px;
+
+        gap:7px;
+
+        padding:11px;
     }
 
     .customer-row .ride-cell{
         display:none;
     }
 
-    .customer-row .status-cell{
+    .customer-info{
+        min-width:0;
+    }
+
+    .customer-name{
+        font-size:12px;
+    }
+
+    .customer-email{
+        font-size:9px;
+    }
+
+    .avatar{
+        width:38px;
+        height:38px;
+        min-width:38px;
+    }
+
+    .status-cell{
         text-align:right;
+    }
+
+    .actions{
+        justify-content:flex-end;
+    }
+
+    .action{
+        width:29px;
+        height:29px;
     }
 
 }
 
-</style>
-
-</head>
-
-<body>
-
-<div class="app">
-
-
-    <!-- HEADER -->
-
-    <header class="header">
-
-        <button
-            class="back-btn"
-            onclick="goBack()"
-        >
-            ‹
-        </button>
-
-        <div class="logo">
-            RX
-        </div>
-
-        <div class="header-info">
-
-            <div class="header-title">
-                Customers
-            </div>
-
-            <div class="header-subtitle">
-                RiderX customer management
-            </div>
-
-        </div>
-
-    </header>
-
-
-    <main class="main">
-
-
-        <!-- TOP -->
-
-        <section class="page-top">
-
-            <div>
-
-                <div class="page-title">
-                    Customer Management
-                </div>
-
-                <div class="page-description">
-                    View and manage all RiderX customers.
-                </div>
-
-            </div>
-
-            <button
-                class="add-btn"
-                onclick="openAddCustomer()"
-            >
-                + CUSTOMER
-            </button>
-
-        </section>
-
-
-        <!-- STATS -->
-
-        <section class="stats">
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    TOTAL CUSTOMERS
-                </div>
-
-                <div
-                    class="stat-value yellow"
-                    id="totalCustomers"
-                >
-                    0
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    ACTIVE
-                </div>
-
-                <div
-                    class="stat-value green"
-                    id="activeCustomers"
-                >
-                    0
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    BLOCKED
-                </div>
-
-                <div
-                    class="stat-value red"
-                    id="blockedCustomers"
-                >
-                    0
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    NEW TODAY
-                </div>
-
-                <div
-                    class="stat-value yellow"
-                    id="newCustomers"
-                >
-                    0
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- CUSTOMER CARD -->
-
-        <section class="card">
-
-            <div class="card-header">
-
-                <div class="card-title">
-                    All Customers
-                </div>
-
-                <div
-                    class="card-count"
-                    id="resultCount"
-                >
-                    0 customers
-                </div>
-
-            </div>
-
-
-            <!-- TOOLBAR -->
-
-            <div class="toolbar">
-
-                <div class="search-box">
-
-                    <span class="search-icon">
-                        🔍
-                    </span>
-
-                    <input
-                        class="search"
-                        id="searchInput"
-                        type="search"
-                        placeholder="Search name, phone or email..."
-                        autocomplete="off"
-                    >
-
-                </div>
-
-
-                <select
-                    class="filter"
-                    id="statusFilter"
-                >
-
-                    <option value="all">
-                        All customers
-                    </option>
-
-                    <option value="active">
-                        Active
-                    </option>
-
-                    <option value="blocked">
-                        Blocked
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- CUSTOMER LIST -->
-
-            <div
-                class="customer-list"
-                id="customerList"
-            >
-
-                <div class="empty">
-                    Loading customers...
-                </div>
-
-            </div>
-
-
-            <!-- PAGINATION -->
-
-            <div class="pagination">
-
-                <div
-                    class="page-info"
-                    id="pageInfo"
-                >
-                    Showing 0 customers
-                </div>
-
-                <div class="page-buttons">
-
-                    <button
-                        class="page-btn"
-                        onclick="previousPage()"
-                    >
-                        ‹
-                    </button>
-
-                    <button
-                        class="page-btn active"
-                        id="pageNumber"
-                    >
-                        1
-                    </button>
-
-                    <button
-                        class="page-btn"
-                        onclick="nextPage()"
-                    >
-                        ›
-                    </button>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-    </main>
+@media(max-width:480px){
+
+    .stats{
+        gap:7px;
+    }
+
+    .stat{
+        padding:12px;
+    }
+
+    .stat-label{
+        font-size:9px;
+    }
+
+    .stat-value{
+        font-size:20px;
+    }
+
+    .page-top{
+        flex-direction:column;
+    }
+
+    .add-btn{
+        width:100%;
+    }
+
+    .details-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+</style></head><body><div class="app"><header class="header"><button
+    type="button"
+    class="back-btn"
+    id="backBtn"
+    aria-label="Go back"
+>
+    ‹
+</button>
+
+<div class="logo">
+    RX
+</div>
+
+<div class="header-info">
+
+    <div class="header-title">
+        Customers
+    </div>
+
+    <div class="header-subtitle">
+        RiderX customer management
+    </div>
+
+</div>
+
+</header><main class="main"><section class="page-top"><div>
+
+    <div class="page-title">
+        Customer Management
+    </div>
+
+    <div class="page-description">
+        View and manage RiderX customers.
+    </div>
+
+</div>
+
+<button
+    type="button"
+    class="add-btn"
+    id="addCustomerBtn"
+>
+    + CUSTOMER
+</button>
+
+</section><div
+    class="backend-status"
+    id="backendStatus"
+><span
+    class="backend-dot"
+    id="backendDot"
+></span>
+
+<span id="backendStatusText">
+    Connecting to customer database...
+</span>
+
+</div><section class="stats"><div class="stat">
+
+    <div class="stat-label">
+        TOTAL CUSTOMERS
+    </div>
+
+    <div
+        class="stat-value yellow"
+        id="totalCustomers"
+    >
+        0
+    </div>
 
 </div>
 
 
-<!-- ADD CUSTOMER MODAL -->
+<div class="stat">
+
+    <div class="stat-label">
+        ACTIVE
+    </div>
+
+    <div
+        class="stat-value green"
+        id="activeCustomers"
+    >
+        0
+    </div>
+
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        BLOCKED
+    </div>
+
+    <div
+        class="stat-value red"
+        id="blockedCustomers"
+    >
+        0
+    </div>
+
+</div>
+
+
+<div class="stat">
+
+    <div class="stat-label">
+        NEW TODAY
+    </div>
+
+    <div
+        class="stat-value yellow"
+        id="newCustomers"
+    >
+        0
+    </div>
+
+</div>
+
+</section><section class="card"><div class="card-header"><div class="card-title">
+    All Customers
+</div>
 
 <div
+    class="card-count"
+    id="resultCount"
+>
+    0 customers
+</div>
+
+</div><div class="toolbar"><div class="search-box">
+
+    <span class="search-icon">
+        🔍
+    </span>
+
+    <input
+        class="search"
+        id="searchInput"
+        type="search"
+        placeholder="Search name, phone or email..."
+        autocomplete="off"
+    >
+
+</div>
+
+
+<select
+    class="filter"
+    id="statusFilter"
+>
+
+    <option value="all">
+        All customers
+    </option>
+
+    <option value="active">
+        Active
+    </option>
+
+    <option value="blocked">
+        Blocked
+    </option>
+
+    <option value="pending">
+        Pending
+    </option>
+
+</select>
+
+</div><div
+    class="customer-list"
+    id="customerList"
+><div class="empty">
+    <strong>Loading customers</strong>
+    Connecting to RiderX database...
+</div>
+
+</div><div class="pagination"><div
+    class="page-info"
+    id="pageInfo"
+>
+    Showing 0 customers
+</div>
+
+<div class="page-buttons">
+
+    <button
+        type="button"
+        class="page-btn"
+        id="previousPageBtn"
+        aria-label="Previous page"
+    >
+        ‹
+    </button>
+
+    <button
+        type="button"
+        class="page-btn active"
+        id="pageNumber"
+        aria-label="Current page"
+    >
+        1
+    </button>
+
+    <button
+        type="button"
+        class="page-btn"
+        id="nextPageBtn"
+        aria-label="Next page"
+    >
+        ›
+    </button>
+
+</div>
+
+</div></section></main></div><!-- =======================================================
+     ADD CUSTOMER MODAL
+======================================================= --><div
     class="modal"
     id="customerModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="customerModalTitle"
+><div class="modal-card"><div
+    class="modal-title"
+    id="customerModalTitle"
 >
+    Add Customer
+</div>
 
-    <div class="modal-card">
+<div
+    class="modal-text"
+    id="customerModalDescription"
+>
+    Add a customer profile to the RiderX customer database.
+</div>
 
-        <div class="modal-title">
-            Add Customer
-        </div>
 
-        <div class="form-group">
+<div class="form-group">
 
-            <label class="form-label">
-                CUSTOMER NAME
-            </label>
+    <label
+        class="form-label"
+        for="customerName"
+    >
+        CUSTOMER NAME
+    </label>
 
-            <input
-                class="form-input"
-                id="customerName"
-                type="text"
-                placeholder="Customer name"
-            >
+    <input
+        class="form-input"
+        id="customerName"
+        type="text"
+        maxlength="80"
+        placeholder="Customer name"
+        autocomplete="name"
+    >
 
-        </div>
+</div>
 
-        <div class="form-group">
 
-            <label class="form-label">
-                PHONE
-            </label>
+<div class="form-group">
 
-            <input
-                class="form-input"
-                id="customerPhone"
-                type="tel"
-                placeholder="Phone number"
-            >
+    <label
+        class="form-label"
+        for="customerPhone"
+    >
+        PHONE
+    </label>
 
-        </div>
+    <input
+        class="form-input"
+        id="customerPhone"
+        type="tel"
+        maxlength="20"
+        placeholder="Phone number"
+        autocomplete="tel"
+    >
 
-        <div class="form-group">
+</div>
 
-            <label class="form-label">
-                EMAIL
-            </label>
 
-            <input
-                class="form-input"
-                id="customerEmail"
-                type="email"
-                placeholder="Email address"
-            >
+<div class="form-group">
 
-        </div>
+    <label
+        class="form-label"
+        for="customerEmail"
+    >
+        EMAIL
+    </label>
 
-        <div class="modal-actions">
+    <input
+        class="form-input"
+        id="customerEmail"
+        type="email"
+        maxlength="120"
+        placeholder="Email address"
+        autocomplete="email"
+    >
 
-            <button
-                class="modal-btn cancel-btn"
-                onclick="closeCustomerModal()"
-            >
-                CANCEL
-            </button>
-
-            <button
-                class="modal-btn confirm-btn"
-                onclick="addCustomer()"
-            >
-                ADD CUSTOMER
-            </button>
-
-        </div>
-
+    <div class="form-help">
+        This creates the customer profile. It does not create a Firebase Auth password account.
     </div>
 
 </div>
 
 
-<!-- CONFIRM MODAL -->
+<div class="modal-actions">
 
-<div
+    <button
+        type="button"
+        class="modal-btn cancel-btn"
+        id="cancelCustomerBtn"
+    >
+        CANCEL
+    </button>
+
+    <button
+        type="button"
+        class="modal-btn confirm-btn"
+        id="saveCustomerBtn"
+    >
+        ADD CUSTOMER
+    </button>
+
+</div>
+
+</div></div><!-- =======================================================
+     CUSTOMER DETAILS MODAL
+======================================================= --><div
     class="modal"
-    id="confirmModal"
+    id="detailsModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="detailsTitle"
+><div class="modal-card"><div
+    class="modal-title"
+    id="detailsTitle"
 >
-
-    <div class="modal-card">
-
-        <div
-            class="modal-title"
-            id="confirmTitle"
-        >
-            Confirm action
-        </div>
-
-        <div
-            class="modal-text"
-            id="confirmText"
-        >
-            Are you sure?
-        </div>
-
-        <div class="modal-actions">
-
-            <button
-                class="modal-btn cancel-btn"
-                onclick="closeConfirm()"
-            >
-                CANCEL
-            </button>
-
-            <button
-                class="modal-btn confirm-btn"
-                id="confirmActionBtn"
-                onclick="executeConfirm()"
-            >
-                CONFIRM
-            </button>
-
-        </div>
-
-    </div>
-
+    Customer Details
 </div>
 
-
 <div
-    class="toast"
-    id="toast"
+    class="details-grid"
+    id="detailsGrid"
 ></div>
 
+<div class="modal-actions">
 
-<script>
+    <button
+        type="button"
+        class="modal-btn cancel-btn"
+        id="closeDetailsBtn"
+    >
+        CLOSE
+    </button>
 
-/* =========================================
-   RIDERX ADMIN CUSTOMERS
-========================================= */
+</div>
 
-const STORAGE_KEY =
+</div></div><!-- =======================================================
+     CONFIRM MODAL
+======================================================= --><div
+    class="modal"
+    id="confirmModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirmTitle"
+><div class="modal-card"><div
+    class="modal-title"
+    id="confirmTitle"
+>
+    Confirm action
+</div>
+
+<div
+    class="modal-text"
+    id="confirmText"
+>
+    Are you sure?
+</div>
+
+<div class="modal-actions">
+
+    <button
+        type="button"
+        class="modal-btn cancel-btn"
+        id="cancelConfirmBtn"
+    >
+        CANCEL
+    </button>
+
+    <button
+        type="button"
+        class="modal-btn confirm-btn"
+        id="confirmActionBtn"
+    >
+        CONFIRM
+    </button>
+
+</div>
+
+</div></div><div
+    class="toast"
+    id="toast"
+    role="status"
+    aria-live="polite"
+></div><script type="module">
+
+"use strict";
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const LOCAL_STORAGE_KEY =
     "riderxAdminCustomers";
 
 const PAGE_SIZE =
     10;
+
+const FIREBASE_VERSION =
+    "10.14.1";
+
+
+/*
+ * Possible RiderX customer collections.
+ *
+ * The first collection that is successfully
+ * readable will be used.
+ */
+
+const CUSTOMER_COLLECTIONS = [
+    "customers",
+    "users"
+];
+
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let customers = [];
 
@@ -1162,83 +1573,817 @@ let currentPage = 1;
 
 let confirmAction = null;
 
-let toastTimer;
+let toastTimer = null;
+
+let firebaseContext = null;
+
+let firebaseCollectionName = null;
+
+let usingFirebase = false;
+
+let loading = false;
 
 
-/* =========================================
-   DEFAULT DATA
-========================================= */
+/* =========================================================
+   DOM
+========================================================= */
 
-function loadCustomers(){
+const customerList =
+    document.getElementById(
+        "customerList"
+    );
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+const statusFilter =
+    document.getElementById(
+        "statusFilter"
+    );
+
+const previousPageBtn =
+    document.getElementById(
+        "previousPageBtn"
+    );
+
+const nextPageBtn =
+    document.getElementById(
+        "nextPageBtn"
+    );
+
+const pageNumber =
+    document.getElementById(
+        "pageNumber"
+    );
+
+const customerModal =
+    document.getElementById(
+        "customerModal"
+    );
+
+const detailsModal =
+    document.getElementById(
+        "detailsModal"
+    );
+
+const confirmModal =
+    document.getElementById(
+        "confirmModal"
+    );
+
+const toast =
+    document.getElementById(
+        "toast"
+    );
+
+
+/* =========================================================
+   INIT
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    init
+);
+
+
+async function init(){
+
+    bindEvents();
+
+    restoreLocalCustomers();
+
+    render();
+
+    setBackendStatus(
+        "connecting",
+        "Connecting to RiderX database..."
+    );
+
+    await loadCustomers();
+
+}
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+function bindEvents(){
+
+    searchInput?.addEventListener(
+        "input",
+        function(){
+
+            currentPage = 1;
+
+            applyFilters();
+
+        }
+    );
+
+
+    statusFilter?.addEventListener(
+        "change",
+        function(){
+
+            currentPage = 1;
+
+            applyFilters();
+
+        }
+    );
+
+
+    previousPageBtn?.addEventListener(
+        "click",
+        previousPage
+    );
+
+
+    nextPageBtn?.addEventListener(
+        "click",
+        nextPage
+    );
+
+
+    document
+        .getElementById(
+            "pageNumber"
+        )
+        ?.addEventListener(
+            "click",
+            function(){
+
+                currentPage = 1;
+
+                renderList();
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "addCustomerBtn"
+        )
+        ?.addEventListener(
+            "click",
+            openAddCustomer
+        );
+
+
+    document
+        .getElementById(
+            "cancelCustomerBtn"
+        )
+        ?.addEventListener(
+            "click",
+            closeCustomerModal
+        );
+
+
+    document
+        .getElementById(
+            "saveCustomerBtn"
+        )
+        ?.addEventListener(
+            "click",
+            addCustomer
+        );
+
+
+    document
+        .getElementById(
+            "closeDetailsBtn"
+        )
+        ?.addEventListener(
+            "click",
+            closeDetails
+        );
+
+
+    document
+        .getElementById(
+            "cancelConfirmBtn"
+        )
+        ?.addEventListener(
+            "click",
+            closeConfirm
+        );
+
+
+    document
+        .getElementById(
+            "confirmActionBtn"
+        )
+        ?.addEventListener(
+            "click",
+            executeConfirm
+        );
+
+
+    document
+        .getElementById(
+            "backBtn"
+        )
+        ?.addEventListener(
+            "click",
+            goBack
+        );
+
+
+    customerModal?.addEventListener(
+        "click",
+        function(event){
+
+            if(
+                event.target ===
+                customerModal
+            ){
+
+                closeCustomerModal();
+
+            }
+
+        }
+    );
+
+
+    detailsModal?.addEventListener(
+        "click",
+        function(event){
+
+            if(
+                event.target ===
+                detailsModal
+            ){
+
+                closeDetails();
+
+            }
+
+        }
+    );
+
+
+    confirmModal?.addEventListener(
+        "click",
+        function(event){
+
+            if(
+                event.target ===
+                confirmModal
+            ){
+
+                closeConfirm();
+
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        function(event){
+
+            if(
+                event.key ===
+                "Escape"
+            ){
+
+                closeAllModals();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FIREBASE LOADER
+========================================================= */
+
+async function loadFirebase(){
+
+    if(
+        firebaseContext
+    ){
+
+        return firebaseContext;
+
+    }
+
 
     try{
 
-        const raw =
-            localStorage.getItem(
-                STORAGE_KEY
+        const config =
+            await import(
+                "../firebase/firebase-config.js"
             );
 
+
+        let db =
+            config.db ||
+            config.firestore ||
+            window.riderxDb ||
+            window.db ||
+            null;
+
+
+        let auth =
+            config.auth ||
+            window.riderxAuth ||
+            window.firebaseAuth ||
+            null;
+
+
+        let app =
+            config.app ||
+            config.firebaseApp ||
+            null;
+
+
+        let firestoreModule =
+            null;
+
+
+        /*
+         * If the existing config exposes
+         * an initialized Firebase app, derive
+         * Firestore from that app.
+         */
+
         if(
-            raw
+            !db &&
+            app
         ){
 
-            const parsed =
-                JSON.parse(
-                    raw
+            try{
+
+                firestoreModule =
+                    await import(
+                        "https://www.gstatic.com/firebasejs/"
+                        + FIREBASE_VERSION
+                        + "/firebase-firestore.js"
+                    );
+
+
+                db =
+                    firestoreModule.getFirestore(
+                        app
+                    );
+
+            }catch(error){
+
+                console.warn(
+                    "Could not derive Firestore:",
+                    error
                 );
-
-            if(
-                Array.isArray(parsed)
-            ){
-
-                customers =
-                    parsed;
 
             }
 
         }
 
+
+        /*
+         * Some RiderX config versions may export
+         * a Firestore instance under another name.
+         */
+
+        if(
+            !db &&
+            config.firestoreDb
+        ){
+
+            db =
+                config.firestoreDb;
+
+        }
+
+
+        /*
+         * Load Firestore module if we have a
+         * database instance but not helpers.
+         */
+
+        if(
+            db &&
+            !firestoreModule
+        ){
+
+            try{
+
+                firestoreModule =
+                    await import(
+                        "https://www.gstatic.com/firebasejs/"
+                        + FIREBASE_VERSION
+                        + "/firebase-firestore.js"
+                    );
+
+            }catch(error){
+
+                console.warn(
+                    "Firestore module unavailable:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        if(
+            db &&
+            firestoreModule
+        ){
+
+            firebaseContext = {
+
+                config,
+
+                db,
+
+                auth,
+
+                app,
+
+                collection:
+                    firestoreModule.collection,
+
+                getDocs:
+                    firestoreModule.getDocs,
+
+                getDoc:
+                    firestoreModule.getDoc,
+
+                doc:
+                    firestoreModule.doc,
+
+                addDoc:
+                    firestoreModule.addDoc,
+
+                setDoc:
+                    firestoreModule.setDoc,
+
+                updateDoc:
+                    firestoreModule.updateDoc,
+
+                deleteDoc:
+                    firestoreModule.deleteDoc,
+
+                serverTimestamp:
+                    firestoreModule.serverTimestamp,
+
+                query:
+                    firestoreModule.query,
+
+                orderBy:
+                    firestoreModule.orderBy,
+
+                limit:
+                    firestoreModule.limit
+
+            };
+
+
+            return firebaseContext;
+
+        }
+
+
     }catch(error){
 
-        console.log(
+        console.warn(
+            "RiderX Firebase config unavailable:",
             error
         );
 
     }
 
 
-    /*
-      Do not create fake customers.
-      Real Firebase/customer data can
-      populate this page later.
-    */
+    return null;
 
-    if(
-        !Array.isArray(
-            customers
-        )
+}
+
+
+/* =========================================================
+   LOAD CUSTOMERS
+========================================================= */
+
+async function loadCustomers(){
+
+    loading = true;
+
+    try{
+
+        const firebase =
+            await loadFirebase();
+
+
+        if(
+            firebase
+        ){
+
+            const loaded =
+                await loadCustomersFromFirebase(
+                    firebase
+                );
+
+
+            if(
+                loaded.success
+            ){
+
+                customers =
+                    loaded.customers;
+
+                firebaseCollectionName =
+                    loaded.collectionName;
+
+                usingFirebase =
+                    true;
+
+                saveLocalCustomers();
+
+                setBackendStatus(
+                    "online",
+                    "Firebase customer database connected"
+                );
+
+                applyFilters();
+
+                return;
+
+            }
+
+        }
+
+
+        /*
+         * Firebase unavailable:
+         * preserve local data as offline fallback.
+         */
+
+        usingFirebase =
+            false;
+
+        setBackendStatus(
+            "offline",
+            "Firebase unavailable • offline data mode"
+        );
+
+        applyFilters();
+
+    }catch(error){
+
+        console.error(
+            "Customer loading error:",
+            error
+        );
+
+        usingFirebase =
+            false;
+
+        setBackendStatus(
+            "offline",
+            "Customer database unavailable"
+        );
+
+        applyFilters();
+
+        showToast(
+            getFirebaseErrorMessage(
+                error,
+                "Could not load customers from Firebase."
+            ),
+            "error"
+        );
+
+    }finally{
+
+        loading = false;
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD FIREBASE CUSTOMERS
+========================================================= */
+
+async function loadCustomersFromFirebase(
+    firebase
+){
+
+    for(
+        const collectionName of
+        CUSTOMER_COLLECTIONS
     ){
+
+        try{
+
+            const ref =
+                firebase.collection(
+                    firebase.db,
+                    collectionName
+                );
+
+
+            const snapshot =
+                await firebase.getDocs(
+                    ref
+                );
+
+
+            const result = [];
+
+
+            snapshot.forEach(
+                function(docSnapshot){
+
+                    const data =
+                        docSnapshot.data() ||
+                        {};
+
+
+                    result.push(
+                        normalizeCustomer(
+                            {
+                                id:
+                                    docSnapshot.id,
+
+                                ...data
+
+                            }
+                        )
+                    );
+
+                }
+            );
+
+
+            /*
+             * A successfully readable collection
+             * is considered valid even when empty.
+             */
+
+            result.sort(
+                function(a,b){
+
+                    const dateA =
+                        getCustomerDate(a);
+
+                    const dateB =
+                        getCustomerDate(b);
+
+
+                    if(
+                        !dateA &&
+                        !dateB
+                    ){
+
+                        return 0;
+
+                    }
+
+
+                    if(
+                        !dateA
+                    ){
+
+                        return 1;
+
+                    }
+
+
+                    if(
+                        !dateB
+                    ){
+
+                        return -1;
+
+                    }
+
+
+                    return (
+                        dateB.getTime() -
+                        dateA.getTime()
+                    );
+
+                }
+            );
+
+
+            return {
+
+                success:true,
+
+                customers:result,
+
+                collectionName
+
+            };
+
+        }catch(error){
+
+            console.warn(
+                "Could not read collection:",
+                collectionName,
+                error
+            );
+
+        }
+
+    }
+
+
+    return {
+
+        success:false,
+
+        customers:[],
+
+        collectionName:null
+
+    };
+
+}
+
+
+/* =========================================================
+   LOCAL FALLBACK
+========================================================= */
+
+function restoreLocalCustomers(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                LOCAL_STORAGE_KEY
+            );
+
+
+        if(
+            !raw
+        ){
+
+            customers = [];
+
+            return;
+
+        }
+
+
+        const parsed =
+            JSON.parse(
+                raw
+            );
+
+
+        if(
+            Array.isArray(parsed)
+        ){
+
+            customers =
+                parsed.map(
+                    normalizeCustomer
+                );
+
+        }
+        else{
+
+            customers = [];
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Local customer data error:",
+            error
+        );
 
         customers = [];
 
     }
 
-
-    applyFilters();
-
 }
 
 
-/* =========================================
-   SAVE
-========================================= */
-
-function saveCustomers(){
+function saveLocalCustomers(){
 
     try{
 
         localStorage.setItem(
-            STORAGE_KEY,
+            LOCAL_STORAGE_KEY,
             JSON.stringify(
                 customers
             )
@@ -1246,7 +2391,8 @@ function saveCustomers(){
 
     }catch(error){
 
-        console.log(
+        console.warn(
+            "Local customer save error:",
             error
         );
 
@@ -1255,26 +2401,104 @@ function saveCustomers(){
 }
 
 
-/* =========================================
+/* =========================================================
+   NORMALIZE CUSTOMER
+========================================================= */
+
+function normalizeCustomer(
+    customer
+){
+
+    const source =
+        customer &&
+        typeof customer === "object"
+            ? customer
+            : {};
+
+
+    const status =
+        normalizeStatus(
+            source.status ||
+            source.accountStatus ||
+            source.state ||
+            "active"
+        );
+
+
+    return {
+
+        ...source,
+
+        id:
+            String(
+                source.id ||
+                source.uid ||
+                source.userId ||
+                ""
+            ),
+
+        uid:
+            String(
+                source.uid ||
+                source.userId ||
+                source.id ||
+                ""
+            ),
+
+        name:
+            String(
+                source.name ||
+                source.displayName ||
+                source.fullName ||
+                "Customer"
+            ),
+
+        phone:
+            String(
+                source.phone ||
+                source.mobile ||
+                source.phoneNumber ||
+                ""
+            ),
+
+        email:
+            String(
+                source.email ||
+                ""
+            ),
+
+        status,
+
+        rides:
+            Number(
+                source.rides ??
+                source.totalRides ??
+                source.rideCount ??
+                0
+            ) || 0
+
+    };
+
+}
+
+
+/* =========================================================
    FILTER
-========================================= */
+========================================================= */
 
 function applyFilters(){
 
     const search =
-        (
-            document.getElementById(
-                "searchInput"
-            )?.value || ""
+        String(
+            searchInput?.value ||
+            ""
         )
         .trim()
         .toLowerCase();
 
 
     const status =
-        document.getElementById(
-            "statusFilter"
-        )?.value ||
+        statusFilter?.value ||
         "all";
 
 
@@ -1316,11 +2540,9 @@ function applyFilters(){
 
 
                 const customerStatus =
-                    String(
-                        customer.status ||
-                        "active"
-                    )
-                    .toLowerCase();
+                    normalizeStatus(
+                        customer.status
+                    );
 
 
                 const matchesStatus =
@@ -1337,8 +2559,25 @@ function applyFilters(){
         );
 
 
-    currentPage =
-        1;
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredCustomers.length /
+                PAGE_SIZE
+            )
+        );
+
+
+    if(
+        currentPage >
+        totalPages
+    ){
+
+        currentPage =
+            totalPages;
+
+    }
 
 
     render();
@@ -1346,9 +2585,9 @@ function applyFilters(){
 }
 
 
-/* =========================================
+/* =========================================================
    RENDER
-========================================= */
+========================================================= */
 
 function render(){
 
@@ -1359,9 +2598,9 @@ function render(){
 }
 
 
-/* =========================================
+/* =========================================================
    STATS
-========================================= */
+========================================================= */
 
 function renderStats(){
 
@@ -1373,10 +2612,9 @@ function renderStats(){
         customers.filter(
             function(customer){
 
-                return String(
-                    customer.status ||
-                    "active"
-                ).toLowerCase() ===
+                return normalizeStatus(
+                    customer.status
+                ) ===
                 "active";
 
             }
@@ -1387,10 +2625,9 @@ function renderStats(){
         customers.filter(
             function(customer){
 
-                return String(
-                    customer.status ||
-                    ""
-                ).toLowerCase() ===
+                return normalizeStatus(
+                    customer.status
+                ) ===
                 "blocked";
 
             }
@@ -1452,20 +2689,14 @@ function renderStats(){
 }
 
 
-/* =========================================
+/* =========================================================
    LIST
-========================================= */
+========================================================= */
 
 function renderList(){
 
-    const container =
-        document.getElementById(
-            "customerList"
-        );
-
-
     if(
-        !container
+        !customerList
     ){
 
         return;
@@ -1487,17 +2718,6 @@ function renderList(){
         );
 
 
-    if(
-        currentPage >
-        totalPages
-    ){
-
-        currentPage =
-            totalPages;
-
-    }
-
-
     const start =
         (
             currentPage -
@@ -1514,7 +2734,7 @@ function renderList(){
         );
 
 
-    container.innerHTML =
+    customerList.innerHTML =
         "";
 
 
@@ -1522,13 +2742,51 @@ function renderList(){
         !visible.length
     ){
 
-        container.innerHTML = `
+        const empty =
+            document.createElement(
+                "div"
+            );
 
-            <div class="empty">
-                No customers found.
-            </div>
 
-        `;
+        empty.className =
+            "empty";
+
+
+        const strong =
+            document.createElement(
+                "strong"
+            );
+
+
+        strong.textContent =
+            loading
+                ? "Loading customers"
+                : "No customers found";
+
+
+        const text =
+            document.createElement(
+                "div"
+            );
+
+
+        text.textContent =
+            loading
+                ? "Please wait..."
+                : "Try changing your search or filter.";
+
+
+        empty.appendChild(
+            strong
+        );
+
+        empty.appendChild(
+            text
+        );
+
+        customerList.appendChild(
+            empty
+        );
 
     }
     else{
@@ -1536,7 +2794,7 @@ function renderList(){
         visible.forEach(
             function(customer){
 
-                container.appendChild(
+                customerList.appendChild(
                     createCustomerRow(
                         customer
                     )
@@ -1588,12 +2846,32 @@ function renderList(){
         currentPage
     );
 
+
+    if(
+        previousPageBtn
+    ){
+
+        previousPageBtn.disabled =
+            currentPage <= 1;
+
+    }
+
+
+    if(
+        nextPageBtn
+    ){
+
+        nextPageBtn.disabled =
+            currentPage >= totalPages;
+
+    }
+
 }
 
 
-/* =========================================
+/* =========================================================
    CREATE ROW
-========================================= */
+========================================================= */
 
 function createCustomerRow(
     customer
@@ -1628,17 +2906,16 @@ function createCustomerRow(
 
     const rides =
         Number(
-            customer.rides ||
-            customer.totalRides ||
+            customer.rides ??
+            customer.totalRides ??
             0
-        );
+        ) || 0;
 
 
     const status =
-        String(
-            customer.status ||
-            "active"
-        ).toLowerCase();
+        normalizeStatus(
+            customer.status
+        );
 
 
     const created =
@@ -1664,8 +2941,10 @@ function createCustomerRow(
         String(
             name
         )
+        .trim()
         .charAt(0)
-        .toUpperCase();
+        .toUpperCase() ||
+        "C";
 
 
     const statusClass =
@@ -1673,26 +2952,22 @@ function createCustomerRow(
             ? "blocked"
             : status === "pending"
                 ? "pending"
-                : "active";
+                : status === "active"
+                    ? "active"
+                    : "unknown";
 
 
     row.innerHTML = `
 
         <div class="customer-info">
 
-            <div class="avatar">
-                ${escapeHtml(initial)}
-            </div>
+            <div class="avatar"></div>
 
             <div class="customer-details">
 
-                <div class="customer-name">
-                    ${escapeHtml(name)}
-                </div>
+                <div class="customer-name"></div>
 
-                <div class="customer-email">
-                    ${escapeHtml(email)}
-                </div>
+                <div class="customer-email"></div>
 
             </div>
 
@@ -1701,18 +2976,14 @@ function createCustomerRow(
 
         <div class="cell email-cell">
 
-            <strong>
-                ${escapeHtml(phone)}
-            </strong>
+            <strong class="phone-value"></strong>
 
         </div>
 
 
         <div class="cell ride-cell">
 
-            <strong>
-                ${rides}
-            </strong>
+            <strong class="ride-value"></strong>
 
             rides
 
@@ -1721,11 +2992,7 @@ function createCustomerRow(
 
         <div class="status-cell">
 
-            <span class="status ${statusClass}">
-                ${escapeHtml(
-                    capitalize(status)
-                )}
-            </span>
+            <span class="status ${statusClass}"></span>
 
         </div>
 
@@ -1733,36 +3000,42 @@ function createCustomerRow(
         <div class="actions">
 
             <button
-                class="action"
-                title="View"
-                onclick="viewCustomer('${escapeJs(
-                    customer.id ||
-                    ""
-                )}')"
+                type="button"
+                class="action view-action"
+                title="View customer"
+                aria-label="View customer"
             >
                 👁
             </button>
 
             <button
-                class="action"
-                title="Edit"
-                onclick="editCustomer('${escapeJs(
-                    customer.id ||
-                    ""
-                )}')"
+                type="button"
+                class="action edit-action"
+                title="Edit customer"
+                aria-label="Edit customer"
             >
                 ✎
             </button>
 
             <button
-                class="action danger"
-                title="${status === "blocked" ? "Unblock" : "Block"}"
-                onclick="toggleCustomerStatus('${escapeJs(
-                    customer.id ||
-                    ""
-                )}')"
+                type="button"
+                class="action danger status-action"
+                title="${
+                    status === "blocked"
+                        ? "Unblock customer"
+                        : "Block customer"
+                }"
+                aria-label="${
+                    status === "blocked"
+                        ? "Unblock customer"
+                        : "Block customer"
+                }"
             >
-                ${status === "blocked" ? "✓" : "⊘"}
+                ${
+                    status === "blocked"
+                        ? "✓"
+                        : "⊘"
+                }
             </button>
 
         </div>
@@ -1770,86 +3043,106 @@ function createCustomerRow(
     `;
 
 
+    row.querySelector(
+        ".avatar"
+    ).textContent =
+        initial;
+
+
+    row.querySelector(
+        ".customer-name"
+    ).textContent =
+        name;
+
+
+    row.querySelector(
+        ".customer-email"
+    ).textContent =
+        email;
+
+
+    row.querySelector(
+        ".phone-value"
+    ).textContent =
+        phone;
+
+
+    row.querySelector(
+        ".ride-value"
+    ).textContent =
+        rides;
+
+
+    row.querySelector(
+        ".status"
+    ).textContent =
+        capitalize(
+            status
+        );
+
+
+    row.querySelector(
+        ".view-action"
+    ).addEventListener(
+        "click",
+        function(){
+
+            viewCustomer(
+                customer.id
+            );
+
+        }
+    );
+
+
+    row.querySelector(
+        ".edit-action"
+    ).addEventListener(
+        "click",
+        function(){
+
+            editCustomer(
+                customer.id
+            );
+
+        }
+    );
+
+
+    row.querySelector(
+        ".status-action"
+    ).addEventListener(
+        "click",
+        function(){
+
+            toggleCustomerStatus(
+                customer.id
+            );
+
+        }
+    );
+
+
+    row.dataset.joined =
+        joined;
+
+
     return row;
 
 }
 
 
-/* =========================================
-   CUSTOMER DATE
-========================================= */
-
-function getCustomerDate(
-    customer
-){
-
-    const value =
-        customer.createdAt ||
-        customer.created_at ||
-        customer.joinedAt ||
-        customer.date;
-
-
-    if(
-        !value
-    ){
-
-        return null;
-
-    }
-
-
-    if(
-        value &&
-        typeof value.toDate ===
-        "function"
-    ){
-
-        return value.toDate();
-
-    }
-
-
-    const date =
-        new Date(
-            value
-        );
-
-
-    if(
-        Number.isNaN(
-            date.getTime()
-        )
-    ){
-
-        return null;
-
-    }
-
-
-    return date;
-
-}
-
-
-/* =========================================
-   VIEW
-========================================= */
+/* =========================================================
+   VIEW CUSTOMER
+========================================================= */
 
 function viewCustomer(
     id
 ){
 
     const customer =
-        customers.find(
-            function(item){
-
-                return String(
-                    item.id || ""
-                ) ===
-                String(id);
-
-            }
+        findCustomer(
+            id
         );
 
 
@@ -1858,7 +3151,8 @@ function viewCustomer(
     ){
 
         showToast(
-            "Customer details unavailable."
+            "Customer details unavailable.",
+            "error"
         );
 
         return;
@@ -1872,37 +3166,156 @@ function viewCustomer(
         "Customer";
 
 
-    showToast(
-        name +
-        " • " +
-        (
+    setText(
+        "detailsTitle",
+        name
+    );
+
+
+    const detailsGrid =
+        document.getElementById(
+            "detailsGrid"
+        );
+
+
+    if(
+        !detailsGrid
+    ){
+
+        return;
+
+    }
+
+
+    detailsGrid.innerHTML =
+        "";
+
+
+    const details = [
+
+        [
+            "Name",
+            name
+        ],
+
+        [
+            "Phone",
             customer.phone ||
+            "Not provided"
+        ],
+
+        [
+            "Email",
             customer.email ||
-            "Customer"
-        )
+            "Not provided"
+        ],
+
+        [
+            "Status",
+            capitalize(
+                normalizeStatus(
+                    customer.status
+                )
+            )
+        ],
+
+        [
+            "Total Rides",
+            String(
+                Number(
+                    customer.rides ||
+                    customer.totalRides ||
+                    0
+                ) || 0
+            )
+        ],
+
+        [
+            "Joined",
+            formatCustomerDate(
+                customer
+            )
+        ]
+
+    ];
+
+
+    details.forEach(
+        function(item){
+
+            const box =
+                document.createElement(
+                    "div"
+                );
+
+
+            box.className =
+                "detail-box";
+
+
+            const label =
+                document.createElement(
+                    "div"
+                );
+
+
+            label.className =
+                "detail-label";
+
+
+            label.textContent =
+                item[0];
+
+
+            const value =
+                document.createElement(
+                    "div"
+                );
+
+
+            value.className =
+                "detail-value";
+
+
+            value.textContent =
+                item[1];
+
+
+            box.appendChild(
+                label
+            );
+
+            box.appendChild(
+                value
+            );
+
+
+            detailsGrid.appendChild(
+                box
+            );
+
+        }
+    );
+
+
+    detailsModal?.classList.add(
+        "show"
     );
 
 }
 
 
-/* =========================================
-   EDIT
-========================================= */
+/* =========================================================
+   EDIT CUSTOMER
+========================================================= */
 
-function editCustomer(
+async function editCustomer(
     id
 ){
 
     const customer =
-        customers.find(
-            function(item){
-
-                return String(
-                    item.id || ""
-                ) ===
-                String(id);
-
-            }
+        findCustomer(
+            id
         );
 
 
@@ -1911,7 +3324,8 @@ function editCustomer(
     ){
 
         showToast(
-            "Customer not found."
+            "Customer not found.",
+            "error"
         );
 
         return;
@@ -1920,7 +3334,7 @@ function editCustomer(
 
 
     const name =
-        prompt(
+        window.prompt(
             "Customer name",
             customer.name ||
             customer.displayName ||
@@ -1938,41 +3352,139 @@ function editCustomer(
     }
 
 
+    const cleanName =
+        name.trim();
+
+
+    if(
+        !cleanName
+    ){
+
+        showToast(
+            "Customer name cannot be empty.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        cleanName.length >
+        80
+    ){
+
+        showToast(
+            "Customer name is too long.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const oldName =
+        customer.name;
+
+
     customer.name =
-        name.trim() ||
-        "Customer";
+        cleanName;
 
 
-    saveCustomers();
+    if(
+        usingFirebase &&
+        firebaseContext &&
+        firebaseCollectionName &&
+        customer.id
+    ){
+
+        try{
+
+            const reference =
+                firebaseContext.doc(
+                    firebaseContext.db,
+                    firebaseCollectionName,
+                    customer.id
+                );
+
+
+            await firebaseContext.updateDoc(
+                reference,
+                {
+                    name:cleanName,
+
+                    displayName:cleanName,
+
+                    updatedAt:
+                        firebaseContext.serverTimestamp
+                            ? firebaseContext.serverTimestamp()
+                            : new Date().toISOString()
+                }
+            );
+
+
+            saveLocalCustomers();
+
+            applyFilters();
+
+
+            showToast(
+                "Customer updated successfully.",
+                "success"
+            );
+
+        }catch(error){
+
+            customer.name =
+                oldName;
+
+
+            console.error(
+                "Customer update error:",
+                error
+            );
+
+
+            showToast(
+                getFirebaseErrorMessage(
+                    error,
+                    "Customer could not be updated."
+                ),
+                "error"
+            );
+
+        }
+
+        return;
+
+    }
+
+
+    saveLocalCustomers();
 
     applyFilters();
 
-
     showToast(
-        "Customer updated."
+        "Customer updated locally.",
+        "success"
     );
 
 }
 
 
-/* =========================================
+/* =========================================================
    BLOCK / UNBLOCK
-========================================= */
+========================================================= */
 
 function toggleCustomerStatus(
     id
 ){
 
     const customer =
-        customers.find(
-            function(item){
-
-                return String(
-                    item.id || ""
-                ) ===
-                String(id);
-
-            }
+        findCustomer(
+            id
         );
 
 
@@ -1981,7 +3493,8 @@ function toggleCustomerStatus(
     ){
 
         showToast(
-            "Customer not found."
+            "Customer not found.",
+            "error"
         );
 
         return;
@@ -1990,43 +3503,32 @@ function toggleCustomerStatus(
 
 
     const current =
-        String(
-            customer.status ||
-            "active"
-        ).toLowerCase();
+        normalizeStatus(
+            customer.status
+        );
 
 
-    const blocked =
+    const shouldBlock =
         current !==
         "blocked";
 
 
     openConfirm(
-        blocked
+        shouldBlock
             ? "Block customer"
             : "Unblock customer",
 
-        blocked
+        shouldBlock
             ? "This customer will be marked as blocked."
             : "This customer will be marked as active.",
 
-        function(){
+        async function(){
 
-            customer.status =
-                blocked
+            await updateCustomerStatus(
+                customer,
+                shouldBlock
                     ? "blocked"
-                    : "active";
-
-
-            saveCustomers();
-
-            applyFilters();
-
-
-            showToast(
-                blocked
-                    ? "Customer blocked."
-                    : "Customer unblocked."
+                    : "active"
             );
 
         }
@@ -2035,29 +3537,168 @@ function toggleCustomerStatus(
 }
 
 
-/* =========================================
+/* =========================================================
+   UPDATE STATUS
+========================================================= */
+
+async function updateCustomerStatus(
+    customer,
+    status
+){
+
+    const oldStatus =
+        customer.status;
+
+
+    customer.status =
+        status;
+
+
+    if(
+        usingFirebase &&
+        firebaseContext &&
+        firebaseCollectionName &&
+        customer.id
+    ){
+
+        try{
+
+            const reference =
+                firebaseContext.doc(
+                    firebaseContext.db,
+                    firebaseCollectionName,
+                    customer.id
+                );
+
+
+            await firebaseContext.updateDoc(
+                reference,
+                {
+                    status,
+
+                    updatedAt:
+                        firebaseContext.serverTimestamp
+                            ? firebaseContext.serverTimestamp()
+                            : new Date().toISOString()
+                }
+            );
+
+
+            saveLocalCustomers();
+
+            applyFilters();
+
+
+            showToast(
+                status === "blocked"
+                    ? "Customer blocked successfully."
+                    : "Customer unblocked successfully.",
+                "success"
+            );
+
+        }catch(error){
+
+            customer.status =
+                oldStatus;
+
+
+            console.error(
+                "Customer status update error:",
+                error
+            );
+
+
+            showToast(
+                getFirebaseErrorMessage(
+                    error,
+                    "Customer status could not be updated."
+                ),
+                "error"
+            );
+
+        }
+
+        return;
+
+    }
+
+
+    saveLocalCustomers();
+
+    applyFilters();
+
+    showToast(
+        status === "blocked"
+            ? "Customer blocked locally."
+            : "Customer unblocked locally.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
    ADD CUSTOMER
-========================================= */
+========================================================= */
 
 function openAddCustomer(){
 
-    document.getElementById(
-        "customerName"
-    ).value = "";
+    const nameInput =
+        document.getElementById(
+            "customerName"
+        );
 
-    document.getElementById(
-        "customerPhone"
-    ).value = "";
+    const phoneInput =
+        document.getElementById(
+            "customerPhone"
+        );
 
-    document.getElementById(
-        "customerEmail"
-    ).value = "";
+    const emailInput =
+        document.getElementById(
+            "customerEmail"
+        );
 
 
-    document.getElementById(
-        "customerModal"
-    ).classList.add(
+    if(
+        nameInput
+    ){
+
+        nameInput.value =
+            "";
+
+    }
+
+    if(
+        phoneInput
+    ){
+
+        phoneInput.value =
+            "";
+
+    }
+
+    if(
+        emailInput
+    ){
+
+        emailInput.value =
+            "";
+
+    }
+
+
+    customerModal?.classList.add(
         "show"
+    );
+
+
+    setTimeout(
+        function(){
+
+            nameInput?.focus();
+
+        },
+        50
     );
 
 }
@@ -2065,33 +3706,58 @@ function openAddCustomer(){
 
 function closeCustomerModal(){
 
-    document.getElementById(
-        "customerModal"
-    ).classList.remove(
+    customerModal?.classList.remove(
         "show"
     );
 
 }
 
 
-function addCustomer(){
+async function addCustomer(){
 
-    const name =
+    const nameInput =
         document.getElementById(
             "customerName"
-        ).value.trim();
+        );
+
+    const phoneInput =
+        document.getElementById(
+            "customerPhone"
+        );
+
+    const emailInput =
+        document.getElementById(
+            "customerEmail"
+        );
+
+    const saveButton =
+        document.getElementById(
+            "saveCustomerBtn"
+        );
+
+
+    const name =
+        String(
+            nameInput?.value ||
+            ""
+        )
+        .trim();
 
 
     const phone =
-        document.getElementById(
-            "customerPhone"
-        ).value.trim();
+        normalizePhone(
+            phoneInput?.value ||
+            ""
+        );
 
 
     const email =
-        document.getElementById(
-            "customerEmail"
-        ).value.trim();
+        String(
+            emailInput?.value ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
 
 
     if(
@@ -2099,7 +3765,82 @@ function addCustomer(){
     ){
 
         showToast(
-            "Please enter customer name."
+            "Please enter customer name.",
+            "error"
+        );
+
+        nameInput?.focus();
+
+        return;
+
+    }
+
+
+    if(
+        name.length <
+        2
+    ){
+
+        showToast(
+            "Customer name is too short.",
+            "error"
+        );
+
+        nameInput?.focus();
+
+        return;
+
+    }
+
+
+    if(
+        email &&
+        !isValidEmail(
+            email
+        )
+    ){
+
+        showToast(
+            "Please enter a valid email address.",
+            "error"
+        );
+
+        emailInput?.focus();
+
+        return;
+
+    }
+
+
+    if(
+        phone &&
+        !isValidPhone(
+            phone
+        )
+    ){
+
+        showToast(
+            "Please enter a valid phone number.",
+            "error"
+        );
+
+        phoneInput?.focus();
+
+        return;
+
+    }
+
+
+    if(
+        isDuplicateCustomer(
+            email,
+            phone
+        )
+    ){
+
+        showToast(
+            "A customer with this email or phone already exists.",
+            "error"
         );
 
         return;
@@ -2107,63 +3848,276 @@ function addCustomer(){
     }
 
 
-    const customer = {
+    if(
+        saveButton
+    ){
 
-        id:
-            "customer_" +
-            Date.now(),
+        saveButton.disabled =
+            true;
 
-        name:name,
+        saveButton.textContent =
+            "ADDING...";
 
-        phone:phone,
-
-        email:email,
-
-        status:"active",
-
-        rides:0,
-
-        createdAt:
-            new Date().toISOString()
-
-    };
+    }
 
 
-    customers.unshift(
-        customer
-    );
+    try{
+
+        const customerData = {
+
+            name,
+
+            displayName:name,
+
+            phone,
+
+            email,
+
+            status:"active",
+
+            rides:0,
+
+            createdAt:
+                firebaseContext &&
+                firebaseContext.serverTimestamp
+                    ? firebaseContext.serverTimestamp()
+                    : new Date().toISOString()
+
+        };
 
 
-    saveCustomers();
+        if(
+            usingFirebase &&
+            firebaseContext &&
+            firebaseCollectionName
+        ){
 
-    closeCustomerModal();
+            const reference =
+                firebaseContext.collection(
+                    firebaseContext.db,
+                    firebaseCollectionName
+                );
 
-    applyFilters();
+
+            const created =
+                await firebaseContext.addDoc(
+                    reference,
+                    customerData
+                );
 
 
-    showToast(
-        "Customer added."
+            const customer =
+                normalizeCustomer(
+                    {
+                        id:
+                            created.id,
+
+                        ...customerData,
+
+                        createdAt:
+                            new Date().toISOString()
+                    }
+                );
+
+
+            customers.unshift(
+                customer
+            );
+
+
+            saveLocalCustomers();
+
+            closeCustomerModal();
+
+            currentPage =
+                1;
+
+            applyFilters();
+
+
+            showToast(
+                "Customer added to Firebase successfully.",
+                "success"
+            );
+
+        }
+        else{
+
+            /*
+             * Offline fallback.
+             */
+
+            const customer = {
+
+                id:
+                    "customer_" +
+                    Date.now() +
+                    "_" +
+                    Math.random()
+                        .toString(36)
+                        .slice(2,8),
+
+                ...customerData,
+
+                createdAt:
+                    new Date().toISOString()
+
+            };
+
+
+            customers.unshift(
+                normalizeCustomer(
+                    customer
+                )
+            );
+
+
+            saveLocalCustomers();
+
+            closeCustomerModal();
+
+            currentPage =
+                1;
+
+            applyFilters();
+
+
+            showToast(
+                "Firebase unavailable. Customer saved locally.",
+                "success"
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Add customer error:",
+            error
+        );
+
+
+        showToast(
+            getFirebaseErrorMessage(
+                error,
+                "Customer could not be added."
+            ),
+            "error"
+        );
+
+    }finally{
+
+        if(
+            saveButton
+        ){
+
+            saveButton.disabled =
+                false;
+
+            saveButton.textContent =
+                "ADD CUSTOMER";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   DUPLICATE CHECK
+========================================================= */
+
+function isDuplicateCustomer(
+    email,
+    phone
+){
+
+    const cleanEmail =
+        String(
+            email ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const cleanPhone =
+        normalizePhone(
+            phone
+        );
+
+
+    if(
+        !cleanEmail &&
+        !cleanPhone
+    ){
+
+        return false;
+
+    }
+
+
+    return customers.some(
+        function(customer){
+
+            const existingEmail =
+                String(
+                    customer.email ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            const existingPhone =
+                normalizePhone(
+                    customer.phone ||
+                    customer.mobile ||
+                    ""
+                );
+
+
+            return (
+                (
+                    cleanEmail &&
+                    existingEmail &&
+                    cleanEmail ===
+                    existingEmail
+                ) ||
+                (
+                    cleanPhone &&
+                    existingPhone &&
+                    cleanPhone ===
+                    existingPhone
+                )
+            );
+
+        }
     );
 
 }
 
 
-/* =========================================
+/* =========================================================
    PAGINATION
-========================================= */
+========================================================= */
 
 function previousPage(){
 
     if(
-        currentPage >
+        currentPage <=
         1
     ){
 
-        currentPage--;
-
-        renderList();
+        return;
 
     }
+
+
+    currentPage--;
+
+    renderList();
 
 }
 
@@ -2181,22 +4135,25 @@ function nextPage(){
 
 
     if(
-        currentPage <
+        currentPage >=
         pages
     ){
 
-        currentPage++;
-
-        renderList();
+        return;
 
     }
+
+
+    currentPage++;
+
+    renderList();
 
 }
 
 
-/* =========================================
+/* =========================================================
    CONFIRM
-========================================= */
+========================================================= */
 
 function openConfirm(
     title,
@@ -2204,25 +4161,22 @@ function openConfirm(
     action
 ){
 
-    document.getElementById(
-        "confirmTitle"
-    ).textContent =
-        title;
+    setText(
+        "confirmTitle",
+        title
+    );
 
-
-    document.getElementById(
-        "confirmText"
-    ).textContent =
-        text;
+    setText(
+        "confirmText",
+        text
+    );
 
 
     confirmAction =
         action;
 
 
-    document.getElementById(
-        "confirmModal"
-    ).classList.add(
+    confirmModal?.classList.add(
         "show"
     );
 
@@ -2231,9 +4185,7 @@ function openConfirm(
 
 function closeConfirm(){
 
-    document.getElementById(
-        "confirmModal"
-    ).classList.remove(
+    confirmModal?.classList.remove(
         "show"
     );
 
@@ -2244,13 +4196,19 @@ function closeConfirm(){
 }
 
 
-function executeConfirm(){
+async function executeConfirm(){
 
     const action =
         confirmAction;
 
 
-    closeConfirm();
+    confirmAction =
+        null;
+
+
+    confirmModal?.classList.remove(
+        "show"
+    );
 
 
     if(
@@ -2258,16 +4216,382 @@ function executeConfirm(){
         "function"
     ){
 
-        action();
+        try{
+
+            await action();
+
+        }catch(error){
+
+            console.error(
+                "Confirm action error:",
+                error
+            );
+
+        }
 
     }
 
 }
 
 
-/* =========================================
-   UTILITIES
-========================================= */
+/* =========================================================
+   DETAILS
+========================================================= */
+
+function closeDetails(){
+
+    detailsModal?.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE ALL MODALS
+========================================================= */
+
+function closeAllModals(){
+
+    closeCustomerModal();
+
+    closeDetails();
+
+    closeConfirm();
+
+}
+
+
+/* =========================================================
+   FIND CUSTOMER
+========================================================= */
+
+function findCustomer(
+    id
+){
+
+    const target =
+        String(
+            id ??
+            ""
+        );
+
+
+    return customers.find(
+        function(customer){
+
+            return String(
+                customer.id ||
+                customer.uid ||
+                ""
+            ) ===
+            target;
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function getCustomerDate(
+    customer
+){
+
+    if(
+        !customer
+    ){
+
+        return null;
+
+    }
+
+
+    const value =
+        customer.createdAt ||
+        customer.created_at ||
+        customer.joinedAt ||
+        customer.date ||
+        customer.registeredAt;
+
+
+    return parseDateValue(
+        value
+    );
+
+}
+
+
+function parseDateValue(
+    value
+){
+
+    if(
+        !value
+    ){
+
+        return null;
+
+    }
+
+
+    if(
+        value instanceof Date
+    ){
+
+        return Number.isNaN(
+            value.getTime()
+        )
+            ? null
+            : value;
+
+    }
+
+
+    if(
+        typeof value.toDate ===
+        "function"
+    ){
+
+        try{
+
+            const date =
+                value.toDate();
+
+
+            return Number.isNaN(
+                date.getTime()
+            )
+                ? null
+                : date;
+
+        }catch(error){
+
+            return null;
+
+        }
+
+    }
+
+
+    if(
+        typeof value ===
+        "object" &&
+        Number.isFinite(
+            value.seconds
+        )
+    ){
+
+        const date =
+            new Date(
+                value.seconds * 1000
+            );
+
+
+        return Number.isNaN(
+            date.getTime()
+        )
+            ? null
+            : date;
+
+    }
+
+
+    if(
+        typeof value ===
+        "object" &&
+        Number.isFinite(
+            value._seconds
+        )
+    ){
+
+        const date =
+            new Date(
+                value._seconds * 1000
+            );
+
+
+        return Number.isNaN(
+            date.getTime()
+        )
+            ? null
+            : date;
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    return Number.isNaN(
+        date.getTime()
+    )
+        ? null
+        : date;
+
+}
+
+
+function formatCustomerDate(
+    customer
+){
+
+    const date =
+        getCustomerDate(
+            customer
+        );
+
+
+    if(
+        !date
+    ){
+
+        return "Not available";
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function normalizeStatus(
+    value
+){
+
+    const status =
+        String(
+            value ||
+            "active"
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        status === "blocked" ||
+        status === "disabled" ||
+        status === "suspended"
+    ){
+
+        return "blocked";
+
+    }
+
+
+    if(
+        status === "pending" ||
+        status === "requested"
+    ){
+
+        return "pending";
+
+    }
+
+
+    if(
+        status === "active" ||
+        status === "enabled"
+    ){
+
+        return "active";
+
+    }
+
+
+    return "active";
+
+}
+
+
+/* =========================================================
+   PHONE
+========================================================= */
+
+function normalizePhone(
+    value
+){
+
+    return String(
+        value ||
+        ""
+    )
+    .replace(
+        /[\s\-().]/g,
+        ""
+    )
+    .trim();
+
+}
+
+
+function isValidPhone(
+    phone
+){
+
+    const clean =
+        normalizePhone(
+            phone
+        );
+
+
+    if(
+        !clean
+    ){
+
+        return false;
+
+    }
+
+
+    return /^\+?[0-9]{8,15}$/
+        .test(
+            clean
+        );
+
+}
+
+
+/* =========================================================
+   EMAIL
+========================================================= */
+
+function isValidEmail(
+    email
+){
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        .test(
+            String(
+                email ||
+                ""
+            )
+        );
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
 
 function setText(
     id,
@@ -2285,7 +4609,10 @@ function setText(
     ){
 
         element.textContent =
-            value;
+            String(
+                value ??
+                ""
+            );
 
     }
 
@@ -2303,61 +4630,239 @@ function capitalize(
         );
 
 
-    return text.charAt(0).toUpperCase() +
-        text.slice(1);
-
-}
-
-
-function escapeHtml(
-    value
-){
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
+    return (
+        text.charAt(0).toUpperCase() +
+        text.slice(1)
     );
 
 }
 
 
-function escapeJs(
-    value
+/* =========================================================
+   BACKEND STATUS
+========================================================= */
+
+function setBackendStatus(
+    type,
+    message
 ){
 
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /\\/g,
-        "\\\\"
-    )
-    .replace(
-        /'/g,
-        "\\'"
-    );
+    const status =
+        document.getElementById(
+            "backendStatus"
+        );
+
+
+    const text =
+        document.getElementById(
+            "backendStatusText"
+        );
+
+
+    if(
+        status
+    ){
+
+        status.classList.remove(
+            "online",
+            "offline"
+        );
+
+
+        if(
+            type ===
+            "online"
+        ){
+
+            status.classList.add(
+                "online"
+            );
+
+        }
+
+
+        if(
+            type ===
+            "offline"
+        ){
+
+            status.classList.add(
+                "offline"
+            );
+
+        }
+
+    }
+
+
+    if(
+        text
+    ){
+
+        text.textContent =
+            message;
+
+    }
 
 }
 
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(
+    message,
+    type = "info"
+){
+
+    if(
+        toastTimer
+    ){
+
+        clearTimeout(
+            toastTimer
+        );
+
+    }
+
+
+    if(
+        !toast
+    ){
+
+        return;
+
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    toast.className =
+        "toast show";
+
+
+    if(
+        type ===
+        "success"
+    ){
+
+        toast.classList.add(
+            "success"
+        );
+
+    }
+    else if(
+        type ===
+        "error"
+    ){
+
+        toast.classList.add(
+            "error"
+        );
+
+    }
+
+
+    toastTimer =
+        setTimeout(
+            function(){
+
+                toast.className =
+                    "toast";
+
+            },
+            3500
+        );
+
+}
+
+
+/* =========================================================
+   FIREBASE ERROR
+========================================================= */
+
+function getFirebaseErrorMessage(
+    error,
+    fallback
+){
+
+    const code =
+        String(
+            error?.code ||
+            ""
+        )
+        .toLowerCase();
+
+
+    if(
+        code.includes(
+            "permission-denied"
+        )
+    ){
+
+        return "Firebase permission denied. Check your Firestore security rules.";
+
+    }
+
+
+    if(
+        code.includes(
+            "unauthenticated"
+        )
+    ){
+
+        return "Admin authentication expired. Please sign in again.";
+
+    }
+
+
+    if(
+        code.includes(
+            "network"
+        )
+    ){
+
+        return "Network error. Check your internet connection.";
+
+    }
+
+
+    if(
+        code.includes(
+            "already-exists"
+        )
+    ){
+
+        return "This customer record already exists.";
+
+    }
+
+
+    if(
+        error?.message &&
+        !error.message
+            .toLowerCase()
+            .includes(
+                "internal"
+            )
+    ){
+
+        return error.message;
+
+    }
+
+
+    return fallback;
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
 
 function goBack(){
 
@@ -2370,53 +4875,33 @@ function goBack(){
 
         history.back();
 
-    }
-    else{
-
-        window.location.href =
-            "dashboard.html";
+        return;
 
     }
+
+
+    window.location.href =
+        "dashboard.html";
 
 }
 
 
-/* =========================================
-   SEARCH EVENTS
-========================================= */
+/* =========================================================
+   STORAGE SYNC
+========================================================= */
 
-document.getElementById(
-    "searchInput"
-).addEventListener(
-    "input",
-    applyFilters
-);
-
-
-document.getElementById(
-    "statusFilter"
-).addEventListener(
-    "change",
-    applyFilters
-);
-
-
-/* =========================================
-   MODAL CLICK OUTSIDE
-========================================= */
-
-document.getElementById(
-    "customerModal"
-).addEventListener(
-    "click",
+window.addEventListener(
+    "storage",
     function(event){
 
         if(
-            event.target ===
-            this
+            event.key ===
+            LOCAL_STORAGE_KEY
         ){
 
-            closeCustomerModal();
+            restoreLocalCustomers();
+
+            applyFilters();
 
         }
 
@@ -2424,40 +4909,137 @@ document.getElementById(
 );
 
 
-document.getElementById(
-    "confirmModal"
-).addEventListener(
-    "click",
-    function(event){
+/* =========================================================
+   FIREBASE AUTH STATE CHECK
+========================================================= */
+
+async function verifyAdminSession(){
+
+    /*
+     * This is intentionally a soft frontend guard.
+     *
+     * Real admin protection MUST remain in
+     * Firebase Authentication + Firestore Rules.
+     */
+
+    try{
+
+        const firebase =
+            await loadFirebase();
+
 
         if(
-            event.target ===
-            this
+            !firebase
         ){
 
-            closeConfirm();
+            return true;
 
         }
 
+
+        if(
+            firebase.auth &&
+            typeof firebase.auth.onAuthStateChanged ===
+            "function"
+        ){
+
+            return new Promise(
+                function(resolve){
+
+                    let finished =
+                        false;
+
+
+                    const timeout =
+                        setTimeout(
+                            function(){
+
+                                if(
+                                    !finished
+                                ){
+
+                                    finished =
+                                        true;
+
+                                    resolve(
+                                        true
+                                    );
+
+                                }
+
+                            },
+                            2500
+                        );
+
+
+                    firebase.auth.onAuthStateChanged(
+                        function(user){
+
+                            if(
+                                finished
+                            ){
+
+                                return;
+
+                            }
+
+
+                            clearTimeout(
+                                timeout
+                            );
+
+
+                            finished =
+                                true;
+
+
+                            if(
+                                !user
+                            ){
+
+                                window.location.href =
+                                    "login.html";
+
+                                resolve(
+                                    false
+                                );
+
+                                return;
+
+                            }
+
+
+                            resolve(
+                                true
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Admin session check unavailable:",
+            error
+        );
+
     }
-);
 
 
-/* =========================================
-   INIT
-========================================= */
+    return true;
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+}
 
-        loadCustomers();
 
-    }
-);
+/* =========================================================
+   FINAL SESSION START
+========================================================= */
 
-</script>
+verifyAdminSession();
 
-</body>
-
-  </html>
+</script></body></html>
