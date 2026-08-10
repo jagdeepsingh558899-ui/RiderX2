@@ -18,6 +18,7 @@
 
 :root{
     --yellow:#FFD400;
+    --yellow-dark:#d9b500;
     --bg:#0d0d0d;
     --card:#191919;
     --border:#303030;
@@ -47,6 +48,11 @@ button{
     font-family:inherit;
 }
 
+button:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
 .app{
     width:100%;
     max-width:650px;
@@ -56,9 +62,9 @@ button{
 }
 
 
-/* =========================
+/* ==========================================
    HEADER
-========================= */
+========================================== */
 
 .header{
     position:sticky;
@@ -82,6 +88,7 @@ button{
     background:#1b1b1b;
     color:#fff;
     font-size:22px;
+    line-height:1;
     cursor:pointer;
 }
 
@@ -101,9 +108,9 @@ button{
 }
 
 
-/* =========================
+/* ==========================================
    CONTENT
-========================= */
+========================================== */
 
 .content{
     padding:13px;
@@ -111,9 +118,9 @@ button{
 }
 
 
-/* =========================
+/* ==========================================
    STATUS HERO
-========================= */
+========================================== */
 
 .status-card{
     padding:20px 14px;
@@ -153,7 +160,20 @@ button{
     animation:pulse 2s infinite;
 }
 
+.status-card.completed .status-icon{
+    border-color:#236b3c;
+    background:#15301f;
+    color:#5be187;
+}
+
+.status-card.cancelled .status-icon{
+    border-color:#6b2929;
+    background:#241414;
+    color:#ff7070;
+}
+
 @keyframes pulse{
+
     0%{
         transform:scale(.9);
         opacity:.8;
@@ -168,6 +188,7 @@ button{
         transform:scale(1.08);
         opacity:0;
     }
+
 }
 
 .status-title{
@@ -197,10 +218,20 @@ button{
     font-weight:900;
 }
 
+.status-badge.cancelled{
+    background:#2b1515;
+    color:#ff7070;
+}
 
-/* =========================
+.status-badge.completed{
+    background:#15301f;
+    color:#5be187;
+}
+
+
+/* ==========================================
    PROGRESS
-========================= */
+========================================== */
 
 .progress-card{
     margin-top:11px;
@@ -269,6 +300,12 @@ button{
     color:#5be187;
 }
 
+.step.cancelled .step-dot{
+    border-color:#ef4444;
+    background:#2b1515;
+    color:#ff7070;
+}
+
 .step-label{
     margin-top:7px;
     color:#555;
@@ -277,14 +314,15 @@ button{
 }
 
 .step.active .step-label,
-.step.completed .step-label{
+.step.completed .step-label,
+.step.cancelled .step-label{
     color:#aaa;
 }
 
 
-/* =========================
+/* ==========================================
    RIDE INFO
-========================= */
+========================================== */
 
 .info-card{
     margin-top:11px;
@@ -329,9 +367,9 @@ button{
 }
 
 
-/* =========================
+/* ==========================================
    DRIVER
-========================= */
+========================================== */
 
 .driver{
     display:flex;
@@ -342,6 +380,7 @@ button{
 .driver-avatar{
     width:44px;
     height:44px;
+    min-width:44px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -362,9 +401,13 @@ button{
 
 .driver-info{
     flex:1;
+    min-width:0;
 }
 
 .driver-name{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
     font-size:8px;
     font-weight:900;
 }
@@ -379,12 +422,13 @@ button{
     color:var(--yellow);
     font-size:7px;
     font-weight:900;
+    white-space:nowrap;
 }
 
 
-/* =========================
+/* ==========================================
    ROUTE
-========================= */
+========================================== */
 
 .route{
     position:relative;
@@ -440,9 +484,9 @@ button{
 }
 
 
-/* =========================
+/* ==========================================
    ACTIONS
-========================= */
+========================================== */
 
 .actions{
     display:grid;
@@ -462,6 +506,10 @@ button{
     cursor:pointer;
 }
 
+.action-btn:active{
+    transform:scale(.98);
+}
+
 .action-btn.primary{
     border-color:#756600;
     background:var(--yellow);
@@ -473,10 +521,14 @@ button{
     color:#ff7070;
 }
 
+.action-btn.hidden{
+    display:none;
+}
 
-/* =========================
-   ERROR / EMPTY
-========================= */
+
+/* ==========================================
+   EMPTY
+========================================== */
 
 .empty{
     display:none;
@@ -505,10 +557,24 @@ button{
     line-height:1.6;
 }
 
+.empty-btn{
+    width:100%;
+    max-width:300px;
+    height:43px;
+    margin:18px auto 0;
+    border:1px solid #756600;
+    border-radius:11px;
+    background:var(--yellow);
+    color:#000;
+    font-size:6px;
+    font-weight:900;
+    cursor:pointer;
+}
 
-/* =========================
+
+/* ==========================================
    TOAST
-========================= */
+========================================== */
 
 .toast{
     position:fixed;
@@ -535,6 +601,28 @@ button{
     transform:translate(-50%,0);
 }
 
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:420px){
+
+    .content{
+        padding:10px;
+    }
+
+    .progress-card{
+        padding-left:8px;
+        padding-right:8px;
+    }
+
+    .step-label{
+        font-size:4px;
+    }
+
+}
+
 </style>
 
 </head>
@@ -550,7 +638,8 @@ button{
 
         <button
             class="back-btn"
-            onclick="goBack()"
+            id="backBtn"
+            type="button"
             aria-label="Back"
         >
             ‹
@@ -585,7 +674,7 @@ button{
                 class="status-icon"
                 id="statusIcon"
             >
-                🚕
+                🛵
             </div>
 
             <div
@@ -606,7 +695,7 @@ button{
                 class="status-badge"
                 id="statusBadge"
             >
-                ● ACTIVE
+                ● ACCEPTED
             </div>
 
         </section>
@@ -627,12 +716,12 @@ button{
 
 
                 <div
-                    class="step completed"
+                    class="step"
                     data-step="1"
                 >
 
                     <div class="step-dot">
-                        ✓
+                        1
                     </div>
 
                     <div class="step-label">
@@ -643,7 +732,7 @@ button{
 
 
                 <div
-                    class="step active"
+                    class="step"
                     data-step="2"
                 >
 
@@ -796,15 +885,14 @@ button{
 
                 <div class="driver-avatar">
 
-                    <span
-                        id="driverInitial"
-                    >
+                    <span id="driverInitial">
                         R
                     </span>
 
                     <img
                         id="driverPhoto"
                         alt="Rider"
+                        loading="lazy"
                     >
 
                 </div>
@@ -898,29 +986,32 @@ button{
 
             <button
                 class="action-btn primary"
-                onclick="openTracking()"
+                id="trackBtn"
+                type="button"
             >
                 📍 TRACK RIDE
             </button>
 
             <button
                 class="action-btn"
-                onclick="openChat()"
+                id="chatBtn"
+                type="button"
             >
                 💬 CHAT
             </button>
 
             <button
                 class="action-btn"
-                onclick="openMap()"
+                id="mapBtn"
+                type="button"
             >
                 🗺️ MAP
             </button>
 
             <button
                 class="action-btn danger"
-                onclick="cancelRide()"
                 id="cancelBtn"
+                type="button"
             >
                 ✕ CANCEL RIDE
             </button>
@@ -947,6 +1038,14 @@ button{
                 You don't have an active RiderX ride right now.
             </div>
 
+            <button
+                class="empty-btn"
+                id="homeBtn"
+                type="button"
+            >
+                ← BACK TO HOME
+            </button>
+
         </section>
 
     </main>
@@ -957,110 +1056,167 @@ button{
 <div
     class="toast"
     id="toast"
+    role="status"
+    aria-live="polite"
 ></div>
 
 
 <script>
 
-/* ==========================================
-   RIDERX CUSTOMER RIDE STATUS
-========================================== */
+/* =========================================================
+   RIDERX CUSTOMER — RIDE STATUS
+   File: customer/ride-status.html
+   ========================================================= */
+
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let rideData = {};
-let toastTimer = null;
 let statusTimer = null;
+let toastTimer = null;
+let storageHandler = null;
+let currentStatus = "accepted";
+let initialized = false;
 
 
-/* ==========================================
-   DEFAULT
-========================================== */
+/* =========================================================
+   DEFAULT RIDE
+========================================================= */
 
 const defaultRide = {
 
     id:"",
+    rideId:"",
+
     service:"Bike Taxi",
+    type:"Bike Taxi",
 
     status:"accepted",
+    rideStatus:"accepted",
+    state:"accepted",
 
     fare:0,
     total:0,
     amount:0,
+    price:0,
 
     paymentMethod:"Cash",
+    payment:"Cash",
 
     pickup:"",
+    pickupAddress:"",
+    from:"",
+
     destination:"",
+    destinationAddress:"",
+    to:"",
 
     riderName:"RiderX Partner",
+    driverName:"",
     riderPhoto:"",
+    driverPhoto:"",
+    photoURL:"",
+
     vehicle:"",
+    vehicleType:"",
     vehicleNumber:"",
-    riderRating:""
+
+    riderRating:"",
+    driverRating:""
 
 };
 
 
-/* ==========================================
-   PARAM
-========================================== */
+/* =========================================================
+   DOM HELPER
+========================================================= */
 
-function getParam(
-    name
-){
+function $(id){
 
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
-
-    return params.get(
-        name
-    );
+    return document.getElementById(id);
 
 }
 
 
-/* ==========================================
+/* =========================================================
+   URL PARAM
+========================================================= */
+
+function getParam(name){
+
+    try{
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        return params.get(name);
+
+    }catch(error){
+
+        return null;
+
+    }
+
+}
+
+
+/* =========================================================
+   GET RIDE ID
+========================================================= */
+
+function getRideId(){
+
+    return String(
+        rideData.id ||
+        rideData.rideId ||
+        getParam("rideId") ||
+        getParam("id") ||
+        ""
+    ).trim();
+
+}
+
+
+/* =========================================================
    LOAD RIDE
-========================================== */
+========================================================= */
 
 function loadRide(){
+
+    const urlId =
+        getParam("rideId") ||
+        getParam("id");
+
+    const urlStatus =
+        getParam("status");
+
 
     rideData = {
         ...defaultRide
     };
 
 
-    const urlId =
-        getParam(
-            "rideId"
-        ) ||
-        getParam(
-            "id"
-        );
-
-
-    const urlStatus =
-        getParam(
-            "status"
-        );
-
-
-    if(
-        urlId
-    ){
+    if(urlId){
 
         rideData.id =
+            urlId;
+
+        rideData.rideId =
             urlId;
 
     }
 
 
-    if(
-        urlStatus
-    ){
+    if(urlStatus){
 
         rideData.status =
+            urlStatus;
+
+        rideData.rideStatus =
             urlStatus;
 
     }
@@ -1072,26 +1228,25 @@ function loadRide(){
         "activeRide",
         "riderxCurrentRide",
         "rideData",
-        "lastRide"
+        "lastRide",
+        "pendingRide",
+        "bookingData"
 
     ];
 
 
-    for(
-        const key of keys
-    ){
+    let foundStoredRide = false;
+
+
+    for(const key of keys){
 
         try{
 
             const raw =
-                localStorage.getItem(
-                    key
-                );
+                localStorage.getItem(key);
 
 
-            if(
-                !raw
-            ){
+            if(!raw){
 
                 continue;
 
@@ -1099,32 +1254,60 @@ function loadRide(){
 
 
             const data =
-                JSON.parse(
-                    raw
-                );
+                JSON.parse(raw);
 
 
             if(
-                data &&
-                typeof data ===
-                "object"
+                !data ||
+                typeof data !== "object" ||
+                Array.isArray(data)
             ){
 
-                rideData = {
-
-                    ...rideData,
-                    ...data
-
-                };
-
-
-                break;
+                continue;
 
             }
 
+
+            const storedId =
+                String(
+                    data.id ||
+                    data.rideId ||
+                    ""
+                ).trim();
+
+
+            /*
+             * If URL contains a ride ID, don't replace
+             * it with a different stored ride.
+             */
+
+            if(
+                urlId &&
+                storedId &&
+                String(urlId) !== storedId
+            ){
+
+                continue;
+
+            }
+
+
+            rideData = {
+
+                ...rideData,
+                ...data
+
+            };
+
+
+            foundStoredRide = true;
+
+            break;
+
         }catch(error){
 
-            console.log(
+            console.warn(
+                "RiderX ride data read error:",
                 error
             );
 
@@ -1133,14 +1316,72 @@ function loadRide(){
     }
 
 
+    /*
+     * URL parameters always have priority.
+     */
+
+    if(urlId){
+
+        rideData.id =
+            urlId;
+
+        rideData.rideId =
+            urlId;
+
+    }
+
+
+    if(urlStatus){
+
+        rideData.status =
+            urlStatus;
+
+    }
+
+
+    if(
+        !foundStoredRide &&
+        !urlId &&
+        !hasRideInformation()
+    ){
+
+        showEmpty();
+
+        return;
+
+    }
+
+
+    hideEmpty();
+
     renderRide();
 
 }
 
 
-/* ==========================================
-   RENDER
-========================================== */
+/* =========================================================
+   CHECK RIDE INFORMATION
+========================================================= */
+
+function hasRideInformation(){
+
+    return Boolean(
+
+        rideData.id ||
+        rideData.rideId ||
+        rideData.pickup ||
+        rideData.destination ||
+        rideData.fare ||
+        rideData.riderName
+
+    );
+
+}
+
+
+/* =========================================================
+   RENDER RIDE
+========================================================= */
 
 function renderRide(){
 
@@ -1153,25 +1394,21 @@ function renderRide(){
         );
 
 
-    /*
-      If there is no ride information at all,
-      still allow status page to work with defaults.
-    */
+    currentStatus =
+        status;
 
-    document.getElementById(
-        "rideId"
-    ).textContent =
-        rideData.id ||
-        rideData.rideId ||
+
+    $("rideId").textContent =
+        getRideId() ||
         "—";
 
 
-    document.getElementById(
-        "service"
-    ).textContent =
-        rideData.service ||
-        rideData.type ||
-        "Bike Taxi";
+    $("service").textContent =
+        cleanText(
+            rideData.service ||
+            rideData.type,
+            "Bike Taxi"
+        );
 
 
     const fare =
@@ -1179,223 +1416,169 @@ function renderRide(){
             rideData.fare,
             rideData.total,
             rideData.amount,
-            rideData.price
+            rideData.price,
+            rideData.estimatedFare
         );
 
 
-    document.getElementById(
-        "fare"
-    ).textContent =
+    $("fare").textContent =
         fare > 0
-            ? "₹" + Math.round(fare)
+            ? "₹" + formatMoney(fare)
             : "—";
 
 
-    document.getElementById(
-        "payment"
-    ).textContent =
+    $("payment").textContent =
         formatPayment(
             rideData.paymentMethod ||
             rideData.payment ||
+            rideData.paymentType ||
             "Cash"
         );
 
 
-    document.getElementById(
-        "pickup"
-    ).textContent =
-        rideData.pickup ||
-        rideData.pickupAddress ||
-        rideData.from ||
-        "Pickup location";
+    $("pickup").textContent =
+        cleanText(
+            rideData.pickup ||
+            rideData.pickupAddress ||
+            rideData.from,
+            "Pickup location"
+        );
 
 
-    document.getElementById(
-        "destination"
-    ).textContent =
-        rideData.destination ||
-        rideData.destinationAddress ||
-        rideData.to ||
-        "Destination location";
+    $("destination").textContent =
+        cleanText(
+            rideData.destination ||
+            rideData.destinationAddress ||
+            rideData.to,
+            "Destination location"
+        );
 
 
     renderDriver();
 
-    updateStatus(
-        status
-    );
+    updateStatus(status);
 
 }
 
 
-/* ==========================================
-   DRIVER
-========================================== */
+/* =========================================================
+   RENDER DRIVER
+========================================================= */
 
 function renderDriver(){
 
     const name =
-        rideData.riderName ||
-        rideData.driverName ||
-        rideData.name ||
-        "RiderX Partner";
+        cleanText(
+            rideData.riderName ||
+            rideData.driverName ||
+            rideData.partnerName ||
+            rideData.name,
+            "RiderX Partner"
+        );
 
 
-    document.getElementById(
-        "driverName"
-    ).textContent =
+    $("driverName").textContent =
         name;
 
 
-    document.getElementById(
-        "driverVehicle"
-    ).textContent =
-        rideData.vehicleNumber ||
-        rideData.vehicle ||
-        rideData.vehicleType ||
-        "Rider";
+    const vehicle =
+        cleanText(
+            rideData.vehicleNumber ||
+            rideData.vehicle ||
+            rideData.vehicleType,
+            "Rider"
+        );
 
 
-    document.getElementById(
-        "driverRating"
-    ).textContent =
+    $("driverVehicle").textContent =
+        vehicle;
+
+
+    const rating =
         rideData.riderRating ||
         rideData.driverRating ||
-        "—";
-
-
-    const photo =
-        rideData.riderPhoto ||
-        rideData.driverPhoto ||
-        rideData.photoURL ||
+        rideData.rating ||
         "";
 
 
-    if(
-        photo
-    ){
+    $("driverRating").textContent =
+        rating || "—";
 
-        const image =
-            document.getElementById(
-                "driverPhoto"
-            );
 
+    const photo =
+        cleanText(
+            rideData.riderPhoto ||
+            rideData.driverPhoto ||
+            rideData.photoURL ||
+            rideData.photo,
+            ""
+        );
+
+
+    const image =
+        $("driverPhoto");
+
+    const initial =
+        $("driverInitial");
+
+
+    if(photo){
 
         image.src =
             photo;
 
-
         image.style.display =
             "block";
 
-
-        document.getElementById(
-            "driverInitial"
-        ).style.display =
+        initial.style.display =
             "none";
 
     }else{
 
-        document.getElementById(
-            "driverInitial"
-        ).textContent =
-            name
-                .charAt(0)
-                .toUpperCase();
+        image.removeAttribute(
+            "src"
+        );
+
+        image.style.display =
+            "none";
+
+        initial.style.display =
+            "block";
+
+        initial.textContent =
+            getInitial(
+                name
+            );
 
     }
 
 }
 
 
-/* ==========================================
+/* =========================================================
    NORMALIZE STATUS
-========================================== */
+========================================================= */
 
-function normalizeStatus(
-    status
-){
+function normalizeStatus(status){
 
     const value =
         String(
-            status
+            status || ""
         )
         .toLowerCase()
         .replace(
             /[_-]/g,
             " "
         )
+        .replace(
+            /\s+/g,
+            " "
+        )
         .trim();
 
 
     if(
-        value.includes(
-            "cancel"
-        )
-    ){
-
-        return "cancelled";
-
-    }
-
-
-    if(
-        value.includes(
-            "complete"
-        ) ||
-        value.includes(
-            "finish"
-        ) ||
-        value === "completed"
-    ){
-
-        return "completed";
-
-    }
-
-
-    if(
-        value.includes(
-            "start"
-        ) ||
-        value.includes(
-            "ongoing"
-        ) ||
-        value.includes(
-            "in progress"
-        ) ||
-        value.includes(
-            "on trip"
-        ) ||
-        value.includes(
-            "trip"
-        )
-    ){
-
-        return "started";
-
-    }
-
-
-    if(
-        value.includes(
-            "arriv"
-        )
-    ){
-
-        return "arriving";
-
-    }
-
-
-    if(
-        value.includes(
-            "accept"
-        ) ||
-        value.includes(
-            "confirm"
-        ) ||
-        value === "assigned"
+        !value
     ){
 
         return "accepted";
@@ -1404,18 +1587,71 @@ function normalizeStatus(
 
 
     if(
-        value.includes(
-            "search"
-        ) ||
-        value.includes(
-            "pending"
-        ) ||
-        value.includes(
-            "request"
-        ) ||
-        value.includes(
-            "looking"
-        )
+        value.includes("cancel") ||
+        value === "cancelled" ||
+        value === "canceled"
+    ){
+
+        return "cancelled";
+
+    }
+
+
+    if(
+        value.includes("complete") ||
+        value.includes("completed") ||
+        value.includes("finish") ||
+        value === "done"
+    ){
+
+        return "completed";
+
+    }
+
+
+    if(
+        value.includes("start") ||
+        value.includes("started") ||
+        value.includes("ongoing") ||
+        value.includes("in progress") ||
+        value.includes("on trip") ||
+        value === "trip"
+    ){
+
+        return "started";
+
+    }
+
+
+    if(
+        value.includes("arriv") ||
+        value.includes("on way") ||
+        value.includes("on the way")
+    ){
+
+        return "arriving";
+
+    }
+
+
+    if(
+        value.includes("accept") ||
+        value.includes("confirm") ||
+        value.includes("assigned") ||
+        value.includes("accepted")
+    ){
+
+        return "accepted";
+
+    }
+
+
+    if(
+        value.includes("search") ||
+        value.includes("pending") ||
+        value.includes("request") ||
+        value.includes("looking") ||
+        value.includes("finding")
     ){
 
         return "searching";
@@ -1428,154 +1664,217 @@ function normalizeStatus(
 }
 
 
-/* ==========================================
-   UPDATE STATUS
-========================================== */
+/* =========================================================
+   STATUS CONFIG
+========================================================= */
 
-function updateStatus(
-    status
-){
+function getStatusConfig(status){
 
     const config = {
 
         searching:{
+
             title:"Finding a rider...",
-            text:"We're looking for a nearby RiderX partner.",
+
+            text:
+                "We're looking for a nearby RiderX partner.",
+
             icon:"🔎",
+
             badge:"● SEARCHING",
+
             step:1
+
         },
 
         accepted:{
+
             title:"Ride accepted",
-            text:"Your rider has accepted the ride and is preparing to pick you up.",
+
+            text:
+                "Your rider has accepted the ride and is preparing to pick you up.",
+
             icon:"🛵",
+
             badge:"● ACCEPTED",
+
             step:2
+
         },
 
         arriving:{
+
             title:"Rider is arriving",
-            text:"Your rider is on the way to your pickup location.",
+
+            text:
+                "Your rider is on the way to your pickup location.",
+
             icon:"📍",
+
             badge:"● ARRIVING",
+
             step:3
+
         },
 
         started:{
+
             title:"Ride in progress",
-            text:"Your trip has started. Enjoy your journey with RiderX.",
+
+            text:
+                "Your trip has started. Enjoy your journey with RiderX.",
+
             icon:"🚕",
+
             badge:"● ON TRIP",
+
             step:4
+
         },
 
         completed:{
+
             title:"Ride completed",
-            text:"Your RiderX trip has been completed successfully.",
+
+            text:
+                "Your RiderX trip has been completed successfully.",
+
             icon:"✓",
+
             badge:"● COMPLETED",
+
             step:5
+
         },
 
         cancelled:{
+
             title:"Ride cancelled",
-            text:"This ride has been cancelled.",
+
+            text:
+                "This ride has been cancelled.",
+
             icon:"✕",
+
             badge:"● CANCELLED",
+
             step:0
+
         }
 
     };
 
 
-    const current =
+    return (
         config[status] ||
-        config.accepted;
-
-
-    document.getElementById(
-        "statusTitle"
-    ).textContent =
-        current.title;
-
-
-    document.getElementById(
-        "statusText"
-    ).textContent =
-        current.text;
-
-
-    document.getElementById(
-        "statusIcon"
-    ).textContent =
-        current.icon;
-
-
-    document.getElementById(
-        "statusBadge"
-    ).textContent =
-        current.badge;
-
-
-    updateProgress(
-        current.step
+        config.accepted
     );
-
-
-    const cancelBtn =
-        document.getElementById(
-            "cancelBtn"
-        );
-
-
-    if(
-        status ===
-        "completed" ||
-        status ===
-        "cancelled"
-    ){
-
-        cancelBtn.style.display =
-            "none";
-
-    }else{
-
-        cancelBtn.style.display =
-            "block";
-
-    }
-
-
-    if(
-        status ===
-        "completed"
-    ){
-
-        setTimeout(
-            function(){
-
-                /*
-                  Do not automatically redirect.
-                  Customer can choose receipt/rating
-                  from the next screen when integrated.
-                */
-
-            },
-            300
-        );
-
-    }
 
 }
 
 
-/* ==========================================
-   PROGRESS
-========================================== */
+/* =========================================================
+   UPDATE STATUS
+========================================================= */
+
+function updateStatus(status){
+
+    const normalized =
+        normalizeStatus(status);
+
+
+    currentStatus =
+        normalized;
+
+
+    const config =
+        getStatusConfig(
+            normalized
+        );
+
+
+    $("statusTitle").textContent =
+        config.title;
+
+
+    $("statusText").textContent =
+        config.text;
+
+
+    $("statusIcon").textContent =
+        config.icon;
+
+
+    $("statusBadge").textContent =
+        config.badge;
+
+
+    $("statusBadge").className =
+        "status-badge";
+
+
+    if(normalized === "completed"){
+
+        $("statusBadge").classList.add(
+            "completed"
+        );
+
+    }
+
+
+    if(normalized === "cancelled"){
+
+        $("statusBadge").classList.add(
+            "cancelled"
+        );
+
+    }
+
+
+    $("statusCard").classList.remove(
+        "completed",
+        "cancelled"
+    );
+
+
+    if(normalized === "completed"){
+
+        $("statusCard").classList.add(
+            "completed"
+        );
+
+    }
+
+
+    if(normalized === "cancelled"){
+
+        $("statusCard").classList.add(
+            "cancelled"
+        );
+
+    }
+
+
+    updateProgress(
+        config.step,
+        normalized
+    );
+
+
+    updateActions(
+        normalized
+    );
+
+}
+
+
+/* =========================================================
+   UPDATE PROGRESS
+========================================================= */
 
 function updateProgress(
-    currentStep
+    currentStep,
+    status
 ){
 
     const steps =
@@ -1593,7 +1892,8 @@ function updateProgress(
 
             step.classList.remove(
                 "active",
-                "completed"
+                "completed",
+                "cancelled"
             );
 
 
@@ -1601,6 +1901,38 @@ function updateProgress(
                 step.querySelector(
                     ".step-dot"
                 );
+
+
+            if(status === "cancelled"){
+
+                if(number === 1){
+
+                    step.classList.add(
+                        "completed"
+                    );
+
+                    dot.textContent =
+                        "✓";
+
+                }else if(number === 2){
+
+                    step.classList.add(
+                        "cancelled"
+                    );
+
+                    dot.textContent =
+                        "✕";
+
+                }else{
+
+                    dot.textContent =
+                        number;
+
+                }
+
+                return;
+
+            }
 
 
             if(
@@ -1651,132 +1983,269 @@ function updateProgress(
 
 
     const active =
-        document.getElementById(
-            "progressActive"
-        );
+        $("progressActive");
 
 
     if(
-        currentStep <=
-        1
+        status === "cancelled" ||
+        currentStep <= 1
     ){
 
         active.style.width =
             "0%";
 
+        return;
+
+    }
+
+
+    const percent =
+        (
+            (
+                currentStep - 1
+            ) /
+            4
+        ) * 80;
+
+
+    active.style.width =
+        Math.max(
+            0,
+            Math.min(
+                80,
+                percent
+            )
+        ) + "%";
+
+}
+
+
+/* =========================================================
+   UPDATE ACTIONS
+========================================================= */
+
+function updateActions(status){
+
+    const track =
+        $("trackBtn");
+
+    const chat =
+        $("chatBtn");
+
+    const map =
+        $("mapBtn");
+
+    const cancel =
+        $("cancelBtn");
+
+
+    const activeRide =
+        status === "accepted" ||
+        status === "arriving" ||
+        status === "started";
+
+
+    const searching =
+        status === "searching";
+
+
+    const finished =
+        status === "completed" ||
+        status === "cancelled";
+
+
+    track.classList.toggle(
+        "hidden",
+        finished || searching
+    );
+
+
+    chat.classList.toggle(
+        "hidden",
+        finished || searching
+    );
+
+
+    map.classList.toggle(
+        "hidden",
+        finished
+    );
+
+
+    cancel.classList.toggle(
+        "hidden",
+        !activeRide && !searching
+    );
+
+
+    if(searching){
+
+        cancel.textContent =
+            "✕ CANCEL SEARCH";
+
     }else{
 
-        const percent =
-            (
-                (
-                    currentStep - 1
-                ) /
-                4
-            ) *
-            80;
-
-
-        active.style.width =
-            percent +
-            "%";
+        cancel.textContent =
+            "✕ CANCEL RIDE";
 
     }
 
 }
 
 
-/* ==========================================
-   TRACKING
-========================================== */
+/* =========================================================
+   OPEN TRACKING
+========================================================= */
 
 function openTracking(){
 
     const id =
-        rideData.id ||
-        rideData.rideId ||
-        "";
+        getRideId();
 
 
-    window.location.href =
-        "tracking.html" +
-        (
-            id
-                ? "?rideId=" +
-                  encodeURIComponent(
-                      id
-                  )
-                : ""
+    if(!id){
+
+        showToast(
+            "Ride ID is not available yet."
         );
+
+        return;
+
+    }
+
+
+    navigateTo(
+        "tracking.html",
+        id
+    );
 
 }
 
 
-/* ==========================================
-   CHAT
-========================================== */
+/* =========================================================
+   OPEN CHAT
+========================================================= */
 
 function openChat(){
 
-    const id =
-        rideData.id ||
-        rideData.rideId ||
-        "";
+    if(
+        currentStatus !== "accepted" &&
+        currentStatus !== "arriving" &&
+        currentStatus !== "started"
+    ){
 
-
-    window.location.href =
-        "chat.html" +
-        (
-            id
-                ? "?rideId=" +
-                  encodeURIComponent(
-                      id
-                  )
-                : ""
+        showToast(
+            "Chat is available after the rider accepts the ride."
         );
+
+        return;
+
+    }
+
+
+    const id =
+        getRideId();
+
+
+    if(!id){
+
+        showToast(
+            "Ride ID is not available yet."
+        );
+
+        return;
+
+    }
+
+
+    navigateTo(
+        "chat.html",
+        id
+    );
 
 }
 
 
-/* ==========================================
-   MAP
-========================================== */
+/* =========================================================
+   OPEN MAP
+========================================================= */
 
 function openMap(){
 
     const id =
-        rideData.id ||
-        rideData.rideId ||
-        "";
+        getRideId();
 
 
-    window.location.href =
-        "map.html" +
-        (
-            id
-                ? "?rideId=" +
-                  encodeURIComponent(
-                      id
-                  )
-                : ""
+    if(!id){
+
+        showToast(
+            "Ride ID is not available yet."
         );
+
+        return;
+
+    }
+
+
+    navigateTo(
+        "map.html",
+        id
+    );
 
 }
 
 
-/* ==========================================
-   CANCEL
-========================================== */
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+function navigateTo(
+    page,
+    rideId
+){
+
+    const query =
+        rideId
+            ? "?rideId=" +
+              encodeURIComponent(
+                  rideId
+              )
+            : "";
+
+
+    window.location.href =
+        page +
+        query;
+
+}
+
+
+/* =========================================================
+   CANCEL RIDE
+========================================================= */
 
 function cancelRide(){
 
-    const confirmed =
-        window.confirm(
-            "Are you sure you want to cancel this ride?"
-        );
+    if(
+        currentStatus === "completed" ||
+        currentStatus === "cancelled"
+    ){
+
+        return;
+
+    }
+
+
+    const message =
+        currentStatus === "searching"
+            ? "Are you sure you want to cancel the rider search?"
+            : "Are you sure you want to cancel this ride?";
 
 
     if(
-        !confirmed
+        !window.confirm(
+            message
+        )
     ){
 
         return;
@@ -1787,34 +2256,17 @@ function cancelRide(){
     rideData.status =
         "cancelled";
 
+    rideData.rideStatus =
+        "cancelled";
+
+    rideData.state =
+        "cancelled";
 
     rideData.cancelledAt =
         Date.now();
 
 
-    try{
-
-        localStorage.setItem(
-            "currentRide",
-            JSON.stringify(
-                rideData
-            )
-        );
-
-        localStorage.setItem(
-            "activeRide",
-            JSON.stringify(
-                rideData
-            )
-        );
-
-    }catch(error){
-
-        console.log(
-            error
-        );
-
-    }
+    saveRide();
 
 
     updateStatus(
@@ -1829,22 +2281,356 @@ function cancelRide(){
 }
 
 
-/* ==========================================
-   PAYMENT
-========================================== */
+/* =========================================================
+   SAVE RIDE
+========================================================= */
 
-function formatPayment(
-    value
-){
+function saveRide(){
+
+    const payload =
+        JSON.stringify(
+            rideData
+        );
+
+
+    const keys = [
+
+        "currentRide",
+        "activeRide"
+
+    ];
+
+
+    keys.forEach(
+        key => {
+
+            try{
+
+                localStorage.setItem(
+                    key,
+                    payload
+                );
+
+            }catch(error){
+
+                console.warn(
+                    "RiderX localStorage error:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SYNC RIDE
+========================================================= */
+
+function syncRideFromStorage(){
+
+    const keys = [
+
+        "currentRide",
+        "activeRide",
+        "riderxCurrentRide",
+        "rideData",
+        "lastRide"
+
+    ];
+
+
+    const currentId =
+        getRideId();
+
+
+    for(const key of keys){
+
+        try{
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+
+            if(!raw){
+
+                continue;
+
+            }
+
+
+            const latest =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                !latest ||
+                typeof latest !== "object" ||
+                Array.isArray(latest)
+            ){
+
+                continue;
+
+            }
+
+
+            const latestId =
+                String(
+                    latest.id ||
+                    latest.rideId ||
+                    ""
+                ).trim();
+
+
+            /*
+             * Never overwrite the currently opened ride
+             * with another ride.
+             */
+
+            if(
+                currentId &&
+                latestId &&
+                currentId !== latestId
+            ){
+
+                continue;
+
+            }
+
+
+            const previousStatus =
+                normalizeStatus(
+                    rideData.status ||
+                    rideData.rideStatus ||
+                    rideData.state
+                );
+
+
+            rideData = {
+
+                ...rideData,
+                ...latest
+
+            };
+
+
+            if(currentId){
+
+                rideData.id =
+                    currentId;
+
+                rideData.rideId =
+                    currentId;
+
+            }
+
+
+            const newStatus =
+                normalizeStatus(
+                    rideData.status ||
+                    rideData.rideStatus ||
+                    rideData.state
+                );
+
+
+            renderRide();
+
+
+            if(
+                previousStatus !==
+                newStatus
+            ){
+
+                showToast(
+                    getStatusChangeMessage(
+                        newStatus
+                    )
+                );
+
+            }
+
+
+            return;
+
+        }catch(error){
+
+            console.warn(
+                "RiderX sync error:",
+                error
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   STATUS CHANGE MESSAGE
+========================================================= */
+
+function getStatusChangeMessage(status){
+
+    const messages = {
+
+        searching:
+            "Searching for a RiderX partner...",
+
+        accepted:
+            "Your ride has been accepted.",
+
+        arriving:
+            "Your rider is on the way.",
+
+        started:
+            "Your ride has started.",
+
+        completed:
+            "Your ride has been completed.",
+
+        cancelled:
+            "Your ride has been cancelled."
+
+    };
+
+
+    return (
+        messages[status] ||
+        "Ride status updated."
+    );
+
+}
+
+
+/* =========================================================
+   LIVE STATUS SYNC
+========================================================= */
+
+function startStatusSync(){
+
+    stopStatusSync();
+
+
+    statusTimer =
+        setInterval(
+            function(){
+
+                if(
+                    document.hidden
+                ){
+
+                    return;
+
+                }
+
+
+                syncRideFromStorage();
+
+            },
+            2500
+        );
+
+
+    storageHandler =
+        function(event){
+
+            if(
+                !event.key
+            ){
+
+                return;
+
+            }
+
+
+            const rideKeys = [
+
+                "currentRide",
+                "activeRide",
+                "riderxCurrentRide",
+                "rideData",
+                "lastRide"
+
+            ];
+
+
+            if(
+                rideKeys.includes(
+                    event.key
+                )
+            ){
+
+                syncRideFromStorage();
+
+            }
+
+        };
+
+
+    window.addEventListener(
+        "storage",
+        storageHandler
+    );
+
+}
+
+
+/* =========================================================
+   STOP STATUS SYNC
+========================================================= */
+
+function stopStatusSync(){
+
+    if(statusTimer){
+
+        clearInterval(
+            statusTimer
+        );
+
+        statusTimer =
+            null;
+
+    }
+
+
+    if(storageHandler){
+
+        window.removeEventListener(
+            "storage",
+            storageHandler
+        );
+
+        storageHandler =
+            null;
+
+    }
+
+}
+
+
+/* =========================================================
+   PAYMENT FORMAT
+========================================================= */
+
+function formatPayment(value){
 
     if(
-        typeof value ===
-        "object"
+        typeof value === "object" &&
+        value !== null
     ){
 
         value =
             value.method ||
             value.type ||
+            value.name ||
             "Cash";
 
     }
@@ -1852,8 +2638,8 @@ function formatPayment(
 
     const text =
         String(
-            value
-        );
+            value || "Cash"
+        ).trim();
 
 
     const lower =
@@ -1861,9 +2647,7 @@ function formatPayment(
 
 
     if(
-        lower.includes(
-            "cash"
-        )
+        lower.includes("cash")
     ){
 
         return "Cash";
@@ -1872,9 +2656,7 @@ function formatPayment(
 
 
     if(
-        lower.includes(
-            "wallet"
-        )
+        lower.includes("wallet")
     ){
 
         return "RiderX Wallet";
@@ -1883,12 +2665,19 @@ function formatPayment(
 
 
     if(
-        lower.includes(
-            "upi"
-        )
+        lower.includes("upi")
     ){
 
         return "UPI";
+
+    }
+
+
+    if(
+        lower.includes("online")
+    ){
+
+        return "Online";
 
     }
 
@@ -1898,13 +2687,11 @@ function formatPayment(
 }
 
 
-/* ==========================================
+/* =========================================================
    NUMBER
-========================================== */
+========================================================= */
 
-function getNumber(
-    ...values
-){
+function getNumber(...values){
 
     for(
         const value of values
@@ -1921,15 +2708,40 @@ function getNumber(
         }
 
 
+        if(
+            typeof value === "number" &&
+            Number.isFinite(value)
+        ){
+
+            return value;
+
+        }
+
+
+        const cleaned =
+            String(
+                value
+            )
+            .replace(
+                /,/g,
+                ""
+            )
+            .replace(
+                /[^0-9.-]/g,
+                ""
+            );
+
+
+        if(!cleaned){
+
+            continue;
+
+        }
+
+
         const number =
             Number(
-                String(
-                    value
-                )
-                .replace(
-                    /[^0-9.-]/g,
-                    ""
-                )
+                cleaned
             );
 
 
@@ -1951,11 +2763,175 @@ function getNumber(
 }
 
 
-/* ==========================================
+/* =========================================================
+   MONEY
+========================================================= */
+
+function formatMoney(value){
+
+    const number =
+        Number(
+            value
+        );
+
+
+    if(
+        !Number.isFinite(
+            number
+        )
+    ){
+
+        return "0";
+
+    }
+
+
+    return Math.round(
+        number
+    ).toLocaleString(
+        "en-IN"
+    );
+
+}
+
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+function cleanText(
+    value,
+    fallback
+){
+
+    if(
+        value === null ||
+        value === undefined
+    ){
+
+        return fallback;
+
+    }
+
+
+    const text =
+        String(
+            value
+        ).trim();
+
+
+    return text ||
+        fallback;
+
+}
+
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+function getInitial(name){
+
+    const text =
+        cleanText(
+            name,
+            "R"
+        );
+
+
+    return text
+        .charAt(0)
+        .toUpperCase();
+
+}
+
+
+/* =========================================================
+   SHOW EMPTY
+========================================================= */
+
+function showEmpty(){
+
+    $("empty").classList.add(
+        "show"
+    );
+
+
+    document.querySelectorAll(
+        ".status-card, .progress-card, .info-card, .actions"
+    ).forEach(
+        element => {
+
+            element.style.display =
+                "none";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   HIDE EMPTY
+========================================================= */
+
+function hideEmpty(){
+
+    $("empty").classList.remove(
+        "show"
+    );
+
+
+    document.querySelectorAll(
+        ".status-card, .progress-card, .info-card, .actions"
+    ).forEach(
+        element => {
+
+            element.style.display =
+                "";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   HOME
+========================================================= */
+
+function goHome(){
+
+    stopStatusSync();
+
+    window.location.href =
+        "home.html";
+
+}
+
+
+/* =========================================================
    BACK
-========================================== */
+========================================================= */
 
 function goBack(){
+
+    if(
+        currentStatus === "searching"
+    ){
+
+        if(
+            !window.confirm(
+                "Your rider search is still active. Go back without cancelling?"
+            )
+        ){
+
+            return;
+
+        }
+
+    }
+
 
     if(
         document.referrer &&
@@ -1968,26 +2944,21 @@ function goBack(){
 
     }else{
 
-        window.location.href =
-            "home.html";
+        goHome();
 
     }
 
 }
 
 
-/* ==========================================
+/* =========================================================
    TOAST
-========================================== */
+========================================================= */
 
-function showToast(
-    message
-){
+function showToast(message){
 
     const toast =
-        document.getElementById(
-            "toast"
-        );
+        $("toast");
 
 
     toast.textContent =
@@ -2019,130 +2990,134 @@ function showToast(
 }
 
 
-/* ==========================================
-   LIVE LOCAL STATUS SYNC
-========================================== */
+/* =========================================================
+   VISIBILITY
+========================================================= */
 
-function startStatusSync(){
+function handleVisibility(){
 
-    clearInterval(
-        statusTimer
-    );
+    if(
+        !document.hidden
+    ){
 
+        syncRideFromStorage();
 
-    statusTimer =
-        setInterval(
-            function(){
-
-                try{
-
-                    const raw =
-                        localStorage.getItem(
-                            "currentRide"
-                        );
-
-
-                    if(
-                        !raw
-                    ){
-
-                        return;
-
-                    }
-
-
-                    const latest =
-                        JSON.parse(
-                            raw
-                        );
-
-
-                    if(
-                        !latest ||
-                        typeof latest !==
-                        "object"
-                    ){
-
-                        return;
-
-                    }
-
-
-                    const latestId =
-                        latest.id ||
-                        latest.rideId;
-
-
-                    const currentId =
-                        rideData.id ||
-                        rideData.rideId;
-
-
-                    if(
-                        currentId &&
-                        latestId &&
-                        String(
-                            currentId
-                        ) !==
-                        String(
-                            latestId
-                        )
-                    ){
-
-                        return;
-
-                    }
-
-
-                    rideData = {
-
-                        ...rideData,
-                        ...latest
-
-                    };
-
-
-                    updateStatus(
-                        normalizeStatus(
-                            rideData.status ||
-                            rideData.rideStatus
-                        )
-                    );
-
-
-                    renderDriver();
-
-                }catch(error){
-
-                    console.log(
-                        error
-                    );
-
-                }
-
-            },
-            3000
-        );
+    }
 
 }
 
 
-/* ==========================================
+/* =========================================================
    INIT
-========================================== */
+========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+function init(){
 
-        loadRide();
+    if(initialized){
+
+        return;
+
+    }
+
+
+    initialized =
+        true;
+
+
+    $("backBtn").addEventListener(
+        "click",
+        goBack
+    );
+
+
+    $("trackBtn").addEventListener(
+        "click",
+        openTracking
+    );
+
+
+    $("chatBtn").addEventListener(
+        "click",
+        openChat
+    );
+
+
+    $("mapBtn").addEventListener(
+        "click",
+        openMap
+    );
+
+
+    $("cancelBtn").addEventListener(
+        "click",
+        cancelRide
+    );
+
+
+    $("homeBtn").addEventListener(
+        "click",
+        goHome
+    );
+
+
+    document.addEventListener(
+        "visibilitychange",
+        handleVisibility
+    );
+
+
+    loadRide();
+
+
+    if(
+        !document.getElementById(
+            "empty"
+        ).classList.contains(
+            "show"
+        )
+    ){
 
         startStatusSync();
 
     }
+
+}
+
+
+/* =========================================================
+   PAGE START
+========================================================= */
+
+if(
+    document.readyState === "loading"
+){
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        init,
+        {
+            once:true
+        }
+    );
+
+}else{
+
+    init();
+
+}
+
+
+/* =========================================================
+   CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "pagehide",
+    stopStatusSync
 );
 
 </script>
 
 </body>
-    </html>
+
+</html>
