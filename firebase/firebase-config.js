@@ -12,10 +12,10 @@
    - Firebase Storage
 
    IMPORTANT:
-   This file is the SINGLE Firebase initialization point
+   This is the SINGLE Firebase initialization point
    for the RiderX application.
 
-   All application modules should import Firebase services
+   Application modules should import Firebase services
    from this file instead of initializing Firebase again.
 ========================================================= */
 
@@ -150,30 +150,34 @@ const firebaseConfig = Object.freeze({
 
 
 /* =========================================================
-   INITIALIZE FIREBASE
+   FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   Firebase must only be initialized once per page.
+   Reuse an existing default Firebase app when available.
+   Otherwise initialize Firebase exactly once.
 ========================================================= */
 
 let app;
 
-const existingApps =
-    getApps();
+try {
 
+    if (getApps().length > 0) {
 
-if (
-    existingApps.length > 0
-) {
+        app = getApp();
 
-    app =
-        getApp();
+    } else {
 
-} else {
+        app = initializeApp(firebaseConfig);
 
-    app =
-        initializeApp(
-            firebaseConfig
-        );
+    }
+
+} catch (error) {
+
+    console.error(
+        "RiderX Firebase initialization failed.",
+        error
+    );
+
+    throw error;
 
 }
 
@@ -183,27 +187,19 @@ if (
 ========================================================= */
 
 const auth =
-    getAuth(
-        app
-    );
+    getAuth(app);
 
 
 const db =
-    getFirestore(
-        app
-    );
+    getFirestore(app);
 
 
 const realtimeDb =
-    getDatabase(
-        app
-    );
+    getDatabase(app);
 
 
 const storage =
-    getStorage(
-        app
-    );
+    getStorage(app);
 
 
 /* =========================================================
@@ -255,32 +251,7 @@ const firebaseServices =
 ========================================================= */
 
 let firebaseReady =
-    false;
-
-
-function markFirebaseReady() {
-
-    firebaseReady =
-        true;
-
-
-    if (
-        typeof window !== "undefined"
-    ) {
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx:firebase-ready",
-                {
-                    detail:
-                        firebaseServices
-                }
-            )
-        );
-
-    }
-
-}
+    true;
 
 
 function isFirebaseReady() {
@@ -293,12 +264,53 @@ function isFirebaseReady() {
 
 
 /* =========================================================
+   FIREBASE READY EVENT
+   ---------------------------------------------------------
+   Dispatch after all Firebase services are initialized.
+========================================================= */
+
+function dispatchFirebaseReady() {
+
+    if (
+        typeof window === "undefined"
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "riderx:firebase-ready",
+                {
+                    detail:
+                        firebaseServices
+                }
+            )
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX Firebase ready event could not be dispatched.",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    GLOBAL RIDERX FIREBASE REFERENCE
    ---------------------------------------------------------
    These references DO NOT initialize Firebase again.
 
-   They only expose the already initialized services to
-   application modules that need a global reference.
+   They expose the already initialized services for legacy
+   or non-module RiderX code that needs a global reference.
 ========================================================= */
 
 if (
@@ -351,12 +363,16 @@ if (
 
 export {
 
-    /* Firebase app */
+    /* =====================================================
+       FIREBASE APP
+    ===================================================== */
 
     app,
 
 
-    /* Firebase services */
+    /* =====================================================
+       FIREBASE SERVICES
+    ===================================================== */
 
     auth,
 
@@ -371,17 +387,23 @@ export {
     firebaseServices,
 
 
-    /* Configuration */
+    /* =====================================================
+       CONFIGURATION
+    ===================================================== */
 
     firebaseConfig,
 
 
-    /* Firebase readiness */
+    /* =====================================================
+       FIREBASE READY
+    ===================================================== */
 
     isFirebaseReady,
 
 
-    /* Authentication */
+    /* =====================================================
+       AUTHENTICATION
+    ===================================================== */
 
     createUserWithEmailAndPassword,
 
@@ -408,7 +430,9 @@ export {
     sendEmailVerification,
 
 
-    /* Firestore */
+    /* =====================================================
+       CLOUD FIRESTORE
+    ===================================================== */
 
     doc,
 
@@ -451,7 +475,9 @@ export {
     increment,
 
 
-    /* Realtime Database */
+    /* =====================================================
+       REALTIME DATABASE
+    ===================================================== */
 
     ref,
 
@@ -474,7 +500,9 @@ export {
     databaseServerTimestamp,
 
 
-    /* Storage */
+    /* =====================================================
+       FIREBASE STORAGE
+    ===================================================== */
 
     storageRef,
 
@@ -493,7 +521,7 @@ export {
    FIREBASE READY
 ========================================================= */
 
-markFirebaseReady();
+dispatchFirebaseReady();
 
 
 /* =========================================================
