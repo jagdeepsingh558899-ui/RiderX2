@@ -22,6 +22,9 @@
 
     <title>RiderX - Login</title>
 
+    <!-- IMPORTANT:
+         RiderX repository uses lowercase CSS filenames.
+    -->
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/auth.css">
     <link rel="stylesheet" href="../css/responsive.css">
@@ -194,8 +197,7 @@
             cursor: pointer;
             font-size: 10px;
             font-weight: 900;
-            transition:
-                .15s ease;
+            transition: .15s ease;
         }
 
         .role-btn.active {
@@ -548,8 +550,6 @@
         </div>
 
 
-        <!-- ROLE -->
-
         <div class="role-box">
 
             <div class="role-title">
@@ -562,6 +562,7 @@
                     type="button"
                     class="role-btn"
                     id="customerRole"
+                    aria-pressed="false"
                 >
                     Customer
                 </button>
@@ -570,6 +571,7 @@
                     type="button"
                     class="role-btn"
                     id="riderRole"
+                    aria-pressed="false"
                 >
                     Rider / Driver
                 </button>
@@ -578,8 +580,6 @@
 
         </div>
 
-
-        <!-- EMAIL LOGIN -->
 
         <form
             class="form"
@@ -627,6 +627,7 @@
                         type="button"
                         class="show-password"
                         id="showPassword"
+                        aria-label="Show password"
                     >
                         SHOW
                     </button>
@@ -661,12 +662,12 @@
         </div>
 
 
-        <!-- OTP -->
-
         <button
             type="button"
             class="otp-btn"
             id="otpToggle"
+            aria-expanded="false"
+            aria-controls="otpPanel"
         >
             Login with Mobile / OTP
         </button>
@@ -675,6 +676,7 @@
         <section
             class="otp-panel"
             id="otpPanel"
+            aria-hidden="true"
         >
 
             <div class="otp-title">
@@ -798,28 +800,62 @@
 
 
 /* =========================================================
-   AUTH MODULE
+   RIDERX LOGIN CONTROLLER
 ========================================================= */
 
 let AUTH = null;
+let authModuleLoaded = false;
+let redirecting = false;
+let existingSessionChecked = false;
 
-try {
 
-    const module =
+/* =========================================================
+   LOAD AUTH ENGINE
+========================================================= */
+
+async function loadAuth() {
+
+    if (authModuleLoaded && AUTH) {
+        return AUTH;
+    }
+
+    try {
+
         await import("../js/auth.js");
 
-    AUTH =
-        window.RiderX &&
-        window.RiderX.auth
-            ? window.RiderX.auth
-            : null;
+        AUTH =
+            window.RiderX &&
+            window.RiderX.auth
+                ? window.RiderX.auth
+                : null;
 
-} catch (error) {
+        if (!AUTH) {
 
-    console.error(
-        "RiderX auth.js failed to load:",
-        error
-    );
+            throw new Error(
+                "RiderX authentication engine is unavailable."
+            );
+
+        }
+
+        authModuleLoaded = true;
+
+        return AUTH;
+
+    } catch (error) {
+
+        console.error(
+            "RiderX auth.js failed to load:",
+            error
+        );
+
+        showStatus(
+            "Authentication system could not be loaded. Please refresh the page.",
+            "error"
+        );
+
+        return null;
+
+    }
 
 }
 
@@ -829,107 +865,88 @@ try {
 ========================================================= */
 
 const customerRole =
-    document.getElementById(
-        "customerRole"
-    );
+    document.getElementById("customerRole");
 
 const riderRole =
-    document.getElementById(
-        "riderRole"
-    );
+    document.getElementById("riderRole");
 
 const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+    document.getElementById("loginForm");
 
 const email =
-    document.getElementById(
-        "email"
-    );
+    document.getElementById("email");
 
 const password =
-    document.getElementById(
-        "password"
-    );
+    document.getElementById("password");
 
 const showPassword =
-    document.getElementById(
-        "showPassword"
-    );
+    document.getElementById("showPassword");
 
 const loginButton =
-    document.getElementById(
-        "loginButton"
-    );
+    document.getElementById("loginButton");
 
 const forgotButton =
-    document.getElementById(
-        "forgotButton"
-    );
+    document.getElementById("forgotButton");
 
 const otpToggle =
-    document.getElementById(
-        "otpToggle"
-    );
+    document.getElementById("otpToggle");
 
 const otpPanel =
-    document.getElementById(
-        "otpPanel"
-    );
+    document.getElementById("otpPanel");
 
 const phone =
-    document.getElementById(
-        "phone"
-    );
+    document.getElementById("phone");
 
 const otp =
-    document.getElementById(
-        "otp"
-    );
+    document.getElementById("otp");
 
 const sendOtpButton =
-    document.getElementById(
-        "sendOtpButton"
-    );
+    document.getElementById("sendOtpButton");
 
 const verifyOtpButton =
-    document.getElementById(
-        "verifyOtpButton"
-    );
+    document.getElementById("verifyOtpButton");
 
 const status =
-    document.getElementById(
-        "status"
-    );
+    document.getElementById("status");
 
 const registerButton =
-    document.getElementById(
-        "registerButton"
-    );
+    document.getElementById("registerButton");
 
 const backButton =
-    document.getElementById(
-        "backButton"
-    );
+    document.getElementById("backButton");
 
 
 /* =========================================================
    STATE
 ========================================================= */
 
+const ROLE_KEY =
+    "riderx_selected_role";
+
+const LEGACY_ROLE_KEY =
+    "riderx_role";
+
+
 let selectedRole =
-    localStorage.getItem(
-        "riderx_selected_role"
+    normalizeSelectedRole(
+        localStorage.getItem(ROLE_KEY)
     );
 
 
-if (
-    selectedRole !== "customer" &&
-    selectedRole !== "rider"
-) {
+if (!selectedRole) {
 
-    selectedRole = "customer";
+    selectedRole =
+        normalizeSelectedRole(
+            localStorage.getItem(LEGACY_ROLE_KEY)
+        );
+
+}
+
+
+if (!selectedRole) {
+
+    selectedRole =
+        "customer";
 
 }
 
@@ -943,8 +960,12 @@ function showStatus(
     type = ""
 ) {
 
+    if (!status) {
+        return;
+    }
+
     status.textContent =
-        message;
+        String(message || "");
 
     status.className =
         "status show";
@@ -962,6 +983,10 @@ function showStatus(
 
 function clearStatus() {
 
+    if (!status) {
+        return;
+    }
+
     status.textContent =
         "";
 
@@ -972,50 +997,95 @@ function clearStatus() {
 
 
 /* =========================================================
-   ROLE
+   ROLE NORMALIZATION
+========================================================= */
+
+function normalizeSelectedRole(
+    role
+) {
+
+    const value =
+        String(role || "")
+            .trim()
+            .toLowerCase();
+
+    if (
+        value === "rider" ||
+        value === "driver" ||
+        value === "partner"
+    ) {
+
+        return "rider";
+
+    }
+
+    if (
+        value === "customer" ||
+        value === "user"
+    ) {
+
+        return "customer";
+
+    }
+
+    return "";
+
+}
+
+
+/* =========================================================
+   ROLE SELECTION
 ========================================================= */
 
 function selectRole(
     role
 ) {
 
-    if (
-        role !== "customer" &&
-        role !== "rider"
-    ) {
+    const normalized =
+        normalizeSelectedRole(
+            role
+        );
 
+    if (!normalized) {
         return;
-
     }
 
-
     selectedRole =
-        role;
-
-
-    localStorage.setItem(
-        "riderx_selected_role",
-        role
-    );
-
+        normalized;
 
     localStorage.setItem(
-        "riderx_role",
-        role
+        ROLE_KEY,
+        selectedRole
     );
 
+    localStorage.setItem(
+        LEGACY_ROLE_KEY,
+        selectedRole
+    );
 
     customerRole.classList.toggle(
         "active",
-        role === "customer"
+        selectedRole === "customer"
     );
-
 
     riderRole.classList.toggle(
         "active",
-        role === "rider"
+        selectedRole === "rider"
     );
 
+    customerRole.setAttribute(
+        "aria-pressed",
+        selectedRole === "customer"
+            ? "true"
+            : "false"
+    );
+
+    riderRole.setAttribute(
+        "aria-pressed",
+        selectedRole === "rider"
+            ? "true"
+            : "false"
+    );
 
     clearStatus();
 
@@ -1038,17 +1108,22 @@ showPassword.addEventListener(
         const isPassword =
             password.type === "password";
 
-
         password.type =
             isPassword
                 ? "text"
                 : "password";
 
-
         showPassword.textContent =
             isPassword
                 ? "HIDE"
                 : "SHOW";
+
+        showPassword.setAttribute(
+            "aria-label",
+            isPassword
+                ? "Hide password"
+                : "Show password"
+        );
 
     }
 );
@@ -1064,18 +1139,19 @@ loginForm.addEventListener(
 
         event.preventDefault();
 
-        clearStatus();
+        if (redirecting) {
+            return;
+        }
 
+        clearStatus();
 
         const emailValue =
             email.value
                 .trim()
                 .toLowerCase();
 
-
         const passwordValue =
             password.value;
-
 
         if (!selectedRole) {
 
@@ -1087,7 +1163,6 @@ loginForm.addEventListener(
             return;
 
         }
-
 
         if (!emailValue) {
 
@@ -1102,10 +1177,10 @@ loginForm.addEventListener(
 
         }
 
-
         if (
-            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                .test(emailValue)
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                emailValue
+            )
         ) {
 
             showStatus(
@@ -1118,7 +1193,6 @@ loginForm.addEventListener(
             return;
 
         }
-
 
         if (
             passwordValue.length < 6
@@ -1135,22 +1209,17 @@ loginForm.addEventListener(
 
         }
 
+        const auth =
+            await loadAuth();
 
         if (
-            !AUTH ||
-            typeof AUTH.loginEmail !==
-            "function"
+            !auth ||
+            typeof auth.loginEmail !== "function"
         ) {
-
-            showStatus(
-                "Authentication system could not be loaded. Please refresh and try again.",
-                "error"
-            );
 
             return;
 
         }
-
 
         loginButton.disabled =
             true;
@@ -1158,33 +1227,46 @@ loginForm.addEventListener(
         loginButton.textContent =
             "SIGNING IN...";
 
-
         try {
 
             const result =
-                await AUTH.loginEmail(
+                await auth.loginEmail(
                     emailValue,
                     passwordValue
                 );
 
-
             const actualRole =
-                AUTH.normalizeRole(
-                    result.role
+                normalizeSelectedRole(
+                    typeof auth.normalizeRole === "function"
+                        ? auth.normalizeRole(
+                            result?.role
+                        )
+                        : result?.role
                 );
 
-
-            /*
-             * Never allow a customer to enter rider
-             * dashboard or rider to enter customer dashboard.
-             */
-
             if (
-                actualRole !==
-                selectedRole
+                actualRole !== selectedRole
             ) {
 
-                await AUTH.logout();
+                try {
+
+                    if (
+                        typeof auth.logout ===
+                        "function"
+                    ) {
+
+                        await auth.logout();
+
+                    }
+
+                } catch (logoutError) {
+
+                    console.warn(
+                        "RiderX logout after role mismatch failed:",
+                        logoutError
+                    );
+
+                }
 
                 throw new Error(
                     "This account belongs to " +
@@ -1198,47 +1280,14 @@ loginForm.addEventListener(
 
             }
 
-
             showStatus(
                 "Login successful. Opening your dashboard...",
                 "success"
             );
 
-
-            setTimeout(
-                function () {
-
-                    if (
-                        actualRole ===
-                        "rider"
-                    ) {
-
-                        window.location.replace(
-                            "../rider/home.html"
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (
-                        actualRole ===
-                        "customer"
-                    ) {
-
-                        window.location.replace(
-                            "../customer/home.html"
-                        );
-
-                        return;
-
-                    }
-
-                },
-                250
+            redirectToRole(
+                actualRole
             );
-
 
         } catch (error) {
 
@@ -1247,14 +1296,10 @@ loginForm.addEventListener(
                 error
             );
 
-
             showStatus(
-                getFirebaseErrorMessage(
-                    error
-                ),
+                getFirebaseErrorMessage(error),
                 "error"
             );
-
 
             loginButton.disabled =
                 false;
@@ -1276,14 +1321,16 @@ forgotButton.addEventListener(
     "click",
     async function () {
 
-        clearStatus();
+        if (redirecting) {
+            return;
+        }
 
+        clearStatus();
 
         const emailValue =
             email.value
                 .trim()
                 .toLowerCase();
-
 
         if (!emailValue) {
 
@@ -1298,33 +1345,43 @@ forgotButton.addEventListener(
 
         }
 
-
         if (
-            !AUTH ||
-            typeof AUTH.resetPassword !==
-            "function"
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+                emailValue
+            )
         ) {
 
             showStatus(
-                "Password reset service is unavailable.",
+                "Enter a valid email address.",
                 "error"
             );
+
+            email.focus();
 
             return;
 
         }
 
+        const auth =
+            await loadAuth();
+
+        if (
+            !auth ||
+            typeof auth.resetPassword !== "function"
+        ) {
+
+            return;
+
+        }
 
         forgotButton.disabled =
             true;
 
-
         try {
 
-            await AUTH.resetPassword(
+            await auth.resetPassword(
                 emailValue
             );
-
 
             showStatus(
                 "Password reset email sent. Check your inbox.",
@@ -1338,11 +1395,8 @@ forgotButton.addEventListener(
                 error
             );
 
-
             showStatus(
-                getFirebaseErrorMessage(
-                    error
-                ),
+                getFirebaseErrorMessage(error),
                 "error"
             );
 
@@ -1365,16 +1419,22 @@ otpToggle.addEventListener(
     "click",
     function () {
 
-        otpPanel.classList.toggle(
-            "show"
+        const open =
+            otpPanel.classList.toggle(
+                "show"
+            );
+
+        otpToggle.setAttribute(
+            "aria-expanded",
+            open ? "true" : "false"
         );
 
+        otpPanel.setAttribute(
+            "aria-hidden",
+            open ? "false" : "true"
+        );
 
-        if (
-            otpPanel.classList.contains(
-                "show"
-            )
-        ) {
+        if (open) {
 
             phone.focus();
 
@@ -1394,18 +1454,16 @@ phone.addEventListener(
 
         phone.value =
             phone.value
-                .replace(
-                    /\D/g,
-                    ""
-                )
-                .slice(
-                    0,
-                    10
-                );
+                .replace(/\D/g, "")
+                .slice(0, 10);
 
     }
 );
 
+
+/* =========================================================
+   OTP CLEANUP
+========================================================= */
 
 otp.addEventListener(
     "input",
@@ -1413,14 +1471,8 @@ otp.addEventListener(
 
         otp.value =
             otp.value
-                .replace(
-                    /\D/g,
-                    ""
-                )
-                .slice(
-                    0,
-                    6
-                );
+                .replace(/\D/g, "")
+                .slice(0, 6);
 
     }
 );
@@ -1434,16 +1486,15 @@ sendOtpButton.addEventListener(
     "click",
     async function () {
 
-        clearStatus();
+        if (redirecting) {
+            return;
+        }
 
+        clearStatus();
 
         const phoneValue =
             phone.value
-                .replace(
-                    /\D/g,
-                    ""
-                );
-
+                .replace(/\D/g, "");
 
         if (
             !/^[6-9]\d{9}$/.test(
@@ -1462,22 +1513,17 @@ sendOtpButton.addEventListener(
 
         }
 
+        const auth =
+            await loadAuth();
 
         if (
-            !AUTH ||
-            typeof AUTH.sendOtp !==
-            "function"
+            !auth ||
+            typeof auth.sendOtp !== "function"
         ) {
-
-            showStatus(
-                "OTP authentication service could not be loaded.",
-                "error"
-            );
 
             return;
 
         }
-
 
         sendOtpButton.disabled =
             true;
@@ -1485,20 +1531,17 @@ sendOtpButton.addEventListener(
         sendOtpButton.textContent =
             "SENDING...";
 
-
         try {
 
-            await AUTH.sendOtp(
+            await auth.sendOtp(
                 "+91" + phoneValue,
                 "recaptcha-container"
             );
-
 
             showStatus(
                 "OTP sent successfully. Enter the 6-digit code.",
                 "success"
             );
-
 
             otp.focus();
 
@@ -1509,11 +1552,8 @@ sendOtpButton.addEventListener(
                 error
             );
 
-
             showStatus(
-                getFirebaseErrorMessage(
-                    error
-                ),
+                getFirebaseErrorMessage(error),
                 "error"
             );
 
@@ -1539,13 +1579,14 @@ verifyOtpButton.addEventListener(
     "click",
     async function () {
 
+        if (redirecting) {
+            return;
+        }
+
         clearStatus();
 
-
         const otpValue =
-            otp.value
-                .trim();
-
+            otp.value.trim();
 
         if (
             !/^\d{6}$/.test(
@@ -1564,22 +1605,17 @@ verifyOtpButton.addEventListener(
 
         }
 
+        const auth =
+            await loadAuth();
 
         if (
-            !AUTH ||
-            typeof AUTH.verifyOtp !==
-            "function"
+            !auth ||
+            typeof auth.verifyOtp !== "function"
         ) {
-
-            showStatus(
-                "OTP authentication service could not be loaded.",
-                "error"
-            );
 
             return;
 
         }
-
 
         verifyOtpButton.disabled =
             true;
@@ -1587,28 +1623,46 @@ verifyOtpButton.addEventListener(
         verifyOtpButton.textContent =
             "VERIFYING...";
 
-
         try {
 
             const result =
-                await AUTH.verifyOtp(
+                await auth.verifyOtp(
                     otpValue,
                     selectedRole
                 );
 
-
             const actualRole =
-                AUTH.normalizeRole(
-                    result.role
+                normalizeSelectedRole(
+                    typeof auth.normalizeRole === "function"
+                        ? auth.normalizeRole(
+                            result?.role
+                        )
+                        : result?.role
                 );
 
-
             if (
-                actualRole !==
-                selectedRole
+                actualRole !== selectedRole
             ) {
 
-                await AUTH.logout();
+                try {
+
+                    if (
+                        typeof auth.logout ===
+                        "function"
+                    ) {
+
+                        await auth.logout();
+
+                    }
+
+                } catch (logoutError) {
+
+                    console.warn(
+                        "RiderX OTP mismatch logout failed:",
+                        logoutError
+                    );
+
+                }
 
                 throw new Error(
                     "This phone account belongs to another RiderX account type."
@@ -1616,38 +1670,14 @@ verifyOtpButton.addEventListener(
 
             }
 
-
             showStatus(
                 "OTP verified. Opening your dashboard...",
                 "success"
             );
 
-
-            setTimeout(
-                function () {
-
-                    if (
-                        actualRole ===
-                        "rider"
-                    ) {
-
-                        window.location.replace(
-                            "../rider/home.html"
-                        );
-
-                        return;
-
-                    }
-
-
-                    window.location.replace(
-                        "../customer/home.html"
-                    );
-
-                },
-                250
+            redirectToRole(
+                actualRole
             );
-
 
         } catch (error) {
 
@@ -1656,14 +1686,10 @@ verifyOtpButton.addEventListener(
                 error
             );
 
-
             showStatus(
-                getFirebaseErrorMessage(
-                    error
-                ),
+                getFirebaseErrorMessage(error),
                 "error"
             );
-
 
             verifyOtpButton.disabled =
                 false;
@@ -1686,16 +1712,14 @@ registerButton.addEventListener(
     function () {
 
         localStorage.setItem(
-            "riderx_selected_role",
+            ROLE_KEY,
             selectedRole
         );
-
 
         localStorage.setItem(
-            "riderx_role",
+            LEGACY_ROLE_KEY,
             selectedRole
         );
-
 
         window.location.replace(
             "./register.html"
@@ -1706,7 +1730,7 @@ registerButton.addEventListener(
 
 
 /* =========================================================
-   BACK
+   BACK TO ROLE
 ========================================================= */
 
 backButton.addEventListener(
@@ -1714,14 +1738,12 @@ backButton.addEventListener(
     function () {
 
         localStorage.removeItem(
-            "riderx_selected_role"
+            ROLE_KEY
         );
-
 
         localStorage.removeItem(
-            "riderx_role"
+            LEGACY_ROLE_KEY
         );
-
 
         window.location.replace(
             "./role.html"
@@ -1760,6 +1782,65 @@ riderRole.addEventListener(
 
 
 /* =========================================================
+   ROLE REDIRECT
+========================================================= */
+
+function redirectToRole(
+    role
+) {
+
+    const normalized =
+        normalizeSelectedRole(
+            role
+        );
+
+    if (
+        normalized !== "customer" &&
+        normalized !== "rider"
+    ) {
+
+        throw new Error(
+            "RiderX account role could not be determined."
+        );
+
+    }
+
+    if (redirecting) {
+        return;
+    }
+
+    redirecting = true;
+
+    localStorage.setItem(
+        ROLE_KEY,
+        normalized
+    );
+
+    localStorage.setItem(
+        LEGACY_ROLE_KEY,
+        normalized
+    );
+
+    const destination =
+        normalized === "rider"
+            ? "../rider/home.html"
+            : "../customer/home.html";
+
+    window.setTimeout(
+        function () {
+
+            window.location.replace(
+                destination
+            );
+
+        },
+        250
+    );
+
+}
+
+
+/* =========================================================
    FIREBASE ERROR TRANSLATOR
 ========================================================= */
 
@@ -1770,145 +1851,121 @@ function getFirebaseErrorMessage(
     const code =
         String(
             error?.code || ""
-        )
-        .toLowerCase();
-
+        ).toLowerCase();
 
     const message =
         String(
             error?.message || ""
         );
 
-
     if (
-        code.includes(
-            "invalid-credential"
-        ) ||
-        code.includes(
-            "wrong-password"
-        ) ||
-        code.includes(
-            "user-not-found"
-        )
+        code.includes("invalid-credential") ||
+        code.includes("wrong-password") ||
+        code.includes("user-not-found")
     ) {
 
         return "Email or password is incorrect.";
 
     }
 
-
     if (
-        code.includes(
-            "invalid-email"
-        )
+        code.includes("invalid-email")
     ) {
 
         return "Enter a valid email address.";
 
     }
 
-
     if (
-        code.includes(
-            "email-already-in-use"
-        )
+        code.includes("email-already-in-use")
     ) {
 
         return "This email is already registered.";
 
     }
 
-
     if (
-        code.includes(
-            "weak-password"
-        )
+        code.includes("weak-password")
     ) {
 
         return "Password is too weak. Use at least 6 characters.";
 
     }
 
-
     if (
-        code.includes(
-            "too-many-requests"
-        )
+        code.includes("too-many-requests")
     ) {
 
         return "Too many attempts. Please wait and try again.";
 
     }
 
-
     if (
-        code.includes(
-            "network-request-failed"
-        )
+        code.includes("network-request-failed")
     ) {
 
         return "Network error. Check your internet connection.";
 
     }
 
-
     if (
-        code.includes(
-            "captcha-check-failed"
-        )
+        code.includes("captcha-check-failed")
     ) {
 
         return "Security verification failed. Please try again.";
 
     }
 
-
     if (
-        code.includes(
-            "invalid-phone-number"
-        )
+        code.includes("invalid-phone-number")
     ) {
 
         return "The mobile number is invalid.";
 
     }
 
-
     if (
-        code.includes(
-            "quota-exceeded"
-        )
+        code.includes("quota-exceeded")
     ) {
 
         return "OTP service limit has been reached. Please try later.";
 
     }
 
-
     if (
-        code.includes(
-            "code-expired"
-        )
+        code.includes("code-expired")
     ) {
 
         return "OTP has expired. Request a new OTP.";
 
     }
 
-
     if (
-        code.includes(
-            "invalid-verification-code"
-        )
+        code.includes("invalid-verification-code")
     ) {
 
         return "Incorrect OTP. Please check and try again.";
 
     }
 
+    if (
+        code.includes("requires-recent-login")
+    ) {
+
+        return "Please sign in again and retry this action.";
+
+    }
 
     if (
-        message.includes(
+        code.includes("user-disabled")
+    ) {
+
+        return "This RiderX account has been disabled.";
+
+    }
+
+    if (
+        message.toLowerCase().includes(
             "role is not configured"
         )
     ) {
@@ -1917,17 +1974,15 @@ function getFirebaseErrorMessage(
 
     }
 
-
     if (
-        message.includes(
-            "disabled"
+        message.toLowerCase().includes(
+            "authentication"
         )
     ) {
 
         return message;
 
     }
-
 
     return (
         message ||
@@ -1938,124 +1993,204 @@ function getFirebaseErrorMessage(
 
 
 /* =========================================================
-   ALREADY LOGGED-IN CHECK
+   EXISTING FIREBASE SESSION
 ========================================================= */
 
 async function checkExistingSession() {
 
-    if (!AUTH) {
+    if (existingSessionChecked) {
+        return;
+    }
+
+    existingSessionChecked = true;
+
+    const auth =
+        await loadAuth();
+
+    if (!auth) {
+        return;
+    }
+
+    /*
+     * auth.js maintains the Firebase auth state.
+     * Do not trust localStorage alone for automatic
+     * dashboard access.
+     */
+
+    const firebaseUser =
+        auth.state?.firebaseUser ||
+        auth.state?.user ||
+        null;
+
+    if (!firebaseUser) {
+        return;
+    }
+
+    let role =
+        "";
+
+    try {
+
+        role =
+            normalizeSelectedRole(
+                typeof auth.getRole === "function"
+                    ? auth.getRole()
+                    : auth.state?.role
+            );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX existing-session role lookup failed:",
+            error
+        );
+
+    }
+
+    if (
+        role !== "customer" &&
+        role !== "rider"
+    ) {
 
         return;
 
     }
 
-
     /*
-     * Firebase listener is the source of truth.
-     * We only redirect when the Firebase user and
-     * RiderX role are both available.
+     * If the user explicitly selected another role,
+     * never silently switch account type.
      */
 
     if (
-        AUTH.state &&
-        AUTH.state.firebaseUser
+        selectedRole &&
+        role !== selectedRole
     ) {
 
-        const role =
-            AUTH.normalizeRole(
-                AUTH.getRole()
-            );
-
-
-        if (
-            role === "rider"
-        ) {
-
-            window.location.replace(
-                "../rider/home.html"
-            );
-
-            return;
-
-        }
-
-
-        if (
-            role === "customer"
-        ) {
-
-            window.location.replace(
-                "../customer/home.html"
-            );
-
-        }
+        return;
 
     }
+
+    showStatus(
+        "You are already signed in. Opening your dashboard...",
+        "success"
+    );
+
+    redirectToRole(
+        role
+    );
 
 }
 
 
 /* =========================================================
-   AUTH EVENTS
+   AUTH LOGIN EVENT
 ========================================================= */
 
 window.addEventListener(
     "riderx-auth-login",
     function (event) {
 
-        const role =
-            AUTH?.normalizeRole(
+        if (redirecting) {
+            return;
+        }
+
+        const authRole =
+            normalizeSelectedRole(
                 event.detail?.role
             );
 
-
         if (
-            role !== selectedRole
+            !authRole ||
+            authRole !== selectedRole
         ) {
 
             return;
 
         }
 
-
-        if (
-            role === "rider"
-        ) {
-
-            window.location.replace(
-                "../rider/home.html"
-            );
-
-            return;
-
-        }
-
-
-        if (
-            role === "customer"
-        ) {
-
-            window.location.replace(
-                "../customer/home.html"
-            );
-
-        }
+        redirectToRole(
+            authRole
+        );
 
     }
 );
 
 
 /* =========================================================
-   INITIAL CHECK
+   KEYBOARD SUPPORT
 ========================================================= */
 
-setTimeout(
-    checkExistingSession,
-    250
+[email, password].forEach(
+    function (input) {
+
+        input.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Enter"
+                ) {
+
+                    if (
+                        input === email
+                    ) {
+
+                        password.focus();
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
 );
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+(async function initLoginPage() {
+
+    try {
+
+        const auth =
+            await loadAuth();
+
+        if (!auth) {
+            return;
+        }
+
+        /*
+         * Give auth.js a moment to finish its initial
+         * Firebase onAuthStateChanged processing.
+         */
+
+        window.setTimeout(
+            checkExistingSession,
+            400
+        );
+
+    } catch (error) {
+
+        console.error(
+            "RiderX login initialization failed:",
+            error
+        );
+
+        showStatus(
+            "Unable to initialize login. Please refresh the page.",
+            "error"
+        );
+
+    }
+
+})();
 
 </script>
 
 </body>
 
-    </html>
+</html>
