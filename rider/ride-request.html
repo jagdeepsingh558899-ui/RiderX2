@@ -9,9 +9,10 @@
 
 <meta name="theme-color" content="#FFD400">
 
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
+<!-- RiderX CSS paths must remain lowercase in the final repository -->
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/responsive.css">
 
 <style>
 
@@ -404,7 +405,7 @@ body{
     line-height:1.45;
 }
 
-/* BOTTOM ACTION */
+/* BOTTOM */
 
 .bottom{
     background:#111;
@@ -432,6 +433,7 @@ body{
     height:100%;
     background:var(--yellow);
     transform-origin:left;
+    transition:width .9s linear;
 }
 
 .timer-text{
@@ -472,7 +474,7 @@ body{
     cursor:not-allowed;
 }
 
-/* OVERLAY */
+/* PROCESSING */
 
 .processing{
     position:fixed;
@@ -489,7 +491,7 @@ body{
     border:1px solid #333;
     border-radius:18px;
     padding:22px;
-    width:180px;
+    width:190px;
     text-align:center;
 }
 
@@ -572,49 +574,133 @@ body{
 
 <div class="ride-request-page">
 
-    <!-- HEADER -->
+<header class="topbar">
 
-    <header class="topbar">
+    <div class="brand">
 
-        <div class="brand">
-
-            <div class="brand-title">
-                Rider<span>X</span>
-            </div>
-
-            <div class="brand-subtitle">
-                New ride request
-            </div>
-
+        <div class="brand-title">
+            Rider<span>X</span>
         </div>
 
-        <button
-            class="close-btn"
-            onclick="closeRequest()"
-            aria-label="Close"
+        <div class="brand-subtitle">
+            New ride request
+        </div>
+
+    </div>
+
+    <button
+        class="close-btn"
+        onclick="closeRequest()"
+        aria-label="Close"
+    >
+        ×
+    </button>
+
+</header>
+
+
+<div class="request-alert">
+
+    <div class="alert-icon">
+        !
+    </div>
+
+    <div class="alert-content">
+
+        <div class="alert-title">
+            New Ride Available
+        </div>
+
+        <div class="alert-subtitle">
+            Review the trip details and accept the ride.
+        </div>
+
+    </div>
+
+</div>
+
+
+<main class="content">
+
+<section class="fare-card">
+
+    <div class="fare-label">
+        Estimated Earnings
+    </div>
+
+    <div class="fare">
+        ₹<span id="fare">--</span>
+    </div>
+
+    <div class="fare-note">
+        Final fare may vary based on the actual trip.
+    </div>
+
+</section>
+
+
+<section class="customer-card">
+
+    <div class="customer-row">
+
+        <div
+            class="avatar"
+            id="customerAvatar"
         >
-            ×
-        </button>
-
-    </header>
-
-
-    <!-- ALERT -->
-
-    <div class="request-alert">
-
-        <div class="alert-icon">
-            !
+            C
         </div>
 
-        <div class="alert-content">
+        <div class="customer-info">
 
-            <div class="alert-title">
-                New Ride Available
+            <div
+                class="customer-name"
+                id="customerName"
+            >
+                Customer
             </div>
 
-            <div class="alert-subtitle">
-                Review the trip details and accept the ride.
+            <div class="customer-rating">
+
+                ★
+                <strong id="rating">
+                    5.0
+                </strong>
+
+                · RiderX Customer
+
+            </div>
+
+        </div>
+
+        <div
+            class="service-badge"
+            id="service"
+        >
+            Bike Ride
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="route-card">
+
+    <div class="route-row">
+
+        <div class="route-dot pickup"></div>
+
+        <div>
+
+            <div class="route-label">
+                Pickup
+            </div>
+
+            <div
+                class="route-address"
+                id="pickup"
+            >
+                Pickup location
             </div>
 
         </div>
@@ -622,289 +708,183 @@ body{
     </div>
 
 
-    <!-- CONTENT -->
+    <div class="route-row">
 
-    <main class="content">
+        <div class="route-dot drop"></div>
 
-        <!-- FARE -->
+        <div>
 
-        <section class="fare-card">
-
-            <div class="fare-label">
-                Estimated Earnings
-            </div>
-
-            <div class="fare">
-                ₹<span id="fare">--</span>
-            </div>
-
-            <div class="fare-note">
-                Final fare may vary based on the actual trip.
-            </div>
-
-        </section>
-
-
-        <!-- CUSTOMER -->
-
-        <section class="customer-card">
-
-            <div class="customer-row">
-
-                <div
-                    class="avatar"
-                    id="customerAvatar"
-                >
-                    C
-                </div>
-
-                <div class="customer-info">
-
-                    <div
-                        class="customer-name"
-                        id="customerName"
-                    >
-                        Customer
-                    </div>
-
-                    <div class="customer-rating">
-
-                        ★
-                        <strong id="rating">
-                            5.0
-                        </strong>
-
-                        · RiderX Customer
-
-                    </div>
-
-                </div>
-
-                <div
-                    class="service-badge"
-                    id="service"
-                >
-                    Bike Ride
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ROUTE -->
-
-        <section class="route-card">
-
-            <div class="route-row">
-
-                <div class="route-dot pickup"></div>
-
-                <div>
-
-                    <div class="route-label">
-                        Pickup
-                    </div>
-
-                    <div
-                        class="route-address"
-                        id="pickup"
-                    >
-                        Pickup location
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="route-row">
-
-                <div class="route-dot drop"></div>
-
-                <div>
-
-                    <div class="route-label">
-                        Drop-off
-                    </div>
-
-                    <div
-                        class="route-address"
-                        id="drop"
-                    >
-                        Drop-off location
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- DETAILS -->
-
-        <section class="details-grid">
-
-            <div class="detail">
-
-                <div class="detail-icon">
-                    📍
-                </div>
-
-                <div
-                    class="detail-value"
-                    id="distance"
-                >
-                    -- km
-                </div>
-
-                <div class="detail-label">
-                    Distance
-                </div>
-
-            </div>
-
-
-            <div class="detail">
-
-                <div class="detail-icon">
-                    ⏱
-                </div>
-
-                <div
-                    class="detail-value"
-                    id="duration"
-                >
-                    -- min
-                </div>
-
-                <div class="detail-label">
-                    Duration
-                </div>
-
-            </div>
-
-
-            <div class="detail">
-
-                <div class="detail-icon">
-                    💰
-                </div>
-
-                <div
-                    class="detail-value"
-                    id="payment"
-                >
-                    Cash
-                </div>
-
-                <div class="detail-label">
-                    Payment
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- PAYMENT -->
-
-        <section class="payment-card">
-
-            <div class="payment-icon">
-                💳
-            </div>
-
-            <div class="payment-info">
-
-                <div class="payment-title">
-                    Payment method
-                </div>
-
-                <div
-                    class="payment-value"
-                    id="paymentMethod"
-                >
-                    Cash
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- NOTE -->
-
-        <section class="note-card">
-
-            <div class="note-title">
-                Customer Note
+            <div class="route-label">
+                Drop-off
             </div>
 
             <div
-                class="note"
-                id="note"
+                class="route-address"
+                id="drop"
             >
-                No special instructions.
-            </div>
-
-        </section>
-
-    </main>
-
-
-    <!-- BOTTOM -->
-
-    <footer class="bottom">
-
-        <div class="timer-wrap">
-
-            <div class="timer-bar">
-
-                <div
-                    class="timer-progress"
-                    id="timerProgress"
-                ></div>
-
-            </div>
-
-            <div
-                class="timer-text"
-                id="timerText"
-            >
-                30 sec
+                Drop-off location
             </div>
 
         </div>
 
+    </div>
 
-        <div class="action-row">
+</section>
 
-            <button
-                class="action-btn reject"
-                id="rejectBtn"
-                onclick="rejectRide()"
-            >
-                Reject
-            </button>
 
-            <button
-                class="action-btn accept"
-                id="acceptBtn"
-                onclick="acceptRide()"
-            >
-                Accept Ride
-            </button>
+<section class="details-grid">
+
+    <div class="detail">
+
+        <div class="detail-icon">
+            📍
+        </div>
+
+        <div
+            class="detail-value"
+            id="distance"
+        >
+            -- km
+        </div>
+
+        <div class="detail-label">
+            Distance
+        </div>
+
+    </div>
+
+
+    <div class="detail">
+
+        <div class="detail-icon">
+            ⏱
+        </div>
+
+        <div
+            class="detail-value"
+            id="duration"
+        >
+            -- min
+        </div>
+
+        <div class="detail-label">
+            Duration
+        </div>
+
+    </div>
+
+
+    <div class="detail">
+
+        <div class="detail-icon">
+            💰
+        </div>
+
+        <div
+            class="detail-value"
+            id="payment"
+        >
+            Cash
+        </div>
+
+        <div class="detail-label">
+            Payment
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="payment-card">
+
+    <div class="payment-icon">
+        💳
+    </div>
+
+    <div class="payment-info">
+
+        <div class="payment-title">
+            Payment method
+        </div>
+
+        <div
+            class="payment-value"
+            id="paymentMethod"
+        >
+            Cash
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="note-card">
+
+    <div class="note-title">
+        Customer Note
+    </div>
+
+    <div
+        class="note"
+        id="note"
+    >
+        No special instructions.
+    </div>
+
+</section>
+
+</main>
+
+
+<footer class="bottom">
+
+    <div class="timer-wrap">
+
+        <div class="timer-bar">
+
+            <div
+                class="timer-progress"
+                id="timerProgress"
+            ></div>
 
         </div>
 
-    </footer>
+        <div
+            class="timer-text"
+            id="timerText"
+        >
+            30 sec
+        </div>
+
+    </div>
+
+
+    <div class="action-row">
+
+        <button
+            class="action-btn reject"
+            id="rejectBtn"
+            onclick="rejectRide()"
+        >
+            Reject
+        </button>
+
+        <button
+            class="action-btn accept"
+            id="acceptBtn"
+            onclick="acceptRide()"
+        >
+            Accept Ride
+        </button>
+
+    </div>
+
+</footer>
 
 </div>
 
-
-<!-- PROCESSING -->
 
 <div
     class="processing"
@@ -924,28 +904,76 @@ body{
 </div>
 
 
-<!-- TOAST -->
-
 <div
     class="toast"
     id="toast"
 ></div>
 
 
-<script>
-/* ==========================================
-   RIDERX INCOMING RIDE REQUEST
-========================================== */
+<script type="module">
 
-const $ = id => document.getElementById(id);
+/*
+============================================================
+ RIDERX INCOMING RIDE REQUEST
+ FINAL ACCEPTANCE SYNC
+
+ Flow:
+
+ Rider accepts
+       ↓
+ RTDB transaction checks ride
+       ↓
+ rides/{rideId} -> accepted
+       ↓
+ customerRides/{customerId}/{rideId} -> accepted
+       ↓
+ rideRequests/{rideId} -> accepted
+       ↓
+ Firestore rides/{rideId} -> accepted
+       ↓
+ Customer listener receives accepted
+       ↓
+ Searching Nearby Rider disappears
+       ↓
+ Rider Found / driver details appear
+
+============================================================
+*/
+
+import {
+    auth,
+    db,
+    realtimeDb,
+    doc,
+    updateDoc,
+    runTransaction,
+    ref,
+    update,
+    onValue,
+    serverTimestamp
+} from "../firebase/firebase-config.js";
+
+
+const $ = id =>
+    document.getElementById(id);
+
 
 let currentRide = null;
+
 let countdown = 30;
+
 let timer = null;
+
 let timerStarted = false;
 
+let accepting = false;
 
-/* URL RIDE ID */
+let firebaseRideUnsubscribe = null;
+
+
+/* ============================================================
+   RIDE ID
+============================================================ */
 
 function getRideId(){
 
@@ -964,13 +992,22 @@ function getRideId(){
 }
 
 
-/* SET TEXT */
+/* ============================================================
+   TEXT
+============================================================ */
 
-function setText(id,value,fallback="--"){
+function setText(
+    id,
+    value,
+    fallback="--"
+){
 
-    const element = $(id);
+    const element =
+        $(id);
 
-    if(!element) return;
+    if(!element){
+        return;
+    }
 
     element.textContent =
         value !== undefined &&
@@ -982,7 +1019,9 @@ function setText(id,value,fallback="--"){
 }
 
 
-/* FORMAT SERVICE */
+/* ============================================================
+   SERVICE
+============================================================ */
 
 function formatService(service){
 
@@ -990,29 +1029,130 @@ function formatService(service){
         String(service || "")
         .toLowerCase();
 
-    if(value.includes("bike"))
+    if(value.includes("bike")){
         return "🏍 Bike Ride";
+    }
 
-    if(value.includes("cab") ||
-       value.includes("car"))
+    if(
+        value.includes("cab") ||
+        value.includes("car")
+    ){
         return "🚕 Cab Ride";
+    }
 
-    if(value.includes("parcel"))
+    if(value.includes("parcel")){
         return "📦 Parcel";
+    }
 
-    if(value.includes("food"))
+    if(value.includes("food")){
         return "🍔 Food";
+    }
 
     return "🚕 Ride";
 
 }
 
 
-/* RENDER RIDE */
+/* ============================================================
+   RIDER PROFILE
+============================================================ */
+
+function getRiderProfile(){
+
+    const user =
+        auth?.currentUser || null;
+
+    let stored = {};
+
+    const possibleKeys = [
+        "riderx_rider",
+        "riderx_user",
+        "riderxRider",
+        "rider"
+    ];
+
+    for(
+        const key of possibleKeys
+    ){
+
+        try{
+
+            const value =
+                localStorage.getItem(key);
+
+            if(!value){
+                continue;
+            }
+
+            const parsed =
+                JSON.parse(value);
+
+            if(
+                parsed &&
+                typeof parsed === "object"
+            ){
+
+                stored = parsed;
+
+                break;
+
+            }
+
+        }catch(error){
+
+            console.warn(
+                "RiderX rider profile parse failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    const uid =
+        user?.uid ||
+        stored.uid ||
+        stored.id ||
+        stored.userId ||
+        "";
+
+    const name =
+        user?.displayName ||
+        stored.name ||
+        stored.fullName ||
+        stored.displayName ||
+        "Rider";
+
+    const phone =
+        user?.phoneNumber ||
+        stored.phone ||
+        stored.phoneNumber ||
+        "";
+
+    return {
+        uid,
+        name,
+        phone
+    };
+
+}
+
+
+/* ============================================================
+   RENDER
+============================================================ */
 
 function renderRide(ride){
 
-    currentRide = ride;
+    if(!ride){
+        return;
+    }
+
+    currentRide = {
+        ...ride
+    };
+
 
     const customer =
         ride.customerName ||
@@ -1021,46 +1161,67 @@ function renderRide(ride){
         ride.user?.name ||
         "Customer";
 
+
     const fare =
         ride.fare ??
+        ride.totalFare ??
         ride.amount ??
         ride.estimatedFare ??
         ride.price ??
         0;
 
+
     const pickup =
         ride.pickupAddress ||
         ride.pickup?.address ||
-        ride.pickupLocation ||
+        ride.pickupLocation?.address ||
+        (
+            typeof ride.pickupLocation === "string"
+                ? ride.pickupLocation
+                : ""
+        ) ||
         ride.from ||
         "Pickup location";
+
 
     const drop =
         ride.dropAddress ||
         ride.destinationAddress ||
         ride.drop?.address ||
-        ride.dropLocation ||
+        ride.dropoff?.address ||
+        ride.dropLocation?.address ||
+        (
+            typeof ride.dropLocation === "string"
+                ? ride.dropLocation
+                : ""
+        ) ||
         ride.to ||
         "Drop-off location";
+
 
     const distance =
         ride.distance ??
         ride.distanceKm;
 
+
     const duration =
         ride.duration ??
-        ride.durationMin;
+        ride.durationMin ??
+        ride.durationMinutes;
+
 
     const payment =
         ride.paymentMethod ||
         ride.payment ||
         "Cash";
 
+
     const service =
         ride.serviceType ||
         ride.rideType ||
         ride.service ||
         "Ride";
+
 
     const note =
         ride.customerNote ||
@@ -1074,54 +1235,69 @@ function renderRide(ride){
         customer
     );
 
+
     setText(
         "customerAvatar",
-        customer.charAt(0).toUpperCase()
+        String(customer)
+            .charAt(0)
+            .toUpperCase()
     );
+
 
     setText(
         "fare",
-        Number(fare || 0).toFixed(0)
+        Number(fare || 0)
+            .toFixed(0)
     );
+
 
     setText(
         "pickup",
         pickup
     );
 
+
     setText(
         "drop",
         drop
     );
 
+
     setText(
         "distance",
-        distance !== undefined
+        distance !== undefined &&
+        distance !== null
             ? `${distance} km`
             : "-- km"
     );
 
+
     setText(
         "duration",
-        duration !== undefined
+        duration !== undefined &&
+        duration !== null
             ? `${duration} min`
             : "-- min"
     );
+
 
     setText(
         "payment",
         payment
     );
 
+
     setText(
         "paymentMethod",
         payment
     );
 
+
     setText(
         "service",
         formatService(service)
     );
+
 
     setText(
         "note",
@@ -1129,7 +1305,10 @@ function renderRide(ride){
     );
 
 
-    if(ride.customerRating){
+    if(
+        ride.customerRating !== undefined &&
+        ride.customerRating !== null
+    ){
 
         setText(
             "rating",
@@ -1141,7 +1320,129 @@ function renderRide(ride){
 }
 
 
-/* LOAD */
+/* ============================================================
+   FIRESTORE RIDE LOAD
+============================================================ */
+
+async function loadRideFromFirestore(
+    rideId
+){
+
+    if(
+        !db ||
+        !rideId
+    ){
+        return null;
+    }
+
+
+    try{
+
+        /*
+         * Use dynamic Firestore import only if
+         * the current config does not expose getDoc.
+         */
+
+        const module =
+            await import(
+                "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+            );
+
+
+        const snapshot =
+            await module.getDoc(
+                module.doc(
+                    db,
+                    "rides",
+                    rideId
+                )
+            );
+
+
+        if(!snapshot.exists()){
+            return null;
+        }
+
+
+        return {
+            ...snapshot.data(),
+            id: snapshot.id
+        };
+
+    }catch(error){
+
+        console.warn(
+            "Firestore ride load failed:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   RTDB RIDE LOAD
+============================================================ */
+
+async function loadRideFromRealtime(
+    rideId
+){
+
+    if(
+        !realtimeDb ||
+        !rideId
+    ){
+        return null;
+    }
+
+
+    try{
+
+        const firebase =
+            await import(
+                "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            );
+
+
+        const snapshot =
+            await firebase.get(
+                firebase.ref(
+                    realtimeDb,
+                    "rides/" + rideId
+                )
+            );
+
+
+        if(!snapshot.exists()){
+            return null;
+        }
+
+
+        return {
+            ...snapshot.val(),
+            id: rideId
+        };
+
+    }catch(error){
+
+        console.warn(
+            "RTDB ride load failed:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   LOAD RIDE
+============================================================ */
 
 async function loadRide(){
 
@@ -1149,59 +1450,71 @@ async function loadRide(){
         getRideId();
 
 
+    if(!rideId){
+
+        showToast(
+            "Ride information is missing.",
+            "error"
+        );
+
+        startTimer();
+
+        return;
+
+    }
+
+
     try{
 
-        if(typeof window.getRideById === "function"){
+        /*
+         * First Firestore.
+         */
 
-            const ride =
-                await window.getRideById(
+        let ride =
+            await loadRideFromFirestore(
+                rideId
+            );
+
+
+        /*
+         * RTDB is the live customer/rider
+         * synchronization source.
+         */
+
+        if(!ride){
+
+            ride =
+                await loadRideFromRealtime(
                     rideId
                 );
-
-            if(ride){
-
-                renderRide(ride);
-
-                startTimer();
-
-                return;
-
-            }
 
         }
 
 
-        if(typeof window.loadRideRequest === "function"){
+        if(ride){
 
-            const ride =
-                await window.loadRideRequest(
-                    rideId
-                );
-
-            if(ride){
-
-                renderRide(ride);
-
-                startTimer();
-
-                return;
-
-            }
+            renderRide(
+                ride
+            );
 
         }
 
 
         /*
-          Existing Firebase listener can provide
-          the incoming request through this event.
-        */
+         * Keep listening to the live RTDB ride.
+         */
+
+        listenLiveRide(
+            rideId
+        );
+
 
         document.dispatchEvent(
             new CustomEvent(
                 "riderxRideRequestPageReady",
                 {
                     detail:{
-                        rideId:rideId
+                        rideId
                     }
                 }
             )
@@ -1224,11 +1537,180 @@ async function loadRide(){
 }
 
 
-/* TIMER */
+/* ============================================================
+   LIVE RIDE LISTENER
+============================================================ */
+
+function listenLiveRide(
+    rideId
+){
+
+    if(
+        !realtimeDb ||
+        !rideId
+    ){
+        return;
+    }
+
+
+    if(
+        typeof firebaseRideUnsubscribe ===
+        "function"
+    ){
+
+        try{
+            firebaseRideUnsubscribe();
+        }catch(error){}
+
+    }
+
+
+    /*
+     * Import RTDB listener because this page
+     * is already a Firebase module.
+     */
+
+    import(
+        "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+    )
+    .then(
+        firebase => {
+
+            const rideRef =
+                firebase.ref(
+                    realtimeDb,
+                    "rides/" + rideId
+                );
+
+
+            firebaseRideUnsubscribe =
+                firebase.onValue(
+                    rideRef,
+                    snapshot => {
+
+                        if(
+                            !snapshot.exists()
+                        ){
+                            return;
+                        }
+
+
+                        const ride = {
+                            ...snapshot.val(),
+                            id: rideId
+                        };
+
+
+                        currentRide =
+                            ride;
+
+
+                        /*
+                         * If another rider has already
+                         * accepted the ride, this request
+                         * must disappear.
+                         */
+
+                        const status =
+                            normalizeStatus(
+                                ride.status ||
+                                ride.rideStatus
+                            );
+
+
+                        if(
+                            status !== "searching" &&
+                            status !== "requested" &&
+                            status !== "pending"
+                        ){
+
+                            if(
+                                status === "accepted" &&
+                                ride.riderId &&
+                                ride.riderId !==
+                                getRiderProfile().uid
+                            ){
+
+                                stopTimer();
+
+                                disableButtons();
+
+                                showToast(
+                                    "This ride was accepted by another rider.",
+                                    "error"
+                                );
+
+
+                                setTimeout(
+                                    closeRequest,
+                                    900
+                                );
+
+                                return;
+
+                            }
+
+                        }
+
+
+                        renderRide(
+                            ride
+                        );
+
+                    },
+                    error => {
+
+                        console.error(
+                            "Live ride listener error:",
+                            error
+                        );
+
+                    }
+                );
+
+        }
+    )
+    .catch(
+        error => {
+
+            console.error(
+                "RTDB listener import error:",
+                error
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   STATUS
+============================================================ */
+
+function normalizeStatus(
+    status
+){
+
+    return String(
+        status || ""
+    )
+    .trim()
+    .toLowerCase();
+
+}
+
+
+/* ============================================================
+   TIMER
+============================================================ */
 
 function startTimer(){
 
-    if(timerStarted) return;
+    if(timerStarted){
+        return;
+    }
+
 
     timerStarted = true;
 
@@ -1236,43 +1718,85 @@ function startTimer(){
 
     updateTimer();
 
+
     timer =
-        setInterval(() => {
+        setInterval(
+            () => {
 
-            countdown--;
+                countdown--;
 
-            updateTimer();
+                updateTimer();
 
-            if(countdown <= 0){
 
-                clearInterval(timer);
+                if(
+                    countdown <= 0
+                ){
 
-                autoExpire();
+                    stopTimer();
 
-            }
+                    autoExpire();
 
-        },1000);
+                }
+
+            },
+            1000
+        );
 
 }
 
 
-/* TIMER UI */
+/* ============================================================
+   STOP TIMER
+============================================================ */
+
+function stopTimer(){
+
+    if(timer){
+
+        clearInterval(
+            timer
+        );
+
+    }
+
+    timer = null;
+
+}
+
+
+/* ============================================================
+   TIMER UI
+============================================================ */
 
 function updateTimer(){
 
     setText(
         "timerText",
-        `${countdown} sec`
+        `${Math.max(
+            0,
+            countdown
+        )} sec`
     );
+
 
     const progress =
         $("timerProgress");
 
+
+    if(!progress){
+        return;
+    }
+
+
     const percent =
         Math.max(
             0,
-            countdown / 30
-        ) * 100;
+            Math.min(
+                100,
+                countdown / 30 * 100
+            )
+        );
+
 
     progress.style.width =
         percent + "%";
@@ -1280,17 +1804,20 @@ function updateTimer(){
 }
 
 
-/* EXPIRE */
+/* ============================================================
+   EXPIRE
+============================================================ */
 
 function autoExpire(){
 
-    $("acceptBtn").disabled = true;
-    $("rejectBtn").disabled = true;
+    disableButtons();
+
 
     setText(
         "timerText",
         "Expired"
     );
+
 
     showToast(
         "Ride request expired.",
@@ -1298,67 +1825,144 @@ function autoExpire(){
     );
 
 
-    setTimeout(() => {
-
-        closeRequest();
-
-    },1200);
-
-}
-
-
-/* PROCESSING */
-
-function processing(show,text){
-
-    $("processingText").textContent =
-        text || "Processing...";
-
-    $("processing").style.display =
-        show ? "flex" : "none";
-
-    $("acceptBtn").disabled = show;
-    $("rejectBtn").disabled = show;
+    setTimeout(
+        closeRequest,
+        1200
+    );
 
 }
 
 
-/* TOAST */
+/* ============================================================
+   DISABLE
+============================================================ */
 
-let toastTimer;
+function disableButtons(){
 
-function showToast(message,type=""){
+    if($("acceptBtn")){
+        $("acceptBtn").disabled = true;
+    }
+
+    if($("rejectBtn")){
+        $("rejectBtn").disabled = true;
+    }
+
+}
+
+
+/* ============================================================
+   PROCESSING
+============================================================ */
+
+function processing(
+    show,
+    text
+){
+
+    if($("processingText")){
+
+        $("processingText")
+            .textContent =
+            text || "Processing...";
+
+    }
+
+
+    if($("processing")){
+
+        $("processing")
+            .style.display =
+            show
+                ? "flex"
+                : "none";
+
+    }
+
+
+    if($("acceptBtn")){
+        $("acceptBtn").disabled =
+            show;
+    }
+
+    if($("rejectBtn")){
+        $("rejectBtn").disabled =
+            show;
+    }
+
+}
+
+
+/* ============================================================
+   TOAST
+============================================================ */
+
+let toastTimer = null;
+
+
+function showToast(
+    message,
+    type=""
+){
 
     const toast =
         $("toast");
 
+
+    if(!toast){
+        return;
+    }
+
+
     toast.textContent =
         message;
+
 
     toast.className =
         "toast show " + type;
 
-    clearTimeout(toastTimer);
+
+    if(toastTimer){
+
+        clearTimeout(
+            toastTimer
+        );
+
+    }
+
 
     toastTimer =
-        setTimeout(() => {
+        setTimeout(
+            () => {
 
-            toast.className =
-                "toast";
+                toast.className =
+                    "toast";
 
-        },3000);
+            },
+            3000
+        );
 
 }
 
 
-/* ACCEPT */
+/* ============================================================
+   ACCEPT RIDE
+============================================================ */
 
 async function acceptRide(){
+
+    if(accepting){
+        return;
+    }
+
 
     const rideId =
         getRideId();
 
-    if(!rideId && !currentRide){
+
+    if(
+        !rideId ||
+        !currentRide
+    ){
 
         showToast(
             "Ride information is missing.",
@@ -1370,12 +1974,9 @@ async function acceptRide(){
     }
 
 
-    if(timer){
+    accepting = true;
 
-        clearInterval(timer);
-
-    }
-
+    stopTimer();
 
     processing(
         true,
@@ -1385,89 +1986,544 @@ async function acceptRide(){
 
     try{
 
-        let result = false;
+        const rider =
+            getRiderProfile();
 
 
-        if(typeof window.acceptRideRequest === "function"){
+        if(!rider.uid){
 
-            result =
-                await window.acceptRideRequest(
+            throw new Error(
+                "Rider account is not available. Please login again."
+            );
+
+        }
+
+
+        /*
+         * ====================================================
+         * STEP 1
+         * RTDB TRANSACTION
+         *
+         * This is the live source watched by the customer.
+         * It prevents two riders from accepting the same ride.
+         * ====================================================
+         */
+
+        if(!realtimeDb){
+
+            throw new Error(
+                "Realtime Database is not available."
+            );
+
+        }
+
+
+        const firebase =
+            await import(
+                "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
+            );
+
+
+        const rideRef =
+            firebase.ref(
+                realtimeDb,
+                "rides/" + rideId
+            );
+
+
+        let acceptedRide = null;
+
+
+        await firebase.runTransaction(
+            rideRef,
+            currentData => {
+
+                if(!currentData){
+
+                    return;
+
+                }
+
+
+                const status =
+                    normalizeStatus(
+                        currentData.status ||
+                        currentData.rideStatus
+                    );
+
+
+                /*
+                 * Another rider already accepted.
+                 */
+
+                if(
+                    status !== "searching" &&
+                    status !== "requested" &&
+                    status !== "pending"
+                ){
+
+                    return;
+
+                }
+
+
+                /*
+                 * Safety check.
+                 */
+
+                if(
+                    currentData.riderId &&
+                    currentData.riderId !==
+                    rider.uid
+                ){
+
+                    return;
+
+                }
+
+
+                acceptedRide = {
+                    ...currentData,
+
+                    id:
+                        rideId,
+
+                    status:
+                        "accepted",
+
+                    rideStatus:
+                        "accepted",
+
+                    riderId:
+                        rider.uid,
+
+                    riderUid:
+                        rider.uid,
+
+                    riderName:
+                        rider.name,
+
+                    riderPhone:
+                        rider.phone,
+
+                    acceptedAt:
+                        Date.now(),
+
+                    updatedAt:
+                        Date.now()
+                };
+
+
+                return acceptedRide;
+
+            }
+        );
+
+
+        /*
+         * Transaction returns null when another rider
+         * already took the ride.
+         */
+
+        if(!acceptedRide){
+
+            throw new Error(
+                "Another rider accepted this ride."
+            );
+
+        }
+
+
+        /*
+         * ====================================================
+         * STEP 2
+         * UPDATE RTDB INDEXES
+         *
+         * Customer watches customerRides/{uid}/{rideId}.
+         * Rider request queue also becomes accepted.
+         * ====================================================
+         */
+
+        const customerId =
+            acceptedRide.customerId ||
+            acceptedRide.customerUid ||
+            acceptedRide.userId ||
+            acceptedRide.userUid ||
+            currentRide.customerId ||
+            currentRide.customerUid ||
+            "";
+
+
+        const rtdbUpdates = {};
+
+
+        /*
+         * Main ride.
+         */
+
+        rtdbUpdates[
+            "rides/" + rideId
+        ] = {
+            ...acceptedRide
+        };
+
+
+        /*
+         * Customer live ride.
+         */
+
+        if(customerId){
+
+            rtdbUpdates[
+                "customerRides/" +
+                customerId +
+                "/" +
+                rideId
+            ] = {
+
+                bookingId:
                     rideId,
-                    currentRide
-                );
 
-        }else if(typeof window.acceptRide === "function"){
-
-            result =
-                await window.acceptRide(
+                rideId:
                     rideId,
-                    currentRide
-                );
 
-        }else{
+                customerId:
+                    customerId,
 
-            document.dispatchEvent(
-                new CustomEvent(
-                    "riderxAcceptRide",
-                    {
-                        detail:{
-                            rideId:rideId,
-                            ride:currentRide
-                        }
-                    }
+                status:
+                    "accepted",
+
+                rideStatus:
+                    "accepted",
+
+                service:
+                    acceptedRide.service ||
+                    acceptedRide.serviceType ||
+                    "",
+
+                serviceName:
+                    acceptedRide.serviceName ||
+                    "",
+
+                pickup:
+                    acceptedRide.pickup ||
+                    null,
+
+                destination:
+                    acceptedRide.destination ||
+                    acceptedRide.dropoff ||
+                    null,
+
+                pickupAddress:
+                    acceptedRide.pickupAddress ||
+                    acceptedRide.pickup?.address ||
+                    "",
+
+                destinationAddress:
+                    acceptedRide.destinationAddress ||
+                    acceptedRide.dropoff?.address ||
+                    "",
+
+                pickupLat:
+                    acceptedRide.pickupLat ??
+                    acceptedRide.pickup?.lat ??
+                    null,
+
+                pickupLng:
+                    acceptedRide.pickupLng ??
+                    acceptedRide.pickup?.lng ??
+                    null,
+
+                destinationLat:
+                    acceptedRide.destinationLat ??
+                    acceptedRide.destination?.lat ??
+                    null,
+
+                destinationLng:
+                    acceptedRide.destinationLng ??
+                    acceptedRide.destination?.lng ??
+                    null,
+
+                distanceKm:
+                    acceptedRide.distanceKm ??
+                    acceptedRide.distance ??
+                    0,
+
+                durationMinutes:
+                    acceptedRide.durationMinutes ??
+                    acceptedRide.duration ??
+                    0,
+
+                fare:
+                    acceptedRide.fare ??
+                    acceptedRide.totalFare ??
+                    acceptedRide.estimatedFare ??
+                    0,
+
+                paymentMethod:
+                    acceptedRide.paymentMethod ||
+                    acceptedRide.payment ||
+                    "Cash",
+
+                riderId:
+                    rider.uid,
+
+                riderUid:
+                    rider.uid,
+
+                riderName:
+                    rider.name,
+
+                riderPhone:
+                    rider.phone,
+
+                riderRating:
+                    acceptedRide.riderRating ??
+                    null,
+
+                acceptedAt:
+                    acceptedRide.acceptedAt,
+
+                updatedAt:
+                    acceptedRide.updatedAt
+
+            };
+
+        }
+
+
+        /*
+         * Rider request queue.
+         *
+         * Keep the request but mark it accepted so other
+         * riders stop displaying it.
+         */
+
+        rtdbUpdates[
+            "rideRequests/" + rideId
+        ] = {
+
+            ...acceptedRide,
+
+            status:
+                "accepted",
+
+            rideStatus:
+                "accepted",
+
+            riderId:
+                rider.uid,
+
+            riderUid:
+                rider.uid,
+
+            riderName:
+                rider.name,
+
+            riderPhone:
+                rider.phone
+
+        };
+
+
+        /*
+         * One multi-location RTDB update.
+         */
+
+        await firebase.update(
+            firebase.ref(
+                realtimeDb
+            ),
+            rtdbUpdates
+        );
+
+
+        /*
+         * ====================================================
+         * STEP 3
+         * FIRESTORE MIRROR
+         *
+         * Rider home currently reads Firestore.
+         * Keep Firestore synchronized with RTDB.
+         * ====================================================
+         */
+
+        if(db){
+
+            await updateDoc(
+                doc(
+                    db,
+                    "rides",
+                    rideId
+                ),
+                {
+
+                    status:
+                        "accepted",
+
+                    rideStatus:
+                        "accepted",
+
+                    riderId:
+                        rider.uid,
+
+                    riderUid:
+                        rider.uid,
+
+                    riderName:
+                        rider.name,
+
+                    riderPhone:
+                        rider.phone,
+
+                    acceptedAt:
+                        serverTimestamp(),
+
+                    updatedAt:
+                        serverTimestamp()
+
+                }
+            );
+
+        }
+
+
+        /*
+         * Save locally so the next page can immediately
+         * recover the active ride.
+         */
+
+        try{
+
+            localStorage.setItem(
+                "riderx_active_ride",
+                JSON.stringify(
+                    acceptedRide
                 )
             );
 
-            await new Promise(
-                resolve =>
-                    setTimeout(resolve,500)
-            );
+        }catch(error){
 
-            result = true;
-
-        }
-
-
-        if(result === false){
-
-            throw new Error(
-                "Ride acceptance failed."
+            console.warn(
+                "Active ride local storage failed:",
+                error
             );
 
         }
+
+
+        currentRide =
+            acceptedRide;
+
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "riderxRideAccepted",
+                {
+                    detail:{
+                        rideId,
+                        ride:
+                            acceptedRide,
+                        rider
+                    }
+                }
+            )
+        );
+
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "riderx:ride-accepted",
+                {
+                    detail:{
+                        rideId,
+                        ride:
+                            acceptedRide,
+                        rider
+                    }
+                }
+            )
+        );
 
 
         showToast(
-            "Ride accepted.",
+            "Ride accepted successfully.",
             "success"
         );
 
 
-        setTimeout(() => {
+        /*
+         * Go to active ride page.
+         */
 
-            window.location.href =
-                "ride-details.html?rideId=" +
-                encodeURIComponent(
-                    rideId
-                );
+        setTimeout(
+            () => {
 
-        },700);
+                window.location.href =
+                    "ride-details.html?rideId=" +
+                    encodeURIComponent(
+                        rideId
+                    );
+
+            },
+            650
+        );
 
 
     }catch(error){
 
         console.error(
-            "Accept ride error:",
+            "RiderX accept ride error:",
             error
         );
 
-        processing(false);
+
+        accepting = false;
+
+        processing(
+            false
+        );
+
+
+        const message =
+            error?.message ||
+            "Unable to accept ride.";
+
 
         showToast(
-            error.message ||
-            "Unable to accept ride.",
+            message,
             "error"
         );
+
+
+        /*
+         * If acceptance failed because another rider
+         * won the race, close this request.
+         */
+
+        if(
+            message.includes(
+                "Another rider"
+            )
+        ){
+
+            disableButtons();
+
+            setTimeout(
+                closeRequest,
+                900
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Give rider another chance.
+         */
+
+        timerStarted = false;
 
         startTimer();
 
@@ -1476,7 +2532,9 @@ async function acceptRide(){
 }
 
 
-/* REJECT */
+/* ============================================================
+   REJECT
+============================================================ */
 
 async function rejectRide(){
 
@@ -1484,19 +2542,24 @@ async function rejectRide(){
         getRideId();
 
 
+    if(!rideId){
+        closeRequest();
+        return;
+    }
+
+
     const confirmed =
         confirm(
             "Reject this ride request?"
         );
 
-    if(!confirmed) return;
 
-
-    if(timer){
-
-        clearInterval(timer);
-
+    if(!confirmed){
+        return;
     }
+
+
+    stopTimer();
 
 
     processing(
@@ -1507,56 +2570,73 @@ async function rejectRide(){
 
     try{
 
-        let result = false;
+        if(realtimeDb){
 
-
-        if(typeof window.rejectRideRequest === "function"){
-
-            result =
-                await window.rejectRideRequest(
-                    rideId,
-                    currentRide
+            const firebase =
+                await import(
+                    "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js"
                 );
 
-        }else if(typeof window.rejectRide === "function"){
 
-            result =
-                await window.rejectRide(
-                    rideId,
-                    currentRide
+            const rideRef =
+                firebase.ref(
+                    realtimeDb,
+                    "rides/" + rideId
                 );
 
-        }else{
 
-            document.dispatchEvent(
-                new CustomEvent(
-                    "riderxRejectRide",
+            const snapshot =
+                await firebase.get(
+                    rideRef
+                );
+
+
+            if(snapshot.exists()){
+
+                const ride =
+                    snapshot.val();
+
+
+                /*
+                 * Only remove the request from the
+                 * rider queue. Never cancel customer's
+                 * booking merely because one rider rejects.
+                 */
+
+                await firebase.update(
+                    firebase.ref(
+                        realtimeDb,
+                        "rideRequests/" +
+                        rideId
+                    ),
                     {
-                        detail:{
-                            rideId:rideId,
-                            ride:currentRide
-                        }
+
+                        lastRejectedBy:
+                            getRiderProfile().uid,
+
+                        lastRejectedAt:
+                            Date.now()
+
                     }
-                )
-            );
+                );
 
-            await new Promise(
-                resolve =>
-                    setTimeout(resolve,400)
-            );
-
-            result = true;
+            }
 
         }
 
 
-        if(result === false){
-
-            throw new Error(
-                "Ride rejection failed."
-            );
-
-        }
+        document.dispatchEvent(
+            new CustomEvent(
+                "riderxRejectRide",
+                {
+                    detail:{
+                        rideId,
+                        ride:
+                            currentRide
+                    }
+                }
+            )
+        );
 
 
         showToast(
@@ -1565,11 +2645,10 @@ async function rejectRide(){
         );
 
 
-        setTimeout(() => {
-
-            closeRequest();
-
-        },600);
+        setTimeout(
+            closeRequest,
+            600
+        );
 
 
     }catch(error){
@@ -1579,13 +2658,20 @@ async function rejectRide(){
             error
         );
 
-        processing(false);
+
+        processing(
+            false
+        );
+
 
         showToast(
-            error.message ||
+            error?.message ||
             "Unable to reject ride.",
             "error"
         );
+
+
+        timerStarted = false;
 
         startTimer();
 
@@ -1594,48 +2680,66 @@ async function rejectRide(){
 }
 
 
-/* CLOSE */
+/* ============================================================
+   CLOSE
+============================================================ */
 
 function closeRequest(){
 
-    if(timer){
+    stopTimer();
 
-        clearInterval(timer);
+
+    if(
+        typeof firebaseRideUnsubscribe ===
+        "function"
+    ){
+
+        try{
+            firebaseRideUnsubscribe();
+        }catch(error){}
+
+        firebaseRideUnsubscribe =
+            null;
 
     }
 
 
-    const rideId =
-        getRideId();
-
-
-    if(history.length > 1){
+    if(
+        history.length > 1
+    ){
 
         history.back();
 
     }else{
 
         window.location.href =
-            "requests.html";
+            "home.html";
 
     }
 
 }
 
 
-/* REALTIME EVENT */
+/* ============================================================
+   EXTERNAL RIDE EVENT
+============================================================ */
 
 document.addEventListener(
     "riderxIncomingRide",
-    function(event){
+    event => {
 
-        if(event.detail){
+        if(
+            event.detail
+        ){
 
             renderRide(
                 event.detail
             );
 
-            if(!timerStarted){
+
+            if(
+                !timerStarted
+            ){
 
                 startTimer();
 
@@ -1647,11 +2751,60 @@ document.addEventListener(
 );
 
 
-/* PAGE READY */
+/* ============================================================
+   FIREBASE READY EVENT
+============================================================ */
+
+window.addEventListener(
+    "riderx:firebase-ready",
+    () => {
+
+        if(
+            document.readyState !==
+            "loading"
+        ){
+
+            loadRide();
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   PAGE READY
+============================================================ */
 
 document.addEventListener(
     "DOMContentLoaded",
     loadRide
+);
+
+
+/* ============================================================
+   CLEANUP
+============================================================ */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        stopTimer();
+
+
+        if(
+            typeof firebaseRideUnsubscribe ===
+            "function"
+        ){
+
+            try{
+                firebaseRideUnsubscribe();
+            }catch(error){}
+
+        }
+
+    }
 );
 
 </script>
