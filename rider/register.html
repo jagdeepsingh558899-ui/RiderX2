@@ -1,22 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>RiderX - Rider Registration</title>
-
-<meta name="theme-color" content="#FFD400">
-
-<link rel="stylesheet" href="../css/style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>RiderX - Rider Registration</title><meta name="theme-color" content="#FFD400"><link rel="stylesheet" href="../css/style.css">
 <link rel="stylesheet" href="../css/auth.css">
-<link rel="stylesheet" href="../css/responsive.css">
-
-<style>
+<link rel="stylesheet" href="../css/responsive.css"><style>
 :root{
     --yellow:#FFD400;
     --black:#080808;
-    --dark:#111111;
+    --dark:#111;
     --card:#171717;
     --border:#292929;
     --text:#fff;
@@ -58,8 +49,6 @@ body{
     max-width:520px;
 }
 
-/* LOGO */
-
 .logo-area{
     text-align:center;
     margin-bottom:22px;
@@ -83,7 +72,6 @@ body{
 .logo-title{
     font-size:25px;
     font-weight:900;
-    letter-spacing:-.5px;
 }
 
 .logo-title span{
@@ -95,8 +83,6 @@ body{
     font-size:12px;
     margin-top:5px;
 }
-
-/* CARD */
 
 .register-card{
     background:rgba(23,23,23,.96);
@@ -121,8 +107,6 @@ body{
     line-height:1.45;
 }
 
-/* PROGRESS */
-
 .progress{
     display:flex;
     align-items:center;
@@ -140,8 +124,6 @@ body{
 .progress-step.active{
     background:var(--yellow);
 }
-
-/* FORM */
 
 .form-group{
     margin-bottom:15px;
@@ -170,11 +152,6 @@ body{
     outline:none;
     padding:0 13px;
     font-size:14px;
-    transition:.2s;
-}
-
-.form-select{
-    appearance:auto;
 }
 
 .form-input:focus,
@@ -205,15 +182,11 @@ body{
     font-size:17px;
 }
 
-/* GRID */
-
 .two-column{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:10px;
 }
-
-/* VEHICLE */
 
 .section-title{
     font-size:15px;
@@ -226,8 +199,6 @@ body{
 .section-title span{
     color:var(--yellow);
 }
-
-/* DOCUMENT */
 
 .document-box{
     border:1px dashed #3a3a3a;
@@ -242,6 +213,13 @@ body{
     font-size:12px;
     font-weight:700;
     margin-bottom:8px;
+}
+
+.document-note{
+    color:#666;
+    font-size:10px;
+    line-height:1.4;
+    margin-top:7px;
 }
 
 .file-input{
@@ -259,8 +237,6 @@ body{
     margin-right:8px;
     cursor:pointer;
 }
-
-/* TERMS */
 
 .terms{
     display:flex;
@@ -288,8 +264,6 @@ body{
     text-decoration:none;
 }
 
-/* BUTTON */
-
 .register-btn{
     width:100%;
     height:50px;
@@ -300,7 +274,6 @@ body{
     font-size:15px;
     font-weight:900;
     cursor:pointer;
-    transition:.2s;
 }
 
 .register-btn:active{
@@ -327,8 +300,6 @@ body{
     to{transform:rotate(360deg)}
 }
 
-/* LOGIN */
-
 .login-link{
     text-align:center;
     margin-top:19px;
@@ -341,8 +312,6 @@ body{
     font-weight:800;
     text-decoration:none;
 }
-
-/* MESSAGE */
 
 .form-message{
     display:none;
@@ -366,8 +335,6 @@ body{
     background:rgba(34,197,94,.10);
     border:1px solid rgba(34,197,94,.25);
 }
-
-/* MOBILE */
 
 @media(max-width:430px){
 
@@ -395,7 +362,6 @@ body{
         grid-template-columns:1fr;
         gap:0;
     }
-
 }
 
 @media(min-width:700px){
@@ -407,389 +373,354 @@ body{
     .register-card{
         padding:28px;
     }
-
 }
-</style>
-</head>
+</style></head><body><div class="register-page"><div class="register-container"><div class="logo-area">
 
-<body>
+    <div class="logo">RX</div>
 
-<div class="register-page">
+    <div class="logo-title">
+        Rider<span>X</span>
+    </div>
 
-<div class="register-container">
+    <div class="logo-subtitle">
+        Ride. Earn. Grow.
+    </div>
 
-    <!-- LOGO -->
+</div>
 
-    <div class="logo-area">
+<div class="register-card">
 
-        <div class="logo">
-            RX
-        </div>
+    <div class="register-heading">
+        <h1>Become a Rider</h1>
+        <p>
+            Create your RiderX account and submit your documents
+            for admin approval.
+        </p>
+    </div>
 
-        <div class="logo-title">
-            Rider<span>X</span>
-        </div>
+    <div class="progress">
+        <div class="progress-step active"></div>
+        <div class="progress-step active"></div>
+        <div class="progress-step active"></div>
+    </div>
 
-        <div class="logo-subtitle">
-            Ride. Earn. Grow.
+    <div id="formMessage" class="form-message"></div>
+
+    <div class="form-group">
+
+        <label class="form-label" for="fullName">
+            Full Name
+        </label>
+
+        <input
+            type="text"
+            id="fullName"
+            class="form-input"
+            placeholder="Enter your full name"
+            autocomplete="name"
+            maxlength="80"
+        >
+
+    </div>
+
+    <div class="form-group">
+
+        <label class="form-label" for="phone">
+            Mobile Number
+        </label>
+
+        <input
+            type="tel"
+            id="phone"
+            class="form-input"
+            placeholder="Enter 10 digit mobile number"
+            inputmode="numeric"
+            autocomplete="tel"
+            maxlength="10"
+        >
+
+    </div>
+
+    <div class="form-group">
+
+        <label class="form-label" for="email">
+            Email Address
+        </label>
+
+        <input
+            type="email"
+            id="email"
+            class="form-input"
+            placeholder="Enter your email"
+            autocomplete="email"
+        >
+
+    </div>
+
+    <div class="section-title">
+        <span>01</span> Account Security
+    </div>
+
+    <div class="form-group">
+
+        <label class="form-label" for="password">
+            Password
+        </label>
+
+        <div class="input-wrap">
+
+            <input
+                type="password"
+                id="password"
+                class="form-input password-input"
+                placeholder="Create a strong password"
+                autocomplete="new-password"
+                minlength="6"
+            >
+
+            <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword('password',this)"
+            >👁</button>
+
         </div>
 
     </div>
 
+    <div class="form-group">
 
-    <!-- CARD -->
+        <label class="form-label" for="confirmPassword">
+            Confirm Password
+        </label>
 
-    <div class="register-card">
+        <div class="input-wrap">
 
-        <div class="register-heading">
+            <input
+                type="password"
+                id="confirmPassword"
+                class="form-input password-input"
+                placeholder="Confirm your password"
+                autocomplete="new-password"
+                minlength="6"
+            >
 
-            <h1>Become a Rider</h1>
-
-            <p>
-                Create your RiderX account and start accepting rides.
-            </p>
+            <button
+                type="button"
+                class="password-toggle"
+                onclick="togglePassword('confirmPassword',this)"
+            >👁</button>
 
         </div>
 
+    </div>
 
-        <!-- PROGRESS -->
+    <div class="section-title">
+        <span>02</span> Vehicle Details
+    </div>
 
-        <div class="progress">
+    <div class="form-group">
 
-            <div class="progress-step active"></div>
-            <div class="progress-step active"></div>
-            <div class="progress-step active"></div>
+        <label class="form-label" for="vehicleType">
+            Vehicle Type
+        </label>
 
-        </div>
+        <select id="vehicleType" class="form-select">
 
+            <option value="">Select vehicle type</option>
+            <option value="bike">Bike</option>
+            <option value="taxi">Taxi</option>
+            <option value="cab">Cab / Car</option>
 
-        <!-- MESSAGE -->
+        </select>
 
-        <div id="formMessage" class="form-message"></div>
+    </div>
 
-
-        <!-- PERSONAL -->
+    <div class="two-column">
 
         <div class="form-group">
 
-            <label class="form-label" for="fullName">
-                Full Name
+            <label class="form-label" for="vehicleModel">
+                Vehicle Model
             </label>
 
             <input
                 type="text"
-                id="fullName"
+                id="vehicleModel"
                 class="form-input"
-                placeholder="Enter your full name"
-                autocomplete="name"
-                maxlength="80"
+                placeholder="e.g. Splendor"
+                maxlength="60"
             >
 
         </div>
 
-
         <div class="form-group">
 
-            <label class="form-label" for="phone">
-                Mobile Number
+            <label class="form-label" for="vehicleNumber">
+                Vehicle Number
             </label>
 
             <input
-                type="tel"
-                id="phone"
+                type="text"
+                id="vehicleNumber"
                 class="form-input"
-                placeholder="Enter 10 digit mobile number"
-                inputmode="numeric"
-                autocomplete="tel"
-                maxlength="10"
+                placeholder="PB00XX0000"
+                maxlength="15"
+                autocapitalize="characters"
             >
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label class="form-label" for="email">
-                Email Address
-            </label>
-
-            <input
-                type="email"
-                id="email"
-                class="form-input"
-                placeholder="Enter your email"
-                autocomplete="email"
-            >
-
-        </div>
-
-
-        <!-- ACCOUNT -->
-
-        <div class="section-title">
-            <span>01</span> Account Security
-        </div>
-
-
-        <div class="form-group">
-
-            <label class="form-label" for="password">
-                Password
-            </label>
-
-            <div class="input-wrap">
-
-                <input
-                    type="password"
-                    id="password"
-                    class="form-input password-input"
-                    placeholder="Create a strong password"
-                    autocomplete="new-password"
-                    minlength="6"
-                >
-
-                <button
-                    type="button"
-                    class="password-toggle"
-                    onclick="togglePassword('password',this)"
-                >
-                    👁
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <label class="form-label" for="confirmPassword">
-                Confirm Password
-            </label>
-
-            <div class="input-wrap">
-
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    class="form-input password-input"
-                    placeholder="Confirm your password"
-                    autocomplete="new-password"
-                    minlength="6"
-                >
-
-                <button
-                    type="button"
-                    class="password-toggle"
-                    onclick="togglePassword('confirmPassword',this)"
-                >
-                    👁
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- VEHICLE -->
-
-        <div class="section-title">
-            <span>02</span> Vehicle Details
-        </div>
-
-
-        <div class="form-group">
-
-            <label class="form-label" for="vehicleType">
-                Vehicle Type
-            </label>
-
-            <select id="vehicleType" class="form-select">
-
-                <option value="">Select vehicle type</option>
-                <option value="bike">Bike</option>
-                <option value="taxi">Taxi</option>
-                <option value="cab">Cab / Car</option>
-
-            </select>
-
-        </div>
-
-
-        <div class="two-column">
-
-            <div class="form-group">
-
-                <label class="form-label" for="vehicleModel">
-                    Vehicle Model
-                </label>
-
-                <input
-                    type="text"
-                    id="vehicleModel"
-                    class="form-input"
-                    placeholder="e.g. Splendor"
-                    maxlength="60"
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label class="form-label" for="vehicleNumber">
-                    Vehicle Number
-                </label>
-
-                <input
-                    type="text"
-                    id="vehicleNumber"
-                    class="form-input"
-                    placeholder="PB00XX0000"
-                    maxlength="15"
-                    autocapitalize="characters"
-                >
-
-            </div>
-
-        </div>
-
-
-        <!-- DOCUMENTS -->
-
-        <div class="section-title">
-            <span>03</span> Documents
-        </div>
-
-
-        <div class="form-group">
-
-            <div class="document-box">
-
-                <label for="license">
-                    Driving License
-                </label>
-
-                <input
-                    type="file"
-                    id="license"
-                    class="file-input"
-                    accept="image/*,.pdf"
-                >
-
-            </div>
-
-        </div>
-
-
-        <div class="form-group">
-
-            <div class="document-box">
-
-                <label for="vehicleDocument">
-                    RC / Vehicle Document
-                </label>
-
-                <input
-                    type="file"
-                    id="vehicleDocument"
-                    class="file-input"
-                    accept="image/*,.pdf"
-                >
-
-            </div>
-
-        </div>
-
-
-        <!-- TERMS -->
-
-        <div class="terms">
-
-            <input
-                type="checkbox"
-                id="terms"
-            >
-
-            <label for="terms">
-
-                I agree to RiderX
-                <a href="#" onclick="showTerms(event)">Terms & Conditions</a>
-                and
-                <a href="#" onclick="showPrivacy(event)">Privacy Policy</a>.
-
-            </label>
-
-        </div>
-
-
-        <!-- REGISTER -->
-
-        <button
-            type="button"
-            id="registerBtn"
-            class="register-btn"
-            onclick="registerRider()"
-        >
-
-            <span id="registerText">
-                Create Rider Account
-            </span>
-
-            <span id="registerLoader" class="loader"></span>
-
-        </button>
-
-
-        <!-- LOGIN -->
-
-        <div class="login-link">
-
-            Already have an account?
-
-            <a href="../auth/login.html">
-                Login
-            </a>
 
         </div>
 
     </div>
 
-</div>
+    <div class="section-title">
+        <span>03</span> Documents
+    </div>
+
+    <div class="form-group">
+
+        <div class="document-box">
+
+            <label for="license">
+                Driving License
+            </label>
+
+            <input
+                type="file"
+                id="license"
+                class="file-input"
+                accept="image/*,.pdf"
+            >
+
+            <div class="document-note">
+                JPG, PNG or PDF. Maximum 5 MB.
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="form-group">
+
+        <div class="document-box">
+
+            <label for="vehicleDocument">
+                RC / Vehicle Document
+            </label>
+
+            <input
+                type="file"
+                id="vehicleDocument"
+                class="file-input"
+                accept="image/*,.pdf"
+            >
+
+            <div class="document-note">
+                JPG, PNG or PDF. Maximum 5 MB.
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="terms">
+
+        <input
+            type="checkbox"
+            id="terms"
+        >
+
+        <label for="terms">
+
+            I agree to RiderX
+            <a href="#" onclick="showTerms(event)">
+                Terms & Conditions
+            </a>
+            and
+            <a href="#" onclick="showPrivacy(event)">
+                Privacy Policy
+            </a>.
+
+        </label>
+
+    </div>
+
+    <button
+        type="button"
+        id="registerBtn"
+        class="register-btn"
+        onclick="registerRider()"
+    >
+
+        <span id="registerText">
+            Submit Rider Application
+        </span>
+
+        <span id="registerLoader" class="loader"></span>
+
+    </button>
+
+    <div class="login-link">
+
+        Already have an account?
+
+        <a href="../auth/login.html">
+            Login
+        </a>
+
+    </div>
 
 </div>
 
+</div></div><script type="module">
 
-<script>
-/* ==========================================
-   RIDERX RIDER REGISTRATION
-========================================== */
+import {
+    auth,
+    db,
+    storage,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    setDoc,
+    doc,
+    signOut,
+    storageRef,
+    uploadBytes,
+    getDownloadURL
+} from "../firebase/firebase-config.js";
 
-const $ = id => document.getElementById(id);
+
+const $ = id =>
+    document.getElementById(id);
 
 
-/* PASSWORD */
+/* =========================================================
+   UI
+========================================================= */
 
-function togglePassword(id,button){
+window.togglePassword = function(id,button){
 
     const input = $(id);
+
+    if(!input){
+        return;
+    }
 
     if(input.type === "password"){
 
         input.type = "text";
+
         button.textContent = "🙈";
 
     }else{
 
         input.type = "password";
+
         button.textContent = "👁";
 
     }
 
-}
+};
 
-
-/* MESSAGE */
 
 function showMessage(message,type="error"){
 
@@ -797,7 +728,8 @@ function showMessage(message,type="error"){
 
     box.textContent = message;
 
-    box.className = "form-message " + type;
+    box.className =
+        "form-message " + type;
 
     window.scrollTo({
         top:0,
@@ -813,59 +745,115 @@ function clearMessage(){
 
     box.textContent = "";
 
-    box.className = "form-message";
+    box.className =
+        "form-message";
 
 }
 
 
-/* PHONE */
+function setLoading(loading){
 
-$("phone").addEventListener("input",function(){
+    $("registerBtn").disabled =
+        loading;
 
-    this.value = this.value.replace(/\D/g,"").slice(0,10);
+    $("registerText").style.display =
+        loading ? "none" : "inline";
 
-});
-
-
-/* VEHICLE NUMBER */
-
-$("vehicleNumber").addEventListener("input",function(){
-
-    this.value = this.value
-        .toUpperCase()
-        .replace(/[^A-Z0-9 -]/g,"")
-        .slice(0,15);
-
-});
-
-
-/* PASSWORD VALIDATION */
-
-function validatePassword(password){
-
-    return password.length >= 6;
+    $("registerLoader").style.display =
+        loading ? "block" : "none";
 
 }
 
 
-/* FORM VALIDATION */
+/* =========================================================
+   VALIDATION
+========================================================= */
+
+function validateFile(file){
+
+    if(!file){
+        return "Please upload both required documents.";
+    }
+
+    const maxSize =
+        5 * 1024 * 1024;
+
+    if(file.size > maxSize){
+
+        return (
+            file.name +
+            " is larger than 5 MB."
+        );
+
+    }
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/pdf"
+    ];
+
+    const validType =
+        allowedTypes.includes(
+            file.type
+        );
+
+    const validExtension =
+        /\.(jpg|jpeg|png|webp|pdf)$/i
+            .test(file.name);
+
+    if(!validType && !validExtension){
+
+        return (
+            "Invalid document format: " +
+            file.name
+        );
+
+    }
+
+    return null;
+
+}
+
 
 function validateForm(){
 
-    const name = $("fullName").value.trim();
-    const phone = $("phone").value.trim();
-    const email = $("email").value.trim();
-    const password = $("password").value;
-    const confirmPassword = $("confirmPassword").value;
-    const vehicleType = $("vehicleType").value;
-    const vehicleModel = $("vehicleModel").value.trim();
-    const vehicleNumber = $("vehicleNumber").value.trim();
-    const terms = $("terms").checked;
+    const name =
+        $("fullName").value.trim();
 
+    const phone =
+        $("phone").value.trim();
+
+    const email =
+        $("email").value.trim();
+
+    const password =
+        $("password").value;
+
+    const confirmPassword =
+        $("confirmPassword").value;
+
+    const vehicleType =
+        $("vehicleType").value;
+
+    const vehicleModel =
+        $("vehicleModel").value.trim();
+
+    const vehicleNumber =
+        $("vehicleNumber").value.trim();
+
+    const license =
+        $("license").files[0];
+
+    const vehicleDocument =
+        $("vehicleDocument").files[0];
 
     if(name.length < 2){
 
-        showMessage("Please enter your full name.");
+        showMessage(
+            "Please enter your full name."
+        );
 
         $("fullName").focus();
 
@@ -873,10 +861,11 @@ function validateForm(){
 
     }
 
-
     if(!/^[0-9]{10}$/.test(phone)){
 
-        showMessage("Please enter a valid 10 digit mobile number.");
+        showMessage(
+            "Please enter a valid 10 digit mobile number."
+        );
 
         $("phone").focus();
 
@@ -884,10 +873,14 @@ function validateForm(){
 
     }
 
+    if(
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            .test(email)
+    ){
 
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-
-        showMessage("Please enter a valid email address.");
+        showMessage(
+            "Please enter a valid email address."
+        );
 
         $("email").focus();
 
@@ -895,10 +888,11 @@ function validateForm(){
 
     }
 
+    if(password.length < 6){
 
-    if(!validatePassword(password)){
-
-        showMessage("Password must contain at least 6 characters.");
+        showMessage(
+            "Password must contain at least 6 characters."
+        );
 
         $("password").focus();
 
@@ -906,10 +900,11 @@ function validateForm(){
 
     }
 
-
     if(password !== confirmPassword){
 
-        showMessage("Passwords do not match.");
+        showMessage(
+            "Passwords do not match."
+        );
 
         $("confirmPassword").focus();
 
@@ -917,10 +912,11 @@ function validateForm(){
 
     }
 
-
     if(!vehicleType){
 
-        showMessage("Please select your vehicle type.");
+        showMessage(
+            "Please select your vehicle type."
+        );
 
         $("vehicleType").focus();
 
@@ -928,10 +924,11 @@ function validateForm(){
 
     }
 
-
     if(vehicleModel.length < 2){
 
-        showMessage("Please enter your vehicle model.");
+        showMessage(
+            "Please enter your vehicle model."
+        );
 
         $("vehicleModel").focus();
 
@@ -939,10 +936,11 @@ function validateForm(){
 
     }
 
-
     if(vehicleNumber.length < 4){
 
-        showMessage("Please enter your vehicle registration number.");
+        showMessage(
+            "Please enter your vehicle registration number."
+        );
 
         $("vehicleNumber").focus();
 
@@ -950,170 +948,494 @@ function validateForm(){
 
     }
 
+    const licenseError =
+        validateFile(license);
 
-    if(!terms){
+    if(licenseError){
 
-        showMessage("Please accept the Terms & Conditions and Privacy Policy.");
+        showMessage(
+            licenseError
+        );
 
         return false;
 
     }
 
+    const vehicleError =
+        validateFile(vehicleDocument);
+
+    if(vehicleError){
+
+        showMessage(
+            vehicleError
+        );
+
+        return false;
+
+    }
+
+    if(!$("terms").checked){
+
+        showMessage(
+            "Please accept the Terms & Conditions and Privacy Policy."
+        );
+
+        return false;
+
+    }
 
     return true;
 
 }
 
 
-/* LOADING */
+/* =========================================================
+   DOCUMENT UPLOAD
+========================================================= */
 
-function setLoading(loading){
+async function uploadDocument(
+    uid,
+    file,
+    type
+){
 
-    const button = $("registerBtn");
-    const text = $("registerText");
-    const loader = $("registerLoader");
+    const safeName =
+        file.name
+            .replace(
+                /[^a-zA-Z0-9._-]/g,
+                "_"
+            );
 
-    button.disabled = loading;
+    const path =
+        "rider-documents/" +
+        uid +
+        "/" +
+        type +
+        "_" +
+        Date.now() +
+        "_" +
+        safeName;
 
-    text.style.display = loading ? "none" : "inline";
+    const fileRef =
+        storageRef(
+            storage,
+            path
+        );
 
-    loader.style.display = loading ? "block" : "none";
+    await uploadBytes(
+        fileRef,
+        file,
+        {
+            contentType:
+                file.type ||
+                "application/octet-stream"
+        }
+    );
+
+    const url =
+        await getDownloadURL(
+            fileRef
+        );
+
+    return {
+        path,
+        url,
+        name:
+            file.name,
+        type:
+            file.type,
+        size:
+            file.size
+    };
 
 }
 
 
-/* REGISTER */
+/* =========================================================
+   REGISTER RIDER
+========================================================= */
 
-async function registerRider(){
+window.registerRider =
+async function(){
 
     clearMessage();
 
-    if(!validateForm()) return;
-
-    const data = {
-
-        name: $("fullName").value.trim(),
-
-        phone: $("phone").value.trim(),
-
-        email: $("email").value.trim(),
-
-        password: $("password").value,
-
-        vehicleType: $("vehicleType").value,
-
-        vehicleModel: $("vehicleModel").value.trim(),
-
-        vehicleNumber: $("vehicleNumber").value.trim(),
-
-        role: "rider",
-
-        status: "pending",
-
-        online: false,
-
-        createdAt: Date.now()
-
-    };
-
+    if(!validateForm()){
+        return;
+    }
 
     setLoading(true);
 
-
-    /*
-      First try to use the project's existing
-      registration function if it is available.
-    */
+    let createdUser = null;
 
     try{
 
-        if(typeof window.registerUser === "function"){
+        const name =
+            $("fullName").value.trim();
 
-            const result = await window.registerUser(data);
+        const phone =
+            $("phone").value.trim();
 
-            if(result !== false){
+        const email =
+            $("email").value
+                .trim()
+                .toLowerCase();
 
-                showMessage(
-                    "Registration successful. Your rider account is being reviewed.",
-                    "success"
-                );
+        const password =
+            $("password").value;
 
-                setTimeout(() => {
+        const vehicleType =
+            $("vehicleType").value;
 
-                    window.location.href = "index.html";
+        const vehicleModel =
+            $("vehicleModel").value.trim();
 
-                },1200);
+        const vehicleNumber =
+            $("vehicleNumber").value
+                .trim()
+                .toUpperCase();
 
-                return;
+        const licenseFile =
+            $("license").files[0];
 
+        const vehicleDocumentFile =
+            $("vehicleDocument").files[0];
+
+
+        /*
+         * 1. CREATE FIREBASE AUTH ACCOUNT
+         */
+
+        const result =
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+        createdUser =
+            result.user;
+
+
+        /*
+         * 2. UPDATE AUTH DISPLAY NAME
+         */
+
+        await updateProfile(
+            createdUser,
+            {
+                displayName:
+                    name
             }
+        );
 
-        }
+
+        /*
+         * 3. UPLOAD DOCUMENTS
+         */
+
+        const license =
+            await uploadDocument(
+                createdUser.uid,
+                licenseFile,
+                "driving_license"
+            );
+
+        const vehicleDocument =
+            await uploadDocument(
+                createdUser.uid,
+                vehicleDocumentFile,
+                "vehicle_document"
+            );
 
 
-        if(typeof window.registerRiderWithFirebase === "function"){
+        /*
+         * 4. CREATE RIDER PROFILE
+         *
+         * PENDING IS THE IMPORTANT PART.
+         *
+         * Admin must approve this account.
+         */
 
-            const result =
-                await window.registerRiderWithFirebase(data);
+        const now =
+            Date.now();
 
-            if(result !== false){
+        const riderProfile = {
 
-                showMessage(
-                    "Registration successful. Your rider account is being reviewed.",
-                    "success"
-                );
+            uid:
+                createdUser.uid,
 
-                setTimeout(() => {
+            id:
+                createdUser.uid,
 
-                    window.location.href = "index.html";
+            role:
+                "rider",
 
-                },1200);
+            userRole:
+                "rider",
 
-                return;
+            accountType:
+                "rider",
 
+            status:
+                "pending",
+
+            applicationStatus:
+                "pending",
+
+            online:
+                false,
+
+            busy:
+                false,
+
+            blocked:
+                false,
+
+            name:
+                name,
+
+            fullName:
+                name,
+
+            displayName:
+                name,
+
+            email:
+                email,
+
+            phone:
+                phone,
+
+            phoneNumber:
+                "+91" + phone,
+
+            vehicleType:
+                vehicleType,
+
+            vehicleModel:
+                vehicleModel,
+
+            vehicleNumber:
+                vehicleNumber,
+
+            documents:{
+
+                drivingLicense:
+                    license,
+
+                vehicleDocument:
+                    vehicleDocument
+
+            },
+
+            city:
+                "Chandigarh",
+
+            rating:
+                5,
+
+            totalRides:
+                0,
+
+            completedRides:
+                0,
+
+            cancelledRides:
+                0,
+
+            walletBalance:
+                0,
+
+            createdAt:
+                now,
+
+            applicationSubmittedAt:
+                now,
+
+            updatedAt:
+                now
+
+        };
+
+
+        /*
+         * 5. SAVE TO FIRESTORE
+         */
+
+        await setDoc(
+            doc(
+                db,
+                "users",
+                createdUser.uid
+            ),
+            riderProfile,
+            {
+                merge:
+                    true
             }
+        );
+
+
+        /*
+         * 6. SIGN OUT
+         *
+         * Rider is pending and should not enter
+         * the rider dashboard before approval.
+         */
+
+        try{
+
+            await signOut(
+                auth
+            );
+
+        }catch(signOutError){
+
+            console.warn(
+                "RiderX sign-out after registration failed:",
+                signOutError
+            );
 
         }
 
 
         /*
-          If no existing auth function is exposed,
-          stop instead of creating fake/local accounts.
-        */
+         * 7. APPROVAL PENDING SCREEN
+         */
 
         showMessage(
-            "Registration service is not connected yet. Please check the RiderX Firebase/auth setup."
+            "Your RiderX rider application has been submitted successfully. Our team is reviewing your documents and profile.",
+            "success"
         );
+
+        setTimeout(
+            function(){
+
+                window.location.href =
+                    "../auth/login.html?pending=1";
+
+            },
+            1800
+        );
+
 
     }catch(error){
 
-        console.error("Rider registration error:",error);
+        console.error(
+            "Rider registration error:",
+            error
+        );
 
-        let message = "Registration failed. Please try again.";
 
-        if(error && error.code){
+        /*
+         * If Auth was created but Firestore/storage
+         * failed, sign out. We intentionally do not
+         * expose the password anywhere.
+         */
 
-            if(error.code.includes("email-already-in-use")){
+        if(createdUser){
 
-                message = "This email is already registered.";
+            try{
 
-            }else if(error.code.includes("weak-password")){
+                await signOut(
+                    auth
+                );
 
-                message = "Password is too weak.";
+            }catch(cleanupError){
 
-            }else if(error.code.includes("invalid-email")){
-
-                message = "Please enter a valid email address.";
-
-            }else if(error.code.includes("network")){
-
-                message = "Network error. Please check your internet connection.";
+                console.warn(
+                    "Registration cleanup failed:",
+                    cleanupError
+                );
 
             }
 
         }
 
-        showMessage(message);
+
+        let message =
+            "Registration failed. Please try again.";
+
+
+        const code =
+            String(
+                error?.code || ""
+            ).toLowerCase();
+
+
+        if(
+            code.includes(
+                "email-already-in-use"
+            )
+        ){
+
+            message =
+                "This email is already registered.";
+
+        }
+        else if(
+            code.includes(
+                "weak-password"
+            )
+        ){
+
+            message =
+                "Password is too weak.";
+
+        }
+        else if(
+            code.includes(
+                "invalid-email"
+            )
+        ){
+
+            message =
+                "Please enter a valid email address.";
+
+        }
+        else if(
+            code.includes(
+                "permission-denied"
+            )
+        ){
+
+            message =
+                "Firebase permission denied. Please check Firestore/Storage rules.";
+
+        }
+        else if(
+            code.includes(
+                "storage"
+            )
+        ){
+
+            message =
+                "Document upload failed. Please check Firebase Storage rules.";
+
+        }
+        else if(
+            code.includes(
+                "network"
+            )
+        ){
+
+            message =
+                "Network error. Please check your internet connection.";
+
+        }
+        else if(error?.message){
+
+            message =
+                error.message;
+
+        }
+
+
+        showMessage(
+            message,
+            "error"
+        );
 
     }finally{
 
@@ -1121,12 +1443,15 @@ async function registerRider(){
 
     }
 
-}
+};
 
 
-/* TERMS */
+/* =========================================================
+   TERMS / PRIVACY
+========================================================= */
 
-function showTerms(event){
+window.showTerms =
+function(event){
 
     event.preventDefault();
 
@@ -1135,10 +1460,11 @@ function showTerms(event){
         "By registering as a RiderX rider, you agree to follow RiderX ride, safety, payment and service policies."
     );
 
-}
+};
 
 
-function showPrivacy(event){
+window.showPrivacy =
+function(event){
 
     event.preventDefault();
 
@@ -1147,47 +1473,78 @@ function showPrivacy(event){
         "RiderX may use your account, vehicle and ride information to provide rider services and maintain platform security."
     );
 
-}
+};
 
 
-/* ENTER KEY */
+/* =========================================================
+   INPUT FORMATTING
+========================================================= */
 
-document.addEventListener("keydown",function(event){
+$("phone").addEventListener(
+    "input",
+    function(){
 
-    if(event.key === "Enter"){
+        this.value =
+            this.value
+                .replace(/\D/g,"")
+                .slice(0,10);
 
-        const active = document.activeElement;
+    }
+);
 
-        if(active && active.tagName === "INPUT"){
 
-            event.preventDefault();
+$("vehicleNumber").addEventListener(
+    "input",
+    function(){
 
-            registerRider();
+        this.value =
+            this.value
+                .toUpperCase()
+                .replace(
+                    /[^A-Z0-9 -]/g,
+                    ""
+                )
+                .slice(0,15);
+
+    }
+);
+
+
+/* =========================================================
+   ENTER KEY
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.key === "Enter"
+        ){
+
+            const active =
+                document.activeElement;
+
+            if(
+                active &&
+                (
+                    active.tagName ===
+                    "INPUT" ||
+                    active.tagName ===
+                    "SELECT"
+                )
+            ){
+
+                event.preventDefault();
+
+                window.registerRider();
+
+            }
 
         }
 
     }
+);
 
-});
-
-
-/* PAGE READY */
-
-document.addEventListener("DOMContentLoaded",function(){
-
-    const params = new URLSearchParams(window.location.search);
-
-    if(params.get("message")){
-
-        showMessage(
-            params.get("message"),
-            "success"
-        );
-
-    }
-
-});
-</script>
-
-</body>
+</script></body>
 </html>
