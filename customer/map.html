@@ -4,6 +4,7 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
@@ -644,25 +645,20 @@ body{
 
 <div class="app">
 
-
-    <!-- MAP -->
-
     <div id="map"></div>
-
-
-    <!-- LOADING -->
 
     <div
         class="loading"
         id="loading"
     >
-
         <div class="spinner"></div>
 
-        <div class="loading-text">
-            Loading map...
+        <div
+            class="loading-text"
+            id="loadingText"
+        >
+            Getting your location...
         </div>
-
     </div>
 
 
@@ -673,6 +669,7 @@ body{
         <button
             class="back-btn"
             onclick="goBack()"
+            aria-label="Back"
         >
             ‹
         </button>
@@ -684,7 +681,7 @@ body{
             </div>
 
             <div class="top-sub">
-                Move the map and select your location
+                Move the map or search for a location
             </div>
 
         </div>
@@ -714,12 +711,12 @@ body{
                 id="clearBtn"
                 class="clear-btn"
                 onclick="clearSearch()"
+                aria-label="Clear search"
             >
                 ×
             </button>
 
         </div>
-
 
         <div
             class="results"
@@ -735,6 +732,7 @@ body{
 
         <button
             class="map-btn"
+            id="currentLocationBtn"
             onclick="useCurrentLocation()"
             title="Current location"
         >
@@ -796,8 +794,6 @@ body{
         </div>
 
 
-        <!-- TYPE -->
-
         <div class="type-tabs">
 
             <button
@@ -819,8 +815,6 @@ body{
         </div>
 
 
-        <!-- SELECTED LOCATION -->
-
         <div class="location-card">
 
             <div
@@ -841,7 +835,7 @@ body{
                     id="selectedAddress"
                     class="location-address"
                 >
-                    Move the map or search for a location
+                    Getting your location...
                 </div>
 
             </div>
@@ -849,6 +843,7 @@ body{
             <button
                 class="location-edit"
                 onclick="useCurrentLocation()"
+                aria-label="Use current location"
             >
                 ◎
             </button>
@@ -867,7 +862,6 @@ body{
 
     </section>
 
-
 </div>
 
 
@@ -877,59 +871,106 @@ body{
 ></div>
 
 
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 
 <script>
 
-/* ==========================================
-   RIDERX CUSTOMER MAP
-========================================== */
-
-let map =
-    null;
-
-let currentLocationMarker =
-    null;
-
-let selectedType =
-    "pickup";
-
-let selectedLocation =
-    null;
-
-let pickupLocation =
-    null;
-
-let dropLocation =
-    null;
-
-let searchTimer =
-    null;
-
-let toastTimer =
-    null;
-
-let isSearching =
-    false;
+/* ============================================================
+   RIDERX
+   CUSTOMER LOCATION SELECTOR
+   ============================================================ */
 
 
-/* ==========================================
-   ELEMENTS
-========================================== */
+/* ============================================================
+   STATE
+   ============================================================ */
 
-const $ =
-    id =>
-        document.getElementById(
-            id
+let map = null;
+
+let currentLocationMarker = null;
+
+let selectedType = "pickup";
+
+let selectedLocation = null;
+
+let pickupLocation = null;
+
+let dropLocation = null;
+
+let searchTimer = null;
+
+let toastTimer = null;
+
+let reverseTimer = null;
+
+let reverseRequestId = 0;
+
+let isSearching = false;
+
+let isMapReady = false;
+
+
+/* ============================================================
+   FALLBACK LOCATION
+   IMPORTANT:
+   This is ONLY used when GPS / saved / URL location
+   is unavailable.
+   ============================================================ */
+
+const FALLBACK_LOCATION = {
+    lat:30.7046,
+    lng:76.7179
+};
+
+
+/* ============================================================
+   ELEMENT HELPER
+   ============================================================ */
+
+const $ = id =>
+    document.getElementById(id);
+
+
+/* ============================================================
+   DOM READY
+   ============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    async function(){
+
+        const params = getParams();
+
+        selectedType =
+            params.type === "drop" ||
+            params.type === "destination"
+                ? "drop"
+                : "pickup";
+
+
+        updateTypeUI();
+
+
+        loadSavedLocations(
+            params
         );
 
 
-/* ==========================================
-   GET PARAMETERS
-========================================== */
+        setupSearch();
+
+
+        await initMap(
+            params
+        );
+
+    }
+);
+
+
+/* ============================================================
+   URL PARAMETERS
+   ============================================================ */
 
 function getParams(){
 
@@ -942,224 +983,71 @@ function getParams(){
     return {
 
         type:
-            params.get(
-                "type"
-            ) ||
-            params.get(
-                "locationType"
-            ) ||
+            params.get("type") ||
+            params.get("locationType") ||
             "pickup",
 
         lat:
-            params.get(
-                "lat"
-            ),
+            params.get("lat"),
 
         lng:
-            params.get(
-                "lng"
-            ),
+            params.get("lng"),
 
         address:
-            params.get(
-                "address"
-            ),
+            params.get("address"),
+
+        return:
+            params.get("return"),
 
         pickupLat:
-            params.get(
-                "pickupLat"
-            ),
+            params.get("pickupLat"),
 
         pickupLng:
-            params.get(
-                "pickupLng"
-            ),
+            params.get("pickupLng"),
 
         pickupAddress:
-            params.get(
-                "pickupAddress"
-            ),
+            params.get("pickupAddress"),
 
         dropLat:
-            params.get(
-                "dropLat"
-            ),
+            params.get("dropLat"),
 
         dropLng:
-            params.get(
-                "dropLng"
-            ),
+            params.get("dropLng"),
 
         dropAddress:
-            params.get(
-                "dropAddress"
-            )
+            params.get("dropAddress")
 
     };
 
 }
 
 
-/* ==========================================
-   INIT
-========================================== */
+/* ============================================================
+   MAP INITIALIZATION
+   ============================================================ */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+async function initMap(params){
 
-        const params =
-            getParams();
-
-
-        if(
-            params.type ===
-            "drop" ||
-            params.type ===
-            "destination"
-        ){
-
-            setLocationType(
-                "drop"
-            );
-
-        }
-
-
-        initMap(
+    let startLocation =
+        getInitialLocation(
             params
         );
-
-
-        setupSearch();
-
-
-        loadSavedLocations(
-            params
-        );
-
-    }
-);
-
-
-/* ==========================================
-   MAP INIT
-========================================== */
-
-function initMap(
-    params
-){
-
-    let startLat =
-        30.7046;
-
-    let startLng =
-        76.7179;
-
-
-    /*
-      URL coordinates.
-    */
-
-    if(
-        params.lat &&
-        params.lng
-    ){
-
-        startLat =
-            Number(
-                params.lat
-            );
-
-        startLng =
-            Number(
-                params.lng
-            );
-
-    }
-
-
-    /*
-      Saved pickup.
-    */
-
-    if(
-        !params.lat &&
-        params.pickupLat &&
-        params.pickupLng &&
-        selectedType ===
-        "pickup"
-    ){
-
-        startLat =
-            Number(
-                params.pickupLat
-            );
-
-        startLng =
-            Number(
-                params.pickupLng
-            );
-
-    }
-
-
-    /*
-      Saved drop.
-    */
-
-    if(
-        !params.lat &&
-        params.dropLat &&
-        params.dropLng &&
-        selectedType ===
-        "drop"
-    ){
-
-        startLat =
-            Number(
-                params.dropLat
-            );
-
-        startLng =
-            Number(
-                params.dropLng
-            );
-
-    }
-
-
-    if(
-        !Number.isFinite(
-            startLat
-        ) ||
-        !Number.isFinite(
-            startLng
-        )
-    ){
-
-        startLat =
-            30.7046;
-
-        startLng =
-            76.7179;
-
-    }
 
 
     map =
         L.map(
             "map",
             {
-                zoomControl:false
+                zoomControl:false,
+                attributionControl:true
             }
         )
         .setView(
             [
-                startLat,
-                startLng
+                startLocation.lat,
+                startLocation.lng
             ],
-            15
+            startLocation.zoom || 16
         );
 
 
@@ -1168,7 +1056,7 @@ function initMap(
         {
             maxZoom:19,
             attribution:
-                '&copy; OpenStreetMap'
+                "&copy; OpenStreetMap contributors"
         }
     )
     .addTo(
@@ -1196,7 +1084,46 @@ function initMap(
     );
 
 
-    updateCenterLocation();
+    isMapReady = true;
+
+
+    /*
+      If we already have an exact URL/saved
+      location, show it immediately.
+    */
+
+    if(
+        startLocation.exact &&
+        startLocation.address
+    ){
+
+        setSelectedLocation(
+            startLocation.lat,
+            startLocation.lng,
+            startLocation.address,
+            false
+        );
+
+    }else{
+
+        /*
+          GPS is the preferred source.
+          Do NOT default to Chandigarh first.
+        */
+
+        if(
+            startLocation.source === "gps-needed"
+        ){
+
+            await requestInitialGPS();
+
+        }else{
+
+            updateCenterLocation();
+
+        }
+
+    }
 
 
     $("loading")
@@ -1204,35 +1131,343 @@ function initMap(
             "hidden"
         );
 
+}
+
+
+/* ============================================================
+   INITIAL LOCATION PRIORITY
+
+   1. Explicit URL lat/lng
+   2. URL pickup/drop
+   3. Saved pickup/drop
+   4. Temporary booking data
+   5. GPS
+   6. Chandigarh fallback
+   ============================================================ */
+
+function getInitialLocation(params){
+
+    let lat = null;
+    let lng = null;
+    let address = null;
+
 
     /*
-      If URL already contains
-      an address, use it.
+      1. Direct URL coordinates
     */
 
     if(
-        params.address
+        validCoordinates(
+            params.lat,
+            params.lng
+        )
     ){
 
-        setSelectedLocation(
-            startLat,
-            startLng,
-            params.address
-        );
+        lat = Number(params.lat);
+        lng = Number(params.lng);
+        address = params.address || null;
+
+
+        return {
+            lat,
+            lng,
+            address,
+            exact:true,
+            source:"url"
+        };
 
     }
+
+
+    /*
+      2. URL pickup
+    */
+
+    if(
+        selectedType === "pickup" &&
+        validCoordinates(
+            params.pickupLat,
+            params.pickupLng
+        )
+    ){
+
+        return {
+            lat:Number(params.pickupLat),
+            lng:Number(params.pickupLng),
+            address:
+                params.pickupAddress ||
+                null,
+            exact:true,
+            source:"url-pickup"
+        };
+
+    }
+
+
+    /*
+      3. URL destination
+    */
+
+    if(
+        selectedType === "drop" &&
+        validCoordinates(
+            params.dropLat,
+            params.dropLng
+        )
+    ){
+
+        return {
+            lat:Number(params.dropLat),
+            lng:Number(params.dropLng),
+            address:
+                params.dropAddress ||
+                null,
+            exact:true,
+            source:"url-drop"
+        };
+
+    }
+
+
+    /*
+      4. Saved selected location
+    */
+
+    const saved =
+        selectedType === "pickup"
+            ? pickupLocation
+            : dropLocation;
+
+
+    if(
+        saved &&
+        validCoordinates(
+            saved.lat,
+            saved.lng
+        )
+    ){
+
+        return {
+            lat:Number(saved.lat),
+            lng:Number(saved.lng),
+            address:saved.address || null,
+            exact:true,
+            source:"saved"
+        };
+
+    }
+
+
+    /*
+      5. Booking data
+    */
+
+    const booking =
+        getBookingData();
+
+
+    const bookingLocation =
+        selectedType === "pickup"
+            ? booking.pickup
+            : booking.drop;
+
+
+    if(
+        bookingLocation &&
+        validCoordinates(
+            bookingLocation.lat,
+            bookingLocation.lng
+        )
+    ){
+
+        return {
+            lat:Number(bookingLocation.lat),
+            lng:Number(bookingLocation.lng),
+            address:
+                bookingLocation.address ||
+                null,
+            exact:true,
+            source:"booking"
+        };
+
+    }
+
+
+    /*
+      6. Need GPS
+    */
+
+    if(
+        navigator.geolocation
+    ){
+
+        return {
+            ...FALLBACK_LOCATION,
+            exact:false,
+            source:"gps-needed"
+        };
+
+    }
+
+
+    /*
+      7. Final fallback only
+    */
+
+    return {
+        ...FALLBACK_LOCATION,
+        exact:false,
+        source:"fallback"
+    };
 
 }
 
 
-/* ==========================================
+/* ============================================================
+   INITIAL GPS
+   ============================================================ */
+
+function requestInitialGPS(){
+
+    return new Promise(
+        resolve => {
+
+            if(
+                !navigator.geolocation
+            ){
+
+                updateCenterLocation();
+
+                resolve();
+
+                return;
+
+            }
+
+
+            $("loadingText")
+                .textContent =
+                "Getting your current location...";
+
+
+            navigator.geolocation.getCurrentPosition(
+
+                position => {
+
+                    const lat =
+                        position.coords.latitude;
+
+                    const lng =
+                        position.coords.longitude;
+
+
+                    if(
+                        !validCoordinates(
+                            lat,
+                            lng
+                        )
+                    ){
+
+                        updateCenterLocation();
+
+                        resolve();
+
+                        return;
+
+                    }
+
+
+                    updateCurrentMarker(
+                        lat,
+                        lng
+                    );
+
+
+                    map.setView(
+                        [
+                            lat,
+                            lng
+                        ],
+                        17,
+                        {
+                            animate:false
+                        }
+                    );
+
+
+                    setSelectedLocation(
+                        lat,
+                        lng,
+                        "Getting address...",
+                        false
+                    );
+
+
+                    reverseGeocode(
+                        lat,
+                        lng
+                    );
+
+
+                    resolve();
+
+                },
+
+                error => {
+
+                    console.warn(
+                        "Initial GPS unavailable:",
+                        error
+                    );
+
+
+                    /*
+                      GPS failed:
+                      use fallback ONLY now.
+                    */
+
+                    map.setView(
+                        [
+                            FALLBACK_LOCATION.lat,
+                            FALLBACK_LOCATION.lng
+                        ],
+                        14,
+                        {
+                            animate:false
+                        }
+                    );
+
+
+                    updateCenterLocation();
+
+
+                    resolve();
+
+                },
+
+                {
+                    enableHighAccuracy:true,
+                    timeout:10000,
+                    maximumAge:30000
+                }
+
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
    CENTER LOCATION
-========================================== */
+   ============================================================ */
 
 function updateCenterLocation(){
 
     if(
         !map ||
+        !isMapReady ||
         isSearching
     ){
 
@@ -1245,16 +1480,15 @@ function updateCenterLocation(){
         map.getCenter();
 
 
+    const requestId =
+        ++reverseRequestId;
+
+
     selectedLocation = {
 
-        lat:
-            center.lat,
-
-        lng:
-            center.lng,
-
-        address:
-            "Getting address..."
+        lat:center.lat,
+        lng:center.lng,
+        address:"Getting address..."
 
     };
 
@@ -1264,22 +1498,50 @@ function updateCenterLocation(){
         "Getting address...";
 
 
-    reverseGeocode(
-        center.lat,
-        center.lng
+    $("centerLabel")
+        .textContent =
+        "Getting address...";
+
+
+    $("confirmBtn")
+        .disabled = true;
+
+
+    clearTimeout(
+        reverseTimer
     );
+
+
+    reverseTimer =
+        setTimeout(
+            function(){
+
+                reverseGeocode(
+                    center.lat,
+                    center.lng,
+                    requestId
+                );
+
+            },
+            250
+        );
 
 }
 
 
-/* ==========================================
+/* ============================================================
    REVERSE GEOCODING
-========================================== */
+   ============================================================ */
 
 async function reverseGeocode(
     lat,
-    lng
+    lng,
+    requestId = reverseRequestId
 ){
+
+    const thisRequest =
+        requestId;
+
 
     try{
 
@@ -1288,19 +1550,14 @@ async function reverseGeocode(
                 "https://nominatim.openstreetmap.org/reverse" +
                 "?format=json" +
                 "&lat=" +
-                encodeURIComponent(
-                    lat
-                ) +
+                encodeURIComponent(lat) +
                 "&lon=" +
-                encodeURIComponent(
-                    lng
-                ) +
+                encodeURIComponent(lng) +
                 "&zoom=18" +
                 "&addressdetails=1",
                 {
                     headers:{
-                        "Accept-Language":
-                            "en"
+                        "Accept-Language":"en"
                     }
                 }
             );
@@ -1321,15 +1578,19 @@ async function reverseGeocode(
             await response.json();
 
 
-        const address =
-            data.display_name ||
-            "Selected location";
-
-
         /*
-          Ignore if user has already
-          moved to another position.
+          Ignore stale request.
         */
+
+        if(
+            thisRequest !==
+            reverseRequestId
+        ){
+
+            return;
+
+        }
+
 
         if(
             !selectedLocation
@@ -1349,6 +1610,10 @@ async function reverseGeocode(
             );
 
 
+        /*
+          Ignore response for old map position.
+        */
+
         if(
             distance >
             0.03
@@ -1357,6 +1622,11 @@ async function reverseGeocode(
             return;
 
         }
+
+
+        const address =
+            data.display_name ||
+            "Selected location";
 
 
         selectedLocation.address =
@@ -1384,6 +1654,16 @@ async function reverseGeocode(
         console.error(
             error
         );
+
+
+        if(
+            thisRequest !==
+            reverseRequestId
+        ){
+
+            return;
+
+        }
 
 
         if(
@@ -1415,9 +1695,9 @@ async function reverseGeocode(
 }
 
 
-/* ==========================================
-   SEARCH
-========================================== */
+/* ============================================================
+   SEARCH SETUP
+   ============================================================ */
 
 function setupSearch(){
 
@@ -1469,7 +1749,7 @@ function setupSearch(){
                         );
 
                     },
-                    500
+                    600
                 );
 
         }
@@ -1511,13 +1791,11 @@ function setupSearch(){
 }
 
 
-/* ==========================================
+/* ============================================================
    SEARCH PLACES
-========================================== */
+   ============================================================ */
 
-async function searchPlaces(
-    query
-){
+async function searchPlaces(query){
 
     if(
         isSearching
@@ -1528,8 +1806,7 @@ async function searchPlaces(
     }
 
 
-    isSearching =
-        true;
+    isSearching = true;
 
 
     const results =
@@ -1562,15 +1839,12 @@ async function searchPlaces(
                 "https://nominatim.openstreetmap.org/search" +
                 "?format=json" +
                 "&q=" +
-                encodeURIComponent(
-                    query
-                ) +
+                encodeURIComponent(query) +
                 "&limit=6" +
                 "&addressdetails=1",
                 {
                     headers:{
-                        "Accept-Language":
-                            "en"
+                        "Accept-Language":"en"
                     }
                 }
             );
@@ -1617,21 +1891,18 @@ async function searchPlaces(
 
     }finally{
 
-        isSearching =
-            false;
+        isSearching = false;
 
     }
 
 }
 
 
-/* ==========================================
-   RENDER RESULTS
-========================================== */
+/* ============================================================
+   RENDER SEARCH RESULTS
+   ============================================================ */
 
-function renderResults(
-    data
-){
+function renderResults(data){
 
     const results =
         $("results");
@@ -1639,8 +1910,7 @@ function renderResults(
 
     if(
         !data ||
-        data.length ===
-        0
+        data.length === 0
     ){
 
         results.innerHTML =
@@ -1661,8 +1931,7 @@ function renderResults(
     }
 
 
-    results.innerHTML =
-        "";
+    results.innerHTML = "";
 
 
     data.forEach(
@@ -1688,16 +1957,13 @@ function renderResults(
 
                     <div class="result-name">
                         ${escapeHtml(
-                            getPlaceName(
-                                item
-                            )
+                            getPlaceName(item)
                         )}
                     </div>
 
                     <div class="result-address">
                         ${escapeHtml(
-                            item.display_name ||
-                            ""
+                            item.display_name || ""
                         )}
                     </div>
 
@@ -1727,33 +1993,30 @@ function renderResults(
 }
 
 
-/* ==========================================
+/* ============================================================
    SELECT SEARCH RESULT
-========================================== */
+   ============================================================ */
 
-function selectSearchResult(
-    item
-){
+function selectSearchResult(item){
 
     const lat =
-        Number(
-            item.lat
-        );
+        Number(item.lat);
 
     const lng =
-        Number(
-            item.lon
-        );
+        Number(item.lon);
 
 
     if(
-        !Number.isFinite(
-            lat
-        ) ||
-        !Number.isFinite(
+        !validCoordinates(
+            lat,
             lng
         )
     ){
+
+        showToast(
+            "Invalid location.",
+            "error"
+        );
 
         return;
 
@@ -1765,8 +2028,19 @@ function selectSearchResult(
         "Selected location";
 
 
-    isSearching =
-        true;
+    isSearching = true;
+
+
+    ++reverseRequestId;
+
+
+    selectedLocation = {
+
+        lat,
+        lng,
+        address
+
+    };
 
 
     map.setView(
@@ -1781,11 +2055,21 @@ function selectSearchResult(
     );
 
 
-    setSelectedLocation(
-        lat,
-        lng,
-        address
-    );
+    $("selectedAddress")
+        .textContent =
+        address;
+
+
+    $("centerLabel")
+        .textContent =
+        shortAddress(
+            address
+        );
+
+
+    $("confirmBtn")
+        .disabled =
+        false;
 
 
     $("results")
@@ -1809,38 +2093,49 @@ function selectSearchResult(
     setTimeout(
         function(){
 
-            isSearching =
-                false;
+            isSearching = false;
 
         },
-        400
+        500
     );
 
 }
 
 
-/* ==========================================
-   SET LOCATION
-========================================== */
+/* ============================================================
+   SET SELECTED LOCATION
+   ============================================================ */
 
 function setSelectedLocation(
     lat,
     lng,
-    address
+    address,
+    moveMap = true
 ){
+
+    lat = Number(lat);
+    lng = Number(lng);
+
+
+    if(
+        !validCoordinates(
+            lat,
+            lng
+        )
+    ){
+
+        return;
+
+    }
+
+
+    ++reverseRequestId;
+
 
     selectedLocation = {
 
-        lat:
-            Number(
-                lat
-            ),
-
-        lng:
-            Number(
-                lng
-            ),
-
+        lat,
+        lng,
         address:
             address ||
             "Selected location"
@@ -1866,18 +2161,22 @@ function setSelectedLocation(
 
 
     if(
+        moveMap &&
         map
     ){
 
         map.setView(
             [
-                selectedLocation.lat,
-                selectedLocation.lng
+                lat,
+                lng
             ],
             Math.max(
                 map.getZoom(),
                 15
-            )
+            ),
+            {
+                animate:true
+            }
         );
 
     }
@@ -1885,20 +2184,86 @@ function setSelectedLocation(
 }
 
 
-/* ==========================================
+/* ============================================================
    LOCATION TYPE
-========================================== */
+   ============================================================ */
 
-function setLocationType(
-    type
-){
+function setLocationType(type){
 
     selectedType =
-        type ===
-        "drop"
+        type === "drop"
             ? "drop"
             : "pickup";
 
+
+    updateTypeUI();
+
+
+    const existing =
+        selectedType === "pickup"
+            ? pickupLocation
+            : dropLocation;
+
+
+    if(
+        existing &&
+        validCoordinates(
+            existing.lat,
+            existing.lng
+        )
+    ){
+
+        setSelectedLocation(
+            existing.lat,
+            existing.lng,
+            existing.address ||
+                (
+                    selectedType === "pickup"
+                        ? "Pickup location"
+                        : "Destination"
+                )
+        );
+
+        return;
+
+    }
+
+
+    /*
+      No saved destination:
+      keep current map center as selection.
+    */
+
+    if(
+        map
+    ){
+
+        const center =
+            map.getCenter();
+
+
+        setSelectedLocation(
+            center.lat,
+            center.lng,
+            "Getting address..."
+        );
+
+
+        reverseGeocode(
+            center.lat,
+            center.lng
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   UPDATE TYPE UI
+   ============================================================ */
+
+function updateTypeUI(){
 
     const pickupBtn =
         $("pickupBtn");
@@ -1907,17 +2272,25 @@ function setLocationType(
         $("dropBtn");
 
 
+    if(
+        !pickupBtn ||
+        !dropBtn
+    ){
+
+        return;
+
+    }
+
+
     pickupBtn.classList.toggle(
         "active",
-        selectedType ===
-        "pickup"
+        selectedType === "pickup"
     );
 
 
     dropBtn.classList.toggle(
         "active",
-        selectedType ===
-        "drop"
+        selectedType === "drop"
     );
 
 
@@ -1927,79 +2300,29 @@ function setLocationType(
 
     dot.classList.toggle(
         "drop",
-        selectedType ===
-        "drop"
+        selectedType === "drop"
     );
 
 
     $("locationLabel")
         .textContent =
-        selectedType ===
-        "pickup"
+        selectedType === "pickup"
             ? "Pickup location"
             : "Destination";
 
 
     $("confirmBtn")
         .textContent =
-        selectedType ===
-        "pickup"
+        selectedType === "pickup"
             ? "Confirm Pickup Location"
             : "Confirm Destination";
-
-
-    if(
-        selectedType ===
-        "pickup" &&
-        pickupLocation
-    ){
-
-        setSelectedLocation(
-            pickupLocation.lat,
-            pickupLocation.lng,
-            pickupLocation.address
-        );
-
-        return;
-
-    }
-
-
-    if(
-        selectedType ===
-        "drop" &&
-        dropLocation
-    ){
-
-        setSelectedLocation(
-            dropLocation.lat,
-            dropLocation.lng,
-            dropLocation.address
-        );
-
-        return;
-
-    }
-
-
-    $("selectedAddress")
-        .textContent =
-        selectedType ===
-        "pickup"
-            ? "Move the map or search for pickup"
-            : "Move the map or search for destination";
-
-
-    $("confirmBtn")
-        .disabled =
-        !selectedLocation;
 
 }
 
 
-/* ==========================================
+/* ============================================================
    CURRENT LOCATION
-========================================== */
+   ============================================================ */
 
 function useCurrentLocation(){
 
@@ -2022,62 +2345,65 @@ function useCurrentLocation(){
     );
 
 
-    navigator.geolocation
-        .getCurrentPosition(
-            async position => {
-
-                const lat =
-                    position.coords.latitude;
-
-                const lng =
-                    position.coords.longitude;
+    $("currentLocationBtn")
+        .classList.add(
+            "active"
+        );
 
 
-                if(
-                    currentLocationMarker
-                ){
+    navigator.geolocation.getCurrentPosition(
 
-                    currentLocationMarker
-                        .setLatLng(
-                            [
-                                lat,
-                                lng
-                            ]
-                        );
+        async position => {
 
-                }else{
+            const lat =
+                position.coords.latitude;
 
-                    currentLocationMarker =
-                        L.marker(
-                            [
-                                lat,
-                                lng
-                            ],
-                            {
-                                icon:
-                                    L.divIcon({
+            const lng =
+                position.coords.longitude;
 
-                                        className:"",
-                                        html:
-                                            `<div class="user-marker"></div>`,
-                                        iconSize:[
-                                            18,
-                                            18
-                                        ],
-                                        iconAnchor:[
-                                            9,
-                                            9
-                                        ]
 
-                                    })
-                            }
-                        )
-                        .addTo(
-                            map
-                        );
+            if(
+                !validCoordinates(
+                    lat,
+                    lng
+                )
+            ){
 
-                }
+                showToast(
+                    "Invalid GPS location.",
+                    "error"
+                );
 
+                $("currentLocationBtn")
+                    .classList.remove(
+                        "active"
+                    );
+
+                return;
+
+            }
+
+
+            updateCurrentMarker(
+                lat,
+                lng
+            );
+
+
+            ++reverseRequestId;
+
+
+            setSelectedLocation(
+                lat,
+                lng,
+                "Getting address...",
+                false
+            );
+
+
+            if(
+                map
+            ){
 
                 map.setView(
                     [
@@ -2090,45 +2416,164 @@ function useCurrentLocation(){
                     }
                 );
 
-
-                await reverseGeocode(
-                    lat,
-                    lng
-                );
-
-
-                showToast(
-                    "Current location selected.",
-                    "success"
-                );
-
-            },
-            error => {
-
-                console.error(
-                    error
-                );
-
-
-                showToast(
-                    "Please allow location permission.",
-                    "error"
-                );
-
-            },
-            {
-                enableHighAccuracy:true,
-                timeout:12000,
-                maximumAge:5000
             }
+
+
+            await reverseGeocode(
+                lat,
+                lng
+            );
+
+
+            $("currentLocationBtn")
+                .classList.remove(
+                    "active"
+                );
+
+
+            showToast(
+                "Current location selected.",
+                "success"
+            );
+
+        },
+
+        error => {
+
+            console.error(
+                "GPS error:",
+                error
+            );
+
+
+            $("currentLocationBtn")
+                .classList.remove(
+                    "active"
+                );
+
+
+            let message =
+                "Unable to get your location.";
+
+
+            if(
+                error.code ===
+                1
+            ){
+
+                message =
+                    "Please allow location permission.";
+
+            }else if(
+                error.code ===
+                2
+            ){
+
+                message =
+                    "Your location is currently unavailable.";
+
+            }else if(
+                error.code ===
+                3
+            ){
+
+                message =
+                    "Location request timed out.";
+
+            }
+
+
+            showToast(
+                message,
+                "error"
+            );
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            timeout:12000,
+            maximumAge:5000
+        }
+
+    );
+
+}
+
+
+/* ============================================================
+   CURRENT LOCATION MARKER
+   ============================================================ */
+
+function updateCurrentMarker(
+    lat,
+    lng
+){
+
+    if(
+        !map
+    ){
+
+        return;
+
+    }
+
+
+    if(
+        currentLocationMarker
+    ){
+
+        currentLocationMarker.setLatLng(
+            [
+                lat,
+                lng
+            ]
+        );
+
+        return;
+
+    }
+
+
+    currentLocationMarker =
+        L.marker(
+            [
+                lat,
+                lng
+            ],
+            {
+                icon:
+                    L.divIcon({
+
+                        className:"",
+                        html:
+                            `
+                            <div class="user-marker"></div>
+                            `,
+
+                        iconSize:[
+                            18,
+                            18
+                        ],
+
+                        iconAnchor:[
+                            9,
+                            9
+                        ]
+
+                    })
+            }
+        )
+        .addTo(
+            map
         );
 
 }
 
 
-/* ==========================================
+/* ============================================================
    ZOOM
-========================================== */
+   ============================================================ */
 
 function zoomIn(){
 
@@ -2156,15 +2601,14 @@ function zoomOut(){
 }
 
 
-/* ==========================================
+/* ============================================================
    CLEAR SEARCH
-========================================== */
+   ============================================================ */
 
 function clearSearch(){
 
     $("searchInput")
-        .value =
-        "";
+        .value = "";
 
 
     $("clearBtn")
@@ -2184,9 +2628,9 @@ function clearSearch(){
 }
 
 
-/* ==========================================
+/* ============================================================
    CONFIRM LOCATION
-========================================== */
+   ============================================================ */
 
 function confirmLocation(){
 
@@ -2205,10 +2649,8 @@ function confirmLocation(){
 
 
     if(
-        !Number.isFinite(
-            selectedLocation.lat
-        ) ||
-        !Number.isFinite(
+        !validCoordinates(
+            selectedLocation.lat,
             selectedLocation.lng
         )
     ){
@@ -2223,18 +2665,37 @@ function confirmLocation(){
     }
 
 
+    const address =
+        selectedLocation.address ||
+        "Selected location";
+
+
+    const location = {
+
+        lat:Number(
+            selectedLocation.lat
+        ),
+
+        lng:Number(
+            selectedLocation.lng
+        ),
+
+        address:address
+
+    };
+
+
     /*
-      Save selected location.
+      Save pickup.
     */
 
     if(
-        selectedType ===
-        "pickup"
+        selectedType === "pickup"
     ){
 
         pickupLocation =
             {
-                ...selectedLocation
+                ...location
             };
 
 
@@ -2245,11 +2706,18 @@ function confirmLocation(){
             )
         );
 
-    }else{
+    }
+
+
+    /*
+      Save destination.
+    */
+
+    else{
 
         dropLocation =
             {
-                ...selectedLocation
+                ...location
             };
 
 
@@ -2264,7 +2732,7 @@ function confirmLocation(){
 
 
     /*
-      Also save combined booking data.
+      Preserve combined booking data.
     */
 
     const booking =
@@ -2272,20 +2740,19 @@ function confirmLocation(){
 
 
     if(
-        selectedType ===
-        "pickup"
+        selectedType === "pickup"
     ){
 
         booking.pickup =
             {
-                ...selectedLocation
+                ...location
             };
 
     }else{
 
         booking.drop =
             {
-                ...selectedLocation
+                ...location
             };
 
     }
@@ -2300,7 +2767,7 @@ function confirmLocation(){
 
 
     /*
-      Return to booking page.
+      Build return page.
     */
 
     const target =
@@ -2310,14 +2777,13 @@ function confirmLocation(){
     const query =
         buildReturnQuery(
             selectedType,
-            selectedLocation,
+            location,
             booking
         );
 
 
     showToast(
-        selectedType ===
-        "pickup"
+        selectedType === "pickup"
             ? "Pickup location saved."
             : "Destination saved.",
         "success"
@@ -2338,9 +2804,9 @@ function confirmLocation(){
 }
 
 
-/* ==========================================
+/* ============================================================
    BOOKING DATA
-========================================== */
+   ============================================================ */
 
 function getBookingData(){
 
@@ -2352,17 +2818,29 @@ function getBookingData(){
             );
 
 
-        if(raw){
+        if(
+            raw
+        ){
 
-            return JSON.parse(
-                raw
-            );
+            const parsed =
+                JSON.parse(raw);
+
+
+            if(
+                parsed &&
+                typeof parsed === "object"
+            ){
+
+                return parsed;
+
+            }
 
         }
 
     }catch(error){
 
         console.error(
+            "Booking data error:",
             error
         );
 
@@ -2374,9 +2852,9 @@ function getBookingData(){
 }
 
 
-/* ==========================================
+/* ============================================================
    RETURN PAGE
-========================================== */
+   ============================================================ */
 
 function getReturnPage(){
 
@@ -2384,17 +2862,35 @@ function getReturnPage(){
         getParams();
 
 
-    return (
+    const requested =
         params.return ||
-        "booking.html"
-    );
+        "booking.html";
+
+
+    /*
+      Security:
+      only allow local relative pages.
+    */
+
+    if(
+        requested.startsWith("/") ||
+        requested.includes("://") ||
+        requested.includes("\\")
+    ){
+
+        return "booking.html";
+
+    }
+
+
+    return requested;
 
 }
 
 
-/* ==========================================
+/* ============================================================
    RETURN QUERY
-========================================== */
+   ============================================================ */
 
 function buildReturnQuery(
     type,
@@ -2431,8 +2927,7 @@ function buildReturnQuery(
 
 
     if(
-        type ===
-        "pickup"
+        type === "pickup"
     ){
 
         params.set(
@@ -2451,6 +2946,41 @@ function buildReturnQuery(
         );
 
 
+        /*
+          Preserve existing destination.
+        */
+
+        const drop =
+            booking.drop ||
+            dropLocation;
+
+
+        if(
+            drop &&
+            validCoordinates(
+                drop.lat,
+                drop.lng
+            )
+        ){
+
+            params.set(
+                "dropLat",
+                drop.lat
+            );
+
+            params.set(
+                "dropLng",
+                drop.lng
+            );
+
+            params.set(
+                "dropAddress",
+                drop.address ||
+                "Destination"
+            );
+
+        }
+
     }else{
 
         params.set(
@@ -2468,6 +2998,65 @@ function buildReturnQuery(
             location.address
         );
 
+
+        /*
+          Preserve existing pickup.
+        */
+
+        const pickup =
+            booking.pickup ||
+            pickupLocation;
+
+
+        if(
+            pickup &&
+            validCoordinates(
+                pickup.lat,
+                pickup.lng
+            )
+        ){
+
+            params.set(
+                "pickupLat",
+                pickup.lat
+            );
+
+            params.set(
+                "pickupLng",
+                pickup.lng
+            );
+
+            params.set(
+                "pickupAddress",
+                pickup.address ||
+                "Pickup location"
+            );
+
+        }
+
+    }
+
+
+    /*
+      IMPORTANT:
+      Preserve return page so we do not accidentally
+      always go to booking.html.
+    */
+
+    const returnPage =
+        getReturnPage();
+
+
+    if(
+        returnPage !==
+        "booking.html"
+    ){
+
+        params.set(
+            "return",
+            returnPage
+        );
+
     }
 
 
@@ -2479,13 +3068,11 @@ function buildReturnQuery(
 }
 
 
-/* ==========================================
+/* ============================================================
    LOAD SAVED LOCATIONS
-========================================== */
+   ============================================================ */
 
-function loadSavedLocations(
-    params
-){
+function loadSavedLocations(params){
 
     try{
 
@@ -2505,10 +3092,24 @@ function loadSavedLocations(
             pickupRaw
         ){
 
-            pickupLocation =
+            const parsed =
                 JSON.parse(
                     pickupRaw
                 );
+
+
+            if(
+                parsed &&
+                validCoordinates(
+                    parsed.lat,
+                    parsed.lng
+                )
+            ){
+
+                pickupLocation =
+                    parsed;
+
+            }
 
         }
 
@@ -2517,21 +3118,37 @@ function loadSavedLocations(
             dropRaw
         ){
 
-            dropLocation =
+            const parsed =
                 JSON.parse(
                     dropRaw
                 );
+
+
+            if(
+                parsed &&
+                validCoordinates(
+                    parsed.lat,
+                    parsed.lng
+                )
+            ){
+
+                dropLocation =
+                    parsed;
+
+            }
 
         }
 
 
         /*
-          URL pickup.
+          URL pickup has priority over saved pickup.
         */
 
         if(
-            params.pickupLat &&
-            params.pickupLng
+            validCoordinates(
+                params.pickupLat,
+                params.pickupLng
+            )
         ){
 
             pickupLocation = {
@@ -2556,12 +3173,14 @@ function loadSavedLocations(
 
 
         /*
-          URL drop.
+          URL drop has priority over saved drop.
         */
 
         if(
-            params.dropLat &&
-            params.dropLng
+            validCoordinates(
+                params.dropLat,
+                params.dropLng
+            )
         ){
 
             dropLocation = {
@@ -2587,6 +3206,7 @@ function loadSavedLocations(
     }catch(error){
 
         console.error(
+            "Saved location error:",
             error
         );
 
@@ -2595,9 +3215,9 @@ function loadSavedLocations(
 }
 
 
-/* ==========================================
+/* ============================================================
    BACK
-========================================== */
+   ============================================================ */
 
 function goBack(){
 
@@ -2610,25 +3230,53 @@ function goBack(){
 
         window.history.back();
 
-    }else{
-
-        window.location.href =
-            "booking.html";
+        return;
 
     }
+
+
+    window.location.href =
+        "booking.html";
 
 }
 
 
-/* ==========================================
-   HELPERS
-========================================== */
+/* ============================================================
+   VALID COORDINATES
+   ============================================================ */
 
-function getPlaceName(
-    item
+function validCoordinates(
+    lat,
+    lng
 ){
 
+    const latitude =
+        Number(lat);
+
+    const longitude =
+        Number(lng);
+
+
+    return (
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude) &&
+        latitude >= -90 &&
+        latitude <= 90 &&
+        longitude >= -180 &&
+        longitude <= 180
+    );
+
+}
+
+
+/* ============================================================
+   PLACE NAME
+   ============================================================ */
+
+function getPlaceName(item){
+
     if(
+        item &&
         item.name
     ){
 
@@ -2638,12 +3286,14 @@ function getPlaceName(
 
 
     if(
+        item &&
         item.address
     ){
 
         return (
             item.address.road ||
             item.address.suburb ||
+            item.address.neighbourhood ||
             item.address.city ||
             item.address.town ||
             item.address.village ||
@@ -2658,9 +3308,11 @@ function getPlaceName(
 }
 
 
-function shortAddress(
-    address
-){
+/* ============================================================
+   SHORT ADDRESS
+   ============================================================ */
+
+function shortAddress(address){
 
     if(
         !address
@@ -2672,55 +3324,40 @@ function shortAddress(
 
 
     const parts =
-        String(
-            address
-        )
-        .split(
-            ","
-        )
-        .map(
-            part =>
-                part.trim()
-        )
-        .filter(
-            Boolean
-        );
+        String(address)
+            .split(",")
+            .map(
+                part =>
+                    part.trim()
+            )
+            .filter(Boolean);
 
 
     if(
-        parts.length >=
-        3
+        parts.length >= 3
     ){
 
         return parts
-            .slice(
-                0,
-                2
-            )
-            .join(
-                ", "
-            );
+            .slice(0,2)
+            .join(", ");
 
     }
 
 
-    return String(
-        address
-    ).slice(
-        0,
-        45
-    );
+    return String(address)
+        .slice(0,45);
 
 }
 
 
-function escapeHtml(
-    value
-){
+/* ============================================================
+   ESCAPE HTML
+   ============================================================ */
+
+function escapeHtml(value){
 
     return String(
-        value ||
-        ""
+        value || ""
     )
     .replace(
         /&/g,
@@ -2746,6 +3383,10 @@ function escapeHtml(
 }
 
 
+/* ============================================================
+   DISTANCE
+   ============================================================ */
+
 function calculateDistance(
     lat1,
     lon1,
@@ -2753,8 +3394,7 @@ function calculateDistance(
     lon2
 ){
 
-    const R =
-        6371;
+    const R = 6371;
 
 
     const dLat =
@@ -2782,16 +3422,19 @@ function calculateDistance(
         Math.sin(
             dLat / 2
         ) +
+
         Math.cos(
             lat1 *
             Math.PI /
             180
         ) *
+
         Math.cos(
             lat2 *
             Math.PI /
             180
         ) *
+
         Math.sin(
             dLon / 2
         ) *
@@ -2804,25 +3447,21 @@ function calculateDistance(
         R *
         2 *
         Math.atan2(
-            Math.sqrt(
-                a
-            ),
-            Math.sqrt(
-                1 - a
-            )
+            Math.sqrt(a),
+            Math.sqrt(1 - a)
         )
     );
 
 }
 
 
-/* ==========================================
+/* ============================================================
    TOAST
-========================================== */
+   ============================================================ */
 
 function showToast(
     message,
-    type=""
+    type = ""
 ){
 
     const toast =
@@ -2857,9 +3496,9 @@ function showToast(
 }
 
 
-/* ==========================================
+/* ============================================================
    CLOSE SEARCH
-========================================== */
+   ============================================================ */
 
 document.addEventListener(
     "click",
@@ -2888,7 +3527,30 @@ document.addEventListener(
     }
 );
 
+
+/* ============================================================
+   PREVENT ENTER FORM-LIKE BEHAVIOUR
+   ============================================================ */
+
+document.addEventListener(
+    "keydown",
+    function(event){
+
+        if(
+            event.key === "Escape"
+        ){
+
+            $("results")
+                .classList.remove(
+                    "show"
+                );
+
+        }
+
+    }
+);
+
 </script>
 
 </body>
-  </html>
+    </html>
