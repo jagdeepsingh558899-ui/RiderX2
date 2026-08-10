@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 
 <meta
@@ -56,9 +55,17 @@ body{
     color:#fff;
 }
 
+body{
+    overscroll-behavior:none;
+}
+
 button{
     font-family:inherit;
     cursor:pointer;
+}
+
+button:disabled{
+    cursor:not-allowed;
 }
 
 #map{
@@ -235,6 +242,7 @@ button{
     border-radius:27px 27px 0 0;
     box-shadow:0 -12px 40px rgba(0,0,0,.55);
     overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
 }
 
 .handle{
@@ -592,20 +600,20 @@ button{
             id="backBtn"
             class="top-btn"
             type="button"
+            aria-label="Back"
         >
             <i class="fa-solid fa-arrow-left"></i>
         </button>
-
 
         <div class="logo">
             RIDER<span>X</span>
         </div>
 
-
         <button
             id="notificationBtn"
             class="top-btn"
             type="button"
+            aria-label="Notifications"
         >
             <i class="fa-solid fa-bell"></i>
         </button>
@@ -642,7 +650,6 @@ button{
         <i class="fa-solid fa-location-crosshairs"></i>
     </button>
 
-
     <button
         id="zoomIn"
         class="map-btn"
@@ -651,7 +658,6 @@ button{
     >
         <i class="fa-solid fa-plus"></i>
     </button>
-
 
     <button
         id="zoomOut"
@@ -678,9 +684,7 @@ button{
 
         <i class="fa-solid fa-motorcycle"></i>
 
-        <h3>
-            No Active Ride
-        </h3>
+        <h3>No Active Ride</h3>
 
         <p>
             Your active trip will appear here.
@@ -708,7 +712,6 @@ button{
             <i class="fa-solid fa-user"></i>
         </div>
 
-
         <div class="customer-info">
 
             <div
@@ -734,7 +737,6 @@ button{
 
         </div>
 
-
         <button
             id="chatBtn"
             class="chat-btn"
@@ -743,7 +745,6 @@ button{
         >
             <i class="fa-solid fa-comment"></i>
         </button>
-
 
         <button
             id="callBtn"
@@ -764,11 +765,8 @@ button{
         <div class="route-row">
 
             <div class="route-icon pickup">
-
                 <i class="fa-solid fa-circle"></i>
-
             </div>
-
 
             <div class="route-text">
 
@@ -787,18 +785,13 @@ button{
 
         </div>
 
-
         <div class="route-line"></div>
-
 
         <div class="route-row">
 
             <div class="route-icon dropoff">
-
                 <i class="fa-solid fa-location-dot"></i>
-
             </div>
-
 
             <div class="route-text">
 
@@ -841,7 +834,6 @@ button{
 
         </div>
 
-
         <div class="info">
 
             <i class="fa-solid fa-indian-rupee-sign"></i>
@@ -858,7 +850,6 @@ button{
             </div>
 
         </div>
-
 
         <div class="info">
 
@@ -956,7 +947,6 @@ import {
     db
 } from "../firebase/firebase-config.js";
 
-
 import {
     doc,
     getDoc,
@@ -969,7 +959,6 @@ import {
     where,
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
-
 
 import {
     onAuthStateChanged
@@ -1027,6 +1016,32 @@ const completeText =
 
 
 /* =========================================================
+   CONSTANTS
+========================================================= */
+
+const ACTIVE_STATUSES = [
+    "ACCEPTED",
+    "ASSIGNED",
+    "ARRIVING",
+    "DRIVER_ARRIVING",
+    "ARRIVED",
+    "STARTED",
+    "IN_PROGRESS",
+    "ONGOING"
+];
+
+const CANCELLED_STATUSES = [
+    "CANCELLED",
+    "CANCELED"
+];
+
+const COMPLETED_STATUSES = [
+    "COMPLETED",
+    "COMPLETE"
+];
+
+
+/* =========================================================
    MAP
 ========================================================= */
 
@@ -1039,7 +1054,6 @@ const map =
         }
     );
 
-
 L.tileLayer(
     "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
@@ -1047,7 +1061,6 @@ L.tileLayer(
         attribution:"© OpenStreetMap"
     }
 ).addTo(map);
-
 
 map.setView(
     [30.7333,76.7794],
@@ -1072,6 +1085,8 @@ let currentRideId = null;
 let currentRideData = null;
 
 let rideUnsubscribe = null;
+
+let statusUpdating = false;
 
 
 /* =========================================================
@@ -1189,9 +1204,12 @@ function getNumber(value){
 
 function getCoords(data,type){
 
+    if(!data){
+        return null;
+    }
+
     let lat = null;
     let lng = null;
-
 
     if(type === "pickup"){
 
@@ -1201,7 +1219,8 @@ function getCoords(data,type){
                 data.pickupLatitude ??
                 data.fromLat ??
                 data.from?.lat ??
-                data.pickup?.lat
+                data.pickup?.lat ??
+                data.pickup?.latitude
             );
 
         lng =
@@ -1210,11 +1229,11 @@ function getCoords(data,type){
                 data.pickupLongitude ??
                 data.fromLng ??
                 data.from?.lng ??
-                data.pickup?.lng
+                data.pickup?.lng ??
+                data.pickup?.longitude
             );
 
     }
-
 
     if(type === "dropoff"){
 
@@ -1226,7 +1245,8 @@ function getCoords(data,type){
                 data.toLat ??
                 data.dropoff?.lat ??
                 data.destination?.lat ??
-                data.to?.lat
+                data.to?.lat ??
+                data.destination?.latitude
             );
 
         lng =
@@ -1237,23 +1257,62 @@ function getCoords(data,type){
                 data.toLng ??
                 data.dropoff?.lng ??
                 data.destination?.lng ??
-                data.to?.lng
+                data.to?.lng ??
+                data.destination?.longitude
             );
 
     }
 
-
     if(
         lat === null ||
-        lng === null
+        lng === null ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
     ){
-
         return null;
+    }
+
+    return [lat,lng];
+}
+
+
+/* =========================================================
+   CLEAR MAP RIDE DATA
+========================================================= */
+
+function clearRideMap(){
+
+    if(pickupMarker){
+
+        map.removeLayer(
+            pickupMarker
+        );
+
+        pickupMarker = null;
 
     }
 
+    if(dropoffMarker){
 
-    return [lat,lng];
+        map.removeLayer(
+            dropoffMarker
+        );
+
+        dropoffMarker = null;
+
+    }
+
+    if(routeLine){
+
+        map.removeLayer(
+            routeLine
+        );
+
+        routeLine = null;
+
+    }
 
 }
 
@@ -1266,7 +1325,6 @@ function fitRideMap(){
 
     const points = [];
 
-
     if(currentPosition){
 
         points.push([
@@ -1276,7 +1334,6 @@ function fitRideMap(){
 
     }
 
-
     if(pickupMarker){
 
         points.push(
@@ -1285,7 +1342,6 @@ function fitRideMap(){
 
     }
 
-
     if(dropoffMarker){
 
         points.push(
@@ -1293,7 +1349,6 @@ function fitRideMap(){
         );
 
     }
-
 
     if(points.length >= 2){
 
@@ -1308,7 +1363,6 @@ function fitRideMap(){
         return;
 
     }
-
 
     if(points.length === 1){
 
@@ -1328,25 +1382,30 @@ function fitRideMap(){
 
 function displayRide(data){
 
-    currentRideData = data;
+    currentRideData = data || {};
+
+    const ride =
+        currentRideData;
 
 
     customerName.innerText =
-        data.customerName ||
-        data.customer?.name ||
+        ride.customerName ||
+        ride.customer?.name ||
+        ride.riderName ||
         "Customer";
 
 
     customerPhone.innerText =
-        data.customerPhone ||
-        data.customer?.phone ||
+        ride.customerPhone ||
+        ride.customer?.phone ||
         "RiderX customer";
 
 
     const rating =
         getNumber(
-            data.customerRating ??
-            data.rating ??
+            ride.customerRating ??
+            ride.rating ??
+            ride.customer?.rating ??
             5
         ) ?? 5;
 
@@ -1356,54 +1415,49 @@ function displayRide(data){
 
 
     pickupAddress.innerText =
-        data.pickupAddress ||
-        data.pickupLocation ||
-        data.fromAddress ||
+        ride.pickupAddress ||
+        ride.pickupLocation ||
+        ride.fromAddress ||
         (
-            typeof data.from === "string"
-                ? data.from
+            typeof ride.from === "string"
+                ? ride.from
                 : "Pickup location"
         );
 
 
     dropoffAddress.innerText =
-        data.dropoffAddress ||
-        data.dropoffLocation ||
-        data.destinationAddress ||
-        data.toAddress ||
+        ride.dropoffAddress ||
+        ride.dropoffLocation ||
+        ride.destinationAddress ||
+        ride.toAddress ||
         (
-            typeof data.destination === "string"
-                ? data.destination
+            typeof ride.destination === "string"
+                ? ride.destination
                 : "Destination"
         );
 
 
     const distance =
         getNumber(
-            data.distance ??
-            data.estimatedDistance ??
-            data.distanceKm
+            ride.distance ??
+            ride.estimatedDistance ??
+            ride.distanceKm ??
+            ride.estimatedDistanceKm
         );
 
 
-    if(distance !== null){
-
-        distanceEl.innerText =
-            `${distance.toFixed(1)} km`;
-
-    }else{
-
-        distanceEl.innerText =
-            "-- km";
-
-    }
+    distanceEl.innerText =
+        distance !== null
+            ? `${distance.toFixed(1)} km`
+            : "-- km";
 
 
     const fare =
         getNumber(
-            data.fare ??
-            data.estimatedFare ??
-            data.price ??
+            ride.fare ??
+            ride.estimatedFare ??
+            ride.price ??
+            ride.totalFare ??
             0
         ) ?? 0;
 
@@ -1414,47 +1468,39 @@ function displayRide(data){
 
     paymentEl.innerText =
         String(
-            data.paymentMethod ||
-            data.payment ||
+            ride.paymentMethod ||
+            ride.payment ||
+            ride.paymentType ||
             "Cash"
         );
 
 
+    clearRideMap();
+
+
     const pickup =
         getCoords(
-            data,
+            ride,
             "pickup"
         );
 
 
     const dropoff =
         getCoords(
-            data,
+            ride,
             "dropoff"
         );
 
 
-    /* PICKUP */
-
     if(pickup){
 
-        if(!pickupMarker){
-
-            pickupMarker =
-                L.marker(
-                    pickup,
-                    {
-                        icon:pickupIcon
-                    }
-                ).addTo(map);
-
-        }else{
-
-            pickupMarker.setLatLng(
-                pickup
-            );
-
-        }
+        pickupMarker =
+            L.marker(
+                pickup,
+                {
+                    icon:pickupIcon
+                }
+            ).addTo(map);
 
         pickupMarker.bindPopup(
             "Customer Pickup"
@@ -1463,27 +1509,15 @@ function displayRide(data){
     }
 
 
-    /* DROPOFF */
-
     if(dropoff){
 
-        if(!dropoffMarker){
-
-            dropoffMarker =
-                L.marker(
-                    dropoff,
-                    {
-                        icon:dropoffIcon
-                    }
-                ).addTo(map);
-
-        }else{
-
-            dropoffMarker.setLatLng(
-                dropoff
-            );
-
-        }
+        dropoffMarker =
+            L.marker(
+                dropoff,
+                {
+                    icon:dropoffIcon
+                }
+            ).addTo(map);
 
         dropoffMarker.bindPopup(
             "Destination"
@@ -1492,21 +1526,10 @@ function displayRide(data){
     }
 
 
-    /* ROUTE */
-
     if(
         pickup &&
         dropoff
     ){
-
-        if(routeLine){
-
-            map.removeLayer(
-                routeLine
-            );
-
-        }
-
 
         routeLine =
             L.polyline(
@@ -1526,7 +1549,7 @@ function displayRide(data){
 
 
     updateRideUI(
-        data.status
+        ride.status
     );
 
 
@@ -1544,7 +1567,8 @@ function updateRideUI(status){
     const normalized =
         String(
             status || "ACCEPTED"
-        ).toUpperCase();
+        ).trim()
+        .toUpperCase();
 
 
     statusPill.className =
@@ -1554,14 +1578,11 @@ function updateRideUI(status){
     mainAction.style.display =
         "block";
 
-
     arrivedBtn.style.display =
         "none";
 
-
     cancelBtn.style.display =
         "block";
-
 
     completeBox.classList.remove(
         "show"
@@ -1588,16 +1609,19 @@ function updateRideUI(status){
 
         mainAction.innerHTML =
             `
-            <i class="fa-solid fa-clock"></i>
-            Waiting...
+                <i class="fa-solid fa-clock"></i>
+                Waiting...
             `;
+
+        cancelBtn.style.display =
+            "block";
 
         return;
 
     }
 
 
-    /* ACCEPTED */
+    /* ACCEPTED / ASSIGNED */
 
     if([
         "ACCEPTED",
@@ -1616,12 +1640,18 @@ function updateRideUI(status){
 
         mainAction.innerHTML =
             `
-            <i class="fa-solid fa-route"></i>
-            Start Ride
+                <i class="fa-solid fa-location-arrow"></i>
+                Start Ride
             `;
 
         arrivedBtn.style.display =
             "block";
+
+        arrivedBtn.innerHTML =
+            `
+                <i class="fa-solid fa-flag-checkered"></i>
+                Mark Arrived
+            `;
 
         return;
 
@@ -1647,8 +1677,8 @@ function updateRideUI(status){
 
         mainAction.innerHTML =
             `
-            <i class="fa-solid fa-location-arrow"></i>
-            Arriving...
+                <i class="fa-solid fa-location-arrow"></i>
+                Arriving...
             `;
 
         arrivedBtn.style.display =
@@ -1656,8 +1686,8 @@ function updateRideUI(status){
 
         arrivedBtn.innerHTML =
             `
-            <i class="fa-solid fa-flag-checkered"></i>
-            Mark Arrived
+                <i class="fa-solid fa-flag-checkered"></i>
+                Mark Arrived
             `;
 
         return;
@@ -1681,8 +1711,8 @@ function updateRideUI(status){
 
         mainAction.innerHTML =
             `
-            <i class="fa-solid fa-play"></i>
-            Start Ride
+                <i class="fa-solid fa-play"></i>
+                Start Ride
             `;
 
         arrivedBtn.style.display =
@@ -1713,8 +1743,8 @@ function updateRideUI(status){
 
         mainAction.innerHTML =
             `
-            <i class="fa-solid fa-flag-checkered"></i>
-            Complete Ride
+                <i class="fa-solid fa-flag-checkered"></i>
+                Complete Ride
             `;
 
         arrivedBtn.style.display =
@@ -1727,10 +1757,11 @@ function updateRideUI(status){
 
     /* COMPLETED */
 
-    if([
-        "COMPLETED",
-        "COMPLETE"
-    ].includes(normalized)){
+    if(
+        COMPLETED_STATUSES.includes(
+            normalized
+        )
+    ){
 
         statusPill.classList.add(
             "completed"
@@ -1755,8 +1786,9 @@ function updateRideUI(status){
 
         const fare =
             getNumber(
-                currentRideData?.fare ||
-                currentRideData?.estimatedFare ||
+                currentRideData?.fare ??
+                currentRideData?.estimatedFare ??
+                currentRideData?.price ??
                 0
             ) ?? 0;
 
@@ -1771,10 +1803,11 @@ function updateRideUI(status){
 
     /* CANCELLED */
 
-    if([
-        "CANCELLED",
-        "CANCELED"
-    ].includes(normalized)){
+    if(
+        CANCELLED_STATUSES.includes(
+            normalized
+        )
+    ){
 
         statusPill.classList.add(
             "cancelled"
@@ -1796,6 +1829,78 @@ function updateRideUI(status){
 
     }
 
+
+    /* UNKNOWN */
+
+    statusPill.classList.add(
+        "searching"
+    );
+
+    statusPill.innerText =
+        "Ride status updating...";
+
+}
+
+
+/* =========================================================
+   CLEAN RIDER ACTIVE RIDE
+========================================================= */
+
+async function clearRiderActiveRide(){
+
+    if(!currentUser){
+        return;
+    }
+
+    try{
+
+        const riderRef =
+            doc(
+                db,
+                "riders",
+                currentUser.uid
+            );
+
+
+        const riderSnap =
+            await getDoc(
+                riderRef
+            );
+
+
+        if(riderSnap.exists()){
+
+            const riderData =
+                riderSnap.data();
+
+
+            if(
+                riderData.activeRideId ===
+                currentRideId
+            ){
+
+                await updateDoc(
+                    riderRef,
+                    {
+                        activeRideId:null,
+                        updatedAt:
+                            serverTimestamp()
+                    }
+                );
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Clear active ride:",
+            error
+        );
+
+    }
+
 }
 
 
@@ -1807,7 +1912,8 @@ async function updateRideStatus(status){
 
     if(
         !currentRideId ||
-        !currentUser
+        !currentUser ||
+        statusUpdating
     ){
 
         return false;
@@ -1815,24 +1921,94 @@ async function updateRideStatus(status){
     }
 
 
+    statusUpdating =
+        true;
+
+
+    const normalized =
+        String(
+            status
+        ).toUpperCase();
+
+
     try{
 
-        await updateDoc(
+        const rideRef =
             doc(
                 db,
                 "rides",
                 currentRideId
-            ),
-            {
-                status:status,
+            );
 
-                riderId:
-                    currentUser.uid,
 
-                updatedAt:
-                    serverTimestamp()
-            }
+        const updateData = {
+            status:normalized,
+
+            riderId:
+                currentUser.uid,
+
+            updatedAt:
+                serverTimestamp()
+        };
+
+
+        if(normalized === "STARTED"){
+
+            updateData.startedAt =
+                serverTimestamp();
+
+        }
+
+
+        if(normalized === "COMPLETED"){
+
+            updateData.completedAt =
+                serverTimestamp();
+
+        }
+
+
+        if(
+            normalized === "ARRIVED"
+        ){
+
+            updateData.arrivedAt =
+                serverTimestamp();
+
+        }
+
+
+        if(
+            CANCELLED_STATUSES.includes(
+                normalized
+            )
+        ){
+
+            updateData.cancelledAt =
+                serverTimestamp();
+
+            updateData.cancelledBy =
+                "rider";
+
+        }
+
+
+        await updateDoc(
+            rideRef,
+            updateData
         );
+
+
+        if(
+            normalized === "COMPLETED" ||
+            CANCELLED_STATUSES.includes(
+                normalized
+            )
+        ){
+
+            await clearRiderActiveRide();
+
+        }
 
 
         return true;
@@ -1846,12 +2022,17 @@ async function updateRideStatus(status){
 
 
         alert(
-            error.message ||
+            error?.message ||
             "Unable to update ride."
         );
 
 
         return false;
+
+    }finally{
+
+        statusUpdating =
+            false;
 
     }
 
@@ -1866,16 +2047,29 @@ mainAction.addEventListener(
     "click",
     async () => {
 
-        if(!currentRideData)
+        if(
+            !currentRideData ||
+            !currentRideId
+        ){
             return;
+        }
 
 
         const status =
             String(
                 currentRideData.status ||
                 ""
-            ).toUpperCase();
+            )
+            .trim()
+            .toUpperCase();
 
+
+        /*
+         * ACCEPTED / ASSIGNED
+         *
+         * Rider should first travel to pickup.
+         * Do not directly mark ride STARTED.
+         */
 
         if([
             "ACCEPTED",
@@ -1883,7 +2077,7 @@ mainAction.addEventListener(
         ].includes(status)){
 
             await updateRideStatus(
-                "STARTED"
+                "ARRIVING"
             );
 
             return;
@@ -1891,7 +2085,22 @@ mainAction.addEventListener(
         }
 
 
+        /*
+         * ARRIVED
+         */
+
         if(status === "ARRIVED"){
+
+            const confirmed =
+                confirm(
+                    "Customer is ready and you are at the pickup location. Start ride?"
+                );
+
+
+            if(!confirmed){
+                return;
+            }
+
 
             await updateRideStatus(
                 "STARTED"
@@ -1901,6 +2110,10 @@ mainAction.addEventListener(
 
         }
 
+
+        /*
+         * STARTED / IN PROGRESS
+         */
 
         if([
             "STARTED",
@@ -1914,8 +2127,9 @@ mainAction.addEventListener(
                 );
 
 
-            if(!confirmed)
+            if(!confirmed){
                 return;
+            }
 
 
             await updateRideStatus(
@@ -1936,15 +2150,21 @@ arrivedBtn.addEventListener(
     "click",
     async () => {
 
-        if(!currentRideData)
+        if(
+            !currentRideData ||
+            !currentRideId
+        ){
             return;
+        }
 
 
         const status =
             String(
                 currentRideData.status ||
                 ""
-            ).toUpperCase();
+            )
+            .trim()
+            .toUpperCase();
 
 
         if([
@@ -1972,8 +2192,30 @@ cancelBtn.addEventListener(
     "click",
     async () => {
 
-        if(!currentRideId)
+        if(
+            !currentRideId ||
+            !currentRideData
+        ){
             return;
+        }
+
+
+        const status =
+            String(
+                currentRideData.status ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        if(
+            !ACTIVE_STATUSES.includes(
+                status
+            )
+        ){
+            return;
+        }
 
 
         const confirmed =
@@ -1982,8 +2224,9 @@ cancelBtn.addEventListener(
             );
 
 
-        if(!confirmed)
+        if(!confirmed){
             return;
+        }
 
 
         await updateRideStatus(
@@ -2008,22 +2251,16 @@ document
             String(
                 currentRideData?.status ||
                 ""
-            ).toUpperCase();
+            )
+            .trim()
+            .toUpperCase();
 
 
-        const activeStatuses = [
-            "ACCEPTED",
-            "ASSIGNED",
-            "ARRIVING",
-            "DRIVER_ARRIVING",
-            "ARRIVED",
-            "STARTED",
-            "IN_PROGRESS",
-            "ONGOING"
-        ];
-
-
-        if(!activeStatuses.includes(status)){
+        if(
+            !ACTIVE_STATUSES.includes(
+                status
+            )
+        ){
 
             alert(
                 "Call is available only during an active ride."
@@ -2042,7 +2279,10 @@ document
         if(phone){
 
             location.href =
-                `tel:${phone}`;
+                `tel:${String(phone).replace(
+                    /[^\d+]/g,
+                    ""
+                )}`;
 
         }else{
 
@@ -2081,22 +2321,16 @@ document
             String(
                 currentRideData?.status ||
                 ""
-            ).toUpperCase();
+            )
+            .trim()
+            .toUpperCase();
 
 
-        const activeStatuses = [
-            "ACCEPTED",
-            "ASSIGNED",
-            "ARRIVING",
-            "DRIVER_ARRIVING",
-            "ARRIVED",
-            "STARTED",
-            "IN_PROGRESS",
-            "ONGOING"
-        ];
-
-
-        if(!activeStatuses.includes(status)){
+        if(
+            !ACTIVE_STATUSES.includes(
+                status
+            )
+        ){
 
             alert(
                 "Chat is available only during an active ride."
@@ -2136,11 +2370,12 @@ document
                 16
             );
 
-        }else{
-
-            startGPS();
+            return;
 
         }
+
+
+        startGPS();
 
     }
 );
@@ -2177,7 +2412,7 @@ function startGPS(){
     ){
 
         console.warn(
-            "Geolocation not supported."
+            "Geolocation is not supported."
         );
 
         return;
@@ -2185,7 +2420,9 @@ function startGPS(){
     }
 
 
-    if(watchId !== null){
+    if(
+        watchId !== null
+    ){
 
         return;
 
@@ -2195,6 +2432,7 @@ function startGPS(){
     watchId =
         navigator.geolocation.watchPosition(
             updateGPS,
+
             error => {
 
                 console.warn(
@@ -2203,6 +2441,7 @@ function startGPS(){
                 );
 
             },
+
             {
                 enableHighAccuracy:true,
                 maximumAge:3000,
@@ -2256,6 +2495,11 @@ async function updateGPS(position){
     }
 
 
+    /*
+     * Save live rider location only when
+     * the rider has an active ride.
+     */
+
     if(
         currentUser &&
         currentRideId
@@ -2283,10 +2527,37 @@ async function updateGPS(position){
                         lng,
 
                     accuracy:
-                        position.coords.accuracy || null,
+                        Number.isFinite(
+                            Number(
+                                position.coords.accuracy
+                            )
+                        )
+                        ? Number(
+                            position.coords.accuracy
+                        )
+                        : null,
 
                     speed:
-                        position.coords.speed || 0,
+                        Number.isFinite(
+                            Number(
+                                position.coords.speed
+                            )
+                        )
+                        ? Number(
+                            position.coords.speed
+                        )
+                        : 0,
+
+                    heading:
+                        Number.isFinite(
+                            Number(
+                                position.coords.heading
+                            )
+                        )
+                        ? Number(
+                            position.coords.heading
+                        )
+                        : null,
 
                     online:true,
 
@@ -2320,6 +2591,11 @@ async function findActiveRide(uid){
 
     try{
 
+        /*
+         * First use rider.activeRideId.
+         * This is the fastest and safest lookup.
+         */
+
         const riderSnap =
             await getDoc(
                 doc(
@@ -2336,16 +2612,60 @@ async function findActiveRide(uid){
                 riderSnap.data();
 
 
-            if(
-                riderData.activeRideId
-            ){
+            const activeRideId =
+                riderData.activeRideId;
 
-                return riderData.activeRideId;
+
+            if(activeRideId){
+
+                const activeRideSnap =
+                    await getDoc(
+                        doc(
+                            db,
+                            "rides",
+                            activeRideId
+                        )
+                    );
+
+
+                if(
+                    activeRideSnap.exists()
+                ){
+
+                    const activeData =
+                        activeRideSnap.data();
+
+
+                    const activeStatus =
+                        String(
+                            activeData.status ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    if(
+                        ACTIVE_STATUSES.includes(
+                            activeStatus
+                        )
+                    ){
+
+                        return activeRideId;
+
+                    }
+
+                }
 
             }
 
         }
 
+
+        /*
+         * Fallback: find an active ride
+         * belonging to this rider.
+         */
 
         const ridesQuery =
             query(
@@ -2379,31 +2699,40 @@ async function findActiveRide(uid){
 
                 const status =
                     String(
-                        data.status || ""
-                    ).toUpperCase();
-
-
-                const activeStatuses = [
-                    "ACCEPTED",
-                    "ASSIGNED",
-                    "ARRIVING",
-                    "DRIVER_ARRIVING",
-                    "ARRIVED",
-                    "STARTED",
-                    "IN_PROGRESS",
-                    "ONGOING"
-                ];
+                        data.status ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase();
 
 
                 if(
-                    activeStatuses.includes(
+                    !ACTIVE_STATUSES.includes(
                         status
                     )
                 ){
+                    return;
+                }
+
+
+                const timestamp =
+                    data.updatedAt?.toMillis?.() ||
+                    data.createdAt?.toMillis?.() ||
+                    0;
+
+
+                if(
+                    !latestRide ||
+                    timestamp >=
+                    latestRide.timestamp
+                ){
 
                     latestRide = {
-                        id:rideSnap.id,
-                        data:data
+                        id:
+                            rideSnap.id,
+
+                        timestamp:
+                            timestamp
                     };
 
                 }
@@ -2434,7 +2763,9 @@ async function findActiveRide(uid){
 
 function listenRide(rideId){
 
-    if(rideUnsubscribe){
+    if(
+        rideUnsubscribe
+    ){
 
         rideUnsubscribe();
 
@@ -2458,14 +2789,19 @@ function listenRide(rideId){
 
     rideUnsubscribe =
         onSnapshot(
+
             rideRef,
 
             snapshot => {
 
-                if(!snapshot.exists()){
+                if(
+                    !snapshot.exists()
+                ){
 
                     currentRideData =
                         null;
+
+                    clearRideMap();
 
                     noRide.classList.add(
                         "show"
@@ -2476,6 +2812,15 @@ function listenRide(rideId){
 
                     statusPill.innerText =
                         "Ride no longer available";
+
+                    mainAction.style.display =
+                        "none";
+
+                    arrivedBtn.style.display =
+                        "none";
+
+                    cancelBtn.style.display =
+                        "none";
 
                     return;
 
@@ -2563,15 +2908,31 @@ onAuthStateChanged(
 
         if(!rideId){
 
+            currentRideId =
+                null;
+
+            currentRideData =
+                null;
+
             noRide.classList.add(
                 "show"
             );
 
             statusPill.className =
-                "status-pill";
+                "status-pill"
+            ;
 
             statusPill.innerText =
                 "No active ride";
+
+            mainAction.style.display =
+                "none";
+
+            arrivedBtn.style.display =
+                "none";
+
+            cancelBtn.style.display =
+                "none";
 
             return;
 
@@ -2601,18 +2962,20 @@ document
     "click",
     () => {
 
-        if(
-            currentRideData &&
-            [
-                "STARTED",
-                "IN_PROGRESS",
-                "ONGOING"
-            ].includes(
-                String(
-                    currentRideData.status || ""
-                ).toUpperCase()
+        const status =
+            String(
+                currentRideData?.status ||
+                ""
             )
-        ){
+            .trim()
+            .toUpperCase();
+
+
+        if([
+            "STARTED",
+            "IN_PROGRESS",
+            "ONGOING"
+        ].includes(status)){
 
             const leave =
                 confirm(
@@ -2620,8 +2983,9 @@ document
                 );
 
 
-            if(!leave)
+            if(!leave){
                 return;
+            }
 
         }
 
@@ -2650,6 +3014,44 @@ document
 
 
 /* =========================================================
+   CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "beforeunload",
+    () => {
+
+        if(
+            watchId !== null &&
+            navigator.geolocation
+        ){
+
+            navigator.geolocation.clearWatch(
+                watchId
+            );
+
+            watchId =
+                null;
+
+        }
+
+
+        if(
+            rideUnsubscribe
+        ){
+
+            rideUnsubscribe();
+
+            rideUnsubscribe =
+                null;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
    MAP RESIZE
 ========================================================= */
 
@@ -2665,5 +3067,4 @@ setTimeout(
 </script>
 
 </body>
-
-    </html>
+        </html>
