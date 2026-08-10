@@ -11,11 +11,11 @@ const APP_SHELL = [
 "./assets/logo.png",
 "./assets/logo.svg",
 
-"./css/Style.css",
-"./css/Auth.css",
-"./css/Dashboard.css",
-"./css/Responsive.css",
-"./css/Animation.css"
+"./css/style.css",
+"./css/auth.css",
+"./css/dashboard.css",
+"./css/responsive.css",
+"./css/animation.css"
 
 ];
 
