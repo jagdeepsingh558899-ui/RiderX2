@@ -503,11 +503,9 @@
             <i class="fa-solid fa-arrow-left"></i>
         </button>
 
-
         <div class="logo">
             RIDER<span>X</span>
         </div>
-
 
         <button
             id="menuBtn"
@@ -574,7 +572,6 @@
 
     <div class="handle"></div>
 
-
     <div class="panel-title">
 
         <h3>
@@ -590,7 +587,6 @@
 
     </div>
 
-
     <div class="location-info">
 
         <div class="location-line">
@@ -603,7 +599,6 @@
 
         </div>
 
-
         <div
             id="coordinates"
             class="coordinates"
@@ -612,7 +607,6 @@
         </div>
 
     </div>
-
 
     <div class="actions">
 
@@ -624,7 +618,6 @@
             <i class="fa-solid fa-crosshairs"></i>
             Center Map
         </button>
-
 
         <button
             id="requestsBtn"
@@ -686,7 +679,6 @@
 
     /* =====================================================
        FIREBASE
-       Canonical RiderX2 config path
     ===================================================== */
 
     import {
@@ -709,9 +701,6 @@
 
     /* =====================================================
        CONSTANTS
-       IMPORTANT:
-       NO CITY LOCK.
-       RiderX supports India-wide location.
     ===================================================== */
 
     const DEFAULT_MAP_CENTER = [
@@ -721,6 +710,7 @@
 
     const DEFAULT_ZOOM = 5;
 
+    const RIDER_ZOOM = 16;
 
     const LOCATION_WRITE_INTERVAL = 10000;
 
@@ -735,18 +725,17 @@
        MAP
     ===================================================== */
 
-    const map =
-        L.map(
-            "map",
-            {
-                zoomControl: false,
-                attributionControl: true,
-                preferCanvas: true
-            }
-        ).setView(
-            DEFAULT_MAP_CENTER,
-            DEFAULT_ZOOM
-        );
+    const map = L.map(
+        "map",
+        {
+            zoomControl: false,
+            attributionControl: true,
+            preferCanvas: true
+        }
+    ).setView(
+        DEFAULT_MAP_CENTER,
+        DEFAULT_ZOOM
+    );
 
 
     L.tileLayer(
@@ -762,19 +751,18 @@
        RIDER ICON
     ===================================================== */
 
-    const riderIcon =
-        L.divIcon(
-            {
-                className: "",
-                html: `
-                    <div class="rider-marker">
-                        <i class="fa-solid fa-motorcycle"></i>
-                    </div>
-                `,
-                iconSize: [42, 42],
-                iconAnchor: [21, 21]
-            }
-        );
+    const riderIcon = L.divIcon(
+        {
+            className: "",
+            html: `
+                <div class="rider-marker">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+            `,
+            iconSize: [42, 42],
+            iconAnchor: [21, 21]
+        }
+    );
 
 
     /* =====================================================
@@ -801,7 +789,11 @@
 
     let locationWriteInProgress = false;
 
+    let onlineRequestInProgress = false;
+
     let toastTimer = null;
+
+    let authTimeout = null;
 
 
     /* =====================================================
@@ -809,45 +801,25 @@
     ===================================================== */
 
     const statusEl =
-        document.getElementById(
-            "status"
-        );
-
+        document.getElementById("status");
 
     const onlineBtn =
-        document.getElementById(
-            "onlineBtn"
-        );
-
+        document.getElementById("onlineBtn");
 
     const coordinatesEl =
-        document.getElementById(
-            "coordinates"
-        );
-
+        document.getElementById("coordinates");
 
     const gpsBadge =
-        document.getElementById(
-            "gpsBadge"
-        );
-
+        document.getElementById("gpsBadge");
 
     const toastEl =
-        document.getElementById(
-            "toast"
-        );
-
+        document.getElementById("toast");
 
     const loadingEl =
-        document.getElementById(
-            "loading"
-        );
-
+        document.getElementById("loading");
 
     const loadingText =
-        document.getElementById(
-            "loadingText"
-        );
+        document.getElementById("loadingText");
 
 
     /* =====================================================
@@ -859,37 +831,25 @@
         type = ""
     ) {
 
-        clearTimeout(
-            toastTimer
-        );
+        clearTimeout(toastTimer);
 
         toastEl.textContent =
-            String(
-                message || ""
-            );
+            String(message || "");
 
         toastEl.className =
             "toast show";
 
         if (type) {
-
-            toastEl.classList.add(
-                type
-            );
-
+            toastEl.classList.add(type);
         }
 
-        toastTimer =
-            setTimeout(
-                () => {
+        toastTimer = setTimeout(
+            () => {
+                toastEl.classList.remove("show");
+            },
+            3500
+        );
 
-                    toastEl.classList.remove(
-                        "show"
-                    );
-
-                },
-                3500
-            );
     }
 
 
@@ -899,9 +859,7 @@
 
     function hideLoading() {
 
-        loadingEl.classList.add(
-            "hidden"
-        );
+        loadingEl.classList.add("hidden");
 
     }
 
@@ -911,13 +869,13 @@
     ) {
 
         loadingText.textContent =
-            message;
+            String(message || "");
 
     }
 
 
     /* =====================================================
-       STATUS
+       STATUS UI
     ===================================================== */
 
     function setOnlineUI(
@@ -925,9 +883,7 @@
     ) {
 
         online =
-            Boolean(
-                isOnline
-            );
+            Boolean(isOnline);
 
 
         onlineBtn.classList.toggle(
@@ -938,19 +894,16 @@
 
         onlineBtn.setAttribute(
             "aria-pressed",
-            online
-                ? "true"
-                : "false"
+            online ? "true" : "false"
         );
 
 
         if (online) {
 
-            onlineBtn.innerHTML =
-                `
-                    <i class="fa-solid fa-power-off"></i>
-                    Online
-                `;
+            onlineBtn.innerHTML = `
+                <i class="fa-solid fa-power-off"></i>
+                Online
+            `;
 
             statusEl.textContent =
                 "● Online";
@@ -960,11 +913,10 @@
 
         } else {
 
-            onlineBtn.innerHTML =
-                `
-                    <i class="fa-solid fa-power-off"></i>
-                    Go Online
-                `;
+            onlineBtn.innerHTML = `
+                <i class="fa-solid fa-power-off"></i>
+                Go Online
+            `;
 
             statusEl.textContent =
                 "● Offline";
@@ -986,9 +938,7 @@
     ) {
 
         const value =
-            String(
-                role || ""
-            )
+            String(role || "")
                 .trim()
                 .toLowerCase()
                 .replace(
@@ -1004,13 +954,9 @@
                 "partner",
                 "riders",
                 "drivers"
-            ].includes(
-                value
-            )
+            ].includes(value)
         ) {
-
             return "rider";
-
         }
 
 
@@ -1019,22 +965,14 @@
                 "customer",
                 "user",
                 "users"
-            ].includes(
-                value
-            )
+            ].includes(value)
         ) {
-
             return "customer";
-
         }
 
 
-        if (
-            value === "admin"
-        ) {
-
+        if (value === "admin") {
             return "admin";
-
         }
 
 
@@ -1044,7 +982,7 @@
 
 
     /* =====================================================
-       CHECK RIDER ROLE
+       STORED ROLE
     ===================================================== */
 
     function getStoredRole() {
@@ -1058,27 +996,68 @@
             );
 
 
-        return normalizeRole(
-            role
-        );
+        return normalizeRole(role);
 
     }
 
 
     /* =====================================================
-       AUTH REDIRECT
+       AUTH ROLE
+       Firebase custom claims are checked first.
+       Stored role is used as navigation fallback.
     ===================================================== */
 
-    function redirectToLogin() {
+    async function getUserRole(
+        user
+    ) {
 
-        if (window.location.pathname.endsWith(
-            "/auth/login.html"
-        )) {
+        if (!user) {
+            return "";
+        }
 
-            return;
+
+        try {
+
+            const tokenResult =
+                await user.getIdTokenResult();
+
+
+            const claims =
+                tokenResult?.claims || {};
+
+
+            const claimRole =
+                normalizeRole(
+                    claims.role ||
+                    claims.userRole ||
+                    claims.accountRole
+                );
+
+
+            if (claimRole) {
+                return claimRole;
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX role claim check failed:",
+                error
+            );
 
         }
 
+
+        return getStoredRole();
+
+    }
+
+
+    /* =====================================================
+       REDIRECT
+    ===================================================== */
+
+    function redirectToLogin() {
 
         window.location.replace(
             "../auth/login.html"
@@ -1087,8 +1066,43 @@
     }
 
 
+    function redirectByRole(
+        role
+    ) {
+
+        const normalized =
+            normalizeRole(role);
+
+
+        if (normalized === "customer") {
+
+            window.location.replace(
+                "../customer/home.html"
+            );
+
+            return;
+
+        }
+
+
+        if (normalized === "admin") {
+
+            window.location.replace(
+                "../admin/dashboard.html"
+            );
+
+            return;
+
+        }
+
+
+        redirectToLogin();
+
+    }
+
+
     /* =====================================================
-       LOCATION MARKER
+       UPDATE RIDER MARKER
     ===================================================== */
 
     function updateMarker(
@@ -1106,9 +1120,7 @@
                         icon: riderIcon,
                         title: "Your location"
                     }
-                ).addTo(
-                    map
-                );
+                ).addTo(map);
 
         } else {
 
@@ -1119,6 +1131,14 @@
         }
 
 
+        const safeAccuracy =
+            Number.isFinite(
+                Number(accuracy)
+            )
+                ? Number(accuracy)
+                : 5;
+
+
         if (!accuracyCircle) {
 
             accuracyCircle =
@@ -1127,19 +1147,21 @@
                     {
                         radius:
                             Math.max(
-                                accuracy || 0,
+                                safeAccuracy,
                                 5
                             ),
-                        color: "#ffe500",
-                        fillColor: "#ffe500",
-                        fillOpacity: .08,
-                        weight: 1,
+                        color:
+                            "#ffe500",
+                        fillColor:
+                            "#ffe500",
+                        fillOpacity:
+                            .08,
+                        weight:
+                            1,
                         className:
                             "accuracy-circle"
                     }
-                ).addTo(
-                    map
-                );
+                ).addTo(map);
 
         } else {
 
@@ -1149,7 +1171,7 @@
 
             accuracyCircle.setRadius(
                 Math.max(
-                    accuracy || 0,
+                    safeAccuracy,
                     5
                 )
             );
@@ -1161,7 +1183,6 @@
 
     /* =====================================================
        FIRESTORE LOCATION WRITE
-       Throttled to prevent excessive writes.
     ===================================================== */
 
     async function saveLocation(
@@ -1171,20 +1192,15 @@
 
         if (
             !currentUser ||
-            !online
+            !online ||
+            !location
         ) {
-
-            return;
-
+            return false;
         }
 
 
-        if (
-            locationWriteInProgress
-        ) {
-
-            return;
-
+        if (locationWriteInProgress) {
+            return false;
         }
 
 
@@ -1197,9 +1213,7 @@
             now - lastLocationWrite <
             LOCATION_WRITE_INTERVAL
         ) {
-
-            return;
-
+            return false;
         }
 
 
@@ -1235,7 +1249,8 @@
                         serverTimestamp()
                 },
                 {
-                    merge: true
+                    merge:
+                        true
                 }
             );
 
@@ -1244,6 +1259,8 @@
                 Date.now();
 
 
+            return true;
+
         } catch (error) {
 
             console.error(
@@ -1251,13 +1268,7 @@
                 error
             );
 
-
-            /*
-             * Do not force the rider offline merely because
-             * one Firestore write failed.
-             *
-             * GPS and online state remain independent.
-             */
+            return false;
 
         } finally {
 
@@ -1270,7 +1281,7 @@
 
 
     /* =====================================================
-       UPDATE LOCATION
+       UPDATE GPS LOCATION
     ===================================================== */
 
     async function updateLocation(
@@ -1278,9 +1289,7 @@
     ) {
 
         if (!position) {
-
             return;
-
         }
 
 
@@ -1289,12 +1298,10 @@
                 position.coords.latitude
             );
 
-
         const lng =
             Number(
                 position.coords.longitude
             );
-
 
         const accuracy =
             Number(
@@ -1341,19 +1348,32 @@
         gpsBadge.textContent =
             "GPS Active";
 
-
         gpsBadge.style.color =
             "#22c55e";
 
 
-        statusEl.classList.remove(
-            "gps"
-        );
+        if (online) {
+
+            statusEl.textContent =
+                "● Online";
+
+            statusEl.className =
+                "status online";
+
+        } else {
+
+            statusEl.textContent =
+                "● Offline";
+
+            statusEl.className =
+                "status offline";
+
+        }
 
 
         /*
-         * Center only on the first valid GPS fix.
-         * After that the rider can freely move the map.
+         * First GPS fix automatically centers the map.
+         * After that, manually moving the map is respected.
          */
 
         if (!mapCenteredOnUser) {
@@ -1361,12 +1381,12 @@
             mapCenteredOnUser =
                 true;
 
-
             map.setView(
                 [lat, lng],
-                16,
+                RIDER_ZOOM,
                 {
-                    animate: true
+                    animate:
+                        true
                 }
             );
 
@@ -1401,15 +1421,15 @@
         gpsBadge.textContent =
             "GPS Error";
 
-
         gpsBadge.style.color =
             "#ff7777";
 
 
-        if (
-            error?.code ===
-            1
-        ) {
+        const code =
+            Number(error?.code || 0);
+
+
+        if (code === 1) {
 
             coordinatesEl.textContent =
                 "Location permission denied. Enable GPS permission.";
@@ -1419,52 +1439,44 @@
                 "error"
             );
 
-            return;
-
-        }
-
-
-        if (
-            error?.code ===
-            2
-        ) {
+        } else if (code === 2) {
 
             coordinatesEl.textContent =
                 "Current location is unavailable.";
 
-            return;
-
-        }
-
-
-        if (
-            error?.code ===
-            3
-        ) {
+        } else if (code === 3) {
 
             coordinatesEl.textContent =
                 "GPS request timed out. Trying again...";
 
-            return;
+        } else {
+
+            coordinatesEl.textContent =
+                "Unable to get current location.";
 
         }
 
 
-        coordinatesEl.textContent =
-            "Unable to get current location.";
+        if (!online) {
+
+            statusEl.textContent =
+                "● Offline";
+
+            statusEl.className =
+                "status offline";
+
+        }
 
     }
 
 
     /* =====================================================
-       START GPS
+       START GPS WATCH
     ===================================================== */
 
     function startTracking() {
 
-        if (
-            !navigator.geolocation
-        ) {
+        if (!navigator.geolocation) {
 
             showToast(
                 "Location service is not supported on this device.",
@@ -1476,20 +1488,20 @@
         }
 
 
-        if (
-            watchId !== null
-        ) {
+        if (watchId !== null) {
 
             navigator.geolocation.clearWatch(
                 watchId
             );
+
+            watchId =
+                null;
 
         }
 
 
         gpsBadge.textContent =
             "Starting GPS...";
-
 
         gpsBadge.style.color =
             "#ffe500";
@@ -1503,20 +1515,21 @@
             );
 
 
-        return true;
+        return (
+            watchId !== null &&
+            watchId !== undefined
+        );
 
     }
 
 
     /* =====================================================
-       STOP GPS
+       STOP GPS WATCH
     ===================================================== */
 
-    async function stopTracking() {
+    function stopTracking() {
 
-        if (
-            watchId !== null
-        ) {
+        if (watchId !== null) {
 
             navigator.geolocation.clearWatch(
                 watchId
@@ -1531,12 +1544,8 @@
         gpsBadge.textContent =
             "GPS Ready";
 
-
         gpsBadge.style.color =
             "#ffe500";
-
-
-        await setRiderOffline();
 
     }
 
@@ -1545,12 +1554,17 @@
        SET RIDER OFFLINE
     ===================================================== */
 
-    async function setRiderOffline() {
+    async function setRiderOffline(
+        userOverride = null
+    ) {
 
-        if (!currentUser) {
+        const user =
+            userOverride ||
+            currentUser;
 
+
+        if (!user) {
             return;
-
         }
 
 
@@ -1560,15 +1574,21 @@
                 doc(
                     db,
                     "riderLocations",
-                    currentUser.uid
+                    user.uid
                 ),
                 {
-                    online: false,
+                    uid:
+                        user.uid,
+
+                    online:
+                        false,
+
                     updatedAt:
                         serverTimestamp()
                 },
                 {
-                    merge: true
+                    merge:
+                        true
                 }
             );
 
@@ -1585,28 +1605,131 @@
 
 
     /* =====================================================
-       GO ONLINE
+       GET CURRENT GPS FIX
     ===================================================== */
 
-    async function goOnline() {
+    function getCurrentLocation(
+        center = true
+    ) {
 
-        if (!currentUser) {
+        if (!navigator.geolocation) {
 
             showToast(
-                "Please login again.",
+                "Location is not supported on this device.",
                 "error"
             );
-
-            redirectToLogin();
 
             return;
 
         }
 
 
+        statusEl.textContent =
+            "● Locating...";
+
+        statusEl.className =
+            "status gps";
+
+
+        gpsBadge.textContent =
+            "Locating...";
+
+        gpsBadge.style.color =
+            "#ffe500";
+
+
+        navigator.geolocation.getCurrentPosition(
+            async function(position) {
+
+                await updateLocation(
+                    position
+                );
+
+
+                if (
+                    center &&
+                    currentPosition
+                ) {
+
+                    mapCenteredOnUser =
+                        true;
+
+                    map.setView(
+                        [
+                            currentPosition.lat,
+                            currentPosition.lng
+                        ],
+                        RIDER_ZOOM,
+                        {
+                            animate:
+                                true
+                        }
+                    );
+
+                }
+
+
+                if (!online) {
+
+                    statusEl.textContent =
+                        "● Offline";
+
+                    statusEl.className =
+                        "status offline";
+
+                }
+
+            },
+            function(error) {
+
+                locationError(
+                    error
+                );
+
+            },
+            {
+                enableHighAccuracy:
+                    true,
+
+                timeout:
+                    15000,
+
+                maximumAge:
+                    0
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       GO ONLINE
+       A valid GPS fix is required before Firestore
+       marks the rider online.
+    ===================================================== */
+
+    async function goOnline() {
+
         if (
-            !navigator.geolocation
+            onlineRequestInProgress
         ) {
+            return;
+        }
+
+
+        if (!authReady || !currentUser) {
+
+            showToast(
+                "Please wait for RiderX account verification.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!navigator.geolocation) {
 
             showToast(
                 "Location service is required to go online.",
@@ -1618,58 +1741,123 @@
         }
 
 
+        onlineRequestInProgress =
+            true;
+
         onlineBtn.disabled =
             true;
 
 
-        onlineBtn.innerHTML =
-            `
-                <i class="fa-solid fa-spinner fa-spin"></i>
-                Starting...
-            `;
+        onlineBtn.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Locating...
+        `;
 
 
         try {
 
-            const started =
-                startTracking();
+            /*
+             * Require an actual current GPS position.
+             * This prevents a rider from becoming online
+             * without coordinates.
+             */
+
+            const position =
+                await new Promise(
+                    function(resolve, reject) {
+
+                        navigator.geolocation.getCurrentPosition(
+                            resolve,
+                            reject,
+                            {
+                                enableHighAccuracy:
+                                    true,
+
+                                timeout:
+                                    15000,
+
+                                maximumAge:
+                                    0
+                            }
+                        );
+
+                    }
+                );
 
 
-            if (!started) {
+            await updateLocation(
+                position
+            );
+
+
+            if (!currentPosition) {
 
                 throw new Error(
-                    "GPS could not be started."
+                    "GPS position unavailable."
                 );
 
             }
 
 
+            const trackingStarted =
+                startTracking();
+
+
+            if (!trackingStarted) {
+
+                throw new Error(
+                    "GPS tracking could not be started."
+                );
+
+            }
+
+
+            online = true;
+
+
             /*
-             * Mark online immediately.
-             * GPS coordinates are added as soon as a valid fix
-             * arrives.
+             * Save online state together with the latest
+             * known coordinates.
              */
 
-            await setDoc(
-                doc(
-                    db,
-                    "riderLocations",
-                    currentUser.uid
-                ),
-                {
-                    uid:
-                        currentUser.uid,
+            const saved =
+                await setDoc(
+                    doc(
+                        db,
+                        "riderLocations",
+                        currentUser.uid
+                    ),
+                    {
+                        uid:
+                            currentUser.uid,
 
-                    online:
-                        true,
+                        lat:
+                            currentPosition.lat,
 
-                    updatedAt:
-                        serverTimestamp()
-                },
-                {
-                    merge: true
-                }
-            );
+                        lng:
+                            currentPosition.lng,
+
+                        accuracy:
+                            currentPosition.accuracy,
+
+                        online:
+                            true,
+
+                        updatedAt:
+                            serverTimestamp()
+                    },
+                    {
+                        merge:
+                            true
+                    }
+                );
+
+
+            void saved;
+
+
+            lastLocationWrite =
+                Date.now();
 
 
             setOnlineUI(
@@ -1683,15 +1871,6 @@
             );
 
 
-            /*
-             * Ask for an immediate GPS fix as well.
-             */
-
-            getCurrentLocation(
-                false
-            );
-
-
         } catch (error) {
 
             console.error(
@@ -1700,42 +1879,69 @@
             );
 
 
+            online =
+                false;
+
+
+            stopTracking();
+
+
+            await setRiderOffline();
+
+
             setOnlineUI(
                 false
             );
 
 
-            if (
-                watchId !== null
-            ) {
+            const code =
+                Number(error?.code || 0);
 
-                navigator.geolocation.clearWatch(
-                    watchId
+
+            if (code === 1) {
+
+                showToast(
+                    "Location permission is required to go online.",
+                    "error"
                 );
 
-                watchId =
-                    null;
+            } else if (code === 2) {
+
+                showToast(
+                    "Your current location could not be found.",
+                    "error"
+                );
+
+            } else if (code === 3) {
+
+                showToast(
+                    "GPS timed out. Please move to an open area and try again.",
+                    "error"
+                );
+
+            } else {
+
+                showToast(
+                    "Could not go online. Please try again.",
+                    "error"
+                );
 
             }
 
-
-            showToast(
-                "Could not go online. Please try again.",
-                "error"
-            );
-
         } finally {
+
+            onlineRequestInProgress =
+                false;
 
             onlineBtn.disabled =
                 false;
 
+
             if (!online) {
 
-                onlineBtn.innerHTML =
-                    `
-                        <i class="fa-solid fa-power-off"></i>
-                        Go Online
-                    `;
+                setOnlineUI(
+                    false
+                );
 
             }
 
@@ -1750,13 +1956,35 @@
 
     async function goOffline() {
 
+        if (
+            onlineRequestInProgress
+        ) {
+            return;
+        }
+
+
+        onlineRequestInProgress =
+            true;
+
         onlineBtn.disabled =
             true;
 
 
         try {
 
-            await stopTracking();
+            online =
+                false;
+
+
+            stopTracking();
+
+
+            /*
+             * Explicitly synchronize Firestore before
+             * changing the visible UI.
+             */
+
+            await setRiderOffline();
 
 
             setOnlineUI(
@@ -1769,7 +1997,6 @@
                 "success"
             );
 
-
         } catch (error) {
 
             console.error(
@@ -1777,7 +2004,14 @@
                 error
             );
 
+            setOnlineUI(
+                false
+            );
+
         } finally {
+
+            onlineRequestInProgress =
+                false;
 
             onlineBtn.disabled =
                 false;
@@ -1793,7 +2027,7 @@
 
     onlineBtn.addEventListener(
         "click",
-        async function () {
+        async function() {
 
             if (online) {
 
@@ -1810,131 +2044,27 @@
 
 
     /* =====================================================
-       GET CURRENT LOCATION
-    ===================================================== */
-
-    function getCurrentLocation(
-        center = true
-    ) {
-
-        if (
-            !navigator.geolocation
-        ) {
-
-            showToast(
-                "Location is not supported on this device.",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        statusEl.textContent =
-            "● Locating...";
-
-
-        statusEl.className =
-            "status gps";
-
-
-        navigator.geolocation.getCurrentPosition(
-            async function (
-                position
-            ) {
-
-                await updateLocation(
-                    position
-                );
-
-
-                if (
-                    center &&
-                    currentPosition
-                ) {
-
-                    map.setView(
-                        [
-                            currentPosition.lat,
-                            currentPosition.lng
-                        ],
-                        16,
-                        {
-                            animate: true
-                        }
-                    );
-
-                }
-
-
-                if (
-                    !online
-                ) {
-
-                    statusEl.textContent =
-                        "● Offline";
-
-                    statusEl.className =
-                        "status offline";
-
-                }
-
-            },
-            function (
-                error
-            ) {
-
-                locationError(
-                    error
-                );
-
-
-                if (!online) {
-
-                    statusEl.textContent =
-                        "● Offline";
-
-                    statusEl.className =
-                        "status offline";
-
-                }
-
-            },
-            {
-                enableHighAccuracy:
-                    true,
-                timeout:
-                    15000,
-                maximumAge:
-                    0
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       CENTER LOCATION
+       LOCATION / CENTER
     ===================================================== */
 
     function centerLocation() {
 
-        if (
-            currentPosition
-        ) {
+        if (currentPosition) {
+
+            mapCenteredOnUser =
+                true;
 
             map.setView(
                 [
                     currentPosition.lat,
                     currentPosition.lng
                 ],
-                16,
+                RIDER_ZOOM,
                 {
-                    animate: true
+                    animate:
+                        true
                 }
             );
-
 
             return;
 
@@ -1949,9 +2079,7 @@
 
 
     document
-        .getElementById(
-            "locationBtn"
-        )
+        .getElementById("locationBtn")
         .addEventListener(
             "click",
             centerLocation
@@ -1959,9 +2087,7 @@
 
 
     document
-        .getElementById(
-            "centerBtn"
-        )
+        .getElementById("centerBtn")
         .addEventListener(
             "click",
             centerLocation
@@ -1973,12 +2099,10 @@
     ===================================================== */
 
     document
-        .getElementById(
-            "backBtn"
-        )
+        .getElementById("backBtn")
         .addEventListener(
             "click",
-            function () {
+            function() {
 
                 if (
                     document.referrer &&
@@ -2000,12 +2124,10 @@
 
 
     document
-        .getElementById(
-            "menuBtn"
-        )
+        .getElementById("menuBtn")
         .addEventListener(
             "click",
-            function () {
+            function() {
 
                 window.location.href =
                     "menu.html";
@@ -2015,17 +2137,15 @@
 
 
     /*
-     * Canonical RiderX2 rider request screen is rides.html.
-     * Do not redirect to a non-existent requests.html.
+     * Canonical RiderX rider request screen:
+     * rides.html
      */
 
     document
-        .getElementById(
-            "requestsBtn"
-        )
+        .getElementById("requestsBtn")
         .addEventListener(
             "click",
-            function () {
+            function() {
 
                 window.location.href =
                     "rides.html";
@@ -2040,22 +2160,46 @@
 
     onAuthStateChanged(
         auth,
-        async function (
-            user
-        ) {
+        async function(user) {
+
+            if (authTimeout) {
+
+                clearTimeout(
+                    authTimeout
+                );
+
+                authTimeout =
+                    null;
+
+            }
+
 
             if (!user) {
 
+                authReady =
+                    false;
+
                 currentUser =
                     null;
+
+                online =
+                    false;
+
+                stopTracking();
 
                 setOnlineUI(
                     false
                 );
 
-                hideLoading();
+                setLoading(
+                    "Opening RiderX login..."
+                );
 
-                redirectToLogin();
+
+                setTimeout(
+                    redirectToLogin,
+                    100
+                );
 
                 return;
 
@@ -2067,25 +2211,33 @@
 
 
             /*
-             * Rider map must not be used by a customer/admin.
-             *
-             * The stored role is only a client-side navigation
-             * check. Firebase Authentication remains the actual
-             * authentication layer.
+             * Check Firebase custom claim first,
+             * then use existing RiderX stored role.
              */
 
-            const storedRole =
-                getStoredRole();
+            const role =
+                await getUserRole(
+                    user
+                );
 
 
             if (
-                storedRole &&
-                storedRole !== "rider"
+                role &&
+                role !== "rider"
             ) {
 
-                showToast(
-                    "This page is available for Rider / Driver accounts only.",
-                    "error"
+                authReady =
+                    false;
+
+                stopTracking();
+
+                await setRiderOffline(
+                    user
+                );
+
+
+                setOnlineUI(
+                    false
                 );
 
 
@@ -2094,37 +2246,66 @@
                 );
 
 
+                showToast(
+                    "This page is available for Rider / Driver accounts only.",
+                    "error"
+                );
+
+
                 setTimeout(
-                    function () {
+                    function() {
 
-                        if (
-                            storedRole ===
-                            "customer"
-                        ) {
-
-                            window.location.replace(
-                                "../customer/home.html"
-                            );
-
-                        } else if (
-                            storedRole ===
-                            "admin"
-                        ) {
-
-                            window.location.replace(
-                                "../admin/dashboard.html"
-                            );
-
-                        } else {
-
-                            redirectToLogin();
-
-                        }
+                        redirectByRole(
+                            role
+                        );
 
                     },
                     500
                 );
 
+
+                return;
+
+            }
+
+
+            /*
+             * If no role information exists, do not
+             * automatically grant a different role.
+             * The authenticated rider can continue only
+             * when the existing RiderX role flow identifies
+             * this account as a rider.
+             */
+
+            if (!role) {
+
+                authReady =
+                    false;
+
+                setOnlineUI(
+                    false
+                );
+
+                setLoading(
+                    "Checking RiderX rider account..."
+                );
+
+
+                /*
+                 * Preserve the current RiderX auth flow.
+                 * Do not create or invent a role here.
+                 */
+
+                showToast(
+                    "Rider account role could not be verified. Please login again.",
+                    "error"
+                );
+
+
+                setTimeout(
+                    redirectToLogin,
+                    700
+                );
 
                 return;
 
@@ -2144,8 +2325,7 @@
 
 
             /*
-             * Do not automatically put a rider online.
-             * The rider must explicitly tap Go Online.
+             * Never automatically put a rider online.
              */
 
             setOnlineUI(
@@ -2162,15 +2342,38 @@
 
 
     /* =====================================================
+       AUTH TIMEOUT
+       Prevents an endless loading screen if Firebase
+       authentication initialization is interrupted.
+    ===================================================== */
+
+    authTimeout =
+        setTimeout(
+            function() {
+
+                if (!authReady && !currentUser) {
+
+                    hideLoading();
+
+                    showToast(
+                        "RiderX login check timed out. Please login again.",
+                        "error"
+                    );
+
+                }
+
+            },
+            12000
+        );
+
+
+    /* =====================================================
        PAGE VISIBILITY
-       Do NOT automatically set offline when the browser
-       backgrounds the page. Mobile browsers frequently
-       suspend pages temporarily.
     ===================================================== */
 
     document.addEventListener(
         "visibilitychange",
-        function () {
+        function() {
 
             if (
                 document.visibilityState ===
@@ -2178,9 +2381,26 @@
             ) {
 
                 setTimeout(
-                    function () {
+                    function() {
 
                         map.invalidateSize();
+
+
+                        /*
+                         * If rider is online and the browser
+                         * suspended GPS, restart the watcher.
+                         */
+
+                        if (
+                            online &&
+                            authReady &&
+                            currentUser &&
+                            watchId === null
+                        ) {
+
+                            startTracking();
+
+                        }
 
                     },
                     250
@@ -2198,7 +2418,7 @@
 
     window.addEventListener(
         "beforeunload",
-        function () {
+        function() {
 
             if (
                 watchId !== null
@@ -2208,15 +2428,41 @@
                     watchId
                 );
 
+                watchId =
+                    null;
+
             }
 
             /*
-             * Firestore network operations cannot reliably be
-             * awaited during beforeunload.
-             *
-             * Therefore explicit Go Offline is the reliable
-             * state-changing action.
+             * Firestore writes are not reliable during
+             * beforeunload. Explicit "Go Offline" remains
+             * the reliable way to change rider state.
              */
+
+        }
+    );
+
+
+    /* =====================================================
+       PAGE HIDE / MOBILE BACKGROUND
+    ===================================================== */
+
+    window.addEventListener(
+        "pagehide",
+        function() {
+
+            if (
+                watchId !== null
+            ) {
+
+                navigator.geolocation.clearWatch(
+                    watchId
+                );
+
+                watchId =
+                    null;
+
+            }
 
         }
     );
@@ -2228,10 +2474,10 @@
 
     window.addEventListener(
         "resize",
-        function () {
+        function() {
 
             setTimeout(
-                function () {
+                function() {
 
                     map.invalidateSize();
 
@@ -2248,7 +2494,7 @@
     ===================================================== */
 
     setTimeout(
-        function () {
+        function() {
 
             map.invalidateSize();
 
@@ -2267,17 +2513,30 @@
 
 
     /* =====================================================
-       SAFETY
+       GLOBAL RUNTIME ERROR LOGGING
     ===================================================== */
 
     window.addEventListener(
         "error",
-        function (event) {
+        function(event) {
 
             console.error(
                 "RiderX map runtime error:",
                 event.error ||
                 event.message
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "unhandledrejection",
+        function(event) {
+
+            console.error(
+                "RiderX map promise error:",
+                event.reason
             );
 
         }
