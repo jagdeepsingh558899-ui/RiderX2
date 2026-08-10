@@ -1,878 +1,1681 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+>
+
+<meta
+    name="theme-color"
+    content="#ffd400"
+>
+
+<meta
+    name="description"
+    content="RiderX Rider Chat"
+>
 
 <title>RiderX - Chat</title>
 
-<meta name="theme-color" content="#FFD400">
-
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/responsive.css">
 
 <style>
-:root{
-    --yellow:#FFD400;
-    --black:#090909;
-    --dark:#111111;
-    --card:#181818;
-    --border:#292929;
-    --text:#ffffff;
-    --muted:#9a9a9a;
-    --green:#22c55e;
-}
 
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-
-body{
-    background:var(--black);
-    color:var(--text);
-    font-family:Arial,Helvetica,sans-serif;
-    min-height:100vh;
-    overflow:hidden;
-}
-
-.chat-app{
-    height:100vh;
-    height:100dvh;
-    display:flex;
-    flex-direction:column;
-    max-width:650px;
-    margin:auto;
-    background:#0d0d0d;
-}
-
-/* HEADER */
-
-.chat-header{
-    height:70px;
-    min-height:70px;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:10px 14px;
-    background:#111;
-    border-bottom:1px solid var(--border);
-    position:relative;
-    z-index:10;
-}
-
-.back-btn{
-    width:42px;
-    height:42px;
-    border:0;
-    border-radius:50%;
-    background:#1d1d1d;
-    color:white;
-    font-size:25px;
-    cursor:pointer;
-}
-
-.chat-user{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex:1;
-    min-width:0;
-}
-
-.user-avatar{
-    width:43px;
-    height:43px;
-    min-width:43px;
-    border-radius:50%;
-    background:var(--yellow);
-    color:#000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:18px;
-    font-weight:800;
-}
-
-.user-info{
-    min-width:0;
-}
-
-.user-name{
-    font-size:16px;
-    font-weight:700;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.user-status{
-    color:var(--green);
-    font-size:12px;
-    margin-top:3px;
-}
-
-.header-action{
-    width:40px;
-    height:40px;
-    border:0;
-    border-radius:50%;
-    background:#1d1d1d;
-    color:white;
-    font-size:18px;
-    cursor:pointer;
-}
-
-/* MESSAGES */
-
-.chat-messages{
-    flex:1;
-    overflow-y:auto;
-    padding:18px 14px 12px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    background:
-        radial-gradient(circle at top,rgba(255,212,0,.05),transparent 35%),
-        #0d0d0d;
-}
-
-.chat-messages::-webkit-scrollbar{
-    width:4px;
-}
-
-.chat-messages::-webkit-scrollbar-thumb{
-    background:#333;
-    border-radius:10px;
-}
-
-.date-label{
-    align-self:center;
-    background:#1b1b1b;
-    color:#8f8f8f;
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:11px;
-    margin:3px 0 8px;
-}
-
-.message{
-    display:flex;
-    max-width:82%;
-}
-
-.message.rider{
-    align-self:flex-end;
-    justify-content:flex-end;
-}
-
-.message.customer{
-    align-self:flex-start;
-}
-
-.bubble{
-    padding:10px 13px;
-    border-radius:17px;
-    font-size:14px;
-    line-height:1.4;
-    word-break:break-word;
-    position:relative;
-}
-
-.customer .bubble{
-    background:#202020;
-    border-bottom-left-radius:5px;
-    color:#fff;
-}
-
-.rider .bubble{
-    background:var(--yellow);
-    color:#000;
-    border-bottom-right-radius:5px;
-}
-
-.message-time{
-    display:block;
-    font-size:9px;
-    margin-top:4px;
-    opacity:.6;
-    text-align:right;
-}
-
-/* EMPTY */
-
-.empty-chat{
-    margin:auto;
-    text-align:center;
-    color:#777;
-    display:none;
-}
-
-.empty-icon{
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    background:#181818;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:0 auto 12px;
-    font-size:30px;
-}
-
-.empty-chat h3{
-    color:#ddd;
-    margin-bottom:5px;
-    font-size:16px;
-}
-
-.empty-chat p{
-    font-size:12px;
-}
-
-/* TYPING */
-
-.typing{
-    display:none;
-    align-self:flex-start;
-    background:#202020;
-    padding:9px 13px;
-    border-radius:17px;
-}
-
-.typing span{
-    display:inline-block;
-    width:6px;
-    height:6px;
-    background:#888;
-    border-radius:50%;
-    margin:0 2px;
-    animation:typing 1.2s infinite;
-}
-
-.typing span:nth-child(2){
-    animation-delay:.15s;
-}
-
-.typing span:nth-child(3){
-    animation-delay:.3s;
-}
-
-@keyframes typing{
-    0%,60%,100%{transform:translateY(0);opacity:.5}
-    30%{transform:translateY(-4px);opacity:1}
-}
-
-/* INPUT */
-
-.chat-input-area{
-    padding:9px 10px;
-    background:#111;
-    border-top:1px solid var(--border);
-    padding-bottom:calc(9px + env(safe-area-inset-bottom));
-}
-
-.chat-input-row{
-    display:flex;
-    align-items:center;
-    gap:7px;
-}
-
-.attach-btn,
-.send-btn{
-    width:43px;
-    height:43px;
-    min-width:43px;
-    border:0;
-    border-radius:50%;
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.attach-btn{
-    background:#202020;
-    color:#ddd;
-    font-size:20px;
-}
-
-.send-btn{
-    background:var(--yellow);
-    color:#000;
-    font-size:19px;
-    font-weight:bold;
-}
-
-.message-input{
-    flex:1;
-    height:43px;
-    background:#1c1c1c;
-    border:1px solid #2a2a2a;
-    border-radius:23px;
-    color:#fff;
-    outline:none;
-    padding:0 15px;
-    font-size:14px;
-}
-
-.message-input:focus{
-    border-color:var(--yellow);
-}
-
-.message-input::placeholder{
-    color:#777;
-}
-
-/* ATTACHMENT MENU */
-
-.attach-menu{
-    display:none;
-    padding:10px 4px 4px;
-    gap:8px;
-}
-
-.attach-menu.show{
-    display:flex;
-}
-
-.attach-option{
-    flex:1;
-    background:#1d1d1d;
-    border:1px solid #292929;
-    border-radius:12px;
-    color:#ddd;
-    padding:10px 5px;
-    font-size:11px;
-    text-align:center;
-    cursor:pointer;
-}
-
-.attach-option span{
-    display:block;
-    font-size:19px;
-    margin-bottom:4px;
-}
-
-/* CALL SHEET */
-
-.call-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.7);
-    display:none;
-    align-items:flex-end;
-    justify-content:center;
-    z-index:100;
-}
-
-.call-sheet{
-    width:100%;
-    max-width:650px;
-    background:#171717;
-    border-radius:22px 22px 0 0;
-    padding:20px;
-    text-align:center;
-    border-top:1px solid #333;
-}
-
-.call-sheet h3{
-    margin-bottom:7px;
-}
-
-.call-sheet p{
-    color:#888;
-    font-size:13px;
-    margin-bottom:18px;
-}
-
-.call-actions{
-    display:flex;
-    gap:10px;
-}
-
-.call-actions button{
-    flex:1;
-    height:45px;
-    border:0;
-    border-radius:12px;
-    font-weight:700;
-    cursor:pointer;
-}
-
-.cancel-call{
-    background:#292929;
-    color:white;
-}
-
-.confirm-call{
-    background:var(--yellow);
-    color:#000;
-}
-
-/* RESPONSIVE */
-
-@media(max-width:420px){
-    .chat-header{
-        height:64px;
-        min-height:64px;
+    :root {
+        --yellow: #ffd400;
+        --black: #090909;
+        --dark: #111111;
+        --card: #181818;
+        --border: #292929;
+        --text: #ffffff;
+        --muted: #9a9a9a;
+        --green: #22c55e;
+        --danger: #ef4444;
     }
 
-    .message{
-        max-width:88%;
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
 
-    .bubble{
-        font-size:13px;
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        background: var(--black);
     }
-}
+
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow: hidden;
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input {
+        font: inherit;
+    }
+
+    button {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .chat-app {
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        max-width: 650px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #0d0d0d;
+    }
+
+
+    /* =====================================================
+       HEADER
+    ===================================================== */
+
+    .chat-header {
+        position: relative;
+        z-index: 10;
+
+        min-height: 70px;
+        height: 70px;
+
+        display: flex;
+        align-items: center;
+
+        gap: 12px;
+
+        padding:
+            max(10px, env(safe-area-inset-top))
+            14px
+            10px;
+
+        background: #111111;
+
+        border-bottom: 1px solid var(--border);
+    }
+
+    .back-btn,
+    .header-action {
+        width: 42px;
+        height: 42px;
+
+        min-width: 42px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 0;
+        border-radius: 50%;
+
+        background: #1d1d1d;
+        color: #ffffff;
+
+        cursor: pointer;
+
+        transition:
+            background .15s ease,
+            transform .15s ease,
+            color .15s ease;
+    }
+
+    .back-btn {
+        font-size: 27px;
+        line-height: 1;
+    }
+
+    .header-action {
+        font-size: 18px;
+    }
+
+    .back-btn:hover,
+    .header-action:hover {
+        background: #292929;
+        color: var(--yellow);
+    }
+
+    .back-btn:active,
+    .header-action:active {
+        transform: scale(.94);
+    }
+
+    .chat-user {
+        min-width: 0;
+        flex: 1;
+
+        display: flex;
+        align-items: center;
+
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 43px;
+        height: 43px;
+
+        min-width: 43px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 50%;
+
+        background: var(--yellow);
+        color: #000000;
+
+        font-size: 18px;
+        font-weight: 900;
+    }
+
+    .user-info {
+        min-width: 0;
+    }
+
+    .user-name {
+        overflow: hidden;
+
+        color: #ffffff;
+
+        font-size: 16px;
+        font-weight: 700;
+
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .user-status {
+        margin-top: 3px;
+
+        color: var(--green);
+
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+
+    /* =====================================================
+       MESSAGES
+    ===================================================== */
+
+    .chat-messages {
+        position: relative;
+
+        flex: 1;
+
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        display: flex;
+        flex-direction: column;
+
+        gap: 10px;
+
+        padding: 18px 14px 12px;
+
+        background:
+            radial-gradient(
+                circle at top,
+                rgba(255, 212, 0, .05),
+                transparent 35%
+            ),
+            #0d0d0d;
+
+        overscroll-behavior: contain;
+
+        scrollbar-width: thin;
+        scrollbar-color: #333333 transparent;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: #333333;
+        border-radius: 10px;
+    }
+
+    .date-label {
+        align-self: center;
+
+        margin: 3px 0 8px;
+
+        padding: 6px 12px;
+
+        border-radius: 20px;
+
+        background: #1b1b1b;
+        color: #8f8f8f;
+
+        font-size: 11px;
+    }
+
+    .message {
+        max-width: 82%;
+
+        display: flex;
+    }
+
+    .message.customer {
+        align-self: flex-start;
+    }
+
+    .message.rider {
+        align-self: flex-end;
+
+        justify-content: flex-end;
+    }
+
+    .bubble {
+        position: relative;
+
+        padding: 10px 13px;
+
+        border-radius: 17px;
+
+        font-size: 14px;
+        line-height: 1.4;
+
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .customer .bubble {
+        background: #202020;
+        color: #ffffff;
+
+        border-bottom-left-radius: 5px;
+    }
+
+    .rider .bubble {
+        background: var(--yellow);
+        color: #000000;
+
+        border-bottom-right-radius: 5px;
+    }
+
+    .message-time {
+        display: block;
+
+        margin-top: 4px;
+
+        font-size: 9px;
+
+        opacity: .6;
+
+        text-align: right;
+    }
+
+
+    /* =====================================================
+       EMPTY STATE
+    ===================================================== */
+
+    .empty-chat {
+        display: none;
+
+        margin: auto;
+
+        color: #777777;
+
+        text-align: center;
+    }
+
+    .empty-chat.show {
+        display: block;
+    }
+
+    .empty-icon {
+        width: 70px;
+        height: 70px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin: 0 auto 12px;
+
+        border-radius: 50%;
+
+        background: #181818;
+
+        font-size: 30px;
+    }
+
+    .empty-chat h3 {
+        margin-bottom: 5px;
+
+        color: #dddddd;
+
+        font-size: 16px;
+    }
+
+    .empty-chat p {
+        font-size: 12px;
+    }
+
+
+    /* =====================================================
+       TYPING
+    ===================================================== */
+
+    .typing {
+        display: none;
+        align-self: flex-start;
+
+        padding: 9px 13px;
+
+        border-radius: 17px;
+
+        background: #202020;
+    }
+
+    .typing.show {
+        display: block;
+    }
+
+    .typing span {
+        display: inline-block;
+
+        width: 6px;
+        height: 6px;
+
+        margin: 0 2px;
+
+        border-radius: 50%;
+
+        background: #888888;
+
+        animation: typing 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) {
+        animation-delay: .15s;
+    }
+
+    .typing span:nth-child(3) {
+        animation-delay: .3s;
+    }
+
+    @keyframes typing {
+
+        0%,
+        60%,
+        100% {
+            transform: translateY(0);
+            opacity: .5;
+        }
+
+        30% {
+            transform: translateY(-4px);
+            opacity: 1;
+        }
+    }
+
+
+    /* =====================================================
+       INPUT
+    ===================================================== */
+
+    .chat-input-area {
+        padding:
+            9px
+            10px
+            max(9px, env(safe-area-inset-bottom));
+
+        background: #111111;
+
+        border-top: 1px solid var(--border);
+    }
+
+    .chat-input-row {
+        display: flex;
+        align-items: center;
+
+        gap: 7px;
+    }
+
+    .attach-btn,
+    .send-btn {
+        width: 43px;
+        height: 43px;
+
+        min-width: 43px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border: 0;
+        border-radius: 50%;
+
+        cursor: pointer;
+
+        transition:
+            transform .15s ease,
+            background .15s ease;
+    }
+
+    .attach-btn {
+        background: #202020;
+        color: #dddddd;
+
+        font-size: 20px;
+    }
+
+    .send-btn {
+        background: var(--yellow);
+        color: #000000;
+
+        font-size: 19px;
+        font-weight: 900;
+    }
+
+    .attach-btn:hover {
+        background: #292929;
+    }
+
+    .send-btn:hover {
+        background: #ffe14a;
+    }
+
+    .attach-btn:active,
+    .send-btn:active {
+        transform: scale(.93);
+    }
+
+    .message-input {
+        flex: 1;
+
+        width: 100%;
+        height: 43px;
+
+        padding: 0 15px;
+
+        outline: none;
+
+        border: 1px solid #2a2a2a;
+        border-radius: 23px;
+
+        background: #1c1c1c;
+        color: #ffffff;
+
+        font-size: 14px;
+    }
+
+    .message-input:focus {
+        border-color: var(--yellow);
+    }
+
+    .message-input::placeholder {
+        color: #777777;
+    }
+
+
+    /* =====================================================
+       ATTACHMENT MENU
+    ===================================================== */
+
+    .attach-menu {
+        display: none;
+
+        padding: 10px 4px 4px;
+
+        gap: 8px;
+    }
+
+    .attach-menu.show {
+        display: flex;
+    }
+
+    .attach-option {
+        flex: 1;
+
+        padding: 10px 5px;
+
+        border: 1px solid #292929;
+        border-radius: 12px;
+
+        background: #1d1d1d;
+        color: #dddddd;
+
+        font-size: 11px;
+        text-align: center;
+
+        cursor: pointer;
+    }
+
+    .attach-option:hover {
+        border-color: var(--yellow);
+        color: var(--yellow);
+    }
+
+    .attach-option span {
+        display: block;
+
+        margin-bottom: 4px;
+
+        font-size: 19px;
+    }
+
+
+    /* =====================================================
+       CALL SHEET
+    ===================================================== */
+
+    .call-overlay {
+        position: fixed;
+        inset: 0;
+
+        z-index: 100;
+
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+
+        padding:
+            0
+            0
+            env(safe-area-inset-bottom);
+
+        background: rgba(0, 0, 0, .72);
+    }
+
+    .call-overlay.show {
+        display: flex;
+    }
+
+    .call-sheet {
+        width: 100%;
+        max-width: 650px;
+
+        padding: 20px;
+
+        border-top: 1px solid #333333;
+        border-radius: 22px 22px 0 0;
+
+        background: #171717;
+
+        text-align: center;
+    }
+
+    .call-sheet h3 {
+        margin-bottom: 7px;
+
+        color: #ffffff;
+    }
+
+    .call-sheet p {
+        margin-bottom: 18px;
+
+        color: #888888;
+
+        font-size: 13px;
+    }
+
+    .call-actions {
+        display: flex;
+
+        gap: 10px;
+    }
+
+    .call-actions button {
+        flex: 1;
+
+        height: 45px;
+
+        border: 0;
+        border-radius: 12px;
+
+        font-weight: 700;
+
+        cursor: pointer;
+    }
+
+    .cancel-call {
+        background: #292929;
+        color: #ffffff;
+    }
+
+    .confirm-call {
+        background: var(--yellow);
+        color: #000000;
+    }
+
+
+    /* =====================================================
+       RESPONSIVE
+    ===================================================== */
+
+    @media (max-width: 420px) {
+
+        .chat-header {
+            min-height: 64px;
+            height: 64px;
+
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .message {
+            max-width: 88%;
+        }
+
+        .bubble {
+            font-size: 13px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+        }
+
+        .back-btn,
+        .header-action {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+        }
+
+    }
+
 </style>
-</head>
 
-<body>
+</head><body><div class="chat-app"><!-- =====================================================
+     HEADER
+====================================================== -->
 
-<div class="chat-app">
+<header class="chat-header">
 
-    <!-- HEADER -->
-    <header class="chat-header">
+    <button
+        type="button"
+        class="back-btn"
+        id="backButton"
+        aria-label="Back"
+    >
+        ‹
+    </button>
 
-        <button class="back-btn" onclick="goBack()" aria-label="Back">
-            ‹
-        </button>
 
-        <div class="chat-user">
+    <div class="chat-user">
 
-            <div class="user-avatar" id="userAvatar">
-                C
-            </div>
-
-            <div class="user-info">
-                <div class="user-name" id="customerName">
-                    Customer
-                </div>
-
-                <div class="user-status" id="customerStatus">
-                    ● Online
-                </div>
-            </div>
-
+        <div
+            class="user-avatar"
+            id="userAvatar"
+            aria-hidden="true"
+        >
+            C
         </div>
 
-        <button class="header-action" onclick="openCall()" aria-label="Call">
-            ☎
-        </button>
+        <div class="user-info">
 
-    </header>
-
-
-    <!-- MESSAGES -->
-    <main class="chat-messages" id="chatMessages">
-
-        <div class="date-label">
-            Today
-        </div>
-
-        <div class="message customer">
-
-            <div class="bubble">
-
-                Hello Rider 👋
-
-                <span class="message-time">
-                    10:20 AM
-                </span>
-
-            </div>
-
-        </div>
-
-        <div class="message rider">
-
-            <div class="bubble">
-
-                Hello! I'm your RiderX rider. 👍
-
-                <span class="message-time">
-                    10:21 AM
-                </span>
-
-            </div>
-
-        </div>
-
-        <div class="message customer">
-
-            <div class="bubble">
-
-                I'm waiting at the pickup location.
-
-                <span class="message-time">
-                    10:21 AM
-                </span>
-
-            </div>
-
-        </div>
-
-        <div class="message rider">
-
-            <div class="bubble">
-
-                I'm on my way. I'll reach you shortly.
-
-                <span class="message-time">
-                    10:22 AM
-                </span>
-
-            </div>
-
-        </div>
-
-        <div class="typing" id="typingIndicator">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-
-    </main>
-
-
-    <!-- INPUT -->
-    <section class="chat-input-area">
-
-        <div class="attach-menu" id="attachMenu">
-
-            <button class="attach-option" onclick="sendLocation()">
-                <span>📍</span>
-                Location
-            </button>
-
-            <button class="attach-option" onclick="selectImage()">
-                <span>🖼️</span>
-                Photo
-            </button>
-
-            <button class="attach-option" onclick="sendQuickMessage('I am arriving soon.')">
-                <span>⚡</span>
-                Quick
-            </button>
-
-        </div>
-
-        <div class="chat-input-row">
-
-            <button class="attach-btn" onclick="toggleAttach()" aria-label="Attachment">
-                ＋
-            </button>
-
-            <input
-                type="text"
-                id="messageInput"
-                class="message-input"
-                placeholder="Type a message..."
-                autocomplete="off"
-                maxlength="500"
+            <div
+                class="user-name"
+                id="customerName"
             >
+                Customer
+            </div>
 
-            <button class="send-btn" onclick="sendMessage()" aria-label="Send">
-                ➤
-            </button>
-
-        </div>
-
-    </section>
-
-</div>
-
-
-<!-- CALL CONFIRMATION -->
-
-<div class="call-overlay" id="callOverlay">
-
-    <div class="call-sheet">
-
-        <h3>Call Customer?</h3>
-
-        <p>
-            You can contact the customer regarding this ride.
-        </p>
-
-        <div class="call-actions">
-
-            <button class="cancel-call" onclick="closeCall()">
-                Cancel
-            </button>
-
-            <button class="confirm-call" onclick="confirmCall()">
-                Call
-            </button>
+            <div
+                class="user-status"
+                id="customerStatus"
+            >
+                ● Online
+            </div>
 
         </div>
 
     </div>
 
+
+    <button
+        type="button"
+        class="header-action"
+        id="callButton"
+        aria-label="Call customer"
+    >
+        ☎
+    </button>
+
+</header>
+
+
+<!-- =====================================================
+     MESSAGES
+====================================================== -->
+
+<main
+    class="chat-messages"
+    id="chatMessages"
+    aria-live="polite"
+>
+
+    <div class="date-label">
+        Today
+    </div>
+
+
+    <div
+        class="message customer"
+        data-demo-message="true"
+    >
+
+        <div class="bubble">
+
+            Hello Rider 👋
+
+            <span class="message-time">
+                10:20 AM
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="message rider"
+        data-demo-message="true"
+    >
+
+        <div class="bubble">
+
+            Hello! I'm your RiderX rider. 👍
+
+            <span class="message-time">
+                10:21 AM
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="message customer"
+        data-demo-message="true"
+    >
+
+        <div class="bubble">
+
+            I'm waiting at the pickup location.
+
+            <span class="message-time">
+                10:21 AM
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="message rider"
+        data-demo-message="true"
+    >
+
+        <div class="bubble">
+
+            I'm on my way. I'll reach you shortly.
+
+            <span class="message-time">
+                10:22 AM
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="typing"
+        id="typingIndicator"
+        aria-label="Customer is typing"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+
+
+    <div
+        class="empty-chat"
+        id="emptyChat"
+    >
+
+        <div class="empty-icon">
+            💬
+        </div>
+
+        <h3>
+            No messages yet
+        </h3>
+
+        <p>
+            Start a conversation with your customer.
+        </p>
+
+    </div>
+
+</main>
+
+
+<!-- =====================================================
+     INPUT
+====================================================== -->
+
+<section class="chat-input-area">
+
+    <div
+        class="attach-menu"
+        id="attachMenu"
+    >
+
+        <button
+            type="button"
+            class="attach-option"
+            id="locationButton"
+        >
+            <span>📍</span>
+            Location
+        </button>
+
+
+        <button
+            type="button"
+            class="attach-option"
+            id="photoButton"
+        >
+            <span>🖼️</span>
+            Photo
+        </button>
+
+
+        <button
+            type="button"
+            class="attach-option"
+            id="quickButton"
+        >
+            <span>⚡</span>
+            Quick
+        </button>
+
+    </div>
+
+
+    <div class="chat-input-row">
+
+        <button
+            type="button"
+            class="attach-btn"
+            id="attachButton"
+            aria-label="Attachments"
+            aria-expanded="false"
+        >
+            ＋
+        </button>
+
+
+        <input
+            type="text"
+            id="messageInput"
+            class="message-input"
+            placeholder="Type a message..."
+            autocomplete="off"
+            autocapitalize="sentences"
+            maxlength="500"
+            enterkeyhint="send"
+        >
+
+
+        <button
+            type="button"
+            class="send-btn"
+            id="sendButton"
+            aria-label="Send message"
+        >
+            ➤
+        </button>
+
+    </div>
+
+</section>
+
+</div><!-- =====================================================
+     CALL CONFIRMATION
+====================================================== --><div
+    class="call-overlay"
+    id="callOverlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="callTitle"
+><div class="call-sheet">
+
+    <h3 id="callTitle">
+        Call Customer?
+    </h3>
+
+    <p>
+        You can contact the customer regarding this ride.
+    </p>
+
+
+    <div class="call-actions">
+
+        <button
+            type="button"
+            class="cancel-call"
+            id="cancelCallButton"
+        >
+            Cancel
+        </button>
+
+
+        <button
+            type="button"
+            class="confirm-call"
+            id="confirmCallButton"
+        >
+            Call
+        </button>
+
+    </div>
+
 </div>
 
+</div><script>
 
-<script>
-/* ==========================================
+"use strict";
+
+
+/* ============================================================
    RIDERX CHAT
-========================================== */
+   ------------------------------------------------------------
+   UI-first chat controller.
+   Existing Firebase/chat modules can listen to:
+   - riderxMessageSent
+   - riderxCallCustomer
+   ============================================================ */
 
-const input = document.getElementById("messageInput");
-const messages = document.getElementById("chatMessages");
-const attachMenu = document.getElementById("attachMenu");
 
-function scrollToBottom(){
-    setTimeout(() => {
-        messages.scrollTop = messages.scrollHeight;
-    },50);
+const input =
+    document.getElementById("messageInput");
+
+
+const messages =
+    document.getElementById("chatMessages");
+
+
+const attachMenu =
+    document.getElementById("attachMenu");
+
+
+const typingIndicator =
+    document.getElementById("typingIndicator");
+
+
+const attachButton =
+    document.getElementById("attachButton");
+
+
+const callOverlay =
+    document.getElementById("callOverlay");
+
+
+const customerNameElement =
+    document.getElementById("customerName");
+
+
+const userAvatar =
+    document.getElementById("userAvatar");
+
+
+const customerStatus =
+    document.getElementById("customerStatus");
+
+
+const emptyChat =
+    document.getElementById("emptyChat");
+
+
+/* ============================================================
+   HELPERS
+============================================================ */
+
+
+function scrollToBottom() {
+
+    requestAnimationFrame(function () {
+
+        messages.scrollTop =
+            messages.scrollHeight;
+
+    });
+
 }
 
-scrollToBottom();
 
+function getCurrentTime() {
 
-/* BACK */
-
-function goBack(){
-
-    if(history.length > 1){
-        history.back();
-    }else{
-        window.location.href = "home.html";
-    }
-
-}
-
-
-/* SEND MESSAGE */
-
-function sendMessage(){
-
-    const text = input.value.trim();
-
-    if(!text) return;
-
-    addMessage(text,"rider");
-
-    input.value = "";
-
-    attachMenu.classList.remove("show");
-
-    scrollToBottom();
-
-    /*
-      Existing RiderX chat/Firebase logic can hook
-      into this event without changing the UI.
-    */
-
-    document.dispatchEvent(
-        new CustomEvent("riderxMessageSent",{
-            detail:{
-                message:text,
-                sender:"rider",
-                timestamp:Date.now()
-            }
-        })
+    return new Date().toLocaleTimeString(
+        [],
+        {
+            hour: "2-digit",
+            minute: "2-digit"
+        }
     );
 
 }
 
 
-/* ENTER TO SEND */
+function closeAttachmentMenu() {
 
-input.addEventListener("keydown",function(e){
+    attachMenu.classList.remove("show");
 
-    if(e.key === "Enter" && !e.shiftKey){
+    attachButton.setAttribute(
+        "aria-expanded",
+        "false"
+    );
 
-        e.preventDefault();
+}
 
-        sendMessage();
+
+function openAttachmentMenu() {
+
+    attachMenu.classList.add("show");
+
+    attachButton.setAttribute(
+        "aria-expanded",
+        "true"
+    );
+
+}
+
+
+function updateEmptyState() {
+
+    const realMessages =
+        messages.querySelectorAll(
+            ".message"
+        );
+
+    emptyChat.classList.toggle(
+        "show",
+        realMessages.length === 0
+    );
+
+}
+
+
+/* ============================================================
+   BACK
+============================================================ */
+
+
+function goBack() {
+
+    if (
+        window.history.length > 1
+    ) {
+
+        window.history.back();
+
+        return;
 
     }
 
-});
 
-
-/* ADD MESSAGE */
-
-function addMessage(text,type){
-
-    const wrapper = document.createElement("div");
-
-    wrapper.className = "message " + type;
-
-    const bubble = document.createElement("div");
-
-    bubble.className = "bubble";
-
-    const safeText = document.createTextNode(text);
-
-    bubble.appendChild(safeText);
-
-    const time = document.createElement("span");
-
-    time.className = "message-time";
-
-    time.textContent = new Date().toLocaleTimeString([],{
-        hour:"2-digit",
-        minute:"2-digit"
-    });
-
-    bubble.appendChild(time);
-
-    wrapper.appendChild(bubble);
-
-    const typing = document.getElementById("typingIndicator");
-
-    messages.insertBefore(wrapper,typing);
+    window.location.href =
+        "home.html";
 
 }
 
 
-/* ATTACHMENT */
-
-function toggleAttach(){
-
-    attachMenu.classList.toggle("show");
-
-}
+/* ============================================================
+   SEND MESSAGE
+============================================================ */
 
 
-function sendLocation(){
+function sendMessage() {
 
-    attachMenu.classList.remove("show");
+    const text =
+        input.value.trim();
 
-    addMessage("📍 I'm sharing my current location.", "rider");
+
+    if (!text) {
+
+        return;
+
+    }
+
+
+    addMessage(
+        text,
+        "rider"
+    );
+
+
+    input.value = "";
+
+
+    closeAttachmentMenu();
+
 
     scrollToBottom();
 
+
+    document.dispatchEvent(
+        new CustomEvent(
+            "riderxMessageSent",
+            {
+                detail: {
+                    message: text,
+                    sender: "rider",
+                    timestamp: Date.now()
+                }
+            }
+        )
+    );
+
 }
 
 
-function selectImage(){
+/* ============================================================
+   ADD MESSAGE
+============================================================ */
 
-    attachMenu.classList.remove("show");
 
-    const inputFile = document.createElement("input");
+function addMessage(
+    text,
+    type
+) {
 
-    inputFile.type = "file";
-    inputFile.accept = "image/*";
+    if (
+        !text ||
+        (
+            type !== "rider" &&
+            type !== "customer"
+        )
+    ) {
 
-    inputFile.onchange = function(){
+        return;
 
-        if(inputFile.files && inputFile.files.length){
+    }
 
-            addMessage(
-                "🖼️ Photo selected: " + inputFile.files[0].name,
-                "rider"
-            );
 
-            scrollToBottom();
+    const wrapper =
+        document.createElement("div");
+
+
+    wrapper.className =
+        "message " + type;
+
+
+    const bubble =
+        document.createElement("div");
+
+
+    bubble.className =
+        "bubble";
+
+
+    bubble.appendChild(
+        document.createTextNode(text)
+    );
+
+
+    const time =
+        document.createElement("span");
+
+
+    time.className =
+        "message-time";
+
+
+    time.textContent =
+        getCurrentTime();
+
+
+    bubble.appendChild(time);
+
+
+    wrapper.appendChild(bubble);
+
+
+    messages.insertBefore(
+        wrapper,
+        typingIndicator
+    );
+
+
+    updateEmptyState();
+
+
+    return wrapper;
+
+}
+
+
+/* ============================================================
+   ENTER TO SEND
+============================================================ */
+
+
+input.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
 
         }
 
-    };
+    }
+);
 
-    inputFile.click();
+
+/* ============================================================
+   ATTACHMENT
+============================================================ */
+
+
+function toggleAttach() {
+
+    if (
+        attachMenu.classList.contains("show")
+    ) {
+
+        closeAttachmentMenu();
+
+    } else {
+
+        openAttachmentMenu();
+
+    }
 
 }
 
 
-function sendQuickMessage(text){
+function sendLocation() {
 
-    attachMenu.classList.remove("show");
+    closeAttachmentMenu();
 
-    input.value = text;
+
+    addMessage(
+        "📍 I'm sharing my current location.",
+        "rider"
+    );
+
+
+    scrollToBottom();
+
+
+    document.dispatchEvent(
+        new CustomEvent(
+            "riderxLocationShared",
+            {
+                detail: {
+                    timestamp: Date.now()
+                }
+            }
+        )
+    );
+
+}
+
+
+function selectImage() {
+
+    closeAttachmentMenu();
+
+
+    const fileInput =
+        document.createElement("input");
+
+
+    fileInput.type =
+        "file";
+
+
+    fileInput.accept =
+        "image/*";
+
+
+    fileInput.addEventListener(
+        "change",
+        function () {
+
+            if (
+                !fileInput.files ||
+                !fileInput.files.length
+            ) {
+
+                return;
+
+            }
+
+
+            const file =
+                fileInput.files[0];
+
+
+            addMessage(
+                "🖼️ Photo selected: " +
+                file.name,
+                "rider"
+            );
+
+
+            scrollToBottom();
+
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    "riderxPhotoSelected",
+                    {
+                        detail: {
+                            file: file,
+                            name: file.name,
+                            timestamp: Date.now()
+                        }
+                    }
+                )
+            );
+
+        }
+    );
+
+
+    fileInput.click();
+
+}
+
+
+function sendQuickMessage(
+    text
+) {
+
+    if (!text) {
+
+        return;
+
+    }
+
+
+    closeAttachmentMenu();
+
+
+    input.value =
+        text;
+
 
     sendMessage();
 
 }
 
 
-/* CALL */
-
-function openCall(){
-
-    document.getElementById("callOverlay").style.display = "flex";
-
-}
+/* ============================================================
+   CALL
+============================================================ */
 
 
-function closeCall(){
+function openCall() {
 
-    document.getElementById("callOverlay").style.display = "none";
-
-}
-
-
-function confirmCall(){
-
-    closeCall();
-
-    /*
-      If a customer phone number is available from
-      the active ride data, existing RiderX JS can
-      handle the actual call.
-    */
-
-    document.dispatchEvent(
-        new CustomEvent("riderxCallCustomer")
+    callOverlay.classList.add(
+        "show"
     );
 
 }
 
 
-/* CLOSE ATTACHMENT WHEN CLICKING MESSAGE AREA */
+function closeCall() {
 
-messages.addEventListener("click",function(){
-
-    attachMenu.classList.remove("show");
-
-});
-
-
-/* DEMO CUSTOMER NAME FROM URL */
-
-try{
-
-    const params = new URLSearchParams(window.location.search);
-
-    const name = params.get("customer") || params.get("name");
-
-    if(name){
-
-        document.getElementById("customerName").textContent = name;
-
-        document.getElementById("userAvatar").textContent =
-            name.charAt(0).toUpperCase();
-
-    }
-
-}catch(error){
-
-    console.log("Chat params unavailable");
+    callOverlay.classList.remove(
+        "show"
+    );
 
 }
 
 
-/* ESCAPE */
+function confirmCall() {
 
-document.addEventListener("keydown",function(e){
+    closeCall();
 
-    if(e.key === "Escape"){
+
+    /*
+     * Existing RiderX ride/contact logic can
+     * listen for this event and initiate the
+     * real customer phone call.
+     */
+
+    document.dispatchEvent(
+        new CustomEvent(
+            "riderxCallCustomer"
+        )
+    );
+
+}
+
+
+/* ============================================================
+   CLICK EVENTS
+============================================================ */
+
+
+document
+    .getElementById("backButton")
+    .addEventListener(
+        "click",
+        goBack
+    );
+
+
+document
+    .getElementById("sendButton")
+    .addEventListener(
+        "click",
+        sendMessage
+    );
+
+
+attachButton.addEventListener(
+    "click",
+    toggleAttach
+);
+
+
+document
+    .getElementById("locationButton")
+    .addEventListener(
+        "click",
+        sendLocation
+    );
+
+
+document
+    .getElementById("photoButton")
+    .addEventListener(
+        "click",
+        selectImage
+    );
+
+
+document
+    .getElementById("quickButton")
+    .addEventListener(
+        "click",
+        function () {
+
+            sendQuickMessage(
+                "I am arriving soon."
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("callButton")
+    .addEventListener(
+        "click",
+        openCall
+    );
+
+
+document
+    .getElementById("cancelCallButton")
+    .addEventListener(
+        "click",
+        closeCall
+    );
+
+
+document
+    .getElementById("confirmCallButton")
+    .addEventListener(
+        "click",
+        confirmCall
+    );
+
+
+/* ============================================================
+   CLOSE MENUS
+============================================================ */
+
+
+messages.addEventListener(
+    "click",
+    closeAttachmentMenu
+);
+
+
+document.addEventListener(
+    "click",
+    function (event) {
+
+        if (
+            !attachMenu.contains(event.target) &&
+            event.target !== attachButton
+        ) {
+
+            closeAttachmentMenu();
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   ESCAPE
+============================================================ */
+
+
+document.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key !== "Escape"
+        ) {
+
+            return;
+
+        }
+
 
         closeCall();
 
-        attachMenu.classList.remove("show");
+        closeAttachmentMenu();
+
+    }
+);
+
+
+/* ============================================================
+   URL CUSTOMER DATA
+============================================================ */
+
+
+try {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const name =
+        params.get("customer") ||
+        params.get("name");
+
+
+    if (name) {
+
+        const cleanName =
+            name.trim();
+
+
+        if (cleanName) {
+
+            customerNameElement.textContent =
+                cleanName;
+
+
+            userAvatar.textContent =
+                cleanName
+                    .charAt(0)
+                    .toUpperCase();
+
+        }
 
     }
 
-});
 
-</script>
+    const status =
+        params.get("status");
 
-</body>
-</html>
+
+    if (status) {
+
+        customerStatus.textContent =
+            "● " + status;
+
+    }
+
+} catch (error) {
+
+    console.warn(
+        "RiderX chat parameters unavailable."
+    );
+
+}
+
+
+/* ============================================================
+   INITIAL STATE
+============================================================ */
+
+updateEmptyState();
+
+scrollToBottom();
+
+</script></body></html>
