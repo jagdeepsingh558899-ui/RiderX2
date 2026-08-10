@@ -1,30 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!DOCTYPE html><html lang="en">
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX - Ride Status</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <meta name="theme-color" content="#FFD400">
-
-<link rel="stylesheet" href="../css/Style.css">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes"><title>RiderX | Ride Status</title><link rel="stylesheet" href="../css/Style.css">
 <link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
-
-<style>
-
+<link rel="stylesheet" href="../css/Responsive.css"><style>
 :root{
-    --yellow:#FFD400;
+    --yellow:#ffd400;
     --yellow-dark:#d9b500;
-    --bg:#0d0d0d;
-    --card:#191919;
+    --bg:#0b0b0b;
+    --card:#171717;
+    --card2:#1d1d1d;
     --border:#303030;
-    --muted:#777;
+    --muted:#858585;
     --green:#22c55e;
     --red:#ef4444;
+    --blue:#60a5fa;
+    --white:#fff;
 }
 
 *{
@@ -36,16 +30,18 @@
 html,
 body{
     min-height:100%;
-    background:#080808;
+    background:#050505;
 }
 
 body{
-    color:#fff;
+    color:var(--white);
     font-family:Arial,Helvetica,sans-serif;
+    -webkit-font-smoothing:antialiased;
 }
 
 button{
-    font-family:inherit;
+    font:inherit;
+    -webkit-tap-highlight-color:transparent;
 }
 
 button:disabled{
@@ -61,166 +57,173 @@ button:disabled{
     background:var(--bg);
 }
 
-
-/* ==========================================
-   HEADER
-========================================== */
+/* HEADER */
 
 .header{
     position:sticky;
     top:0;
-    z-index:50;
+    z-index:100;
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:11px;
     padding:12px;
     border-bottom:1px solid #252525;
-    background:rgba(10,10,10,.97);
-    backdrop-filter:blur(14px);
+    background:rgba(10,10,10,.96);
+    backdrop-filter:blur(15px);
 }
 
 .back-btn{
-    width:40px;
-    height:40px;
-    min-width:40px;
-    border:1px solid #303030;
+    width:42px;
+    height:42px;
+    min-width:42px;
+    border:1px solid #333;
     border-radius:50%;
     background:#1b1b1b;
     color:#fff;
-    font-size:22px;
+    font-size:25px;
     line-height:1;
     cursor:pointer;
 }
 
+.back-btn:active{
+    transform:scale(.94);
+}
+
 .title-box{
     flex:1;
+    min-width:0;
 }
 
 .title{
-    font-size:12px;
+    font-size:15px;
     font-weight:900;
 }
 
 .subtitle{
     margin-top:3px;
     color:#777;
-    font-size:6px;
+    font-size:10px;
 }
 
-
-/* ==========================================
-   CONTENT
-========================================== */
+/* CONTENT */
 
 .content{
     padding:13px;
-    padding-bottom:40px;
+    padding-bottom:45px;
 }
 
-
-/* ==========================================
-   STATUS HERO
-========================================== */
+/* STATUS */
 
 .status-card{
-    padding:20px 14px;
+    padding:23px 15px;
     border:1px solid #343434;
-    border-radius:19px;
+    border-radius:20px;
     background:
         radial-gradient(
-            circle at 50% 0%,
-            rgba(255,212,0,.13),
-            transparent 48%
+            circle at 50% 0,
+            rgba(255,212,0,.14),
+            transparent 50%
         ),
         var(--card);
     text-align:center;
 }
 
+.status-card.completed{
+    background:
+        radial-gradient(
+            circle at 50% 0,
+            rgba(34,197,94,.12),
+            transparent 50%
+        ),
+        var(--card);
+}
+
+.status-card.cancelled{
+    background:
+        radial-gradient(
+            circle at 50% 0,
+            rgba(239,68,68,.10),
+            transparent 50%
+        ),
+        var(--card);
+}
+
 .status-icon{
     position:relative;
-    width:72px;
-    height:72px;
-    margin:0 auto;
+    width:74px;
+    height:74px;
+    margin:auto;
     display:flex;
     align-items:center;
     justify-content:center;
-    border:1px solid #5b4e00;
+    border:1px solid #665800;
     border-radius:50%;
     background:#282300;
     color:var(--yellow);
-    font-size:27px;
+    font-size:29px;
 }
 
 .status-icon::after{
     content:"";
     position:absolute;
     inset:-7px;
-    border:1px solid rgba(255,212,0,.15);
+    border:1px solid rgba(255,212,0,.18);
     border-radius:50%;
     animation:pulse 2s infinite;
 }
 
 .status-card.completed .status-icon{
-    border-color:#236b3c;
+    border-color:#286d40;
     background:#15301f;
     color:#5be187;
 }
 
 .status-card.cancelled .status-icon{
     border-color:#6b2929;
-    background:#241414;
+    background:#281414;
     color:#ff7070;
 }
 
 @keyframes pulse{
-
     0%{
         transform:scale(.9);
         opacity:.8;
     }
-
     70%{
         transform:scale(1.08);
         opacity:0;
     }
-
     100%{
         transform:scale(1.08);
         opacity:0;
     }
-
 }
 
 .status-title{
-    margin-top:15px;
-    font-size:14px;
+    margin-top:16px;
+    font-size:18px;
     font-weight:900;
 }
 
 .status-text{
-    max-width:310px;
-    margin:7px auto 0;
-    color:#777;
-    font-size:6px;
-    line-height:1.6;
+    max-width:370px;
+    margin:8px auto 0;
+    color:#888;
+    font-size:11px;
+    line-height:1.55;
 }
 
 .status-badge{
     display:inline-flex;
     align-items:center;
     gap:5px;
-    margin-top:11px;
-    padding:6px 10px;
+    margin-top:12px;
+    padding:7px 11px;
     border-radius:20px;
-    background:#15301f;
-    color:#5be187;
-    font-size:5px;
+    background:#302900;
+    color:var(--yellow);
+    font-size:9px;
     font-weight:900;
-}
-
-.status-badge.cancelled{
-    background:#2b1515;
-    color:#ff7070;
 }
 
 .status-badge.completed{
@@ -228,16 +231,18 @@ button:disabled{
     color:#5be187;
 }
 
+.status-badge.cancelled{
+    background:#2b1515;
+    color:#ff7070;
+}
 
-/* ==========================================
-   PROGRESS
-========================================== */
+/* PROGRESS */
 
 .progress-card{
     margin-top:11px;
-    padding:16px 13px;
-    border:1px solid #303030;
-    border-radius:17px;
+    padding:17px 12px;
+    border:1px solid var(--border);
+    border-radius:18px;
     background:var(--card);
 }
 
@@ -263,7 +268,7 @@ button:disabled{
     width:0;
     height:2px;
     background:var(--yellow);
-    transition:.4s;
+    transition:width .4s ease;
 }
 
 .step{
@@ -274,8 +279,8 @@ button:disabled{
 }
 
 .step-dot{
-    width:30px;
-    height:30px;
+    width:31px;
+    height:31px;
     margin:auto;
     display:flex;
     align-items:center;
@@ -284,7 +289,7 @@ button:disabled{
     border-radius:50%;
     background:#171717;
     color:#555;
-    font-size:9px;
+    font-size:10px;
     font-weight:900;
 }
 
@@ -295,21 +300,21 @@ button:disabled{
 }
 
 .step.completed .step-dot{
-    border-color:#22c55e;
+    border-color:var(--green);
     background:#15301f;
     color:#5be187;
 }
 
 .step.cancelled .step-dot{
-    border-color:#ef4444;
+    border-color:var(--red);
     background:#2b1515;
     color:#ff7070;
 }
 
 .step-label{
     margin-top:7px;
-    color:#555;
-    font-size:5px;
+    color:#666;
+    font-size:8px;
     font-weight:800;
 }
 
@@ -319,33 +324,31 @@ button:disabled{
     color:#aaa;
 }
 
-
-/* ==========================================
-   RIDE INFO
-========================================== */
+/* INFO */
 
 .info-card{
     margin-top:11px;
-    padding:14px;
-    border:1px solid #303030;
-    border-radius:17px;
+    padding:15px;
+    border:1px solid var(--border);
+    border-radius:18px;
     background:var(--card);
 }
 
 .section-title{
     margin-bottom:11px;
-    color:#666;
-    font-size:6px;
+    color:#777;
+    font-size:10px;
     font-weight:900;
+    letter-spacing:.5px;
     text-transform:uppercase;
 }
 
 .info-row{
     display:flex;
     justify-content:space-between;
-    gap:10px;
-    padding:7px 0;
-    border-bottom:1px solid #262626;
+    gap:12px;
+    padding:9px 0;
+    border-bottom:1px solid #272727;
 }
 
 .info-row:last-child{
@@ -354,41 +357,38 @@ button:disabled{
 
 .info-label{
     color:#777;
-    font-size:6px;
+    font-size:11px;
 }
 
 .info-value{
     max-width:65%;
     color:#fff;
     text-align:right;
-    font-size:6px;
+    font-size:11px;
     font-weight:800;
     word-break:break-word;
 }
 
-
-/* ==========================================
-   DRIVER
-========================================== */
+/* DRIVER */
 
 .driver{
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:11px;
 }
 
 .driver-avatar{
-    width:44px;
-    height:44px;
-    min-width:44px;
+    width:48px;
+    height:48px;
+    min-width:48px;
     display:flex;
     align-items:center;
     justify-content:center;
     overflow:hidden;
     border-radius:50%;
-    background:#282828;
+    background:#292929;
     color:var(--yellow);
-    font-size:13px;
+    font-size:15px;
     font-weight:900;
 }
 
@@ -408,45 +408,42 @@ button:disabled{
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
-    font-size:8px;
+    font-size:13px;
     font-weight:900;
 }
 
 .driver-meta{
     margin-top:4px;
-    color:#666;
-    font-size:5px;
+    color:#777;
+    font-size:10px;
 }
 
 .rating{
     color:var(--yellow);
-    font-size:7px;
+    font-size:12px;
     font-weight:900;
     white-space:nowrap;
 }
 
-
-/* ==========================================
-   ROUTE
-========================================== */
+/* ROUTE */
 
 .route{
     position:relative;
-    padding-left:25px;
+    padding-left:28px;
 }
 
 .route-line{
     position:absolute;
-    left:7px;
+    left:8px;
     top:10px;
     bottom:10px;
-    width:1px;
-    background:#404040;
+    width:2px;
+    background:#414141;
 }
 
 .location{
     position:relative;
-    padding-bottom:16px;
+    padding-bottom:19px;
 }
 
 .location:last-child{
@@ -455,10 +452,10 @@ button:disabled{
 
 .dot{
     position:absolute;
-    left:-22px;
+    left:-24px;
     top:2px;
-    width:10px;
-    height:10px;
+    width:12px;
+    height:12px;
     border:2px solid #111;
     border-radius:50%;
     background:var(--yellow);
@@ -469,24 +466,22 @@ button:disabled{
 }
 
 .location-label{
-    color:#666;
-    font-size:5px;
+    color:#777;
+    font-size:9px;
     font-weight:900;
+    letter-spacing:.4px;
     text-transform:uppercase;
 }
 
 .location-name{
-    margin-top:4px;
+    margin-top:5px;
     color:#fff;
-    font-size:7px;
+    font-size:12px;
     font-weight:800;
-    line-height:1.4;
+    line-height:1.45;
 }
 
-
-/* ==========================================
-   ACTIONS
-========================================== */
+/* ACTIONS */
 
 .actions{
     display:grid;
@@ -496,12 +491,12 @@ button:disabled{
 }
 
 .action-btn{
-    height:43px;
+    min-height:45px;
     border:1px solid #363636;
-    border-radius:11px;
+    border-radius:12px;
     background:#202020;
     color:#fff;
-    font-size:6px;
+    font-size:10px;
     font-weight:900;
     cursor:pointer;
 }
@@ -525,14 +520,11 @@ button:disabled{
     display:none;
 }
 
-
-/* ==========================================
-   EMPTY
-========================================== */
+/* EMPTY */
 
 .empty{
     display:none;
-    padding:40px 20px;
+    padding:55px 20px;
     text-align:center;
 }
 
@@ -541,59 +533,57 @@ button:disabled{
 }
 
 .empty-icon{
-    font-size:34px;
+    font-size:40px;
 }
 
 .empty-title{
-    margin-top:12px;
-    font-size:11px;
+    margin-top:13px;
+    font-size:16px;
     font-weight:900;
 }
 
 .empty-text{
-    margin-top:6px;
+    max-width:320px;
+    margin:7px auto 0;
     color:#777;
-    font-size:6px;
+    font-size:10px;
     line-height:1.6;
 }
 
 .empty-btn{
     width:100%;
     max-width:300px;
-    height:43px;
-    margin:18px auto 0;
+    height:45px;
+    margin:19px auto 0;
     border:1px solid #756600;
-    border-radius:11px;
+    border-radius:12px;
     background:var(--yellow);
     color:#000;
-    font-size:6px;
+    font-size:10px;
     font-weight:900;
     cursor:pointer;
 }
 
-
-/* ==========================================
-   TOAST
-========================================== */
+/* TOAST */
 
 .toast{
     position:fixed;
     left:50%;
     bottom:25px;
-    z-index:200;
+    z-index:500;
     width:calc(100% - 28px);
     max-width:500px;
-    padding:11px 13px;
+    padding:12px 14px;
     transform:translate(-50%,20px);
-    border:1px solid #333;
-    border-radius:11px;
+    border:1px solid #3a3a3a;
+    border-radius:12px;
     background:#222;
     color:#fff;
     text-align:center;
-    font-size:7px;
+    font-size:11px;
     opacity:0;
     pointer-events:none;
-    transition:.25s;
+    transition:.25s ease;
 }
 
 .toast.show{
@@ -601,495 +591,248 @@ button:disabled{
     transform:translate(-50%,0);
 }
 
-
-/* ==========================================
-   RESPONSIVE
-========================================== */
-
 @media(max-width:420px){
-
     .content{
         padding:10px;
     }
 
     .progress-card{
-        padding-left:8px;
-        padding-right:8px;
+        padding-left:7px;
+        padding-right:7px;
     }
 
     .step-label{
-        font-size:4px;
+        font-size:7px;
     }
 
+    .status-title{
+        font-size:17px;
+    }
 }
-
-</style>
-
-</head>
-
-<body>
-
-<div class="app">
-
-
-    <!-- HEADER -->
-
-    <header class="header">
-
-        <button
-            class="back-btn"
-            id="backBtn"
-            type="button"
-            aria-label="Back"
-        >
-            ‹
-        </button>
-
-        <div class="title-box">
-
-            <div class="title">
-                Ride Status
-            </div>
-
-            <div class="subtitle">
-                Track your RiderX ride
-            </div>
-
-        </div>
-
-    </header>
-
-
-    <main class="content">
-
-
-        <!-- STATUS -->
-
-        <section
-            class="status-card"
-            id="statusCard"
-        >
-
-            <div
-                class="status-icon"
-                id="statusIcon"
-            >
-                🛵
-            </div>
-
-            <div
-                class="status-title"
-                id="statusTitle"
-            >
-                Ride Confirmed
-            </div>
-
-            <div
-                class="status-text"
-                id="statusText"
-            >
-                Your ride is confirmed. Your rider will be with you shortly.
-            </div>
-
-            <div
-                class="status-badge"
-                id="statusBadge"
-            >
-                ● ACCEPTED
-            </div>
-
-        </section>
-
-
-        <!-- PROGRESS -->
-
-        <section class="progress-card">
-
-            <div class="progress">
-
-                <div class="progress-line"></div>
-
-                <div
-                    class="progress-line-active"
-                    id="progressActive"
-                ></div>
-
-
-                <div
-                    class="step"
-                    data-step="1"
-                >
-
-                    <div class="step-dot">
-                        1
-                    </div>
-
-                    <div class="step-label">
-                        Booked
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="step"
-                    data-step="2"
-                >
-
-                    <div class="step-dot">
-                        2
-                    </div>
-
-                    <div class="step-label">
-                        Accepted
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="step"
-                    data-step="3"
-                >
-
-                    <div class="step-dot">
-                        3
-                    </div>
-
-                    <div class="step-label">
-                        Arriving
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="step"
-                    data-step="4"
-                >
-
-                    <div class="step-dot">
-                        4
-                    </div>
-
-                    <div class="step-label">
-                        Started
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="step"
-                    data-step="5"
-                >
-
-                    <div class="step-dot">
-                        5
-                    </div>
-
-                    <div class="step-label">
-                        Complete
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- RIDE INFO -->
-
-        <section class="info-card">
-
-            <div class="section-title">
-                Ride details
-            </div>
-
-            <div class="info-row">
-
-                <span class="info-label">
-                    Ride ID
-                </span>
-
-                <span
-                    class="info-value"
-                    id="rideId"
-                >
-                    —
-                </span>
-
-            </div>
-
-            <div class="info-row">
-
-                <span class="info-label">
-                    Service
-                </span>
-
-                <span
-                    class="info-value"
-                    id="service"
-                >
-                    Bike Taxi
-                </span>
-
-            </div>
-
-            <div class="info-row">
-
-                <span class="info-label">
-                    Estimated fare
-                </span>
-
-                <span
-                    class="info-value"
-                    id="fare"
-                >
-                    —
-                </span>
-
-            </div>
-
-            <div class="info-row">
-
-                <span class="info-label">
-                    Payment
-                </span>
-
-                <span
-                    class="info-value"
-                    id="payment"
-                >
-                    Cash
-                </span>
-
-            </div>
-
-        </section>
-
-
-        <!-- DRIVER -->
-
-        <section
-            class="info-card"
-            id="driverCard"
-        >
-
-            <div class="section-title">
-                Rider
-            </div>
-
-            <div class="driver">
-
-                <div class="driver-avatar">
-
-                    <span id="driverInitial">
-                        R
-                    </span>
-
-                    <img
-                        id="driverPhoto"
-                        alt="Rider"
-                        loading="lazy"
-                    >
-
-                </div>
-
-                <div class="driver-info">
-
-                    <div
-                        class="driver-name"
-                        id="driverName"
-                    >
-                        RiderX Partner
-                    </div>
-
-                    <div
-                        class="driver-meta"
-                        id="driverVehicle"
-                    >
-                        Rider
-                    </div>
-
-                </div>
-
-                <div class="rating">
-                    ★
-                    <span id="driverRating">
-                        —
-                    </span>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ROUTE -->
-
-        <section class="info-card">
-
-            <div class="section-title">
-                Route
-            </div>
-
-            <div class="route">
-
-                <div class="route-line"></div>
-
-
-                <div class="location">
-
-                    <div class="dot"></div>
-
-                    <div class="location-label">
-                        Pickup
-                    </div>
-
-                    <div
-                        class="location-name"
-                        id="pickup"
-                    >
-                        Pickup location
-                    </div>
-
-                </div>
-
-
-                <div class="location destination">
-
-                    <div class="dot"></div>
-
-                    <div class="location-label">
-                        Destination
-                    </div>
-
-                    <div
-                        class="location-name"
-                        id="destination"
-                    >
-                        Destination location
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ACTIONS -->
-
-        <div class="actions">
-
-            <button
-                class="action-btn primary"
-                id="trackBtn"
-                type="button"
-            >
-                📍 TRACK RIDE
-            </button>
-
-            <button
-                class="action-btn"
-                id="chatBtn"
-                type="button"
-            >
-                💬 CHAT
-            </button>
-
-            <button
-                class="action-btn"
-                id="mapBtn"
-                type="button"
-            >
-                🗺️ MAP
-            </button>
-
-            <button
-                class="action-btn danger"
-                id="cancelBtn"
-                type="button"
-            >
-                ✕ CANCEL RIDE
-            </button>
-
-        </div>
-
-
-        <!-- EMPTY -->
-
-        <section
-            class="empty"
-            id="empty"
-        >
-
-            <div class="empty-icon">
-                🚕
-            </div>
-
-            <div class="empty-title">
-                No active ride
-            </div>
-
-            <div class="empty-text">
-                You don't have an active RiderX ride right now.
-            </div>
-
-            <button
-                class="empty-btn"
-                id="homeBtn"
-                type="button"
-            >
-                ← BACK TO HOME
-            </button>
-
-        </section>
-
-    </main>
+</style></head><body><div class="app"><header class="header">
+    <button
+        class="back-btn"
+        id="backBtn"
+        type="button"
+        aria-label="Back"
+    >‹</button><div class="title-box">
+    <div class="title">Ride Status</div>
+    <div class="subtitle">Track your RiderX ride</div>
+</div>
+
+</header><main class="content"><section class="status-card" id="statusCard">
+    <div class="status-icon" id="statusIcon">🛵</div><div class="status-title" id="statusTitle">
+    Ride Confirmed
+</div>
+
+<div class="status-text" id="statusText">
+    Your ride is confirmed. Your rider will be with you shortly.
+</div>
+
+<div class="status-badge" id="statusBadge">
+    ● ACCEPTED
+</div>
+
+</section><section class="progress-card">
+    <div class="progress">    <div class="progress-line"></div>
+    <div class="progress-line-active" id="progressActive"></div>
+
+    <div class="step" data-step="1">
+        <div class="step-dot">1</div>
+        <div class="step-label">Booked</div>
+    </div>
+
+    <div class="step" data-step="2">
+        <div class="step-dot">2</div>
+        <div class="step-label">Accepted</div>
+    </div>
+
+    <div class="step" data-step="3">
+        <div class="step-dot">3</div>
+        <div class="step-label">Arriving</div>
+    </div>
+
+    <div class="step" data-step="4">
+        <div class="step-dot">4</div>
+        <div class="step-label">Started</div>
+    </div>
+
+    <div class="step" data-step="5">
+        <div class="step-dot">5</div>
+        <div class="step-label">Complete</div>
+    </div>
 
 </div>
 
+</section><section class="info-card"><div class="section-title">Ride details</div>
 
-<div
+<div class="info-row">
+    <span class="info-label">Ride ID</span>
+    <span class="info-value" id="rideId">—</span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">Service</span>
+    <span class="info-value" id="service">Bike Taxi</span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">Estimated fare</span>
+    <span class="info-value" id="fare">—</span>
+</div>
+
+<div class="info-row">
+    <span class="info-label">Payment</span>
+    <span class="info-value" id="payment">Cash</span>
+</div>
+
+</section><section class="info-card" id="driverCard"><div class="section-title">Rider</div>
+
+<div class="driver">
+
+    <div class="driver-avatar">
+        <span id="driverInitial">R</span>
+
+        <img
+            id="driverPhoto"
+            alt="Rider"
+            loading="lazy"
+        >
+    </div>
+
+    <div class="driver-info">
+        <div class="driver-name" id="driverName">
+            RiderX Partner
+        </div>
+
+        <div class="driver-meta" id="driverVehicle">
+            Rider
+        </div>
+    </div>
+
+    <div class="rating">
+        ★ <span id="driverRating">—</span>
+    </div>
+
+</div>
+
+</section><section class="info-card"><div class="section-title">Route</div>
+
+<div class="route">
+
+    <div class="route-line"></div>
+
+    <div class="location">
+        <div class="dot"></div>
+
+        <div class="location-label">
+            Pickup
+        </div>
+
+        <div class="location-name" id="pickup">
+            Pickup location
+        </div>
+    </div>
+
+    <div class="location destination">
+        <div class="dot"></div>
+
+        <div class="location-label">
+            Destination
+        </div>
+
+        <div class="location-name" id="destination">
+            Destination location
+        </div>
+    </div>
+
+</div>
+
+</section><div class="actions"><button
+    class="action-btn primary"
+    id="trackBtn"
+    type="button"
+>
+    📍 TRACK RIDE
+</button>
+
+<button
+    class="action-btn"
+    id="chatBtn"
+    type="button"
+>
+    💬 CHAT
+</button>
+
+<button
+    class="action-btn"
+    id="mapBtn"
+    type="button"
+>
+    🗺️ MAP
+</button>
+
+<button
+    class="action-btn danger"
+    id="cancelBtn"
+    type="button"
+>
+    ✕ CANCEL RIDE
+</button>
+
+</div><section class="empty" id="empty"><div class="empty-icon">🚕</div>
+
+<div class="empty-title">
+    No active ride
+</div>
+
+<div class="empty-text">
+    You don't have an active RiderX ride right now.
+</div>
+
+<button
+    class="empty-btn"
+    id="homeBtn"
+    type="button"
+>
+    ← BACK TO HOME
+</button>
+
+</section></main>
+</div><div
     class="toast"
     id="toast"
     role="status"
     aria-live="polite"
-></div>
-
-
-<script>
-
+></div><script>
 /* =========================================================
    RIDERX CUSTOMER — RIDE STATUS
    File: customer/ride-status.html
    ========================================================= */
 
+"use strict";
 
 /* =========================================================
    STATE
 ========================================================= */
 
 let rideData = {};
+let currentStatus = "accepted";
+let currentRideId = "";
 let statusTimer = null;
 let toastTimer = null;
 let storageHandler = null;
-let currentStatus = "accepted";
+let firebaseUnsubscribe = null;
 let initialized = false;
-
+let firebaseStarted = false;
 
 /* =========================================================
-   DEFAULT RIDE
+   DEFAULT
 ========================================================= */
 
 const defaultRide = {
-
     id:"",
     rideId:"",
-
     service:"Bike Taxi",
     type:"Bike Taxi",
 
@@ -1101,9 +844,11 @@ const defaultRide = {
     total:0,
     amount:0,
     price:0,
+    estimatedFare:0,
 
     paymentMethod:"Cash",
     payment:"Cash",
+    paymentType:"Cash",
 
     pickup:"",
     pickupAddress:"",
@@ -1115,6 +860,8 @@ const defaultRide = {
 
     riderName:"RiderX Partner",
     driverName:"",
+    partnerName:"",
+
     riderPhoto:"",
     driverPhoto:"",
     photoURL:"",
@@ -1124,65 +871,245 @@ const defaultRide = {
     vehicleNumber:"",
 
     riderRating:"",
-    driverRating:""
-
+    driverRating:"",
+    rating:""
 };
 
-
 /* =========================================================
-   DOM HELPER
+   DOM
 ========================================================= */
 
 function $(id){
-
     return document.getElementById(id);
-
 }
 
-
 /* =========================================================
-   URL PARAM
+   URL
 ========================================================= */
 
 function getParam(name){
-
     try{
-
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
-
-        return params.get(name);
-
+        return new URLSearchParams(window.location.search).get(name);
     }catch(error){
-
         return null;
-
     }
-
 }
 
-
-/* =========================================================
-   GET RIDE ID
-========================================================= */
-
 function getRideId(){
-
     return String(
         rideData.id ||
         rideData.rideId ||
+        currentRideId ||
         getParam("rideId") ||
         getParam("id") ||
         ""
     ).trim();
-
 }
 
+/* =========================================================
+   STATUS NORMALIZATION
+========================================================= */
+
+function normalizeStatus(status){
+
+    const value = String(status || "")
+        .toLowerCase()
+        .replace(/[_-]/g," ")
+        .replace(/\s+/g," ")
+        .trim();
+
+    if(!value){
+        return "accepted";
+    }
+
+    if(
+        value.includes("cancel") ||
+        value === "cancelled" ||
+        value === "canceled"
+    ){
+        return "cancelled";
+    }
+
+    if(
+        value.includes("complete") ||
+        value.includes("finish") ||
+        value === "done"
+    ){
+        return "completed";
+    }
+
+    if(
+        value.includes("start") ||
+        value.includes("ongoing") ||
+        value.includes("in progress") ||
+        value.includes("on trip") ||
+        value === "trip"
+    ){
+        return "started";
+    }
+
+    if(
+        value.includes("arriv") ||
+        value.includes("on way") ||
+        value.includes("on the way")
+    ){
+        return "arriving";
+    }
+
+    if(
+        value.includes("accept") ||
+        value.includes("confirm") ||
+        value.includes("assign")
+    ){
+        return "accepted";
+    }
+
+    if(
+        value.includes("search") ||
+        value.includes("pending") ||
+        value.includes("request") ||
+        value.includes("finding")
+    ){
+        return "searching";
+    }
+
+    if(
+        value === "booked" ||
+        value === "booking" ||
+        value === "created"
+    ){
+        return "searching";
+    }
+
+    return "accepted";
+}
 
 /* =========================================================
-   LOAD RIDE
+   NUMBER
+========================================================= */
+
+function getNumber(...values){
+
+    for(const value of values){
+
+        if(
+            value === null ||
+            value === undefined ||
+            value === ""
+        ){
+            continue;
+        }
+
+        if(
+            typeof value === "number" &&
+            Number.isFinite(value)
+        ){
+            return value;
+        }
+
+        const cleaned = String(value)
+            .replace(/,/g,"")
+            .replace(/[^0-9.-]/g,"");
+
+        if(!cleaned){
+            continue;
+        }
+
+        const number = Number(cleaned);
+
+        if(Number.isFinite(number)){
+            return number;
+        }
+    }
+
+    return 0;
+}
+
+/* =========================================================
+   TEXT
+========================================================= */
+
+function cleanText(value,fallback){
+
+    if(
+        value === null ||
+        value === undefined
+    ){
+        return fallback;
+    }
+
+    const text = String(value).trim();
+
+    return text || fallback;
+}
+
+/* =========================================================
+   MONEY
+========================================================= */
+
+function formatMoney(value){
+
+    const number = Number(value);
+
+    if(!Number.isFinite(number)){
+        return "0";
+    }
+
+    return Math.round(number).toLocaleString("en-IN");
+}
+
+/* =========================================================
+   INITIAL
+========================================================= */
+
+function getInitial(name){
+
+    return cleanText(name,"R")
+        .charAt(0)
+        .toUpperCase();
+}
+
+/* =========================================================
+   PAYMENT
+========================================================= */
+
+function formatPayment(value){
+
+    if(
+        typeof value === "object" &&
+        value !== null
+    ){
+        value =
+            value.method ||
+            value.type ||
+            value.name ||
+            "Cash";
+    }
+
+    const text = String(value || "Cash").trim();
+    const lower = text.toLowerCase();
+
+    if(lower.includes("cash")){
+        return "Cash";
+    }
+
+    if(lower.includes("wallet")){
+        return "RiderX Wallet";
+    }
+
+    if(lower.includes("upi")){
+        return "UPI";
+    }
+
+    if(lower.includes("online")){
+        return "Online";
+    }
+
+    return text;
+}
+
+/* =========================================================
+   LOAD LOCAL RIDE
 ========================================================= */
 
 function loadRide(){
@@ -1194,36 +1121,17 @@ function loadRide(){
     const urlStatus =
         getParam("status");
 
-
     rideData = {
         ...defaultRide
     };
 
-
     if(urlId){
-
-        rideData.id =
-            urlId;
-
-        rideData.rideId =
-            urlId;
-
+        currentRideId = String(urlId);
+        rideData.id = currentRideId;
+        rideData.rideId = currentRideId;
     }
-
-
-    if(urlStatus){
-
-        rideData.status =
-            urlStatus;
-
-        rideData.rideStatus =
-            urlStatus;
-
-    }
-
 
     const keys = [
-
         "currentRide",
         "activeRide",
         "riderxCurrentRide",
@@ -1231,177 +1139,120 @@ function loadRide(){
         "lastRide",
         "pendingRide",
         "bookingData"
-
     ];
 
-
-    let foundStoredRide = false;
-
+    let found = false;
 
     for(const key of keys){
 
         try{
 
-            const raw =
-                localStorage.getItem(key);
-
+            const raw = localStorage.getItem(key);
 
             if(!raw){
-
                 continue;
-
             }
 
-
-            const data =
-                JSON.parse(raw);
-
+            const data = JSON.parse(raw);
 
             if(
                 !data ||
                 typeof data !== "object" ||
                 Array.isArray(data)
             ){
-
                 continue;
-
             }
 
-
-            const storedId =
-                String(
-                    data.id ||
-                    data.rideId ||
-                    ""
-                ).trim();
-
-
-            /*
-             * If URL contains a ride ID, don't replace
-             * it with a different stored ride.
-             */
+            const storedId = String(
+                data.id ||
+                data.rideId ||
+                ""
+            ).trim();
 
             if(
                 urlId &&
                 storedId &&
                 String(urlId) !== storedId
             ){
-
                 continue;
-
             }
 
-
             rideData = {
-
                 ...rideData,
                 ...data
-
             };
 
-
-            foundStoredRide = true;
-
+            found = true;
             break;
 
         }catch(error){
-
             console.warn(
-                "RiderX ride data read error:",
+                "RiderX local ride read failed:",
                 error
             );
-
         }
-
     }
-
-
-    /*
-     * URL parameters always have priority.
-     */
 
     if(urlId){
-
-        rideData.id =
-            urlId;
-
-        rideData.rideId =
-            urlId;
-
+        rideData.id = String(urlId);
+        rideData.rideId = String(urlId);
     }
-
 
     if(urlStatus){
-
-        rideData.status =
-            urlStatus;
-
+        rideData.status = urlStatus;
+        rideData.rideStatus = urlStatus;
     }
 
+    currentRideId = getRideId();
 
     if(
-        !foundStoredRide &&
+        !found &&
         !urlId &&
         !hasRideInformation()
     ){
-
         showEmpty();
-
         return;
-
     }
 
-
     hideEmpty();
-
     renderRide();
 
+    startFirebaseSync();
 }
 
-
 /* =========================================================
-   CHECK RIDE INFORMATION
+   RIDE EXISTS
 ========================================================= */
 
 function hasRideInformation(){
 
     return Boolean(
-
         rideData.id ||
         rideData.rideId ||
         rideData.pickup ||
         rideData.destination ||
         rideData.fare ||
         rideData.riderName
-
     );
-
 }
 
-
 /* =========================================================
-   RENDER RIDE
+   RENDER
 ========================================================= */
 
 function renderRide(){
 
-    const status =
-        normalizeStatus(
-            rideData.status ||
-            rideData.rideStatus ||
-            rideData.state ||
-            "accepted"
-        );
+    const status = normalizeStatus(
+        rideData.status ||
+        rideData.rideStatus ||
+        rideData.state
+    );
 
-
-    currentStatus =
-        status;
-
+    currentStatus = status;
+    currentRideId = getRideId();
 
     $("rideId").textContent =
-        getRideId() ||
-        "—";
-
+        currentRideId || "—";
 
     $("service").textContent =
         cleanText(
@@ -1410,31 +1261,25 @@ function renderRide(){
             "Bike Taxi"
         );
 
-
-    const fare =
-        getNumber(
-            rideData.fare,
-            rideData.total,
-            rideData.amount,
-            rideData.price,
-            rideData.estimatedFare
-        );
-
+    const fare = getNumber(
+        rideData.fare,
+        rideData.total,
+        rideData.amount,
+        rideData.price,
+        rideData.estimatedFare
+    );
 
     $("fare").textContent =
         fare > 0
             ? "₹" + formatMoney(fare)
             : "—";
 
-
     $("payment").textContent =
         formatPayment(
             rideData.paymentMethod ||
             rideData.payment ||
-            rideData.paymentType ||
-            "Cash"
+            rideData.paymentType
         );
-
 
     $("pickup").textContent =
         cleanText(
@@ -1444,7 +1289,6 @@ function renderRide(){
             "Pickup location"
         );
 
-
     $("destination").textContent =
         cleanText(
             rideData.destination ||
@@ -1453,46 +1297,34 @@ function renderRide(){
             "Destination location"
         );
 
-
     renderDriver();
-
     updateStatus(status);
-
 }
 
-
 /* =========================================================
-   RENDER DRIVER
+   DRIVER
 ========================================================= */
 
 function renderDriver(){
 
-    const name =
-        cleanText(
-            rideData.riderName ||
-            rideData.driverName ||
-            rideData.partnerName ||
-            rideData.name,
-            "RiderX Partner"
-        );
+    const name = cleanText(
+        rideData.riderName ||
+        rideData.driverName ||
+        rideData.partnerName ||
+        rideData.name,
+        "RiderX Partner"
+    );
 
+    $("driverName").textContent = name;
 
-    $("driverName").textContent =
-        name;
+    const vehicle = cleanText(
+        rideData.vehicleNumber ||
+        rideData.vehicle ||
+        rideData.vehicleType,
+        "Rider"
+    );
 
-
-    const vehicle =
-        cleanText(
-            rideData.vehicleNumber ||
-            rideData.vehicle ||
-            rideData.vehicleType,
-            "Rider"
-        );
-
-
-    $("driverVehicle").textContent =
-        vehicle;
-
+    $("driverVehicle").textContent = vehicle;
 
     const rating =
         rideData.riderRating ||
@@ -1500,169 +1332,40 @@ function renderDriver(){
         rideData.rating ||
         "";
 
-
     $("driverRating").textContent =
         rating || "—";
 
+    const photo = cleanText(
+        rideData.riderPhoto ||
+        rideData.driverPhoto ||
+        rideData.photoURL ||
+        rideData.photo,
+        ""
+    );
 
-    const photo =
-        cleanText(
-            rideData.riderPhoto ||
-            rideData.driverPhoto ||
-            rideData.photoURL ||
-            rideData.photo,
-            ""
-        );
-
-
-    const image =
-        $("driverPhoto");
-
-    const initial =
-        $("driverInitial");
-
+    const image = $("driverPhoto");
+    const initial = $("driverInitial");
 
     if(photo){
 
-        image.src =
-            photo;
+        image.src = photo;
+        image.style.display = "block";
+        initial.style.display = "none";
 
-        image.style.display =
-            "block";
-
-        initial.style.display =
-            "none";
+        image.onerror = function(){
+            image.style.display = "none";
+            initial.style.display = "block";
+            initial.textContent = getInitial(name);
+        };
 
     }else{
 
-        image.removeAttribute(
-            "src"
-        );
-
-        image.style.display =
-            "none";
-
-        initial.style.display =
-            "block";
-
-        initial.textContent =
-            getInitial(
-                name
-            );
-
+        image.removeAttribute("src");
+        image.style.display = "none";
+        initial.style.display = "block";
+        initial.textContent = getInitial(name);
     }
-
 }
-
-
-/* =========================================================
-   NORMALIZE STATUS
-========================================================= */
-
-function normalizeStatus(status){
-
-    const value =
-        String(
-            status || ""
-        )
-        .toLowerCase()
-        .replace(
-            /[_-]/g,
-            " "
-        )
-        .replace(
-            /\s+/g,
-            " "
-        )
-        .trim();
-
-
-    if(
-        !value
-    ){
-
-        return "accepted";
-
-    }
-
-
-    if(
-        value.includes("cancel") ||
-        value === "cancelled" ||
-        value === "canceled"
-    ){
-
-        return "cancelled";
-
-    }
-
-
-    if(
-        value.includes("complete") ||
-        value.includes("completed") ||
-        value.includes("finish") ||
-        value === "done"
-    ){
-
-        return "completed";
-
-    }
-
-
-    if(
-        value.includes("start") ||
-        value.includes("started") ||
-        value.includes("ongoing") ||
-        value.includes("in progress") ||
-        value.includes("on trip") ||
-        value === "trip"
-    ){
-
-        return "started";
-
-    }
-
-
-    if(
-        value.includes("arriv") ||
-        value.includes("on way") ||
-        value.includes("on the way")
-    ){
-
-        return "arriving";
-
-    }
-
-
-    if(
-        value.includes("accept") ||
-        value.includes("confirm") ||
-        value.includes("assigned") ||
-        value.includes("accepted")
-    ){
-
-        return "accepted";
-
-    }
-
-
-    if(
-        value.includes("search") ||
-        value.includes("pending") ||
-        value.includes("request") ||
-        value.includes("looking") ||
-        value.includes("finding")
-    ){
-
-        return "searching";
-
-    }
-
-
-    return "accepted";
-
-}
-
 
 /* =========================================================
    STATUS CONFIG
@@ -1670,461 +1373,262 @@ function normalizeStatus(status){
 
 function getStatusConfig(status){
 
-    const config = {
+    const configs = {
 
         searching:{
-
             title:"Finding a rider...",
-
-            text:
-                "We're looking for a nearby RiderX partner.",
-
+            text:"We're looking for a nearby RiderX partner.",
             icon:"🔎",
-
             badge:"● SEARCHING",
-
             step:1
-
         },
 
         accepted:{
-
             title:"Ride accepted",
-
-            text:
-                "Your rider has accepted the ride and is preparing to pick you up.",
-
+            text:"Your rider has accepted the ride and is preparing to pick you up.",
             icon:"🛵",
-
             badge:"● ACCEPTED",
-
             step:2
-
         },
 
         arriving:{
-
             title:"Rider is arriving",
-
-            text:
-                "Your rider is on the way to your pickup location.",
-
+            text:"Your rider is on the way to your pickup location.",
             icon:"📍",
-
             badge:"● ARRIVING",
-
             step:3
-
         },
 
         started:{
-
             title:"Ride in progress",
-
-            text:
-                "Your trip has started. Enjoy your journey with RiderX.",
-
+            text:"Your trip has started. Enjoy your journey with RiderX.",
             icon:"🚕",
-
             badge:"● ON TRIP",
-
             step:4
-
         },
 
         completed:{
-
             title:"Ride completed",
-
-            text:
-                "Your RiderX trip has been completed successfully.",
-
+            text:"Your RiderX trip has been completed successfully.",
             icon:"✓",
-
             badge:"● COMPLETED",
-
             step:5
-
         },
 
         cancelled:{
-
             title:"Ride cancelled",
-
-            text:
-                "This ride has been cancelled.",
-
+            text:"This ride has been cancelled.",
             icon:"✕",
-
             badge:"● CANCELLED",
-
             step:0
-
         }
-
     };
 
-
-    return (
-        config[status] ||
-        config.accepted
-    );
-
+    return configs[status] || configs.accepted;
 }
 
-
 /* =========================================================
-   UPDATE STATUS
+   STATUS UPDATE
 ========================================================= */
 
 function updateStatus(status){
 
-    const normalized =
-        normalizeStatus(status);
+    const normalized = normalizeStatus(status);
+    const config = getStatusConfig(normalized);
 
-
-    currentStatus =
-        normalized;
-
-
-    const config =
-        getStatusConfig(
-            normalized
-        );
-
+    currentStatus = normalized;
 
     $("statusTitle").textContent =
         config.title;
 
-
     $("statusText").textContent =
         config.text;
-
 
     $("statusIcon").textContent =
         config.icon;
 
-
     $("statusBadge").textContent =
         config.badge;
 
-
     $("statusBadge").className =
         "status-badge";
-
-
-    if(normalized === "completed"){
-
-        $("statusBadge").classList.add(
-            "completed"
-        );
-
-    }
-
-
-    if(normalized === "cancelled"){
-
-        $("statusBadge").classList.add(
-            "cancelled"
-        );
-
-    }
-
 
     $("statusCard").classList.remove(
         "completed",
         "cancelled"
     );
 
-
     if(normalized === "completed"){
 
-        $("statusCard").classList.add(
-            "completed"
-        );
-
+        $("statusCard").classList.add("completed");
+        $("statusBadge").classList.add("completed");
     }
-
 
     if(normalized === "cancelled"){
 
-        $("statusCard").classList.add(
-            "cancelled"
-        );
-
+        $("statusCard").classList.add("cancelled");
+        $("statusBadge").classList.add("cancelled");
     }
-
 
     updateProgress(
         config.step,
         normalized
     );
 
-
-    updateActions(
-        normalized
-    );
-
+    updateActions(normalized);
 }
 
-
 /* =========================================================
-   UPDATE PROGRESS
+   PROGRESS
 ========================================================= */
 
-function updateProgress(
-    currentStep,
-    status
-){
+function updateProgress(currentStep,status){
 
     const steps =
-        document.querySelectorAll(
-            ".step"
+        document.querySelectorAll(".step");
+
+    steps.forEach((step,index)=>{
+
+        const number = index + 1;
+        const dot = step.querySelector(".step-dot");
+
+        step.classList.remove(
+            "active",
+            "completed",
+            "cancelled"
         );
 
+        if(status === "cancelled"){
 
-    steps.forEach(
-        (step,index) => {
+            if(number === 1){
 
-            const number =
-                index + 1;
+                step.classList.add("completed");
+                dot.textContent = "✓";
 
+            }else if(number === 2){
 
-            step.classList.remove(
-                "active",
-                "completed",
-                "cancelled"
-            );
-
-
-            const dot =
-                step.querySelector(
-                    ".step-dot"
-                );
-
-
-            if(status === "cancelled"){
-
-                if(number === 1){
-
-                    step.classList.add(
-                        "completed"
-                    );
-
-                    dot.textContent =
-                        "✓";
-
-                }else if(number === 2){
-
-                    step.classList.add(
-                        "cancelled"
-                    );
-
-                    dot.textContent =
-                        "✕";
-
-                }else{
-
-                    dot.textContent =
-                        number;
-
-                }
-
-                return;
-
-            }
-
-
-            if(
-                currentStep === 0
-            ){
-
-                dot.textContent =
-                    number;
-
-                return;
-
-            }
-
-
-            if(
-                number <
-                currentStep
-            ){
-
-                step.classList.add(
-                    "completed"
-                );
-
-                dot.textContent =
-                    "✓";
-
-            }else if(
-                number ===
-                currentStep
-            ){
-
-                step.classList.add(
-                    "active"
-                );
-
-                dot.textContent =
-                    number;
+                step.classList.add("cancelled");
+                dot.textContent = "✕";
 
             }else{
 
-                dot.textContent =
-                    number;
-
+                dot.textContent = number;
             }
 
+            return;
         }
-    );
 
+        if(number < currentStep){
 
-    const active =
-        $("progressActive");
+            step.classList.add("completed");
+            dot.textContent = "✓";
 
+        }else if(number === currentStep){
+
+            step.classList.add("active");
+            dot.textContent = number;
+
+        }else{
+
+            dot.textContent = number;
+        }
+    });
+
+    const active = $("progressActive");
 
     if(
         status === "cancelled" ||
         currentStep <= 1
     ){
-
-        active.style.width =
-            "0%";
-
+        active.style.width = "0%";
         return;
-
     }
 
-
     const percent =
-        (
-            (
-                currentStep - 1
-            ) /
-            4
-        ) * 80;
-
+        ((currentStep - 1) / 4) * 80;
 
     active.style.width =
         Math.max(
             0,
-            Math.min(
-                80,
-                percent
-            )
+            Math.min(80,percent)
         ) + "%";
-
 }
 
-
 /* =========================================================
-   UPDATE ACTIONS
+   ACTIONS
 ========================================================= */
 
 function updateActions(status){
 
-    const track =
-        $("trackBtn");
+    const track = $("trackBtn");
+    const chat = $("chatBtn");
+    const map = $("mapBtn");
+    const cancel = $("cancelBtn");
 
-    const chat =
-        $("chatBtn");
-
-    const map =
-        $("mapBtn");
-
-    const cancel =
-        $("cancelBtn");
-
-
-    const activeRide =
+    const active =
         status === "accepted" ||
         status === "arriving" ||
         status === "started";
 
-
     const searching =
         status === "searching";
-
 
     const finished =
         status === "completed" ||
         status === "cancelled";
-
 
     track.classList.toggle(
         "hidden",
         finished || searching
     );
 
-
     chat.classList.toggle(
         "hidden",
         finished || searching
     );
-
 
     map.classList.toggle(
         "hidden",
         finished
     );
 
-
     cancel.classList.toggle(
         "hidden",
-        !activeRide && !searching
+        !active && !searching
     );
 
-
-    if(searching){
-
-        cancel.textContent =
-            "✕ CANCEL SEARCH";
-
-    }else{
-
-        cancel.textContent =
-            "✕ CANCEL RIDE";
-
-    }
-
+    cancel.textContent =
+        searching
+            ? "✕ CANCEL SEARCH"
+            : "✕ CANCEL RIDE";
 }
 
-
 /* =========================================================
-   OPEN TRACKING
+   NAVIGATION
 ========================================================= */
 
-function openTracking(){
+function navigateTo(page){
 
-    const id =
-        getRideId();
-
+    const id = getRideId();
 
     if(!id){
-
-        showToast(
-            "Ride ID is not available yet."
-        );
-
+        showToast("Ride ID is not available.");
         return;
-
     }
 
-
-    navigateTo(
-        "tracking.html",
-        id
-    );
-
+    window.location.href =
+        page +
+        "?rideId=" +
+        encodeURIComponent(id);
 }
 
+function openTracking(){
+    navigateTo("tracking.html");
+}
 
-/* =========================================================
-   OPEN CHAT
-========================================================= */
+function openMap(){
+    navigateTo("map.html");
+}
 
 function openChat(){
 
@@ -2133,253 +1637,493 @@ function openChat(){
         currentStatus !== "arriving" &&
         currentStatus !== "started"
     ){
-
         showToast(
             "Chat is available after the rider accepts the ride."
         );
-
         return;
-
     }
 
-
-    const id =
-        getRideId();
-
-
-    if(!id){
-
-        showToast(
-            "Ride ID is not available yet."
-        );
-
-        return;
-
-    }
-
-
-    navigateTo(
-        "chat.html",
-        id
-    );
-
+    navigateTo("chat.html");
 }
 
-
 /* =========================================================
-   OPEN MAP
+   LOCAL SAVE
 ========================================================= */
 
-function openMap(){
+function saveRide(){
 
-    const id =
-        getRideId();
+    const payload =
+        JSON.stringify(rideData);
 
+    [
+        "currentRide",
+        "activeRide",
+        "riderxCurrentRide"
+    ].forEach(key=>{
 
-    if(!id){
-
-        showToast(
-            "Ride ID is not available yet."
-        );
-
-        return;
-
-    }
-
-
-    navigateTo(
-        "map.html",
-        id
-    );
-
+        try{
+            localStorage.setItem(
+                key,
+                payload
+            );
+        }catch(error){
+            console.warn(
+                "RiderX local save failed:",
+                error
+            );
+        }
+    });
 }
 
-
 /* =========================================================
-   NAVIGATION
+   CANCEL
 ========================================================= */
 
-function navigateTo(
-    page,
-    rideId
-){
-
-    const query =
-        rideId
-            ? "?rideId=" +
-              encodeURIComponent(
-                  rideId
-              )
-            : "";
-
-
-    window.location.href =
-        page +
-        query;
-
-}
-
-
-/* =========================================================
-   CANCEL RIDE
-========================================================= */
-
-function cancelRide(){
+async function cancelRide(){
 
     if(
         currentStatus === "completed" ||
         currentStatus === "cancelled"
     ){
-
         return;
-
     }
-
 
     const message =
         currentStatus === "searching"
             ? "Are you sure you want to cancel the rider search?"
             : "Are you sure you want to cancel this ride?";
 
-
-    if(
-        !window.confirm(
-            message
-        )
-    ){
-
+    if(!window.confirm(message)){
         return;
-
     }
 
+    const id = getRideId();
 
-    rideData.status =
-        "cancelled";
+    rideData = {
+        ...rideData,
 
-    rideData.rideStatus =
-        "cancelled";
+        status:"cancelled",
+        rideStatus:"cancelled",
+        state:"cancelled",
 
-    rideData.state =
-        "cancelled";
-
-    rideData.cancelledAt =
-        Date.now();
-
+        cancelledAt:Date.now(),
+        cancelledBy:"customer"
+    };
 
     saveRide();
+    updateStatus("cancelled");
 
+    if(id){
+        await updateFirebaseRide(id,{
+            status:"cancelled",
+            rideStatus:"cancelled",
+            state:"cancelled",
+            cancelledAt:Date.now(),
+            cancelledBy:"customer"
+        });
+    }
 
-    updateStatus(
-        "cancelled"
-    );
-
-
-    showToast(
-        "Ride cancelled."
-    );
-
+    showToast("Ride cancelled.");
 }
 
-
 /* =========================================================
-   SAVE RIDE
+   FIREBASE DETECTION
 ========================================================= */
 
-function saveRide(){
+function getFirebaseDatabase(){
 
-    const payload =
-        JSON.stringify(
-            rideData
+    try{
+
+        if(
+            window.firebase &&
+            typeof window.firebase.database === "function"
+        ){
+            return window.firebase.database();
+        }
+
+    }catch(error){
+        console.warn(
+            "Firebase RTDB unavailable:",
+            error
         );
+    }
 
+    return null;
+}
 
-    const keys = [
+function getFirebaseFirestore(){
 
-        "currentRide",
-        "activeRide"
+    try{
 
+        if(
+            window.firebase &&
+            typeof window.firebase.firestore === "function"
+        ){
+            return window.firebase.firestore();
+        }
+
+    }catch(error){
+        console.warn(
+            "Firebase Firestore unavailable:",
+            error
+        );
+    }
+
+    return null;
+}
+
+/* =========================================================
+   FIREBASE SYNC START
+========================================================= */
+
+function startFirebaseSync(){
+
+    if(firebaseStarted){
+        return;
+    }
+
+    const rideId = getRideId();
+
+    if(!rideId){
+        return;
+    }
+
+    firebaseStarted = true;
+
+    startRealtimeDatabaseSync(rideId);
+    startFirestoreSync(rideId);
+}
+
+/* =========================================================
+   FIREBASE RTDB
+========================================================= */
+
+function startRealtimeDatabaseSync(rideId){
+
+    const db = getFirebaseDatabase();
+
+    if(!db){
+        return;
+    }
+
+    const possiblePaths = [
+        "rides/" + rideId,
+        "rideRequests/" + rideId,
+        "bookings/" + rideId
     ];
 
+    let attached = false;
 
-    keys.forEach(
-        key => {
+    for(const path of possiblePaths){
+
+        try{
+
+            const ref = db.ref(path);
+
+            const handler = snapshot => {
+
+                const value = snapshot.val();
+
+                if(
+                    value &&
+                    typeof value === "object"
+                ){
+                    applyRemoteRide(value);
+                }
+            };
+
+            ref.on(
+                "value",
+                handler
+            );
+
+            if(!firebaseUnsubscribe){
+
+                firebaseUnsubscribe = () => {
+
+                    try{
+                        ref.off(
+                            "value",
+                            handler
+                        );
+                    }catch(error){
+                        console.warn(error);
+                    }
+                };
+            }
+
+            attached = true;
+            break;
+
+        }catch(error){
+
+            console.warn(
+                "RiderX RTDB path unavailable:",
+                path,
+                error
+            );
+        }
+    }
+
+    if(!attached){
+        firebaseStarted = false;
+    }
+}
+
+/* =========================================================
+   FIRESTORE SYNC
+========================================================= */
+
+function startFirestoreSync(rideId){
+
+    const firestore =
+        getFirebaseFirestore();
+
+    if(!firestore){
+        return;
+    }
+
+    const paths = [
+        ["rides",rideId],
+        ["rideRequests",rideId],
+        ["bookings",rideId]
+    ];
+
+    for(const [collection,id] of paths){
+
+        try{
+
+            const ref =
+                firestore
+                    .collection(collection)
+                    .doc(id);
+
+            ref.onSnapshot(
+                snapshot => {
+
+                    if(
+                        snapshot.exists
+                    ){
+
+                        const value =
+                            snapshot.data();
+
+                        if(value){
+                            applyRemoteRide(value);
+                        }
+                    }
+                },
+                error => {
+
+                    console.warn(
+                        "RiderX Firestore listener:",
+                        error
+                    );
+                }
+            );
+
+        }catch(error){
+
+            console.warn(
+                "RiderX Firestore path unavailable:",
+                collection,
+                error
+            );
+        }
+    }
+}
+
+/* =========================================================
+   FIREBASE UPDATE
+========================================================= */
+
+async function updateFirebaseRide(
+    rideId,
+    updates
+){
+
+    const db =
+        getFirebaseDatabase();
+
+    if(db){
+
+        const paths = [
+            "rides/" + rideId,
+            "rideRequests/" + rideId,
+            "bookings/" + rideId
+        ];
+
+        for(const path of paths){
 
             try{
 
-                localStorage.setItem(
-                    key,
-                    payload
-                );
+                await db
+                    .ref(path)
+                    .update(updates);
+
+                return true;
 
             }catch(error){
 
                 console.warn(
-                    "RiderX localStorage error:",
+                    "RTDB update failed:",
+                    path,
                     error
                 );
-
             }
-
         }
-    );
+    }
 
+    const firestore =
+        getFirebaseFirestore();
+
+    if(firestore){
+
+        const collections = [
+            "rides",
+            "rideRequests",
+            "bookings"
+        ];
+
+        for(const collection of collections){
+
+            try{
+
+                await firestore
+                    .collection(collection)
+                    .doc(rideId)
+                    .set(
+                        updates,
+                        {
+                            merge:true
+                        }
+                    );
+
+                return true;
+
+            }catch(error){
+
+                console.warn(
+                    "Firestore update failed:",
+                    collection,
+                    error
+                );
+            }
+        }
+    }
+
+    return false;
 }
 
+/* =========================================================
+   REMOTE RIDE
+========================================================= */
+
+function applyRemoteRide(remote){
+
+    if(
+        !remote ||
+        typeof remote !== "object"
+    ){
+        return;
+    }
+
+    const remoteId =
+        String(
+            remote.id ||
+            remote.rideId ||
+            getRideId()
+        ).trim();
+
+    const localId =
+        getRideId();
+
+    if(
+        localId &&
+        remoteId &&
+        localId !== remoteId
+    ){
+        return;
+    }
+
+    const oldStatus =
+        normalizeStatus(
+            rideData.status ||
+            rideData.rideStatus ||
+            rideData.state
+        );
+
+    rideData = {
+        ...rideData,
+        ...remote
+    };
+
+    if(localId){
+
+        rideData.id = localId;
+        rideData.rideId = localId;
+    }
+
+    saveRide();
+    renderRide();
+
+    const newStatus =
+        normalizeStatus(
+            rideData.status ||
+            rideData.rideStatus ||
+            rideData.state
+        );
+
+    if(
+        oldStatus !== newStatus
+    ){
+        showToast(
+            getStatusChangeMessage(
+                newStatus
+            )
+        );
+    }
+}
 
 /* =========================================================
-   SYNC RIDE
+   LOCAL STORAGE SYNC
 ========================================================= */
 
 function syncRideFromStorage(){
 
     const keys = [
-
         "currentRide",
         "activeRide",
         "riderxCurrentRide",
         "rideData",
-        "lastRide"
-
+        "lastRide",
+        "bookingData"
     ];
-
 
     const currentId =
         getRideId();
-
 
     for(const key of keys){
 
         try{
 
             const raw =
-                localStorage.getItem(
-                    key
-                );
-
+                localStorage.getItem(key);
 
             if(!raw){
-
                 continue;
-
             }
 
-
             const latest =
-                JSON.parse(
-                    raw
-                );
-
+                JSON.parse(raw);
 
             if(
                 !latest ||
                 typeof latest !== "object" ||
                 Array.isArray(latest)
             ){
-
                 continue;
-
             }
-
 
             const latestId =
                 String(
@@ -2388,218 +2132,100 @@ function syncRideFromStorage(){
                     ""
                 ).trim();
 
-
-            /*
-             * Never overwrite the currently opened ride
-             * with another ride.
-             */
-
             if(
                 currentId &&
                 latestId &&
                 currentId !== latestId
             ){
-
                 continue;
-
             }
 
-
-            const previousStatus =
-                normalizeStatus(
-                    rideData.status ||
-                    rideData.rideStatus ||
-                    rideData.state
-                );
-
-
-            rideData = {
-
-                ...rideData,
-                ...latest
-
-            };
-
-
-            if(currentId){
-
-                rideData.id =
-                    currentId;
-
-                rideData.rideId =
-                    currentId;
-
-            }
-
-
-            const newStatus =
-                normalizeStatus(
-                    rideData.status ||
-                    rideData.rideStatus ||
-                    rideData.state
-                );
-
-
-            renderRide();
-
-
-            if(
-                previousStatus !==
-                newStatus
-            ){
-
-                showToast(
-                    getStatusChangeMessage(
-                        newStatus
-                    )
-                );
-
-            }
-
-
+            applyRemoteRide(latest);
             return;
 
         }catch(error){
 
             console.warn(
-                "RiderX sync error:",
+                "RiderX storage sync failed:",
                 error
             );
-
         }
-
     }
-
 }
 
-
 /* =========================================================
-   STATUS CHANGE MESSAGE
+   STATUS MESSAGE
 ========================================================= */
 
 function getStatusChangeMessage(status){
 
     const messages = {
-
-        searching:
-            "Searching for a RiderX partner...",
-
-        accepted:
-            "Your ride has been accepted.",
-
-        arriving:
-            "Your rider is on the way.",
-
-        started:
-            "Your ride has started.",
-
-        completed:
-            "Your ride has been completed.",
-
-        cancelled:
-            "Your ride has been cancelled."
-
+        searching:"Searching for a RiderX partner...",
+        accepted:"Your ride has been accepted.",
+        arriving:"Your rider is on the way.",
+        started:"Your ride has started.",
+        completed:"Your ride has been completed.",
+        cancelled:"Your ride has been cancelled."
     };
 
-
-    return (
-        messages[status] ||
-        "Ride status updated."
-    );
-
+    return messages[status] ||
+        "Ride status updated.";
 }
 
-
 /* =========================================================
-   LIVE STATUS SYNC
+   START POLLING
 ========================================================= */
 
 function startStatusSync(){
 
     stopStatusSync();
 
-
     statusTimer =
         setInterval(
-            function(){
-
-                if(
-                    document.hidden
-                ){
-
-                    return;
-
+            ()=>{
+                if(!document.hidden){
+                    syncRideFromStorage();
                 }
-
-
-                syncRideFromStorage();
-
             },
             2500
         );
 
+    storageHandler = event => {
 
-    storageHandler =
-        function(event){
+        const keys = [
+            "currentRide",
+            "activeRide",
+            "riderxCurrentRide",
+            "rideData",
+            "lastRide",
+            "bookingData"
+        ];
 
-            if(
-                !event.key
-            ){
-
-                return;
-
-            }
-
-
-            const rideKeys = [
-
-                "currentRide",
-                "activeRide",
-                "riderxCurrentRide",
-                "rideData",
-                "lastRide"
-
-            ];
-
-
-            if(
-                rideKeys.includes(
-                    event.key
-                )
-            ){
-
-                syncRideFromStorage();
-
-            }
-
-        };
-
+        if(
+            event.key &&
+            keys.includes(event.key)
+        ){
+            syncRideFromStorage();
+        }
+    };
 
     window.addEventListener(
         "storage",
         storageHandler
     );
-
 }
 
-
 /* =========================================================
-   STOP STATUS SYNC
+   STOP SYNC
 ========================================================= */
 
 function stopStatusSync(){
 
     if(statusTimer){
 
-        clearInterval(
-            statusTimer
-        );
-
-        statusTimer =
-            null;
-
+        clearInterval(statusTimer);
+        statusTimer = null;
     }
-
 
     if(storageHandler){
 
@@ -2608,293 +2234,46 @@ function stopStatusSync(){
             storageHandler
         );
 
-        storageHandler =
-            null;
-
+        storageHandler = null;
     }
 
-}
+    if(firebaseUnsubscribe){
 
-
-/* =========================================================
-   PAYMENT FORMAT
-========================================================= */
-
-function formatPayment(value){
-
-    if(
-        typeof value === "object" &&
-        value !== null
-    ){
-
-        value =
-            value.method ||
-            value.type ||
-            value.name ||
-            "Cash";
-
-    }
-
-
-    const text =
-        String(
-            value || "Cash"
-        ).trim();
-
-
-    const lower =
-        text.toLowerCase();
-
-
-    if(
-        lower.includes("cash")
-    ){
-
-        return "Cash";
-
-    }
-
-
-    if(
-        lower.includes("wallet")
-    ){
-
-        return "RiderX Wallet";
-
-    }
-
-
-    if(
-        lower.includes("upi")
-    ){
-
-        return "UPI";
-
-    }
-
-
-    if(
-        lower.includes("online")
-    ){
-
-        return "Online";
-
-    }
-
-
-    return text;
-
-}
-
-
-/* =========================================================
-   NUMBER
-========================================================= */
-
-function getNumber(...values){
-
-    for(
-        const value of values
-    ){
-
-        if(
-            value === null ||
-            value === undefined ||
-            value === ""
-        ){
-
-            continue;
-
+        try{
+            firebaseUnsubscribe();
+        }catch(error){
+            console.warn(error);
         }
 
-
-        if(
-            typeof value === "number" &&
-            Number.isFinite(value)
-        ){
-
-            return value;
-
-        }
-
-
-        const cleaned =
-            String(
-                value
-            )
-            .replace(
-                /,/g,
-                ""
-            )
-            .replace(
-                /[^0-9.-]/g,
-                ""
-            );
-
-
-        if(!cleaned){
-
-            continue;
-
-        }
-
-
-        const number =
-            Number(
-                cleaned
-            );
-
-
-        if(
-            Number.isFinite(
-                number
-            )
-        ){
-
-            return number;
-
-        }
-
+        firebaseUnsubscribe = null;
     }
-
-
-    return 0;
-
 }
 
-
 /* =========================================================
-   MONEY
-========================================================= */
-
-function formatMoney(value){
-
-    const number =
-        Number(
-            value
-        );
-
-
-    if(
-        !Number.isFinite(
-            number
-        )
-    ){
-
-        return "0";
-
-    }
-
-
-    return Math.round(
-        number
-    ).toLocaleString(
-        "en-IN"
-    );
-
-}
-
-
-/* =========================================================
-   TEXT
-========================================================= */
-
-function cleanText(
-    value,
-    fallback
-){
-
-    if(
-        value === null ||
-        value === undefined
-    ){
-
-        return fallback;
-
-    }
-
-
-    const text =
-        String(
-            value
-        ).trim();
-
-
-    return text ||
-        fallback;
-
-}
-
-
-/* =========================================================
-   INITIAL
-========================================================= */
-
-function getInitial(name){
-
-    const text =
-        cleanText(
-            name,
-            "R"
-        );
-
-
-    return text
-        .charAt(0)
-        .toUpperCase();
-
-}
-
-
-/* =========================================================
-   SHOW EMPTY
+   EMPTY
 ========================================================= */
 
 function showEmpty(){
 
-    $("empty").classList.add(
-        "show"
-    );
-
+    $("empty").classList.add("show");
 
     document.querySelectorAll(
-        ".status-card, .progress-card, .info-card, .actions"
-    ).forEach(
-        element => {
-
-            element.style.display =
-                "none";
-
-        }
-    );
-
+        ".status-card,.progress-card,.info-card,.actions"
+    ).forEach(element=>{
+        element.style.display = "none";
+    });
 }
-
-
-/* =========================================================
-   HIDE EMPTY
-========================================================= */
 
 function hideEmpty(){
 
-    $("empty").classList.remove(
-        "show"
-    );
-
+    $("empty").classList.remove("show");
 
     document.querySelectorAll(
-        ".status-card, .progress-card, .info-card, .actions"
-    ).forEach(
-        element => {
-
-            element.style.display =
-                "";
-
-        }
-    );
-
+        ".status-card,.progress-card,.info-card,.actions"
+    ).forEach(element=>{
+        element.style.display = "";
+    });
 }
-
 
 /* =========================================================
    HOME
@@ -2906,9 +2285,7 @@ function goHome(){
 
     window.location.href =
         "home.html";
-
 }
-
 
 /* =========================================================
    BACK
@@ -2925,13 +2302,9 @@ function goBack(){
                 "Your rider search is still active. Go back without cancelling?"
             )
         ){
-
             return;
-
         }
-
     }
-
 
     if(
         document.referrer &&
@@ -2939,17 +2312,11 @@ function goBack(){
             window.location.host
         )
     ){
-
         window.history.back();
-
     }else{
-
         goHome();
-
     }
-
 }
-
 
 /* =========================================================
    TOAST
@@ -2957,38 +2324,26 @@ function goBack(){
 
 function showToast(message){
 
-    const toast =
-        $("toast");
-
+    const toast = $("toast");
 
     toast.textContent =
-        message;
+        cleanText(
+            message,
+            "Something happened."
+        );
 
+    toast.classList.add("show");
 
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
+    clearTimeout(toastTimer);
 
     toastTimer =
         setTimeout(
-            function(){
-
-                toast.classList.remove(
-                    "show"
-                );
-
+            ()=>{
+                toast.classList.remove("show");
             },
-            2500
+            2800
         );
-
 }
-
 
 /* =========================================================
    VISIBILITY
@@ -2996,16 +2351,15 @@ function showToast(message){
 
 function handleVisibility(){
 
-    if(
-        !document.hidden
-    ){
+    if(!document.hidden){
 
         syncRideFromStorage();
 
+        if(!firebaseStarted){
+            startFirebaseSync();
+        }
     }
-
 }
-
 
 /* =========================================================
    INIT
@@ -3014,78 +2368,57 @@ function handleVisibility(){
 function init(){
 
     if(initialized){
-
         return;
-
     }
 
-
-    initialized =
-        true;
-
+    initialized = true;
 
     $("backBtn").addEventListener(
         "click",
         goBack
     );
 
-
     $("trackBtn").addEventListener(
         "click",
         openTracking
     );
-
 
     $("chatBtn").addEventListener(
         "click",
         openChat
     );
 
-
     $("mapBtn").addEventListener(
         "click",
         openMap
     );
-
 
     $("cancelBtn").addEventListener(
         "click",
         cancelRide
     );
 
-
     $("homeBtn").addEventListener(
         "click",
         goHome
     );
-
 
     document.addEventListener(
         "visibilitychange",
         handleVisibility
     );
 
-
     loadRide();
 
-
     if(
-        !document.getElementById(
-            "empty"
-        ).classList.contains(
-            "show"
-        )
+        !$("empty").classList.contains("show")
     ){
-
         startStatusSync();
-
     }
-
 }
 
-
 /* =========================================================
-   PAGE START
+   START
 ========================================================= */
 
 if(
@@ -3095,17 +2428,13 @@ if(
     document.addEventListener(
         "DOMContentLoaded",
         init,
-        {
-            once:true
-        }
+        {once:true}
     );
 
 }else{
 
     init();
-
 }
-
 
 /* =========================================================
    CLEANUP
@@ -3115,9 +2444,5 @@ window.addEventListener(
     "pagehide",
     stopStatusSync
 );
-
-</script>
-
-</body>
-
-</html>
+</script></body>
+          </html>
