@@ -1,9 +1,36 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<meta name="theme-color" content="#000000"><title>RiderX | Notifications</title><link rel="stylesheet" href="../css/style.css"><link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<meta name="theme-color" content="#000000">
+
+<meta
+    name="description"
+    content="RiderX rider notifications"
+>
+
+<title>RiderX | Notifications</title>
+
+<link
+    rel="stylesheet"
+    href="../css/style.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
+
+<style>
+
 :root{
     --yellow:#ffe500;
     --black:#000;
@@ -14,6 +41,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     --muted:#8b8b8b;
     --green:#22c55e;
     --red:#ef4444;
+    --blue:#60a5fa;
+    --orange:#ffb020;
 }
 
 *{
@@ -24,23 +53,32 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     -webkit-tap-highlight-color:transparent;
 }
 
-html,body{
+html,
+body{
+    width:100%;
     min-height:100%;
-    background:var(--black);
-    color:var(--white);
+    background:#000;
+    color:#fff;
 }
 
 body{
-    padding-bottom:30px;
+    min-height:100vh;
+    padding-bottom:
+        max(25px,env(safe-area-inset-bottom));
 }
 
-/* HEADER */
+
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header{
     position:sticky;
     top:0;
     z-index:100;
-    height:68px;
+
+    min-height:68px;
+
     padding:
         max(10px,env(safe-area-inset-top))
         14px
@@ -50,13 +88,19 @@ body{
     align-items:center;
     gap:12px;
 
-    background:rgba(0,0,0,.96);
+    background:rgba(0,0,0,.97);
+
     border-bottom:1px solid #292929;
+
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
 }
 
-.back-btn{
+.back-btn,
+.header-icon{
     width:42px;
     height:42px;
+    min-width:42px;
 
     border:0;
     border-radius:50%;
@@ -69,47 +113,54 @@ body{
     justify-content:center;
 
     font-size:17px;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease;
+}
+
+.back-btn:active,
+.header-icon:active{
+    transform:scale(.91);
 }
 
 .header-title{
     flex:1;
+    min-width:0;
 }
 
 .header-title h1{
     font-size:19px;
     font-weight:800;
+    line-height:1.1;
 }
 
 .header-title p{
-    margin-top:3px;
+    margin-top:4px;
     color:#777;
     font-size:10px;
 }
 
 .header-icon{
-    width:42px;
-    height:42px;
-
-    border:0;
-    border-radius:50%;
-
-    background:#171717;
-    color:var(--yellow);
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
     position:relative;
+    color:var(--yellow);
 }
+
+
+/* =========================================================
+   UNREAD BADGE
+========================================================= */
 
 .unread-badge{
     position:absolute;
-    top:-2px;
-    right:-2px;
 
-    min-width:17px;
-    height:17px;
+    top:-3px;
+    right:-3px;
+
+    min-width:18px;
+    height:18px;
 
     padding:0 4px;
 
@@ -128,7 +179,10 @@ body{
     border:2px solid #000;
 }
 
-/* ACTIONS */
+
+/* =========================================================
+   ACTIONS
+========================================================= */
 
 .actions{
     display:flex;
@@ -150,6 +204,16 @@ body{
 
     font-size:11px;
     font-weight:700;
+
+    cursor:pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease;
+}
+
+.action-btn:active{
+    transform:scale(.97);
 }
 
 .action-btn i{
@@ -164,7 +228,15 @@ body{
     color:#ff6b6b;
 }
 
-/* NOTIFICATIONS */
+.action-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
 
 .notifications{
     padding:0 14px;
@@ -174,6 +246,8 @@ body{
     position:relative;
 
     display:flex;
+    align-items:flex-start;
+
     gap:12px;
 
     padding:14px;
@@ -185,17 +259,25 @@ body{
     border:1px solid #242424;
     border-radius:17px;
 
-    transition:.2s ease;
+    transition:
+        transform .18s ease,
+        border-color .18s ease,
+        background .18s ease;
 }
 
 .notification.unread{
-    border-color:rgba(255,229,0,.28);
+    border-color:rgba(255,229,0,.30);
     background:#171700;
 }
 
 .notification:active{
     transform:scale(.985);
 }
+
+
+/* =========================================================
+   NOTIFICATION ICON
+========================================================= */
 
 .icon{
     width:43px;
@@ -219,7 +301,7 @@ body{
 }
 
 .icon.warning{
-    color:#ffb020;
+    color:var(--orange);
 }
 
 .icon.danger{
@@ -227,8 +309,13 @@ body{
 }
 
 .icon.wallet{
-    color:#60a5fa;
+    color:var(--blue);
 }
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
 
 .content{
     flex:1;
@@ -243,6 +330,8 @@ body{
     display:flex;
     align-items:center;
     gap:7px;
+
+    line-height:1.3;
 }
 
 .notification-body{
@@ -267,6 +356,8 @@ body{
     width:7px;
     height:7px;
 
+    min-width:7px;
+
     border-radius:50%;
 
     background:var(--yellow);
@@ -274,13 +365,19 @@ body{
     display:none;
 }
 
-.unread .dot{
+.notification.unread .dot{
     display:inline-block;
 }
+
+
+/* =========================================================
+   DELETE BUTTON
+========================================================= */
 
 .delete-one{
     width:30px;
     height:30px;
+    min-width:30px;
 
     border:0;
     border-radius:50%;
@@ -293,6 +390,8 @@ body{
     justify-content:center;
 
     flex-shrink:0;
+
+    cursor:pointer;
 }
 
 .delete-one:active{
@@ -300,7 +399,10 @@ body{
     color:#ff6b6b;
 }
 
-/* EMPTY */
+
+/* =========================================================
+   EMPTY
+========================================================= */
 
 .empty{
     display:none;
@@ -337,14 +439,21 @@ body{
 
     color:#777;
     font-size:11px;
+    line-height:1.5;
 }
 
-/* LOADING */
+
+/* =========================================================
+   LOADING
+========================================================= */
 
 .loading{
     padding:60px 20px;
+
     text-align:center;
+
     color:#777;
+
     font-size:12px;
 }
 
@@ -359,21 +468,85 @@ body{
 
     border-radius:50%;
 
-    animation:spin .8s linear infinite;
+    animation:
+        riderxSpin .8s linear infinite;
 }
 
-@keyframes spin{
+@keyframes riderxSpin{
     to{
         transform:rotate(360deg);
     }
 }
 
-/* TOAST */
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error-box{
+    display:none;
+
+    margin:20px 14px;
+    padding:18px;
+
+    text-align:center;
+
+    background:#180909;
+
+    border:1px solid #402020;
+
+    border-radius:17px;
+}
+
+.error-box.show{
+    display:block;
+}
+
+.error-box i{
+    color:#ff6262;
+    font-size:25px;
+}
+
+.error-box h3{
+    margin-top:9px;
+    font-size:14px;
+}
+
+.error-box p{
+    margin-top:5px;
+    color:#888;
+    font-size:10px;
+    line-height:1.5;
+}
+
+.retry-btn{
+    margin-top:13px;
+
+    min-height:40px;
+
+    padding:0 18px;
+
+    border:0;
+    border-radius:11px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:fixed;
+
     left:50%;
-    bottom:25px;
+    bottom:
+        max(25px,env(safe-area-inset-bottom));
 
     transform:translate(-50%,20px);
 
@@ -392,11 +565,15 @@ body{
     font-size:11px;
 
     opacity:0;
+
     pointer-events:none;
 
-    transition:.25s ease;
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
 
-    box-shadow:0 8px 30px rgba(0,0,0,.45);
+    box-shadow:
+        0 8px 30px rgba(0,0,0,.45);
 }
 
 .toast.show{
@@ -404,7 +581,13 @@ body{
     transform:translate(-50%,0);
 }
 
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
 @media(max-width:380px){
+
     .actions{
         padding:12px 10px;
     }
@@ -416,75 +599,225 @@ body{
     .notification{
         padding:12px;
     }
+
+    .icon{
+        width:40px;
+        height:40px;
+        min-width:40px;
+    }
+
 }
-</style></head><body><header class="header"><button
-    id="backButton"
-    class="back-btn"
-    type="button"
-    aria-label="Back">
-    <i class="fa-solid fa-arrow-left"></i>
-</button>
 
-<div class="header-title">
-    <h1>Notifications</h1>
-    <p id="notificationCount">No notifications</p>
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =======================================================
+     HEADER
+======================================================= -->
+
+<header class="header">
+
+    <button
+        id="backButton"
+        class="back-btn"
+        type="button"
+        aria-label="Back"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+
+
+    <div class="header-title">
+
+        <h1>
+            Notifications
+        </h1>
+
+        <p id="notificationCount">
+            Loading...
+        </p>
+
+    </div>
+
+
+    <button
+        id="refreshButton"
+        class="header-icon"
+        type="button"
+        aria-label="Refresh notifications"
+    >
+
+        <i class="fa-solid fa-rotate"></i>
+
+        <span
+            id="unreadBadge"
+            class="unread-badge"
+        >
+            0
+        </span>
+
+    </button>
+
+</header>
+
+
+<!-- =======================================================
+     ACTIONS
+======================================================= -->
+
+<div class="actions">
+
+    <button
+        id="markAllRead"
+        class="action-btn primary"
+        type="button"
+    >
+        <i class="fa-solid fa-check-double"></i>
+        Mark all read
+    </button>
+
+
+    <button
+        id="deleteAll"
+        class="action-btn danger"
+        type="button"
+    >
+        <i class="fa-solid fa-trash"></i>
+        Clear all
+    </button>
+
 </div>
 
-<button
-    id="refreshButton"
-    class="header-icon"
-    type="button"
-    aria-label="Refresh">
-    <i class="fa-solid fa-rotate"></i>
 
-    <span
-        id="unreadBadge"
-        class="unread-badge">
-        0
-    </span>
-</button>
+<!-- =======================================================
+     NOTIFICATIONS
+======================================================= -->
 
-</header><div class="actions"><button
-    id="markAllRead"
-    class="action-btn primary"
-    type="button">
-    <i class="fa-solid fa-check-double"></i>
-    Mark all read
-</button>
+<main
+    id="notifications"
+    class="notifications"
+>
 
-<button
-    id="deleteAll"
-    class="action-btn danger"
-    type="button">
-    <i class="fa-solid fa-trash"></i>
-    Clear all
-</button>
+    <div
+        id="loading"
+        class="loading"
+    >
 
-</div><main id="notifications" class="notifications"><div id="loading" class="loading">
+        <div class="spinner"></div>
 
-    <div class="spinner"></div>
+        Loading notifications...
 
-    Loading notifications...
+    </div>
+
+</main>
+
+
+<!-- =======================================================
+     EMPTY
+======================================================= -->
+
+<div
+    id="empty"
+    class="empty"
+>
+
+    <div class="empty-icon">
+
+        <i class="fa-regular fa-bell-slash"></i>
+
+    </div>
+
+
+    <h2>
+        No notifications
+    </h2>
+
+
+    <p>
+        New ride requests, ride updates and RiderX alerts
+        will appear here.
+    </p>
 
 </div>
 
-</main><div id="empty" class="empty"><div class="empty-icon">
-    <i class="fa-regular fa-bell-slash"></i>
+
+<!-- =======================================================
+     ERROR
+======================================================= -->
+
+<div
+    id="errorBox"
+    class="error-box"
+>
+
+    <i class="fa-solid fa-triangle-exclamation"></i>
+
+    <h3>
+        Unable to load notifications
+    </h3>
+
+    <p id="errorText">
+        Please check your connection and try again.
+    </p>
+
+    <button
+        id="retryButton"
+        class="retry-btn"
+        type="button"
+    >
+        Retry
+    </button>
+
 </div>
 
-<h2>No notifications</h2>
 
-<p>
-    New ride requests, ride updates and RiderX alerts
-    will appear here.
-</p>
+<!-- =======================================================
+     TOAST
+======================================================= -->
 
-</div><div id="toast" class="toast"></div><script type="module">
+<div
+    id="toast"
+    class="toast"
+    role="status"
+    aria-live="polite"
+></div>
+
+
+<script type="module">
+
+/* =========================================================
+   RIDERX
+   NOTIFICATIONS
+   File: rider/notifications.html
+
+   Handles:
+   - Firebase authentication
+   - Real-time notifications
+   - Read / unread state
+   - Mark all read
+   - Delete notification
+   - Clear all notifications
+   - Notification count
+   - Ride notification navigation
+   - Safe HTML rendering
+   - Firestore query fallback
+========================================================= */
+
+
+/* =========================================================
+   FIREBASE CONFIG
+========================================================= */
 
 import {
     auth,
     db
-} from "../firebase/config.js";
+} from "../firebase/firebase-config.js";
+
 
 import {
     collection,
@@ -500,116 +833,313 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+
 import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
 const notificationContainer =
-    document.getElementById("notifications");
+    document.getElementById(
+        "notifications"
+    );
+
 
 const loading =
-    document.getElementById("loading");
+    document.getElementById(
+        "loading"
+    );
+
 
 const empty =
-    document.getElementById("empty");
+    document.getElementById(
+        "empty"
+    );
+
 
 const countText =
-    document.getElementById("notificationCount");
+    document.getElementById(
+        "notificationCount"
+    );
+
 
 const badge =
-    document.getElementById("unreadBadge");
+    document.getElementById(
+        "unreadBadge"
+    );
+
 
 const toast =
-    document.getElementById("toast");
+    document.getElementById(
+        "toast"
+    );
 
+
+const errorBox =
+    document.getElementById(
+        "errorBox"
+    );
+
+
+const errorText =
+    document.getElementById(
+        "errorText"
+    );
+
+
+const retryButton =
+    document.getElementById(
+        "retryButton"
+    );
+
+
+const markAllReadButton =
+    document.getElementById(
+        "markAllRead"
+    );
+
+
+const deleteAllButton =
+    document.getElementById(
+        "deleteAll"
+    );
+
+
+const refreshButton =
+    document.getElementById(
+        "refreshButton"
+    );
+
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let currentUser = null;
-let unsubscribe = null;
-let notificationData = [];
+
+let unsubscribe =
+    null;
+
+let notificationData =
+    [];
+
+let listenerStarted =
+    false;
 
 
-/* =========================================
+/* =========================================================
    TOAST
-========================================= */
+========================================================= */
 
 function showToast(message){
 
-    toast.textContent = message;
+    toast.textContent =
+        String(message || "");
 
-    toast.classList.add("show");
+
+    toast.classList.add(
+        "show"
+    );
+
 
     clearTimeout(
         window.riderXToastTimer
     );
 
+
     window.riderXToastTimer =
         setTimeout(
-            ()=>{
-                toast.classList.remove("show");
+            () => {
+
+                toast.classList.remove(
+                    "show"
+                );
+
             },
             2200
         );
+
 }
 
 
-/* =========================================
+/* =========================================================
+   ERROR UI
+========================================================= */
+
+function showError(message){
+
+    loading.style.display =
+        "none";
+
+
+    errorText.textContent =
+        message ||
+        "Unable to load notifications.";
+
+
+    errorBox.classList.add(
+        "show"
+    );
+
+}
+
+
+function hideError(){
+
+    errorBox.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
    BACK
-========================================= */
+========================================================= */
 
 document
 .getElementById("backButton")
 .addEventListener(
     "click",
-    ()=>{
-        if(history.length > 1){
+    () => {
+
+        if(
+            history.length > 1
+        ){
+
             history.back();
+
         }else{
-            location.href="home.html";
+
+            location.replace(
+                "home.html"
+            );
+
         }
+
     }
 );
 
 
-/* =========================================
-   FORMAT TIME
-========================================= */
+/* =========================================================
+   TIME FORMAT
+========================================================= */
 
 function formatTime(timestamp){
 
     if(!timestamp){
+
         return "Just now";
+
     }
+
 
     let date;
 
+
     try{
-        date =
-            timestamp.toDate
-            ? timestamp.toDate()
-            : new Date(timestamp);
+
+        if(
+            typeof timestamp.toDate ===
+            "function"
+        ){
+
+            date =
+                timestamp.toDate();
+
+        }else if(
+            typeof timestamp.toMillis ===
+            "function"
+        ){
+
+            date =
+                new Date(
+                    timestamp.toMillis()
+                );
+
+        }else{
+
+            date =
+                new Date(timestamp);
+
+        }
+
     }catch{
+
         return "Just now";
+
     }
+
+
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
+        return "Just now";
+
+    }
+
 
     const diff =
-        Date.now() - date.getTime();
+        Date.now() -
+        date.getTime();
+
+
+    if(diff < 0){
+
+        return "Just now";
+
+    }
+
 
     if(diff < 60000){
+
         return "Just now";
+
     }
+
 
     if(diff < 3600000){
-        return Math.floor(diff / 60000) + " min ago";
+
+        const minutes =
+            Math.floor(
+                diff / 60000
+            );
+
+        return `${minutes} min ago`;
+
     }
+
 
     if(diff < 86400000){
-        return Math.floor(diff / 3600000) + " hr ago";
+
+        const hours =
+            Math.floor(
+                diff / 3600000
+            );
+
+        return `${hours} hr ago`;
+
     }
 
+
     if(diff < 604800000){
-        return Math.floor(diff / 86400000) + " day ago";
+
+        const days =
+            Math.floor(
+                diff / 86400000
+            );
+
+        return `${days} day${days === 1 ? "" : "s"} ago`;
+
     }
+
 
     return date.toLocaleDateString(
         "en-IN",
@@ -619,12 +1149,13 @@ function formatTime(timestamp){
             year:"numeric"
         }
     );
+
 }
 
 
-/* =========================================
+/* =========================================================
    ICON
-========================================= */
+========================================================= */
 
 function getNotificationIcon(data){
 
@@ -632,125 +1163,286 @@ function getNotificationIcon(data){
         String(
             data.type ||
             data.category ||
+            data.notificationType ||
             ""
         ).toLowerCase();
 
+
+    const title =
+        String(
+            data.title ||
+            data.heading ||
+            ""
+        ).toLowerCase();
+
+
+    const text =
+        `${type} ${title}`;
+
+
     if(
-        type.includes("ride") ||
-        type.includes("request")
+        text.includes("ride") ||
+        text.includes("request") ||
+        text.includes("pickup") ||
+        text.includes("driver")
     ){
+
         return {
             icon:"fa-motorcycle",
             className:"ride"
         };
+
     }
 
+
     if(
-        type.includes("wallet") ||
-        type.includes("payment") ||
-        type.includes("earning")
+        text.includes("wallet") ||
+        text.includes("payment") ||
+        text.includes("earning") ||
+        text.includes("fare")
     ){
+
         return {
             icon:"fa-wallet",
             className:"wallet"
         };
+
     }
 
+
     if(
-        type.includes("warning") ||
-        type.includes("alert")
+        text.includes("warning") ||
+        text.includes("alert")
     ){
+
         return {
             icon:"fa-triangle-exclamation",
             className:"warning"
         };
+
     }
 
+
     if(
-        type.includes("cancel") ||
-        type.includes("danger")
+        text.includes("cancel") ||
+        text.includes("danger") ||
+        text.includes("failed")
     ){
+
         return {
             icon:"fa-circle-exclamation",
             className:"danger"
         };
+
     }
+
 
     return {
         icon:"fa-bell",
         className:""
     };
+
 }
 
 
-/* =========================================
-   ESCAPE HTML
-========================================= */
+/* =========================================================
+   SAFE TEXT
+========================================================= */
 
 function escapeHTML(value){
 
-    return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    return String(
+        value ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
+
 }
 
 
-/* =========================================
+/* =========================================================
+   READ STATE
+========================================================= */
+
+function isUnread(data){
+
+    return (
+        data.read !== true &&
+        data.isRead !== true
+    );
+
+}
+
+
+/* =========================================================
+   SORT
+========================================================= */
+
+function getTimestampValue(timestamp){
+
+    if(!timestamp){
+
+        return 0;
+
+    }
+
+
+    try{
+
+        if(
+            typeof timestamp.toMillis ===
+            "function"
+        ){
+
+            return timestamp.toMillis();
+
+        }
+
+
+        if(
+            typeof timestamp.toDate ===
+            "function"
+        ){
+
+            return timestamp
+                .toDate()
+                .getTime();
+
+        }
+
+
+        const value =
+            new Date(timestamp)
+            .getTime();
+
+
+        return Number.isFinite(value)
+            ? value
+            : 0;
+
+    }catch{
+
+        return 0;
+
+    }
+
+}
+
+
+/* =========================================================
    RENDER
-========================================= */
+========================================================= */
 
 function renderNotifications(){
 
-    loading.style.display="none";
+    loading.style.display =
+        "none";
+
+
+    hideError();
+
 
     notificationContainer
-        .querySelectorAll(".notification")
+        .querySelectorAll(
+            ".notification"
+        )
         .forEach(
-            el=>el.remove()
+            element =>
+                element.remove()
         );
 
-    if(!notificationData.length){
 
-        empty.style.display="block";
+    if(
+        !notificationData.length
+    ){
+
+        empty.style.display =
+            "block";
+
 
         countText.textContent =
             "No notifications";
 
-        badge.style.display="none";
+
+        badge.style.display =
+            "none";
+
+
+        markAllReadButton.disabled =
+            true;
+
+
+        deleteAllButton.disabled =
+            true;
+
 
         return;
+
     }
 
-    empty.style.display="none";
+
+    empty.style.display =
+        "none";
+
+
+    markAllReadButton.disabled =
+        false;
+
+
+    deleteAllButton.disabled =
+        false;
 
 
     const unread =
         notificationData.filter(
             item =>
-                item.read !== true &&
-                item.isRead !== true
+                isUnread(
+                    item.data
+                )
         ).length;
 
 
     countText.textContent =
         `${notificationData.length} notification${
-            notificationData.length === 1 ? "" : "s"
+            notificationData.length === 1
+                ? ""
+                : "s"
         }`;
 
 
     if(unread > 0){
 
         badge.textContent =
-            unread > 99 ? "99+" : unread;
+            unread > 99
+                ? "99+"
+                : String(unread);
 
-        badge.style.display="flex";
+
+        badge.style.display =
+            "flex";
 
     }else{
 
-        badge.style.display="none";
+        badge.style.display =
+            "none";
 
     }
 
@@ -759,10 +1451,13 @@ function renderNotifications(){
         item => {
 
             const data =
-                item.data;
+                item.data || {};
+
 
             const icon =
-                getNotificationIcon(data);
+                getNotificationIcon(
+                    data
+                );
 
 
             const title =
@@ -778,18 +1473,25 @@ function renderNotifications(){
                 "You have a new notification.";
 
 
-            const isUnread =
-                data.read !== true &&
-                data.isRead !== true;
+            const unreadState =
+                isUnread(
+                    data
+                );
 
 
             const element =
-                document.createElement("article");
+                document.createElement(
+                    "article"
+                );
 
 
             element.className =
                 "notification" +
-                (isUnread ? " unread" : "");
+                (
+                    unreadState
+                        ? " unread"
+                        : ""
+                );
 
 
             element.dataset.id =
@@ -798,8 +1500,12 @@ function renderNotifications(){
 
             element.innerHTML = `
 
-                <div class="icon ${icon.className}">
-                    <i class="fa-solid ${icon.icon}"></i>
+                <div class="icon ${escapeHTML(
+                    icon.className
+                )}">
+                    <i class="fa-solid ${escapeHTML(
+                        icon.icon
+                    )}"></i>
                 </div>
 
                 <div class="content">
@@ -817,7 +1523,12 @@ function renderNotifications(){
                     </div>
 
                     <div class="time">
-                        ${formatTime(data.createdAt)}
+                        ${escapeHTML(
+                            formatTime(
+                                data.createdAt ||
+                                data.timestamp
+                            )
+                        )}
                     </div>
 
                 </div>
@@ -825,60 +1536,62 @@ function renderNotifications(){
                 <button
                     class="delete-one"
                     type="button"
-                    aria-label="Delete notification">
-
+                    aria-label="Delete notification"
+                >
                     <i class="fa-solid fa-xmark"></i>
-
                 </button>
 
             `;
 
 
+            /* =========================================
+               OPEN NOTIFICATION
+            ========================================= */
+
             element.addEventListener(
                 "click",
-                async(event)=>{
+                async event => {
 
                     if(
                         event.target.closest(
                             ".delete-one"
                         )
                     ){
+
                         return;
+
                     }
+
 
                     await markAsRead(
                         item.id
                     );
 
-                    /*
-                     * If notification contains
-                     * rideId, open ride details.
-                     */
 
-                    if(data.rideId){
-
-                        try{
-
-                            sessionStorage.setItem(
-                                "riderx_selected_ride",
-                                data.rideId
-                            );
-
-                        }catch{}
-
-                    }
+                    openNotification(
+                        data
+                    );
 
                 }
             );
 
 
-            element
-            .querySelector(".delete-one")
-            .addEventListener(
+            /* =========================================
+               DELETE
+            ========================================= */
+
+            const deleteButton =
+                element.querySelector(
+                    ".delete-one"
+                );
+
+
+            deleteButton.addEventListener(
                 "click",
-                async(event)=>{
+                async event => {
 
                     event.stopPropagation();
+
 
                     await deleteNotification(
                         item.id
@@ -889,16 +1602,95 @@ function renderNotifications(){
 
 
             notificationContainer
-                .appendChild(element);
+                .appendChild(
+                    element
+                );
 
         }
     );
+
 }
 
 
-/* =========================================
+/* =========================================================
+   OPEN NOTIFICATION
+========================================================= */
+
+function openNotification(data){
+
+    const rideId =
+        data.rideId ||
+        data.rideID ||
+        data.ride;
+
+
+    if(rideId){
+
+        try{
+
+            sessionStorage.setItem(
+                "riderx_selected_ride",
+                String(rideId)
+            );
+
+            sessionStorage.setItem(
+                "riderx_active_ride_id",
+                String(rideId)
+            );
+
+        }catch{}
+
+        /*
+         * Open live ride screen when
+         * notification belongs to a ride.
+         */
+
+        location.href =
+            `live.html?rideId=${encodeURIComponent(
+                String(rideId)
+            )}`;
+
+        return;
+
+    }
+
+
+    const actionUrl =
+        data.actionUrl ||
+        data.url;
+
+
+    if(
+        actionUrl &&
+        typeof actionUrl === "string"
+    ){
+
+        /*
+         * Only allow same-origin
+         * relative navigation.
+         */
+
+        if(
+            actionUrl.startsWith("/") ||
+            actionUrl.startsWith("./") ||
+            actionUrl.startsWith("../")
+        ){
+
+            location.href =
+                actionUrl;
+
+            return;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
    AUTH
-========================================= */
+========================================================= */
 
 onAuthStateChanged(
     auth,
@@ -906,19 +1698,37 @@ onAuthStateChanged(
 
         if(!user){
 
+            currentUser =
+                null;
+
+
             if(unsubscribe){
+
                 unsubscribe();
-                unsubscribe=null;
+
+                unsubscribe =
+                    null;
+
             }
 
-            location.href =
-                "../auth/login.html";
+
+            notificationData =
+                [];
+
+
+            location.replace(
+                "../auth/login.html?role=rider"
+            );
+
 
             return;
+
         }
+
 
         currentUser =
             user;
+
 
         listenNotifications(
             user.uid
@@ -928,27 +1738,43 @@ onAuthStateChanged(
 );
 
 
-/* =========================================
-   LISTEN
-========================================= */
+/* =========================================================
+   LISTEN NOTIFICATIONS
+========================================================= */
 
 function listenNotifications(uid){
 
-    if(unsubscribe){
-        unsubscribe();
+    if(!uid){
+
+        return;
+
     }
 
-    loading.style.display="block";
 
-    empty.style.display="none";
+    if(unsubscribe){
+
+        unsubscribe();
+
+        unsubscribe =
+            null;
+
+    }
 
 
-    /*
-     * Primary query.
-     *
-     * If Firestore asks for an index,
-     * fallback query below will be used.
-     */
+    listenerStarted =
+        true;
+
+
+    loading.style.display =
+        "block";
+
+
+    empty.style.display =
+        "none";
+
+
+    hideError();
+
 
     const notificationsRef =
         collection(
@@ -957,85 +1783,59 @@ function listenNotifications(uid){
         );
 
 
-    let q;
+    /*
+     * IMPORTANT:
+     *
+     * First try the normal indexed query.
+     * If the Firestore index is missing,
+     * automatically fall back to userId-only
+     * query so the notification screen still
+     * works.
+     */
 
-    try{
 
-        q =
-            query(
-                notificationsRef,
-                where(
-                    "userId",
-                    "==",
-                    uid
-                ),
-                orderBy(
-                    "createdAt",
-                    "desc"
-                )
-            );
-
-    }catch{
-
-        q =
-            query(
-                notificationsRef,
-                where(
-                    "userId",
-                    "==",
-                    uid
-                )
-            );
-
-    }
+    const primaryQuery =
+        query(
+            notificationsRef,
+            where(
+                "userId",
+                "==",
+                uid
+            ),
+            orderBy(
+                "createdAt",
+                "desc"
+            )
+        );
 
 
     unsubscribe =
         onSnapshot(
-            q,
+            primaryQuery,
+
             snapshot => {
 
-                notificationData =
-                    snapshot.docs
-                    .map(
-                        item => ({
-                            id:item.id,
-                            data:item.data()
-                        })
-                    );
-
-
-                notificationData.sort(
-                    (a,b)=>{
-
-                        const aTime =
-                            a.data.createdAt
-                            ?.toMillis?.() || 0;
-
-                        const bTime =
-                            b.data.createdAt
-                            ?.toMillis?.() || 0;
-
-                        return bTime-aTime;
-
-                    }
+                processSnapshot(
+                    snapshot
                 );
 
-
-                renderNotifications();
-
             },
+
             error => {
 
-                console.error(
-                    "Notification listener error:",
+                console.warn(
+                    "Primary notification query failed:",
                     error
                 );
 
-                loading.style.display="none";
 
-                showToast(
-                    "Unable to load notifications"
+                /*
+                 * Missing-index / query failure
+                 * fallback.
+                 */
+
+                listenNotificationsFallback(
+                    uid
                 );
 
             }
@@ -1044,15 +1844,151 @@ function listenNotifications(uid){
 }
 
 
-/* =========================================
-   MARK READ
-========================================= */
+/* =========================================================
+   FALLBACK LISTENER
+========================================================= */
+
+function listenNotificationsFallback(uid){
+
+    if(unsubscribe){
+
+        unsubscribe();
+
+        unsubscribe =
+            null;
+
+    }
+
+
+    const notificationsRef =
+        collection(
+            db,
+            "notifications"
+        );
+
+
+    const fallbackQuery =
+        query(
+            notificationsRef,
+            where(
+                "userId",
+                "==",
+                uid
+            )
+        );
+
+
+    unsubscribe =
+        onSnapshot(
+            fallbackQuery,
+
+            snapshot => {
+
+                processSnapshot(
+                    snapshot
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "Notification fallback error:",
+                    error
+                );
+
+
+                showError(
+                    error.message ||
+                    "Unable to load notifications."
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   PROCESS SNAPSHOT
+========================================================= */
+
+function processSnapshot(snapshot){
+
+    notificationData =
+        snapshot.docs.map(
+            item => ({
+
+                id:
+                    item.id,
+
+                data:
+                    item.data() || {}
+
+            })
+        );
+
+
+    notificationData.sort(
+        (a,b) => {
+
+            const aTime =
+                getTimestampValue(
+                    a.data.createdAt ||
+                    a.data.timestamp
+                );
+
+
+            const bTime =
+                getTimestampValue(
+                    b.data.createdAt ||
+                    b.data.timestamp
+                );
+
+
+            return bTime - aTime;
+
+        }
+    );
+
+
+    renderNotifications();
+
+}
+
+
+/* =========================================================
+   MARK ONE READ
+========================================================= */
 
 async function markAsRead(id){
 
-    if(!currentUser){
+    if(
+        !currentUser ||
+        !id
+    ){
+
         return;
+
     }
+
+
+    const item =
+        notificationData.find(
+            notification =>
+                notification.id === id
+        );
+
+
+    if(
+        !item ||
+        !isUnread(item.data)
+    ){
+
+        return;
+
+    }
+
 
     try{
 
@@ -1065,40 +2001,48 @@ async function markAsRead(id){
             {
                 read:true,
                 isRead:true,
-                readAt:serverTimestamp()
+                readAt:
+                    serverTimestamp()
             }
         );
 
     }catch(error){
 
         console.error(
-            "Mark read error:",
+            "Mark notification read:",
             error
         );
 
     }
+
 }
 
 
-/* =========================================
+/* =========================================================
    MARK ALL READ
-========================================= */
+========================================================= */
 
-document
-.getElementById("markAllRead")
-.addEventListener(
+markAllReadButton.addEventListener(
     "click",
-    async()=>{
+    async () => {
 
         if(!currentUser){
+
+            showToast(
+                "Please login first"
+            );
+
             return;
+
         }
+
 
         const unread =
             notificationData.filter(
                 item =>
-                    item.data.read !== true &&
-                    item.data.isRead !== true
+                    isUnread(
+                        item.data
+                    )
             );
 
 
@@ -1109,17 +2053,24 @@ document
             );
 
             return;
+
         }
+
+
+        markAllReadButton.disabled =
+            true;
 
 
         try{
 
             const batch =
-                writeBatch(db);
+                writeBatch(
+                    db
+                );
 
 
             unread.forEach(
-                item=>{
+                item => {
 
                     batch.update(
                         doc(
@@ -1141,6 +2092,7 @@ document
 
             await batch.commit();
 
+
             showToast(
                 "All notifications marked as read"
             );
@@ -1148,13 +2100,19 @@ document
         }catch(error){
 
             console.error(
-                "Mark all read error:",
+                "Mark all read:",
                 error
             );
+
 
             showToast(
                 "Unable to update notifications"
             );
+
+        }finally{
+
+            markAllReadButton.disabled =
+                false;
 
         }
 
@@ -1162,11 +2120,18 @@ document
 );
 
 
-/* =========================================
+/* =========================================================
    DELETE ONE
-========================================= */
+========================================================= */
 
 async function deleteNotification(id){
+
+    if(!id){
+
+        return;
+
+    }
+
 
     try{
 
@@ -1178,6 +2143,7 @@ async function deleteNotification(id){
             )
         );
 
+
         showToast(
             "Notification deleted"
         );
@@ -1185,39 +2151,49 @@ async function deleteNotification(id){
     }catch(error){
 
         console.error(
-            "Delete notification error:",
+            "Delete notification:",
             error
         );
+
 
         showToast(
             "Unable to delete notification"
         );
 
     }
+
 }
 
 
-/* =========================================
+/* =========================================================
    DELETE ALL
-========================================= */
+========================================================= */
 
-document
-.getElementById("deleteAll")
-.addEventListener(
+deleteAllButton.addEventListener(
     "click",
-    async()=>{
+    async () => {
 
         if(!currentUser){
+
+            showToast(
+                "Please login first"
+            );
+
             return;
+
         }
 
-        if(!notificationData.length){
+
+        if(
+            !notificationData.length
+        ){
 
             showToast(
                 "No notifications to clear"
             );
 
             return;
+
         }
 
 
@@ -1228,32 +2204,69 @@ document
 
 
         if(!confirmed){
+
             return;
+
         }
+
+
+        deleteAllButton.disabled =
+            true;
 
 
         try{
 
-            const batch =
-                writeBatch(db);
+            /*
+             * Firestore batch supports a maximum
+             * of 500 operations.
+             *
+             * Process notifications in chunks
+             * so the button also works when the
+             * user has many notifications.
+             */
+
+            const chunkSize =
+                450;
 
 
-            notificationData.forEach(
-                item=>{
+            for(
+                let i = 0;
+                i < notificationData.length;
+                i += chunkSize
+            ){
 
-                    batch.delete(
-                        doc(
-                            db,
-                            "notifications",
-                            item.id
-                        )
+                const chunk =
+                    notificationData.slice(
+                        i,
+                        i + chunkSize
                     );
 
-                }
-            );
+
+                const batch =
+                    writeBatch(
+                        db
+                    );
 
 
-            await batch.commit();
+                chunk.forEach(
+                    item => {
+
+                        batch.delete(
+                            doc(
+                                db,
+                                "notifications",
+                                item.id
+                            )
+                        );
+
+                    }
+                );
+
+
+                await batch.commit();
+
+            }
+
 
             showToast(
                 "All notifications cleared"
@@ -1262,13 +2275,19 @@ document
         }catch(error){
 
             console.error(
-                "Delete all error:",
+                "Delete all notifications:",
                 error
             );
+
 
             showToast(
                 "Unable to clear notifications"
             );
+
+        }finally{
+
+            deleteAllButton.disabled =
+                false;
 
         }
 
@@ -1276,47 +2295,138 @@ document
 );
 
 
-/* =========================================
+/* =========================================================
    REFRESH
-========================================= */
+========================================================= */
 
-document
-.getElementById("refreshButton")
-.addEventListener(
+refreshButton.addEventListener(
     "click",
-    ()=>{
+    () => {
 
-        const button =
-            document.getElementById(
-                "refreshButton"
+        if(
+            !currentUser
+        ){
+
+            showToast(
+                "Please login first"
             );
 
-        button
-            .querySelector("i")
-            .classList.add("fa-spin");
+            return;
+
+        }
+
+
+        const icon =
+            refreshButton.querySelector(
+                "i"
+            );
+
+
+        icon.classList.add(
+            "fa-spin"
+        );
+
+
+        refreshButton.disabled =
+            true;
+
+
+        /*
+         * Re-create listener so that refresh
+         * also recovers from a stale listener.
+         */
+
+        listenNotifications(
+            currentUser.uid
+        );
 
 
         setTimeout(
-            ()=>{
+            () => {
 
-                button
-                    .querySelector("i")
-                    .classList.remove("fa-spin");
+                icon.classList.remove(
+                    "fa-spin"
+                );
 
-                if(currentUser){
 
-                    listenNotifications(
-                        currentUser.uid
-                    );
+                refreshButton.disabled =
+                    false;
 
-                }
+
+                showToast(
+                    "Notifications refreshed"
+                );
 
             },
-            500
+            700
         );
 
     }
 );
 
-</script></body>
-</html>
+
+/* =========================================================
+   RETRY
+========================================================= */
+
+retryButton.addEventListener(
+    "click",
+    () => {
+
+        if(
+            !currentUser
+        ){
+
+            location.replace(
+                "../auth/login.html?role=rider"
+            );
+
+            return;
+
+        }
+
+
+        listenNotifications(
+            currentUser.uid
+        );
+
+    }
+);
+
+
+/* =========================================================
+   PAGE CLEANUP
+========================================================= */
+
+window.addEventListener(
+    "pagehide",
+    () => {
+
+        if(unsubscribe){
+
+            unsubscribe();
+
+            unsubscribe =
+                null;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   INITIAL UI
+========================================================= */
+
+markAllReadButton.disabled =
+    true;
+
+deleteAllButton.disabled =
+    true;
+
+</script>
+
+</body>
+
+    </html>
