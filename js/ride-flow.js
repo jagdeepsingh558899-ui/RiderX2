@@ -1,5 +1,5 @@
 /* ============================================================
-   RIDERX - RIDE FLOW
+   RIDERX 2.0 - RIDE FLOW ENGINE
    File: js/ride-flow.js
 
    Rider trip state machine:
@@ -19,23 +19,30 @@
    completed
 
    Also handles:
-   - Firebase ride synchronization
+   - Firebase RTDB ride synchronization
+   - Rider ownership protection
    - Customer notifications
    - OTP verification
    - Pickup / drop status
    - Ride completion handoff
    - Local active ride recovery
+   - Strict ride state transitions
+   - UI action state
+   - DOM ride controls
    ============================================================ */
 
 (function () {
 
     "use strict";
 
-    window.RiderX = window.RiderX || {};
+    window.RiderX =
+        window.RiderX || {};
 
-    const RX = window.RiderX;
+    const RX =
+        window.RiderX;
 
-    const Flow = RX.rideFlow =
+    const Flow =
+        RX.rideFlow =
         RX.rideFlow || {};
 
 
@@ -57,17 +64,28 @@
         ridersPath:
             "riders",
 
+        notificationsPath:
+            "notifications",
+
         activeRideKey:
             "riderx_active_ride",
 
         activeStatusKey:
             "riderx_ride_status",
 
+        otpAttemptsKey:
+            "riderx_otp_attempts",
+
         otpLength:
             4,
 
         maxOtpAttempts:
-            5
+            5,
+
+        listenerEvents:
+            [
+                "value"
+            ]
     };
 
 
@@ -78,6 +96,9 @@
     Flow.state = {
 
         initialized:
+            false,
+
+        initializing:
             false,
 
         ride:
@@ -104,6 +125,86 @@
 
 
     /* ========================================================
+       STATUS ORDER
+       ======================================================== */
+
+    Flow.statusOrder = {
+
+        searching:
+            0,
+
+        accepted:
+            1,
+
+        arriving:
+            2,
+
+        arrived:
+            3,
+
+        otp_verified:
+            4,
+
+        in_progress:
+            5,
+
+        completed:
+            6,
+
+        cancelled:
+            99
+    };
+
+
+    /* ========================================================
+       VALID NEXT STATES
+       ======================================================== */
+
+    Flow.nextStates = {
+
+        searching:
+            [
+                "accepted",
+                "cancelled"
+            ],
+
+        accepted:
+            [
+                "arriving",
+                "cancelled"
+            ],
+
+        arriving:
+            [
+                "arrived",
+                "cancelled"
+            ],
+
+        arrived:
+            [
+                "otp_verified",
+                "cancelled"
+            ],
+
+        otp_verified:
+            [
+                "in_progress"
+            ],
+
+        in_progress:
+            [
+                "completed"
+            ],
+
+        completed:
+            [],
+
+        cancelled:
+            []
+    };
+
+
+    /* ========================================================
        FIREBASE
        ======================================================== */
 
@@ -117,10 +218,35 @@
                     RX.firebase.database
                 ) {
 
+                    /*
+                     * Supports both:
+                     *
+                     * RX.firebase.database()
+                     *
+                     * and
+                     *
+                     * RX.firebase.database
+                     *
+                     */
+
+                    if (
+                        typeof RX.firebase.database ===
+                        "function"
+                    ) {
+
+                        return RX.firebase.database();
+                    }
+
                     return RX.firebase.database;
                 }
 
-            } catch (error) {}
+            } catch (error) {
+
+                console.warn(
+                    "RiderX database access failed:",
+                    error
+                );
+            }
 
 
             try {
@@ -134,7 +260,13 @@
                     return firebase.database();
                 }
 
-            } catch (error) {}
+            } catch (error) {
+
+                console.warn(
+                    "Firebase database access failed:",
+                    error
+                );
+            }
 
 
             return null;
@@ -142,7 +274,7 @@
 
 
     /* ========================================================
-       USER
+       FIREBASE AUTH USER
        ======================================================== */
 
     Flow.getUser =
@@ -155,7 +287,29 @@
                     RX.firebase.auth
                 ) {
 
-                    return RX.firebase.auth.currentUser;
+                    if (
+                        RX.firebase.auth.currentUser
+                    ) {
+
+                        return RX.firebase.auth.currentUser;
+                    }
+
+                    if (
+                        typeof RX.firebase.auth ===
+                        "function"
+                    ) {
+
+                        const auth =
+                            RX.firebase.auth();
+
+                        if (
+                            auth &&
+                            auth.currentUser
+                        ) {
+
+                            return auth.currentUser;
+                        }
+                    }
                 }
 
             } catch (error) {}
@@ -169,29 +323,67 @@
                     "function"
                 ) {
 
-                    return firebase.auth().currentUser;
+                    const auth =
+                        firebase.auth();
+
+                    if (
+                        auth &&
+                        auth.currentUser
+                    ) {
+
+                        return auth.currentUser;
+                    }
                 }
 
             } catch (error) {}
 
 
-            try {
+            /*
+             * Local RiderX session fallback.
+             */
 
-                const saved =
-                    localStorage.getItem(
-                        "riderx_user"
-                    );
+            const keys = [
 
-                if (
-                    saved
-                ) {
+                "riderx_rider",
+                "riderx_user"
 
-                    return JSON.parse(
+            ];
+
+
+            for (
+                let i = 0;
+                i < keys.length;
+                i++
+            ) {
+
+                try {
+
+                    const saved =
+                        localStorage.getItem(
+                            keys[i]
+                        );
+
+
+                    if (
                         saved
-                    );
-                }
+                    ) {
 
-            } catch (error) {}
+                        const user =
+                            JSON.parse(
+                                saved
+                            );
+
+
+                        if (
+                            user
+                        ) {
+
+                            return user;
+                        }
+                    }
+
+                } catch (error) {}
+            }
 
 
             return null;
@@ -209,15 +401,60 @@
                 Flow.getUser() ||
                 {};
 
+
             return (
+
                 user.uid ||
-                user.id ||
+
                 user.riderId ||
+
                 user.driverId ||
+
+                user.id ||
+
                 localStorage.getItem(
                     "riderx_uid"
                 ) ||
+
+                localStorage.getItem(
+                    "riderx_rider_id"
+                ) ||
+
                 null
+
+            );
+        };
+
+
+    /* ========================================================
+       CUSTOMER ID
+       ======================================================== */
+
+    Flow.getCustomerId =
+        function (
+            ride
+        ) {
+
+            ride =
+                ride ||
+                Flow.state.ride ||
+                {};
+
+
+            return (
+
+                ride.customerId ||
+
+                ride.userId ||
+
+                ride.passengerId ||
+
+                ride.customerUID ||
+
+                ride.customerUid ||
+
+                null
+
             );
         };
 
@@ -231,14 +468,25 @@
             ride
         ) {
 
+            ride =
+                ride ||
+                {};
+
+
             return (
-                ride?.rideId ||
-                ride?.id ||
+
+                ride.rideId ||
+
+                ride.id ||
+
                 Flow.state.rideId ||
+
                 localStorage.getItem(
                     Flow.config.activeRideKey
                 ) ||
+
                 null
+
             );
         };
 
@@ -258,12 +506,28 @@
                     "accepted"
                 )
                 .toLowerCase()
-                .trim();
+                .trim()
+                .replace(
+                    /[\s-]+/g,
+                    "_"
+                );
 
 
             const aliases = {
 
                 pending:
+                    "searching",
+
+                requested:
+                    "searching",
+
+                searching:
+                    "searching",
+
+                matching:
+                    "searching",
+
+                matched:
                     "accepted",
 
                 assigned:
@@ -273,6 +537,9 @@
                     "accepted",
 
                 driver_assigned:
+                    "accepted",
+
+                rider_assigned:
                     "accepted",
 
                 arriving:
@@ -287,16 +554,25 @@
                 on_the_way:
                     "arriving",
 
+                going_to_pickup:
+                    "arriving",
+
                 arrived:
                     "arrived",
 
                 at_pickup:
                     "arrived",
 
+                pickup_arrived:
+                    "arrived",
+
                 otp:
                     "otp_verified",
 
                 otp_verified:
+                    "otp_verified",
+
+                verified:
                     "otp_verified",
 
                 started:
@@ -311,7 +587,13 @@
                 riding:
                     "in_progress",
 
+                trip_started:
+                    "in_progress",
+
                 completed:
+                    "completed",
+
+                complete:
                     "completed",
 
                 finished:
@@ -321,6 +603,9 @@
                     "cancelled",
 
                 canceled:
+                    "cancelled",
+
+                rejected:
                     "cancelled"
             };
 
@@ -333,35 +618,29 @@
 
 
     /* ========================================================
-       STATUS ORDER
+       CHECK STATUS
        ======================================================== */
 
-    Flow.statusOrder =
-        {
+    Flow.isTerminalStatus =
+        function (
+            status
+        ) {
 
-            searching:
-                0,
+            status =
+                Flow.normalizeStatus(
+                    status
+                );
 
-            accepted:
-                1,
 
-            arriving:
-                2,
+            return (
 
-            arrived:
-                3,
+                status ===
+                    "completed" ||
 
-            otp_verified:
-                4,
+                status ===
+                    "cancelled"
 
-            in_progress:
-                5,
-
-            completed:
-                6,
-
-            cancelled:
-                99
+            );
         };
 
 
@@ -395,24 +674,99 @@
             }
 
 
+            /*
+             * Never move away from terminal states.
+             */
+
+            if (
+                Flow.isTerminalStatus(
+                    from
+                )
+            ) {
+
+                return false;
+            }
+
+
+            /*
+             * Cancellation is allowed only
+             * before trip completion.
+             */
+
             if (
                 to ===
                 "cancelled"
             ) {
 
-                return true;
+                return [
+                    "searching",
+                    "accepted",
+                    "arriving",
+                    "arrived"
+                ].includes(
+                    from
+                );
             }
 
 
+            /*
+             * Strict state-machine transition.
+             */
+
+            return (
+                Flow.nextStates[
+                    from
+                ] &&
+                Flow.nextStates[
+                    from
+                ].includes(
+                    to
+                )
+            );
+        };
+
+
+    /* ========================================================
+       RIDE OWNERSHIP
+       ======================================================== */
+
+    Flow.isRideOwnedByCurrentRider =
+        function (
+            ride
+        ) {
+
             if (
-                !Flow.statusOrder
-                    .hasOwnProperty(
-                        from
-                    ) ||
-                !Flow.statusOrder
-                    .hasOwnProperty(
-                        to
-                    )
+                !ride
+            ) {
+
+                return false;
+            }
+
+
+            const riderId =
+                Flow.getRiderId();
+
+
+            if (
+                !riderId
+            ) {
+
+                return false;
+            }
+
+
+            const assignedRider =
+                ride.riderId ||
+                ride.driverId ||
+                ride.acceptedBy;
+
+
+            /*
+             * No rider assigned yet.
+             */
+
+            if (
+                !assignedRider
             ) {
 
                 return true;
@@ -420,9 +774,73 @@
 
 
             return (
-                Flow.statusOrder[to] >=
-                Flow.statusOrder[from]
+                String(
+                    assignedRider
+                ) ===
+                String(
+                    riderId
+                )
             );
+        };
+
+
+    /* ========================================================
+       NORMALIZE RIDE
+       ======================================================== */
+
+    Flow.normalizeRide =
+        function (
+            ride,
+            rideId
+        ) {
+
+            if (
+                !ride
+            ) {
+
+                return null;
+            }
+
+
+            const normalized = {
+
+                ...ride,
+
+                rideId:
+                    ride.rideId ||
+                    ride.id ||
+                    rideId ||
+                    null
+            };
+
+
+            normalized.status =
+                Flow.normalizeStatus(
+                    ride.status
+                );
+
+
+            if (
+                normalized.riderId &&
+                !normalized.driverId
+            ) {
+
+                normalized.driverId =
+                    normalized.riderId;
+            }
+
+
+            if (
+                normalized.driverId &&
+                !normalized.riderId
+            ) {
+
+                normalized.riderId =
+                    normalized.driverId;
+            }
+
+
+            return normalized;
         };
 
 
@@ -480,10 +898,130 @@
             }
 
 
-            const existing =
-                await Flow.loadRide(
-                    rideId
-                );
+            const database =
+                Flow.getDatabase();
+
+
+            let existing =
+                null;
+
+
+            /*
+             * Always load the current remote ride
+             * before accepting.
+             */
+
+            if (
+                database
+            ) {
+
+                try {
+
+                    const snapshot =
+                        await database
+                            .ref(
+                                Flow.config.ridesPath +
+                                "/" +
+                                rideId
+                            )
+                            .once(
+                                "value"
+                            );
+
+
+                    existing =
+                        snapshot.val() ||
+                        null;
+
+                } catch (error) {
+
+                    console.error(
+                        "Ride acceptance load failed:",
+                        error
+                    );
+
+
+                    return {
+
+                        success:
+                            false,
+
+                        error:
+                            "Unable to verify ride availability."
+                    };
+                }
+
+            } else {
+
+                existing =
+                    await Flow.loadRide(
+                        rideId
+                    );
+            }
+
+
+            /*
+             * Do not accept an already completed/cancelled ride.
+             */
+
+            if (
+                existing
+            ) {
+
+                const currentStatus =
+                    Flow.normalizeStatus(
+                        existing.status
+                    );
+
+
+                if (
+                    Flow.isTerminalStatus(
+                        currentStatus
+                    )
+                ) {
+
+                    return {
+
+                        success:
+                            false,
+
+                        error:
+                            "This ride is no longer available."
+                    };
+                }
+
+
+                /*
+                 * Prevent another rider from
+                 * taking an already assigned ride.
+                 */
+
+                const assignedRider =
+                    existing.riderId ||
+                    existing.driverId ||
+                    existing.acceptedBy;
+
+
+                if (
+                    assignedRider &&
+                    String(
+                        assignedRider
+                    ) !==
+                    String(
+                        riderId
+                    )
+                ) {
+
+                    return {
+
+                        success:
+                            false,
+
+                        error:
+                            "This ride has already been accepted by another rider."
+                    };
+                }
+            }
 
 
             const ride =
@@ -501,6 +1039,9 @@
                     driverId:
                         riderId,
 
+                    acceptedBy:
+                        riderId,
+
                     status:
                         "accepted",
 
@@ -511,6 +1052,40 @@
                     updatedAt:
                         Date.now()
                 };
+
+
+            /*
+             * If the remote ride exists, verify the
+             * current state before changing it.
+             */
+
+            if (
+                existing
+            ) {
+
+                const current =
+                    Flow.normalizeStatus(
+                        existing.status
+                    );
+
+
+                if (
+                    current !==
+                        "searching" &&
+                    current !==
+                        "accepted"
+                ) {
+
+                    return {
+
+                        success:
+                            false,
+
+                        error:
+                            "Ride is not available for acceptance."
+                    };
+                }
+            }
 
 
             const result =
@@ -525,6 +1100,9 @@
                             riderId,
 
                         driverId:
+                            riderId,
+
+                        acceptedBy:
                             riderId,
 
                         acceptedAt:
@@ -556,10 +1134,22 @@
                 "accepted";
 
 
+            Flow.state.otpAttempts =
+                0;
+
+
+            Flow.saveOtpAttempts();
+
+
             Flow.startRideListener(
                 rideId
             );
 
+
+            /*
+             * Notification should not make
+             * ride acceptance fail.
+             */
 
             Flow.notifyCustomer(
                 ride,
@@ -602,7 +1192,12 @@
         async function () {
 
             return Flow.setStatus(
-                "arriving"
+                "arriving",
+                {
+
+                    arrivingAt:
+                        Date.now()
+                }
             );
         };
 
@@ -639,6 +1234,9 @@
                     {
 
                         arrivedAt:
+                            Date.now(),
+
+                        pickupArrivedAt:
                             Date.now()
                     }
                 );
@@ -652,11 +1250,194 @@
                     Flow.state.ride,
                     "arrived"
                 );
-
             }
 
 
             return result;
+        };
+
+
+    /* ========================================================
+       GET EXPECTED OTP
+       ======================================================== */
+
+    Flow.getExpectedOTP =
+        async function (
+            ride
+        ) {
+
+            ride =
+                ride ||
+                Flow.state.ride;
+
+
+            if (
+                !ride
+            ) {
+
+                return "";
+            }
+
+
+            const directOtp =
+                ride.otp ||
+                ride.rideOtp ||
+                ride.pickupOtp ||
+                ride.customerOtp ||
+                ride.otpCode;
+
+
+            if (
+                directOtp
+            ) {
+
+                return String(
+                    directOtp
+                )
+                .replace(
+                    /\D/g,
+                    ""
+                );
+            }
+
+
+            const database =
+                Flow.getDatabase();
+
+
+            const customerId =
+                Flow.getCustomerId(
+                    ride
+                );
+
+
+            if (
+                database &&
+                customerId
+            ) {
+
+                try {
+
+                    const snapshot =
+                        await database
+                            .ref(
+                                Flow.config
+                                    .customersPath +
+                                "/" +
+                                customerId
+                            )
+                            .once(
+                                "value"
+                            );
+
+
+                    const customer =
+                        snapshot.val() ||
+                        {};
+
+
+                    const customerOtp =
+                        customer.rideOtp ||
+                        customer.otp ||
+                        customer.pickupOtp ||
+                        customer.rideOTP;
+
+
+                    return String(
+                        customerOtp ||
+                        ""
+                    )
+                    .replace(
+                        /\D/g,
+                        ""
+                    );
+
+                } catch (error) {
+
+                    console.warn(
+                        "Customer OTP lookup failed:",
+                        error
+                    );
+                }
+            }
+
+
+            return "";
+        };
+
+
+    /* ========================================================
+       OTP ATTEMPTS STORAGE
+       ======================================================== */
+
+    Flow.loadOtpAttempts =
+        function () {
+
+            try {
+
+                const saved =
+                    localStorage.getItem(
+                        Flow.config.otpAttemptsKey
+                    );
+
+
+                const attempts =
+                    Number(
+                        saved
+                    );
+
+
+                Flow.state.otpAttempts =
+                    Number.isFinite(
+                        attempts
+                    )
+                        ? Math.max(
+                            0,
+                            attempts
+                        )
+                        : 0;
+
+            } catch (error) {
+
+                Flow.state.otpAttempts =
+                    0;
+            }
+
+
+            return Flow.state.otpAttempts;
+        };
+
+
+    Flow.saveOtpAttempts =
+        function () {
+
+            try {
+
+                localStorage.setItem(
+                    Flow.config.otpAttemptsKey,
+                    String(
+                        Flow.state.otpAttempts
+                    )
+                );
+
+            } catch (error) {}
+        };
+
+
+    Flow.clearOtpAttempts =
+        function () {
+
+            Flow.state.otpAttempts =
+                0;
+
+
+            try {
+
+                localStorage.removeItem(
+                    Flow.config.otpAttemptsKey
+                );
+
+            } catch (error) {}
         };
 
 
@@ -696,22 +1477,6 @@
             }
 
 
-            if (
-                Flow.state.otpAttempts >=
-                Flow.config.maxOtpAttempts
-            ) {
-
-                return {
-
-                    success:
-                        false,
-
-                    error:
-                        "Too many OTP attempts."
-                };
-            }
-
-
             const ride =
                 Flow.state.ride;
 
@@ -731,99 +1496,77 @@
             }
 
 
-            /*
-             * Accept multiple possible field names
-             * so the customer and rider systems
-             * remain compatible.
-             */
-
-            const expected =
-                String(
-                    ride.otp ||
-                    ride.rideOtp ||
-                    ride.pickupOtp ||
-                    ride.customerOtp ||
-                    ""
-                )
-                .replace(
-                    /\D/g,
-                    "");
+            const currentStatus =
+                Flow.normalizeStatus(
+                    ride.status
+                );
 
 
             /*
-             * If OTP is not stored in ride object,
-             * try Firebase customer record.
+             * OTP is only valid at pickup.
              */
 
-            let valid =
-                expected &&
-                expected === otp;
+            if (
+                currentStatus !==
+                "arrived"
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "OTP can only be verified after the rider reaches pickup."
+                };
+            }
 
 
             if (
-                !valid &&
+                Flow.state.otpAttempts >=
+                Flow.config.maxOtpAttempts
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Too many OTP attempts. Please contact support."
+                };
+            }
+
+
+            const expected =
+                await Flow.getExpectedOTP(
+                    ride
+                );
+
+
+            /*
+             * Never accept an arbitrary OTP
+             * when no OTP exists.
+             */
+
+            if (
                 !expected
             ) {
 
-                const database =
-                    Flow.getDatabase();
+                return {
 
+                    success:
+                        false,
 
-                const customerId =
-                    ride.customerId ||
-                    ride.userId ||
-                    ride.passengerId;
-
-
-                if (
-                    database &&
-                    customerId
-                ) {
-
-                    try {
-
-                        const snapshot =
-                            await database
-                                .ref(
-                                    Flow.config
-                                        .customersPath +
-                                    "/" +
-                                    customerId
-                                )
-                                .once(
-                                    "value"
-                                );
-
-
-                        const customer =
-                            snapshot.val() ||
-                            {};
-
-
-                        const customerOtp =
-                            String(
-                                customer.rideOtp ||
-                                customer.otp ||
-                                ""
-                            )
-                            .replace(
-                                /\D/g,
-                                "");
-
-
-                        valid =
-                            customerOtp ===
-                            otp;
-
-                    } catch (error) {
-
-                        console.warn(
-                            "Customer OTP lookup failed:",
-                            error
-                        );
-                    }
-                }
+                    error:
+                        "Ride OTP is not available yet. Please try again."
+                };
             }
+
+
+            const valid =
+                expected ===
+                otp;
 
 
             if (
@@ -833,12 +1576,23 @@
                 Flow.state.otpAttempts++;
 
 
+                Flow.saveOtpAttempts();
+
+
                 Flow.emit(
                     "otp-invalid",
                     {
 
                         attempts:
-                            Flow.state.otpAttempts
+                            Flow.state.otpAttempts,
+
+                        remaining:
+                            Math.max(
+                                0,
+                                Flow.config
+                                    .maxOtpAttempts -
+                                Flow.state.otpAttempts
+                            )
                     }
                 );
 
@@ -852,13 +1606,21 @@
                         "Incorrect OTP.",
 
                     attempts:
-                        Flow.state.otpAttempts
+                        Flow.state.otpAttempts,
+
+                    remaining:
+                        Math.max(
+                            0,
+                            Flow.config
+                                .maxOtpAttempts -
+                            Flow.state.otpAttempts
+                        )
                 };
             }
 
 
             /*
-             * OTP verified.
+             * OTP verified successfully.
              */
 
             const result =
@@ -883,8 +1645,7 @@
             }
 
 
-            Flow.state.otpAttempts =
-                0;
+            Flow.clearOtpAttempts();
 
 
             Flow.emit(
@@ -941,17 +1702,18 @@
 
 
             /*
-             * Normally OTP must be verified
-             * before starting.
+             * OTP verification is mandatory.
+             *
+             * Previous implementation allowed:
+             *
+             * accepted → in_progress
+             *
+             * which is unsafe.
              */
 
             if (
                 status !==
-                    "otp_verified" &&
-                status !==
-                    "arrived" &&
-                status !==
-                    "accepted"
+                "otp_verified"
             ) {
 
                 return {
@@ -960,7 +1722,7 @@
                         false,
 
                     error:
-                        "Ride cannot be started from the current status."
+                        "Verify the customer's OTP before starting the trip."
                 };
             }
 
@@ -977,9 +1739,7 @@
                             Date.now(),
 
                         otpVerified:
-                            ride.otpVerified ||
-                            status ===
-                                "otp_verified"
+                            true
                     }
                 );
 
@@ -1042,49 +1802,88 @@
             }
 
 
+            const status =
+                Flow.normalizeStatus(
+                    ride.status
+                );
+
+
+            if (
+                status !==
+                "in_progress"
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Trip can only be completed after it has started."
+                };
+            }
+
+
             /*
              * Handoff to ride-complete.js
              */
 
             if (
                 RX.rideComplete &&
-                typeof RX.rideComplete
-                    .complete ===
+                typeof RX.rideComplete.complete ===
                 "function"
             ) {
 
                 const result =
-                    await RX.rideComplete
-                        .complete(
-                            ride,
-                            options
-                        );
+                    await RX.rideComplete.complete(
+                        ride,
+                        options
+                    );
 
 
                 if (
+                    result &&
                     result.success
                 ) {
+
+                    const completedRide =
+                        Flow.normalizeRide(
+                            result.ride ||
+                            ride,
+                            Flow.getRideId(
+                                ride
+                            )
+                        );
+
 
                     Flow.state.status =
                         "completed";
 
                     Flow.state.ride =
-                        result.ride ||
-                        ride;
+                        completedRide;
+
+
+                    Flow.clearOtpAttempts();
 
 
                     Flow.clearActiveRide();
 
 
                     Flow.notifyCustomer(
-                        Flow.state.ride,
+                        completedRide,
                         "completed"
                     );
 
 
                     Flow.emit(
                         "completed",
-                        result
+                        {
+
+                            ...result,
+
+                            ride:
+                                completedRide
+                        }
                     );
                 }
 
@@ -1094,8 +1893,7 @@
 
 
             /*
-             * Fallback if ride-complete.js
-             * is not loaded.
+             * Fallback.
              */
 
             const result =
@@ -1107,6 +1905,9 @@
                             Date.now(),
 
                         endedAt:
+                            Date.now(),
+
+                        dropCompletedAt:
                             Date.now(),
 
                         paymentMethod:
@@ -1121,11 +1922,25 @@
                 result.success
             ) {
 
-                Flow.clearActiveRide();
+                Flow.clearOtpAttempts();
+
 
                 Flow.notifyCustomer(
                     Flow.state.ride,
                     "completed"
+                );
+
+
+                Flow.clearActiveRide();
+
+
+                Flow.emit(
+                    "completed",
+                    {
+
+                        ride:
+                            Flow.state.ride
+                    }
                 );
             }
 
@@ -1167,6 +1982,34 @@
             }
 
 
+            const status =
+                Flow.normalizeStatus(
+                    ride.status
+                );
+
+
+            if (
+                ![
+                    "searching",
+                    "accepted",
+                    "arriving",
+                    "arrived"
+                ].includes(
+                    status
+                )
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "This ride cannot be cancelled at the current stage."
+                };
+            }
+
+
             const result =
                 await Flow.setStatus(
                     "cancelled",
@@ -1188,7 +2031,7 @@
                 result.success
             ) {
 
-                Flow.clearActiveRide();
+                Flow.clearOtpAttempts();
 
 
                 Flow.notifyCustomer(
@@ -1208,6 +2051,9 @@
                             reason
                     }
                 );
+
+
+                Flow.clearActiveRide();
             }
 
 
@@ -1270,6 +2116,27 @@
             }
 
 
+            const rideId =
+                Flow.getRideId(
+                    ride
+                );
+
+
+            if (
+                !rideId
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "Ride ID missing."
+                };
+            }
+
+
             const current =
                 Flow.normalizeStatus(
                     ride.status ||
@@ -1295,6 +2162,28 @@
             }
 
 
+            /*
+             * Prevent rider from changing another
+             * rider's ride.
+             */
+
+            if (
+                !Flow.isRideOwnedByCurrentRider(
+                    ride
+                )
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        "This ride belongs to another rider."
+                };
+            }
+
+
             const updated =
                 {
 
@@ -1302,9 +2191,7 @@
                     ...extra,
 
                     rideId:
-                        Flow.getRideId(
-                            ride
-                        ),
+                        rideId,
 
                     status:
                         status,
@@ -1338,8 +2225,21 @@
                 Flow.state.ride =
                     updated;
 
+                Flow.state.rideId =
+                    rideId;
+
                 Flow.state.status =
                     status;
+
+
+                if (
+                    status ===
+                        "otp_verified"
+                ) {
+
+                    updated.otpVerified =
+                        true;
+                }
 
 
                 Flow.setActiveRide(
@@ -1358,6 +2258,9 @@
 
                         status:
                             status,
+
+                        previousStatus:
+                            current,
 
                         ride:
                             updated
@@ -1386,7 +2289,7 @@
 
 
     /* ========================================================
-       UPDATE FIREBASE RIDE
+       FIREBASE RIDE UPDATE
        ======================================================== */
 
     Flow.updateRide =
@@ -1394,6 +2297,12 @@
             ride,
             extra
         ) {
+
+            ride =
+                Flow.normalizeRide(
+                    ride
+                );
+
 
             const database =
                 Flow.getDatabase();
@@ -1423,18 +2332,18 @@
             const payload =
                 {
 
+                    ...(extra || {}),
+
                     status:
                         ride.status,
 
                     updatedAt:
-                        Date.now(),
-
-                    ...(extra || {})
+                        Date.now()
                 };
 
 
             /*
-             * Keep important rider information.
+             * Preserve important assignment data.
              */
 
             if (
@@ -1456,15 +2365,184 @@
 
 
             if (
+                ride.acceptedBy
+            ) {
+
+                payload.acceptedBy =
+                    ride.acceptedBy;
+            }
+
+
+            if (
+                ride.customerId
+            ) {
+
+                payload.customerId =
+                    ride.customerId;
+            }
+
+
+            /*
+             * Important ride timestamps.
+             */
+
+            [
+                "acceptedAt",
+                "arrivingAt",
+                "arrivedAt",
+                "pickupArrivedAt",
+                "otpVerifiedAt",
+                "startedAt",
+                "tripStartedAt",
+                "completedAt",
+                "endedAt",
+                "cancelledAt"
+            ]
+            .forEach(
+                function (
+                    key
+                ) {
+
+                    if (
+                        ride[key] !==
+                        undefined
+                    ) {
+
+                        payload[key] =
+                            ride[key];
+                    }
+                }
+            );
+
+
+            if (
+                ride.otpVerified !==
+                undefined
+            ) {
+
+                payload.otpVerified =
+                    ride.otpVerified;
+            }
+
+
+            if (
+                ride.paymentMethod
+            ) {
+
+                payload.paymentMethod =
+                    ride.paymentMethod;
+            }
+
+
+            if (
+                ride.cancellationReason
+            ) {
+
+                payload.cancellationReason =
+                    ride.cancellationReason;
+            }
+
+
+            if (
                 database
             ) {
 
                 try {
 
+                    /*
+                     * Before writing an assignment,
+                     * verify current remote owner.
+                     */
+
+                    const remoteSnapshot =
+                        await database
+                            .ref(
+                                Flow.config.ridesPath +
+                                "/" +
+                                rideId
+                            )
+                            .once(
+                                "value"
+                            );
+
+
+                    const remoteRide =
+                        remoteSnapshot.val();
+
+
+                    if (
+                        remoteRide
+                    ) {
+
+                        const remoteOwner =
+                            remoteRide.riderId ||
+                            remoteRide.driverId ||
+                            remoteRide.acceptedBy;
+
+
+                        const localOwner =
+                            ride.riderId ||
+                            ride.driverId ||
+                            ride.acceptedBy;
+
+
+                        if (
+                            remoteOwner &&
+                            localOwner &&
+                            String(
+                                remoteOwner
+                            ) !==
+                            String(
+                                localOwner
+                            )
+                        ) {
+
+                            return {
+
+                                success:
+                                    false,
+
+                                error:
+                                    "Ride ownership conflict. Another rider is assigned."
+                            };
+                        }
+
+
+                        const remoteStatus =
+                            Flow.normalizeStatus(
+                                remoteRide.status
+                            );
+
+
+                        /*
+                         * Never overwrite a terminal ride.
+                         */
+
+                        if (
+                            Flow.isTerminalStatus(
+                                remoteStatus
+                            ) &&
+                            remoteStatus !==
+                            Flow.normalizeStatus(
+                                ride.status
+                            )
+                        ) {
+
+                            return {
+
+                                success:
+                                    false,
+
+                                error:
+                                    "Ride is already closed."
+                            };
+                        }
+                    }
+
+
                     await database
                         .ref(
-                            Flow.config
-                                .ridesPath +
+                            Flow.config.ridesPath +
                             "/" +
                             rideId
                         )
@@ -1474,15 +2552,14 @@
 
 
                     /*
-                     * Keep request status in sync.
+                     * Keep rideRequests synchronized.
                      */
 
                     try {
 
                         await database
                             .ref(
-                                Flow.config
-                                    .requestsPath +
+                                Flow.config.requestsPath +
                                 "/" +
                                 rideId
                             )
@@ -1502,13 +2579,16 @@
                     return {
 
                         success:
-                            true
+                            true,
+
+                        offline:
+                            false
                     };
 
                 } catch (error) {
 
                     console.error(
-                        "Ride Firebase update failed:",
+                        "RiderX Firebase ride update failed:",
                         error
                     );
 
@@ -1520,14 +2600,18 @@
 
                         error:
                             error.message ||
-                            "Firebase update failed."
+                            "Firebase ride update failed."
                     };
                 }
             }
 
 
             /*
-             * Offline/local fallback.
+             * Local fallback.
+             *
+             * This is only a local recovery mechanism;
+             * it does not claim that the ride was synced
+             * to Firebase.
              */
 
             try {
@@ -1588,8 +2672,7 @@
                     const snapshot =
                         await database
                             .ref(
-                                Flow.config
-                                    .ridesPath +
+                                Flow.config.ridesPath +
                                 "/" +
                                 rideId
                             )
@@ -1607,14 +2690,10 @@
                     ) {
 
                         const ride =
-                            {
-
-                                ...data,
-
-                                rideId:
-                                    data.rideId ||
-                                    rideId
-                            };
+                            Flow.normalizeRide(
+                                data,
+                                rideId
+                            );
 
 
                         Flow.state.ride =
@@ -1658,17 +2737,33 @@
                     saved
                 ) {
 
-                    const ride =
+                    const localRide =
                         JSON.parse(
                             saved
                         );
 
 
-                    if (
+                    const localRideId =
                         Flow.getRideId(
-                            ride
-                        ) === rideId
+                            localRide
+                        );
+
+
+                    if (
+                        String(
+                            localRideId
+                        ) ===
+                        String(
+                            rideId
+                        )
                     ) {
+
+                        const ride =
+                            Flow.normalizeRide(
+                                localRide,
+                                rideId
+                            );
+
 
                         Flow.state.ride =
                             ride;
@@ -1725,8 +2820,7 @@
 
             const ref =
                 database.ref(
-                    Flow.config
-                        .ridesPath +
+                    Flow.config.ridesPath +
                     "/" +
                     rideId
                 );
@@ -1749,36 +2843,94 @@
                     }
 
 
-                    const ride =
-                        {
+                    const remoteRide =
+                        Flow.normalizeRide(
+                            data,
+                            rideId
+                        );
 
-                            ...data,
 
-                            rideId:
-                                data.rideId ||
-                                rideId
-                        };
+                    const currentRide =
+                        Flow.state.ride;
+
+
+                    /*
+                     * Protect local rider ownership.
+                     */
+
+                    const localRiderId =
+                        Flow.getRiderId();
+
+
+                    const remoteOwner =
+                        remoteRide.riderId ||
+                        remoteRide.driverId ||
+                        remoteRide.acceptedBy;
+
+
+                    if (
+                        localRiderId &&
+                        remoteOwner &&
+                        String(
+                            localRiderId
+                        ) !==
+                        String(
+                            remoteOwner
+                        )
+                    ) {
+
+                        Flow.emit(
+                            "ownership-conflict",
+                            {
+
+                                ride:
+                                    remoteRide
+                            }
+                        );
+
+
+                        return;
+                    }
+
+
+                    /*
+                     * If a local ride is already terminal,
+                     * don't revive it with an old update.
+                     */
+
+                    if (
+                        currentRide &&
+                        Flow.isTerminalStatus(
+                            currentRide.status
+                        ) &&
+                        !Flow.isTerminalStatus(
+                            remoteRide.status
+                        )
+                    ) {
+
+                        return;
+                    }
 
 
                     Flow.state.ride =
-                        ride;
+                        remoteRide;
 
                     Flow.state.rideId =
                         rideId;
 
                     Flow.state.status =
                         Flow.normalizeStatus(
-                            ride.status
+                            remoteRide.status
                         );
 
 
                     Flow.setActiveRide(
-                        ride
+                        remoteRide
                     );
 
 
                     Flow.updateStatusUI(
-                        ride
+                        remoteRide
                     );
 
 
@@ -1787,20 +2939,18 @@
                         {
 
                             ride:
-                                ride
+                                remoteRide
                         }
                     );
 
 
                     /*
-                     * Stop listener after completed/cancelled.
+                     * Terminal rides no longer need
+                     * a live listener.
                      */
 
                     if (
-                        [
-                            "completed",
-                            "cancelled"
-                        ].includes(
+                        Flow.isTerminalStatus(
                             Flow.state.status
                         )
                     ) {
@@ -1853,19 +3003,25 @@
 
                     try {
 
-                        item.ref.off(
-                            item.event,
-                            item.callback
-                        );
+                        if (
+                            item &&
+                            item.ref
+                        ) {
+
+                            item.ref.off(
+                                item.event,
+                                item.callback
+                            );
+                        }
 
                     } catch (error) {}
-
                 }
             );
 
 
             Flow.state.listeners =
                 [];
+
 
             return true;
         };
@@ -1886,6 +3042,12 @@
 
                 return;
             }
+
+
+            ride =
+                Flow.normalizeRide(
+                    ride
+                );
 
 
             Flow.state.ride =
@@ -1918,6 +3080,9 @@
                 );
 
             } catch (error) {}
+
+
+            return ride;
         };
 
 
@@ -1936,6 +3101,13 @@
             Flow.state.status =
                 null;
 
+            Flow.state.updating =
+                false;
+
+
+            Flow.clearOtpAttempts();
+
+
             try {
 
                 localStorage.removeItem(
@@ -1952,8 +3124,15 @@
             Flow.emit(
                 "active-cleared"
             );
+
+
+            return true;
         };
 
+
+    /* ========================================================
+       RESTORE ACTIVE RIDE
+       ======================================================== */
 
     Flow.restoreActiveRide =
         async function () {
@@ -1975,8 +3154,10 @@
 
 
                 const localRide =
-                    JSON.parse(
-                        saved
+                    Flow.normalizeRide(
+                        JSON.parse(
+                            saved
+                        )
                     );
 
 
@@ -1990,9 +3171,18 @@
                     !rideId
                 ) {
 
+                    Flow.clearActiveRide();
+
                     return null;
                 }
 
+
+                Flow.loadOtpAttempts();
+
+
+                /*
+                 * Try Firebase first.
+                 */
 
                 const remoteRide =
                     await Flow.loadRide(
@@ -2012,11 +3202,40 @@
 
 
                 if (
-                    [
-                        "completed",
-                        "cancelled"
-                    ].includes(
+                    Flow.isTerminalStatus(
                         status
+                    )
+                ) {
+
+                    Flow.clearActiveRide();
+
+                    return null;
+                }
+
+
+                /*
+                 * If a rider is logged in, make sure
+                 * this active ride belongs to them.
+                 */
+
+                const riderId =
+                    Flow.getRiderId();
+
+
+                const owner =
+                    ride.riderId ||
+                    ride.driverId ||
+                    ride.acceptedBy;
+
+
+                if (
+                    riderId &&
+                    owner &&
+                    String(
+                        riderId
+                    ) !==
+                    String(
+                        owner
                     )
                 ) {
 
@@ -2033,6 +3252,21 @@
 
                 Flow.startRideListener(
                     rideId
+                );
+
+
+                Flow.updateStatusUI(
+                    ride
+                );
+
+
+                Flow.emit(
+                    "restored",
+                    {
+
+                        ride:
+                            ride
+                    }
                 );
 
 
@@ -2075,49 +3309,60 @@
 
 
             const customerId =
-                ride.customerId ||
-                ride.userId ||
-                ride.passengerId;
+                Flow.getCustomerId(
+                    ride
+                );
+
+
+            const rideId =
+                Flow.getRideId(
+                    ride
+                );
 
 
             if (
-                !customerId
+                !customerId ||
+                !rideId
             ) {
 
                 return false;
             }
 
 
-            const messages =
-                {
+            const messages = {
 
-                    accepted:
-                        "Your RiderX ride has been accepted.",
+                accepted:
+                    "Your RiderX ride has been accepted.",
 
-                    arrived:
-                        "Your RiderX rider has arrived at pickup.",
+                arriving:
+                    "Your RiderX rider is on the way to pickup.",
 
-                    started:
-                        "Your RiderX trip has started.",
+                arrived:
+                    "Your RiderX rider has arrived at pickup.",
 
-                    completed:
-                        "Your RiderX trip has been completed.",
+                started:
+                    "Your RiderX trip has started.",
 
-                    cancelled:
-                        "Your RiderX ride has been cancelled."
-                };
+                completed:
+                    "Your RiderX trip has been completed.",
+
+                cancelled:
+                    "Your RiderX ride has been cancelled."
+            };
 
 
             const message =
                 messages[type] ||
-                "Your ride has been updated.";
+                "Your RiderX ride has been updated.";
 
 
             try {
 
                 await database
                     .ref(
-                        "notifications/" +
+                        Flow.config
+                            .notificationsPath +
+                        "/" +
                         customerId
                     )
                     .push(
@@ -2127,9 +3372,7 @@
                                 "ride",
 
                             rideId:
-                                Flow.getRideId(
-                                    ride
-                                ),
+                                rideId,
 
                             title:
                                 "RiderX",
@@ -2138,7 +3381,9 @@
                                 message,
 
                             rideStatus:
-                                ride.status,
+                                Flow.normalizeStatus(
+                                    ride.status
+                                ),
 
                             read:
                                 false,
@@ -2150,33 +3395,57 @@
 
 
                 /*
-                 * Also keep customer ride record
-                 * synchronized.
+                 * Keep customer's activeRide synchronized.
                  */
 
-                await database
-                    .ref(
+                const activeRideRef =
+                    database.ref(
                         Flow.config
                             .customersPath +
                         "/" +
                         customerId +
                         "/activeRide"
-                    )
-                    .update(
-                        {
-
-                            rideId:
-                                Flow.getRideId(
-                                    ride
-                                ),
-
-                            status:
-                                ride.status,
-
-                            updatedAt:
-                                Date.now()
-                        }
                     );
+
+
+                if (
+                    type ===
+                        "completed" ||
+                    type ===
+                        "cancelled"
+                ) {
+
+                    /*
+                     * Remove stale active ride.
+                     */
+
+                    await activeRideRef
+                        .remove();
+
+                } else {
+
+                    await activeRideRef
+                        .update(
+                            {
+
+                                rideId:
+                                    rideId,
+
+                                status:
+                                    Flow.normalizeStatus(
+                                        ride.status
+                                    ),
+
+                                riderId:
+                                    ride.riderId ||
+                                    ride.driverId ||
+                                    null,
+
+                                updatedAt:
+                                    Date.now()
+                            }
+                        );
+                }
 
 
                 return true;
@@ -2231,9 +3500,9 @@
                                 status
                             );
 
+
                         element.dataset.status =
                             status;
-
                     }
                 );
 
@@ -2252,12 +3521,22 @@
                                 .rideAction;
 
 
-                        element.disabled =
-                            !Flow.canUseAction(
+                        const allowed =
+                            Flow.canUseAction(
                                 action,
                                 status
                             );
 
+
+                        element.disabled =
+                            !allowed;
+
+
+                        element.dataset
+                            .enabled =
+                            allowed
+                                ? "true"
+                                : "false";
                     }
                 );
 
@@ -2292,47 +3571,52 @@
                 );
 
 
-            const rules =
-                {
+            const rules = {
 
-                    accept:
-                        [
-                            "accepted"
-                        ],
+                /*
+                 * accept is normally handled
+                 * by the incoming ride card,
+                 * not active ride controls.
+                 */
 
-                    arriving:
-                        [
-                            "accepted"
-                        ],
+                accept:
+                    [
+                        "searching"
+                    ],
 
-                    arrived:
-                        [
-                            "arriving"
-                        ],
+                arriving:
+                    [
+                        "accepted"
+                    ],
 
-                    otp:
-                        [
-                            "arrived"
-                        ],
+                arrived:
+                    [
+                        "arriving"
+                    ],
 
-                    start:
-                        [
-                            "arrived",
-                            "otp_verified"
-                        ],
+                otp:
+                    [
+                        "arrived"
+                    ],
 
-                    complete:
-                        [
-                            "in_progress"
-                        ],
+                start:
+                    [
+                        "otp_verified"
+                    ],
 
-                    cancel:
-                        [
-                            "accepted",
-                            "arriving",
-                            "arrived"
-                        ]
-                };
+                complete:
+                    [
+                        "in_progress"
+                    ],
+
+                cancel:
+                    [
+                        "searching",
+                        "accepted",
+                        "arriving",
+                        "arrived"
+                    ]
+            };
 
 
             if (
@@ -2359,33 +3643,32 @@
             status
         ) {
 
-            const labels =
-                {
+            const labels = {
 
-                    searching:
-                        "Finding rider",
+                searching:
+                    "Finding rider",
 
-                    accepted:
-                        "Ride accepted",
+                accepted:
+                    "Ride accepted",
 
-                    arriving:
-                        "On the way to pickup",
+                arriving:
+                    "On the way to pickup",
 
-                    arrived:
-                        "Arrived at pickup",
+                arrived:
+                    "Arrived at pickup",
 
-                    otp_verified:
-                        "OTP verified",
+                otp_verified:
+                    "OTP verified",
 
-                    in_progress:
-                        "Trip in progress",
+                in_progress:
+                    "Trip in progress",
 
-                    completed:
-                        "Ride completed",
+                completed:
+                    "Ride completed",
 
-                    cancelled:
-                        "Ride cancelled"
-                };
+                cancelled:
+                    "Ride cancelled"
+            };
 
 
             return (
@@ -2409,19 +3692,34 @@
             data
         ) {
 
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-ride-flow-" +
-                    name,
-                    {
+            try {
 
-                        detail:
-                            data || {}
-                    }
-                )
-            );
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "riderx-ride-flow-" +
+                        name,
+                        {
+
+                            detail:
+                                data ||
+                                {}
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX ride-flow event error:",
+                    error
+                );
+            }
         };
 
+
+    /* ========================================================
+       EVENT LISTENER API
+       ======================================================== */
 
     Flow.on =
         function (
@@ -2434,29 +3732,30 @@
                 "function"
             ) {
 
-                return;
+                return function () {};
             }
 
 
-            const event =
+            const eventName =
                 "riderx-ride-flow-" +
                 name;
 
 
             const handler =
                 function (
-                    e
+                    event
                 ) {
 
                     callback(
-                        e.detail || {},
-                        e
+                        event.detail ||
+                        {},
+                        event
                     );
                 };
 
 
             window.addEventListener(
-                event,
+                eventName,
                 handler
             );
 
@@ -2464,7 +3763,7 @@
             return function () {
 
                 window.removeEventListener(
-                    event,
+                    eventName,
                     handler
                 );
             };
@@ -2503,8 +3802,22 @@
         };
 
 
+    RX.getRideStatus =
+        function () {
+
+            return Flow.state.status;
+        };
+
+
+    RX.getRideId =
+        function () {
+
+            return Flow.state.rideId;
+        };
+
+
     /* ========================================================
-       DOM EVENT HANDLERS
+       DOM CLICK HANDLERS
        ======================================================== */
 
     document.addEventListener(
@@ -2527,6 +3840,14 @@
             }
 
 
+            if (
+                button.disabled
+            ) {
+
+                return;
+            }
+
+
             const action =
                 button.dataset
                     .rideAction;
@@ -2539,12 +3860,14 @@
 
                 Flow.startArriving();
 
+
             } else if (
                 action ===
                 "arrived"
             ) {
 
                 Flow.arrivedAtPickup();
+
 
             } else if (
                 action ===
@@ -2553,12 +3876,14 @@
 
                 Flow.startTrip();
 
+
             } else if (
                 action ===
                 "complete"
             ) {
 
                 Flow.completeTrip();
+
 
             } else if (
                 action ===
@@ -2630,14 +3955,14 @@
 
                         if (
                             RX.notification &&
-                            typeof RX.notification
-                                .show ===
+                            typeof RX.notification.show ===
                             "function"
                         ) {
 
                             RX.notification.show(
                                 result.error
                             );
+
                         } else {
 
                             console.warn(
@@ -2645,11 +3970,40 @@
                             );
                         }
 
+                        return;
                     }
 
+
+                    /*
+                     * Clear OTP input after
+                     * successful verification.
+                     */
+
+                    input.value =
+                        "";
+
+                    input.dispatchEvent(
+                        new Event(
+                            "input",
+                            {
+                                bubbles:
+                                    true
+                            }
+                        )
+                    );
+                }
+            )
+            .catch(
+                function (
+                    error
+                ) {
+
+                    console.error(
+                        "OTP verification error:",
+                        error
+                    );
                 }
             );
-
         }
     );
 
@@ -2669,36 +4023,70 @@
             }
 
 
-            Flow.state.initialized =
-                true;
-
-
-            /*
-             * Recover active ride after refresh.
-             */
-
-            await Flow.restoreActiveRide();
-
-
-            /*
-             * If ride exists, update UI.
-             */
-
             if (
-                Flow.state.ride
+                Flow.state.initializing
             ) {
 
-                Flow.updateStatusUI(
-                    Flow.state.ride
-                );
+                return;
             }
 
 
-            console.log(
-                "RiderX ride-flow.js loaded."
-            );
+            Flow.state.initializing =
+                true;
+
+
+            try {
+
+                Flow.loadOtpAttempts();
+
+
+                /*
+                 * Recover active ride after refresh.
+                 */
+
+                await Flow.restoreActiveRide();
+
+
+                /*
+                 * Update UI if a ride exists.
+                 */
+
+                if (
+                    Flow.state.ride
+                ) {
+
+                    Flow.updateStatusUI(
+                        Flow.state.ride
+                    );
+                }
+
+
+                Flow.state.initialized =
+                    true;
+
+
+                console.log(
+                    "RiderX ride-flow.js loaded."
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "RiderX ride-flow initialization failed:",
+                    error
+                );
+
+            } finally {
+
+                Flow.state.initializing =
+                    false;
+            }
         };
 
+
+    /* ========================================================
+       DOM READY
+       ======================================================== */
 
     if (
         document.readyState ===
@@ -2707,13 +4095,16 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            Flow.init
+            Flow.init,
+            {
+                once:
+                    true
+            }
         );
 
     } else {
 
         Flow.init();
-
     }
 
 })();
