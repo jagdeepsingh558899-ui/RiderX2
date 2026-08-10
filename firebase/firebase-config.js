@@ -11,19 +11,29 @@
    - Cloud Firestore
    - Realtime Database
    - Firebase Storage
+
+   IMPORTANT:
+   This is the SINGLE Firebase initialization point
+   for the RiderX application.
 ========================================================= */
 
 "use strict";
 
 
 /* =========================================================
-   FIREBASE SDK
+   FIREBASE APP
 ========================================================= */
 
 import {
-    initializeApp
+    initializeApp,
+    getApps,
+    getApp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 
+
+/* =========================================================
+   FIREBASE AUTHENTICATION
+========================================================= */
 
 import {
     getAuth,
@@ -36,9 +46,15 @@ import {
     RecaptchaVerifier,
     signInWithPhoneNumber,
     sendPasswordResetEmail,
-    updateProfile
+    updateProfile,
+    deleteUser,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+
+/* =========================================================
+   CLOUD FIRESTORE
+========================================================= */
 
 import {
     getFirestore,
@@ -65,6 +81,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
+/* =========================================================
+   REALTIME DATABASE
+========================================================= */
+
 import {
     getDatabase,
     ref,
@@ -80,6 +100,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 
+/* =========================================================
+   FIREBASE STORAGE
+========================================================= */
+
 import {
     getStorage,
     ref as storageRef,
@@ -91,7 +115,7 @@ import {
 
 
 /* =========================================================
-   FIREBASE CONFIG
+   FIREBASE CONFIGURATION
 ========================================================= */
 
 const firebaseConfig = {
@@ -125,16 +149,20 @@ const firebaseConfig = {
 
 /* =========================================================
    INITIALIZE FIREBASE
+   ---------------------------------------------------------
+   Prevent duplicate Firebase app initialization.
 ========================================================= */
 
 const app =
-    initializeApp(
-        firebaseConfig
-    );
+    getApps().length > 0
+        ? getApp()
+        : initializeApp(
+            firebaseConfig
+        );
 
 
 /* =========================================================
-   SERVICES
+   FIREBASE SERVICES
 ========================================================= */
 
 const auth =
@@ -162,7 +190,7 @@ const storage =
 
 
 /* =========================================================
-   GOOGLE AUTH
+   GOOGLE AUTH PROVIDER
 ========================================================= */
 
 const googleProvider =
@@ -170,8 +198,64 @@ const googleProvider =
 
 
 googleProvider.setCustomParameters({
-    prompt: "select_account"
+    prompt:
+        "select_account"
 });
+
+
+/* =========================================================
+   FIREBASE SERVICE BUNDLE
+   ---------------------------------------------------------
+   Used by legacy RiderX modules through:
+       RX.firebase
+       RiderXFirebase
+========================================================= */
+
+const firebaseServices = {
+
+    app,
+
+    auth,
+
+    db,
+
+    realtimeDb,
+
+    storage,
+
+    googleProvider
+
+};
+
+
+/* =========================================================
+   LEGACY GLOBAL COMPATIBILITY
+   ---------------------------------------------------------
+   Older RiderX files use:
+       window.RX.firebase
+       window.RiderXFirebase
+
+   Keep both working while the remaining project files
+   are migrated to the central ES-module architecture.
+========================================================= */
+
+if (
+    typeof window !== "undefined"
+) {
+
+    window.RiderXFirebase =
+        firebaseServices;
+
+
+    window.RX =
+        window.RX ||
+        {};
+
+
+    window.RX.firebase =
+        firebaseServices;
+
+}
 
 
 /* =========================================================
@@ -180,7 +264,12 @@ googleProvider.setCustomParameters({
 
 export {
 
+    /* Firebase */
+
     app,
+
+
+    /* Services */
 
     auth,
 
@@ -203,6 +292,8 @@ export {
 
     onAuthStateChanged,
 
+    GoogleAuthProvider,
+
     signInWithPopup,
 
     RecaptchaVerifier,
@@ -213,8 +304,9 @@ export {
 
     updateProfile,
 
+    deleteUser,
 
-    GoogleAuthProvider,
+    sendEmailVerification,
 
 
     /* Firestore */
@@ -293,80 +385,89 @@ export {
 
     getDownloadURL,
 
-    deleteObject
-
-};
+    deleteObject,
 
 
-/* =========================================================
-   GLOBAL RIDERX FIREBASE OBJECT
-   ---------------------------------------------------------
-   This is intentionally exposed for older RiderX modules
-   that still read window.RiderXFirebase.
+    /* Config */
 
-   New code should use ES module imports above.
-========================================================= */
+    firebaseConfig,
 
-window.RiderXFirebase = {
-
-    app,
-
-    auth,
-
-    db,
-
-    realtimeDb,
-
-    storage,
-
-    googleProvider
+    firebaseServices
 
 };
 
 
 /* =========================================================
    FIREBASE READY EVENT
+   ---------------------------------------------------------
+   Other modules can listen for:
+
+       window.addEventListener(
+           "riderx:firebase-ready",
+           ...
+       );
 ========================================================= */
 
-window.dispatchEvent(
-    new CustomEvent(
-        "riderx:firebase-ready",
-        {
-            detail: {
-                app,
-                auth,
-                db,
-                realtimeDb,
-                storage
+if (
+    typeof window !== "undefined"
+) {
+
+    window.dispatchEvent(
+        new CustomEvent(
+            "riderx:firebase-ready",
+            {
+                detail: {
+                    app,
+
+                    auth,
+
+                    db,
+
+                    realtimeDb,
+
+                    storage,
+
+                    googleProvider
+                }
             }
-        }
-    )
-);
+        )
+    );
+
+}
 
 
 /* =========================================================
    DEBUG INFORMATION
    ---------------------------------------------------------
-   Does not expose credentials beyond the public Firebase
-   configuration already required by the client SDK.
+   Firebase public client configuration is not treated as
+   a secret. Security must be enforced through Firebase
+   Authentication and Firestore/Realtime Database rules.
 ========================================================= */
 
 console.info(
-    "RiderX Firebase initialized successfully.",
+    "RiderX Firebase initialized.",
     {
         projectId:
             firebaseConfig.projectId,
 
         auth:
-            !!auth,
+            Boolean(
+                auth
+            ),
 
         firestore:
-            !!db,
+            Boolean(
+                db
+            ),
 
         realtimeDatabase:
-            !!realtimeDb,
+            Boolean(
+                realtimeDb
+            ),
 
         storage:
-            !!storage
+            Boolean(
+                storage
+            )
     }
 );
