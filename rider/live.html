@@ -1,6 +1,30 @@
-<!DOCTYPE html><html lang="en">
-<head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><meta name="theme-color" content="#000000"><title>RiderX | Live Ride</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<meta name="theme-color" content="#000000">
+
+<title>RiderX | Live Ride</title>
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
+
+<style>
 
 :root{
     --yellow:#ffe500;
@@ -12,6 +36,7 @@
     --muted:#888;
     --green:#22c55e;
     --red:#ef4444;
+    --blue:#38bdf8;
 }
 
 *{
@@ -29,6 +54,11 @@ body{
     overflow:hidden;
     background:#000;
     color:#fff;
+}
+
+button{
+    font-family:inherit;
+    cursor:pointer;
 }
 
 #map{
@@ -50,9 +80,9 @@ body{
 }
 
 
-/* =========================================
+/* =========================================================
    TOP BAR
-========================================= */
+========================================================= */
 
 .topbar{
     position:fixed;
@@ -107,9 +137,9 @@ body{
 }
 
 
-/* =========================================
-   RIDE STATUS
-========================================= */
+/* =========================================================
+   STATUS
+========================================================= */
 
 .status-pill{
     position:fixed;
@@ -140,17 +170,17 @@ body{
 }
 
 .status-pill.completed{
-    color:#7dd3fc;
+    color:var(--blue);
 }
 
 .status-pill.cancelled{
-    color:#ff6b6b;
+    color:#ff7070;
 }
 
 
-/* =========================================
-   MAP BUTTONS
-========================================= */
+/* =========================================================
+   MAP CONTROLS
+========================================================= */
 
 .map-controls{
     position:fixed;
@@ -182,9 +212,9 @@ body{
 }
 
 
-/* =========================================
+/* =========================================================
    BOTTOM SHEET
-========================================= */
+========================================================= */
 
 .sheet{
     position:fixed;
@@ -192,7 +222,7 @@ body{
     right:0;
     bottom:0;
     z-index:1000;
-    max-height:58vh;
+    max-height:62vh;
     overflow-y:auto;
     padding:
         10px
@@ -216,14 +246,14 @@ body{
 }
 
 
-/* =========================================
-   DRIVER / CUSTOMER CARD
-========================================= */
+/* =========================================================
+   CUSTOMER
+========================================================= */
 
 .customer-card{
     display:flex;
     align-items:center;
-    gap:12px;
+    gap:9px;
     padding:13px;
     background:#151515;
     border:1px solid #292929;
@@ -268,32 +298,33 @@ body{
     font-size:10px;
 }
 
-.call-btn{
-    width:45px;
-    height:45px;
-    min-width:45px;
-    border:0;
-    border-radius:50%;
-    background:var(--green);
-    color:#000;
-    font-size:17px;
-}
-
+.call-btn,
 .chat-btn{
     width:45px;
     height:45px;
     min-width:45px;
     border:0;
     border-radius:50%;
-    background:#292929;
-    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     font-size:17px;
 }
 
+.call-btn{
+    background:var(--green);
+    color:#000;
+}
 
-/* =========================================
+.chat-btn{
+    background:#292929;
+    color:#fff;
+}
+
+
+/* =========================================================
    ROUTE
-========================================= */
+========================================================= */
 
 .route-card{
     margin-top:11px;
@@ -353,9 +384,9 @@ body{
 }
 
 
-/* =========================================
-   FARE
-========================================= */
+/* =========================================================
+   RIDE INFO
+========================================================= */
 
 .ride-info{
     display:grid;
@@ -390,9 +421,9 @@ body{
 }
 
 
-/* =========================================
-   ACTION BUTTONS
-========================================= */
+/* =========================================================
+   BUTTONS
+========================================================= */
 
 .primary-btn{
     width:100%;
@@ -436,9 +467,9 @@ body{
 }
 
 
-/* =========================================
+/* =========================================================
    COMPLETE
-========================================= */
+========================================================= */
 
 .complete-box{
     display:none;
@@ -478,9 +509,9 @@ body{
 }
 
 
-/* =========================================
+/* =========================================================
    NO RIDE
-========================================= */
+========================================================= */
 
 .no-ride{
     position:fixed;
@@ -501,7 +532,7 @@ body{
 .no-ride-box{
     padding:20px;
     border-radius:20px;
-    background:rgba(10,10,10,.9);
+    background:rgba(10,10,10,.92);
 }
 
 .no-ride-box i{
@@ -521,9 +552,9 @@ body{
 }
 
 
-/* =========================================
+/* =========================================================
    DESKTOP
-========================================= */
+========================================================= */
 
 @media(min-width:700px){
 
@@ -540,325 +571,391 @@ body{
 
 }
 
-</style></head><body><div id="map"></div><!-- TOP BAR --><div class="topbar"><div class="topbar-inner">
+</style>
 
-    <button
-        id="backBtn"
-        class="top-btn"
-        type="button"
-    >
-        <i class="fa-solid fa-arrow-left"></i>
-    </button>
+</head>
 
-    <div class="logo">
-        RIDER<span>X</span>
+<body>
+
+<div id="map"></div>
+
+
+<!-- ======================================================
+     TOP BAR
+====================================================== -->
+
+<div class="topbar">
+
+    <div class="topbar-inner">
+
+        <button
+            id="backBtn"
+            class="top-btn"
+            type="button"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+
+        <div class="logo">
+            RIDER<span>X</span>
+        </div>
+
+
+        <button
+            id="notificationBtn"
+            class="top-btn"
+            type="button"
+        >
+            <i class="fa-solid fa-bell"></i>
+        </button>
+
     </div>
-
-    <button
-        id="notificationBtn"
-        class="top-btn"
-        type="button"
-    >
-        <i class="fa-solid fa-bell"></i>
-    </button>
 
 </div>
 
-</div><!-- STATUS --><div
+
+<!-- ======================================================
+     STATUS
+====================================================== -->
+
+<div
     id="statusPill"
     class="status-pill searching"
 >
     Loading ride...
-</div><!-- MAP CONTROLS --><div class="map-controls"><button
-    id="centerBtn"
-    class="map-btn location"
-    type="button"
->
-    <i class="fa-solid fa-location-crosshairs"></i>
-</button>
-
-<button
-    id="zoomIn"
-    class="map-btn"
-    type="button"
->
-    <i class="fa-solid fa-plus"></i>
-</button>
-
-<button
-    id="zoomOut"
-    class="map-btn"
-    type="button"
->
-    <i class="fa-solid fa-minus"></i>
-</button>
-
-</div><!-- NO RIDE --><div
-    id="noRide"
-    class="no-ride"
-><div class="no-ride-box">
-
-    <i class="fa-solid fa-motorcycle"></i>
-
-    <h3>
-        No Active Ride
-    </h3>
-
-    <p>
-        Your active trip will appear here.
-    </p>
-
 </div>
 
-</div><!-- BOTTOM SHEET --><div class="sheet"><div class="handle"></div>
 
+<!-- ======================================================
+     MAP CONTROLS
+====================================================== -->
 
-<!-- CUSTOMER -->
-
-<div class="customer-card">
-
-    <div class="avatar">
-
-        <i class="fa-solid fa-user"></i>
-
-    </div>
-
-    <div class="customer-info">
-
-        <div
-            id="customerName"
-            class="customer-name"
-        >
-            Customer
-        </div>
-
-        <div
-            id="customerPhone"
-            class="customer-meta"
-        >
-            RiderX customer
-        </div>
-
-        <div
-            id="customerRating"
-            class="rating"
-        >
-            ★ 5.0
-        </div>
-
-    </div>
-
+<div class="map-controls">
 
     <button
-        id="chatBtn"
-        class="chat-btn"
+        id="centerBtn"
+        class="map-btn location"
         type="button"
-        aria-label="Chat"
+        aria-label="My location"
     >
-        <i class="fa-solid fa-comment"></i>
+        <i class="fa-solid fa-location-crosshairs"></i>
     </button>
 
 
     <button
-        id="callBtn"
-        class="call-btn"
+        id="zoomIn"
+        class="map-btn"
         type="button"
-        aria-label="Call"
+        aria-label="Zoom in"
     >
-        <i class="fa-solid fa-phone"></i>
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+
+    <button
+        id="zoomOut"
+        class="map-btn"
+        type="button"
+        aria-label="Zoom out"
+    >
+        <i class="fa-solid fa-minus"></i>
     </button>
 
 </div>
 
 
-<!-- ROUTE -->
-
-<div class="route-card">
-
-    <div class="route-row">
-
-        <div class="route-icon pickup">
-
-            <i class="fa-solid fa-circle"></i>
-
-        </div>
-
-        <div class="route-text">
-
-            <div class="route-label">
-                PICKUP
-            </div>
-
-            <div
-                id="pickupAddress"
-                class="route-address"
-            >
-                Loading pickup...
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="route-line"></div>
-
-
-    <div class="route-row">
-
-        <div class="route-icon dropoff">
-
-            <i class="fa-solid fa-location-dot"></i>
-
-        </div>
-
-        <div class="route-text">
-
-            <div class="route-label">
-                DESTINATION
-            </div>
-
-            <div
-                id="dropoffAddress"
-                class="route-address"
-            >
-                Loading destination...
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- RIDE INFO -->
-
-<div class="ride-info">
-
-    <div class="info">
-
-        <i class="fa-solid fa-route"></i>
-
-        <div
-            id="distance"
-            class="info-value"
-        >
-            -- km
-        </div>
-
-        <div class="info-label">
-            DISTANCE
-        </div>
-
-    </div>
-
-
-    <div class="info">
-
-        <i class="fa-solid fa-indian-rupee-sign"></i>
-
-        <div
-            id="fare"
-            class="info-value"
-        >
-            ₹0
-        </div>
-
-        <div class="info-label">
-            FARE
-        </div>
-
-    </div>
-
-
-    <div class="info">
-
-        <i class="fa-solid fa-wallet"></i>
-
-        <div
-            id="payment"
-            class="info-value"
-        >
-            Cash
-        </div>
-
-        <div class="info-label">
-            PAYMENT
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- MAIN ACTION -->
-
-<button
-    id="mainAction"
-    class="primary-btn"
-    type="button"
->
-    <i class="fa-solid fa-location-arrow"></i>
-    Start Ride
-</button>
-
-
-<!-- ARRIVED -->
-
-<button
-    id="arrivedBtn"
-    class="secondary-btn"
-    type="button"
->
-    <i class="fa-solid fa-flag-checkered"></i>
-    Mark Arrived
-</button>
-
-
-<!-- CANCEL -->
-
-<button
-    id="cancelBtn"
-    class="cancel-btn"
-    type="button"
->
-    Cancel Ride
-</button>
-
-
-<!-- COMPLETE -->
+<!-- ======================================================
+     NO RIDE
+====================================================== -->
 
 <div
-    id="completeBox"
-    class="complete-box"
+    id="noRide"
+    class="no-ride"
 >
 
-    <div class="complete-icon">
+    <div class="no-ride-box">
 
-        <i class="fa-solid fa-check"></i>
+        <i class="fa-solid fa-motorcycle"></i>
 
-    </div>
+        <h3>
+            No Active Ride
+        </h3>
 
-    <div class="complete-title">
-        Ride Completed
-    </div>
+        <p>
+            Your active trip will appear here.
+        </p>
 
-    <div
-        id="completeText"
-        class="complete-text"
-    >
-        Payment collected successfully.
     </div>
 
 </div>
 
-</div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script type="module">
+
+<!-- ======================================================
+     BOTTOM SHEET
+====================================================== -->
+
+<div class="sheet">
+
+    <div class="handle"></div>
+
+
+    <!-- CUSTOMER -->
+
+    <div class="customer-card">
+
+        <div class="avatar">
+            <i class="fa-solid fa-user"></i>
+        </div>
+
+
+        <div class="customer-info">
+
+            <div
+                id="customerName"
+                class="customer-name"
+            >
+                Customer
+            </div>
+
+            <div
+                id="customerPhone"
+                class="customer-meta"
+            >
+                RiderX customer
+            </div>
+
+            <div
+                id="customerRating"
+                class="rating"
+            >
+                ★ 5.0
+            </div>
+
+        </div>
+
+
+        <button
+            id="chatBtn"
+            class="chat-btn"
+            type="button"
+            aria-label="Chat"
+        >
+            <i class="fa-solid fa-comment"></i>
+        </button>
+
+
+        <button
+            id="callBtn"
+            class="call-btn"
+            type="button"
+            aria-label="Call"
+        >
+            <i class="fa-solid fa-phone"></i>
+        </button>
+
+    </div>
+
+
+    <!-- ROUTE -->
+
+    <div class="route-card">
+
+        <div class="route-row">
+
+            <div class="route-icon pickup">
+
+                <i class="fa-solid fa-circle"></i>
+
+            </div>
+
+
+            <div class="route-text">
+
+                <div class="route-label">
+                    PICKUP
+                </div>
+
+                <div
+                    id="pickupAddress"
+                    class="route-address"
+                >
+                    Loading pickup...
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="route-line"></div>
+
+
+        <div class="route-row">
+
+            <div class="route-icon dropoff">
+
+                <i class="fa-solid fa-location-dot"></i>
+
+            </div>
+
+
+            <div class="route-text">
+
+                <div class="route-label">
+                    DESTINATION
+                </div>
+
+                <div
+                    id="dropoffAddress"
+                    class="route-address"
+                >
+                    Loading destination...
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- RIDE INFO -->
+
+    <div class="ride-info">
+
+        <div class="info">
+
+            <i class="fa-solid fa-route"></i>
+
+            <div
+                id="distance"
+                class="info-value"
+            >
+                -- km
+            </div>
+
+            <div class="info-label">
+                DISTANCE
+            </div>
+
+        </div>
+
+
+        <div class="info">
+
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+
+            <div
+                id="fare"
+                class="info-value"
+            >
+                ₹0
+            </div>
+
+            <div class="info-label">
+                FARE
+            </div>
+
+        </div>
+
+
+        <div class="info">
+
+            <i class="fa-solid fa-wallet"></i>
+
+            <div
+                id="payment"
+                class="info-value"
+            >
+                Cash
+            </div>
+
+            <div class="info-label">
+                PAYMENT
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MAIN ACTION -->
+
+    <button
+        id="mainAction"
+        class="primary-btn"
+        type="button"
+    >
+        <i class="fa-solid fa-route"></i>
+        Start Ride
+    </button>
+
+
+    <!-- ARRIVED -->
+
+    <button
+        id="arrivedBtn"
+        class="secondary-btn"
+        type="button"
+    >
+        <i class="fa-solid fa-flag-checkered"></i>
+        Mark Arrived
+    </button>
+
+
+    <!-- CANCEL -->
+
+    <button
+        id="cancelBtn"
+        class="cancel-btn"
+        type="button"
+    >
+        Cancel Ride
+    </button>
+
+
+    <!-- COMPLETE -->
+
+    <div
+        id="completeBox"
+        class="complete-box"
+    >
+
+        <div class="complete-icon">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <div class="complete-title">
+            Ride Completed
+        </div>
+
+        <div
+            id="completeText"
+            class="complete-text"
+        >
+            Payment collected successfully.
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<script type="module">
+
+/* =========================================================
+   FIREBASE
+========================================================= */
 
 import {
     auth,
     db
-} from "../firebase/config.js";
+} from "../firebase/firebase-config.js";
+
 
 import {
     doc,
@@ -873,14 +970,15 @@ import {
     getDocs
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
+
 import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
-/* =========================================
+/* =========================================================
    ELEMENTS
-========================================= */
+========================================================= */
 
 const statusPill =
     document.getElementById("statusPill");
@@ -928,14 +1026,18 @@ const completeText =
     document.getElementById("completeText");
 
 
-/* =========================================
+/* =========================================================
    MAP
-========================================= */
+========================================================= */
 
 const map =
-    L.map("map",{
-        zoomControl:false
-    });
+    L.map(
+        "map",
+        {
+            zoomControl:false,
+            attributionControl:true
+        }
+    );
 
 
 L.tileLayer(
@@ -953,6 +1055,10 @@ map.setView(
 );
 
 
+/* =========================================================
+   STATE
+========================================================= */
+
 let riderMarker = null;
 let pickupMarker = null;
 let dropoffMarker = null;
@@ -960,20 +1066,23 @@ let routeLine = null;
 
 let currentPosition = null;
 let watchId = null;
+
 let currentUser = null;
 let currentRideId = null;
 let currentRideData = null;
+
 let rideUnsubscribe = null;
 
 
-/* =========================================
+/* =========================================================
    ICONS
-========================================= */
+========================================================= */
 
 const riderIcon =
     L.divIcon({
 
         className:"",
+
         html:`
             <div style="
                 width:46px;
@@ -991,6 +1100,7 @@ const riderIcon =
                 <i class="fa-solid fa-motorcycle"></i>
             </div>
         `,
+
         iconSize:[46,46],
         iconAnchor:[23,23]
 
@@ -1001,6 +1111,7 @@ const pickupIcon =
     L.divIcon({
 
         className:"",
+
         html:`
             <div style="
                 width:38px;
@@ -1017,6 +1128,7 @@ const pickupIcon =
                 <i class="fa-solid fa-user"></i>
             </div>
         `,
+
         iconSize:[38,38],
         iconAnchor:[19,19]
 
@@ -1027,6 +1139,7 @@ const dropoffIcon =
     L.divIcon({
 
         className:"",
+
         html:`
             <div style="
                 width:40px;
@@ -1047,15 +1160,16 @@ const dropoffIcon =
                 ></i>
             </div>
         `,
+
         iconSize:[40,40],
         iconAnchor:[14,34]
 
     });
 
 
-/* =========================================
-   HELPERS
-========================================= */
+/* =========================================================
+   NUMBER HELPER
+========================================================= */
 
 function getNumber(value){
 
@@ -1068,6 +1182,10 @@ function getNumber(value){
 
 }
 
+
+/* =========================================================
+   COORDINATE HELPER
+========================================================= */
 
 function getCoords(data,type){
 
@@ -1140,14 +1258,16 @@ function getCoords(data,type){
 }
 
 
+/* =========================================================
+   FIT MAP
+========================================================= */
+
 function fitRideMap(){
 
     const points = [];
 
 
-    if(
-        currentPosition
-    ){
+    if(currentPosition){
 
         points.push([
             currentPosition.coords.latitude,
@@ -1157,9 +1277,7 @@ function fitRideMap(){
     }
 
 
-    if(
-        pickupMarker
-    ){
+    if(pickupMarker){
 
         points.push(
             pickupMarker.getLatLng()
@@ -1168,9 +1286,7 @@ function fitRideMap(){
     }
 
 
-    if(
-        dropoffMarker
-    ){
+    if(dropoffMarker){
 
         points.push(
             dropoffMarker.getLatLng()
@@ -1179,9 +1295,7 @@ function fitRideMap(){
     }
 
 
-    if(
-        points.length >= 2
-    ){
+    if(points.length >= 2){
 
         map.fitBounds(
             L.latLngBounds(points),
@@ -1191,9 +1305,12 @@ function fitRideMap(){
             }
         );
 
-    }else if(
-        points.length === 1
-    ){
+        return;
+
+    }
+
+
+    if(points.length === 1){
 
         map.setView(
             points[0],
@@ -1205,14 +1322,13 @@ function fitRideMap(){
 }
 
 
-/* =========================================
+/* =========================================================
    DISPLAY RIDE
-========================================= */
+========================================================= */
 
 function displayRide(data){
 
-    currentRideData =
-        data;
+    currentRideData = data;
 
 
     customerName.innerText =
@@ -1228,21 +1344,26 @@ function displayRide(data){
 
 
     const rating =
-        data.customerRating ??
-        data.rating ??
-        5;
+        getNumber(
+            data.customerRating ??
+            data.rating ??
+            5
+        ) ?? 5;
 
 
     customerRating.innerText =
-        `★ ${Number(rating).toFixed(1)}`;
+        `★ ${rating.toFixed(1)}`;
 
 
     pickupAddress.innerText =
         data.pickupAddress ||
         data.pickupLocation ||
         data.fromAddress ||
-        data.from ||
-        "Pickup location";
+        (
+            typeof data.from === "string"
+                ? data.from
+                : "Pickup location"
+        );
 
 
     dropoffAddress.innerText =
@@ -1250,33 +1371,45 @@ function displayRide(data){
         data.dropoffLocation ||
         data.destinationAddress ||
         data.toAddress ||
-        data.destination ||
-        "Destination";
+        (
+            typeof data.destination === "string"
+                ? data.destination
+                : "Destination"
+        );
 
 
     const distance =
-        data.distance ??
-        data.estimatedDistance ??
-        data.distanceKm;
+        getNumber(
+            data.distance ??
+            data.estimatedDistance ??
+            data.distanceKm
+        );
 
 
-    if(distance != null){
+    if(distance !== null){
 
         distanceEl.innerText =
-            `${Number(distance).toFixed(1)} km`;
+            `${distance.toFixed(1)} km`;
+
+    }else{
+
+        distanceEl.innerText =
+            "-- km";
 
     }
 
 
     const fare =
-        data.fare ??
-        data.estimatedFare ??
-        data.price ??
-        0;
+        getNumber(
+            data.fare ??
+            data.estimatedFare ??
+            data.price ??
+            0
+        ) ?? 0;
 
 
     fareEl.innerText =
-        `₹${Number(fare).toFixed(0)}`;
+        `₹${fare.toFixed(0)}`;
 
 
     paymentEl.innerText =
@@ -1300,6 +1433,8 @@ function displayRide(data){
             "dropoff"
         );
 
+
+    /* PICKUP */
 
     if(pickup){
 
@@ -1328,6 +1463,8 @@ function displayRide(data){
     }
 
 
+    /* DROPOFF */
+
     if(dropoff){
 
         if(!dropoffMarker){
@@ -1354,6 +1491,8 @@ function displayRide(data){
 
     }
 
+
+    /* ROUTE */
 
     if(
         pickup &&
@@ -1396,16 +1535,15 @@ function displayRide(data){
 }
 
 
-/* =========================================
-   RIDE STATUS UI
-========================================= */
+/* =========================================================
+   RIDE UI
+========================================================= */
 
 function updateRideUI(status){
 
     const normalized =
         String(
-            status ||
-            "ACCEPTED"
+            status || "ACCEPTED"
         ).toUpperCase();
 
 
@@ -1413,11 +1551,30 @@ function updateRideUI(status){
         "status-pill";
 
 
-    if(
-        normalized === "SEARCHING" ||
-        normalized === "REQUESTED" ||
-        normalized === "PENDING"
-    ){
+    mainAction.style.display =
+        "block";
+
+
+    arrivedBtn.style.display =
+        "none";
+
+
+    cancelBtn.style.display =
+        "block";
+
+
+    completeBox.classList.remove(
+        "show"
+    );
+
+
+    /* SEARCHING */
+
+    if([
+        "SEARCHING",
+        "REQUESTED",
+        "PENDING"
+    ].includes(normalized)){
 
         statusPill.classList.add(
             "searching"
@@ -1426,7 +1583,8 @@ function updateRideUI(status){
         statusPill.innerText =
             "Waiting for ride confirmation";
 
-        mainAction.disabled = true;
+        mainAction.disabled =
+            true;
 
         mainAction.innerHTML =
             `
@@ -1434,21 +1592,17 @@ function updateRideUI(status){
             Waiting...
             `;
 
-        arrivedBtn.style.display =
-            "none";
-
-        cancelBtn.style.display =
-            "block";
-
         return;
 
     }
 
 
-    if(
-        normalized === "ACCEPTED" ||
-        normalized === "ASSIGNED"
-    ){
+    /* ACCEPTED */
+
+    if([
+        "ACCEPTED",
+        "ASSIGNED"
+    ].includes(normalized)){
 
         statusPill.classList.add(
             "accepted"
@@ -1457,7 +1611,8 @@ function updateRideUI(status){
         statusPill.innerText =
             "Ride accepted • Go to pickup";
 
-        mainAction.disabled = false;
+        mainAction.disabled =
+            false;
 
         mainAction.innerHTML =
             `
@@ -1468,18 +1623,17 @@ function updateRideUI(status){
         arrivedBtn.style.display =
             "block";
 
-        cancelBtn.style.display =
-            "block";
-
         return;
 
     }
 
 
-    if(
-        normalized === "ARRIVING" ||
-        normalized === "DRIVER_ARRIVING"
-    ){
+    /* ARRIVING */
+
+    if([
+        "ARRIVING",
+        "DRIVER_ARRIVING"
+    ].includes(normalized)){
 
         statusPill.classList.add(
             "accepted"
@@ -1488,30 +1642,64 @@ function updateRideUI(status){
         statusPill.innerText =
             "Heading to customer";
 
-        mainAction.disabled = false;
+        mainAction.disabled =
+            true;
 
         mainAction.innerHTML =
             `
-            <i class="fa-solid fa-person-walking"></i>
-            Start Ride
+            <i class="fa-solid fa-location-arrow"></i>
+            Arriving...
             `;
 
         arrivedBtn.style.display =
             "block";
 
-        cancelBtn.style.display =
-            "block";
+        arrivedBtn.innerHTML =
+            `
+            <i class="fa-solid fa-flag-checkered"></i>
+            Mark Arrived
+            `;
 
         return;
 
     }
 
 
-    if(
-        normalized === "STARTED" ||
-        normalized === "IN_PROGRESS" ||
-        normalized === "ONGOING"
-    ){
+    /* ARRIVED */
+
+    if(normalized === "ARRIVED"){
+
+        statusPill.classList.add(
+            "accepted"
+        );
+
+        statusPill.innerText =
+            "You have arrived • Start ride";
+
+        mainAction.disabled =
+            false;
+
+        mainAction.innerHTML =
+            `
+            <i class="fa-solid fa-play"></i>
+            Start Ride
+            `;
+
+        arrivedBtn.style.display =
+            "none";
+
+        return;
+
+    }
+
+
+    /* STARTED */
+
+    if([
+        "STARTED",
+        "IN_PROGRESS",
+        "ONGOING"
+    ].includes(normalized)){
 
         statusPill.classList.add(
             "accepted"
@@ -1520,7 +1708,8 @@ function updateRideUI(status){
         statusPill.innerText =
             "Ride in progress";
 
-        mainAction.disabled = false;
+        mainAction.disabled =
+            false;
 
         mainAction.innerHTML =
             `
@@ -1531,18 +1720,17 @@ function updateRideUI(status){
         arrivedBtn.style.display =
             "none";
 
-        cancelBtn.style.display =
-            "block";
-
         return;
 
     }
 
 
-    if(
-        normalized === "COMPLETED" ||
-        normalized === "COMPLETE"
-    ){
+    /* COMPLETED */
+
+    if([
+        "COMPLETED",
+        "COMPLETE"
+    ].includes(normalized)){
 
         statusPill.classList.add(
             "completed"
@@ -1564,20 +1752,29 @@ function updateRideUI(status){
             "show"
         );
 
+
+        const fare =
+            getNumber(
+                currentRideData?.fare ||
+                currentRideData?.estimatedFare ||
+                0
+            ) ?? 0;
+
+
         completeText.innerText =
-            `Fare ₹${Number(
-                currentRideData?.fare || 0
-            ).toFixed(0)} completed successfully.`;
+            `Fare ₹${fare.toFixed(0)} completed successfully.`;
 
         return;
 
     }
 
 
-    if(
-        normalized === "CANCELLED" ||
-        normalized === "CANCELED"
-    ){
+    /* CANCELLED */
+
+    if([
+        "CANCELLED",
+        "CANCELED"
+    ].includes(normalized)){
 
         statusPill.classList.add(
             "cancelled"
@@ -1602,20 +1799,18 @@ function updateRideUI(status){
 }
 
 
-/* =========================================
-   UPDATE FIRESTORE STATUS
-========================================= */
+/* =========================================================
+   UPDATE RIDE STATUS
+========================================================= */
 
-async function updateRideStatus(
-    status
-){
+async function updateRideStatus(status){
 
     if(
         !currentRideId ||
         !currentUser
     ){
 
-        return;
+        return false;
 
     }
 
@@ -1629,11 +1824,18 @@ async function updateRideStatus(
                 currentRideId
             ),
             {
-                status,
+                status:status,
+
+                riderId:
+                    currentUser.uid,
+
                 updatedAt:
                     serverTimestamp()
             }
         );
+
+
+        return true;
 
     }catch(error){
 
@@ -1642,18 +1844,23 @@ async function updateRideStatus(
             error
         );
 
+
         alert(
-            "Unable to update ride. Please try again."
+            error.message ||
+            "Unable to update ride."
         );
+
+
+        return false;
 
     }
 
 }
 
 
-/* =========================================
+/* =========================================================
    MAIN ACTION
-========================================= */
+========================================================= */
 
 mainAction.addEventListener(
     "click",
@@ -1670,12 +1877,10 @@ mainAction.addEventListener(
             ).toUpperCase();
 
 
-        if(
-            status === "ACCEPTED" ||
-            status === "ASSIGNED" ||
-            status === "ARRIVING" ||
-            status === "DRIVER_ARRIVING"
-        ){
+        if([
+            "ACCEPTED",
+            "ASSIGNED"
+        ].includes(status)){
 
             await updateRideStatus(
                 "STARTED"
@@ -1686,11 +1891,22 @@ mainAction.addEventListener(
         }
 
 
-        if(
-            status === "STARTED" ||
-            status === "IN_PROGRESS" ||
-            status === "ONGOING"
-        ){
+        if(status === "ARRIVED"){
+
+            await updateRideStatus(
+                "STARTED"
+            );
+
+            return;
+
+        }
+
+
+        if([
+            "STARTED",
+            "IN_PROGRESS",
+            "ONGOING"
+        ].includes(status)){
 
             const confirmed =
                 confirm(
@@ -1712,9 +1928,9 @@ mainAction.addEventListener(
 );
 
 
-/* =========================================
-   ARRIVED
-========================================= */
+/* =========================================================
+   MARK ARRIVED
+========================================================= */
 
 arrivedBtn.addEventListener(
     "click",
@@ -1724,17 +1940,33 @@ arrivedBtn.addEventListener(
             return;
 
 
-        await updateRideStatus(
-            "ARRIVING"
-        );
+        const status =
+            String(
+                currentRideData.status ||
+                ""
+            ).toUpperCase();
+
+
+        if([
+            "ACCEPTED",
+            "ASSIGNED",
+            "ARRIVING",
+            "DRIVER_ARRIVING"
+        ].includes(status)){
+
+            await updateRideStatus(
+                "ARRIVED"
+            );
+
+        }
 
     }
 );
 
 
-/* =========================================
+/* =========================================================
    CANCEL
-========================================= */
+========================================================= */
 
 cancelBtn.addEventListener(
     "click",
@@ -1762,15 +1994,45 @@ cancelBtn.addEventListener(
 );
 
 
-/* =========================================
+/* =========================================================
    CALL
-========================================= */
+========================================================= */
 
 document
 .getElementById("callBtn")
 .addEventListener(
     "click",
     () => {
+
+        const status =
+            String(
+                currentRideData?.status ||
+                ""
+            ).toUpperCase();
+
+
+        const activeStatuses = [
+            "ACCEPTED",
+            "ASSIGNED",
+            "ARRIVING",
+            "DRIVER_ARRIVING",
+            "ARRIVED",
+            "STARTED",
+            "IN_PROGRESS",
+            "ONGOING"
+        ];
+
+
+        if(!activeStatuses.includes(status)){
+
+            alert(
+                "Call is available only during an active ride."
+            );
+
+            return;
+
+        }
+
 
         const phone =
             currentRideData?.customerPhone ||
@@ -1794,9 +2056,9 @@ document
 );
 
 
-/* =========================================
+/* =========================================================
    CHAT
-========================================= */
+========================================================= */
 
 document
 .getElementById("chatBtn")
@@ -1815,6 +2077,36 @@ document
         }
 
 
+        const status =
+            String(
+                currentRideData?.status ||
+                ""
+            ).toUpperCase();
+
+
+        const activeStatuses = [
+            "ACCEPTED",
+            "ASSIGNED",
+            "ARRIVING",
+            "DRIVER_ARRIVING",
+            "ARRIVED",
+            "STARTED",
+            "IN_PROGRESS",
+            "ONGOING"
+        ];
+
+
+        if(!activeStatuses.includes(status)){
+
+            alert(
+                "Chat is available only during an active ride."
+            );
+
+            return;
+
+        }
+
+
         location.href =
             `chat.html?rideId=${encodeURIComponent(
                 currentRideId
@@ -1824,9 +2116,9 @@ document
 );
 
 
-/* =========================================
+/* =========================================================
    CENTER MAP
-========================================= */
+========================================================= */
 
 document
 .getElementById("centerBtn")
@@ -1854,9 +2146,9 @@ document
 );
 
 
-/* =========================================
+/* =========================================================
    ZOOM
-========================================= */
+========================================================= */
 
 document
 .getElementById("zoomIn")
@@ -1874,16 +2166,26 @@ document
 );
 
 
-/* =========================================
+/* =========================================================
    GPS
-========================================= */
+========================================================= */
 
 function startGPS(){
 
     if(
-        !navigator.geolocation ||
-        watchId !== null
+        !navigator.geolocation
     ){
+
+        console.warn(
+            "Geolocation not supported."
+        );
+
+        return;
+
+    }
+
+
+    if(watchId !== null){
 
         return;
 
@@ -1896,7 +2198,7 @@ function startGPS(){
             error => {
 
                 console.warn(
-                    "GPS:",
+                    "GPS error:",
                     error
                 );
 
@@ -1911,17 +2213,26 @@ function startGPS(){
 }
 
 
-async function updateGPS(
-    position
-){
+/* =========================================================
+   UPDATE GPS
+========================================================= */
+
+async function updateGPS(position){
 
     currentPosition =
         position;
 
 
+    const lat =
+        position.coords.latitude;
+
+    const lng =
+        position.coords.longitude;
+
+
     const coords = [
-        position.coords.latitude,
-        position.coords.longitude
+        lat,
+        lng
     ];
 
 
@@ -1961,13 +2272,24 @@ async function updateGPS(
                 {
                     riderId:
                         currentUser.uid,
+
                     rideId:
                         currentRideId,
+
                     lat:
-                        coords[0],
+                        lat,
+
                     lng:
-                        coords[1],
+                        lng,
+
+                    accuracy:
+                        position.coords.accuracy || null,
+
+                    speed:
+                        position.coords.speed || 0,
+
                     online:true,
+
                     updatedAt:
                         serverTimestamp()
                 },
@@ -1990,17 +2312,15 @@ async function updateGPS(
 }
 
 
-/* =========================================
+/* =========================================================
    FIND ACTIVE RIDE
-========================================= */
+========================================================= */
 
-async function findActiveRide(
-    uid
-){
+async function findActiveRide(uid){
 
     try{
 
-        const riderRef =
+        const riderSnap =
             await getDoc(
                 doc(
                     db,
@@ -2010,12 +2330,10 @@ async function findActiveRide(
             );
 
 
-        if(
-            riderRef.exists()
-        ){
+        if(riderSnap.exists()){
 
             const riderData =
-                riderRef.data();
+                riderSnap.data();
 
 
             if(
@@ -2031,7 +2349,10 @@ async function findActiveRide(
 
         const ridesQuery =
             query(
-                collection(db,"rides"),
+                collection(
+                    db,
+                    "rides"
+                ),
                 where(
                     "riderId",
                     "==",
@@ -2046,7 +2367,7 @@ async function findActiveRide(
             );
 
 
-        let latest = null;
+        let latestRide = null;
 
 
         snap.forEach(
@@ -2058,26 +2379,31 @@ async function findActiveRide(
 
                 const status =
                     String(
-                        data.status ||
-                        ""
+                        data.status || ""
                     ).toUpperCase();
 
 
+                const activeStatuses = [
+                    "ACCEPTED",
+                    "ASSIGNED",
+                    "ARRIVING",
+                    "DRIVER_ARRIVING",
+                    "ARRIVED",
+                    "STARTED",
+                    "IN_PROGRESS",
+                    "ONGOING"
+                ];
+
+
                 if(
-                    [
-                        "ACCEPTED",
-                        "ASSIGNED",
-                        "ARRIVING",
-                        "DRIVER_ARRIVING",
-                        "STARTED",
-                        "IN_PROGRESS",
-                        "ONGOING"
-                    ].includes(status)
+                    activeStatuses.includes(
+                        status
+                    )
                 ){
 
-                    latest = {
+                    latestRide = {
                         id:rideSnap.id,
-                        data
+                        data:data
                     };
 
                 }
@@ -2086,7 +2412,7 @@ async function findActiveRide(
         );
 
 
-        return latest?.id || null;
+        return latestRide?.id || null;
 
     }catch(error){
 
@@ -2102,19 +2428,18 @@ async function findActiveRide(
 }
 
 
-/* =========================================
+/* =========================================================
    LISTEN TO RIDE
-========================================= */
+========================================================= */
 
-function listenRide(
-    rideId
-){
+function listenRide(rideId){
 
-    if(
-        rideUnsubscribe
-    ){
+    if(rideUnsubscribe){
 
         rideUnsubscribe();
+
+        rideUnsubscribe =
+            null;
 
     }
 
@@ -2134,11 +2459,10 @@ function listenRide(
     rideUnsubscribe =
         onSnapshot(
             rideRef,
+
             snapshot => {
 
-                if(
-                    !snapshot.exists()
-                ){
+                if(!snapshot.exists()){
 
                     currentRideData =
                         null;
@@ -2146,6 +2470,9 @@ function listenRide(
                     noRide.classList.add(
                         "show"
                     );
+
+                    statusPill.className =
+                        "status-pill cancelled";
 
                     statusPill.innerText =
                         "Ride no longer available";
@@ -2169,12 +2496,16 @@ function listenRide(
                 );
 
             },
+
             error => {
 
                 console.error(
                     "Ride listener:",
                     error
                 );
+
+                statusPill.className =
+                    "status-pill cancelled";
 
                 statusPill.innerText =
                     "Unable to load ride";
@@ -2185,9 +2516,9 @@ function listenRide(
 }
 
 
-/* =========================================
+/* =========================================================
    AUTH
-========================================= */
+========================================================= */
 
 onAuthStateChanged(
     auth,
@@ -2236,11 +2567,11 @@ onAuthStateChanged(
                 "show"
             );
 
-            statusPill.innerText =
-                "No active ride";
-
             statusPill.className =
                 "status-pill";
+
+            statusPill.innerText =
+                "No active ride";
 
             return;
 
@@ -2260,9 +2591,9 @@ onAuthStateChanged(
 );
 
 
-/* =========================================
+/* =========================================================
    BACK
-========================================= */
+========================================================= */
 
 document
 .getElementById("backBtn")
@@ -2270,15 +2601,40 @@ document
     "click",
     () => {
 
+        if(
+            currentRideData &&
+            [
+                "STARTED",
+                "IN_PROGRESS",
+                "ONGOING"
+            ].includes(
+                String(
+                    currentRideData.status || ""
+                ).toUpperCase()
+            )
+        ){
+
+            const leave =
+                confirm(
+                    "Ride is in progress. Leave live ride screen?"
+                );
+
+
+            if(!leave)
+                return;
+
+        }
+
+
         history.back();
 
     }
 );
 
 
-/* =========================================
+/* =========================================================
    NOTIFICATIONS
-========================================= */
+========================================================= */
 
 document
 .getElementById("notificationBtn")
@@ -2293,9 +2649,9 @@ document
 );
 
 
-/* =========================================
+/* =========================================================
    MAP RESIZE
-========================================= */
+========================================================= */
 
 setTimeout(
     () => {
@@ -2306,5 +2662,8 @@ setTimeout(
     500
 );
 
-</script></body>
-        </html>
+</script>
+
+</body>
+
+    </html>
