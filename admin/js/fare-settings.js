@@ -1,14 +1,53 @@
 /* =========================================================
    RiderX Admin - Fare Settings
    File: admin/js/fare-settings.js
-   FINAL FIXED VERSION
+
+   FINAL RIDERX 2.0 FARE ENGINE
+
+   Supports:
+   - Bike Taxi
+   - Cab
+   - Parcel
+   - Food Delivery
+   - Day / Long Distance / Night rates
+   - Base fare
+   - Minimum fare
+   - Admin save/reset
+   - LocalStorage persistence
+   - Customer booking compatibility
+   - Rider fare compatibility
+   - Public RiderXFareSettings API
+
+   Default RiderX pricing:
+   06:00 - 22:00
+     <= 10 km  : normal rate
+     > 10 km   : long-distance rate
+
+   22:00 - 06:00
+     night rate
+
+   IMPORTANT:
+   This file does not create duplicate storage systems.
+   Existing RiderX fare storage key is preserved.
 ========================================================= */
 
 "use strict";
 
-const FARE_STORAGE_KEY = "riderxFareSettings";
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+const FARE_STORAGE_KEY =
+    "riderxFareSettings";
+
+
+/* =========================================================
+   DEFAULT SETTINGS
+========================================================= */
 
 const DEFAULT_FARE_SETTINGS = {
+
     bike: {
         dayRate: 8,
         longDistanceRate: 9,
@@ -46,33 +85,44 @@ const DEFAULT_FARE_SETTINGS = {
     },
 
     currency: "INR",
+
     city: "Chandigarh",
+
     enabled: true,
+
     updatedAt: null
+
 };
 
-let fareSettings = clone(DEFAULT_FARE_SETTINGS);
+
+let fareSettings =
+    clone(
+        DEFAULT_FARE_SETTINGS
+    );
 
 
 /* =========================================================
-   INIT
+   INITIALIZATION
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    loadFareSettings();
+        loadFareSettings();
 
-    bindFareEvents();
+        bindFareEvents();
 
-    renderFareSettings();
+        renderFareSettings();
 
-    updateFarePreview();
+        updateFarePreview();
 
-});
+    }
+);
 
 
 /* =========================================================
-   LOAD
+   LOAD SETTINGS
 ========================================================= */
 
 function loadFareSettings() {
@@ -84,16 +134,29 @@ function loadFareSettings() {
                 FARE_STORAGE_KEY
             );
 
+
         if (!raw) {
+
+            fareSettings =
+                clone(
+                    DEFAULT_FARE_SETTINGS
+                );
+
             return;
+
         }
 
+
         const saved =
-            JSON.parse(raw);
+            JSON.parse(
+                raw
+            );
+
 
         if (
             saved &&
-            typeof saved === "object"
+            typeof saved === "object" &&
+            !Array.isArray(saved)
         ) {
 
             fareSettings =
@@ -103,11 +166,20 @@ function loadFareSettings() {
                 );
 
         }
+        else {
 
-    } catch (error) {
+            fareSettings =
+                clone(
+                    DEFAULT_FARE_SETTINGS
+                );
+
+        }
+
+    }
+    catch (error) {
 
         console.error(
-            "Fare settings load error:",
+            "RiderX fare settings load error:",
             error
         );
 
@@ -122,7 +194,7 @@ function loadFareSettings() {
 
 
 /* =========================================================
-   SAVE
+   SAVE SETTINGS
 ========================================================= */
 
 function saveFareSettings() {
@@ -136,12 +208,53 @@ function saveFareSettings() {
             )
         );
 
+
+        /*
+         * Keep a second in-memory/global copy
+         * available to pages loaded in the same
+         * browser context.
+         */
+        window.riderxFareSettings =
+            clone(
+                fareSettings
+            );
+
+
+        /*
+         * Notify other RiderX pages/scripts.
+         */
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx:fare-settings-updated",
+                    {
+                        detail:
+                            clone(
+                                fareSettings
+                            )
+                    }
+                )
+            );
+
+        }
+        catch (eventError) {
+
+            console.warn(
+                "Fare settings event error:",
+                eventError
+            );
+
+        }
+
+
         return true;
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Fare settings save error:",
+            "RiderX fare settings save error:",
             error
         );
 
@@ -153,7 +266,7 @@ function saveFareSettings() {
 
 
 /* =========================================================
-   MERGE
+   MERGE SETTINGS
 ========================================================= */
 
 function mergeFareSettings(
@@ -161,30 +274,39 @@ function mergeFareSettings(
     saved
 ) {
 
+    const safeSaved =
+        saved &&
+        typeof saved === "object"
+            ? saved
+            : {};
+
+
     return {
 
-        ...defaults,
+        ...clone(
+            defaults
+        ),
 
-        ...saved,
+        ...safeSaved,
 
         bike: {
             ...defaults.bike,
-            ...(saved.bike || {})
+            ...(safeSaved.bike || {})
         },
 
         cab: {
             ...defaults.cab,
-            ...(saved.cab || {})
+            ...(safeSaved.cab || {})
         },
 
         parcel: {
             ...defaults.parcel,
-            ...(saved.parcel || {})
+            ...(safeSaved.parcel || {})
         },
 
         food: {
             ...defaults.food,
-            ...(saved.food || {})
+            ...(safeSaved.food || {})
         }
 
     };
@@ -202,6 +324,7 @@ function bindFareEvents() {
         document.getElementById(
             "fareSettingsForm"
         );
+
 
     if (form) {
 
@@ -224,6 +347,7 @@ function bindFareEvents() {
             "saveFareSettings"
         );
 
+
     if (
         saveButton &&
         !form
@@ -231,7 +355,21 @@ function bindFareEvents() {
 
         saveButton.addEventListener(
             "click",
-            saveFromForm
+            function (event) {
+
+                if (
+                    event &&
+                    typeof event.preventDefault ===
+                    "function"
+                ) {
+
+                    event.preventDefault();
+
+                }
+
+                saveFromForm();
+
+            }
         );
 
     }
@@ -242,11 +380,26 @@ function bindFareEvents() {
             "resetFareSettings"
         );
 
+
     if (resetButton) {
 
         resetButton.addEventListener(
             "click",
-            resetFareSettings
+            function (event) {
+
+                if (
+                    event &&
+                    typeof event.preventDefault ===
+                    "function"
+                ) {
+
+                    event.preventDefault();
+
+                }
+
+                resetFareSettings();
+
+            }
         );
 
     }
@@ -257,11 +410,26 @@ function bindFareEvents() {
             "calculateFare"
         );
 
+
     if (previewButton) {
 
         previewButton.addEventListener(
             "click",
-            updateFarePreview
+            function (event) {
+
+                if (
+                    event &&
+                    typeof event.preventDefault ===
+                    "function"
+                ) {
+
+                    event.preventDefault();
+
+                }
+
+                updateFarePreview();
+
+            }
         );
 
     }
@@ -269,7 +437,10 @@ function bindFareEvents() {
 
     document
         .querySelectorAll(
-            "input, select"
+            "#fareSettingsForm input, " +
+            "#fareSettingsForm select, " +
+            "#previewDistance, " +
+            "#previewService"
         )
         .forEach(
             function (element) {
@@ -291,132 +462,62 @@ function bindFareEvents() {
 
 
 /* =========================================================
-   RENDER
+   RENDER SETTINGS
 ========================================================= */
 
 function renderFareSettings() {
 
-    setInput(
-        "bikeDayRate",
-        fareSettings.bike.dayRate
-    );
-
-    setInput(
-        "bikeLongDistanceRate",
-        fareSettings.bike.longDistanceRate
-    );
-
-    setInput(
-        "bikeNightRate",
-        fareSettings.bike.nightRate
-    );
-
-    setInput(
-        "bikeLongDistanceKm",
-        fareSettings.bike.longDistanceKm
-    );
-
-    setInput(
-        "bikeBaseFare",
-        fareSettings.bike.baseFare
-    );
-
-    setInput(
-        "bikeMinimumFare",
-        fareSettings.bike.minimumFare
-    );
+    const services = [
+        "bike",
+        "cab",
+        "parcel",
+        "food"
+    ];
 
 
-    setInput(
-        "cabDayRate",
-        fareSettings.cab.dayRate
-    );
+    services.forEach(
+        function (service) {
 
-    setInput(
-        "cabLongDistanceRate",
-        fareSettings.cab.longDistanceRate
-    );
-
-    setInput(
-        "cabNightRate",
-        fareSettings.cab.nightRate
-    );
-
-    setInput(
-        "cabLongDistanceKm",
-        fareSettings.cab.longDistanceKm
-    );
-
-    setInput(
-        "cabBaseFare",
-        fareSettings.cab.baseFare
-    );
-
-    setInput(
-        "cabMinimumFare",
-        fareSettings.cab.minimumFare
-    );
+            const data =
+                fareSettings[
+                    service
+                ] ||
+                DEFAULT_FARE_SETTINGS[
+                    service
+                ];
 
 
-    setInput(
-        "parcelDayRate",
-        fareSettings.parcel.dayRate
-    );
+            setInput(
+                service + "DayRate",
+                data.dayRate
+            );
 
-    setInput(
-        "parcelLongDistanceRate",
-        fareSettings.parcel.longDistanceRate
-    );
+            setInput(
+                service + "LongDistanceRate",
+                data.longDistanceRate
+            );
 
-    setInput(
-        "parcelNightRate",
-        fareSettings.parcel.nightRate
-    );
+            setInput(
+                service + "NightRate",
+                data.nightRate
+            );
 
-    setInput(
-        "parcelLongDistanceKm",
-        fareSettings.parcel.longDistanceKm
-    );
+            setInput(
+                service + "LongDistanceKm",
+                data.longDistanceKm
+            );
 
-    setInput(
-        "parcelBaseFare",
-        fareSettings.parcel.baseFare
-    );
+            setInput(
+                service + "BaseFare",
+                data.baseFare
+            );
 
-    setInput(
-        "parcelMinimumFare",
-        fareSettings.parcel.minimumFare
-    );
+            setInput(
+                service + "MinimumFare",
+                data.minimumFare
+            );
 
-
-    setInput(
-        "foodDayRate",
-        fareSettings.food.dayRate
-    );
-
-    setInput(
-        "foodLongDistanceRate",
-        fareSettings.food.longDistanceRate
-    );
-
-    setInput(
-        "foodNightRate",
-        fareSettings.food.nightRate
-    );
-
-    setInput(
-        "foodLongDistanceKm",
-        fareSettings.food.longDistanceKm
-    );
-
-    setInput(
-        "foodBaseFare",
-        fareSettings.food.baseFare
-    );
-
-    setInput(
-        "foodMinimumFare",
-        fareSettings.food.minimumFare
+        }
     );
 
 
@@ -431,6 +532,7 @@ function renderFareSettings() {
             "fareEnabled"
         );
 
+
     if (enabled) {
 
         enabled.checked =
@@ -442,7 +544,7 @@ function renderFareSettings() {
 
 
 /* =========================================================
-   SAVE FROM FORM
+   READ FORM + SAVE
 ========================================================= */
 
 function saveFromForm() {
@@ -475,11 +577,15 @@ function saveFromForm() {
                 fareSettings.food
             ),
 
+        currency:
+            "INR",
+
         city:
             readText(
                 "fareCity",
                 fareSettings.city
-            ),
+            ) ||
+            "Chandigarh",
 
         enabled:
             readChecked(
@@ -537,13 +643,14 @@ function saveFromForm() {
         "success"
     );
 
+
     return true;
 
 }
 
 
 /* =========================================================
-   SERVICE FORM
+   READ SERVICE
 ========================================================= */
 
 function readServiceForm(
@@ -551,48 +658,56 @@ function readServiceForm(
     fallback
 ) {
 
+    const safeFallback =
+        fallback ||
+        DEFAULT_FARE_SETTINGS[
+            service
+        ] ||
+        DEFAULT_FARE_SETTINGS.bike;
+
+
     return {
 
         dayRate:
             readNumber(
                 service +
                 "DayRate",
-                fallback.dayRate
+                safeFallback.dayRate
             ),
 
         longDistanceRate:
             readNumber(
                 service +
                 "LongDistanceRate",
-                fallback.longDistanceRate
+                safeFallback.longDistanceRate
             ),
 
         nightRate:
             readNumber(
                 service +
                 "NightRate",
-                fallback.nightRate
+                safeFallback.nightRate
             ),
 
         longDistanceKm:
             readNumber(
                 service +
                 "LongDistanceKm",
-                fallback.longDistanceKm
+                safeFallback.longDistanceKm
             ),
 
         baseFare:
             readNumber(
                 service +
                 "BaseFare",
-                fallback.baseFare
+                safeFallback.baseFare
             ),
 
         minimumFare:
             readNumber(
                 service +
                 "MinimumFare",
-                fallback.minimumFare
+                safeFallback.minimumFare
             )
 
     };
@@ -621,28 +736,42 @@ function validateFareSettings(
     ) {
 
         const data =
-            settings[service];
+            settings[
+                service
+            ];
 
 
         if (
             !data ||
             !Number.isFinite(
-                Number(data.dayRate)
+                Number(
+                    data.dayRate
+                )
             ) ||
             !Number.isFinite(
-                Number(data.longDistanceRate)
+                Number(
+                    data.longDistanceRate
+                )
             ) ||
             !Number.isFinite(
-                Number(data.nightRate)
+                Number(
+                    data.nightRate
+                )
             ) ||
             !Number.isFinite(
-                Number(data.longDistanceKm)
+                Number(
+                    data.longDistanceKm
+                )
             ) ||
             !Number.isFinite(
-                Number(data.baseFare)
+                Number(
+                    data.baseFare
+                )
             ) ||
             !Number.isFinite(
-                Number(data.minimumFare)
+                Number(
+                    data.minimumFare
+                )
             )
         ) {
 
@@ -659,12 +788,12 @@ function validateFareSettings(
 
 
         if (
-            data.dayRate < 0 ||
-            data.longDistanceRate < 0 ||
-            data.nightRate < 0 ||
-            data.longDistanceKm <= 0 ||
-            data.baseFare < 0 ||
-            data.minimumFare < 0
+            Number(data.dayRate) < 0 ||
+            Number(data.longDistanceRate) < 0 ||
+            Number(data.nightRate) < 0 ||
+            Number(data.longDistanceKm) <= 0 ||
+            Number(data.baseFare) < 0 ||
+            Number(data.minimumFare) < 0
         ) {
 
             return {
@@ -677,6 +806,38 @@ function validateFareSettings(
             };
 
         }
+
+
+        /*
+         * A minimum fare greater than the normal
+         * fare is allowed intentionally.
+         *
+         * Example:
+         * Cab base + distance = ₹55
+         * minimum = ₹60
+         * final = ₹60
+         */
+
+    }
+
+
+    const city =
+        String(
+            settings.city ||
+            ""
+        ).trim();
+
+
+    if (!city) {
+
+        return {
+
+            valid: false,
+
+            message:
+                "Please enter the service city."
+
+        };
 
     }
 
@@ -701,7 +862,9 @@ function resetFareSettings() {
 
 
     if (!confirmed) {
-        return;
+
+        return false;
+
     }
 
 
@@ -722,7 +885,7 @@ function resetFareSettings() {
             "error"
         );
 
-        return;
+        return false;
 
     }
 
@@ -737,12 +900,32 @@ function resetFareSettings() {
         "success"
     );
 
+
+    return true;
+
 }
 
 
 /* =========================================================
-   FARE CALCULATOR
+   MAIN FARE CALCULATOR
 ========================================================= */
+
+/*
+   RiderX pricing rule:
+
+   Day:
+     06:00 <= hour < 22:00
+
+   Night:
+     22:00 <= hour OR hour < 06:00
+
+   Long distance:
+     distance > longDistanceKm
+
+   IMPORTANT:
+   Night rate takes priority over long-distance
+   rate, matching the RiderX pricing rule.
+*/
 
 function calculateFare(
     distance,
@@ -751,7 +934,9 @@ function calculateFare(
 ) {
 
     const km =
-        Number(distance);
+        Number(
+            distance
+        );
 
 
     const serviceKey =
@@ -782,7 +967,9 @@ function calculateFare(
 
             fare: 0,
 
-            period: "day"
+            period: "day",
+
+            currency: "INR"
 
         };
 
@@ -799,9 +986,9 @@ function calculateFare(
 
 
     const currentHour =
-        hour === null
-            ? new Date().getHours()
-            : Number(hour);
+        normalizeHour(
+            hour
+        );
 
 
     const isNight =
@@ -810,43 +997,65 @@ function calculateFare(
 
 
     const longDistanceKm =
-        Number(
-            settings.longDistanceKm
-        ) || 10;
+        positiveNumber(
+            settings.longDistanceKm,
+            10
+        );
 
 
-    const rate =
-        isNight
-            ? Number(
+    let rate;
+
+    let period;
+
+
+    if (isNight) {
+
+        rate =
+            positiveOrZero(
                 settings.nightRate
-            )
-            : (
-                km >
-                longDistanceKm
-                    ? Number(
-                        settings.longDistanceRate
-                    )
-                    : Number(
-                        settings.dayRate
-                    )
             );
 
+        period =
+            "night";
 
-    const period =
-        isNight
-            ? "night"
-            : (
-                km >
-                longDistanceKm
-                    ? "long-distance"
-                    : "day"
+    }
+    else if (
+        km >
+        longDistanceKm
+    ) {
+
+        rate =
+            positiveOrZero(
+                settings.longDistanceRate
             );
+
+        period =
+            "long-distance";
+
+    }
+    else {
+
+        rate =
+            positiveOrZero(
+                settings.dayRate
+            );
+
+        period =
+            "day";
+
+    }
 
 
     const baseFare =
-        Number(
+        positiveOrZero(
             settings.baseFare
-        ) || 0;
+        );
+
+
+    const minimumFare =
+        positiveOrZero(
+            settings.minimumFare
+        );
 
 
     const subtotal =
@@ -857,13 +1066,7 @@ function calculateFare(
         );
 
 
-    const minimumFare =
-        Number(
-            settings.minimumFare
-        ) || 0;
-
-
-    const fare =
+    const finalFare =
         Math.max(
             subtotal,
             minimumFare
@@ -873,28 +1076,48 @@ function calculateFare(
     return {
 
         distance:
-            roundMoney(km),
+            roundMoney(
+                km
+            ),
 
         service:
             serviceKey,
 
         rate:
-            roundMoney(rate),
+            roundMoney(
+                rate
+            ),
 
         baseFare:
-            roundMoney(baseFare),
+            roundMoney(
+                baseFare
+            ),
 
         subtotal:
-            roundMoney(subtotal),
+            roundMoney(
+                subtotal
+            ),
 
         minimumFare:
-            roundMoney(minimumFare),
+            roundMoney(
+                minimumFare
+            ),
 
         fare:
-            roundMoney(fare),
+            roundMoney(
+                finalFare
+            ),
 
         period:
-            period
+            period,
+
+        currency:
+            fareSettings.currency ||
+            "INR",
+
+        city:
+            fareSettings.city ||
+            "Chandigarh"
 
     };
 
@@ -907,16 +1130,6 @@ function calculateFare(
 
 function updateFarePreview() {
 
-    const distanceElement =
-        document.getElementById(
-            "previewDistance"
-        );
-
-    const serviceElement =
-        document.getElementById(
-            "previewService"
-        );
-
     const resultElement =
         document.getElementById(
             "farePreview"
@@ -924,14 +1137,37 @@ function updateFarePreview() {
 
 
     if (!resultElement) {
+
         return null;
+
     }
+
+
+    const distanceElement =
+        document.getElementById(
+            "previewDistance"
+        );
+
+
+    const serviceElement =
+        document.getElementById(
+            "previewService"
+        );
 
 
     const distance =
         parseFloat(
             distanceElement?.value
-        ) || 10;
+        );
+
+
+    const safeDistance =
+        Number.isFinite(
+            distance
+        ) &&
+        distance > 0
+            ? distance
+            : 10;
 
 
     const service =
@@ -943,9 +1179,15 @@ function updateFarePreview() {
 
     const result =
         calculateFare(
-            distance,
+            safeDistance,
             service
         );
+
+
+    const currency =
+        result.currency === "INR"
+            ? "₹"
+            : result.currency + " ";
 
 
     resultElement.innerHTML = `
@@ -953,7 +1195,7 @@ function updateFarePreview() {
         <div class="fare-preview-main">
 
             <strong>
-                ₹${result.fare.toFixed(0)}
+                ${currency}${result.fare.toFixed(0)}
             </strong>
 
         </div>
@@ -962,7 +1204,11 @@ function updateFarePreview() {
 
             <span>
                 Service:
-                ${escapeHtml(result.service)}
+                ${escapeHtml(
+                    formatServiceName(
+                        result.service
+                    )
+                )}
             </span>
 
             <span>
@@ -972,22 +1218,26 @@ function updateFarePreview() {
 
             <span>
                 Rate:
-                ₹${result.rate.toFixed(2)}/km
+                ${currency}${result.rate.toFixed(2)}/km
             </span>
 
             <span>
                 Base:
-                ₹${result.baseFare.toFixed(2)}
+                ${currency}${result.baseFare.toFixed(2)}
             </span>
 
             <span>
                 Minimum:
-                ₹${result.minimumFare.toFixed(2)}
+                ${currency}${result.minimumFare.toFixed(2)}
             </span>
 
             <span>
                 Period:
-                ${escapeHtml(result.period)}
+                ${escapeHtml(
+                    formatPeriod(
+                        result.period
+                    )
+                )}
             </span>
 
         </div>
@@ -1001,17 +1251,195 @@ function updateFarePreview() {
 
 
 /* =========================================================
-   HELPERS
+   SERVICE NAME
 ========================================================= */
 
-function clone(value) {
+function formatServiceName(
+    service
+) {
 
-    return JSON.parse(
-        JSON.stringify(value)
+    const names = {
+
+        bike: "Bike Taxi",
+
+        cab: "Cab",
+
+        parcel: "Parcel",
+
+        food: "Food Delivery"
+
+    };
+
+
+    return (
+        names[
+            normalizeService(
+                service
+            )
+        ] ||
+        "Bike Taxi"
     );
 
 }
 
+
+/* =========================================================
+   PERIOD NAME
+========================================================= */
+
+function formatPeriod(
+    period
+) {
+
+    const labels = {
+
+        day:
+            "Day",
+
+        night:
+            "Night",
+
+        "long-distance":
+            "Long Distance"
+
+    };
+
+
+    return (
+        labels[
+            period
+        ] ||
+        "Day"
+    );
+
+}
+
+
+/* =========================================================
+   NORMALIZE HOUR
+========================================================= */
+
+function normalizeHour(
+    hour
+) {
+
+    if (
+        hour === null ||
+        hour === undefined ||
+        hour === ""
+    ) {
+
+        return new Date().getHours();
+
+    }
+
+
+    const numeric =
+        Number(
+            hour
+        );
+
+
+    if (
+        !Number.isFinite(
+            numeric
+        )
+    ) {
+
+        return new Date().getHours();
+
+    }
+
+
+    /*
+     * Supports:
+     * 0-23
+     * decimal values are converted
+     * into a valid hour range.
+     */
+
+    const normalized =
+        Math.floor(
+            numeric
+        );
+
+
+    return (
+        (
+            normalized %
+            24
+        ) +
+        24
+    ) % 24;
+
+}
+
+
+/* =========================================================
+   NUMBER HELPERS
+========================================================= */
+
+function positiveNumber(
+    value,
+    fallback
+) {
+
+    const number =
+        Number(
+            value
+        );
+
+
+    return Number.isFinite(
+        number
+    ) &&
+    number > 0
+        ? number
+        : fallback;
+
+}
+
+
+function positiveOrZero(
+    value
+) {
+
+    const number =
+        Number(
+            value
+        );
+
+
+    return Number.isFinite(
+        number
+    ) &&
+    number >= 0
+        ? number
+        : 0;
+
+}
+
+
+/* =========================================================
+   CLONE
+========================================================= */
+
+function clone(
+    value
+) {
+
+    return JSON.parse(
+        JSON.stringify(
+            value
+        )
+    );
+
+}
+
+
+/* =========================================================
+   INPUT HELPERS
+========================================================= */
 
 function setInput(
     id,
@@ -1025,7 +1453,9 @@ function setInput(
 
 
     if (!element) {
+
         return;
+
     }
 
 
@@ -1048,9 +1478,11 @@ function readNumber(
 
     if (!element) {
 
-        return Number(
-            fallback
-        ) || 0;
+        return (
+            Number(
+                fallback
+            ) || 0
+        );
 
     }
 
@@ -1065,7 +1497,11 @@ function readNumber(
         value
     )
         ? value
-        : Number(fallback) || 0;
+        : (
+            Number(
+                fallback
+            ) || 0
+        );
 
 }
 
@@ -1110,16 +1546,25 @@ function readChecked(
         );
 
 
-    return element
-        ? Boolean(
-            element.checked
-        )
-        : Boolean(
+    if (!element) {
+
+        return Boolean(
             fallback
         );
 
+    }
+
+
+    return Boolean(
+        element.checked
+    );
+
 }
 
+
+/* =========================================================
+   SERVICE NORMALIZATION
+========================================================= */
 
 function normalizeService(
     service
@@ -1134,17 +1579,68 @@ function normalizeService(
         .toLowerCase();
 
 
-    return [
-        "bike",
-        "cab",
-        "parcel",
-        "food"
-    ].includes(value)
-        ? value
-        : "bike";
+    /*
+     * Customer/booking compatibility:
+     * bike taxi / bike-taxi / motorcycle
+     * cab / car
+     * parcel / delivery
+     * food / food delivery
+     */
+
+    if (
+        value === "bike" ||
+        value === "bike taxi" ||
+        value === "bike-taxi" ||
+        value === "motorcycle" ||
+        value === "motorbike"
+    ) {
+
+        return "bike";
+
+    }
+
+
+    if (
+        value === "cab" ||
+        value === "car" ||
+        value === "taxi"
+    ) {
+
+        return "cab";
+
+    }
+
+
+    if (
+        value === "parcel" ||
+        value === "delivery" ||
+        value === "parcel delivery"
+    ) {
+
+        return "parcel";
+
+    }
+
+
+    if (
+        value === "food" ||
+        value === "food delivery" ||
+        value === "food-delivery"
+    ) {
+
+        return "food";
+
+    }
+
+
+    return "bike";
 
 }
 
+
+/* =========================================================
+   MONEY
+========================================================= */
 
 function roundMoney(
     value
@@ -1152,13 +1648,19 @@ function roundMoney(
 
     return Math.round(
         (
-            Number(value) ||
-            0
-        ) * 100
+            Number(
+                value
+            ) || 0
+        ) *
+        100
     ) / 100;
 
 }
 
+
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
 
 function escapeHtml(
     value
@@ -1167,24 +1669,24 @@ function escapeHtml(
     return String(
         value ?? ""
     )
-    .replaceAll(
-        "&",
+    .replace(
+        /&/g,
         "&amp;"
     )
-    .replaceAll(
-        "<",
+    .replace(
+        /</g,
         "&lt;"
     )
-    .replaceAll(
-        ">",
+    .replace(
+        />/g,
         "&gt;"
     )
-    .replaceAll(
-        '"',
+    .replace(
+        /"/g,
         "&quot;"
     )
-    .replaceAll(
-        "'",
+    .replace(
+        /'/g,
         "&#039;"
     );
 
@@ -1200,88 +1702,107 @@ function showMessage(
     type = "success"
 ) {
 
-    const existing =
+    let element =
         document.getElementById(
             "fareSettingsMessage"
         );
 
 
-    if (existing) {
+    if (!element) {
 
-        existing.textContent =
-            message;
-
-        existing.className =
-            `fare-settings-message ${type}`;
-
-        clearTimeout(
-            existing._hideTimer
-        );
-
-
-        existing._hideTimer =
-            setTimeout(
-                function () {
-
-                    existing.textContent =
-                        "";
-
-                    existing.className =
-                        "fare-settings-message";
-
-                },
-                4000
+        element =
+            document.createElement(
+                "div"
             );
 
-        return;
+
+        element.id =
+            "fareSettingsMessage";
+
+
+        element.className =
+            "fare-settings-message";
+
+
+        document.body.prepend(
+            element
+        );
 
     }
 
 
-    const messageElement =
-        document.createElement(
-            "div"
-        );
-
-
-    messageElement.id =
-        "fareSettingsMessage";
-
-
-    messageElement.className =
-        `fare-settings-message ${type}`;
-
-
-    messageElement.textContent =
+    element.textContent =
         message;
 
 
-    document.body.prepend(
-        messageElement
+    element.className =
+        "fare-settings-message " +
+        (
+            type === "error"
+                ? "error"
+                : "success"
+        );
+
+
+    clearTimeout(
+        element._hideTimer
     );
 
 
-    setTimeout(
-        function () {
+    element._hideTimer =
+        setTimeout(
+            function () {
 
-            if (
-                messageElement &&
-                messageElement.parentNode
-            ) {
+                if (!element) {
 
-                messageElement.remove();
+                    return;
 
-            }
+                }
 
-        },
-        4000
-    );
+
+                element.textContent =
+                    "";
+
+                element.className =
+                    "fare-settings-message";
+
+            },
+            4000
+        );
 
 }
 
 
 /* =========================================================
-   PUBLIC API
+   CROSS-PAGE STORAGE SYNC
+========================================================= */
+
+window.addEventListener(
+    "storage",
+    function (event) {
+
+        if (
+            event.key !==
+            FARE_STORAGE_KEY
+        ) {
+
+            return;
+
+        }
+
+
+        loadFareSettings();
+
+        renderFareSettings();
+
+        updateFarePreview();
+
+    }
+);
+
+
+/* =========================================================
+   PUBLIC RIDERX API
 ========================================================= */
 
 window.RiderXFareSettings = {
@@ -1291,6 +1812,16 @@ window.RiderXFareSettings = {
 
             return clone(
                 fareSettings
+            );
+
+        },
+
+
+    getDefaultSettings:
+        function () {
+
+            return clone(
+                DEFAULT_FARE_SETTINGS
             );
 
         },
@@ -1313,11 +1844,19 @@ window.RiderXFareSettings = {
 
 
     save:
-        saveFromForm,
+        function () {
+
+            return saveFromForm();
+
+        },
 
 
     reset:
-        resetFareSettings,
+        function () {
+
+            return resetFareSettings();
+
+        },
 
 
     refresh:
@@ -1329,6 +1868,90 @@ window.RiderXFareSettings = {
 
             updateFarePreview();
 
+            return clone(
+                fareSettings
+            );
+
+        },
+
+
+    normalizeService:
+        function (
+            service
+        ) {
+
+            return normalizeService(
+                service
+            );
+
+        },
+
+
+    getFare:
+        function (
+            distance,
+            service = "bike",
+            hour = null
+        ) {
+
+            return calculateFare(
+                distance,
+                service,
+                hour
+            ).fare;
+
         }
 
 };
+
+
+/* =========================================================
+   GLOBAL COMPATIBILITY
+========================================================= */
+
+/*
+ * These globals allow existing RiderX pages such as
+ * booking.js / customer pages to call the same fare
+ * calculation engine when this script is loaded.
+ */
+
+window.calculateRiderXFare =
+    function (
+        distance,
+        service = "bike",
+        hour = null
+    ) {
+
+        return calculateFare(
+            distance,
+            service,
+            hour
+        );
+
+    };
+
+
+window.getRiderXFare =
+    function (
+        distance,
+        service = "bike",
+        hour = null
+    ) {
+
+        return calculateFare(
+            distance,
+            service,
+            hour
+        ).fare;
+
+    };
+
+
+/* =========================================================
+   INITIAL GLOBAL SETTINGS COPY
+========================================================= */
+
+window.riderxFareSettings =
+    clone(
+        fareSettings
+    );
