@@ -9,9 +9,9 @@
 
 <meta name="theme-color" content="#FFD400">
 
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/responsive.css">
 
 <style>
 
@@ -19,13 +19,11 @@
     --yellow:#FFD400;
     --bg:#080808;
     --card:#151515;
-    --card2:#1d1d1d;
     --border:#303030;
-    --muted:#777;
     --green:#22c55e;
     --red:#ef4444;
-    --blue:#60a5fa;
     --orange:#f59e0b;
+    --muted:#777;
 }
 
 *{
@@ -60,7 +58,9 @@ button{
 }
 
 
-/* HEADER */
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header{
     position:sticky;
@@ -88,6 +88,10 @@ button{
     color:#fff;
 
     font-size:20px;
+}
+
+.back-btn:active{
+    transform:scale(.96);
 }
 
 .logo{
@@ -118,28 +122,36 @@ button{
 
 .header-subtitle{
     margin-top:3px;
+
     color:#777;
+
     font-size:5px;
 }
 
 
-/* MAIN */
+/* =========================================================
+   MAIN
+========================================================= */
 
 .main{
     width:100%;
     max-width:1200px;
 
     margin:auto;
+
     padding:15px;
 }
 
 
-/* TOP */
+/* =========================================================
+   PAGE TOP
+========================================================= */
 
 .page-top{
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     gap:12px;
 
     margin-bottom:13px;
@@ -152,7 +164,9 @@ button{
 
 .page-description{
     margin-top:4px;
+
     color:#777;
+
     font-size:6px;
 }
 
@@ -171,8 +185,15 @@ button{
     font-weight:900;
 }
 
+.refresh-btn:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
 
-/* STATS */
+
+/* =========================================================
+   STATS
+========================================================= */
 
 .stats{
     display:grid;
@@ -209,7 +230,9 @@ button{
 }
 
 
-/* CARD */
+/* =========================================================
+   CARD
+========================================================= */
 
 .card{
     border:1px solid var(--border);
@@ -221,11 +244,14 @@ button{
 }
 
 
-/* TOOLBAR */
+/* =========================================================
+   TOOLBAR
+========================================================= */
 
 .toolbar{
     display:flex;
     align-items:center;
+
     gap:8px;
 
     padding:11px;
@@ -251,6 +277,10 @@ button{
     font-size:6px;
 }
 
+.search::placeholder{
+    color:#555;
+}
+
 .search:focus{
     border-color:#766800;
 }
@@ -273,23 +303,10 @@ button{
     font-size:5.5px;
 }
 
-.action-btn{
-    height:37px;
 
-    padding:0 12px;
-
-    border:1px solid #5d5200;
-    border-radius:9px;
-
-    background:#292400;
-    color:var(--yellow);
-
-    font-size:5px;
-    font-weight:900;
-}
-
-
-/* TABLE */
+/* =========================================================
+   TABLE
+========================================================= */
 
 .table-wrap{
     width:100%;
@@ -333,11 +350,14 @@ tr:hover td{
 }
 
 
-/* USER */
+/* =========================================================
+   USER
+========================================================= */
 
 .user-cell{
     display:flex;
     align-items:center;
+
     gap:8px;
 }
 
@@ -374,7 +394,9 @@ tr:hover td{
 }
 
 
-/* BADGES */
+/* =========================================================
+   BADGES
+========================================================= */
 
 .badge{
     display:inline-flex;
@@ -414,7 +436,9 @@ tr:hover td{
 }
 
 
-/* ACTIONS */
+/* =========================================================
+   ACTIONS
+========================================================= */
 
 .row-actions{
     display:flex;
@@ -443,18 +467,29 @@ tr:hover td{
 
 .small-btn.danger{
     color:#ff7777;
+
     border-color:#512525;
+
     background:#211313;
 }
 
 .small-btn.success{
     color:#55df82;
+
     border-color:#235a35;
+
     background:#112116;
 }
 
+.small-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
 
-/* EMPTY */
+
+/* =========================================================
+   EMPTY / LOADING / ERROR
+========================================================= */
 
 .empty{
     padding:50px 15px;
@@ -466,8 +501,57 @@ tr:hover td{
     font-size:6px;
 }
 
+.loading-spinner{
+    width:24px;
+    height:24px;
 
-/* MODAL */
+    margin:0 auto 10px;
+
+    border:3px solid #292929;
+    border-top-color:var(--yellow);
+
+    border-radius:50%;
+
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+.error-box{
+    padding:18px;
+
+    color:#ff8585;
+
+    text-align:center;
+
+    font-size:6px;
+}
+
+.retry-btn{
+    margin-top:10px;
+
+    height:32px;
+
+    padding:0 12px;
+
+    border:1px solid #5d5200;
+    border-radius:8px;
+
+    background:#292400;
+    color:var(--yellow);
+
+    font-size:5px;
+    font-weight:900;
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
 
 .modal{
     position:fixed;
@@ -542,6 +626,7 @@ tr:hover td{
 .detail-row{
     display:flex;
     justify-content:space-between;
+
     gap:10px;
 
     padding:9px 0;
@@ -560,12 +645,18 @@ tr:hover td{
 }
 
 .detail-value{
+    max-width:65%;
+
     text-align:right;
+
     font-weight:700;
+
+    overflow-wrap:anywhere;
 }
 
 .modal-actions{
     display:flex;
+
     gap:7px;
 
     padding:12px 14px;
@@ -603,7 +694,9 @@ tr:hover td{
 }
 
 
-/* TOAST */
+/* =========================================================
+   TOAST
+========================================================= */
 
 .toast{
     position:fixed;
@@ -638,11 +731,14 @@ tr:hover td{
 
 .toast.show{
     opacity:1;
+
     transform:translate(-50%,0);
 }
 
 
-/* RESPONSIVE */
+/* =========================================================
+   RESPONSIVE
+========================================================= */
 
 @media(max-width:700px){
 
@@ -696,7 +792,8 @@ tr:hover td{
 
     <button
         class="back-btn"
-        onclick="goBack()"
+        id="backButton"
+        type="button"
         aria-label="Back"
     >
         ‹
@@ -740,7 +837,8 @@ tr:hover td{
 
     <button
         class="refresh-btn"
-        onclick="loadUsers()"
+        id="refreshButton"
+        type="button"
     >
         ↻ REFRESH
     </button>
@@ -828,15 +926,14 @@ tr:hover td{
         class="search"
         id="searchInput"
         type="search"
+        autocomplete="off"
         placeholder="Search by name, email or phone..."
-        oninput="renderUsers()"
     >
 
 
     <select
         class="select"
         id="roleFilter"
-        onchange="renderUsers()"
     >
 
         <option value="all">
@@ -857,7 +954,6 @@ tr:hover td{
     <select
         class="select"
         id="statusFilter"
-        onchange="renderUsers()"
     >
 
         <option value="all">
@@ -889,29 +985,12 @@ tr:hover td{
 
 <tr>
 
-    <th>
-        USER
-    </th>
-
-    <th>
-        ROLE
-    </th>
-
-    <th>
-        PHONE
-    </th>
-
-    <th>
-        STATUS
-    </th>
-
-    <th>
-        JOINED
-    </th>
-
-    <th>
-        ACTIONS
-    </th>
+    <th>USER</th>
+    <th>ROLE</th>
+    <th>PHONE</th>
+    <th>STATUS</th>
+    <th>JOINED</th>
+    <th>ACTIONS</th>
 
 </tr>
 
@@ -925,7 +1004,11 @@ tr:hover td{
 <td colspan="6">
 
     <div class="empty">
+
+        <div class="loading-spinner"></div>
+
         Loading users...
+
     </div>
 
 </td>
@@ -947,18 +1030,17 @@ tr:hover td{
 </div>
 
 
-<!-- USER MODAL -->
+<!-- =======================================================
+     USER MODAL
+======================================================= -->
 
 <div
     class="modal"
     id="userModal"
-    onclick="closeModalOutside(event)"
+    aria-hidden="true"
 >
 
-    <div
-        class="modal-card"
-        onclick="event.stopPropagation()"
-    >
+    <div class="modal-card">
 
         <div class="modal-head">
 
@@ -968,7 +1050,9 @@ tr:hover td{
 
             <button
                 class="close-btn"
-                onclick="closeModal()"
+                id="closeModalButton"
+                type="button"
+                aria-label="Close"
             >
                 ×
             </button>
@@ -979,15 +1063,15 @@ tr:hover td{
         <div
             class="modal-body"
             id="modalBody"
-        >
-        </div>
+        ></div>
 
 
         <div class="modal-actions">
 
             <button
                 class="modal-action"
-                onclick="closeModal()"
+                id="modalCloseAction"
+                type="button"
             >
                 CLOSE
             </button>
@@ -995,7 +1079,7 @@ tr:hover td{
             <button
                 class="modal-action primary"
                 id="modalStatusButton"
-                onclick="toggleSelectedUserStatus()"
+                type="button"
             >
                 UPDATE STATUS
             </button>
@@ -1013,188 +1097,440 @@ tr:hover td{
 ></div>
 
 
-<script>
+<!-- =======================================================
+     FIREBASE + PAGE LOGIC
+======================================================= -->
 
-const STORAGE_KEY =
-    "riderxAdminUsers";
+<script type="module">
 
+/*
+ * RiderX Admin Users
+ *
+ * Canonical file:
+ * admin/users.html
+ *
+ * Uses the existing RiderX Firebase configuration.
+ *
+ * Primary data:
+ *   Firestore / users
+ *   Firestore / riders
+ *
+ * LocalStorage is NOT used as the primary user database.
+ */
+
+import {
+    db
+} from "../firebase/firebase-config.js";
+
+import {
+    collection,
+    getDocs,
+    doc,
+    updateDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let users = [];
 
 let selectedUserId = null;
 
-let toastTimer;
+let selectedUser = null;
+
+let toastTimer = null;
+
+let loading = false;
 
 
-/* =========================================
-   DEFAULT USERS
-========================================= */
+/* =========================================================
+   DOM
+========================================================= */
 
-const DEFAULT_USERS = [
+const usersTable =
+    document.getElementById(
+        "usersTable"
+    );
 
-    {
-        id:"demo-customer-001",
-        name:"RiderX Customer",
-        email:"",
-        phone:"",
-        role:"customer",
-        status:"active",
-        joinedAt:new Date().toISOString()
-    },
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
 
-    {
-        id:"demo-rider-001",
-        name:"RiderX Rider",
-        email:"",
-        phone:"",
-        role:"rider",
-        status:"active",
-        joinedAt:new Date().toISOString()
-    }
+const roleFilter =
+    document.getElementById(
+        "roleFilter"
+    );
 
-];
+const statusFilter =
+    document.getElementById(
+        "statusFilter"
+    );
+
+const refreshButton =
+    document.getElementById(
+        "refreshButton"
+    );
+
+const backButton =
+    document.getElementById(
+        "backButton"
+    );
+
+const userModal =
+    document.getElementById(
+        "userModal"
+    );
+
+const modalBody =
+    document.getElementById(
+        "modalBody"
+    );
+
+const closeModalButton =
+    document.getElementById(
+        "closeModalButton"
+    );
+
+const modalCloseAction =
+    document.getElementById(
+        "modalCloseAction"
+    );
+
+const modalStatusButton =
+    document.getElementById(
+        "modalStatusButton"
+    );
 
 
-/* =========================================
-   LOAD USERS
-========================================= */
+/* =========================================================
+   NORMALIZE ROLE
+========================================================= */
 
-function loadUsers(){
+function normalizeRole(value){
 
-    let loaded = null;
-
-
-    try{
-
-        const raw =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
+    const role =
+        String(
+            value || ""
+        )
+        .trim()
+        .toLowerCase();
 
 
-        if(raw){
+    if(
+        role === "rider" ||
+        role === "driver" ||
+        role === "captain"
+    ){
 
-            loaded =
-                JSON.parse(
-                    raw
-                );
-
-        }
-
-    }catch(error){
-
-        console.log(
-            "Users load error:",
-            error
-        );
+        return "rider";
 
     }
 
 
     if(
-        Array.isArray(
-            loaded
-        )
+        role === "customer" ||
+        role === "user" ||
+        role === "passenger"
     ){
 
-        users =
-            loaded;
-
-    }
-    else{
-
-        users =
-            getUsersFromLocalStorage();
+        return "customer";
 
     }
 
 
-    if(
-        !Array.isArray(
-            users
-        )
-    ){
-
-        users = [];
-
-    }
-
-
-    renderStats();
-
-    renderUsers();
+    return "customer";
 
 }
 
 
-/* =========================================
-   FIND USERS FROM APP STORAGE
-========================================= */
+/* =========================================================
+   NORMALIZE STATUS
+========================================================= */
 
-function getUsersFromLocalStorage(){
+function normalizeStatus(value){
+
+    const status =
+        String(
+            value || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if(
+        status === "blocked" ||
+        status === "disabled" ||
+        status === "suspended"
+    ){
+
+        return "blocked";
+
+    }
+
+
+    if(
+        status === "pending" ||
+        status === "waiting"
+    ){
+
+        return "pending";
+
+    }
+
+
+    if(
+        status === "offline"
+    ){
+
+        return "active";
+
+    }
+
+
+    return "active";
+
+}
+
+
+/* =========================================================
+   NORMALIZE FIRESTORE DATE
+========================================================= */
+
+function normalizeDate(value){
+
+    if(!value){
+
+        return "";
+
+    }
+
+
+    if(
+        typeof value.toDate ===
+        "function"
+    ){
+
+        try{
+
+            return value.toDate();
+
+        }catch(error){
+
+            return "";
+
+        }
+
+    }
+
+
+    if(
+        value instanceof Date
+    ){
+
+        return value;
+
+    }
+
+
+    if(
+        typeof value ===
+        "number"
+    ){
+
+        const date =
+            new Date(value);
+
+        return isNaN(
+            date.getTime()
+        )
+            ? ""
+            : date;
+
+    }
+
+
+    if(
+        typeof value ===
+        "string"
+    ){
+
+        const date =
+            new Date(value);
+
+        return isNaN(
+            date.getTime()
+        )
+            ? ""
+            : date;
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   NORMALIZE USER
+========================================================= */
+
+function normalizeUser(
+    data,
+    id,
+    forcedRole = ""
+){
+
+    const role =
+        normalizeRole(
+            forcedRole ||
+            data.role ||
+            data.userType ||
+            data.type
+        );
+
+
+    const status =
+        normalizeStatus(
+            data.status ||
+            data.accountStatus ||
+            data.account_status
+        );
+
+
+    const joinedAt =
+        data.joinedAt ||
+        data.createdAt ||
+        data.created ||
+        data.registrationDate ||
+        "";
+
+
+    return {
+
+        id:
+            String(
+                data.uid ||
+                data.userId ||
+                id ||
+                ""
+            ),
+
+        name:
+            String(
+                data.name ||
+                data.fullName ||
+                data.displayName ||
+                data.firstName ||
+                "RiderX User"
+            ),
+
+        email:
+            String(
+                data.email ||
+                ""
+            ),
+
+        phone:
+            String(
+                data.phone ||
+                data.phoneNumber ||
+                data.mobile ||
+                ""
+            ),
+
+        role,
+
+        status,
+
+        joinedAt,
+
+        raw:data
+
+    };
+
+}
+
+
+/* =========================================================
+   DUPLICATE CHECK
+========================================================= */
+
+function addUser(
+    list,
+    user
+){
+
+    if(
+        !user ||
+        !user.id
+    ){
+
+        return;
+
+    }
+
+
+    const exists =
+        list.some(
+            item =>
+                String(item.id) ===
+                String(user.id)
+        );
+
+
+    if(!exists){
+
+        list.push(
+            user
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FIRESTORE COLLECTION LOADER
+========================================================= */
+
+async function loadCollection(
+    collectionName,
+    forcedRole
+){
 
     const result = [];
 
-    const keys = [
 
-        "riderxUsers",
-        "users",
-        "riderx_users",
-        "riderxCustomers",
-        "riderxRiders"
-
-    ];
-
-
-    keys.forEach(
-        function(key){
-
-            try{
-
-                const raw =
-                    localStorage.getItem(
-                        key
-                    );
+    const snapshot =
+        await getDocs(
+            collection(
+                db,
+                collectionName
+            )
+        );
 
 
-                if(!raw){
-                    return;
-                }
+    snapshot.forEach(
+        documentSnapshot => {
+
+            const data =
+                documentSnapshot.data() ||
+                {};
 
 
-                const data =
-                    JSON.parse(
-                        raw
-                    );
-
-
-                if(
-                    Array.isArray(
-                        data
-                    )
-                ){
-
-                    data.forEach(
-                        function(item){
-
-                            addUserIfNew(
-                                result,
-                                item
-                            );
-
-                        }
-                    );
-
-                }
-
-            }catch(error){
-
-                console.log(
-                    key,
-                    error
-                );
-
-            }
+            addUser(
+                result,
+                normalizeUser(
+                    data,
+                    documentSnapshot.id,
+                    forcedRole
+                )
+            );
 
         }
     );
@@ -1205,118 +1541,180 @@ function getUsersFromLocalStorage(){
 }
 
 
-/* =========================================
-   NORMALIZE USER
-========================================= */
+/* =========================================================
+   LOAD USERS
+========================================================= */
 
-function normalizeUser(
-    user
-){
+async function loadUsers(){
 
-    const role =
-        normalizeRole(
-            user.role ||
-            user.userType ||
-            user.type
-        );
-
-
-    let status =
-        normalizeStatus(
-            user.status ||
-            user.accountStatus
-        );
-
-
-    if(!status){
-
-        status =
-            "active";
-
-    }
-
-
-    return {
-
-        id:
-            user.id ||
-            user.uid ||
-            user.userId ||
-            createId(),
-
-        name:
-            user.name ||
-            user.fullName ||
-            user.displayName ||
-            "RiderX User",
-
-        email:
-            user.email ||
-            "",
-
-        phone:
-            user.phone ||
-            user.phoneNumber ||
-            "",
-
-        role:
-            role,
-
-        status:
-            status,
-
-        joinedAt:
-            user.joinedAt ||
-            user.createdAt ||
-            user.created ||
-            new Date().toISOString()
-
-    };
-
-}
-
-
-function addUserIfNew(
-    list,
-    user
-){
-
-    if(
-        !user ||
-        typeof user !==
-        "object"
-    ){
+    if(loading){
 
         return;
 
     }
 
 
-    const normalized =
-        normalizeUser(
-            user
-        );
+    loading = true;
+
+    setRefreshState(
+        true
+    );
+
+    showLoading();
 
 
-    const exists =
-        list.some(
-            function(item){
+    try{
 
-                return String(
-                    item.id
-                ) ===
-                String(
-                    normalized.id
+        const result = [];
+
+
+        /*
+         * Main users collection.
+         */
+        try{
+
+            const customerUsers =
+                await loadCollection(
+                    "users",
+                    "customer"
                 );
 
-            }
+
+            customerUsers.forEach(
+                user =>
+                    addUser(
+                        result,
+                        user
+                    )
+            );
+
+        }catch(error){
+
+            console.warn(
+                "users collection could not be loaded:",
+                error
+            );
+
+        }
+
+
+        /*
+         * Rider collection.
+         *
+         * Riders are kept separate in the
+         * existing RiderX architecture.
+         */
+        try{
+
+            const riderUsers =
+                await loadCollection(
+                    "riders",
+                    "rider"
+                );
+
+
+            riderUsers.forEach(
+                user =>
+                    addUser(
+                        result,
+                        user
+                    )
+            );
+
+        }catch(error){
+
+            console.warn(
+                "riders collection could not be loaded:",
+                error
+            );
+
+        }
+
+
+        users =
+            result.sort(
+                function(a,b){
+
+                    const dateA =
+                        normalizeDate(
+                            a.joinedAt
+                        );
+
+                    const dateB =
+                        normalizeDate(
+                            b.joinedAt
+                        );
+
+
+                    if(
+                        !dateA &&
+                        !dateB
+                    ){
+
+                        return a.name.localeCompare(
+                            b.name
+                        );
+
+                    }
+
+
+                    if(!dateA){
+
+                        return 1;
+
+                    }
+
+
+                    if(!dateB){
+
+                        return -1;
+
+                    }
+
+
+                    return dateB.getTime() -
+                        dateA.getTime();
+
+                }
+            );
+
+
+        renderStats();
+
+        renderUsers();
+
+
+        if(!users.length){
+
+            showToast(
+                "No users found in Firebase."
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Firebase users load error:",
+            error
         );
 
 
-    if(!exists){
+        showError(
+            "Unable to load users from Firebase."
+        );
 
-        list.push(
-            normalized
+
+        showToast(
+            "Firebase users could not be loaded."
+        );
+
+    }finally{
+
+        loading = false;
+
+        setRefreshState(
+            false
         );
 
     }
@@ -1324,42 +1722,33 @@ function addUserIfNew(
 }
 
 
-/* =========================================
-   STATS
-========================================= */
+/* =========================================================
+   RENDER STATS
+========================================================= */
 
 function renderStats(){
 
     const customers =
         users.filter(
-            function(user){
-
-                return user.role ===
-                    "customer";
-
-            }
+            user =>
+                user.role ===
+                "customer"
         ).length;
 
 
     const riders =
         users.filter(
-            function(user){
-
-                return user.role ===
-                    "rider";
-
-            }
+            user =>
+                user.role ===
+                "rider"
         ).length;
 
 
     const active =
         users.filter(
-            function(user){
-
-                return user.status ===
-                    "active";
-
-            }
+            user =>
+                user.status ===
+                "active"
         ).length;
 
 
@@ -1386,28 +1775,15 @@ function renderStats(){
 }
 
 
-/* =========================================
-   RENDER
-========================================= */
+/* =========================================================
+   FILTER
+========================================================= */
 
-function renderUsers(){
-
-    const tbody =
-        document.getElementById(
-            "usersTable"
-        );
-
-
-    if(!tbody){
-        return;
-    }
-
+function getFilteredUsers(){
 
     const search =
         String(
-            document.getElementById(
-                "searchInput"
-            )?.value ||
+            searchInput?.value ||
             ""
         )
         .toLowerCase()
@@ -1415,81 +1791,91 @@ function renderUsers(){
 
 
     const role =
-        document.getElementById(
-            "roleFilter"
-        )?.value ||
+        roleFilter?.value ||
         "all";
 
 
     const status =
-        document.getElementById(
-            "statusFilter"
-        )?.value ||
+        statusFilter?.value ||
         "all";
 
 
-    const filtered =
-        users.filter(
-            function(user){
+    return users.filter(
+        function(user){
 
-                if(
-                    role !==
-                    "all" &&
-                    user.role !==
-                    role
-                ){
+            if(
+                role !== "all" &&
+                user.role !== role
+            ){
 
-                    return false;
-
-                }
-
-
-                if(
-                    status !==
-                    "all" &&
-                    user.status !==
-                    status
-                ){
-
-                    return false;
-
-                }
-
-
-                if(!search){
-
-                    return true;
-
-                }
-
-
-                const text =
-                    [
-                        user.id,
-                        user.name,
-                        user.email,
-                        user.phone,
-                        user.role,
-                        user.status
-                    ]
-                    .join(" ")
-                    .toLowerCase();
-
-
-                return text.includes(
-                    search
-                );
+                return false;
 
             }
-        );
 
 
-    tbody.innerHTML = "";
+            if(
+                status !== "all" &&
+                user.status !== status
+            ){
+
+                return false;
+
+            }
+
+
+            if(!search){
+
+                return true;
+
+            }
+
+
+            const searchable =
+                [
+                    user.id,
+                    user.name,
+                    user.email,
+                    user.phone,
+                    user.role,
+                    user.status
+                ]
+                .join(" ")
+                .toLowerCase();
+
+
+            return searchable.includes(
+                search
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RENDER USERS
+========================================================= */
+
+function renderUsers(){
+
+    if(!usersTable){
+
+        return;
+
+    }
+
+
+    const filtered =
+        getFilteredUsers();
+
+
+    usersTable.innerHTML = "";
 
 
     if(!filtered.length){
 
-        tbody.innerHTML = `
+        usersTable.innerHTML = `
 
             <tr>
 
@@ -1511,9 +1897,9 @@ function renderUsers(){
 
 
     filtered.forEach(
-        function(user){
+        user => {
 
-            tbody.appendChild(
+            usersTable.appendChild(
                 createUserRow(
                     user
                 )
@@ -1525,9 +1911,9 @@ function renderUsers(){
 }
 
 
-/* =========================================
-   USER ROW
-========================================= */
+/* =========================================================
+   CREATE ROW
+========================================================= */
 
 function createUserRow(
     user
@@ -1545,11 +1931,35 @@ function createUserRow(
 
 
     const initial =
-        String(
-            name
-        )
+        name
+        .trim()
         .charAt(0)
-        .toUpperCase();
+        .toUpperCase() ||
+        "R";
+
+
+    const roleClass =
+        user.role === "rider"
+            ? "badge-rider"
+            : "badge-customer";
+
+
+    const roleLabel =
+        user.role === "rider"
+            ? "Rider"
+            : "Customer";
+
+
+    const statusClassName =
+        getStatusClass(
+            user.status
+        );
+
+
+    const statusText =
+        getStatusLabel(
+            user.status
+        );
 
 
     tr.innerHTML = `
@@ -1584,22 +1994,8 @@ function createUserRow(
 
         <td>
 
-            <span class="
-                badge
-                ${
-                    user.role === "rider"
-                        ? "badge-rider"
-                        : "badge-customer"
-                }
-            ">
-
-                ${escapeHtml(
-                    user.role ===
-                    "rider"
-                        ? "Rider"
-                        : "Customer"
-                )}
-
+            <span class="badge ${roleClass}">
+                ${roleLabel}
             </span>
 
         </td>
@@ -1617,17 +2013,9 @@ function createUserRow(
 
             <span class="
                 badge
-                ${statusClass(
-                    user.status
-                )}
+                ${statusClassName}
             ">
-
-                ${escapeHtml(
-                    statusLabel(
-                        user.status
-                    )
-                )}
-
+                ${statusText}
             </span>
 
         </td>
@@ -1648,40 +2036,35 @@ function createUserRow(
 
                 <button
                     class="small-btn"
-                    onclick="viewUser('${escapeJs(
-                        user.id
-                    )}')"
+                    type="button"
+                    data-action="view"
+                    data-id="${escapeHtml(user.id)}"
                 >
                     VIEW
                 </button>
 
 
-                ${
-                    user.status ===
-                    "blocked"
+                <button
+                    class="
+                        small-btn
+                        ${
+                            user.status === "blocked"
+                                ? "success"
+                                : "danger"
+                        }
+                    "
+                    type="button"
+                    data-action="status"
+                    data-id="${escapeHtml(user.id)}"
+                >
 
-                        ? `
-                            <button
-                                class="small-btn success"
-                                onclick="toggleUserStatus('${escapeJs(
-                                    user.id
-                                )}')"
-                            >
-                                UNBLOCK
-                            </button>
-                        `
+                    ${
+                        user.status === "blocked"
+                            ? "UNBLOCK"
+                            : "BLOCK"
+                    }
 
-                        : `
-                            <button
-                                class="small-btn danger"
-                                onclick="toggleUserStatus('${escapeJs(
-                                    user.id
-                                )}')"
-                            >
-                                BLOCK
-                            </button>
-                        `
-                }
+                </button>
 
             </div>
 
@@ -1695,9 +2078,63 @@ function createUserRow(
 }
 
 
-/* =========================================
+/* =========================================================
+   TABLE ACTIONS
+========================================================= */
+
+usersTable?.addEventListener(
+    "click",
+    function(event){
+
+        const button =
+            event.target.closest(
+                "button[data-action]"
+            );
+
+
+        if(!button){
+
+            return;
+
+        }
+
+
+        const id =
+            button.dataset.id;
+
+
+        if(
+            button.dataset.action ===
+            "view"
+        ){
+
+            viewUser(
+                id
+            );
+
+            return;
+
+        }
+
+
+        if(
+            button.dataset.action ===
+            "status"
+        ){
+
+            toggleUserStatus(
+                id
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
    VIEW USER
-========================================= */
+========================================================= */
 
 function viewUser(
     id
@@ -1705,14 +2142,9 @@ function viewUser(
 
     const user =
         users.find(
-            function(item){
-
-                return String(
-                    item.id
-                ) ===
-                String(id);
-
-            }
+            item =>
+                String(item.id) ===
+                String(id)
         );
 
 
@@ -1728,30 +2160,10 @@ function viewUser(
 
 
     selectedUserId =
-        id;
+        user.id;
 
-
-    const modal =
-        document.getElementById(
-            "userModal"
-        );
-
-
-    const body =
-        document.getElementById(
-            "modalBody"
-        );
-
-
-    const button =
-        document.getElementById(
-            "modalStatusButton"
-        );
-
-
-    if(!modal || !body){
-        return;
-    }
+    selectedUser =
+        user;
 
 
     const name =
@@ -1760,14 +2172,14 @@ function viewUser(
 
 
     const initial =
-        String(
-            name
-        )
+        name
+        .trim()
         .charAt(0)
-        .toUpperCase();
+        .toUpperCase() ||
+        "R";
 
 
-    body.innerHTML = `
+    modalBody.innerHTML = `
 
         <div
             style="
@@ -1809,9 +2221,7 @@ function viewUser(
             </span>
 
             <span class="detail-value">
-                ${escapeHtml(
-                    user.id
-                )}
+                ${escapeHtml(user.id)}
             </span>
 
         </div>
@@ -1825,7 +2235,25 @@ function viewUser(
 
             <span class="detail-value">
                 ${escapeHtml(
-                    user.role
+                    user.role === "rider"
+                        ? "Rider"
+                        : "Customer"
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="detail-row">
+
+            <span class="detail-label">
+                Email
+            </span>
+
+            <span class="detail-value">
+                ${escapeHtml(
+                    user.email ||
+                    "—"
                 )}
             </span>
 
@@ -1855,10 +2283,8 @@ function viewUser(
             </span>
 
             <span class="detail-value">
-                ${escapeHtml(
-                    statusLabel(
-                        user.status
-                    )
+                ${getStatusLabel(
+                    user.status
                 )}
             </span>
 
@@ -1884,42 +2310,47 @@ function viewUser(
     `;
 
 
-    if(button){
-
-        button.textContent =
-            user.status ===
-            "blocked"
-                ? "UNBLOCK USER"
-                : "BLOCK USER";
-
-    }
+    modalStatusButton.textContent =
+        user.status === "blocked"
+            ? "UNBLOCK USER"
+            : "BLOCK USER";
 
 
-    modal.classList.add(
+    modalStatusButton.className =
+        "modal-action " +
+        (
+            user.status === "blocked"
+                ? "primary"
+                : "danger"
+        );
+
+
+    userModal.classList.add(
         "show"
+    );
+
+
+    userModal.setAttribute(
+        "aria-hidden",
+        "false"
     );
 
 }
 
 
-/* =========================================
-   TOGGLE STATUS
-========================================= */
+/* =========================================================
+   TOGGLE USER STATUS
+========================================================= */
 
-function toggleUserStatus(
+async function toggleUserStatus(
     id
 ){
 
     const user =
         users.find(
-            function(item){
-
-                return String(
-                    item.id
-                ) ===
-                String(id);
-
-            }
+            item =>
+                String(item.id) ===
+                String(id)
         );
 
 
@@ -1934,258 +2365,392 @@ function toggleUserStatus(
     }
 
 
-    const isBlocked =
-        user.status ===
-        "blocked";
-
-
-    user.status =
-        isBlocked
+    const newStatus =
+        user.status === "blocked"
             ? "active"
             : "blocked";
 
 
-    user.updatedAt =
-        new Date().toISOString();
+    const collectionName =
+        user.role === "rider"
+            ? "riders"
+            : "users";
 
 
-    saveUsers();
+    try{
 
-    renderStats();
+        showToast(
+            newStatus === "blocked"
+                ? "Blocking user..."
+                : "Unblocking user..."
+        );
 
-    renderUsers();
+
+        await updateDoc(
+            doc(
+                db,
+                collectionName,
+                user.id
+            ),
+            {
+                status:newStatus,
+                updatedAt:serverTimestamp()
+            }
+        );
 
 
-    if(
-        String(
-            selectedUserId
-        ) ===
-        String(id)
-    ){
+        user.status =
+            newStatus;
 
-        viewUser(id);
+
+        user.raw =
+            {
+                ...(user.raw || {}),
+                status:newStatus
+            };
+
+
+        renderStats();
+
+        renderUsers();
+
+
+        if(
+            selectedUserId &&
+            String(
+                selectedUserId
+            ) ===
+            String(
+                user.id
+            )
+        ){
+
+            viewUser(
+                user.id
+            );
+
+        }
+
+
+        showToast(
+            newStatus === "blocked"
+                ? "User blocked successfully."
+                : "User unblocked successfully."
+        );
+
+    }catch(error){
+
+        console.error(
+            "User status update error:",
+            error
+        );
+
+
+        showToast(
+            "Unable to update user status."
+        );
 
     }
-
-
-    showToast(
-        isBlocked
-            ? "User unblocked."
-            : "User blocked."
-    );
 
 }
 
 
-/* =========================================
-   MODAL STATUS
-========================================= */
+/* =========================================================
+   MODAL STATUS BUTTON
+========================================================= */
 
-function toggleSelectedUserStatus(){
+modalStatusButton?.addEventListener(
+    "click",
+    function(){
 
-    if(!selectedUserId){
+        if(!selectedUserId){
+
+            return;
+
+        }
+
+
+        toggleUserStatus(
+            selectedUserId
+        );
+
+    }
+);
+
+
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
+
+function closeModal(){
+
+    userModal.classList.remove(
+        "show"
+    );
+
+
+    userModal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    selectedUserId =
+        null;
+
+    selectedUser =
+        null;
+
+}
+
+
+closeModalButton?.addEventListener(
+    "click",
+    closeModal
+);
+
+
+modalCloseAction?.addEventListener(
+    "click",
+    closeModal
+);
+
+
+userModal?.addEventListener(
+    "click",
+    function(event){
+
+        if(
+            event.target ===
+            userModal
+        ){
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   FILTER EVENTS
+========================================================= */
+
+searchInput?.addEventListener(
+    "input",
+    renderUsers
+);
+
+
+roleFilter?.addEventListener(
+    "change",
+    renderUsers
+);
+
+
+statusFilter?.addEventListener(
+    "change",
+    renderUsers
+);
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+refreshButton?.addEventListener(
+    "click",
+    loadUsers
+);
+
+
+/* =========================================================
+   BACK
+========================================================= */
+
+backButton?.addEventListener(
+    "click",
+    function(){
+
+        if(
+            document.referrer &&
+            document.referrer.includes(
+                window.location.host
+            )
+        ){
+
+            window.history.back();
+
+        }else{
+
+            window.location.href =
+                "dashboard.html";
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+function showLoading(){
+
+    if(!usersTable){
 
         return;
 
     }
 
 
-    toggleUserStatus(
-        selectedUserId
-    );
+    usersTable.innerHTML = `
+
+        <tr>
+
+            <td colspan="6">
+
+                <div class="empty">
+
+                    <div class="loading-spinner"></div>
+
+                    Loading users from Firebase...
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    `;
 
 }
 
 
-/* =========================================
-   SAVE
-========================================= */
+/* =========================================================
+   ERROR
+========================================================= */
 
-function saveUsers(){
-
-    try{
-
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(
-                users
-            )
-        );
-
-    }catch(error){
-
-        console.log(
-            "Users save error:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================
-   CLOSE MODAL
-========================================= */
-
-function closeModal(){
-
-    const modal =
-        document.getElementById(
-            "userModal"
-        );
-
-
-    if(modal){
-
-        modal.classList.remove(
-            "show"
-        );
-
-    }
-
-
-    selectedUserId =
-        null;
-
-}
-
-
-function closeModalOutside(
-    event
+function showError(
+    message
 ){
 
-    if(
-        event.target &&
-        event.target.id ===
-        "userModal"
-    ){
+    if(!usersTable){
 
-        closeModal();
+        return;
 
     }
 
-}
+
+    usersTable.innerHTML = `
+
+        <tr>
+
+            <td colspan="6">
+
+                <div class="error-box">
+
+                    ${escapeHtml(message)}
+
+                    <br>
+
+                    <button
+                        class="retry-btn"
+                        type="button"
+                        id="inlineRetryButton"
+                    >
+                        RETRY
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    `;
 
 
-/* =========================================
-   STATUS
-========================================= */
-
-function normalizeRole(
-    role
-){
-
-    const value =
-        String(
-            role ||
-            ""
+    document
+        .getElementById(
+            "inlineRetryButton"
         )
-        .toLowerCase();
-
-
-    if(
-        value.includes(
-            "rider"
-        ) ||
-        value.includes(
-            "driver"
-        )
-    ){
-
-        return "rider";
-
-    }
-
-
-    return "customer";
+        ?.addEventListener(
+            "click",
+            loadUsers
+        );
 
 }
 
 
-function normalizeStatus(
-    status
+/* =========================================================
+   REFRESH STATE
+========================================================= */
+
+function setRefreshState(
+isLoading
 ){
 
-    const value =
-        String(
-            status ||
-            ""
-        )
-        .toLowerCase();
+    if(!refreshButton){
 
-
-    if(
-        value ===
-        "blocked" ||
-        value ===
-        "disabled" ||
-        value ===
-        "suspended"
-    ){
-
-        return "blocked";
+        return;
 
     }
 
 
-    if(
-        value ===
-        "pending" ||
-        value ===
-        "waiting"
-    ){
+    refreshButton.disabled =
+        isLoading;
 
-        return "pending";
+
+    refreshButton.textContent =
+        isLoading
+            ? "↻ LOADING..."
+            : "↻ REFRESH";
+
+}
+
+
+/* =========================================================
+   STATUS HELPERS
+========================================================= */
+
+function getStatusLabel(
+status
+){
+
+    if(status === "blocked"){
+
+        return "Blocked";
 
     }
 
 
-    return "active";
+    if(status === "pending"){
+
+        return "Pending";
+
+    }
+
+
+    return "Active";
 
 }
 
 
-function statusLabel(
-    status
+function getStatusClass(
+status
 ){
 
-    const labels = {
-
-        active:"Active",
-
-        blocked:"Blocked",
-
-        pending:"Pending"
-
-    };
-
-
-    return labels[
-        status
-    ] || "Active";
-
-}
-
-
-function statusClass(
-    status
-){
-
-    if(
-        status ===
-        "blocked"
-    ){
+    if(status === "blocked"){
 
         return "badge-blocked";
 
     }
 
 
-    if(
-        status ===
-        "pending"
-    ){
+    if(status === "pending"){
 
         return "badge-pending";
 
@@ -2197,39 +2762,13 @@ function statusClass(
 }
 
 
-/* =========================================
-   NAVIGATION
-========================================= */
-
-function goBack(){
-
-    if(
-        document.referrer &&
-        document.referrer.includes(
-            window.location.host
-        )
-    ){
-
-        history.back();
-
-    }
-    else{
-
-        window.location.href =
-            "dashboard.html";
-
-    }
-
-}
-
-
-/* =========================================
-   HELPERS
-========================================= */
+/* =========================================================
+   TEXT
+========================================================= */
 
 function setText(
-    id,
-    value
+id,
+value
 ){
 
     const element =
@@ -2248,90 +2787,76 @@ function setText(
 }
 
 
-function createId(){
+/* =========================================================
+   DATE
+========================================================= */
 
-    return (
-        "user-" +
-        Date.now() +
-        "-" +
-        Math.random()
-            .toString(36)
-            .slice(2,8)
+function formatDate(
+value
+){
+
+    const date =
+        normalizeDate(
+            value
+        );
+
+
+    if(!date){
+
+        return "—";
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric"
+        }
     );
 
 }
 
 
-function formatDate(
-    value
-){
-
-    if(!value){
-
-        return "—";
-
-    }
-
-
-    try{
-
-        return new Date(
-            value
-        ).toLocaleDateString(
-            "en-IN",
-            {
-                day:"2-digit",
-                month:"short",
-                year:"numeric"
-            }
-        );
-
-    }catch(error){
-
-        return "—";
-
-    }
-
-}
-
-
 function formatDateLong(
-    value
+value
 ){
 
-    if(!value){
-
-        return "—";
-
-    }
-
-
-    try{
-
-        return new Date(
+    const date =
+        normalizeDate(
             value
-        ).toLocaleString(
-            "en-IN",
-            {
-                day:"2-digit",
-                month:"short",
-                year:"numeric",
-                hour:"2-digit",
-                minute:"2-digit"
-            }
         );
 
-    }catch(error){
+
+    if(!date){
 
         return "—";
 
     }
+
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day:"2-digit",
+            month:"short",
+            year:"numeric",
+            hour:"2-digit",
+            minute:"2-digit"
+        }
+    );
 
 }
 
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
 
 function escapeHtml(
-    value
+value
 ){
 
     return String(
@@ -2361,35 +2886,12 @@ function escapeHtml(
 }
 
 
-function escapeJs(
-    value
-){
-
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /\\/g,
-        "\\\\"
-    )
-    .replace(
-        /'/g,
-        "\\'"
-    )
-    .replace(
-        /"/g,
-        '\\"'
-    );
-
-}
-
-
-/* =========================================
+/* =========================================================
    TOAST
-========================================= */
+========================================================= */
 
 function showToast(
-    message
+message
 ){
 
     const toast =
@@ -2399,7 +2901,9 @@ function showToast(
 
 
     if(!toast){
+
         return;
+
     }
 
 
@@ -2426,15 +2930,15 @@ function showToast(
                 );
 
             },
-            2500
+            2800
         );
 
 }
 
 
-/* =========================================
+/* =========================================================
    KEYBOARD
-========================================= */
+========================================================= */
 
 document.addEventListener(
     "keydown",
@@ -2453,20 +2957,13 @@ document.addEventListener(
 );
 
 
-/* =========================================
+/* =========================================================
    INIT
-========================================= */
+========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
-
-        loadUsers();
-
-    }
-);
+loadUsers();
 
 </script>
 
 </body>
-  </html>
+</html>
