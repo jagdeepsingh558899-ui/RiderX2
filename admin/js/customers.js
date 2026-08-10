@@ -1,20 +1,44 @@
 /* =========================================================
    RiderX Admin - Customers Manager
    File: admin/js/customers.js
+
+   FINAL CUSTOMER MANAGEMENT ENGINE
+
+   Handles:
+   - Customer discovery from existing localStorage data
+   - Customer normalization
+   - Admin customer cache
+   - Search
+   - Status filtering
+   - Statistics
+   - Customer details
+   - Block / unblock
+   - Modal support
+   - Refresh
+   - Cross-tab synchronization
+   - Safe HTML rendering
+   - Public RiderXCustomers API
+
+   IMPORTANT:
+   - Does NOT create duplicate folders/files.
+   - Keeps existing RiderX localStorage compatibility.
+   - Does NOT treat riders/drivers as customers.
 ========================================================= */
 
 "use strict";
 
 
 /* =========================================================
-   STORAGE
+   STORAGE KEYS
 ========================================================= */
 
 const CUSTOMER_STORAGE_KEYS = [
     "riderxCustomers",
     "riderxUsers",
     "riderx_users",
-    "users"
+    "users",
+    "riderx_user",
+    "riderx_customer"
 ];
 
 const CUSTOMER_ADMIN_KEY =
@@ -38,12 +62,23 @@ document.addEventListener(
     "DOMContentLoaded",
     function () {
 
-        loadCustomers();
-
-        bindCustomerEvents();
+        initializeCustomers();
 
     }
 );
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+function initializeCustomers() {
+
+    bindCustomerEvents();
+
+    loadCustomers();
+
+}
 
 
 /* =========================================================
@@ -54,8 +89,9 @@ function loadCustomers() {
 
     const collected = [];
 
-    /* First check admin/customer storage */
-
+    /*
+     * First load the admin-maintained customer cache.
+     */
     readStorageArray(
         CUSTOMER_ADMIN_KEY
     ).forEach(
@@ -70,8 +106,9 @@ function loadCustomers() {
     );
 
 
-    /* Then check application storage */
-
+    /*
+     * Then load customers from application storage.
+     */
     CUSTOMER_STORAGE_KEYS.forEach(
         function (key) {
 
@@ -92,11 +129,15 @@ function loadCustomers() {
     );
 
 
+    /*
+     * Final safety filter.
+     */
     customers =
         collected.filter(
             function (customer) {
 
                 return (
+                    customer &&
                     customer.role ===
                     "customer"
                 );
@@ -105,17 +146,57 @@ function loadCustomers() {
         );
 
 
+    /*
+     * Keep a normalized admin cache.
+     */
     saveCustomers();
+
 
     renderCustomerStats();
 
     renderCustomers();
 
+
+    /*
+     * Re-open selected customer if it still exists.
+     */
+    if (
+        selectedCustomerId !==
+        null
+    ) {
+
+        const selected =
+            getCustomerById(
+                selectedCustomerId
+            );
+
+
+        if (selected) {
+
+            renderSelectedCustomer(
+                selected
+            );
+
+        }
+        else {
+
+            selectedCustomerId =
+                null;
+
+        }
+
+    }
+
+
+    return [
+        ...customers
+    ];
+
 }
 
 
 /* =========================================================
-   READ STORAGE
+   READ STORAGE ARRAY
 ========================================================= */
 
 function readStorageArray(
@@ -154,18 +235,9 @@ function readStorageArray(
 
         if (
             data &&
-            typeof data === "object"
+            typeof data ===
+            "object"
         ) {
-
-            if (
-                Array.isArray(
-                    data.users
-                )
-            ) {
-
-                return data.users;
-
-            }
 
             if (
                 Array.isArray(
@@ -177,12 +249,42 @@ function readStorageArray(
 
             }
 
+
+            if (
+                Array.isArray(
+                    data.users
+                )
+            ) {
+
+                return data.users;
+
+            }
+
+
+            /*
+             * Single stored user object.
+             */
+            if (
+                data.id ||
+                data.uid ||
+                data.userId ||
+                data.email ||
+                data.phone
+            ) {
+
+                return [
+                    data
+                ];
+
+            }
+
         }
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Customer storage error:",
+            "RiderX customer storage error:",
             key,
             error
         );
@@ -196,7 +298,7 @@ function readStorageArray(
 
 
 /* =========================================================
-   ADD CUSTOMER
+   ADD CUSTOMER IF VALID
 ========================================================= */
 
 function addCustomerIfValid(
@@ -210,7 +312,7 @@ function addCustomerIfValid(
         "object"
     ) {
 
-        return;
+        return false;
 
     }
 
@@ -226,33 +328,242 @@ function addCustomerIfValid(
         "customer"
     ) {
 
-        return;
+        return false;
 
     }
 
 
-    const exists =
-        list.some(
+    const existingIndex =
+        list.findIndex(
             function (item) {
 
-                return String(
-                    item.id
-                ) ===
-                String(
-                    normalized.id
+                return sameCustomer(
+                    item,
+                    normalized
                 );
 
             }
         );
 
 
-    if (!exists) {
+    if (
+        existingIndex ===
+        -1
+    ) {
 
         list.push(
             normalized
         );
 
+        return true;
+
     }
+
+
+    /*
+     * Merge newer/useful values instead of silently
+     * discarding the second source.
+     */
+    list[existingIndex] =
+        mergeCustomer(
+            list[existingIndex],
+            normalized
+        );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   CUSTOMER IDENTITY
+========================================================= */
+
+function sameCustomer(
+    first,
+    second
+) {
+
+    if (
+        !first ||
+        !second
+    ) {
+
+        return false;
+
+    }
+
+
+    const firstId =
+        String(
+            first.id ||
+            ""
+        ).trim();
+
+
+    const secondId =
+        String(
+            second.id ||
+            ""
+        ).trim();
+
+
+    if (
+        firstId &&
+        secondId &&
+        firstId ===
+        secondId
+    ) {
+
+        return true;
+
+    }
+
+
+    const firstEmail =
+        String(
+            first.email ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const secondEmail =
+        String(
+            second.email ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    if (
+        firstEmail &&
+        secondEmail &&
+        firstEmail ===
+        secondEmail
+    ) {
+
+        return true;
+
+    }
+
+
+    const firstPhone =
+        normalizePhone(
+            first.phone
+        );
+
+
+    const secondPhone =
+        normalizePhone(
+            second.phone
+        );
+
+
+    if (
+        firstPhone &&
+        secondPhone &&
+        firstPhone ===
+        secondPhone
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   MERGE CUSTOMER
+========================================================= */
+
+function mergeCustomer(
+    oldCustomer,
+    newCustomer
+) {
+
+    const merged = {
+
+        ...oldCustomer,
+        ...newCustomer
+
+    };
+
+
+    /*
+     * Never replace useful values with empty values.
+     */
+    const protectedFields = [
+        "name",
+        "email",
+        "phone",
+        "photo",
+        "city",
+        "joinedAt"
+    ];
+
+
+    protectedFields.forEach(
+        function (field) {
+
+            const newValue =
+                newCustomer[field];
+
+
+            const oldValue =
+                oldCustomer[field];
+
+
+            if (
+                (
+                    newValue ===
+                    null ||
+                    newValue ===
+                    undefined ||
+                    String(
+                        newValue
+                    ).trim() ===
+                    ""
+                ) &&
+                oldValue
+            ) {
+
+                merged[field] =
+                    oldValue;
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Preserve blocked status if another source
+     * still contains an older active record.
+     */
+    if (
+        oldCustomer.status ===
+        "blocked" &&
+        newCustomer.status !==
+        "blocked"
+    ) {
+
+        merged.status =
+            "blocked";
+
+    }
+
+
+    return normalizeCustomer(
+        merged
+    );
 
 }
 
@@ -265,71 +576,118 @@ function normalizeCustomer(
     user
 ) {
 
+    const rawRole =
+        user.role ||
+        user.userType ||
+        user.type ||
+        user.accountType ||
+        "customer";
+
+
+    const rawStatus =
+        user.status ||
+        user.accountStatus ||
+        user.state ||
+        "active";
+
+
+    const ridesValue =
+        user.rides ??
+        user.totalRides ??
+        user.completedRides ??
+        0;
+
+
+    const walletValue =
+        user.wallet ??
+        user.walletBalance ??
+        user.balance ??
+        0;
+
+
     return {
 
         id:
-            user.id ||
-            user.uid ||
-            user.userId ||
-            createId(),
+            String(
+                user.id ||
+                user.uid ||
+                user.userId ||
+                createId()
+            ),
+
 
         name:
-            user.name ||
-            user.fullName ||
-            user.displayName ||
-            "RiderX Customer",
+            cleanString(
+                user.name ||
+                user.fullName ||
+                user.displayName ||
+                user.username ||
+                "RiderX Customer"
+            ),
+
 
         email:
-            user.email ||
-            "",
+            cleanString(
+                user.email
+            ),
+
 
         phone:
-            user.phone ||
-            user.phoneNumber ||
-            "",
+            cleanString(
+                user.phone ||
+                user.phoneNumber ||
+                user.mobile
+            ),
+
 
         role:
             normalizeRole(
-                user.role ||
-                user.userType ||
-                user.type
+                rawRole
             ),
+
 
         status:
             normalizeStatus(
-                user.status ||
-                user.accountStatus
+                rawStatus
             ),
 
+
         photo:
-            user.photo ||
-            user.photoURL ||
-            user.avatar ||
-            "",
+            cleanString(
+                user.photo ||
+                user.photoURL ||
+                user.avatar ||
+                user.profileImage
+            ),
+
 
         city:
-            user.city ||
-            "Chandigarh",
+            cleanString(
+                user.city ||
+                user.locationCity ||
+                "Chandigarh"
+            ),
+
 
         rides:
-            Number(
-                user.rides ||
-                user.totalRides ||
-                0
-            ) || 0,
+            safeNumber(
+                ridesValue
+            ),
+
 
         wallet:
-            Number(
-                user.wallet ||
-                user.walletBalance ||
-                0
-            ) || 0,
+            safeNumber(
+                walletValue
+            ),
+
 
         joinedAt:
             user.joinedAt ||
             user.createdAt ||
             user.created ||
+            user.registeredAt ||
             new Date().toISOString(),
+
 
         updatedAt:
             user.updatedAt ||
@@ -341,7 +699,7 @@ function normalizeCustomer(
 
 
 /* =========================================================
-   SAVE
+   SAVE ADMIN CUSTOMER CACHE
 ========================================================= */
 
 function saveCustomers() {
@@ -355,14 +713,17 @@ function saveCustomers() {
             )
         );
 
+
         return true;
 
-    } catch (error) {
+    }
+    catch (error) {
 
         console.error(
-            "Customer save error:",
+            "RiderX customer save error:",
             error
         );
+
 
         return false;
 
@@ -377,6 +738,9 @@ function saveCustomers() {
 
 function bindCustomerEvents() {
 
+    /*
+     * Search
+     */
     const search =
         document.getElementById(
             "customerSearch"
@@ -390,13 +754,20 @@ function bindCustomerEvents() {
 
         search.addEventListener(
             "input",
-            renderCustomers
+            function () {
+
+                renderCustomers();
+
+            }
         );
 
     }
 
 
-    const roleFilter =
+    /*
+     * Status filter
+     */
+    const statusFilter =
         document.getElementById(
             "customerStatusFilter"
         ) ||
@@ -405,16 +776,23 @@ function bindCustomerEvents() {
         );
 
 
-    if (roleFilter) {
+    if (statusFilter) {
 
-        roleFilter.addEventListener(
+        statusFilter.addEventListener(
             "change",
-            renderCustomers
+            function () {
+
+                renderCustomers();
+
+            }
         );
 
     }
 
 
+    /*
+     * Refresh button
+     */
     const refresh =
         document.getElementById(
             "refreshCustomers"
@@ -439,6 +817,55 @@ function bindCustomerEvents() {
 
     }
 
+
+    /*
+     * Optional close buttons.
+     */
+    document
+        .querySelectorAll(
+            "[data-close-customer-modal]"
+        )
+        .forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    closeCustomerModal
+                );
+
+            }
+        );
+
+
+    /*
+     * Close modal when clicking outside.
+     */
+    const modal =
+        document.getElementById(
+            "customerModal"
+        );
+
+
+    if (modal) {
+
+        modal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    modal
+                ) {
+
+                    closeCustomerModal();
+
+                }
+
+            }
+        );
+
+    }
+
 }
 
 
@@ -456,8 +883,10 @@ function renderCustomerStats() {
         customers.filter(
             function (customer) {
 
-                return customer.status ===
-                    "active";
+                return (
+                    customer.status ===
+                    "active"
+                );
 
             }
         ).length;
@@ -467,8 +896,10 @@ function renderCustomerStats() {
         customers.filter(
             function (customer) {
 
-                return customer.status ===
-                    "blocked";
+                return (
+                    customer.status ===
+                    "blocked"
+                );
 
             }
         ).length;
@@ -478,8 +909,10 @@ function renderCustomerStats() {
         customers.filter(
             function (customer) {
 
-                return customer.status ===
-                    "pending";
+                return (
+                    customer.status ===
+                    "pending"
+                );
 
             }
         ).length;
@@ -490,20 +923,24 @@ function renderCustomerStats() {
         total
     );
 
+
     setText(
         "customerCount",
         total
     );
+
 
     setText(
         "activeCustomers",
         active
     );
 
+
     setText(
         "blockedCustomers",
         blocked
     );
+
 
     setText(
         "pendingCustomers",
@@ -575,7 +1012,8 @@ function renderCustomers() {
                         customer.name,
                         customer.email,
                         customer.phone,
-                        customer.city
+                        customer.city,
+                        customer.role
                     ]
                     .join(" ")
                     .toLowerCase();
@@ -589,7 +1027,17 @@ function renderCustomers() {
         );
 
 
-    container.innerHTML = "";
+    /*
+     * Optional count elements.
+     */
+    setText(
+        "customerCount",
+        filtered.length
+    );
+
+
+    container.innerHTML =
+        "";
 
 
     if (!filtered.length) {
@@ -625,7 +1073,8 @@ function renderCustomers() {
                     )
                 );
 
-            } else {
+            }
+            else {
 
                 container.appendChild(
                     createCustomerCard(
@@ -661,11 +1110,15 @@ function createCustomerRow(
 
 
     const initial =
-        String(
+        getInitial(
             name
-        )
-        .charAt(0)
-        .toUpperCase();
+        );
+
+
+    const safeId =
+        escapeJs(
+            customer.id
+        );
 
 
     tr.innerHTML = `
@@ -684,6 +1137,7 @@ function createCustomerRow(
                     style="
                         width:34px;
                         height:34px;
+                        min-width:34px;
                         border-radius:10px;
                         display:flex;
                         align-items:center;
@@ -783,9 +1237,7 @@ function createCustomerRow(
 
             <button
                 type="button"
-                onclick="viewCustomer('${escapeJs(
-                    customer.id
-                )}')"
+                data-customer-view="${safeId}"
             >
                 View
             </button>
@@ -793,9 +1245,7 @@ function createCustomerRow(
 
             <button
                 type="button"
-                onclick="toggleCustomerStatus('${escapeJs(
-                    customer.id
-                )}')"
+                data-customer-toggle="${safeId}"
             >
                 ${
                     customer.status ===
@@ -808,6 +1258,12 @@ function createCustomerRow(
         </td>
 
     `;
+
+
+    bindCustomerRowActions(
+        tr,
+        customer.id
+    );
 
 
     return tr;
@@ -835,11 +1291,13 @@ function createCustomerCard(
 
 
     const initial =
-        String(
+        getInitial(
             name
-        )
-        .charAt(0)
-        .toUpperCase();
+        );
+
+
+    card.className =
+        "customer-card";
 
 
     card.style.cssText = `
@@ -865,6 +1323,7 @@ function createCustomerCard(
                 style="
                     width:42px;
                     height:42px;
+                    min-width:42px;
                     border-radius:12px;
                     display:flex;
                     align-items:center;
@@ -881,6 +1340,7 @@ function createCustomerCard(
             <div
                 style="
                     flex:1;
+                    min-width:0;
                 "
             >
 
@@ -898,6 +1358,9 @@ function createCustomerCard(
                         margin-top:4px;
                         color:#777;
                         font-size:11px;
+                        overflow:hidden;
+                        text-overflow:ellipsis;
+                        white-space:nowrap;
                     "
                 >
                     ${escapeHtml(
@@ -942,6 +1405,7 @@ function createCustomerCard(
         >
 
             <div>
+
                 <small style="color:#777">
                     RIDES
                 </small>
@@ -949,10 +1413,12 @@ function createCustomerCard(
                 <div>
                     ${customer.rides || 0}
                 </div>
+
             </div>
 
 
             <div>
+
                 <small style="color:#777">
                     WALLET
                 </small>
@@ -962,10 +1428,12 @@ function createCustomerCard(
                         customer.wallet
                     )}
                 </div>
+
             </div>
 
 
             <div>
+
                 <small style="color:#777">
                     CITY
                 </small>
@@ -976,6 +1444,7 @@ function createCustomerCard(
                         "Chandigarh"
                     )}
                 </div>
+
             </div>
 
         </div>
@@ -991,9 +1460,7 @@ function createCustomerCard(
 
             <button
                 type="button"
-                onclick="viewCustomer('${escapeJs(
-                    customer.id
-                )}')"
+                data-customer-view
                 style="
                     flex:1;
                     height:36px;
@@ -1005,9 +1472,7 @@ function createCustomerCard(
 
             <button
                 type="button"
-                onclick="toggleCustomerStatus('${escapeJs(
-                    customer.id
-                )}')"
+                data-customer-toggle
                 style="
                     flex:1;
                     height:36px;
@@ -1026,7 +1491,106 @@ function createCustomerCard(
     `;
 
 
+    const viewButton =
+        card.querySelector(
+            "[data-customer-view]"
+        );
+
+
+    const toggleButton =
+        card.querySelector(
+            "[data-customer-toggle]"
+        );
+
+
+    if (viewButton) {
+
+        viewButton.addEventListener(
+            "click",
+            function () {
+
+                viewCustomer(
+                    customer.id
+                );
+
+            }
+        );
+
+    }
+
+
+    if (toggleButton) {
+
+        toggleButton.addEventListener(
+            "click",
+            function () {
+
+                toggleCustomerStatus(
+                    customer.id
+                );
+
+            }
+        );
+
+    }
+
+
     return card;
+
+}
+
+
+/* =========================================================
+   ROW ACTIONS
+========================================================= */
+
+function bindCustomerRowActions(
+    row,
+    id
+) {
+
+    const viewButton =
+        row.querySelector(
+            "[data-customer-view]"
+        );
+
+
+    const toggleButton =
+        row.querySelector(
+            "[data-customer-toggle]"
+        );
+
+
+    if (viewButton) {
+
+        viewButton.addEventListener(
+            "click",
+            function () {
+
+                viewCustomer(
+                    id
+                );
+
+            }
+        );
+
+    }
+
+
+    if (toggleButton) {
+
+        toggleButton.addEventListener(
+            "click",
+            function () {
+
+                toggleCustomerStatus(
+                    id
+                );
+
+            }
+        );
+
+    }
 
 }
 
@@ -1040,15 +1604,8 @@ function viewCustomer(
 ) {
 
     const customer =
-        customers.find(
-            function (item) {
-
-                return String(
-                    item.id
-                ) ===
-                String(id);
-
-            }
+        getCustomerById(
+            id
         );
 
 
@@ -1065,7 +1622,7 @@ function viewCustomer(
 
 
     selectedCustomerId =
-        id;
+        customer.id;
 
 
     const modal =
@@ -1085,9 +1642,6 @@ function viewCustomer(
         !body
     ) {
 
-        /* If current HTML has no modal,
-           open a simple detail dialog. */
-
         showCustomerFallback(
             customer
         );
@@ -1097,17 +1651,46 @@ function viewCustomer(
     }
 
 
+    renderCustomerModal(
+        customer,
+        body
+    );
+
+
+    modal.classList.add(
+        "show"
+    );
+
+
+    /*
+     * Support alternate modal implementations.
+     */
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+}
+
+
+/* =========================================================
+   RENDER CUSTOMER MODAL
+========================================================= */
+
+function renderCustomerModal(
+    customer,
+    body
+) {
+
     const name =
         customer.name ||
         "Customer";
 
 
     const initial =
-        String(
+        getInitial(
             name
-        )
-        .charAt(0)
-        .toUpperCase();
+        );
 
 
     body.innerHTML = `
@@ -1126,6 +1709,7 @@ function viewCustomer(
                 style="
                     width:46px;
                     height:46px;
+                    min-width:46px;
                     display:flex;
                     align-items:center;
                     justify-content:center;
@@ -1140,7 +1724,11 @@ function viewCustomer(
             </div>
 
 
-            <div>
+            <div
+                style="
+                    min-width:0;
+                "
+            >
 
                 <div
                     style="
@@ -1158,7 +1746,7 @@ function viewCustomer(
                         margin-top:4px;
                     "
                 >
-                    Customer
+                    RiderX Customer
                 </div>
 
             </div>
@@ -1171,11 +1759,13 @@ function viewCustomer(
             customer.id
         )}
 
+
         ${detailRow(
             "Email",
             customer.email ||
             "—"
         )}
+
 
         ${detailRow(
             "Phone",
@@ -1183,17 +1773,20 @@ function viewCustomer(
             "—"
         )}
 
+
         ${detailRow(
             "City",
             customer.city ||
             "Chandigarh"
         )}
 
+
         ${detailRow(
             "Total Rides",
             customer.rides ||
             0
         )}
+
 
         ${detailRow(
             "Wallet Balance",
@@ -1203,12 +1796,14 @@ function viewCustomer(
             )
         )}
 
+
         ${detailRow(
             "Status",
             statusLabel(
                 customer.status
             )
         )}
+
 
         ${detailRow(
             "Joined",
@@ -1217,18 +1812,118 @@ function viewCustomer(
             )
         )}
 
+
+        <div
+            style="
+                display:flex;
+                gap:8px;
+                margin-top:14px;
+            "
+        >
+
+            <button
+                type="button"
+                id="modalCustomerToggle"
+                style="
+                    flex:1;
+                    min-height:38px;
+                "
+            >
+                ${
+                    customer.status ===
+                    "blocked"
+                        ? "UNBLOCK CUSTOMER"
+                        : "BLOCK CUSTOMER"
+                }
+            </button>
+
+        </div>
+
     `;
 
 
-    modal.classList.add(
-        "show"
-    );
+    const toggle =
+        document.getElementById(
+            "modalCustomerToggle"
+        );
+
+
+    if (toggle) {
+
+        toggle.addEventListener(
+            "click",
+            function () {
+
+                toggleCustomerStatus(
+                    customer.id
+                );
+
+
+                const updated =
+                    getCustomerById(
+                        customer.id
+                    );
+
+
+                if (
+                    updated
+                ) {
+
+                    renderCustomerModal(
+                        updated,
+                        body
+                    );
+
+                }
+
+            }
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   FALLBACK DETAIL
+   RENDER SELECTED CUSTOMER
+========================================================= */
+
+function renderSelectedCustomer(
+    customer
+) {
+
+    const modal =
+        document.getElementById(
+            "customerModal"
+        );
+
+
+    const body =
+        document.getElementById(
+            "customerModalBody"
+        );
+
+
+    if (
+        modal &&
+        body &&
+        modal.classList.contains(
+            "show"
+        )
+    ) {
+
+        renderCustomerModal(
+            customer,
+            body
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FALLBACK CUSTOMER DETAIL
 ========================================================= */
 
 function showCustomerFallback(
@@ -1243,6 +1938,12 @@ function showCustomerFallback(
             "Customer"
         ),
 
+        "User ID: " +
+        (
+            customer.id ||
+            "—"
+        ),
+
         "Phone: " +
         (
             customer.phone ||
@@ -1253,6 +1954,12 @@ function showCustomerFallback(
         (
             customer.email ||
             "—"
+        ),
+
+        "City: " +
+        (
+            customer.city ||
+            "Chandigarh"
         ),
 
         "Rides: " +
@@ -1282,7 +1989,34 @@ function showCustomerFallback(
 
 
 /* =========================================================
-   TOGGLE STATUS
+   GET CUSTOMER
+========================================================= */
+
+function getCustomerById(
+    id
+) {
+
+    return (
+        customers.find(
+            function (customer) {
+
+                return (
+                    String(
+                        customer.id
+                    ) ===
+                    String(id)
+                );
+
+            }
+        ) ||
+        null
+    );
+
+}
+
+
+/* =========================================================
+   TOGGLE CUSTOMER STATUS
 ========================================================= */
 
 function toggleCustomerStatus(
@@ -1290,15 +2024,8 @@ function toggleCustomerStatus(
 ) {
 
     const customer =
-        customers.find(
-            function (item) {
-
-                return String(
-                    item.id
-                ) ===
-                String(id);
-
-            }
+        getCustomerById(
+            id
         );
 
 
@@ -1309,7 +2036,7 @@ function toggleCustomerStatus(
             "error"
         );
 
-        return;
+        return false;
 
     }
 
@@ -1343,11 +2070,96 @@ function toggleCustomerStatus(
         "success"
     );
 
+
+    return true;
+
 }
 
 
 /* =========================================================
-   MODAL CLOSE
+   BLOCK CUSTOMER
+========================================================= */
+
+function blockCustomer(
+    id
+) {
+
+    const customer =
+        getCustomerById(
+            id
+        );
+
+
+    if (!customer) {
+
+        return false;
+
+    }
+
+
+    customer.status =
+        "blocked";
+
+
+    customer.updatedAt =
+        new Date().toISOString();
+
+
+    saveCustomers();
+
+    renderCustomerStats();
+
+    renderCustomers();
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   UNBLOCK CUSTOMER
+========================================================= */
+
+function unblockCustomer(
+    id
+) {
+
+    const customer =
+        getCustomerById(
+            id
+        );
+
+
+    if (!customer) {
+
+        return false;
+
+    }
+
+
+    customer.status =
+        "active";
+
+
+    customer.updatedAt =
+        new Date().toISOString();
+
+
+    saveCustomers();
+
+    renderCustomerStats();
+
+    renderCustomers();
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   CLOSE MODAL
 ========================================================= */
 
 function closeCustomerModal() {
@@ -1362,6 +2174,12 @@ function closeCustomerModal() {
 
         modal.classList.remove(
             "show"
+        );
+
+
+        modal.setAttribute(
+            "aria-hidden",
+            "true"
         );
 
     }
@@ -1388,6 +2206,7 @@ function detailRow(
             style="
                 display:flex;
                 justify-content:space-between;
+                align-items:flex-start;
                 gap:15px;
                 padding:10px 0;
                 border-bottom:1px solid #292929;
@@ -1398,12 +2217,18 @@ function detailRow(
             <span
                 style="
                     color:#777;
+                    flex-shrink:0;
                 "
             >
                 ${escapeHtml(label)}
             </span>
 
-            <strong>
+            <strong
+                style="
+                    text-align:right;
+                    word-break:break-word;
+                "
+            >
                 ${escapeHtml(value)}
             </strong>
 
@@ -1415,7 +2240,7 @@ function detailRow(
 
 
 /* =========================================================
-   FILTER HELPERS
+   SEARCH
 ========================================================= */
 
 function getSearchValue() {
@@ -1439,6 +2264,10 @@ function getSearchValue() {
 }
 
 
+/* =========================================================
+   STATUS FILTER
+========================================================= */
+
 function getStatusFilter() {
 
     const element =
@@ -1450,16 +2279,17 @@ function getStatusFilter() {
         );
 
 
-    return (
+    return String(
         element?.value ||
         "all"
-    );
+    )
+    .toLowerCase();
 
 }
 
 
 /* =========================================================
-   STATUS
+   ROLE NORMALIZATION
 ========================================================= */
 
 function normalizeRole(
@@ -1471,7 +2301,24 @@ function normalizeRole(
             role ||
             "customer"
         )
-        .toLowerCase();
+        .toLowerCase()
+        .trim();
+
+
+    if (
+        value ===
+        "customer" ||
+        value ===
+        "user" ||
+        value ===
+        "passenger" ||
+        value ===
+        "client"
+    ) {
+
+        return "customer";
+
+    }
 
 
     if (
@@ -1480,7 +2327,9 @@ function normalizeRole(
         ) ||
         value.includes(
             "driver"
-        )
+        ) ||
+        value ===
+        "captain"
     ) {
 
         return "rider";
@@ -1488,10 +2337,29 @@ function normalizeRole(
     }
 
 
-    return "customer";
+    if (
+        value.includes(
+            "admin"
+        )
+    ) {
+
+        return "admin";
+
+    }
+
+
+    /*
+     * Unknown role must NOT accidentally become
+     * a customer.
+     */
+    return "unknown";
 
 }
 
+
+/* =========================================================
+   STATUS NORMALIZATION
+========================================================= */
 
 function normalizeStatus(
     status
@@ -1502,13 +2370,19 @@ function normalizeStatus(
             status ||
             "active"
         )
-        .toLowerCase();
+        .toLowerCase()
+        .trim();
 
 
     if (
-        value === "blocked" ||
-        value === "disabled" ||
-        value === "suspended"
+        value ===
+        "blocked" ||
+        value ===
+        "disabled" ||
+        value ===
+        "suspended" ||
+        value ===
+        "banned"
     ) {
 
         return "blocked";
@@ -1517,11 +2391,27 @@ function normalizeStatus(
 
 
     if (
-        value === "pending" ||
-        value === "waiting"
+        value ===
+        "pending" ||
+        value ===
+        "waiting" ||
+        value ===
+        "verification"
     ) {
 
         return "pending";
+
+    }
+
+
+    if (
+        value ===
+        "inactive" ||
+        value ===
+        "offline"
+    ) {
+
+        return "inactive";
 
     }
 
@@ -1531,34 +2421,44 @@ function normalizeStatus(
 }
 
 
+/* =========================================================
+   STATUS LABEL
+========================================================= */
+
 function statusLabel(
     status
 ) {
 
-    if (
-        status ===
-        "blocked"
-    ) {
+    const labels = {
 
-        return "Blocked";
+        active:
+            "Active",
 
-    }
+        blocked:
+            "Blocked",
 
+        pending:
+            "Pending",
 
-    if (
-        status ===
-        "pending"
-    ) {
+        inactive:
+            "Inactive"
 
-        return "Pending";
-
-    }
+    };
 
 
-    return "Active";
+    return (
+        labels[
+            status
+        ] ||
+        "Active"
+    );
 
 }
 
+
+/* =========================================================
+   STATUS STYLE
+========================================================= */
 
 function statusStyle(
     status
@@ -1590,6 +2490,19 @@ function statusStyle(
     }
 
 
+    if (
+        status ===
+        "inactive"
+    ) {
+
+        return `
+            background:#272727;
+            color:#aaa;
+        `;
+
+    }
+
+
     return `
         background:#102719;
         color:#4ade80;
@@ -1610,7 +2523,95 @@ function createId() {
         "-" +
         Math.random()
             .toString(36)
-            .slice(2,8)
+            .slice(2, 9)
+    );
+
+}
+
+
+function cleanString(
+    value
+) {
+
+    if (
+        value ===
+        null ||
+        value ===
+        undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(
+        value
+    ).trim();
+
+}
+
+
+function safeNumber(
+    value
+) {
+
+    const number =
+        Number(
+            value
+        );
+
+
+    if (
+        !Number.isFinite(
+            number
+        )
+    ) {
+
+        return 0;
+
+    }
+
+
+    return number;
+
+}
+
+
+function normalizePhone(
+    value
+) {
+
+    return String(
+        value ||
+        ""
+    )
+    .replace(
+        /\D/g,
+        ""
+    )
+    .slice(
+        -15
+    );
+
+}
+
+
+function getInitial(
+    name
+) {
+
+    const value =
+        String(
+            name ||
+            "C"
+        ).trim();
+
+
+    return (
+        value.charAt(0)
+        .toUpperCase() ||
+        "C"
     );
 
 }
@@ -1621,14 +2622,19 @@ function formatMoney(
 ) {
 
     const amount =
-        Number(value) || 0;
+        safeNumber(
+            value
+        );
 
 
     return amount.toLocaleString(
         "en-IN",
         {
-            minimumFractionDigits:2,
-            maximumFractionDigits:2
+            minimumFractionDigits:
+                2,
+
+            maximumFractionDigits:
+                2
         }
     );
 
@@ -1648,20 +2654,45 @@ function formatDate(
 
     try {
 
-        return new Date(
-            value
-        ).toLocaleString(
+        const date =
+            new Date(
+                value
+            );
+
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return "—";
+
+        }
+
+
+        return date.toLocaleString(
             "en-IN",
             {
-                day:"2-digit",
-                month:"short",
-                year:"numeric",
-                hour:"2-digit",
-                minute:"2-digit"
+                day:
+                    "2-digit",
+
+                month:
+                    "short",
+
+                year:
+                    "numeric",
+
+                hour:
+                    "2-digit",
+
+                minute:
+                    "2-digit"
             }
         );
 
-    } catch (error) {
+    }
+    catch (error) {
 
         return "—";
 
@@ -1691,12 +2722,17 @@ function setText(
 }
 
 
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
 function escapeHtml(
     value
 ) {
 
     return String(
-        value ?? ""
+        value ??
+        ""
     )
     .replace(
         /&/g,
@@ -1722,12 +2758,17 @@ function escapeHtml(
 }
 
 
+/* =========================================================
+   JS ESCAPE
+========================================================= */
+
 function escapeJs(
     value
 ) {
 
     return String(
-        value ?? ""
+        value ??
+        ""
     )
     .replace(
         /\\/g,
@@ -1740,13 +2781,21 @@ function escapeJs(
     .replace(
         /"/g,
         '\\"'
+    )
+    .replace(
+        /\r/g,
+        "\\r"
+    )
+    .replace(
+        /\n/g,
+        "\\n"
     );
 
 }
 
 
 /* =========================================================
-   MESSAGE
+   MESSAGE / TOAST
 ========================================================= */
 
 function showMessage(
@@ -1778,7 +2827,10 @@ function showMessage(
 
 
     box.textContent =
-        message;
+        String(
+            message ||
+            ""
+        );
 
 
     box.style.cssText = `
@@ -1786,7 +2838,8 @@ function showMessage(
         left:50%;
         bottom:22px;
         transform:translateX(-50%);
-        z-index:9999;
+        z-index:99999;
+        width:max-content;
         max-width:calc(100% - 30px);
         padding:12px 18px;
         border-radius:10px;
@@ -1846,10 +2899,17 @@ function showMessage(
     );
 
 
-    setTimeout(
+    window.setTimeout(
         function () {
 
-            box.remove();
+            if (
+                box &&
+                box.parentNode
+            ) {
+
+                box.remove();
+
+            }
 
         },
         2800
@@ -1877,62 +2937,27 @@ window.RiderXCustomers = {
     getById:
         function (id) {
 
-            return customers.find(
-                function (customer) {
-
-                    return String(
-                        customer.id
-                    ) ===
-                    String(id);
-
-                }
-            ) || null;
+            return getCustomerById(
+                id
+            );
 
         },
 
 
     refresh:
-        loadCustomers,
+        function () {
+
+            return loadCustomers();
+
+        },
 
 
     block:
         function (id) {
 
-            const customer =
-                customers.find(
-                    function (item) {
-
-                        return String(
-                            item.id
-                        ) ===
-                        String(id);
-
-                    }
-                );
-
-
-            if (!customer) {
-                return false;
-            }
-
-
-            customer.status =
-                "blocked";
-
-
-            customer.updatedAt =
-                new Date()
-                    .toISOString();
-
-
-            saveCustomers();
-
-            renderCustomerStats();
-
-            renderCustomers();
-
-
-            return true;
+            return blockCustomer(
+                id
+            );
 
         },
 
@@ -1940,41 +2965,68 @@ window.RiderXCustomers = {
     unblock:
         function (id) {
 
-            const customer =
-                customers.find(
-                    function (item) {
+            return unblockCustomer(
+                id
+            );
 
-                        return String(
-                            item.id
-                        ) ===
-                        String(id);
-
-                    }
-                );
+        },
 
 
-            if (!customer) {
-                return false;
-            }
+    toggle:
+        function (id) {
+
+            return toggleCustomerStatus(
+                id
+            );
+
+        },
 
 
-            customer.status =
-                "active";
+    getStats:
+        function () {
 
+            return {
 
-            customer.updatedAt =
-                new Date()
-                    .toISOString();
+                total:
+                    customers.length,
 
+                active:
+                    customers.filter(
+                        function (customer) {
 
-            saveCustomers();
+                            return (
+                                customer.status ===
+                                "active"
+                            );
 
-            renderCustomerStats();
+                        }
+                    ).length,
 
-            renderCustomers();
+                blocked:
+                    customers.filter(
+                        function (customer) {
 
+                            return (
+                                customer.status ===
+                                "blocked"
+                            );
 
-            return true;
+                        }
+                    ).length,
+
+                pending:
+                    customers.filter(
+                        function (customer) {
+
+                            return (
+                                customer.status ===
+                                "pending"
+                            );
+
+                        }
+                    ).length
+
+            };
 
         }
 
@@ -1982,7 +3034,7 @@ window.RiderXCustomers = {
 
 
 /* =========================================================
-   CROSS TAB SYNC
+   CROSS-TAB SYNC
 ========================================================= */
 
 window.addEventListener(
@@ -2003,3 +3055,29 @@ window.addEventListener(
 
     }
 );
+
+
+/* =========================================================
+   GLOBAL COMPATIBILITY
+========================================================= */
+
+window.loadCustomers =
+    loadCustomers;
+
+window.renderCustomers =
+    renderCustomers;
+
+window.viewCustomer =
+    viewCustomer;
+
+window.toggleCustomerStatus =
+    toggleCustomerStatus;
+
+window.blockCustomer =
+    blockCustomer;
+
+window.unblockCustomer =
+    unblockCustomer;
+
+window.closeCustomerModal =
+    closeCustomerModal;
