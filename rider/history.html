@@ -1,7 +1,25 @@
-<!DOCTYPE html><html lang="en">
-<head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>RiderX | Ride History</title><link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
+
+<title>RiderX | Ride History</title>
+
+<link rel="stylesheet" href="../css/style.css">
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+>
+
+<style>
 
 :root{
     --yellow:#ffe500;
@@ -27,6 +45,11 @@ body{
     background:#000;
     color:#fff;
     padding-bottom:25px;
+}
+
+button{
+    font:inherit;
+    cursor:pointer;
 }
 
 .header{
@@ -60,6 +83,10 @@ body{
     align-items:center;
     justify-content:center;
     font-size:17px;
+}
+
+.back:active{
+    transform:scale(.94);
 }
 
 .logo{
@@ -144,6 +171,10 @@ body{
     font-weight:700;
 }
 
+.filter:active{
+    transform:scale(.97);
+}
+
 .filter.active{
     background:var(--yellow);
     color:#000;
@@ -162,11 +193,19 @@ body{
     border-radius:18px;
     padding:14px;
     cursor:pointer;
-    transition:transform .15s ease,border-color .2s ease;
+    transition:
+        transform .15s ease,
+        border-color .2s ease,
+        background .2s ease;
+}
+
+.ride-card:hover{
+    border-color:#3a3a3a;
 }
 
 .ride-card:active{
     transform:scale(.985);
+    background:#171717;
 }
 
 .ride-head{
@@ -180,11 +219,13 @@ body{
     display:flex;
     align-items:center;
     gap:9px;
+    min-width:0;
 }
 
 .service-icon{
     width:38px;
     height:38px;
+    min-width:38px;
     border-radius:11px;
     background:#202020;
     display:flex;
@@ -196,6 +237,10 @@ body{
 .service-name{
     font-size:13px;
     font-weight:800;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:180px;
 }
 
 .ride-date{
@@ -209,6 +254,7 @@ body{
     font-size:17px;
     font-weight:900;
     text-align:right;
+    white-space:nowrap;
 }
 
 .status{
@@ -218,6 +264,7 @@ body{
     border-radius:20px;
     font-size:8px;
     font-weight:800;
+    float:right;
 }
 
 .status.completed{
@@ -289,9 +336,20 @@ body{
     font-size:9px;
 }
 
+.ride-footer span{
+    min-width:0;
+}
+
+.ride-footer span:not(.details){
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
 .details{
     color:var(--yellow);
     font-weight:700;
+    white-space:nowrap;
 }
 
 .loading{
@@ -301,6 +359,7 @@ body{
 }
 
 .loading i{
+    display:block;
     color:var(--yellow);
     font-size:25px;
     margin-bottom:10px;
@@ -345,6 +404,21 @@ body{
     font-size:11px;
 }
 
+.retry{
+    margin-top:12px;
+    padding:9px 16px;
+    border:0;
+    border-radius:10px;
+    background:var(--yellow);
+    color:#000;
+    font-size:11px;
+    font-weight:800;
+}
+
+.retry:active{
+    transform:scale(.96);
+}
+
 @media(max-width:380px){
 
     .container{
@@ -360,178 +434,221 @@ body{
         font-size:17px;
     }
 
+    .ride-footer{
+        font-size:8px;
+    }
+
+    .service-name{
+        max-width:140px;
+    }
+
 }
 
-</style></head><body><header class="header"><div class="header-left">
+</style>
 
-    <button
-        class="back"
-        id="backBtn"
-        type="button"
-        aria-label="Back"
-    >
-        <i class="fa-solid fa-arrow-left"></i>
-    </button>
+</head>
 
-    <div>
+<body>
 
-        <div class="logo">
-            RIDER<span>X</span>
-        </div>
+<header class="header">
 
-        <div class="header-title">
-            Ride History
-        </div>
+    <div class="header-left">
 
-    </div>
-
-</div>
-
-<i class="fa-solid fa-clock-rotate-left header-icon"></i>
-
-</header><main class="container"><!-- SUMMARY -->
-
-<section class="summary">
-
-    <div class="summary-card">
-
-        <i class="fa-solid fa-road"></i>
-
-        <div
-            id="totalRides"
-            class="summary-number"
+        <button
+            class="back"
+            id="backBtn"
+            type="button"
+            aria-label="Back"
         >
-            0
-        </div>
-
-        <div class="summary-label">
-            Total Rides
-        </div>
-
-    </div>
-
-
-    <div class="summary-card">
-
-        <i class="fa-solid fa-circle-check"></i>
-
-        <div
-            id="completedRides"
-            class="summary-number"
-        >
-            0
-        </div>
-
-        <div class="summary-label">
-            Completed
-        </div>
-
-    </div>
-
-
-    <div class="summary-card">
-
-        <i class="fa-solid fa-indian-rupee-sign"></i>
-
-        <div
-            id="totalEarned"
-            class="summary-number"
-        >
-            ₹0
-        </div>
-
-        <div class="summary-label">
-            Earned
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- FILTERS -->
-
-<div class="filters">
-
-    <button
-        class="filter active"
-        data-filter="all"
-        type="button"
-    >
-        All
-    </button>
-
-    <button
-        class="filter"
-        data-filter="completed"
-        type="button"
-    >
-        Completed
-    </button>
-
-    <button
-        class="filter"
-        data-filter="cancelled"
-        type="button"
-    >
-        Cancelled
-    </button>
-
-</div>
-
-
-<!-- HISTORY -->
-
-<section
-    id="history"
-    class="history"
->
-
-    <div class="loading">
-
-        <i class="fa-solid fa-spinner fa-spin"></i>
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
 
         <div>
-            Loading ride history...
+
+            <div class="logo">
+                RIDER<span>X</span>
+            </div>
+
+            <div class="header-title">
+                Ride History
+            </div>
+
         </div>
 
     </div>
 
-</section>
+    <i class="fa-solid fa-clock-rotate-left header-icon"></i>
+
+</header>
 
 
-<!-- EMPTY -->
+<main class="container">
 
-<div
-    id="empty"
-    class="empty"
->
+    <!-- SUMMARY -->
 
-    <i class="fa-solid fa-route"></i>
+    <section class="summary">
 
-    <div class="empty-title">
-        No rides found
+        <div class="summary-card">
+
+            <i class="fa-solid fa-road"></i>
+
+            <div
+                id="totalRides"
+                class="summary-number"
+            >
+                0
+            </div>
+
+            <div class="summary-label">
+                Total Rides
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <i class="fa-solid fa-circle-check"></i>
+
+            <div
+                id="completedRides"
+                class="summary-number"
+            >
+                0
+            </div>
+
+            <div class="summary-label">
+                Completed
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <i class="fa-solid fa-indian-rupee-sign"></i>
+
+            <div
+                id="totalEarned"
+                class="summary-number"
+            >
+                ₹0
+            </div>
+
+            <div class="summary-label">
+                Earned
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FILTERS -->
+
+    <div class="filters">
+
+        <button
+            class="filter active"
+            data-filter="all"
+            type="button"
+        >
+            All
+        </button>
+
+        <button
+            class="filter"
+            data-filter="completed"
+            type="button"
+        >
+            Completed
+        </button>
+
+        <button
+            class="filter"
+            data-filter="cancelled"
+            type="button"
+        >
+            Cancelled
+        </button>
+
     </div>
 
-    <div class="empty-text">
-        Your ride history will appear here.
+
+    <!-- HISTORY -->
+
+    <section
+        id="history"
+        class="history"
+    >
+
+        <div class="loading">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+            <div>
+                Loading ride history...
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- EMPTY -->
+
+    <div
+        id="empty"
+        class="empty"
+    >
+
+        <i class="fa-solid fa-route"></i>
+
+        <div class="empty-title">
+            No rides found
+        </div>
+
+        <div class="empty-text">
+            Your ride history will appear here.
+        </div>
+
     </div>
 
-</div>
+
+    <!-- ERROR -->
+
+    <div
+        id="error"
+        class="error"
+    >
+
+        <div>
+            Unable to load ride history.
+        </div>
+
+        <button
+            id="retryBtn"
+            class="retry"
+            type="button"
+        >
+            Try Again
+        </button>
+
+    </div>
+
+</main>
 
 
-<!-- ERROR -->
+<script type="module">
 
-<div
-    id="error"
-    class="error"
->
-    Unable to load ride history. Please try again.
-</div>
+/* =========================================
+   FIREBASE
+========================================= */
 
-</main><script type="module">
-
-import { auth, db } from "../firebase/config.js";
+import {
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
 import {
     collection,
@@ -545,6 +662,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
+/* =========================================
+   HELPERS
+========================================= */
+
 const $ = id =>
     document.getElementById(id);
 
@@ -553,6 +674,8 @@ let allRides = [];
 
 let activeFilter = "all";
 
+let currentUid = null;
+
 
 /* =========================================
    BACK
@@ -560,7 +683,25 @@ let activeFilter = "all";
 
 $("backBtn")?.addEventListener(
     "click",
-    () => history.back()
+    () => {
+
+        if(
+            document.referrer &&
+            document.referrer.includes(
+                location.origin
+            )
+        ){
+
+            history.back();
+
+            return;
+
+        }
+
+        location.href =
+            "./home.html";
+
+    }
 );
 
 
@@ -575,26 +716,43 @@ function getRideDate(data){
         data.updatedAt ||
         data.createdAt;
 
-    if(!value) return null;
+    if(!value){
+        return null;
+    }
+
 
     if(
         typeof value.toDate ===
         "function"
     ){
+
         return value.toDate();
+
     }
 
-    if(value.seconds){
+
+    if(
+        typeof value === "object" &&
+        value.seconds != null
+    ){
+
         return new Date(
-            value.seconds * 1000
+            Number(value.seconds) * 1000
         );
+
     }
 
-    const date = new Date(value);
 
-    return isNaN(date.getTime())
+    const date =
+        new Date(value);
+
+
+    return isNaN(
+        date.getTime()
+    )
         ? null
         : date;
+
 }
 
 
@@ -609,23 +767,32 @@ function normalizeStatus(value){
             .trim()
             .toLowerCase();
 
+
     if(
         status === "completed" ||
         status === "complete" ||
-        status === "finished"
+        status === "finished" ||
+        status === "done"
     ){
+
         return "completed";
+
     }
+
 
     if(
         status === "cancelled" ||
         status === "canceled" ||
         status === "cancel"
     ){
+
         return "cancelled";
+
     }
 
+
     return "other";
+
 }
 
 
@@ -639,22 +806,36 @@ function serviceIcon(service){
         String(service || "")
             .toLowerCase();
 
+
     if(
         value.includes("cab") ||
         value.includes("car")
     ){
+
         return "fa-car";
+
     }
+
 
     if(value.includes("parcel")){
+
         return "fa-box";
+
     }
 
-    if(value.includes("food")){
+
+    if(
+        value.includes("food") ||
+        value.includes("delivery")
+    ){
+
         return "fa-utensils";
+
     }
+
 
     return "fa-motorcycle";
+
 }
 
 
@@ -665,8 +846,11 @@ function serviceIcon(service){
 function formatDate(date){
 
     if(!date){
+
         return "Date unavailable";
+
     }
+
 
     return date.toLocaleString(
         "en-IN",
@@ -683,25 +867,83 @@ function formatDate(date){
 
 
 /* =========================================
+   NUMBER HELPERS
+========================================= */
+
+function getFare(ride){
+
+    return Number(
+        ride.fare ??
+        ride.totalFare ??
+        ride.amount ??
+        ride.driverFare ??
+        ride.riderFare ??
+        0
+    ) || 0;
+
+}
+
+
+function getDistance(ride){
+
+    return Number(
+        ride.distance ??
+        ride.distanceKm ??
+        ride.distanceInKm ??
+        0
+    ) || 0;
+
+}
+
+
+/* =========================================
    LOAD
 ========================================= */
 
 async function loadHistory(uid){
 
+    currentUid = uid;
+
+
+    $("error").style.display =
+        "none";
+
+    $("empty").style.display =
+        "none";
+
+
+    $("history").innerHTML = `
+
+        <div class="loading">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+            <div>
+                Loading ride history...
+            </div>
+
+        </div>
+
+    `;
+
+
     try{
 
-        $("error").style.display =
-            "none";
+        const ridesQuery =
+            query(
+                collection(db,"rides"),
+                where("riderId","==",uid)
+            );
 
-        const q = query(
-            collection(db,"rides"),
-            where("riderId","==",uid)
-        );
 
         const snapshot =
-            await getDocs(q);
+            await getDocs(
+                ridesQuery
+            );
+
 
         allRides = [];
+
 
         snapshot.forEach(
             rideDoc => {
@@ -718,13 +960,13 @@ async function loadHistory(uid){
         allRides.sort(
             (a,b) => {
 
-                const da =
+                const dateA =
                     getRideDate(a)?.getTime() || 0;
 
-                const db =
+                const dateB =
                     getRideDate(b)?.getTime() || 0;
 
-                return db - da;
+                return dateB - dateA;
 
             }
         );
@@ -738,9 +980,13 @@ async function loadHistory(uid){
     }catch(error){
 
         console.error(
-            "History error:",
+            "RiderX ride history error:",
             error
         );
+
+
+        allRides = [];
+
 
         $("history").innerHTML = "";
 
@@ -776,12 +1022,8 @@ function updateSummary(){
     completed.forEach(
         ride => {
 
-            earned += Number(
-                ride.fare ??
-                ride.totalFare ??
-                ride.amount ??
-                0
-            );
+            earned +=
+                getFare(ride);
 
         }
     );
@@ -809,9 +1051,14 @@ function updateSummary(){
 
 function getFiltered(){
 
-    if(activeFilter === "all"){
+    if(
+        activeFilter === "all"
+    ){
+
         return allRides;
+
     }
+
 
     return allRides.filter(
         ride =>
@@ -832,8 +1079,10 @@ function render(){
     const rides =
         getFiltered();
 
+
     const container =
         $("history");
+
 
     container.innerHTML = "";
 
@@ -855,177 +1104,257 @@ function render(){
     rides.forEach(
         ride => {
 
-            const status =
-                normalizeStatus(
-                    ride.status
-                );
-
-
-            const service =
-                ride.serviceType ||
-                ride.service ||
-                "Bike";
-
-
-            const fare =
-                Number(
-                    ride.fare ??
-                    ride.totalFare ??
-                    ride.amount ??
-                    0
-                );
-
-
-            const distance =
-                Number(
-                    ride.distance ??
-                    ride.distanceKm ??
-                    0
-                );
-
-
-            const pickup =
-                ride.pickupLocation ||
-                ride.pickupAddress ||
-                ride.pickup ||
-                "Pickup location";
-
-
-            const drop =
-                ride.dropoffLocation ||
-                ride.dropLocation ||
-                ride.destination ||
-                ride.dropoffAddress ||
-                "Destination";
-
-
-            const date =
-                getRideDate(ride);
-
-
-            const payment =
-                ride.paymentMethod ||
-                ride.payment ||
-                "Cash";
-
-
-            const card =
-                document.createElement("div");
-
-
-            card.className =
-                "ride-card";
-
-
-            card.innerHTML = `
-
-                <div class="ride-head">
-
-                    <div class="service">
-
-                        <div class="service-icon">
-
-                            <i class="fa-solid ${serviceIcon(service)}"></i>
-
-                        </div>
-
-                        <div>
-
-                            <div class="service-name">
-                                ${escapeHtml(service)}
-                            </div>
-
-                            <div class="ride-date">
-                                ${escapeHtml(formatDate(date))}
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div>
-
-                        <div class="fare">
-                            ₹${Math.round(fare).toLocaleString("en-IN")}
-                        </div>
-
-                        <div class="status ${status}">
-                            ${escapeHtml(statusText(status))}
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="route">
-
-                    <div class="route-row">
-
-                        <span class="dot pickup"></span>
-
-                        <span class="route-text">
-                            ${escapeHtml(pickup)}
-                        </span>
-
-                    </div>
-
-
-                    <div class="route-row">
-
-                        <span class="dot drop"></span>
-
-                        <span class="route-text">
-                            ${escapeHtml(drop)}
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="ride-footer">
-
-                    <span>
-                        <i class="fa-solid fa-route"></i>
-                        ${distance.toFixed(1)} KM
-                    </span>
-
-                    <span>
-                        <i class="fa-solid fa-wallet"></i>
-                        ${escapeHtml(payment)}
-                    </span>
-
-                    <span class="details">
-                        View details
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </span>
-
-                </div>
-
-            `;
-
-
-            card.addEventListener(
-                "click",
-                () => {
-
-                    sessionStorage.setItem(
-                        "riderxSelectedRide",
-                        JSON.stringify(ride)
-                    );
-
-                    location.href =
-                        `ride-details.html?id=${encodeURIComponent(ride.id)}`;
-
-                }
+            renderRideCard(
+                ride,
+                container
             );
 
+        }
+    );
 
-            container.appendChild(card);
+}
+
+
+/* =========================================
+   RIDE CARD
+========================================= */
+
+function renderRideCard(
+    ride,
+    container
+){
+
+    const status =
+        normalizeStatus(
+            ride.status
+        );
+
+
+    const service =
+        ride.serviceType ||
+        ride.service ||
+        ride.vehicleType ||
+        "Bike";
+
+
+    const fare =
+        getFare(ride);
+
+
+    const distance =
+        getDistance(ride);
+
+
+    const pickup =
+        ride.pickupLocation ||
+        ride.pickupAddress ||
+        ride.pickup ||
+        ride.pickup?.address ||
+        "Pickup location";
+
+
+    const drop =
+        ride.dropoffLocation ||
+        ride.dropLocation ||
+        ride.destination ||
+        ride.dropoffAddress ||
+        ride.dropoff?.address ||
+        "Destination";
+
+
+    const date =
+        getRideDate(ride);
+
+
+    const payment =
+        ride.paymentMethod ||
+        ride.payment ||
+        ride.paymentMode ||
+        "Cash";
+
+
+    const card =
+        document.createElement(
+            "div"
+        );
+
+
+    card.className =
+        "ride-card";
+
+
+    card.setAttribute(
+        "role",
+        "button"
+    );
+
+
+    card.setAttribute(
+        "tabindex",
+        "0"
+    );
+
+
+    card.innerHTML = `
+
+        <div class="ride-head">
+
+            <div class="service">
+
+                <div class="service-icon">
+
+                    <i class="fa-solid ${serviceIcon(service)}"></i>
+
+                </div>
+
+                <div>
+
+                    <div class="service-name">
+                        ${escapeHtml(service)}
+                    </div>
+
+                    <div class="ride-date">
+                        ${escapeHtml(formatDate(date))}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <div class="fare">
+                    ₹${Math.round(fare).toLocaleString("en-IN")}
+                </div>
+
+                <div class="status ${status}">
+                    ${escapeHtml(statusText(status))}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="route">
+
+            <div class="route-row">
+
+                <span class="dot pickup"></span>
+
+                <span class="route-text">
+                    ${escapeHtml(pickup)}
+                </span>
+
+            </div>
+
+
+            <div class="route-row">
+
+                <span class="dot drop"></span>
+
+                <span class="route-text">
+                    ${escapeHtml(drop)}
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="ride-footer">
+
+            <span>
+
+                <i class="fa-solid fa-route"></i>
+
+                ${distance.toFixed(1)} KM
+
+            </span>
+
+
+            <span>
+
+                <i class="fa-solid fa-wallet"></i>
+
+                ${escapeHtml(payment)}
+
+            </span>
+
+
+            <span class="details">
+
+                View details
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </span>
+
+        </div>
+
+    `;
+
+
+    const openDetails =
+        () => {
+
+            try{
+
+                sessionStorage.setItem(
+                    "riderxSelectedRide",
+                    JSON.stringify(ride)
+                );
+
+            }catch(error){
+
+                console.warn(
+                    "Unable to save selected ride:",
+                    error
+                );
+
+            }
+
+
+            /*
+             * Use existing ride-details.html
+             * only when that file is present
+             * in the RiderX rider section.
+             */
+
+            location.href =
+                `ride-details.html?id=${encodeURIComponent(ride.id)}`;
+
+        };
+
+
+    card.addEventListener(
+        "click",
+        openDetails
+    );
+
+
+    card.addEventListener(
+        "keydown",
+        event => {
+
+            if(
+                event.key === "Enter" ||
+                event.key === " "
+            ){
+
+                event.preventDefault();
+
+                openDetails();
+
+            }
 
         }
+    );
+
+
+    container.appendChild(
+        card
     );
 
 }
@@ -1037,15 +1366,26 @@ function render(){
 
 function statusText(status){
 
-    if(status === "completed"){
+    if(
+        status === "completed"
+    ){
+
         return "COMPLETED";
+
     }
 
-    if(status === "cancelled"){
+
+    if(
+        status === "cancelled"
+    ){
+
         return "CANCELLED";
+
     }
+
 
     return "RIDE";
+
 }
 
 
@@ -1055,12 +1395,29 @@ function statusText(status){
 
 function escapeHtml(value){
 
-    return String(value ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+    return String(
+        value ?? ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
@@ -1069,36 +1426,62 @@ function escapeHtml(value){
    FILTER BUTTONS
 ========================================= */
 
-document.querySelectorAll(
-    ".filter"
-).forEach(button => {
+document
+    .querySelectorAll(".filter")
+    .forEach(
+        button => {
 
-    button.addEventListener(
-        "click",
-        () => {
+            button.addEventListener(
+                "click",
+                () => {
 
-            document
-                .querySelectorAll(".filter")
-                .forEach(
-                    item =>
-                        item.classList.remove("active")
-                );
-
-
-            button.classList.add("active");
-
-
-            activeFilter =
-                button.dataset.filter ||
-                "all";
+                    document
+                        .querySelectorAll(".filter")
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "active"
+                                )
+                        );
 
 
-            render();
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    activeFilter =
+                        button.dataset.filter ||
+                        "all";
+
+
+                    render();
+
+                }
+            );
 
         }
     );
 
-});
+
+/* =========================================
+   RETRY
+========================================= */
+
+$("retryBtn")?.addEventListener(
+    "click",
+    () => {
+
+        if(currentUid){
+
+            loadHistory(
+                currentUid
+            );
+
+        }
+
+    }
+);
 
 
 /* =========================================
@@ -1126,5 +1509,8 @@ onAuthStateChanged(
     }
 );
 
-</script></body>
+</script>
+
+</body>
+
 </html>
