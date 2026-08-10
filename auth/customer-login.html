@@ -399,7 +399,6 @@ button {
 
 .login-btn:hover {
     background: #ffe04a;
-
     transform: translateY(-1px);
 }
 
@@ -409,9 +408,7 @@ button {
 
 .login-btn:disabled {
     opacity: .6;
-
     cursor: not-allowed;
-
     transform: none;
 }
 
@@ -455,11 +452,6 @@ button {
 
     font-size: 10px;
     font-weight: 900;
-
-    transition:
-        border-color .2s ease,
-        color .2s ease,
-        background .2s ease;
 }
 
 .otp-btn:hover {
@@ -548,9 +540,7 @@ button {
     vertical-align: -2px;
 
     border: 2px solid rgba(0, 0, 0, .25);
-
     border-top-color: #111111;
-
     border-radius: 50%;
 
     animation:
@@ -593,7 +583,6 @@ button {
 
     .options {
         align-items: flex-start;
-
         flex-direction: column;
     }
 
@@ -829,17 +818,13 @@ button {
 
 
 import {
-
     auth,
     db,
-
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
     signOut,
-
     doc,
     getDoc
-
 } from "../firebase/firebase-config.js";
 
 
@@ -848,72 +833,60 @@ const form =
         "customerLoginForm"
     );
 
-
 const emailInput =
     document.getElementById(
         "email"
     );
-
 
 const passwordInput =
     document.getElementById(
         "password"
     );
 
-
 const rememberInput =
     document.getElementById(
         "remember"
     );
-
 
 const loginButton =
     document.getElementById(
         "loginButton"
     );
 
-
 const togglePassword =
     document.getElementById(
         "togglePassword"
     );
-
 
 const forgotPassword =
     document.getElementById(
         "forgotPassword"
     );
 
-
 const otpButton =
     document.getElementById(
         "otpButton"
     );
-
 
 const registerButton =
     document.getElementById(
         "registerButton"
     );
 
-
 const riderLoginButton =
     document.getElementById(
         "riderLoginButton"
     );
-
 
 const roleButton =
     document.getElementById(
         "roleButton"
     );
 
-
 const errorBox =
     document.getElementById(
         "errorBox"
     );
-
 
 const successBox =
     document.getElementById(
@@ -925,23 +898,38 @@ let busy =
     false;
 
 
-/*
- * This page always represents
- * the Customer authentication flow.
- */
+/* =========================================================
+   FORCE CUSTOMER ROLE
+========================================================= */
 
-setCustomerRole();
+function setCustomerRole() {
+
+    localStorage.setItem(
+        "riderx_selected_role",
+        "customer"
+    );
+
+    localStorage.setItem(
+        "riderx_role",
+        "customer"
+    );
+
+    localStorage.setItem(
+        "userRole",
+        "customer"
+    );
+
+}
 
 
-/*
- * Restore remembered email.
- */
+/* =========================================================
+   RESTORE REMEMBERED EMAIL
+========================================================= */
 
 const savedEmail =
     localStorage.getItem(
         "riderx_customer_email"
     );
-
 
 if (
     savedEmail
@@ -956,9 +944,9 @@ if (
 }
 
 
-/*
- * Password visibility.
- */
+/* =========================================================
+   PASSWORD VISIBILITY
+========================================================= */
 
 togglePassword.addEventListener(
     "click",
@@ -968,18 +956,15 @@ togglePassword.addEventListener(
             passwordInput.type ===
             "password";
 
-
         passwordInput.type =
             hidden
                 ? "text"
                 : "password";
 
-
         togglePassword.textContent =
             hidden
                 ? "HIDE"
                 : "SHOW";
-
 
         togglePassword.setAttribute(
             "aria-label",
@@ -992,9 +977,9 @@ togglePassword.addEventListener(
 );
 
 
-/*
- * Customer email/password login.
- */
+/* =========================================================
+   CUSTOMER LOGIN
+========================================================= */
 
 form.addEventListener(
     "submit",
@@ -1004,28 +989,21 @@ form.addEventListener(
 
         event.preventDefault();
 
-
         if (
             busy
         ) {
-
             return;
-
         }
 
-
         clearMessages();
-
 
         const email =
             emailInput.value
                 .trim()
                 .toLowerCase();
 
-
         const password =
             passwordInput.value;
-
 
         if (
             !email
@@ -1041,11 +1019,8 @@ form.addEventListener(
 
         }
 
-
         if (
-            !validEmail(
-                email
-            )
+            !validEmail(email)
         ) {
 
             showError(
@@ -1057,7 +1032,6 @@ form.addEventListener(
             return;
 
         }
-
 
         if (
             !password
@@ -1073,7 +1047,6 @@ form.addEventListener(
 
         }
 
-
         if (
             password.length < 6
         ) {
@@ -1088,21 +1061,17 @@ form.addEventListener(
 
         }
 
-
         busy =
             true;
-
 
         setLoading(
             true
         );
 
-
         try {
 
-            /*
-             * Authenticate with Firebase first.
-             */
+            setCustomerRole();
+
 
             const result =
                 await signInWithEmailAndPassword(
@@ -1127,22 +1096,11 @@ form.addEventListener(
             }
 
 
-            /*
-             * Get the Customer profile using the
-             * authenticated Firebase UID.
-             */
-
             const profile =
                 await findCustomerProfile(
                     firebaseUser.uid
                 );
 
-
-            /*
-             * Never keep a Firebase session alive
-             * when the account does not have a valid
-             * Customer profile.
-             */
 
             if (
                 !profile
@@ -1152,12 +1110,9 @@ form.addEventListener(
 
                 clearCustomerSession();
 
-
-                showError(
+                throw new Error(
                     "This Firebase account does not have a valid RiderX Customer profile."
                 );
-
-                return;
 
             }
 
@@ -1166,14 +1121,8 @@ form.addEventListener(
                 String(
                     profile.uid ||
                     ""
-                )
-                    .trim();
+                ).trim();
 
-
-            /*
-             * Verify that the Firestore profile and
-             * Firebase Auth account belong together.
-             */
 
             if (
                 profileUid &&
@@ -1185,12 +1134,9 @@ form.addEventListener(
 
                 clearCustomerSession();
 
-
-                showError(
+                throw new Error(
                     "Customer account verification failed. Please contact RiderX support."
                 );
-
-                return;
 
             }
 
@@ -1213,12 +1159,9 @@ form.addEventListener(
 
                 clearCustomerSession();
 
-
-                showError(
+                throw new Error(
                     "This is not a Customer account. Please use Rider Login if you are a Rider."
                 );
-
-                return;
 
             }
 
@@ -1237,20 +1180,12 @@ form.addEventListener(
 
                 clearCustomerSession();
 
-
-                showError(
+                throw new Error(
                     access.message
                 );
 
-                return;
-
             }
 
-
-            /*
-             * Create local Customer session only after
-             * every authentication and account check passes.
-             */
 
             createCustomerSession(
                 firebaseUser,
@@ -1281,7 +1216,7 @@ form.addEventListener(
             );
 
 
-            setTimeout(
+            window.setTimeout(
                 function () {
 
                     window.location.replace(
@@ -1289,7 +1224,7 @@ form.addEventListener(
                     );
 
                 },
-                600
+                500
             );
 
 
@@ -1298,10 +1233,9 @@ form.addEventListener(
         ) {
 
             console.error(
-                "Customer login error:",
+                "RiderX Customer login error:",
                 error
             );
-
 
             showError(
                 firebaseMessage(
@@ -1309,12 +1243,10 @@ form.addEventListener(
                 )
             );
 
-
         } finally {
 
             busy =
                 false;
-
 
             setLoading(
                 false
@@ -1326,15 +1258,9 @@ form.addEventListener(
 );
 
 
-/*
- * Find Customer profile.
- *
- * Primary structure:
- * users/{uid}
- *
- * Legacy compatibility:
- * customers/{uid}
- */
+/* =========================================================
+   FIND CUSTOMER PROFILE
+========================================================= */
 
 async function findCustomerProfile(
     uid
@@ -1358,7 +1284,6 @@ async function findCustomerProfile(
             userSnapshot.data() ||
             {};
 
-
         const profile = {
 
             ...data,
@@ -1368,7 +1293,6 @@ async function findCustomerProfile(
                 userSnapshot.id
 
         };
-
 
         const role =
             normalizeRole(
@@ -1394,11 +1318,6 @@ async function findCustomerProfile(
     }
 
 
-    /*
-     * Older RiderX customer documents may still
-     * exist under customers/{uid}.
-     */
-
     const customerSnapshot =
         await getDoc(
             doc(
@@ -1417,7 +1336,6 @@ async function findCustomerProfile(
             customerSnapshot.data() ||
             {};
 
-
         const profile = {
 
             ...data,
@@ -1427,7 +1345,6 @@ async function findCustomerProfile(
                 customerSnapshot.id
 
         };
-
 
         const role =
             normalizeRole(
@@ -1455,9 +1372,9 @@ async function findCustomerProfile(
 }
 
 
-/*
- * Customer access control.
- */
+/* =========================================================
+   CUSTOMER ACCESS
+========================================================= */
 
 function customerAccess(
     profile
@@ -1526,13 +1443,9 @@ function customerAccess(
 }
 
 
-/*
- * Build the common Customer session object.
- *
- * Other Customer-side files can use the same
- * localStorage keys without needing to know
- * how authentication happened.
- */
+/* =========================================================
+   CUSTOMER SESSION
+========================================================= */
 
 function createCustomerSession(
     firebaseUser,
@@ -1573,14 +1486,6 @@ function createCustomerSession(
         displayName:
             profile.displayName ||
             firebaseUser.displayName ||
-            "",
-
-        firstName:
-            profile.firstName ||
-            "",
-
-        lastName:
-            profile.lastName ||
             "",
 
         email:
@@ -1668,7 +1573,6 @@ function createCustomerSession(
         )
     );
 
-
     localStorage.setItem(
         "riderx_customer",
         JSON.stringify(
@@ -1676,24 +1580,20 @@ function createCustomerSession(
         )
     );
 
-
     localStorage.setItem(
         "riderx_customer_id",
         firebaseUser.uid
     );
-
 
     localStorage.setItem(
         "userRole",
         "customer"
     );
 
-
     localStorage.setItem(
         "riderx_role",
         "customer"
     );
-
 
     localStorage.setItem(
         "riderx_selected_role",
@@ -1703,9 +1603,9 @@ function createCustomerSession(
 }
 
 
-/*
- * Remove stale Customer session data.
- */
+/* =========================================================
+   CLEAR CUSTOMER SESSION
+========================================================= */
 
 function clearCustomerSession() {
 
@@ -1729,12 +1629,16 @@ function clearCustomerSession() {
         "riderx_role"
     );
 
+    localStorage.removeItem(
+        "riderx_session"
+    );
+
 }
 
 
-/*
- * Safe Firebase sign-out.
- */
+/* =========================================================
+   SAFE SIGN OUT
+========================================================= */
 
 async function safeSignOut() {
 
@@ -1758,28 +1662,9 @@ async function safeSignOut() {
 }
 
 
-/*
- * Force Customer role for this page.
- */
-
-function setCustomerRole() {
-
-    localStorage.setItem(
-        "riderx_selected_role",
-        "customer"
-    );
-
-    localStorage.setItem(
-        "riderx_role",
-        "customer"
-    );
-
-}
-
-
-/*
- * Normalize account roles.
- */
+/* =========================================================
+   ROLE NORMALIZATION
+========================================================= */
 
 function normalizeRole(
     role
@@ -1820,9 +1705,9 @@ function normalizeRole(
 }
 
 
-/*
- * Numeric helper.
- */
+/* =========================================================
+   NUMBER HELPER
+========================================================= */
 
 function numberValue(
     value,
@@ -1844,9 +1729,9 @@ function numberValue(
 }
 
 
-/*
- * Email validation.
- */
+/* =========================================================
+   EMAIL VALIDATION
+========================================================= */
 
 function validEmail(
     email
@@ -1859,9 +1744,9 @@ function validEmail(
 }
 
 
-/*
- * Clear messages.
- */
+/* =========================================================
+   MESSAGE HELPERS
+========================================================= */
 
 function clearMessages() {
 
@@ -1882,20 +1767,16 @@ function clearMessages() {
 }
 
 
-/*
- * Error message.
- */
-
 function showError(
     message
 ) {
 
+    successBox.textContent =
+        "";
+
     successBox.classList.remove(
         "show"
     );
-
-    successBox.textContent =
-        "";
 
     errorBox.textContent =
         message;
@@ -1907,20 +1788,16 @@ function showError(
 }
 
 
-/*
- * Success message.
- */
-
 function showSuccess(
     message
 ) {
 
+    errorBox.textContent =
+        "";
+
     errorBox.classList.remove(
         "show"
     );
-
-    errorBox.textContent =
-        "";
 
     successBox.textContent =
         message;
@@ -1932,20 +1809,20 @@ function showSuccess(
 }
 
 
-/*
- * Login button loading state.
- */
+/* =========================================================
+   LOADING
+========================================================= */
 
 function setLoading(
-    value
+    loading
 ) {
 
     loginButton.disabled =
-        value;
+        loading;
 
 
     if (
-        value
+        loading
     ) {
 
         loginButton.innerHTML =
@@ -1961,9 +1838,9 @@ function setLoading(
 }
 
 
-/*
- * Password reset.
- */
+/* =========================================================
+   PASSWORD RESET
+========================================================= */
 
 forgotPassword.addEventListener(
     "click",
@@ -2032,7 +1909,7 @@ forgotPassword.addEventListener(
         ) {
 
             console.error(
-                "Customer password reset error:",
+                "RiderX password reset error:",
                 error
             );
 
@@ -2042,7 +1919,6 @@ forgotPassword.addEventListener(
                     error
                 )
             );
-
 
         } finally {
 
@@ -2055,16 +1931,15 @@ forgotPassword.addEventListener(
 );
 
 
-/*
- * Customer OTP login.
- */
+/* =========================================================
+   OTP LOGIN
+========================================================= */
 
 otpButton.addEventListener(
     "click",
     function () {
 
         setCustomerRole();
-
 
         window.location.href =
             "./otp-login.html";
@@ -2073,16 +1948,15 @@ otpButton.addEventListener(
 );
 
 
-/*
- * Customer registration.
- */
+/* =========================================================
+   CUSTOMER REGISTER
+========================================================= */
 
 registerButton.addEventListener(
     "click",
     function () {
 
         setCustomerRole();
-
 
         window.location.href =
             "./register.html";
@@ -2091,9 +1965,9 @@ registerButton.addEventListener(
 );
 
 
-/*
- * Rider login.
- */
+/* =========================================================
+   RIDER LOGIN
+========================================================= */
 
 riderLoginButton.addEventListener(
     "click",
@@ -2109,6 +1983,10 @@ riderLoginButton.addEventListener(
             "rider"
         );
 
+        localStorage.setItem(
+            "userRole",
+            "rider"
+        );
 
         window.location.href =
             "./rider-login.html";
@@ -2117,9 +1995,9 @@ riderLoginButton.addEventListener(
 );
 
 
-/*
- * Account role selection.
- */
+/* =========================================================
+   ROLE SELECTION
+========================================================= */
 
 roleButton.addEventListener(
     "click",
@@ -2132,9 +2010,9 @@ roleButton.addEventListener(
 );
 
 
-/*
- * Firebase error translator.
- */
+/* =========================================================
+   FIREBASE ERROR TRANSLATOR
+========================================================= */
 
 function firebaseMessage(
     error
