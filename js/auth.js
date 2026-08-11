@@ -1,30 +1,41 @@
 /* ============================================================
-RIDERX 2.0
-AUTHENTICATION ENGINE
-File: js/auth.js
+   RIDERX 2.0
+   AUTHENTICATION ENGINE
+   File: js/auth.js
 
-FINAL CUSTOMER/RIDER AUTH FLOW
+   FINAL CUSTOMER / RIDER / ADMIN AUTH FLOW
 
-- Firebase Authentication
-- Customer / Rider / Admin role resolution
-- Email login / registration
-- Phone OTP
-- Firestore user profiles
-- Firebase auth-state listener
-- UI-only localStorage cache
-- Route guards
-- Logout
-- Password reset
-- Profile update
-- User rendering
-- Compatibility API
+   FEATURES
+   ------------------------------------------------------------
+   - Firebase Authentication
+   - Customer / Rider / Admin role resolution
+   - Email login / registration
+   - Phone OTP login / registration
+   - Firestore user profiles
+   - Role-specific profile collections
+   - Firebase auth-state listener
+   - UI-only localStorage cache
+   - Route guards
+   - Logout
+   - Password reset
+   - Password change
+   - Profile update
+   - User rendering
+   - Compatibility API
+   - OTP reCAPTCHA cleanup
+   - Auth initialization synchronization
+   - Async auth-event race protection
 
-SECURITY:
-Firebase Authentication + Firestore Security Rules remain
-the real security authority.
+   SECURITY
+   ------------------------------------------------------------
+   Firebase Authentication + Firestore Security Rules are the
+   real security authority.
 
-localStorage is ONLY a UI/session cache.
-============================================================ */
+   localStorage is ONLY a temporary UI/session cache.
+
+   Client-selected roles are NEVER trusted for admin access.
+   Admin / superadmin roles must come from Firestore.
+   ============================================================ */
 
 "use strict";
 
@@ -41,10 +52,14 @@ localStorage is ONLY a UI/session cache.
        GLOBAL NAMESPACE
     ========================================================= */
 
-    window.RiderX = window.RiderX || {};
+    window.RiderX =
+        window.RiderX || {};
 
-    const RX = window.RiderX;
-    const AUTH = RX.auth = RX.auth || {};
+    const RX =
+        window.RiderX;
+
+    const AUTH =
+        RX.auth = RX.auth || {};
 
     /* =========================================================
        STORAGE
@@ -52,18 +67,32 @@ localStorage is ONLY a UI/session cache.
 
     const STORAGE = Object.freeze({
 
-        user: "riderx_user",
-        role: "riderx_role",
-        session: "riderx_session",
+        user:
+            "riderx_user",
 
-        customer: "riderx_customer",
-        rider: "riderx_rider",
-        admin: "riderx_admin_session",
+        role:
+            "riderx_role",
 
-        selectedRole: "riderx_selected_role",
-        legacyRole: "userRole",
+        session:
+            "riderx_session",
 
-        otpPhone: "riderx_otp_phone"
+        customer:
+            "riderx_customer",
+
+        rider:
+            "riderx_rider",
+
+        admin:
+            "riderx_admin_session",
+
+        selectedRole:
+            "riderx_selected_role",
+
+        legacyRole:
+            "userRole",
+
+        otpPhone:
+            "riderx_otp_phone"
 
     });
 
@@ -73,19 +102,27 @@ localStorage is ONLY a UI/session cache.
 
     const ROLES = Object.freeze({
 
-        CUSTOMER: "customer",
-        RIDER: "rider",
-        ADMIN: "admin",
-        SUPERADMIN: "superadmin"
+        CUSTOMER:
+            "customer",
+
+        RIDER:
+            "rider",
+
+        ADMIN:
+            "admin",
+
+        SUPERADMIN:
+            "superadmin"
 
     });
 
-    const NORMAL_USER_ROLES = Object.freeze([
+    const NORMAL_USER_ROLES =
+        Object.freeze([
 
-        ROLES.CUSTOMER,
-        ROLES.RIDER
+            ROLES.CUSTOMER,
+            ROLES.RIDER
 
-    ]);
+        ]);
 
     /* =========================================================
        ROUTES
@@ -93,13 +130,26 @@ localStorage is ONLY a UI/session cache.
 
     const ROUTES = Object.freeze({
 
-        customer: "customer/home.html",
-        rider: "rider/home.html",
-        admin: "admin/dashboard.html",
-        superadmin: "admin/dashboard.html",
-        auth: "auth/role.html",
-        login: "auth/login.html",
-        pendingRider: "rider/pending.html"
+        customer:
+            "customer/home.html",
+
+        rider:
+            "rider/home.html",
+
+        admin:
+            "admin/dashboard.html",
+
+        superadmin:
+            "admin/dashboard.html",
+
+        auth:
+            "auth/role.html",
+
+        login:
+            "auth/login.html",
+
+        pendingRider:
+            "rider/pending.html"
 
     });
 
@@ -107,43 +157,71 @@ localStorage is ONLY a UI/session cache.
        AUTH STATE
     ========================================================= */
 
-    AUTH.state = AUTH.state || {
+    AUTH.state =
+        AUTH.state || {
 
-        initialized: false,
-        initializing: false,
-        loading: false,
+            initialized:
+                false,
 
-        authReady: false,
+            initializing:
+                false,
 
-        user: null,
-        role: null,
-        firebaseUser: null,
+            loading:
+                false,
 
-        unsubscribe: null,
+            authReady:
+                false,
 
-        logoutBound: false,
+            user:
+                null,
 
-        authError: null,
+            role:
+                null,
 
-        listenerStarted: false,
+            firebaseUser:
+                null,
 
-        authEventVersion: 0,
+            unsubscribe:
+                null,
 
-        readyPromise: null,
+            logoutBound:
+                false,
 
-        lastResolvedUid: null
+            authError:
+                null,
 
-    };
+            listenerStarted:
+                false,
+
+            authEventVersion:
+                0,
+
+            readyPromise:
+                null,
+
+            readyResolved:
+                false,
+
+            lastResolvedUid:
+                null
+
+        };
 
     /* =========================================================
        FIREBASE REFERENCES
     ========================================================= */
 
-    let Firebase = null;
-    let firebaseLoadPromise = null;
+    let Firebase =
+        null;
 
-    AUTH.phoneConfirmation = null;
-    AUTH.phoneVerifier = null;
+    let firebaseLoadPromise =
+        null;
+
+    AUTH.phoneConfirmation =
+        null;
+
+    AUTH.phoneVerifier =
+        null;
 
     /* =========================================================
        BASIC HELPERS
@@ -151,13 +229,17 @@ localStorage is ONLY a UI/session cache.
 
     function cleanString(value) {
 
-        return String(value ?? "").trim();
+        return String(
+            value ?? ""
+        ).trim();
 
     }
 
     function safeLower(value) {
 
-        return cleanString(value).toLowerCase();
+        return cleanString(
+            value
+        ).toLowerCase();
 
     }
 
@@ -184,7 +266,9 @@ localStorage is ONLY a UI/session cache.
 
         try {
 
-            return localStorage.getItem(key);
+            return localStorage.getItem(
+                key
+            );
 
         } catch (error) {
 
@@ -199,7 +283,10 @@ localStorage is ONLY a UI/session cache.
 
     }
 
-    function safeStorageSet(key, value) {
+    function safeStorageSet(
+        key,
+        value
+    ) {
 
         try {
 
@@ -227,7 +314,9 @@ localStorage is ONLY a UI/session cache.
 
         try {
 
-            localStorage.removeItem(key);
+            localStorage.removeItem(
+                key
+            );
 
         } catch (error) {
 
@@ -381,7 +470,10 @@ localStorage is ONLY a UI/session cache.
                 "The request took too long. Please try again.",
 
             "not-found":
-                "The requested RiderX profile was not found."
+                "The requested RiderX profile was not found.",
+
+            "auth/requires-recent-login":
+                "Please login again before changing this account information."
 
         };
 
@@ -461,10 +553,21 @@ localStorage is ONLY a UI/session cache.
                         "signInWithEmailAndPassword",
                         "createUserWithEmailAndPassword",
 
+                        "signInWithPhoneNumber",
+
                         "signOut",
 
                         "updateProfile",
-                        "sendPasswordResetEmail"
+
+                        "sendPasswordResetEmail",
+
+                        "EmailAuthProvider",
+
+                        "reauthenticateWithCredential",
+
+                        "updatePassword",
+
+                        "RecaptchaVerifier"
 
                     ];
 
@@ -472,8 +575,10 @@ localStorage is ONLY a UI/session cache.
                         required.filter(
                             function (name) {
 
-                                return typeof module[name] ===
-                                    "undefined";
+                                return (
+                                    typeof module[name] ===
+                                    "undefined"
+                                );
 
                             }
                         );
@@ -539,10 +644,14 @@ localStorage is ONLY a UI/session cache.
 
         ];
 
-        for (const folder of knownFolders) {
+        for (
+            const folder of knownFolders
+        ) {
 
             const index =
-                normalized.indexOf(folder);
+                normalized.indexOf(
+                    folder
+                );
 
             if (index !== -1) {
 
@@ -557,11 +666,15 @@ localStorage is ONLY a UI/session cache.
 
         if (
             normalized === "/" ||
-            normalized.endsWith("/index.html")
+            normalized.endsWith(
+                "/index.html"
+            )
         ) {
 
             if (
-                normalized.endsWith("/index.html")
+                normalized.endsWith(
+                    "/index.html"
+                )
             ) {
 
                 return normalized
@@ -591,8 +704,13 @@ localStorage is ONLY a UI/session cache.
             getApplicationRoot();
 
         const cleanRoute =
-            cleanString(route)
-                .replace(/^\/+/, "");
+            cleanString(
+                route
+            )
+                .replace(
+                    /^\/+/,
+                    ""
+                );
 
         if (!cleanRoute) {
 
@@ -726,9 +844,9 @@ localStorage is ONLY a UI/session cache.
 
             return (
                 normalized ===
-                    ROLES.ADMIN ||
+                ROLES.ADMIN ||
                 normalized ===
-                    ROLES.SUPERADMIN
+                ROLES.SUPERADMIN
             );
 
         };
@@ -739,7 +857,8 @@ localStorage is ONLY a UI/session cache.
             return (
                 AUTH.normalizeRole(
                     role
-                ) === ROLES.RIDER
+                ) ===
+                ROLES.RIDER
             );
 
         };
@@ -750,7 +869,8 @@ localStorage is ONLY a UI/session cache.
             return (
                 AUTH.normalizeRole(
                     role
-                ) === ROLES.CUSTOMER
+                ) ===
+                ROLES.CUSTOMER
             );
 
         };
@@ -818,7 +938,11 @@ localStorage is ONLY a UI/session cache.
             }
 
             const role =
-                AUTH.getStoredRole();
+                AUTH.normalizeRole(
+                    safeStorageGet(
+                        STORAGE.role
+                    )
+                );
 
             if (
                 role === ROLES.CUSTOMER
@@ -903,22 +1027,32 @@ localStorage is ONLY a UI/session cache.
     AUTH.getUid =
         function () {
 
+            const stored =
+                !AUTH.state.authReady
+                    ? AUTH.getStoredUser()
+                    : null;
+
             return (
                 AUTH.state.firebaseUser?.uid ||
                 AUTH.state.user?.uid ||
                 AUTH.state.user?.id ||
                 AUTH.state.user?.userId ||
-                (
-                    !AUTH.state.authReady
-                        ? (
-                            AUTH.getStoredUser()?.uid ||
-                            AUTH.getStoredUser()?.id ||
-                            AUTH.getStoredUser()?.userId ||
-                            ""
-                        )
-                        : ""
-                ) ||
+                stored?.uid ||
+                stored?.id ||
+                stored?.userId ||
                 ""
+            );
+
+        };
+
+    AUTH.getUserId =
+        function (user) {
+
+            return (
+                user?.uid ||
+                user?.id ||
+                user?.userId ||
+                null
             );
 
         };
@@ -983,9 +1117,14 @@ localStorage is ONLY a UI/session cache.
 
             const sessionUser = {
 
-                uid: uid,
-                id: uid,
-                userId: uid,
+                uid:
+                    uid,
+
+                id:
+                    uid,
+
+                userId:
+                    uid,
 
                 email:
                     cleanString(
@@ -1053,6 +1192,17 @@ localStorage is ONLY a UI/session cache.
                         user.status
                     ) ||
                     "active",
+
+                approvalStatus:
+                    cleanString(
+                        user.approvalStatus
+                    ),
+
+                approved:
+                    user.approved === true,
+
+                isApproved:
+                    user.isApproved === true,
 
                 online:
                     user.online === true,
@@ -1129,9 +1279,7 @@ localStorage is ONLY a UI/session cache.
                     STORAGE.admin
                 );
 
-            }
-
-            if (
+            } else if (
                 normalizedRole ===
                 ROLES.RIDER
             ) {
@@ -1151,9 +1299,7 @@ localStorage is ONLY a UI/session cache.
                     STORAGE.admin
                 );
 
-            }
-
-            if (
+            } else if (
                 AUTH.isAdminRole(
                     normalizedRole
                 )
@@ -1290,89 +1436,76 @@ localStorage is ONLY a UI/session cache.
                     firebaseUser.uid
                 );
 
-            try {
-
-                const snapshot =
-                    await FB.getDoc(
-                        userRef
-                    );
-
-                if (
-                    !snapshot.exists()
-                ) {
-
-                    return baseProfile;
-
-                }
-
-                const data =
-                    snapshot.data() || {};
-
-                return {
-
-                    ...baseProfile,
-                    ...data,
-
-                    uid:
-                        firebaseUser.uid,
-
-                    email:
-                        cleanString(
-                            data.email
-                        ) ||
-                        baseProfile.email,
-
-                    displayName:
-                        cleanString(
-                            data.displayName
-                        ) ||
-                        baseProfile.displayName,
-
-                    name:
-                        cleanString(
-                            data.name
-                        ) ||
-                        cleanString(
-                            data.displayName
-                        ) ||
-                        baseProfile.name,
-
-                    phone:
-                        cleanString(
-                            data.phone
-                        ) ||
-                        cleanString(
-                            data.phoneNumber
-                        ) ||
-                        baseProfile.phone,
-
-                    phoneNumber:
-                        cleanString(
-                            data.phoneNumber
-                        ) ||
-                        cleanString(
-                            data.phone
-                        ) ||
-                        baseProfile.phoneNumber,
-
-                    photoURL:
-                        cleanString(
-                            data.photoURL
-                        ) ||
-                        baseProfile.photoURL
-
-                };
-
-            } catch (error) {
-
-                console.error(
-                    "RiderX user profile read failed:",
-                    error
+            const snapshot =
+                await FB.getDoc(
+                    userRef
                 );
 
-                throw error;
+            if (
+                !snapshot.exists()
+            ) {
+
+                return baseProfile;
 
             }
+
+            const data =
+                snapshot.data() || {};
+
+            return {
+
+                ...baseProfile,
+                ...data,
+
+                uid:
+                    firebaseUser.uid,
+
+                email:
+                    cleanString(
+                        data.email
+                    ) ||
+                    baseProfile.email,
+
+                displayName:
+                    cleanString(
+                        data.displayName
+                    ) ||
+                    baseProfile.displayName,
+
+                name:
+                    cleanString(
+                        data.name
+                    ) ||
+                    cleanString(
+                        data.displayName
+                    ) ||
+                    baseProfile.name,
+
+                phone:
+                    cleanString(
+                        data.phone
+                    ) ||
+                    cleanString(
+                        data.phoneNumber
+                    ) ||
+                    baseProfile.phone,
+
+                phoneNumber:
+                    cleanString(
+                        data.phoneNumber
+                    ) ||
+                    cleanString(
+                        data.phone
+                    ) ||
+                    baseProfile.phoneNumber,
+
+                photoURL:
+                    cleanString(
+                        data.photoURL
+                    ) ||
+                    baseProfile.photoURL
+
+            };
 
         };
 
@@ -1419,29 +1552,40 @@ localStorage is ONLY a UI/session cache.
             const data =
                 snapshot.data() || {};
 
+            let fallbackRole = "";
+
+            if (
+                collectionName ===
+                "customers"
+            ) {
+
+                fallbackRole =
+                    ROLES.CUSTOMER;
+
+            } else if (
+                collectionName ===
+                "riders"
+            ) {
+
+                fallbackRole =
+                    ROLES.RIDER;
+
+            } else if (
+                collectionName ===
+                "admins"
+            ) {
+
+                fallbackRole =
+                    ROLES.ADMIN;
+
+            }
+
             const role =
                 AUTH.normalizeRole(
                     data.role ||
                     data.userRole ||
                     data.accountType ||
-                    (
-                        collectionName ===
-                        "customers"
-                            ? ROLES.CUSTOMER
-                            : ""
-                    ) ||
-                    (
-                        collectionName ===
-                        "riders"
-                            ? ROLES.RIDER
-                            : ""
-                    ) ||
-                    (
-                        collectionName ===
-                        "admins"
-                            ? ROLES.ADMIN
-                            : ""
-                    )
+                    fallbackRole
                 );
 
             if (role) {
@@ -1459,6 +1603,13 @@ localStorage is ONLY a UI/session cache.
             }
 
         } catch (error) {
+
+            /*
+             * A permission error in one collection must not
+             * automatically destroy the whole authentication
+             * state. The primary users/{uid} document remains
+             * authoritative when available.
+             */
 
             console.warn(
                 "RiderX role collection lookup skipped:",
@@ -1499,6 +1650,9 @@ localStorage is ONLY a UI/session cache.
             const uid =
                 user.uid;
 
+            let primaryReadFailed =
+                false;
+
             try {
 
                 const userRef =
@@ -1538,12 +1692,13 @@ localStorage is ONLY a UI/session cache.
 
             } catch (error) {
 
+                primaryReadFailed =
+                    true;
+
                 console.error(
                     "RiderX primary role resolution failed:",
                     error
                 );
-
-                return null;
 
             }
 
@@ -1589,17 +1744,49 @@ localStorage is ONLY a UI/session cache.
 
             }
 
+            /*
+             * IMPORTANT SECURITY RULE:
+             *
+             * A selected role can ONLY be used as a compatibility
+             * fallback for customer/rider.
+             *
+             * It can NEVER create an admin/superadmin session.
+             */
+
             if (
                 options.allowSelectedRoleFallback ===
                 true
             ) {
 
-                return AUTH.normalizeRole(
-                    options.selectedRole ||
-                    safeStorageGet(
-                        STORAGE.selectedRole
+                const fallbackRole =
+                    AUTH.normalizeRole(
+                        options.selectedRole ||
+                        safeStorageGet(
+                            STORAGE.selectedRole
+                        )
+                    );
+
+                if (
+                    NORMAL_USER_ROLES.includes(
+                        fallbackRole
                     )
-                );
+                ) {
+
+                    return fallbackRole;
+
+                }
+
+            }
+
+            /*
+             * If Firestore could not be read at all, return null
+             * so the caller can distinguish a service/permission
+             * failure from a genuinely missing role.
+             */
+
+            if (primaryReadFailed) {
+
+                return null;
 
             }
 
@@ -1808,7 +1995,7 @@ localStorage is ONLY a UI/session cache.
 
             if (
                 value.startsWith("0") &&
-                value.length === 10
+                value.length === 11
             ) {
 
                 value =
@@ -1834,25 +2021,7 @@ localStorage is ONLY a UI/session cache.
         };
 
     /* =========================================================
-       UID HELPER
-    ========================================================= */
-
-    AUTH.getUserId =
-        function (
-            user
-        ) {
-
-            return (
-                user?.uid ||
-                user?.id ||
-                user?.userId ||
-                null
-            );
-
-        };
-
-    /* =========================================================
-       CURRENT LOGIN STATE
+       LOGIN STATE
     ========================================================= */
 
     AUTH.isLoggedIn =
@@ -1909,11 +2078,73 @@ localStorage is ONLY a UI/session cache.
        AUTH READY
     ========================================================= */
 
+    function resolveAuthReady() {
+
+        if (
+            AUTH.state.readyResolved
+        ) {
+
+            return;
+
+        }
+
+        AUTH.state.readyResolved =
+            true;
+
+        AUTH.state.authReady =
+            true;
+
+        AUTH.emit(
+            "ready",
+            {
+                user:
+                    AUTH.state.user,
+
+                role:
+                    AUTH.state.role,
+
+                firebaseUser:
+                    AUTH.state.firebaseUser
+            }
+        );
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx:auth-ready",
+                    {
+                        detail: {
+                            user:
+                                AUTH.state.user,
+
+                            role:
+                                AUTH.state.role,
+
+                            firebaseUser:
+                                AUTH.state.firebaseUser
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX auth-ready event failed:",
+                error
+            );
+
+        }
+
+    }
+
     AUTH.waitForAuth =
         function () {
 
             if (
-                AUTH.state.authReady
+                AUTH.state.authReady &&
+                AUTH.state.readyResolved
             ) {
 
                 return Promise.resolve(
@@ -1933,6 +2164,19 @@ localStorage is ONLY a UI/session cache.
             AUTH.state.readyPromise =
                 new Promise(
                     function (resolve) {
+
+                        if (
+                            AUTH.state.authReady &&
+                            AUTH.state.readyResolved
+                        ) {
+
+                            resolve(
+                                AUTH.state
+                            );
+
+                            return;
+
+                        }
 
                         const handler =
                             function () {
@@ -1961,6 +2205,43 @@ localStorage is ONLY a UI/session cache.
         };
 
     /* =========================================================
+       FIREBASE SIGN OUT HELPER
+    ========================================================= */
+
+    async function safeFirebaseSignOut(
+        FB
+    ) {
+
+        try {
+
+            if (
+                FB?.auth &&
+                typeof FB.signOut ===
+                "function"
+            ) {
+
+                await FB.signOut(
+                    FB.auth
+                );
+
+                return true;
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX Firebase sign-out failed:",
+                error
+            );
+
+        }
+
+        return false;
+
+    }
+
+    /* =========================================================
        FINALIZE AUTHENTICATED USER
     ========================================================= */
 
@@ -1982,9 +2263,6 @@ localStorage is ONLY a UI/session cache.
 
         }
 
-        const FB =
-            await loadFirebase();
-
         const profile =
             await AUTH.getProfile(
                 firebaseUser
@@ -1996,11 +2274,20 @@ localStorage is ONLY a UI/session cache.
             )
         ) {
 
-            await safeFirebaseSignOut(
-                FB
-            );
+            try {
 
-            AUTH.clearSession();
+                const FB =
+                    await loadFirebase();
+
+                await safeFirebaseSignOut(
+                    FB
+                );
+
+            } finally {
+
+                AUTH.clearSession();
+
+            }
 
             throw new Error(
                 "This RiderX account has been disabled."
@@ -2035,6 +2322,9 @@ localStorage is ONLY a UI/session cache.
 
         if (!role) {
 
+            const FB =
+                await loadFirebase();
+
             AUTH.clearSession();
 
             await safeFirebaseSignOut(
@@ -2048,10 +2338,9 @@ localStorage is ONLY a UI/session cache.
         }
 
         /*
-         * Never trust a client-selected role when Firebase
-         * already has a different role.
-         *
-         * The resolved Firestore role is authoritative.
+         * Client selected role can NEVER override an existing
+         * Firestore role. resolveRole has already checked the
+         * authoritative sources.
          */
 
         profile.role =
@@ -2077,9 +2366,6 @@ localStorage is ONLY a UI/session cache.
 
         AUTH.state.authError =
             null;
-
-        AUTH.state.authReady =
-            true;
 
         AUTH.state.lastResolvedUid =
             firebaseUser.uid;
@@ -2170,19 +2456,16 @@ localStorage is ONLY a UI/session cache.
 
                 }
 
-                /*
-                 * First resolve the real Firebase/Firestore role.
-                 *
-                 * selectedRole is only a compatibility fallback
-                 * for an account whose profile has no role.
-                 */
-
                 const authResult =
                     await finalizeAuthenticatedUser(
                         firebaseUser,
                         {
+                            /*
+                             * Only customer/rider may be used
+                             * as migration fallback.
+                             */
                             allowSelectedRoleFallback:
-                                Boolean(
+                                NORMAL_USER_ROLES.includes(
                                     requestedRole
                                 ),
 
@@ -2194,6 +2477,12 @@ localStorage is ONLY a UI/session cache.
                 safeStorageRemove(
                     STORAGE.selectedRole
                 );
+
+                AUTH.state.authReady =
+                    true;
+
+                AUTH.state.readyResolved =
+                    true;
 
                 AUTH.emit(
                     "login",
@@ -2232,7 +2521,9 @@ localStorage is ONLY a UI/session cache.
                 );
 
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             } finally {
@@ -2306,8 +2597,7 @@ localStorage is ONLY a UI/session cache.
             }
 
             if (
-                password.length <
-                6
+                password.length < 6
             ) {
 
                 throw new Error(
@@ -2337,8 +2627,7 @@ localStorage is ONLY a UI/session cache.
             }
 
             if (
-                role ===
-                ROLES.RIDER &&
+                role === ROLES.RIDER &&
                 !phone
             ) {
 
@@ -2374,29 +2663,20 @@ localStorage is ONLY a UI/session cache.
 
                 }
 
-                if (
-                    name ||
-                    phone
-                ) {
+                if (name) {
 
                     await FB.updateProfile(
                         firebaseUser,
                         {
                             displayName:
-                                name || null
+                                name
                         }
                     );
 
                 }
 
-                /*
-                 * Rider accounts start in pending state.
-                 * Customer accounts start active.
-                 */
-
                 const initialStatus =
-                    role ===
-                    ROLES.RIDER
+                    role === ROLES.RIDER
                         ? "pending"
                         : "active";
 
@@ -2467,15 +2747,12 @@ localStorage is ONLY a UI/session cache.
 
                 };
 
-                const userRef =
+                await FB.setDoc(
                     FB.doc(
                         FB.db,
                         "users",
                         firebaseUser.uid
-                    );
-
-                await FB.setDoc(
-                    userRef,
+                    ),
                     profile,
                     {
                         merge:
@@ -2483,26 +2760,17 @@ localStorage is ONLY a UI/session cache.
                     }
                 );
 
-                /*
-                 * Keep role-specific profile collections for
-                 * compatibility with existing RiderX pages.
-                 */
-
                 const collectionName =
-                    role ===
-                    ROLES.RIDER
+                    role === ROLES.RIDER
                         ? "riders"
                         : "customers";
 
-                const roleRef =
+                await FB.setDoc(
                     FB.doc(
                         FB.db,
                         collectionName,
                         firebaseUser.uid
-                    );
-
-                await FB.setDoc(
-                    roleRef,
+                    ),
                     profile,
                     {
                         merge:
@@ -2527,6 +2795,12 @@ localStorage is ONLY a UI/session cache.
 
                 AUTH.state.authReady =
                     true;
+
+                AUTH.state.readyResolved =
+                    true;
+
+                AUTH.state.authError =
+                    null;
 
                 safeStorageRemove(
                     STORAGE.selectedRole
@@ -2553,6 +2827,8 @@ localStorage is ONLY a UI/session cache.
                             role
                     }
                 );
+
+                AUTH.renderUser();
 
                 return {
 
@@ -2581,7 +2857,9 @@ localStorage is ONLY a UI/session cache.
                 );
 
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             } finally {
@@ -2648,7 +2926,9 @@ localStorage is ONLY a UI/session cache.
                 );
 
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             }
@@ -2656,7 +2936,7 @@ localStorage is ONLY a UI/session cache.
         };
 
     /* =========================================================
-       PHONE OTP
+       OTP VERIFIER CLEANUP
     ========================================================= */
 
     AUTH.clearOtpVerifier =
@@ -2694,7 +2974,7 @@ localStorage is ONLY a UI/session cache.
         };
 
     /* =========================================================
-       OTP SEND
+       SEND OTP
     ========================================================= */
 
     AUTH.sendOtp =
@@ -2741,7 +3021,7 @@ localStorage is ONLY a UI/session cache.
 
             }
 
-            AUTH.clearOtpVerifier();
+            AUTH.cancelOtp();
 
             let container =
                 recaptchaContainer;
@@ -2780,6 +3060,7 @@ localStorage is ONLY a UI/session cache.
                     FB.auth,
                     container,
                     {
+
                         size:
                             "invisible",
 
@@ -2840,13 +3121,18 @@ localStorage is ONLY a UI/session cache.
 
                 AUTH.clearOtpVerifier();
 
+                AUTH.phoneConfirmation =
+                    null;
+
                 console.error(
                     "RiderX OTP send failed:",
                     error
                 );
 
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             }
@@ -2854,13 +3140,196 @@ localStorage is ONLY a UI/session cache.
         };
 
     /* =========================================================
-       OTP VERIFY
+       CREATE PHONE PROFILE
+    ========================================================= */
+
+    async function createPhoneProfile(
+        firebaseUser,
+        role,
+        phone,
+        extraData
+    ) {
+
+        const FB =
+            await loadFirebase();
+
+        const normalizedRole =
+            AUTH.normalizeRole(
+                role
+            );
+
+        if (
+            !NORMAL_USER_ROLES.includes(
+                normalizedRole
+            )
+        ) {
+
+            throw new Error(
+                "Please select Customer or Rider."
+            );
+
+        }
+
+        extraData =
+            isObject(extraData)
+                ? extraData
+                : {};
+
+        const displayName =
+            cleanString(
+                extraData.name ||
+                extraData.fullName ||
+                firebaseUser.displayName
+            );
+
+        const initialStatus =
+            normalizedRole === ROLES.RIDER
+                ? "pending"
+                : "active";
+
+        const profile = {
+
+            uid:
+                firebaseUser.uid,
+
+            email:
+                firebaseUser.email ||
+                "",
+
+            name:
+                displayName,
+
+            fullName:
+                displayName,
+
+            displayName:
+                displayName,
+
+            phone:
+                firebaseUser.phoneNumber ||
+                phone ||
+                "",
+
+            phoneNumber:
+                firebaseUser.phoneNumber ||
+                phone ||
+                "",
+
+            role:
+                normalizedRole,
+
+            userRole:
+                normalizedRole,
+
+            accountType:
+                normalizedRole,
+
+            status:
+                initialStatus,
+
+            approvalStatus:
+                normalizedRole === ROLES.RIDER
+                    ? "pending"
+                    : "approved",
+
+            approved:
+                normalizedRole === ROLES.RIDER
+                    ? false
+                    : true,
+
+            isApproved:
+                normalizedRole === ROLES.RIDER
+                    ? false
+                    : true,
+
+            city:
+                cleanString(
+                    extraData.city
+                ) ||
+                "Chandigarh",
+
+            online:
+                false,
+
+            createdAt:
+                Date.now(),
+
+            updatedAt:
+                Date.now()
+
+        };
+
+        if (
+            displayName &&
+            typeof FB.updateProfile ===
+            "function"
+        ) {
+
+            try {
+
+                await FB.updateProfile(
+                    firebaseUser,
+                    {
+                        displayName:
+                            displayName
+                    }
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX phone profile display-name update skipped:",
+                    error
+                );
+
+            }
+
+        }
+
+        await FB.setDoc(
+            FB.doc(
+                FB.db,
+                "users",
+                firebaseUser.uid
+            ),
+            profile,
+            {
+                merge:
+                    true
+            }
+        );
+
+        const collectionName =
+            normalizedRole === ROLES.RIDER
+                ? "riders"
+                : "customers";
+
+        await FB.setDoc(
+            FB.doc(
+                FB.db,
+                collectionName,
+                firebaseUser.uid
+            ),
+            profile,
+            {
+                merge:
+                    true
+            }
+        );
+
+        return profile;
+
+    }
+
+    /* =========================================================
+       VERIFY OTP
     ========================================================= */
 
     AUTH.verifyOtp =
         async function (
             otp,
-            selectedRole
+            selectedRole,
+            extraData
         ) {
 
             otp =
@@ -2896,6 +3365,11 @@ localStorage is ONLY a UI/session cache.
                     )
                 );
 
+            const otpPhone =
+                safeStorageGet(
+                    STORAGE.otpPhone
+                );
+
             AUTH.state.loading =
                 true;
 
@@ -2918,11 +3392,12 @@ localStorage is ONLY a UI/session cache.
                 }
 
                 /*
-                 * Existing users resolve their actual Firestore role.
+                 * IMPORTANT:
                  *
-                 * For a brand-new phone account, selectedRole is
-                 * allowed as the initial role so the profile can be
-                 * created correctly.
+                 * Do NOT use selectedRole as an immediate role
+                 * resolution result.
+                 *
+                 * First check the real Firestore profile.
                  */
 
                 let profile =
@@ -2935,14 +3410,15 @@ localStorage is ONLY a UI/session cache.
                         firebaseUser,
                         {
                             allowSelectedRoleFallback:
-                                Boolean(
-                                    requestedRole
-                                ),
-
-                            selectedRole:
-                                requestedRole
+                                false
                         }
                     );
+
+                /*
+                 * If no Firestore role exists, this is a new
+                 * phone account. Only customer/rider can be
+                 * selected and a real Firestore profile is created.
+                 */
 
                 if (!role) {
 
@@ -2952,8 +3428,11 @@ localStorage is ONLY a UI/session cache.
                         )
                     ) {
 
+                        const FB =
+                            await loadFirebase();
+
                         await safeFirebaseSignOut(
-                            await loadFirebase()
+                            FB
                         );
 
                         throw new Error(
@@ -2962,114 +3441,29 @@ localStorage is ONLY a UI/session cache.
 
                     }
 
-                    const FB =
-                        await loadFirebase();
-
-                    const initialStatus =
-                        requestedRole ===
-                        ROLES.RIDER
-                            ? "pending"
-                            : "active";
-
-                    profile = {
-
-                        ...profile,
-
-                        uid:
-                            firebaseUser.uid,
-
-                        phone:
-                            firebaseUser.phoneNumber ||
-                            safeStorageGet(
-                                STORAGE.otpPhone
-                            ) ||
-                            "",
-
-                        phoneNumber:
-                            firebaseUser.phoneNumber ||
-                            safeStorageGet(
-                                STORAGE.otpPhone
-                            ) ||
-                            "",
-
-                        role:
+                    profile =
+                        await createPhoneProfile(
+                            firebaseUser,
                             requestedRole,
-
-                        userRole:
-                            requestedRole,
-
-                        accountType:
-                            requestedRole,
-
-                        status:
-                            initialStatus,
-
-                        approvalStatus:
-                            requestedRole ===
-                            ROLES.RIDER
-                                ? "pending"
-                                : "approved",
-
-                        approved:
-                            requestedRole ===
-                            ROLES.RIDER
-                                ? false
-                                : true,
-
-                        isApproved:
-                            requestedRole ===
-                            ROLES.RIDER
-                                ? false
-                                : true,
-
-                        city:
-                            "Chandigarh",
-
-                        online:
-                            false,
-
-                        createdAt:
-                            Date.now(),
-
-                        updatedAt:
-                            Date.now()
-
-                    };
-
-                    await FB.setDoc(
-                        FB.doc(
-                            FB.db,
-                            "users",
-                            firebaseUser.uid
-                        ),
-                        profile,
-                        {
-                            merge:
-                                true
-                        }
-                    );
-
-                    const collectionName =
-                        requestedRole ===
-                        ROLES.RIDER
-                            ? "riders"
-                            : "customers";
-
-                    await FB.setDoc(
-                        FB.doc(
-                            FB.db,
-                            collectionName,
-                            firebaseUser.uid
-                        ),
-                        profile,
-                        {
-                            merge:
-                                true
-                        }
-                    );
+                            otpPhone,
+                            extraData
+                        );
 
                     role =
                         requestedRole;
+
+                } else {
+
+                    /*
+                     * Existing phone account:
+                     * selectedRole is ignored.
+                     */
+
+                    profile = {
+
+                        ...profile
+
+                    };
 
                 }
 
@@ -3079,8 +3473,11 @@ localStorage is ONLY a UI/session cache.
                     )
                 ) {
 
+                    const FB =
+                        await loadFirebase();
+
                     await safeFirebaseSignOut(
-                        await loadFirebase()
+                        FB
                     );
 
                     throw new Error(
@@ -3098,6 +3495,9 @@ localStorage is ONLY a UI/session cache.
                 profile.accountType =
                     role;
 
+                profile.uid =
+                    firebaseUser.uid;
+
                 const savedUser =
                     AUTH.saveSession(
                         profile,
@@ -3114,6 +3514,9 @@ localStorage is ONLY a UI/session cache.
                     role;
 
                 AUTH.state.authReady =
+                    true;
+
+                AUTH.state.readyResolved =
                     true;
 
                 AUTH.state.authError =
@@ -3154,6 +3557,8 @@ localStorage is ONLY a UI/session cache.
                     }
                 );
 
+                AUTH.renderUser();
+
                 return {
 
                     success:
@@ -3181,7 +3586,9 @@ localStorage is ONLY a UI/session cache.
                 );
 
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             } finally {
@@ -3192,43 +3599,6 @@ localStorage is ONLY a UI/session cache.
             }
 
         };
-
-    /* =========================================================
-       FIREBASE SIGN OUT HELPER
-    ========================================================= */
-
-    async function safeFirebaseSignOut(
-        FB
-    ) {
-
-        try {
-
-            if (
-                FB?.auth &&
-                typeof FB.signOut ===
-                "function"
-            ) {
-
-                await FB.signOut(
-                    FB.auth
-                );
-
-                return true;
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX Firebase sign-out failed:",
-                error
-            );
-
-        }
-
-        return false;
-
-    }
 
     /* =========================================================
        LOGOUT
@@ -3284,7 +3654,16 @@ localStorage is ONLY a UI/session cache.
                 AUTH.state.firebaseUser =
                     null;
 
+                AUTH.state.user =
+                    null;
+
+                AUTH.state.role =
+                    null;
+
                 AUTH.state.authReady =
+                    true;
+
+                AUTH.state.readyResolved =
                     true;
 
                 AUTH.emit(
@@ -3309,9 +3688,11 @@ localStorage is ONLY a UI/session cache.
                             ROUTES.auth
                         );
 
+                    const currentAbsolute =
+                        window.location.pathname;
+
                     if (
-                        window.location.href !==
-                        window.location.origin +
+                        currentAbsolute !==
                         target
                     ) {
 
@@ -3376,18 +3757,12 @@ localStorage is ONLY a UI/session cache.
 
                             AUTH.clearSession();
 
+                            resolveAuthReady();
+
+                            AUTH.autoGuard();
+
                             AUTH.emit(
                                 "signed-out"
-                            );
-
-                            AUTH.emit(
-                                "ready"
-                            );
-
-                            window.dispatchEvent(
-                                new CustomEvent(
-                                    "riderx:auth-ready"
-                                )
                             );
 
                             return;
@@ -3404,12 +3779,6 @@ localStorage is ONLY a UI/session cache.
                                             false
                                     }
                                 );
-
-                            /*
-                             * Ignore stale async auth events.
-                             * Firebase can fire multiple state changes while
-                             * a previous profile lookup is still running.
-                             */
 
                             if (
                                 eventVersion !==
@@ -3435,6 +3804,11 @@ localStorage is ONLY a UI/session cache.
                             AUTH.state.authError =
                                 null;
 
+                            AUTH.state.lastResolvedUid =
+                                firebaseUser.uid;
+
+                            resolveAuthReady();
+
                             AUTH.emit(
                                 "state-changed",
                                 {
@@ -3447,27 +3821,6 @@ localStorage is ONLY a UI/session cache.
                                     firebaseUser:
                                         firebaseUser
                                 }
-                            );
-
-                            AUTH.emit(
-                                "ready",
-                                {
-                                    user:
-                                        result.user,
-
-                                    role:
-                                        result.role
-                                }
-                            );
-
-                            window.dispatchEvent(
-                                new CustomEvent(
-                                    "riderx:auth-ready",
-                                    {
-                                        detail:
-                                            result
-                                    }
-                                )
                             );
 
                             AUTH.renderUser();
@@ -3502,6 +3855,8 @@ localStorage is ONLY a UI/session cache.
 
                             AUTH.clearSession();
 
+                            resolveAuthReady();
+
                             AUTH.emit(
                                 "auth-error",
                                 {
@@ -3511,26 +3866,6 @@ localStorage is ONLY a UI/session cache.
                                     firebaseUser:
                                         firebaseUser
                                 }
-                            );
-
-                            AUTH.emit(
-                                "ready",
-                                {
-                                    error:
-                                        error
-                                }
-                            );
-
-                            window.dispatchEvent(
-                                new CustomEvent(
-                                    "riderx:auth-ready",
-                                    {
-                                        detail: {
-                                            error:
-                                                error
-                                        }
-                                    }
-                                )
                             );
 
                             AUTH.autoGuard();
@@ -3697,7 +4032,8 @@ localStorage is ONLY a UI/session cache.
 
             if (
                 options.redirect !==
-                false
+                false &&
+                isBrowser()
             ) {
 
                 const target =
@@ -3774,7 +4110,8 @@ localStorage is ONLY a UI/session cache.
 
             if (
                 options.redirect !==
-                false
+                false &&
+                isBrowser()
             ) {
 
                 if (
@@ -3842,8 +4179,8 @@ localStorage is ONLY a UI/session cache.
                 currentPath();
 
             /*
-             * Do not interfere with public authentication pages
-             * when there is no authenticated Firebase user.
+             * Public auth pages remain accessible when there is
+             * no authenticated Firebase user.
              */
 
             if (
@@ -3878,7 +4215,7 @@ localStorage is ONLY a UI/session cache.
             }
 
             /*
-             * Firebase user exists but profile/role resolution failed.
+             * Firebase user exists but profile/role is not valid.
              */
 
             if (
@@ -3905,7 +4242,7 @@ localStorage is ONLY a UI/session cache.
             }
 
             /*
-             * Admin can access admin only.
+             * ADMIN / SUPERADMIN
              */
 
             if (
@@ -3932,7 +4269,7 @@ localStorage is ONLY a UI/session cache.
             }
 
             /*
-             * Rider access.
+             * RIDER
              */
 
             if (
@@ -4014,7 +4351,7 @@ localStorage is ONLY a UI/session cache.
             }
 
             /*
-             * Customer access.
+             * CUSTOMER
              */
 
             if (
@@ -4034,8 +4371,6 @@ localStorage is ONLY a UI/session cache.
                     );
 
                 }
-
-                return;
 
             }
 
@@ -4060,6 +4395,9 @@ localStorage is ONLY a UI/session cache.
             const role =
                 AUTH.getRole();
 
+            const loggedIn =
+                AUTH.isLoggedIn();
+
             const name =
                 cleanString(
                     user?.name ||
@@ -4083,38 +4421,24 @@ localStorage is ONLY a UI/session cache.
                     user?.photoURL
                 );
 
-            const selectors = [
+            document
+                .querySelectorAll(
+                    [
+                        "[data-riderx-user-name]",
+                        "[data-user-name]",
+                        ".user-name",
+                        "#userName",
+                        "#profileName"
+                    ].join(",")
+                )
+                .forEach(
+                    function (element) {
 
-                "[data-riderx-user-name]",
-                "[data-user-name]",
-                ".user-name",
-                "#userName",
-                "#profileName"
+                        element.textContent =
+                            name || "";
 
-            ];
-
-            selectors.forEach(
-                function (selector) {
-
-                    document
-                        .querySelectorAll(
-                            selector
-                        )
-                        .forEach(
-                            function (element) {
-
-                                if (name) {
-
-                                    element.textContent =
-                                        name;
-
-                                }
-
-                            }
-                        );
-
-                }
-            );
+                    }
+                );
 
             document
                 .querySelectorAll(
@@ -4123,12 +4447,8 @@ localStorage is ONLY a UI/session cache.
                 .forEach(
                     function (element) {
 
-                        if (email) {
-
-                            element.textContent =
-                                email;
-
-                        }
+                        element.textContent =
+                            email || "";
 
                     }
                 );
@@ -4140,12 +4460,8 @@ localStorage is ONLY a UI/session cache.
                 .forEach(
                     function (element) {
 
-                        if (phone) {
-
-                            element.textContent =
-                                phone;
-
-                        }
+                        element.textContent =
+                            phone || "";
 
                     }
                 );
@@ -4157,29 +4473,25 @@ localStorage is ONLY a UI/session cache.
                 .forEach(
                     function (element) {
 
-                        if (role) {
-
-                            element.textContent =
-                                role;
-
-                        }
+                        element.textContent =
+                            role || "";
 
                     }
                 );
 
-            if (photo) {
+            document
+                .querySelectorAll(
+                    "[data-riderx-user-photo], [data-user-photo], #userPhoto"
+                )
+                .forEach(
+                    function (element) {
 
-                document
-                    .querySelectorAll(
-                        "[data-riderx-user-photo], [data-user-photo], #userPhoto"
-                    )
-                    .forEach(
-                        function (element) {
+                        if (
+                            element instanceof
+                            HTMLImageElement
+                        ) {
 
-                            if (
-                                element instanceof
-                                HTMLImageElement
-                            ) {
+                            if (photo) {
 
                                 element.src =
                                     photo;
@@ -4188,12 +4500,18 @@ localStorage is ONLY a UI/session cache.
                                     name ||
                                     "RiderX user";
 
+                            } else {
+
+                                element.removeAttribute(
+                                    "src"
+                                );
+
                             }
 
                         }
-                    );
 
-            }
+                    }
+                );
 
             document
                 .querySelectorAll(
@@ -4203,9 +4521,7 @@ localStorage is ONLY a UI/session cache.
                     function (element) {
 
                         element.hidden =
-                            !Boolean(
-                                AUTH.isLoggedIn()
-                            );
+                            !loggedIn;
 
                     }
                 );
@@ -4218,9 +4534,7 @@ localStorage is ONLY a UI/session cache.
                     function (element) {
 
                         element.hidden =
-                            Boolean(
-                                AUTH.isLoggedIn()
-                            );
+                            loggedIn;
 
                     }
                 );
@@ -4357,7 +4671,8 @@ localStorage is ONLY a UI/session cache.
 
             try {
 
-                const firebaseUpdates = {};
+                const firebaseUpdates =
+                    {};
 
                 if (
                     Object.prototype.hasOwnProperty.call(
@@ -4429,13 +4744,21 @@ localStorage is ONLY a UI/session cache.
                         "",
 
                     displayName:
-                        firebaseUpdates.displayName ||
+                        firebaseUpdates.displayName ??
                         currentUser.displayName ||
                         currentUser.name ||
                         "",
 
+                    name:
+                        cleanString(
+                            updates.name ||
+                            firebaseUpdates.displayName ||
+                            currentUser.name ||
+                            currentUser.displayName
+                        ),
+
                     photoURL:
-                        firebaseUpdates.photoURL ||
+                        firebaseUpdates.photoURL ??
                         currentUser.photoURL ||
                         "",
 
@@ -4444,15 +4767,29 @@ localStorage is ONLY a UI/session cache.
 
                 };
 
-                const userRef =
+                /*
+                 * Do not allow profile update calls from changing
+                 * the authoritative role.
+                 */
+
+                const currentRole =
+                    AUTH.getRole();
+
+                updatedProfile.role =
+                    currentRole;
+
+                updatedProfile.userRole =
+                    currentRole;
+
+                updatedProfile.accountType =
+                    currentRole;
+
+                await FB.setDoc(
                     FB.doc(
                         FB.db,
                         "users",
                         firebaseUser.uid
-                    );
-
-                await FB.setDoc(
-                    userRef,
+                    ),
                     updatedProfile,
                     {
                         merge:
@@ -4460,18 +4797,15 @@ localStorage is ONLY a UI/session cache.
                     }
                 );
 
-                const role =
-                    AUTH.getRole();
-
                 if (
-                    role ===
+                    currentRole ===
                     ROLES.CUSTOMER ||
-                    role ===
+                    currentRole ===
                     ROLES.RIDER
                 ) {
 
                     const collectionName =
-                        role ===
+                        currentRole ===
                         ROLES.RIDER
                             ? "riders"
                             : "customers";
@@ -4494,7 +4828,7 @@ localStorage is ONLY a UI/session cache.
                 const savedUser =
                     AUTH.saveSession(
                         updatedProfile,
-                        role
+                        currentRole
                     );
 
                 AUTH.state.user =
@@ -4539,8 +4873,19 @@ localStorage is ONLY a UI/session cache.
             newPassword
         ) {
 
+            const firebaseUser =
+                AUTH.state.firebaseUser;
+
             const email =
                 AUTH.getEmail();
+
+            if (!firebaseUser) {
+
+                throw new Error(
+                    "Please login first."
+                );
+
+            }
 
             if (!email) {
 
@@ -4563,26 +4908,50 @@ localStorage is ONLY a UI/session cache.
 
             }
 
+            if (
+                !String(
+                    currentPassword || ""
+                )
+            ) {
+
+                throw new Error(
+                    "Current password is required."
+                );
+
+            }
+
             const FB =
                 await loadFirebase();
 
             try {
 
+                if (
+                    typeof FB.EmailAuthProvider !==
+                    "function" &&
+                    !FB.EmailAuthProvider?.credential
+                ) {
+
+                    throw new Error(
+                        "Email password authentication is not available."
+                    );
+
+                }
+
                 const credential =
-                    await FB.EmailAuthProvider.credential(
+                    FB.EmailAuthProvider.credential(
                         email,
                         String(
-                            currentPassword || ""
+                            currentPassword
                         )
                     );
 
                 await FB.reauthenticateWithCredential(
-                    FB.auth.currentUser,
+                    firebaseUser,
                     credential
                 );
 
                 await FB.updatePassword(
-                    FB.auth.currentUser,
+                    firebaseUser,
                     String(
                         newPassword
                     )
@@ -4612,7 +4981,7 @@ localStorage is ONLY a UI/session cache.
         };
 
     /* =========================================================
-       PHONE OTP VERIFIER CLEANUP
+       CANCEL OTP
     ========================================================= */
 
     AUTH.cancelOtp =
@@ -4647,6 +5016,11 @@ localStorage is ONLY a UI/session cache.
                     role
                 );
 
+            /*
+             * Only normal users can be selected from the public
+             * authentication UI.
+             */
+
             if (
                 !NORMAL_USER_ROLES.includes(
                     normalized
@@ -4679,6 +5053,43 @@ localStorage is ONLY a UI/session cache.
         };
 
     /* =========================================================
+       CLEANUP
+    ========================================================= */
+
+    AUTH.destroy =
+        function () {
+
+            try {
+
+                if (
+                    typeof AUTH.state.unsubscribe ===
+                    "function"
+                ) {
+
+                    AUTH.state.unsubscribe();
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX auth listener cleanup failed:",
+                    error
+                );
+
+            }
+
+            AUTH.state.unsubscribe =
+                null;
+
+            AUTH.state.listenerStarted =
+                false;
+
+            AUTH.cancelOtp();
+
+        };
+
+    /* =========================================================
        INIT
     ========================================================= */
 
@@ -4697,7 +5108,8 @@ localStorage is ONLY a UI/session cache.
                 AUTH.state.initializing
             ) {
 
-                return AUTH.state;
+                return AUTH.state.readyPromise ||
+                    AUTH.state;
 
             }
 
@@ -4709,7 +5121,8 @@ localStorage is ONLY a UI/session cache.
                 AUTH.bindLogout();
 
                 /*
-                 * Cached data is only for temporary UI rendering.
+                 * Cached data is ONLY for temporary UI rendering.
+                 * It is not considered authenticated.
                  */
 
                 AUTH.renderUser();
@@ -4755,9 +5168,16 @@ localStorage is ONLY a UI/session cache.
                     }
                 );
 
-                AUTH.emit(
-                    "ready"
-                );
+                /*
+                 * IMPORTANT:
+                 * Resolve waitForAuth even when Firebase fails,
+                 * otherwise protected pages can remain permanently
+                 * waiting.
+                 */
+
+                resolveAuthReady();
+
+                AUTH.autoGuard();
 
             } finally {
 
@@ -4816,20 +5236,26 @@ localStorage is ONLY a UI/session cache.
     RX.verifyOtp =
         function (
             otp,
-            role
+            role,
+            extraData
         ) {
 
             return AUTH.verifyOtp(
                 otp,
-                role
+                role,
+                extraData
             );
 
         };
 
     RX.logout =
-        function () {
+        function (
+            options
+        ) {
 
-            return AUTH.logout();
+            return AUTH.logout(
+                options
+            );
 
         };
 
@@ -4851,6 +5277,17 @@ localStorage is ONLY a UI/session cache.
         function () {
 
             return AUTH.isLoggedIn();
+
+        };
+
+    RX.requireAuth =
+        function (
+            options
+        ) {
+
+            return AUTH.requireAuth(
+                options
+            );
 
         };
 
@@ -4908,6 +5345,19 @@ localStorage is ONLY a UI/session cache.
 
             return AUTH.resetPassword(
                 email
+            );
+
+        };
+
+    RX.changePassword =
+        function (
+            currentPassword,
+            newPassword
+        ) {
+
+            return AUTH.changePassword(
+                currentPassword,
+                newPassword
             );
 
         };
