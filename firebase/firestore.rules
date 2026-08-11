@@ -4,217 +4,118 @@ service cloud.firestore {
 
   match /databases/{database}/documents {
 
-
-    /* =====================================================
-       RIDERX 2.0
-       FIRESTORE SECURITY RULES
-
-       SECURITY MODEL
-       -----------------------------------------------------
-       - Authentication is mandatory for application data.
-       - Users can access only their own profile.
-       - Riders cannot approve themselves.
-       - Customers cannot promote themselves to riders/admins.
-       - Admin access is controlled by the protected user role.
-       - Ride ownership cannot be transferred by clients.
-       - Financial data cannot be modified by customers/riders.
-       - Chat access is limited to actual participants.
-       - Notifications cannot be forged by normal users.
-       - Unknown collections are denied by default.
-
-       IMPORTANT
-       -----------------------------------------------------
-       Admin accounts MUST be provisioned through a trusted
-       administrative process. Do not create/promote admins
-       from normal client-side application code.
-
-       These rules protect FIRESTORE only.
-       Realtime Database and Storage require their own rules.
-    ===================================================== */
-
-
     /* =====================================================
        COMMON HELPERS
     ===================================================== */
 
     function signedIn() {
-
       return request.auth != null;
-
     }
-
 
     function isOwner(uid) {
-
-      return signedIn()
-        && request.auth.uid == uid;
-
+      return signedIn() && request.auth.uid == uid;
     }
-
 
     function userPath(uid) {
-
       return /databases/$(database)/documents/users/$(uid);
-
     }
-
 
     function userExists(uid) {
-
-      return signedIn()
-        && exists(userPath(uid));
-
+      return exists(userPath(uid));
     }
 
-
-    function userDocument(uid) {
-
-      return get(userPath(uid));
-
+    function userData(uid) {
+      return get(userPath(uid)).data;
     }
-
-
-    function activeAccount() {
-
-      return signedIn()
-        && userExists(request.auth.uid)
-        && !(
-          userDocument(request.auth.uid).data.disabled == true
-          ||
-          userDocument(request.auth.uid).data.blocked == true
-          ||
-          userDocument(request.auth.uid).data.status == "disabled"
-          ||
-          userDocument(request.auth.uid).data.status == "blocked"
-          ||
-          userDocument(request.auth.uid).data.status == "suspended"
-        );
-
-    }
-
-
-    /* =====================================================
-       ADMIN
-    ===================================================== */
 
     function isAdmin() {
-
       return signedIn()
         && userExists(request.auth.uid)
         && (
-          userDocument(request.auth.uid).data.role == "admin"
-          ||
-          userDocument(request.auth.uid).data.userRole == "admin"
-          ||
-          userDocument(request.auth.uid).data.accountType == "admin"
-          ||
-          userDocument(request.auth.uid).data.isAdmin == true
+          userData(request.auth.uid).role == "admin"
+          || userData(request.auth.uid).userRole == "admin"
+          || userData(request.auth.uid).accountType == "admin"
+          || userData(request.auth.uid).isAdmin == true
         );
-
     }
-
-
-    /* =====================================================
-       CUSTOMER
-    ===================================================== */
 
     function isCustomer() {
-
       return signedIn()
         && userExists(request.auth.uid)
+        && !isAdmin()
         && (
-          userDocument(request.auth.uid).data.role == "customer"
-          ||
-          userDocument(request.auth.uid).data.userRole == "customer"
-          ||
-          userDocument(request.auth.uid).data.accountType == "customer"
-          ||
-          userDocument(request.auth.uid).data.role == "user"
+          userData(request.auth.uid).role == "customer"
+          || userData(request.auth.uid).userRole == "customer"
+          || userData(request.auth.uid).accountType == "customer"
+          || userData(request.auth.uid).role == "user"
         );
-
     }
-
-
-    /* =====================================================
-       RIDER
-    ===================================================== */
 
     function isRider() {
-
       return signedIn()
         && userExists(request.auth.uid)
+        && !isAdmin()
         && (
-          userDocument(request.auth.uid).data.role == "rider"
-          ||
-          userDocument(request.auth.uid).data.userRole == "rider"
-          ||
-          userDocument(request.auth.uid).data.accountType == "rider"
-          ||
-          userDocument(request.auth.uid).data.userType == "rider"
+          userData(request.auth.uid).role == "rider"
+          || userData(request.auth.uid).userRole == "rider"
+          || userData(request.auth.uid).accountType == "rider"
+          || userData(request.auth.uid).userType == "rider"
         );
-
     }
 
-
-    /* =====================================================
-       RIDER PROFILE HELPERS
-    ===================================================== */
+    function activeAccount() {
+      return signedIn()
+        && userExists(request.auth.uid)
+        && userData(request.auth.uid).disabled != true
+        && userData(request.auth.uid).blocked != true
+        && userData(request.auth.uid).status != "disabled"
+        && userData(request.auth.uid).status != "blocked"
+        && userData(request.auth.uid).status != "suspended";
+    }
 
     function riderPath(uid) {
-
       return /databases/$(database)/documents/riders/$(uid);
-
     }
 
-
-    function riderProfileExists() {
-
-      return signedIn()
-        && exists(riderPath(request.auth.uid));
-
+    function riderExists(uid) {
+      return exists(riderPath(uid));
     }
 
+    function riderData(uid) {
+      return get(riderPath(uid)).data;
+    }
 
     function riderApproved() {
-
-      return activeAccount()
-        && isRider()
-        && riderProfileExists()
+      return signedIn()
+        && riderExists(request.auth.uid)
         && (
-          get(riderPath(request.auth.uid)).data.adminApproved == true
-          ||
-          get(riderPath(request.auth.uid)).data.approved == true
-          ||
-          get(riderPath(request.auth.uid)).data.isApproved == true
-          ||
-          get(riderPath(request.auth.uid)).data.approvalStatus == "approved"
-          ||
-          get(riderPath(request.auth.uid)).data.status == "approved"
-          ||
-          get(riderPath(request.auth.uid)).data.riderStatus == "approved"
+          riderData(request.auth.uid).adminApproved == true
+          || riderData(request.auth.uid).approved == true
+          || riderData(request.auth.uid).isApproved == true
+          || riderData(request.auth.uid).approvalStatus == "approved"
+          || riderData(request.auth.uid).status == "approved"
+          || riderData(request.auth.uid).riderStatus == "approved"
         );
-
     }
 
+    function isRideParticipant(resourceData) {
+      return signedIn()
+        && (
+          resourceData.customerId == request.auth.uid
+          || resourceData.userId == request.auth.uid
+          || resourceData.riderId == request.auth.uid
+          || resourceData.driverId == request.auth.uid
+        );
+    }
 
-    /* =====================================================
-       RIDER APPROVAL STATUS
-       -----------------------------------------------------
-       Used to prevent a rider from changing approval fields.
-    ===================================================== */
-
-    function approvalFieldsChanged() {
-
-      return request.resource.data.diff(resource.data)
-        .affectedKeys()
-        .hasAny([
-          "approved",
-          "isApproved",
-          "adminApproved",
-          "approvalStatus",
-          "riderStatus"
-        ]);
-
+    function isBookingParticipant(resourceData) {
+      return signedIn()
+        && (
+          resourceData.customerId == request.auth.uid
+          || resourceData.userId == request.auth.uid
+          || resourceData.riderId == request.auth.uid
+          || resourceData.driverId == request.auth.uid
+        );
     }
 
 
@@ -224,78 +125,56 @@ service cloud.firestore {
 
     match /users/{uid} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-        isOwner(uid)
-        ||
-        isAdmin();
+        isOwner(uid) || isAdmin();
 
 
-      /* ---------------------------------------------------
-         CREATE
-
-         A normal client may create only its own customer
-         or rider profile.
-
-         Admin values are explicitly rejected.
-      --------------------------------------------------- */
+      /*
+       * Customer/rider may create only their own account.
+       * Admin cannot be created from the client.
+       */
 
       allow create: if
         isOwner(uid)
-        &&
-        !(
+        && !(
           request.resource.data.role == "admin"
-          ||
-          request.resource.data.userRole == "admin"
-          ||
-          request.resource.data.accountType == "admin"
-          ||
-          request.resource.data.isAdmin == true
+          || request.resource.data.userRole == "admin"
+          || request.resource.data.accountType == "admin"
+          || request.resource.data.isAdmin == true
         )
-        &&
-        (
+        && (
           request.resource.data.role == "customer"
-          ||
-          request.resource.data.role == "rider"
-          ||
-          request.resource.data.role == "user"
-          ||
-          request.resource.data.userRole == "customer"
-          ||
-          request.resource.data.userRole == "rider"
-          ||
-          request.resource.data.accountType == "customer"
-          ||
-          request.resource.data.accountType == "rider"
+          || request.resource.data.role == "rider"
+          || request.resource.data.userRole == "customer"
+          || request.resource.data.userRole == "rider"
+          || request.resource.data.accountType == "customer"
+          || request.resource.data.accountType == "rider"
         );
 
 
-      /* ---------------------------------------------------
-         UPDATE
-
-         Users can edit only profile/preferences.
-
-         Role, account status, admin flags and other security
-         fields cannot be changed by the account owner.
-      --------------------------------------------------- */
+      /*
+       * Own profile updates are restricted to safe profile fields.
+       * Role, approval, wallet and security fields cannot be changed.
+       */
 
       allow update: if
-
         isAdmin()
 
         ||
 
         (
           isOwner(uid)
+
           &&
-          activeAccount()
+
+          request.resource.data.role == resource.data.role
+          && request.resource.data.userRole == resource.data.userRole
+          && request.resource.data.accountType == resource.data.accountType
+          && request.resource.data.isAdmin == resource.data.isAdmin
+
           &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
+
+          request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly([
               "name",
               "fullName",
@@ -307,23 +186,22 @@ service cloud.firestore {
               "phoneNumber",
               "email",
               "photoURL",
+              "profileImage",
               "city",
               "address",
-              "profileImage",
               "language",
               "notificationEnabled",
-              "updatedAt"
+              "notificationToken",
+              "notificationUpdatedAt",
+              "fcmToken",
+              "pushToken",
+              "updatedAt",
+              "lastSeenAt"
             ])
         );
 
 
-      /* ---------------------------------------------------
-         DELETE
-      --------------------------------------------------- */
-
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -333,86 +211,52 @@ service cloud.firestore {
 
     match /riders/{uid} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
         isOwner(uid)
-        ||
-        isAdmin();
+        || isAdmin()
+        || (
+          signedIn()
+          && isCustomer()
+        );
 
 
-      /* ---------------------------------------------------
-         CREATE
-
-         Rider can register only as an unapproved rider.
-      --------------------------------------------------- */
+      /*
+       * Rider creates own application.
+       * Approval fields cannot be set to approved by rider.
+       */
 
       allow create: if
-
         isOwner(uid)
-        &&
-        activeAccount()
-        &&
-        (
-          request.resource.data.role == "rider"
-          ||
-          request.resource.data.userRole == "rider"
-          ||
-          request.resource.data.accountType == "rider"
-          ||
-          request.resource.data.userType == "rider"
-          ||
-          request.resource.data.riderId == uid
-        )
-        &&
-        request.resource.data.riderId == uid
-        &&
-        request.resource.data.adminApproved != true
-        &&
-        request.resource.data.approved != true
-        &&
-        request.resource.data.isApproved != true
-        &&
-        request.resource.data.approvalStatus != "approved"
-        &&
-        request.resource.data.status != "approved"
-        &&
-        request.resource.data.riderStatus != "approved";
+        && isRider()
+        && request.resource.data.uid == uid
+        && request.resource.data.approved != true
+        && request.resource.data.isApproved != true
+        && request.resource.data.adminApproved != true
+        && request.resource.data.approvalStatus != "approved"
+        && request.resource.data.status != "approved";
 
 
-      /* ---------------------------------------------------
-         UPDATE
-
-         Rider may update profile and operational fields.
-
-         Approval/security/earnings fields are locked.
-
-         Identity fields remain tied to the authenticated
-         rider.
-      --------------------------------------------------- */
+      /*
+       * Rider may update operational/profile data.
+       * Approval/security fields remain admin-controlled.
+       */
 
       allow update: if
-
         isAdmin()
 
         ||
 
         (
           isOwner(uid)
+          && riderApproved()
+
           &&
-          activeAccount()
+
+          request.resource.data.uid == resource.data.uid
+
           &&
-          isRider()
-          &&
-          !approvalFieldsChanged()
-          &&
-          request.resource.data.riderId == resource.data.riderId
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
+
+          request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly([
               "name",
               "fullName",
@@ -452,13 +296,7 @@ service cloud.firestore {
         );
 
 
-      /* ---------------------------------------------------
-         DELETE
-      --------------------------------------------------- */
-
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -468,272 +306,118 @@ service cloud.firestore {
 
     match /rides/{rideId} {
 
-
-      /* ---------------------------------------------------
-         READ
-
-         Only:
-         - Admin
-         - Ride customer
-         - Assigned rider/driver
-      --------------------------------------------------- */
-
       allow read: if
-
         isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          (
-            resource.data.customerId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
-            ||
-            resource.data.driverId == request.auth.uid
-          )
-        );
+        || isRideParticipant(resource.data);
 
 
-      /* ---------------------------------------------------
-         CREATE
-
-         Customer creates a new pending/searching ride.
-
-         Rider assignment MUST be empty at creation.
-      --------------------------------------------------- */
+      /*
+       * Customer creates a new ride request.
+       */
 
       allow create: if
-
-        activeAccount()
-        &&
         isCustomer()
-        &&
-        request.resource.data.customerId == request.auth.uid
-        &&
-        (
+        && activeAccount()
+        && request.resource.data.customerId == request.auth.uid
+        && (
           request.resource.data.status == "REQUESTED"
-          ||
-          request.resource.data.status == "requested"
-          ||
-          request.resource.data.status == "SEARCHING"
-          ||
-          request.resource.data.status == "searching"
-          ||
-          request.resource.data.status == "pending"
-          ||
-          request.resource.data.status == "PENDING"
+          || request.resource.data.status == "requested"
+          || request.resource.data.status == "SEARCHING"
+          || request.resource.data.status == "searching"
+          || request.resource.data.status == "PENDING"
+          || request.resource.data.status == "pending"
         )
-        &&
-        (
+        && (
           request.resource.data.riderId == null
-          ||
-          request.resource.data.riderId == ""
+          || request.resource.data.riderId == ""
         )
-        &&
-        (
+        && (
           request.resource.data.driverId == null
-          ||
-          request.resource.data.driverId == ""
+          || request.resource.data.driverId == ""
         );
 
 
-      /* ---------------------------------------------------
-         UPDATE
-
-         CUSTOMER:
-         Can cancel only an unaccepted ride.
-
-         RIDER:
-         Can accept a pending ride OR update an already
-         assigned ride.
-
-         ADMIN:
-         Full administrative control.
-      --------------------------------------------------- */
+      /*
+       * Customer can cancel only their own unaccepted ride.
+       */
 
       allow update: if
 
-        /* ================================================
-           ADMIN
-        ================================================ */
-
         isAdmin()
 
         ||
 
-        /* ================================================
-           CUSTOMER CANCELLATION
-        ================================================ */
-
         (
-          activeAccount()
-          &&
           isCustomer()
-          &&
-          resource.data.customerId == request.auth.uid
-          &&
-          (
+          && resource.data.customerId == request.auth.uid
+          && (
             resource.data.riderId == null
-            ||
-            resource.data.riderId == ""
+            || resource.data.riderId == ""
           )
-          &&
-          request.resource.data.customerId ==
-            resource.data.customerId
-          &&
-          request.resource.data.riderId ==
-            resource.data.riderId
-          &&
-          request.resource.data.driverId ==
-            resource.data.driverId
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly([
-              "status",
-              "cancelledAt",
-              "canceledAt",
-              "cancellationReason",
-              "updatedAt"
-            ])
-          &&
-          (
+          && request.resource.data.customerId == resource.data.customerId
+          && request.resource.data.riderId == resource.data.riderId
+          && request.resource.data.driverId == resource.data.driverId
+          && (
             request.resource.data.status == "CANCELLED"
-            ||
-            request.resource.data.status == "cancelled"
-            ||
-            request.resource.data.status == "CANCELED"
-            ||
-            request.resource.data.status == "canceled"
+            || request.resource.data.status == "cancelled"
+            || request.resource.data.status == "CANCELED"
+            || request.resource.data.status == "canceled"
           )
         )
 
         ||
 
-        /* ================================================
-           RIDER ACCEPTANCE
-        ================================================ */
+        /*
+         * Approved rider accepts an unassigned request.
+         */
 
         (
           riderApproved()
-          &&
-          (
+          && (
             resource.data.status == "REQUESTED"
-            ||
-            resource.data.status == "requested"
-            ||
-            resource.data.status == "SEARCHING"
-            ||
-            resource.data.status == "searching"
-            ||
-            resource.data.status == "pending"
-            ||
-            resource.data.status == "PENDING"
+            || resource.data.status == "requested"
+            || resource.data.status == "SEARCHING"
+            || resource.data.status == "searching"
+            || resource.data.status == "PENDING"
+            || resource.data.status == "pending"
           )
-          &&
-          (
+          && (
             resource.data.riderId == null
-            ||
-            resource.data.riderId == ""
+            || resource.data.riderId == ""
           )
-          &&
-          request.resource.data.riderId ==
-            request.auth.uid
-          &&
-          request.resource.data.driverId ==
-            request.auth.uid
-          &&
-          request.resource.data.customerId ==
-            resource.data.customerId
-          &&
-          (
+          && (
+            resource.data.driverId == null
+            || resource.data.driverId == ""
+          )
+          && request.resource.data.customerId == resource.data.customerId
+          && request.resource.data.riderId == request.auth.uid
+          && request.resource.data.driverId == request.auth.uid
+          && (
             request.resource.data.status == "ACCEPTED"
-            ||
-            request.resource.data.status == "accepted"
+            || request.resource.data.status == "accepted"
           )
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly([
-              "riderId",
-              "driverId",
-              "status",
-              "acceptedAt",
-              "updatedAt",
-              "riderName",
-              "driverName",
-              "riderPhone",
-              "driverPhone"
-            ])
         )
 
         ||
 
-        /* ================================================
-           ASSIGNED RIDER RIDE OPERATIONS
-        ================================================ */
+        /*
+         * Assigned rider can update the ride.
+         * Rider/driver IDs cannot be transferred.
+         */
 
         (
           riderApproved()
-          &&
-          (
+          && (
             resource.data.riderId == request.auth.uid
-            ||
-            resource.data.driverId == request.auth.uid
+            || resource.data.driverId == request.auth.uid
           )
-          &&
-          request.resource.data.customerId ==
-            resource.data.customerId
-          &&
-          request.resource.data.riderId ==
-            resource.data.riderId
-          &&
-          request.resource.data.driverId ==
-            resource.data.driverId
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly([
-              "status",
-              "updatedAt",
-              "acceptedAt",
-              "arrivedAt",
-              "startedAt",
-              "completedAt",
-              "cancelledAt",
-              "canceledAt",
-              "riderLatitude",
-              "riderLongitude",
-              "riderLocation",
-              "latitude",
-              "longitude",
-              "location",
-              "currentLocation",
-              "lastLocation",
-              "eta",
-              "otpVerified",
-              "pickupOtpVerified",
-              "rideOtpVerified",
-              "navigationStatus",
-              "arrivalStatus",
-              "tripStarted",
-              "tripCompleted",
-              "riderOnline",
-              "lastSeenAt"
-            ])
+          && request.resource.data.customerId == resource.data.customerId
+          && request.resource.data.riderId == resource.data.riderId
+          && request.resource.data.driverId == resource.data.driverId
         );
 
 
-      /* ---------------------------------------------------
-         DELETE
-      --------------------------------------------------- */
-
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -743,218 +427,100 @@ service cloud.firestore {
 
     match /bookings/{bookingId} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-
         isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          (
-            resource.data.customerId == request.auth.uid
-            ||
-            resource.data.userId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
-            ||
-            resource.data.driverId == request.auth.uid
-          )
-        );
+        || isBookingParticipant(resource.data);
 
 
-      /* ---------------------------------------------------
-         CREATE
-
-         Customer creates own booking.
-
-         Admin may create administrative bookings.
-      --------------------------------------------------- */
+      /*
+       * Customer creates own booking.
+       */
 
       allow create: if
-
-        isAdmin()
-
-        ||
-
         (
-          activeAccount()
-          &&
           isCustomer()
-          &&
-          (
-            request.resource.data.customerId ==
-              request.auth.uid
-            ||
-            request.resource.data.userId ==
-              request.auth.uid
+          && activeAccount()
+          && (
+            request.resource.data.customerId == request.auth.uid
+            || request.resource.data.userId == request.auth.uid
           )
-        );
-
-
-      /* ---------------------------------------------------
-         UPDATE
-
-         Prevent customer/rider from changing ownership,
-         fare authority, payment totals or assigned identity.
-
-         Normal participants can only modify ride lifecycle,
-         location and communication state.
-      --------------------------------------------------- */
-
-      allow update: if
-
-        isAdmin()
-
+        )
         ||
-
-        (
-          activeAccount()
-          &&
-          (
-            resource.data.customerId == request.auth.uid
-            ||
-            resource.data.userId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
-            ||
-            resource.data.driverId == request.auth.uid
-          )
-          &&
-          request.resource.data.customerId ==
-            resource.data.customerId
-          &&
-          request.resource.data.userId ==
-            resource.data.userId
-          &&
-          request.resource.data.riderId ==
-            resource.data.riderId
-          &&
-          request.resource.data.driverId ==
-            resource.data.driverId
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly([
-              "status",
-              "updatedAt",
-              "acceptedAt",
-              "arrivedAt",
-              "startedAt",
-              "completedAt",
-              "cancelledAt",
-              "canceledAt",
-              "riderLatitude",
-              "riderLongitude",
-              "riderLocation",
-              "latitude",
-              "longitude",
-              "location",
-              "currentLocation",
-              "lastLocation",
-              "eta",
-              "otpVerified",
-              "pickupOtpVerified",
-              "rideOtpVerified",
-              "tripStarted",
-              "tripCompleted",
-              "navigationStatus",
-              "arrivalStatus",
-              "riderOnline",
-              "lastSeenAt",
-              "chatEnabled",
-              "customerMessage",
-              "riderMessage"
-            ])
-        );
-
-
-      /* ---------------------------------------------------
-         DELETE
-      --------------------------------------------------- */
-
-      allow delete: if
         isAdmin();
 
+
+      /*
+       * Only associated users or admin may update.
+       */
+
+      allow update: if
+        isAdmin()
+        ||
+        (
+          signedIn()
+          && isBookingParticipant(resource.data)
+          && (
+            request.resource.data.customerId == resource.data.customerId
+            || request.resource.data.customerId == null
+            || request.resource.data.customerId == ""
+          )
+          && (
+            request.resource.data.userId == resource.data.userId
+            || request.resource.data.userId == null
+            || request.resource.data.userId == ""
+          )
+          && (
+            request.resource.data.riderId == resource.data.riderId
+            || request.resource.data.riderId == request.auth.uid
+            || request.resource.data.riderId == null
+            || request.resource.data.riderId == ""
+          )
+          && (
+            request.resource.data.driverId == resource.data.driverId
+            || request.resource.data.driverId == request.auth.uid
+            || request.resource.data.driverId == null
+            || request.resource.data.driverId == ""
+          )
+        );
+
+
+      allow delete: if isAdmin();
     }
 
 
     /* =====================================================
        WALLET
-       ===================================================== */
+    ===================================================== */
 
     match /wallet/{uid} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-
-        isOwner(uid)
-        ||
-        isAdmin();
+        isOwner(uid) || isAdmin();
 
 
-      /* ---------------------------------------------------
-         FINANCIAL WRITE
+      /*
+       * Wallet balance is trusted financial data.
+       * Client cannot create/update/delete it.
+       */
 
-         Client applications cannot directly change:
-         - balance
-         - earnings
-         - commission
-         - withdrawals
-         - credits
-         - debits
+      allow create: if isAdmin();
 
-         Trusted backend/admin must perform these changes.
-      --------------------------------------------------- */
+      allow update: if isAdmin();
 
-      allow create: if
-        isAdmin();
+      allow delete: if isAdmin();
 
-
-      allow update: if
-        isAdmin();
-
-
-      allow delete: if
-        isAdmin();
-
-
-      /* ---------------------------------------------------
-         WALLET TRANSACTIONS
-      --------------------------------------------------- */
 
       match /transactions/{transactionId} {
 
         allow read: if
+          isOwner(uid) || isAdmin();
 
-          isOwner(uid)
-          ||
-          isAdmin();
+        allow create: if isAdmin();
 
+        allow update: if isAdmin();
 
-        allow create: if
-          isAdmin();
-
-
-        allow update: if
-          isAdmin();
-
-
-        allow delete: if
-          isAdmin();
-
+        allow delete: if isAdmin();
       }
-
     }
 
 
@@ -964,65 +530,40 @@ service cloud.firestore {
 
     match /notifications/{notificationId} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-
         isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          (
+        || (
+          signedIn()
+          && (
             resource.data.userId == request.auth.uid
-            ||
-            resource.data.uid == request.auth.uid
-            ||
-            resource.data.customerId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
+            || resource.data.uid == request.auth.uid
+            || resource.data.customerId == request.auth.uid
+            || resource.data.riderId == request.auth.uid
           )
         );
 
 
-      /* ---------------------------------------------------
-         CREATE
+      /*
+       * Notifications are created by trusted/admin code.
+       */
 
-         Only trusted/admin code should create notifications.
-      --------------------------------------------------- */
-
-      allow create: if
-        isAdmin();
+      allow create: if isAdmin();
 
 
-      /* ---------------------------------------------------
-         UPDATE
-
-         User can only change read/seen state.
-      --------------------------------------------------- */
+      /*
+       * User may only mark notification state.
+       */
 
       allow update: if
-
         isAdmin()
-
         ||
-
         (
-          activeAccount()
-          &&
-          (
+          signedIn()
+          && (
             resource.data.userId == request.auth.uid
-            ||
-            resource.data.uid == request.auth.uid
+            || resource.data.uid == request.auth.uid
           )
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
+          && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly([
               "read",
               "isRead",
@@ -1033,9 +574,7 @@ service cloud.firestore {
         );
 
 
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -1045,87 +584,41 @@ service cloud.firestore {
 
     match /supports/{supportId} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-
         isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          (
+        || (
+          signedIn()
+          && (
             resource.data.userId == request.auth.uid
-            ||
-            resource.data.uid == request.auth.uid
-            ||
-            resource.data.customerId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
+            || resource.data.uid == request.auth.uid
+            || resource.data.customerId == request.auth.uid
+            || resource.data.riderId == request.auth.uid
           )
         );
 
-
-      /* ---------------------------------------------------
-         CREATE
-
-         User may create only a support request belonging
-         to the authenticated account.
-      --------------------------------------------------- */
 
       allow create: if
-
-        activeAccount()
-        &&
-        (
-          request.resource.data.userId ==
-            request.auth.uid
-          ||
-          request.resource.data.uid ==
-            request.auth.uid
-          ||
-          request.resource.data.customerId ==
-            request.auth.uid
-          ||
-          request.resource.data.riderId ==
-            request.auth.uid
+        signedIn()
+        && (
+          request.resource.data.userId == request.auth.uid
+          || request.resource.data.uid == request.auth.uid
+          || request.resource.data.customerId == request.auth.uid
+          || request.resource.data.riderId == request.auth.uid
         );
 
 
-      /* ---------------------------------------------------
-         UPDATE
-
-         User can update message-related fields only.
-
-         Admin can manage support state.
-      --------------------------------------------------- */
-
       allow update: if
-
         isAdmin()
-
         ||
-
         (
-          activeAccount()
-          &&
-          (
+          signedIn()
+          && (
             resource.data.userId == request.auth.uid
-            ||
-            resource.data.uid == request.auth.uid
-            ||
-            resource.data.customerId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
+            || resource.data.uid == request.auth.uid
+            || resource.data.customerId == request.auth.uid
+            || resource.data.riderId == request.auth.uid
           )
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
+          && request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly([
               "message",
               "messages",
@@ -1135,9 +628,7 @@ service cloud.firestore {
         );
 
 
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -1147,209 +638,92 @@ service cloud.firestore {
 
     match /chats/{chatId} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-
         isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          (
+        || (
+          signedIn()
+          && (
             resource.data.customerId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
-            ||
-            resource.data.driverId == request.auth.uid
+            || resource.data.riderId == request.auth.uid
+            || resource.data.driverId == request.auth.uid
           )
         );
 
-
-      /* ---------------------------------------------------
-         CREATE
-
-         Chat must contain the authenticated participant.
-      --------------------------------------------------- */
 
       allow create: if
-
-        activeAccount()
-        &&
-        (
-          request.resource.data.customerId ==
-            request.auth.uid
-          ||
-          request.resource.data.riderId ==
-            request.auth.uid
-          ||
-          request.resource.data.driverId ==
-            request.auth.uid
+        signedIn()
+        && (
+          request.resource.data.customerId == request.auth.uid
+          || request.resource.data.riderId == request.auth.uid
+          || request.resource.data.driverId == request.auth.uid
+          || isAdmin()
         );
 
-
-      /* ---------------------------------------------------
-         UPDATE
-
-         Participants can update only safe chat metadata.
-
-         Participant identities cannot be changed.
-      --------------------------------------------------- */
 
       allow update: if
-
         isAdmin()
-
         ||
-
         (
-          activeAccount()
-          &&
-          (
+          signedIn()
+          && (
             resource.data.customerId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
-            ||
-            resource.data.driverId == request.auth.uid
+            || resource.data.riderId == request.auth.uid
+            || resource.data.driverId == request.auth.uid
           )
-          &&
-          request.resource.data.customerId ==
-            resource.data.customerId
-          &&
-          request.resource.data.riderId ==
-            resource.data.riderId
-          &&
-          request.resource.data.driverId ==
-            resource.data.driverId
-          &&
-          request.resource.data.diff(resource.data)
-            .affectedKeys()
-            .hasOnly([
-              "lastMessage",
-              "lastMessageAt",
-              "lastSenderId",
-              "updatedAt",
-              "customerTyping",
-              "riderTyping",
-              "driverTyping"
-            ])
         );
 
 
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
     /* =====================================================
        CHAT MESSAGES
-       /chats/{chatId}/messages/{messageId}
     ===================================================== */
 
     match /chats/{chatId}/messages/{messageId} {
 
+      function chatParticipant() {
+        return signedIn()
+          && exists(
+            /databases/$(database)/documents/chats/$(chatId)
+          )
+          && (
+            get(
+              /databases/$(database)/documents/chats/$(chatId)
+            ).data.customerId == request.auth.uid
+            ||
+            get(
+              /databases/$(database)/documents/chats/$(chatId)
+            ).data.riderId == request.auth.uid
+            ||
+            get(
+              /databases/$(database)/documents/chats/$(chatId)
+            ).data.driverId == request.auth.uid
+          );
+      }
 
-      /* ---------------------------------------------------
-         CHAT PARTICIPANT HELPER IS REPEATED INLINE BECAUSE
-         FIRESTORE RULES NESTED PATHS REQUIRE THE CHAT
-         DOCUMENT TO BE CHECKED.
-      --------------------------------------------------- */
 
       allow read: if
+        isAdmin() || chatParticipant();
 
-        isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          exists(
-            /databases/$(database)/documents/chats/$(chatId)
-          )
-          &&
-          (
-            get(
-              /databases/$(database)/documents/chats/$(chatId)
-            ).data.customerId == request.auth.uid
-
-            ||
-
-            get(
-              /databases/$(database)/documents/chats/$(chatId)
-            ).data.riderId == request.auth.uid
-
-            ||
-
-            get(
-              /databases/$(database)/documents/chats/$(chatId)
-            ).data.driverId == request.auth.uid
-          )
-        );
-
-
-      /* ---------------------------------------------------
-         CREATE
-
-         Sender MUST be authenticated and must be a member
-         of the parent chat.
-      --------------------------------------------------- */
 
       allow create: if
-
         isAdmin()
-
         ||
-
         (
-          activeAccount()
-          &&
-          exists(
-            /databases/$(database)/documents/chats/$(chatId)
-          )
-          &&
-          (
-            get(
-              /databases/$(database)/documents/chats/$(chatId)
-            ).data.customerId == request.auth.uid
-
-            ||
-
-            get(
-              /databases/$(database)/documents/chats/$(chatId)
-            ).data.riderId == request.auth.uid
-
-            ||
-
-            get(
-              /databases/$(database)/documents/chats/$(chatId)
-            ).data.driverId == request.auth.uid
-          )
-          &&
-          request.resource.data.senderId ==
-            request.auth.uid
+          chatParticipant()
+          && request.resource.data.senderId == request.auth.uid
         );
 
 
-      /* ---------------------------------------------------
-         MESSAGE EDITING IS ADMIN-ONLY.
+      /*
+       * Messages are immutable from clients.
+       */
 
-         Normal users cannot rewrite chat history.
-      --------------------------------------------------- */
+      allow update: if isAdmin();
 
-      allow update: if
-        isAdmin();
-
-
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -1359,66 +733,33 @@ service cloud.firestore {
 
     match /referrals/{referralId} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-
         isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          (
+        || (
+          signedIn()
+          && (
             resource.data.userId == request.auth.uid
-            ||
-            resource.data.referrerId == request.auth.uid
-            ||
-            resource.data.referredUserId == request.auth.uid
+            || resource.data.referrerId == request.auth.uid
+            || resource.data.referredUserId == request.auth.uid
           )
         );
 
 
-      /* ---------------------------------------------------
-         CREATE
-
-         A user may create only a referral associated with
-         themselves.
-
-         Reward/financial fields are not accepted from the
-         client at update time.
-      --------------------------------------------------- */
-
       allow create: if
-
-        activeAccount()
-        &&
-        (
-          request.resource.data.userId ==
-            request.auth.uid
-          ||
-          request.resource.data.referrerId ==
-            request.auth.uid
+        signedIn()
+        && (
+          request.resource.data.userId == request.auth.uid
+          || request.resource.data.referrerId == request.auth.uid
         );
 
 
-      /* ---------------------------------------------------
-         UPDATE
+      /*
+       * Referral rewards are trusted financial data.
+       */
 
-         Referral rewards/status are trusted data.
-      --------------------------------------------------- */
+      allow update: if isAdmin();
 
-      allow update: if
-        isAdmin();
-
-
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -1428,60 +769,41 @@ service cloud.firestore {
 
     match /ratings/{ratingId} {
 
-
-      /* ---------------------------------------------------
-         READ
-      --------------------------------------------------- */
-
       allow read: if
-
         isAdmin()
-
-        ||
-
-        (
-          activeAccount()
-          &&
-          (
+        || (
+          signedIn()
+          && (
             resource.data.customerId == request.auth.uid
-            ||
-            resource.data.riderId == request.auth.uid
+            || resource.data.riderId == request.auth.uid
           )
         );
 
 
-      /* ---------------------------------------------------
-         CREATE
-
-         Customer can submit a rating.
-
-         Rating identity cannot be forged.
-      --------------------------------------------------- */
+      /*
+       * Customer can submit a rating.
+       */
 
       allow create: if
-
-        activeAccount()
-        &&
         isCustomer()
-        &&
-        request.resource.data.customerId ==
-          request.auth.uid;
+        && request.resource.data.customerId == request.auth.uid;
 
 
-      /* ---------------------------------------------------
-         UPDATE
-
-         Ratings are intentionally immutable for normal
-         users. Admin can moderate/correct them.
-      --------------------------------------------------- */
+      /*
+       * Customer may edit own rating.
+       */
 
       allow update: if
-        isAdmin();
+        isAdmin()
+        ||
+        (
+          isCustomer()
+          && resource.data.customerId == request.auth.uid
+          && request.resource.data.customerId == resource.data.customerId
+        );
 
 
-      allow delete: if
-        isAdmin();
-
+      allow delete: if isAdmin();
     }
 
 
@@ -1491,70 +813,41 @@ service cloud.firestore {
 
     match /fareSettings/{documentId} {
 
+      allow read: if signedIn();
 
-      /* ---------------------------------------------------
-         Read pricing configuration.
-
-         Authenticated application users may read.
-      --------------------------------------------------- */
-
-      allow read: if
-        activeAccount();
-
-
-      /* ---------------------------------------------------
-         Only admin can change pricing.
-      --------------------------------------------------- */
-
-      allow write: if
-        isAdmin();
-
+      allow write: if isAdmin();
     }
 
 
     /* =====================================================
-       GENERAL APP SETTINGS
+       APP SETTINGS
     ===================================================== */
 
     match /settings/{documentId} {
 
+      allow read: if signedIn();
 
-      allow read: if
-        activeAccount();
-
-
-      allow write: if
-        isAdmin();
-
+      allow write: if isAdmin();
     }
 
 
     /* =====================================================
-       ADMIN COLLECTION
+       ADMIN
     ===================================================== */
 
     match /admin/{documentId} {
 
-
-      allow read, write: if
-        isAdmin();
-
+      allow read, write: if isAdmin();
     }
 
 
     /* =====================================================
        DEFAULT DENY
-       -----------------------------------------------------
-       Anything not explicitly allowed above is denied.
     ===================================================== */
 
     match /{document=**} {
 
-      allow read, write: if
-        false;
-
+      allow read, write: if false;
     }
-
   }
-
 }
