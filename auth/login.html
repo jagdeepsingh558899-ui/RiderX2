@@ -800,6 +800,8 @@
 <div
     id="loadingOverlay"
     class="loading-overlay"
+    role="dialog"
+    aria-modal="true"
     aria-hidden="true"
 >
     <div
@@ -827,25 +829,6 @@
 <script type="module">
 
 "use strict";
-
-/*
-============================================================
- RIDERX 2.0
- AUTH / LOGIN PAGE
- FINAL LOGIN CONTROLLER
-============================================================
-
- IMPORTANT:
- - Firebase authentication is centralized in ../js/auth.js
- - This page does NOT initialize Firebase directly.
- - localStorage is UI/session cache only.
- - Firebase/Firestore role is authoritative.
- - Existing auth-state events NEVER cause automatic login
-   redirects from this page.
- - Dashboard navigation happens only after explicit login.
-============================================================
-*/
-
 
 /* ============================================================
    STORAGE
@@ -1049,8 +1032,12 @@ function getSelectedRole() {
         getUrlRole();
 
     if (
-        urlRole === "customer" ||
-        urlRole === "rider"
+        [
+            "customer",
+            "rider",
+            "admin",
+            "superadmin"
+        ].includes(urlRole)
     ) {
 
         return urlRole;
@@ -1066,8 +1053,12 @@ function getSelectedRole() {
             );
 
         if (
-            storedRole === "customer" ||
-            storedRole === "rider"
+            [
+                "customer",
+                "rider",
+                "admin",
+                "superadmin"
+            ].includes(storedRole)
         ) {
 
             return storedRole;
@@ -1094,10 +1085,7 @@ function saveSelectedRole(role) {
     const normalized =
         normalizeRole(role);
 
-    if (
-        normalized !== "customer" &&
-        normalized !== "rider"
-    ) {
+    if (!normalized) {
 
         return;
     }
@@ -1210,6 +1198,10 @@ function hideMessage() {
 
     message.className =
         "message";
+
+    emailInput.removeAttribute("aria-invalid");
+
+    passwordInput.removeAttribute("aria-invalid");
 }
 
 
@@ -1283,7 +1275,9 @@ function friendlyAuthError(error) {
     }
 
     const raw =
-        clean(error?.message);
+        typeof error === "string"
+            ? clean(error)
+            : clean(error?.message);
 
     if (!raw) {
 
@@ -1475,6 +1469,30 @@ function renderSelectedRole() {
         return;
     }
 
+    if (role === "admin") {
+
+        selectedRoleText.textContent =
+            "Admin";
+
+        saveSelectedRole(
+            "admin"
+        );
+
+        return;
+    }
+
+    if (role === "superadmin") {
+
+        selectedRoleText.textContent =
+            "Super Admin";
+
+        saveSelectedRole(
+            "superadmin"
+        );
+
+        return;
+    }
+
     selectedRoleText.textContent =
         "RiderX account";
 }
@@ -1505,18 +1523,17 @@ async function loadAuthEngine() {
     if (!authLoadPromise) {
 
         authLoadPromise =
-            import("../js/auth.js");
+            import("../js/auth.js")
+                .catch(function (error) {
+
+                    authLoadPromise = null;
+
+                    throw error;
+                });
     }
 
     const module =
         await authLoadPromise;
-
-    /*
-     * auth.js normally exposes window.RiderX.auth.
-     * The fallback also supports an exported auth object,
-     * making this login page compatible with module-based
-     * versions of the authentication engine.
-     */
 
     if (
         window.RiderX &&
@@ -1636,12 +1653,6 @@ async function getVerifiedRole(
     const firebaseUser =
         extractFirebaseUser(result);
 
-
-    /*
-     * Preferred source:
-     * central auth.js role resolver.
-     */
-
     if (
         auth &&
         typeof auth.getRole === "function"
@@ -1669,12 +1680,6 @@ async function getVerifiedRole(
             );
         }
     }
-
-
-    /*
-     * Secondary source:
-     * current authenticated profile.
-     */
 
     if (
         auth &&
@@ -1705,11 +1710,6 @@ async function getVerifiedRole(
             );
         }
     }
-
-
-    /*
-     * Final profile API fallback.
-     */
 
     if (
         auth &&
@@ -1888,6 +1888,8 @@ async function handleLogin(event) {
             "Please enter your email address."
         );
 
+        emailInput.setAttribute("aria-invalid", "true");
+
         emailInput.focus();
 
         return;
@@ -1898,6 +1900,8 @@ async function handleLogin(event) {
         showMessage(
             "Please enter a valid email address."
         );
+
+        emailInput.setAttribute("aria-invalid", "true");
 
         emailInput.focus();
 
@@ -1910,6 +1914,8 @@ async function handleLogin(event) {
             "Please enter your password."
         );
 
+        passwordInput.setAttribute("aria-invalid", "true");
+
         passwordInput.focus();
 
         return;
@@ -1920,6 +1926,8 @@ async function handleLogin(event) {
         showMessage(
             "Password must contain at least 6 characters."
         );
+
+        passwordInput.setAttribute("aria-invalid", "true");
 
         passwordInput.focus();
 
@@ -1970,15 +1978,6 @@ async function handleLogin(event) {
         }
 
 
-        /*
-         * IMPORTANT:
-         *
-         * Never trust localStorage selectedRole as the
-         * authenticated user's actual role.
-         *
-         * Firebase/Firestore role is authoritative.
-         */
-
         const verifiedRole =
             await getVerifiedRole(
                 auth,
@@ -2000,13 +1999,6 @@ async function handleLogin(event) {
         }
 
 
-        /*
-         * Customer/Rider role mismatch.
-         *
-         * Admin accounts are allowed to authenticate through
-         * the same central login engine and are routed to admin.
-         */
-
         if (
             (
                 selectedRole === "customer" ||
@@ -2025,10 +2017,6 @@ async function handleLogin(event) {
 
             clearLocalSession();
 
-            /*
-             * Keep selectedRole so the user can change it.
-             */
-
             throw new Error(
                 "This email belongs to a " +
                 verifiedRole +
@@ -2038,10 +2026,6 @@ async function handleLogin(event) {
             );
         }
 
-
-        /*
-         * Verified authentication + verified role.
-         */
 
         saveVerifiedSession(
             result,
@@ -2108,6 +2092,8 @@ async function handleForgotPassword() {
             "Enter your email address first."
         );
 
+        emailInput.setAttribute("aria-invalid", "true");
+
         emailInput.focus();
 
         return;
@@ -2118,6 +2104,8 @@ async function handleForgotPassword() {
         showMessage(
             "Please enter a valid email address."
         );
+
+        emailInput.setAttribute("aria-invalid", "true");
 
         emailInput.focus();
 
@@ -2258,31 +2246,6 @@ function handleRegister() {
    AUTH EVENTS
 ============================================================ */
 
-/*
- * IMPORTANT FIX
- *
- * We intentionally DO NOT redirect when auth.js fires a
- * "signed-in" event.
- *
- * Why?
- *
- * Firebase can restore an already-authenticated session when
- * this page opens. Automatically redirecting here can cause:
- *
- *    login.html
- *        ↓
- *    Firebase restores session
- *        ↓
- *    auth event
- *        ↓
- *    dashboard
- *
- * without the user actually pressing Login.
- *
- * The explicit handleLogin() flow is the only place that
- * performs dashboard navigation.
- */
-
 function handleAuthSignedIn(event) {
 
     console.debug(
@@ -2402,42 +2365,12 @@ window.addEventListener(
 
 function init() {
 
-    /*
-     * Do not initialize Firebase here.
-     *
-     * ../js/auth.js is the single authentication engine.
-     *
-     * Do not read riderx_user and redirect from this page.
-     *
-     * localStorage is only a cache/UI helper.
-     */
-
     renderSelectedRole();
 
     hideMessage();
 
     setLoading(false);
 
-
-    window.setTimeout(
-        function () {
-
-            if (
-                !emailInput.disabled &&
-                document.visibilityState !== "hidden"
-            ) {
-
-                emailInput.focus();
-            }
-
-        },
-        80
-    );
-
-
-    /*
-     * Public compatibility API.
-     */
 
     window.RiderXLogin =
         Object.freeze({
