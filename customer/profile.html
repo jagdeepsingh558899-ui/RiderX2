@@ -1,20 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX - Profile</title>
-
-<meta name="theme-color" content="#FFD400">
-
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
-
-<style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>RiderX - Profile</title><meta name="theme-color" content="#FFD400"><link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/responsive.css"><style>
 
 :root{
     --yellow:#FFD400;
@@ -35,6 +22,7 @@
 
 html,
 body{
+    width:100%;
     min-height:100%;
     background:#080808;
 }
@@ -44,12 +32,22 @@ body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
+button,
+input{
+    font:inherit;
+}
+
+button{
+    -webkit-tap-highlight-color:transparent;
+}
+
 .app{
     width:100%;
     max-width:650px;
     min-height:100vh;
     margin:auto;
     background:var(--bg);
+    padding-bottom:30px;
 }
 
 
@@ -64,10 +62,12 @@ body{
     display:flex;
     align-items:center;
     gap:10px;
-    padding:12px;
+    min-height:64px;
+    padding:10px 12px;
     border-bottom:1px solid #252525;
     background:rgba(10,10,10,.97);
     backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
 }
 
 .back-btn{
@@ -82,8 +82,13 @@ body{
     cursor:pointer;
 }
 
+.back-btn:active{
+    transform:scale(.95);
+}
+
 .title-box{
     flex:1;
+    min-width:0;
 }
 
 .title{
@@ -107,6 +112,10 @@ body{
     font-size:6px;
     font-weight:900;
     cursor:pointer;
+}
+
+.edit-header-btn:active{
+    transform:scale(.97);
 }
 
 
@@ -151,6 +160,7 @@ body{
 
 .avatar-wrap{
     position:relative;
+    flex:none;
 }
 
 .avatar{
@@ -319,11 +329,17 @@ body{
 
 .input:focus{
     border-color:#8c7500;
+    box-shadow:0 0 0 2px rgba(255,212,0,.06);
 }
 
 .input:disabled{
     color:#777;
     background:#181818;
+    cursor:not-allowed;
+}
+
+.input::placeholder{
+    color:#555;
 }
 
 
@@ -344,8 +360,13 @@ body{
     cursor:pointer;
 }
 
+.save-btn:active{
+    transform:scale(.99);
+}
+
 .save-btn:disabled{
     opacity:.5;
+    cursor:not-allowed;
 }
 
 
@@ -369,6 +390,7 @@ body{
     border-radius:14px;
     background:var(--card);
     cursor:pointer;
+    transition:.15s ease;
 }
 
 .menu-item:active{
@@ -378,6 +400,7 @@ body{
 .menu-icon{
     width:35px;
     height:35px;
+    min-width:35px;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -407,11 +430,6 @@ body{
     font-size:16px;
 }
 
-
-/* =========================
-   LOGOUT
-========================= */
-
 .logout{
     color:#ff6868;
 }
@@ -427,6 +445,16 @@ body{
 
 #photoInput{
     display:none;
+}
+
+
+/* =========================
+   LOADING
+========================= */
+
+.profile-loading{
+    opacity:.65;
+    pointer-events:none;
 }
 
 
@@ -459,6 +487,14 @@ body{
     transform:translate(-50%,0);
 }
 
+.toast.success{
+    border-color:rgba(34,197,94,.45);
+}
+
+.toast.error{
+    border-color:rgba(239,68,68,.45);
+}
+
 
 /* =========================
    RESPONSIVE
@@ -482,511 +518,583 @@ body{
 
 }
 
-</style>
+</style></head><body><div class="app" id="app"><!-- HEADER -->
 
-</head>
+<header class="header">
 
-<body>
+    <button
+        class="back-btn"
+        onclick="goBack()"
+        aria-label="Back"
+        type="button"
+    >
+        ‹
+    </button>
 
-<div class="app">
+    <div class="title-box">
+
+        <div class="title">
+            My Profile
+        </div>
+
+        <div class="subtitle">
+            Manage your RiderX account
+        </div>
+
+    </div>
+
+    <button
+        class="edit-header-btn"
+        id="headerEditBtn"
+        onclick="toggleEdit()"
+        type="button"
+    >
+        EDIT
+    </button>
+
+</header>
 
 
-    <!-- HEADER -->
+<main class="content">
 
-    <header class="header">
 
-        <button
-            class="back-btn"
-            onclick="goBack()"
-            aria-label="Back"
-        >
-            ‹
-        </button>
+    <!-- PROFILE CARD -->
 
-        <div class="title-box">
+    <section class="profile-card">
 
-            <div class="title">
-                My Profile
+        <div class="profile-top">
+
+            <div class="avatar-wrap">
+
+                <div
+                    class="avatar"
+                    id="avatar"
+                >
+
+                    <span id="avatarText">
+                        U
+                    </span>
+
+                    <img
+                        id="avatarImage"
+                        alt="Profile photo"
+                    >
+
+                </div>
+
+                <button
+                    class="camera-btn"
+                    onclick="choosePhoto()"
+                    aria-label="Change profile photo"
+                    type="button"
+                >
+                    📷
+                </button>
+
             </div>
 
-            <div class="subtitle">
-                Manage your RiderX account
+
+            <div class="profile-info">
+
+                <div
+                    class="profile-name"
+                    id="displayName"
+                >
+                    RiderX User
+                </div>
+
+                <div
+                    class="profile-phone"
+                    id="displayPhone"
+                >
+                    Phone not added
+                </div>
+
+                <div
+                    class="profile-email"
+                    id="displayEmail"
+                >
+                    Email not added
+                </div>
+
+                <div class="verified">
+                    ✓ Account verified
+                </div>
+
             </div>
 
         </div>
 
-        <button
-            class="edit-header-btn"
-            id="headerEditBtn"
-            onclick="toggleEdit()"
-        >
-            EDIT
-        </button>
 
-    </header>
+        <!-- STATS -->
 
+        <div class="stats">
 
-    <main class="content">
+            <div class="stat">
 
-
-        <!-- PROFILE CARD -->
-
-        <section class="profile-card">
-
-            <div class="profile-top">
-
-                <div class="avatar-wrap">
-
-                    <div
-                        class="avatar"
-                        id="avatar"
-                    >
-
-                        <span id="avatarText">
-                            U
-                        </span>
-
-                        <img
-                            id="avatarImage"
-                            alt="Profile"
-                        >
-
-                    </div>
-
-                    <button
-                        class="camera-btn"
-                        onclick="choosePhoto()"
-                        aria-label="Change profile photo"
-                    >
-                        📷
-                    </button>
-
+                <div
+                    class="stat-value"
+                    id="totalRides"
+                >
+                    0
                 </div>
 
-
-                <div class="profile-info">
-
-                    <div
-                        class="profile-name"
-                        id="displayName"
-                    >
-                        RiderX User
-                    </div>
-
-                    <div
-                        class="profile-phone"
-                        id="displayPhone"
-                    >
-                        Phone not added
-                    </div>
-
-                    <div
-                        class="profile-email"
-                        id="displayEmail"
-                    >
-                        Email not added
-                    </div>
-
-                    <div class="verified">
-                        ✓ Account verified
-                    </div>
-
+                <div class="stat-label">
+                    Rides
                 </div>
 
             </div>
 
+            <div class="stat">
 
-            <!-- STATS -->
-
-            <div class="stats">
-
-                <div class="stat">
-
-                    <div
-                        class="stat-value"
-                        id="totalRides"
-                    >
-                        0
-                    </div>
-
-                    <div class="stat-label">
-                        Rides
-                    </div>
-
+                <div
+                    class="stat-value"
+                    id="totalSpent"
+                >
+                    ₹0
                 </div>
 
-                <div class="stat">
-
-                    <div
-                        class="stat-value"
-                        id="totalSpent"
-                    >
-                        ₹0
-                    </div>
-
-                    <div class="stat-label">
-                        Spent
-                    </div>
-
-                </div>
-
-                <div class="stat">
-
-                    <div
-                        class="stat-value"
-                        id="memberSince"
-                    >
-                        2026
-                    </div>
-
-                    <div class="stat-label">
-                        Member since
-                    </div>
-
+                <div class="stat-label">
+                    Spent
                 </div>
 
             </div>
 
-        </section>
+            <div class="stat">
 
+                <div
+                    class="stat-value"
+                    id="memberSince"
+                >
+                    —
+                </div>
 
-        <!-- PERSONAL INFORMATION -->
+                <div class="stat-label">
+                    Member since
+                </div>
 
-        <div class="section-title">
-            Personal information
+            </div>
+
         </div>
 
-        <section class="form-card">
-
-            <div class="form-row">
-
-                <div class="input-group">
-
-                    <label class="label">
-                        First name
-                    </label>
-
-                    <input
-                        class="input"
-                        id="firstName"
-                        type="text"
-                        placeholder="First name"
-                        disabled
-                    >
-
-                </div>
+    </section>
 
 
-                <div class="input-group">
+    <!-- PERSONAL INFORMATION -->
 
-                    <label class="label">
-                        Last name
-                    </label>
+    <div class="section-title">
+        Personal information
+    </div>
 
-                    <input
-                        class="input"
-                        id="lastName"
-                        type="text"
-                        placeholder="Last name"
-                        disabled
-                    >
+    <section class="form-card">
 
-                </div>
-
-            </div>
-
+        <div class="form-row">
 
             <div class="input-group">
 
-                <label class="label">
-                    Phone number
-                </label>
-
-                <input
-                    class="input"
-                    id="phone"
-                    type="tel"
-                    inputmode="tel"
-                    placeholder="+91 XXXXX XXXXX"
-                    disabled
+                <label
+                    class="label"
+                    for="firstName"
                 >
-
-            </div>
-
-
-            <div class="input-group">
-
-                <label class="label">
-                    Email address
+                    First name
                 </label>
 
                 <input
                     class="input"
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
-                    disabled
-                >
-
-            </div>
-
-
-            <div class="input-group">
-
-                <label class="label">
-                    City
-                </label>
-
-                <input
-                    class="input"
-                    id="city"
+                    id="firstName"
                     type="text"
-                    value="Chandigarh"
+                    placeholder="First name"
+                    autocomplete="given-name"
+                    maxlength="50"
                     disabled
                 >
 
             </div>
 
 
-            <button
-                class="save-btn"
-                id="saveBtn"
-                onclick="saveProfile()"
-                style="display:none;"
-            >
-                SAVE CHANGES
-            </button>
+            <div class="input-group">
 
-        </section>
+                <label
+                    class="label"
+                    for="lastName"
+                >
+                    Last name
+                </label>
 
-
-        <!-- ACCOUNT -->
-
-        <div class="section-title">
-            Account
-        </div>
-
-        <div class="menu">
-
-
-            <div
-                class="menu-item"
-                onclick="openPage('settings.html')"
-            >
-
-                <div class="menu-icon">
-                    ⚙️
-                </div>
-
-                <div class="menu-info">
-
-                    <div class="menu-title">
-                        Account settings
-                    </div>
-
-                    <div class="menu-sub">
-                        Security, language and preferences
-                    </div>
-
-                </div>
-
-                <div class="arrow">
-                    ›
-                </div>
-
-            </div>
-
-
-            <div
-                class="menu-item"
-                onclick="openPage('wallet.html')"
-            >
-
-                <div class="menu-icon">
-                    👛
-                </div>
-
-                <div class="menu-info">
-
-                    <div class="menu-title">
-                        Wallet
-                    </div>
-
-                    <div class="menu-sub">
-                        Manage balance and payments
-                    </div>
-
-                </div>
-
-                <div class="arrow">
-                    ›
-                </div>
-
-            </div>
-
-
-            <div
-                class="menu-item"
-                onclick="openPage('history.html')"
-            >
-
-                <div class="menu-icon">
-                    🧾
-                </div>
-
-                <div class="menu-info">
-
-                    <div class="menu-title">
-                        Ride history
-                    </div>
-
-                    <div class="menu-sub">
-                        View your previous trips
-                    </div>
-
-                </div>
-
-                <div class="arrow">
-                    ›
-                </div>
-
-            </div>
-
-
-            <div
-                class="menu-item"
-                onclick="openPage('notifications.html')"
-            >
-
-                <div class="menu-icon">
-                    🔔
-                </div>
-
-                <div class="menu-info">
-
-                    <div class="menu-title">
-                        Notifications
-                    </div>
-
-                    <div class="menu-sub">
-                        Ride and account alerts
-                    </div>
-
-                </div>
-
-                <div class="arrow">
-                    ›
-                </div>
+                <input
+                    class="input"
+                    id="lastName"
+                    type="text"
+                    placeholder="Last name"
+                    autocomplete="family-name"
+                    maxlength="50"
+                    disabled
+                >
 
             </div>
 
         </div>
 
 
-        <!-- SUPPORT -->
+        <div class="input-group">
 
-        <div class="section-title">
-            Support
-        </div>
+            <label
+                class="label"
+                for="phone"
+            >
+                Phone number
+            </label>
 
-        <div class="menu">
-
-            <div
-                class="menu-item"
-                onclick="showToast('RiderX Help & Support coming soon.')"
+            <input
+                class="input"
+                id="phone"
+                type="tel"
+                inputmode="tel"
+                placeholder="+91 XXXXX XXXXX"
+                autocomplete="tel"
+                maxlength="20"
+                disabled
             >
 
-                <div class="menu-icon">
-                    💬
+        </div>
+
+
+        <div class="input-group">
+
+            <label
+                class="label"
+                for="email"
+            >
+                Email address
+            </label>
+
+            <input
+                class="input"
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+                maxlength="120"
+                disabled
+            >
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label
+                class="label"
+                for="city"
+            >
+                City
+            </label>
+
+            <input
+                class="input"
+                id="city"
+                type="text"
+                value="Chandigarh"
+                disabled
+            >
+
+        </div>
+
+
+        <button
+            class="save-btn"
+            id="saveBtn"
+            onclick="saveProfile()"
+            type="button"
+            style="display:none;"
+        >
+            SAVE CHANGES
+        </button>
+
+    </section>
+
+
+    <!-- ACCOUNT -->
+
+    <div class="section-title">
+        Account
+    </div>
+
+    <div class="menu">
+
+        <div
+            class="menu-item"
+            onclick="openPage('settings.html')"
+            role="button"
+            tabindex="0"
+            onkeydown="handleMenuKey(event,'settings.html')"
+        >
+
+            <div class="menu-icon">
+                ⚙️
+            </div>
+
+            <div class="menu-info">
+
+                <div class="menu-title">
+                    Account settings
                 </div>
 
-                <div class="menu-info">
-
-                    <div class="menu-title">
-                        Help & Support
-                    </div>
-
-                    <div class="menu-sub">
-                        Get help with your RiderX account
-                    </div>
-
-                </div>
-
-                <div class="arrow">
-                    ›
+                <div class="menu-sub">
+                    Security, language and preferences
                 </div>
 
             </div>
 
-
-            <div
-                class="menu-item logout"
-                onclick="logout()"
-            >
-
-                <div class="menu-icon">
-                    🚪
-                </div>
-
-                <div class="menu-info">
-
-                    <div class="menu-title">
-                        Logout
-                    </div>
-
-                    <div class="menu-sub">
-                        Sign out of this account
-                    </div>
-
-                </div>
-
-                <div class="arrow">
-                    ›
-                </div>
-
+            <div class="arrow">
+                ›
             </div>
 
         </div>
 
-    </main>
 
-</div>
+        <div
+            class="menu-item"
+            onclick="openPage('wallet.html')"
+            role="button"
+            tabindex="0"
+            onkeydown="handleMenuKey(event,'wallet.html')"
+        >
+
+            <div class="menu-icon">
+                👛
+            </div>
+
+            <div class="menu-info">
+
+                <div class="menu-title">
+                    Wallet
+                </div>
+
+                <div class="menu-sub">
+                    Manage balance and payments
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </div>
 
 
-<input
-    type="file"
-    id="photoInput"
-    accept="image/*"
->
+        <div
+            class="menu-item"
+            onclick="openPage('history.html')"
+            role="button"
+            tabindex="0"
+            onkeydown="handleMenuKey(event,'history.html')"
+        >
 
+            <div class="menu-icon">
+                🧾
+            </div>
+
+            <div class="menu-info">
+
+                <div class="menu-title">
+                    Ride history
+                </div>
+
+                <div class="menu-sub">
+                    View your previous trips
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </div>
+
+
+        <div
+            class="menu-item"
+            onclick="openPage('notifications.html')"
+            role="button"
+            tabindex="0"
+            onkeydown="handleMenuKey(event,'notifications.html')"
+        >
+
+            <div class="menu-icon">
+                🔔
+            </div>
+
+            <div class="menu-info">
+
+                <div class="menu-title">
+                    Notifications
+                </div>
+
+                <div class="menu-sub">
+                    Ride and account alerts
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUPPORT -->
+
+    <div class="section-title">
+        Support
+    </div>
+
+    <div class="menu">
+
+        <div
+            class="menu-item"
+            onclick="showToast('RiderX Help & Support coming soon.','')"
+            role="button"
+            tabindex="0"
+        >
+
+            <div class="menu-icon">
+                💬
+            </div>
+
+            <div class="menu-info">
+
+                <div class="menu-title">
+                    Help & Support
+                </div>
+
+                <div class="menu-sub">
+                    Get help with your RiderX account
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </div>
+
+
+        <div
+            class="menu-item logout"
+            onclick="logout()"
+            role="button"
+            tabindex="0"
+        >
+
+            <div class="menu-icon">
+                🚪
+            </div>
+
+            <div class="menu-info">
+
+                <div class="menu-title">
+                    Logout
+                </div>
+
+                <div class="menu-sub">
+                    Sign out of this account
+                </div>
+
+            </div>
+
+            <div class="arrow">
+                ›
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+</div><input
+type="file"
+id="photoInput"
+accept="image/jpeg,image/png,image/webp"
+
+«»
 
 <div
     class="toast"
     id="toast"
-></div>
+    role="status"
+    aria-live="polite"
+></div><script>
 
-
-<script>
-
-/* ==========================================
+/* =========================================================
    RIDERX CUSTOMER PROFILE
-========================================== */
+   File: customer/profile.html
+
+   Handles:
+   - Firebase authenticated customer
+   - Firestore customer profile
+   - Local profile fallback
+   - Profile editing
+   - Profile photo
+   - Ride statistics
+   - Navigation
+   - Logout
+========================================================= */
+
+"use strict";
+
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let editMode = false;
 let toastTimer = null;
+let currentAuthUser = null;
+let firebaseProfileLoaded = false;
 
 
-/* ==========================================
-   STORAGE KEYS
-========================================== */
+/* =========================================================
+   STORAGE
+========================================================= */
 
 const PROFILE_KEY =
     "riderxCustomerProfile";
 
 
-/* ==========================================
+const SESSION_KEYS = [
+
+    "currentUser",
+    "riderxCurrentUser",
+    "riderxSession",
+    "userSession",
+    "firebaseUser"
+
+];
+
+
+const EXTERNAL_USER_KEYS = [
+
+    "riderxUser",
+    "currentUser",
+    "user",
+    "customer",
+    "userData",
+    "riderxCustomer"
+
+];
+
+
+/* =========================================================
    DEFAULT PROFILE
-========================================== */
+========================================================= */
 
 const defaultProfile = {
 
@@ -996,67 +1104,138 @@ const defaultProfile = {
     email:"",
     city:"Chandigarh",
     photo:"",
-    createdAt:Date.now()
+    photoURL:"",
+    createdAt:Date.now(),
+    uid:""
 
 };
 
 
-/* ==========================================
-   LOAD PROFILE
-========================================== */
+/* =========================================================
+   DOM
+========================================================= */
 
-function loadProfile(){
+function $(id){
 
-    let profile = {
-        ...defaultProfile
-    };
+    return document.getElementById(id);
 
+}
+
+
+/* =========================================================
+   FIREBASE GETTERS
+========================================================= */
+
+function getFirebaseAuth(){
 
     try{
 
-        const raw =
-            localStorage.getItem(
-                PROFILE_KEY
-            );
-
-
         if(
-            raw
+            window.firebase &&
+            typeof window.firebase.auth ===
+            "function"
         ){
 
-            const saved =
-                JSON.parse(
-                    raw
-                );
-
-
-            if(
-                saved &&
-                typeof saved ===
-                "object"
-            ){
-
-                profile = {
-                    ...profile,
-                    ...saved
-                };
-
-            }
+            return window.firebase.auth();
 
         }
 
     }catch(error){
 
-        console.log(
-            "Profile load error:",
+        console.warn(
+            "RiderX Firebase Auth unavailable:",
             error
         );
 
     }
 
+    return null;
+
+}
+
+
+function getFirestore(){
+
+    try{
+
+        if(
+            window.firebase &&
+            typeof window.firebase.firestore ===
+            "function"
+        ){
+
+            return window.firebase.firestore();
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "RiderX Firestore unavailable:",
+            error
+        );
+
+    }
+
+    return null;
+
+}
+
+
+/* =========================================================
+   AUTH INITIALIZATION
+========================================================= */
+
+function initProfile(){
+
+    const auth =
+        getFirebaseAuth();
+
+
+    if(
+        auth &&
+        typeof auth.onAuthStateChanged ===
+        "function"
+    ){
+
+        auth.onAuthStateChanged(
+            async user => {
+
+                currentAuthUser =
+                    user || null;
+
+
+                await loadProfile();
+
+            }
+        );
+
+        return;
+
+    }
+
+
+    loadProfile();
+
+}
+
+
+/* =========================================================
+   LOAD PROFILE
+========================================================= */
+
+async function loadProfile(){
+
+    setPageLoading(true);
+
+
+    let profile =
+        getStoredProfile();
+
 
     /*
-      Try existing user/customer data.
+      First merge local/existing frontend
+      customer data.
     */
 
     const external =
@@ -1077,8 +1256,500 @@ function loadProfile(){
 
 
     /*
-      Keep profile locally available.
+      Firebase Auth is the strongest source
+      for identity information.
     */
+
+    if(
+        currentAuthUser
+    ){
+
+        profile =
+            mergeAuthProfile(
+                profile,
+                currentAuthUser
+            );
+
+    }
+
+
+    /*
+      Firestore customer document.
+      Try UID first. If the project uses
+      customers/{uid}, this is the canonical
+      document location.
+    */
+
+    if(
+        currentAuthUser &&
+        currentAuthUser.uid
+    ){
+
+        const firestoreProfile =
+            await loadFirestoreProfile(
+                currentAuthUser.uid
+            );
+
+
+        if(
+            firestoreProfile
+        ){
+
+            profile =
+                mergeExternalProfile(
+                    profile,
+                    firestoreProfile
+                );
+
+            firebaseProfileLoaded =
+                true;
+
+        }
+
+    }
+
+
+    /*
+      Ensure city remains RiderX's configured
+      customer city.
+    */
+
+    profile.city =
+        "Chandigarh";
+
+
+    /*
+      Preserve UID.
+    */
+
+    if(
+        currentAuthUser &&
+        currentAuthUser.uid
+    ){
+
+        profile.uid =
+            currentAuthUser.uid;
+
+    }
+
+
+    saveLocalProfile(
+        profile
+    );
+
+
+    fillProfile(
+        profile
+    );
+
+
+    await loadRideStats(
+        profile
+    );
+
+
+    setPageLoading(false);
+
+}
+
+
+/* =========================================================
+   FIRESTORE PROFILE
+========================================================= */
+
+async function loadFirestoreProfile(
+    uid
+){
+
+    const db =
+        getFirestore();
+
+
+    if(
+        !db ||
+        !uid
+    ){
+
+        return null;
+
+    }
+
+
+    try{
+
+        const collections = [
+
+            "customers",
+            "users"
+
+        ];
+
+
+        for(
+            const collectionName of collections
+        ){
+
+            try{
+
+                const snapshot =
+                    await db
+                        .collection(
+                            collectionName
+                        )
+                        .doc(uid)
+                        .get();
+
+
+                if(
+                    snapshot.exists
+                ){
+
+                    return {
+
+                        uid:uid,
+
+                        ...snapshot.data()
+
+                    };
+
+                }
+
+            }catch(error){
+
+                /*
+                  If one collection is not available,
+                  continue to the next compatible
+                  RiderX structure.
+                */
+
+                console.warn(
+                    "Firestore profile lookup:",
+                    collectionName,
+                    error
+                );
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.error(
+            "Firestore profile error:",
+            error
+        );
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   SAVE FIRESTORE PROFILE
+========================================================= */
+
+async function saveFirestoreProfile(
+    profile
+){
+
+    const db =
+        getFirestore();
+
+
+    const uid =
+        currentAuthUser?.uid ||
+        profile.uid;
+
+
+    if(
+        !db ||
+        !uid
+    ){
+
+        return false;
+
+    }
+
+
+    const data = {
+
+        uid:uid,
+
+        firstName:
+            profile.firstName || "",
+
+        lastName:
+            profile.lastName || "",
+
+        name:
+            getFullName(
+                profile
+            ),
+
+        phone:
+            profile.phone || "",
+
+        email:
+            profile.email || "",
+
+        city:
+            "Chandigarh",
+
+        photoURL:
+            profile.photoURL ||
+            profile.photo ||
+            "",
+
+        updatedAt:
+            new Date().toISOString()
+
+    };
+
+
+    try{
+
+        await db
+            .collection("customers")
+            .doc(uid)
+            .set(
+                data,
+                {
+                    merge:true
+                }
+            );
+
+
+        return true;
+
+    }catch(error){
+
+        console.warn(
+            "Customer Firestore save failed:",
+            error
+        );
+
+
+        /*
+          Some RiderX installations may use
+          users/{uid} instead of customers/{uid}.
+        */
+
+        try{
+
+            await db
+                .collection("users")
+                .doc(uid)
+                .set(
+                    data,
+                    {
+                        merge:true
+                    }
+                );
+
+
+            return true;
+
+        }catch(fallbackError){
+
+            console.warn(
+                "User Firestore save failed:",
+                fallbackError
+            );
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   AUTH PROFILE MERGE
+========================================================= */
+
+function mergeAuthProfile(
+    profile,
+    user
+){
+
+    const merged = {
+        ...profile
+    };
+
+
+    if(
+        user.uid
+    ){
+
+        merged.uid =
+            user.uid;
+
+    }
+
+
+    if(
+        user.email
+    ){
+
+        merged.email =
+            user.email;
+
+    }
+
+
+    if(
+        user.phoneNumber
+    ){
+
+        merged.phone =
+            user.phoneNumber;
+
+    }
+
+
+    if(
+        user.displayName
+    ){
+
+        const parts =
+            user.displayName
+                .trim()
+                .split(/\s+/);
+
+
+        if(
+            !merged.firstName
+        ){
+
+            merged.firstName =
+                parts.shift() ||
+                "";
+
+        }
+
+
+        if(
+            !merged.lastName
+        ){
+
+            merged.lastName =
+                parts.join(" ");
+
+        }
+
+    }
+
+
+    if(
+        user.photoURL
+    ){
+
+        merged.photo =
+            user.photoURL;
+
+        merged.photoURL =
+            user.photoURL;
+
+    }
+
+
+    if(
+        user.metadata &&
+        user.metadata.creationTime
+    ){
+
+        const created =
+            new Date(
+                user.metadata.creationTime
+            ).getTime();
+
+
+        if(
+            Number.isFinite(created)
+        ){
+
+            merged.createdAt =
+                created;
+
+        }
+
+    }
+
+
+    return merged;
+
+}
+
+
+/* =========================================================
+   LOCAL PROFILE
+========================================================= */
+
+function getStoredProfile(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                PROFILE_KEY
+            );
+
+
+        if(
+            raw
+        ){
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if(
+                data &&
+                typeof data ===
+                "object"
+            ){
+
+                return {
+
+                    ...defaultProfile,
+                    ...data
+
+                };
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Profile storage read error:",
+            error
+        );
+
+    }
+
+
+    return {
+
+        ...defaultProfile
+
+    };
+
+}
+
+
+function saveLocalProfile(
+    profile
+){
 
     try{
 
@@ -1089,43 +1760,30 @@ function loadProfile(){
             )
         );
 
+        return true;
+
     }catch(error){
 
-        console.log(error);
+        console.warn(
+            "Profile storage write error:",
+            error
+        );
+
+        return false;
 
     }
-
-
-    fillProfile(
-        profile
-    );
-
-
-    loadRideStats();
 
 }
 
 
-/* ==========================================
+/* =========================================================
    EXTERNAL USER
-========================================== */
+========================================================= */
 
 function findExternalUser(){
 
-    const keys = [
-
-        "riderxUser",
-        "currentUser",
-        "user",
-        "customer",
-        "userData",
-        "riderxCustomer"
-
-    ];
-
-
     for(
-        const key of keys
+        const key of EXTERNAL_USER_KEYS
     ){
 
         try{
@@ -1163,7 +1821,9 @@ function findExternalUser(){
 
         }catch(error){
 
-            console.log(
+            console.warn(
+                "User storage read error:",
+                key,
                 error
             );
 
@@ -1177,48 +1837,81 @@ function findExternalUser(){
 }
 
 
-/* ==========================================
-   MERGE EXTERNAL
-========================================== */
+/* =========================================================
+   MERGE EXTERNAL PROFILE
+========================================================= */
 
 function mergeExternalProfile(
     profile,
     external
 ){
 
+    if(
+        !external ||
+        typeof external !==
+        "object"
+    ){
+
+        return profile;
+
+    }
+
+
     const merged = {
         ...profile
     };
 
 
+    const externalName =
+        external.name ||
+        external.displayName ||
+        "";
+
+
+    const nameParts =
+        String(
+            externalName
+        )
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
+
+
     merged.firstName =
         external.firstName ||
         external.firstname ||
-        external.name?.split(" ")[0] ||
-        profile.firstName;
+        nameParts[0] ||
+        profile.firstName ||
+        "";
 
 
     merged.lastName =
         external.lastName ||
         external.lastname ||
-        external.name?.split(" ").slice(1).join(" ") ||
-        profile.lastName;
+        (
+            nameParts.length > 1
+                ? nameParts.slice(1).join(" ")
+                : profile.lastName
+        ) ||
+        "";
 
 
     merged.phone =
         external.phone ||
         external.mobile ||
         external.phoneNumber ||
-        profile.phone;
+        external.mobileNumber ||
+        profile.phone ||
+        "";
 
 
     merged.email =
         external.email ||
-        profile.email;
+        profile.email ||
+        "";
 
 
     merged.city =
-        external.city ||
         "Chandigarh";
 
 
@@ -1226,12 +1919,31 @@ function mergeExternalProfile(
         external.photo ||
         external.photoURL ||
         external.profileImage ||
-        profile.photo;
+        external.profilePhoto ||
+        profile.photo ||
+        "";
+
+
+    merged.photoURL =
+        external.photoURL ||
+        external.photo ||
+        profile.photoURL ||
+        profile.photo ||
+        "";
+
+
+    merged.uid =
+        external.uid ||
+        external.userId ||
+        profile.uid ||
+        "";
 
 
     merged.createdAt =
         external.createdAt ||
-        profile.createdAt;
+        external.created_at ||
+        profile.createdAt ||
+        Date.now();
 
 
     return merged;
@@ -1239,75 +1951,68 @@ function mergeExternalProfile(
 }
 
 
-/* ==========================================
-   FILL UI
-========================================== */
+/* =========================================================
+   FILL PROFILE UI
+========================================================= */
 
 function fillProfile(
     profile
 ){
 
-    document.getElementById(
-        "firstName"
-    ).value =
-        profile.firstName ||
-        "";
+    const firstName =
+        profile.firstName || "";
 
 
-    document.getElementById(
-        "lastName"
-    ).value =
-        profile.lastName ||
-        "";
+    const lastName =
+        profile.lastName || "";
 
 
-    document.getElementById(
-        "phone"
-    ).value =
-        profile.phone ||
-        "";
+    const phone =
+        profile.phone || "";
 
 
-    document.getElementById(
-        "email"
-    ).value =
-        profile.email ||
-        "";
+    const email =
+        profile.email || "";
 
 
-    document.getElementById(
-        "city"
-    ).value =
+    $("firstName").value =
+        firstName;
+
+
+    $("lastName").value =
+        lastName;
+
+
+    $("phone").value =
+        phone;
+
+
+    $("email").value =
+        email;
+
+
+    $("city").value =
         "Chandigarh";
 
 
     const fullName =
-        [
-            profile.firstName,
-            profile.lastName
-        ]
-        .filter(Boolean)
-        .join(" ");
+        getFullName(
+            profile
+        );
 
 
-    document.getElementById(
-        "displayName"
-    ).textContent =
+    $("displayName").textContent =
         fullName ||
         "RiderX User";
 
 
-    document.getElementById(
-        "displayPhone"
-    ).textContent =
-        profile.phone ||
+    $("displayPhone").textContent =
+        phone ||
         "Phone not added";
 
 
-    document.getElementById(
-        "displayEmail"
-    ).textContent =
-        profile.email ||
+    $("displayEmail").textContent =
+        email ||
         "Email not added";
 
 
@@ -1323,32 +2028,53 @@ function fillProfile(
 }
 
 
-/* ==========================================
+/* =========================================================
+   FULL NAME
+========================================================= */
+
+function getFullName(
+    profile
+){
+
+    return [
+
+        profile?.firstName,
+        profile?.lastName
+
+    ]
+    .map(
+        value =>
+            String(
+                value ||
+                ""
+            ).trim()
+    )
+    .filter(Boolean)
+    .join(" ");
+
+}
+
+
+/* =========================================================
    AVATAR
-========================================== */
+========================================================= */
 
 function setAvatar(
     profile
 ){
 
     const image =
-        document.getElementById(
-            "avatarImage"
-        );
+        $("avatarImage");
+
 
     const text =
-        document.getElementById(
-            "avatarText"
-        );
+        $("avatarText");
 
 
     const name =
-        [
-            profile.firstName,
-            profile.lastName
-        ]
-        .filter(Boolean)
-        .join(" ");
+        getFullName(
+            profile
+        );
 
 
     const initial =
@@ -1361,18 +2087,42 @@ function setAvatar(
         initial;
 
 
+    const photo =
+        profile.photo ||
+        profile.photoURL ||
+        "";
+
+
     if(
-        profile.photo
+        photo
     ){
 
+        image.onload =
+            function(){
+
+                image.style.display =
+                    "block";
+
+                text.style.display =
+                    "none";
+
+            };
+
+
+        image.onerror =
+            function(){
+
+                image.style.display =
+                    "none";
+
+                text.style.display =
+                    "block";
+
+            };
+
+
         image.src =
-            profile.photo;
-
-        image.style.display =
-            "block";
-
-        text.style.display =
-            "none";
+            photo;
 
     }else{
 
@@ -1391,43 +2141,99 @@ function setAvatar(
 }
 
 
-/* ==========================================
+/* =========================================================
    MEMBER SINCE
-========================================== */
+========================================================= */
 
 function setMemberSince(
     createdAt
 ){
 
-    const date =
-        new Date(
-            Number(
+    let timestamp =
+        0;
+
+
+    if(
+        createdAt &&
+        typeof createdAt.toMillis ===
+        "function"
+    ){
+
+        timestamp =
+            createdAt.toMillis();
+
+    }else if(
+        createdAt &&
+        typeof createdAt.toDate ===
+        "function"
+    ){
+
+        timestamp =
+            createdAt.toDate()
+                .getTime();
+
+    }else if(
+        typeof createdAt ===
+        "number"
+    ){
+
+        timestamp =
+            createdAt;
+
+    }else if(
+        createdAt
+    ){
+
+        timestamp =
+            new Date(
                 createdAt
-            )
-        );
+            ).getTime();
+
+    }
 
 
-    const year =
-        Number.isNaN(
-            date.getTime()
-        )
-            ? new Date().getFullYear()
-            : date.getFullYear();
+    if(
+        !Number.isFinite(timestamp) ||
+        timestamp <= 0
+    ){
+
+        $("memberSince").textContent =
+            "—";
+
+        return;
+
+    }
 
 
-    document.getElementById(
-        "memberSince"
-    ).textContent =
-        year;
+    $("memberSince").textContent =
+        new Date(
+            timestamp
+        ).getFullYear();
 
 }
 
 
-/* ==========================================
-   EDIT
-========================================== */
+/* =========================================================
+   EDIT MODE
+========================================================= */
 
 function toggleEdit(){
+
+    if(
+        editMode
+    ){
+
+        /*
+          Cancel:
+          restore saved profile values.
+        */
+
+        fillProfile(
+            getStoredProfile()
+        );
+
+    }
+
 
     editMode =
         !editMode;
@@ -1446,30 +2252,20 @@ function toggleEdit(){
     fields.forEach(
         id => {
 
-            document.getElementById(
-                id
-            ).disabled =
+            $(id).disabled =
                 !editMode;
 
         }
     );
 
 
-    const saveBtn =
-        document.getElementById(
-            "saveBtn"
-        );
-
-
-    saveBtn.style.display =
+    $("saveBtn").style.display =
         editMode
             ? "block"
             : "none";
 
 
-    document.getElementById(
-        "headerEditBtn"
-    ).textContent =
+    $("headerEditBtn").textContent =
         editMode
             ? "CANCEL"
             : "EDIT";
@@ -1479,47 +2275,136 @@ function toggleEdit(){
         editMode
     ){
 
-        document.getElementById(
-            "firstName"
-        ).focus();
+        setTimeout(
+            function(){
+
+                $("firstName").focus();
+
+            },
+            50
+        );
 
     }
 
 }
 
 
-/* ==========================================
+/* =========================================================
    SAVE PROFILE
-========================================== */
+========================================================= */
 
-function saveProfile(){
+async function saveProfile(){
+
+    if(
+        !editMode
+    ){
+
+        return;
+
+    }
+
+
+    const saveBtn =
+        $("saveBtn");
+
+
+    const firstName =
+        $("firstName")
+            .value
+            .trim();
+
+
+    const lastName =
+        $("lastName")
+            .value
+            .trim();
+
+
+    const phone =
+        $("phone")
+            .value
+            .trim();
+
+
+    const email =
+        $("email")
+            .value
+            .trim()
+            .toLowerCase();
+
+
+    if(
+        !firstName
+    ){
+
+        showToast(
+            "Please enter your first name.",
+            "error"
+        );
+
+        $("firstName").focus();
+
+        return;
+
+    }
+
+
+    if(
+        email &&
+        !isValidEmail(
+            email
+        )
+    ){
+
+        showToast(
+            "Please enter a valid email address.",
+            "error"
+        );
+
+        $("email").focus();
+
+        return;
+
+    }
+
+
+    if(
+        phone &&
+        !isValidPhone(
+            phone
+        )
+    ){
+
+        showToast(
+            "Please enter a valid phone number.",
+            "error"
+        );
+
+        $("phone").focus();
+
+        return;
+
+    }
+
 
     const profile =
         getStoredProfile();
 
 
     profile.firstName =
-        document.getElementById(
-            "firstName"
-        ).value.trim();
+        firstName;
 
 
     profile.lastName =
-        document.getElementById(
-            "lastName"
-        ).value.trim();
+        lastName;
 
 
     profile.phone =
-        document.getElementById(
-            "phone"
-        ).value.trim();
+        phone;
 
 
     profile.email =
-        document.getElementById(
-            "email"
-        ).value.trim();
+        email;
 
 
     profile.city =
@@ -1527,222 +2412,245 @@ function saveProfile(){
 
 
     if(
-        !profile.firstName
+        currentAuthUser?.uid
     ){
 
-        showToast(
-            "Please enter your first name."
-        );
-
-        return;
+        profile.uid =
+            currentAuthUser.uid;
 
     }
+
+
+    saveBtn.disabled =
+        true;
+
+
+    saveBtn.textContent =
+        "SAVING...";
+
+
+    const localSaved =
+        saveLocalProfile(
+            profile
+        );
+
+
+    syncUserStorage(
+        profile
+    );
+
+
+    let firebaseSaved =
+        false;
 
 
     if(
-        profile.email &&
-        !isValidEmail(
-            profile.email
-        )
+        currentAuthUser
     ){
 
-        showToast(
-            "Please enter a valid email address."
-        );
-
-        return;
-
-    }
-
-
-    try{
-
-        localStorage.setItem(
-            PROFILE_KEY,
-            JSON.stringify(
+        firebaseSaved =
+            await saveFirestoreProfile(
                 profile
-            )
-        );
-
-
-        /*
-          Keep common user storage
-          synchronized for the RiderX
-          frontend.
-        */
-
-        syncUserStorage(
-            profile
-        );
-
-
-        fillProfile(
-            profile
-        );
-
-
-        if(
-            editMode
-        ){
-
-            toggleEdit();
-
-        }
-
-
-        showToast(
-            "Profile updated successfully."
-        );
-
-    }catch(error){
-
-        console.error(
-            error
-        );
-
-        showToast(
-            "Unable to save profile."
-
-        );
-
-    }
-
-}
-
-
-/* ==========================================
-   GET STORED
-========================================== */
-
-function getStoredProfile(){
-
-    try{
-
-        const raw =
-            localStorage.getItem(
-                PROFILE_KEY
             );
 
 
-        if(
-            raw
-        ){
+        /*
+          Keep Firebase Auth display
+          information synchronized when possible.
+        */
 
-            const data =
-                JSON.parse(
-                    raw
-                );
+        try{
+
+            const authUser =
+                currentAuthUser;
 
 
             if(
-                data &&
-                typeof data ===
-                "object"
+                typeof authUser.updateProfile ===
+                "function"
             ){
 
-                return {
-                    ...defaultProfile,
-                    ...data
+                const fullName =
+                    getFullName(
+                        profile
+                    );
+
+
+                const updateData = {
+
+                    displayName:
+                        fullName || null
+
                 };
+
+
+                await authUser.updateProfile(
+                    updateData
+                );
 
             }
 
+        }catch(error){
+
+            console.warn(
+                "Firebase Auth profile update:",
+                error
+            );
+
         }
-
-    }catch(error){
-
-        console.log(
-            error
-        );
 
     }
 
 
-    return {
-        ...defaultProfile
-    };
+    fillProfile(
+        profile
+    );
+
+
+    editMode =
+        true;
+
+    toggleEdit();
+
+
+    saveBtn.disabled =
+        false;
+
+
+    saveBtn.textContent =
+        "SAVE CHANGES";
+
+
+    if(
+        firebaseSaved
+    ){
+
+        showToast(
+            "Profile updated successfully.",
+            "success"
+        );
+
+    }else if(
+        localSaved
+    ){
+
+        showToast(
+            "Profile saved on this device.",
+            "success"
+        );
+
+    }else{
+
+        showToast(
+            "Unable to save profile.",
+            "error"
+        );
+
+    }
 
 }
 
 
-/* ==========================================
-   SYNC USER STORAGE
-========================================== */
+/* =========================================================
+   SYNC COMMON USER STORAGE
+========================================================= */
 
 function syncUserStorage(
     profile
 ){
 
     const fullName =
-        [
-            profile.firstName,
-            profile.lastName
-        ]
-        .filter(Boolean)
-        .join(" ");
+        getFullName(
+            profile
+        );
 
 
-    const keys = [
+    EXTERNAL_USER_KEYS
+        .forEach(
+            key => {
 
-        "riderxUser",
-        "currentUser",
-        "customer"
+                try{
 
-    ];
-
-
-    keys.forEach(
-        key => {
-
-            try{
-
-                const raw =
-                    localStorage.getItem(
-                        key
-                    );
+                    const raw =
+                        localStorage.getItem(
+                            key
+                        );
 
 
-                if(
-                    !raw
-                ){
+                    if(
+                        !raw
+                    ){
 
-                    return;
+                        return;
 
-                }
-
-
-                const data =
-                    JSON.parse(
-                        raw
-                    );
+                    }
 
 
-                if(
-                    data &&
-                    typeof data ===
-                    "object"
-                ){
+                    const data =
+                        JSON.parse(
+                            raw
+                        );
+
+
+                    if(
+                        !data ||
+                        typeof data !==
+                        "object"
+                    ){
+
+                        return;
+
+                    }
+
 
                     data.firstName =
                         profile.firstName;
 
+
                     data.lastName =
                         profile.lastName;
+
 
                     data.name =
                         fullName;
 
+
+                    data.displayName =
+                        fullName;
+
+
                     data.phone =
                         profile.phone;
+
 
                     data.email =
                         profile.email;
 
+
                     data.city =
                         "Chandigarh";
 
-                    data.photoURL =
-                        profile.photo;
+
+                    if(
+                        profile.photo ||
+                        profile.photoURL
+                    ){
+
+                        data.photoURL =
+                            profile.photoURL ||
+                            profile.photo;
+
+                    }
+
+
+                    if(
+                        profile.uid
+                    ){
+
+                        data.uid =
+                            profile.uid;
+
+                    }
 
 
                     localStorage.setItem(
@@ -1752,25 +2660,25 @@ function syncUserStorage(
                         )
                     );
 
+                }catch(error){
+
+                    console.warn(
+                        "User sync error:",
+                        key,
+                        error
+                    );
+
                 }
 
-            }catch(error){
-
-                console.log(
-                    error
-                );
-
             }
-
-        }
-    );
+        );
 
 }
 
 
-/* ==========================================
-   VALIDATE EMAIL
-========================================== */
+/* =========================================================
+   VALIDATION
+========================================================= */
 
 function isValidEmail(
     email
@@ -1784,139 +2692,384 @@ function isValidEmail(
 }
 
 
-/* ==========================================
-   PHOTO
-========================================== */
+function isValidPhone(
+    phone
+){
 
-function choosePhoto(){
+    const digits =
+        String(
+            phone
+        )
+        .replace(
+            /\D/g,
+            ""
+        );
 
-    document.getElementById(
-        "photoInput"
-    ).click();
+
+    return (
+        digits.length >= 10 &&
+        digits.length <= 15
+    );
 
 }
 
 
-document.getElementById(
-    "photoInput"
-).addEventListener(
-    "change",
-    function(){
+/* =========================================================
+   PHOTO
+========================================================= */
 
-        const file =
-            this.files &&
-            this.files[0];
+function choosePhoto(){
 
+    $("photoInput").click();
 
-        if(
-            !file
-        ){
-
-            return;
-
-        }
+}
 
 
-        if(
-            !file.type.startsWith(
-                "image/"
-            )
-        ){
-
-            showToast(
-                "Please select an image."
-            );
-
-            return;
-
-        }
+$("photoInput")
+    .addEventListener(
+        "change",
+        handlePhoto
+    );
 
 
-        if(
-            file.size >
-            5 * 1024 * 1024
-        ){
+function handlePhoto(){
 
-            showToast(
-                "Image must be smaller than 5 MB."
-            );
-
-            return;
-
-        }
+    const file =
+        this.files &&
+        this.files[0];
 
 
-        const reader =
-            new FileReader();
+    if(
+        !file
+    ){
 
-
-        reader.onload =
-            function(event){
-
-                const profile =
-                    getStoredProfile();
-
-
-                profile.photo =
-                    event.target.result;
-
-
-                try{
-
-                    localStorage.setItem(
-                        PROFILE_KEY,
-                        JSON.stringify(
-                            profile
-                        )
-                    );
-
-
-                    setAvatar(
-                        profile
-                    );
-
-
-                    syncUserStorage(
-                        profile
-                    );
-
-
-                    showToast(
-                        "Profile photo updated."
-                    );
-
-                }catch(error){
-
-                    console.error(
-                        error
-                    );
-
-                    showToast(
-                        "Unable to save this photo."
-                    );
-
-                }
-
-            };
-
-
-        reader.readAsDataURL(
-            file
-        );
+        return;
 
     }
-);
 
 
-/* ==========================================
+    if(
+        !file.type.startsWith(
+            "image/"
+        )
+    ){
+
+        showToast(
+            "Please select an image.",
+            "error"
+        );
+
+        this.value =
+            "";
+
+        return;
+
+    }
+
+
+    if(
+        file.size >
+        5 * 1024 * 1024
+    ){
+
+        showToast(
+            "Image must be smaller than 5 MB.",
+            "error"
+        );
+
+        this.value =
+            "";
+
+        return;
+
+    }
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        async function(event){
+
+            const photo =
+                event.target.result;
+
+
+            const profile =
+                getStoredProfile();
+
+
+            profile.photo =
+                photo;
+
+
+            profile.photoURL =
+                photo;
+
+
+            if(
+                currentAuthUser?.uid
+            ){
+
+                profile.uid =
+                    currentAuthUser.uid;
+
+            }
+
+
+            if(
+                saveLocalProfile(
+                    profile
+                )
+            ){
+
+                setAvatar(
+                    profile
+                );
+
+
+                syncUserStorage(
+                    profile
+                );
+
+
+                /*
+                  Base64 image is intentionally kept
+                  in local storage for the existing
+                  frontend-only profile system.
+
+                  Firebase Storage can be integrated
+                  separately when the project's Storage
+                  upload helper is available.
+                */
+
+                showToast(
+                    "Profile photo updated.",
+                    "success"
+                );
+
+            }else{
+
+                showToast(
+                    "Unable to save this photo.",
+                    "error"
+                );
+
+            }
+
+
+            $("photoInput").value =
+                "";
+
+        };
+
+
+    reader.onerror =
+        function(){
+
+            showToast(
+                "Unable to read this image.",
+                "error"
+            );
+
+            $("photoInput").value =
+                "";
+
+        };
+
+
+    reader.readAsDataURL(
+        file
+    );
+
+}
+
+
+/* =========================================================
    RIDE STATS
-========================================== */
+========================================================= */
 
-function loadRideStats(){
+async function loadRideStats(
+    profile
+){
 
     let rides =
         [];
 
+
+    /*
+      First use the same public integration
+      that history.html can use.
+    */
+
+    try{
+
+        if(
+            typeof window.getCustomerRideHistory ===
+            "function"
+        ){
+
+            const result =
+                await window.getCustomerRideHistory(
+                    currentAuthUser
+                );
+
+
+            if(
+                Array.isArray(result)
+            ){
+
+                rides =
+                    result;
+
+            }
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Customer ride history integration:",
+            error
+        );
+
+    }
+
+
+    /*
+      Firestore fallback.
+    */
+
+    if(
+        rides.length === 0 &&
+        currentAuthUser?.uid
+    ){
+
+        rides =
+            await loadFirestoreRides(
+                currentAuthUser.uid
+            );
+
+    }
+
+
+    /*
+      Local fallback.
+    */
+
+    if(
+        rides.length === 0
+    ){
+
+        rides =
+            loadLocalRideHistory();
+
+    }
+
+
+    const completed =
+        rides.filter(
+            ride =>
+                isCompletedRide(
+                    ride
+                )
+        );
+
+
+    const totalSpent =
+        completed.reduce(
+            (
+                total,
+                ride
+            ) =>
+                total +
+                getRideAmount(
+                    ride
+                ),
+            0
+        );
+
+
+    $("totalRides").textContent =
+        completed.length;
+
+
+    $("totalSpent").textContent =
+        "₹" +
+        Math.round(
+            totalSpent
+        );
+
+}
+
+
+/* =========================================================
+   FIRESTORE RIDES
+========================================================= */
+
+async function loadFirestoreRides(
+    uid
+){
+
+    const db =
+        getFirestore();
+
+
+    if(
+        !db ||
+        !uid
+    ){
+
+        return [];
+
+    }
+
+
+    try{
+
+        const snapshot =
+            await db
+                .collection("rides")
+                .where(
+                    "customerId",
+                    "==",
+                    uid
+                )
+                .get();
+
+
+        return snapshot.docs.map(
+            doc => ({
+
+                id:
+                    doc.id,
+
+                ...doc.data()
+
+            })
+        );
+
+    }catch(error){
+
+        console.warn(
+            "Firestore ride stats:",
+            error
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =========================================================
+   LOCAL RIDE HISTORY
+========================================================= */
+
+function loadLocalRideHistory(){
 
     const keys = [
 
@@ -1956,21 +3109,18 @@ function loadRideStats(){
 
 
             if(
-                Array.isArray(
-                    data
-                )
+                Array.isArray(data)
             ){
 
-                rides =
-                    data;
-
-                break;
+                return data;
 
             }
 
         }catch(error){
 
-            console.log(
+            console.warn(
+                "Ride history storage:",
+                key,
                 error
             );
 
@@ -1979,53 +3129,14 @@ function loadRideStats(){
     }
 
 
-    const completed =
-        rides.filter(
-            ride =>
-                isCompletedRide(
-                    ride
-                )
-        );
-
-
-    const totalSpent =
-        completed.reduce(
-            (
-                total,
-                ride
-            ) =>
-                total +
-                Number(
-                    ride.amount ||
-                    ride.fare ||
-                    ride.total ||
-                    ride.price ||
-                    0
-                ),
-            0
-        );
-
-
-    document.getElementById(
-        "totalRides"
-    ).textContent =
-        completed.length;
-
-
-    document.getElementById(
-        "totalSpent"
-    ).textContent =
-        "₹" +
-        Math.round(
-            totalSpent
-        );
+    return [];
 
 }
 
 
-/* ==========================================
-   COMPLETED RIDE
-========================================== */
+/* =========================================================
+   RIDE STATUS
+========================================================= */
 
 function isCompletedRide(
     ride
@@ -2046,13 +3157,41 @@ function isCompletedRide(
         String(
             ride.status ||
             ride.rideStatus ||
+            ride.ride_status ||
             ""
         )
-        .toLowerCase();
+        .toLowerCase()
+        .replace(
+            /[-_ ]/g,
+            ""
+        );
+
+
+    /*
+      Do not count cancelled/searching/
+      pending/accepted rides as completed.
+    */
+
+    if(
+        status.includes("cancel") ||
+        status.includes("reject") ||
+        status.includes("search") ||
+        status.includes("pending") ||
+        status.includes("accept") ||
+        status.includes("request")
+    ){
+
+        return false;
+
+    }
 
 
     if(
-        !status
+        status.includes("complete") ||
+        status === "done" ||
+        status === "finished" ||
+        status === "paid" ||
+        status === "success"
     ){
 
         return true;
@@ -2060,28 +3199,122 @@ function isCompletedRide(
     }
 
 
-    return [
+    /*
+      Legacy history records without a status
+      are treated as completed so old RiderX
+      history remains visible in profile stats.
+    */
 
-        "completed",
-        "complete",
-        "finished",
-        "paid",
-        "success"
-
-    ].includes(
-        status
-    );
+    return !status;
 
 }
 
 
-/* ==========================================
+/* =========================================================
+   RIDE AMOUNT
+========================================================= */
+
+function getRideAmount(
+    ride
+){
+
+    if(
+        !ride ||
+        typeof ride !==
+        "object"
+    ){
+
+        return 0;
+
+    }
+
+
+    const candidates = [
+
+        ride.fare,
+        ride.totalFare,
+        ride.amount,
+        ride.total,
+        ride.price,
+        ride.finalFare,
+        ride.finalAmount
+
+    ];
+
+
+    for(
+        const value of candidates
+    ){
+
+        const number =
+            Number(
+                value
+            );
+
+
+        if(
+            Number.isFinite(number)
+        ){
+
+            return number;
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* =========================================================
+   PAGE LOADING
+========================================================= */
+
+function setPageLoading(
+loading
+){
+
+    const app =
+        $("app");
+
+
+    if(
+        loading
+    ){
+
+        app.classList.add(
+            "profile-loading"
+        );
+
+    }else{
+
+        app.classList.remove(
+            "profile-loading"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
    OPEN PAGE
-========================================== */
+========================================================= */
 
 function openPage(
     page
 ){
+
+    if(
+        !page
+    ){
+
+        return;
+
+    }
+
 
     window.location.href =
         page;
@@ -2089,11 +3322,32 @@ function openPage(
 }
 
 
-/* ==========================================
-   LOGOUT
-========================================== */
+function handleMenuKey(
+    event,
+    page
+){
 
-function logout(){
+    if(
+        event.key === "Enter" ||
+        event.key === " "
+    ){
+
+        event.preventDefault();
+
+        openPage(
+            page
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+async function logout(){
 
     const confirmed =
         window.confirm(
@@ -2110,24 +3364,60 @@ function logout(){
     }
 
 
+    try{
+
+        const auth =
+            getFirebaseAuth();
+
+
+        if(
+            auth &&
+            typeof auth.signOut ===
+            "function"
+        ){
+
+            await auth.signOut();
+
+        }
+
+    }catch(error){
+
+        console.warn(
+            "Firebase logout:",
+            error
+        );
+
+    }
+
+
     /*
-      Clear only frontend session keys.
-      Persistent profile/preferences remain
-      available unless the auth system removes them.
+      Remove session-only frontend data.
+      Do NOT remove riderxCustomerProfile,
+      so the customer's saved profile can
+      remain available after the next login.
     */
 
-    const sessionKeys = [
-
-        "currentUser",
-        "riderxCurrentUser",
-        "riderxSession",
-        "userSession",
-        "firebaseUser"
-
-    ];
+    SESSION_KEYS.forEach(
+        key =>
+            localStorage.removeItem(
+                key
+            )
+    );
 
 
-    sessionKeys.forEach(
+    /*
+      Remove old role/session aliases that
+      can accidentally auto-login the user.
+    */
+
+    [
+
+        "riderx_customer",
+        "riderxCustomerSession",
+        "riderx_logged_in",
+        "riderxAuth"
+
+    ].forEach(
         key =>
             localStorage.removeItem(
                 key
@@ -2136,7 +3426,8 @@ function logout(){
 
 
     showToast(
-        "Logged out successfully."
+        "Logged out successfully.",
+        "success"
     );
 
 
@@ -2153,9 +3444,9 @@ function logout(){
 }
 
 
-/* ==========================================
+/* =========================================================
    BACK
-========================================== */
+========================================================= */
 
 function goBack(){
 
@@ -2168,32 +3459,47 @@ function goBack(){
 
         window.history.back();
 
-    }else{
-
-        window.location.href =
-            "home.html";
+        return;
 
     }
+
+
+    window.location.href =
+        "home.html";
 
 }
 
 
-/* ==========================================
+/* =========================================================
    TOAST
-========================================== */
+========================================================= */
 
 function showToast(
-    message
+    message,
+    type
 ){
 
     const toast =
-        document.getElementById(
-            "toast"
-        );
+        $("toast");
 
 
     toast.textContent =
         message;
+
+
+    toast.className =
+        "toast";
+
+
+    if(
+        type
+    ){
+
+        toast.classList.add(
+            type
+        );
+
+    }
 
 
     toast.classList.add(
@@ -2215,26 +3521,31 @@ function showToast(
                 );
 
             },
-            2500
+            2800
         );
 
 }
 
 
-/* ==========================================
+/* =========================================================
    INIT
-========================================== */
+========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+if(
+    document.readyState ===
+    "loading"
+){
 
-        loadProfile();
+    document.addEventListener(
+        "DOMContentLoaded",
+        initProfile
+    );
 
-    }
-);
+}else{
 
-</script>
+    initProfile();
 
-</body>
-</html>
+}
+
+</script></body>
+          </html>
