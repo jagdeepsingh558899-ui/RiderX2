@@ -3,71 +3,47 @@
    CUSTOMER BOOKING ENGINE
    File: js/booking.js
 
-   PURPOSE:
+   FINAL RESPONSIBILITIES
    ------------------------------------------------------------
-   - Create customer ride in Firestore
-   - Use one stable rideId
-   - Start RiderX matching engine
-   - Dispatch ride to nearby riders
-   - Save active ride locally
-   - Listen for ride status changes
-   - Support Firebase modular + existing RiderX setup
-
-   FIRESTORE:
-   ------------------------------------------------------------
-   rides/{rideId}
-
-   REQUIRED RIDE FIELDS:
-   ------------------------------------------------------------
-   rideId
-   customerId
-   riderId
-   service
-   serviceType
-   status
-   pickup
-   destination
-   pickupLocation
-   destinationLocation
-   fare
-   estimatedFare
-   paymentMethod
-   customerName
-   customerPhone
-   createdAt
-   updatedAt
-
-   IMPORTANT:
-   ------------------------------------------------------------
-   Customer and rider MUST use the same Firestore rideId.
+   - Use the shared RiderX Firebase instance
+   - Require a real Firebase authenticated customer
+   - Create exactly ONE stable rideId
+   - Create rides/{rideId} before matching starts
+   - Keep customer/rider on the same ride document
+   - Start the existing RiderX matching engine
+   - Persist active ride locally
+   - Restore/watch active rides
+   - Listen for Firestore ride status changes
+   - Support existing RiderX booking/map UI
    ============================================================ */
 
 "use strict";
 
 
 /* ============================================================
-   FIREBASE MODULAR IMPORTS
+   FIREBASE
+   ------------------------------------------------------------
+   IMPORTANT:
+   Do NOT initialize another Firebase app here.
+   firebase/firebase-config.js is the single Firebase source.
    ============================================================ */
 
 import {
-    getApps,
-    getApp,
-    initializeApp
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    auth,
+    db
+} from "../firebase/firebase-config.js";
 
 import {
-    getFirestore,
     collection,
     doc,
-    setDoc,
     getDoc,
-    updateDoc,
     onSnapshot,
-    serverTimestamp
+    serverTimestamp,
+    setDoc,
+    updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 import {
-    getAuth,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
@@ -96,266 +72,124 @@ const Booking =
    CONFIG
    ============================================================ */
 
-Booking.config = {
+Booking.config = Object.assign(
+    {
+        ridesCollection:
+            "rides",
 
-    ridesCollection:
-        "rides",
+        customersCollection:
+            "customers",
 
-    customersCollection:
-        "customers",
+        matchingTimeout:
+            90000,
 
-    matchingTimeout:
-        90000,
+        defaultService:
+            "bike",
 
-    defaultService:
-        "bike",
+        defaultPayment:
+            "cash",
 
-    defaultPayment:
-        "cash",
+        redirectAfterCreate:
+            true,
 
-    redirectAfterCreate:
-        true,
-
-    rideStatusPage:
-        "ride-status.html"
-
-};
+        rideStatusPage:
+            "ride-status.html"
+    },
+    Booking.config || {}
+);
 
 
 /* ============================================================
    STATE
    ============================================================ */
 
-Booking.state = {
+Booking.state = Object.assign(
+    {
+        initialized:
+            false,
 
-    initialized:
-        false,
+        submitting:
+            false,
 
-    submitting:
-        false,
+        active:
+            false,
 
-    active:
-        false,
+        rideId:
+            null,
 
-    rideId:
-        null,
+        unsubscribe:
+            null,
 
-    unsubscribe:
-        null,
+        authUser:
+            null,
 
-    authUser:
-        null,
+        pickup:
+            null,
 
-    pickup:
-        null,
+        destination:
+            null,
 
-    destination:
-        null,
+        fare:
+            0,
 
-    fare:
-        0,
+        service:
+            "bike",
 
-    service:
-        "bike",
-
-    paymentMethod:
-        "cash"
-
-};
-
-
-/* ============================================================
-   FIREBASE APP
-   ============================================================ */
-
-Booking.getFirebaseApp = function () {
-
-    try {
-
-        const apps =
-            getApps();
-
-        if (
-            apps &&
-            apps.length
-        ) {
-
-            return getApp();
-
-        }
-
-        /*
-         * Normally firebase-config.js should
-         * initialize the Firebase app before this file.
-         */
-
-        console.error(
-            "RiderX: Firebase app is not initialized. " +
-            "Load firebase/firebase-config.js before booking.js."
-        );
-
-        return null;
-
-    } catch (error) {
-
-        console.error(
-            "RiderX Firebase app error:",
-            error
-        );
-
-        return null;
-    }
-
-};
+        paymentMethod:
+            "cash"
+    },
+    Booking.state || {}
+);
 
 
 /* ============================================================
-   FIRESTORE
+   FIREBASE HELPERS
    ============================================================ */
 
 Booking.getFirestore = function () {
 
-    try {
-
-        const app =
-            Booking.getFirebaseApp();
-
-        if (!app) {
-
-            return null;
-        }
-
-        return getFirestore(
-            app
-        );
-
-    } catch (error) {
-
-        console.error(
-            "RiderX Firestore initialization failed:",
-            error
-        );
-
-        return null;
-    }
+    return db || null;
 
 };
 
-
-/* ============================================================
-   AUTH
-   ============================================================ */
 
 Booking.getAuth = function () {
 
-    try {
+    return auth || null;
 
-        const app =
-            Booking.getFirebaseApp();
+};
 
-        if (!app) {
 
-            return null;
-        }
+Booking.isFirebaseReady = function () {
 
-        return getAuth(
-            app
-        );
-
-    } catch (error) {
-
-        console.error(
-            "RiderX Auth initialization failed:",
-            error
-        );
-
-        return null;
-    }
+    return Boolean(
+        Booking.getFirestore() &&
+        Booking.getAuth()
+    );
 
 };
 
 
 /* ============================================================
-   AUTH USER
+   CURRENT AUTH USER
+   ------------------------------------------------------------
+   Firebase Auth is the ONLY authentication authority.
+   localStorage is never accepted as proof of login.
    ============================================================ */
 
 Booking.getCurrentUser = function () {
 
-    try {
+    const firebaseAuth =
+        Booking.getAuth();
 
-        const auth =
-            Booking.getAuth();
-
-        if (
-            auth &&
-            auth.currentUser
-        ) {
-
-            return auth.currentUser;
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX auth user lookup failed:",
-            error
-        );
-    }
-
-
-    /*
-     * RiderX saved user fallback.
-     */
-
-    const storageKeys = [
-
-        "riderx_user",
-        "riderx_customer",
-        "riderxUser",
-        "riderxCustomer"
-
-    ];
-
-
-    for (
-        const key of storageKeys
+    if (
+        firebaseAuth &&
+        firebaseAuth.currentUser
     ) {
 
-        try {
-
-            const raw =
-                localStorage.getItem(
-                    key
-                );
-
-            if (!raw) {
-
-                continue;
-            }
-
-
-            const user =
-                JSON.parse(
-                    raw
-                );
-
-            if (user) {
-
-                return user;
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX saved user parse failed:",
-                key,
-                error
-            );
-
-        }
+        return firebaseAuth.currentUser;
 
     }
-
 
     return null;
 
@@ -371,28 +205,17 @@ Booking.getCustomerId = function () {
     const user =
         Booking.getCurrentUser();
 
+    if (
+        !user ||
+        !user.uid
+    ) {
 
-    if (user) {
-
-        return (
-            user.uid ||
-            user.id ||
-            user.userId ||
-            user.customerId ||
-            null
-        );
+        return null;
 
     }
 
-
-    return (
-        localStorage.getItem(
-            "riderx_uid"
-        ) ||
-        localStorage.getItem(
-            "riderx_customer_id"
-        ) ||
-        null
+    return String(
+        user.uid
     );
 
 };
@@ -407,118 +230,109 @@ Booking.getCustomerProfile = async function () {
     const user =
         Booking.getCurrentUser();
 
-    const customerId =
-        Booking.getCustomerId();
+    if (
+        !user ||
+        !user.uid
+    ) {
+
+        throw new Error(
+            "Customer login required."
+        );
+
+    }
 
 
-    let profile = {
+    const profile = {
 
         name:
+            user.displayName ||
             "",
 
         phone:
+            user.phoneNumber ||
             "",
 
         email:
+            user.email ||
             ""
 
     };
 
 
-    if (user) {
-
-        profile.name =
-            user.displayName ||
-            user.name ||
-            user.fullName ||
-            user.username ||
-            "";
-
-        profile.phone =
-            user.phoneNumber ||
-            user.phone ||
-            "";
-
-        profile.email =
-            user.email ||
-            "";
-
-    }
-
-
     /*
-     * Try Firestore customer document.
+     * Customer profile is optional.
+     * Booking must still work when the customer document
+     * has not been created yet.
      */
 
-    if (
-        customerId
-    ) {
+    try {
 
-        try {
+        const database =
+            Booking.getFirestore();
 
-            const db =
-                Booking.getFirestore();
+        if (!database) {
 
-            if (db) {
-
-                const customerRef =
-                    doc(
-                        db,
-                        Booking.config
-                            .customersCollection,
-                        String(
-                            customerId
-                        )
-                    );
-
-
-                const snapshot =
-                    await getDoc(
-                        customerRef
-                    );
-
-
-                if (
-                    snapshot.exists()
-                ) {
-
-                    const data =
-                        snapshot.data() ||
-                        {};
-
-
-                    profile.name =
-                        data.name ||
-                        data.fullName ||
-                        data.displayName ||
-                        profile.name ||
-                        "";
-
-
-                    profile.phone =
-                        data.phone ||
-                        data.phoneNumber ||
-                        profile.phone ||
-                        "";
-
-
-                    profile.email =
-                        data.email ||
-                        profile.email ||
-                        "";
-
-                }
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX customer profile lookup failed:",
-                error
-            );
+            return profile;
 
         }
+
+
+        const customerRef =
+            doc(
+                database,
+                Booking.config.customersCollection,
+                user.uid
+            );
+
+
+        const snapshot =
+            await getDoc(
+                customerRef
+            );
+
+
+        if (
+            snapshot.exists()
+        ) {
+
+            const data =
+                snapshot.data() ||
+                {};
+
+
+            profile.name =
+                data.name ||
+                data.fullName ||
+                data.displayName ||
+                profile.name ||
+                "";
+
+
+            profile.phone =
+                data.phone ||
+                data.phoneNumber ||
+                profile.phone ||
+                "";
+
+
+            profile.email =
+                data.email ||
+                profile.email ||
+                "";
+
+        }
+
+    } catch (error) {
+
+        /*
+         * A missing/blocked customer profile must not prevent
+         * a valid authenticated customer from booking.
+         */
+
+        console.warn(
+            "RiderX customer profile lookup failed:",
+            error
+        );
 
     }
 
@@ -537,8 +351,7 @@ Booking.findElement = function (
 ) {
 
     if (
-        typeof ids ===
-        "string"
+        typeof ids === "string"
     ) {
 
         ids = [
@@ -553,6 +366,7 @@ Booking.findElement = function (
     ) {
 
         return null;
+
     }
 
 
@@ -563,6 +377,7 @@ Booking.findElement = function (
         if (!id) {
 
             continue;
+
         }
 
 
@@ -575,6 +390,7 @@ Booking.findElement = function (
         if (element) {
 
             return element;
+
         }
 
     }
@@ -586,7 +402,7 @@ Booking.findElement = function (
 
 
 /* ============================================================
-   GET VALUE
+   VALUE HELPER
    ============================================================ */
 
 Booking.getValue = function (
@@ -602,6 +418,7 @@ Booking.getValue = function (
     if (!element) {
 
         return "";
+
     }
 
 
@@ -615,24 +432,26 @@ Booking.getValue = function (
 
 
 /* ============================================================
-   SET MESSAGE
+   MESSAGE
    ============================================================ */
 
 Booking.showMessage = function (
     message,
-    type
+    type = "info"
 ) {
 
     const element =
-        Booking.findElement([
-            "message",
-            "booking-message",
-            "bookingMessage",
-            "status-message",
-            "statusMessage",
-            "error-message",
-            "errorMessage"
-        ]);
+        Booking.findElement(
+            [
+                "message",
+                "booking-message",
+                "bookingMessage",
+                "status-message",
+                "statusMessage",
+                "error-message",
+                "errorMessage"
+            ]
+        );
 
 
     if (element) {
@@ -646,14 +465,13 @@ Booking.showMessage = function (
                 : "";
 
         element.dataset.type =
-            type ||
-            "info";
+            type;
 
     }
 
 
     console.log(
-        "RiderX Booking:",
+        `[RiderX Booking:${type}]`,
         message
     );
 
@@ -702,6 +520,7 @@ Booking.setLoading = function (
                     button.dataset
                         .originalText =
                         button.textContent;
+
                 }
 
 
@@ -718,6 +537,7 @@ Booking.setLoading = function (
                     button.textContent =
                         button.dataset
                             .originalText;
+
                 }
 
             }
@@ -729,26 +549,25 @@ Booking.setLoading = function (
 
 
 /* ============================================================
-   GENERATE RIDE ID
+   RIDE ID
    ============================================================ */
 
 Booking.createRideId = function () {
 
-    return (
-
-        "ride_" +
-
-        Date.now() +
-
-        "_" +
-
+    const random =
         Math.random()
             .toString(36)
             .slice(
                 2,
                 10
-            )
+            );
 
+
+    return (
+        "ride_" +
+        Date.now() +
+        "_" +
+        random
     );
 
 };
@@ -765,74 +584,52 @@ Booking.normalizeLocation = function (
     if (!location) {
 
         return null;
+
     }
 
 
-    /*
-     * Leaflet LatLng.
-     */
+    const lat =
+        Number(
+            location.lat ??
+            location.latitude
+        );
+
+
+    const lng =
+        Number(
+            location.lng ??
+            location.longitude
+        );
+
 
     if (
-        Number.isFinite(
-            Number(
-                location.lat
-            )
-        ) &&
-        Number.isFinite(
-            Number(
-                location.lng
-            )
-        )
+        !Number.isFinite(lat) ||
+        !Number.isFinite(lng)
     ) {
 
-        return {
-
-            lat:
-                Number(
-                    location.lat
-                ),
-
-            lng:
-                Number(
-                    location.lng
-                )
-
-        };
+        return null;
 
     }
 
 
     if (
-        Number.isFinite(
-            Number(
-                location.latitude
-            )
-        ) &&
-        Number.isFinite(
-            Number(
-                location.longitude
-            )
-        )
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
     ) {
 
-        return {
-
-            lat:
-                Number(
-                    location.latitude
-                ),
-
-            lng:
-                Number(
-                    location.longitude
-                )
-
-        };
+        return null;
 
     }
 
 
-    return null;
+    return {
+
+        lat,
+        lng
+
+    };
 
 };
 
@@ -843,33 +640,18 @@ Booking.normalizeLocation = function (
 
 Booking.getPickupLocation = function () {
 
-    /*
-     * Existing RiderX booking state.
-     */
-
-    if (
-        RX.booking &&
-        RX.booking.state &&
-        RX.booking.state.pickup
-    ) {
-
-        const location =
-            Booking.normalizeLocation(
-                RX.booking.state.pickup
-            );
+    const stateLocation =
+        Booking.normalizeLocation(
+            Booking.state.pickup
+        );
 
 
-        if (location) {
+    if (stateLocation) {
 
-            return location;
-        }
+        return stateLocation;
 
     }
 
-
-    /*
-     * Common global variables.
-     */
 
     const candidates = [
 
@@ -895,54 +677,42 @@ Booking.getPickupLocation = function () {
         if (location) {
 
             return location;
+
         }
 
     }
 
 
-    /*
-     * Dataset / hidden fields.
-     */
-
     const lat =
         Number(
-            Booking.getValue([
-                "pickupLat",
-                "pickup-lat",
-                "pickupLatitude"
-            ])
+            Booking.getValue(
+                [
+                    "pickupLat",
+                    "pickup-lat",
+                    "pickupLatitude"
+                ]
+            )
         );
 
 
     const lng =
         Number(
-            Booking.getValue([
-                "pickupLng",
-                "pickup-lng",
-                "pickupLongitude"
-            ])
+            Booking.getValue(
+                [
+                    "pickupLng",
+                    "pickup-lng",
+                    "pickupLongitude"
+                ]
+            )
         );
 
 
-    if (
-        Number.isFinite(lat) &&
-        Number.isFinite(lng)
-    ) {
-
-        return {
-
-            lat:
-                lat,
-
-            lng:
-                lng
-
-        };
-
-    }
-
-
-    return null;
+    return Booking.normalizeLocation(
+        {
+            lat,
+            lng
+        }
+    );
 
 };
 
@@ -953,22 +723,15 @@ Booking.getPickupLocation = function () {
 
 Booking.getDestinationLocation = function () {
 
-    if (
-        RX.booking &&
-        RX.booking.state &&
-        RX.booking.state.destination
-    ) {
-
-        const location =
-            Booking.normalizeLocation(
-                RX.booking.state.destination
-            );
+    const stateLocation =
+        Booking.normalizeLocation(
+            Booking.state.destination
+        );
 
 
-        if (location) {
+    if (stateLocation) {
 
-            return location;
-        }
+        return stateLocation;
 
     }
 
@@ -997,6 +760,7 @@ Booking.getDestinationLocation = function () {
         if (location) {
 
             return location;
+
         }
 
     }
@@ -1004,121 +768,90 @@ Booking.getDestinationLocation = function () {
 
     const lat =
         Number(
-            Booking.getValue([
-                "dropLat",
-                "drop-lat",
-                "dropLatitude",
-                "destinationLat",
-                "destination-lat"
-            ])
+            Booking.getValue(
+                [
+                    "dropLat",
+                    "drop-lat",
+                    "dropLatitude",
+                    "destinationLat",
+                    "destination-lat"
+                ]
+            )
         );
 
 
     const lng =
         Number(
-            Booking.getValue([
-                "dropLng",
-                "drop-lng",
-                "dropLongitude",
-                "destinationLng",
-                "destination-lng"
-            ])
+            Booking.getValue(
+                [
+                    "dropLng",
+                    "drop-lng",
+                    "dropLongitude",
+                    "destinationLng",
+                    "destination-lng"
+                ]
+            )
         );
 
 
-    if (
-        Number.isFinite(lat) &&
-        Number.isFinite(lng)
-    ) {
-
-        return {
-
-            lat:
-                lat,
-
-            lng:
-                lng
-
-        };
-
-    }
-
-
-    return null;
+    return Booking.normalizeLocation(
+        {
+            lat,
+            lng
+        }
+    );
 
 };
 
 
 /* ============================================================
-   GET PICKUP ADDRESS
+   PICKUP ADDRESS
    ============================================================ */
 
 Booking.getPickupAddress = function () {
 
-    return Booking.getValue([
-
-        "pickup",
-        "pickupAddress",
-        "pickup-address",
-        "pickupLocationText",
-        "pickup-location",
-        "from",
-        "fromAddress"
-
-    ]);
+    return Booking.getValue(
+        [
+            "pickup",
+            "pickupAddress",
+            "pickup-address",
+            "pickupLocationText",
+            "pickup-location",
+            "from",
+            "fromAddress"
+        ]
+    );
 
 };
 
 
 /* ============================================================
-   GET DESTINATION ADDRESS
+   DESTINATION ADDRESS
    ============================================================ */
 
 Booking.getDestinationAddress = function () {
 
-    return Booking.getValue([
-
-        "drop",
-        "dropAddress",
-        "drop-address",
-        "destination",
-        "destinationAddress",
-        "destination-address",
-        "to",
-        "toAddress"
-
-    ]);
+    return Booking.getValue(
+        [
+            "drop",
+            "dropAddress",
+            "drop-address",
+            "destination",
+            "destinationAddress",
+            "destination-address",
+            "to",
+            "toAddress"
+        ]
+    );
 
 };
 
 
 /* ============================================================
-   GET SERVICE
+   SERVICE
    ============================================================ */
 
 Booking.getService = function () {
-
-    const value =
-        Booking.getValue([
-
-            "service",
-            "serviceType",
-            "service-type",
-            "rideType",
-            "ride-type",
-            "selectedService"
-
-        ]);
-
-
-    if (value) {
-
-        return value
-            .toLowerCase()
-            .trim();
-
-    }
-
 
     const selected =
         document.querySelector(
@@ -1134,29 +867,45 @@ Booking.getService = function () {
 
     if (selected) {
 
-        return (
-
+        const selectedValue =
             selected.value ||
+            selected.dataset?.service ||
+            selected.dataset?.serviceType ||
+            "";
 
-            selected.dataset
-                ?.service ||
 
-            selected.dataset
-                ?.serviceType ||
+        if (selectedValue) {
 
-            Booking.config
-                .defaultService
+            return String(
+                selectedValue
+            )
+            .toLowerCase()
+            .trim();
 
-        )
-        .toString()
-        .toLowerCase()
-        .trim();
+        }
 
     }
 
 
-    return Booking.config
-        .defaultService;
+    const value =
+        Booking.getValue(
+            [
+                "service",
+                "serviceType",
+                "service-type",
+                "rideType",
+                "ride-type",
+                "selectedService"
+            ]
+        );
+
+
+    return (
+        value ||
+        Booking.config.defaultService
+    )
+    .toLowerCase()
+    .trim();
 
 };
 
@@ -1169,51 +918,41 @@ Booking.normalizeService = function (
     service
 ) {
 
-    service =
+    const value =
         String(
-            service ||
-            "bike"
+            service || "bike"
         )
         .toLowerCase()
         .trim();
 
 
     if (
-        service.includes(
-            "cab"
-        ) ||
-        service.includes(
-            "car"
-        ) ||
-        service.includes(
-            "taxi"
-        )
+        value.includes("cab") ||
+        value.includes("car") ||
+        value.includes("taxi")
     ) {
 
         return "cab";
+
     }
 
 
     if (
-        service.includes(
-            "parcel"
-        ) ||
-        service.includes(
-            "delivery"
-        )
+        value.includes("parcel") ||
+        value.includes("delivery")
     ) {
 
         return "parcel";
+
     }
 
 
     if (
-        service.includes(
-            "food"
-        )
+        value.includes("food")
     ) {
 
         return "food";
+
     }
 
 
@@ -1223,7 +962,7 @@ Booking.normalizeService = function (
 
 
 /* ============================================================
-   GET PAYMENT METHOD
+   PAYMENT METHOD
    ============================================================ */
 
 Booking.getPaymentMethod = function () {
@@ -1240,31 +979,37 @@ Booking.getPaymentMethod = function () {
 
     if (checked) {
 
-        return String(
-            checked.value ||
-            ""
-        )
-        .toLowerCase()
-        .trim();
+        const value =
+            String(
+                checked.value || ""
+            )
+            .toLowerCase()
+            .trim();
+
+
+        if (value) {
+
+            return value;
+
+        }
 
     }
 
 
     const value =
-        Booking.getValue([
-
-            "paymentMethod",
-            "payment-method",
-            "payment",
-            "selectedPayment"
-
-        ]);
+        Booking.getValue(
+            [
+                "paymentMethod",
+                "payment-method",
+                "payment",
+                "selectedPayment"
+            ]
+        );
 
 
     return (
         value ||
-        Booking.config
-            .defaultPayment
+        Booking.config.defaultPayment
     )
     .toLowerCase()
     .trim();
@@ -1273,7 +1018,7 @@ Booking.getPaymentMethod = function () {
 
 
 /* ============================================================
-   GET FARE
+   FARE
    ============================================================ */
 
 Booking.getFare = function () {
@@ -1305,22 +1050,23 @@ Booking.getFare = function () {
         ) {
 
             return fare;
+
         }
 
     }
 
 
     const element =
-        Booking.findElement([
-
-            "fare",
-            "estimatedFare",
-            "estimated-fare",
-            "fareAmount",
-            "totalFare",
-            "total-fare"
-
-        ]);
+        Booking.findElement(
+            [
+                "fare",
+                "estimatedFare",
+                "estimated-fare",
+                "fareAmount",
+                "totalFare",
+                "total-fare"
+            ]
+        );
 
 
     if (element) {
@@ -1340,10 +1086,12 @@ Booking.getFare = function () {
 
 
         if (
-            Number.isFinite(fare)
+            Number.isFinite(fare) &&
+            fare >= 0
         ) {
 
             return fare;
+
         }
 
     }
@@ -1376,9 +1124,7 @@ Booking.validate = function () {
         Booking.getDestinationLocation();
 
 
-    if (
-        !pickupAddress
-    ) {
+    if (!pickupAddress) {
 
         return {
 
@@ -1393,9 +1139,7 @@ Booking.validate = function () {
     }
 
 
-    if (
-        !destinationAddress
-    ) {
+    if (!destinationAddress) {
 
         return {
 
@@ -1410,9 +1154,7 @@ Booking.validate = function () {
     }
 
 
-    if (
-        !pickupLocation
-    ) {
+    if (!pickupLocation) {
 
         return {
 
@@ -1427,9 +1169,7 @@ Booking.validate = function () {
     }
 
 
-    if (
-        !destinationLocation
-    ) {
+    if (!destinationLocation) {
 
         return {
 
@@ -1449,17 +1189,13 @@ Booking.validate = function () {
         valid:
             true,
 
-        pickupAddress:
-            pickupAddress,
+        pickupAddress,
 
-        destinationAddress:
-            destinationAddress,
+        destinationAddress,
 
-        pickupLocation:
-            pickupLocation,
+        pickupLocation,
 
-        destinationLocation:
-            destinationLocation
+        destinationLocation
 
     };
 
@@ -1476,9 +1212,7 @@ Booking.buildRide = async function () {
         Booking.validate();
 
 
-    if (
-        !validation.valid
-    ) {
+    if (!validation.valid) {
 
         throw new Error(
             validation.message
@@ -1487,22 +1221,24 @@ Booking.buildRide = async function () {
     }
 
 
-    const customerId =
-        Booking.getCustomerId();
+    const user =
+        Booking.getCurrentUser();
 
 
-    if (!customerId) {
+    if (
+        !user ||
+        !user.uid
+    ) {
 
         throw new Error(
-            "Customer login required."
+            "Customer login required. Please login again."
         );
 
     }
 
 
     const profile =
-        await Booking
-            .getCustomerProfile();
+        await Booking.getCustomerProfile();
 
 
     const service =
@@ -1523,18 +1259,13 @@ Booking.buildRide = async function () {
         Booking.createRideId();
 
 
-    const now =
-        Date.now();
-
-
     return {
 
-        rideId:
-            rideId,
+        rideId,
 
         customerId:
             String(
-                customerId
+                user.uid
             ),
 
         riderId:
@@ -1552,8 +1283,7 @@ Booking.buildRide = async function () {
             profile.email ||
             "",
 
-        service:
-            service,
+        service,
 
         serviceType:
             service,
@@ -1562,37 +1292,29 @@ Booking.buildRide = async function () {
             "searching",
 
         pickup:
-            validation
-                .pickupAddress,
+            validation.pickupAddress,
 
         destination:
-            validation
-                .destinationAddress,
+            validation.destinationAddress,
 
         pickupAddress:
-            validation
-                .pickupAddress,
+            validation.pickupAddress,
 
         destinationAddress:
-            validation
-                .destinationAddress,
+            validation.destinationAddress,
 
         pickupLocation:
-            validation
-                .pickupLocation,
+            validation.pickupLocation,
 
         destinationLocation:
-            validation
-                .destinationLocation,
+            validation.destinationLocation,
 
-        fare:
-            fare,
+        fare,
 
         estimatedFare:
             fare,
 
-        paymentMethod:
-            paymentMethod,
+        paymentMethod,
 
         createdAt:
             serverTimestamp(),
@@ -1604,10 +1326,10 @@ Booking.buildRide = async function () {
             serverTimestamp(),
 
         createdAtClient:
-            now,
+            Date.now(),
 
         updatedAtClient:
-            now
+            Date.now()
 
     };
 
@@ -1615,21 +1337,33 @@ Booking.buildRide = async function () {
 
 
 /* ============================================================
-   CREATE RIDE DIRECTLY IN FIRESTORE
+   CREATE FIRESTORE RIDE
    ============================================================ */
 
 Booking.createRideInFirestore = async function (
     ride
 ) {
 
-    const db =
+    const database =
         Booking.getFirestore();
 
 
-    if (!db) {
+    if (!database) {
 
         throw new Error(
-            "Firestore is not available. Check firebase-config.js."
+            "Firestore is unavailable."
+        );
+
+    }
+
+
+    if (
+        !ride ||
+        !ride.rideId
+    ) {
+
+        throw new Error(
+            "Invalid ride data."
         );
 
     }
@@ -1637,16 +1371,18 @@ Booking.createRideInFirestore = async function (
 
     const rideRef =
         doc(
-            db,
-            Booking.config
-                .ridesCollection,
-            ride.rideId
+            database,
+            Booking.config.ridesCollection,
+            String(
+                ride.rideId
+            )
         );
 
 
     /*
-     * IMPORTANT:
-     * setDoc guarantees the exact rideId is used.
+     * EXACTLY ONE ride document.
+     *
+     * rides/{rideId}
      */
 
     await setDoc(
@@ -1659,10 +1395,6 @@ Booking.createRideInFirestore = async function (
     );
 
 
-    /*
-     * Verify write.
-     */
-
     const verification =
         await getDoc(
             rideRef
@@ -1674,16 +1406,10 @@ Booking.createRideInFirestore = async function (
     ) {
 
         throw new Error(
-            "Ride write returned but Firestore document was not found."
+            "Ride document could not be verified."
         );
 
     }
-
-
-    console.log(
-        "RiderX FIRESTORE RIDE CREATED:",
-        ride.rideId
-    );
 
 
     return {
@@ -1700,16 +1426,12 @@ Booking.createRideInFirestore = async function (
 
 
 /* ============================================================
-   START MATCHING ENGINE
+   MATCHING ENGINE
    ============================================================ */
 
 Booking.startMatching = async function (
     ride
 ) {
-
-    /*
-     * Matching engine is the preferred dispatcher.
-     */
 
     const matching =
         RX.matching;
@@ -1717,14 +1439,13 @@ Booking.startMatching = async function (
 
     if (
         matching &&
-        typeof matching.start ===
-        "function"
+        typeof matching.start === "function"
     ) {
 
         try {
 
-            const result =
-                await matching.start({
+            return await matching.start(
+                {
 
                     rideId:
                         ride.rideId,
@@ -1738,19 +1459,19 @@ Booking.startMatching = async function (
                     serviceType:
                         ride.serviceType,
 
-                    pickupAddress:
+                    pickup:
                         ride.pickup,
 
-                    pickup:
+                    pickupAddress:
                         ride.pickup,
 
                     pickupLocation:
                         ride.pickupLocation,
 
-                    destinationAddress:
+                    destination:
                         ride.destination,
 
-                    destination:
+                    destinationAddress:
                         ride.destination,
 
                     destinationLocation:
@@ -1771,16 +1492,8 @@ Booking.startMatching = async function (
                     customerPhone:
                         ride.customerPhone
 
-                });
-
-
-            console.log(
-                "RiderX matching started:",
-                result
+                }
             );
-
-
-            return result;
 
         } catch (error) {
 
@@ -1791,9 +1504,8 @@ Booking.startMatching = async function (
 
 
             /*
-             * Important:
-             * Do not silently erase the Firestore ride.
-             * The ride is already safely created.
+             * Do NOT delete the ride.
+             * Firestore remains the source of truth.
              */
 
             return {
@@ -1801,14 +1513,10 @@ Booking.startMatching = async function (
                 success:
                     false,
 
-                error:
-                    error,
-
-                ride:
-                    ride,
-
                 rideId:
-                    ride.rideId
+                    ride.rideId,
+
+                error
 
             };
 
@@ -1817,25 +1525,29 @@ Booking.startMatching = async function (
     }
 
 
+    /*
+     * Matching engine may load after booking.js.
+     * The Firestore ride is still valid.
+     */
+
     console.warn(
-        "RiderX matching engine is not loaded. " +
-        "Ride remains available in Firestore."
+        "RiderX matching engine is not available yet."
     );
 
 
     return {
 
         success:
-            true,
+            false,
 
         matching:
             false,
 
-        ride:
-            ride,
-
         rideId:
-            ride.rideId
+            ride.rideId,
+
+        reason:
+            "matching-engine-not-loaded"
 
     };
 
@@ -1850,34 +1562,53 @@ Booking.saveActiveRide = function (
     ride
 ) {
 
+    if (
+        !ride ||
+        !ride.rideId
+    ) {
+
+        return false;
+
+    }
+
+
     try {
+
+        const activeRide = {
+
+            rideId:
+                ride.rideId,
+
+            customerId:
+                ride.customerId,
+
+            status:
+                ride.status,
+
+            riderId:
+                ride.riderId ||
+                null,
+
+            service:
+                ride.service,
+
+            pickup:
+                ride.pickup,
+
+            destination:
+                ride.destination,
+
+            createdAt:
+                Date.now()
+
+        };
+
 
         localStorage.setItem(
             "riderx_active_ride",
-            JSON.stringify({
-
-                rideId:
-                    ride.rideId,
-
-                customerId:
-                    ride.customerId,
-
-                status:
-                    ride.status,
-
-                service:
-                    ride.service,
-
-                pickup:
-                    ride.pickup,
-
-                destination:
-                    ride.destination,
-
-                createdAt:
-                    Date.now()
-
-            })
+            JSON.stringify(
+                activeRide
+            )
         );
 
 
@@ -1896,12 +1627,18 @@ Booking.saveActiveRide = function (
             )
         );
 
+
+        return true;
+
     } catch (error) {
 
         console.warn(
-            "RiderX active ride localStorage failed:",
+            "RiderX active ride storage failed:",
             error
         );
+
+
+        return false;
 
     }
 
@@ -1931,7 +1668,128 @@ Booking.clearActiveRide = function () {
     } catch (error) {
 
         console.warn(
-            "RiderX active ride clear failed:",
+            "RiderX active ride cleanup failed:",
+            error
+        );
+
+    }
+
+
+    Booking.state.rideId =
+        null;
+
+    Booking.state.active =
+        false;
+
+};
+
+
+/* ============================================================
+   RIDE STATUS HELPERS
+   ============================================================ */
+
+Booking.normalizeStatus = function (
+    status
+) {
+
+    return String(
+        status || ""
+    )
+    .toLowerCase()
+    .trim()
+    .replace(
+        /[\s-]+/g,
+        "_"
+    );
+
+};
+
+
+Booking.isTerminalStatus = function (
+    status
+) {
+
+    return [
+        "completed",
+        "cancelled",
+        "canceled",
+        "no_driver",
+        "expired"
+    ].includes(
+        Booking.normalizeStatus(
+            status
+        )
+    );
+
+};
+
+
+/* ============================================================
+   UPDATE ACTIVE RIDE LOCAL CACHE
+   ============================================================ */
+
+Booking.updateLocalRide = function (
+    rideId,
+    ride
+) {
+
+    try {
+
+        const current =
+            JSON.parse(
+                localStorage.getItem(
+                    "riderx_active_ride"
+                ) ||
+                "{}"
+            );
+
+
+        const merged = {
+
+            ...current,
+
+            rideId,
+
+            status:
+                ride.status ||
+                current.status ||
+                "searching",
+
+            riderId:
+                ride.riderId ||
+                current.riderId ||
+                null,
+
+            updatedAt:
+                Date.now()
+
+        };
+
+
+        if (
+            Booking.isTerminalStatus(
+                merged.status
+            )
+        ) {
+
+            Booking.clearActiveRide();
+
+            return;
+
+        }
+
+
+        localStorage.setItem(
+            "riderx_active_ride",
+            JSON.stringify(
+                merged
+            )
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX local ride update failed:",
             error
         );
 
@@ -1951,6 +1809,7 @@ Booking.watchRide = function (
     if (!rideId) {
 
         return null;
+
     }
 
 
@@ -1958,36 +1817,16 @@ Booking.watchRide = function (
      * Remove previous listener.
      */
 
-    if (
-        typeof Booking.state
-            .unsubscribe ===
-        "function"
-    ) {
-
-        try {
-
-            Booking.state
-                .unsubscribe();
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX old ride listener cleanup failed:",
-                error
-            );
-
-        }
-
-    }
+    Booking.stopWatchingRide();
 
 
-    const db =
+    const database =
         Booking.getFirestore();
 
 
-    if (!db) {
+    if (!database) {
 
-        console.warn(
+        console.error(
             "RiderX cannot watch ride: Firestore unavailable."
         );
 
@@ -1998,30 +1837,44 @@ Booking.watchRide = function (
 
     const rideRef =
         doc(
-            db,
-            Booking.config
-                .ridesCollection,
+            database,
+            Booking.config.ridesCollection,
             String(
                 rideId
             )
         );
 
 
-    Booking.state.unsubscribe =
+    const unsubscribe =
         onSnapshot(
             rideRef,
-            function (snapshot) {
+
+            function (
+                snapshot
+            ) {
 
                 if (
                     !snapshot.exists()
                 ) {
 
                     console.warn(
-                        "RiderX ride document disappeared:",
+                        "RiderX ride document does not exist:",
                         rideId
                     );
 
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "riderx-ride-not-found",
+                            {
+                                detail: {
+                                    rideId
+                                }
+                            }
+                        )
+                    );
+
                     return;
+
                 }
 
 
@@ -2030,65 +1883,40 @@ Booking.watchRide = function (
                     {};
 
 
+                const status =
+                    Booking.normalizeStatus(
+                        ride.status
+                    );
+
+
+                Booking.state.rideId =
+                    String(
+                        rideId
+                    );
+
+
                 Booking.state.active =
-                    ![
-                        "completed",
-                        "cancelled",
-                        "no_driver"
-                    ].includes(
-                        String(
-                            ride.status ||
-                            ""
-                        ).toLowerCase()
+                    !Booking.isTerminalStatus(
+                        status
                     );
 
 
-                /*
-                 * Keep local active ride updated.
-                 */
-
-                try {
-
-                    const saved =
-                        JSON.parse(
-                            localStorage.getItem(
-                                "riderx_active_ride"
-                            ) ||
-                            "{}"
-                        );
-
-
-                    localStorage.setItem(
-                        "riderx_active_ride",
-                        JSON.stringify({
-
-                            ...saved,
-
-                            rideId:
-                                rideId,
-
-                            status:
-                                ride.status ||
-                                "searching",
-
-                            riderId:
-                                ride.riderId ||
-                                null,
-
-                            updatedAt:
-                                Date.now()
-
-                        })
+                Booking.state.pickup =
+                    Booking.normalizeLocation(
+                        ride.pickupLocation
                     );
 
-                } catch (error) {
 
-                    console.warn(
-                        "RiderX ride local state update failed:",
-                        error
+                Booking.state.destination =
+                    Booking.normalizeLocation(
+                        ride.destinationLocation
                     );
 
-                }
+
+                Booking.updateLocalRide(
+                    String(rideId),
+                    ride
+                );
 
 
                 window.dispatchEvent(
@@ -2098,10 +1926,11 @@ Booking.watchRide = function (
                             detail: {
 
                                 rideId:
-                                    rideId,
+                                    String(
+                                        rideId
+                                    ),
 
-                                ride:
-                                    ride
+                                ride
 
                             }
                         }
@@ -2120,12 +1949,10 @@ Booking.watchRide = function (
                         "arriving",
                         "arrived",
                         "started",
-                        "in_progress"
+                        "in_progress",
+                        "inprogress"
                     ].includes(
-                        String(
-                            ride.status ||
-                            ""
-                        ).toLowerCase()
+                        status
                     )
                 ) {
 
@@ -2136,13 +1963,14 @@ Booking.watchRide = function (
                                 detail: {
 
                                     rideId:
-                                        rideId,
+                                        String(
+                                            rideId
+                                        ),
 
                                     riderId:
                                         ride.riderId,
 
-                                    ride:
-                                        ride
+                                    ride
 
                                 }
                             }
@@ -2153,29 +1981,46 @@ Booking.watchRide = function (
 
 
                 /*
-                 * Ride completed/cancelled.
+                 * Terminal ride.
                  */
 
                 if (
-                    [
-                        "completed",
-                        "cancelled",
-                        "no_driver"
-                    ].includes(
-                        String(
-                            ride.status ||
-                            ""
-                        ).toLowerCase()
+                    Booking.isTerminalStatus(
+                        status
                     )
                 ) {
 
                     Booking.state.active =
                         false;
 
+
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "riderx-ride-finished",
+                            {
+                                detail: {
+
+                                    rideId:
+                                        String(
+                                            rideId
+                                        ),
+
+                                    status,
+
+                                    ride
+
+                                }
+                            }
+                        )
+                    );
+
                 }
 
             },
-            function (error) {
+
+            function (
+                error
+            ) {
 
                 console.error(
                     "RiderX ride listener error:",
@@ -2190,10 +2035,11 @@ Booking.watchRide = function (
                             detail: {
 
                                 rideId:
-                                    rideId,
+                                    String(
+                                        rideId
+                                    ),
 
-                                error:
-                                    error
+                                error
 
                             }
                         }
@@ -2204,7 +2050,44 @@ Booking.watchRide = function (
         );
 
 
-    return Booking.state.unsubscribe;
+    Booking.state.unsubscribe =
+        unsubscribe;
+
+
+    return unsubscribe;
+
+};
+
+
+/* ============================================================
+   STOP WATCHING RIDE
+   ============================================================ */
+
+Booking.stopWatchingRide = function () {
+
+    if (
+        typeof Booking.state.unsubscribe ===
+        "function"
+    ) {
+
+        try {
+
+            Booking.state.unsubscribe();
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX ride listener cleanup failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    Booking.state.unsubscribe =
+        null;
 
 };
 
@@ -2218,11 +2101,32 @@ Booking.updateRide = async function (
     update
 ) {
 
-    const db =
+    if (!rideId) {
+
+        throw new Error(
+            "Ride ID is required."
+        );
+
+    }
+
+
+    if (
+        !update ||
+        typeof update !== "object"
+    ) {
+
+        throw new Error(
+            "Ride update data is invalid."
+        );
+
+    }
+
+
+    const database =
         Booking.getFirestore();
 
 
-    if (!db) {
+    if (!database) {
 
         throw new Error(
             "Firestore unavailable."
@@ -2233,9 +2137,8 @@ Booking.updateRide = async function (
 
     const rideRef =
         doc(
-            db,
-            Booking.config
-                .ridesCollection,
+            database,
+            Booking.config.ridesCollection,
             String(
                 rideId
             )
@@ -2273,19 +2176,135 @@ Booking.cancelRide = async function (
 
     rideId =
         rideId ||
-        Booking.state.rideId ||
-        localStorage.getItem(
-            "riderx_active_ride_id"
-        );
+        Booking.state.rideId;
+
+
+    if (!rideId) {
+
+        try {
+
+            rideId =
+                localStorage.getItem(
+                    "riderx_active_ride_id"
+                );
+
+        } catch (error) {
+
+            rideId =
+                null;
+
+        }
+
+    }
 
 
     if (!rideId) {
 
         return false;
+
+    }
+
+
+    const user =
+        Booking.getCurrentUser();
+
+
+    if (
+        !user ||
+        !user.uid
+    ) {
+
+        Booking.showMessage(
+            "Please login again before cancelling the ride.",
+            "error"
+        );
+
+        return false;
+
     }
 
 
     try {
+
+        /*
+         * Read first so a customer cannot accidentally
+         * cancel a ride belonging to another account.
+         */
+
+        const database =
+            Booking.getFirestore();
+
+
+        if (!database) {
+
+            throw new Error(
+                "Firestore unavailable."
+            );
+
+        }
+
+
+        const rideRef =
+            doc(
+                database,
+                Booking.config.ridesCollection,
+                String(
+                    rideId
+                )
+            );
+
+
+        const snapshot =
+            await getDoc(
+                rideRef
+            );
+
+
+        if (
+            !snapshot.exists()
+        ) {
+
+            Booking.clearActiveRide();
+
+            return false;
+
+        }
+
+
+        const ride =
+            snapshot.data() ||
+            {};
+
+
+        if (
+            String(
+                ride.customerId ||
+                ""
+            ) !==
+            String(
+                user.uid
+            )
+        ) {
+
+            throw new Error(
+                "You are not allowed to cancel this ride."
+            );
+
+        }
+
+
+        if (
+            Booking.isTerminalStatus(
+                ride.status
+            )
+        ) {
+
+            Booking.clearActiveRide();
+
+            return true;
+
+        }
+
 
         await Booking.updateRide(
             rideId,
@@ -2293,6 +2312,9 @@ Booking.cancelRide = async function (
 
                 status:
                     "cancelled",
+
+                cancelledBy:
+                    "customer",
 
                 cancelledAt:
                     serverTimestamp(),
@@ -2304,9 +2326,6 @@ Booking.cancelRide = async function (
         );
 
 
-        Booking.clearActiveRide();
-
-
         if (
             RX.matching &&
             typeof RX.matching.cancel ===
@@ -2315,7 +2334,11 @@ Booking.cancelRide = async function (
 
             try {
 
-                await RX.matching.cancel();
+                await RX.matching.cancel(
+                    String(
+                        rideId
+                    )
+                );
 
             } catch (error) {
 
@@ -2329,6 +2352,11 @@ Booking.cancelRide = async function (
         }
 
 
+        Booking.stopWatchingRide();
+
+        Booking.clearActiveRide();
+
+
         window.dispatchEvent(
             new CustomEvent(
                 "riderx-ride-cancelled",
@@ -2336,7 +2364,9 @@ Booking.cancelRide = async function (
                     detail: {
 
                         rideId:
-                            rideId
+                            String(
+                                rideId
+                            )
 
                     }
                 }
@@ -2355,6 +2385,7 @@ Booking.cancelRide = async function (
 
 
         Booking.showMessage(
+            error?.message ||
             "Ride cancel nahi hui. Please try again.",
             "error"
         );
@@ -2377,17 +2408,10 @@ Booking.openRideStatus = function (
 
     if (!rideId) {
 
-        return;
+        return null;
+
     }
 
-
-    /*
-     * Current page:
-     * customer/booking.html
-     *
-     * Target:
-     * customer/ride-status.html
-     */
 
     const currentPath =
         String(
@@ -2396,9 +2420,7 @@ Booking.openRideStatus = function (
         );
 
 
-    let target =
-        Booking.config
-            .rideStatusPage;
+    let target;
 
 
     if (
@@ -2429,21 +2451,20 @@ Booking.openRideStatus = function (
         separator +
         "rideId=" +
         encodeURIComponent(
-            rideId
+            String(
+                rideId
+            )
         );
 
-
-    /*
-     * Only redirect when explicitly enabled.
-     */
 
     if (
         Booking.config
             .redirectAfterCreate
     ) {
 
-        window.location.href =
-            url;
+        window.location.replace(
+            url
+        );
 
     }
 
@@ -2472,17 +2493,9 @@ Booking.bookRide = async function (
     }
 
 
-    /*
-     * Prevent double booking.
-     */
-
     if (
         Booking.state.submitting
     ) {
-
-        console.warn(
-            "RiderX booking already in progress."
-        );
 
         return false;
 
@@ -2507,32 +2520,32 @@ Booking.bookRide = async function (
     try {
 
         /*
-         * Validate Firebase first.
+         * Firebase must be ready.
          */
 
-        const db =
-            Booking.getFirestore();
-
-
-        if (!db) {
+        if (
+            !Booking.isFirebaseReady()
+        ) {
 
             throw new Error(
-                "Firebase/Firestore load nahi hua. " +
-                "firebase/firebase-config.js check karo."
+                "Firebase service unavailable. Please reload RiderX."
             );
 
         }
 
 
         /*
-         * Validate customer.
+         * Real authenticated customer required.
          */
 
-        const customerId =
-            Booking.getCustomerId();
+        const user =
+            Booking.getCurrentUser();
 
 
-        if (!customerId) {
+        if (
+            !user ||
+            !user.uid
+        ) {
 
             throw new Error(
                 "Customer login required. Please login again."
@@ -2542,40 +2555,25 @@ Booking.bookRide = async function (
 
 
         /*
-         * Build complete ride object.
+         * Build ride.
          */
 
         const ride =
             await Booking.buildRide();
 
 
-        console.log(
-            "RiderX ride prepared:",
+        /*
+         * IMPORTANT:
+         * Firestore document is created FIRST.
+         */
+
+        await Booking.createRideInFirestore(
             ride
         );
 
 
         /*
-         * --------------------------------------------------------
-         * STEP 1
-         * CREATE RIDE DIRECTLY IN FIRESTORE.
-         *
-         * This guarantees:
-         *
-         * rides/{rideId}
-         *
-         * exists BEFORE matching starts.
-         * --------------------------------------------------------
-         */
-
-        await Booking
-            .createRideInFirestore(
-                ride
-            );
-
-
-        /*
-         * Save local active ride immediately.
+         * Save active ride immediately.
          */
 
         Booking.state.rideId =
@@ -2606,17 +2604,13 @@ Booking.bookRide = async function (
 
 
         /*
-         * Start listener BEFORE matching.
+         * Start Firestore listener BEFORE matching.
          */
 
         Booking.watchRide(
             ride.rideId
         );
 
-
-        /*
-         * Tell UI that Firestore ride exists.
-         */
 
         window.dispatchEvent(
             new CustomEvent(
@@ -2627,8 +2621,7 @@ Booking.bookRide = async function (
                         rideId:
                             ride.rideId,
 
-                        ride:
-                            ride
+                        ride
 
                     }
                 }
@@ -2643,27 +2636,15 @@ Booking.bookRide = async function (
 
 
         /*
-         * --------------------------------------------------------
-         * STEP 2
-         * START MATCHING ENGINE.
-         *
-         * matching.js may already create a ride itself.
-         * We pass the SAME rideId so both customer and
-         * rider side use the same Firestore document.
-         * --------------------------------------------------------
+         * Start existing matching engine
+         * with the SAME rideId.
          */
 
         const matchingResult =
-            await Booking
-                .startMatching(
-                    ride
-                );
+            await Booking.startMatching(
+                ride
+            );
 
-
-        /*
-         * If matching.js returns the same ride,
-         * continue normally.
-         */
 
         console.log(
             "RiderX matching result:",
@@ -2672,14 +2653,19 @@ Booking.bookRide = async function (
 
 
         /*
-         * Important:
-         * Matching engine may update the ride.
-         * Keep customer listening.
+         * Keep listener active.
          */
 
-        Booking.watchRide(
+        if (
+            Booking.state.rideId ===
             ride.rideId
-        );
+        ) {
+
+            Booking.watchRide(
+                ride.rideId
+            );
+
+        }
 
 
         window.dispatchEvent(
@@ -2688,8 +2674,7 @@ Booking.bookRide = async function (
                 {
                     detail: {
 
-                        ride:
-                            ride,
+                        ride,
 
                         rideId:
                             ride.rideId,
@@ -2704,8 +2689,10 @@ Booking.bookRide = async function (
 
 
         /*
-         * Redirect only after Firestore document
-         * has definitely been created.
+         * Open customer ride-status screen.
+         *
+         * This happens only after rides/{rideId}
+         * has been successfully created and verified.
          */
 
         Booking.openRideStatus(
@@ -2718,8 +2705,7 @@ Booking.bookRide = async function (
             success:
                 true,
 
-            ride:
-                ride,
+            ride,
 
             rideId:
                 ride.rideId,
@@ -2732,22 +2718,8 @@ Booking.bookRide = async function (
     } catch (error) {
 
         console.error(
-            "================================================",
-            "\nRIDERX BOOKING FAILED",
-            "\n================================================",
+            "RiderX booking failed:",
             error
-        );
-
-
-        console.error(
-            "Error code:",
-            error?.code
-        );
-
-
-        console.error(
-            "Error message:",
-            error?.message
         );
 
 
@@ -2764,8 +2736,7 @@ Booking.bookRide = async function (
                 {
                     detail: {
 
-                        error:
-                            error
+                        error
 
                     }
                 }
@@ -2778,8 +2749,7 @@ Booking.bookRide = async function (
             success:
                 false,
 
-            error:
-                error
+            error
 
         };
 
@@ -2787,7 +2757,6 @@ Booking.bookRide = async function (
 
         Booking.state.submitting =
             false;
-
 
         Booking.setLoading(
             false
@@ -2834,6 +2803,7 @@ Booking.bindBookButtons = function () {
             ) {
 
                 return;
+
             }
 
 
@@ -2850,10 +2820,6 @@ Booking.bindBookButtons = function () {
         }
     );
 
-
-    /*
-     * Forms.
-     */
 
     const forms =
         document.querySelectorAll(
@@ -2875,6 +2841,7 @@ Booking.bindBookButtons = function () {
             ) {
 
                 return;
+
             }
 
 
@@ -2918,17 +2885,16 @@ Booking.bindMatchingEvents = function () {
                 {};
 
 
-            console.log(
-                "RiderX nearby riders:",
-                data.riders || []
-            );
+            const riders =
+                Array.isArray(
+                    data.riders
+                )
+                    ? data.riders
+                    : [];
 
 
             Booking.showMessage(
-                (
-                    data.riders &&
-                    data.riders.length
-                )
+                riders.length
                     ? "Nearby riders mil gaye. Request send ho rahi hai..."
                     : "Nearby rider search ho rahi hai...",
                 "info"
@@ -2955,14 +2921,9 @@ Booking.bindMatchingEvents = function () {
         "riderx-matching-rider-accepted",
         function (event) {
 
-            const data =
-                event.detail ||
-                {};
-
-
             console.log(
-                "RiderX rider accepted:",
-                data
+                "RiderX matching rider accepted:",
+                event.detail
             );
 
 
@@ -3013,14 +2974,9 @@ Booking.bindRideEvents = function () {
         "riderx-ride-updated",
         function (event) {
 
-            const data =
-                event.detail ||
-                {};
-
-
             console.log(
                 "RiderX ride updated:",
-                data
+                event.detail
             );
 
         }
@@ -3052,14 +3008,45 @@ Booking.bindRideEvents = function () {
         }
     );
 
+
+    window.addEventListener(
+        "riderx-ride-finished",
+        function (event) {
+
+            console.log(
+                "RiderX ride finished:",
+                event.detail
+            );
+
+        }
+    );
+
 };
 
 
 /* ============================================================
-   AUTO RESTORE ACTIVE RIDE
+   RESTORE ACTIVE RIDE
    ============================================================ */
 
 Booking.restoreActiveRide = async function () {
+
+    const user =
+        Booking.getCurrentUser();
+
+
+    /*
+     * Never restore a ride for an unauthenticated user.
+     */
+
+    if (
+        !user ||
+        !user.uid
+    ) {
+
+        return null;
+
+    }
+
 
     let rideId =
         null;
@@ -3075,25 +3062,32 @@ Booking.restoreActiveRide = async function () {
 
         if (!rideId) {
 
-            const saved =
-                JSON.parse(
-                    localStorage.getItem(
-                        "riderx_active_ride"
-                    ) ||
-                    "null"
+            const raw =
+                localStorage.getItem(
+                    "riderx_active_ride"
                 );
 
 
-            rideId =
-                saved?.rideId ||
-                null;
+            if (raw) {
+
+                const saved =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                rideId =
+                    saved?.rideId ||
+                    null;
+
+            }
 
         }
 
     } catch (error) {
 
         console.warn(
-            "RiderX active ride restore failed:",
+            "RiderX active ride storage restore failed:",
             error
         );
 
@@ -3103,27 +3097,30 @@ Booking.restoreActiveRide = async function () {
     if (!rideId) {
 
         return null;
+
     }
 
 
     try {
 
-        const db =
+        const database =
             Booking.getFirestore();
 
 
-        if (!db) {
+        if (!database) {
 
             return null;
+
         }
 
 
         const rideRef =
             doc(
-                db,
-                Booking.config
-                    .ridesCollection,
-                rideId
+                database,
+                Booking.config.ridesCollection,
+                String(
+                    rideId
+                )
             );
 
 
@@ -3140,6 +3137,7 @@ Booking.restoreActiveRide = async function () {
             Booking.clearActiveRide();
 
             return null;
+
         }
 
 
@@ -3148,21 +3146,32 @@ Booking.restoreActiveRide = async function () {
             {};
 
 
-        const status =
+        /*
+         * IMPORTANT:
+         * Do not attach to another customer's ride even if
+         * an old/stale rideId exists in localStorage.
+         */
+
+        if (
             String(
-                ride.status ||
+                ride.customerId ||
                 ""
+            ) !==
+            String(
+                user.uid
             )
-            .toLowerCase();
+        ) {
+
+            Booking.clearActiveRide();
+
+            return null;
+
+        }
 
 
         if (
-            [
-                "completed",
-                "cancelled",
-                "no_driver"
-            ].includes(
-                status
+            Booking.isTerminalStatus(
+                ride.status
             )
         ) {
 
@@ -3174,10 +3183,68 @@ Booking.restoreActiveRide = async function () {
 
 
         Booking.state.rideId =
-            rideId;
+            String(
+                rideId
+            );
 
         Booking.state.active =
             true;
+
+        Booking.state.authUser =
+            user;
+
+        Booking.state.pickup =
+            Booking.normalizeLocation(
+                ride.pickupLocation
+            );
+
+        Booking.state.destination =
+            Booking.normalizeLocation(
+                ride.destinationLocation
+            );
+
+        Booking.state.service =
+            ride.service ||
+            "bike";
+
+        Booking.state.paymentMethod =
+            ride.paymentMethod ||
+            "cash";
+
+        Booking.state.fare =
+            Number(
+                ride.fare ||
+                ride.estimatedFare ||
+                0
+            );
+
+
+        Booking.saveActiveRide(
+            {
+
+                rideId:
+                    rideId,
+
+                customerId:
+                    ride.customerId,
+
+                status:
+                    ride.status,
+
+                riderId:
+                    ride.riderId,
+
+                service:
+                    ride.service,
+
+                pickup:
+                    ride.pickup,
+
+                destination:
+                    ride.destination
+
+            }
+        );
 
 
         Booking.watchRide(
@@ -3190,13 +3257,96 @@ Booking.restoreActiveRide = async function () {
     } catch (error) {
 
         console.warn(
-            "RiderX active ride restore Firestore lookup failed:",
+            "RiderX active ride restore failed:",
             error
         );
 
 
         return null;
+
     }
+
+};
+
+
+/* ============================================================
+   AUTH STATE LISTENER
+   ============================================================ */
+
+Booking.bindAuthState = function () {
+
+    const firebaseAuth =
+        Booking.getAuth();
+
+
+    if (!firebaseAuth) {
+
+        return;
+
+    }
+
+
+    /*
+     * Avoid registering this listener multiple times.
+     */
+
+    if (
+        Booking.state.authListenerBound
+    ) {
+
+        return;
+
+    }
+
+
+    Booking.state.authListenerBound =
+        true;
+
+
+    onAuthStateChanged(
+        firebaseAuth,
+        async function (user) {
+
+            Booking.state.authUser =
+                user ||
+                null;
+
+
+            if (!user) {
+
+                Booking.stopWatchingRide();
+
+                Booking.state.rideId =
+                    null;
+
+                Booking.state.active =
+                    false;
+
+                return;
+
+            }
+
+
+            /*
+             * Restore only this authenticated user's active ride.
+             */
+
+            try {
+
+                await Booking
+                    .restoreActiveRide();
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX authenticated ride restore failed:",
+                    error
+                );
+
+            }
+
+        }
+    );
 
 };
 
@@ -3225,6 +3375,10 @@ RX.getActiveRide =
     Booking.restoreActiveRide;
 
 
+RX.stopWatchingRide =
+    Booking.stopWatchingRide;
+
+
 /* ============================================================
    INITIALIZE
    ============================================================ */
@@ -3236,6 +3390,7 @@ Booking.init = async function () {
     ) {
 
         return;
+
     }
 
 
@@ -3248,18 +3403,35 @@ Booking.init = async function () {
     );
 
     console.log(
-        "RiderX booking.js loaded."
+        "RiderX booking.js initialized."
     );
 
     console.log(
-        "Firestore rides collection:",
-        Booking.config
-            .ridesCollection
+        "Firestore collection:",
+        Booking.config.ridesCollection
     );
 
     console.log(
         "=============================================="
     );
+
+
+    if (
+        !Booking.isFirebaseReady()
+    ) {
+
+        console.error(
+            "RiderX booking.js: shared Firebase is unavailable."
+        );
+
+        Booking.showMessage(
+            "Firebase service unavailable.",
+            "error"
+        );
+
+        return;
+
+    }
 
 
     Booking.bindBookButtons();
@@ -3268,58 +3440,28 @@ Booking.init = async function () {
 
     Booking.bindRideEvents();
 
+    Booking.bindAuthState();
+
 
     /*
-     * Restore current authenticated user.
+     * Current user may already be available immediately.
+     * Auth listener will also handle later resolution.
      */
 
-    try {
-
-        const auth =
-            Booking.getAuth();
+    const user =
+        Booking.getCurrentUser();
 
 
-        if (auth) {
+    if (user) {
 
-            onAuthStateChanged(
-                auth,
-                function (user) {
-
-                    Booking.state.authUser =
-                        user ||
-                        null;
+        Booking.state.authUser =
+            user;
 
 
-                    if (user) {
-
-                        console.log(
-                            "RiderX customer auth:",
-                            user.uid
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "RiderX auth listener failed:",
-            error
-        );
+        await Booking
+            .restoreActiveRide();
 
     }
-
-
-    /*
-     * Restore existing ride.
-     */
-
-    await Booking
-        .restoreActiveRide();
 
 };
 
@@ -3339,6 +3481,10 @@ if (
 
             Booking.init();
 
+        },
+        {
+            once:
+                true
         }
     );
 
@@ -3350,7 +3496,7 @@ if (
 
 
 /* ============================================================
-   DEBUG HELPER
+   DEBUG API
    ============================================================ */
 
 window.RiderXBookingDebug = {
@@ -3360,6 +3506,14 @@ window.RiderXBookingDebug = {
 
             return Booking
                 .getCustomerId();
+
+        },
+
+    getCurrentUser:
+        function () {
+
+            return Booking
+                .getCurrentUser();
 
         },
 
@@ -3416,6 +3570,26 @@ window.RiderXBookingDebug = {
 
             return Booking
                 .bookRide();
+
+        },
+
+    cancelRide:
+        function (
+            rideId
+        ) {
+
+            return Booking
+                .cancelRide(
+                    rideId
+                );
+
+        },
+
+    stopWatchingRide:
+        function () {
+
+            return Booking
+                .stopWatchingRide();
 
         }
 
