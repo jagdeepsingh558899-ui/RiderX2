@@ -1,882 +1,891 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-
-«»
-
-<meta
-name="theme-color"
-content="#FFD400"
-
-«»
-
-<meta
-name="description"
-content="RiderX secure customer login"
-
-«»
-
-<meta
-name="robots"
-content="noindex, nofollow"
-
-«»
-
-<title>RiderX - Customer Login</title><link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/auth.css">
-<link rel="stylesheet" href="../css/responsive.css"><style>
-
-:root {
-    --rx-yellow: #FFD400;
-    --rx-yellow-hover: #FFE04A;
-    --rx-black: #070707;
-    --rx-card: #111111;
-    --rx-input: #191919;
-    --rx-border: rgba(255,255,255,.10);
-    --rx-text: #FFFFFF;
-    --rx-muted: #858585;
-    --rx-danger: #FF5A5A;
-    --rx-success: #35D16F;
-}
-
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    width: 100%;
-    min-width: 100%;
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-html {
-    background: var(--rx-black);
-}
-
-body {
-    min-height: 100vh;
-    min-height: 100dvh;
-
-    background:
-        radial-gradient(
-            circle at top right,
-            rgba(255,212,0,.10),
-            transparent 35%
-        ),
-        radial-gradient(
-            circle at bottom left,
-            rgba(255,212,0,.055),
-            transparent 32%
-        ),
-        var(--rx-black);
-
-    color: var(--rx-text);
-
-    font-family:
-        Inter,
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    -webkit-font-smoothing: antialiased;
-    text-rendering: optimizeLegibility;
-}
-
-button,
-input {
-    font: inherit;
-}
-
-button {
-    -webkit-tap-highlight-color: transparent;
-}
-
-button:focus-visible,
-input:focus-visible {
-    outline: 2px solid var(--rx-yellow);
-    outline-offset: 2px;
-}
-
-.auth-page {
-    width: 100%;
-    min-height: 100vh;
-    min-height: 100dvh;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding:
-        max(18px, env(safe-area-inset-top))
-        max(18px, env(safe-area-inset-right))
-        max(18px, env(safe-area-inset-bottom))
-        max(18px, env(safe-area-inset-left));
-
-    position: relative;
-    overflow: auto;
-}
-
-.auth-card {
-    position: relative;
-    z-index: 2;
-
-    width: 100%;
-    max-width: 430px;
-
-    padding: 28px 24px 23px;
-
-    border: 1px solid var(--rx-border);
-    border-radius: 24px;
-
-    background:
-        linear-gradient(
-            180deg,
-            rgba(255,255,255,.045),
-            rgba(255,255,255,.015)
-        ),
-        var(--rx-card);
-
-    box-shadow:
-        0 28px 80px rgba(0,0,0,.48);
-}
-
-.brand {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.logo-box {
-    width: 68px;
-    height: 68px;
-
-    margin: 0 auto 13px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 20px;
-
-    background: var(--rx-yellow);
-    color: #050505;
-
-    font-size: 25px;
-    font-weight: 900;
-
-    box-shadow:
-        0 12px 35px rgba(255,212,0,.16);
-
-    user-select: none;
-}
-
-.brand h1 {
-    margin: 0;
-
-    font-size: 27px;
-    line-height: 1.1;
-    font-weight: 900;
-    letter-spacing: -.7px;
-}
-
-.brand h1 span {
-    color: var(--rx-yellow);
-}
-
-.brand p {
-    margin: 7px 0 0;
-
-    color: var(--rx-muted);
-
-    font-size: 12px;
-}
-
-.welcome {
-    margin-bottom: 19px;
-}
-
-.welcome h2 {
-    margin: 0;
-
-    font-size: 21px;
-    line-height: 1.2;
-    font-weight: 900;
-}
-
-.welcome p {
-    margin: 7px 0 0;
-
-    color: var(--rx-muted);
-
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.account-badge {
-    display: inline-flex;
-    align-items: center;
-
-    margin-top: 12px;
-    padding: 7px 10px;
-
-    border: 1px solid rgba(255,212,0,.20);
-    border-radius: 9px;
-
-    background: rgba(255,212,0,.07);
-
-    color: var(--rx-yellow);
-
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: .3px;
-}
-
-.message {
-    display: none;
-
-    margin-bottom: 16px;
-    padding: 12px 13px;
-
-    border-radius: 12px;
-
-    font-size: 13px;
-    line-height: 1.45;
-
-    overflow-wrap: anywhere;
-}
-
-.message.show {
-    display: block;
-}
-
-.message.error {
-    border: 1px solid rgba(255,90,90,.22);
-    background: rgba(255,90,90,.08);
-    color: #FFB4B4;
-}
-
-.message.success {
-    border: 1px solid rgba(53,209,111,.22);
-    background: rgba(53,209,111,.08);
-    color: #B8FFD0;
-}
-
-.form-group {
-    margin-bottom: 16px;
-}
-
-.form-group label {
-    display: block;
-
-    margin-bottom: 8px;
-
-    color: #D4D4D4;
-
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.form-group input {
-    width: 100%;
-    height: 52px;
-
-    padding: 0 14px;
-
-    border: 1px solid var(--rx-border);
-    border-radius: 14px;
-
-    outline: none;
-
-    background: var(--rx-input);
-    color: #FFFFFF;
-
-    font-size: 15px;
-
-    transition:
-        border-color .2s ease,
-        box-shadow .2s ease,
-        opacity .2s ease;
-}
-
-.form-group input::placeholder {
-    color: #606060;
-}
-
-.form-group input:hover {
-    border-color: rgba(255,255,255,.17);
-}
-
-.form-group input:focus {
-    border-color: var(--rx-yellow);
-
-    box-shadow:
-        0 0 0 3px rgba(255,212,0,.09);
-}
-
-.form-group input:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-.input-wrap {
-    position: relative;
-}
-
-.password-input {
-    padding-right: 72px !important;
-}
-
-.eye-btn {
-    position: absolute;
-
-    right: 9px;
-    top: 50%;
-
-    min-width: 48px;
-    min-height: 36px;
-
-    transform: translateY(-50%);
-
-    border: 0;
-    border-radius: 8px;
-
-    background: transparent;
-
-    color: #999999;
-
-    cursor: pointer;
-
-    font-size: 11px;
-    font-weight: 900;
-}
-
-.eye-btn:hover {
-    color: var(--rx-yellow);
-    background: rgba(255,212,0,.06);
-}
-
-.eye-btn:disabled {
-    opacity: .45;
-    cursor: not-allowed;
-}
-
-.options {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 12px;
-
-    margin: 0 0 19px;
-}
-
-.remember {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 7px;
-
-    color: #888888;
-
-    font-size: 12px;
-
-    cursor: pointer;
-}
-
-.remember input {
-    width: 15px;
-    height: 15px;
-
-    margin: 0;
-
-    accent-color: var(--rx-yellow);
-
-    cursor: pointer;
-}
-
-.link-btn,
-.register button,
-.secondary-btn {
-    border: 0;
-    background: transparent;
-}
-
-.link-btn {
-    padding: 5px 0;
-
-    color: var(--rx-yellow);
-
-    cursor: pointer;
-
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.link-btn:hover {
-    text-decoration: underline;
-}
-
-.link-btn:disabled {
-    opacity: .45;
-    cursor: not-allowed;
-}
-
-.login-btn {
-    position: relative;
-
-    width: 100%;
-    min-height: 54px;
-
-    border: 0;
-    border-radius: 15px;
-
-    background: var(--rx-yellow);
-    color: #080808;
-
-    cursor: pointer;
-
-    font-size: 15px;
-    font-weight: 900;
-
-    box-shadow:
-        0 10px 28px rgba(255,212,0,.13);
-
-    transition:
-        transform .2s ease,
-        background .2s ease,
-        opacity .2s ease;
-}
-
-.login-btn:hover {
-    background: var(--rx-yellow-hover);
-    transform: translateY(-1px);
-}
-
-.login-btn:active {
-    transform: translateY(0);
-}
-
-.login-btn:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-
-    gap: 11px;
-
-    margin: 21px 0;
-
-    color: #666666;
-
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.divider::before,
-.divider::after {
-    content: "";
-
-    flex: 1;
-
-    height: 1px;
-
-    background: var(--rx-border);
-}
-
-.otp-btn {
-    width: 100%;
-    min-height: 48px;
-
-    border: 1px solid #303030;
-    border-radius: 13px;
-
-    background: #181818;
-
-    color: #DDDDDD;
-
-    cursor: pointer;
-
-    font-size: 13px;
-    font-weight: 800;
-
-    transition:
-        border-color .2s ease,
-        color .2s ease,
-        background .2s ease;
-}
-
-.otp-btn:hover {
-    border-color: var(--rx-yellow);
-    color: var(--rx-yellow);
-    background: #1D1D1D;
-}
-
-.secondary-actions {
-    display: grid;
-
-    grid-template-columns: 1fr 1fr;
-
-    gap: 10px;
-
-    margin-top: 11px;
-}
-
-.secondary-btn {
-    min-height: 44px;
-
-    border: 1px solid #303030;
-    border-radius: 11px;
-
-    background: #151515;
-
-    color: #909090;
-
-    cursor: pointer;
-
-    font-size: 11px;
-    font-weight: 800;
-
-    transition:
-        border-color .2s ease,
-        color .2s ease,
-        background .2s ease;
-}
-
-.secondary-btn:hover {
-    border-color: var(--rx-yellow);
-    color: var(--rx-yellow);
-    background: #1A1A1A;
-}
-
-.secondary-btn:disabled,
-.otp-btn:disabled {
-    opacity: .45;
-    cursor: not-allowed;
-}
-
-.register {
-    margin-top: 20px;
-
-    text-align: center;
-
-    color: #777777;
-
-    font-size: 12px;
-}
-
-.register button {
-    padding: 0 2px;
-
-    color: var(--rx-yellow);
-
-    cursor: pointer;
-
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.register button:hover {
-    text-decoration: underline;
-}
-
-.footer {
-    margin-top: 20px;
-
-    text-align: center;
-
-    color: #4E4E4E;
-
-    font-size: 10px;
-}
-
-.loader {
-    display: inline-block;
-
-    width: 14px;
-    height: 14px;
-
-    margin-right: 7px;
-
-    vertical-align: -2px;
-
-    border: 2px solid rgba(0,0,0,.20);
-    border-top-color: #080808;
-
-    border-radius: 50%;
-
-    animation:
-        rxSpin .7s linear infinite;
-}
-
-@keyframes rxSpin {
-
-    to {
-        transform: rotate(360deg);
-    }
-
-}
-
-@media (max-width: 480px) {
-
-    .auth-page {
-        align-items: flex-start;
-
-        padding-top:
-            max(24px, env(safe-area-inset-top));
-
-        padding-bottom:
-            max(24px, env(safe-area-inset-bottom));
-    }
-
-    .auth-card {
-        padding: 24px 19px 20px;
-        border-radius: 21px;
-    }
-
-}
-
-@media (max-width: 360px) {
-
-    .auth-card {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
-
-    .options {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .secondary-actions {
-        grid-template-columns: 1fr;
-    }
-
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-        scroll-behavior: auto !important;
-    }
-
-    .login-btn,
-    .form-group input,
-    .loader {
-        transition: none;
-        animation: none;
-    }
-
-}
-
-</style></head><body><main class="auth-page"><section
-    class="auth-card"
-    aria-labelledby="customerLoginTitle"
-><div class="brand">
-
-    <div
-        class="logo-box"
-        aria-hidden="true"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
-        RX
-    </div>
 
-    <h1>
-        Rider<span>X</span>
-    </h1>
+    <meta
+        name="theme-color"
+        content="#FFD400"
+    >
 
-    <p>
-        Ride smarter. Ride with RiderX.
-    </p>
+    <meta
+        name="description"
+        content="RiderX secure customer login"
+    >
 
-</div>
+    <meta
+        name="robots"
+        content="noindex, nofollow"
+    >
 
+    <title>RiderX - Customer Login</title>
 
-<div class="welcome">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 
-    <h2 id="customerLoginTitle">
-        Customer Login
-    </h2>
+    <style>
+        :root {
+            --rx-yellow: #FFD400;
+            --rx-yellow-hover: #FFE04A;
+            --rx-black: #070707;
+            --rx-card: #111111;
+            --rx-input: #191919;
+            --rx-border: rgba(255,255,255,.10);
+            --rx-text: #FFFFFF;
+            --rx-muted: #858585;
+            --rx-danger: #FF5A5A;
+            --rx-success: #35D16F;
+        }
 
-    <p>
-        Login to book rides, track your driver,
-        manage trips, wallet and payments.
-    </p>
+        * {
+            box-sizing: border-box;
+        }
 
-    <div class="account-badge">
-        CUSTOMER ACCOUNT
-    </div>
+        html,
+        body {
+            width: 100%;
+            min-width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-</div>
+        html {
+            background: var(--rx-black);
+        }
 
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
 
-<div
-    class="message"
-    id="message"
-    role="alert"
-    aria-live="polite"
-    aria-atomic="true"
-></div>
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(255,212,0,.10),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at bottom left,
+                    rgba(255,212,0,.055),
+                    transparent 32%
+                ),
+                var(--rx-black);
 
+            color: var(--rx-text);
 
-<form
-    id="customerLoginForm"
-    novalidate
->
+            font-family:
+                Inter,
+                Arial,
+                Helvetica,
+                sans-serif;
 
-    <div class="form-group">
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
 
-        <label for="email">
-            Email address
-        </label>
+        button,
+        input {
+            font: inherit;
+        }
 
-        <input
-            type="email"
-            id="email"
-            name="email"
-            autocomplete="email"
-            inputmode="email"
-            placeholder="Enter your email"
-            maxlength="254"
-            required
-        >
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    </div>
+        button:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--rx-yellow);
+            outline-offset: 2px;
+        }
 
+        .auth-page {
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
 
-    <div class="form-group">
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-        <label for="password">
-            Password
-        </label>
+            padding:
+                max(18px, env(safe-area-inset-top))
+                max(18px, env(safe-area-inset-right))
+                max(18px, env(safe-area-inset-bottom))
+                max(18px, env(safe-area-inset-left));
 
-        <div class="input-wrap">
+            position: relative;
+            overflow: auto;
+        }
 
-            <input
-                type="password"
-                id="password"
-                name="password"
-                class="password-input"
-                autocomplete="current-password"
-                placeholder="Enter your password"
-                minlength="6"
-                maxlength="128"
-                required
+        .auth-card {
+            position: relative;
+            z-index: 2;
+
+            width: 100%;
+            max-width: 430px;
+
+            padding: 28px 24px 23px;
+
+            border: 1px solid var(--rx-border);
+            border-radius: 24px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(255,255,255,.045),
+                    rgba(255,255,255,.015)
+                ),
+                var(--rx-card);
+
+            box-shadow:
+                0 28px 80px rgba(0,0,0,.48);
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo-box {
+            width: 68px;
+            height: 68px;
+
+            margin: 0 auto 13px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 20px;
+
+            background: var(--rx-yellow);
+            color: #050505;
+
+            font-size: 25px;
+            font-weight: 900;
+
+            box-shadow:
+                0 12px 35px rgba(255,212,0,.16);
+
+            user-select: none;
+        }
+
+        .brand h1 {
+            margin: 0;
+
+            font-size: 27px;
+            line-height: 1.1;
+            font-weight: 900;
+            letter-spacing: -.7px;
+        }
+
+        .brand h1 span {
+            color: var(--rx-yellow);
+        }
+
+        .brand p {
+            margin: 7px 0 0;
+
+            color: var(--rx-muted);
+
+            font-size: 12px;
+        }
+
+        .welcome {
+            margin-bottom: 19px;
+        }
+
+        .welcome h2 {
+            margin: 0;
+
+            font-size: 21px;
+            line-height: 1.2;
+            font-weight: 900;
+        }
+
+        .welcome p {
+            margin: 7px 0 0;
+
+            color: var(--rx-muted);
+
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .account-badge {
+            display: inline-flex;
+            align-items: center;
+
+            margin-top: 12px;
+            padding: 7px 10px;
+
+            border: 1px solid rgba(255,212,0,.20);
+            border-radius: 9px;
+
+            background: rgba(255,212,0,.07);
+
+            color: var(--rx-yellow);
+
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: .3px;
+        }
+
+        .message {
+            display: none;
+
+            margin-bottom: 16px;
+            padding: 12px 13px;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+            line-height: 1.45;
+
+            overflow-wrap: anywhere;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.error {
+            border: 1px solid rgba(255,90,90,.22);
+            background: rgba(255,90,90,.08);
+            color: #FFB4B4;
+        }
+
+        .message.success {
+            border: 1px solid rgba(53,209,111,.22);
+            background: rgba(53,209,111,.08);
+            color: #B8FFD0;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #D4D4D4;
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .form-group input {
+            width: 100%;
+            height: 52px;
+
+            padding: 0 14px;
+
+            border: 1px solid var(--rx-border);
+            border-radius: 14px;
+
+            outline: none;
+
+            background: var(--rx-input);
+            color: #FFFFFF;
+
+            font-size: 15px;
+
+            transition:
+                border-color .2s ease,
+                box-shadow .2s ease,
+                opacity .2s ease;
+        }
+
+        .form-group input::placeholder {
+            color: #606060;
+        }
+
+        .form-group input:hover {
+            border-color: rgba(255,255,255,.17);
+        }
+
+        .form-group input:focus {
+            border-color: var(--rx-yellow);
+
+            box-shadow:
+                0 0 0 3px rgba(255,212,0,.09);
+        }
+
+        .form-group input:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .password-input {
+            padding-right: 72px !important;
+        }
+
+        .eye-btn {
+            position: absolute;
+
+            right: 9px;
+            top: 50%;
+
+            min-width: 48px;
+            min-height: 36px;
+
+            transform: translateY(-50%);
+
+            border: 0;
+            border-radius: 8px;
+
+            background: transparent;
+
+            color: #999999;
+
+            cursor: pointer;
+
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .eye-btn:hover {
+            color: var(--rx-yellow);
+            background: rgba(255,212,0,.06);
+        }
+
+        .eye-btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 12px;
+
+            margin: 0 0 19px;
+        }
+
+        .remember {
+            display: inline-flex;
+            align-items: center;
+
+            gap: 7px;
+
+            color: #888888;
+
+            font-size: 12px;
+
+            cursor: pointer;
+        }
+
+        .remember input {
+            width: 15px;
+            height: 15px;
+
+            margin: 0;
+
+            accent-color: var(--rx-yellow);
+
+            cursor: pointer;
+        }
+
+        .link-btn,
+        .register button,
+        .secondary-btn {
+            border: 0;
+            background: transparent;
+        }
+
+        .link-btn {
+            padding: 5px 0;
+
+            color: var(--rx-yellow);
+
+            cursor: pointer;
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .link-btn:hover {
+            text-decoration: underline;
+        }
+
+        .link-btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .login-btn {
+            position: relative;
+
+            width: 100%;
+            min-height: 54px;
+
+            border: 0;
+            border-radius: 15px;
+
+            background: var(--rx-yellow);
+            color: #080808;
+
+            cursor: pointer;
+
+            font-size: 15px;
+            font-weight: 900;
+
+            box-shadow:
+                0 10px 28px rgba(255,212,0,.13);
+
+            transition:
+                transform .2s ease,
+                background .2s ease,
+                opacity .2s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--rx-yellow-hover);
+            transform: translateY(-1px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+
+            gap: 11px;
+
+            margin: 21px 0;
+
+            color: #666666;
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+
+            flex: 1;
+
+            height: 1px;
+
+            background: var(--rx-border);
+        }
+
+        .otp-btn {
+            width: 100%;
+            min-height: 48px;
+
+            border: 1px solid #303030;
+            border-radius: 13px;
+
+            background: #181818;
+
+            color: #DDDDDD;
+
+            cursor: pointer;
+
+            font-size: 13px;
+            font-weight: 800;
+
+            transition:
+                border-color .2s ease,
+                color .2s ease,
+                background .2s ease;
+        }
+
+        .otp-btn:hover {
+            border-color: var(--rx-yellow);
+            color: var(--rx-yellow);
+            background: #1D1D1D;
+        }
+
+        .secondary-actions {
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 10px;
+
+            margin-top: 11px;
+        }
+
+        .secondary-btn {
+            min-height: 44px;
+
+            border: 1px solid #303030;
+            border-radius: 11px;
+
+            background: #151515;
+
+            color: #909090;
+
+            cursor: pointer;
+
+            font-size: 11px;
+            font-weight: 800;
+
+            transition:
+                border-color .2s ease,
+                color .2s ease,
+                background .2s ease;
+        }
+
+        .secondary-btn:hover {
+            border-color: var(--rx-yellow);
+            color: var(--rx-yellow);
+            background: #1A1A1A;
+        }
+
+        .secondary-btn:disabled,
+        .otp-btn:disabled {
+            opacity: .45;
+            cursor: not-allowed;
+        }
+
+        .register {
+            margin-top: 20px;
+
+            text-align: center;
+
+            color: #777777;
+
+            font-size: 12px;
+        }
+
+        .register button {
+            padding: 0 2px;
+
+            color: var(--rx-yellow);
+
+            cursor: pointer;
+
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .register button:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 20px;
+
+            text-align: center;
+
+            color: #4E4E4E;
+
+            font-size: 10px;
+        }
+
+        .loader {
+            display: inline-block;
+
+            width: 14px;
+            height: 14px;
+
+            margin-right: 7px;
+
+            vertical-align: -2px;
+
+            border: 2px solid rgba(0,0,0,.20);
+            border-top-color: #080808;
+
+            border-radius: 50%;
+
+            animation:
+                rxSpin .7s linear infinite;
+        }
+
+        @keyframes rxSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-page {
+                align-items: flex-start;
+
+                padding-top:
+                    max(24px, env(safe-area-inset-top));
+
+                padding-bottom:
+                    max(24px, env(safe-area-inset-bottom));
+            }
+
+            .auth-card {
+                padding: 24px 19px 20px;
+                border-radius: 21px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .auth-card {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .options {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .secondary-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+            }
+
+            .login-btn,
+            .form-group input,
+            .loader {
+                transition: none;
+                animation: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="auth-page">
+
+    <section
+        class="auth-card"
+        aria-labelledby="customerLoginTitle"
+    >
+
+        <div class="brand">
+
+            <div
+                class="logo-box"
+                aria-hidden="true"
             >
+                RX
+            </div>
 
-            <button
-                type="button"
-                class="eye-btn"
-                id="togglePassword"
-                aria-label="Show password"
-                aria-pressed="false"
-            >
-                SHOW
-            </button>
+            <h1>
+                Rider<span>X</span>
+            </h1>
+
+            <p>
+                Ride smarter. Ride with RiderX.
+            </p>
 
         </div>
 
-    </div>
+
+        <div class="welcome">
+
+            <h2 id="customerLoginTitle">
+                Customer Login
+            </h2>
+
+            <p>
+                Login to book rides, track your driver,
+                manage trips, wallet and payments.
+            </p>
+
+            <div class="account-badge">
+                CUSTOMER ACCOUNT
+            </div>
+
+        </div>
 
 
-    <div class="options">
+        <div
+            class="message"
+            id="message"
+            role="alert"
+            aria-live="polite"
+            aria-atomic="true"
+        ></div>
 
-        <label class="remember">
 
-            <input
-                type="checkbox"
-                id="remember"
+        <form
+            id="customerLoginForm"
+            novalidate
+        >
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email address
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    inputmode="email"
+                    placeholder="Enter your email"
+                    maxlength="254"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="input-wrap">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="password-input"
+                        autocomplete="current-password"
+                        placeholder="Enter your password"
+                        minlength="6"
+                        maxlength="128"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="eye-btn"
+                        id="togglePassword"
+                        aria-label="Show password"
+                        aria-pressed="false"
+                    >
+                        SHOW
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="options">
+
+                <label class="remember">
+
+                    <input
+                        type="checkbox"
+                        id="remember"
+                    >
+
+                    Remember email
+
+                </label>
+
+
+                <button
+                    type="button"
+                    class="link-btn"
+                    id="forgotPassword"
+                >
+                    Forgot password?
+                </button>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-btn"
+                id="loginButton"
             >
+                Login as Customer
+            </button>
 
-            Remember email
+        </form>
 
-        </label>
+
+        <div class="divider">
+            OR
+        </div>
 
 
         <button
             type="button"
-            class="link-btn"
-            id="forgotPassword"
+            class="otp-btn"
+            id="otpButton"
         >
-            Forgot password?
+            Login with Mobile / OTP
         </button>
 
-    </div>
+
+        <div class="secondary-actions">
+
+            <button
+                type="button"
+                class="secondary-btn"
+                id="registerButton"
+            >
+                Create Customer Account
+            </button>
 
 
-    <button
-        type="submit"
-        class="login-btn"
-        id="loginButton"
-    >
-        Login as Customer
-    </button>
+            <button
+                type="button"
+                class="secondary-btn"
+                id="riderLoginButton"
+            >
+                Rider Login
+            </button>
 
-</form>
-
-
-<div class="divider">
-    OR
-</div>
+        </div>
 
 
-<button
-    type="button"
-    class="otp-btn"
-    id="otpButton"
->
-    Login with Mobile / OTP
-</button>
+        <div class="register">
+
+            New to RiderX?
+
+            <button
+                type="button"
+                id="roleButton"
+            >
+                Choose account type
+            </button>
+
+        </div>
 
 
-<div class="secondary-actions">
+        <div class="footer">
+            © 2026 RiderX
+        </div>
 
-    <button
-        type="button"
-        class="secondary-btn"
-        id="registerButton"
-    >
-        Create Customer Account
-    </button>
+    </section>
+
+</main>
 
 
-    <button
-        type="button"
-        class="secondary-btn"
-        id="riderLoginButton"
-    >
-        Rider Login
-    </button>
-
-</div>
-
-
-<div class="register">
-
-    New to RiderX?
-
-    <button
-        type="button"
-        id="roleButton"
-    >
-        Choose account type
-    </button>
-
-</div>
-
-
-<div class="footer">
-    © 2026 RiderX
-</div>
-
-</section></main><script type="module">
+<script type="module">
 
 "use strict";
 
@@ -884,13 +893,23 @@ input:focus-visible {
 /* ============================================================
    RIDERX 2.0
    CUSTOMER LOGIN
-   FINAL CUSTOMER LOGIN CONTROLLER
+   FILE: auth/customer-login.html
 
-   IMPORTANT:
-   Authentication is handled by js/auth.js.
-   This page does NOT initialize Firebase directly.
+   MASTER-FIXED CUSTOMER AUTH CONTROLLER
+
+   RULES:
+   - Firebase is initialized ONLY by the central RiderX config.
+   - Authentication is handled ONLY through js/auth.js.
+   - localStorage is UI/session cache only.
+   - localStorage is NEVER treated as authentication proof.
+   - Customer dashboard is allowed ONLY after verified customer role.
+   - Unknown roles are rejected.
    ============================================================ */
 
+
+/* ============================================================
+   STORAGE
+============================================================ */
 
 const STORAGE = Object.freeze({
 
@@ -918,6 +937,10 @@ const STORAGE = Object.freeze({
 });
 
 
+/* ============================================================
+   ROUTES
+============================================================ */
+
 const ROUTES = Object.freeze({
 
     role:
@@ -937,6 +960,10 @@ const ROUTES = Object.freeze({
 
 });
 
+
+/* ============================================================
+   STATE
+============================================================ */
 
 let RX_AUTH = null;
 
@@ -1013,7 +1040,7 @@ const message =
 
 
 /* ============================================================
-   HELPERS
+   BASIC HELPERS
 ============================================================ */
 
 function clean(value) {
@@ -1024,6 +1051,34 @@ function clean(value) {
 
 }
 
+
+function numberValue(
+    value,
+    fallback = 0
+) {
+
+    const number =
+        Number(value);
+
+    return Number.isFinite(number)
+        ? number
+        : fallback;
+
+}
+
+
+function validEmail(email) {
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        email
+    );
+
+}
+
+
+/* ============================================================
+   ROLE NORMALIZATION
+============================================================ */
 
 function normalizeRole(role) {
 
@@ -1098,15 +1153,6 @@ function normalizeRole(role) {
 }
 
 
-function validEmail(email) {
-
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        email
-    );
-
-}
-
-
 /* ============================================================
    ROLE STORAGE
 ============================================================ */
@@ -1174,7 +1220,7 @@ function setRiderRole() {
 
 
 /* ============================================================
-   AUTH ENGINE
+   AUTH ENGINE LOADER
 ============================================================ */
 
 async function loadAuthEngine() {
@@ -1250,7 +1296,9 @@ function extractFirebaseUser(
         (
             result.email ||
             result.phoneNumber ||
-            result.providerData
+            Array.isArray(
+                result.providerData
+            )
         )
     ) {
 
@@ -1295,7 +1343,7 @@ function extractFirebaseUser(
 
 
 /* ============================================================
-   ROLE RESOLUTION
+   VERIFIED ROLE
 ============================================================ */
 
 async function getVerifiedRole(
@@ -1351,7 +1399,7 @@ async function getVerifiedRole(
         } catch (error) {
 
             console.warn(
-                "RiderX customer role lookup failed:",
+                "RiderX role lookup failed:",
                 error
             );
 
@@ -1387,7 +1435,7 @@ async function getVerifiedRole(
         } catch (error) {
 
             console.warn(
-                "RiderX current user lookup failed:",
+                "RiderX current-user lookup failed:",
                 error
             );
 
@@ -1418,7 +1466,8 @@ async function getVerifiedRole(
             role =
                 normalizeRole(
                     profile?.role ||
-                    profile?.data?.role
+                    profile?.userRole ||
+                    profile?.accountType
                 );
 
 
@@ -1431,7 +1480,7 @@ async function getVerifiedRole(
         } catch (error) {
 
             console.warn(
-                "RiderX profile lookup failed:",
+                "RiderX profile role lookup failed:",
                 error
             );
 
@@ -1446,7 +1495,7 @@ async function getVerifiedRole(
 
 
 /* ============================================================
-   PROFILE EXTRACTION
+   VERIFIED PROFILE
 ============================================================ */
 
 async function getVerifiedProfile(
@@ -1549,7 +1598,7 @@ async function getVerifiedProfile(
 
 
 /* ============================================================
-   ACCOUNT ACCESS
+   CUSTOMER ACCOUNT ACCESS
 ============================================================ */
 
 function customerAccess(
@@ -1618,7 +1667,7 @@ function customerAccess(
 
 
 /* ============================================================
-   SAVE CUSTOMER SESSION
+   SESSION CACHE
 ============================================================ */
 
 function saveCustomerSession(
@@ -1644,10 +1693,14 @@ function saveCustomerSession(
     const customer = {
 
         uid:
-            clean(firebaseUser.uid),
+            clean(
+                firebaseUser.uid
+            ),
 
         id:
-            clean(firebaseUser.uid),
+            clean(
+                firebaseUser.uid
+            ),
 
         role:
             "customer",
@@ -1702,7 +1755,9 @@ function saveCustomerSession(
             ),
 
         city:
-            clean(profile?.city),
+            clean(
+                profile?.city
+            ),
 
         photoURL:
             clean(
@@ -1741,7 +1796,9 @@ function saveCustomerSession(
             ),
 
         referralCode:
-            clean(profile?.referralCode),
+            clean(
+                profile?.referralCode
+            ),
 
         currentRideId:
             profile?.currentRideId ||
@@ -1808,7 +1865,7 @@ function saveCustomerSession(
 
 
 /* ============================================================
-   CLEAR LOCAL SESSION
+   CLEAR SESSION
 ============================================================ */
 
 function clearCustomerSession() {
@@ -1835,6 +1892,10 @@ function clearCustomerSession() {
             STORAGE.legacyRole
         );
 
+        localStorage.removeItem(
+            STORAGE.selectedRole
+        );
+
     } catch (error) {
 
         console.warn(
@@ -1848,7 +1909,7 @@ function clearCustomerSession() {
 
 
 /* ============================================================
-   AUTH LOGOUT
+   AUTH CLEANUP
 ============================================================ */
 
 async function cleanupAuthSession(
@@ -1881,7 +1942,7 @@ async function cleanupAuthSession(
     } catch (error) {
 
         console.warn(
-            "RiderX customer logout cleanup failed:",
+            "RiderX auth cleanup failed:",
             error
         );
 
@@ -1915,8 +1976,9 @@ async function handleLogin(
 
 
     const email =
-        clean(emailInput.value)
-            .toLowerCase();
+        clean(
+            emailInput.value
+        ).toLowerCase();
 
 
     const password =
@@ -1979,15 +2041,13 @@ async function handleLogin(
 
     busy = true;
 
-    setLoading(true);
+    setLoading(
+        true,
+        "Signing in..."
+    );
 
 
     try {
-
-        /*
-         * Customer is the requested login context only.
-         * It is NOT treated as proof of account role.
-         */
 
         setCustomerRole();
 
@@ -2047,7 +2107,7 @@ async function handleLogin(
 
 
         /*
-         * NEVER default an unknown role to customer.
+         * Never assume an unknown role is customer.
          */
 
         if (!verifiedRole) {
@@ -2066,8 +2126,7 @@ async function handleLogin(
 
 
         /*
-         * Customer login page can ONLY enter the customer
-         * dashboard when Firebase/Firestore says customer.
+         * This page accepts CUSTOMER only.
          */
 
         if (
@@ -2079,6 +2138,7 @@ async function handleLogin(
             );
 
             clearCustomerSession();
+
 
             if (
                 verifiedRole === "rider"
@@ -2128,8 +2188,8 @@ async function handleLogin(
 
 
         /*
-         * If a profile explicitly contains a role, it must
-         * agree with the verified role.
+         * Explicit profile role must agree with
+         * the verified authentication role.
          */
 
         if (
@@ -2179,42 +2239,36 @@ async function handleLogin(
         );
 
 
-        if (
-            rememberInput.checked
-        ) {
+        /*
+         * Remember email only.
+         * Password is NEVER stored locally.
+         */
 
-            try {
+        try {
+
+            if (
+                rememberInput.checked
+            ) {
 
                 localStorage.setItem(
                     STORAGE.rememberedEmail,
                     email
                 );
 
-            } catch (error) {
-
-                console.warn(
-                    "RiderX remembered email save failed:",
-                    error
-                );
-
-            }
-
-        } else {
-
-            try {
+            } else {
 
                 localStorage.removeItem(
                     STORAGE.rememberedEmail
                 );
 
-            } catch (error) {
-
-                console.warn(
-                    "RiderX remembered email cleanup failed:",
-                    error
-                );
-
             }
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX remembered email handling failed:",
+                error
+            );
 
         }
 
@@ -2227,7 +2281,7 @@ async function handleLogin(
 
         setLoading(
             true,
-            "Login successful..."
+            "Opening RiderX..."
         );
 
 
@@ -2265,6 +2319,16 @@ async function handleLogin(
 
         }
 
+    } finally {
+
+        if (
+            !navigationStarted
+        ) {
+
+            busy = false;
+
+        }
+
     }
 
 }
@@ -2290,8 +2354,9 @@ async function handleForgotPassword() {
 
 
     const email =
-        clean(emailInput.value)
-            .toLowerCase();
+        clean(
+            emailInput.value
+        ).toLowerCase();
 
 
     if (!email) {
@@ -2322,10 +2387,10 @@ async function handleForgotPassword() {
 
     busy = true;
 
+
     setLoading(
         true,
-        "Sending reset link...",
-        "Please wait"
+        "Sending reset link..."
     );
 
 
@@ -2362,7 +2427,7 @@ async function handleForgotPassword() {
     } catch (error) {
 
         console.error(
-            "RiderX customer password reset error:",
+            "RiderX password reset error:",
             error
         );
 
@@ -2438,7 +2503,8 @@ function navigate(
 ) {
 
     if (
-        navigationStarted
+        navigationStarted ||
+        busy
     ) {
 
         return;
@@ -2456,48 +2522,59 @@ function navigate(
 
 
 /* ============================================================
-   LOADING
+   LOADING STATE
 ============================================================ */
 
 function setLoading(
     loading,
-    title
+    title = "Signing in..."
 ) {
 
-    loginButton.disabled =
+    const state =
         Boolean(loading);
+
+
+    loginButton.disabled =
+        state;
 
     forgotPassword.disabled =
-        Boolean(loading);
+        state;
 
     otpButton.disabled =
-        Boolean(loading);
+        state;
 
     registerButton.disabled =
-        Boolean(loading);
+        state;
 
     riderLoginButton.disabled =
-        Boolean(loading);
+        state;
 
     roleButton.disabled =
-        Boolean(loading);
+        state;
 
     togglePassword.disabled =
-        Boolean(loading);
+        state;
 
     emailInput.disabled =
-        Boolean(loading);
+        state;
 
     passwordInput.disabled =
-        Boolean(loading);
+        state;
+
+    rememberInput.disabled =
+        state;
 
 
-    if (loading) {
+    if (state) {
+
+        const safeTitle =
+            clean(title) ||
+            "Signing in...";
+
 
         loginButton.innerHTML =
             '<span class="loader" aria-hidden="true"></span>' +
-            clean(title) ||
-            "Signing in...";
+            safeTitle;
 
     } else {
 
@@ -2557,7 +2634,7 @@ function hideMessage() {
 
 
 /* ============================================================
-   FRIENDLY AUTH ERROR
+   FIREBASE ERROR TRANSLATION
 ============================================================ */
 
 function friendlyAuthError(
@@ -2644,6 +2721,15 @@ function friendlyAuthError(
     ) {
 
         return "RiderX account verification was denied by Firebase. Please check your Firestore security rules.";
+
+    }
+
+
+    if (
+        lower.includes("network")
+    ) {
+
+        return "Network error. Check your internet connection and try again.";
 
     }
 
@@ -2804,15 +2890,12 @@ passwordInput.addEventListener(
 function init() {
 
     /*
-     * This page intentionally does NOT:
+     * Do NOT initialize Firebase here.
      *
-     * - import Firebase directly
-     * - initialize Firebase
-     * - call signInWithEmailAndPassword directly
-     * - read Firestore directly for authentication
-     * - trust localStorage as proof of authentication
+     * Do NOT call Firebase SDK directly here.
      *
-     * js/auth.js is the centralized authentication engine.
+     * js/auth.js remains the centralized authentication
+     * controller for RiderX.
      */
 
     setCustomerRole();
@@ -2870,6 +2953,10 @@ function init() {
     );
 
 
+    /*
+     * Small compatibility API for other RiderX modules.
+     */
+
     window.RiderXCustomerLogin =
         Object.freeze({
 
@@ -2890,4 +2977,7 @@ function init() {
 
 init();
 
-</script></body></html>
+</script>
+
+</body>
+</html>
