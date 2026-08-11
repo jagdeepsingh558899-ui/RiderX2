@@ -53,7 +53,7 @@
 
     "riderLocations": {
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'customer' || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'customer' || root.child('users').child(auth.uid).child('role').val() === 'rider' || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
 
         ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
 
@@ -65,13 +65,25 @@
 
         "longitude": {
           ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+        },
+
+        "uid": {
+          ".validate": "newData.val() === $uid"
+        },
+
+        "online": {
+          ".validate": "newData.isBoolean()"
+        },
+
+        "updatedAt": {
+          ".validate": "newData.isNumber() || newData.val() == null"
         }
       }
     },
 
     "locations": {
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role') === 'admin' || root.child('users').child(auth.uid).child('role') === 'superadmin' || root.child('users').child(auth.uid).child('role') === 'customer')",
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || root.child('users').child(auth.uid).child('role').val() === 'customer' || root.child('users').child(auth.uid).child('role').val() === 'rider')",
 
         ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
 
@@ -83,28 +95,66 @@
 
         "longitude": {
           ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+        },
+
+        "uid": {
+          ".validate": "newData.val() === $uid"
         }
       }
     },
 
     "rides": {
       "$rideId": {
-        ".read": "auth != null && (data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
 
-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || (!data.exists() && newData.child('customerId').val() === auth.uid) || (data.exists() && data.child('customerId').val() === auth.uid && newData.child('customerId').val() === data.child('customerId').val()) || (data.exists() && (data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid) && newData.child('customerId').val() === data.child('customerId').val())) || (data.exists() && root.child('users').child(auth.uid).child('role').val() === 'rider' && !data.child('riderId').exists() && newData.child('riderId').val() === auth.uid))",
+        /*
+         * Ride reads:
+         *
+         * Customer:
+         *   own ride
+         *
+         * Rider:
+         *   own assigned ride
+         *   OR an unassigned searching ride
+         *
+         * Admin:
+         *   all rides
+         */
 
-        ".validate": "newData.hasChildren(['status']) && (!data.exists() || newData.child('customerId').val() === data.child('customerId').val()) && (!data.exists() || !data.child('riderId').exists() || newData.child('riderId').val() === data.child('riderId').val()) && (!data.exists() || !data.child('driverId').exists() || newData.child('driverId').val() === data.child('driverId').val())",
+        ".read": "auth != null && (data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid || (root.child('users').child(auth.uid).child('role').val() === 'rider' && (!data.child('riderId').exists() || data.child('riderId').val() === '') && (!data.child('driverId').exists() || data.child('driverId').val() === '') && (data.child('status').val() === 'searching' || data.child('status').val() === 'SEARCHING' || data.child('status').val() === 'requested' || data.child('status').val() === 'REQUESTED' || data.child('status').val() === 'pending' || data.child('status').val() === 'PENDING')) || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
+
+        /*
+         * Writes:
+         *
+         * Customer:
+         *   create own ride
+         *   update own unassigned ride
+         *
+         * Rider:
+         *   claim an unassigned searching ride
+         *   update own assigned ride
+         *
+         * Admin:
+         *   full access
+         */
+
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || (!data.exists() && newData.child('customerId').val() === auth.uid) || (data.exists() && data.child('customerId').val() === auth.uid && newData.child('customerId').val() === data.child('customerId').val() && (!data.child('riderId').exists() || newData.child('riderId').val() === data.child('riderId').val()) && (!data.child('driverId').exists() || newData.child('driverId').val() === data.child('driverId').val())) || (data.exists() && (data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid) && newData.child('customerId').val() === data.child('customerId').val() && newData.child('riderId').val() === data.child('riderId').val() && newData.child('driverId').val() === data.child('driverId').val()) || (data.exists() && root.child('users').child(auth.uid).child('role').val() === 'rider' && (!data.child('riderId').exists() || data.child('riderId').val() === '') && (!data.child('driverId').exists() || data.child('driverId').val() === '') && (data.child('status').val() === 'searching' || data.child('status').val() === 'SEARCHING' || data.child('status').val() === 'requested' || data.child('status').val() === 'REQUESTED' || data.child('status').val() === 'pending' || data.child('status').val() === 'PENDING') && newData.child('riderId').val() === auth.uid && newData.child('customerId').val() === data.child('customerId').val()))",
+
+        /*
+         * Ownership IDs cannot be transferred after creation.
+         */
+
+        ".validate": "newData.hasChildren(['status']) && (!data.exists() || newData.child('customerId').val() === data.child('customerId').val()) && (!data.exists() || !data.child('riderId').exists() || newData.child('riderId').val() === data.child('riderId').val() || (root.child('users').child(auth.uid).child('role').val() === 'rider' && !data.child('riderId').exists() && newData.child('riderId').val() === auth.uid)) && (!data.exists() || !data.child('driverId').exists() || newData.child('driverId').val() === data.child('driverId').val())",
 
         "customerId": {
           ".validate": "newData.val() === (data.exists() ? data.val() : newData.val())"
         },
 
         "riderId": {
-          ".validate": "!data.exists() || newData.val() === data.val() || (!data.parent().child('riderId').exists() && newData.val() === auth.uid)"
+          ".validate": "!data.exists() || newData.val() === data.val() || (!data.parent().child('riderId').exists() && root.child('users').child(auth.uid).child('role').val() === 'rider' && newData.val() === auth.uid)"
         },
 
         "driverId": {
-          ".validate": "!data.exists() || newData.val() === data.val() || (!data.parent().child('driverId').exists() && newData.val() === auth.uid)"
+          ".validate": "!data.exists() || newData.val() === data.val() || (!data.parent().child('driverId').exists() && root.child('users').child(auth.uid).child('role').val() === 'rider' && newData.val() === auth.uid)"
         },
 
         "status": {
@@ -117,9 +167,9 @@
       "$bookingId": {
         ".read": "auth != null && (data.child('customerId').val() === auth.uid || data.child('userId').val() === auth.uid || data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
 
-        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || (!data.exists() && (newData.child('customerId').val() === auth.uid || newData.child('userId').val() === auth.uid)) || (data.exists() && data.child('customerId').val() === auth.uid && newData.child('customerId').val() === data.child('customerId').val()) || (data.exists() && data.child('userId').val() === auth.uid && newData.child('userId').val() === data.child('userId').val()) || (data.exists() && (data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid) && newData.child('customerId').val() === data.child('customerId').val())) || (data.exists() && root.child('users').child(auth.uid).child('role').val() === 'rider' && !data.child('riderId').exists() && newData.child('riderId').val() === auth.uid))",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || (!data.exists() && (newData.child('customerId').val() === auth.uid || newData.child('userId').val() === auth.uid)) || (data.exists() && data.child('customerId').val() === auth.uid && newData.child('customerId').val() === data.child('customerId').val()) || (data.exists() && data.child('userId').val() === auth.uid && newData.child('userId').val() === data.child('userId').val()) || (data.exists() && (data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid) && newData.child('customerId').val() === data.child('customerId').val()) || (data.exists() && root.child('users').child(auth.uid).child('role').val() === 'rider' && !data.child('riderId').exists() && newData.child('riderId').val() === auth.uid))",
 
-        ".validate": "(!data.exists() || (!data.child('customerId').exists() || newData.child('customerId').val() === data.child('customerId').val())) && (!data.exists() || (!data.child('userId').exists() || newData.child('userId').val() === data.child('userId').val())) && (!data.exists() || (!data.child('riderId').exists() || newData.child('riderId').val() === data.child('riderId').val())) && (!data.exists() || (!data.child('driverId').exists() || newData.child('driverId').val() === data.child('driverId').val()))",
+        ".validate": "(!data.exists() || (!data.child('customerId').exists() || newData.child('customerId').val() === data.child('customerId').val())) && (!data.exists() || (!data.child('userId').exists() || newData.child('userId').val() === data.child('userId').val())) && (!data.exists() || (!data.child('riderId').exists() || newData.child('riderId').val() === data.child('riderId').val() || (root.child('users').child(auth.uid).child('role').val() === 'rider' && newData.child('riderId').val() === auth.uid))) && (!data.exists() || (!data.child('driverId').exists() || newData.child('driverId').val() === data.child('driverId').val()))",
 
         "status": {
           ".validate": "newData.isString() && newData.val().length > 0"
@@ -127,23 +177,53 @@
       }
     },
 
+    /*
+     * Legacy compatibility path.
+     *
+     * RiderX currently contains code using rideRequests.
+     * It is kept protected and ownership-based rather than
+     * exposing every request to every authenticated user.
+     */
+
     "rideRequests": {
       "$rideId": {
         ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'rider' || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || data.child('customerId').val() === auth.uid)",
 
         ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || (!data.exists() && newData.child('customerId').val() === auth.uid) || (data.exists() && data.child('customerId').val() === auth.uid && newData.child('customerId').val() === data.child('customerId').val()) || (data.exists() && root.child('users').child(auth.uid).child('role').val() === 'rider' && (data.child('riderId').val() === auth.uid || (!data.child('riderId').exists() && newData.child('riderId').val() === auth.uid))))",
 
-        ".validate": "(!data.exists() || newData.child('customerId').val() === data.child('customerId').val()) && (!data.exists() || !data.child('riderId').exists() || newData.child('riderId').val() === data.child('riderId').val())"
+        ".validate": "newData.hasChildren(['customerId']) && (!data.exists() || newData.child('customerId').val() === data.child('customerId').val()) && (!data.exists() || !data.child('riderId').exists() || newData.child('riderId').val() === data.child('riderId').val() || (root.child('users').child(auth.uid).child('role').val() === 'rider' && newData.child('riderId').val() === auth.uid))"
       }
     },
+
+    /*
+     * Rider presence.
+     *
+     * Rider controls only their own presence.
+     * Authenticated users may read presence because customer
+     * and rider interfaces use it for live availability.
+     */
 
     "presence": {
       "$uid": {
         ".read": "auth != null",
 
-        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')"
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
+
+        ".validate": "newData.hasChildren(['online'])",
+
+        "uid": {
+          ".validate": "newData.val() === $uid"
+        },
+
+        "online": {
+          ".validate": "newData.isBoolean()"
+        }
       }
     },
+
+    /*
+     * Primary live rider location path.
+     */
 
     "onlineRiders": {
       "$uid": {
@@ -167,6 +247,14 @@
 
         "online": {
           ".validate": "newData.isBoolean()"
+        },
+
+        "rideId": {
+          ".validate": "newData.isString() || newData.val() == null"
+        },
+
+        "updatedAt": {
+          ".validate": "newData.isNumber() || newData.val() == null"
         }
       }
     },
@@ -175,9 +263,20 @@
       "$uid": {
         ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')",
 
-        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin')"
+        /*
+         * A user can update their own notification read state.
+         * Admin can create/update/delete notifications.
+         */
+
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'superadmin' || auth.uid === $uid)"
       }
     },
+
+    /*
+     * Legacy RTDB chat path.
+     *
+     * Only chat participants/admins can access a chat.
+     */
 
     "chat": {
       "$chatId": {
