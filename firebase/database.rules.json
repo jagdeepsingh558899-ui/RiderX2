@@ -9,97 +9,75 @@
 
         ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
 
-        ".validate": "newData.hasChildren(['uid']) && newData.child('uid').val() === $uid"
+        ".validate": "newData.hasChildren(['uid'])",
+
+        "uid": {
+          ".validate": "newData.val() === $uid"
+        },
+
+        "role": {
+          ".validate": "newData.val() === 'customer' || newData.val() === 'rider' || newData.val() === 'admin'"
+        }
       }
     },
 
     "riders": {
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'customer')",
 
         ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
 
-        "location": {
-          ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || data.parent().child('currentRideId').val() != null)",
-
-          ".write": "auth != null && auth.uid === $uid",
-
-          ".validate": "newData.hasChildren(['latitude', 'longitude']) && newData.child('latitude').isNumber() && newData.child('longitude').isNumber() && newData.child('latitude').val() >= -90 && newData.child('latitude').val() <= 90 && newData.child('longitude').val() >= -180 && newData.child('longitude').val() <= 180"
-        },
-
-        "latitude": {
-          ".write": "auth != null && auth.uid === $uid",
-          ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
-        },
-
-        "longitude": {
-          ".write": "auth != null && auth.uid === $uid",
-          ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+        "uid": {
+          ".validate": "newData.val() === $uid"
         },
 
         "online": {
-          ".write": "auth != null && auth.uid === $uid",
           ".validate": "newData.isBoolean()"
         },
 
         "isOnline": {
-          ".write": "auth != null && auth.uid === $uid",
           ".validate": "newData.isBoolean()"
         },
 
-        "lastSeenAt": {
-          ".write": "auth != null && auth.uid === $uid"
+        "latitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
         },
 
-        "currentRideId": {
-          ".write": "auth != null && auth.uid === $uid"
+        "longitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+        }
+      }
+    },
+
+    "riderLocations": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'customer')",
+
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+
+        "latitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
         },
 
-        "currentBookingId": {
-          ".write": "auth != null && auth.uid === $uid"
-        },
-
-        "$other": {
-          ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        "longitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
         }
       }
     },
 
     "locations": {
       "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('rides').child(auth.uid).exists())",
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin' || root.child('users').child(auth.uid).child('role').val() === 'customer')",
 
-        ".write": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
 
-        ".validate": "newData.hasChildren(['latitude', 'longitude']) && newData.child('latitude').isNumber() && newData.child('longitude').isNumber() && newData.child('latitude').val() >= -90 && newData.child('latitude').val() <= 90 && newData.child('longitude').val() >= -180 && newData.child('longitude').val() <= 180"
-      }
-    },
+        "latitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+        },
 
-    "presence": {
-      "$uid": {
-        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
-
-        ".write": "auth != null && auth.uid === $uid",
-
-        ".validate": "newData.hasChildren(['online']) && newData.child('online').isBoolean()"
-      }
-    },
-
-    "onlineRiders": {
-      "$uid": {
-        ".read": "auth != null",
-
-        ".write": "auth != null && auth.uid === $uid",
-
-        ".validate": "newData.hasChildren(['uid']) && newData.child('uid').val() === $uid"
-      }
-    },
-
-    "rideRequests": {
-      "$rideId": {
-        ".read": "auth != null && (root.child('rides').child($rideId).child('customerId').val() === auth.uid || root.child('rides').child($rideId).child('riderId').val() === auth.uid || root.child('rides').child($rideId).child('driverId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
-
-        ".write": "auth != null && (root.child('rides').child($rideId).child('customerId').val() === auth.uid || root.child('rides').child($rideId).child('riderId').val() === auth.uid || root.child('rides').child($rideId).child('driverId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        "longitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+        }
       }
     },
 
@@ -109,7 +87,7 @@
 
         ".write": "auth != null && (data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid || newData.child('customerId').val() === auth.uid || newData.child('riderId').val() === auth.uid || newData.child('driverId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
 
-        ".validate": "newData.hasChildren(['rideId']) && newData.child('rideId').val() === $rideId"
+        ".validate": "newData.hasChildren(['status'])"
       }
     },
 
@@ -121,11 +99,47 @@
       }
     },
 
-    "notifications": {
-      "$notificationId": {
-        ".read": "auth != null && (data.child('userId').val() === auth.uid || data.child('uid').val() === auth.uid || data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+    "rideRequests": {
+      "$rideId": {
+        ".read": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'rider' || root.child('users').child(auth.uid).child('role').val() === 'admin' || data.child('customerId').val() === auth.uid)",
 
-        ".write": "auth != null && (data.child('userId').val() === auth.uid || data.child('uid').val() === auth.uid || data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role').val() === 'rider' || root.child('users').child(auth.uid).child('role').val() === 'admin' || newData.child('customerId').val() === auth.uid)"
+      }
+    },
+
+    "presence": {
+      "$uid": {
+        ".read": "auth != null",
+
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      }
+    },
+
+    "onlineRiders": {
+      "$uid": {
+        ".read": "auth != null",
+
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+
+        "latitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+        },
+
+        "longitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+        },
+
+        "online": {
+          ".validate": "newData.isBoolean()"
+        }
+      }
+    },
+
+    "notifications": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+
+        ".write": "auth != null && (auth.uid === $uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     },
 
@@ -134,14 +148,6 @@
         ".read": "auth != null && (data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
 
         ".write": "auth != null && (data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || data.child('driverId').val() === auth.uid || newData.child('customerId').val() === auth.uid || newData.child('riderId').val() === auth.uid || newData.child('driverId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
-      }
-    },
-
-    "support": {
-      "$supportId": {
-        ".read": "auth != null && (data.child('userId').val() === auth.uid || data.child('uid').val() === auth.uid || data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')",
-
-        ".write": "auth != null && (data.child('userId').val() === auth.uid || data.child('uid').val() === auth.uid || data.child('customerId').val() === auth.uid || data.child('riderId').val() === auth.uid || newData.child('userId').val() === auth.uid || newData.child('uid').val() === auth.uid || newData.child('customerId').val() === auth.uid || newData.child('riderId').val() === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'admin')"
       }
     }
   }
