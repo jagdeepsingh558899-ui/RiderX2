@@ -10,9 +10,9 @@
 
 <meta name="theme-color" content="#FFD400">
 
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/dashboard.css">
+<link rel="stylesheet" href="../css/responsive.css">
 
 <style>
 
@@ -20,9 +20,7 @@
     --yellow:#FFD400;
     --bg:#0d0d0d;
     --card:#181818;
-    --card2:#202020;
     --border:#2d2d2d;
-    --muted:#777;
     --green:#22c55e;
     --red:#ef4444;
     --blue:#3b82f6;
@@ -45,6 +43,11 @@ body{
     font-family:Arial,Helvetica,sans-serif;
 }
 
+button{
+    font-family:inherit;
+    cursor:pointer;
+}
+
 .app{
     width:100%;
     max-width:650px;
@@ -54,9 +57,9 @@ body{
 }
 
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 .header{
     position:sticky;
@@ -74,16 +77,24 @@ body{
 .back-btn{
     width:40px;
     height:40px;
+    min-width:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     border:1px solid #303030;
     border-radius:50%;
     background:#1b1b1b;
     color:#fff;
     font-size:22px;
-    cursor:pointer;
+}
+
+.back-btn:active{
+    transform:scale(.95);
 }
 
 .title-box{
     flex:1;
+    min-width:0;
 }
 
 .title{
@@ -99,17 +110,16 @@ body{
 
 .header-action{
     border:0;
-    background:none;
+    background:transparent;
     color:var(--yellow);
     font-size:7px;
     font-weight:900;
-    cursor:pointer;
 }
 
 
-/* =========================
+/* =========================================================
    CONTENT
-========================= */
+========================================================= */
 
 .content{
     padding:13px;
@@ -117,14 +127,15 @@ body{
 }
 
 
-/* =========================
+/* =========================================================
    TOP BAR
-========================= */
+========================================================= */
 
 .topbar{
     display:flex;
     align-items:center;
     justify-content:space-between;
+    gap:10px;
     margin-bottom:10px;
 }
 
@@ -145,13 +156,16 @@ body{
     color:#aaa;
     font-size:6px;
     font-weight:900;
-    cursor:pointer;
+}
+
+.clear-btn:active{
+    transform:scale(.97);
 }
 
 
-/* =========================
+/* =========================================================
    FILTERS
-========================= */
+========================================================= */
 
 .filters{
     display:flex;
@@ -174,7 +188,6 @@ body{
     color:#777;
     font-size:6px;
     font-weight:900;
-    cursor:pointer;
 }
 
 .filter.active{
@@ -184,9 +197,9 @@ body{
 }
 
 
-/* =========================
+/* =========================================================
    NOTIFICATION LIST
-========================= */
+========================================================= */
 
 .notification-list{
     display:flex;
@@ -203,7 +216,14 @@ body{
     border-radius:15px;
     background:var(--card);
     cursor:pointer;
-    transition:.15s;
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease;
+}
+
+.notification:hover{
+    border-color:#3b3b3b;
 }
 
 .notification:active{
@@ -287,9 +307,9 @@ body{
 }
 
 
-/* =========================
-   EMPTY STATE
-========================= */
+/* =========================================================
+   EMPTY
+========================================================= */
 
 .empty{
     display:none;
@@ -327,9 +347,9 @@ body{
 }
 
 
-/* =========================
+/* =========================================================
    DATE GROUP
-========================= */
+========================================================= */
 
 .date-label{
     margin:14px 2px 7px;
@@ -340,9 +360,9 @@ body{
 }
 
 
-/* =========================
-   DETAIL MODAL
-========================= */
+/* =========================================================
+   MODAL
+========================================================= */
 
 .modal{
     position:fixed;
@@ -405,6 +425,8 @@ body{
     color:#999;
     font-size:7px;
     line-height:1.6;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
 }
 
 .modal-close{
@@ -417,13 +439,12 @@ body{
     color:#000;
     font-size:7px;
     font-weight:900;
-    cursor:pointer;
 }
 
 
-/* =========================
+/* =========================================================
    TOAST
-========================= */
+========================================================= */
 
 .toast{
     position:fixed;
@@ -450,6 +471,28 @@ body{
     transform:translate(-50%,0);
 }
 
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:380px){
+
+    .content{
+        padding-left:10px;
+        padding-right:10px;
+    }
+
+    .title{
+        font-size:11px;
+    }
+
+    .header-action{
+        font-size:6px;
+    }
+
+}
+
 </style>
 
 </head>
@@ -458,15 +501,13 @@ body{
 
 <div class="app">
 
-
-    <!-- HEADER -->
-
     <header class="header">
 
         <button
+            type="button"
             class="back-btn"
-            onclick="goBack()"
-            aria-label="Back"
+            id="backButton"
+            aria-label="Go back"
         >
             ‹
         </button>
@@ -484,8 +525,9 @@ body{
         </div>
 
         <button
+            type="button"
             class="header-action"
-            onclick="markAllRead()"
+            id="markAllButton"
         >
             Mark all read
         </button>
@@ -495,9 +537,6 @@ body{
 
     <main class="content">
 
-
-        <!-- TOP -->
-
         <div class="topbar">
 
             <div class="unread-text">
@@ -506,8 +545,9 @@ body{
             </div>
 
             <button
+                type="button"
                 class="clear-btn"
-                onclick="clearNotifications()"
+                id="clearButton"
             >
                 Clear all
             </button>
@@ -515,46 +555,44 @@ body{
         </div>
 
 
-        <!-- FILTERS -->
-
         <div class="filters">
 
             <button
+                type="button"
                 class="filter active"
                 data-filter="all"
-                onclick="setFilter('all',this)"
             >
                 All
             </button>
 
             <button
+                type="button"
                 class="filter"
                 data-filter="ride"
-                onclick="setFilter('ride',this)"
             >
                 Rides
             </button>
 
             <button
+                type="button"
                 class="filter"
                 data-filter="payment"
-                onclick="setFilter('payment',this)"
             >
                 Payments
             </button>
 
             <button
+                type="button"
                 class="filter"
                 data-filter="promo"
-                onclick="setFilter('promo',this)"
             >
                 Offers
             </button>
 
             <button
+                type="button"
                 class="filter"
                 data-filter="system"
-                onclick="setFilter('system',this)"
             >
                 Updates
             </button>
@@ -562,15 +600,12 @@ body{
         </div>
 
 
-        <!-- LIST -->
-
         <div
             id="notificationList"
             class="notification-list"
+            aria-live="polite"
         ></div>
 
-
-        <!-- EMPTY -->
 
         <div
             id="emptyState"
@@ -597,14 +632,22 @@ body{
 </div>
 
 
-<!-- DETAIL MODAL -->
+<!-- =======================================================
+     DETAIL MODAL
+======================================================= -->
 
 <div
     class="modal"
     id="detailModal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
 >
 
-    <div class="modal-card">
+    <div
+        class="modal-card"
+        role="document"
+    >
 
         <div class="handle"></div>
 
@@ -635,8 +678,9 @@ body{
         ></div>
 
         <button
+            type="button"
             class="modal-close"
-            onclick="closeModal()"
+            id="modalCloseButton"
         >
             Done
         </button>
@@ -649,101 +693,455 @@ body{
 <div
     class="toast"
     id="toast"
+    role="status"
+    aria-live="polite"
 ></div>
 
 
 <script>
 
-/* ==========================================
+/* =========================================================
    RIDERX CUSTOMER NOTIFICATIONS
-========================================== */
+   Final notification center
 
-let notifications = [];
-let currentFilter = "all";
-let toastTimer = null;
+   Supports:
+   - Ride notifications
+   - Payment notifications
+   - Promo notifications
+   - System notifications
+   - Unread/read state
+   - Filters
+   - Notification detail modal
+   - Clear all
+   - Cross-tab localStorage sync
+   - Multiple legacy RiderX storage keys
+   - Safe normalization
+========================================================= */
 
+(function(){
 
-/* ==========================================
-   DEFAULT NOTIFICATIONS
-========================================== */
-
-const defaultNotifications = [
-
-    {
-        id:"welcome",
-        type:"system",
-        icon:"👋",
-        title:"Welcome to RiderX",
-        message:"Welcome to RiderX. Book Bike Taxi, Cab, Parcel and Food Delivery from one app.",
-        time:Date.now(),
-        read:false
-    },
-
-    {
-        id:"payment-ready",
-        type:"payment",
-        icon:"💳",
-        title:"Payments are ready",
-        message:"You can now manage your RiderX wallet and payment methods from the Wallet section.",
-        time:Date.now() - 3600000,
-        read:false
-    }
-
-];
+    "use strict";
 
 
-/* ==========================================
-   LOAD
-========================================== */
+    /* =====================================================
+       STORAGE
+    ===================================================== */
 
-function loadNotifications(){
-
-    const keys = [
-
+    const STORAGE_KEYS = [
         "riderxNotifications",
         "notifications",
         "customerNotifications"
+    ];
+
+    const PRIMARY_STORAGE_KEY =
+        "riderxNotifications";
+
+
+    /* =====================================================
+       STATE
+    ===================================================== */
+
+    let notifications = [];
+
+    let currentFilter = "all";
+
+    let toastTimer = null;
+
+
+    /* =====================================================
+       DEFAULT NOTIFICATIONS
+    ===================================================== */
+
+    const defaultNotifications = [
+
+        {
+            id:"welcome",
+            type:"system",
+            icon:"👋",
+            title:"Welcome to RiderX",
+            message:
+                "Welcome to RiderX. Book Bike Taxi, Cab, Parcel and Food Delivery from one app.",
+            time:Date.now(),
+            read:false
+        },
+
+        {
+            id:"payment-ready",
+            type:"payment",
+            icon:"💳",
+            title:"Payments are ready",
+            message:
+                "You can now manage your RiderX wallet and payment methods from the Wallet section.",
+            time:Date.now() - 3600000,
+            read:false
+        }
 
     ];
 
-    let loaded = null;
 
-    for(
-        const key of keys
-    ){
+    /* =====================================================
+       DOM
+    ===================================================== */
 
-        try{
+    const $ = function(id){
 
-            const raw =
-                localStorage.getItem(
-                    key
-                );
+        return document.getElementById(id);
 
-            if(
-                raw
-            ){
+    };
 
-                const data =
-                    JSON.parse(
-                        raw
-                    );
+
+    /* =====================================================
+       LOAD NOTIFICATIONS
+    ===================================================== */
+
+    function loadNotifications(){
+
+        let loaded = null;
+
+        for(
+            const key of STORAGE_KEYS
+        ){
+
+            try{
+
+                const raw =
+                    localStorage.getItem(key);
 
                 if(
-                    Array.isArray(data)
+                    !raw
                 ){
 
-                    loaded = data;
+                    continue;
+
+                }
+
+
+                const parsed =
+                    JSON.parse(raw);
+
+
+                if(
+                    Array.isArray(parsed)
+                ){
+
+                    loaded = parsed;
 
                     break;
 
                 }
 
+            }catch(error){
+
+                console.warn(
+                    "RiderX notification storage read failed:",
+                    key,
+                    error
+                );
+
             }
+
+        }
+
+
+        if(
+            loaded &&
+            loaded.length
+        ){
+
+            notifications =
+                normalizeNotifications(
+                    loaded
+                );
+
+        }else{
+
+            notifications =
+                defaultNotifications.map(
+                    function(item){
+
+                        return {
+                            ...item
+                        };
+
+                    }
+                );
+
+        }
+
+
+        removeDuplicateNotifications();
+
+        saveNotifications();
+
+        renderNotifications();
+
+    }
+
+
+    /* =====================================================
+       NORMALIZE
+    ===================================================== */
+
+    function normalizeNotifications(data){
+
+        if(
+            !Array.isArray(data)
+        ){
+
+            return [];
+
+        }
+
+
+        return data
+            .map(
+                function(item,index){
+
+                    if(
+                        !item ||
+                        typeof item !== "object"
+                    ){
+
+                        return null;
+
+                    }
+
+
+                    const type =
+                        normalizeType(
+                            item.type ||
+                            item.category ||
+                            item.kind
+                        );
+
+
+                    const rawTime =
+                        item.time ??
+                        item.createdAt ??
+                        item.timestamp ??
+                        Date.now();
+
+
+                    const numericTime =
+                        Number(
+                            rawTime
+                        );
+
+
+                    return {
+
+                        id:
+                            String(
+                                item.id ||
+                                item.notificationId ||
+                                "notification-" +
+                                Date.now() +
+                                "-" +
+                                index
+                            ),
+
+                        type:
+                            type,
+
+                        icon:
+                            safeIcon(
+                                item.icon,
+                                type
+                            ),
+
+                        title:
+                            String(
+                                item.title ||
+                                item.heading ||
+                                "RiderX Notification"
+                            ),
+
+                        message:
+                            String(
+                                item.message ||
+                                item.body ||
+                                item.text ||
+                                ""
+                            ),
+
+                        time:
+                            Number.isFinite(
+                                numericTime
+                            )
+                                ? numericTime
+                                : Date.now(),
+
+                        read:
+                            item.read === true ||
+                            item.isRead === true
+
+                    };
+
+                }
+            )
+            .filter(
+                Boolean
+            );
+
+    }
+
+
+    /* =====================================================
+       TYPE
+    ===================================================== */
+
+    function normalizeType(type){
+
+        const value =
+            String(
+                type || "system"
+            )
+            .toLowerCase()
+            .trim();
+
+
+        if(
+            [
+                "ride",
+                "booking",
+                "trip",
+                "driver",
+                "rider"
+            ].includes(value)
+        ){
+
+            return "ride";
+
+        }
+
+
+        if(
+            [
+                "payment",
+                "wallet",
+                "transaction",
+                "refund"
+            ].includes(value)
+        ){
+
+            return "payment";
+
+        }
+
+
+        if(
+            [
+                "promo",
+                "offer",
+                "coupon",
+                "promotion"
+            ].includes(value)
+        ){
+
+            return "promo";
+
+        }
+
+
+        return "system";
+
+    }
+
+
+    /* =====================================================
+       ICON
+    ===================================================== */
+
+    function safeIcon(icon,type){
+
+        if(
+            typeof icon === "string" &&
+            icon.trim()
+        ){
+
+            return icon;
+
+        }
+
+
+        return getIcon(type);
+
+    }
+
+
+    function getIcon(type){
+
+        switch(type){
+
+            case "ride":
+                return "🚕";
+
+            case "payment":
+                return "💳";
+
+            case "promo":
+                return "🎁";
+
+            case "system":
+                return "⚙️";
+
+            default:
+                return "🔔";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       REMOVE DUPLICATES
+    ===================================================== */
+
+    function removeDuplicateNotifications(){
+
+        const seen = new Set();
+
+        notifications =
+            notifications.filter(
+                function(item){
+
+                    if(
+                        seen.has(item.id)
+                    ){
+
+                        return false;
+
+                    }
+
+                    seen.add(item.id);
+
+                    return true;
+
+                }
+            );
+
+    }
+
+
+    /* =====================================================
+       SAVE
+    ===================================================== */
+
+    function saveNotifications(){
+
+        try{
+
+            localStorage.setItem(
+                PRIMARY_STORAGE_KEY,
+                JSON.stringify(
+                    notifications
+                )
+            );
 
         }catch(error){
 
-            console.log(
-                "Notification load error:",
+            console.warn(
+                "RiderX notification save failed:",
                 error
             );
 
@@ -752,266 +1150,105 @@ function loadNotifications(){
     }
 
 
-    if(
-        loaded &&
-        loaded.length
-    ){
+    /* =====================================================
+       RENDER
+    ===================================================== */
 
-        notifications =
-            normalizeNotifications(
-                loaded
-            );
+    function renderNotifications(){
 
-    }else{
+        const list =
+            $("notificationList");
 
-        notifications =
-            defaultNotifications.map(
-                item => ({
-                    ...item
-                })
-            );
-
-    }
+        const empty =
+            $("emptyState");
 
 
-    saveNotifications();
+        if(
+            !list ||
+            !empty
+        ){
 
-    renderNotifications();
-
-}
-
-
-/* ==========================================
-   NORMALIZE
-========================================== */
-
-function normalizeNotifications(
-    data
-){
-
-    return data.map(
-        (item,index) => {
-
-            const type =
-                item.type ||
-                item.category ||
-                "system";
-
-            let icon =
-                item.icon;
-
-            if(
-                !icon
-            ){
-
-                icon =
-                    getIcon(
-                        type
-                    );
-
-            }
-
-            return {
-
-                id:
-                    item.id ||
-                    "notification-" +
-                    index,
-
-                type:
-                    type,
-
-                icon:
-                    icon,
-
-                title:
-                    item.title ||
-                    item.heading ||
-                    "RiderX Notification",
-
-                message:
-                    item.message ||
-                    item.body ||
-                    item.text ||
-                    "",
-
-                time:
-                    Number(
-                        item.time ||
-                        item.createdAt ||
-                        Date.now()
-                    ),
-
-                read:
-                    Boolean(
-                        item.read
-                    )
-
-            };
+            return;
 
         }
-    );
-
-}
 
 
-/* ==========================================
-   ICON
-========================================== */
-
-function getIcon(
-    type
-){
-
-    switch(
-        type
-    ){
-
-        case "ride":
-            return "🚕";
-
-        case "payment":
-            return "💳";
-
-        case "promo":
-            return "🎁";
-
-        case "system":
-            return "⚙️";
-
-        default:
-            return "🔔";
-
-    }
-
-}
+        list.innerHTML = "";
 
 
-/* ==========================================
-   SAVE
-========================================== */
+        let filtered =
+            notifications.filter(
+                function(item){
 
-function saveNotifications(){
-
-    try{
-
-        localStorage.setItem(
-            "riderxNotifications",
-            JSON.stringify(
-                notifications
-            )
-        );
-
-    }catch(error){
-
-        console.log(
-            "Notification save error:",
-            error
-        );
-
-    }
-
-}
-
-
-/* ==========================================
-   RENDER
-========================================== */
-
-function renderNotifications(){
-
-    const list =
-        document.getElementById(
-            "notificationList"
-        );
-
-    const empty =
-        document.getElementById(
-            "emptyState"
-        );
-
-
-    list.innerHTML = "";
-
-
-    let filtered =
-        notifications.filter(
-            item => {
-
-                if(
-                    currentFilter ===
-                    "all"
-                ){
-
-                    return true;
+                    return (
+                        currentFilter === "all" ||
+                        item.type === currentFilter
+                    );
 
                 }
+            );
+
+
+        filtered.sort(
+            function(a,b){
 
                 return (
-                    item.type ===
-                    currentFilter
+                    Number(b.time) -
+                    Number(a.time)
                 );
 
             }
         );
 
 
-    filtered.sort(
-        (
-            a,
-            b
-        ) =>
-            Number(b.time) -
-            Number(a.time)
-    );
+        if(
+            !filtered.length
+        ){
 
+            empty.classList.add(
+                "show"
+            );
 
-    if(
-        !filtered.length
-    ){
+            updateUnreadCount();
 
-        empty.classList.add(
-            "show"
-        );
+            return;
 
-    }else{
+        }
+
 
         empty.classList.remove(
             "show"
         );
 
-    }
+
+        const groups =
+            groupByDate(
+                filtered
+            );
 
 
-    const groups =
-        groupByDate(
-            filtered
-        );
+        Object.keys(groups)
+            .forEach(
+                function(group){
 
+                    const label =
+                        document.createElement(
+                            "div"
+                        );
 
-    Object.keys(groups)
-        .forEach(
-            group => {
+                    label.className =
+                        "date-label";
 
-                const label =
-                    document.createElement(
-                        "div"
+                    label.textContent =
+                        group;
+
+                    list.appendChild(
+                        label
                     );
 
-                label.className =
-                    "date-label";
 
-                label.textContent =
-                    group;
-
-                list.appendChild(
-                    label
-                );
-
-
-                groups[group]
-                    .forEach(
-                        notification => {
+                    groups[group].forEach(
+                        function(notification){
 
                             list.appendChild(
                                 createNotificationElement(
@@ -1022,727 +1259,1063 @@ function renderNotifications(){
                         }
                     );
 
-            }
-        );
-
-
-    updateUnreadCount();
-
-}
-
-
-/* ==========================================
-   CREATE ITEM
-========================================== */
-
-function createNotificationElement(
-    item
-){
-
-    const el =
-        document.createElement(
-            "div"
-        );
-
-
-    el.className =
-        "notification" +
-        (
-            item.read
-                ? ""
-                : " unread"
-        );
-
-
-    const iconClass =
-        getIconClass(
-            item.type
-        );
-
-
-    el.innerHTML = `
-
-        <div class="notification-icon ${iconClass}">
-            ${escapeHtml(item.icon)}
-        </div>
-
-        <div class="notification-content">
-
-            <div class="notification-title">
-                ${escapeHtml(item.title)}
-            </div>
-
-            <div class="notification-message">
-                ${escapeHtml(item.message)}
-            </div>
-
-            <div class="notification-time">
-                ${formatTime(item.time)}
-            </div>
-
-        </div>
-
-    `;
-
-
-    el.addEventListener(
-        "click",
-        function(){
-
-            openNotification(
-                item.id
+                }
             );
 
-        }
-    );
 
-
-    return el;
-
-}
-
-
-/* ==========================================
-   ICON CLASS
-========================================== */
-
-function getIconClass(
-    type
-){
-
-    if(
-        type ===
-        "ride"
-    ){
-
-        return "yellow";
+        updateUnreadCount();
 
     }
 
-    if(
-        type ===
-        "payment"
-    ){
 
-        return "green";
+    /* =====================================================
+       CREATE NOTIFICATION
+    ===================================================== */
 
-    }
+    function createNotificationElement(item){
 
-    if(
-        type ===
-        "promo"
-    ){
-
-        return "blue";
-
-    }
-
-    if(
-        type ===
-        "system"
-    ){
-
-        return "yellow";
-
-    }
-
-    return "";
-
-}
+        const el =
+            document.createElement(
+                "div"
+            );
 
 
-/* ==========================================
-   GROUP DATES
-========================================== */
-
-function groupByDate(
-    list
-){
-
-    const groups = {};
+        el.className =
+            "notification" +
+            (
+                item.read
+                    ? ""
+                    : " unread"
+            );
 
 
-    list.forEach(
-        item => {
+        el.setAttribute(
+            "role",
+            "button"
+        );
 
-            const label =
-                getDateLabel(
-                    item.time
+
+        el.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+
+        el.setAttribute(
+            "aria-label",
+            item.title
+        );
+
+
+        const iconClass =
+            getIconClass(
+                item.type
+            );
+
+
+        el.innerHTML = `
+
+            <div class="notification-icon ${iconClass}">
+                ${escapeHtml(item.icon)}
+            </div>
+
+            <div class="notification-content">
+
+                <div class="notification-title">
+                    ${escapeHtml(item.title)}
+                </div>
+
+                <div class="notification-message">
+                    ${escapeHtml(item.message)}
+                </div>
+
+                <div class="notification-time">
+                    ${escapeHtml(
+                        formatTime(item.time)
+                    )}
+                </div>
+
+            </div>
+
+        `;
+
+
+        const open =
+            function(){
+
+                openNotification(
+                    item.id
                 );
 
+            };
+
+
+        el.addEventListener(
+            "click",
+            open
+        );
+
+
+        el.addEventListener(
+            "keydown",
+            function(event){
+
+                if(
+                    event.key === "Enter" ||
+                    event.key === " "
+                ){
+
+                    event.preventDefault();
+
+                    open();
+
+                }
+
+            }
+        );
+
+
+        return el;
+
+    }
+
+
+    /* =====================================================
+       ICON CLASS
+    ===================================================== */
+
+    function getIconClass(type){
+
+        switch(type){
+
+            case "ride":
+                return "yellow";
+
+            case "payment":
+                return "green";
+
+            case "promo":
+                return "blue";
+
+            case "system":
+                return "yellow";
+
+            default:
+                return "";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GROUP BY DATE
+    ===================================================== */
+
+    function groupByDate(list){
+
+        const groups = {};
+
+
+        list.forEach(
+            function(item){
+
+                const label =
+                    getDateLabel(
+                        item.time
+                    );
+
+
+                if(
+                    !groups[label]
+                ){
+
+                    groups[label] = [];
+
+                }
+
+
+                groups[label].push(
+                    item
+                );
+
+            }
+        );
+
+
+        return groups;
+
+    }
+
+
+    /* =====================================================
+       DATE LABEL
+    ===================================================== */
+
+    function getDateLabel(timestamp){
+
+        const date =
+            new Date(
+                timestamp
+            );
+
+
+        if(
+            Number.isNaN(
+                date.getTime()
+            )
+        ){
+
+            return "Earlier";
+
+        }
+
+
+        const now =
+            new Date();
+
+
+        const today =
+            new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+            );
+
+
+        const yesterday =
+            new Date(
+                today
+            );
+
+
+        yesterday.setDate(
+            yesterday.getDate() - 1
+        );
+
+
+        const target =
+            new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+            );
+
+
+        if(
+            target.getTime() ===
+            today.getTime()
+        ){
+
+            return "Today";
+
+        }
+
+
+        if(
+            target.getTime() ===
+            yesterday.getTime()
+        ){
+
+            return "Yesterday";
+
+        }
+
+
+        return date.toLocaleDateString(
+            "en-IN",
+            {
+                day:"numeric",
+                month:"short",
+                year:"numeric"
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       TIME
+    ===================================================== */
+
+    function formatTime(timestamp){
+
+        const date =
+            new Date(
+                timestamp
+            );
+
+
+        if(
+            Number.isNaN(
+                date.getTime()
+            )
+        ){
+
+            return "Recently";
+
+        }
+
+
+        const diff =
+            Math.max(
+                0,
+                Date.now() -
+                date.getTime()
+            );
+
+
+        const minute =
+            60000;
+
+        const hour =
+            minute * 60;
+
+        const day =
+            hour * 24;
+
+
+        if(
+            diff < minute
+        ){
+
+            return "Just now";
+
+        }
+
+
+        if(
+            diff < hour
+        ){
+
+            const value =
+                Math.floor(
+                    diff / minute
+                );
+
+            return value +
+                (
+                    value === 1
+                        ? " minute ago"
+                        : " minutes ago"
+                );
+
+        }
+
+
+        if(
+            diff < day
+        ){
+
+            const value =
+                Math.floor(
+                    diff / hour
+                );
+
+            return value +
+                (
+                    value === 1
+                        ? " hour ago"
+                        : " hours ago"
+                );
+
+        }
+
+
+        return date.toLocaleDateString(
+            "en-IN",
+            {
+                day:"numeric",
+                month:"short"
+            }
+        ) +
+        " • " +
+        date.toLocaleTimeString(
+            "en-IN",
+            {
+                hour:"numeric",
+                minute:"2-digit"
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       FILTER
+    ===================================================== */
+
+    function setFilter(filter){
+
+        currentFilter =
+            normalizeType(
+                filter
+            );
+
+
+        if(
+            filter === "all"
+        ){
+
+            currentFilter = "all";
+
+        }
+
+
+        document
+            .querySelectorAll(
+                ".filter"
+            )
+            .forEach(
+                function(button){
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.filter ===
+                        currentFilter
+                    );
+
+                }
+            );
+
+
+        renderNotifications();
+
+    }
+
+
+    /* =====================================================
+       OPEN
+    ===================================================== */
+
+    function openNotification(id){
+
+        const item =
+            notifications.find(
+                function(notification){
+
+                    return (
+                        notification.id ===
+                        id
+                    );
+
+                }
+            );
+
+
+        if(
+            !item
+        ){
+
+            return;
+
+        }
+
+
+        item.read = true;
+
+        saveNotifications();
+
+        renderNotifications();
+
+
+        $("modalIcon").textContent =
+            item.icon;
+
+
+        $("modalTitle").textContent =
+            item.title;
+
+
+        $("modalTime").textContent =
+            formatTime(
+                item.time
+            );
+
+
+        $("modalMessage").textContent =
+            item.message;
+
+
+        $("detailModal").classList.add(
+            "show"
+        );
+
+
+        document.body.style.overflow =
+            "hidden";
+
+    }
+
+
+    /* =====================================================
+       CLOSE
+    ===================================================== */
+
+    function closeModal(){
+
+        $("detailModal").classList.remove(
+            "show"
+        );
+
+        document.body.style.overflow =
+            "";
+
+    }
+
+
+    /* =====================================================
+       MARK ALL READ
+    ===================================================== */
+
+    function markAllRead(){
+
+        let changed = false;
+
+
+        notifications.forEach(
+            function(item){
+
+                if(
+                    !item.read
+                ){
+
+                    item.read = true;
+
+                    changed = true;
+
+                }
+
+            }
+        );
+
+
+        if(
+            changed
+        ){
+
+            saveNotifications();
+
+            renderNotifications();
+
+            showToast(
+                "All notifications marked as read."
+            );
+
+        }else{
+
+            showToast(
+                "All notifications are already read."
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CLEAR
+    ===================================================== */
+
+    function clearNotifications(){
+
+        if(
+            !notifications.length
+        ){
+
+            showToast(
+                "No notifications to clear."
+            );
+
+            return;
+
+        }
+
+
+        const confirmed =
+            window.confirm(
+                "Clear all RiderX notifications?"
+            );
+
+
+        if(
+            !confirmed
+        ){
+
+            return;
+
+        }
+
+
+        notifications = [];
+
+        saveNotifications();
+
+        renderNotifications();
+
+        showToast(
+            "Notifications cleared."
+        );
+
+    }
+
+
+    /* =====================================================
+       UNREAD COUNT
+    ===================================================== */
+
+    function updateUnreadCount(){
+
+        const count =
+            notifications.filter(
+                function(item){
+
+                    return !item.read;
+
+                }
+            ).length;
+
+
+        $("unreadCount").textContent =
+            count;
+
+    }
+
+
+    /* =====================================================
+       BACK
+    ===================================================== */
+
+    function goBack(){
+
+        try{
 
             if(
-                !groups[label]
+                document.referrer &&
+                new URL(
+                    document.referrer
+                ).origin ===
+                window.location.origin
             ){
 
-                groups[label] = [];
+                window.history.back();
+
+                return;
 
             }
 
+        }catch(error){
 
-            groups[label].push(
-                item
+            console.warn(
+                "Back navigation check failed:",
+                error
             );
 
         }
-    );
 
-
-    return groups;
-
-}
-
-
-/* ==========================================
-   DATE LABEL
-========================================== */
-
-function getDateLabel(
-    timestamp
-){
-
-    const date =
-        new Date(
-            timestamp
-        );
-
-    const now =
-        new Date();
-
-
-    const today =
-        new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
-        );
-
-
-    const yesterday =
-        new Date(
-            today
-        );
-
-    yesterday.setDate(
-        yesterday.getDate() -
-        1
-    );
-
-
-    const target =
-        new Date(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate()
-        );
-
-
-    if(
-        target.getTime() ===
-        today.getTime()
-    ){
-
-        return "Today";
-
-    }
-
-
-    if(
-        target.getTime() ===
-        yesterday.getTime()
-    ){
-
-        return "Yesterday";
-
-    }
-
-
-    return date.toLocaleDateString(
-        "en-IN",
-        {
-            day:"numeric",
-            month:"short",
-            year:"numeric"
-        }
-    );
-
-}
-
-
-/* ==========================================
-   FORMAT TIME
-========================================== */
-
-function formatTime(
-    timestamp
-){
-
-    const date =
-        new Date(
-            timestamp
-        );
-
-
-    if(
-        Number.isNaN(
-            date.getTime()
-        )
-    ){
-
-        return "Recently";
-
-    }
-
-
-    const now =
-        Date.now();
-
-
-    const diff =
-        Math.max(
-            0,
-            now -
-            date.getTime()
-        );
-
-
-    const minute =
-        60000;
-
-    const hour =
-        minute *
-        60;
-
-    const day =
-        hour *
-        24;
-
-
-    if(
-        diff <
-        minute
-    ){
-
-        return "Just now";
-
-    }
-
-
-    if(
-        diff <
-        hour
-    ){
-
-        const value =
-            Math.floor(
-                diff /
-                minute
-            );
-
-        return value +
-            (
-                value === 1
-                    ? " minute ago"
-                    : " minutes ago"
-            );
-
-    }
-
-
-    if(
-        diff <
-        day
-    ){
-
-        const value =
-            Math.floor(
-                diff /
-                hour
-            );
-
-        return value +
-            (
-                value === 1
-                    ? " hour ago"
-                    : " hours ago"
-            );
-
-    }
-
-
-    return date.toLocaleDateString(
-        "en-IN",
-        {
-            day:"numeric",
-            month:"short"
-        }
-    ) +
-    " • " +
-    date.toLocaleTimeString(
-        "en-IN",
-        {
-            hour:"numeric",
-            minute:"2-digit"
-        }
-    );
-
-}
-
-
-/* ==========================================
-   FILTER
-========================================== */
-
-function setFilter(
-    filter,
-    button
-){
-
-    currentFilter =
-        filter;
-
-
-    document
-        .querySelectorAll(
-            ".filter"
-        )
-        .forEach(
-            item =>
-                item.classList.remove(
-                    "active"
-                )
-        );
-
-
-    button.classList.add(
-        "active"
-    );
-
-
-    renderNotifications();
-
-}
-
-
-/* ==========================================
-   OPEN NOTIFICATION
-========================================== */
-
-function openNotification(
-    id
-){
-
-    const item =
-        notifications.find(
-            notification =>
-                notification.id ===
-                id
-        );
-
-
-    if(
-        !item
-    ){
-
-        return;
-
-    }
-
-
-    item.read =
-        true;
-
-
-    saveNotifications();
-
-    renderNotifications();
-
-
-    document.getElementById(
-        "modalIcon"
-    ).textContent =
-        item.icon;
-
-
-    document.getElementById(
-        "modalTitle"
-    ).textContent =
-        item.title;
-
-
-    document.getElementById(
-        "modalTime"
-    ).textContent =
-        formatTime(
-            item.time
-        );
-
-
-    document.getElementById(
-        "modalMessage"
-    ).textContent =
-        item.message;
-
-
-    document.getElementById(
-        "detailModal"
-    ).classList.add(
-        "show"
-    );
-
-}
-
-
-/* ==========================================
-   CLOSE MODAL
-========================================== */
-
-function closeModal(){
-
-    document.getElementById(
-        "detailModal"
-    ).classList.remove(
-        "show"
-    );
-
-}
-
-
-/* ==========================================
-   MARK ALL READ
-========================================== */
-
-function markAllRead(){
-
-    notifications.forEach(
-        item => {
-
-            item.read =
-                true;
-
-        }
-    );
-
-
-    saveNotifications();
-
-    renderNotifications();
-
-    showToast(
-        "All notifications marked as read."
-    );
-
-}
-
-
-/* ==========================================
-   CLEAR
-========================================== */
-
-function clearNotifications(){
-
-    if(
-        !notifications.length
-    ){
-
-        showToast(
-            "No notifications to clear."
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        window.confirm(
-            "Clear all RiderX notifications?"
-        );
-
-
-    if(
-        !confirmed
-    ){
-
-        return;
-
-    }
-
-
-    notifications = [];
-
-    saveNotifications();
-
-    renderNotifications();
-
-    showToast(
-        "Notifications cleared."
-    );
-
-}
-
-
-/* ==========================================
-   UNREAD COUNT
-========================================== */
-
-function updateUnreadCount(){
-
-    const count =
-        notifications.filter(
-            item =>
-                !item.read
-        ).length;
-
-
-    document.getElementById(
-        "unreadCount"
-    ).textContent =
-        count;
-
-}
-
-
-/* ==========================================
-   BACK
-========================================== */
-
-function goBack(){
-
-    if(
-        document.referrer &&
-        document.referrer.includes(
-            window.location.host
-        )
-    ){
-
-        window.history.back();
-
-    }else{
 
         window.location.href =
             "home.html";
 
     }
 
-}
+
+    /* =====================================================
+       ESCAPE HTML
+    ===================================================== */
+
+    function escapeHtml(value){
+
+        return String(
+            value ?? ""
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+    }
 
 
-/* ==========================================
-   ESCAPE HTML
-========================================== */
+    /* =====================================================
+       TOAST
+    ===================================================== */
 
-function escapeHtml(
-    value
-){
+    function showToast(message){
 
-    return String(
-        value ?? ""
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
+        const toast =
+            $("toast");
 
 
-/* ==========================================
-   TOAST
-========================================== */
+        toast.textContent =
+            message;
 
-function showToast(
-    message
-){
 
-    const toast =
-        document.getElementById(
-            "toast"
+        toast.classList.add(
+            "show"
         );
 
 
-    toast.textContent =
-        message;
+        clearTimeout(
+            toastTimer
+        );
 
 
-    toast.classList.add(
-        "show"
+        toastTimer =
+            setTimeout(
+                function(){
+
+                    toast.classList.remove(
+                        "show"
+                    );
+
+                },
+                2500
+            );
+
+    }
+
+
+    /* =====================================================
+       CROSS TAB / PAGE SYNC
+    ===================================================== */
+
+    window.addEventListener(
+        "storage",
+        function(event){
+
+            if(
+                STORAGE_KEYS.includes(
+                    event.key
+                )
+            ){
+
+                loadNotifications();
+
+            }
+
+        }
     );
 
 
-    clearTimeout(
-        toastTimer
-    );
+    /* =====================================================
+       PUBLIC RIDERX NOTIFICATION API
+       
+       Other RiderX pages can call:
+
+       RiderXNotifications.add({...})
+
+       Example:
+
+       RiderXNotifications.add({
+           type:"ride",
+           title:"Ride accepted",
+           message:"Your rider has accepted the ride."
+       });
+    ===================================================== */
+
+    window.RiderXNotifications = {
+
+        getAll:function(){
+
+            return notifications.map(
+                function(item){
+
+                    return {
+                        ...item
+                    };
+
+                }
+            );
+
+        },
 
 
-    toastTimer =
-        setTimeout(
-            function(){
+        getUnreadCount:function(){
 
-                toast.classList.remove(
-                    "show"
+            return notifications.filter(
+                function(item){
+
+                    return !item.read;
+
+                }
+            ).length;
+
+        },
+
+
+        add:function(data){
+
+            if(
+                !data ||
+                typeof data !== "object"
+            ){
+
+                return null;
+
+            }
+
+
+            const type =
+                normalizeType(
+                    data.type
                 );
 
-            },
-            2500
-        );
 
-}
+            const item = {
+
+                id:
+                    String(
+                        data.id ||
+                        "notification-" +
+                        Date.now() +
+                        "-" +
+                        Math.random()
+                            .toString(36)
+                            .slice(2,8)
+                    ),
+
+                type:
+                    type,
+
+                icon:
+                    safeIcon(
+                        data.icon,
+                        type
+                    ),
+
+                title:
+                    String(
+                        data.title ||
+                        "RiderX Notification"
+                    ),
+
+                message:
+                    String(
+                        data.message ||
+                        data.body ||
+                        ""
+                    ),
+
+                time:
+                    Number(
+                        data.time ||
+                        Date.now()
+                    ),
+
+                read:
+                    data.read === true
+
+            };
 
 
-/* ==========================================
-   MODAL OUTSIDE CLICK
-========================================== */
+            notifications.unshift(
+                item
+            );
 
-document.getElementById(
-    "detailModal"
-).addEventListener(
-    "click",
-    function(event){
 
-        if(
-            event.target ===
-            this
-        ){
+            removeDuplicateNotifications();
 
-            closeModal();
+            saveNotifications();
+
+            renderNotifications();
+
+
+            return {
+                ...item
+            };
+
+        },
+
+
+        markRead:function(id){
+
+            const item =
+                notifications.find(
+                    function(notification){
+
+                        return (
+                            notification.id ===
+                            String(id)
+                        );
+
+                    }
+                );
+
+
+            if(
+                !item
+            ){
+
+                return false;
+
+            }
+
+
+            item.read = true;
+
+            saveNotifications();
+
+            renderNotifications();
+
+            return true;
+
+        },
+
+
+        markAllRead:function(){
+
+            markAllRead();
 
         }
 
+    };
+
+
+    /* =====================================================
+       EVENT BINDINGS
+    ===================================================== */
+
+    function bindEvents(){
+
+        $("backButton")
+            .addEventListener(
+                "click",
+                goBack
+            );
+
+
+        $("markAllButton")
+            .addEventListener(
+                "click",
+                markAllRead
+            );
+
+
+        $("clearButton")
+            .addEventListener(
+                "click",
+                clearNotifications
+            );
+
+
+        $("modalCloseButton")
+            .addEventListener(
+                "click",
+                closeModal
+            );
+
+
+        document
+            .querySelectorAll(
+                ".filter"
+            )
+            .forEach(
+                function(button){
+
+                    button.addEventListener(
+                        "click",
+                        function(){
+
+                            setFilter(
+                                button.dataset.filter
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        $("detailModal")
+            .addEventListener(
+                "click",
+                function(event){
+
+                    if(
+                        event.target ===
+                        $("detailModal")
+                    ){
+
+                        closeModal();
+
+                    }
+
+                }
+            );
+
+
+        document.addEventListener(
+            "keydown",
+            function(event){
+
+                if(
+                    event.key === "Escape"
+                ){
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
     }
-);
 
 
-/* ==========================================
-   INIT
-========================================== */
+    /* =====================================================
+       INIT
+    ===================================================== */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
+    function init(){
+
+        bindEvents();
 
         loadNotifications();
 
     }
-);
+
+
+    if(
+        document.readyState ===
+        "loading"
+    ){
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            init,
+            {
+                once:true
+            }
+        );
+
+    }else{
+
+        init();
+
+    }
+
+})();
 
 </script>
 
 </body>
+
 </html>
