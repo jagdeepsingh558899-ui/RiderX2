@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#050505">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+
 <title>RiderX | Rider Home</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -14,119 +15,797 @@
 
 <style>
 :root{
- --y:#ffd600;--g:#22c55e;--r:#ef4444;--bg:#050505;--card:#111;
- --border:#2d2d2d;--muted:#777;--white:#fff;
+ --y:#ffd600;
+ --g:#22c55e;
+ --r:#ef4444;
+ --bg:#050505;
+ --card:#111;
+ --border:#2d2d2d;
+ --muted:#777;
+ --white:#fff;
 }
-*{box-sizing:border-box;margin:0;padding:0;font-family:Poppins,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
-html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:#fff}
-button,input{font:inherit}button{cursor:pointer}
-button:disabled{opacity:.55}
-#map{position:fixed;inset:0;z-index:1;background:#111}
-.leaflet-control-zoom{margin-top:145px!important;margin-right:10px!important}
-.leaflet-control-zoom a{background:#111!important;color:var(--y)!important;border-color:#333!important}
-.leaflet-control-attribution{font-size:8px!important}
 
-.topbar{position:fixed;top:0;left:0;right:0;z-index:1500;padding:max(10px,env(safe-area-inset-top)) 12px 0;pointer-events:none}
-.toprow{display:flex;justify-content:space-between;align-items:center}
-.logo{background:#080808f5;border:1px solid #333;border-radius:15px;padding:8px 16px;font-size:19px;font-weight:900}
-.logo span{color:var(--y)}
-.top-actions{display:flex;gap:8px}
-.top-btn{width:44px;height:44px;border:1px solid #333;border-radius:50%;background:#080808f5;color:#fff;pointer-events:auto}
-.notification-wrap{position:relative}
-.notification-dot{position:absolute;right:-3px;top:-3px;width:9px;height:9px;border-radius:50%;background:var(--r);display:none}
+*{
+ box-sizing:border-box;
+ margin:0;
+ padding:0;
+ font-family:Poppins,Arial,sans-serif;
+ -webkit-tap-highlight-color:transparent;
+}
 
-.online-control{position:fixed;top:calc(max(10px,env(safe-area-inset-top)) + 58px);left:12px;right:12px;z-index:1400;max-width:500px;margin:auto;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;background:#070707f5;border:1px solid #333;border-radius:18px;box-shadow:0 9px 30px #0008}
-.online-info{display:flex;align-items:center;gap:9px}
-.online-dot{width:11px;height:11px;border-radius:50%;background:#666}
-.online-dot.online{background:var(--g);box-shadow:0 0 14px #22c55ecc}
-.online-title{font-size:12px;font-weight:900}
-.online-sub{font-size:8px;color:#777}
-.online-btn{border:0;border-radius:11px;padding:9px 13px;background:var(--y);color:#000;font-size:9px;font-weight:900}
-.online-btn.offline{background:var(--r);color:#fff}
+html,
+body{
+ width:100%;
+ height:100%;
+ overflow:hidden;
+ background:var(--bg);
+ color:#fff;
+}
 
-.location-btn{position:fixed;right:13px;bottom:calc(28vh + 82px);z-index:1300;width:47px;height:47px;border:1px solid #444;border-radius:50%;background:#111;color:var(--y)}
-.navigation-banner{position:fixed;left:12px;right:12px;top:calc(max(10px,env(safe-area-inset-top)) + 115px);z-index:1350;display:none;padding:11px 13px;background:#070707f7;border:1px solid var(--y);border-radius:17px}
-.navigation-banner.show{display:block}
-.nav-title{color:var(--y);font-size:9px;font-weight:900}
-.nav-distance{font-size:20px;font-weight:900}
-.nav-sub{font-size:8px;color:#888}
+button,
+input{
+ font:inherit;
+}
 
-.sheet{position:fixed;left:0;right:0;bottom:68px;z-index:1200;max-height:43vh;overflow:auto;padding:8px 13px 15px;background:#070707fa;border-top:1px solid #292929;border-radius:24px 24px 0 0}
-.handle{width:43px;height:4px;margin:0 auto 10px;background:#444;border-radius:20px}
-.sheet-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
-.sheet-title{font-size:16px;font-weight:900}
-.request-count{font-size:8px;color:#777}
-.empty{padding:20px 14px;text-align:center;background:#111;border:1px solid #252525;border-radius:17px;color:#777;font-size:10px}
-.empty i{display:block;margin-bottom:8px;color:var(--y);font-size:25px}
+button{
+ cursor:pointer;
+}
 
-.request-card,.active-card{margin-bottom:9px;padding:12px;background:#131313;border:1px solid #393939;border-radius:18px}
-.request-top,.active-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.badge{padding:4px 8px;border-radius:8px;background:var(--y);color:#000;font-size:7px;font-weight:900}
-.new-badge{color:var(--g);font-size:8px;font-weight:900}
-.customer-name{margin-bottom:8px;font-size:14px;font-weight:800}
-.route,.active-route{padding:9px;background:#080808;border:1px solid #222;border-radius:13px}
-.route-row{display:flex;gap:9px;align-items:flex-start}
-.route-row+.route-row{margin-top:8px}
-.route-icon{width:23px;height:23px;min-width:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px}
-.pick-icon{background:#12351f;color:var(--g)}
-.drop-icon{background:#3a3200;color:var(--y)}
-.route-label{font-size:7px;color:#666;text-transform:uppercase}
-.route-address{font-size:9px;color:#eee;line-height:1.35;word-break:break-word}
-.request-info{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
-.request-info-box{padding:7px;text-align:center;background:#0a0a0a;border:1px solid #222;border-radius:9px}
-.request-info-box small{display:block;color:#666;font-size:6px}
-.request-info-box strong{font-size:9px}
-.earning-box,.active-fare{margin-top:8px;padding:9px;display:flex;align-items:center;justify-content:space-between;background:#1c1800;border:1px solid #4c4300;border-radius:13px}
-.earning-label{font-size:8px;color:#aaa}
-.earning,.active-fare strong{font-size:21px;font-weight:900;color:var(--y)}
-.request-actions,.active-actions,.contact-actions{display:grid;grid-template-columns:1fr 2fr;gap:7px;margin-top:8px}
-.reject-btn,.accept,.action-btn,.contact-btn{padding:11px 6px;border-radius:11px;font-size:9px;font-weight:900}
-.reject-btn{border:1px solid #552222;background:#291010;color:#f66}
-.accept{border:0;background:var(--y);color:#000}
-.active-card{border-color:var(--g)}
-.active-title{color:var(--g);font-size:13px;font-weight:900}
-.active-status{padding:4px 8px;border-radius:8px;background:#12351f;color:var(--g);font-size:7px;font-weight:900}
-.customer-box{display:flex;align-items:center;gap:10px;padding:9px;background:#0b0b0b;border:1px solid #222;border-radius:13px}
-.customer-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#222;color:var(--y)}
-.customer-info{flex:1}
-.customer-info strong{display:block;font-size:11px}
-.customer-info small{font-size:7px;color:#777}
-.contact-actions{grid-template-columns:1fr 1fr}
-.call-btn{border:1px solid #244f34;background:#12351f;color:var(--g)}
-.chat-btn{border:1px solid #4c4300;background:#181800;color:var(--y)}
-.active-actions{grid-template-columns:1fr 1fr}
-.nav-btn{background:#222;color:#fff;border:1px solid #444}
-.start-btn{background:var(--g);color:#000;border:0}
-.complete-btn{grid-column:1/-1;background:var(--g);color:#000;border:0}
+button:disabled{
+ opacity:.55;
+ cursor:not-allowed;
+}
 
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:68px;z-index:2000;display:grid;grid-template-columns:repeat(4,1fr);background:#080808fa;border-top:1px solid #292929}
-.nav-item{border:0;background:transparent;color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:8px;font-weight:700}
-.nav-item i{font-size:18px}.nav-item.active{color:var(--y)}
+#map{
+ position:fixed;
+ inset:0;
+ z-index:1;
+ background:#111;
+}
 
-.chat-overlay{position:fixed;inset:0;z-index:5000;display:none;align-items:flex-end;background:#000b}
-.chat-overlay.show{display:flex}
-.chat-box{width:100%;height:82vh;display:flex;flex-direction:column;background:#0b0b0b;border-radius:24px 24px 0 0}
-.chat-header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #292929}
-.chat-back{width:37px;height:37px;border-radius:50%;border:1px solid #333;background:#151515;color:#fff}
-.chat-person{flex:1}.chat-person strong{display:block;font-size:12px}.chat-person small{font-size:7px;color:#777}
-.chat-call{width:38px;height:38px;border:0;border-radius:50%;background:#12351f;color:var(--g)}
-.chat-messages{flex:1;overflow:auto;padding:13px}.chat-empty{text-align:center;padding-top:30px;color:#666;font-size:10px}
-.message{max-width:78%;margin-bottom:8px;padding:8px 10px;border-radius:13px;font-size:10px;word-break:break-word}
-.message.mine{margin-left:auto;background:#3a3200}.message.theirs{background:#1b1b1b}
-.message-time{display:block;margin-top:3px;color:#777;font-size:6px}
-.chat-input-row{display:flex;gap:7px;padding:9px;border-top:1px solid #292929}
-.chat-input{flex:1;padding:10px;border:1px solid #333;border-radius:13px;background:#151515;color:#fff;outline:0;font-size:10px}
-.chat-send{width:43px;border:0;border-radius:13px;background:var(--y);color:#000}
+.leaflet-control-zoom{
+ margin-top:145px!important;
+ margin-right:10px!important;
+}
 
-.toast{position:fixed;left:50%;bottom:82px;z-index:7000;max-width:90%;padding:9px 14px;border:1px solid #444;border-radius:12px;background:#222;font-size:10px;text-align:center;opacity:0;transform:translate(-50%,20px);transition:.25s;pointer-events:none}
-.toast.show{opacity:1;transform:translate(-50%,0)}.toast.success{border-color:var(--g)}.toast.error{border-color:var(--r)}
-.loading{position:fixed;inset:0;z-index:8000;display:none;align-items:center;justify-content:center;background:#000b}
-.loading.show{display:flex}.loading-box{padding:24px 32px;text-align:center;background:#111;border:1px solid #333;border-radius:18px}
-.loading-box i{color:var(--y);font-size:24px}.loading-box p{color:#aaa;font-size:10px;margin-top:9px}
+.leaflet-control-zoom a{
+ background:#111!important;
+ color:var(--y)!important;
+ border-color:#333!important;
+}
+
+.leaflet-control-attribution{
+ font-size:8px!important;
+}
+
+.topbar{
+ position:fixed;
+ top:0;
+ left:0;
+ right:0;
+ z-index:1500;
+ padding:max(10px,env(safe-area-inset-top)) 12px 0;
+ pointer-events:none;
+}
+
+.toprow{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.logo{
+ background:#080808f5;
+ border:1px solid #333;
+ border-radius:15px;
+ padding:8px 16px;
+ font-size:19px;
+ font-weight:900;
+}
+
+.logo span{
+ color:var(--y);
+}
+
+.top-actions{
+ display:flex;
+ gap:8px;
+}
+
+.top-btn{
+ width:44px;
+ height:44px;
+ border:1px solid #333;
+ border-radius:50%;
+ background:#080808f5;
+ color:#fff;
+ pointer-events:auto;
+}
+
+.notification-wrap{
+ position:relative;
+ display:inline-flex;
+}
+
+.notification-dot{
+ position:absolute;
+ right:-3px;
+ top:-3px;
+ width:9px;
+ height:9px;
+ border-radius:50%;
+ background:var(--r);
+ display:none;
+}
+
+.online-control{
+ position:fixed;
+ top:calc(max(10px,env(safe-area-inset-top)) + 58px);
+ left:12px;
+ right:12px;
+ z-index:1400;
+ max-width:500px;
+ margin:auto;
+ padding:10px 12px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ background:#070707f5;
+ border:1px solid #333;
+ border-radius:18px;
+ box-shadow:0 9px 30px #0008;
+}
+
+.online-info{
+ display:flex;
+ align-items:center;
+ gap:9px;
+}
+
+.online-dot{
+ width:11px;
+ height:11px;
+ border-radius:50%;
+ background:#666;
+}
+
+.online-dot.online{
+ background:var(--g);
+ box-shadow:0 0 14px #22c55ecc;
+}
+
+.online-title{
+ font-size:12px;
+ font-weight:900;
+}
+
+.online-sub{
+ font-size:8px;
+ color:#777;
+}
+
+.online-btn{
+ border:0;
+ border-radius:11px;
+ padding:9px 13px;
+ background:var(--y);
+ color:#000;
+ font-size:9px;
+ font-weight:900;
+}
+
+.online-btn.offline{
+ background:var(--r);
+ color:#fff;
+}
+
+.location-btn{
+ position:fixed;
+ right:13px;
+ bottom:calc(28vh + 82px);
+ z-index:1300;
+ width:47px;
+ height:47px;
+ border:1px solid #444;
+ border-radius:50%;
+ background:#111;
+ color:var(--y);
+}
+
+.navigation-banner{
+ position:fixed;
+ left:12px;
+ right:12px;
+ top:calc(max(10px,env(safe-area-inset-top)) + 115px);
+ z-index:1350;
+ display:none;
+ padding:11px 13px;
+ background:#070707f7;
+ border:1px solid var(--y);
+ border-radius:17px;
+}
+
+.navigation-banner.show{
+ display:block;
+}
+
+.nav-title{
+ color:var(--y);
+ font-size:9px;
+ font-weight:900;
+}
+
+.nav-distance{
+ font-size:20px;
+ font-weight:900;
+}
+
+.nav-sub{
+ font-size:8px;
+ color:#888;
+}
+
+.sheet{
+ position:fixed;
+ left:0;
+ right:0;
+ bottom:68px;
+ z-index:1200;
+ max-height:43vh;
+ overflow:auto;
+ padding:8px 13px 15px;
+ background:#070707fa;
+ border-top:1px solid #292929;
+ border-radius:24px 24px 0 0;
+}
+
+.handle{
+ width:43px;
+ height:4px;
+ margin:0 auto 10px;
+ background:#444;
+ border-radius:20px;
+}
+
+.sheet-title-row{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:9px;
+}
+
+.sheet-title{
+ font-size:16px;
+ font-weight:900;
+}
+
+.request-count{
+ font-size:8px;
+ color:#777;
+}
+
+.empty{
+ padding:20px 14px;
+ text-align:center;
+ background:#111;
+ border:1px solid #252525;
+ border-radius:17px;
+ color:#777;
+ font-size:10px;
+}
+
+.empty i{
+ display:block;
+ margin-bottom:8px;
+ color:var(--y);
+ font-size:25px;
+}
+
+.request-card,
+.active-card{
+ margin-bottom:9px;
+ padding:12px;
+ background:#131313;
+ border:1px solid #393939;
+ border-radius:18px;
+}
+
+.request-top,
+.active-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:8px;
+}
+
+.badge{
+ padding:4px 8px;
+ border-radius:8px;
+ background:var(--y);
+ color:#000;
+ font-size:7px;
+ font-weight:900;
+}
+
+.new-badge{
+ color:var(--g);
+ font-size:8px;
+ font-weight:900;
+}
+
+.customer-name{
+ margin-bottom:8px;
+ font-size:14px;
+ font-weight:800;
+}
+
+.route,
+.active-route{
+ padding:9px;
+ background:#080808;
+ border:1px solid #222;
+ border-radius:13px;
+}
+
+.route-row{
+ display:flex;
+ gap:9px;
+ align-items:flex-start;
+}
+
+.route-row+.route-row{
+ margin-top:8px;
+}
+
+.route-icon{
+ width:23px;
+ height:23px;
+ min-width:23px;
+ border-radius:50%;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:8px;
+}
+
+.pick-icon{
+ background:#12351f;
+ color:var(--g);
+}
+
+.drop-icon{
+ background:#3a3200;
+ color:var(--y);
+}
+
+.route-label{
+ font-size:7px;
+ color:#666;
+ text-transform:uppercase;
+}
+
+.route-address{
+ font-size:9px;
+ color:#eee;
+ line-height:1.35;
+ word-break:break-word;
+}
+
+.request-info{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:6px;
+ margin-top:8px;
+}
+
+.request-info-box{
+ padding:7px;
+ text-align:center;
+ background:#0a0a0a;
+ border:1px solid #222;
+ border-radius:9px;
+}
+
+.request-info-box small{
+ display:block;
+ color:#666;
+ font-size:6px;
+}
+
+.request-info-box strong{
+ font-size:9px;
+}
+
+.earning-box,
+.active-fare{
+ margin-top:8px;
+ padding:9px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ background:#1c1800;
+ border:1px solid #4c4300;
+ border-radius:13px;
+}
+
+.earning-label{
+ font-size:8px;
+ color:#aaa;
+}
+
+.earning,
+.active-fare strong{
+ font-size:21px;
+ font-weight:900;
+ color:var(--y);
+}
+
+.request-actions,
+.active-actions,
+.contact-actions{
+ display:grid;
+ grid-template-columns:1fr 2fr;
+ gap:7px;
+ margin-top:8px;
+}
+
+.reject-btn,
+.accept,
+.action-btn,
+.contact-btn{
+ padding:11px 6px;
+ border-radius:11px;
+ font-size:9px;
+ font-weight:900;
+}
+
+.reject-btn{
+ border:1px solid #552222;
+ background:#291010;
+ color:#f66;
+}
+
+.accept{
+ border:0;
+ background:var(--y);
+ color:#000;
+}
+
+.active-card{
+ border-color:var(--g);
+}
+
+.active-title{
+ color:var(--g);
+ font-size:13px;
+ font-weight:900;
+}
+
+.active-status{
+ padding:4px 8px;
+ border-radius:8px;
+ background:#12351f;
+ color:var(--g);
+ font-size:7px;
+ font-weight:900;
+}
+
+.customer-box{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ padding:9px;
+ background:#0b0b0b;
+ border:1px solid #222;
+ border-radius:13px;
+}
+
+.customer-avatar{
+ width:40px;
+ height:40px;
+ border-radius:50%;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ background:#222;
+ color:var(--y);
+}
+
+.customer-info{
+ flex:1;
+}
+
+.customer-info strong{
+ display:block;
+ font-size:11px;
+}
+
+.customer-info small{
+ font-size:7px;
+ color:#777;
+}
+
+.contact-actions{
+ grid-template-columns:1fr 1fr;
+}
+
+.call-btn{
+ border:1px solid #244f34;
+ background:#12351f;
+ color:var(--g);
+}
+
+.chat-btn{
+ border:1px solid #4c4300;
+ background:#181800;
+ color:var(--y);
+}
+
+.active-actions{
+ grid-template-columns:1fr 1fr;
+}
+
+.nav-btn{
+ background:#222;
+ color:#fff;
+ border:1px solid #444;
+}
+
+.start-btn{
+ background:var(--g);
+ color:#000;
+ border:0;
+}
+
+.complete-btn{
+ grid-column:1/-1;
+ background:var(--g);
+ color:#000;
+ border:0;
+}
+
+.bottom-nav{
+ position:fixed;
+ left:0;
+ right:0;
+ bottom:0;
+ height:68px;
+ z-index:2000;
+ display:grid;
+ grid-template-columns:repeat(4,1fr);
+ background:#080808fa;
+ border-top:1px solid #292929;
+}
+
+.nav-item{
+ border:0;
+ background:transparent;
+ color:#777;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ gap:4px;
+ font-size:8px;
+ font-weight:700;
+}
+
+.nav-item i{
+ font-size:18px;
+}
+
+.nav-item.active{
+ color:var(--y);
+}
+
+.chat-overlay{
+ position:fixed;
+ inset:0;
+ z-index:5000;
+ display:none;
+ align-items:flex-end;
+ background:#000b;
+}
+
+.chat-overlay.show{
+ display:flex;
+}
+
+.chat-box{
+ width:100%;
+ height:82vh;
+ display:flex;
+ flex-direction:column;
+ background:#0b0b0b;
+ border-radius:24px 24px 0 0;
+}
+
+.chat-header{
+ display:flex;
+ align-items:center;
+ gap:10px;
+ padding:12px 14px;
+ border-bottom:1px solid #292929;
+}
+
+.chat-back{
+ width:37px;
+ height:37px;
+ border-radius:50%;
+ border:1px solid #333;
+ background:#151515;
+ color:#fff;
+}
+
+.chat-person{
+ flex:1;
+}
+
+.chat-person strong{
+ display:block;
+ font-size:12px;
+}
+
+.chat-person small{
+ font-size:7px;
+ color:#777;
+}
+
+.chat-call{
+ width:38px;
+ height:38px;
+ border:0;
+ border-radius:50%;
+ background:#12351f;
+ color:var(--g);
+}
+
+.chat-messages{
+ flex:1;
+ overflow:auto;
+ padding:13px;
+}
+
+.chat-empty{
+ text-align:center;
+ padding-top:30px;
+ color:#666;
+ font-size:10px;
+}
+
+.message{
+ max-width:78%;
+ margin-bottom:8px;
+ padding:8px 10px;
+ border-radius:13px;
+ font-size:10px;
+ word-break:break-word;
+}
+
+.message.mine{
+ margin-left:auto;
+ background:#3a3200;
+}
+
+.message.theirs{
+ background:#1b1b1b;
+}
+
+.message-time{
+ display:block;
+ margin-top:3px;
+ color:#777;
+ font-size:6px;
+}
+
+.chat-input-row{
+ display:flex;
+ gap:7px;
+ padding:9px;
+ border-top:1px solid #292929;
+ padding-bottom:max(9px,env(safe-area-inset-bottom));
+}
+
+.chat-input{
+ flex:1;
+ padding:10px;
+ border:1px solid #333;
+ border-radius:13px;
+ background:#151515;
+ color:#fff;
+ outline:0;
+ font-size:10px;
+}
+
+.chat-send{
+ width:43px;
+ border:0;
+ border-radius:13px;
+ background:var(--y);
+ color:#000;
+}
+
+.toast{
+ position:fixed;
+ left:50%;
+ bottom:82px;
+ z-index:7000;
+ max-width:90%;
+ padding:9px 14px;
+ border:1px solid #444;
+ border-radius:12px;
+ background:#222;
+ font-size:10px;
+ text-align:center;
+ opacity:0;
+ transform:translate(-50%,20px);
+ transition:.25s;
+ pointer-events:none;
+}
+
+.toast.show{
+ opacity:1;
+ transform:translate(-50%,0);
+}
+
+.toast.success{
+ border-color:var(--g);
+}
+
+.toast.error{
+ border-color:var(--r);
+}
+
+.loading{
+ position:fixed;
+ inset:0;
+ z-index:8000;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ background:#000b;
+}
+
+.loading.show{
+ display:flex;
+}
+
+.loading-box{
+ padding:24px 32px;
+ text-align:center;
+ background:#111;
+ border:1px solid #333;
+ border-radius:18px;
+}
+
+.loading-box i{
+ color:var(--y);
+ font-size:24px;
+}
+
+.loading-box p{
+ color:#aaa;
+ font-size:10px;
+ margin-top:9px;
+}
 
 @media(min-width:700px){
- .sheet,.bottom-nav{left:50%;right:auto;width:450px;transform:translateX(-50%)}
- .online-control{max-width:450px}.chat-box{width:450px;margin:auto}
+ .sheet,
+ .bottom-nav{
+  left:50%;
+  right:auto;
+  width:450px;
+  transform:translateX(-50%);
+ }
+
+ .online-control{
+  max-width:450px;
+ }
+
+ .chat-box{
+  width:450px;
+  margin:auto;
+ }
 }
 </style>
 </head>
@@ -137,118 +816,203 @@ button:disabled{opacity:.55}
 
 <div class="topbar">
  <div class="toprow">
-  <div class="logo">RIDER<span>X</span></div>
+
+  <div class="logo">
+   RIDER<span>X</span>
+  </div>
+
   <div class="top-actions">
-   <button id="notificationBtn" class="top-btn">
+
+   <button id="notificationBtn" class="top-btn" type="button">
     <span class="notification-wrap">
      <i class="fa-solid fa-bell"></i>
      <span id="notificationDot" class="notification-dot"></span>
     </span>
    </button>
-   <button id="profileTopBtn" class="top-btn">
+
+   <button id="profileTopBtn" class="top-btn" type="button">
     <i class="fa-solid fa-user"></i>
    </button>
+
   </div>
+
  </div>
 </div>
 
 <div class="online-control">
+
  <div class="online-info">
+
   <div id="onlineDot" class="online-dot"></div>
+
   <div>
-   <div id="onlineTitle" class="online-title">Offline</div>
-   <div id="onlineSub" class="online-sub">Go online to receive rides</div>
+   <div id="onlineTitle" class="online-title">
+    Offline
+   </div>
+
+   <div id="onlineSub" class="online-sub">
+    Go online to receive rides
+   </div>
   </div>
+
  </div>
- <button id="onlineBtn" class="online-btn" type="button">GO ONLINE</button>
+
+ <button id="onlineBtn" class="online-btn" type="button">
+  GO ONLINE
+ </button>
+
 </div>
 
 <div id="navigationBanner" class="navigation-banner">
- <div id="navigationTitle" class="nav-title">NAVIGATING</div>
- <div id="navigationDistance" class="nav-distance">--</div>
- <div id="navigationSub" class="nav-sub">--</div>
+
+ <div id="navigationTitle" class="nav-title">
+  NAVIGATING
+ </div>
+
+ <div id="navigationDistance" class="nav-distance">
+  --
+ </div>
+
+ <div id="navigationSub" class="nav-sub">
+  --
+ </div>
+
 </div>
 
-<button id="locationBtn" class="location-btn">
+<button id="locationBtn" class="location-btn" type="button">
  <i class="fa-solid fa-location-crosshairs"></i>
 </button>
 
 <section class="sheet">
+
  <div class="handle"></div>
 
  <div id="requestsArea">
+
   <div class="sheet-title-row">
-   <div class="sheet-title">Ride Requests</div>
-   <div id="requestCount" class="request-count">0 requests</div>
+
+   <div class="sheet-title">
+    Ride Requests
+   </div>
+
+   <div id="requestCount" class="request-count">
+    0 requests
+   </div>
+
   </div>
+
   <div id="requestsContainer"></div>
+
  </div>
 
  <div id="activeArea" style="display:none">
+
   <div class="sheet-title-row">
-   <div class="sheet-title">Active Ride</div>
-   <div class="request-count">Current trip</div>
+
+   <div class="sheet-title">
+    Active Ride
+   </div>
+
+   <div class="request-count">
+    Current trip
+   </div>
+
   </div>
+
   <div id="activeContainer"></div>
+
  </div>
+
 </section>
 
 <nav class="bottom-nav">
- <button class="nav-item active" id="homeNav">
-  <i class="fa-solid fa-house"></i><span>Home</span>
+
+ <button class="nav-item active" id="homeNav" type="button">
+  <i class="fa-solid fa-house"></i>
+  <span>Home</span>
  </button>
- <button class="nav-item" id="ridesNav">
-  <i class="fa-solid fa-route"></i><span>Rides</span>
+
+ <button class="nav-item" id="ridesNav" type="button">
+  <i class="fa-solid fa-route"></i>
+  <span>Rides</span>
  </button>
- <button class="nav-item" id="walletNav">
-  <i class="fa-solid fa-wallet"></i><span>Wallet</span>
+
+ <button class="nav-item" id="walletNav" type="button">
+  <i class="fa-solid fa-wallet"></i>
+  <span>Wallet</span>
  </button>
- <button class="nav-item" id="profileNav">
-  <i class="fa-solid fa-user"></i><span>Profile</span>
+
+ <button class="nav-item" id="profileNav" type="button">
+  <i class="fa-solid fa-user"></i>
+  <span>Profile</span>
  </button>
+
 </nav>
 
 <div id="chatOverlay" class="chat-overlay">
+
  <div class="chat-box">
 
   <div class="chat-header">
-   <button id="chatBack" class="chat-back">
+
+   <button id="chatBack" class="chat-back" type="button">
     <i class="fa-solid fa-arrow-left"></i>
    </button>
 
    <div class="chat-person">
-    <strong id="chatCustomerName">Customer</strong>
-    <small>RiderX customer</small>
+
+    <strong id="chatCustomerName">
+     Customer
+    </strong>
+
+    <small>
+     RiderX customer
+    </small>
+
    </div>
 
-   <button id="chatCall" class="chat-call">
+   <button id="chatCall" class="chat-call" type="button">
     <i class="fa-solid fa-phone"></i>
    </button>
+
   </div>
 
   <div id="chatMessages" class="chat-messages"></div>
 
   <div class="chat-input-row">
-   <input id="chatInput"
-          class="chat-input"
-          maxlength="500"
-          placeholder="Type message..."
-          autocomplete="off">
-   <button id="chatSend" class="chat-send">
+
+   <input
+    id="chatInput"
+    class="chat-input"
+    maxlength="500"
+    placeholder="Type message..."
+    autocomplete="off"
+   >
+
+   <button id="chatSend" class="chat-send" type="button">
     <i class="fa-solid fa-paper-plane"></i>
    </button>
+
   </div>
 
  </div>
+
 </div>
 
 <div id="toast" class="toast"></div>
 
 <div id="loading" class="loading">
+
  <div class="loading-box">
+
   <i class="fa-solid fa-spinner fa-spin"></i>
-  <p id="loadingText">Please wait...</p>
+
+  <p id="loadingText">
+   Please wait...
+  </p>
+
  </div>
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -256,31 +1020,53 @@ button:disabled{opacity:.55}
 <script type="module">
 
 /* ============================================================
-   RIDERX RIDER HOME
-   IMPORTANT FIX:
-   Firestore + Realtime Database ride-state synchronization.
+   RIDERX 2.0
+   RIDER HOME
+   ============================================================
 
-   Rider accepts:
-   Firestore rides/{rideId} -> accepted
-   RTDB       rides/{rideId} -> accepted
+   FINAL RESPONSIBILITIES
 
-   Rider starts:
-   Firestore rides/{rideId} -> started
-   RTDB       rides/{rideId} -> started
+   - Firebase Authentication
+   - Rider profile loading
+   - Rider online/offline state
+   - Live GPS
+   - Firestore ride requests
+   - Atomic ride acceptance
+   - Active ride restoration
+   - Accepted / started / completed ride states
+   - Firestore -> RTDB ride-state synchronization
+   - Customer call
+   - Ride chat
+   - Leaflet map
+   - OSRM navigation
+   - Ride request sound
+   - Route cleanup
+   - Navigation cleanup
 
-   Rider completes:
-   Firestore rides/{rideId} -> completed
-   RTDB       rides/{rideId} -> completed
+   IMPORTANT
 
-   This allows the customer-side realtime listener to receive
-   rider status changes immediately.
+   This file does not initialize Firebase itself.
+
+   It uses the existing:
+       ../firebase/firebase-config.js
+
+   The existing Firebase app is reused for:
+       Auth
+       Firestore
+       Realtime Database
    ============================================================ */
 
-import {auth,db} from "../firebase/firebase-config.js";
+
+import {
+ auth,
+ db
+} from "../firebase/firebase-config.js";
+
 
 import {
  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
 
 import {
  collection,
@@ -297,6 +1083,7 @@ import {
  runTransaction
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+
 import {
  getDatabase,
  ref as rtdbRef,
@@ -309,15 +1096,19 @@ import {
    ============================================================ */
 
 let user=null;
+
 let userData={};
 let riderData={};
 
 let map=null;
+
 let riderMarker=null;
 let accuracyCircle=null;
 
 let riderLocation=null;
+
 let watchId=null;
+
 let isOnline=false;
 
 let requestUnsub=null;
@@ -329,7 +1120,9 @@ let activeRideId=null;
 let activeRide=null;
 
 let rejected=new Set();
+
 let requestMarkers=new Map();
+
 let previousIds=new Set();
 
 let target=null;
@@ -339,117 +1132,255 @@ let routeTimer=null;
 
 let audio=null;
 
-
-/* ============================================================
-   FIREBASE REALTIME DATABASE
-   ============================================================ */
-
-/*
-  IMPORTANT:
-  auth.app is the same Firebase App used by the authenticated
-  Firebase Auth instance. This avoids initializing a second
-  Firebase app and keeps the existing firebase-config.js intact.
-*/
 let realtimeDb=null;
 
-function initRealtimeDatabase(){
- if(realtimeDb)return realtimeDb;
-
- try{
-  realtimeDb=getDatabase(auth.app);
-  return realtimeDb;
- }catch(e){
-  console.error("Realtime Database initialization failed:",e);
-  return null;
- }
-}
+let booted=false;
 
 
 /* ============================================================
-   HELPERS
+   DOM HELPER
    ============================================================ */
 
-const $=id=>document.getElementById(id);
+const $=id=>
+ document.getElementById(id);
 
-const esc=v=>
- String(v??"")
+
+/* ============================================================
+   TEXT ESCAPE
+   ============================================================ */
+
+function esc(value){
+
+ return String(value??"")
   .replaceAll("&","&amp;")
   .replaceAll("<","&lt;")
   .replaceAll(">","&gt;")
   .replaceAll('"',"&quot;")
   .replaceAll("'","&#039;");
 
-const status=v=>
- String(v||"").trim().toLowerCase();
-
-
-function toast(t,type="success"){
- $("toast").textContent=t;
- $("toast").className=`toast show ${type}`;
-
- clearTimeout(toast.t);
-
- toast.t=setTimeout(()=>{
-  $("toast").className="toast";
- },3000);
 }
 
 
-function loading(v,t="Please wait..."){
- $("loadingText").textContent=t;
- $("loading").classList.toggle("show",v);
+/* ============================================================
+   STATUS NORMALIZATION
+   ============================================================ */
+
+function status(value){
+
+ return String(value||"")
+  .trim()
+  .toLowerCase();
+
 }
 
 
-function go(p){
- location.href=p;
+/* ============================================================
+   TOAST
+   ============================================================ */
+
+function toast(message,type="success"){
+
+ const el=$("toast");
+
+ if(!el)return;
+
+ el.textContent=message;
+
+ el.className=
+  `toast show ${type}`;
+
+ clearTimeout(toast.timer);
+
+ toast.timer=
+  setTimeout(()=>{
+   el.className="toast";
+  },3000);
+
 }
 
 
-function locationData(v){
+/* ============================================================
+   LOADING
+   ============================================================ */
 
- if(!v){
+function loading(show,message="Please wait..."){
+
+ const el=$("loading");
+
+ if(!el)return;
+
+ $("loadingText").textContent=
+  message;
+
+ el.classList.toggle(
+  "show",
+  Boolean(show)
+ );
+
+}
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+function go(path){
+
+ if(!path)return;
+
+ location.href=path;
+
+}
+
+
+/* ============================================================
+   LOCATION NORMALIZER
+   ============================================================ */
+
+function locationData(value){
+
+ if(!value){
+
   return {
    text:"Location unavailable",
    lat:null,
    lng:null
   };
+
  }
 
- if(typeof v==="string"){
+
+ if(typeof value==="string"){
+
   return {
-   text:v,
+   text:value,
    lat:null,
    lng:null
   };
+
  }
 
+
  const lat=
-  v.lat??
-  v.latitude??
-  v.coordinates?.lat??
-  v.location?.lat??
+  value.lat ??
+  value.latitude ??
+  value.coordinates?.lat ??
+  value.location?.lat ??
   null;
+
 
  const lng=
-  v.lng??
-  v.longitude??
-  v.coordinates?.lng??
-  v.location?.lng??
+  value.lng ??
+  value.longitude ??
+  value.coordinates?.lng ??
+  value.location?.lng ??
   null;
 
+
  return {
+
   text:
-   v.address||
-   v.name||
-   v.text||
-   v.label||
-   v.formattedAddress||
+   value.address ||
+   value.name ||
+   value.text ||
+   value.label ||
+   value.formattedAddress ||
    "Location",
 
-  lat:lat!==null?Number(lat):null,
-  lng:lng!==null?Number(lng):null
+  lat:
+   lat!==null
+    ?Number(lat)
+    :null,
+
+  lng:
+   lng!==null
+    ?Number(lng)
+    :null
+
  };
+
+}
+
+
+/* ============================================================
+   FIREBASE APP / RTDB
+   ============================================================ */
+
+function initRealtimeDatabase(){
+
+ if(realtimeDb){
+
+  return realtimeDb;
+
+ }
+
+
+ try{
+
+  /*
+    Firebase Auth exposes the Firebase App
+    through auth.app.
+
+    This prevents creating a second Firebase app.
+  */
+
+  realtimeDb=
+   getDatabase(auth.app);
+
+  return realtimeDb;
+
+ }catch(error){
+
+  console.error(
+   "RiderX RTDB initialization failed:",
+   error
+  );
+
+  realtimeDb=null;
+
+  return null;
+
+ }
+
+}
+
+
+/* ============================================================
+   RIDER INFORMATION
+   ============================================================ */
+
+function getCurrentRiderInfo(){
+
+ const name=
+  userData.name ||
+  userData.fullName ||
+  riderData.name ||
+  riderData.fullName ||
+  user.displayName ||
+  "Rider";
+
+
+ const phone=
+  userData.phone ||
+  userData.phoneNumber ||
+  riderData.phone ||
+  riderData.phoneNumber ||
+  user.phoneNumber ||
+  "";
+
+
+ return {
+
+  riderId:user.uid,
+
+  riderUid:user.uid,
+
+  riderName:name,
+
+  riderPhone:phone
+
+ };
+
 }
 
 
@@ -457,104 +1388,87 @@ function locationData(v){
    FIRESTORE -> RTDB RIDE SYNCHRONIZATION
    ============================================================ */
 
-/*
-  This is the main fix.
+async function syncRideToRealtime(
+ rideId,
+ payload={}
+){
 
-  Every important ride state change is mirrored into:
+ if(!rideId){
 
-  RTDB:
-      rides/{rideId}
+  return false;
 
-  Customer-side booking.js can therefore listen to the same
-  ride ID and receive accepted/started/completed immediately.
-*/
+ }
 
-async function syncRideToRealtime(rideId,payload={}){
 
- if(!rideId)return false;
+ const realtime=
+  initRealtimeDatabase();
 
- const realtime=initRealtimeDatabase();
 
  if(!realtime){
-  console.warn("RTDB unavailable; Firestore update remains active.");
+
+  console.warn(
+   "RiderX RTDB unavailable."
+  );
+
   return false;
+
  }
+
 
  try{
 
   const clean={};
 
-  Object.entries(payload||{}).forEach(([key,value])=>{
 
-   /*
-     Firebase RTDB does not accept undefined values.
-   */
-   if(value!==undefined){
-    clean[key]=value;
-   }
+  Object.entries(payload||{})
+   .forEach(
+    ([key,value])=>{
 
-  });
+     /*
+       RTDB does not accept undefined.
+     */
 
-  clean.rideId=rideId;
-  clean.updatedAt=Date.now();
+     if(value!==undefined){
+
+      clean[key]=value;
+
+     }
+
+    }
+   );
+
+
+  clean.rideId=
+   String(rideId);
+
+
+  clean.updatedAt=
+   Date.now();
+
 
   await rtdbUpdate(
-   rtdbRef(realtime,`rides/${rideId}`),
+   rtdbRef(
+    realtime,
+    `rides/${rideId}`
+   ),
    clean
   );
 
-  console.log(
-   "RiderX RTDB ride synchronized:",
-   rideId,
-   clean
-  );
 
   return true;
 
- }catch(e){
+
+ }catch(error){
 
   console.error(
-   "RTDB ride synchronization failed:",
-   rideId,
-   e
+   "RiderX RTDB ride sync failed:",
+   error
   );
 
-  /*
-    Do not cancel an already-successful Firestore ride
-    transaction only because RTDB failed.
-  */
   return false;
+
  }
-}
 
-
-/*
-  Get the rider information used in both databases.
-*/
-function getCurrentRiderInfo(){
-
- const name=
-  userData.name||
-  userData.fullName||
-  riderData.name||
-  riderData.fullName||
-  user.displayName||
-  "Rider";
-
- const phone=
-  userData.phone||
-  userData.phoneNumber||
-  riderData.phone||
-  riderData.phoneNumber||
-  user.phoneNumber||
-  "";
-
- return {
-  riderId:user.uid,
-  riderUid:user.uid,
-  riderName:name,
-  riderPhone:phone
- };
 }
 
 
@@ -564,12 +1478,22 @@ function getCurrentRiderInfo(){
 
 function initMap(){
 
- if(map)return;
+ if(map){
 
- map=L.map("map",{
-  zoomControl:true,
-  attributionControl:true
- });
+  return;
+
+ }
+
+
+ map=
+  L.map(
+   "map",
+   {
+    zoomControl:true,
+    attributionControl:true
+   }
+  );
+
 
  L.tileLayer(
   "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -579,18 +1503,32 @@ function initMap(){
   }
  ).addTo(map);
 
+
  /*
-   No Chandigarh/default location.
-   Real GPS will determine rider's map location.
+   Do not hard-code Chandigarh as the rider position.
+
+   The map starts at a neutral India view until
+   GPS provides the actual rider location.
  */
- map.setView([20,78],5);
+
+ map.setView(
+  [20,78],
+  5
+ );
+
 }
 
+
+/* ============================================================
+   RIDER MAP ICON
+   ============================================================ */
 
 function riderIcon(){
 
  return L.divIcon({
+
   className:"",
+
   html:`
    <div style="
     width:46px;
@@ -603,67 +1541,105 @@ function riderIcon(){
     color:#000;
     border:4px solid #fff;
     box-shadow:0 5px 18px #0007;
-    font-size:20px
+    font-size:20px;
    ">
     <i class="fa-solid fa-motorcycle"></i>
    </div>
   `,
+
   iconSize:[46,46],
+
   iconAnchor:[23,23]
+
  });
+
 }
 
 
-function updateRiderMarker(lat,lng,accuracy=0,center=false){
+/* ============================================================
+   UPDATE RIDER LOCATION
+   ============================================================ */
+
+function updateRiderMarker(
+ lat,
+ lng,
+ accuracy=0,
+ center=false
+){
 
  lat=Number(lat);
  lng=Number(lng);
 
- if(!Number.isFinite(lat)||!Number.isFinite(lng))return;
+ if(
+  !Number.isFinite(lat) ||
+  !Number.isFinite(lng)
+ ){
 
- const first=!riderLocation;
+  return;
+
+ }
+
+
+ const first=
+  !riderLocation;
+
 
  riderLocation={
   lat,
   lng
  };
 
+
  if(!riderMarker){
 
-  riderMarker=L.marker(
-   [lat,lng],
-   {
-    icon:riderIcon(),
-    zIndexOffset:1000
-   }
-  ).addTo(map);
+  riderMarker=
+   L.marker(
+    [lat,lng],
+    {
+     icon:riderIcon(),
+     zIndexOffset:1000
+    }
+   ).addTo(map);
 
  }else{
 
-  riderMarker.setLatLng([lat,lng]);
+  riderMarker.setLatLng(
+   [lat,lng]
+  );
 
  }
 
 
- if(accuracy>0){
+ if(
+  Number.isFinite(
+   Number(accuracy)
+  ) &&
+  Number(accuracy)>0
+ ){
 
   if(!accuracyCircle){
 
-   accuracyCircle=L.circle(
-    [lat,lng],
-    {
-     radius:accuracy,
-     color:"#ffd600",
-     fillColor:"#ffd600",
-     fillOpacity:.08,
-     weight:1
-    }
-   ).addTo(map);
+   accuracyCircle=
+    L.circle(
+     [lat,lng],
+     {
+      radius:Number(accuracy),
+      color:"#ffd600",
+      fillColor:"#ffd600",
+      fillOpacity:.08,
+      weight:1
+     }
+    ).addTo(map);
 
   }else{
 
-   accuracyCircle.setLatLng([lat,lng]);
-   accuracyCircle.setRadius(accuracy);
+   accuracyCircle.setLatLng(
+    [lat,lng]
+   );
+
+   accuracyCircle.setRadius(
+    Number(accuracy)
+   );
 
   }
 
@@ -675,110 +1651,73 @@ function updateRiderMarker(lat,lng,accuracy=0,center=false){
   map.setView(
    [lat,lng],
    16,
-   {animate:true}
+   {
+    animate:true
+   }
   );
 
  }
 
 
  if(target){
+
   updateNavigationDistance();
+
  }
+
 }
 
+
+/* ============================================================
+   ONE-TIME GPS
+   ============================================================ */
 
 function gpsOnce(center=true){
 
  if(!navigator.geolocation){
 
-  return toast(
+  toast(
    "GPS is not available.",
    "error"
   );
 
+  return;
+
  }
+
 
  navigator.geolocation.getCurrentPosition(
 
-  p=>{
+  position=>{
 
    updateRiderMarker(
-    p.coords.latitude,
-    p.coords.longitude,
-    p.coords.accuracy,
+    position.coords.latitude,
+    position.coords.longitude,
+    position.coords.accuracy,
     center
    );
 
   },
 
-  e=>{
+  error=>{
 
-   toast(
-    e.code===1
-     ?"Please allow location permission."
-     :"Unable to get your location.",
-    "error"
+   console.warn(
+    "GPS:",
+    error
    );
 
-  },
 
-  {
-   enableHighAccuracy:true,
-   maximumAge:3000,
-   timeout:15000
-  }
-
- );
-}
-
-
-function startGPS(){
-
- if(!navigator.geolocation){
-
-  return toast(
-   "GPS is not available.",
-   "error"
-  );
-
- }
-
- if(watchId!==null){
-
-  navigator.geolocation.clearWatch(
-   watchId
-  );
-
- }
-
- watchId=navigator.geolocation.watchPosition(
-
-  async p=>{
-
-   updateRiderMarker(
-    p.coords.latitude,
-    p.coords.longitude,
-    p.coords.accuracy,
-    false
-   );
-
-   if(isOnline&&user){
-
-    await saveLocation(
-     p.coords.latitude,
-     p.coords.longitude
-    );
-
-   }
-
-  },
-
-  e=>{
-
-   if(e.code===1){
+   if(error.code===1){
 
     toast(
      "Please allow location permission.",
+     "error"
+    );
+
+   }else{
+
+    toast(
+     "Unable to get your location.",
      "error"
     );
 
@@ -793,8 +1732,82 @@ function startGPS(){
   }
 
  );
+
 }
 
+
+/* ============================================================
+   START GPS WATCH
+   ============================================================ */
+
+function startGPS(){
+
+ if(!navigator.geolocation){
+
+  return;
+
+ }
+
+
+ if(watchId!==null){
+
+  navigator.geolocation.clearWatch(
+   watchId
+  );
+
+ }
+
+
+ watchId=
+  navigator.geolocation.watchPosition(
+
+   async position=>{
+
+    updateRiderMarker(
+     position.coords.latitude,
+     position.coords.longitude,
+     position.coords.accuracy,
+     false
+    );
+
+
+    if(
+     isOnline &&
+     user
+    ){
+
+     await saveLocation(
+      position.coords.latitude,
+      position.coords.longitude
+     );
+
+    }
+
+   },
+
+   error=>{
+
+    console.warn(
+     "GPS watch:",
+     error
+    );
+
+   },
+
+   {
+    enableHighAccuracy:true,
+    maximumAge:3000,
+    timeout:15000
+   }
+
+  );
+
+}
+
+
+/* ============================================================
+   STOP GPS
+   ============================================================ */
 
 function stopGPS(){
 
@@ -807,38 +1820,184 @@ function stopGPS(){
  }
 
  watchId=null;
+
 }
 
 
-async function saveLocation(lat,lng){
+/* ============================================================
+   SAVE RIDER LOCATION
+   ============================================================ */
+
+async function saveLocation(
+ lat,
+ lng
+){
+
+ if(!user)return;
 
  const location={
   lat:Number(lat),
   lng:Number(lng)
  };
 
- for(const path of ["users","riders"]){
+
+ /*
+   Firestore rider location.
+
+   The existing project may use both
+   users/{uid} and riders/{uid}.
+ */
+
+ try{
+
+  await setDoc(
+   doc(
+    db,
+    "users",
+    user.uid
+   ),
+   {
+    location,
+    lat:location.lat,
+    lng:location.lng,
+    isOnline:true,
+    updatedAt:serverTimestamp()
+   },
+   {
+    merge:true
+   }
+  );
+
+ }catch(error){
+
+  console.warn(
+   "users location update:",
+   error
+  );
+
+ }
+
+
+ try{
+
+  await setDoc(
+   doc(
+    db,
+    "riders",
+    user.uid
+   ),
+   {
+    uid:user.uid,
+    location,
+    lat:location.lat,
+    lng:location.lng,
+    isOnline:true,
+    updatedAt:serverTimestamp()
+   },
+   {
+    merge:true
+   }
+  );
+
+ }catch(error){
+
+  console.warn(
+   "riders location update:",
+   error
+  );
+
+ }
+
+}
+
+
+/* ============================================================
+   ONLINE STATE
+   ============================================================ */
+
+async function setOnline(value){
+
+ if(!user){
+
+  throw new Error(
+   "NO_USER"
+  );
+
+ }
+
+
+ const payload={
+  isOnline:Boolean(value),
+  updatedAt:serverTimestamp()
+ };
+
+
+ await setDoc(
+  doc(
+   db,
+   "users",
+   user.uid
+  ),
+  payload,
+  {
+   merge:true
+  }
+ );
+
+
+ await setDoc(
+  doc(
+   db,
+   "riders",
+   user.uid
+  ),
+  {
+   ...payload,
+   uid:user.uid
+  },
+  {
+   merge:true
+  }
+ );
+
+
+ /*
+   Keep RTDB rider presence useful for realtime
+   rider-location / online features.
+ */
+
+ const realtime=
+  initRealtimeDatabase();
+
+
+ if(realtime){
 
   try{
 
-   await setDoc(
-    doc(db,path,user.uid),
+   await rtdbUpdate(
+    rtdbRef(
+     realtime,
+     `riders/${user.uid}`
+    ),
     {
-     location,
-     lat:location.lat,
-     lng:location.lng,
-     isOnline:true,
-     updatedAt:serverTimestamp()
-    },
-    {merge:true}
+     riderId:user.uid,
+     riderUid:user.uid,
+     isOnline:Boolean(value),
+     ...(riderLocation
+      ?{
+       lat:riderLocation.lat,
+       lng:riderLocation.lng
+      }
+      :{}),
+     updatedAt:Date.now()
+    }
    );
 
-  }catch(e){
+  }catch(error){
 
    console.warn(
-    "Location update:",
-    path,
-    e
+    "RTDB rider presence:",
+    error
    );
 
   }
@@ -849,151 +2008,192 @@ async function saveLocation(lat,lng){
 
 
 /* ============================================================
-   ONLINE
+   ONLINE UI
    ============================================================ */
-
-async function setOnline(v){
-
- if(!user){
-  throw Error("NO_USER");
- }
-
- const payload={
-  isOnline:v,
-  updatedAt:serverTimestamp()
- };
-
- await setDoc(
-  doc(db,"users",user.uid),
-  payload,
-  {merge:true}
- );
-
- await setDoc(
-  doc(db,"riders",user.uid),
-  {
-   ...payload,
-   uid:user.uid
-  },
-  {merge:true}
- );
-}
-
 
 function onlineUI(){
 
  $("onlineDot")
   .classList
-  .toggle("online",isOnline);
+  .toggle(
+   "online",
+   isOnline
+  );
+
 
  $("onlineTitle").textContent=
-  isOnline?"Online":"Offline";
+  isOnline
+   ?"Online"
+   :"Offline";
+
 
  $("onlineSub").textContent=
   isOnline
    ?"You can receive ride requests"
    :"Go online to receive ride requests";
 
+
  $("onlineBtn").textContent=
   isOnline
    ?"GO OFFLINE"
    :"GO ONLINE";
 
+
  $("onlineBtn")
   .classList
-  .toggle("offline",isOnline);
-}
-
-
-$("onlineBtn").onclick=async()=>{
-
- if(!user){
-
-  return toast(
-   "Please login first.",
-   "error"
-  );
-
- }
-
- $("onlineBtn").disabled=true;
-
- try{
-
-  loading(
-   true,
+  .toggle(
+   "offline",
    isOnline
-    ?"Going offline..."
-    :"Going online..."
   );
 
-  if(isOnline){
-
-   isOnline=false;
-
-   stopRequests();
-   clearRequestMarkers();
-
-   await setOnline(false);
-
-   onlineUI();
-   showOffline();
-
-  }else{
-
-   await setOnline(true);
-
-   isOnline=true;
-
-   onlineUI();
-
-   startGPS();
-   gpsOnce(false);
-
-   listenRequests();
-
-  }
-
-  toast(
-   isOnline
-    ?"You are now ONLINE."
-    :"You are now OFFLINE."
-  );
-
- }catch(e){
-
-  console.error(e);
-
-  toast(
-   "Unable to change online status.",
-   "error"
-  );
-
- }finally{
-
-  loading(false);
-  $("onlineBtn").disabled=false;
-
- }
-
-};
-
-
-function showOffline(){
-
- $("requestCount").textContent="0 requests";
-
- $("requestsContainer").innerHTML=`
-  <div class="empty">
-   <i class="fa-solid fa-power-off"></i>
-   Go online to receive ride requests.
-  </div>
- `;
 }
 
 
 /* ============================================================
-   REQUESTS
+   OFFLINE SCREEN
+   ============================================================ */
+
+function showOffline(){
+
+ $("requestCount").textContent=
+  "0 requests";
+
+
+ $("requestsContainer").innerHTML=`
+
+  <div class="empty">
+
+   <i class="fa-solid fa-power-off"></i>
+
+   Go online to receive ride requests.
+
+  </div>
+
+ `;
+
+}
+
+
+/* ============================================================
+   ONLINE BUTTON
+   ============================================================ */
+
+$("onlineBtn").onclick=
+ async()=>{
+
+  if(!user){
+
+   toast(
+    "Please login first.",
+    "error"
+   );
+
+   return;
+
+  }
+
+
+  const previous=
+   isOnline;
+
+
+  $("onlineBtn").disabled=true;
+
+
+  try{
+
+   loading(
+    true,
+    previous
+     ?"Going offline..."
+     :"Going online..."
+   );
+
+
+   if(previous){
+
+    /*
+      Change local state only after the database
+      operation succeeds.
+    */
+
+    await setOnline(false);
+
+    isOnline=false;
+
+    stopRequests();
+
+    clearRequestMarkers();
+
+    onlineUI();
+
+    showOffline();
+
+
+   }else{
+
+    await setOnline(true);
+
+    isOnline=true;
+
+    onlineUI();
+
+    startGPS();
+
+    gpsOnce(false);
+
+    /*
+      Only request rides when there is no active ride.
+    */
+
+    if(!activeRideId){
+
+     listenRequests();
+
+    }
+
+   }
+
+
+   toast(
+    isOnline
+     ?"You are now ONLINE."
+     :"You are now OFFLINE."
+   );
+
+
+  }catch(error){
+
+   console.error(
+    "Online state:",
+    error
+   );
+
+
+   isOnline=previous;
+
+   onlineUI();
+
+
+   toast(
+    "Unable to change online status.",
+    "error"
+   );
+
+
+  }finally{
+
+   loading(false);
+
+   $("onlineBtn").disabled=false;
+
+  }
+
+ };
+
+
+/* ============================================================
+   STOP REQUEST LISTENER
    ============================================================ */
 
 function stopRequests(){
@@ -1001,190 +2201,331 @@ function stopRequests(){
  if(requestUnsub){
 
   requestUnsub();
+
   requestUnsub=null;
 
  }
 
  previousIds.clear();
+
 }
 
+
+/* ============================================================
+   RIDE REQUEST LISTENER
+   ============================================================ */
 
 function listenRequests(){
 
  stopRequests();
 
- if(!user||!isOnline||activeRideId)return;
 
- requestUnsub=onSnapshot(
+ if(
+  !user ||
+  !isOnline ||
+  activeRideId
+ ){
 
-  query(
-   collection(db,"rides"),
-   where("status","==","searching")
-  ),
+  return;
 
-  snap=>{
+ }
 
-   const rides=[];
-   const ids=new Set();
 
-   snap.forEach(s=>{
+ requestUnsub=
+  onSnapshot(
 
-    const r=s.data();
+   query(
+    collection(
+     db,
+     "rides"
+    ),
+    where(
+     "status",
+     "==",
+     "searching"
+    )
+   ),
 
-    if(
-     r.riderId&&
-     r.riderId!==user.uid
-    )return;
+   snapshot=>{
 
-    if(rejected.has(s.id))return;
+    const rides=[];
+    const ids=new Set();
 
-    rides.push({
-     ...r,
-     id:s.id
-    });
 
-    ids.add(s.id);
+    snapshot.forEach(
+     rideSnapshot=>{
 
-   });
+      const ride=
+       rideSnapshot.data();
 
-   rides.sort(
-    (a,b)=>
-     (b.createdAt?.seconds||0)-
-     (a.createdAt?.seconds||0)
-   );
 
-   const fresh=
-    rides.some(
-     r=>!previousIds.has(r.id)
+      /*
+        If a request has already been reserved
+        for another rider, hide it.
+
+        If riderId is empty/missing, it is open.
+      */
+
+      if(
+       ride.riderId &&
+       ride.riderId!==user.uid
+      ){
+
+       return;
+
+      }
+
+
+      if(
+       rejected.has(
+        rideSnapshot.id
+       )
+      ){
+
+       return;
+
+      }
+
+
+      rides.push({
+
+       ...ride,
+
+       id:rideSnapshot.id
+
+      });
+
+
+      ids.add(
+       rideSnapshot.id
+      );
+
+     }
     );
 
-   previousIds=ids;
 
-   renderRequests(rides);
+    rides.sort(
+     (a,b)=>{
 
-   if(fresh){
-    requestSound();
+      const aTime=
+       a.createdAt?.seconds||
+       a.createdAt?.toMillis?.()||
+       0;
+
+
+      const bTime=
+       b.createdAt?.seconds||
+       b.createdAt?.toMillis?.()||
+       0;
+
+
+      return bTime-aTime;
+
+     }
+    );
+
+
+    const fresh=
+     rides.some(
+      ride=>
+       !previousIds.has(
+        ride.id
+       )
+     );
+
+
+    previousIds=ids;
+
+
+    renderRequests(
+     rides
+    );
+
+
+    if(fresh){
+
+     requestSound();
+
+    }
+
+   },
+
+   error=>{
+
+    console.error(
+     "Ride request listener:",
+     error
+    );
+
+
+    toast(
+     "Ride requests unavailable.",
+     "error"
+    );
+
    }
 
-  },
+  );
 
-  e=>{
-
-   console.error(e);
-
-   toast(
-    "Ride requests unavailable.",
-    "error"
-   );
-
-  }
-
- );
 }
 
+
+/* ============================================================
+   REQUEST RENDER
+   ============================================================ */
 
 function renderRequests(rides){
 
  $("requestCount").textContent=
   `${rides.length} request${rides.length===1?"":"s"}`;
 
+
  if(!rides.length){
 
   $("requestsContainer").innerHTML=`
+
    <div class="empty">
+
     <i class="fa-solid fa-motorcycle"></i>
+
     Waiting for ride requests...
+
    </div>
+
   `;
+
 
   clearRequestMarkers();
 
   return;
+
  }
 
+
  $("requestsContainer").innerHTML=
-  rides.map(requestCard).join("");
+  rides
+   .map(requestCard)
+   .join("");
 
- rides.forEach(r=>{
 
-  $(`accept-${r.id}`)
-   ?.addEventListener(
+ rides.forEach(
+  ride=>{
+
+   const accept=
+    $(`accept-${ride.id}`);
+
+
+   const reject=
+    $(`reject-${ride.id}`);
+
+
+   accept?.addEventListener(
     "click",
-    ()=>acceptRide(r.id)
+    ()=>acceptRide(
+     ride.id
+    )
    );
 
-  $(`reject-${r.id}`)
-   ?.addEventListener(
+
+   reject?.addEventListener(
     "click",
-    ()=>rejectRide(r.id)
+    ()=>rejectRide(
+     ride.id
+    )
    );
 
- });
+  }
+ );
 
- renderRequestMarkers(rides);
+
+ renderRequestMarkers(
+  rides
+ );
+
 }
 
 
-function requestCard(r){
+/* ============================================================
+   REQUEST CARD
+   ============================================================ */
+
+function requestCard(ride){
 
  const customer=
-  r.customerName||
-  r.userName||
-  r.name||
+  ride.customerName||
+  ride.userName||
+  ride.name||
   "Customer";
 
- const p=
+
+ const pickup=
   locationData(
-   r.pickup||
-   r.pickupLocation
+   ride.pickup||
+   ride.pickupLocation
   );
 
- const d=
+
+ const drop=
   locationData(
-   r.dropoff||
-   r.dropoffLocation||
-   r.destination
+   ride.dropoff||
+   ride.dropoffLocation||
+   ride.destination
   );
+
 
  const fare=
   Number(
-   r.fare??
-   r.estimatedFare??
-   r.amount??
+   ride.fare ??
+   ride.estimatedFare ??
+   ride.amount ??
    0
   );
 
- const distance=
+
+ const distanceValue=
   Number(
-   r.distance??
-   r.distanceKm??
+   ride.distance ??
+   ride.distanceKm ??
    0
   );
+
 
  const service=
   String(
-   r.serviceType||
-   r.service||
+   ride.serviceType||
+   ride.service||
    "Bike"
   );
 
+
  const payment=
   String(
-   r.paymentMethod||
+   ride.paymentMethod||
    "cash"
   ).toUpperCase();
 
+
  return `
+
   <div class="request-card">
 
    <div class="request-top">
-    <span class="badge">${esc(service)}</span>
-    <span class="new-badge">NEW RIDE</span>
+
+    <span class="badge">
+     ${esc(service)}
+    </span>
+
+    <span class="new-badge">
+     NEW RIDE
+    </span>
+
    </div>
+
 
    <div class="customer-name">
     ${esc(customer)}
    </div>
+
 
    <div class="route">
 
@@ -1195,13 +2536,19 @@ function requestCard(r){
      </div>
 
      <div>
-      <div class="route-label">Pickup</div>
-      <div class="route-address">
-       ${esc(p.text)}
+
+      <div class="route-label">
+       Pickup
       </div>
+
+      <div class="route-address">
+       ${esc(pickup.text)}
+      </div>
+
      </div>
 
     </div>
+
 
     <div class="route-row">
 
@@ -1210,189 +2557,338 @@ function requestCard(r){
      </div>
 
      <div>
-      <div class="route-label">Drop</div>
-      <div class="route-address">
-       ${esc(d.text)}
+
+      <div class="route-label">
+       Drop
       </div>
+
+      <div class="route-address">
+       ${esc(drop.text)}
+      </div>
+
      </div>
 
     </div>
 
    </div>
 
+
    <div class="request-info">
 
     <div class="request-info-box">
-     <small>DISTANCE</small>
+
+     <small>
+      DISTANCE
+     </small>
+
      <strong>
       ${
-       Number.isFinite(distance)
-        ?distance.toFixed(1)
+       Number.isFinite(
+        distanceValue
+       )
+        ?distanceValue.toFixed(1)
         :"0.0"
-      } KM
+      }
+      KM
      </strong>
+
     </div>
 
-    <div class="request-info-box">
-     <small>SERVICE</small>
-     <strong>${esc(service)}</strong>
-    </div>
 
     <div class="request-info-box">
-     <small>PAYMENT</small>
-     <strong>${esc(payment)}</strong>
+
+     <small>
+      SERVICE
+     </small>
+
+     <strong>
+      ${esc(service)}
+     </strong>
+
+    </div>
+
+
+    <div class="request-info-box">
+
+     <small>
+      PAYMENT
+     </small>
+
+     <strong>
+      ${esc(payment)}
+     </strong>
+
     </div>
 
    </div>
 
+
    <div class="earning-box">
+
     <div class="earning-label">
      Estimated earning
     </div>
+
     <div class="earning">
      ₹${fare.toFixed(0)}
     </div>
+
    </div>
+
 
    <div class="request-actions">
 
     <button
-     id="reject-${esc(r.id)}"
-     class="reject-btn">
+     id="reject-${esc(ride.id)}"
+     class="reject-btn"
+     type="button">
+
      REJECT
+
     </button>
 
+
     <button
-     id="accept-${esc(r.id)}"
-     class="accept">
+     id="accept-${esc(ride.id)}"
+     class="accept"
+     type="button">
+
      ACCEPT RIDE
+
     </button>
 
    </div>
 
   </div>
+
  `;
+
 }
 
+
+/* ============================================================
+   REJECT RIDE
+   ============================================================ */
 
 function rejectRide(id){
 
+ if(!id)return;
+
+
  rejected.add(id);
 
- const m=
+
+ const marker=
   requestMarkers.get(id);
 
- if(m){
 
-  map.removeLayer(m);
-  requestMarkers.delete(id);
+ if(marker){
+
+  try{
+
+   map.removeLayer(
+    marker
+   );
+
+  }catch(error){}
+
+
+  requestMarkers.delete(
+   id
+  );
 
  }
 
- toast("Ride rejected.");
+
+ const card=
+  document.getElementById(
+   `reject-${id}`
+  )?.closest(
+   ".request-card"
+  );
+
+
+ if(card){
+
+  card.remove();
+
+ }
+
+
+ toast(
+  "Ride rejected."
+ );
+
 }
 
+
+/* ============================================================
+   REQUEST MARKERS
+   ============================================================ */
 
 function renderRequestMarkers(rides){
 
  const active=new Set();
 
- rides.forEach(r=>{
 
-  const p=
-   locationData(
-    r.pickup||
-    r.pickupLocation
+ rides.forEach(
+  ride=>{
+
+   const pickup=
+    locationData(
+     ride.pickup||
+     ride.pickupLocation
+    );
+
+
+   if(
+    pickup.lat===null||
+    pickup.lng===null
+   ){
+
+    return;
+
+   }
+
+
+   active.add(
+    ride.id
    );
 
-  if(
-   p.lat===null||
-   p.lng===null
-  )return;
 
-  active.add(r.id);
+   if(
+    requestMarkers.has(
+     ride.id
+    )
+   ){
 
-  if(requestMarkers.has(r.id)){
+    requestMarkers
+     .get(ride.id)
+     .setLatLng([
+      pickup.lat,
+      pickup.lng
+     ]);
 
-   requestMarkers
-    .get(r.id)
-    .setLatLng([
-     p.lat,
-     p.lng
-    ]);
+    return;
 
-   return;
-  }
-
-  const m=L.marker(
-   [p.lat,p.lng],
-   {
-    icon:L.divIcon({
-     className:"",
-     html:`
-      <div style="
-       width:38px;
-       height:38px;
-       border-radius:50%;
-       display:flex;
-       align-items:center;
-       justify-content:center;
-       background:#111;
-       color:#ffd600;
-       border:3px solid #ffd600
-      ">
-       <i class="fa-solid fa-user"></i>
-      </div>
-     `,
-     iconSize:[38,38],
-     iconAnchor:[19,19]
-    })
    }
-  ).addTo(map);
 
-  m.bindPopup(`
-   <strong>Ride Request</strong>
-   <br>
-   ${esc(
-    r.customerName||
-    r.userName||
-    "Customer"
-   )}
-  `);
 
-  requestMarkers.set(
-   r.id,
-   m
-  );
+   const marker=
+    L.marker(
+     [
+      pickup.lat,
+      pickup.lng
+     ],
+     {
+      icon:L.divIcon({
 
- });
+       className:"",
+
+       html:`
+        <div style="
+         width:38px;
+         height:38px;
+         border-radius:50%;
+         display:flex;
+         align-items:center;
+         justify-content:center;
+         background:#111;
+         color:#ffd600;
+         border:3px solid #ffd600;
+        ">
+         <i class="fa-solid fa-user"></i>
+        </div>
+       `,
+
+       iconSize:[
+        38,
+        38
+       ],
+
+       iconAnchor:[
+        19,
+        19
+       ]
+
+      })
+     }
+    ).addTo(map);
+
+
+   marker.bindPopup(`
+    <strong>
+     Ride Request
+    </strong>
+    <br>
+    ${esc(
+     ride.customerName||
+     ride.userName||
+     "Customer"
+    )}
+   `);
+
+
+   requestMarkers.set(
+    ride.id,
+    marker
+   );
+
+  }
+ );
+
 
  requestMarkers.forEach(
-  (m,id)=>{
+  (marker,id)=>{
 
-   if(!active.has(id)){
+   if(
+    !active.has(id)
+   ){
 
-    map.removeLayer(m);
-    requestMarkers.delete(id);
+    try{
+
+     map.removeLayer(
+      marker
+     );
+
+    }catch(error){}
+
+
+    requestMarkers.delete(
+     id
+    );
 
    }
 
   }
  );
+
 }
 
+
+/* ============================================================
+   CLEAR REQUEST MARKERS
+   ============================================================ */
 
 function clearRequestMarkers(){
 
  requestMarkers.forEach(
-  m=>{
+  marker=>{
+
    try{
-    map.removeLayer(m);
-   }catch(e){}
+
+    map.removeLayer(
+     marker
+    );
+
+   }catch(error){}
+
   }
  );
 
+
  requestMarkers.clear();
+
 }
 
 
@@ -1402,81 +2898,119 @@ function clearRequestMarkers(){
 
 async function acceptRide(id){
 
- if(!user||activeRideId)return;
+ if(
+  !user||
+  activeRideId||
+  !id
+ ){
+
+  return;
+
+ }
+
 
  loading(
   true,
   "Accepting ride..."
  );
 
+
  try{
 
-  const firestoreRef=
-   doc(db,"rides",id);
+  const rideRef=
+   doc(
+    db,
+    "rides",
+    id
+   );
 
-  let accepted=null;
+
+  let acceptedRide=null;
+
+
+  /*
+    Atomic transaction.
+
+    Only one rider can change:
+        searching -> accepted
+  */
 
   await runTransaction(
    db,
-   async tx=>{
+   async transaction=>{
 
-    const snap=
-     await tx.get(
-      firestoreRef
+    const snapshot=
+     await transaction.get(
+      rideRef
      );
 
-    if(!snap.exists()){
 
-     throw Error(
+    if(!snapshot.exists()){
+
+     throw new Error(
       "NOT_FOUND"
      );
 
     }
 
-    const r=snap.data();
+
+    const ride=
+     snapshot.data();
+
 
     if(
-     status(r.status)!=="searching"
+     status(
+      ride.status
+     )!=="searching"
     ){
 
-     throw Error(
+     throw new Error(
       "TAKEN"
      );
 
     }
 
+
     if(
-     r.riderId&&
-     r.riderId!==user.uid
+     ride.riderId &&
+     ride.riderId!==user.uid
     ){
 
-     throw Error(
+     throw new Error(
       "TAKEN"
      );
 
     }
+
 
     const rider=
      getCurrentRiderInfo();
 
-    tx.update(
-     firestoreRef,
+
+    transaction.update(
+     rideRef,
      {
       status:"accepted",
       rideStatus:"accepted",
 
       riderId:rider.riderId,
       riderUid:rider.riderUid,
+
       riderName:rider.riderName,
       riderPhone:rider.riderPhone,
 
-      acceptedAt:serverTimestamp(),
-      updatedAt:serverTimestamp()
+      acceptedAt:
+       serverTimestamp(),
+
+      updatedAt:
+       serverTimestamp()
      }
     );
 
-    accepted={
-     ...r,
+
+    acceptedRide={
+     ...ride,
+
      id,
 
      status:"accepted",
@@ -1484,6 +3018,7 @@ async function acceptRide(id){
 
      riderId:rider.riderId,
      riderUid:rider.riderUid,
+
      riderName:rider.riderName,
      riderPhone:rider.riderPhone
     };
@@ -1493,16 +3028,14 @@ async function acceptRide(id){
 
 
   /*
-    IMPORTANT:
-    Firestore transaction succeeded.
+    Firestore succeeded.
 
-    Now mirror the accepted state to RTDB.
-
-    Customer-side booking.js can receive this immediately.
+    Mirror the exact important state to RTDB.
   */
 
   const rider=
    getCurrentRiderInfo();
+
 
   const realtimeSynced=
    await syncRideToRealtime(
@@ -1513,13 +3046,15 @@ async function acceptRide(id){
 
      riderId:rider.riderId,
      riderUid:rider.riderUid,
+
      riderName:rider.riderName,
      riderPhone:rider.riderPhone,
 
      customerId:
-      accepted?.customerId||
-      accepted?.userId||
-      accepted?.uid||
+      acceptedRide?.customerId||
+      acceptedRide?.customerUid||
+      acceptedRide?.userId||
+      acceptedRide?.customer?.id||
       null,
 
      acceptedAt:Date.now()
@@ -1529,58 +3064,65 @@ async function acceptRide(id){
 
   activeRideId=id;
 
+
   activeRide={
-   ...accepted,
+   ...acceptedRide,
 
    status:"accepted",
-   rideStatus:"accepted",
-
-   riderId:rider.riderId,
-   riderUid:rider.riderUid,
-   riderName:rider.riderName,
-   riderPhone:rider.riderPhone
+   rideStatus:"accepted"
   };
 
 
   stopRequests();
+
   clearRequestMarkers();
 
   showActive();
+
   listenActive();
+
 
   toast(
    realtimeSynced
     ?"Ride accepted!"
-    :"Ride accepted. Syncing customer..."
+    :"Ride accepted. Customer sync pending..."
   );
 
-  startNavigation("pickup");
+
+  startNavigation(
+   "pickup"
+  );
 
 
- }catch(e){
+ }catch(error){
 
   console.error(
    "acceptRide:",
-   e
+   error
   );
 
+
   toast(
-   e.message==="TAKEN"
+   error.message==="TAKEN"
     ?"Another rider accepted this ride."
-    :"Unable to accept ride.",
+    :error.message==="NOT_FOUND"
+     ?"Ride no longer exists."
+     :"Unable to accept ride.",
    "error"
   );
+
 
  }finally{
 
   loading(false);
 
  }
+
 }
 
 
 /* ============================================================
-   ACTIVE RIDE
+   ACTIVE RIDE LISTENER
    ============================================================ */
 
 function stopActive(){
@@ -1588,132 +3130,203 @@ function stopActive(){
  if(activeUnsub){
 
   activeUnsub();
+
   activeUnsub=null;
 
  }
+
 }
 
+
+/* ============================================================
+   ACTIVE RIDE LISTENER
+   ============================================================ */
 
 function listenActive(){
 
  stopActive();
 
- if(!activeRideId)return;
+
+ if(!activeRideId){
+
+  return;
+
+ }
+
+
+ const rideId=
+  activeRideId;
+
 
  activeUnsub=
   onSnapshot(
-   doc(db,"rides",activeRideId),
 
-   snap=>{
+   doc(
+    db,
+    "rides",
+    rideId
+   ),
 
-    if(!snap.exists()){
+   snapshot=>{
 
-     finishLocal();
+    /*
+      Ignore stale listener callbacks after a new
+      ride has been selected.
+    */
+
+    if(
+     activeRideId!==rideId
+    ){
+
      return;
 
     }
 
+
+    if(!snapshot.exists()){
+
+     finishLocal(false);
+
+     return;
+
+    }
+
+
     activeRide={
-     ...snap.data(),
-     id:snap.id
+     ...snapshot.data(),
+     id:snapshot.id
     };
 
-    const s=
-     status(activeRide.status);
+
+    const currentStatus=
+     status(
+      activeRide.status||
+      activeRide.rideStatus
+     );
+
 
     if(
      [
       "completed",
       "cancelled",
       "canceled"
-     ].includes(s)
+     ].includes(
+      currentStatus
+     )
     ){
 
      finishLocal(
-      s==="completed"
+      currentStatus==="completed"
      );
 
      return;
 
     }
 
+
     showActive();
 
    },
 
-   e=>{
+   error=>{
+
     console.error(
      "Active ride listener:",
-     e
+     error
     );
+
    }
+
   );
+
 }
 
+
+/* ============================================================
+   SHOW ACTIVE RIDE
+   ============================================================ */
 
 function showActive(){
 
  if(!activeRide){
 
   showRequests();
+
   return;
 
  }
 
- $("requestsArea").style.display="none";
- $("activeArea").style.display="block";
 
- const c=
+ $("requestsArea").style.display=
+  "none";
+
+
+ $("activeArea").style.display=
+  "block";
+
+
+ const customer=
   activeRide.customerName||
   activeRide.userName||
   "Customer";
 
- const p=
+
+ const pickup=
   locationData(
    activeRide.pickup||
    activeRide.pickupLocation
   );
 
- const d=
+
+ const drop=
   locationData(
    activeRide.dropoff||
    activeRide.dropoffLocation||
    activeRide.destination
   );
 
+
  const fare=
   Number(
-   activeRide.fare??
-   activeRide.estimatedFare??
-   activeRide.amount??
+   activeRide.fare ??
+   activeRide.estimatedFare ??
+   activeRide.amount ??
    0
   );
 
- const s=
+
+ const rideStatus=
   status(
    activeRide.status||
+   activeRide.rideStatus||
    "accepted"
   );
 
+
  let buttons=`
+
 
   <button
    id="pickupNavBtn"
-   class="action-btn nav-btn">
+   class="action-btn nav-btn"
+   type="button">
 
    <i class="fa-solid fa-route"></i>
    PICKUP
 
   </button>
 
+
   <button
    id="dropNavBtn"
-   class="action-btn nav-btn">
+   class="action-btn nav-btn"
+   type="button">
 
    <i class="fa-solid fa-location-arrow"></i>
    DROP
 
   </button>
+
  `;
 
 
@@ -1721,19 +3334,23 @@ function showActive(){
   [
    "accepted",
    "arriving"
-  ].includes(s)
+  ].includes(
+   rideStatus
+  )
  ){
 
   buttons+=`
 
    <button
     id="startRideBtn"
-    class="action-btn start-btn">
+    class="action-btn start-btn"
+    type="button">
 
     <i class="fa-solid fa-play"></i>
     START RIDE
 
    </button>
+
   `;
 
  }
@@ -1744,19 +3361,23 @@ function showActive(){
    "started",
    "in_progress",
    "ongoing"
-  ].includes(s)
+  ].includes(
+   rideStatus
+  )
  ){
 
   buttons+=`
 
    <button
     id="completeRideBtn"
-    class="action-btn complete-btn">
+    class="action-btn complete-btn"
+    type="button">
 
     <i class="fa-solid fa-flag-checkered"></i>
     COMPLETE RIDE
 
    </button>
+
   `;
 
  }
@@ -1766,6 +3387,7 @@ function showActive(){
 
   <div class="active-card">
 
+
    <div class="active-header">
 
     <div class="active-title">
@@ -1773,7 +3395,9 @@ function showActive(){
     </div>
 
     <div class="active-status">
-     ${esc(s.toUpperCase())}
+     ${esc(
+      rideStatus.toUpperCase()
+     )}
     </div>
 
    </div>
@@ -1785,10 +3409,11 @@ function showActive(){
      <i class="fa-solid fa-user"></i>
     </div>
 
+
     <div class="customer-info">
 
      <strong>
-      ${esc(c)}
+      ${esc(customer)}
      </strong>
 
      <small>
@@ -1804,16 +3429,19 @@ function showActive(){
 
     <button
      id="callCustomerBtn"
-     class="contact-btn call-btn">
+     class="contact-btn call-btn"
+     type="button">
 
      <i class="fa-solid fa-phone"></i>
      CALL
 
     </button>
 
+
     <button
      id="chatCustomerBtn"
-     class="contact-btn chat-btn">
+     class="contact-btn chat-btn"
+     type="button">
 
      <i class="fa-solid fa-message"></i>
      CHAT
@@ -1838,7 +3466,7 @@ function showActive(){
       </div>
 
       <div class="route-address">
-       ${esc(p.text)}
+       ${esc(pickup.text)}
       </div>
 
      </div>
@@ -1859,7 +3487,7 @@ function showActive(){
       </div>
 
       <div class="route-address">
-       ${esc(d.text)}
+       ${esc(drop.text)}
       </div>
 
      </div>
@@ -1886,21 +3514,31 @@ function showActive(){
     ${buttons}
    </div>
 
+
   </div>
+
  `;
 
 
  $("callCustomerBtn").onclick=
   callCustomer;
 
+
  $("chatCustomerBtn").onclick=
   openChat;
 
+
  $("pickupNavBtn").onclick=
-  ()=>startNavigation("pickup");
+  ()=>startNavigation(
+   "pickup"
+  );
+
 
  $("dropNavBtn").onclick=
-  ()=>startNavigation("drop");
+  ()=>startNavigation(
+   "drop"
+  );
+
 
  $("startRideBtn")
   ?.addEventListener(
@@ -1908,21 +3546,29 @@ function showActive(){
    startRide
   );
 
+
  $("completeRideBtn")
   ?.addEventListener(
    "click",
    completeRide
   );
+
 }
 
+
+/* ============================================================
+   SHOW REQUESTS
+   ============================================================ */
 
 function showRequests(){
 
  $("requestsArea").style.display=
   "block";
 
+
  $("activeArea").style.display=
   "none";
+
 }
 
 
@@ -1932,72 +3578,110 @@ function showRequests(){
 
 async function startRide(){
 
- if(!activeRideId)return;
+ if(
+  !activeRideId||
+  !user
+ ){
+
+  return;
+
+ }
+
 
  loading(
   true,
   "Starting ride..."
  );
 
+
+ const rideId=
+  activeRideId;
+
+
  try{
 
   /*
-    First Firestore.
+    Firestore is the primary source of truth.
   */
+
   await updateDoc(
-   doc(db,"rides",activeRideId),
+   doc(
+    db,
+    "rides",
+    rideId
+   ),
    {
     status:"started",
     rideStatus:"started",
-    startedAt:serverTimestamp(),
-    updatedAt:serverTimestamp()
+
+    startedAt:
+     serverTimestamp(),
+
+    updatedAt:
+     serverTimestamp()
    }
   );
 
 
   /*
-    Then RTDB.
-    Customer sees started state immediately.
+    Mirror to RTDB.
   */
+
   await syncRideToRealtime(
-   activeRideId,
+   rideId,
    {
     status:"started",
     rideStatus:"started",
+
     startedAt:Date.now()
    }
   );
 
 
-  if(activeRide){
+  if(
+   activeRide &&
+   activeRideId===rideId
+  ){
 
-   activeRide.status="started";
-   activeRide.rideStatus="started";
+   activeRide.status=
+    "started";
+
+   activeRide.rideStatus=
+    "started";
 
   }
 
 
-  toast("Ride started!");
+  toast(
+   "Ride started!"
+  );
 
-  startNavigation("drop");
 
- }catch(e){
+  startNavigation(
+   "drop"
+  );
+
+
+ }catch(error){
 
   console.error(
    "startRide:",
-   e
+   error
   );
+
 
   toast(
    "Unable to start ride.",
    "error"
   );
 
+
  }finally{
 
   loading(false);
 
  }
+
 }
 
 
@@ -2007,36 +3691,64 @@ async function startRide(){
 
 async function completeRide(){
 
- if(!activeRideId)return;
+ if(
+  !activeRideId||
+  !user
+ ){
 
- if(!confirm("Complete this ride?"))return;
+  return;
+
+ }
+
+
+ if(
+  !confirm(
+   "Complete this ride?"
+  )
+ ){
+
+  return;
+
+ }
+
+
+ const rideId=
+  activeRideId;
+
 
  loading(
   true,
   "Completing ride..."
  );
 
+
  try{
 
   await updateDoc(
-   doc(db,"rides",activeRideId),
+   doc(
+    db,
+    "rides",
+    rideId
+   ),
    {
     status:"completed",
     rideStatus:"completed",
-    completedAt:serverTimestamp(),
-    updatedAt:serverTimestamp()
+
+    completedAt:
+     serverTimestamp(),
+
+    updatedAt:
+     serverTimestamp()
    }
   );
 
 
-  /*
-    Customer receives completed state too.
-  */
   await syncRideToRealtime(
-   activeRideId,
+   rideId,
    {
     status:"completed",
     rideStatus:"completed",
+
     completedAt:Date.now()
    }
   );
@@ -2044,41 +3756,61 @@ async function completeRide(){
 
   finishLocal(true);
 
- }catch(e){
+
+ }catch(error){
 
   console.error(
    "completeRide:",
-   e
+   error
   );
+
 
   toast(
    "Unable to complete ride.",
    "error"
   );
 
+
  }finally{
 
   loading(false);
 
  }
+
 }
 
 
-function finishLocal(completed=false){
+/* ============================================================
+   FINISH LOCAL ACTIVE RIDE
+   ============================================================ */
+
+function finishLocal(
+ completed=false
+){
 
  stopNavigation();
+
  stopActive();
 
+
  activeRide=null;
+
  activeRideId=null;
 
+
  showRequests();
+
 
  if(isOnline){
 
   listenRequests();
 
+ }else{
+
+  showOffline();
+
  }
+
 
  if(completed){
 
@@ -2087,67 +3819,102 @@ function finishLocal(completed=false){
   );
 
  }
+
 }
 
 
 /* ============================================================
-   CALL / CHAT
+   CUSTOMER PHONE
    ============================================================ */
 
 function customerPhone(){
 
+ if(!activeRide){
+
+  return "";
+
+ }
+
+
  return (
-  activeRide?.customerPhone||
-  activeRide?.userPhone||
-  activeRide?.phone||
-  activeRide?.customer?.phone||
+  activeRide.customerPhone||
+  activeRide.userPhone||
+  activeRide.phone||
+  activeRide.customer?.phone||
   ""
  );
+
 }
 
 
+/* ============================================================
+   CALL CUSTOMER
+   ============================================================ */
+
 function callCustomer(){
 
- const p=
+ const phone=
   customerPhone();
 
- if(!p){
 
-  return toast(
+ if(!phone){
+
+  toast(
    "Customer phone number unavailable.",
    "error"
   );
 
+  return;
+
  }
 
+
  location.href=
-  `tel:${p}`;
+  `tel:${phone}`;
+
 }
 
 
+/* ============================================================
+   OPEN CHAT
+   ============================================================ */
+
 function openChat(){
 
- if(!activeRideId){
+ if(
+  !activeRideId||
+  !activeRide
+ ){
 
-  return toast(
+  toast(
    "No active ride.",
    "error"
   );
 
+  return;
+
  }
+
 
  $("chatCustomerName").textContent=
   activeRide.customerName||
   activeRide.userName||
   "Customer";
 
+
  $("chatOverlay")
   .classList
   .add("show");
 
+
  listenChat();
+
 }
 
+
+/* ============================================================
+   CLOSE CHAT
+   ============================================================ */
 
 function closeChat(){
 
@@ -2155,21 +3922,37 @@ function closeChat(){
   .classList
   .remove("show");
 
+
  if(chatUnsub){
 
   chatUnsub();
+
   chatUnsub=null;
 
  }
+
 }
 
+
+/* ============================================================
+   CHAT BACK
+   ============================================================ */
 
 $("chatBack").onclick=
  closeChat;
 
+
+/* ============================================================
+   CHAT CALL
+   ============================================================ */
+
 $("chatCall").onclick=
  callCustomer;
 
+
+/* ============================================================
+   CHAT LISTENER
+   ============================================================ */
 
 function listenChat(){
 
@@ -2177,7 +3960,24 @@ function listenChat(){
 
   chatUnsub();
 
+  chatUnsub=null;
+
  }
+
+
+ if(
+  !activeRideId||
+  !user
+ ){
+
+  return;
+
+ }
+
+
+ const rideId=
+  activeRideId;
+
 
  chatUnsub=
   onSnapshot(
@@ -2186,7 +3986,7 @@ function listenChat(){
     collection(
      db,
      "rides",
-     activeRideId,
+     rideId,
      "messages"
     ),
     orderBy(
@@ -2195,84 +3995,135 @@ function listenChat(){
     )
    ),
 
-   snap=>{
+   snapshot=>{
 
-    if(snap.empty){
+    if(
+     activeRideId!==rideId
+    ){
+
+     return;
+
+    }
+
+
+    if(snapshot.empty){
 
      $("chatMessages").innerHTML=`
+
       <div class="chat-empty">
        Start conversation with customer.
       </div>
+
      `;
 
      return;
+
     }
 
 
     $("chatMessages").innerHTML=
-     snap.docs.map(s=>{
+     snapshot.docs
+      .map(
+       messageSnapshot=>{
 
-      const m=s.data();
+        const message=
+         messageSnapshot.data();
 
-      const mine=
-       m.senderId===user.uid;
 
-      const time=
-       m.createdAt
-        ?.toDate
-        ?.()
-        .toLocaleTimeString(
-         [],
-         {
-          hour:"2-digit",
-          minute:"2-digit"
-         }
-        )||"";
+        const mine=
+         message.senderId===
+         user.uid;
 
-      return `
-       <div class="message ${mine?"mine":"theirs"}">
 
-        ${esc(m.text)}
+        const time=
+         message.createdAt
+          ?.toDate
+          ?.()
+          .toLocaleTimeString(
+           [],
+           {
+            hour:"2-digit",
+            minute:"2-digit"
+           }
+          )||
+          "";
 
-        <span class="message-time">
-         ${esc(time)}
-        </span>
 
-       </div>
-      `;
+        return `
 
-     }).join("");
+         <div class="message ${
+          mine
+           ?"mine"
+           :"theirs"
+         }">
+
+          ${esc(
+           message.text
+          )}
+
+          <span class="message-time">
+           ${esc(time)}
+          </span>
+
+         </div>
+
+        `;
+
+       }
+      )
+      .join("");
+
 
     $("chatMessages").scrollTop=
      $("chatMessages").scrollHeight;
 
    },
 
-   e=>{
+   error=>{
+
     console.error(
      "Chat listener:",
-     e
+     error
     );
+
    }
+
   );
+
 }
 
+
+/* ============================================================
+   SEND MESSAGE
+   ============================================================ */
 
 async function sendMessage(){
 
  const input=
   $("chatInput");
 
+
  const text=
   input.value.trim();
+
 
  if(
   !text||
   !activeRideId||
   !user
- )return;
+ ){
+
+  return;
+
+ }
+
+
+ const rideId=
+  activeRideId;
+
 
  input.value="";
+
 
  try{
 
@@ -2280,24 +4131,40 @@ async function sendMessage(){
    collection(
     db,
     "rides",
-    activeRideId,
+    rideId,
     "messages"
    ),
    {
     text,
-    senderId:user.uid,
-    senderRole:"rider",
+
+    senderId:
+     user.uid,
+
+    senderRole:
+     "rider",
+
     senderName:
      userData.name||
      riderData.name||
+     user.displayName||
      "Rider",
-    createdAt:serverTimestamp()
+
+    createdAt:
+     serverTimestamp()
    }
   );
 
- }catch(e){
+
+ }catch(error){
+
+  console.error(
+   "sendMessage:",
+   error
+  );
+
 
   input.value=text;
+
 
   toast(
    "Message could not be sent.",
@@ -2305,76 +4172,119 @@ async function sendMessage(){
   );
 
  }
+
 }
 
+
+/* ============================================================
+   CHAT SEND
+   ============================================================ */
 
 $("chatSend").onclick=
  sendMessage;
 
 
-$("chatInput").onkeydown=e=>{
+/* ============================================================
+   CHAT ENTER
+   ============================================================ */
 
- if(e.key==="Enter"){
+$("chatInput").onkeydown=
+ event=>{
 
-  e.preventDefault();
-  sendMessage();
+  if(
+   event.key==="Enter"
+  ){
 
- }
+   event.preventDefault();
 
-};
+   sendMessage();
+
+  }
+
+ };
 
 
 /* ============================================================
-   NAVIGATION
+   DISTANCE
    ============================================================ */
 
-function distance(a,b,c,d){
+function distance(
+ lat1,
+ lng1,
+ lat2,
+ lng2
+){
 
  const R=6371;
- const rad=Math.PI/180;
 
- const x=(c-a)*rad;
- const y=(d-b)*rad;
+ const rad=
+  Math.PI/180;
 
- const z=
+
+ const x=
+  (lat2-lat1)*
+  rad;
+
+
+ const y=
+  (lng2-lng1)*
+  rad;
+
+
+ const a=
   Math.sin(x/2)**2+
-  Math.cos(a*rad)*
-  Math.cos(c*rad)*
+  Math.cos(lat1*rad)*
+  Math.cos(lat2*rad)*
   Math.sin(y/2)**2;
+
 
  return R*
   2*
   Math.atan2(
-   Math.sqrt(z),
-   Math.sqrt(1-z)
+   Math.sqrt(a),
+   Math.sqrt(1-a)
   );
+
 }
 
 
-async function startNavigation(type){
+/* ============================================================
+   START NAVIGATION
+   ============================================================ */
+
+async function startNavigation(
+ type
+){
 
  if(!activeRide){
 
-  return toast(
+  toast(
    "No active ride.",
    "error"
   );
 
+  return;
+
  }
+
 
  if(!riderLocation){
 
   gpsOnce(false);
 
-  return toast(
+
+  toast(
    "Waiting for your location...",
    "error"
   );
 
+
+  return;
+
  }
 
 
- const v=
+ const value=
   type==="pickup"
    ?(
      activeRide.pickup||
@@ -2387,27 +4297,29 @@ async function startNavigation(type){
     );
 
 
- const t=
-  locationData(v);
+ const destination=
+  locationData(value);
 
 
  if(
-  t.lat===null||
-  t.lng===null
+  destination.lat===null||
+  destination.lng===null
  ){
 
-  return toast(
+  toast(
    "Destination coordinates unavailable.",
    "error"
   );
+
+  return;
 
  }
 
 
  target={
-  lat:t.lat,
-  lng:t.lng,
-  text:t.text,
+  lat:destination.lat,
+  lng:destination.lng,
+  text:destination.text,
   type
  };
 
@@ -2419,7 +4331,8 @@ async function startNavigation(type){
 
 
  $("navigationSub").textContent=
-  t.text||"Destination";
+  destination.text||
+  "Destination";
 
 
  $("navigationBanner")
@@ -2429,19 +4342,28 @@ async function startNavigation(type){
 
  if(targetMarker){
 
-  map.removeLayer(
-   targetMarker
-  );
+  try{
+
+   map.removeLayer(
+    targetMarker
+   );
+
+  }catch(error){}
 
  }
 
 
  targetMarker=
   L.marker(
-   [t.lat,t.lng],
+   [
+    destination.lat,
+    destination.lng
+   ],
    {
     icon:L.divIcon({
+
      className:"",
+
      html:`
       <div style="
        width:40px;
@@ -2453,15 +4375,26 @@ async function startNavigation(type){
        background:#000;
        color:#ffd600;
        border:3px solid #ffd600;
-       font-size:16px
+       font-size:16px;
       ">
        <i class="fa-solid fa-location-dot"></i>
       </div>
      `,
-     iconSize:[40,40],
-     iconAnchor:[20,20]
+
+     iconSize:[
+      40,
+      40
+     ],
+
+     iconAnchor:[
+      20,
+      20
+     ]
+
     }),
+
     zIndexOffset:900
+
    }
   ).addTo(map);
 
@@ -2479,34 +4412,51 @@ async function startNavigation(type){
  routeTimer=
   setInterval(
    ()=>{
+
     if(
-     target&&
+     target &&
      riderLocation
     ){
 
      drawRoute();
+
      updateNavigationDistance();
 
     }
+
    },
    15000
   );
+
 }
 
+
+/* ============================================================
+   DRAW ROUTE
+   ============================================================ */
 
 async function drawRoute(){
 
  if(
   !target||
   !riderLocation
- )return;
+ ){
+
+  return;
+
+ }
 
 
  if(routeLine){
 
-  map.removeLayer(
-   routeLine
-  );
+  try{
+
+   map.removeLayer(
+    routeLine
+   );
+
+  }catch(error){}
+
 
   routeLine=null;
 
@@ -2515,26 +4465,33 @@ async function drawRoute(){
 
  try{
 
-  const u=
+  const url=
    `https://router.project-osrm.org/route/v1/driving/`+
    `${riderLocation.lng},${riderLocation.lat};`+
    `${target.lng},${target.lat}`+
    `?overview=full&geometries=geojson`;
 
 
-  const r=
-   await fetch(u);
+  const response=
+   await fetch(
+    url,
+    {
+     method:"GET"
+    }
+   );
 
 
-  if(!r.ok){
+  if(!response.ok){
 
-   throw Error("route");
+   throw new Error(
+    "ROUTE_HTTP"
+   );
 
   }
 
 
   const data=
-   await r.json();
+   await response.json();
 
 
   const route=
@@ -2543,20 +4500,26 @@ async function drawRoute(){
 
   if(!route){
 
-   throw Error("route");
+   throw new Error(
+    "ROUTE_EMPTY"
+   );
 
   }
 
 
-  const coords=
-   route.geometry.coordinates.map(
-    x=>[x[1],x[0]]
-   );
+  const coordinates=
+   route.geometry.coordinates
+    .map(
+     point=>[
+      point[1],
+      point[0]
+     ]
+    );
 
 
   routeLine=
    L.polyline(
-    coords,
+    coordinates,
     {
      color:"#ffd600",
      weight:6,
@@ -2568,7 +4531,10 @@ async function drawRoute(){
   map.fitBounds(
    routeLine.getBounds(),
    {
-    padding:[80,80],
+    padding:[
+     80,
+     80
+    ],
     maxZoom:17
    }
   );
@@ -2580,7 +4546,17 @@ async function drawRoute(){
    ).toFixed(1)} km`;
 
 
- }catch(e){
+ }catch(error){
+
+  console.warn(
+   "OSRM route unavailable:",
+   error
+  );
+
+
+  /*
+    Fallback straight line.
+  */
 
   routeLine=
    L.polyline(
@@ -2606,83 +4582,129 @@ async function drawRoute(){
   map.fitBounds(
    routeLine.getBounds(),
    {
-    padding:[70,70],
+    padding:[
+     70,
+     70
+    ],
     maxZoom:16
    }
   );
 
  }
+
 }
 
+
+/* ============================================================
+   NAVIGATION DISTANCE
+   ============================================================ */
 
 function updateNavigationDistance(){
 
  if(
   !target||
   !riderLocation
- )return;
+ ){
 
- $("navigationDistance").textContent=
-  `${distance(
+  return;
+
+ }
+
+
+ const km=
+  distance(
    riderLocation.lat,
    riderLocation.lng,
    target.lat,
    target.lng
-  ).toFixed(1)} km`;
+  );
+
+
+ $("navigationDistance").textContent=
+  `${km.toFixed(1)} km`;
+
 }
 
+
+/* ============================================================
+   STOP NAVIGATION
+   ============================================================ */
 
 function stopNavigation(){
 
  target=null;
 
+
  clearInterval(
   routeTimer
  );
 
+
+ routeTimer=null;
+
+
  if(routeLine){
 
   try{
+
    map.removeLayer(
     routeLine
    );
-  }catch(e){}
+
+  }catch(error){}
+
 
   routeLine=null;
+
  }
 
 
  if(targetMarker){
 
   try{
+
    map.removeLayer(
     targetMarker
    );
-  }catch(e){}
+
+  }catch(error){}
+
 
   targetMarker=null;
+
  }
 
 
  $("navigationBanner")
   .classList
   .remove("show");
+
 }
 
 
 /* ============================================================
-   SOUND
+   REQUEST SOUND
    ============================================================ */
 
 function requestSound(){
 
  try{
 
+  const AudioContext=
+   window.AudioContext||
+   window.webkitAudioContext;
+
+
+  if(!AudioContext){
+
+   return;
+
+  }
+
+
   audio??=
-   new (
-    window.AudioContext||
-    window.webkitAudioContext
-   )();
+   new AudioContext();
+
 
   if(
    audio.state==="suspended"
@@ -2692,96 +4714,152 @@ function requestSound(){
 
   }
 
-  const n=
+
+  const start=
    audio.currentTime;
 
 
-  [0,.18,.36].forEach(
-   (o,i)=>{
+  [0,.18,.36]
+   .forEach(
+    (offset,index)=>{
 
-    const osc=
-     audio.createOscillator();
+     const oscillator=
+      audio.createOscillator();
 
-    const g=
-     audio.createGain();
 
-    osc.frequency.value=
-     i===1
-      ?880
-      :660;
+     const gain=
+      audio.createGain();
 
-    osc.type="sine";
 
-    g.gain.setValueAtTime(
-     .0001,
-     n+o
-    );
+     oscillator.frequency.value=
+      index===1
+       ?880
+       :660;
 
-    g.gain.exponentialRampToValueAtTime(
-     .18,
-     n+o+.03
-    );
 
-    g.gain.exponentialRampToValueAtTime(
-     .0001,
-     n+o+.15
-    );
+     oscillator.type=
+      "sine";
 
-    osc.connect(g);
-    g.connect(
-     audio.destination
-    );
 
-    osc.start(n+o);
-    osc.stop(n+o+.16);
+     gain.gain.setValueAtTime(
+      .0001,
+      start+offset
+     );
 
-   }
+
+     gain.gain.exponentialRampToValueAtTime(
+      .18,
+      start+offset+.03
+     );
+
+
+     gain.gain.exponentialRampToValueAtTime(
+      .0001,
+      start+offset+.15
+     );
+
+
+     oscillator.connect(
+      gain
+     );
+
+
+     gain.connect(
+      audio.destination
+     );
+
+
+     oscillator.start(
+      start+offset
+     );
+
+
+     oscillator.stop(
+      start+offset+.16
+     );
+
+    }
+   );
+
+ }catch(error){
+
+  console.warn(
+   "Ride sound:",
+   error
   );
 
- }catch(e){}
+ }
 
 }
 
 
 /* ============================================================
-   RESTORE RIDER ACCOUNT
+   LOAD USER PROFILE
    ============================================================ */
 
 async function loadUser(){
 
  userData={};
+
  riderData={};
 
- try{
-
-  const s=
-   await getDoc(
-    doc(db,"users",user.uid)
-   );
-
-  if(s.exists()){
-
-   userData=s.data();
-
-  }
-
- }catch(e){}
-
 
  try{
 
-  const s=
+  const snapshot=
    await getDoc(
-    doc(db,"riders",user.uid)
+    doc(
+     db,
+     "users",
+     user.uid
+    )
    );
 
-  if(s.exists()){
 
-   riderData=s.data();
+  if(snapshot.exists()){
+
+   userData=
+    snapshot.data();
 
   }
 
- }catch(e){}
+ }catch(error){
+
+  console.warn(
+   "User profile:",
+   error
+  );
+
+ }
+
+
+ try{
+
+  const snapshot=
+   await getDoc(
+    doc(
+     db,
+     "riders",
+     user.uid
+    )
+   );
+
+
+  if(snapshot.exists()){
+
+   riderData=
+    snapshot.data();
+
+  }
+
+ }catch(error){
+
+  console.warn(
+   "Rider profile:",
+   error
+  );
+
+ }
 
 }
 
@@ -2790,11 +4868,31 @@ async function loadUser(){
    RESTORE ACTIVE RIDE
    ============================================================ */
 
-async function restoreActive(){
+function stopRestore(){
 
  if(restoreUnsub){
 
   restoreUnsub();
+
+  restoreUnsub=null;
+
+ }
+
+}
+
+
+/* ============================================================
+   RESTORE ACTIVE RIDE
+   ============================================================ */
+
+function restoreActive(){
+
+ stopRestore();
+
+
+ if(!user){
+
+  return;
 
  }
 
@@ -2803,7 +4901,10 @@ async function restoreActive(){
   onSnapshot(
 
    query(
-    collection(db,"rides"),
+    collection(
+     db,
+     "rides"
+    ),
     where(
      "riderId",
      "==",
@@ -2811,55 +4912,74 @@ async function restoreActive(){
     )
    ),
 
-   snap=>{
+   snapshot=>{
+
+    /*
+      Select the newest ride that is genuinely active.
+    */
 
     let found=null;
+
     let best=-1;
 
 
-    snap.forEach(s=>{
+    snapshot.forEach(
+     rideSnapshot=>{
 
-     const r=s.data();
-
-     const st=
-      status(r.status);
+      const ride=
+       rideSnapshot.data();
 
 
-     if(
-      ![
-       "accepted",
-       "arriving",
-       "started",
-       "in_progress",
-       "ongoing"
-      ].includes(st)
-     ){
+      const rideStatus=
+       status(
+        ride.status||
+        ride.rideStatus
+       );
 
-      return;
+
+      if(
+       ![
+        "accepted",
+        "arriving",
+        "started",
+        "in_progress",
+        "ongoing"
+       ].includes(
+        rideStatus
+       )
+      ){
+
+       return;
+
+      }
+
+
+      const seconds=
+       ride.acceptedAt?.seconds||
+       ride.startedAt?.seconds||
+       ride.createdAt?.seconds||
+       0;
+
+
+      if(seconds>=best){
+
+       best=seconds;
+
+
+       found={
+        ...ride,
+        id:rideSnapshot.id
+       };
+
+      }
 
      }
+    );
 
 
-     const sec=
-      r.acceptedAt?.seconds||
-      r.startedAt?.seconds||
-      r.createdAt?.seconds||
-      0;
-
-
-     if(sec>=best){
-
-      best=sec;
-
-      found={
-       ...r,
-       id:s.id
-      };
-
-     }
-
-    });
-
+    /*
+      ACTIVE RIDE FOUND
+    */
 
     if(found){
 
@@ -2869,6 +4989,7 @@ async function restoreActive(){
 
      activeRideId=
       found.id;
+
 
      activeRide=
       found;
@@ -2885,111 +5006,190 @@ async function restoreActive(){
 
      }
 
-    }else if(!activeRideId){
 
-     showRequests();
+     return;
 
-     if(isOnline){
+    }
 
-      listenRequests();
 
-     }
+    /*
+      NO ACTIVE RIDE FOUND.
+
+      If a previous ride was active locally, clear it.
+    */
+
+    if(activeRideId){
+
+     stopActive();
+
+     stopNavigation();
+
+     activeRideId=null;
+
+     activeRide=null;
+
+    }
+
+
+    showRequests();
+
+
+    if(isOnline){
+
+     listenRequests();
+
+    }else{
+
+     showOffline();
 
     }
 
    },
 
-   e=>{
+   error=>{
+
     console.warn(
-     "restore",
-     e
+     "Restore active ride:",
+     error
     );
+
    }
+
   );
+
 }
 
 
 /* ============================================================
-   BUTTONS
+   LOCATION BUTTON
    ============================================================ */
 
-$("locationBtn").onclick=()=>{
+$("locationBtn").onclick=
+ ()=>{
 
- if(riderLocation){
+  if(riderLocation){
 
-  map.setView(
-   [
-    riderLocation.lat,
-    riderLocation.lng
-   ],
-   16,
-   {
-    animate:true
-   }
-  );
+   map.setView(
+    [
+     riderLocation.lat,
+     riderLocation.lng
+    ],
+    16,
+    {
+     animate:true
+    }
+   );
 
- }else{
+  }else{
 
-  gpsOnce(true);
+   gpsOnce(true);
 
- }
+  }
 
-};
-
-
-$("homeNav").onclick=()=>{
-
- if(riderLocation){
-
-  map.setView(
-   [
-    riderLocation.lat,
-    riderLocation.lng
-   ],
-   16,
-   {
-    animate:true
-   }
-  );
-
- }
-
-};
-
-
-$("ridesNav").onclick=
- ()=>go("rides.html");
-
-$("walletNav").onclick=
- ()=>go("wallet.html");
-
-$("profileNav").onclick=
- ()=>go("profile.html");
-
-$("profileTopBtn").onclick=
- ()=>go("profile.html");
-
-
-$("notificationBtn").onclick=()=>{
-
- $("notificationDot")
-  .style
-  .display="none";
-
- go("notifications.html");
-
-};
+ };
 
 
 /* ============================================================
-   AUTH
+   HOME BUTTON
+   ============================================================ */
+
+$("homeNav").onclick=
+ ()=>{
+
+  if(riderLocation){
+
+   map.setView(
+    [
+     riderLocation.lat,
+     riderLocation.lng
+    ],
+    16,
+    {
+     animate:true
+    }
+   );
+
+  }else{
+
+   gpsOnce(true);
+
+  }
+
+ };
+
+
+/* ============================================================
+   RIDES
+   ============================================================ */
+
+$("ridesNav").onclick=
+ ()=>go(
+  "rides.html"
+ );
+
+
+/* ============================================================
+   WALLET
+   ============================================================ */
+
+$("walletNav").onclick=
+ ()=>go(
+  "wallet.html"
+ );
+
+
+/* ============================================================
+   PROFILE
+   ============================================================ */
+
+$("profileNav").onclick=
+ ()=>go(
+  "profile.html"
+ );
+
+
+$("profileTopBtn").onclick=
+ ()=>go(
+  "profile.html"
+ );
+
+
+/* ============================================================
+   NOTIFICATION BUTTON
+   ============================================================ */
+
+$("notificationBtn").onclick=
+ ()=>{
+
+  /*
+    Do not navigate to a file that is not guaranteed
+    to exist in the RiderX2 rider folder.
+
+    The notification UI can later be connected to the
+    centralized notification system.
+  */
+
+  $("notificationDot")
+   .style
+   .display="none";
+
+
+  toast(
+   "Notifications are coming soon."
+  );
+
+ };
+
+
+/* ============================================================
+   AUTH STATE
    ============================================================ */
 
 onAuthStateChanged(
  auth,
- async u=>{
+ async authenticatedUser=>{
 
-  if(!u){
+  if(!authenticatedUser){
 
    location.href=
     "../auth/login.html";
@@ -2999,22 +5199,38 @@ onAuthStateChanged(
   }
 
 
-  user=u;
+  user=
+   authenticatedUser;
+
+
+  if(booted){
+
+   return;
+
+  }
+
+
+  booted=true;
 
 
   try{
 
    /*
-     Initialize RTDB using the same Firebase app
-     already used by auth.
+     Initialize shared Firebase services.
    */
+
    initRealtimeDatabase();
 
 
    initMap();
 
+
    await loadUser();
 
+
+   /*
+     Restore online state from the rider profile.
+   */
 
    isOnline=
     Boolean(
@@ -3027,34 +5243,34 @@ onAuthStateChanged(
 
 
    /*
-     GPS always follows actual rider position.
-     Database publishing only happens when online.
+     GPS can run even while offline so the map
+     can still show the rider's actual position.
+
+     Database publishing is restricted to online mode.
    */
+
    startGPS();
 
    gpsOnce(true);
 
 
-   await restoreActive();
+   /*
+     Restore active ride first.
+
+     The listener itself will decide whether request
+     listening should start.
+   */
+
+   restoreActive();
 
 
-   if(isOnline){
-
-    listenRequests();
-
-   }else{
-
-    showOffline();
-
-   }
-
-
-  }catch(e){
+  }catch(error){
 
    console.error(
-    "Rider home:",
-    e
+    "Rider home boot:",
+    error
    );
+
 
    toast(
     "Unable to load rider account.",
@@ -3067,7 +5283,7 @@ onAuthStateChanged(
 
 
 /* ============================================================
-   INITIAL
+   INITIAL UI
    ============================================================ */
 
 initMap();
@@ -3075,6 +5291,45 @@ initMap();
 onlineUI();
 
 showOffline();
+
+
+/* ============================================================
+   PAGE VISIBILITY
+   ============================================================ */
+
+document.addEventListener(
+ "visibilitychange",
+ ()=>{
+
+  if(
+   document.visibilityState==="visible" &&
+   user
+  ){
+
+   /*
+     Refresh GPS when returning to the app.
+   */
+
+   gpsOnce(false);
+
+   /*
+     Recover listeners if necessary.
+   */
+
+   if(
+    !activeRideId &&
+    isOnline &&
+    !requestUnsub
+   ){
+
+    listenRequests();
+
+   }
+
+  }
+
+ }
+);
 
 
 /* ============================================================
@@ -3091,17 +5346,9 @@ window.addEventListener(
 
   stopActive();
 
-  if(restoreUnsub){
+  stopRestore();
 
-   restoreUnsub();
-
-  }
-
-  if(chatUnsub){
-
-   chatUnsub();
-
-  }
+  closeChat();
 
   clearInterval(
    routeTimer
@@ -3111,5 +5358,6 @@ window.addEventListener(
 );
 
 </script>
+
 </body>
  </html>
