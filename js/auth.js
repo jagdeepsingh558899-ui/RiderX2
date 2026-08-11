@@ -3,13 +3,21 @@
    AUTHENTICATION ENGINE
    File: js/auth.js
 
-   PRODUCTION AUTH ENGINE
+   FINAL PRODUCTION AUTH ENGINE
 
-   SOURCE OF TRUTH:
-   - Firebase Authentication
-   - Firestore /users/{uid}
+   SOURCE OF TRUTH
+   ------------------------------------------------------------
+   Firebase Authentication
+       -> identity / login session
 
-   SUPPORTS:
+   Firestore /users/{uid}
+       -> RiderX profile / role / account status
+
+   localStorage
+       -> UI/session cache ONLY
+
+   SUPPORTS
+   ------------------------------------------------------------
    - Customer
    - Rider
    - Admin
@@ -26,15 +34,20 @@
    - Password reset
    - Profile update
    - Route guards
+   - Rider approval guard
    - Legacy RiderX compatibility APIs
 
-   SECURITY:
-   - Firebase Authentication is the authentication authority.
-   - Firestore /users/{uid} is the application profile authority.
-   - localStorage is ONLY a UI/session cache.
-   - localStorage is NEVER treated as authentication authority.
-   - Admin authorization MUST also be enforced by Firestore
-     Security Rules / trusted backend logic.
+   IMPORTANT
+   ------------------------------------------------------------
+   No authentication decision is made from localStorage.
+
+   Admin authorization MUST also be enforced by Firestore
+   Security Rules / trusted backend logic.
+
+   This file does NOT initialize Firebase.
+   Firebase initialization belongs ONLY to:
+
+       firebase/firebase-config.js
 ============================================================ */
 
 "use strict";
@@ -111,7 +124,10 @@ let otpConfirmationResult = null;
 ============================================================ */
 
 function safeString(value) {
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
         return "";
     }
 
@@ -124,7 +140,10 @@ function safeLower(value) {
 }
 
 
-function safeNumber(value, fallback = 0) {
+function safeNumber(
+    value,
+    fallback = 0
+) {
     const number = Number(value);
 
     return Number.isFinite(number)
@@ -133,7 +152,10 @@ function safeNumber(value, fallback = 0) {
 }
 
 
-function safeBoolean(value, fallback = false) {
+function safeBoolean(
+    value,
+    fallback = false
+) {
     return typeof value === "boolean"
         ? value
         : fallback;
@@ -158,7 +180,10 @@ function storageGet(key) {
 }
 
 
-function storageSet(key, value) {
+function storageSet(
+    key,
+    value
+) {
     try {
         localStorage.setItem(
             key,
@@ -193,7 +218,8 @@ function storageGetJSON(
     key,
     fallback = null
 ) {
-    const value = storageGet(key);
+    const value =
+        storageGet(key);
 
     if (!value) {
         return fallback;
@@ -203,7 +229,6 @@ function storageGetJSON(
         return JSON.parse(value);
     } catch (error) {
         storageRemove(key);
-
         return fallback;
     }
 }
@@ -229,34 +254,33 @@ function storageSetJSON(
 ============================================================ */
 
 function resolveRoute(route) {
-    const value = safeString(route);
+    const value =
+        safeString(route);
 
     if (!value) {
         return value;
     }
 
     /*
-     * Preserve:
-     * - absolute URLs
-     * - root paths
-     * - hash links
-     * - mailto/tel
+     * Preserve absolute URLs and special browser routes.
      */
     if (
-        /^(https?:|mailto:|tel:|#|\/)/i.test(value)
+        /^(https?:|mailto:|tel:|#|\/)/i.test(
+            value
+        )
     ) {
         return value;
     }
 
     try {
         /*
-         * auth.js is inside /js.
+         * auth.js lives in /js/.
          *
          * "../customer/home.html"
          * "../rider/home.html"
          * "../auth/login.html"
          *
-         * correctly resolve to the repository root.
+         * therefore resolve correctly from repository root.
          */
         return new URL(
             "../" + value,
@@ -278,8 +302,12 @@ function resolveRoute(route) {
 ============================================================ */
 
 function normalizeRole(value) {
-    const role = safeLower(value)
-        .replace(/[\s-]+/g, "_");
+    const role =
+        safeLower(value)
+            .replace(
+                /[\s-]+/g,
+                "_"
+            );
 
     if (
         [
@@ -337,21 +365,29 @@ function normalizeRole(value) {
 ============================================================ */
 
 function normalizePhone(value) {
-    let phone = safeString(value);
+    let phone =
+        safeString(value);
 
     if (!phone) {
         return "";
     }
 
-    phone = phone.replace(
-        /[\s()-]/g,
-        ""
-    );
+    phone =
+        phone.replace(
+            /[\s()-]/g,
+            ""
+        );
 
-    if (phone.startsWith("+")) {
-        const digits = phone
-            .slice(1)
-            .replace(/\D/g, "");
+    if (
+        phone.startsWith("+")
+    ) {
+        const digits =
+            phone
+                .slice(1)
+                .replace(
+                    /\D/g,
+                    ""
+                );
 
         if (
             digits.length >= 10 &&
@@ -363,16 +399,15 @@ function normalizePhone(value) {
         return "";
     }
 
-    const digits = phone.replace(
-        /\D/g,
-        ""
-    );
+    const digits =
+        phone.replace(
+            /\D/g,
+            ""
+        );
 
-    /*
-     * RiderX currently assumes Indian 10-digit numbers
-     * when no country code is supplied.
-     */
-    if (digits.length === 10) {
+    if (
+        digits.length === 10
+    ) {
         return "+91" + digits;
     }
 
@@ -392,7 +427,9 @@ function normalizePhone(value) {
 ============================================================ */
 
 function normalizeEmail(value) {
-    return safeString(value).toLowerCase();
+    return safeString(
+        value
+    ).toLowerCase();
 }
 
 
@@ -403,12 +440,15 @@ function validateEmail(email) {
     if (!value) {
         return {
             valid: false,
-            message: "Email is required."
+            message:
+                "Email is required."
         };
     }
 
     if (
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+            value
+        )
     ) {
         return {
             valid: false,
@@ -428,7 +468,9 @@ function validatePassword(password) {
     const value =
         safeString(password);
 
-    if (value.length < 6) {
+    if (
+        value.length < 6
+    ) {
         return {
             valid: false,
             message:
@@ -539,15 +581,16 @@ function getErrorMessage(error) {
             "This account has been blocked or suspended."
     };
 
-    if (messages[code]) {
+    if (
+        messages[code]
+    ) {
         return messages[code];
     }
 
-    const message =
-        safeString(error.message);
-
-    return message ||
-        "Authentication failed.";
+    return (
+        safeString(error.message) ||
+        "Authentication failed."
+    );
 }
 
 
@@ -586,7 +629,10 @@ function getUser() {
     }
 
     try {
-        return FB.auth?.currentUser || null;
+        return (
+            FB.auth?.currentUser ||
+            null
+        );
     } catch (error) {
         return null;
     }
@@ -622,13 +668,14 @@ function normalizeProfile(
             ? profile
             : {};
 
-    const role = normalizeRole(
-        source.role ||
-        source.userRole ||
-        source.accountType ||
-        source.userType ||
-        source.type
-    );
+    const role =
+        normalizeRole(
+            source.role ||
+            source.userRole ||
+            source.accountType ||
+            source.userType ||
+            source.type
+        );
 
     const name =
         safeString(
@@ -710,7 +757,9 @@ function normalizeProfile(
 ============================================================ */
 
 function getUserRef(uid) {
-    if (!firestoreReady()) {
+    if (
+        !firestoreReady()
+    ) {
         throw new Error(
             "Firestore is not available. Check firebase-config.js."
         );
@@ -733,13 +782,16 @@ async function getUserProfile(user) {
         return null;
     }
 
-    const userRef =
-        getUserRef(user.uid);
-
     const snapshot =
-        await FB.getDoc(userRef);
+        await FB.getDoc(
+            getUserRef(
+                user.uid
+            )
+        );
 
-    if (!snapshot.exists()) {
+    if (
+        !snapshot.exists()
+    ) {
         return null;
     }
 
@@ -771,17 +823,22 @@ async function saveUserProfile(
             user
         );
 
-    if (!normalized.role) {
+    if (
+        !normalized.role
+    ) {
         throw new Error(
             "User profile role is missing."
         );
     }
 
     await FB.setDoc(
-        getUserRef(user.uid),
+        getUserRef(
+            user.uid
+        ),
         {
             ...normalized,
-            updatedAt: Date.now()
+            updatedAt:
+                Date.now()
         },
         {
             merge
@@ -945,7 +1002,7 @@ async function createUserProfile(
 
 
 /* ============================================================
-   ROLE MISMATCH ERROR
+   ROLE MISMATCH
 ============================================================ */
 
 function createRoleMismatchError(
@@ -985,7 +1042,9 @@ function cacheAuthenticatedSession(
             profile?.role
         );
 
-    if (!normalizedRole) {
+    if (
+        !normalizedRole
+    ) {
         return false;
     }
 
@@ -1091,13 +1150,11 @@ function cacheAuthenticatedSession(
         );
     }
 
-    /*
-     * Admin and superadmin should not inherit customer/rider
-     * identity caches.
-     */
     if (
-        normalizedRole === ROLES.ADMIN ||
-        normalizedRole === ROLES.SUPERADMIN
+        normalizedRole ===
+            ROLES.ADMIN ||
+        normalizedRole ===
+            ROLES.SUPERADMIN
     ) {
         storageRemove(
             STORAGE.customerId
@@ -1149,12 +1206,14 @@ function clearSessionCache() {
         STORAGE.riderId,
         STORAGE.session,
         STORAGE.authReady
-    ].forEach(storageRemove);
+    ].forEach(
+        storageRemove
+    );
 }
 
 
 /* ============================================================
-   RESET IN-MEMORY AUTH STATE
+   RESET MEMORY
 ============================================================ */
 
 function clearAuthMemory() {
@@ -1189,7 +1248,9 @@ async function finalizeAuthenticatedUser(
         );
 
     let profile =
-        await getUserProfile(user);
+        await getUserProfile(
+            user
+        );
 
     let role =
         normalizeRole(
@@ -1197,22 +1258,12 @@ async function finalizeAuthenticatedUser(
         );
 
     /*
-     * --------------------------------------------------------
      * EXISTING PROFILE
-     * --------------------------------------------------------
-     *
-     * Firestore role is authoritative.
      */
-
-    if (profile && role) {
-
-        /*
-         * A selected Customer/Rider role must match the actual
-         * Firestore role.
-         *
-         * Admin/superadmin accounts remain controlled by their
-         * actual Firestore role.
-         */
+    if (
+        profile &&
+        role
+    ) {
         if (
             requestedRole &&
             NORMAL_USER_ROLES.includes(
@@ -1230,7 +1281,9 @@ async function finalizeAuthenticatedUser(
         }
 
         if (
-            isAccountBlocked(profile)
+            isAccountBlocked(
+                profile
+            )
         ) {
             const error =
                 new Error(
@@ -1269,14 +1322,14 @@ async function finalizeAuthenticatedUser(
 
 
     /*
-     * --------------------------------------------------------
-     * MISSING PROFILE WITH EXPLICIT FALLBACK
-     * --------------------------------------------------------
+     * MISSING PROFILE WITH EXPLICIT ROLE
+     *
+     * Used only by controlled registration/recovery flows.
      */
-
     if (
         !profile &&
-        options.allowSelectedRoleFallback === true &&
+        options.allowSelectedRoleFallback ===
+            true &&
         NORMAL_USER_ROLES.includes(
             requestedRole
         )
@@ -1319,13 +1372,10 @@ async function finalizeAuthenticatedUser(
 
 
     /*
-     * --------------------------------------------------------
-     * PROFILE DOES NOT EXIST
-     * --------------------------------------------------------
+     * PROFILE MISSING / INVALID
      *
-     * Do not invent a role.
+     * Never invent a role from localStorage.
      */
-
     currentUser =
         user;
 
@@ -1346,7 +1396,7 @@ async function finalizeAuthenticatedUser(
 
 
 /* ============================================================
-   SAFE ACCOUNT DELETE
+   SAFE FIREBASE DELETE
 ============================================================ */
 
 async function safeDeleteCurrentFirebaseUser() {
@@ -1373,6 +1423,30 @@ async function safeDeleteCurrentFirebaseUser() {
     }
 
     return false;
+}
+
+
+/* ============================================================
+   SAFE FIREBASE SIGN OUT
+============================================================ */
+
+async function safeFirebaseSignOut() {
+    try {
+        if (
+            FB.auth &&
+            typeof FB.signOut ===
+                "function"
+        ) {
+            await FB.signOut(
+                FB.auth
+            );
+        }
+    } catch (error) {
+        console.warn(
+            "RiderX Firebase sign-out failed:",
+            error
+        );
+    }
 }
 
 
@@ -1409,16 +1483,22 @@ async function registerWithEmail(
     const emailValidation =
         validateEmail(email);
 
-    if (!emailValidation.valid) {
+    if (
+        !emailValidation.valid
+    ) {
         throw new Error(
             emailValidation.message
         );
     }
 
     const passwordValidation =
-        validatePassword(password);
+        validatePassword(
+            password
+        );
 
-    if (!passwordValidation.valid) {
+    if (
+        !passwordValidation.valid
+    ) {
         throw new Error(
             passwordValidation.message
         );
@@ -1444,13 +1524,24 @@ async function registerWithEmail(
         );
     }
 
-    /*
-     * Store role only as temporary UI state.
-     * Firestore profile remains the real authority.
-     */
     storageSet(
         STORAGE.selectedRole,
         role
+    );
+
+    storageSet(
+        STORAGE.pendingRole,
+        role
+    );
+
+    storageSet(
+        STORAGE.pendingEmail,
+        email
+    );
+
+    storageSet(
+        STORAGE.pendingName,
+        name
     );
 
     let credential;
@@ -1463,15 +1554,26 @@ async function registerWithEmail(
                 password
             );
     } catch (error) {
+        clearOtpState();
+
+        storageRemove(
+            STORAGE.pendingRole
+        );
+
+        storageRemove(
+            STORAGE.pendingEmail
+        );
+
+        storageRemove(
+            STORAGE.pendingName
+        );
+
         throw error;
     }
 
     const user =
         credential.user;
 
-    /*
-     * Update Firebase Auth display name.
-     */
     if (
         name &&
         typeof FB.updateProfile ===
@@ -1493,12 +1595,6 @@ async function registerWithEmail(
         }
     }
 
-    /*
-     * Create Firestore profile.
-     *
-     * Registration is not considered complete until this
-     * profile is successfully written.
-     */
     let profile;
 
     try {
@@ -1510,16 +1606,13 @@ async function registerWithEmail(
                     name,
                     fullName:
                         name,
-
                     displayName:
                         name,
-
                     phone:
                         options.phone ||
                         options.phoneNumber ||
                         user.phoneNumber ||
                         "",
-
                     city:
                         options.city ||
                         "Chandigarh"
@@ -1527,12 +1620,6 @@ async function registerWithEmail(
             );
     } catch (error) {
 
-        /*
-         * Attempt to roll back the newly-created Firebase
-         * account. If deletion is unavailable/fails, sign out
-         * at minimum so the UI never treats the half-created
-         * account as a valid session.
-         */
         const deleted =
             await safeDeleteCurrentFirebaseUser();
 
@@ -1542,6 +1629,18 @@ async function registerWithEmail(
 
         clearAuthMemory();
         clearSessionCache();
+
+        storageRemove(
+            STORAGE.pendingRole
+        );
+
+        storageRemove(
+            STORAGE.pendingEmail
+        );
+
+        storageRemove(
+            STORAGE.pendingName
+        );
 
         throw error;
     }
@@ -1559,6 +1658,26 @@ async function registerWithEmail(
         user,
         profile,
         role
+    );
+
+    storageRemove(
+        STORAGE.pendingRole
+    );
+
+    storageRemove(
+        STORAGE.pendingEmail
+    );
+
+    storageRemove(
+        STORAGE.pendingName
+    );
+
+    storageRemove(
+        STORAGE.otpPhone
+    );
+
+    notifyAuthListeners(
+        getState()
     );
 
     return {
@@ -1596,9 +1715,13 @@ async function loginWithEmail(
         );
 
     const validation =
-        validateEmail(email);
+        validateEmail(
+            email
+        );
 
-    if (!validation.valid) {
+    if (
+        !validation.valid
+    ) {
         throw new Error(
             validation.message
         );
@@ -1620,9 +1743,6 @@ async function loginWithEmail(
         );
     }
 
-    /*
-     * Temporary UI selection only.
-     */
     if (
         NORMAL_USER_ROLES.includes(
             selectedRole
@@ -1664,10 +1784,6 @@ async function loginWithEmail(
             );
     } catch (error) {
 
-        /*
-         * Never leave an account authenticated when profile or
-         * role verification fails.
-         */
         await safeFirebaseSignOut();
 
         clearAuthMemory();
@@ -1676,8 +1792,9 @@ async function loginWithEmail(
         throw error;
     }
 
-    if (!result.configured) {
-
+    if (
+        !result.configured
+    ) {
         await safeFirebaseSignOut();
 
         clearAuthMemory();
@@ -1700,12 +1817,16 @@ async function loginWithEmail(
         result.role
     );
 
+    notifyAuthListeners(
+        result
+    );
+
     return result;
 }
 
 
 /* ============================================================
-   COMPATIBILITY LOGIN API
+   COMPATIBILITY LOGIN
 ============================================================ */
 
 async function loginEmail(
@@ -1729,14 +1850,18 @@ async function sendPasswordReset(
     email
 ) {
     const normalizedEmail =
-        normalizeEmail(email);
+        normalizeEmail(
+            email
+        );
 
     const validation =
         validateEmail(
             normalizedEmail
         );
 
-    if (!validation.valid) {
+    if (
+        !validation.valid
+    ) {
         throw new Error(
             validation.message
         );
@@ -1816,10 +1941,6 @@ async function sendPhoneOtp(
         );
     }
 
-    /*
-     * Clear any previous confirmation session before starting
-     * a new OTP flow.
-     */
     otpConfirmationResult =
         null;
 
@@ -1876,7 +1997,9 @@ async function verifyPhoneOtp(
         );
     }
 
-    if (!otpConfirmationResult) {
+    if (
+        !otpConfirmationResult
+    ) {
         throw new Error(
             "OTP session expired. Please request a new OTP."
         );
@@ -1903,9 +2026,6 @@ async function verifyPhoneOtp(
         throw error;
     }
 
-    /*
-     * Confirmation result is one-time-use.
-     */
     otpConfirmationResult =
         null;
 
@@ -1929,10 +2049,9 @@ async function verifyPhoneOtp(
     }
 
     /*
-     * New phone user.
+     * NEW PHONE ACCOUNT
      */
     if (!profile) {
-
         try {
             profile =
                 await createUserProfile(
@@ -1960,7 +2079,6 @@ async function verifyPhoneOtp(
 
             throw error;
         }
-
     } else {
 
         const existingRole =
@@ -2004,7 +2122,9 @@ async function verifyPhoneOtp(
         }
 
         if (
-            isAccountBlocked(profile)
+            isAccountBlocked(
+                profile
+            )
         ) {
             await safeFirebaseSignOut();
 
@@ -2035,7 +2155,9 @@ async function verifyPhoneOtp(
             }
         );
 
-    if (!result.configured) {
+    if (
+        !result.configured
+    ) {
         await safeFirebaseSignOut();
 
         clearAuthMemory();
@@ -2052,21 +2174,7 @@ async function verifyPhoneOtp(
         throw error;
     }
 
-    storageRemove(
-        STORAGE.otpPhone
-    );
-
-    storageRemove(
-        STORAGE.pendingRole
-    );
-
-    storageRemove(
-        STORAGE.pendingEmail
-    );
-
-    storageRemove(
-        STORAGE.pendingName
-    );
+    clearOtpState();
 
     cacheAuthenticatedSession(
         result.user,
@@ -2074,31 +2182,11 @@ async function verifyPhoneOtp(
         result.role
     );
 
+    notifyAuthListeners(
+        result
+    );
+
     return result;
-}
-
-
-/* ============================================================
-   FIREBASE SIGN OUT
-============================================================ */
-
-async function safeFirebaseSignOut() {
-    try {
-        if (
-            FB.auth &&
-            typeof FB.signOut ===
-                "function"
-        ) {
-            await FB.signOut(
-                FB.auth
-            );
-        }
-    } catch (error) {
-        console.warn(
-            "RiderX Firebase sign-out failed:",
-            error
-        );
-    }
 }
 
 
@@ -2117,24 +2205,11 @@ async function logout(
     otpConfirmationResult =
         null;
 
-    storageRemove(
-        STORAGE.otpPhone
-    );
-
-    storageRemove(
-        STORAGE.pendingRole
-    );
-
-    storageRemove(
-        STORAGE.pendingEmail
-    );
-
-    storageRemove(
-        STORAGE.pendingName
-    );
+    clearOtpState();
 
     if (
-        options.redirect !== false
+        options.redirect !== false &&
+        typeof window !== "undefined"
     ) {
         window.location.replace(
             resolveRoute(
@@ -2193,7 +2268,9 @@ function isRiderApproved(
     }
 
     if (
-        isAccountBlocked(profile)
+        isAccountBlocked(
+            profile
+        )
     ) {
         return false;
     }
@@ -2205,9 +2282,6 @@ function isRiderApproved(
             ""
         );
 
-    /*
-     * Generic "active" status is NOT rider approval.
-     */
     return (
         profile.approved === true ||
         profile.isApproved === true ||
@@ -2312,9 +2386,6 @@ async function updateProfile(
             true
         );
 
-    /*
-     * Firebase Auth display name.
-     */
     if (
         name &&
         typeof FB.updateProfile ===
@@ -2330,19 +2401,31 @@ async function updateProfile(
             );
         } catch (error) {
             console.warn(
-                "RiderX Auth profile update failed:",
+                "RiderX Auth display name update failed:",
                 error
             );
         }
     }
 
+    currentUser =
+        user;
+
     currentProfile =
         updated;
+
+    currentRole =
+        normalizeRole(
+            updated.role
+        );
 
     cacheAuthenticatedSession(
         user,
         updated,
         currentRole
+    );
+
+    notifyAuthListeners(
+        getState()
     );
 
     return updated;
@@ -2399,13 +2482,25 @@ function getState() {
 
 /* ============================================================
    AUTH INIT
-============================================================ */
+   ============================================================ */
 
 function init() {
+
+    /*
+     * IMPORTANT FIX:
+     *
+     * Never return an old resolved initialization result when
+     * the in-memory state has subsequently changed.
+     *
+     * This prevents registration/login flows from becoming
+     * permanently stuck on configured:false.
+     */
     if (
-        authInitPromise
+        authInitialized
     ) {
-        return authInitPromise;
+        return Promise.resolve(
+            getState()
+        );
     }
 
     if (
@@ -2441,13 +2536,21 @@ function init() {
         return authInitPromise;
     }
 
-    /*
-     * Prevent accidental duplicate Firebase auth listeners.
-     */
+    if (
+        authInitPromise
+    ) {
+        return authInitPromise;
+    }
+
     if (
         authListenerStarted
     ) {
-        return authInitPromise;
+        return (
+            authInitPromise ||
+            Promise.resolve(
+                getState()
+            )
+        );
     }
 
     authListenerStarted =
@@ -2471,9 +2574,7 @@ function init() {
                                 null;
 
                             /*
-                             * ------------------------------------------------
-                             * NO AUTHENTICATED FIREBASE USER
-                             * ------------------------------------------------
+                             * NO FIREBASE USER
                              */
                             if (!user) {
 
@@ -2504,7 +2605,9 @@ function init() {
                                     state
                                 );
 
-                                if (!resolved) {
+                                if (
+                                    !resolved
+                                ) {
                                     resolved =
                                         true;
 
@@ -2518,14 +2621,13 @@ function init() {
 
 
                             /*
-                             * ------------------------------------------------
-                             * EXISTING FIREBASE SESSION
-                             * ------------------------------------------------
+                             * FIREBASE USER EXISTS
+                             *
+                             * Read Firestore profile.
                              */
                             let result;
 
                             try {
-
                                 result =
                                     await finalizeAuthenticatedUser(
                                         user,
@@ -2534,7 +2636,6 @@ function init() {
                                                 false
                                         }
                                     );
-
                             } catch (error) {
 
                                 console.error(
@@ -2542,10 +2643,9 @@ function init() {
                                     error
                                 );
 
-                                /*
-                                 * Never keep stale local profile data when
-                                 * Firestore validation fails.
-                                 */
+                                currentUser =
+                                    user;
+
                                 currentProfile =
                                     null;
 
@@ -2554,11 +2654,6 @@ function init() {
 
                                 clearSessionCache();
 
-                                /*
-                                 * Keep Firebase state visible in the returned
-                                 * state so the application knows the Firebase
-                                 * user exists but is not configured.
-                                 */
                                 result = {
                                     authenticated:
                                         true,
@@ -2583,7 +2678,9 @@ function init() {
                                 result
                             );
 
-                            if (!resolved) {
+                            if (
+                                !resolved
+                            ) {
                                 resolved =
                                     true;
 
@@ -2622,6 +2719,10 @@ function init() {
                             authInitialized =
                                 true;
 
+                            currentUser =
+                                user ||
+                                null;
+
                             currentProfile =
                                 null;
 
@@ -2634,7 +2735,9 @@ function init() {
                                 state
                             );
 
-                            if (!resolved) {
+                            if (
+                                !resolved
+                            ) {
                                 resolved =
                                     true;
 
@@ -2692,7 +2795,9 @@ function onAuthStateChanged(
                 callback
             );
 
-        if (index !== -1) {
+        if (
+            index !== -1
+        ) {
             authListeners.splice(
                 index,
                 1
@@ -2711,76 +2816,121 @@ async function refreshSession() {
         getUser();
 
     if (!user) {
-
         clearAuthMemory();
         clearSessionCache();
 
-        return getState();
-    }
+        const state =
+            getState();
 
-    const profile =
-        await getUserProfile(
-            user
+        notifyAuthListeners(
+            state
         );
 
-    if (!profile) {
-
-        currentProfile =
-            null;
-
-        currentRole =
-            "";
-
-        clearSessionCache();
-
-        return getState();
+        return state;
     }
 
-    const role =
-        normalizeRole(
-            profile.role
+    try {
+
+        const profile =
+            await getUserProfile(
+                user
+            );
+
+        if (!profile) {
+            currentProfile =
+                null;
+
+            currentRole =
+                "";
+
+            clearSessionCache();
+
+            const state =
+                getState();
+
+            notifyAuthListeners(
+                state
+            );
+
+            return state;
+        }
+
+        const role =
+            normalizeRole(
+                profile.role
+            );
+
+        if (!role) {
+            currentProfile =
+                null;
+
+            currentRole =
+                "";
+
+            clearSessionCache();
+
+            const state =
+                getState();
+
+            notifyAuthListeners(
+                state
+            );
+
+            return state;
+        }
+
+        if (
+            isAccountBlocked(
+                profile
+            )
+        ) {
+            await safeFirebaseSignOut();
+
+            clearAuthMemory();
+            clearSessionCache();
+
+            const state =
+                getState();
+
+            notifyAuthListeners(
+                state
+            );
+
+            return state;
+        }
+
+        currentUser =
+            user;
+
+        currentProfile =
+            profile;
+
+        currentRole =
+            role;
+
+        cacheAuthenticatedSession(
+            user,
+            profile,
+            role
         );
 
-    if (!role) {
+        const state =
+            getState();
 
-        currentProfile =
-            null;
+        notifyAuthListeners(
+            state
+        );
 
-        currentRole =
-            "";
+        return state;
 
-        clearSessionCache();
-
-        return getState();
-    }
-
-    if (
-        isAccountBlocked(profile)
-    ) {
-        await safeFirebaseSignOut();
-
-        clearAuthMemory();
-        clearSessionCache();
+    } catch (error) {
+        console.error(
+            "RiderX session refresh failed:",
+            error
+        );
 
         return getState();
     }
-
-    currentUser =
-        user;
-
-    currentProfile =
-        profile;
-
-    currentRole =
-        role;
-
-    cacheAuthenticatedSession(
-        user,
-        profile,
-        role
-    );
-
-    return getState();
 }
 
 
@@ -2807,7 +2957,7 @@ async function refreshToken() {
 
 
 /* ============================================================
-   ROLE GUARDS
+   ROLE ROUTING
 ============================================================ */
 
 function getDefaultRouteForRole(
@@ -2841,14 +2991,27 @@ function getDefaultRouteForRole(
 }
 
 
+/* ============================================================
+   AUTH GUARD
+============================================================ */
+
 async function requireAuth(
     options = {}
 ) {
     const state =
         await init();
 
+    /*
+     * Refresh current state when init has already completed.
+     * This is important after registration/profile creation.
+     */
+    const currentState =
+        authInitialized
+            ? getState()
+            : state;
+
     if (
-        !state.authenticated
+        !currentState.authenticated
     ) {
         if (
             options.redirect !==
@@ -2865,13 +3028,9 @@ async function requireAuth(
         return false;
     }
 
-    /*
-     * A Firebase user without a valid Firestore profile is
-     * authenticated technically, but not configured for RiderX.
-     */
     if (
-        !state.configured ||
-        !state.role
+        !currentState.configured ||
+        !currentState.role
     ) {
         if (
             options.redirect !==
@@ -2898,10 +3057,9 @@ async function requireAuth(
 
         if (
             !requiredRole ||
-            state.role !==
+            currentState.role !==
                 requiredRole
         ) {
-
             if (
                 options.redirect !==
                 false
@@ -2909,7 +3067,7 @@ async function requireAuth(
                 window.location.replace(
                     resolveRoute(
                         getDefaultRouteForRole(
-                            state.role
+                            currentState.role
                         )
                     )
                 );
@@ -2923,7 +3081,7 @@ async function requireAuth(
         options.checkBlocked !==
             false &&
         isAccountBlocked(
-            state.profile
+            currentState.profile
         )
     ) {
         await logout({
@@ -2935,12 +3093,12 @@ async function requireAuth(
     }
 
     if (
-        state.role ===
+        currentState.role ===
             ROLES.RIDER &&
         options.requireApprovedRider ===
             true &&
         !isRiderApproved(
-            state.profile
+            currentState.profile
         )
     ) {
         if (
@@ -2960,6 +3118,10 @@ async function requireAuth(
     return true;
 }
 
+
+/* ============================================================
+   ROLE GUARDS
+============================================================ */
 
 async function requireRole(
     role,
@@ -3004,8 +3166,13 @@ async function requireAdmin(
     const state =
         await init();
 
+    const currentState =
+        authInitialized
+            ? getState()
+            : state;
+
     if (
-        !state.authenticated
+        !currentState.authenticated
     ) {
         if (
             options.redirect !==
@@ -3022,15 +3189,10 @@ async function requireAdmin(
         return false;
     }
 
-    /*
-     * Admin authorization is based on Firestore profile role
-     * here, but Firebase/Firestore Security Rules MUST still
-     * enforce admin privileges server-side.
-     */
     const admin =
-        state.role ===
+        currentState.role ===
             ROLES.ADMIN ||
-        state.role ===
+        currentState.role ===
             ROLES.SUPERADMIN;
 
     if (!admin) {
@@ -3042,7 +3204,7 @@ async function requireAdmin(
             window.location.replace(
                 resolveRoute(
                     getDefaultRouteForRole(
-                        state.role
+                        currentState.role
                     )
                 )
             );
@@ -3055,7 +3217,7 @@ async function requireAdmin(
         options.checkBlocked !==
             false &&
         isAccountBlocked(
-            state.profile
+            currentState.profile
         )
     ) {
         await logout({
