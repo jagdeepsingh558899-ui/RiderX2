@@ -14,15 +14,17 @@
    - Realtime Database
    - Firebase Storage
 
+   ARCHITECTURE:
+   - This is the ONLY page-side Firebase initialization file.
+   - No other RiderX page/module may call initializeApp().
+   - Feature modules must import Firebase services from here.
+   - This file uses Firebase Modular SDK only.
+   - No Firebase Compat SDK is initialized here.
+
    IMPORTANT:
-   This is the ONLY RiderX page-side Firebase
-   initialization file.
-
-   No other RiderX page/module should call:
-       initializeApp()
-
-   Feature modules should import Firebase services
-   from this file.
+   Firebase API keys used by Firebase web applications are not
+   treated as application secrets. Security must be enforced
+   through Firebase Authentication and database/storage rules.
 ========================================================= */
 
 "use strict";
@@ -34,6 +36,9 @@
 
 const FIREBASE_SDK_VERSION = "12.2.1";
 
+const FIREBASE_SDK_BASE =
+    `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
+
 
 /* =========================================================
    FIREBASE APP
@@ -42,7 +47,7 @@ const FIREBASE_SDK_VERSION = "12.2.1";
 import {
     initializeApp,
     getApps
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+} from `${FIREBASE_SDK_BASE}/firebase-app.js`;
 
 
 /* =========================================================
@@ -63,7 +68,7 @@ import {
     updateProfile,
     deleteUser,
     sendEmailVerification
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+} from `${FIREBASE_SDK_BASE}/firebase-auth.js`;
 
 
 /* =========================================================
@@ -92,7 +97,7 @@ import {
     arrayUnion,
     arrayRemove,
     increment
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from `${FIREBASE_SDK_BASE}/firebase-firestore.js`;
 
 
 /* =========================================================
@@ -111,7 +116,7 @@ import {
     off,
     onDisconnect,
     serverTimestamp as databaseServerTimestamp
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+} from `${FIREBASE_SDK_BASE}/firebase-database.js`;
 
 
 /* =========================================================
@@ -125,11 +130,19 @@ import {
     uploadBytesResumable,
     getDownloadURL,
     deleteObject
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+} from `${FIREBASE_SDK_BASE}/firebase-storage.js`;
 
 
 /* =========================================================
    RIDERX FIREBASE CONFIGURATION
+   ---------------------------------------------------------
+   This configuration belongs to Firebase project:
+       riderx-1
+
+   SECURITY:
+   - Do NOT put passwords or service-account credentials here.
+   - Authentication/database/storage security belongs in Firebase
+     Authentication configuration and security rules.
 ========================================================= */
 
 const firebaseConfig = Object.freeze({
@@ -164,16 +177,18 @@ const firebaseConfig = Object.freeze({
 /* =========================================================
    FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   Reuse an existing default Firebase app if available.
-   Otherwise initialize exactly one default app.
+   IMPORTANT:
+   - Reuse the existing default application if another module
+     has already loaded this module.
+   - Otherwise create exactly one default Firebase application.
+   - This module never initializes a second Firebase app.
 ========================================================= */
 
 let app = null;
 
 try {
 
-    const existingApps =
-        getApps();
+    const existingApps = getApps();
 
     app =
         existingApps.find(
@@ -181,13 +196,11 @@ try {
                 firebaseApp.name === "[DEFAULT]"
         ) || null;
 
-
     if (!app) {
 
-        app =
-            initializeApp(
-                firebaseConfig
-            );
+        app = initializeApp(
+            firebaseConfig
+        );
 
     }
 
@@ -199,22 +212,18 @@ try {
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   FIREBASE AUTH
+   FIREBASE AUTHENTICATION INSTANCE
 ========================================================= */
 
 let auth = null;
 
 try {
 
-    auth =
-        getAuth(
-            app
-        );
+    auth = getAuth(app);
 
 } catch (error) {
 
@@ -224,22 +233,18 @@ try {
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   CLOUD FIRESTORE
+   CLOUD FIRESTORE INSTANCE
 ========================================================= */
 
 let db = null;
 
 try {
 
-    db =
-        getFirestore(
-            app
-        );
+    db = getFirestore(app);
 
 } catch (error) {
 
@@ -249,47 +254,39 @@ try {
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   REALTIME DATABASE
+   REALTIME DATABASE INSTANCE
 ========================================================= */
 
 let realtimeDb = null;
 
 try {
 
-    realtimeDb =
-        getDatabase(
-            app
-        );
+    realtimeDb = getDatabase(app);
 
 } catch (error) {
 
     console.error(
-        "RiderX: Realtime Database initialization failed.",
+        "RiderX: Firebase Realtime Database initialization failed.",
         error
     );
 
     throw error;
-
 }
 
 
 /* =========================================================
-   FIREBASE STORAGE
+   FIREBASE STORAGE INSTANCE
 ========================================================= */
 
 let storage = null;
 
 try {
 
-    storage =
-        getStorage(
-            app
-        );
+    storage = getStorage(app);
 
 } catch (error) {
 
@@ -299,7 +296,6 @@ try {
     );
 
     throw error;
-
 }
 
 
@@ -311,39 +307,34 @@ const googleProvider =
     new GoogleAuthProvider();
 
 googleProvider.setCustomParameters({
-
-    prompt:
-        "select_account"
-
+    prompt: "select_account"
 });
 
 
 /* =========================================================
    CENTRAL FIREBASE SERVICES
+   ---------------------------------------------------------
+   Every RiderX feature module should use these instances
+   rather than creating its own Firebase application.
 ========================================================= */
 
-const firebaseServices =
-    Object.freeze({
+const firebaseServices = Object.freeze({
 
-        app,
+    app,
 
-        auth,
+    auth,
 
-        db,
+    db,
+    firestore: db,
 
-        firestore:
-            db,
+    realtimeDb,
+    database: realtimeDb,
 
-        realtimeDb,
+    storage,
 
-        database:
-            realtimeDb,
+    googleProvider
 
-        storage,
-
-        googleProvider
-
-    });
+});
 
 
 /* =========================================================
@@ -366,9 +357,7 @@ const firebaseReady =
 
 const firebaseReadyPromise =
     firebaseReady
-        ? Promise.resolve(
-            firebaseServices
-        )
+        ? Promise.resolve(firebaseServices)
         : Promise.reject(
             new Error(
                 "RiderX Firebase services are not ready."
@@ -382,15 +371,14 @@ const firebaseReadyPromise =
 
 function isFirebaseReady() {
 
-    return (
-        firebaseReady === true &&
-        Boolean(app) &&
-        Boolean(auth) &&
-        Boolean(db) &&
-        Boolean(realtimeDb) &&
-        Boolean(storage)
+    return Boolean(
+        firebaseReady &&
+        app &&
+        auth &&
+        db &&
+        realtimeDb &&
+        storage
     );
-
 }
 
 
@@ -401,7 +389,6 @@ function isFirebaseReady() {
 function waitForFirebase() {
 
     return firebaseReadyPromise;
-
 }
 
 
@@ -412,27 +399,31 @@ function waitForFirebase() {
 function getFirebase() {
 
     return firebaseServices;
-
 }
 
 
 /* =========================================================
-   LEGACY COMPATIBILITY BRIDGE
+   GLOBAL COMPATIBILITY BRIDGE
    ---------------------------------------------------------
-   This bridge DOES NOT initialize Firebase.
+   IMPORTANT:
+   This bridge exposes the already initialized modular
+   Firebase services.
+
+   It DOES NOT:
+   - initialize Firebase
+   - load compat SDK
+   - create another Firebase app
+   - replace Firebase Authentication
 ========================================================= */
 
-if (
-    typeof window !== "undefined"
-) {
+if (typeof window !== "undefined") {
 
     window.RiderXFirebase =
         firebaseServices;
 
 
     window.RX =
-        window.RX ||
-        {};
+        window.RX || {};
 
 
     window.RX.firebase =
@@ -440,8 +431,7 @@ if (
 
 
     window.RiderX =
-        window.RiderX ||
-        {};
+        window.RiderX || {};
 
 
     window.RiderX.firebase =
@@ -464,31 +454,30 @@ if (
        FIREBASE READY EVENT
     ===================================================== */
 
-    const dispatchReadyEvent =
-        () => {
+    const dispatchReadyEvent = () => {
 
-            try {
+        try {
 
-                window.dispatchEvent(
-                    new CustomEvent(
-                        "riderx:firebase-ready",
-                        {
-                            detail:
-                                firebaseServices
-                        }
-                    )
-                );
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx:firebase-ready",
+                    {
+                        detail:
+                            firebaseServices
+                    }
+                )
+            );
 
-            } catch (error) {
+        } catch (error) {
 
-                console.warn(
-                    "RiderX: Firebase ready event could not be dispatched.",
-                    error
-                );
+            console.warn(
+                "RiderX: Firebase ready event could not be dispatched.",
+                error
+            );
 
-            }
+        }
 
-        };
+    };
 
 
     if (
@@ -516,6 +505,13 @@ if (
 ========================================================= */
 
 export {
+
+    /* =====================================================
+       FIREBASE SDK
+    ===================================================== */
+
+    FIREBASE_SDK_VERSION,
+
 
     /* =====================================================
        FIREBASE APP / CONFIG
@@ -671,13 +667,15 @@ export {
 
 
 /* =========================================================
-   DEBUG INFORMATION
+   SAFE DEBUG INFORMATION
    ---------------------------------------------------------
    Never print:
-   - API key
-   - Auth credentials
-   - User tokens
-   - Firebase secrets
+   - API keys
+   - passwords
+   - ID tokens
+   - refresh tokens
+   - auth credentials
+   - private keys
 ========================================================= */
 
 console.info(
