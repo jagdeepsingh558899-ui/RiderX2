@@ -120,12 +120,22 @@ import {
 
 /* =========================================================
    RIDERX FIREBASE CONFIGURATION
+   ---------------------------------------------------------
+   IMPORTANT:
+   This API key must exactly match the Firebase Console
+   configuration for project: riderx-1
+
+   The previous RiderX config contained a typo:
+       ATNcUBKI2
+
+   Correct value:
+       ATNcJyUBKI2
 ========================================================= */
 
 const firebaseConfig = Object.freeze({
 
     apiKey:
-        "AIzaSyAjYxSxATNcUBKI2I4vn3KDWxxLKGJhs",
+        "AIzaSyAjYxSxATNcJyUBKI2I4vn3KDWxxLKGJhs",
 
     authDomain:
         "riderx-1.firebaseapp.com",
@@ -155,21 +165,24 @@ const firebaseConfig = Object.freeze({
    INTERNAL CONSTANTS
 ========================================================= */
 
-const FIREBASE_DEFAULT_APP_NAME = "[DEFAULT]";
+const FIREBASE_DEFAULT_APP_NAME =
+    "[DEFAULT]";
 
 
 /* =========================================================
-   FIREBASE APP
+   FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   Reuse the existing default Firebase app when available.
-   Otherwise create exactly one default application.
+   Reuse an already initialized default app.
+   Otherwise create exactly one default app.
 ========================================================= */
 
 let app;
 
 try {
 
-    const apps = getApps();
+    const apps =
+        getApps();
+
 
     const existingDefaultApp =
         apps.find(
@@ -179,7 +192,9 @@ try {
         );
 
 
-    if (existingDefaultApp) {
+    if (
+        existingDefaultApp
+    ) {
 
         app =
             existingDefaultApp;
@@ -193,7 +208,9 @@ try {
 
     }
 
-} catch (error) {
+} catch (
+    error
+) {
 
     console.error(
         "RiderX Firebase initialization failed:",
@@ -218,7 +235,9 @@ try {
             app
         );
 
-} catch (error) {
+} catch (
+    error
+) {
 
     console.error(
         "RiderX Firebase Auth initialization failed:",
@@ -231,7 +250,7 @@ try {
 
 
 /* =========================================================
-   FIRESTORE
+   CLOUD FIRESTORE
 ========================================================= */
 
 let db;
@@ -243,7 +262,9 @@ try {
             app
         );
 
-} catch (error) {
+} catch (
+    error
+) {
 
     console.error(
         "RiderX Firestore initialization failed:",
@@ -268,7 +289,9 @@ try {
             app
         );
 
-} catch (error) {
+} catch (
+    error
+) {
 
     console.error(
         "RiderX Realtime Database initialization failed:",
@@ -281,7 +304,7 @@ try {
 
 
 /* =========================================================
-   STORAGE
+   FIREBASE STORAGE
 ========================================================= */
 
 let storage;
@@ -293,7 +316,9 @@ try {
             app
         );
 
-} catch (error) {
+} catch (
+    error
+) {
 
     console.error(
         "RiderX Firebase Storage initialization failed:",
@@ -311,6 +336,7 @@ try {
 
 const googleProvider =
     new GoogleAuthProvider();
+
 
 googleProvider.setCustomParameters({
 
@@ -349,18 +375,18 @@ const firebaseServices =
 
 
 /* =========================================================
-   READY STATE
+   FIREBASE READY STATE
 ========================================================= */
 
-let firebaseReady = true;
+const firebaseReady =
+    true;
 
 
 /* =========================================================
    READY PROMISE
    ---------------------------------------------------------
-   Firebase initialization is synchronous once this module
-   has loaded successfully. Therefore the promise resolves
-   immediately with the shared services.
+   Firebase initialization is synchronous after this module
+   successfully loads.
 ========================================================= */
 
 const firebaseReadyPromise =
@@ -370,7 +396,7 @@ const firebaseReadyPromise =
 
 
 /* =========================================================
-   READY STATE
+   CHECK FIREBASE READY
 ========================================================= */
 
 function isFirebaseReady() {
@@ -394,7 +420,7 @@ function waitForFirebase() {
 
 
 /* =========================================================
-   GET FIREBASE
+   GET FIREBASE SERVICES
 ========================================================= */
 
 function getFirebase() {
@@ -407,15 +433,17 @@ function getFirebase() {
 /* =========================================================
    GLOBAL COMPATIBILITY BRIDGE
    ---------------------------------------------------------
-   This DOES NOT initialize Firebase.
-   It only exposes the already-created instances for legacy
-   RiderX pages/scripts.
+   This does NOT initialize Firebase.
+
+   It only exposes the already initialized Firebase
+   instances for legacy RiderX pages/scripts.
 
    New code should use ES module imports.
 ========================================================= */
 
 if (
-    typeof window !== "undefined"
+    typeof window !==
+    "undefined"
 ) {
 
     window.RiderXFirebase =
@@ -453,9 +481,9 @@ if (
 
 
     /*
-       Dispatch only after all Firebase services
-       have successfully initialized.
-    */
+     * Dispatch the ready event after all Firebase services
+     * have successfully initialized.
+     */
 
     try {
 
@@ -469,7 +497,9 @@ if (
             )
         );
 
-    } catch (error) {
+    } catch (
+        error
+    ) {
 
         console.warn(
             "RiderX Firebase ready event could not be dispatched:",
