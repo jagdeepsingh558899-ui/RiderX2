@@ -16,88 +16,206 @@
    - Password reset
    - Profile update
    - User rendering
+   - Compatibility API
 
    SECURITY:
-   Firebase Authentication and Firebase Security Rules are the
-   authority. localStorage is only a UI/session cache.
+   Firebase Authentication + Firestore Security Rules are the
+   authority.
+
+   localStorage is ONLY a UI/session cache.
 
    IMPORTANT:
    Firebase is initialized ONLY by:
        firebase/firebase-config.js
+
+   No duplicate Firebase initialization is performed here.
 ============================================================ */
 
 "use strict";
 
 (function () {
 
-    window.RiderX = window.RiderX || {};
+    window.RiderX =
+        window.RiderX ||
+        {};
 
-    const RX = window.RiderX;
-    const AUTH = RX.auth = RX.auth || {};
+    const RX =
+        window.RiderX;
 
-    const STORAGE = Object.freeze({
-        user: "riderx_user",
-        role: "riderx_role",
-        session: "riderx_session",
-        customer: "riderx_customer",
-        rider: "riderx_rider",
-        admin: "riderx_admin_session",
-        selectedRole: "riderx_selected_role",
-        legacyRole: "userRole",
-        otpPhone: "riderx_otp_phone"
-    });
+    const AUTH =
+        RX.auth =
+        RX.auth ||
+        {};
 
-    const ROLES = Object.freeze({
-        CUSTOMER: "customer",
-        RIDER: "rider",
-        ADMIN: "admin",
-        SUPERADMIN: "superadmin"
-    });
 
-    const ROUTES = Object.freeze({
-        customer: "customer/home.html",
-        rider: "rider/home.html",
-        admin: "admin/dashboard.html",
-        auth: "auth/role.html"
-    });
+    /* =========================================================
+       STORAGE KEYS
+    ========================================================= */
 
-    AUTH.state = AUTH.state || {
-        initialized: false,
-        initializing: false,
-        loading: false,
-        authReady: false,
-        user: null,
-        role: null,
-        firebaseUser: null,
-        unsubscribe: null,
-        logoutBound: false
-    };
+    const STORAGE =
+        Object.freeze({
 
-    AUTH.phoneConfirmation = null;
-    AUTH.phoneVerifier = null;
+            user:
+                "riderx_user",
 
-    let Firebase = null;
-    let firebaseLoadPromise = null;
+            role:
+                "riderx_role",
+
+            session:
+                "riderx_session",
+
+            customer:
+                "riderx_customer",
+
+            rider:
+                "riderx_rider",
+
+            admin:
+                "riderx_admin_session",
+
+            selectedRole:
+                "riderx_selected_role",
+
+            legacyRole:
+                "userRole",
+
+            otpPhone:
+                "riderx_otp_phone"
+        });
+
+
+    /* =========================================================
+       ROLES
+    ========================================================= */
+
+    const ROLES =
+        Object.freeze({
+
+            CUSTOMER:
+                "customer",
+
+            RIDER:
+                "rider",
+
+            ADMIN:
+                "admin",
+
+            SUPERADMIN:
+                "superadmin"
+        });
+
+
+    /* =========================================================
+       ROUTES
+    ========================================================= */
+
+    const ROUTES =
+        Object.freeze({
+
+            customer:
+                "customer/home.html",
+
+            rider:
+                "rider/home.html",
+
+            admin:
+                "admin/dashboard.html",
+
+            auth:
+                "auth/role.html"
+        });
+
+
+    /* =========================================================
+       AUTH STATE
+    ========================================================= */
+
+    AUTH.state =
+        AUTH.state ||
+        {
+
+            initialized:
+                false,
+
+            initializing:
+                false,
+
+            loading:
+                false,
+
+            authReady:
+                false,
+
+            user:
+                null,
+
+            role:
+                null,
+
+            firebaseUser:
+                null,
+
+            unsubscribe:
+                null,
+
+            logoutBound:
+                false,
+
+            authError:
+                null
+        };
+
+
+    AUTH.phoneConfirmation =
+        null;
+
+    AUTH.phoneVerifier =
+        null;
+
+
+    /* =========================================================
+       FIREBASE MODULE
+    ========================================================= */
+
+    let Firebase =
+        null;
+
+    let firebaseLoadPromise =
+        null;
 
 
     /* =========================================================
        BASIC HELPERS
     ========================================================= */
 
-    function cleanString(value) {
-        return String(value ?? "").trim();
+    function cleanString(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        ).trim();
     }
 
 
-    function safeLower(value) {
-        return cleanString(value).toLowerCase();
+    function safeLower(
+        value
+    ) {
+
+        return cleanString(
+            value
+        ).toLowerCase();
     }
 
 
     function isBrowser() {
+
         return (
-            typeof window !== "undefined" &&
-            typeof document !== "undefined"
+            typeof window !==
+                "undefined" &&
+
+            typeof document !==
+                "undefined"
         );
     }
 
@@ -106,10 +224,15 @@
        SAFE STORAGE
     ========================================================= */
 
-    function safeStorageGet(key) {
+    function safeStorageGet(
+        key
+    ) {
 
         try {
-            return localStorage.getItem(key);
+
+            return localStorage.getItem(
+                key
+            );
 
         } catch (error) {
 
@@ -123,7 +246,10 @@
     }
 
 
-    function safeStorageSet(key, value) {
+    function safeStorageSet(
+        key,
+        value
+    ) {
 
         try {
 
@@ -146,11 +272,15 @@
     }
 
 
-    function safeStorageRemove(key) {
+    function safeStorageRemove(
+        key
+    ) {
 
         try {
 
-            localStorage.removeItem(key);
+            localStorage.removeItem(
+                key
+            );
 
         } catch (error) {
 
@@ -162,10 +292,14 @@
     }
 
 
-    function parseStorageUser(key) {
+    function parseStorageUser(
+        key
+    ) {
 
         const raw =
-            safeStorageGet(key);
+            safeStorageGet(
+                key
+            );
 
         if (!raw) {
             return null;
@@ -174,14 +308,18 @@
         try {
 
             const parsed =
-                JSON.parse(raw);
+                JSON.parse(
+                    raw
+                );
 
-            return (
+            if (
                 parsed &&
-                typeof parsed === "object"
-            )
-                ? parsed
-                : null;
+                typeof parsed ===
+                    "object"
+            ) {
+
+                return parsed;
+            }
 
         } catch (error) {
 
@@ -189,11 +327,13 @@
                 "Invalid RiderX stored session:",
                 key
             );
-
-            safeStorageRemove(key);
-
-            return null;
         }
+
+        safeStorageRemove(
+            key
+        );
+
+        return null;
     }
 
 
@@ -201,12 +341,16 @@
        FIREBASE ERROR NORMALIZATION
     ========================================================= */
 
-    function firebaseError(error) {
+    function firebaseError(
+        error
+    ) {
 
         const code =
             safeLower(
-                error?.code || ""
+                error?.code ||
+                ""
             );
+
 
         const messages = {
 
@@ -222,11 +366,17 @@
             "auth/invalid-credential":
                 "Incorrect email or password.",
 
+            "auth/invalid-login-credentials":
+                "Incorrect email or password.",
+
             "auth/email-already-in-use":
                 "An account with this email already exists.",
 
             "auth/weak-password":
                 "Password must contain at least 6 characters.",
+
+            "auth/password-does-not-meet-requirements":
+                "Password does not meet the required security requirements.",
 
             "auth/too-many-requests":
                 "Too many attempts. Please wait and try again.",
@@ -253,12 +403,35 @@
                 "OTP service limit reached. Please try again later.",
 
             "auth/captcha-check-failed":
-                "Security verification failed. Please try again."
+                "Security verification failed. Please try again.",
+
+            "auth/missing-phone-number":
+                "Phone number is required.",
+
+            "auth/session-expired":
+                "Your session has expired. Please login again.",
+
+            "auth/user-disabled":
+                "This Firebase account has been disabled.",
+
+            "auth/operation-not-allowed":
+                "This authentication method is not enabled in Firebase.",
+
+            "permission-denied":
+                "You do not have permission to access this RiderX profile.",
+
+            "failed-precondition":
+                "RiderX profile service is temporarily unavailable."
         };
+
 
         return (
             messages[code] ||
-            cleanString(error?.message) ||
+
+            cleanString(
+                error?.message
+            ) ||
+
             "RiderX authentication failed."
         );
     }
@@ -267,26 +440,34 @@
     /* =========================================================
        FIREBASE MODULE LOADER
        ---------------------------------------------------------
-       firebase-config.js is the ONLY Firebase initialization
-       point in RiderX.
+       firebase/firebase-config.js is the ONLY Firebase
+       initialization point.
     ========================================================= */
 
     function loadFirebase() {
 
         if (Firebase) {
-            return Promise.resolve(Firebase);
+
+            return Promise.resolve(
+                Firebase
+            );
         }
 
+
         if (firebaseLoadPromise) {
+
             return firebaseLoadPromise;
         }
+
 
         firebaseLoadPromise =
             import(
                 "../firebase/firebase-config.js"
             )
                 .then(
-                    function (module) {
+                    function (
+                        module
+                    ) {
 
                         if (
                             !module ||
@@ -299,14 +480,70 @@
                             );
                         }
 
+
+                        /*
+                         * Required Firebase functions.
+                         *
+                         * firebase-config.js is expected to
+                         * re-export the modular Firebase API.
+                         */
+
+                        const required =
+                            [
+                                "auth",
+                                "db",
+                                "doc",
+                                "getDoc",
+                                "setDoc",
+                                "onAuthStateChanged",
+                                "signInWithEmailAndPassword",
+                                "createUserWithEmailAndPassword",
+                                "signOut",
+                                "updateProfile",
+                                "sendPasswordResetEmail"
+                            ];
+
+
+                        const missing =
+                            required.filter(
+                                function (
+                                    name
+                                ) {
+
+                                    return (
+                                        typeof module[
+                                            name
+                                        ] ===
+                                        "undefined"
+                                    );
+                                }
+                            );
+
+
+                        if (
+                            missing.length
+                        ) {
+
+                            throw new Error(
+                                "RiderX Firebase module is missing: " +
+                                missing.join(
+                                    ", "
+                                )
+                            );
+                        }
+
+
                         Firebase =
                             module;
+
 
                         return Firebase;
                     }
                 )
                 .catch(
-                    function (error) {
+                    function (
+                        error
+                    ) {
 
                         firebaseLoadPromise =
                             null;
@@ -320,61 +557,152 @@
                     }
                 );
 
+
         return firebaseLoadPromise;
     }
 
 
     /* =========================================================
-       ROUTE RESOLVER
+       ROUTE URL
     ========================================================= */
 
-    function routeUrl(route) {
+    function routeUrl(
+        route
+    ) {
 
         const path =
-            cleanString(route)
-                .replace(/^\/+/, "");
+            cleanString(
+                route
+            )
+                .replace(
+                    /^\/+/,
+                    ""
+                );
+
 
         if (!isBrowser()) {
+
             return path;
         }
 
-        const pathname =
-            window.location.pathname || "";
 
-        const markers = [
-            "/auth/",
-            "/customer/",
-            "/rider/",
-            "/admin/"
-        ];
+        const pathname =
+            window.location.pathname ||
+            "/";
+
+
+        /*
+         * RiderX may be hosted at:
+         *
+         * /
+         * /RiderX2/
+         *
+         * or another repository sub-path.
+         *
+         * Detect the existing application root instead of
+         * blindly assuming the website is hosted at /.
+         */
+
+        const markers =
+            [
+                "/auth/",
+                "/customer/",
+                "/rider/",
+                "/admin/"
+            ];
+
 
         let base =
-            pathname;
+            "";
+
 
         for (
             const marker of markers
         ) {
 
             const index =
-                pathname.indexOf(marker);
+                pathname.indexOf(
+                    marker
+                );
 
-            if (index !== -1) {
+
+            if (
+                index !== -1
+            ) {
 
                 base =
                     pathname.slice(
                         0,
-                        index + 1
+                        index
                     );
 
                 break;
             }
         }
 
-        if (!base.endsWith("/")) {
+
+        /*
+         * If current page is not inside one of the known
+         * application folders, determine the directory root.
+         */
+
+        if (
+            base === ""
+        ) {
+
+            const currentDirectory =
+                pathname.endsWith("/")
+                    ? pathname
+                    : pathname.substring(
+                        0,
+                        pathname.lastIndexOf(
+                            "/"
+                        ) + 1
+                    );
+
+
+            /*
+             * If already at root, use root.
+             * Otherwise preserve the current deployment path.
+             */
+
+            if (
+                currentDirectory ===
+                "/"
+            ) {
+
+                base =
+                    "";
+
+            } else {
+
+                /*
+                 * For pages such as /RiderX2/index.html,
+                 * preserve /RiderX2/.
+                 */
+
+                base =
+                    currentDirectory.replace(
+                        /\/$/,
+                        ""
+                    );
+            }
+        }
+
+
+        if (
+            base &&
+            !base.endsWith("/")
+        ) {
+
             base += "/";
         }
 
-        return base + path;
+
+        return (
+            base +
+            path
+        );
     }
 
 
@@ -383,18 +711,25 @@
     ========================================================= */
 
     AUTH.normalizeRole =
-        function (role) {
+        function (
+            role
+        ) {
 
             const value =
-                safeLower(role)
+                safeLower(
+                    role
+                )
                     .replace(
                         /[\s-]+/g,
                         "_"
                     );
 
+
             if (!value) {
+
                 return "";
             }
+
 
             if (
                 [
@@ -406,11 +741,14 @@
                     "driver_partner",
                     "driverpartner",
                     "captain"
-                ].includes(value)
+                ].includes(
+                    value
+                )
             ) {
 
                 return ROLES.RIDER;
             }
+
 
             if (
                 [
@@ -418,65 +756,90 @@
                     "customers",
                     "user",
                     "users"
-                ].includes(value)
+                ].includes(
+                    value
+                )
             ) {
 
                 return ROLES.CUSTOMER;
             }
 
+
             if (
                 [
                     "admin",
                     "administrator"
-                ].includes(value)
+                ].includes(
+                    value
+                )
             ) {
 
                 return ROLES.ADMIN;
             }
+
 
             if (
                 [
                     "superadmin",
                     "super_admin",
                     "superadministrator"
-                ].includes(value)
+                ].includes(
+                    value
+                )
             ) {
 
                 return ROLES.SUPERADMIN;
             }
+
 
             return "";
         };
 
 
     AUTH.isAdminRole =
-        function (role) {
+        function (
+            role
+        ) {
 
             const normalized =
-                AUTH.normalizeRole(role);
+                AUTH.normalizeRole(
+                    role
+                );
+
 
             return (
-                normalized === ROLES.ADMIN ||
-                normalized === ROLES.SUPERADMIN
+                normalized ===
+                    ROLES.ADMIN ||
+
+                normalized ===
+                    ROLES.SUPERADMIN
             );
         };
 
 
     AUTH.isRiderRole =
-        function (role) {
+        function (
+            role
+        ) {
 
             return (
-                AUTH.normalizeRole(role) ===
+                AUTH.normalizeRole(
+                    role
+                ) ===
                 ROLES.RIDER
             );
         };
 
 
     AUTH.isCustomerRole =
-        function (role) {
+        function (
+            role
+        ) {
 
             return (
-                AUTH.normalizeRole(role) ===
+                AUTH.normalizeRole(
+                    role
+                ) ===
                 ROLES.CUSTOMER
             );
         };
@@ -484,6 +847,9 @@
 
     /* =========================================================
        STORED ROLE
+       ---------------------------------------------------------
+       Only used for UI/session recovery.
+       NEVER treated as Firebase security authority.
     ========================================================= */
 
     AUTH.getStoredRole =
@@ -496,14 +862,18 @@
                     )
                 );
 
+
             if (direct) {
+
                 return direct;
             }
+
 
             const user =
                 parseStorageUser(
                     STORAGE.user
                 );
+
 
             if (user) {
 
@@ -514,15 +884,19 @@
                         user.accountType
                     );
 
+
                 if (role) {
+
                     return role;
                 }
             }
+
 
             const rider =
                 parseStorageUser(
                     STORAGE.rider
                 );
+
 
             if (rider) {
 
@@ -533,18 +907,22 @@
                         rider.accountType
                     );
 
+
                 if (
-                    role === ROLES.RIDER
+                    role ===
+                    ROLES.RIDER
                 ) {
 
                     return role;
                 }
             }
 
+
             const customer =
                 parseStorageUser(
                     STORAGE.customer
                 );
+
 
             if (customer) {
 
@@ -555,18 +933,22 @@
                         customer.accountType
                     );
 
+
                 if (
-                    role === ROLES.CUSTOMER
+                    role ===
+                    ROLES.CUSTOMER
                 ) {
 
                     return role;
                 }
             }
 
+
             const admin =
                 parseStorageUser(
                     STORAGE.admin
                 );
+
 
             if (admin) {
 
@@ -575,18 +957,23 @@
                         admin.role
                     );
 
+
                 if (
-                    AUTH.isAdminRole(role)
+                    AUTH.isAdminRole(
+                        role
+                    )
                 ) {
 
                     return role;
                 }
             }
 
+
             return AUTH.normalizeRole(
                 safeStorageGet(
                     STORAGE.legacyRole
                 ) ||
+
                 safeStorageGet(
                     STORAGE.selectedRole
                 )
@@ -606,15 +993,20 @@
                     STORAGE.user
                 );
 
+
             if (main) {
+
                 return main;
             }
+
 
             const role =
                 AUTH.getStoredRole();
 
+
             if (
-                role === ROLES.RIDER
+                role ===
+                ROLES.RIDER
             ) {
 
                 return parseStorageUser(
@@ -622,8 +1014,10 @@
                 );
             }
 
+
             if (
-                role === ROLES.CUSTOMER
+                role ===
+                ROLES.CUSTOMER
             ) {
 
                 return parseStorageUser(
@@ -631,14 +1025,18 @@
                 );
             }
 
+
             if (
-                AUTH.isAdminRole(role)
+                AUTH.isAdminRole(
+                    role
+                )
             ) {
 
                 return parseStorageUser(
                     STORAGE.admin
                 );
             }
+
 
             return null;
         };
@@ -653,7 +1051,9 @@
 
             return (
                 AUTH.state.user ||
+
                 AUTH.getStoredUser() ||
+
                 null
             );
         };
@@ -661,6 +1061,9 @@
 
     /* =========================================================
        CURRENT ROLE
+       ---------------------------------------------------------
+       Firebase-resolved state wins while authenticated.
+       Stored role is only a UI fallback before auth becomes ready.
     ========================================================= */
 
     AUTH.getRole =
@@ -671,9 +1074,14 @@
                     AUTH.state.role
                 );
 
-            if (stateRole) {
+
+            if (
+                stateRole
+            ) {
+
                 return stateRole;
             }
+
 
             return AUTH.getStoredRole();
         };
@@ -689,6 +1097,7 @@
             const firebaseUser =
                 AUTH.state.firebaseUser;
 
+
             if (
                 firebaseUser?.uid
             ) {
@@ -696,8 +1105,10 @@
                 return firebaseUser.uid;
             }
 
+
             const user =
                 AUTH.getUser();
+
 
             return (
                 user?.uid ||
@@ -717,7 +1128,9 @@
 
             return (
                 AUTH.state.firebaseUser?.email ||
+
                 AUTH.getUser()?.email ||
+
                 ""
             );
         };
@@ -735,26 +1148,35 @@
 
             if (
                 !user ||
-                typeof user !== "object"
+                typeof user !==
+                    "object"
             ) {
 
                 return null;
             }
 
+
             const normalizedRole =
                 AUTH.normalizeRole(
                     role ||
+
                     user.role ||
+
                     user.userRole ||
+
                     user.accountType
                 );
+
 
             const uid =
                 cleanString(
                     user.uid ||
+
                     user.id ||
+
                     user.userId
                 );
+
 
             if (!uid) {
 
@@ -763,105 +1185,111 @@
                 );
             }
 
-            const sessionUser = {
 
-                uid,
+            const sessionUser =
+                {
 
-                id:
-                    uid,
+                    uid:
+                        uid,
 
-                userId:
-                    uid,
+                    id:
+                        uid,
 
-                email:
-                    cleanString(
-                        user.email
-                    ),
+                    userId:
+                        uid,
 
-                displayName:
-                    cleanString(
-                        user.displayName ||
-                        user.name
-                    ),
+                    email:
+                        cleanString(
+                            user.email
+                        ),
 
-                name:
-                    cleanString(
-                        user.name ||
-                        user.displayName
-                    ),
+                    displayName:
+                        cleanString(
+                            user.displayName ||
+                            user.name
+                        ),
 
-                fullName:
-                    cleanString(
-                        user.fullName ||
-                        user.name ||
-                        user.displayName
-                    ),
+                    name:
+                        cleanString(
+                            user.name ||
+                            user.displayName
+                        ),
 
-                firstName:
-                    cleanString(
-                        user.firstName
-                    ),
+                    fullName:
+                        cleanString(
+                            user.fullName ||
+                            user.name ||
+                            user.displayName
+                        ),
 
-                lastName:
-                    cleanString(
-                        user.lastName
-                    ),
+                    firstName:
+                        cleanString(
+                            user.firstName
+                        ),
 
-                phone:
-                    cleanString(
-                        user.phone ||
-                        user.phoneNumber
-                    ),
+                    lastName:
+                        cleanString(
+                            user.lastName
+                        ),
 
-                phoneNumber:
-                    cleanString(
-                        user.phoneNumber ||
-                        user.phone
-                    ),
+                    phone:
+                        cleanString(
+                            user.phone ||
+                            user.phoneNumber
+                        ),
 
-                photoURL:
-                    cleanString(
-                        user.photoURL ||
-                        user.photo
-                    ),
+                    phoneNumber:
+                        cleanString(
+                            user.phoneNumber ||
+                            user.phone
+                        ),
 
-                role:
-                    normalizedRole,
+                    photoURL:
+                        cleanString(
+                            user.photoURL ||
+                            user.photo
+                        ),
 
-                userRole:
-                    normalizedRole,
+                    role:
+                        normalizedRole,
 
-                accountType:
-                    normalizedRole,
+                    userRole:
+                        normalizedRole,
 
-                status:
-                    cleanString(
-                        user.status
-                    ) ||
-                    "active",
+                    accountType:
+                        normalizedRole,
 
-                online:
-                    user.online === true,
+                    status:
+                        cleanString(
+                            user.status
+                        ) ||
+                        "active",
 
-                city:
-                    cleanString(
-                        user.city
-                    ) ||
-                    "Chandigarh",
+                    online:
+                        user.online === true,
 
-                createdAt:
-                    user.createdAt ||
-                    null,
+                    city:
+                        cleanString(
+                            user.city
+                        ) ||
+                        "Chandigarh",
 
-                updatedAt:
-                    Date.now()
-            };
+                    createdAt:
+                        user.createdAt ||
+                        null,
+
+                    updatedAt:
+                        Date.now()
+                };
+
 
             AUTH.state.user =
                 sessionUser;
 
+
             AUTH.state.role =
                 normalizedRole;
+
 
             safeStorageSet(
                 STORAGE.user,
@@ -870,7 +1298,10 @@
                 )
             );
 
-            if (normalizedRole) {
+
+            if (
+                normalizedRole
+            ) {
 
                 safeStorageSet(
                     STORAGE.role,
@@ -878,16 +1309,22 @@
                 );
             }
 
+
             safeStorageSet(
                 STORAGE.session,
                 JSON.stringify({
-                    uid,
+
+                    uid:
+                        uid,
+
                     role:
                         normalizedRole,
+
                     loginAt:
                         Date.now()
                 })
             );
+
 
             safeStorageRemove(
                 STORAGE.customer
@@ -900,6 +1337,7 @@
             safeStorageRemove(
                 STORAGE.admin
             );
+
 
             if (
                 normalizedRole ===
@@ -914,6 +1352,7 @@
                 );
             }
 
+
             if (
                 normalizedRole ===
                 ROLES.RIDER
@@ -927,6 +1366,7 @@
                 );
             }
 
+
             if (
                 AUTH.isAdminRole(
                     normalizedRole
@@ -936,16 +1376,22 @@
                 safeStorageSet(
                     STORAGE.admin,
                     JSON.stringify({
-                        uid,
+
+                        uid:
+                            uid,
+
                         email:
                             sessionUser.email,
+
                         role:
                             normalizedRole,
+
                         loginAt:
                             Date.now()
                     })
                 );
             }
+
 
             return sessionUser;
         };
@@ -966,6 +1412,10 @@
 
             AUTH.state.firebaseUser =
                 null;
+
+            AUTH.state.authError =
+                null;
+
 
             safeStorageRemove(
                 STORAGE.user
@@ -1009,38 +1459,42 @@
                 return null;
             }
 
-            const baseProfile = {
 
-                uid:
-                    firebaseUser.uid,
+            const baseProfile =
+                {
 
-                email:
-                    firebaseUser.email ||
-                    "",
+                    uid:
+                        firebaseUser.uid,
 
-                displayName:
-                    firebaseUser.displayName ||
-                    "",
+                    email:
+                        firebaseUser.email ||
+                        "",
 
-                name:
-                    firebaseUser.displayName ||
-                    "",
+                    displayName:
+                        firebaseUser.displayName ||
+                        "",
 
-                phone:
-                    firebaseUser.phoneNumber ||
-                    "",
+                    name:
+                        firebaseUser.displayName ||
+                        "",
 
-                phoneNumber:
-                    firebaseUser.phoneNumber ||
-                    "",
+                    phone:
+                        firebaseUser.phoneNumber ||
+                        "",
 
-                photoURL:
-                    firebaseUser.photoURL ||
-                    ""
-            };
+                    phoneNumber:
+                        firebaseUser.phoneNumber ||
+                        "",
+
+                    photoURL:
+                        firebaseUser.photoURL ||
+                        ""
+                };
+
 
             const FB =
                 await loadFirebase();
+
 
             try {
 
@@ -1051,10 +1505,12 @@
                         firebaseUser.uid
                     );
 
+
                 const snapshot =
                     await FB.getDoc(
                         userRef
                     );
+
 
                 if (
                     !snapshot.exists()
@@ -1063,9 +1519,11 @@
                     return baseProfile;
                 }
 
+
                 const data =
                     snapshot.data() ||
                     {};
+
 
                 return {
 
@@ -1093,15 +1551,11 @@
 
             } catch (error) {
 
-                /*
-                 * IMPORTANT:
-                 * Do not silently trust localStorage if Firestore
-                 * cannot be read.
-                 */
                 console.error(
                     "RiderX user profile read failed:",
                     error
                 );
+
 
                 throw new Error(
                     "Unable to load your RiderX profile. Please check your connection and try again."
@@ -1113,7 +1567,7 @@
     /* =========================================================
        ROLE RESOLUTION
        ---------------------------------------------------------
-       Firestore users/{uid} is authoritative.
+       Firestore users/{uid}.role is authoritative.
        localStorage can NEVER grant a privileged role.
     ========================================================= */
 
@@ -1129,8 +1583,10 @@
                 return "";
             }
 
+
             const FB =
                 await loadFirebase();
+
 
             try {
 
@@ -1141,10 +1597,12 @@
                         user.uid
                     );
 
+
                 const snapshot =
                     await FB.getDoc(
                         userRef
                     );
+
 
                 if (
                     !snapshot.exists()
@@ -1153,13 +1611,17 @@
                     return "";
                 }
 
+
                 const data =
                     snapshot.data() ||
                     {};
 
+
                 return AUTH.normalizeRole(
                     data.role ||
+
                     data.userRole ||
+
                     data.accountType
                 );
 
@@ -1170,9 +1632,11 @@
                     error
                 );
 
+
                 /*
                  * Fail closed.
                  */
+
                 return "";
             }
         };
@@ -1188,26 +1652,35 @@
         ) {
 
             if (!user) {
+
                 return false;
             }
+
 
             const status =
                 safeLower(
                     user.status ||
+
                     user.accountStatus ||
+
                     user.userStatus
                 );
 
+
             return (
                 user.blocked === true ||
+
                 user.disabled === true ||
+
                 [
                     "blocked",
                     "suspended",
                     "disabled",
                     "banned",
                     "deactivated"
-                ].includes(status)
+                ].includes(
+                    status
+                )
             );
         };
 
@@ -1227,10 +1700,12 @@
                     email
                 ).toLowerCase();
 
+
             password =
                 String(
                     password || ""
                 );
+
 
             if (!email) {
 
@@ -1239,6 +1714,7 @@
                 );
             }
 
+
             if (!password) {
 
                 throw new Error(
@@ -1246,11 +1722,14 @@
                 );
             }
 
+
             const FB =
                 await loadFirebase();
 
+
             AUTH.state.loading =
                 true;
+
 
             try {
 
@@ -1261,8 +1740,10 @@
                         password
                     );
 
+
                 const firebaseUser =
                     result.user;
+
 
                 if (!firebaseUser) {
 
@@ -1271,10 +1752,12 @@
                     );
                 }
 
+
                 const profile =
                     await AUTH.getProfile(
                         firebaseUser
                     );
+
 
                 if (
                     AUTH.isAccountBlocked(
@@ -1286,15 +1769,18 @@
                         FB.auth
                     );
 
+
                     throw new Error(
                         "This RiderX account has been disabled."
                     );
                 }
 
+
                 const role =
                     await AUTH.resolveRole(
                         profile
                     );
+
 
                 if (!role) {
 
@@ -1304,10 +1790,12 @@
 
                     AUTH.clearSession();
 
+
                     throw new Error(
                         "Your RiderX role is not configured. Please contact support."
                     );
                 }
+
 
                 profile.role =
                     role;
@@ -1318,8 +1806,10 @@
                 profile.accountType =
                     role;
 
+
                 AUTH.state.firebaseUser =
                     firebaseUser;
+
 
                 const savedUser =
                     AUTH.saveSession(
@@ -1327,9 +1817,11 @@
                         role
                     );
 
+
                 AUTH.emit(
                     "login",
                     {
+
                         user:
                             savedUser,
 
@@ -1341,7 +1833,9 @@
                     }
                 );
 
+
                 AUTH.renderUser();
+
 
                 return {
 
@@ -1362,8 +1856,11 @@
                     error
                 );
 
+
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             } finally {
@@ -1386,20 +1883,24 @@
             data =
                 data || {};
 
+
             const email =
                 cleanString(
                     data.email
                 ).toLowerCase();
+
 
             const password =
                 String(
                     data.password || ""
                 );
 
+
             const role =
                 AUTH.normalizeRole(
                     data.role
                 );
+
 
             const name =
                 cleanString(
@@ -1407,11 +1908,13 @@
                     data.fullName
                 );
 
+
             const phone =
                 AUTH.normalizePhone(
                     data.phone ||
                     data.mobile
                 );
+
 
             if (!email) {
 
@@ -1419,6 +1922,7 @@
                     "Email is required."
                 );
             }
+
 
             if (
                 password.length < 6
@@ -1429,15 +1933,22 @@
                 );
             }
 
+
             /*
              * Public registration may create only customer
              * or rider accounts.
+             *
+             * Admin accounts must be provisioned securely
+             * through Firebase/admin controls.
              */
+
             if (
                 ![
                     ROLES.CUSTOMER,
                     ROLES.RIDER
-                ].includes(role)
+                ].includes(
+                    role
+                )
             ) {
 
                 throw new Error(
@@ -1445,14 +1956,18 @@
                 );
             }
 
+
             const FB =
                 await loadFirebase();
+
 
             AUTH.state.loading =
                 true;
 
+
             let createdUser =
                 null;
+
 
             try {
 
@@ -1463,8 +1978,10 @@
                         password
                     );
 
+
                 createdUser =
                     result.user;
+
 
                 if (!createdUser) {
 
@@ -1473,9 +1990,11 @@
                     );
                 }
 
+
                 if (
                     name &&
-                    FB.updateProfile
+                    typeof FB.updateProfile ===
+                        "function"
                 ) {
 
                     await FB.updateProfile(
@@ -1487,74 +2006,78 @@
                     );
                 }
 
+
                 const now =
                     Date.now();
 
-                const profile = {
 
-                    uid:
-                        createdUser.uid,
+                const profile =
+                    {
 
-                    email:
-                        email,
+                        uid:
+                            createdUser.uid,
 
-                    name:
-                        name,
+                        email:
+                            email,
 
-                    fullName:
-                        name,
+                        name:
+                            name,
 
-                    displayName:
-                        name,
+                        fullName:
+                            name,
 
-                    phone:
-                        phone,
+                        displayName:
+                            name,
 
-                    phoneNumber:
-                        phone,
+                        phone:
+                            phone,
 
-                    role:
-                        role,
+                        phoneNumber:
+                            phone,
 
-                    userRole:
-                        role,
+                        role:
+                            role,
 
-                    accountType:
-                        role,
+                        userRole:
+                            role,
 
-                    status:
-                        "active",
+                        accountType:
+                            role,
 
-                    online:
-                        false,
+                        status:
+                            "active",
 
-                    city:
-                        cleanString(
-                            data.city
-                        ) ||
-                        "Chandigarh",
+                        online:
+                            false,
 
-                    rating:
-                        5,
+                        city:
+                            cleanString(
+                                data.city
+                            ) ||
+                            "Chandigarh",
 
-                    totalRides:
-                        0,
+                        rating:
+                            5,
 
-                    completedRides:
-                        0,
+                        totalRides:
+                            0,
 
-                    cancelledRides:
-                        0,
+                        completedRides:
+                            0,
 
-                    walletBalance:
-                        0,
+                        cancelledRides:
+                            0,
 
-                    createdAt:
-                        now,
+                        walletBalance:
+                            0,
 
-                    updatedAt:
-                        now
-                };
+                        createdAt:
+                            now,
+
+                        updatedAt:
+                            now
+                    };
+
 
                 await FB.setDoc(
                     FB.doc(
@@ -1569,8 +2092,10 @@
                     }
                 );
 
+
                 AUTH.state.firebaseUser =
                     createdUser;
+
 
                 const savedUser =
                     AUTH.saveSession(
@@ -1578,13 +2103,16 @@
                         role
                     );
 
+
                 safeStorageRemove(
                     STORAGE.selectedRole
                 );
 
+
                 AUTH.emit(
                     "register",
                     {
+
                         user:
                             savedUser,
 
@@ -1593,7 +2121,9 @@
                     }
                 );
 
+
                 AUTH.renderUser();
+
 
                 return {
 
@@ -1610,10 +2140,10 @@
             } catch (error) {
 
                 /*
-                 * If Firebase Auth account was created but the
-                 * application profile failed, do not leave a
-                 * fake RiderX session in the browser.
+                 * If Auth account was created but profile creation
+                 * failed, remove the active browser session.
                  */
+
                 if (
                     createdUser &&
                     FB.signOut
@@ -1625,7 +2155,9 @@
                             FB.auth
                         );
 
-                    } catch (signOutError) {
+                    } catch (
+                        signOutError
+                    ) {
 
                         console.warn(
                             "RiderX cleanup sign-out failed:",
@@ -1634,15 +2166,20 @@
                     }
                 }
 
+
                 AUTH.clearSession();
+
 
                 console.error(
                     "RiderX registration failed:",
                     error
                 );
 
+
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             } finally {
@@ -1667,9 +2204,12 @@
                     phoneNumber
                 );
 
+
             if (!phone) {
+
                 return "";
             }
+
 
             if (
                 phone.startsWith("+")
@@ -1683,8 +2223,11 @@
                             ""
                         );
 
-                return "+" + digits;
+
+                return "+" +
+                    digits;
             }
+
 
             const digits =
                 phone.replace(
@@ -1692,25 +2235,36 @@
                     ""
                 );
 
+
             if (
-                digits.length === 10
+                digits.length ===
+                10
             ) {
 
-                return "+91" +
-                    digits;
+                return (
+                    "+91" +
+                    digits
+                );
             }
+
 
             if (
                 digits.startsWith("91") &&
-                digits.length === 12
+                digits.length ===
+                12
             ) {
 
-                return "+" +
-                    digits;
+                return (
+                    "+" +
+                    digits
+                );
             }
 
-            return "+" +
-                digits;
+
+            return (
+                "+" +
+                digits
+            );
         };
 
 
@@ -1725,8 +2279,10 @@
 
                 if (
                     AUTH.phoneVerifier &&
-                    typeof AUTH.phoneVerifier.clear ===
-                    "function"
+
+                    typeof
+                        AUTH.phoneVerifier.clear ===
+                        "function"
                 ) {
 
                     AUTH.phoneVerifier.clear();
@@ -1739,6 +2295,7 @@
                     error
                 );
             }
+
 
             AUTH.phoneVerifier =
                 null;
@@ -1760,6 +2317,7 @@
                     phoneNumber
                 );
 
+
             if (
                 !/^\+\d{10,15}$/.test(
                     phone
@@ -1771,8 +2329,10 @@
                 );
             }
 
+
             const FB =
                 await loadFirebase();
+
 
             if (!container) {
 
@@ -1781,15 +2341,29 @@
                 );
             }
 
+
+            /*
+             * If an old confirmation/verifier is still present,
+             * clear it before creating a new OTP flow.
+             */
+
+            AUTH.phoneConfirmation =
+                null;
+
+
             let verifier =
                 null;
 
+
             /*
-             * Existing RecaptchaVerifier can be supplied
-             * by the auth page.
+             * Existing RecaptchaVerifier may be supplied by
+             * the auth page.
              */
+
             if (
-                typeof container === "object" &&
+                typeof container ===
+                    "object" &&
+
                 typeof container.verify ===
                     "function"
             ) {
@@ -1801,6 +2375,18 @@
 
                 AUTH.clearOtpVerifier();
 
+
+                if (
+                    typeof FB.RecaptchaVerifier !==
+                        "function"
+                ) {
+
+                    throw new Error(
+                        "Firebase phone verification is not configured correctly."
+                    );
+                }
+
+
                 verifier =
                     new FB.RecaptchaVerifier(
                         FB.auth,
@@ -1811,11 +2397,38 @@
                         }
                     );
 
+
                 AUTH.phoneVerifier =
                     verifier;
             }
 
+
             try {
+
+                /*
+                 * Make sure invisible reCAPTCHA is initialized
+                 * before requesting the OTP.
+                 */
+
+                if (
+                    verifier &&
+                    typeof verifier.render ===
+                        "function"
+                ) {
+
+                    try {
+
+                        await verifier.render();
+
+                    } catch (renderError) {
+
+                        console.warn(
+                            "RiderX reCAPTCHA render warning:",
+                            renderError
+                        );
+                    }
+                }
+
 
                 AUTH.phoneConfirmation =
                     await FB.signInWithPhoneNumber(
@@ -1824,10 +2437,12 @@
                         verifier
                     );
 
+
                 safeStorageSet(
                     STORAGE.otpPhone,
                     phone
                 );
+
 
                 return {
 
@@ -1840,6 +2455,7 @@
                 AUTH.phoneConfirmation =
                     null;
 
+
                 if (
                     verifier ===
                     AUTH.phoneVerifier
@@ -1848,13 +2464,17 @@
                     AUTH.clearOtpVerifier();
                 }
 
+
                 console.error(
                     "RiderX OTP send failed:",
                     error
                 );
 
+
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
             }
         };
@@ -1875,6 +2495,7 @@
                     otp
                 );
 
+
             if (
                 !/^\d{6}$/.test(
                     otp
@@ -1886,6 +2507,7 @@
                 );
             }
 
+
             if (
                 !AUTH.phoneConfirmation
             ) {
@@ -1895,11 +2517,14 @@
                 );
             }
 
+
             const FB =
                 await loadFirebase();
 
+
             AUTH.state.loading =
                 true;
+
 
             try {
 
@@ -1908,13 +2533,17 @@
                         otp
                     );
 
+
                 const firebaseUser =
                     result.user;
+
 
                 AUTH.phoneConfirmation =
                     null;
 
+
                 AUTH.clearOtpVerifier();
+
 
                 if (!firebaseUser) {
 
@@ -1923,10 +2552,12 @@
                     );
                 }
 
+
                 const profile =
                     await AUTH.getProfile(
                         firebaseUser
                     );
+
 
                 if (
                     AUTH.isAccountBlocked(
@@ -1938,29 +2569,39 @@
                         FB.auth
                     );
 
+
                     throw new Error(
                         "This RiderX account has been disabled."
                     );
                 }
+
+
+                /*
+                 * Existing Firestore role ALWAYS wins.
+                 */
 
                 let resolvedRole =
                     await AUTH.resolveRole(
                         profile
                     );
 
+
                 /*
-                 * Existing Firestore role always wins.
+                 * New phone users may not yet have a
+                 * Firestore profile role.
                  *
-                 * If the user is genuinely new and does not
-                 * have a role yet, only Customer/Rider can be
-                 * selected.
+                 * Only customer/rider may be selected.
                  */
-                if (!resolvedRole) {
+
+                if (
+                    !resolvedRole
+                ) {
 
                     const requestedRole =
                         AUTH.normalizeRole(
                             role
                         );
+
 
                     if (
                         [
@@ -1976,7 +2617,10 @@
                     }
                 }
 
-                if (!resolvedRole) {
+
+                if (
+                    !resolvedRole
+                ) {
 
                     const selectedRole =
                         AUTH.normalizeRole(
@@ -1984,6 +2628,7 @@
                                 STORAGE.selectedRole
                             )
                         );
+
 
                     if (
                         [
@@ -1999,47 +2644,76 @@
                     }
                 }
 
-                if (!resolvedRole) {
+
+                if (
+                    !resolvedRole
+                ) {
 
                     await FB.signOut(
                         FB.auth
                     );
+
+
+                    AUTH.clearSession();
+
 
                     throw new Error(
                         "Please select Customer or Rider before completing OTP verification."
                     );
                 }
 
+
                 const phone =
                     profile.phone ||
+
                     profile.phoneNumber ||
+
                     firebaseUser.phoneNumber ||
+
                     safeStorageGet(
                         STORAGE.otpPhone
                     ) ||
+
                     "";
+
 
                 profile.uid =
                     firebaseUser.uid;
 
+
                 profile.phone =
                     phone;
+
 
                 profile.phoneNumber =
                     phone;
 
+
                 profile.role =
                     resolvedRole;
+
 
                 profile.userRole =
                     resolvedRole;
 
+
                 profile.accountType =
                     resolvedRole;
+
 
                 profile.status =
                     profile.status ||
                     "active";
+
+
+                /*
+                 * Do not allow client-side OTP verification to
+                 * overwrite privileged role values.
+                 *
+                 * resolvedRole can only be customer/rider when
+                 * this is a new account. Existing Firestore
+                 * roles have already been preserved above.
+                 */
 
                 await FB.setDoc(
                     FB.doc(
@@ -2073,8 +2747,10 @@
                     }
                 );
 
+
                 AUTH.state.firebaseUser =
                     firebaseUser;
+
 
                 const savedUser =
                     AUTH.saveSession(
@@ -2082,13 +2758,16 @@
                         resolvedRole
                     );
 
+
                 safeStorageRemove(
                     STORAGE.otpPhone
                 );
 
+
                 safeStorageRemove(
                     STORAGE.selectedRole
                 );
+
 
                 AUTH.emit(
                     "login",
@@ -2105,7 +2784,9 @@
                     }
                 );
 
+
                 AUTH.renderUser();
+
 
                 return {
 
@@ -2126,8 +2807,11 @@
                     error
                 );
 
+
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
 
             } finally {
@@ -2145,10 +2829,27 @@
     AUTH.logout =
         async function () {
 
+            /*
+             * Prevent multiple simultaneous logout requests.
+             */
+
+            if (
+                AUTH.state.loading
+            ) {
+
+                return false;
+            }
+
+
+            AUTH.state.loading =
+                true;
+
+
             try {
 
                 const FB =
                     await loadFirebase();
+
 
                 if (
                     FB &&
@@ -2161,6 +2862,9 @@
                     );
                 }
 
+
+                return true;
+
             } catch (error) {
 
                 console.warn(
@@ -2168,35 +2872,57 @@
                     error
                 );
 
+
+                /*
+                 * Even if Firebase network logout fails,
+                 * clear the local UI session.
+                 */
+
+                return false;
+
             } finally {
 
                 AUTH.phoneConfirmation =
                     null;
 
+
                 AUTH.clearOtpVerifier();
 
+
                 AUTH.clearSession();
+
 
                 safeStorageRemove(
                     STORAGE.legacyRole
                 );
 
+
                 safeStorageRemove(
                     STORAGE.selectedRole
                 );
+
 
                 safeStorageRemove(
                     STORAGE.otpPhone
                 );
 
+
                 AUTH.state.authReady =
                     true;
+
+
+                AUTH.state.loading =
+                    false;
+
 
                 AUTH.emit(
                     "logout"
                 );
 
-                if (isBrowser()) {
+
+                if (
+                    isBrowser()
+                ) {
 
                     window.location.replace(
                         routeUrl(
@@ -2222,8 +2948,10 @@
                 return AUTH.state.unsubscribe;
             }
 
+
             const FB =
                 await loadFirebase();
+
 
             AUTH.state.unsubscribe =
                 FB.onAuthStateChanged(
@@ -2235,7 +2963,10 @@
                         AUTH.state.firebaseUser =
                             firebaseUser;
 
-                        if (!firebaseUser) {
+
+                        if (
+                            !firebaseUser
+                        ) {
 
                             AUTH.state.user =
                                 null;
@@ -2243,15 +2974,26 @@
                             AUTH.state.role =
                                 null;
 
+                            AUTH.state.authError =
+                                null;
+
                             AUTH.state.authReady =
                                 true;
+
 
                             AUTH.emit(
                                 "signed-out"
                             );
 
+
+                            AUTH.emit(
+                                "ready"
+                            );
+
+
                             return;
                         }
+
 
                         try {
 
@@ -2259,6 +3001,7 @@
                                 await AUTH.getProfile(
                                     firebaseUser
                                 );
+
 
                             if (
                                 AUTH.isAccountBlocked(
@@ -2270,22 +3013,34 @@
                                     FB.auth
                                 );
 
+
                                 AUTH.clearSession();
+
 
                                 AUTH.state.authReady =
                                     true;
+
 
                                 AUTH.emit(
                                     "signed-out"
                                 );
 
+
                                 return;
                             }
+
 
                             const role =
                                 await AUTH.resolveRole(
                                     profile
                                 );
+
+
+                            /*
+                             * An authenticated Firebase user without
+                             * a valid RiderX role is not allowed to
+                             * remain inside the application.
+                             */
 
                             if (!role) {
 
@@ -2295,21 +3050,53 @@
                                 AUTH.state.role =
                                     null;
 
+                                AUTH.state.authError =
+                                    new Error(
+                                        "RiderX account role is not configured."
+                                    );
+
                                 AUTH.state.authReady =
                                     true;
+
 
                                 AUTH.emit(
                                     "auth-error",
                                     {
                                         error:
-                                            new Error(
-                                                "RiderX account role is not configured."
-                                            )
+                                            AUTH.state.authError
                                     }
                                 );
 
+
+                                /*
+                                 * Do not silently trust localStorage.
+                                 * Firebase account is signed out so the
+                                 * UI cannot continue with a stale role.
+                                 */
+
+                                try {
+
+                                    await FB.signOut(
+                                        FB.auth
+                                    );
+
+                                } catch (
+                                    signOutError
+                                ) {
+
+                                    console.warn(
+                                        "RiderX invalid-role sign-out failed:",
+                                        signOutError
+                                    );
+                                }
+
+
+                                AUTH.clearSession();
+
+
                                 return;
                             }
+
 
                             profile.role =
                                 role;
@@ -2320,17 +3107,23 @@
                             profile.accountType =
                                 role;
 
+
                             const savedUser =
                                 AUTH.saveSession(
                                     profile,
                                     role
                                 );
 
+
                             AUTH.state.firebaseUser =
                                 firebaseUser;
 
+                            AUTH.state.authError =
+                                null;
+
                             AUTH.state.authReady =
                                 true;
+
 
                             AUTH.emit(
                                 "signed-in",
@@ -2344,6 +3137,12 @@
                                 }
                             );
 
+
+                            AUTH.emit(
+                                "ready"
+                            );
+
+
                             AUTH.renderUser();
 
                         } catch (error) {
@@ -2351,10 +3150,15 @@
                             AUTH.state.authReady =
                                 true;
 
+                            AUTH.state.authError =
+                                error;
+
+
                             console.error(
                                 "RiderX auth state error:",
                                 error
                             );
+
 
                             AUTH.emit(
                                 "auth-error",
@@ -2366,6 +3170,7 @@
                         }
                     }
                 );
+
 
             return AUTH.state.unsubscribe;
         };
@@ -2387,7 +3192,9 @@
                 return AUTH.state.firebaseUser;
             }
 
+
             await AUTH.startListener();
+
 
             if (
                 AUTH.state.authReady
@@ -2396,45 +3203,67 @@
                 return AUTH.state.firebaseUser;
             }
 
+
             if (!isBrowser()) {
+
                 return null;
             }
 
+
             return new Promise(
-                function (resolve) {
+                function (
+                    resolve
+                ) {
 
                     let finished =
                         false;
 
+
+                    let timer =
+                        null;
+
+
                     const complete =
                         function () {
 
-                            if (finished) {
+                            if (
+                                finished
+                            ) {
+
                                 return;
                             }
 
+
                             finished =
                                 true;
+
 
                             window.removeEventListener(
                                 "riderx-auth-ready",
                                 readyHandler
                             );
 
-                            clearTimeout(
-                                timer
-                            );
+
+                            if (timer) {
+
+                                clearTimeout(
+                                    timer
+                                );
+                            }
+
 
                             resolve(
                                 AUTH.state.firebaseUser
                             );
                         };
 
+
                     const readyHandler =
                         function () {
 
                             complete();
                         };
+
 
                     window.addEventListener(
                         "riderx-auth-ready",
@@ -2445,13 +3274,16 @@
                         }
                     );
 
-                    const timer =
+
+                    timer =
                         setTimeout(
                             complete,
                             Math.max(
                                 1000,
-                                Number(timeout) ||
-                                    10000
+                                Number(
+                                    timeout
+                                ) ||
+                                10000
                             )
                         );
                 }
@@ -2467,7 +3299,9 @@
         function () {
 
             return Boolean(
+
                 AUTH.state.authReady &&
+
                 AUTH.state.firebaseUser?.uid
             );
         };
@@ -2487,10 +3321,14 @@
                     role
                 );
 
+
             return Boolean(
+
                 wanted &&
+
                 AUTH.getRole() ===
                     wanted &&
+
                 AUTH.isLoggedIn()
             );
         };
@@ -2507,14 +3345,20 @@
         ) {
 
             options =
-                options || {};
+                options ||
+                {};
+
 
             const allowed =
-                Array.isArray(roles)
+                Array.isArray(
+                    roles
+                )
 
                     ? roles
                         .map(
-                            function (role) {
+                            function (
+                                role
+                            ) {
 
                                 return AUTH.normalizeRole(
                                     role
@@ -2529,10 +3373,14 @@
                         )
                     ].filter(Boolean);
 
-            if (!allowed.length) {
+
+            if (
+                !allowed.length
+            ) {
 
                 if (
-                    options.redirect !== false
+                    options.redirect !==
+                    false
                 ) {
 
                     AUTH.redirectByRole(
@@ -2540,35 +3388,45 @@
                     );
                 }
 
+
                 return false;
             }
+
 
             await AUTH.waitForAuth(
                 options.timeout ||
                 10000
             );
 
+
             const current =
                 AUTH.normalizeRole(
                     AUTH.getRole()
                 );
 
+
             if (
                 AUTH.isLoggedIn() &&
-                allowed.includes(current)
+
+                allowed.includes(
+                    current
+                )
             ) {
 
                 return true;
             }
 
+
             if (
-                options.redirect !== false
+                options.redirect !==
+                false
             ) {
 
                 AUTH.redirectByRole(
                     options.fallback
                 );
             }
+
 
             return false;
         };
@@ -2588,42 +3446,71 @@
                     AUTH.getRole()
                 );
 
+
             let target =
                 fallback;
 
+
             if (
-                role === ROLES.ADMIN ||
-                role === ROLES.SUPERADMIN
+                role ===
+                    ROLES.ADMIN ||
+
+                role ===
+                    ROLES.SUPERADMIN
             ) {
 
                 target =
                     ROUTES.admin;
 
             } else if (
-                role === ROLES.RIDER
+                role ===
+                ROLES.RIDER
             ) {
 
                 target =
                     ROUTES.rider;
 
             } else if (
-                role === ROLES.CUSTOMER
+                role ===
+                ROLES.CUSTOMER
             ) {
 
                 target =
                     ROUTES.customer;
             }
 
+
             if (!target) {
+
                 target =
                     ROUTES.auth;
             }
 
-            if (isBrowser()) {
 
-                window.location.replace(
-                    routeUrl(target)
-                );
+            if (
+                isBrowser()
+            ) {
+
+                const destination =
+                    routeUrl(
+                        target
+                    );
+
+
+                /*
+                 * Prevent unnecessary navigation if already
+                 * on the destination page.
+                 */
+
+                if (
+                    window.location.pathname !==
+                    destination
+                ) {
+
+                    window.location.replace(
+                        destination
+                    );
+                }
             }
         };
 
@@ -2638,7 +3525,9 @@
         ) {
 
             updates =
-                updates || {};
+                updates ||
+                {};
+
 
             if (
                 !AUTH.isLoggedIn()
@@ -2649,8 +3538,10 @@
                 );
             }
 
+
             const uid =
                 AUTH.getUid();
+
 
             if (!uid) {
 
@@ -2659,16 +3550,21 @@
                 );
             }
 
+
             const FB =
                 await loadFirebase();
 
+
             if (
                 FB.auth.currentUser &&
-                FB.updateProfile
+
+                typeof FB.updateProfile ===
+                    "function"
             ) {
 
                 const firebaseUpdates =
                     {};
+
 
                 if (
                     updates.displayName !==
@@ -2681,6 +3577,7 @@
                         );
                 }
 
+
                 if (
                     updates.photoURL !==
                     undefined
@@ -2691,6 +3588,7 @@
                             updates.photoURL
                         );
                 }
+
 
                 if (
                     Object.keys(
@@ -2705,11 +3603,20 @@
                 }
             }
 
-            const firestoreUpdates = {
-                ...updates,
-                updatedAt:
-                    Date.now()
-            };
+
+            const firestoreUpdates =
+                {
+                    ...updates,
+
+                    updatedAt:
+                        Date.now()
+                };
+
+
+            /*
+             * Privileged / identity fields can never be changed
+             * through this generic profile-update method.
+             */
 
             [
                 "role",
@@ -2726,11 +3633,16 @@
                 "approved",
                 "adminApproved"
             ].forEach(
-                function (key) {
+                function (
+                    key
+                ) {
 
-                    delete firestoreUpdates[key];
+                    delete firestoreUpdates[
+                        key
+                    ];
                 }
             );
+
 
             await FB.setDoc(
                 FB.doc(
@@ -2745,43 +3657,49 @@
                 }
             );
 
+
             const current =
                 AUTH.getUser() ||
                 {};
 
+
             const role =
                 AUTH.getRole();
 
-            const updated = {
 
-                ...current,
+            const updated =
+                {
 
-                ...firestoreUpdates,
+                    ...current,
 
-                uid:
-                    uid,
+                    ...firestoreUpdates,
 
-                id:
-                    uid,
+                    uid:
+                        uid,
 
-                userId:
-                    uid,
+                    id:
+                        uid,
 
-                role:
-                    role,
+                    userId:
+                        uid,
 
-                userRole:
-                    role,
+                    role:
+                        role,
 
-                accountType:
-                    role
-            };
+                    userRole:
+                        role,
+
+                    accountType:
+                        role
+                };
+
 
             const saved =
                 AUTH.saveSession(
                     updated,
                     role
                 );
+
 
             AUTH.emit(
                 "profile-updated",
@@ -2791,7 +3709,9 @@
                 }
             );
 
+
             AUTH.renderUser();
+
 
             return saved;
         };
@@ -2811,6 +3731,7 @@
                     email
                 ).toLowerCase();
 
+
             if (!email) {
 
                 throw new Error(
@@ -2818,8 +3739,10 @@
                 );
             }
 
+
             const FB =
                 await loadFirebase();
+
 
             try {
 
@@ -2828,12 +3751,21 @@
                     email
                 );
 
+
                 return true;
 
             } catch (error) {
 
+                console.error(
+                    "RiderX password reset failed:",
+                    error
+                );
+
+
                 throw new Error(
-                    firebaseError(error)
+                    firebaseError(
+                        error
+                    )
                 );
             }
         };
@@ -2850,8 +3782,10 @@
         ) {
 
             if (!isBrowser()) {
+
                 return;
             }
+
 
             window.dispatchEvent(
                 new CustomEvent(
@@ -2859,10 +3793,12 @@
                     name,
                     {
                         detail:
-                            detail || {}
+                            detail ||
+                            {}
                     }
                 )
             );
+
 
             if (
                 [
@@ -2872,7 +3808,9 @@
                     "login",
                     "logout",
                     "register"
-                ].includes(name)
+                ].includes(
+                    name
+                )
             ) {
 
                 window.dispatchEvent(
@@ -2898,19 +3836,25 @@
                 return function () {};
             }
 
+
             const handler =
-                function (event) {
+                function (
+                    event
+                ) {
 
                     callback(
-                        event.detail || {}
+                        event.detail ||
+                        {}
                     );
                 };
+
 
             window.addEventListener(
                 "riderx-auth-" +
                 name,
                 handler
             );
+
 
             return function () {
 
@@ -2931,40 +3875,54 @@
         function () {
 
             if (!isBrowser()) {
+
                 return;
             }
+
 
             const user =
                 AUTH.getUser();
 
+
             if (!user) {
+
                 return;
             }
 
+
             const role =
                 AUTH.getRole();
+
 
             document
                 .querySelectorAll(
                     "[data-user-name]"
                 )
                 .forEach(
-                    function (element) {
+                    function (
+                        element
+                    ) {
 
                         element.textContent =
                             user.name ||
+
                             user.displayName ||
+
                             user.fullName ||
+
                             "User";
                     }
                 );
+
 
             document
                 .querySelectorAll(
                     "[data-user-email]"
                 )
                 .forEach(
-                    function (element) {
+                    function (
+                        element
+                    ) {
 
                         element.textContent =
                             user.email ||
@@ -2972,26 +3930,34 @@
                     }
                 );
 
+
             document
                 .querySelectorAll(
                     "[data-user-phone]"
                 )
                 .forEach(
-                    function (element) {
+                    function (
+                        element
+                    ) {
 
                         element.textContent =
                             user.phone ||
+
                             user.phoneNumber ||
+
                             "";
                     }
                 );
+
 
             document
                 .querySelectorAll(
                     "[data-user-role]"
                 )
                 .forEach(
-                    function (element) {
+                    function (
+                        element
+                    ) {
 
                         element.textContent =
                             role ||
@@ -2999,12 +3965,15 @@
                     }
                 );
 
+
             document
                 .querySelectorAll(
                     "[data-user-avatar]"
                 )
                 .forEach(
-                    function (element) {
+                    function (
+                        element
+                    ) {
 
                         if (
                             user.photoURL
@@ -3033,23 +4002,45 @@
                 return;
             }
 
+
             AUTH.state.logoutBound =
                 true;
 
+
             document.addEventListener(
                 "click",
-                function (event) {
+                function (
+                    event
+                ) {
 
-                    const button =
-                        event.target.closest(
-                            "[data-logout]"
-                        );
+                    const target =
+                        event.target;
 
-                    if (!button) {
+
+                    if (
+                        !target ||
+                        typeof target.closest !==
+                            "function"
+                    ) {
+
                         return;
                     }
 
+
+                    const button =
+                        target.closest(
+                            "[data-logout]"
+                        );
+
+
+                    if (!button) {
+
+                        return;
+                    }
+
+
                     event.preventDefault();
+
 
                     if (
                         AUTH.state.loading
@@ -3057,6 +4048,7 @@
 
                         return;
                     }
+
 
                     AUTH.logout();
                 }
@@ -3078,6 +4070,7 @@
                 return;
             }
 
+
             if (
                 AUTH.state.initializing
             ) {
@@ -3085,23 +4078,35 @@
                 return;
             }
 
+
             AUTH.state.initializing =
                 true;
+
 
             try {
 
                 AUTH.bindLogout();
 
+
+                /*
+                 * Render cached user immediately for UI only.
+                 * Firebase remains the authority.
+                 */
+
                 AUTH.renderUser();
 
+
                 await AUTH.startListener();
+
 
                 AUTH.state.initialized =
                     true;
 
+
                 AUTH.emit(
                     "ready"
                 );
+
 
                 console.info(
                     "RiderX authentication engine initialized."
@@ -3112,10 +4117,16 @@
                 AUTH.state.authReady =
                     true;
 
+
+                AUTH.state.authError =
+                    error;
+
+
                 console.error(
                     "RiderX authentication initialization failed:",
                     error
                 );
+
 
                 AUTH.emit(
                     "auth-error",
@@ -3245,6 +4256,7 @@
 
     RX.auth.ROLES =
         ROLES;
+
 
     RX.auth.STORAGE_KEYS =
         STORAGE;
