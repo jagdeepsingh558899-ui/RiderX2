@@ -33,6 +33,11 @@
         href="../css/responsive.css"
     >
 
+    <link
+        rel="icon"
+        href="../assets/logo.png"
+    >
+
     <title>RiderX — Choose Account</title>
 
     <style>
@@ -49,8 +54,10 @@
         body {
             min-height: 100vh;
             min-height: 100dvh;
+
             background: #050505;
             color: #fff;
+
             font-family:
                 Inter,
                 system-ui,
@@ -58,6 +65,17 @@
                 BlinkMacSystemFont,
                 "Segoe UI",
                 sans-serif;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button,
+        label,
+        a {
+            -webkit-tap-highlight-color: transparent;
         }
 
         .rx-role-page {
@@ -113,7 +131,9 @@
             justify-content: center;
 
             border-radius: 22px;
-            border: 2px solid rgba(245, 196, 0, 0.3);
+
+            border: 2px solid
+                rgba(245, 196, 0, 0.3);
 
             background: #101010;
 
@@ -123,6 +143,7 @@
         .rx-logo img {
             width: 100%;
             height: 100%;
+
             object-fit: contain;
         }
 
@@ -131,6 +152,7 @@
 
             font-size: 30px;
             font-weight: 900;
+
             letter-spacing: -1px;
         }
 
@@ -155,6 +177,7 @@
             text-align: center;
 
             color: #999;
+
             font-size: 14px;
             line-height: 1.5;
         }
@@ -170,6 +193,10 @@
 
         .rx-role-option input {
             position: absolute;
+
+            width: 1px;
+            height: 1px;
+
             opacity: 0;
             pointer-events: none;
         }
@@ -179,11 +206,14 @@
 
             display: flex;
             align-items: center;
+
             gap: 15px;
 
             padding: 15px;
 
-            border: 1px solid rgba(255, 255, 255, 0.09);
+            border: 1px solid
+                rgba(255, 255, 255, 0.09);
+
             border-radius: 18px;
 
             background: #101010;
@@ -196,11 +226,23 @@
                 transform 0.2s ease;
         }
 
+        .rx-role-label:hover {
+            border-color:
+                rgba(245, 196, 0, 0.35);
+        }
+
         .rx-role-label:active {
             transform: scale(0.985);
         }
 
-        .rx-role-option input:checked + .rx-role-label {
+        .rx-role-option input:focus-visible
+        + .rx-role-label {
+            outline: 2px solid #f5c400;
+            outline-offset: 3px;
+        }
+
+        .rx-role-option input:checked
+        + .rx-role-label {
             border-color: #f5c400;
 
             background:
@@ -211,7 +253,8 @@
                 );
 
             box-shadow:
-                0 0 0 1px rgba(245, 196, 0, 0.12);
+                0 0 0 1px
+                rgba(245, 196, 0, 0.12);
         }
 
         .rx-role-icon {
@@ -226,7 +269,8 @@
 
             border-radius: 16px;
 
-            background: rgba(245, 196, 0, 0.1);
+            background:
+                rgba(245, 196, 0, 0.1);
 
             font-size: 25px;
         }
@@ -262,10 +306,10 @@
 
             flex: 0 0 22px;
 
+            position: relative;
+
             border: 2px solid #555;
             border-radius: 50%;
-
-            position: relative;
         }
 
         .rx-role-option input:checked
@@ -337,7 +381,9 @@
 
             min-height: 48px;
 
-            border: 1px solid rgba(245, 196, 0, 0.35);
+            border: 1px solid
+                rgba(245, 196, 0, 0.35);
+
             border-radius: 15px;
 
             background: transparent;
@@ -347,6 +393,19 @@
             font-weight: 800;
 
             cursor: pointer;
+
+            transition:
+                background 0.15s ease,
+                transform 0.15s ease;
+        }
+
+        .rx-register:hover {
+            background:
+                rgba(245, 196, 0, 0.06);
+        }
+
+        .rx-register:active {
+            transform: scale(0.985);
         }
 
         .rx-login-text {
@@ -355,6 +414,7 @@
             text-align: center;
 
             color: #888;
+
             font-size: 13px;
         }
 
@@ -369,6 +429,12 @@
             text-decoration: none;
         }
 
+        .rx-login-link:focus-visible {
+            outline: 2px solid #f5c400;
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
+
         .rx-message {
             min-height: 20px;
 
@@ -379,6 +445,7 @@
             color: #f5c400;
 
             font-size: 12px;
+            line-height: 1.4;
         }
 
         .rx-message.error {
@@ -391,8 +458,10 @@
 
         .rx-loading {
             display: none;
+
             align-items: center;
             justify-content: center;
+
             gap: 8px;
         }
 
@@ -422,6 +491,7 @@
         }
 
         @media (max-width: 360px) {
+
             .rx-role-card {
                 padding: 23px 15px;
             }
@@ -436,11 +506,15 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
+
             *,
             *::before,
             *::after {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
+                animation-duration:
+                    0.01ms !important;
+
+                transition-duration:
+                    0.01ms !important;
             }
         }
     </style>
@@ -580,9 +654,7 @@
                 disabled
             >
 
-                <span
-                    id="continue-text"
-                >
+                <span id="continue-text">
                     Continue
                 </span>
 
@@ -590,12 +662,14 @@
                     id="continue-loading"
                     class="rx-loading"
                 >
+
                     <span
                         class="rx-spinner"
                         aria-hidden="true"
                     ></span>
 
                     Please wait...
+
                 </span>
 
             </button>
@@ -611,6 +685,7 @@
 
 
             <div class="rx-login-text">
+
                 Already have an account?
 
                 <br>
@@ -622,6 +697,7 @@
                 >
                     Login
                 </a>
+
             </div>
 
 
@@ -688,20 +764,44 @@
 
         /* =====================================================
            STORAGE
+           -----------------------------------------------------
+           Role is only a navigation preference.
+           It is NEVER treated as authentication.
         ===================================================== */
 
         const SELECTED_ROLE_KEY =
             "riderx_selected_role";
 
-        const USER_ROLE_KEY =
-            "riderx_role";
 
-        const LEGACY_USER_ROLE_KEY =
-            "userRole";
+        /* =====================================================
+           CONSTANTS
+        ===================================================== */
+
+        const ROLE_CUSTOMER =
+            "customer";
+
+        const ROLE_RIDER =
+            "rider";
+
+        const LOGIN_ROUTE =
+            "./login.html";
+
+        /*
+         * The canonical repository currently uses the common
+         * authentication login page.
+         *
+         * Registration is opened through the same authentication
+         * flow with the selected role supplied as a query value.
+         *
+         * This avoids creating/using duplicate auth pages.
+         */
+
+        const REGISTER_ROUTE =
+            "./login.html";
 
 
         /* =====================================================
-           HELPERS
+           ROLE NORMALIZATION
         ===================================================== */
 
         function normalizeRole(
@@ -713,7 +813,6 @@
             ) {
 
                 return "";
-
             }
 
 
@@ -731,8 +830,7 @@
                 ].includes(role)
             ) {
 
-                return "customer";
-
+                return ROLE_CUSTOMER;
             }
 
 
@@ -744,40 +842,45 @@
                 ].includes(role)
             ) {
 
-                return "rider";
-
+                return ROLE_RIDER;
             }
 
 
             return "";
-
         }
 
+
+        /* =====================================================
+           GET SELECTED ROLE
+        ===================================================== */
 
         function getSelectedRole() {
 
             if (
-                customerRole?.checked
+                customerRole &&
+                customerRole.checked
             ) {
 
-                return "customer";
-
+                return ROLE_CUSTOMER;
             }
 
 
             if (
-                riderRole?.checked
+                riderRole &&
+                riderRole.checked
             ) {
 
-                return "rider";
-
+                return ROLE_RIDER;
             }
 
 
             return "";
-
         }
 
+
+        /* =====================================================
+           MESSAGE
+        ===================================================== */
 
         function setMessage(
             text,
@@ -789,12 +892,12 @@
             ) {
 
                 return;
-
             }
 
 
             message.textContent =
                 text;
+
 
             message.className =
                 "rx-message";
@@ -807,11 +910,85 @@
                 message.classList.add(
                     type
                 );
-
             }
-
         }
 
+
+        /* =====================================================
+           SAVE SELECTED ROLE
+        ===================================================== */
+
+        function saveSelectedRole(
+            role
+        ) {
+
+            const normalized =
+                normalizeRole(
+                    role
+                );
+
+
+            if (
+                !normalized
+            ) {
+
+                return false;
+            }
+
+
+            try {
+
+                localStorage.setItem(
+                    SELECTED_ROLE_KEY,
+                    normalized
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX: unable to save selected role.",
+                    error
+                );
+
+
+                return false;
+            }
+        }
+
+
+        /* =====================================================
+           READ SELECTED ROLE
+        ===================================================== */
+
+        function getSavedRole() {
+
+            try {
+
+                return normalizeRole(
+                    localStorage.getItem(
+                        SELECTED_ROLE_KEY
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX: unable to read selected role.",
+                    error
+                );
+
+
+                return "";
+            }
+        }
+
+
+        /* =====================================================
+           UPDATE CONTINUE
+        ===================================================== */
 
         function updateContinueState() {
 
@@ -825,143 +1002,26 @@
 
                 continueButton.disabled =
                     !role;
-
             }
-
         }
 
 
-        function saveRole(
-            role
-        ) {
-
-            const normalized =
-                normalizeRole(
-                    role
-                );
-
-
-            if (
-                !normalized
-            ) {
-
-                return false;
-
-            }
-
-
-            try {
-
-                localStorage.setItem(
-                    SELECTED_ROLE_KEY,
-                    normalized
-                );
-
-                /*
-                 * Compatibility with existing RiderX modules.
-                 * This is only a selected-role cache, not
-                 * authentication proof.
-                 */
-
-                localStorage.setItem(
-                    USER_ROLE_KEY,
-                    normalized
-                );
-
-                localStorage.setItem(
-                    LEGACY_USER_ROLE_KEY,
-                    normalized
-                );
-
-                return true;
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX: unable to save selected role.",
-                    error
-                );
-
-                return false;
-
-            }
-
-        }
-
-
-        function getSavedRole() {
-
-            try {
-
-                const candidates = [
-
-                    localStorage.getItem(
-                        SELECTED_ROLE_KEY
-                    ),
-
-                    localStorage.getItem(
-                        USER_ROLE_KEY
-                    ),
-
-                    localStorage.getItem(
-                        LEGACY_USER_ROLE_KEY
-                    )
-
-                ];
-
-
-                for (
-                    const candidate of candidates
-                ) {
-
-                    const role =
-                        normalizeRole(
-                            candidate
-                        );
-
-
-                    if (
-                        role
-                    ) {
-
-                        return role;
-
-                    }
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX: unable to read saved role.",
-                    error
-                );
-
-            }
-
-
-            return "";
-
-        }
-
+        /* =====================================================
+           LOADING
+        ===================================================== */
 
         function setLoading(
             loading
         ) {
 
             if (
-                !continueButton
+                continueButton
             ) {
 
-                return;
-
+                continueButton.disabled =
+                    loading ||
+                    !getSelectedRole();
             }
-
-
-            continueButton.disabled =
-                loading
-                ||
-                !getSelectedRole();
 
 
             if (
@@ -972,7 +1032,6 @@
                     loading
                         ? "none"
                         : "inline";
-
             }
 
 
@@ -984,57 +1043,117 @@
                     "active",
                     loading
                 );
-
             }
 
+
+            if (
+                registerButton
+            ) {
+
+                registerButton.disabled =
+                    loading;
+            }
         }
 
 
         /* =====================================================
-           ROUTES
+           BUILD LOGIN URL
         ===================================================== */
 
-        function getLoginRoute(
+        function buildLoginUrl(
             role
         ) {
 
+            const normalized =
+                normalizeRole(
+                    role
+                );
+
+
+            const url =
+                new URL(
+                    LOGIN_ROUTE,
+                    window.location.href
+                );
+
+
             if (
-                role === "rider"
+                normalized
             ) {
 
-                return "./rider-login.html";
-
+                url.searchParams.set(
+                    "role",
+                    normalized
+                );
             }
 
 
-            return "./customer-login.html";
-
-        }
-
-
-        function getRegisterRoute(
-            role
-        ) {
-
-            if (
-                role === "rider"
-            ) {
-
-                return "./register.html?role=rider";
-
-            }
-
-
-            return "./register.html?role=customer";
-
+            return (
+                url.pathname
+                +
+                url.search
+                +
+                url.hash
+            );
         }
 
 
         /* =====================================================
-           ROLE CHANGE
+           BUILD REGISTER URL
+           -----------------------------------------------------
+           Uses the canonical login page because the repository
+           must not invent a new auth/register.html route.
         ===================================================== */
 
-        function onRoleChange(
+        function buildRegisterUrl(
+            role
+        ) {
+
+            const normalized =
+                normalizeRole(
+                    role
+                );
+
+
+            const url =
+                new URL(
+                    REGISTER_ROUTE,
+                    window.location.href
+                );
+
+
+            url.searchParams.set(
+                "mode",
+                "register"
+            );
+
+
+            if (
+                normalized
+            ) {
+
+                url.searchParams.set(
+                    "role",
+                    normalized
+                );
+            }
+
+
+            return (
+                url.pathname
+                +
+                url.search
+                +
+                url.hash
+            );
+        }
+
+
+        /* =====================================================
+           SELECT ROLE
+        ===================================================== */
+
+        function selectRole(
             role
         ) {
 
@@ -1045,19 +1164,35 @@
 
 
             if (
-                !normalized
+                normalized === ROLE_CUSTOMER
+                &&
+                customerRole
             ) {
 
-                updateContinueState();
-
-                return;
-
+                customerRole.checked =
+                    true;
             }
 
 
-            saveRole(
+            if (
+                normalized === ROLE_RIDER
+                &&
+                riderRole
+            ) {
+
+                riderRole.checked =
+                    true;
+            }
+
+
+            if (
                 normalized
-            );
+            ) {
+
+                saveSelectedRole(
+                    normalized
+                );
+            }
 
 
             updateContinueState();
@@ -1065,9 +1200,12 @@
             setMessage(
                 ""
             );
-
         }
 
+
+        /* =====================================================
+           ROLE CHANGE
+        ===================================================== */
 
         if (
             customerRole
@@ -1081,15 +1219,12 @@
                         customerRole.checked
                     ) {
 
-                        onRoleChange(
-                            "customer"
+                        selectRole(
+                            ROLE_CUSTOMER
                         );
-
                     }
-
                 }
             );
-
         }
 
 
@@ -1105,15 +1240,12 @@
                         riderRole.checked
                     ) {
 
-                        onRoleChange(
-                            "rider"
+                        selectRole(
+                            ROLE_RIDER
                         );
-
                     }
-
                 }
             );
-
         }
 
 
@@ -1142,12 +1274,12 @@
                             "error"
                         );
 
-                        return;
 
+                        return;
                     }
 
 
-                    saveRole(
+                    saveSelectedRole(
                         role
                     );
 
@@ -1165,18 +1297,17 @@
                     window.setTimeout(
                         function () {
 
-                            window.location.href =
-                                getLoginRoute(
+                            window.location.replace(
+                                buildLoginUrl(
                                     role
-                                );
+                                )
+                            );
 
                         },
                         120
                     );
-
                 }
             );
-
         }
 
 
@@ -1193,9 +1324,7 @@
                 function () {
 
                     const role =
-                        getSelectedRole()
-                        ||
-                        getSavedRole();
+                        getSelectedRole();
 
 
                     if (
@@ -1207,31 +1336,45 @@
                             "error"
                         );
 
-                        return;
 
+                        return;
                     }
 
 
-                    saveRole(
+                    saveSelectedRole(
                         role
                     );
 
 
-                    window.location.href =
-                        getRegisterRoute(
-                            role
-                        );
+                    setLoading(
+                        true
+                    );
 
+
+                    setMessage(
+                        "Opening account registration..."
+                    );
+
+
+                    window.setTimeout(
+                        function () {
+
+                            window.location.replace(
+                                buildRegisterUrl(
+                                    role
+                                )
+                            );
+
+                        },
+                        120
+                    );
                 }
             );
-
         }
 
 
         /* =====================================================
            LOGIN LINK
-           -----------------------------------------------------
-           Keep login page role-aware.
         ===================================================== */
 
         if (
@@ -1242,6 +1385,9 @@
                 "click",
                 function (event) {
 
+                    event.preventDefault();
+
+
                     const role =
                         getSelectedRole()
                         ||
@@ -1249,39 +1395,27 @@
 
 
                     if (
-                        !role
+                        role
                     ) {
 
-                        /*
-                         * Default login remains auth/login.html.
-                         */
-
-                        return;
-
+                        saveSelectedRole(
+                            role
+                        );
                     }
 
 
-                    event.preventDefault();
-
-
-                    saveRole(
-                        role
-                    );
-
-
-                    window.location.href =
-                        getLoginRoute(
+                    window.location.replace(
+                        buildLoginUrl(
                             role
-                        );
-
+                        )
+                    );
                 }
             );
-
         }
 
 
         /* =====================================================
-           RESTORE PREVIOUS ROLE
+           RESTORE SAVED ROLE
         ===================================================== */
 
         (function restoreRole() {
@@ -1291,31 +1425,17 @@
 
 
             if (
-                savedRole === "customer"
-                &&
-                customerRole
+                savedRole
             ) {
 
-                customerRole.checked =
-                    true;
+                selectRole(
+                    savedRole
+                );
 
+            } else {
+
+                updateContinueState();
             }
-
-
-            if (
-                savedRole === "rider"
-                &&
-                riderRole
-            ) {
-
-                riderRole.checked =
-                    true;
-
-            }
-
-
-            updateContinueState();
-
         })();
 
 
@@ -1334,7 +1454,6 @@
                 ) {
 
                     return;
-
                 }
 
 
@@ -1350,15 +1469,28 @@
 
                     event.preventDefault();
 
+
                     target.checked =
                         true;
 
-                    onRoleChange(
+
+                    selectRole(
                         target.value
                     );
-
                 }
+            }
+        );
 
+
+        /* =====================================================
+           PAGE SAFETY
+        ===================================================== */
+
+        window.addEventListener(
+            "pageshow",
+            function () {
+
+                updateContinueState();
             }
         );
 
