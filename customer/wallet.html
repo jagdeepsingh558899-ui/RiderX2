@@ -1,26 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+><title>RiderX - Wallet</title><meta
+name="theme-color"
+content="#FFD400"
 
-<head>
+«»
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>RiderX - Wallet</title>
-
-<meta name="theme-color" content="#FFD400">
-
-<link rel="stylesheet" href="../css/Style.css">
-<link rel="stylesheet" href="../css/Dashboard.css">
-<link rel="stylesheet" href="../css/Responsive.css">
-
-<style>
+<link
+    rel="stylesheet"
+    href="../css/style.css"
+><link
+    rel="stylesheet"
+    href="../css/dashboard.css"
+><link
+    rel="stylesheet"
+    href="../css/responsive.css"
+><style>
 
 :root{
     --yellow:#FFD400;
     --bg:#090909;
     --card:#171717;
-    --card2:#1d1d1d;
     --border:#303030;
     --muted:#777;
     --green:#22c55e;
@@ -35,6 +37,7 @@
 
 html,
 body{
+    width:100%;
     min-height:100%;
     background:#080808;
 }
@@ -58,40 +61,57 @@ button{
     max-width:650px;
     min-height:100vh;
     margin:auto;
+    padding-bottom:25px;
     background:var(--bg);
     overflow:hidden;
 }
 
 
-/* =========================
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 .header{
     position:sticky;
     top:0;
-    z-index:20;
+    z-index:50;
+
     display:flex;
     align-items:center;
     gap:10px;
-    padding:12px;
-    background:#0d0d0d;
+
+    min-height:64px;
+    padding:11px 13px;
+
+    background:rgba(10,10,10,.97);
     border-bottom:1px solid #252525;
+
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
 }
 
 .back-btn{
     width:40px;
     height:40px;
     min-width:40px;
+
     border:1px solid #363636;
     border-radius:50%;
+
     background:#1b1b1b;
     color:#fff;
+
     font-size:22px;
+    line-height:1;
+}
+
+.back-btn:active{
+    transform:scale(.96);
 }
 
 .title-box{
     flex:1;
+    min-width:0;
 }
 
 .title{
@@ -106,59 +126,88 @@ button{
 }
 
 
-/* =========================
-   BALANCE
-========================= */
+/* =========================================================
+   CONTENT
+========================================================= */
 
 .content{
     padding:14px 13px 35px;
 }
 
+
+/* =========================================================
+   BALANCE
+========================================================= */
+
 .balance-card{
     position:relative;
     overflow:hidden;
+
     padding:19px 16px;
+
     border:1px solid #4b4100;
     border-radius:19px;
+
     background:
         radial-gradient(
             circle at 100% 0,
             rgba(255,212,0,.20),
             transparent 48%
         ),
-        #1a1807;
+        linear-gradient(
+            145deg,
+            #1d1a08,
+            #171717
+        );
 }
 
 .balance-card::after{
     content:"₹";
+
     position:absolute;
     right:15px;
     bottom:-18px;
+
     color:rgba(255,212,0,.06);
+
     font-size:100px;
+    line-height:1;
     font-weight:900;
+
+    pointer-events:none;
 }
 
 .balance-label{
+    position:relative;
+    z-index:2;
+
     color:#999;
     font-size:6px;
     font-weight:700;
+    letter-spacing:.4px;
 }
 
 .balance{
     position:relative;
     z-index:2;
+
     margin-top:7px;
+
     color:var(--yellow);
+
     font-size:28px;
+    line-height:1;
     font-weight:900;
+
     letter-spacing:-1px;
 }
 
 .balance-note{
     position:relative;
     z-index:2;
-    margin-top:5px;
+
+    margin-top:7px;
+
     color:#777;
     font-size:5px;
 }
@@ -166,16 +215,20 @@ button{
 .balance-actions{
     position:relative;
     z-index:3;
+
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:8px;
+
     margin-top:14px;
 }
 
 .add-btn,
 .withdraw-btn{
     height:40px;
+
     border-radius:11px;
+
     font-size:6px;
     font-weight:900;
 }
@@ -192,36 +245,54 @@ button{
     color:#fff;
 }
 
+.add-btn:active,
+.withdraw-btn:active{
+    transform:scale(.98);
+}
 
-/* =========================
+
+/* =========================================================
    QUICK STATS
-========================= */
+========================================================= */
 
 .stats{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:8px;
+
     margin-top:10px;
 }
 
 .stat{
+    min-width:0;
+
     padding:11px 8px;
+
     border:1px solid var(--border);
     border-radius:13px;
+
     background:var(--card);
+
     text-align:center;
 }
 
 .stat-label{
     color:#666;
     font-size:5px;
+    font-weight:700;
 }
 
 .stat-value{
     margin-top:6px;
+
     color:#fff;
+
     font-size:8px;
     font-weight:900;
+
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 .stat-value.yellow{
@@ -233,18 +304,19 @@ button{
 }
 
 
-/* =========================
+/* =========================================================
    SECTION
-========================= */
+========================================================= */
 
 .section{
-    margin-top:14px;
+    margin-top:15px;
 }
 
 .section-head{
     display:flex;
     align-items:center;
     justify-content:space-between;
+
     margin-bottom:9px;
 }
 
@@ -256,42 +328,63 @@ button{
 .section-link{
     border:0;
     background:transparent;
+
     color:var(--yellow);
+
     font-size:5px;
     font-weight:900;
 }
 
+.section-link:active{
+    opacity:.7;
+}
 
-/* =========================
+
+/* =========================================================
    PAYMENT METHODS
-========================= */
+========================================================= */
+
+.method-list{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
 
 .method-card{
     display:flex;
     align-items:center;
     gap:10px;
-    padding:12px;
+
+    min-height:61px;
+    padding:11px 12px;
+
     border:1px solid var(--border);
     border-radius:14px;
+
     background:var(--card);
-    margin-bottom:7px;
 }
 
 .method-icon{
     width:37px;
     height:37px;
     min-width:37px;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     border-radius:10px;
+
     background:#242100;
     color:var(--yellow);
+
     font-size:15px;
+    font-weight:900;
 }
 
 .method-info{
     flex:1;
+    min-width:0;
 }
 
 .method-name{
@@ -301,26 +394,43 @@ button{
 
 .method-detail{
     margin-top:4px;
+
     color:#666;
+
     font-size:5px;
+
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
 }
 
 .method-status{
+    flex:none;
+
     color:var(--green);
+
     font-size:5px;
     font-weight:900;
 }
 
 
-/* =========================
+/* =========================================================
    TRANSACTIONS
-========================= */
+========================================================= */
+
+.transaction-list{
+    border-radius:13px;
+    overflow:hidden;
+}
 
 .transaction{
     display:flex;
     align-items:center;
     gap:10px;
-    padding:12px 0;
+
+    min-height:62px;
+    padding:10px 0;
+
     border-bottom:1px solid #292929;
 }
 
@@ -332,12 +442,17 @@ button{
     width:38px;
     height:38px;
     min-width:38px;
+
     display:flex;
     align-items:center;
     justify-content:center;
+
     border-radius:11px;
+
     background:#202020;
+
     font-size:14px;
+    font-weight:900;
 }
 
 .transaction-icon.credit{
@@ -355,20 +470,27 @@ button{
 
 .transaction-title{
     overflow:hidden;
+
     color:#fff;
+
     font-size:7px;
     font-weight:800;
+
     text-overflow:ellipsis;
     white-space:nowrap;
 }
 
 .transaction-date{
     margin-top:4px;
+
     color:#666;
+
     font-size:5px;
 }
 
 .transaction-amount{
+    flex:none;
+
     font-size:7px;
     font-weight:900;
 }
@@ -383,26 +505,33 @@ button{
 
 .empty{
     padding:25px 10px;
+
     border:1px dashed #303030;
     border-radius:13px;
+
     color:#666;
+
     text-align:center;
     font-size:6px;
+    line-height:1.5;
 }
 
 
-/* =========================
-   ADD MONEY MODAL
-========================= */
+/* =========================================================
+   ADD MONEY SHEET
+========================================================= */
 
 .overlay{
     position:fixed;
     inset:0;
     z-index:100;
+
     display:none;
     align-items:flex-end;
     justify-content:center;
+
     padding:12px;
+
     background:rgba(0,0,0,.72);
 }
 
@@ -413,18 +542,42 @@ button{
 .sheet{
     width:100%;
     max-width:625px;
+
     padding:16px;
+
     border:1px solid #3a3a3a;
     border-radius:20px 20px 15px 15px;
+
     background:#151515;
-    box-shadow:0 -15px 50px rgba(0,0,0,.45);
+
+    box-shadow:
+        0 -15px 50px rgba(0,0,0,.45);
+
+    animation:sheetIn .2s ease;
+}
+
+@keyframes sheetIn{
+
+    from{
+        transform:translateY(20px);
+        opacity:0;
+    }
+
+    to{
+        transform:translateY(0);
+        opacity:1;
+    }
+
 }
 
 .sheet-handle{
     width:38px;
     height:4px;
+
     margin:0 auto 14px;
+
     border-radius:10px;
+
     background:#555;
 }
 
@@ -435,20 +588,28 @@ button{
 
 .sheet-subtitle{
     margin-top:5px;
+
     color:#666;
+
     font-size:5px;
+    line-height:1.5;
 }
 
 .amount-input{
     width:100%;
     height:48px;
+
     margin-top:14px;
     padding:0 13px;
+
     border:1px solid #3b3b3b;
     border-radius:12px;
+
     outline:none;
+
     background:#202020;
     color:#fff;
+
     font-size:13px;
     font-weight:900;
 }
@@ -461,17 +622,25 @@ button{
     display:grid;
     grid-template-columns:repeat(4,1fr);
     gap:7px;
+
     margin-top:9px;
 }
 
 .quick-amount{
     height:34px;
+
     border:1px solid #383838;
     border-radius:9px;
+
     background:#202020;
     color:#fff;
+
     font-size:6px;
     font-weight:900;
+}
+
+.quick-amount:active{
+    transform:scale(.97);
 }
 
 .quick-amount:hover{
@@ -483,12 +652,15 @@ button{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:8px;
+
     margin-top:13px;
 }
 
 .sheet-btn{
     height:43px;
+
     border-radius:11px;
+
     font-size:6px;
     font-weight:900;
 }
@@ -506,27 +678,100 @@ button{
 }
 
 
-/* =========================
+/* =========================================================
+   INFO MODAL
+========================================================= */
+
+.info-overlay{
+    position:fixed;
+    inset:0;
+    z-index:110;
+
+    display:none;
+    align-items:center;
+    justify-content:center;
+
+    padding:18px;
+
+    background:rgba(0,0,0,.75);
+}
+
+.info-overlay.show{
+    display:flex;
+}
+
+.info-box{
+    width:100%;
+    max-width:430px;
+
+    padding:17px;
+
+    border:1px solid #353535;
+    border-radius:17px;
+
+    background:#171717;
+}
+
+.info-title{
+    font-size:10px;
+    font-weight:900;
+}
+
+.info-text{
+    margin-top:8px;
+
+    color:#777;
+
+    font-size:6px;
+    line-height:1.6;
+}
+
+.info-close{
+    width:100%;
+    height:39px;
+
+    margin-top:14px;
+
+    border:1px solid #403900;
+    border-radius:10px;
+
+    background:var(--yellow);
+    color:#000;
+
+    font-size:6px;
+    font-weight:900;
+}
+
+
+/* =========================================================
    TOAST
-========================= */
+========================================================= */
 
 .toast{
     position:fixed;
     left:50%;
     bottom:22px;
     z-index:200;
+
     width:calc(100% - 28px);
     max-width:500px;
+
     padding:11px 13px;
+
     border:1px solid #343434;
     border-radius:11px;
+
     background:#222;
     color:#fff;
+
     text-align:center;
     font-size:6px;
+
     opacity:0;
     pointer-events:none;
+
     transform:translate(-50%,20px);
+
     transition:.25s;
 }
 
@@ -535,10 +780,18 @@ button{
     transform:translate(-50%,0);
 }
 
+.toast.success{
+    border-color:rgba(34,197,94,.45);
+}
 
-/* =========================
+.toast.error{
+    border-color:rgba(239,68,68,.45);
+}
+
+
+/* =========================================================
    RESPONSIVE
-========================= */
+========================================================= */
 
 @media(max-width:380px){
 
@@ -550,303 +803,391 @@ button{
         grid-template-columns:repeat(2,1fr);
     }
 
+    .stats{
+        gap:6px;
+    }
+
 }
 
-</style>
+</style></head><body><div class="app"><!-- =====================================================
+     HEADER
+====================================================== -->
 
-</head>
+<header class="header">
 
-<body>
+    <button
+        class="back-btn"
+        id="backBtn"
+        type="button"
+        aria-label="Back"
+    >
+        ‹
+    </button>
 
-<div class="app">
+    <div class="title-box">
+
+        <div class="title">
+            RiderX Wallet
+        </div>
+
+        <div class="subtitle">
+            Manage your payments and wallet
+        </div>
+
+    </div>
+
+</header>
 
 
-    <!-- HEADER -->
+<main class="content">
 
-    <header class="header">
 
-        <button
-            class="back-btn"
-            onclick="goBack()"
-            aria-label="Back"
+    <!-- =================================================
+         BALANCE
+    ================================================== -->
+
+    <section class="balance-card">
+
+        <div class="balance-label">
+            AVAILABLE BALANCE
+        </div>
+
+        <div
+            class="balance"
+            id="balance"
         >
-            ‹
-        </button>
+            ₹0
+        </div>
 
-        <div class="title-box">
+        <div class="balance-note">
+            Wallet balance available for RiderX payments
+        </div>
 
-            <div class="title">
-                RiderX Wallet
-            </div>
+        <div class="balance-actions">
 
-            <div class="subtitle">
-                Manage your payments and wallet
-            </div>
+            <button
+                class="add-btn"
+                id="addMoneyBtn"
+                type="button"
+            >
+                + ADD MONEY
+            </button>
+
+            <button
+                class="withdraw-btn"
+                id="withdrawBtn"
+                type="button"
+            >
+                WITHDRAW
+            </button>
 
         </div>
 
-    </header>
+    </section>
 
 
-    <main class="content">
+    <!-- =================================================
+         STATS
+    ================================================== -->
 
+    <section class="stats">
 
-        <!-- BALANCE -->
+        <div class="stat">
 
-        <section class="balance-card">
-
-            <div class="balance-label">
-                AVAILABLE BALANCE
+            <div class="stat-label">
+                TOTAL ADDED
             </div>
 
             <div
-                class="balance"
-                id="balance"
+                class="stat-value yellow"
+                id="totalAdded"
             >
                 ₹0
             </div>
 
-            <div class="balance-note">
-                Secure RiderX wallet balance
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                TOTAL SPENT
             </div>
-
-            <div class="balance-actions">
-
-                <button
-                    class="add-btn"
-                    onclick="openAddMoney()"
-                >
-                    + ADD MONEY
-                </button>
-
-                <button
-                    class="withdraw-btn"
-                    onclick="withdrawMoney()"
-                >
-                    WITHDRAW
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- STATS -->
-
-        <section class="stats">
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    TOTAL ADDED
-                </div>
-
-                <div
-                    class="stat-value yellow"
-                    id="totalAdded"
-                >
-                    ₹0
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    TOTAL SPENT
-                </div>
-
-                <div
-                    class="stat-value"
-                    id="totalSpent"
-                >
-                    ₹0
-                </div>
-
-            </div>
-
-            <div class="stat">
-
-                <div class="stat-label">
-                    REFUNDS
-                </div>
-
-                <div
-                    class="stat-value green"
-                    id="refunds"
-                >
-                    ₹0
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- PAYMENT METHODS -->
-
-        <section class="section">
-
-            <div class="section-head">
-
-                <div class="section-title">
-                    Payment methods
-                </div>
-
-                <button
-                    class="section-link"
-                    onclick="openPaymentSettings()"
-                >
-                    MANAGE
-                </button>
-
-            </div>
-
 
             <div
-                id="paymentMethods"
-            ></div>
-
-        </section>
-
-
-        <!-- TRANSACTIONS -->
-
-        <section class="section">
-
-            <div class="section-head">
-
-                <div class="section-title">
-                    Recent transactions
-                </div>
-
-                <button
-                    class="section-link"
-                    onclick="viewAllTransactions()"
-                >
-                    VIEW ALL
-                </button>
-
+                class="stat-value"
+                id="totalSpent"
+            >
+                ₹0
             </div>
 
+        </div>
+
+
+        <div class="stat">
+
+            <div class="stat-label">
+                REFUNDS
+            </div>
 
             <div
-                id="transactions"
-            ></div>
+                class="stat-value green"
+                id="refunds"
+            >
+                ₹0
+            </div>
 
-        </section>
+        </div>
+
+    </section>
 
 
-    </main>
+    <!-- =================================================
+         PAYMENT METHODS
+    ================================================== -->
 
-</div>
+    <section class="section">
+
+        <div class="section-head">
+
+            <div class="section-title">
+                Payment methods
+            </div>
+
+            <button
+                class="section-link"
+                id="managePaymentsBtn"
+                type="button"
+            >
+                MANAGE
+            </button>
+
+        </div>
+
+        <div
+            class="method-list"
+            id="paymentMethods"
+        ></div>
+
+    </section>
 
 
-<!-- ADD MONEY -->
+    <!-- =================================================
+         TRANSACTIONS
+    ================================================== -->
 
-<div
+    <section class="section">
+
+        <div class="section-head">
+
+            <div class="section-title">
+                Recent transactions
+            </div>
+
+            <button
+                class="section-link"
+                id="viewTransactionsBtn"
+                type="button"
+            >
+                VIEW ALL
+            </button>
+
+        </div>
+
+        <div
+            class="transaction-list"
+            id="transactions"
+        ></div>
+
+    </section>
+
+
+</main>
+
+</div><!-- =========================================================
+     ADD MONEY SHEET
+========================================================== --><div
     class="overlay"
     id="addMoneyOverlay"
-    onclick="outsideClose(event)"
+    aria-hidden="true"
+><div
+    class="sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="addMoneyTitle"
 >
 
+    <div class="sheet-handle"></div>
+
     <div
-        class="sheet"
-        onclick="event.stopPropagation()"
+        class="sheet-title"
+        id="addMoneyTitle"
+    >
+        Add money
+    </div>
+
+    <div class="sheet-subtitle">
+        Choose an amount. A real payment must be completed before
+        wallet balance is credited.
+    </div>
+
+    <input
+        class="amount-input"
+        id="amountInput"
+        type="number"
+        min="1"
+        max="50000"
+        step="1"
+        placeholder="Enter amount"
+        inputmode="numeric"
+        autocomplete="off"
     >
 
-        <div class="sheet-handle"></div>
+    <div class="quick-amounts">
 
-        <div class="sheet-title">
-            Add money
-        </div>
-
-        <div class="sheet-subtitle">
-            Enter the amount you want to add to your RiderX wallet.
-        </div>
-
-        <input
-            class="amount-input"
-            id="amountInput"
-            type="number"
-            min="1"
-            max="50000"
-            placeholder="Enter amount"
-            inputmode="decimal"
+        <button
+            class="quick-amount"
+            type="button"
+            data-amount="100"
         >
+            ₹100
+        </button>
 
-        <div class="quick-amounts">
+        <button
+            class="quick-amount"
+            type="button"
+            data-amount="200"
+        >
+            ₹200
+        </button>
 
-            <button
-                class="quick-amount"
-                onclick="setAmount(100)"
-            >
-                ₹100
-            </button>
+        <button
+            class="quick-amount"
+            type="button"
+            data-amount="500"
+        >
+            ₹500
+        </button>
 
-            <button
-                class="quick-amount"
-                onclick="setAmount(200)"
-            >
-                ₹200
-            </button>
+        <button
+            class="quick-amount"
+            type="button"
+            data-amount="1000"
+        >
+            ₹1000
+        </button>
 
-            <button
-                class="quick-amount"
-                onclick="setAmount(500)"
-            >
-                ₹500
-            </button>
+    </div>
 
-            <button
-                class="quick-amount"
-                onclick="setAmount(1000)"
-            >
-                ₹1000
-            </button>
+    <div class="sheet-actions">
 
-        </div>
+        <button
+            class="sheet-btn cancel-sheet"
+            id="cancelAddMoneyBtn"
+            type="button"
+        >
+            CANCEL
+        </button>
 
-        <div class="sheet-actions">
-
-            <button
-                class="sheet-btn cancel-sheet"
-                onclick="closeAddMoney()"
-            >
-                CANCEL
-            </button>
-
-            <button
-                class="sheet-btn confirm-sheet"
-                onclick="confirmAddMoney()"
-            >
-                CONTINUE
-            </button>
-
-        </div>
+        <button
+            class="sheet-btn confirm-sheet"
+            id="confirmAddMoneyBtn"
+            type="button"
+        >
+            CONTINUE
+        </button>
 
     </div>
 
 </div>
 
+</div><!-- =========================================================
+     INFO MODAL
+========================================================== --><div
+    class="info-overlay"
+    id="infoOverlay"
+    aria-hidden="true"
+><div
+    class="info-box"
+    role="dialog"
+    aria-modal="true"
+>
 
-<div
+    <div
+        class="info-title"
+        id="infoTitle"
+    >
+        RiderX
+    </div>
+
+    <div
+        class="info-text"
+        id="infoText"
+    ></div>
+
+    <button
+        class="info-close"
+        id="infoCloseBtn"
+        type="button"
+    >
+        OK
+    </button>
+
+</div>
+
+</div><div
     class="toast"
     id="toast"
-></div>
+    role="status"
+    aria-live="polite"
+></div><script>
 
-
-<script>
-
-/* ==========================================
+/* =========================================================
    RIDERX CUSTOMER WALLET
-========================================== */
+   File: customer/wallet.html
+
+   Responsibilities:
+   - Display wallet balance
+   - Maintain wallet transaction ledger
+   - Expose wallet API to booking/payment pages
+   - Prevent negative balance
+   - Support debit / credit / refund
+   - Preserve existing RiderX local storage compatibility
+   - Never treat "Add Money" as a successful real payment
+========================================================= */
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
 
 const STORAGE_KEY =
     "riderxWallet";
 
 const TRANSACTION_KEY =
     "riderxWalletTransactions";
+
+const LEGACY_WALLET_KEYS = [
+
+    "customerWallet",
+    "wallet",
+    "userWallet",
+    "riderx_customer_wallet"
+
+];
+
+const RIDE_HISTORY_KEYS = [
+
+    "riderxRideHistory",
+    "rideHistory",
+    "customerRideHistory"
+
+];
+
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let wallet = {
 
@@ -862,218 +1203,317 @@ let wallet = {
 
 let transactions = [];
 
-let toastTimer;
+let showAllTransactions = false;
+
+let toastTimer = null;
 
 
-/* ==========================================
-   LOAD
-========================================== */
+/* =========================================================
+   DOM
+========================================================= */
+
+const $ = id =>
+    document.getElementById(id);
+
+
+/* =========================================================
+   NUMBER HELPERS
+========================================================= */
+
+function toAmount(value){
+
+    const number =
+        Number(value);
+
+    if(
+        !Number.isFinite(number)
+    ){
+
+        return 0;
+
+    }
+
+    return Math.round(
+        number * 100
+    ) / 100;
+
+}
+
+
+function positiveAmount(value){
+
+    const amount =
+        toAmount(value);
+
+    return amount > 0
+        ? amount
+        : 0;
+
+}
+
+
+/* =========================================================
+   NORMALIZE WALLET
+========================================================= */
+
+function normalizeWallet(data){
+
+    const source =
+        data &&
+        typeof data === "object"
+            ? data
+            : {};
+
+    return {
+
+        balance:
+            Math.max(
+                0,
+                toAmount(
+                    source.balance
+                )
+            ),
+
+        totalAdded:
+            Math.max(
+                0,
+                toAmount(
+                    source.totalAdded
+                )
+            ),
+
+        totalSpent:
+            Math.max(
+                0,
+                toAmount(
+                    source.totalSpent
+                )
+            ),
+
+        refunds:
+            Math.max(
+                0,
+                toAmount(
+                    source.refunds
+                )
+            )
+
+    };
+
+}
+
+
+/* =========================================================
+   LOAD WALLET
+========================================================= */
 
 function loadWallet(){
 
-    try{
-
-        const raw =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
-
-
-        if(
-            raw
-        ){
-
-            const data =
-                JSON.parse(
-                    raw
-                );
-
-
-            if(
-                data &&
-                typeof data ===
-                "object"
-            ){
-
-                wallet = {
-
-                    ...wallet,
-                    ...data
-
-                };
-
-            }
-
-        }
-
-    }catch(error){
-
-        console.log(
-            error
+    wallet =
+        normalizeWallet(
+            readJSON(
+                STORAGE_KEY,
+                wallet
+            )
         );
+
+
+    const savedTransactions =
+        readJSON(
+            TRANSACTION_KEY,
+            []
+        );
+
+
+    transactions =
+        Array.isArray(
+            savedTransactions
+        )
+            ? savedTransactions
+            : [];
+
+
+    /*
+      If the canonical wallet does not exist yet,
+      inspect old RiderX wallet keys.
+    */
+
+    if(
+        !localStorage.getItem(
+            STORAGE_KEY
+        )
+    ){
+
+        importLegacyWallet();
 
     }
 
 
-    try{
+    /*
+      Recalculate statistics from the transaction
+      ledger where possible.
+    */
 
-        const raw =
-            localStorage.getItem(
-                TRANSACTION_KEY
-            );
-
-
-        if(
-            raw
-        ){
-
-            const data =
-                JSON.parse(
-                    raw
-                );
+    recalculateStats();
 
 
-            if(
-                Array.isArray(
-                    data
-                )
-            ){
-
-                transactions =
-                    data;
-
-            }
-
-        }
-
-    }catch(error){
-
-        console.log(
-            error
-        );
-
-    }
-
-
-    syncFromKnownStorage();
+    saveWallet();
 
     render();
 
 }
 
 
-/* ==========================================
-   SYNC OTHER RIDERX STORAGE
-========================================== */
+/* =========================================================
+   LEGACY WALLET IMPORT
+========================================================= */
 
-function syncFromKnownStorage(){
+function importLegacyWallet(){
 
-    try{
+    for(
+        const key of LEGACY_WALLET_KEYS
+    ){
 
-        const possibleKeys = [
-
-            "wallet",
-            "customerWallet",
-            "userWallet",
-            "riderx_customer_wallet"
-
-        ];
+        const data =
+            readJSON(
+                key,
+                null
+            );
 
 
-        for(
-            const key of possibleKeys
+        if(
+            data === null
         ){
 
-            const raw =
-                localStorage.getItem(
-                    key
-                );
-
-
-            if(
-                !raw
-            ){
-
-                continue;
-
-            }
-
-
-            const data =
-                JSON.parse(
-                    raw
-                );
-
-
-            if(
-                typeof data ===
-                "number"
-            ){
-
-                wallet.balance =
-                    data;
-
-                break;
-
-            }
-
-
-            if(
-                data &&
-                typeof data ===
-                "object"
-            ){
-
-                const value =
-                    data.balance ??
-                    data.walletBalance ??
-                    data.amount;
-
-
-                if(
-                    value !==
-                    undefined
-                ){
-
-                    const amount =
-                        Number(
-                            value
-                        );
-
-
-                    if(
-                        Number.isFinite(
-                            amount
-                        )
-                    ){
-
-                        wallet.balance =
-                            amount;
-
-                    }
-
-                }
-
-            }
+            continue;
 
         }
 
-    }catch(error){
 
-        console.log(
-            error
-        );
+        if(
+            typeof data ===
+            "number"
+        ){
+
+            wallet.balance =
+                Math.max(
+                    0,
+                    toAmount(data)
+                );
+
+            return;
+
+        }
+
+
+        if(
+            typeof data ===
+            "object"
+        ){
+
+            const balance =
+                data.balance ??
+                data.walletBalance ??
+                data.amount;
+
+
+            if(
+                balance !== undefined
+            ){
+
+                wallet.balance =
+                    Math.max(
+                        0,
+                        toAmount(
+                            balance
+                        )
+                    );
+
+            }
+
+
+            wallet.totalAdded =
+                positiveAmount(
+                    data.totalAdded
+                );
+
+
+            wallet.totalSpent =
+                positiveAmount(
+                    data.totalSpent
+                );
+
+
+            wallet.refunds =
+                positiveAmount(
+                    data.refunds
+                );
+
+
+            return;
+
+        }
 
     }
 
 }
 
 
-/* ==========================================
-   SAVE
-========================================== */
+/* =========================================================
+   READ JSON
+========================================================= */
+
+function readJSON(
+    key,
+    fallback
+){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                key
+            );
+
+
+        if(
+            !raw
+        ){
+
+            return fallback;
+
+        }
+
+
+        return JSON.parse(
+            raw
+        );
+
+    }catch(error){
+
+        console.warn(
+            "RiderX wallet storage read:",
+            error
+        );
+
+        return fallback;
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE WALLET
+========================================================= */
 
 function saveWallet(){
+
+    wallet =
+        normalizeWallet(
+            wallet
+        );
+
 
     try{
 
@@ -1084,6 +1524,7 @@ function saveWallet(){
             )
         );
 
+
         localStorage.setItem(
             TRANSACTION_KEY,
             JSON.stringify(
@@ -1093,33 +1534,21 @@ function saveWallet(){
 
 
         /*
-          Keep a generic wallet key too,
-          so other RiderX customer pages
-          can read the same balance.
+          Keep the common wallet key synchronized
+          for existing RiderX pages.
         */
 
         localStorage.setItem(
             "customerWallet",
-            JSON.stringify({
-
-                balance:
-                    wallet.balance,
-
-                totalAdded:
-                    wallet.totalAdded,
-
-                totalSpent:
-                    wallet.totalSpent,
-
-                refunds:
-                    wallet.refunds
-
-            })
+            JSON.stringify(
+                wallet
+            )
         );
 
     }catch(error){
 
-        console.log(
+        console.error(
+            "RiderX wallet save:",
             error
         );
 
@@ -1128,39 +1557,509 @@ function saveWallet(){
 }
 
 
-/* ==========================================
+/* =========================================================
+   TRANSACTION ID
+========================================================= */
+
+function createTransactionId(
+    prefix
+){
+
+    return (
+        prefix ||
+        "TX"
+    ) +
+    "_" +
+    Date.now() +
+    "_" +
+    Math.random()
+        .toString(36)
+        .slice(2,8);
+
+}
+
+
+/* =========================================================
+   ADD TRANSACTION
+========================================================= */
+
+function addTransaction(
+    type,
+    amount,
+    title,
+    description,
+    meta
+){
+
+    const cleanAmount =
+        positiveAmount(
+            amount
+        );
+
+
+    if(
+        cleanAmount <= 0
+    ){
+
+        return null;
+
+    }
+
+
+    const transaction = {
+
+        id:
+            createTransactionId(
+                type === "credit"
+                    ? "CR"
+                    : "DR"
+            ),
+
+        type:
+            type === "credit"
+                ? "credit"
+                : "debit",
+
+        amount:
+            cleanAmount,
+
+        title:
+            title ||
+            "Wallet transaction",
+
+        description:
+            description ||
+            "",
+
+        rideId:
+            meta &&
+            meta.rideId
+                ? String(
+                    meta.rideId
+                )
+                : "",
+
+        service:
+            meta &&
+            meta.service
+                ? String(
+                    meta.service
+                )
+                : "",
+
+        createdAt:
+            Date.now()
+
+    };
+
+
+    transactions.unshift(
+        transaction
+    );
+
+
+    /*
+      Keep the ledger reasonably small
+      for localStorage reliability.
+    */
+
+    if(
+        transactions.length >
+        500
+    ){
+
+        transactions =
+            transactions.slice(
+                0,
+                500
+            );
+
+    }
+
+
+    return transaction;
+
+}
+
+
+/* =========================================================
+   CREDIT WALLET
+========================================================= */
+
+function creditWallet(
+    amount,
+    options
+){
+
+    const cleanAmount =
+        positiveAmount(
+            amount
+        );
+
+
+    if(
+        cleanAmount <= 0
+    ){
+
+        return {
+
+            success:false,
+
+            error:
+                "Invalid amount."
+
+        };
+
+    }
+
+
+    const opts =
+        options &&
+        typeof options === "object"
+            ? options
+            : {};
+
+
+    wallet.balance =
+        toAmount(
+            wallet.balance +
+            cleanAmount
+        );
+
+
+    if(
+        opts.countAsAdded !== false
+    ){
+
+        wallet.totalAdded =
+            toAmount(
+                wallet.totalAdded +
+                cleanAmount
+            );
+
+    }
+
+
+    if(
+        opts.refund === true
+    ){
+
+        wallet.refunds =
+            toAmount(
+                wallet.refunds +
+                cleanAmount
+            );
+
+    }
+
+
+    addTransaction(
+
+        "credit",
+
+        cleanAmount,
+
+        opts.title ||
+            (
+                opts.refund
+                    ? "Ride refund"
+                    : "Wallet credit"
+            ),
+
+        opts.description ||
+            (
+                opts.refund
+                    ? "Refund credited to RiderX wallet"
+                    : "Amount credited to RiderX wallet"
+            ),
+
+        opts
+
+    );
+
+
+    saveWallet();
+
+    render();
+
+
+    return {
+
+        success:true,
+
+        amount:
+            cleanAmount,
+
+        balance:
+            wallet.balance
+
+    };
+
+}
+
+
+/* =========================================================
+   DEBIT WALLET
+========================================================= */
+
+function debitWallet(
+    amount,
+    options
+){
+
+    const cleanAmount =
+        positiveAmount(
+            amount
+        );
+
+
+    if(
+        cleanAmount <= 0
+    ){
+
+        return {
+
+            success:false,
+
+            error:
+                "Invalid amount."
+
+        };
+
+    }
+
+
+    if(
+        wallet.balance <
+        cleanAmount
+    ){
+
+        return {
+
+            success:false,
+
+            error:
+                "Insufficient wallet balance.",
+
+            balance:
+                wallet.balance
+
+        };
+
+    }
+
+
+    const opts =
+        options &&
+        typeof options === "object"
+            ? options
+            : {};
+
+
+    wallet.balance =
+        toAmount(
+            wallet.balance -
+            cleanAmount
+        );
+
+
+    wallet.totalSpent =
+        toAmount(
+            wallet.totalSpent +
+            cleanAmount
+        );
+
+
+    addTransaction(
+
+        "debit",
+
+        cleanAmount,
+
+        opts.title ||
+            "RiderX ride payment",
+
+        opts.description ||
+            "Ride payment from RiderX wallet",
+
+        opts
+
+    );
+
+
+    saveWallet();
+
+    render();
+
+
+    return {
+
+        success:true,
+
+        amount:
+            cleanAmount,
+
+        balance:
+            wallet.balance
+
+    };
+
+}
+
+
+/* =========================================================
+   REFUND WALLET
+========================================================= */
+
+function refundWallet(
+    amount,
+    options
+){
+
+    const opts = {
+
+        ...(options || {}),
+
+        refund:true,
+
+        countAsAdded:false,
+
+        title:
+            options &&
+            options.title
+                ? options.title
+                : "Ride refund"
+
+    };
+
+
+    return creditWallet(
+        amount,
+        opts
+    );
+
+}
+
+
+/* =========================================================
+   RECALCULATE STATS
+========================================================= */
+
+function recalculateStats(){
+
+    let added =
+        0;
+
+    let spent =
+        0;
+
+    let refunds =
+        0;
+
+
+    transactions.forEach(
+        transaction => {
+
+            const amount =
+                positiveAmount(
+                    transaction.amount
+                );
+
+
+            if(
+                transaction.type ===
+                "credit"
+            ){
+
+                if(
+                    transaction.refund ===
+                    true
+                ){
+
+                    refunds +=
+                        amount;
+
+                }else{
+
+                    added +=
+                        amount;
+
+                }
+
+            }else if(
+                transaction.type ===
+                "debit"
+            ){
+
+                spent +=
+                    amount;
+
+            }
+
+        }
+    );
+
+
+    /*
+      Only overwrite totals when there is
+      usable transaction data. This preserves
+      older wallet data that had totals but no
+      transaction ledger.
+    */
+
+    if(
+        transactions.length
+    ){
+
+        wallet.totalAdded =
+            toAmount(
+                added
+            );
+
+        wallet.totalSpent =
+            toAmount(
+                spent
+            );
+
+        wallet.refunds =
+            toAmount(
+                refunds
+            );
+
+    }
+
+}
+
+
+/* =========================================================
    RENDER
-========================================== */
+========================================================= */
 
 function render(){
 
-    document.getElementById(
-        "balance"
-    ).textContent =
+    $("balance")
+        .textContent =
         formatMoney(
             wallet.balance
         );
 
 
-    document.getElementById(
-        "totalAdded"
-    ).textContent =
+    $("totalAdded")
+        .textContent =
         formatMoney(
             wallet.totalAdded
         );
 
 
-    document.getElementById(
-        "totalSpent"
-    ).textContent =
+    $("totalSpent")
+        .textContent =
         formatMoney(
             wallet.totalSpent
         );
 
 
-    document.getElementById(
-        "refunds"
-    ).textContent =
+    $("refunds")
+        .textContent =
         formatMoney(
             wallet.refunds
         );
@@ -1173,16 +2072,14 @@ function render(){
 }
 
 
-/* ==========================================
+/* =========================================================
    PAYMENT METHODS
-========================================== */
+========================================================= */
 
 function renderPaymentMethods(){
 
     const container =
-        document.getElementById(
-            "paymentMethods"
-        );
+        $("paymentMethods");
 
 
     container.innerHTML = "";
@@ -1191,35 +2088,73 @@ function renderPaymentMethods(){
     const methods = [
 
         {
+
             icon:"₹",
-            name:"RiderX Wallet",
+
+            name:
+                "RiderX Wallet",
+
             detail:
                 formatMoney(
                     wallet.balance
                 ) +
                 " available",
-            status:"ACTIVE"
+
+            status:
+                "ACTIVE"
+
         },
 
         {
+
             icon:"U",
-            name:"UPI",
-            detail:"UPI payments",
-            status:"AVAILABLE"
+
+            name:
+                "UPI",
+
+            detail:
+                "Available at checkout",
+
+            status:
+                "AVAILABLE"
+
         },
 
         {
+
             icon:"💳",
-            name:"Card",
-            detail:"Debit / Credit Card",
-            status:"AVAILABLE"
+
+            name:
+                "Card",
+
+            detail:
+                "Debit / Credit Card",
+
+            status:
+                "AVAILABLE"
+
+        },
+
+        {
+
+            icon:"💵",
+
+            name:
+                "Cash",
+
+            detail:
+                "Pay rider directly",
+
+            status:
+                "AVAILABLE"
+
         }
 
     ];
 
 
     methods.forEach(
-        function(method){
+        method => {
 
             const card =
                 document.createElement(
@@ -1234,23 +2169,31 @@ function renderPaymentMethods(){
             card.innerHTML = `
 
                 <div class="method-icon">
-                    ${method.icon}
+                    ${escapeHTML(
+                        method.icon
+                    )}
                 </div>
 
                 <div class="method-info">
 
                     <div class="method-name">
-                        ${escapeHtml(method.name)}
+                        ${escapeHTML(
+                            method.name
+                        )}
                     </div>
 
                     <div class="method-detail">
-                        ${escapeHtml(method.detail)}
+                        ${escapeHTML(
+                            method.detail
+                        )}
                     </div>
 
                 </div>
 
                 <div class="method-status">
-                    ${escapeHtml(method.status)}
+                    ${escapeHTML(
+                        method.status
+                    )}
                 </div>
 
             `;
@@ -1266,16 +2209,14 @@ function renderPaymentMethods(){
 }
 
 
-/* ==========================================
+/* =========================================================
    TRANSACTIONS
-========================================== */
+========================================================= */
 
 function renderTransactions(){
 
     const container =
-        document.getElementById(
-            "transactions"
-        );
+        $("transactions");
 
 
     container.innerHTML = "";
@@ -1298,118 +2239,140 @@ function renderTransactions(){
     }
 
 
-    transactions
-        .slice()
-        .sort(
-            function(a,b){
-
-                return Number(
-                    b.createdAt || 0
-                ) -
-                Number(
-                    a.createdAt || 0
-                );
-
-            }
-        )
-        .slice(
-            0,
-            8
-        )
-        .forEach(
-            function(transaction){
-
-                const amount =
+    const sorted =
+        transactions
+            .slice()
+            .sort(
+                (
+                    a,
+                    b
+                ) =>
                     Number(
-                        transaction.amount
-                    ) || 0;
+                        b.createdAt || 0
+                    ) -
+                    Number(
+                        a.createdAt || 0
+                    )
+            );
 
 
-                const type =
-                    transaction.type ===
-                    "credit"
-                        ? "credit"
-                        : "debit";
+    const visible =
+        showAllTransactions
+            ? sorted
+            : sorted.slice(
+                0,
+                8
+            );
 
 
-                const icon =
-                    type ===
-                    "credit"
-                        ? "↓"
-                        : "↑";
+    visible.forEach(
+        transaction => {
 
-
-                const row =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                row.className =
-                    "transaction";
-
-
-                row.innerHTML = `
-
-                    <div class="transaction-icon ${type}">
-                        ${icon}
-                    </div>
-
-                    <div class="transaction-info">
-
-                        <div class="transaction-title">
-                            ${escapeHtml(
-                                transaction.title ||
-                                transaction.description ||
-                                "Wallet transaction"
-                            )}
-                        </div>
-
-                        <div class="transaction-date">
-                            ${formatDate(
-                                transaction.createdAt
-                            )}
-                        </div>
-
-                    </div>
-
-                    <div class="transaction-amount ${type}">
-                        ${type === "credit" ? "+" : "-"}
-                        ${formatMoney(amount)}
-                    </div>
-
-                `;
-
-
-                container.appendChild(
-                    row
+            const amount =
+                positiveAmount(
+                    transaction.amount
                 );
 
-            }
-        );
+
+            const type =
+                transaction.type ===
+                "credit"
+                    ? "credit"
+                    : "debit";
+
+
+            const icon =
+                type === "credit"
+                    ? "↓"
+                    : "↑";
+
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+
+            row.className =
+                "transaction";
+
+
+            row.innerHTML = `
+
+                <div
+                    class="transaction-icon ${type}"
+                >
+                    ${icon}
+                </div>
+
+                <div class="transaction-info">
+
+                    <div class="transaction-title">
+                        ${escapeHTML(
+                            transaction.title ||
+                            transaction.description ||
+                            "Wallet transaction"
+                        )}
+                    </div>
+
+                    <div class="transaction-date">
+                        ${formatDate(
+                            transaction.createdAt
+                        )}
+                    </div>
+
+                </div>
+
+                <div
+                    class="transaction-amount ${type}"
+                >
+                    ${
+                        type === "credit"
+                            ? "+"
+                            : "-"
+                    }
+                    ${formatMoney(
+                        amount
+                    )}
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                row
+            );
+
+        }
+    );
 
 }
 
 
-/* ==========================================
-   ADD MONEY
-========================================== */
+/* =========================================================
+   OPEN ADD MONEY
+========================================================= */
 
 function openAddMoney(){
 
-    document.getElementById(
-        "addMoneyOverlay"
-    ).classList.add(
-        "show"
-    );
+    $("addMoneyOverlay")
+        .classList.add(
+            "show"
+        );
+
+
+    $("addMoneyOverlay")
+        .setAttribute(
+            "aria-hidden",
+            "false"
+        );
 
 
     setTimeout(
-        function(){
+        () => {
 
-            document.getElementById(
-                "amountInput"
-            ).focus();
+            $("amountInput")
+                .focus();
 
         },
         100
@@ -1418,82 +2381,73 @@ function openAddMoney(){
 }
 
 
+/* =========================================================
+   CLOSE ADD MONEY
+========================================================= */
+
 function closeAddMoney(){
 
-    document.getElementById(
-        "addMoneyOverlay"
-    ).classList.remove(
-        "show"
-    );
+    $("addMoneyOverlay")
+        .classList.remove(
+            "show"
+        );
 
 
-    document.getElementById(
-        "amountInput"
-    ).value =
+    $("addMoneyOverlay")
+        .setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+    $("amountInput")
+        .value =
         "";
 
 }
 
 
-function outsideClose(
-    event
-){
-
-    if(
-        event.target.id ===
-        "addMoneyOverlay"
-    ){
-
-        closeAddMoney();
-
-    }
-
-}
-
-
-/* ==========================================
-   QUICK AMOUNT
-========================================== */
+/* =========================================================
+   SET AMOUNT
+========================================================= */
 
 function setAmount(
     amount
 ){
 
-    document.getElementById(
-        "amountInput"
-    ).value =
-        amount;
+    const cleanAmount =
+        positiveAmount(
+            amount
+        );
+
+
+    $("amountInput")
+        .value =
+        cleanAmount || "";
 
 }
 
 
-/* ==========================================
+/* =========================================================
    CONFIRM ADD MONEY
-========================================== */
+========================================================= */
 
 function confirmAddMoney(){
 
-    const input =
-        document.getElementById(
-            "amountInput"
-        );
-
-
     const amount =
-        Number(
-            input.value
+        positiveAmount(
+            $("amountInput")
+                .value
         );
 
 
     if(
-        !Number.isFinite(
-            amount
-        ) ||
         amount <= 0
     ){
 
         showToast(
-            "Please enter a valid amount."
+            "Please enter a valid amount.",
+            "error"
         );
 
         return;
@@ -1507,7 +2461,8 @@ function confirmAddMoney(){
     ){
 
         showToast(
-            "Maximum amount is ₹50,000."
+            "Maximum wallet top-up is ₹50,000.",
+            "error"
         );
 
         return;
@@ -1516,66 +2471,242 @@ function confirmAddMoney(){
 
 
     /*
-      Demo wallet credit.
+      IMPORTANT:
+      Do NOT directly credit wallet here.
+      A real wallet top-up must first complete
+      UPI/card/payment-gateway verification.
 
-      If Firebase/real payment gateway
-      is connected elsewhere, this local
-      operation can be replaced by the
-      payment success callback.
+      If another RiderX payment module exists,
+      it can listen to the global callback below.
     */
 
-    wallet.balance +=
-        amount;
-
-
-    wallet.totalAdded +=
-        amount;
-
-
-    transactions.unshift({
-
-        id:
-            "TX" +
-            Date.now(),
-
-        type:
-            "credit",
+    const paymentRequest = {
 
         amount:
             amount,
 
-        title:
-            "Wallet top-up",
-
-        description:
-            "Money added to RiderX wallet",
+        source:
+            "wallet",
 
         createdAt:
-            Date.now()
+            Date.now(),
 
-    });
+        callback:
+            function(paymentResult){
+
+                handleWalletTopupResult(
+                    amount,
+                    paymentResult
+                );
+
+            }
+
+    };
 
 
-    saveWallet();
+    /*
+      Allow an existing payment module to handle
+      the real transaction if it is available.
+    */
 
-    render();
+    if(
+        typeof window.RiderXWalletPayment ===
+        "function"
+    ){
+
+        try{
+
+            const result =
+                window.RiderXWalletPayment(
+                    paymentRequest
+                );
+
+
+            if(
+                result &&
+                typeof result.then ===
+                "function"
+            ){
+
+                result
+                    .then(
+                        paymentResult => {
+
+                            handleWalletTopupResult(
+                                amount,
+                                paymentResult
+                            );
+
+                        }
+                    )
+                    .catch(
+                        error => {
+
+                            console.error(
+                                error
+                            );
+
+                            showToast(
+                                "Payment could not be started.",
+                                "error"
+                            );
+
+                        }
+                    );
+
+            }
+
+
+            closeAddMoney();
+
+            return;
+
+        }catch(error){
+
+            console.error(
+                "Wallet payment:",
+                error
+            );
+
+            showToast(
+                "Payment could not be started.",
+                "error"
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /*
+      No real payment provider is connected.
+      Never fake-credit the wallet.
+    */
 
     closeAddMoney();
 
 
-    showToast(
-        formatMoney(
-            amount
-        ) +
-        " added to wallet."
+    showInfo(
+
+        "Payment setup required",
+
+        "RiderX wallet top-up needs a connected UPI/card payment gateway. " +
+        "The wallet has not been credited because no verified payment " +
+        "success callback is connected yet."
+
     );
 
 }
 
 
-/* ==========================================
+/* =========================================================
+   HANDLE PAYMENT RESULT
+========================================================= */
+
+function handleWalletTopupResult(
+    requestedAmount,
+    result
+){
+
+    if(
+        !result
+    ){
+
+        showToast(
+            "Payment result was not received.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const success =
+        result.success === true ||
+        result.status === "success" ||
+        result.status === "paid" ||
+        result.paymentStatus === "success";
+
+
+    if(
+        !success
+    ){
+
+        showToast(
+            result.message ||
+            "Payment was not completed.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const paidAmount =
+        positiveAmount(
+            result.amount ||
+            requestedAmount
+        );
+
+
+    if(
+        paidAmount <= 0
+    ){
+
+        showToast(
+            "Invalid payment amount.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    creditWallet(
+
+        paidAmount,
+
+        {
+
+            title:
+                "Wallet top-up",
+
+            description:
+                "Verified wallet payment",
+
+            paymentId:
+                result.paymentId ||
+                result.transactionId ||
+                "",
+
+            paymentMethod:
+                result.paymentMethod ||
+                "Online"
+
+        }
+
+    );
+
+
+    showToast(
+        formatMoney(
+            paidAmount
+        ) +
+        " added to your wallet.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
    WITHDRAW
-========================================== */
+========================================================= */
 
 function withdrawMoney(){
 
@@ -1584,7 +2715,8 @@ function withdrawMoney(){
     ){
 
         showToast(
-            "No wallet balance available."
+            "No wallet balance available.",
+            "error"
         );
 
         return;
@@ -1592,41 +2724,127 @@ function withdrawMoney(){
     }
 
 
-    showToast(
-        "Withdrawal will be available through supported payout methods."
+    showInfo(
+
+        "Withdrawal",
+
+        "Wallet withdrawal is currently unavailable. " +
+        "Only supported payout flows should be used to withdraw " +
+        "a verified wallet balance."
+
     );
 
 }
 
 
-/* ==========================================
+/* =========================================================
    PAYMENT SETTINGS
-========================================== */
+========================================================= */
 
 function openPaymentSettings(){
 
-    showToast(
-        "Payment method management is coming soon."
+    showInfo(
+
+        "Payment methods",
+
+        "UPI, cards and cash are available as RiderX payment " +
+        "options. Payment-method management will be connected " +
+        "to the live payment module when it is enabled."
+
     );
 
 }
 
 
-/* ==========================================
-   ALL TRANSACTIONS
-========================================== */
+/* =========================================================
+   VIEW ALL TRANSACTIONS
+========================================================= */
 
 function viewAllTransactions(){
 
-    window.location.href =
-        "history.html";
+    if(
+        !transactions.length
+    ){
+
+        showToast(
+            "No transactions available."
+        );
+
+        return;
+
+    }
+
+
+    showAllTransactions =
+        !showAllTransactions;
+
+
+    $("viewTransactionsBtn")
+        .textContent =
+        showAllTransactions
+            ? "SHOW RECENT"
+            : "VIEW ALL";
+
+
+    renderTransactions();
 
 }
 
 
-/* ==========================================
+/* =========================================================
+   INFO MODAL
+========================================================= */
+
+function showInfo(
+    title,
+    message
+){
+
+    $("infoTitle")
+        .textContent =
+        title;
+
+
+    $("infoText")
+        .textContent =
+        message;
+
+
+    $("infoOverlay")
+        .classList.add(
+            "show"
+        );
+
+
+    $("infoOverlay")
+        .setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+}
+
+
+function closeInfo(){
+
+    $("infoOverlay")
+        .classList.remove(
+            "show"
+        );
+
+
+    $("infoOverlay")
+        .setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+}
+
+
+/* =========================================================
    BACK
-========================================== */
+========================================================= */
 
 function goBack(){
 
@@ -1639,52 +2857,66 @@ function goBack(){
 
         window.history.back();
 
-    }
-    else{
-
-        window.location.href =
-            "home.html";
+        return;
 
     }
+
+
+    window.location.href =
+        "home.html";
 
 }
 
 
-/* ==========================================
+/* =========================================================
    FORMAT MONEY
-========================================== */
+========================================================= */
 
 function formatMoney(
     amount
 ){
 
     const number =
-        Number(
+        toAmount(
             amount
-        ) || 0;
+        );
 
 
     return "₹" +
         number.toLocaleString(
             "en-IN",
             {
-                maximumFractionDigits:2
+                minimumFractionDigits:
+                    Number.isInteger(
+                        number
+                    )
+                        ? 0
+                        : 2,
+
+                maximumFractionDigits:
+                    2
             }
         );
 
 }
 
 
-/* ==========================================
+/* =========================================================
    FORMAT DATE
-========================================== */
+========================================================= */
 
 function formatDate(
     value
 ){
 
+    const timestamp =
+        normalizeTimestamp(
+            value
+        );
+
+
     if(
-        !value
+        !timestamp
     ){
 
         return "Recently";
@@ -1694,7 +2926,7 @@ function formatDate(
 
     const date =
         new Date(
-            value
+            timestamp
         );
 
 
@@ -1729,11 +2961,78 @@ function formatDate(
 }
 
 
-/* ==========================================
-   ESCAPE HTML
-========================================== */
+/* =========================================================
+   NORMALIZE TIMESTAMP
+========================================================= */
 
-function escapeHtml(
+function normalizeTimestamp(
+    value
+){
+
+    if(
+        value &&
+        typeof value.toMillis ===
+        "function"
+    ){
+
+        return value.toMillis();
+
+    }
+
+
+    if(
+        value &&
+        typeof value.toDate ===
+        "function"
+    ){
+
+        return value.toDate()
+            .getTime();
+
+    }
+
+
+    if(
+        typeof value ===
+        "number"
+    ){
+
+        return value < 10000000000
+            ? value * 1000
+            : value;
+
+    }
+
+
+    if(
+        value
+    ){
+
+        const timestamp =
+            new Date(
+                value
+            ).getTime();
+
+
+        return Number.isNaN(
+            timestamp
+        )
+            ? 0
+            : timestamp;
+
+    }
+
+
+    return 0;
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
     value
 ){
 
@@ -1764,27 +3063,30 @@ function escapeHtml(
 }
 
 
-/* ==========================================
+/* =========================================================
    TOAST
-========================================== */
+========================================================= */
 
 function showToast(
-    message
+    message,
+    type
 ){
 
     const toast =
-        document.getElementById(
-            "toast"
-        );
+        $("toast");
 
 
     toast.textContent =
         message;
 
 
-    toast.classList.add(
-        "show"
-    );
+    toast.className =
+        "toast show" +
+        (
+            type
+                ? " " + type
+                : ""
+        );
 
 
     clearTimeout(
@@ -1794,55 +3096,400 @@ function showToast(
 
     toastTimer =
         setTimeout(
-            function(){
+            () => {
 
-                toast.classList.remove(
-                    "show"
-                );
+                toast.className =
+                    "toast";
 
             },
-            2500
+            3000
         );
 
 }
 
 
-/* ==========================================
-   ESC KEY
-========================================== */
+/* =========================================================
+   EVENT BINDINGS
+========================================================= */
 
-document.addEventListener(
-    "keydown",
-    function(event){
+function bindEvents(){
+
+    $("backBtn")
+        .addEventListener(
+            "click",
+            goBack
+        );
+
+
+    $("addMoneyBtn")
+        .addEventListener(
+            "click",
+            openAddMoney
+        );
+
+
+    $("withdrawBtn")
+        .addEventListener(
+            "click",
+            withdrawMoney
+        );
+
+
+    $("managePaymentsBtn")
+        .addEventListener(
+            "click",
+            openPaymentSettings
+        );
+
+
+    $("viewTransactionsBtn")
+        .addEventListener(
+            "click",
+            viewAllTransactions
+        );
+
+
+    $("cancelAddMoneyBtn")
+        .addEventListener(
+            "click",
+            closeAddMoney
+        );
+
+
+    $("confirmAddMoneyBtn")
+        .addEventListener(
+            "click",
+            confirmAddMoney
+        );
+
+
+    $("infoCloseBtn")
+        .addEventListener(
+            "click",
+            closeInfo
+        );
+
+
+    document
+        .querySelectorAll(
+            ".quick-amount"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        setAmount(
+                            button.dataset.amount
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    $("addMoneyOverlay")
+        .addEventListener(
+            "click",
+            event => {
+
+                if(
+                    event.target ===
+                    $("addMoneyOverlay")
+                ){
+
+                    closeAddMoney();
+
+                }
+
+            }
+        );
+
+
+    $("infoOverlay")
+        .addEventListener(
+            "click",
+            event => {
+
+                if(
+                    event.target ===
+                    $("infoOverlay")
+                ){
+
+                    closeInfo();
+
+                }
+
+            }
+        );
+
+
+    $("amountInput")
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if(
+                    event.key ===
+                    "Enter"
+                ){
+
+                    confirmAddMoney();
+
+                }
+
+            }
+        );
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if(
+                event.key ===
+                "Escape"
+            ){
+
+                closeAddMoney();
+
+                closeInfo();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   GLOBAL RIDERX WALLET API
+   Other existing RiderX JS files can call:
+
+   RiderXWallet.getBalance()
+
+   RiderXWallet.debit(amount, options)
+
+   RiderXWallet.credit(amount, options)
+
+   RiderXWallet.refund(amount, options)
+
+   RiderXWallet.getTransactions()
+
+========================================================= */
+
+window.RiderXWallet = {
+
+    getBalance:function(){
+
+        loadWallet();
+
+        return wallet.balance;
+
+    },
+
+
+    getWallet:function(){
+
+        loadWallet();
+
+        return {
+            ...wallet
+        };
+
+    },
+
+
+    getTransactions:function(){
+
+        loadWallet();
+
+        return transactions
+            .slice();
+
+    },
+
+
+    hasBalance:function(
+        amount
+    ){
+
+        loadWallet();
+
+        return wallet.balance >=
+            positiveAmount(
+                amount
+            );
+
+    },
+
+
+    debit:function(
+        amount,
+        options
+    ){
+
+        loadWallet();
+
+        return debitWallet(
+            amount,
+            options
+        );
+
+    },
+
+
+    credit:function(
+        amount,
+        options
+    ){
+
+        loadWallet();
+
+        return creditWallet(
+            amount,
+            options
+        );
+
+    },
+
+
+    refund:function(
+        amount,
+        options
+    ){
+
+        loadWallet();
+
+        return refundWallet(
+            amount,
+            options
+        );
+
+    },
+
+
+    refresh:function(){
+
+        loadWallet();
+
+    }
+
+};
+
+
+/* =========================================================
+   OPTIONAL GLOBAL TOP-UP CALLBACK
+========================================================= */
+
+window.RiderXWalletTopupSuccess =
+    function(
+        result
+    ){
 
         if(
-            event.key ===
-            "Escape"
+            !result
         ){
 
-            closeAddMoney();
+            return {
+
+                success:false,
+
+                error:
+                    "Missing payment result."
+
+            };
 
         }
 
-    }
-);
+
+        const amount =
+            positiveAmount(
+                result.amount
+            );
 
 
-/* ==========================================
+        if(
+            amount <= 0
+        ){
+
+            return {
+
+                success:false,
+
+                error:
+                    "Invalid payment amount."
+
+            };
+
+        }
+
+
+        const response =
+            creditWallet(
+
+                amount,
+
+                {
+
+                    title:
+                        "Wallet top-up",
+
+                    description:
+                        "Verified online payment",
+
+                    paymentId:
+                        result.paymentId ||
+                        result.transactionId ||
+                        "",
+
+                    paymentMethod:
+                        result.paymentMethod ||
+                        "Online"
+
+                }
+
+            );
+
+
+        if(
+            response.success
+        ){
+
+            showToast(
+                formatMoney(
+                    amount
+                ) +
+                " added to your wallet.",
+                "success"
+            );
+
+        }
+
+
+        return response;
+
+    };
+
+
+/* =========================================================
    INIT
-========================================== */
+========================================================= */
 
 document.addEventListener(
     "DOMContentLoaded",
     function(){
+
+        bindEvents();
 
         loadWallet();
 
     }
 );
 
-</script>
-
-</body>
-
-  </html>
+</script></body></html>
