@@ -3,23 +3,34 @@
    AUTHENTICATION ENGINE
    File: js/auth.js
 
-   FINAL AUTH ENGINE
+   PRODUCTION AUTH ENGINE
+
+   SOURCE OF TRUTH:
    - Firebase Authentication
-   - Customer / Rider / Admin role resolution
-   - Email login / registration
+   - Firestore /users/{uid}
+
+   SUPPORTS:
+   - Customer
+   - Rider
+   - Admin
+   - Superadmin
+   - Email registration
+   - Email login
    - Phone OTP
-   - Firestore user profiles
+   - Firestore profile creation
+   - Existing profile recovery
+   - Role validation
    - Auth state listener
-   - UI-only localStorage cache
-   - Route guards
+   - Session cache
    - Logout
    - Password reset
    - Profile update
-   - Compatibility API
+   - Route guards
+   - Legacy RiderX compatibility APIs
 
    IMPORTANT:
-   Firebase Authentication + Firestore are the source of truth.
-   localStorage is NEVER authentication authority.
+   localStorage is ONLY a UI/session cache.
+   It is NEVER treated as authentication authority.
 ============================================================ */
 
 "use strict";
@@ -87,6 +98,7 @@ let authInitPromise = null;
 let authListenerStarted = false;
 
 let authListeners = [];
+
 let otpConfirmationResult = null;
 
 
@@ -110,12 +122,17 @@ function safeLower(value) {
 
 function safeNumber(value, fallback = 0) {
     const number = Number(value);
-    return Number.isFinite(number) ? number : fallback;
+
+    return Number.isFinite(number)
+        ? number
+        : fallback;
 }
 
 
 function safeBoolean(value, fallback = false) {
-    return typeof value === "boolean" ? value : fallback;
+    return typeof value === "boolean"
+        ? value
+        : fallback;
 }
 
 
@@ -127,7 +144,11 @@ function storageGet(key) {
     try {
         return localStorage.getItem(key);
     } catch (error) {
-        console.warn("RiderX storage read failed:", error);
+        console.warn(
+            "RiderX storage read failed:",
+            error
+        );
+
         return null;
     }
 }
@@ -135,10 +156,18 @@ function storageGet(key) {
 
 function storageSet(key, value) {
     try {
-        localStorage.setItem(key, String(value));
+        localStorage.setItem(
+            key,
+            String(value)
+        );
+
         return true;
     } catch (error) {
-        console.warn("RiderX storage write failed:", error);
+        console.warn(
+            "RiderX storage write failed:",
+            error
+        );
+
         return false;
     }
 }
@@ -148,12 +177,18 @@ function storageRemove(key) {
     try {
         localStorage.removeItem(key);
     } catch (error) {
-        console.warn("RiderX storage remove failed:", error);
+        console.warn(
+            "RiderX storage remove failed:",
+            error
+        );
     }
 }
 
 
-function storageGetJSON(key, fallback = null) {
+function storageGetJSON(
+    key,
+    fallback = null
+) {
     const value = storageGet(key);
 
     if (!value) {
@@ -164,14 +199,21 @@ function storageGetJSON(key, fallback = null) {
         return JSON.parse(value);
     } catch {
         storageRemove(key);
+
         return fallback;
     }
 }
 
 
-function storageSetJSON(key, value) {
+function storageSetJSON(
+    key,
+    value
+) {
     try {
-        return storageSet(key, JSON.stringify(value));
+        return storageSet(
+            key,
+            JSON.stringify(value)
+        );
     } catch {
         return false;
     }
@@ -189,14 +231,23 @@ function resolveRoute(route) {
         return value;
     }
 
-    if (/^(https?:|mailto:|tel:|#|\/)/i.test(value)) {
+    if (
+        /^(https?:|mailto:|tel:|#|\/)/i.test(value)
+    ) {
         return value;
     }
 
     try {
-        return new URL("../" + value, import.meta.url).href;
+        return new URL(
+            "../" + value,
+            import.meta.url
+        ).href;
     } catch (error) {
-        console.warn("RiderX route resolution failed:", error);
+        console.warn(
+            "RiderX route resolution failed:",
+            error
+        );
+
         return value;
     }
 }
@@ -272,25 +323,39 @@ function normalizePhone(value) {
         return "";
     }
 
-    phone = phone.replace(/[\s()-]/g, "");
+    phone = phone.replace(
+        /[\s()-]/g,
+        ""
+    );
 
     if (phone.startsWith("+")) {
-        const digits = phone.slice(1).replace(/\D/g, "");
+        const digits = phone
+            .slice(1)
+            .replace(/\D/g, "");
 
-        if (digits.length >= 10 && digits.length <= 15) {
+        if (
+            digits.length >= 10 &&
+            digits.length <= 15
+        ) {
             return "+" + digits;
         }
 
         return "";
     }
 
-    const digits = phone.replace(/\D/g, "");
+    const digits = phone.replace(
+        /\D/g,
+        ""
+    );
 
     if (digits.length === 10) {
         return "+91" + digits;
     }
 
-    if (digits.startsWith("91") && digits.length === 12) {
+    if (
+        digits.startsWith("91") &&
+        digits.length === 12
+    ) {
         return "+" + digits;
     }
 
@@ -308,7 +373,8 @@ function normalizeEmail(value) {
 
 
 function validateEmail(email) {
-    const value = normalizeEmail(email);
+    const value =
+        normalizeEmail(email);
 
     if (!value) {
         return {
@@ -317,10 +383,13 @@ function validateEmail(email) {
         };
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+    ) {
         return {
             valid: false,
-            message: "Please enter a valid email address."
+            message:
+                "Please enter a valid email address."
         };
     }
 
@@ -332,12 +401,14 @@ function validateEmail(email) {
 
 
 function validatePassword(password) {
-    const value = safeString(password);
+    const value =
+        safeString(password);
 
     if (value.length < 6) {
         return {
             valid: false,
-            message: "Password must be at least 6 characters."
+            message:
+                "Password must be at least 6 characters."
         };
     }
 
@@ -357,9 +428,11 @@ function getErrorMessage(error) {
         return "Something went wrong.";
     }
 
-    const code = safeString(error.code);
+    const code =
+        safeString(error.code);
 
     const messages = {
+
         "auth/invalid-email":
             "Please enter a valid email address.",
 
@@ -420,17 +493,28 @@ function getErrorMessage(error) {
         "auth/requires-recent-login":
             "Please login again before performing this action.",
 
+        "auth/account-exists-with-different-credential":
+            "This email is already connected to another sign-in method.",
+
         "permission-denied":
-            "You do not have permission to access this account."
+            "You do not have permission to access this account.",
+
+        "failed-precondition":
+            "Firebase configuration is incomplete.",
+
+        "unavailable":
+            "Firebase service is temporarily unavailable."
     };
 
     if (messages[code]) {
         return messages[code];
     }
 
-    const message = safeString(error.message);
+    const message =
+        safeString(error.message);
 
-    return message || "Authentication failed.";
+    return message ||
+        "Authentication failed.";
 }
 
 
@@ -442,7 +526,8 @@ function firebaseReady() {
     return Boolean(
         FB &&
         FB.auth &&
-        typeof FB.signInWithEmailAndPassword === "function"
+        typeof FB.signInWithEmailAndPassword ===
+            "function"
     );
 }
 
@@ -494,15 +579,34 @@ function getUid() {
    PROFILE NORMALIZATION
 ============================================================ */
 
-function normalizeProfile(profile = {}, user = null) {
+function normalizeProfile(
+    profile = {},
+    user = null
+) {
     const source = profile || {};
 
     const role = normalizeRole(
         source.role ||
         source.userRole ||
         source.accountType ||
-        source.userType
+        source.userType ||
+        source.type
     );
+
+    const name =
+        safeString(
+            source.name ||
+            source.fullName ||
+            source.displayName ||
+            user?.displayName
+        );
+
+    const phone =
+        safeString(
+            source.phone ||
+            source.phoneNumber ||
+            user?.phoneNumber
+        );
 
     return {
         ...source,
@@ -517,41 +621,26 @@ function normalizeProfile(profile = {}, user = null) {
             user?.email ||
             "",
 
-        name:
-            source.name ||
-            source.fullName ||
-            source.displayName ||
-            user?.displayName ||
-            "",
+        name,
 
         fullName:
             source.fullName ||
-            source.name ||
-            source.displayName ||
-            user?.displayName ||
-            "",
+            name,
 
         displayName:
             source.displayName ||
-            source.name ||
-            source.fullName ||
-            user?.displayName ||
-            "",
+            name,
 
-        phone:
-            source.phone ||
-            source.phoneNumber ||
-            user?.phoneNumber ||
-            "",
+        phone,
 
         phoneNumber:
             source.phoneNumber ||
-            source.phone ||
-            user?.phoneNumber ||
-            "",
+            phone,
 
         role,
+
         userRole: role,
+
         accountType: role,
 
         status:
@@ -559,16 +648,41 @@ function normalizeProfile(profile = {}, user = null) {
             "active",
 
         walletBalance:
-            safeNumber(source.walletBalance, 0),
+            safeNumber(
+                source.walletBalance,
+                0
+            ),
 
         rating:
-            safeNumber(source.rating, 5)
+            safeNumber(
+                source.rating,
+                5
+            )
     };
 }
 
 
 /* ============================================================
-   FIRESTORE PROFILE
+   FIRESTORE USER REFERENCE
+============================================================ */
+
+function getUserRef(uid) {
+    if (!firestoreReady()) {
+        throw new Error(
+            "Firestore is not available. Check firebase-config.js."
+        );
+    }
+
+    return FB.doc(
+        FB.db,
+        "users",
+        uid
+    );
+}
+
+
+/* ============================================================
+   GET USER PROFILE
 ============================================================ */
 
 async function getUserProfile(user) {
@@ -576,19 +690,11 @@ async function getUserProfile(user) {
         return null;
     }
 
-    if (!firestoreReady()) {
-        throw new Error(
-            "Firestore is not available. Check firebase-config.js."
-        );
-    }
+    const userRef =
+        getUserRef(user.uid);
 
-    const userRef = FB.doc(
-        FB.db,
-        "users",
-        user.uid
-    );
-
-    const snapshot = await FB.getDoc(userRef);
+    const snapshot =
+        await FB.getDoc(userRef);
 
     if (!snapshot.exists()) {
         return null;
@@ -602,7 +708,7 @@ async function getUserProfile(user) {
 
 
 /* ============================================================
-   SAVE PROFILE
+   SAVE USER PROFILE
 ============================================================ */
 
 async function saveUserProfile(
@@ -616,35 +722,38 @@ async function saveUserProfile(
         );
     }
 
-    if (!firestoreReady()) {
+    const normalized =
+        normalizeProfile(
+            profile,
+            user
+        );
+
+    if (!normalized.role) {
         throw new Error(
-            "Firestore is not available. Check firebase-config.js."
+            "User profile role is missing."
         );
     }
 
-    const normalized = normalizeProfile(
-        profile,
-        user
-    );
-
     await FB.setDoc(
-        FB.doc(
-            FB.db,
-            "users",
-            user.uid
-        ),
-        normalized,
-        { merge }
+        getUserRef(user.uid),
+        {
+            ...normalized,
+            updatedAt: Date.now()
+        },
+        {
+            merge
+        }
     );
 
-    currentProfile = normalized;
+    currentProfile =
+        normalized;
 
     return normalized;
 }
 
 
 /* ============================================================
-   CREATE PROFILE
+   CREATE USER PROFILE
 ============================================================ */
 
 async function createUserProfile(
@@ -652,22 +761,36 @@ async function createUserProfile(
     role,
     extra = {}
 ) {
-    const normalizedRole = normalizeRole(role);
+    const normalizedRole =
+        normalizeRole(role);
 
-    if (!NORMAL_USER_ROLES.includes(normalizedRole)) {
+    if (
+        !NORMAL_USER_ROLES.includes(
+            normalizedRole
+        )
+    ) {
         throw new Error(
             "Please select Customer or Rider."
         );
     }
 
-    const name = safeString(
-        extra.name ||
-        extra.fullName ||
-        extra.displayName ||
-        user.displayName
-    );
+    const name =
+        safeString(
+            extra.name ||
+            extra.fullName ||
+            extra.displayName ||
+            user.displayName
+        );
 
-    const now = Date.now();
+    const phone =
+        normalizePhone(
+            extra.phone ||
+            extra.phoneNumber ||
+            user.phoneNumber
+        );
+
+    const now =
+        Date.now();
 
     const profile = {
         uid: user.uid,
@@ -683,54 +806,82 @@ async function createUserProfile(
         displayName:
             name,
 
-        phone:
-            extra.phone ||
-            user.phoneNumber ||
-            "",
+        phone,
 
         phoneNumber:
-            extra.phoneNumber ||
-            extra.phone ||
-            user.phoneNumber ||
-            "",
+            phone,
 
-        role: normalizedRole,
-        userRole: normalizedRole,
-        accountType: normalizedRole,
+        role:
+            normalizedRole,
 
-        status: "active",
+        userRole:
+            normalizedRole,
 
-        online: false,
+        accountType:
+            normalizedRole,
+
+        status:
+            "active",
+
+        online:
+            false,
 
         city:
             extra.city ||
             "Chandigarh",
 
         rating:
-            safeNumber(extra.rating, 5),
+            safeNumber(
+                extra.rating,
+                5
+            ),
 
         totalRides:
-            safeNumber(extra.totalRides, 0),
+            safeNumber(
+                extra.totalRides,
+                0
+            ),
 
         completedRides:
-            safeNumber(extra.completedRides, 0),
+            safeNumber(
+                extra.completedRides,
+                0
+            ),
 
         cancelledRides:
-            safeNumber(extra.cancelledRides, 0),
+            safeNumber(
+                extra.cancelledRides,
+                0
+            ),
 
         walletBalance:
-            safeNumber(extra.walletBalance, 0),
+            safeNumber(
+                extra.walletBalance,
+                0
+            ),
 
-        createdAt: now,
-        updatedAt: now
+        createdAt:
+            now,
+
+        updatedAt:
+            now
     };
 
-    if (normalizedRole === ROLES.RIDER) {
+    if (
+        normalizedRole ===
+        ROLES.RIDER
+    ) {
         profile.approved =
-            safeBoolean(extra.approved, false);
+            safeBoolean(
+                extra.approved,
+                false
+            );
 
         profile.isApproved =
-            safeBoolean(extra.isApproved, false);
+            safeBoolean(
+                extra.isApproved,
+                false
+            );
 
         profile.approvalStatus =
             extra.approvalStatus ||
@@ -746,6 +897,32 @@ async function createUserProfile(
 
 
 /* ============================================================
+   ROLE MISMATCH ERROR
+============================================================ */
+
+function createRoleMismatchError(
+    selectedRole,
+    actualRole
+) {
+    const error =
+        new Error(
+            `This account is registered as ${actualRole}, not ${selectedRole}.`
+        );
+
+    error.code =
+        "riderx/role-mismatch";
+
+    error.selectedRole =
+        selectedRole;
+
+    error.actualRole =
+        actualRole;
+
+    return error;
+}
+
+
+/* ============================================================
    SESSION CACHE
 ============================================================ */
 
@@ -754,10 +931,15 @@ function cacheAuthenticatedSession(
     profile,
     role
 ) {
-    const normalizedRole = normalizeRole(
-        role ||
-        profile?.role
-    );
+    const normalizedRole =
+        normalizeRole(
+            role ||
+            profile?.role
+        );
+
+    if (!normalizedRole) {
+        return false;
+    }
 
     const session = {
         uid:
@@ -765,7 +947,8 @@ function cacheAuthenticatedSession(
             profile?.uid ||
             "",
 
-        role: normalizedRole,
+        role:
+            normalizedRole,
 
         email:
             user?.email ||
@@ -784,7 +967,8 @@ function cacheAuthenticatedSession(
             profile?.phoneNumber ||
             "",
 
-        updatedAt: Date.now()
+        updatedAt:
+            Date.now()
     };
 
     storageSetJSON(
@@ -807,7 +991,10 @@ function cacheAuthenticatedSession(
         normalizedRole
     );
 
-    if (normalizedRole === ROLES.CUSTOMER) {
+    if (
+        normalizedRole ===
+        ROLES.CUSTOMER
+    ) {
         storageSet(
             STORAGE.customerId,
             session.uid
@@ -820,9 +1007,20 @@ function cacheAuthenticatedSession(
                 ...session
             }
         );
+
+        storageRemove(
+            STORAGE.riderId
+        );
+
+        storageRemove(
+            STORAGE.rider
+        );
     }
 
-    if (normalizedRole === ROLES.RIDER) {
+    if (
+        normalizedRole ===
+        ROLES.RIDER
+    ) {
         storageSet(
             STORAGE.riderId,
             session.uid
@@ -834,6 +1032,14 @@ function cacheAuthenticatedSession(
                 ...profile,
                 ...session
             }
+        );
+
+        storageRemove(
+            STORAGE.customerId
+        );
+
+        storageRemove(
+            STORAGE.customer
         );
     }
 
@@ -849,8 +1055,14 @@ function cacheAuthenticatedSession(
         STORAGE.authReady,
         "true"
     );
+
+    return true;
 }
 
+
+/* ============================================================
+   CLEAR SESSION CACHE
+============================================================ */
 
 function clearSessionCache() {
     [
@@ -869,7 +1081,7 @@ function clearSessionCache() {
 
 
 /* ============================================================
-   FINALIZE USER
+   FINALIZE AUTHENTICATED USER
 ============================================================ */
 
 async function finalizeAuthenticatedUser(
@@ -882,68 +1094,160 @@ async function finalizeAuthenticatedUser(
         );
     }
 
-    const requestedRole = normalizeRole(
-        options.selectedRole
-    );
-
-    let profile = await getUserProfile(user);
-
-    let role = normalizeRole(
-        profile?.role
-    );
-
-    /*
-     * Existing Firestore role ALWAYS wins.
-     */
-    if (
-        !role &&
-        options.allowSelectedRoleFallback === true &&
-        NORMAL_USER_ROLES.includes(requestedRole)
-    ) {
-        profile = await createUserProfile(
-            user,
-            requestedRole,
-            options.profile || {}
+    const requestedRole =
+        normalizeRole(
+            options.selectedRole
         );
 
-        role = normalizeRole(
+    let profile =
+        await getUserProfile(user);
+
+    let role =
+        normalizeRole(
             profile?.role
         );
-    }
 
-    if (!role) {
+    /*
+     * --------------------------------------------------------
+     * EXISTING PROFILE
+     * --------------------------------------------------------
+     *
+     * Firestore role is authoritative.
+     *
+     * If login screen selected Customer but account is Rider,
+     * do NOT silently log into Rider account.
+     */
+
+    if (profile && role) {
+
+        if (
+            requestedRole &&
+            NORMAL_USER_ROLES.includes(
+                requestedRole
+            ) &&
+            role !== requestedRole
+        ) {
+            throw createRoleMismatchError(
+                requestedRole,
+                role
+            );
+        }
+
+        if (
+            isAccountBlocked(profile)
+        ) {
+            const error =
+                new Error(
+                    "This account has been blocked or suspended."
+                );
+
+            error.code =
+                "riderx/account-blocked";
+
+            throw error;
+        }
+
+        currentUser =
+            user;
+
+        currentProfile =
+            profile;
+
+        currentRole =
+            role;
+
+        cacheAuthenticatedSession(
+            user,
+            profile,
+            role
+        );
+
         return {
             authenticated: true,
-            configured: false,
+            configured: true,
             user,
-            profile: null,
-            role: ""
+            profile,
+            role
         };
     }
 
-    if (!profile) {
-        profile = normalizeProfile(
-            {},
-            user
+
+    /*
+     * --------------------------------------------------------
+     * MISSING PROFILE
+     * --------------------------------------------------------
+     *
+     * Registration can create the profile.
+     *
+     * Existing login must NOT create a random role unless
+     * explicitly allowed by the caller.
+     */
+
+    if (
+        !profile &&
+        options.allowSelectedRoleFallback === true &&
+        NORMAL_USER_ROLES.includes(
+            requestedRole
+        )
+    ) {
+        profile =
+            await createUserProfile(
+                user,
+                requestedRole,
+                options.profile || {}
+            );
+
+        role =
+            normalizeRole(
+                profile.role
+            );
+
+        currentUser =
+            user;
+
+        currentProfile =
+            profile;
+
+        currentRole =
+            role;
+
+        cacheAuthenticatedSession(
+            user,
+            profile,
+            role
         );
+
+        return {
+            authenticated: true,
+            configured: true,
+            user,
+            profile,
+            role
+        };
     }
 
-    currentUser = user;
-    currentProfile = profile;
-    currentRole = role;
 
-    cacheAuthenticatedSession(
-        user,
-        profile,
-        role
-    );
+    /*
+     * --------------------------------------------------------
+     * PROFILE DOES NOT EXIST
+     * --------------------------------------------------------
+     */
+
+    currentUser =
+        user;
+
+    currentProfile =
+        null;
+
+    currentRole =
+        "";
 
     return {
         authenticated: true,
-        configured: true,
+        configured: false,
         user,
-        profile,
-        role
+        profile: null,
+        role: ""
     };
 }
 
@@ -952,25 +1256,31 @@ async function finalizeAuthenticatedUser(
    EMAIL REGISTER
 ============================================================ */
 
-async function registerWithEmail(options = {}) {
-    const name = safeString(
-        options.name ||
-        options.fullName ||
-        options.displayName
-    );
+async function registerWithEmail(
+    options = {}
+) {
+    const name =
+        safeString(
+            options.name ||
+            options.fullName ||
+            options.displayName
+        );
 
-    const email = normalizeEmail(
-        options.email
-    );
+    const email =
+        normalizeEmail(
+            options.email
+        );
 
-    const password = safeString(
-        options.password
-    );
+    const password =
+        safeString(
+            options.password
+        );
 
-    const role = normalizeRole(
-        options.role ||
-        options.selectedRole
-    );
+    const role =
+        normalizeRole(
+            options.role ||
+            options.selectedRole
+        );
 
     const emailValidation =
         validateEmail(email);
@@ -990,7 +1300,11 @@ async function registerWithEmail(options = {}) {
         );
     }
 
-    if (!NORMAL_USER_ROLES.includes(role)) {
+    if (
+        !NORMAL_USER_ROLES.includes(
+            role
+        )
+    ) {
         throw new Error(
             "Please select Customer or Rider."
         );
@@ -998,7 +1312,8 @@ async function registerWithEmail(options = {}) {
 
     if (
         !FB.auth ||
-        typeof FB.createUserWithEmailAndPassword !== "function"
+        typeof FB.createUserWithEmailAndPassword !==
+            "function"
     ) {
         throw new Error(
             "Firebase Authentication is not available. Check firebase-config.js."
@@ -1012,9 +1327,17 @@ async function registerWithEmail(options = {}) {
             password
         );
 
-    const user = credential.user;
+    const user =
+        credential.user;
 
-    if (name && typeof FB.updateProfile === "function") {
+    /*
+     * Update Firebase Auth display name.
+     */
+    if (
+        name &&
+        typeof FB.updateProfile ===
+            "function"
+    ) {
         try {
             await FB.updateProfile(
                 user,
@@ -1030,30 +1353,54 @@ async function registerWithEmail(options = {}) {
         }
     }
 
+    /*
+     * Create Firestore profile.
+     *
+     * This MUST succeed before registration is considered
+     * complete.
+     */
     let profile;
 
     try {
-        profile = await createUserProfile(
-            user,
-            role,
-            {
-                name,
-                fullName: name,
-                displayName: name,
-                phone:
-                    options.phone ||
-                    user.phoneNumber ||
-                    ""
-            }
-        );
+        profile =
+            await createUserProfile(
+                user,
+                role,
+                {
+                    name,
+                    fullName: name,
+                    displayName: name,
+
+                    phone:
+                        options.phone ||
+                        options.phoneNumber ||
+                        user.phoneNumber ||
+                        "",
+
+                    city:
+                        options.city ||
+                        "Chandigarh"
+                }
+            );
     } catch (error) {
+
+        /*
+         * Auth account was created but profile creation failed.
+         * Sign out so UI does not enter a half-configured state.
+         */
         await safeFirebaseSignOut();
+
         throw error;
     }
 
-    currentUser = user;
-    currentProfile = profile;
-    currentRole = role;
+    currentUser =
+        user;
+
+    currentProfile =
+        profile;
+
+    currentRole =
+        role;
 
     cacheAuthenticatedSession(
         user,
@@ -1073,21 +1420,30 @@ async function registerWithEmail(options = {}) {
    EMAIL LOGIN
 ============================================================ */
 
-async function loginWithEmail(options = {}) {
-    const email = normalizeEmail(
-        options.email
-    );
+async function loginWithEmail(
+    options = {}
+) {
+    const email =
+        normalizeEmail(
+            options.email
+        );
 
-    const password = safeString(
-        options.password
-    );
+    const password =
+        safeString(
+            options.password
+        );
 
-    const selectedRole = normalizeRole(
-        options.role ||
-        options.selectedRole
-    );
+    const selectedRole =
+        normalizeRole(
+            options.role ||
+            options.selectedRole ||
+            storageGet(
+                STORAGE.selectedRole
+            )
+        );
 
-    const validation = validateEmail(email);
+    const validation =
+        validateEmail(email);
 
     if (!validation.valid) {
         throw new Error(
@@ -1109,21 +1465,45 @@ async function loginWithEmail(options = {}) {
 
     if (
         typeof FB.signInWithEmailAndPassword !==
-        "function"
+            "function"
     ) {
         throw new Error(
             "Email/password authentication is not available."
         );
     }
 
-    const credential =
-        await FB.signInWithEmailAndPassword(
-            FB.auth,
-            email,
-            password
+    /*
+     * Save selected role before Firebase login.
+     *
+     * This is only UI state.
+     * Firestore will still decide the real account role.
+     */
+    if (
+        NORMAL_USER_ROLES.includes(
+            selectedRole
+        )
+    ) {
+        storageSet(
+            STORAGE.selectedRole,
+            selectedRole
         );
+    }
 
-    const user = credential.user;
+    let credential;
+
+    try {
+        credential =
+            await FB.signInWithEmailAndPassword(
+                FB.auth,
+                email,
+                password
+            );
+    } catch (error) {
+        throw error;
+    }
+
+    const user =
+        credential.user;
 
     let result;
 
@@ -1133,33 +1513,55 @@ async function loginWithEmail(options = {}) {
                 user,
                 {
                     selectedRole,
-                    allowSelectedRoleFallback: false
+                    allowSelectedRoleFallback:
+                        false
                 }
             );
     } catch (error) {
+
+        /*
+         * IMPORTANT:
+         * Never leave Firebase authenticated when role/profile
+         * verification fails.
+         */
         await safeFirebaseSignOut();
+
+        /*
+         * Preserve a useful application error.
+         */
         throw error;
     }
 
     if (!result.configured) {
+
         await safeFirebaseSignOut();
 
-        throw new Error(
-            "Your account profile is incomplete. Please complete account setup."
-        );
+        const error =
+            new Error(
+                "Your RiderX account profile is incomplete. Please register this account again or contact support."
+            );
+
+        error.code =
+            "riderx/profile-missing";
+
+        throw error;
     }
+
+    /*
+     * Final cache write.
+     */
+    cacheAuthenticatedSession(
+        result.user,
+        result.profile,
+        result.role
+    );
 
     return result;
 }
 
 
 /* ============================================================
-   IMPORTANT COMPATIBILITY API
-   login.html and older RiderX files can use either:
-   
-   loginWithEmail(options)
-   loginEmail(email, password)
-   login(options)
+   COMPATIBILITY LOGIN API
 ============================================================ */
 
 async function loginEmail(
@@ -1179,12 +1581,16 @@ async function loginEmail(
    PASSWORD RESET
 ============================================================ */
 
-async function sendPasswordReset(email) {
+async function sendPasswordReset(
+    email
+) {
     const normalizedEmail =
         normalizeEmail(email);
 
     const validation =
-        validateEmail(normalizedEmail);
+        validateEmail(
+            normalizedEmail
+        );
 
     if (!validation.valid) {
         throw new Error(
@@ -1195,7 +1601,7 @@ async function sendPasswordReset(email) {
     if (
         !FB.auth ||
         typeof FB.sendPasswordResetEmail !==
-        "function"
+            "function"
     ) {
         throw new Error(
             "Password reset service is unavailable."
@@ -1215,15 +1621,19 @@ async function sendPasswordReset(email) {
    PHONE OTP
 ============================================================ */
 
-async function sendPhoneOtp(options = {}) {
-    const phone = normalizePhone(
-        options.phone
-    );
+async function sendPhoneOtp(
+    options = {}
+) {
+    const phone =
+        normalizePhone(
+            options.phone
+        );
 
-    const role = normalizeRole(
-        options.role ||
-        options.selectedRole
-    );
+    const role =
+        normalizeRole(
+            options.role ||
+            options.selectedRole
+        );
 
     if (!phone) {
         throw new Error(
@@ -1231,7 +1641,11 @@ async function sendPhoneOtp(options = {}) {
         );
     }
 
-    if (!NORMAL_USER_ROLES.includes(role)) {
+    if (
+        !NORMAL_USER_ROLES.includes(
+            role
+        )
+    ) {
         throw new Error(
             "Please select Customer or Rider."
         );
@@ -1250,7 +1664,7 @@ async function sendPhoneOtp(options = {}) {
     if (
         !FB.auth ||
         typeof FB.signInWithPhoneNumber !==
-        "function"
+            "function"
     ) {
         throw new Error(
             "Phone OTP authentication is not available."
@@ -1286,17 +1700,23 @@ async function sendPhoneOtp(options = {}) {
    VERIFY OTP
 ============================================================ */
 
-async function verifyPhoneOtp(options = {}) {
-    const code = safeString(
-        options.code ||
-        options.otp
-    );
+async function verifyPhoneOtp(
+    options = {}
+) {
+    const code =
+        safeString(
+            options.code ||
+            options.otp
+        );
 
-    const requestedRole = normalizeRole(
-        options.role ||
-        options.selectedRole ||
-        storageGet(STORAGE.pendingRole)
-    );
+    const requestedRole =
+        normalizeRole(
+            options.role ||
+            options.selectedRole ||
+            storageGet(
+                STORAGE.pendingRole
+            )
+        );
 
     if (!code) {
         throw new Error(
@@ -1310,18 +1730,29 @@ async function verifyPhoneOtp(options = {}) {
         );
     }
 
-    if (!NORMAL_USER_ROLES.includes(requestedRole)) {
+    if (
+        !NORMAL_USER_ROLES.includes(
+            requestedRole
+        )
+    ) {
         throw new Error(
             "Please select Customer or Rider."
         );
     }
 
-    const credential =
-        await otpConfirmationResult.confirm(
-            code
-        );
+    let credential;
 
-    otpConfirmationResult = null;
+    try {
+        credential =
+            await otpConfirmationResult.confirm(
+                code
+            );
+    } catch (error) {
+        throw error;
+    }
+
+    otpConfirmationResult =
+        null;
 
     const firebaseUser =
         credential.user;
@@ -1331,6 +1762,9 @@ async function verifyPhoneOtp(options = {}) {
             firebaseUser
         );
 
+    /*
+     * New phone user.
+     */
     if (!profile) {
         profile =
             await createUserProfile(
@@ -1339,17 +1773,40 @@ async function verifyPhoneOtp(options = {}) {
                 {
                     phone:
                         firebaseUser.phoneNumber ||
-                        storageGet(STORAGE.otpPhone)
+                        storageGet(
+                            STORAGE.otpPhone
+                        )
                 }
             );
+    } else {
+
+        const existingRole =
+            normalizeRole(
+                profile.role
+            );
+
+        if (
+            existingRole &&
+            existingRole !== requestedRole
+        ) {
+            await safeFirebaseSignOut();
+
+            throw createRoleMismatchError(
+                requestedRole,
+                existingRole
+            );
+        }
     }
 
     const result =
         await finalizeAuthenticatedUser(
             firebaseUser,
             {
-                selectedRole: requestedRole,
-                allowSelectedRoleFallback: false
+                selectedRole:
+                    requestedRole,
+
+                allowSelectedRoleFallback:
+                    false
             }
         );
 
@@ -1357,28 +1814,36 @@ async function verifyPhoneOtp(options = {}) {
         await safeFirebaseSignOut();
 
         throw new Error(
-            "Your account profile is incomplete."
+            "Your RiderX account profile is incomplete."
         );
     }
 
-    storageRemove(STORAGE.otpPhone);
-    storageRemove(STORAGE.pendingRole);
+    storageRemove(
+        STORAGE.otpPhone
+    );
+
+    storageRemove(
+        STORAGE.pendingRole
+    );
 
     return result;
 }
 
 
 /* ============================================================
-   SIGN OUT
+   FIREBASE SIGN OUT
 ============================================================ */
 
 async function safeFirebaseSignOut() {
     try {
         if (
             FB.auth &&
-            typeof FB.signOut === "function"
+            typeof FB.signOut ===
+                "function"
         ) {
-            await FB.signOut(FB.auth);
+            await FB.signOut(
+                FB.auth
+            );
         }
     } catch (error) {
         console.warn(
@@ -1389,23 +1854,48 @@ async function safeFirebaseSignOut() {
 }
 
 
-async function logout(options = {}) {
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+async function logout(
+    options = {}
+) {
     await safeFirebaseSignOut();
 
-    currentUser = null;
-    currentProfile = null;
-    currentRole = "";
+    currentUser =
+        null;
+
+    currentProfile =
+        null;
+
+    currentRole =
+        "";
 
     clearSessionCache();
 
-    otpConfirmationResult = null;
+    otpConfirmationResult =
+        null;
 
-    storageRemove(STORAGE.otpPhone);
-    storageRemove(STORAGE.pendingRole);
-    storageRemove(STORAGE.pendingEmail);
-    storageRemove(STORAGE.pendingName);
+    storageRemove(
+        STORAGE.otpPhone
+    );
 
-    if (options.redirect !== false) {
+    storageRemove(
+        STORAGE.pendingRole
+    );
+
+    storageRemove(
+        STORAGE.pendingEmail
+    );
+
+    storageRemove(
+        STORAGE.pendingName
+    );
+
+    if (
+        options.redirect !== false
+    ) {
         window.location.replace(
             resolveRoute(
                 options.redirectTo ||
@@ -1419,10 +1909,12 @@ async function logout(options = {}) {
 
 
 /* ============================================================
-   RIDER / ACCOUNT STATUS
+   ACCOUNT STATUS
 ============================================================ */
 
-function isAccountBlocked(profile) {
+function isAccountBlocked(
+    profile
+) {
     if (!profile) {
         return false;
     }
@@ -1431,23 +1923,34 @@ function isAccountBlocked(profile) {
         profile.disabled === true ||
         profile.blocked === true ||
         profile.suspended === true ||
-        ["blocked", "suspended", "disabled"]
-            .includes(
-                safeLower(profile.status)
+        [
+            "blocked",
+            "suspended",
+            "disabled"
+        ].includes(
+            safeLower(
+                profile.status
             )
+        )
     );
 }
 
 
-function isRiderApproved(profile) {
+function isRiderApproved(
+    profile
+) {
     if (
         !profile ||
-        normalizeRole(profile.role) !== ROLES.RIDER
+        normalizeRole(
+            profile.role
+        ) !== ROLES.RIDER
     ) {
         return false;
     }
 
-    if (isAccountBlocked(profile)) {
+    if (
+        isAccountBlocked(profile)
+    ) {
         return false;
     }
 
@@ -1455,9 +1958,14 @@ function isRiderApproved(profile) {
         safeLower(
             profile.approvalStatus ||
             profile.riderStatus ||
-            profile.status
+            ""
         );
 
+    /*
+     * Rider profile uses explicit approval fields.
+     *
+     * Do NOT use generic "active" status as rider approval.
+     */
     return (
         profile.approved === true ||
         profile.isApproved === true ||
@@ -1471,8 +1979,11 @@ function isRiderApproved(profile) {
    UPDATE PROFILE
 ============================================================ */
 
-async function updateProfile(updates = {}) {
-    const user = getUser();
+async function updateProfile(
+    updates = {}
+) {
+    const user =
+        getUser();
 
     if (!user) {
         throw new Error(
@@ -1481,7 +1992,9 @@ async function updateProfile(updates = {}) {
     }
 
     const profile =
-        await getUserProfile(user);
+        await getUserProfile(
+            user
+        );
 
     if (!profile) {
         throw new Error(
@@ -1491,26 +2004,39 @@ async function updateProfile(updates = {}) {
 
     const allowed = {};
 
-    const name = safeString(
-        updates.name ||
-        updates.fullName ||
-        updates.displayName
-    );
+    const name =
+        safeString(
+            updates.name ||
+            updates.fullName ||
+            updates.displayName
+        );
 
     if (name) {
-        allowed.name = name;
-        allowed.fullName = name;
-        allowed.displayName = name;
-    }
+        allowed.name =
+            name;
 
-    if (updates.photoURL !== undefined) {
-        allowed.photoURL =
-            safeString(updates.photoURL);
+        allowed.fullName =
+            name;
+
+        allowed.displayName =
+            name;
     }
 
     if (
-        updates.phone !== undefined ||
-        updates.phoneNumber !== undefined
+        updates.photoURL !==
+        undefined
+    ) {
+        allowed.photoURL =
+            safeString(
+                updates.photoURL
+            );
+    }
+
+    if (
+        updates.phone !==
+            undefined ||
+        updates.phoneNumber !==
+            undefined
     ) {
         const phone =
             normalizePhone(
@@ -1524,11 +2050,15 @@ async function updateProfile(updates = {}) {
             );
         }
 
-        allowed.phone = phone;
-        allowed.phoneNumber = phone;
+        allowed.phone =
+            phone;
+
+        allowed.phoneNumber =
+            phone;
     }
 
-    allowed.updatedAt = Date.now();
+    allowed.updatedAt =
+        Date.now();
 
     const updated =
         await saveUserProfile(
@@ -1540,12 +2070,17 @@ async function updateProfile(updates = {}) {
             true
         );
 
-    if (name && typeof FB.updateProfile === "function") {
+    if (
+        name &&
+        typeof FB.updateProfile ===
+            "function"
+    ) {
         try {
             await FB.updateProfile(
                 user,
                 {
-                    displayName: name
+                    displayName:
+                        name
                 }
             );
         } catch (error) {
@@ -1556,7 +2091,8 @@ async function updateProfile(updates = {}) {
         }
     }
 
-    currentProfile = updated;
+    currentProfile =
+        updated;
 
     cacheAuthenticatedSession(
         user,
@@ -1572,8 +2108,13 @@ async function updateProfile(updates = {}) {
    AUTH STATE
 ============================================================ */
 
-function notifyAuthListeners(state) {
-    for (const listener of [...authListeners]) {
+function notifyAuthListeners(
+    state
+) {
+    for (
+        const listener
+        of [...authListeners]
+    ) {
         try {
             listener(state);
         } catch (error) {
@@ -1587,15 +2128,26 @@ function notifyAuthListeners(state) {
 
 
 function getState() {
-    const user = getUser();
+    const user =
+        getUser();
 
     return {
-        authenticated: Boolean(user),
+        authenticated:
+            Boolean(user),
+
         configured:
-            Boolean(user && currentRole),
+            Boolean(
+                user &&
+                currentRole
+            ),
+
         user,
-        profile: currentProfile,
-        role: currentRole
+
+        profile:
+            currentProfile,
+
+        role:
+            currentRole
     };
 }
 
@@ -1605,130 +2157,225 @@ function getState() {
 ============================================================ */
 
 function init() {
-    if (authInitPromise) {
+    if (
+        authInitPromise
+    ) {
         return authInitPromise;
     }
 
     if (
         !FB.auth ||
-        typeof FB.onAuthStateChanged !== "function"
+        typeof FB.onAuthStateChanged !==
+            "function"
     ) {
-        authInitialized = true;
+        authInitialized =
+            true;
 
         const state = {
-            authenticated: false,
-            configured: false,
-            user: null,
-            profile: null,
-            role: ""
+            authenticated:
+                false,
+
+            configured:
+                false,
+
+            user:
+                null,
+
+            profile:
+                null,
+
+            role:
+                ""
         };
 
         authInitPromise =
-            Promise.resolve(state);
+            Promise.resolve(
+                state
+            );
 
         return authInitPromise;
     }
 
-    authListenerStarted = true;
+    authListenerStarted =
+        true;
 
     authInitPromise =
-        new Promise(resolve => {
-            let resolved = false;
+        new Promise(
+            resolve => {
 
-            FB.onAuthStateChanged(
-                FB.auth,
-                async user => {
-                    try {
-                        currentUser =
-                            user || null;
+                let resolved =
+                    false;
 
-                        if (!user) {
-                            currentProfile = null;
-                            currentRole = "";
-
-                            clearSessionCache();
-
-                            const state = {
-                                authenticated: false,
-                                configured: false,
-                                user: null,
-                                profile: null,
-                                role: ""
-                            };
-
-                            authInitialized = true;
-
-                            notifyAuthListeners(state);
-
-                            if (!resolved) {
-                                resolved = true;
-                                resolve(state);
-                            }
-
-                            return;
-                        }
-
-                        let result;
+                FB.onAuthStateChanged(
+                    FB.auth,
+                    async user => {
 
                         try {
-                            result =
-                                await finalizeAuthenticatedUser(
-                                    user,
-                                    {
-                                        allowSelectedRoleFallback:
-                                            false
-                                    }
+
+                            currentUser =
+                                user ||
+                                null;
+
+                            /*
+                             * No Firebase user.
+                             */
+                            if (!user) {
+
+                                currentProfile =
+                                    null;
+
+                                currentRole =
+                                    "";
+
+                                clearSessionCache();
+
+                                const state = {
+                                    authenticated:
+                                        false,
+
+                                    configured:
+                                        false,
+
+                                    user:
+                                        null,
+
+                                    profile:
+                                        null,
+
+                                    role:
+                                        ""
+                                };
+
+                                authInitialized =
+                                    true;
+
+                                notifyAuthListeners(
+                                    state
                                 );
+
+                                if (!resolved) {
+                                    resolved =
+                                        true;
+
+                                    resolve(
+                                        state
+                                    );
+                                }
+
+                                return;
+                            }
+
+
+                            /*
+                             * Existing Firebase session.
+                             */
+                            let result;
+
+                            try {
+
+                                result =
+                                    await finalizeAuthenticatedUser(
+                                        user,
+                                        {
+                                            allowSelectedRoleFallback:
+                                                false
+                                        }
+                                    );
+
+                            } catch (error) {
+
+                                console.error(
+                                    "RiderX profile initialization failed:",
+                                    error
+                                );
+
+                                /*
+                                 * If an existing account has a
+                                 * broken profile, don't leave stale
+                                 * local auth cache behind.
+                                 */
+                                clearSessionCache();
+
+                                result = {
+                                    authenticated:
+                                        true,
+
+                                    configured:
+                                        false,
+
+                                    user,
+
+                                    profile:
+                                        null,
+
+                                    role:
+                                        ""
+                                };
+                            }
+
+                            authInitialized =
+                                true;
+
+                            notifyAuthListeners(
+                                result
+                            );
+
+                            if (!resolved) {
+                                resolved =
+                                    true;
+
+                                resolve(
+                                    result
+                                );
+                            }
+
                         } catch (error) {
+
                             console.error(
-                                "RiderX profile initialization failed:",
+                                "RiderX auth initialization failed:",
                                 error
                             );
 
-                            result = {
-                                authenticated: true,
-                                configured: false,
-                                user,
-                                profile: null,
-                                role: ""
+                            const state = {
+                                authenticated:
+                                    Boolean(
+                                        user
+                                    ),
+
+                                configured:
+                                    false,
+
+                                user:
+                                    user ||
+                                    null,
+
+                                profile:
+                                    null,
+
+                                role:
+                                    ""
                             };
-                        }
 
-                        authInitialized = true;
+                            authInitialized =
+                                true;
 
-                        notifyAuthListeners(result);
+                            notifyAuthListeners(
+                                state
+                            );
 
-                        if (!resolved) {
-                            resolved = true;
-                            resolve(result);
-                        }
+                            if (!resolved) {
+                                resolved =
+                                    true;
 
-                    } catch (error) {
-                        console.error(
-                            "RiderX auth initialization failed:",
-                            error
-                        );
-
-                        const state = {
-                            authenticated: Boolean(user),
-                            configured: false,
-                            user: user || null,
-                            profile: null,
-                            role: ""
-                        };
-
-                        authInitialized = true;
-
-                        notifyAuthListeners(state);
-
-                        if (!resolved) {
-                            resolved = true;
-                            resolve(state);
+                                resolve(
+                                    state
+                                );
+                            }
                         }
                     }
-                }
-            );
-        });
+                );
+            }
+        );
 
     return authInitPromise;
 }
@@ -1738,16 +2385,27 @@ function init() {
    AUTH LISTENER
 ============================================================ */
 
-function onAuthStateChanged(callback) {
-    if (typeof callback !== "function") {
+function onAuthStateChanged(
+    callback
+) {
+    if (
+        typeof callback !==
+        "function"
+    ) {
         return () => {};
     }
 
-    authListeners.push(callback);
+    authListeners.push(
+        callback
+    );
 
-    if (authInitialized) {
+    if (
+        authInitialized
+    ) {
         try {
-            callback(getState());
+            callback(
+                getState()
+            );
         } catch (error) {
             console.error(
                 "RiderX auth callback failed:",
@@ -1757,11 +2415,17 @@ function onAuthStateChanged(callback) {
     }
 
     return () => {
+
         const index =
-            authListeners.indexOf(callback);
+            authListeners.indexOf(
+                callback
+            );
 
         if (index !== -1) {
-            authListeners.splice(index, 1);
+            authListeners.splice(
+                index,
+                1
+            );
         }
     };
 }
@@ -1772,12 +2436,19 @@ function onAuthStateChanged(callback) {
 ============================================================ */
 
 async function refreshSession() {
-    const user = getUser();
+    const user =
+        getUser();
 
     if (!user) {
-        currentUser = null;
-        currentProfile = null;
-        currentRole = "";
+
+        currentUser =
+            null;
+
+        currentProfile =
+            null;
+
+        currentRole =
+            "";
 
         clearSessionCache();
 
@@ -1785,31 +2456,54 @@ async function refreshSession() {
     }
 
     const profile =
-        await getUserProfile(user);
+        await getUserProfile(
+            user
+        );
 
     if (!profile) {
-        currentProfile = null;
-        currentRole = "";
+
+        currentProfile =
+            null;
+
+        currentRole =
+            "";
 
         clearSessionCache();
 
         return getState();
     }
 
-    currentUser = user;
-    currentProfile = profile;
+    const role =
+        normalizeRole(
+            profile.role
+        );
+
+    if (!role) {
+
+        currentProfile =
+            null;
+
+        currentRole =
+            "";
+
+        clearSessionCache();
+
+        return getState();
+    }
+
+    currentUser =
+        user;
+
+    currentProfile =
+        profile;
+
     currentRole =
-        normalizeRole(profile.role);
-
-    if (!currentRole) {
-        clearSessionCache();
-        return getState();
-    }
+        role;
 
     cacheAuthenticatedSession(
         user,
         profile,
-        currentRole
+        role
     );
 
     return getState();
@@ -1821,16 +2515,20 @@ async function refreshSession() {
 ============================================================ */
 
 async function refreshToken() {
-    const user = getUser();
+    const user =
+        getUser();
 
     if (
         !user ||
-        typeof user.getIdToken !== "function"
+        typeof user.getIdToken !==
+            "function"
     ) {
         return null;
     }
 
-    return user.getIdToken(true);
+    return user.getIdToken(
+        true
+    );
 }
 
 
@@ -1838,11 +2536,19 @@ async function refreshToken() {
    ROLE GUARDS
 ============================================================ */
 
-async function requireAuth(options = {}) {
-    const state = await init();
+async function requireAuth(
+    options = {}
+) {
+    const state =
+        await init();
 
-    if (!state.authenticated) {
-        if (options.redirect !== false) {
+    if (
+        !state.authenticated
+    ) {
+        if (
+            options.redirect !==
+            false
+        ) {
             window.location.replace(
                 resolveRoute(
                     options.redirectTo ||
@@ -1854,36 +2560,57 @@ async function requireAuth(options = {}) {
         return false;
     }
 
-    if (options.role) {
+    if (
+        options.role
+    ) {
         const requiredRole =
-            normalizeRole(options.role);
+            normalizeRole(
+                options.role
+            );
 
         if (
             !requiredRole ||
-            state.role !== requiredRole
+            state.role !==
+                requiredRole
         ) {
-            if (options.redirect !== false) {
-                if (state.role === ROLES.CUSTOMER) {
+
+            if (
+                options.redirect !==
+                false
+            ) {
+
+                if (
+                    state.role ===
+                    ROLES.CUSTOMER
+                ) {
                     window.location.replace(
                         resolveRoute(
                             ROUTES.customerHome
                         )
                     );
-                } else if (state.role === ROLES.RIDER) {
+
+                } else if (
+                    state.role ===
+                    ROLES.RIDER
+                ) {
                     window.location.replace(
                         resolveRoute(
                             ROUTES.riderHome
                         )
                     );
+
                 } else if (
-                    state.role === ROLES.ADMIN ||
-                    state.role === ROLES.SUPERADMIN
+                    state.role ===
+                        ROLES.ADMIN ||
+                    state.role ===
+                        ROLES.SUPERADMIN
                 ) {
                     window.location.replace(
                         resolveRoute(
                             ROUTES.adminDashboard
                         )
                     );
+
                 } else {
                     window.location.replace(
                         resolveRoute(
@@ -1898,22 +2625,33 @@ async function requireAuth(options = {}) {
     }
 
     if (
-        options.checkBlocked !== false &&
-        isAccountBlocked(state.profile)
+        options.checkBlocked !==
+            false &&
+        isAccountBlocked(
+            state.profile
+        )
     ) {
         await logout({
-            redirectTo: ROUTES.login
+            redirectTo:
+                ROUTES.login
         });
 
         return false;
     }
 
     if (
-        state.role === ROLES.RIDER &&
-        options.requireApprovedRider === true &&
-        !isRiderApproved(state.profile)
+        state.role ===
+            ROLES.RIDER &&
+        options.requireApprovedRider ===
+            true &&
+        !isRiderApproved(
+            state.profile
+        )
     ) {
-        if (options.redirect !== false) {
+        if (
+            options.redirect !==
+            false
+        ) {
             window.location.replace(
                 resolveRoute(
                     ROUTES.riderPending
@@ -1939,7 +2677,9 @@ async function requireRole(
 }
 
 
-async function requireCustomer(options = {}) {
+async function requireCustomer(
+    options = {}
+) {
     return requireRole(
         ROLES.CUSTOMER,
         options
@@ -1947,23 +2687,35 @@ async function requireCustomer(options = {}) {
 }
 
 
-async function requireRider(options = {}) {
+async function requireRider(
+    options = {}
+) {
     return requireRole(
         ROLES.RIDER,
         {
             ...options,
+
             requireApprovedRider:
-                options.requireApprovedRider !== false
+                options.requireApprovedRider !==
+                false
         }
     );
 }
 
 
-async function requireAdmin(options = {}) {
-    const state = await init();
+async function requireAdmin(
+    options = {}
+) {
+    const state =
+        await init();
 
-    if (!state.authenticated) {
-        if (options.redirect !== false) {
+    if (
+        !state.authenticated
+    ) {
+        if (
+            options.redirect !==
+            false
+        ) {
             window.location.replace(
                 resolveRoute(
                     options.redirectTo ||
@@ -1976,23 +2728,38 @@ async function requireAdmin(options = {}) {
     }
 
     const admin =
-        state.role === ROLES.ADMIN ||
-        state.role === ROLES.SUPERADMIN;
+        state.role ===
+            ROLES.ADMIN ||
+        state.role ===
+            ROLES.SUPERADMIN;
 
     if (!admin) {
-        if (options.redirect !== false) {
-            if (state.role === ROLES.CUSTOMER) {
+
+        if (
+            options.redirect !==
+            false
+        ) {
+
+            if (
+                state.role ===
+                ROLES.CUSTOMER
+            ) {
                 window.location.replace(
                     resolveRoute(
                         ROUTES.customerHome
                     )
                 );
-            } else if (state.role === ROLES.RIDER) {
+
+            } else if (
+                state.role ===
+                ROLES.RIDER
+            ) {
                 window.location.replace(
                     resolveRoute(
                         ROUTES.riderHome
                     )
                 );
+
             } else {
                 window.location.replace(
                     resolveRoute(
@@ -2006,11 +2773,15 @@ async function requireAdmin(options = {}) {
     }
 
     if (
-        options.checkBlocked !== false &&
-        isAccountBlocked(state.profile)
+        options.checkBlocked !==
+            false &&
+        isAccountBlocked(
+            state.profile
+        )
     ) {
         await logout({
-            redirectTo: ROUTES.login
+            redirectTo:
+                ROUTES.login
         });
 
         return false;
@@ -2058,37 +2829,62 @@ function getEmail() {
 }
 
 
-function hasRole(role) {
-    return (
-        Boolean(normalizeRole(role)) &&
-        currentRole === normalizeRole(role)
+function hasRole(
+    role
+) {
+    const normalized =
+        normalizeRole(role);
+
+    return Boolean(
+        normalized &&
+        currentRole ===
+            normalized
     );
 }
 
 
 function getCachedRole() {
     return normalizeRole(
-        storageGet(STORAGE.role)
+        storageGet(
+            STORAGE.role
+        )
     );
 }
 
 
 function clearOtpState() {
-    otpConfirmationResult = null;
+    otpConfirmationResult =
+        null;
 
-    storageRemove(STORAGE.otpPhone);
-    storageRemove(STORAGE.pendingRole);
-    storageRemove(STORAGE.pendingEmail);
-    storageRemove(STORAGE.pendingName);
+    storageRemove(
+        STORAGE.otpPhone
+    );
+
+    storageRemove(
+        STORAGE.pendingRole
+    );
+
+    storageRemove(
+        STORAGE.pendingEmail
+    );
+
+    storageRemove(
+        STORAGE.pendingName
+    );
 }
 
 
 function clearLocalSession() {
     clearSessionCache();
 
-    currentUser = null;
-    currentProfile = null;
-    currentRole = "";
+    currentUser =
+        null;
+
+    currentProfile =
+        null;
+
+    currentRole =
+        "";
 }
 
 
@@ -2105,7 +2901,10 @@ const AUTH = {
     normalizeRole,
 
     isValidRole:
-        role => Boolean(normalizeRole(role)),
+        role =>
+            Boolean(
+                normalizeRole(role)
+            ),
 
     isNormalUserRole:
         role =>
@@ -2129,7 +2928,8 @@ const AUTH = {
 
     getUid,
 
-    getUserId: getUid,
+    getUserId:
+        getUid,
 
     getDisplayName,
 
@@ -2158,9 +2958,6 @@ const AUTH = {
 
     loginWithEmail,
 
-    /*
-     * Compatibility API used by login.html.
-     */
     loginEmail,
 
     login:
@@ -2243,23 +3040,32 @@ const AUTH = {
    GLOBAL COMPATIBILITY
 ============================================================ */
 
-/*
- * RiderXAuth
- */
 globalThis.RiderXAuth = {
     ...(globalThis.RiderXAuth || {}),
-    auth: AUTH,
+
+    auth:
+        AUTH,
+
     AUTH,
+
     ROLES,
+
     ROUTES,
+
     resolveRoute,
 
     login:
         options =>
-            AUTH.loginWithEmail(options),
+            AUTH.loginWithEmail(
+                options
+            ),
 
     loginEmail:
-        (email, password, role) =>
+        (
+            email,
+            password,
+            role
+        ) =>
             AUTH.loginEmail(
                 email,
                 password,
@@ -2268,83 +3074,126 @@ globalThis.RiderXAuth = {
 
     register:
         options =>
-            AUTH.registerWithEmail(options),
+            AUTH.registerWithEmail(
+                options
+            ),
 
     logout:
         options =>
-            AUTH.logout(options),
+            AUTH.logout(
+                options
+            ),
 
     sendOTP:
         options =>
-            AUTH.sendPhoneOtp(options),
+            AUTH.sendPhoneOtp(
+                options
+            ),
 
     verifyOTP:
         options =>
-            AUTH.verifyPhoneOtp(options),
+            AUTH.verifyPhoneOtp(
+                options
+            ),
 
     getUser:
-        () => AUTH.getUser(),
+        () =>
+            AUTH.getUser(),
 
     getProfile:
-        () => AUTH.getProfile(),
+        () =>
+            AUTH.getProfile(),
 
     getRole:
-        () => AUTH.getRole(),
+        () =>
+            AUTH.getRole(),
 
     getUid:
-        () => AUTH.getUid(),
+        () =>
+            AUTH.getUid(),
 
     hasRole:
-        role => AUTH.hasRole(role),
+        role =>
+            AUTH.hasRole(
+                role
+            ),
 
     requireAuth:
-        options => AUTH.requireAuth(options),
+        options =>
+            AUTH.requireAuth(
+                options
+            ),
 
     requireCustomer:
-        options => AUTH.requireCustomer(options),
+        options =>
+            AUTH.requireCustomer(
+                options
+            ),
 
     requireRider:
-        options => AUTH.requireRider(options),
+        options =>
+            AUTH.requireRider(
+                options
+            ),
 
     requireAdmin:
-        options => AUTH.requireAdmin(options),
+        options =>
+            AUTH.requireAdmin(
+                options
+            ),
 
     getErrorMessage:
-        error => AUTH.getErrorMessage(error),
+        error =>
+            AUTH.getErrorMessage(
+                error
+            ),
 
     updateProfile:
-        updates => AUTH.updateProfile(updates),
+        updates =>
+            AUTH.updateProfile(
+                updates
+            ),
 
     refreshSession:
-        () => AUTH.refreshSession(),
+        () =>
+            AUTH.refreshSession(),
 
     refreshToken:
-        () => AUTH.refreshToken()
+        () =>
+            AUTH.refreshToken()
 };
 
 
-/*
- * IMPORTANT:
- * Older pages may use window.RiderX.auth.
- *
- * The previous version did NOT expose this object.
- * That was the direct cause of:
- *
- * "RiderX authentication engine is unavailable."
- */
-globalThis.RiderX = globalThis.RiderX || {};
+/* ============================================================
+   RIDERX GLOBAL COMPATIBILITY
+============================================================ */
 
-globalThis.RiderX.auth = AUTH;
-globalThis.RiderX.AUTH = AUTH;
-globalThis.RiderX.ROLES = ROLES;
-globalThis.RiderX.ROUTES = ROUTES;
-globalThis.RiderX.resolveRoute = resolveRoute;
+globalThis.RiderX =
+    globalThis.RiderX ||
+    {};
+
+globalThis.RiderX.auth =
+    AUTH;
+
+globalThis.RiderX.AUTH =
+    AUTH;
+
+globalThis.RiderX.ROLES =
+    ROLES;
+
+globalThis.RiderX.ROUTES =
+    ROUTES;
+
+globalThis.RiderX.resolveRoute =
+    resolveRoute;
 
 
-/*
- * Direct global AUTH compatibility.
- */
-globalThis.AUTH = AUTH;
+/* ============================================================
+   DIRECT AUTH GLOBAL
+============================================================ */
+
+globalThis.AUTH =
+    AUTH;
 
 
 /* ============================================================
@@ -2352,18 +3201,23 @@ globalThis.AUTH = AUTH;
 ============================================================ */
 
 try {
+
     if (
         FB.auth &&
-        typeof FB.onAuthStateChanged === "function"
+        typeof FB.onAuthStateChanged ===
+            "function"
     ) {
-        AUTH.init().catch(error => {
-            console.error(
-                "RiderX automatic auth initialization failed:",
-                error
-            );
-        });
+        AUTH.init()
+            .catch(error => {
+                console.error(
+                    "RiderX automatic auth initialization failed:",
+                    error
+                );
+            });
     }
+
 } catch (error) {
+
     console.error(
         "RiderX auth startup failed:",
         error
