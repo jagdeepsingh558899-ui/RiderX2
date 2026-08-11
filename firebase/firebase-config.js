@@ -21,7 +21,7 @@
    No other RiderX page/module should call:
        initializeApp()
 
-   Feature modules must import Firebase services
+   Feature modules should import Firebase services
    from this file.
 ========================================================= */
 
@@ -35,7 +35,7 @@
 const FIREBASE_SDK_VERSION = "12.2.1";
 
 const FIREBASE_BASE_URL =
-    `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
+    "https://www.gstatic.com/firebasejs/12.2.1";
 
 
 /* =========================================================
@@ -45,7 +45,7 @@ const FIREBASE_BASE_URL =
 import {
     initializeApp,
     getApps
-} from `${FIREBASE_BASE_URL}/firebase-app.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 
 /* =========================================================
@@ -66,7 +66,7 @@ import {
     updateProfile,
     deleteUser,
     sendEmailVerification
-} from `${FIREBASE_BASE_URL}/firebase-auth.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 /* =========================================================
@@ -95,7 +95,7 @@ import {
     arrayUnion,
     arrayRemove,
     increment
-} from `${FIREBASE_BASE_URL}/firebase-firestore.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 /* =========================================================
@@ -114,7 +114,7 @@ import {
     off,
     onDisconnect,
     serverTimestamp as databaseServerTimestamp
-} from `${FIREBASE_BASE_URL}/firebase-database.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
 
 /* =========================================================
@@ -128,7 +128,7 @@ import {
     uploadBytesResumable,
     getDownloadURL,
     deleteObject
-} from `${FIREBASE_BASE_URL}/firebase-storage.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 
 
 /* =========================================================
@@ -169,24 +169,23 @@ const firebaseConfig = Object.freeze({
    ---------------------------------------------------------
    Reuse an existing default app when available.
    Otherwise initialize exactly one default app.
+
+   IMPORTANT:
+   No other RiderX file should call initializeApp().
 ========================================================= */
 
 let app = null;
 
 try {
 
-    const apps = getApps();
+    const existingApps = getApps();
 
-    if (apps.length > 0) {
+    app =
+        existingApps.find(
+            firebaseApp =>
+                firebaseApp.name === "[DEFAULT]"
+        ) || null;
 
-        app =
-            apps.find(
-                firebaseApp =>
-                    firebaseApp.name === "[DEFAULT]"
-            ) ||
-            apps[0];
-
-    }
 
     if (!app) {
 
@@ -225,7 +224,7 @@ try {
 } catch (error) {
 
     console.error(
-        "RiderX: Firebase Auth initialization failed.",
+        "RiderX: Firebase Authentication initialization failed.",
         error
     );
 
@@ -250,7 +249,7 @@ try {
 } catch (error) {
 
     console.error(
-        "RiderX: Firestore initialization failed.",
+        "RiderX: Cloud Firestore initialization failed.",
         error
     );
 
@@ -357,8 +356,7 @@ const firebaseServices =
    FIREBASE READY STATE
 ========================================================= */
 
-const firebaseReady =
-    true;
+const firebaseReady = true;
 
 
 /* =========================================================
@@ -414,11 +412,10 @@ function getFirebase() {
 /* =========================================================
    LEGACY COMPATIBILITY BRIDGE
    ---------------------------------------------------------
-   IMPORTANT:
    This bridge DOES NOT initialize Firebase.
 
-   It only exposes the already initialized instances
-   to older RiderX pages/scripts.
+   It only exposes already initialized RiderX
+   Firebase instances to older scripts/pages.
 
    New code should use ES module imports.
 ========================================================= */
@@ -461,10 +458,12 @@ if (
         waitForFirebase;
 
 
-    /*
-     * Dispatch the ready event asynchronously so pages
-     * have a chance to register their listeners.
-     */
+    /* =====================================================
+       FIREBASE READY EVENT
+       -----------------------------------------------------
+       Dispatch asynchronously so pages/scripts have time
+       to register their event listeners.
+    ===================================================== */
 
     const dispatchReadyEvent =
         () => {
@@ -519,7 +518,9 @@ if (
 
 export {
 
-    /* Firebase app/config */
+    /* =====================================================
+       FIREBASE APP / CONFIG
+    ===================================================== */
 
     app,
 
@@ -528,7 +529,9 @@ export {
     firebaseServices,
 
 
-    /* Firebase instances */
+    /* =====================================================
+       FIREBASE INSTANCES
+    ===================================================== */
 
     auth,
 
@@ -541,7 +544,9 @@ export {
     googleProvider,
 
 
-    /* Firebase state/helpers */
+    /* =====================================================
+       FIREBASE STATE / HELPERS
+    ===================================================== */
 
     isFirebaseReady,
 
@@ -551,7 +556,7 @@ export {
 
 
     /* =====================================================
-       AUTH
+       AUTHENTICATION
     ===================================================== */
 
     createUserWithEmailAndPassword,
@@ -580,7 +585,7 @@ export {
 
 
     /* =====================================================
-       FIRESTORE
+       CLOUD FIRESTORE
     ===================================================== */
 
     doc,
@@ -650,7 +655,7 @@ export {
 
 
     /* =====================================================
-       STORAGE
+       FIREBASE STORAGE
     ===================================================== */
 
     storageRef,
