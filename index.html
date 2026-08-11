@@ -298,7 +298,7 @@
                 id="riderx-retry"
                 type="button"
             >
-                Continue
+                Retry Connection
             </button>
         </div>
 
@@ -309,29 +309,6 @@
 <script type="module">
 
 "use strict";
-
-
-/* ============================================================
-   RIDERX 2.0
-   ENTRY ROUTER
-   File: index.html
-
-   AUTHORITY:
-
-   Firebase Authentication
-          ↓
-   Firestore users/{uid}
-          ↓
-   Account role
-          ↓
-   Rider approval check
-          ↓
-   Dashboard
-
-   localStorage is ONLY a compatibility/session cache.
-   It is NEVER trusted for authentication.
-   ============================================================ */
-
 
 /* ============================================================
    FIREBASE
@@ -368,15 +345,10 @@ const retryButton =
 ============================================================ */
 
 const ROUTES = Object.freeze({
-
     role: "./auth/role.html",
-
     customer: "./customer/home.html",
-
     rider: "./rider/home.html",
-
     admin: "./admin/dashboard.html"
-
 });
 
 
@@ -385,9 +357,7 @@ const ROUTES = Object.freeze({
 ============================================================ */
 
 const AUTH_TIMEOUT = 15000;
-
 const FIRESTORE_TIMEOUT = 10000;
-
 const REDIRECT_DELAY = 120;
 
 
@@ -396,11 +366,8 @@ const REDIRECT_DELAY = 120;
 ============================================================ */
 
 let authResolved = false;
-
 let routingStarted = false;
-
 let redirectStarted = false;
-
 let authUnsubscribe = null;
 
 
@@ -409,38 +376,26 @@ let authUnsubscribe = null;
 ============================================================ */
 
 function setStatus(text) {
-
     if (statusElement) {
-        statusElement.textContent =
-            String(text || "");
+        statusElement.textContent = String(text || "");
     }
-
 }
 
 
 /* ============================================================
-   HIDE LOADER
+   HIDE LOADER / FALLBACK
 ============================================================ */
 
 function hideLoader() {
-
     if (loader) {
         loader.classList.add("hidden");
     }
-
 }
 
-
-/* ============================================================
-   FALLBACK
-============================================================ */
-
 function showFallback() {
-
     if (fallback) {
         fallback.classList.add("visible");
     }
-
 }
 
 
@@ -449,43 +404,23 @@ function showFallback() {
 ============================================================ */
 
 function redirectTo(route) {
-
-    if (
-        !route ||
-        redirectStarted
-    ) {
+    if (!route || redirectStarted) {
         return;
     }
 
     redirectStarted = true;
-
     hideLoader();
-
     window.location.replace(route);
-
 }
 
-
-/* ============================================================
-   DELAYED REDIRECT
-============================================================ */
-
-function delayedRedirect(
-    route,
-    message
-) {
-
+function delayedRedirect(route, message) {
     if (message) {
         setStatus(message);
     }
 
-    window.setTimeout(
-        function () {
-            redirectTo(route);
-        },
-        REDIRECT_DELAY
-    );
-
+    window.setTimeout(function () {
+        redirectTo(route);
+    }, REDIRECT_DELAY);
 }
 
 
@@ -494,57 +429,28 @@ function delayedRedirect(
 ============================================================ */
 
 function normalizeRole(value) {
-
-    if (
-        typeof value !== "string"
-    ) {
+    if (typeof value !== "string") {
         return "";
     }
 
-    const role =
-        value
-            .trim()
-            .toLowerCase()
-            .replace(
-                /[\s-]+/g,
-                "_"
-            );
+    const role = value
+        .trim()
+        .toLowerCase()
+        .replace(/[\s-]+/g, "_");
 
-    if (
-        [
-            "admin",
-            "administrator",
-            "superadmin"
-        ].includes(role)
-    ) {
+    if (["admin", "administrator", "superadmin"].includes(role)) {
         return "admin";
     }
 
-    if (
-        [
-            "rider",
-            "driver",
-            "captain",
-            "partner",
-            "driver_partner",
-            "driverpartner"
-        ].includes(role)
-    ) {
+    if (["rider", "driver", "captain", "partner", "driver_partner", "driverpartner"].includes(role)) {
         return "rider";
     }
 
-    if (
-        [
-            "customer",
-            "user",
-            "passenger"
-        ].includes(role)
-    ) {
+    if (["customer", "user", "passenger"].includes(role)) {
         return "customer";
     }
 
     return "";
-
 }
 
 
@@ -552,56 +458,25 @@ function normalizeRole(value) {
    TIMEOUT HELPER
 ============================================================ */
 
-function withTimeout(
-    promise,
-    timeout,
-    label
-) {
-
+function withTimeout(promise, timeout, label) {
     let timer = null;
 
-    const timeoutPromise =
-        new Promise(
-            function (_, reject) {
+    const timeoutPromise = new Promise(function (_, reject) {
+        timer = window.setTimeout(function () {
+            const error = new Error(label || "Operation timed out.");
+            error.code = "riderx/timeout";
+            reject(error);
+        }, timeout);
+    });
 
-                timer =
-                    window.setTimeout(
-                        function () {
-
-                            const error =
-                                new Error(
-                                    label ||
-                                    "Operation timed out."
-                                );
-
-                            error.code =
-                                "riderx/timeout";
-
-                            reject(error);
-
-                        },
-                        timeout
-                    );
-
-            }
-        );
-
-
-    return Promise.race(
-        [
-            Promise.resolve(promise),
-            timeoutPromise
-        ]
-    ).finally(
-        function () {
-
-            if (timer !== null) {
-                window.clearTimeout(timer);
-            }
-
+    return Promise.race([
+        Promise.resolve(promise),
+        timeoutPromise
+    ]).finally(function () {
+        if (timer !== null) {
+            window.clearTimeout(timer);
         }
-    );
-
+    });
 }
 
 
@@ -610,82 +485,35 @@ function withTimeout(
 ============================================================ */
 
 async function getUserRole(user) {
-
-    if (
-        !user ||
-        !user.uid
-    ) {
-        return "";
+    if (!user || !user.uid) {
+        return null; // Return null on invalid user input
     }
 
     try {
+        const userRef = doc(db, "users", user.uid);
+        const snapshot = await withTimeout(
+            getDoc(userRef),
+            FIRESTORE_TIMEOUT,
+            "User profile lookup timed out."
+        );
 
-        const userRef =
-            doc(
-                db,
-                "users",
-                user.uid
-            );
-
-        const snapshot =
-            await withTimeout(
-                getDoc(userRef),
-                FIRESTORE_TIMEOUT,
-                "User profile lookup timed out."
-            );
-
-        if (
-            !snapshot.exists()
-        ) {
-            return "";
+        if (!snapshot.exists()) {
+            return ""; // User exists in Auth but not Firestore
         }
 
-        const data =
-            snapshot.data() || {};
-
-
-        /*
-         * RiderX supports the existing role
-         * field names for compatibility.
-         */
+        const data = snapshot.data() || {};
 
         return (
-
-            normalizeRole(
-                data.role
-            )
-
-            ||
-
-            normalizeRole(
-                data.userRole
-            )
-
-            ||
-
-            normalizeRole(
-                data.accountType
-            )
-
-            ||
-
-            normalizeRole(
-                data.userType
-            )
-
+            normalizeRole(data.role) ||
+            normalizeRole(data.userRole) ||
+            normalizeRole(data.accountType) ||
+            normalizeRole(data.userType)
         );
 
     } catch (error) {
-
-        console.error(
-            "RiderX: Firestore role lookup failed:",
-            error
-        );
-
-        return "";
-
+        console.error("RiderX: Firestore role lookup failed:", error);
+        throw error; // Rethrow so caller knows it was a network/system failure
     }
-
 }
 
 
@@ -694,92 +522,35 @@ async function getUserRole(user) {
 ============================================================ */
 
 async function checkRiderAccess(user) {
-
-    if (
-        !user ||
-        !user.uid
-    ) {
+    if (!user || !user.uid) {
         return false;
     }
 
     try {
+        const riderRef = doc(db, "riders", user.uid);
+        const snapshot = await withTimeout(
+            getDoc(riderRef),
+            FIRESTORE_TIMEOUT,
+            "Rider approval lookup timed out."
+        );
 
-        const riderRef =
-            doc(
-                db,
-                "riders",
-                user.uid
-            );
-
-        const snapshot =
-            await withTimeout(
-                getDoc(riderRef),
-                FIRESTORE_TIMEOUT,
-                "Rider approval lookup timed out."
-            );
-
-        if (
-            !snapshot.exists()
-        ) {
+        if (!snapshot.exists()) {
             return false;
         }
 
-        const data =
-            snapshot.data() || {};
+        const data = snapshot.data() || {};
 
-
-        /*
-         * Explicit blocked/disabled/suspended
-         * states always win.
-         */
-
-        if (
-            data.disabled === true ||
-            data.blocked === true ||
-            data.suspended === true
-        ) {
+        if (data.disabled === true || data.blocked === true || data.suspended === true) {
             return false;
         }
 
-
-        /*
-         * Boolean approval formats.
-         */
-
-        if (
-            data.approved === true ||
-            data.isApproved === true ||
-            data.adminApproved === true
-        ) {
+        if (data.approved === true || data.isApproved === true || data.adminApproved === true) {
             return true;
         }
 
-
-        /*
-         * String approval formats.
-         */
-
-        const approvalStatus =
-            String(
-                data.approvalStatus ?? ""
-            )
-                .trim()
-                .toLowerCase();
-
-        const status =
-            String(
-                data.status ?? ""
-            )
-                .trim()
-                .toLowerCase();
-
-        const riderStatus =
-            String(
-                data.riderStatus ?? ""
-            )
-                .trim()
-                .toLowerCase();
-
+        const approvalStatus = String(data.approvalStatus ?? "").trim().toLowerCase();
+        const status = String(data.status ?? "").trim().toLowerCase();
+        const riderStatus = String(data.riderStatus ?? "").trim().toLowerCase();
 
         return (
             approvalStatus === "approved" ||
@@ -788,16 +559,9 @@ async function checkRiderAccess(user) {
         );
 
     } catch (error) {
-
-        console.error(
-            "RiderX: rider access check failed:",
-            error
-        );
-
-        return false;
-
+        console.error("RiderX: rider access check failed:", error);
+        throw error;
     }
-
 }
 
 
@@ -806,51 +570,25 @@ async function checkRiderAccess(user) {
 ============================================================ */
 
 function clearStaleNavigationState() {
-
     const keys = [
-
         "riderx_user",
-
         "riderx_customer",
-
         "riderx_rider",
-
         "riderx_role",
-
         "riderx_selected_role",
-
         "riderx_customer_id",
-
         "riderx_rider_id",
-
         "riderx_uid",
-
         "riderx_session"
-
     ];
 
-
-    for (
-        const key of keys
-    ) {
-
+    for (const key of keys) {
         try {
-
-            localStorage.removeItem(
-                key
-            );
-
+            localStorage.removeItem(key);
         } catch (error) {
-
-            /*
-             * Storage may be unavailable
-             * in restricted browser modes.
-             */
-
+            // Ignore restricted mode issues
         }
-
     }
-
 }
 
 
@@ -858,98 +596,36 @@ function clearStaleNavigationState() {
    SESSION CACHE
 ============================================================ */
 
-function saveSessionCache(
-    user,
-    role
-) {
-
-    if (
-        !user ||
-        !user.uid ||
-        !role
-    ) {
+function saveSessionCache(user, role) {
+    if (!user || !user.uid || !role) {
         return;
     }
 
     try {
-
         const session = {
-
-            uid:
-                user.uid,
-
-            role:
-                role,
-
-            email:
-                user.email || "",
-
-            displayName:
-                user.displayName || "",
-
-            photoURL:
-                user.photoURL || "",
-
-            updatedAt:
-                Date.now()
-
+            uid: user.uid,
+            role: role,
+            email: user.email || "",
+            displayName: user.displayName || "",
+            photoURL: user.photoURL || "",
+            updatedAt: Date.now()
         };
 
+        localStorage.setItem("riderx_session", JSON.stringify(session));
+        localStorage.setItem("riderx_uid", user.uid);
+        localStorage.setItem("riderx_role", role);
 
-        /*
-         * Compatibility cache only.
-         *
-         * This cache cannot log the user in.
-         */
-
-        localStorage.setItem(
-            "riderx_session",
-            JSON.stringify(session)
-        );
-
-        localStorage.setItem(
-            "riderx_uid",
-            user.uid
-        );
-
-        localStorage.setItem(
-            "riderx_role",
-            role
-        );
-
-
-        if (
-            role === "customer"
-        ) {
-
-            localStorage.setItem(
-                "riderx_customer_id",
-                user.uid
-            );
-
+        if (role === "customer") {
+            localStorage.setItem("riderx_customer_id", user.uid);
         }
 
-
-        if (
-            role === "rider"
-        ) {
-
-            localStorage.setItem(
-                "riderx_rider_id",
-                user.uid
-            );
-
+        if (role === "rider") {
+            localStorage.setItem("riderx_rider_id", user.uid);
         }
 
     } catch (error) {
-
-        console.warn(
-            "RiderX: session cache unavailable:",
-            error
-        );
-
+        console.warn("RiderX: session cache unavailable:", error);
     }
-
 }
 
 
@@ -958,31 +634,15 @@ function saveSessionCache(
 ============================================================ */
 
 async function registerServiceWorker() {
-
-    if (
-        !("serviceWorker" in navigator)
-    ) {
+    if (!("serviceWorker" in navigator)) {
         return;
     }
 
     try {
-
-        await navigator.serviceWorker.register(
-            "./sw.js",
-            {
-                scope: "./"
-            }
-        );
-
+        await navigator.serviceWorker.register("./sw.js", { scope: "./" });
     } catch (error) {
-
-        console.warn(
-            "RiderX: service worker registration failed:",
-            error
-        );
-
+        console.warn("RiderX: service worker registration failed:", error);
     }
-
 }
 
 
@@ -991,20 +651,8 @@ async function registerServiceWorker() {
 ============================================================ */
 
 function routeLoggedOut() {
-
-    /*
-     * No Firebase user means logged out.
-     *
-     * Old localStorage role information is ignored.
-     */
-
     clearStaleNavigationState();
-
-    delayedRedirect(
-        ROUTES.role,
-        "Welcome to RiderX..."
-    );
-
+    delayedRedirect(ROUTES.role, "Welcome to RiderX...");
 }
 
 
@@ -1013,159 +661,71 @@ function routeLoggedOut() {
 ============================================================ */
 
 async function routeLoggedIn(user) {
-
     if (!user) {
-
         routeLoggedOut();
-
         return;
-
     }
 
+    setStatus("Checking your RiderX account...");
 
-    setStatus(
-        "Checking your RiderX account..."
-    );
-
-
-    /*
-     * Firebase Authentication confirms identity.
-     *
-     * Firestore confirms the application role.
-     */
-
-    const role =
-        await getUserRole(user);
-
-
-    /*
-     * Never guess an account role.
-     */
+    let role = "";
+    try {
+        role = await getUserRole(user);
+    } catch (error) {
+        setStatus("Network error while checking profile.");
+        showFallback();
+        routingStarted = false;
+        return;
+    }
 
     if (!role) {
-
         clearStaleNavigationState();
-
-        delayedRedirect(
-            ROUTES.role,
-            "Please select your account type..."
-        );
-
+        delayedRedirect(ROUTES.role, "Please select your account type...");
         return;
-
     }
 
-
-    /* ========================================================
-       ADMIN
-    ======================================================== */
-
-    if (
-        role === "admin"
-    ) {
-
-        saveSessionCache(
-            user,
-            role
-        );
-
-        delayedRedirect(
-            ROUTES.admin,
-            "Opening admin dashboard..."
-        );
-
+    /* ADMIN */
+    if (role === "admin") {
+        saveSessionCache(user, role);
+        delayedRedirect(ROUTES.admin, "Opening admin dashboard...");
         return;
-
     }
 
+    /* RIDER */
+    if (role === "rider") {
+        setStatus("Checking rider approval...");
+        let approved = false;
 
-    /* ========================================================
-       RIDER
-    ======================================================== */
-
-    if (
-        role === "rider"
-    ) {
-
-        setStatus(
-            "Checking rider approval..."
-        );
-
-
-        const approved =
-            await checkRiderAccess(
-                user
-            );
-
-
-        if (!approved) {
-
-            /*
-             * Never allow an unapproved rider
-             * into rider/home.html.
-             */
-
-            clearStaleNavigationState();
-
-            delayedRedirect(
-                ROUTES.role,
-                "Your rider account is not approved yet."
-            );
-
+        try {
+            approved = await checkRiderAccess(user);
+        } catch (error) {
+            setStatus("Network error while checking approval.");
+            showFallback();
+            routingStarted = false;
             return;
-
         }
 
+        if (!approved) {
+            clearStaleNavigationState();
+            delayedRedirect(ROUTES.role, "Your rider account is pending approval.");
+            return;
+        }
 
-        saveSessionCache(
-            user,
-            role
-        );
-
-        delayedRedirect(
-            ROUTES.rider,
-            "Opening rider dashboard..."
-        );
-
+        saveSessionCache(user, role);
+        delayedRedirect(ROUTES.rider, "Opening rider dashboard...");
         return;
-
     }
 
-
-    /* ========================================================
-       CUSTOMER
-    ======================================================== */
-
-    if (
-        role === "customer"
-    ) {
-
-        saveSessionCache(
-            user,
-            role
-        );
-
-        delayedRedirect(
-            ROUTES.customer,
-            "Opening customer dashboard..."
-        );
-
+    /* CUSTOMER */
+    if (role === "customer") {
+        saveSessionCache(user, role);
+        delayedRedirect(ROUTES.customer, "Opening customer dashboard...");
         return;
-
     }
 
-
-    /* ========================================================
-       SAFETY FALLBACK
-    ======================================================== */
-
+    /* FALLBACK */
     clearStaleNavigationState();
-
-    delayedRedirect(
-        ROUTES.role,
-        "Please select your account type..."
-    );
-
+    delayedRedirect(ROUTES.role, "Please select your account type...");
 }
 
 
@@ -1174,57 +734,25 @@ async function routeLoggedIn(user) {
 ============================================================ */
 
 async function handleAuthState(user) {
-
-    /*
-     * Firebase may emit auth state more than once.
-     * Only the first routing decision is accepted.
-     */
-
-    if (
-        routingStarted
-    ) {
+    if (routingStarted) {
         return;
     }
 
     routingStarted = true;
-
     authResolved = true;
 
-
     try {
-
         if (user) {
-
-            await routeLoggedIn(
-                user
-            );
-
+            await routeLoggedIn(user);
         } else {
-
             routeLoggedOut();
-
         }
-
     } catch (error) {
-
-        console.error(
-            "RiderX: entry routing error:",
-            error
-        );
-
-
+        console.error("RiderX: entry routing error:", error);
         routingStarted = false;
-
-
-        setStatus(
-            "Unable to load RiderX."
-        );
-
-
+        setStatus("Unable to load RiderX.");
         showFallback();
-
     }
-
 }
 
 
@@ -1233,16 +761,9 @@ async function handleAuthState(user) {
 ============================================================ */
 
 if (retryButton) {
-
-    retryButton.addEventListener(
-        "click",
-        function () {
-
-            window.location.reload();
-
-        }
-    );
-
+    retryButton.addEventListener("click", function () {
+        window.location.reload();
+    });
 }
 
 
@@ -1251,143 +772,53 @@ if (retryButton) {
 ============================================================ */
 
 (async function startRiderX() {
-
-    setStatus(
-        "Starting RiderX..."
-    );
-
-
-    /*
-     * Service worker is independent from authentication.
-     */
-
+    setStatus("Starting RiderX...");
     registerServiceWorker();
 
-
-    /*
-     * Firebase Auth is the ONLY authority for
-     * logged-in / logged-out state.
-     */
-
     try {
-
-        authUnsubscribe =
-            onAuthStateChanged(
-                auth,
-                handleAuthState
-            );
-
+        authUnsubscribe = onAuthStateChanged(auth, handleAuthState);
     } catch (error) {
-
-        console.error(
-            "RiderX: Firebase Auth listener failed:",
-            error
-        );
-
-
-        setStatus(
-            "Authentication service unavailable."
-        );
-
+        console.error("RiderX: Firebase Auth listener failed:", error);
+        setStatus("Authentication service unavailable.");
         showFallback();
-
         return;
-
     }
 
-
-    /*
-     * Global startup safety timeout.
-     *
-     * It never opens a dashboard.
-     */
-
-    window.setTimeout(
-        function () {
-
-            if (
-                !authResolved &&
-                !routingStarted &&
-                !redirectStarted
-            ) {
-
-                setStatus(
-                    "Authentication is taking longer than expected."
-                );
-
-                showFallback();
-
-            }
-
-        },
-        AUTH_TIMEOUT
-    );
-
+    window.setTimeout(function () {
+        if (!authResolved && !routingStarted && !redirectStarted) {
+            setStatus("Authentication is taking longer than expected.");
+            showFallback();
+        }
+    }, AUTH_TIMEOUT);
 })();
 
 
 /* ============================================================
    DEBUG API
-   ------------------------------------------------------------
-   Browser-console diagnostics only.
-   These methods do NOT authenticate the user and
-   cannot override routing.
 ============================================================ */
 
-window.RiderXEntry =
-    Object.freeze({
-
-        routes:
-            ROUTES,
-
-        normalizeRole,
-
-        getUserRole,
-
-        checkRiderAccess,
-
-        clearStaleNavigationState
-
-    });
+window.RiderXEntry = Object.freeze({
+    routes: ROUTES,
+    normalizeRole,
+    getUserRole,
+    checkRiderAccess,
+    clearStaleNavigationState
+});
 
 
 /* ============================================================
    CLEANUP
 ============================================================ */
 
-window.addEventListener(
-    "pagehide",
-    function () {
-
-        /*
-         * The unsubscribe function is retained for
-         * lifecycle cleanup where supported.
-         */
-
-        if (
-            typeof authUnsubscribe === "function"
-        ) {
-
-            try {
-
-                authUnsubscribe();
-
-            } catch (error) {
-
-                console.warn(
-                    "RiderX: auth listener cleanup failed:",
-                    error
-                );
-
-            }
-
+window.addEventListener("pagehide", function () {
+    if (typeof authUnsubscribe === "function") {
+        try {
+            authUnsubscribe();
+        } catch (error) {
+            console.warn("RiderX: auth listener cleanup failed:", error);
         }
-
-    },
-    {
-        once: true
     }
-);
+}, { once: true });
 
 </script>
 
