@@ -860,573 +860,183 @@
 
 "use strict";
 
-
 /* ============================================================
    RIDERX ROLE SELECTOR
    File: auth/role.html
-
-   PURPOSE:
-   - Select Customer or Rider
-   - Save only the requested role preference
-   - Send selected role to login.html
-   - Send selected role + register mode to login.html
-   - Never treat localStorage role as authentication
-   - Never initialize Firebase
-   - Never create duplicate auth pages
    ============================================================ */
 
-
-/* ============================================================
-   DOM
-============================================================ */
-
-const customerRole =
-    document.getElementById("customer-role");
-
-const riderRole =
-    document.getElementById("rider-role");
-
-const continueButton =
-    document.getElementById("continue-btn");
-
-const continueText =
-    document.getElementById("continue-text");
-
-const continueLoading =
-    document.getElementById("continue-loading");
-
-const registerButton =
-    document.getElementById("register-btn");
-
-const loginLink =
-    document.getElementById("login-link");
-
-const message =
-    document.getElementById("role-message");
-
-const logoImage =
-    document.getElementById("rxLogoImage");
-
-const logoFallback =
-    document.getElementById("rxLogoFallback");
-
-
-/* ============================================================
-   CONSTANTS
-============================================================ */
+const customerRole = document.getElementById("customer-role");
+const riderRole = document.getElementById("rider-role");
+const continueButton = document.getElementById("continue-btn");
+const continueText = document.getElementById("continue-text");
+const continueLoading = document.getElementById("continue-loading");
+const registerButton = document.getElementById("register-btn");
+const loginLink = document.getElementById("login-link");
+const message = document.getElementById("role-message");
+const logoImage = document.getElementById("rxLogoImage");
+const logoFallback = document.getElementById("rxLogoFallback");
 
 const STORAGE = Object.freeze({
-
-    selectedRole:
-        "riderx_selected_role",
-
-    legacyRole:
-        "riderx_role"
-
+    selectedRole: "riderx_selected_role",
+    legacyRole: "riderx_role"
 });
-
 
 const ROLE = Object.freeze({
-
-    CUSTOMER:
-        "customer",
-
-    RIDER:
-        "rider"
-
+    CUSTOMER: "customer",
+    RIDER: "rider"
 });
-
 
 const ROUTES = Object.freeze({
-
-    login:
-        "./login.html"
-
+    login: "./login.html"
 });
-
 
 let navigationBusy = false;
 
-
-/* ============================================================
-   ROLE NORMALIZATION
-============================================================ */
-
+/* ROLE NORMALIZATION */
 function normalizeRole(value) {
+    const role = String(value ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
 
-    const role =
-        String(value ?? "")
-            .trim()
-            .toLowerCase()
-            .replace(/[\s-]+/g, "_");
-
-
-    if (
-        [
-            "customer",
-            "customers",
-            "user",
-            "users",
-            "passenger"
-        ].includes(role)
-    ) {
-
+    if (["customer", "customers", "user", "users", "passenger"].includes(role)) {
         return ROLE.CUSTOMER;
-
     }
 
-
-    if (
-        [
-            "rider",
-            "riders",
-            "driver",
-            "drivers",
-            "captain",
-            "partner",
-            "driver_partner",
-            "driverpartner"
-        ].includes(role)
-    ) {
-
+    if (["rider", "riders", "driver", "drivers", "captain", "partner", "driver_partner", "driverpartner"].includes(role)) {
         return ROLE.RIDER;
-
     }
-
 
     return "";
-
 }
 
-
-/* ============================================================
-   GET ROLE FROM RADIO
-============================================================ */
-
+/* GET ROLE FROM RADIO */
 function getSelectedRole() {
-
-    if (
-        customerRole?.checked
-    ) {
-
+    if (customerRole?.checked) {
         return ROLE.CUSTOMER;
-
     }
-
-
-    if (
-        riderRole?.checked
-    ) {
-
+    if (riderRole?.checked) {
         return ROLE.RIDER;
-
     }
-
-
     return "";
-
 }
 
-
-/* ============================================================
-   STORAGE HELPERS
-============================================================ */
-
+/* STORAGE HELPERS */
 function saveSelectedRole(role) {
-
-    const normalized =
-        normalizeRole(role);
-
-
-    if (
-        normalized !== ROLE.CUSTOMER &&
-        normalized !== ROLE.RIDER
-    ) {
-
+    const normalized = normalizeRole(role);
+    if (normalized !== ROLE.CUSTOMER && normalized !== ROLE.RIDER) {
         return false;
-
     }
-
 
     try {
-
-        localStorage.setItem(
-            STORAGE.selectedRole,
-            normalized
-        );
-
-        /*
-         * Keep legacy role key synchronized because other
-         * RiderX pages may still read riderx_role.
-         *
-         * This is only a UI/navigation preference.
-         * It is NOT proof of authentication.
-         */
-
-        localStorage.setItem(
-            STORAGE.legacyRole,
-            normalized
-        );
-
+        localStorage.setItem(STORAGE.selectedRole, normalized);
+        localStorage.setItem(STORAGE.legacyRole, normalized);
         return true;
-
     } catch (error) {
-
-        console.warn(
-            "RiderX role storage failed:",
-            error
-        );
-
+        console.warn("RiderX role storage failed:", error);
         return false;
-
     }
-
 }
-
 
 function getSavedRole() {
-
     try {
-
-        const selected =
-            normalizeRole(
-                localStorage.getItem(
-                    STORAGE.selectedRole
-                )
-            );
-
-
-        if (
-            selected
-        ) {
-
+        const selected = normalizeRole(localStorage.getItem(STORAGE.selectedRole));
+        if (selected) {
             return selected;
-
         }
-
-
-        return normalizeRole(
-            localStorage.getItem(
-                STORAGE.legacyRole
-            )
-        );
-
+        return normalizeRole(localStorage.getItem(STORAGE.legacyRole));
     } catch (error) {
-
-        console.warn(
-            "RiderX saved role read failed:",
-            error
-        );
-
+        console.warn("RiderX saved role read failed:", error);
         return "";
-
     }
-
 }
 
-
-/* ============================================================
-   MESSAGE
-============================================================ */
-
-function setMessage(
-    text,
-    type = ""
-) {
-
-    if (
-        !message
-    ) {
-
-        return;
-
+/* MESSAGE */
+function setMessage(text, type = "") {
+    if (!message) return;
+    message.textContent = String(text ?? "");
+    message.className = "rx-message";
+    if (type === "error" || type === "success") {
+        message.classList.add(type);
     }
-
-
-    message.textContent =
-        String(text ?? "");
-
-
-    message.className =
-        "rx-message";
-
-
-    if (
-        type === "error" ||
-        type === "success"
-    ) {
-
-        message.classList.add(
-            type
-        );
-
-    }
-
 }
 
-
-/* ============================================================
-   CONTINUE BUTTON STATE
-============================================================ */
-
+/* CONTINUE BUTTON STATE */
 function updateContinueState() {
-
-    if (
-        !continueButton
-    ) {
-
-        return;
-
-    }
-
-
-    continueButton.disabled =
-        navigationBusy ||
-        !getSelectedRole();
-
+    if (!continueButton) return;
+    continueButton.disabled = navigationBusy || !getSelectedRole();
 }
 
+/* LOADING STATE */
+function setLoading(loading) {
+    navigationBusy = Boolean(loading);
 
-/* ============================================================
-   LOADING STATE
-============================================================ */
-
-function setLoading(
-    loading
-) {
-
-    navigationBusy =
-        Boolean(loading);
-
-
-    if (
-        continueButton
-    ) {
-
-        continueButton.disabled =
-            navigationBusy ||
-            !getSelectedRole();
-
+    if (continueButton) {
+        continueButton.disabled = navigationBusy || !getSelectedRole();
     }
-
-
-    if (
-        registerButton
-    ) {
-
-        registerButton.disabled =
-            navigationBusy;
-
+    if (registerButton) {
+        registerButton.disabled = navigationBusy;
     }
-
-
-    if (
-        loginLink
-    ) {
-
-        loginLink.style.pointerEvents =
-            navigationBusy
-                ? "none"
-                : "";
-
-        loginLink.setAttribute(
-            "aria-disabled",
-            navigationBusy
-                ? "true"
-                : "false"
-        );
-
+    if (loginLink) {
+        loginLink.style.pointerEvents = navigationBusy ? "none" : "";
+        loginLink.setAttribute("aria-disabled", navigationBusy ? "true" : "false");
     }
-
-
-    if (
-        continueText
-    ) {
-
-        continueText.style.display =
-            loading
-                ? "none"
-                : "inline";
-
+    if (continueText) {
+        continueText.style.display = loading ? "none" : "inline";
     }
-
-
-    if (
-        continueLoading
-    ) {
-
-        continueLoading.classList.toggle(
-            "active",
-            Boolean(loading)
-        );
-
+    if (continueLoading) {
+        continueLoading.classList.toggle("active", Boolean(loading));
     }
-
 }
 
-
-/* ============================================================
-   CHECK / SELECT ROLE
-============================================================ */
-
+/* CHECK / SELECT ROLE */
 function selectRole(role) {
+    const normalized = normalizeRole(role);
 
-    const normalized =
-        normalizeRole(role);
-
-
-    if (
-        normalized === ROLE.CUSTOMER
-    ) {
-
-        customerRole.checked =
-            true;
-
-        riderRole.checked =
-            false;
-
-    } else if (
-        normalized === ROLE.RIDER
-    ) {
-
-        riderRole.checked =
-            true;
-
-        customerRole.checked =
-            false;
-
+    if (normalized === ROLE.CUSTOMER) {
+        if (customerRole) customerRole.checked = true;
+        if (riderRole) riderRole.checked = false;
+    } else if (normalized === ROLE.RIDER) {
+        if (riderRole) riderRole.checked = true;
+        if (customerRole) customerRole.checked = false;
     } else {
-
-        customerRole.checked =
-            false;
-
-        riderRole.checked =
-            false;
-
+        if (customerRole) customerRole.checked = false;
+        if (riderRole) riderRole.checked = false;
     }
 
-
-    if (
-        normalized
-    ) {
-
-        saveSelectedRole(
-            normalized
-        );
-
+    if (normalized) {
+        saveSelectedRole(normalized);
     }
-
 
     updateContinueState();
-
     setMessage("");
-
 }
 
+/* BUILD AUTH URL */
+function buildAuthUrl(mode = "login", role = "") {
+    const normalized = normalizeRole(role);
+    const url = new URL(ROUTES.login, window.location.href);
 
-/* ============================================================
-   BUILD AUTH URL
-============================================================ */
-
-function buildAuthUrl(
-    mode = "login",
-    role = ""
-) {
-
-    const normalized =
-        normalizeRole(role);
-
-
-    const url =
-        new URL(
-            ROUTES.login,
-            window.location.href
-        );
-
-
-    if (
-        mode === "register"
-    ) {
-
-        url.searchParams.set(
-            "mode",
-            "register"
-        );
-
+    if (mode === "register") {
+        url.searchParams.set("mode", "register");
+    }
+    if (normalized) {
+        url.searchParams.set("role", normalized);
     }
 
-
-    if (
-        normalized
-    ) {
-
-        url.searchParams.set(
-            "role",
-            normalized
-        );
-
-    }
-
-
-    /*
-     * Return only the relative URL so the app continues
-     * working on GitHub Pages, Netlify, Vercel and local hosting.
-     */
-
-    return (
-        url.pathname +
-        url.search +
-        url.hash
-    );
-
+    return url.pathname + url.search + url.hash;
 }
 
+/* NAVIGATE TO AUTH */
+function navigateToAuth(mode = "login", role = "") {
+    if (navigationBusy) return;
 
-/* ============================================================
-   NAVIGATE TO AUTH
-============================================================ */
+    const normalized = normalizeRole(role);
 
-function navigateToAuth(
-    mode = "login",
-    role = ""
-) {
-
-    if (
-        navigationBusy
-    ) {
-
+    if (!normalized) {
+        setMessage("Please select Customer or Rider first.", "error");
         return;
-
     }
 
-
-    const normalized =
-        normalizeRole(role);
-
-
-    if (
-        !normalized
-    ) {
-
-        setMessage(
-            "Please select Customer or Rider first.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    saveSelectedRole(
-        normalized
-    );
-
-
-    setLoading(
-        true
-    );
-
+    saveSelectedRole(normalized);
+    setLoading(true);
 
     setMessage(
         mode === "register"
@@ -1434,413 +1044,104 @@ function navigateToAuth(
             : "Opening login..."
     );
 
+    const target = buildAuthUrl(mode, normalized);
 
-    const target =
-        buildAuthUrl(
-            mode,
-            normalized
-        );
-
-
-    /*
-     * Small delay allows the loading state to render before
-     * browser navigation.
-     */
-
-    window.setTimeout(
-        function () {
-
-            window.location.replace(
-                target
-            );
-
-        },
-        100
-    );
-
+    window.setTimeout(function () {
+        window.location.replace(target);
+    }, 100);
 }
 
+/* LISTENERS */
+customerRole?.addEventListener("change", function () {
+    if (customerRole.checked) selectRole(ROLE.CUSTOMER);
+});
 
-/* ============================================================
-   ROLE CHANGE EVENTS
-============================================================ */
+riderRole?.addEventListener("change", function () {
+    if (riderRole.checked) selectRole(ROLE.RIDER);
+});
 
-customerRole?.addEventListener(
-    "change",
-    function () {
-
-        if (
-            customerRole.checked
-        ) {
-
-            selectRole(
-                ROLE.CUSTOMER
-            );
-
-        }
-
+continueButton?.addEventListener("click", function () {
+    const role = getSelectedRole();
+    if (!role) {
+        setMessage("Please select Customer or Rider.", "error");
+        return;
     }
-);
+    navigateToAuth("login", role);
+});
 
-
-riderRole?.addEventListener(
-    "change",
-    function () {
-
-        if (
-            riderRole.checked
-        ) {
-
-            selectRole(
-                ROLE.RIDER
-            );
-
-        }
-
+registerButton?.addEventListener("click", function () {
+    const role = getSelectedRole();
+    if (!role) {
+        setMessage("Please select Customer or Rider first.", "error");
+        customerRole?.focus();
+        return;
     }
-);
+    navigateToAuth("register", role);
+});
 
+loginLink?.addEventListener("click", function (event) {
+    event.preventDefault();
+    if (navigationBusy) return;
 
-/* ============================================================
-   CONTINUE
-============================================================ */
-
-continueButton?.addEventListener(
-    "click",
-    function () {
-
-        const role =
-            getSelectedRole();
-
-
-        if (
-            !role
-        ) {
-
-            setMessage(
-                "Please select Customer or Rider.",
-                "error"
-            );
-
-            return;
-
-        }
-
-
-        navigateToAuth(
-            "login",
-            role
-        );
-
+    const role = getSelectedRole() || getSavedRole();
+    if (role) {
+        navigateToAuth("login", role);
+        return;
     }
-);
 
+    navigationBusy = true;
+    window.location.replace(buildAuthUrl("login", ""));
+});
 
-/* ============================================================
-   CREATE ACCOUNT
-============================================================ */
+document.addEventListener("keydown", function (event) {
+    if (navigationBusy) return;
 
-registerButton?.addEventListener(
-    "click",
-    function () {
-
-        const role =
-            getSelectedRole();
-
-
-        if (
-            !role
-        ) {
-
-            setMessage(
-                "Please select Customer or Rider first.",
-                "error"
-            );
-
-            /*
-             * Move focus to the first available role so the
-             * user immediately knows what to do.
-             */
-
-            customerRole?.focus();
-
-            return;
-
-        }
-
-
-        navigateToAuth(
-            "register",
-            role
-        );
-
-    }
-);
-
-
-/* ============================================================
-   LOGIN LINK
-============================================================ */
-
-loginLink?.addEventListener(
-    "click",
-    function (event) {
-
+    const target = event.target;
+    if (target === customerRole && (event.key === "Enter" || event.key === " ")) {
         event.preventDefault();
-
-
-        if (
-            navigationBusy
-        ) {
-
-            return;
-
-        }
-
-
-        const role =
-            getSelectedRole() ||
-            getSavedRole();
-
-
-        if (
-            role
-        ) {
-
-            navigateToAuth(
-                "login",
-                role
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * No role selected:
-         * open login normally and let login.html display
-         * "RiderX account" until a role is selected.
-         */
-
-        navigationBusy =
-            true;
-
-        window.location.replace(
-            buildAuthUrl(
-                "login",
-                ""
-            )
-        );
-
+        selectRole(ROLE.CUSTOMER);
+    } else if (target === riderRole && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        selectRole(ROLE.RIDER);
     }
-);
+});
 
+if (logoImage) {
+    logoImage.addEventListener("error", function () {
+        logoImage.style.display = "none";
+        if (logoFallback) logoFallback.style.display = "flex";
+    });
 
-/* ============================================================
-   KEYBOARD SUPPORT
-============================================================ */
-
-document.addEventListener(
-    "keydown",
-    function (event) {
-
-        if (
-            navigationBusy
-        ) {
-
-            return;
-
-        }
-
-
-        /*
-         * Do not interfere with normal keyboard behavior on
-         * buttons, links or form controls.
-         */
-
-        const target =
-            event.target;
-
-
-        if (
-            target === customerRole
-        ) {
-
-            if (
-                event.key === "Enter" ||
-                event.key === " "
-            ) {
-
-                event.preventDefault();
-
-                selectRole(
-                    ROLE.CUSTOMER
-                );
-
-            }
-
-            return;
-
-        }
-
-
-        if (
-            target === riderRole
-        ) {
-
-            if (
-                event.key === "Enter" ||
-                event.key === " "
-            ) {
-
-                event.preventDefault();
-
-                selectRole(
-                    ROLE.RIDER
-                );
-
-            }
-
-        }
-
+    if (logoImage.complete && logoImage.naturalWidth === 0) {
+        logoImage.style.display = "none";
+        if (logoFallback) logoFallback.style.display = "flex";
     }
-);
-
-
-/* ============================================================
-   LOGO FALLBACK
-============================================================ */
-
-if (
-    logoImage
-) {
-
-    logoImage.addEventListener(
-        "error",
-        function () {
-
-            logoImage.style.display =
-                "none";
-
-
-            if (
-                logoFallback
-            ) {
-
-                logoFallback.style.display =
-                    "flex";
-
-            }
-
-        }
-    );
-
-
-    /*
-     * If browser has already completed a failed image load
-     * before the listener was attached.
-     */
-
-    if (
-        logoImage.complete &&
-        logoImage.naturalWidth === 0
-    ) {
-
-        logoImage.style.display =
-            "none";
-
-
-        if (
-            logoFallback
-        ) {
-
-            logoFallback.style.display =
-                "flex";
-
-        }
-
-    }
-
 }
-
-
-/* ============================================================
-   RESTORE SAVED ROLE
-============================================================ */
 
 function restoreSavedRole() {
-
-    const savedRole =
-        getSavedRole();
-
-
-    if (
-        savedRole === ROLE.CUSTOMER ||
-        savedRole === ROLE.RIDER
-    ) {
-
-        selectRole(
-            savedRole
-        );
-
+    const savedRole = getSavedRole();
+    if (savedRole === ROLE.CUSTOMER || savedRole === ROLE.RIDER) {
+        selectRole(savedRole);
         return;
-
     }
-
-
     updateContinueState();
-
 }
 
-
-/* ============================================================
-   PAGE SHOW
-============================================================ */
-
-window.addEventListener(
-    "pageshow",
-    function () {
-
-        /*
-         * BFCache can restore a page after navigation.
-         * Never leave the Continue button permanently disabled.
-         */
-
-        navigationBusy =
-            false;
-
-        setLoading(
-            false
-        );
-
-        restoreSavedRole();
-
-    }
-);
-
-
-/* ============================================================
-   STARTUP
-============================================================ */
+window.addEventListener("pageshow", function () {
+    navigationBusy = false;
+    setLoading(false);
+    restoreSavedRole();
+});
 
 restoreSavedRole();
 
-
-/* ============================================================
-   PUBLIC COMPATIBILITY API
-============================================================ */
-
-window.RiderXRole =
-    Object.freeze({
-
-        normalizeRole,
-        getSelectedRole,
-        getSavedRole,
-        saveSelectedRole,
-        buildAuthUrl
-
-    });
+window.RiderXRole = Object.freeze({
+    normalizeRole,
+    getSelectedRole,
+    getSavedRole,
+    saveSelectedRole,
+    buildAuthUrl
+});
 
 </script>
 
