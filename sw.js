@@ -3,18 +3,35 @@
    SERVICE WORKER
    File: sw.js
 
+   FINAL ROOT SERVICE WORKER
+
    Handles:
    - PWA service worker
-   - Offline caching
+   - Application-shell caching
    - Runtime caching
    - Firebase Cloud Messaging background notifications
    - Notification click routing
    - Service worker update messages
    - Cache cleanup
+   - Offline fallback
 
    IMPORTANT:
-   Service workers run in a separate context.
-   firebase/firebase-config.js is NOT imported here.
+   - This file runs in a Service Worker context.
+   - firebase/firebase-config.js is NOT imported here.
+   - Firebase Auth is NOT handled here.
+   - The service worker NEVER decides whether a user is
+     authenticated.
+   - Authentication and role resolution remain controlled
+     by the application/Firebase Auth.
+
+   CURRENT RIDERX2 STRUCTURE:
+   - ./index.html
+   - ./manifest.json
+   - ./sw.js
+   - ./auth/
+   - ./customer/
+   - ./rider/
+   - ./admin/
 
    Firebase project:
    riderx-1
@@ -27,16 +44,19 @@
    VERSION
 ============================================================ */
 
-const CACHE_NAME = "riderx-cache-v2.1.0";
+const SW_VERSION = "2.2.0";
+
+const CACHE_NAME =
+    `riderx-shell-${SW_VERSION}`;
 
 const RUNTIME_CACHE_NAME =
-    "riderx-runtime-v2.1.0";
+    `riderx-runtime-${SW_VERSION}`;
 
 
 /* ============================================================
    FIREBASE MESSAGING
    ------------------------------------------------------------
-   Service-worker context uses Firebase compat SDK because
+   Service-worker context uses Firebase Compat SDK because
    importScripts() is used here.
 ============================================================ */
 
@@ -51,6 +71,10 @@ const FIREBASE_MESSAGING_COMPAT =
 
 /* ============================================================
    FIREBASE CONFIG
+   ------------------------------------------------------------
+   Firebase web configuration is not a secret credential.
+   Firestore/Auth/Storage security must be enforced through
+   Firebase Security Rules and authorized domains.
 ============================================================ */
 
 const FIREBASE_CONFIG = {
@@ -84,6 +108,10 @@ const FIREBASE_CONFIG = {
 
 /* ============================================================
    APPLICATION SHELL
+   ------------------------------------------------------------
+   Keep this list small and reliable.
+
+   Authentication/role routing remains inside index.html.
 ============================================================ */
 
 const APP_SHELL = [
@@ -152,7 +180,9 @@ try {
    BACKGROUND FCM MESSAGE
 ============================================================ */
 
-if (firebaseMessagingReady) {
+if (
+    firebaseMessagingReady
+) {
 
     try {
 
@@ -200,7 +230,7 @@ if (firebaseMessagingReady) {
                         ||
                         data.icon
                         ||
-                        "/assets/logo.png";
+                        "./assets/logo.png";
 
 
                     const badge =
@@ -208,7 +238,7 @@ if (firebaseMessagingReady) {
                         ||
                         data.badge
                         ||
-                        "/assets/logo.png";
+                        "./assets/logo.png";
 
 
                     const rideId =
@@ -256,11 +286,10 @@ if (firebaseMessagingReady) {
                     };
 
 
-                    return self.registration
-                        .showNotification(
-                            title,
-                            options
-                        );
+                    return self.registration.showNotification(
+                        title,
+                        options
+                    );
 
                 } catch (error) {
 
@@ -289,10 +318,24 @@ if (firebaseMessagingReady) {
 
 
 /* ============================================================
-   CACHE HELPERS
+   URL HELPERS
 ============================================================ */
 
-function isSameOrigin(url) {
+function getAbsoluteUrl(
+    path
+) {
+
+    return new URL(
+        path,
+        self.location.origin
+    ).href;
+
+}
+
+
+function isSameOrigin(
+    url
+) {
 
     return (
         url.origin ===
@@ -302,7 +345,14 @@ function isSameOrigin(url) {
 }
 
 
-function isCacheableRequest(request, url) {
+/* ============================================================
+   CACHEABILITY
+============================================================ */
+
+function isCacheableRequest(
+    request,
+    url
+) {
 
     if (
         request.method !== "GET"
@@ -327,13 +377,13 @@ function isCacheableRequest(request, url) {
 
 
     /*
-     * Do not cache API/backend endpoints.
+     * Never cache API routes.
      */
 
     if (
-        pathname.startsWith("/api/")
+        pathname === "/api"
         ||
-        pathname.includes("/api/")
+        pathname.startsWith("/api/")
     ) {
 
         return false;
@@ -342,7 +392,7 @@ function isCacheableRequest(request, url) {
 
 
     /*
-     * Do not cache Firebase endpoints.
+     * Never cache Firebase/backend requests.
      */
 
     if (
@@ -357,6 +407,19 @@ function isCacheableRequest(request, url) {
         url.hostname.includes(
             "firebaseapp.com"
         )
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+     * Do not cache authentication endpoints.
+     */
+
+    if (
+        pathname.includes("/__/auth/")
     ) {
 
         return false;
@@ -434,20 +497,43 @@ self.addEventListener(
                 async function (cache) {
 
                     for (
-                        const url of APP_SHELL
+                        const path of APP_SHELL
                     ) {
 
                         try {
 
-                            await cache.add(
-                                url
-                            );
+                            const request =
+                                new Request(
+                                    path,
+                                    {
+                                        cache:
+                                            "no-store"
+                                    }
+                                );
+
+
+                            const response =
+                                await fetch(
+                                    request
+                                );
+
+
+                            if (
+                                response.ok
+                            ) {
+
+                                await cache.put(
+                                    request,
+                                    response.clone()
+                                );
+
+                            }
 
                         } catch (error) {
 
                             console.warn(
                                 "RiderX SW: shell cache failed:",
-                                url,
+                                path,
                                 error
                             );
 
@@ -472,7 +558,7 @@ self.addEventListener(
 
 
         /*
-         * New worker can activate immediately.
+         * Activate the new worker immediately.
          */
 
         self.skipWaiting();
@@ -500,10 +586,20 @@ self.addEventListener(
                             cacheNames.map(
                                 function (cacheName) {
 
+                                    /*
+                                     * Remove old RiderX caches.
+                                     */
+
                                     if (
-                                        cacheName !== CACHE_NAME
+                                        cacheName.startsWith(
+                                            "riderx-"
+                                        )
                                         &&
-                                        cacheName !== RUNTIME_CACHE_NAME
+                                        cacheName !==
+                                            CACHE_NAME
+                                        &&
+                                        cacheName !==
+                                            RUNTIME_CACHE_NAME
                                     ) {
 
                                         return caches.delete(
@@ -511,6 +607,7 @@ self.addEventListener(
                                         );
 
                                     }
+
 
                                     return null;
 
@@ -533,6 +630,164 @@ self.addEventListener(
 
     }
 );
+
+
+/* ============================================================
+   OFFLINE RESPONSE
+============================================================ */
+
+function offlineResponse() {
+
+    return new Response(
+        `
+        <!doctype html>
+
+        <html lang="en">
+
+        <head>
+
+            <meta charset="utf-8">
+
+            <meta
+                name="viewport"
+                content="width=device-width,initial-scale=1"
+            >
+
+            <meta
+                name="theme-color"
+                content="#f5c400"
+            >
+
+            <title>RiderX Offline</title>
+
+            <style>
+
+                * {
+                    box-sizing: border-box;
+                }
+
+                html,
+                body {
+                    width: 100%;
+                    min-height: 100%;
+                    margin: 0;
+                }
+
+                body {
+                    min-height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 24px;
+                    background: #050505;
+                    color: #ffffff;
+                    font-family:
+                        system-ui,
+                        -apple-system,
+                        BlinkMacSystemFont,
+                        "Segoe UI",
+                        sans-serif;
+                    text-align: center;
+                }
+
+                .card {
+                    width: min(100%, 380px);
+                    padding: 32px 24px;
+                    border: 1px solid
+                        rgba(245,196,0,.2);
+                    border-radius: 22px;
+                    background: #101010;
+                    box-shadow:
+                        0 20px 70px
+                        rgba(0,0,0,.5);
+                }
+
+                .logo {
+                    width: 68px;
+                    height: 68px;
+                    margin: 0 auto 20px;
+                    border-radius: 18px;
+                    object-fit: contain;
+                }
+
+                h2 {
+                    margin: 0;
+                    font-size: 24px;
+                }
+
+                h2 span {
+                    color: #f5c400;
+                }
+
+                p {
+                    margin: 12px 0 0;
+                    color: #999999;
+                    line-height: 1.6;
+                    font-size: 14px;
+                }
+
+                button {
+                    margin-top: 24px;
+                    padding: 12px 20px;
+                    border: 0;
+                    border-radius: 12px;
+                    background: #f5c400;
+                    color: #080808;
+                    font-weight: 800;
+                    cursor: pointer;
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <div class="card">
+
+                <img
+                    class="logo"
+                    src="./assets/logo.png"
+                    alt="RiderX"
+                >
+
+                <h2>
+                    Rider<span>X</span>
+                </h2>
+
+                <p>
+                    You are currently offline.
+                    Please reconnect to the internet
+                    and try again.
+                </p>
+
+                <button
+                    onclick="location.reload()"
+                >
+                    Try Again
+                </button>
+
+            </div>
+
+        </body>
+
+        </html>
+        `,
+        {
+            status: 503,
+
+            statusText:
+                "RiderX Offline",
+
+            headers: {
+                "Content-Type":
+                    "text/html; charset=utf-8"
+            }
+
+        }
+    );
+
+}
 
 
 /* ============================================================
@@ -576,10 +831,12 @@ self.addEventListener(
 
 
         /*
-         * Never intercept API-style requests.
+         * Never intercept API requests.
          */
 
         if (
+            pathname === "/api"
+            ||
             pathname.startsWith("/api/")
         ) {
 
@@ -589,8 +846,12 @@ self.addEventListener(
 
 
         /* =====================================================
-           NAVIGATION
-           Network first → cached page → index fallback
+           NAVIGATION REQUEST
+           -----------------------------------------------------
+           Network first.
+           Cached page second.
+           index.html third.
+           Offline page last.
         ===================================================== */
 
         if (
@@ -604,6 +865,11 @@ self.addEventListener(
                 )
                 .then(
                     async function (response) {
+
+                        /*
+                         * Only cache successful same-origin
+                         * navigation responses.
+                         */
 
                         await cacheResponse(
                             RUNTIME_CACHE_NAME,
@@ -649,34 +915,7 @@ self.addEventListener(
                         }
 
 
-                        return new Response(
-                            `
-                            <!doctype html>
-                            <html>
-                            <head>
-                                <meta charset="utf-8">
-                                <meta name="viewport"
-                                      content="width=device-width,initial-scale=1">
-                                <title>RiderX Offline</title>
-                            </head>
-                            <body>
-                                <h2>RiderX is offline</h2>
-                                <p>Please reconnect to the internet and try again.</p>
-                            </body>
-                            </html>
-                            `,
-                            {
-                                status: 503,
-
-                                statusText:
-                                    "RiderX Offline",
-
-                                headers: {
-                                    "Content-Type":
-                                        "text/html; charset=utf-8"
-                                }
-                            }
-                        );
+                        return offlineResponse();
 
                     }
                 )
@@ -690,8 +929,10 @@ self.addEventListener(
 
 
         /* =====================================================
-           STATIC/RUNTIME RESOURCES
-           Network first → cache fallback
+           STATIC / RUNTIME RESOURCES
+           -----------------------------------------------------
+           Network first.
+           Cache fallback.
         ===================================================== */
 
         if (
@@ -764,6 +1005,290 @@ self.addEventListener(
 
 
 /* ============================================================
+   NOTIFICATION CLICK ROUTING
+   ------------------------------------------------------------
+   IMPORTANT:
+   Only routes that exist in the current RiderX2 project
+   are used here.
+
+   Existing known routes:
+   - index.html
+   - customer/home.html
+   - customer/booking.html
+   - customer/history.html
+   - customer/profile.html
+   - customer/wallet.html
+   - rider/home.html
+   - rider/rides.html
+   - rider/history.html
+   - rider/profile.html
+   - rider/wallet.html
+   - admin/dashboard.html
+   - auth/role.html
+
+   We intentionally do NOT route to:
+   - rider/request.html
+   - rider/trip.html
+   - rider/chat.html
+   - customer/tracking.html
+   - customer/chat.html
+============================================================ */
+
+function getNotificationTarget(
+    data
+) {
+
+    const notificationData =
+        data || {};
+
+
+    const rideId =
+        notificationData.rideId
+        ||
+        notificationData.bookingId
+        ||
+        "";
+
+
+    const type =
+        String(
+            notificationData.type
+            ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const role =
+        String(
+            notificationData.role
+            ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const url =
+        notificationData.url;
+
+
+    /* =========================================================
+       Explicit safe internal URL
+    ========================================================= */
+
+    if (
+        typeof url === "string"
+        &&
+        url.startsWith("/")
+        &&
+        !url.startsWith("//")
+        &&
+        !url.includes("://")
+    ) {
+
+        return url;
+
+    }
+
+
+    /* =========================================================
+       ADMIN
+    ========================================================= */
+
+    if (
+        role === "admin"
+        ||
+        type === "admin"
+        ||
+        type === "admin_notification"
+    ) {
+
+        return "/admin/dashboard.html";
+
+    }
+
+
+    /* =========================================================
+       RIDER
+       ---------------------------------------------------------
+       Since dedicated request/trip/chat files do not exist,
+       route rider notifications to rider/home.html or
+       rider/rides.html.
+    ========================================================= */
+
+    if (
+        role === "rider"
+    ) {
+
+        if (
+            type === "ride_request"
+            ||
+            type === "new_ride"
+            ||
+            type === "booking_request"
+            ||
+            type === "ride_offer"
+            ||
+            type === "new_booking"
+        ) {
+
+            return "/rider/rides.html";
+
+        }
+
+
+        return "/rider/home.html";
+
+    }
+
+
+    if (
+        type === "ride_request"
+        ||
+        type === "new_ride"
+        ||
+        type === "booking_request"
+        ||
+        type === "ride_offer"
+        ||
+        type === "new_booking"
+    ) {
+
+        return "/rider/rides.html";
+
+    }
+
+
+    /* =========================================================
+       CUSTOMER
+    ========================================================= */
+
+    if (
+        role === "customer"
+    ) {
+
+        if (
+            type === "ride_completed"
+            ||
+            type === "trip_completed"
+            ||
+            type === "booking_completed"
+        ) {
+
+            return "/customer/history.html";
+
+        }
+
+
+        if (
+            type === "payment"
+            ||
+            type === "wallet"
+            ||
+            type === "wallet_update"
+        ) {
+
+            return "/customer/wallet.html";
+
+        }
+
+
+        return "/customer/home.html";
+
+    }
+
+
+    if (
+        type === "driver_assigned"
+        ||
+        type === "rider_assigned"
+        ||
+        type === "ride_accepted"
+        ||
+        type === "ride_started"
+        ||
+        type === "customer_ride"
+        ||
+        type === "trip_started"
+    ) {
+
+        return "/customer/home.html";
+
+    }
+
+
+    if (
+        type === "ride_completed"
+        ||
+        type === "trip_completed"
+        ||
+        type === "booking_completed"
+    ) {
+
+        return "/customer/history.html";
+
+    }
+
+
+    if (
+        type === "payment"
+        ||
+        type === "wallet"
+        ||
+        type === "wallet_update"
+    ) {
+
+        return "/customer/wallet.html";
+
+    }
+
+
+    /* =========================================================
+       CHAT
+       ---------------------------------------------------------
+       No standalone chat pages currently exist.
+       Return to the correct role home instead.
+    ========================================================= */
+
+    if (
+        notificationData.chatId
+    ) {
+
+        if (
+            role === "rider"
+        ) {
+
+            return "/rider/home.html";
+
+        }
+
+
+        if (
+            role === "customer"
+        ) {
+
+            return "/customer/home.html";
+
+        }
+
+
+        return "/index.html";
+
+    }
+
+
+    /* =========================================================
+       DEFAULT
+    ========================================================= */
+
+    return "/index.html";
+
+}
+
+
+/* ============================================================
    NOTIFICATION CLICK
 ============================================================ */
 
@@ -781,166 +1306,10 @@ self.addEventListener(
                 : {};
 
 
-        const rideId =
-            data.rideId
-            ||
-            data.bookingId
-            ||
-            "";
-
-
-        const chatId =
-            data.chatId
-            ||
-            "";
-
-
-        const type =
-            String(
-                data.type
-                ||
-                ""
-            ).toLowerCase();
-
-
-        const role =
-            String(
-                data.role
-                ||
-                ""
-            ).toLowerCase();
-
-
-        let targetPath =
-            "/index.html";
-
-
-        /*
-         * Rider request.
-         */
-
-        if (
-            rideId
-            &&
-            (
-                type === "ride_request"
-                ||
-                type === "new_ride"
-                ||
-                type === "booking_request"
-            )
-        ) {
-
-            targetPath =
-                "/rider/request.html?rideId="
-                +
-                encodeURIComponent(
-                    rideId
-                );
-
-        }
-
-
-        /*
-         * Rider active ride.
-         */
-
-        else if (
-            rideId
-            &&
-            (
-                role === "rider"
-                ||
-                type === "rider_ride"
-                ||
-                type === "ride_accepted"
-                ||
-                type === "ride_started"
-                ||
-                type === "ride_completed"
-            )
-        ) {
-
-            targetPath =
-                "/rider/trip.html?rideId="
-                +
-                encodeURIComponent(
-                    rideId
-                );
-
-        }
-
-
-        /*
-         * Customer active ride.
-         */
-
-        else if (
-            rideId
-            &&
-            (
-                role === "customer"
-                ||
-                type === "customer_ride"
-                ||
-                type === "driver_assigned"
-                ||
-                type === "rider_assigned"
-            )
-        ) {
-
-            targetPath =
-                "/customer/tracking.html?rideId="
-                +
-                encodeURIComponent(
-                    rideId
-                );
-
-        }
-
-
-        /*
-         * Chat.
-         */
-
-        else if (
-            chatId
-        ) {
-
-            targetPath =
-                (
-                    role === "rider"
-                        ? "/rider/chat.html"
-                        : "/customer/chat.html"
-                )
-                +
-                "?chatId="
-                +
-                encodeURIComponent(
-                    chatId
-                );
-
-        }
-
-
-        /*
-         * Explicit internal URL.
-         *
-         * External URLs are rejected.
-         */
-
-        else if (
-            typeof data.url === "string"
-            &&
-            data.url.startsWith("/")
-            &&
-            !data.url.startsWith("//")
-        ) {
-
-            targetPath =
-                data.url;
-
-        }
+        const targetPath =
+            getNotificationTarget(
+                data
+            );
 
 
         const targetUrl =
@@ -965,7 +1334,7 @@ self.addEventListener(
                 async function (clientList) {
 
                     /*
-                     * Prefer an already-open RiderX window.
+                     * Prefer an existing RiderX window.
                      */
 
                     for (
@@ -990,6 +1359,11 @@ self.addEventListener(
                             }
 
 
+                            /*
+                             * Navigate the existing window
+                             * to the notification destination.
+                             */
+
                             if (
                                 "navigate" in client
                             ) {
@@ -1010,18 +1384,23 @@ self.addEventListener(
                             }
 
 
-                            return;
+                            return client;
 
                         } catch (error) {
 
-                            /*
-                             * Try next client.
-                             */
+                            console.warn(
+                                "RiderX SW: existing client navigation failed.",
+                                error
+                            );
 
                         }
 
                     }
 
+
+                    /*
+                     * No existing RiderX window.
+                     */
 
                     if (
                         clients.openWindow
@@ -1055,7 +1434,7 @@ self.addEventListener(
 
         /*
          * Reserved for future analytics.
-         * No network request is performed.
+         * No network request is performed here.
          */
 
     }
@@ -1083,12 +1462,13 @@ self.addEventListener(
         }
 
 
-        /*
-         * Immediately activate this worker.
-         */
+        /* =====================================================
+           ACTIVATE NEW WORKER
+        ===================================================== */
 
         if (
-            data.type === "SKIP_WAITING"
+            data.type ===
+            "SKIP_WAITING"
         ) {
 
             self.skipWaiting();
@@ -1098,23 +1478,27 @@ self.addEventListener(
         }
 
 
-        /*
-         * Delete current RiderX caches.
-         */
+        /* =====================================================
+           CLEAR RIDERX CACHES
+        ===================================================== */
 
         if (
-            data.type === "CLEAR_CACHE"
+            data.type ===
+            "CLEAR_CACHE"
         ) {
 
             event.waitUntil(
 
                 Promise.all([
+
                     caches.delete(
                         CACHE_NAME
                     ),
+
                     caches.delete(
                         RUNTIME_CACHE_NAME
                     )
+
                 ])
 
             );
@@ -1124,12 +1508,13 @@ self.addEventListener(
         }
 
 
-        /*
-         * Delete every cache.
-         */
+        /* =====================================================
+           CLEAR ALL CACHES
+        ===================================================== */
 
         if (
-            data.type === "CLEAR_ALL_CACHES"
+            data.type ===
+            "CLEAR_ALL_CACHES"
         ) {
 
             event.waitUntil(
@@ -1139,6 +1524,7 @@ self.addEventListener(
                         function (cacheNames) {
 
                             return Promise.all(
+
                                 cacheNames.map(
                                     function (cacheName) {
 
@@ -1148,6 +1534,7 @@ self.addEventListener(
 
                                     }
                                 )
+
                             );
 
                         }
@@ -1168,6 +1555,9 @@ self.addEventListener(
 console.info(
     "RiderX Service Worker loaded.",
     {
+        version:
+            SW_VERSION,
+
         cache:
             CACHE_NAME,
 
