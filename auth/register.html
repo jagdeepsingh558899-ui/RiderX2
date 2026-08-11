@@ -1,930 +1,849 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+<!DOCTYPE html>
+<html lang="en">
 
-«»
+<head>
 
-<meta
-name="theme-color"
-content="#ffd400"
+    <meta charset="UTF-8">
 
-«»
-
-<meta
-name="description"
-content="Create your RiderX account"
-
-«»
-
-<title>RiderX - Create Account</title><link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/auth.css">
-<link rel="stylesheet" href="../css/responsive.css"><style>
-
-* {
-    box-sizing: border-box;
-}
-
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-    margin: 0;
-}
-
-body {
-    min-height: 100vh;
-    min-height: 100dvh;
-
-    background: #070707;
-    color: #ffffff;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-}
-
-button,
-input,
-select {
-    font: inherit;
-}
-
-button {
-    -webkit-tap-highlight-color: transparent;
-}
-
-.page {
-    position: relative;
-
-    min-height: 100vh;
-    min-height: 100dvh;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    padding:
-        max(18px, env(safe-area-inset-top))
-        max(18px, env(safe-area-inset-right))
-        max(18px, env(safe-area-inset-bottom))
-        max(18px, env(safe-area-inset-left));
-
-    overflow: auto;
-}
-
-.page::before {
-    content: "";
-
-    position: fixed;
-
-    width: 430px;
-    height: 430px;
-
-    top: -280px;
-    right: -180px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(255, 212, 0, .08);
-
-    pointer-events: none;
-}
-
-.page::after {
-    content: "";
-
-    position: fixed;
-
-    width: 360px;
-    height: 360px;
-
-    bottom: -240px;
-    left: -180px;
-
-    border-radius: 50%;
-
-    background:
-        rgba(255, 212, 0, .05);
-
-    pointer-events: none;
-}
-
-.card {
-    position: relative;
-    z-index: 2;
-
-    width: 100%;
-    max-width: 455px;
-
-    margin: 12px 0;
-
-    padding: 28px 22px 21px;
-
-    border:
-        1px solid #292929;
-
-    border-radius: 23px;
-
-    background: #111111;
-
-    box-shadow:
-        0 25px 80px
-        rgba(0, 0, 0, .55);
-}
-
-.brand {
-    text-align: center;
-    margin-bottom: 21px;
-}
-
-.logo {
-    width: 62px;
-    height: 62px;
-
-    margin:
-        0 auto 11px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 18px;
-
-    background: #ffd400;
-    color: #080808;
-
-    font-size: 21px;
-    font-weight: 1000;
-}
-
-.brand h1 {
-    margin: 0;
-
-    font-size: 25px;
-    font-weight: 1000;
-}
-
-.brand h1 span {
-    color: #ffd400;
-}
-
-.brand p {
-    margin: 6px 0 0;
-
-    color: #777777;
-
-    font-size: 9px;
-}
-
-.heading {
-    text-align: center;
-}
-
-.heading h2 {
-    margin: 0;
-
-    font-size: 19px;
-    font-weight: 900;
-}
-
-.heading p {
-    max-width: 350px;
-
-    margin:
-        6px auto 0;
-
-    color: #777777;
-
-    font-size: 9px;
-    line-height: 1.55;
-}
-
-.role-title {
-    margin-top: 17px;
-
-    color: #999999;
-
-    font-size: 8px;
-    font-weight: 900;
-
-    text-align: center;
-
-    text-transform: uppercase;
-}
-
-.roles {
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 9px;
-
-    margin-top: 8px;
-}
-
-.role {
-    min-height: 57px;
-
-    border:
-        1px solid #303030;
-
-    border-radius: 11px;
-
-    background: #181818;
-
-    color: #888888;
-
-    cursor: pointer;
-
-    font-size: 9px;
-    font-weight: 900;
-}
-
-.role.active {
-    border-color: #ffd400;
-
-    background:
-        rgba(255, 212, 0, .08);
-
-    color: #ffd400;
-}
-
-.form {
-    margin-top: 18px;
-}
-
-.field {
-    margin-bottom: 12px;
-}
-
-.field label {
-    display: block;
-
-    margin-bottom: 6px;
-
-    color: #aaaaaa;
-
-    font-size: 8px;
-    font-weight: 900;
-
-    text-transform: uppercase;
-}
-
-.field input,
-.field select {
-    width: 100%;
-    height: 45px;
-
-    padding:
-        0 12px;
-
-    border:
-        1px solid #303030;
-
-    border-radius: 10px;
-
-    outline: none;
-
-    background: #191919;
-    color: #ffffff;
-
-    font-size: 11px;
-}
-
-.field input::placeholder {
-    color: #555555;
-}
-
-.field input:focus,
-.field select:focus {
-    border-color: #ffd400;
-
-    box-shadow:
-        0 0 0 2px
-        rgba(255, 212, 0, .06);
-}
-
-.field select {
-    appearance: none;
-}
-
-.two {
-    display: grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
-    gap: 9px;
-}
-
-.password-wrap {
-    position: relative;
-}
-
-.password-wrap input {
-    padding-right: 60px;
-}
-
-.password-toggle {
-    position: absolute;
-
-    top: 50%;
-    right: 8px;
-
-    transform:
-        translateY(-50%);
-
-    border: 0;
-
-    background:
-        transparent;
-
-    color: #777777;
-
-    cursor: pointer;
-
-    font-size: 8px;
-    font-weight: 900;
-}
-
-.password-toggle:hover {
-    color: #ffd400;
-}
-
-.terms {
-    display: flex;
-
-    align-items: flex-start;
-
-    gap: 8px;
-
-    margin:
-        3px 0 15px;
-
-    color: #666666;
-
-    font-size: 8px;
-
-    line-height: 1.5;
-}
-
-.terms input {
-    width: 14px;
-    height: 14px;
-
-    flex: 0 0 auto;
-
-    margin-top: 1px;
-
-    accent-color: #ffd400;
-}
-
-.terms a {
-    color: #ffd400;
-
-    text-decoration: none;
-}
-
-.terms a:hover {
-    text-decoration: underline;
-}
-
-.primary {
-    width: 100%;
-    min-height: 47px;
-
-    border: 0;
-
-    border-radius: 10px;
-
-    background: #ffd400;
-    color: #090909;
-
-    cursor: pointer;
-
-    font-size: 10px;
-    font-weight: 1000;
-}
-
-.primary:hover {
-    opacity: .94;
-}
-
-.primary:active {
-    transform: scale(.99);
-}
-
-.primary:disabled {
-    opacity: .55;
-    cursor: not-allowed;
-}
-
-.message {
-    display: none;
-
-    margin:
-        12px 0;
-
-    padding: 10px;
-
-    border-radius: 9px;
-
-    text-align: center;
-
-    font-size: 8px;
-    line-height: 1.5;
-}
-
-.message.show {
-    display: block;
-}
-
-.message.error {
-    border:
-        1px solid #572525;
-
-    background:
-        rgba(255, 50, 50, .07);
-
-    color: #ff7777;
-}
-
-.message.success {
-    border:
-        1px solid #295432;
-
-    background:
-        rgba(40, 180, 70, .07);
-
-    color: #70d888;
-}
-
-.message.info {
-    border:
-        1px solid #443b00;
-
-    background:
-        rgba(255, 212, 0, .07);
-
-    color: #ffd400;
-}
-
-.login {
-    margin-top: 17px;
-
-    padding-top: 16px;
-
-    border-top:
-        1px solid #272727;
-
-    color: #666666;
-
-    text-align: center;
-
-    font-size: 9px;
-}
-
-.login button {
-    border: 0;
-    padding: 0;
-
-    background:
-        transparent;
-
-    color: #ffd400;
-
-    cursor: pointer;
-
-    font-size: 9px;
-    font-weight: 900;
-}
-
-.footer {
-    margin-top: 16px;
-
-    color: #444444;
-
-    font-size: 8px;
-
-    text-align: center;
-}
-
-@media (max-width: 390px) {
-
-    .card {
-        padding:
-            24px 16px 18px;
-
-        border-radius: 19px;
-    }
-
-    .two {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-
-}
-
-</style></head><body><main class="page"><section class="card"><div class="brand"><div class="logo">
-    RX
-</div>
-
-<h1>
-    Rider<span>X</span>
-</h1>
-
-<p>
-    Ride smarter. Ride with RiderX.
-</p>
-
-</div><div class="heading"><h2>
-    Create your RiderX Account
-</h2>
-
-<p>
-    Register once and start using RiderX
-    for rides, payments and trip management.
-</p>
-
-</div><div class="role-title">
-    Choose account type
-</div><div class="roles"><button
-    type="button"
-    class="role active"
-    id="customerRole"
-    aria-pressed="true"
->
-    CUSTOMER
-</button>
-
-<button
-    type="button"
-    class="role"
-    id="riderRole"
-    aria-pressed="false"
->
-    RIDER / DRIVER
-</button>
-
-</div><form
-    class="form"
-    id="registerForm"
-    novalidate
-><div class="two"><div class="field">
-
-    <label for="firstName">
-        First Name
-    </label>
-
-    <input
-        id="firstName"
-        type="text"
-        autocomplete="given-name"
-        placeholder="First name"
-        maxlength="40"
-        required
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     >
 
-</div>
-
-
-<div class="field">
-
-    <label for="lastName">
-        Last Name
-    </label>
-
-    <input
-        id="lastName"
-        type="text"
-        autocomplete="family-name"
-        placeholder="Last name"
-        maxlength="40"
+    <meta
+        name="theme-color"
+        content="#ffd400"
     >
 
-</div>
-
-</div><div class="field"><label for="phone">
-    Mobile Number
-</label>
-
-<input
-    id="phone"
-    type="tel"
-    inputmode="numeric"
-    autocomplete="tel"
-    maxlength="10"
-    placeholder="10 digit mobile number"
-    required
->
-
-</div><div class="field"><label for="email">
-    Email Address
-</label>
-
-<input
-    id="email"
-    type="email"
-    inputmode="email"
-    autocomplete="email"
-    placeholder="Enter your email"
-    maxlength="100"
-    required
->
-
-</div><div class="two"><div class="field">
-
-    <label for="state">
-        State / UT
-    </label>
-
-    <select
-        id="state"
-        required
+    <meta
+        name="description"
+        content="Create your RiderX account"
     >
 
-        <option value="">
-            Select State / UT
-        </option>
-
-        <option value="Andhra Pradesh">
-            Andhra Pradesh
-        </option>
-
-        <option value="Arunachal Pradesh">
-            Arunachal Pradesh
-        </option>
-
-        <option value="Assam">
-            Assam
-        </option>
-
-        <option value="Bihar">
-            Bihar
-        </option>
-
-        <option value="Chhattisgarh">
-            Chhattisgarh
-        </option>
-
-        <option value="Goa">
-            Goa
-        </option>
-
-        <option value="Gujarat">
-            Gujarat
-        </option>
-
-        <option value="Haryana">
-            Haryana
-        </option>
-
-        <option value="Himachal Pradesh">
-            Himachal Pradesh
-        </option>
-
-        <option value="Jharkhand">
-            Jharkhand
-        </option>
-
-        <option value="Karnataka">
-            Karnataka
-        </option>
-
-        <option value="Kerala">
-            Kerala
-        </option>
+    <title>RiderX - Create Account</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/auth.css">
+    <link rel="stylesheet" href="../css/responsive.css">
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
+            background: #070707;
+            color: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .page {
+            position: relative;
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding:
+                max(18px, env(safe-area-inset-top))
+                max(18px, env(safe-area-inset-right))
+                max(18px, env(safe-area-inset-bottom))
+                max(18px, env(safe-area-inset-left));
+
+            overflow: auto;
+        }
+
+        .page::before,
+        .page::after {
+            content: "";
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .page::before {
+            width: 430px;
+            height: 430px;
+            top: -280px;
+            right: -180px;
+            background: rgba(255, 212, 0, .08);
+        }
+
+        .page::after {
+            width: 360px;
+            height: 360px;
+            bottom: -240px;
+            left: -180px;
+            background: rgba(255, 212, 0, .05);
+        }
+
+        .card {
+            position: relative;
+            z-index: 2;
+
+            width: 100%;
+            max-width: 455px;
+
+            margin: 12px 0;
+            padding: 28px 22px 21px;
+
+            border: 1px solid #292929;
+            border-radius: 23px;
+
+            background: #111111;
+
+            box-shadow:
+                0 25px 80px rgba(0, 0, 0, .55);
+        }
+
+        .brand {
+            margin-bottom: 21px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 62px;
+            height: 62px;
+
+            margin: 0 auto 11px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 18px;
+
+            background: #ffd400;
+            color: #080808;
+
+            font-size: 21px;
+            font-weight: 1000;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 25px;
+            font-weight: 1000;
+        }
+
+        .brand h1 span {
+            color: #ffd400;
+        }
+
+        .brand p {
+            margin: 6px 0 0;
+            color: #777777;
+            font-size: 9px;
+        }
+
+        .heading {
+            text-align: center;
+        }
+
+        .heading h2 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 900;
+        }
+
+        .heading p {
+            max-width: 350px;
+            margin: 6px auto 0;
+            color: #777777;
+            font-size: 9px;
+            line-height: 1.55;
+        }
+
+        .role-title {
+            margin-top: 17px;
+            color: #999999;
+            font-size: 8px;
+            font-weight: 900;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .roles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+            margin-top: 8px;
+        }
+
+        .role {
+            min-height: 57px;
+
+            border: 1px solid #303030;
+            border-radius: 11px;
+
+            background: #181818;
+            color: #888888;
+
+            cursor: pointer;
+
+            font-size: 9px;
+            font-weight: 900;
+
+            transition:
+                border-color .15s ease,
+                background .15s ease,
+                color .15s ease,
+                transform .15s ease;
+        }
+
+        .role:hover {
+            border-color: #ffd400;
+            color: #ffd400;
+        }
+
+        .role:active {
+            transform: scale(.99);
+        }
+
+        .role.active {
+            border-color: #ffd400;
+            background: rgba(255, 212, 0, .08);
+            color: #ffd400;
+        }
 
-        <option value="Madhya Pradesh">
-            Madhya Pradesh
-        </option>
+        .form {
+            margin-top: 18px;
+        }
 
-        <option value="Maharashtra">
-            Maharashtra
-        </option>
+        .field {
+            margin-bottom: 12px;
+        }
 
-        <option value="Manipur">
-            Manipur
-        </option>
+        .field label {
+            display: block;
+            margin-bottom: 6px;
 
-        <option value="Meghalaya">
-            Meghalaya
-        </option>
+            color: #aaaaaa;
 
-        <option value="Mizoram">
-            Mizoram
-        </option>
+            font-size: 8px;
+            font-weight: 900;
 
-        <option value="Nagaland">
-            Nagaland
-        </option>
+            text-transform: uppercase;
+        }
 
-        <option value="Odisha">
-            Odisha
-        </option>
+        .field input,
+        .field select {
+            width: 100%;
+            height: 45px;
 
-        <option value="Punjab">
-            Punjab
-        </option>
+            padding: 0 12px;
 
-        <option value="Rajasthan">
-            Rajasthan
-        </option>
+            border: 1px solid #303030;
+            border-radius: 10px;
 
-        <option value="Sikkim">
-            Sikkim
-        </option>
+            outline: none;
 
-        <option value="Tamil Nadu">
-            Tamil Nadu
-        </option>
+            background: #191919;
+            color: #ffffff;
 
-        <option value="Telangana">
-            Telangana
-        </option>
+            font-size: 11px;
 
-        <option value="Tripura">
-            Tripura
-        </option>
+            transition:
+                border-color .15s ease,
+                box-shadow .15s ease;
+        }
 
-        <option value="Uttar Pradesh">
-            Uttar Pradesh
-        </option>
+        .field input::placeholder {
+            color: #555555;
+        }
 
-        <option value="Uttarakhand">
-            Uttarakhand
-        </option>
-
-        <option value="West Bengal">
-            West Bengal
-        </option>
+        .field input:focus,
+        .field select:focus {
+            border-color: #ffd400;
+            box-shadow:
+                0 0 0 2px rgba(255, 212, 0, .06);
+        }
 
-        <option value="Andaman and Nicobar Islands">
-            Andaman and Nicobar Islands
-        </option>
+        .field select {
+            appearance: none;
+        }
 
-        <option value="Chandigarh">
-            Chandigarh
-        </option>
+        .two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+        }
 
-        <option value="Dadra and Nagar Haveli and Daman and Diu">
-            Dadra and Nagar Haveli and Daman and Diu
-        </option>
-
-        <option value="Delhi">
-            Delhi
-        </option>
-
-        <option value="Jammu and Kashmir">
-            Jammu and Kashmir
-        </option>
-
-        <option value="Ladakh">
-            Ladakh
-        </option>
-
-        <option value="Lakshadweep">
-            Lakshadweep
-        </option>
-
-        <option value="Puducherry">
-            Puducherry
-        </option>
-
-    </select>
-
-</div>
-
-
-<div class="field">
-
-    <label for="city">
-        City
-    </label>
-
-    <input
-        id="city"
-        type="text"
-        autocomplete="address-level2"
-        placeholder="Enter your city"
-        maxlength="80"
-        required
-    >
-
-</div>
-
-</div><div class="field"><label for="language">
-    Language
-</label>
-
-<select
-    id="language"
->
-
-    <option value="en">
-        English
-    </option>
-
-    <option value="hi">
-        हिन्दी
-    </option>
-
-</select>
-
-</div><div class="field"><label for="password">
-    Password
-</label>
-
-<div class="password-wrap">
-
-    <input
-        id="password"
-        type="password"
-        autocomplete="new-password"
-        minlength="6"
-        maxlength="72"
-        placeholder="Minimum 6 characters"
-        required
-    >
-
-    <button
-        type="button"
-        class="password-toggle"
-        id="passwordToggle"
-    >
-        SHOW
-    </button>
-
-</div>
-
-</div><div class="field"><label for="confirmPassword">
-    Confirm Password
-</label>
-
-<div class="password-wrap">
-
-    <input
-        id="confirmPassword"
-        type="password"
-        autocomplete="new-password"
-        minlength="6"
-        maxlength="72"
-        placeholder="Re-enter password"
-        required
-    >
-
-    <button
-        type="button"
-        class="password-toggle"
-        id="confirmToggle"
-    >
-        SHOW
-    </button>
-
-</div>
-
-</div><div
-    class="message"
-    id="message"
-    role="alert"
-    aria-live="polite"
-></div><label class="terms"><input
-    type="checkbox"
-    id="terms"
-    required
->
-
-<span>
-    I agree to the RiderX
-    <a href="#" id="termsLink">Terms</a>
-    and
-    <a href="#" id="privacyLink">Privacy Policy</a>.
-</span>
-
-</label><button
-type="submit"
-class="primary"
-id="registerButton"
-
-«»
-
-CREATE CUSTOMER ACCOUNT
-
-</button></form><div class="login">Already have an account?
-
-<button
-    type="button"
-    id="loginButton"
->
-    Login
-</button>
-
-</div><div class="footer">
-    © 2026 RiderX • India
-</div></section></main><script type="module">
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap input {
+            padding-right: 60px;
+        }
+
+        .password-toggle {
+            position: absolute;
+
+            top: 50%;
+            right: 8px;
+
+            transform: translateY(-50%);
+
+            border: 0;
+            padding: 4px;
+
+            background: transparent;
+            color: #777777;
+
+            cursor: pointer;
+
+            font-size: 8px;
+            font-weight: 900;
+        }
+
+        .password-toggle:hover {
+            color: #ffd400;
+        }
+
+        .terms {
+            display: flex;
+            align-items: flex-start;
+
+            gap: 8px;
+
+            margin: 3px 0 15px;
+
+            color: #666666;
+
+            font-size: 8px;
+            line-height: 1.5;
+        }
+
+        .terms input {
+            width: 14px;
+            height: 14px;
+
+            flex: 0 0 auto;
+
+            margin-top: 1px;
+
+            accent-color: #ffd400;
+        }
+
+        .terms a {
+            color: #ffd400;
+            text-decoration: none;
+        }
+
+        .terms a:hover {
+            text-decoration: underline;
+        }
+
+        .primary {
+            width: 100%;
+            min-height: 47px;
+
+            border: 0;
+            border-radius: 10px;
+
+            background: #ffd400;
+            color: #090909;
+
+            cursor: pointer;
+
+            font-size: 10px;
+            font-weight: 1000;
+
+            transition:
+                opacity .15s ease,
+                transform .15s ease;
+        }
+
+        .primary:hover {
+            opacity: .94;
+        }
+
+        .primary:active {
+            transform: scale(.99);
+        }
+
+        .primary:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+
+            margin: 12px 0;
+            padding: 10px;
+
+            border-radius: 9px;
+
+            text-align: center;
+
+            font-size: 8px;
+            line-height: 1.5;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.error {
+            border: 1px solid #572525;
+            background: rgba(255, 50, 50, .07);
+            color: #ff7777;
+        }
+
+        .message.success {
+            border: 1px solid #295432;
+            background: rgba(40, 180, 70, .07);
+            color: #70d888;
+        }
+
+        .message.info {
+            border: 1px solid #443b00;
+            background: rgba(255, 212, 0, .07);
+            color: #ffd400;
+        }
+
+        .login {
+            margin-top: 17px;
+            padding-top: 16px;
+
+            border-top: 1px solid #272727;
+
+            color: #666666;
+
+            text-align: center;
+            font-size: 9px;
+        }
+
+        .login button {
+            border: 0;
+            padding: 0;
+
+            background: transparent;
+            color: #ffd400;
+
+            cursor: pointer;
+
+            font-size: 9px;
+            font-weight: 900;
+        }
+
+        .footer {
+            margin-top: 16px;
+            color: #444444;
+            font-size: 8px;
+            text-align: center;
+        }
+
+        @media (max-width: 390px) {
+
+            .card {
+                padding: 24px 16px 18px;
+                border-radius: 19px;
+            }
+
+            .two {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<main class="page">
+
+    <section class="card">
+
+        <div class="brand">
+
+            <div class="logo">
+                RX
+            </div>
+
+            <h1>
+                Rider<span>X</span>
+            </h1>
+
+            <p>
+                Ride smarter. Ride with RiderX.
+            </p>
+
+        </div>
+
+
+        <div class="heading">
+
+            <h2>
+                Create your RiderX Account
+            </h2>
+
+            <p>
+                Register once and start using RiderX
+                for rides, payments and trip management.
+            </p>
+
+        </div>
+
+
+        <div class="role-title">
+            Choose account type
+        </div>
+
+
+        <div class="roles">
+
+            <button
+                type="button"
+                class="role active"
+                id="customerRole"
+                aria-pressed="true"
+            >
+                CUSTOMER
+            </button>
+
+            <button
+                type="button"
+                class="role"
+                id="riderRole"
+                aria-pressed="false"
+            >
+                RIDER / DRIVER
+            </button>
+
+        </div>
+
+
+        <form
+            class="form"
+            id="registerForm"
+            novalidate
+        >
+
+            <div class="two">
+
+                <div class="field">
+
+                    <label for="firstName">
+                        First Name
+                    </label>
+
+                    <input
+                        id="firstName"
+                        type="text"
+                        autocomplete="given-name"
+                        placeholder="First name"
+                        maxlength="40"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="lastName">
+                        Last Name
+                    </label>
+
+                    <input
+                        id="lastName"
+                        type="text"
+                        autocomplete="family-name"
+                        placeholder="Last name"
+                        maxlength="40"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="phone">
+                    Mobile Number
+                </label>
+
+                <input
+                    id="phone"
+                    type="tel"
+                    inputmode="numeric"
+                    autocomplete="tel"
+                    maxlength="10"
+                    placeholder="10 digit mobile number"
+                    required
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="email">
+                    Email Address
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    inputmode="email"
+                    autocomplete="email"
+                    placeholder="Enter your email"
+                    maxlength="100"
+                    required
+                >
+
+            </div>
+
+
+            <div class="two">
+
+                <div class="field">
+
+                    <label for="state">
+                        State / UT
+                    </label>
+
+                    <select id="state" required>
+
+                        <option value="">
+                            Select State / UT
+                        </option>
+
+                        <option>Andhra Pradesh</option>
+                        <option>Arunachal Pradesh</option>
+                        <option>Assam</option>
+                        <option>Bihar</option>
+                        <option>Chhattisgarh</option>
+                        <option>Goa</option>
+                        <option>Gujarat</option>
+                        <option>Haryana</option>
+                        <option>Himachal Pradesh</option>
+                        <option>Jharkhand</option>
+                        <option>Karnataka</option>
+                        <option>Kerala</option>
+                        <option>Madhya Pradesh</option>
+                        <option>Maharashtra</option>
+                        <option>Manipur</option>
+                        <option>Meghalaya</option>
+                        <option>Mizoram</option>
+                        <option>Nagaland</option>
+                        <option>Odisha</option>
+                        <option>Punjab</option>
+                        <option>Rajasthan</option>
+                        <option>Sikkim</option>
+                        <option>Tamil Nadu</option>
+                        <option>Telangana</option>
+                        <option>Tripura</option>
+                        <option>Uttar Pradesh</option>
+                        <option>Uttarakhand</option>
+                        <option>West Bengal</option>
+                        <option>Andaman and Nicobar Islands</option>
+                        <option>Chandigarh</option>
+                        <option>Dadra and Nagar Haveli and Daman and Diu</option>
+                        <option>Delhi</option>
+                        <option>Jammu and Kashmir</option>
+                        <option>Ladakh</option>
+                        <option>Lakshadweep</option>
+                        <option>Puducherry</option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="city">
+                        City
+                    </label>
+
+                    <input
+                        id="city"
+                        type="text"
+                        autocomplete="address-level2"
+                        placeholder="Enter your city"
+                        maxlength="80"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="language">
+                    Language
+                </label>
+
+                <select id="language">
+
+                    <option value="en">
+                        English
+                    </option>
+
+                    <option value="hi">
+                        हिन्दी
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="password-wrap">
+
+                    <input
+                        id="password"
+                        type="password"
+                        autocomplete="new-password"
+                        minlength="6"
+                        maxlength="72"
+                        placeholder="Minimum 6 characters"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="passwordToggle"
+                    >
+                        SHOW
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="confirmPassword">
+                    Confirm Password
+                </label>
+
+                <div class="password-wrap">
+
+                    <input
+                        id="confirmPassword"
+                        type="password"
+                        autocomplete="new-password"
+                        minlength="6"
+                        maxlength="72"
+                        placeholder="Re-enter password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="confirmToggle"
+                    >
+                        SHOW
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="message"
+                id="message"
+                role="alert"
+                aria-live="polite"
+            ></div>
+
+
+            <label class="terms">
+
+                <input
+                    type="checkbox"
+                    id="terms"
+                    required
+                >
+
+                <span>
+                    I agree to the RiderX
+                    <a href="#" id="termsLink">Terms</a>
+                    and
+                    <a href="#" id="privacyLink">Privacy Policy</a>.
+                </span>
+
+            </label>
+
+
+            <button
+                type="submit"
+                class="primary"
+                id="registerButton"
+            >
+                CREATE CUSTOMER ACCOUNT
+            </button>
+
+        </form>
+
+
+        <div class="login">
+
+            Already have an account?
+
+            <button
+                type="button"
+                id="loginButton"
+            >
+                Login
+            </button>
+
+        </div>
+
+
+        <div class="footer">
+            © 2026 RiderX • India
+        </div>
+
+    </section>
+
+</main>
+
+
+<script type="module">
 
 "use strict";
 
@@ -933,119 +852,99 @@ CREATE CUSTOMER ACCOUNT
    ELEMENTS
 ========================================================= */
 
-const form =
-    document.getElementById(
-        "registerForm"
-    );
+const form = document.getElementById("registerForm");
+const firstName = document.getElementById("firstName");
+const lastName = document.getElementById("lastName");
+const phone = document.getElementById("phone");
+const email = document.getElementById("email");
+const state = document.getElementById("state");
+const city = document.getElementById("city");
+const language = document.getElementById("language");
+const password = document.getElementById("password");
+const confirmPassword = document.getElementById("confirmPassword");
+const terms = document.getElementById("terms");
 
-const firstName =
-    document.getElementById(
-        "firstName"
-    );
-
-const lastName =
-    document.getElementById(
-        "lastName"
-    );
-
-const phone =
-    document.getElementById(
-        "phone"
-    );
-
-const email =
-    document.getElementById(
-        "email"
-    );
-
-const state =
-    document.getElementById(
-        "state"
-    );
-
-const city =
-    document.getElementById(
-        "city"
-    );
-
-const language =
-    document.getElementById(
-        "language"
-    );
-
-const password =
-    document.getElementById(
-        "password"
-    );
-
-const confirmPassword =
-    document.getElementById(
-        "confirmPassword"
-    );
-
-const terms =
-    document.getElementById(
-        "terms"
-    );
-
-const customerRole =
-    document.getElementById(
-        "customerRole"
-    );
-
-const riderRole =
-    document.getElementById(
-        "riderRole"
-    );
+const customerRole = document.getElementById("customerRole");
+const riderRole = document.getElementById("riderRole");
 
 const registerButton =
-    document.getElementById(
-        "registerButton"
-    );
+    document.getElementById("registerButton");
 
 const loginButton =
-    document.getElementById(
-        "loginButton"
-    );
+    document.getElementById("loginButton");
 
 const passwordToggle =
-    document.getElementById(
-        "passwordToggle"
-    );
+    document.getElementById("passwordToggle");
 
 const confirmToggle =
-    document.getElementById(
-        "confirmToggle"
-    );
+    document.getElementById("confirmToggle");
 
 const message =
-    document.getElementById(
-        "message"
-    );
+    document.getElementById("message");
 
 const termsLink =
-    document.getElementById(
-        "termsLink"
-    );
+    document.getElementById("termsLink");
 
 const privacyLink =
-    document.getElementById(
-        "privacyLink"
-    );
+    document.getElementById("privacyLink");
 
 
 /* =========================================================
    STATE
 ========================================================= */
 
-let selectedRole =
-    "customer";
+let selectedRole = "customer";
+let busy = false;
+let firebaseModule = null;
 
-let busy =
-    false;
 
-let firebaseModule =
-    null;
+/* =========================================================
+   SAFE STORAGE
+========================================================= */
+
+function storageGet(key) {
+
+    try {
+
+        return localStorage.getItem(key);
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX localStorage read failed:",
+            error
+        );
+
+        return null;
+
+    }
+
+}
+
+
+function storageSet(key, value) {
+
+    try {
+
+        localStorage.setItem(
+            key,
+            value
+        );
+
+        return true;
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX localStorage write failed:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
 
 
 /* =========================================================
@@ -1054,20 +953,14 @@ let firebaseModule =
 
 async function loadFirebase() {
 
-    if (
-        firebaseModule
-    ) {
-
+    if (firebaseModule) {
         return firebaseModule;
-
     }
-
 
     firebaseModule =
         await import(
             "../firebase/firebase-config.js"
         );
-
 
     return firebaseModule;
 
@@ -1078,17 +971,12 @@ async function loadFirebase() {
    ROLE
 ========================================================= */
 
-function normalizeRole(
-    value
-) {
+function normalizeRole(value) {
 
     const role =
-        String(
-            value || ""
-        )
+        String(value || "")
             .trim()
             .toLowerCase();
-
 
     if (
         role === "rider" ||
@@ -1102,25 +990,18 @@ function normalizeRole(
 
     }
 
-
     return "customer";
 
 }
 
 
-function setRole(
-    role
-) {
+function setRole(role) {
 
     selectedRole =
-        normalizeRole(
-            role
-        );
-
+        normalizeRole(role);
 
     const isRider =
         selectedRole === "rider";
-
 
     customerRole.classList.toggle(
         "active",
@@ -1132,7 +1013,6 @@ function setRole(
         isRider
     );
 
-
     customerRole.setAttribute(
         "aria-pressed",
         String(!isRider)
@@ -1143,38 +1023,39 @@ function setRole(
         String(isRider)
     );
 
-
     registerButton.textContent =
         isRider
             ? "CREATE RIDER ACCOUNT"
             : "CREATE CUSTOMER ACCOUNT";
+
+    storageSet(
+        "riderx_selected_role",
+        selectedRole
+    );
+
+    storageSet(
+        "riderx_role",
+        selectedRole
+    );
 
 }
 
 
 /* =========================================================
    RESTORE ROLE
-   ---------------------------------------------------------
-   Local storage is only used for UI preference.
-   It is NOT an authorization source.
 ========================================================= */
 
 const savedRole =
-    localStorage.getItem(
-        "riderx_selected_role"
-    ) ||
-    localStorage.getItem(
-        "riderx_role"
-    );
-
+    storageGet("riderx_selected_role") ||
+    storageGet("riderx_role");
 
 if (
-    savedRole
+    savedRole === "customer" ||
+    savedRole === "rider"
 ) {
 
-    setRole(
-        savedRole
-    );
+    selectedRole =
+        normalizeRole(savedRole);
 
 }
 
@@ -1189,24 +1070,18 @@ function showMessage(
 ) {
 
     message.textContent =
-        String(
-            text || ""
-        );
+        String(text || "");
 
     message.className =
-        "message show " +
-        type;
+        "message show " + type;
 
 }
 
 
 function clearMessage() {
 
-    message.textContent =
-        "";
-
-    message.className =
-        "message";
+    message.textContent = "";
+    message.className = "message";
 
 }
 
@@ -1215,9 +1090,7 @@ function clearMessage() {
    VALIDATION
 ========================================================= */
 
-function validEmail(
-    value
-) {
+function validEmail(value) {
 
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
         value
@@ -1226,9 +1099,7 @@ function validEmail(
 }
 
 
-function validPhone(
-    value
-) {
+function validPhone(value) {
 
     return /^[6-9]\d{9}$/.test(
         value
@@ -1237,40 +1108,26 @@ function validPhone(
 }
 
 
-function cleanName(
-    value
-) {
+function cleanName(value) {
 
-    return String(
-        value || ""
-    )
+    return String(value || "")
         .trim()
-        .replace(
-            /\s+/g,
-            " "
-        );
+        .replace(/\s+/g, " ");
 
 }
 
 
-function cleanCity(
-    value
-) {
+function cleanCity(value) {
 
-    return String(
-        value || ""
-    )
+    return String(value || "")
         .trim()
-        .replace(
-            /\s+/g,
-            " "
-        );
+        .replace(/\s+/g, " ");
 
 }
 
 
 /* =========================================================
-   PASSWORD VISIBILITY
+   PASSWORD
 ========================================================= */
 
 function togglePassword(
@@ -1279,15 +1136,12 @@ function togglePassword(
 ) {
 
     const hidden =
-        input.type ===
-        "password";
-
+        input.type === "password";
 
     input.type =
         hidden
             ? "text"
             : "password";
-
 
     button.textContent =
         hidden
@@ -1331,9 +1185,7 @@ customerRole.addEventListener(
     "click",
     function () {
 
-        setRole(
-            "customer"
-        );
+        setRole("customer");
 
     }
 );
@@ -1343,12 +1195,129 @@ riderRole.addEventListener(
     "click",
     function () {
 
-        setRole(
-            "rider"
-        );
+        setRole("rider");
 
     }
 );
+
+
+/* =========================================================
+   REFERRAL
+========================================================= */
+
+function createReferralCode(name) {
+
+    const prefix =
+        String(name || "RX")
+            .replace(
+                /[^a-zA-Z0-9]/g,
+                ""
+            )
+            .toUpperCase()
+            .slice(0, 4);
+
+    const random =
+        Math.random()
+            .toString(36)
+            .substring(2, 7)
+            .toUpperCase();
+
+    return "RX" + prefix + random;
+
+}
+
+
+/* =========================================================
+   FIREBASE ERROR
+========================================================= */
+
+function firebaseErrorMessage(error) {
+
+    const code =
+        String(
+            error?.code || ""
+        )
+            .toLowerCase();
+
+    const messages = {
+
+        "auth/email-already-in-use":
+            "An account with this email already exists. Please login instead.",
+
+        "auth/invalid-email":
+            "Please enter a valid email address.",
+
+        "auth/weak-password":
+            "Password is too weak. Use at least 6 characters.",
+
+        "auth/password-does-not-meet-requirements":
+            "Password does not meet the required security rules.",
+
+        "auth/operation-not-allowed":
+            "Email/password registration is not enabled in Firebase.",
+
+        "auth/network-request-failed":
+            "Network error. Check your internet connection.",
+
+        "auth/too-many-requests":
+            "Too many requests. Please wait and try again later.",
+
+        "auth/app-not-authorized":
+            "This RiderX domain is not authorized in Firebase.",
+
+        "auth/invalid-api-key":
+            "Firebase configuration is invalid.",
+
+        "auth/quota-exceeded":
+            "Firebase quota has been exceeded. Please try again later.",
+
+        "auth/configuration-not-found":
+            "Firebase Authentication configuration is missing.",
+
+        "auth/admin-restricted-operation":
+            "This registration method is currently restricted."
+
+    };
+
+    if (messages[code]) {
+        return messages[code];
+    }
+
+    const raw =
+        String(
+            error?.message || ""
+        );
+
+    const lower =
+        raw.toLowerCase();
+
+    if (
+        lower.includes("permission") ||
+        lower.includes(
+            "missing or insufficient permissions"
+        )
+    ) {
+
+        return (
+            "Firebase permission denied. Check Firestore security rules."
+        );
+
+    }
+
+    if (lower.includes("network")) {
+
+        return (
+            "Network error. Check your internet connection and try again."
+        );
+
+    }
+
+    return (
+        raw ||
+        "Registration failed. Please try again."
+    );
+
+}
 
 
 /* =========================================================
@@ -1357,75 +1326,51 @@ riderRole.addEventListener(
 
 form.addEventListener(
     "submit",
-    async function (
-        event
-    ) {
+    async function (event) {
 
         event.preventDefault();
 
-
-        if (
-            busy
-        ) {
-
+        if (busy) {
             return;
-
         }
 
-
         clearMessage();
-
 
         const first =
             cleanName(
                 firstName.value
             );
 
-
         const last =
             cleanName(
                 lastName.value
             );
 
-
         const mobile =
             phone.value
-                .replace(
-                    /\D/g,
-                    ""
-                )
-                .slice(
-                    0,
-                    10
-                );
-
+                .replace(/\D/g, "")
+                .slice(0, 10);
 
         const mail =
             email.value
                 .trim()
                 .toLowerCase();
 
-
         const selectedState =
             String(
                 state.value || ""
             ).trim();
-
 
         const selectedCity =
             cleanCity(
                 city.value
             );
 
-
         const selectedLanguage =
-            language.value ||
-            "en";
-
+            language.value || "en";
 
         const pass =
             password.value;
-
 
         const confirm =
             confirmPassword.value;
@@ -1435,10 +1380,7 @@ form.addEventListener(
            VALIDATION
         ------------------------------------------------- */
 
-        if (
-            first.length <
-            2
-        ) {
+        if (first.length < 2) {
 
             showMessage(
                 "Please enter your first name.",
@@ -1451,12 +1393,7 @@ form.addEventListener(
 
         }
 
-
-        if (
-            !validPhone(
-                mobile
-            )
-        ) {
+        if (!validPhone(mobile)) {
 
             showMessage(
                 "Please enter a valid 10-digit Indian mobile number.",
@@ -1469,12 +1406,7 @@ form.addEventListener(
 
         }
 
-
-        if (
-            !validEmail(
-                mail
-            )
-        ) {
+        if (!validEmail(mail)) {
 
             showMessage(
                 "Please enter a valid email address.",
@@ -1487,10 +1419,7 @@ form.addEventListener(
 
         }
 
-
-        if (
-            !selectedState
-        ) {
+        if (!selectedState) {
 
             showMessage(
                 "Please select your State / UT.",
@@ -1503,11 +1432,7 @@ form.addEventListener(
 
         }
 
-
-        if (
-            selectedCity.length <
-            2
-        ) {
+        if (selectedCity.length < 2) {
 
             showMessage(
                 "Please enter your city.",
@@ -1520,11 +1445,7 @@ form.addEventListener(
 
         }
 
-
-        if (
-            pass.length <
-            6
-        ) {
+        if (pass.length < 6) {
 
             showMessage(
                 "Password must contain at least 6 characters.",
@@ -1537,11 +1458,7 @@ form.addEventListener(
 
         }
 
-
-        if (
-            pass !==
-            confirm
-        ) {
+        if (pass !== confirm) {
 
             showMessage(
                 "Passwords do not match.",
@@ -1554,10 +1471,7 @@ form.addEventListener(
 
         }
 
-
-        if (
-            !terms.checked
-        ) {
+        if (!terms.checked) {
 
             showMessage(
                 "Please accept the RiderX Terms and Privacy Policy.",
@@ -1572,16 +1486,12 @@ form.addEventListener(
 
 
         /* -------------------------------------------------
-           BUSY STATE
+           BUSY
         ------------------------------------------------- */
 
-        busy =
-            true;
+        busy = true;
 
-
-        registerButton.disabled =
-            true;
-
+        registerButton.disabled = true;
 
         registerButton.textContent =
             "CREATING ACCOUNT...";
@@ -1593,9 +1503,14 @@ form.addEventListener(
                 await loadFirebase();
 
 
+            /* ------------------------------------------------
+               FIREBASE EXPORT CHECK
+            ------------------------------------------------ */
+
             if (
                 !FB.auth ||
-                !FB.createUserWithEmailAndPassword
+                typeof FB.createUserWithEmailAndPassword !==
+                    "function"
             ) {
 
                 throw new Error(
@@ -1604,9 +1519,21 @@ form.addEventListener(
 
             }
 
+            if (
+                !FB.db ||
+                typeof FB.doc !== "function" ||
+                typeof FB.setDoc !== "function"
+            ) {
+
+                throw new Error(
+                    "Firebase Firestore is not available."
+                );
+
+            }
+
 
             /* ------------------------------------------------
-               CREATE AUTH ACCOUNT
+               CREATE AUTH USER
             ------------------------------------------------ */
 
             const result =
@@ -1616,14 +1543,11 @@ form.addEventListener(
                     pass
                 );
 
-
             const firebaseUser =
                 result?.user;
 
 
-            if (
-                !firebaseUser
-            ) {
+            if (!firebaseUser) {
 
                 throw new Error(
                     "Firebase account could not be created."
@@ -1640,12 +1564,11 @@ form.addEventListener(
                             ? " " + last
                             : ""
                     )
-                )
-                    .trim();
+                ).trim();
 
 
             /* ------------------------------------------------
-               UPDATE FIREBASE AUTH PROFILE
+               AUTH PROFILE
             ------------------------------------------------ */
 
             if (
@@ -1663,12 +1586,10 @@ form.addEventListener(
                         }
                     );
 
-                } catch (
-                    profileError
-                ) {
+                } catch (profileError) {
 
                     console.warn(
-                        "RiderX Auth profile update failed:",
+                        "RiderX profile update failed:",
                         profileError
                     );
 
@@ -1678,7 +1599,7 @@ form.addEventListener(
 
 
             /* ------------------------------------------------
-               USER PROFILE
+               PROFILE
             ------------------------------------------------ */
 
             const profile = {
@@ -1738,20 +1659,17 @@ form.addEventListener(
                     selectedLanguage,
 
                 status:
-                    selectedRole ===
-                    "rider"
+                    selectedRole === "rider"
                         ? "pending"
                         : "active",
 
                 approvalStatus:
-                    selectedRole ===
-                    "rider"
+                    selectedRole === "rider"
                         ? "pending"
                         : "approved",
 
                 isApproved:
-                    selectedRole !==
-                    "rider",
+                    selectedRole !== "rider",
 
                 isOnline:
                     false,
@@ -1766,8 +1684,7 @@ form.addEventListener(
                     0,
 
                 rating:
-                    selectedRole ===
-                    "rider"
+                    selectedRole === "rider"
                         ? 5
                         : 0,
 
@@ -1775,15 +1692,13 @@ form.addEventListener(
                     0,
 
                 referralCode:
-                    createReferralCode(
-                        first
-                    )
+                    createReferralCode(first)
 
             };
 
 
             /* ------------------------------------------------
-               SERVER TIMESTAMPS
+               TIMESTAMPS
             ------------------------------------------------ */
 
             if (
@@ -1809,7 +1724,7 @@ form.addEventListener(
 
 
             /* ------------------------------------------------
-               MAIN USER DOCUMENT
+               USERS DOCUMENT
             ------------------------------------------------ */
 
             await FB.setDoc(
@@ -1820,8 +1735,7 @@ form.addEventListener(
                 ),
                 profile,
                 {
-                    merge:
-                        true
+                    merge: true
                 }
             );
 
@@ -1831,8 +1745,7 @@ form.addEventListener(
             ------------------------------------------------ */
 
             const roleCollection =
-                selectedRole ===
-                "rider"
+                selectedRole === "rider"
                     ? "riders"
                     : "customers";
 
@@ -1845,18 +1758,13 @@ form.addEventListener(
                 ),
                 profile,
                 {
-                    merge:
-                        true
+                    merge: true
                 }
             );
 
 
             /* ------------------------------------------------
-               LOCAL SESSION CACHE
-               -----------------------------------------------
-               Firebase Auth remains the real authentication
-               source. Local storage is only a convenience
-               cache for the UI.
+               LOCAL CACHE
             ------------------------------------------------ */
 
             const localProfile = {
@@ -1864,69 +1772,55 @@ form.addEventListener(
                 ...profile,
 
                 createdAt:
-                    new Date()
-                        .toISOString(),
+                    new Date().toISOString(),
 
                 updatedAt:
-                    new Date()
-                        .toISOString()
+                    new Date().toISOString()
 
             };
 
 
-            localStorage.setItem(
+            storageSet(
                 "riderx_user",
-                JSON.stringify(
-                    localProfile
-                )
+                JSON.stringify(localProfile)
             );
 
-
-            localStorage.setItem(
+            storageSet(
                 "riderx_role",
                 selectedRole
             );
 
-
-            localStorage.setItem(
+            storageSet(
                 "riderx_selected_role",
                 selectedRole
             );
 
-
-            localStorage.setItem(
+            storageSet(
                 "userRole",
                 selectedRole
             );
 
 
-            if (
-                selectedRole ===
-                "rider"
-            ) {
+            if (selectedRole === "rider") {
 
-                localStorage.setItem(
+                storageSet(
                     "riderx_rider",
-                    JSON.stringify(
-                        localProfile
-                    )
+                    JSON.stringify(localProfile)
                 );
 
-                localStorage.setItem(
+                storageSet(
                     "riderx_rider_id",
                     firebaseUser.uid
                 );
 
             } else {
 
-                localStorage.setItem(
+                storageSet(
                     "riderx_customer",
-                    JSON.stringify(
-                        localProfile
-                    )
+                    JSON.stringify(localProfile)
                 );
 
-                localStorage.setItem(
+                storageSet(
                     "riderx_customer_id",
                     firebaseUser.uid
                 );
@@ -1935,19 +1829,15 @@ form.addEventListener(
 
 
             /* ------------------------------------------------
-               SUCCESS
+               SUCCESS REDIRECT
             ------------------------------------------------ */
 
-            if (
-                selectedRole ===
-                "rider"
-            ) {
+            if (selectedRole === "rider") {
 
                 showMessage(
                     "Rider account created successfully. Your account is pending verification.",
                     "success"
                 );
-
 
                 window.setTimeout(
                     function () {
@@ -1967,7 +1857,6 @@ form.addEventListener(
                     "success"
                 );
 
-
                 window.setTimeout(
                     function () {
 
@@ -1982,37 +1871,26 @@ form.addEventListener(
             }
 
 
-        } catch (
-            error
-        ) {
+        } catch (error) {
 
             console.error(
                 "RiderX registration error:",
                 error
             );
 
-
             showMessage(
-                firebaseErrorMessage(
-                    error
-                ),
+                firebaseErrorMessage(error),
                 "error"
             );
 
-
         } finally {
 
-            busy =
-                false;
+            busy = false;
 
-
-            registerButton.disabled =
-                false;
-
+            registerButton.disabled = false;
 
             registerButton.textContent =
-                selectedRole ===
-                "rider"
+                selectedRole === "rider"
                     ? "CREATE RIDER ACCOUNT"
                     : "CREATE CUSTOMER ACCOUNT";
 
@@ -2023,7 +1901,7 @@ form.addEventListener(
 
 
 /* =========================================================
-   PHONE INPUT
+   PHONE
 ========================================================= */
 
 phone.addEventListener(
@@ -2032,21 +1910,15 @@ phone.addEventListener(
 
         this.value =
             this.value
-                .replace(
-                    /\D/g,
-                    ""
-                )
-                .slice(
-                    0,
-                    10
-                );
+                .replace(/\D/g, "")
+                .slice(0, 10);
 
     }
 );
 
 
 /* =========================================================
-   EMAIL NORMALIZATION
+   EMAIL
 ========================================================= */
 
 email.addEventListener(
@@ -2063,7 +1935,7 @@ email.addEventListener(
 
 
 /* =========================================================
-   NAME NORMALIZATION
+   NAME
 ========================================================= */
 
 firstName.addEventListener(
@@ -2093,7 +1965,7 @@ lastName.addEventListener(
 
 
 /* =========================================================
-   CITY NORMALIZATION
+   CITY
 ========================================================= */
 
 city.addEventListener(
@@ -2110,183 +1982,27 @@ city.addEventListener(
 
 
 /* =========================================================
-   REFERRAL CODE
-========================================================= */
-
-function createReferralCode(
-    name
-) {
-
-    const prefix =
-        String(
-            name ||
-            "RX"
-        )
-            .replace(
-                /[^a-zA-Z0-9]/g,
-                ""
-            )
-            .toUpperCase()
-            .slice(
-                0,
-                4
-            );
-
-
-    const random =
-        Math.random()
-            .toString(
-                36
-            )
-            .substring(
-                2,
-                7
-            )
-            .toUpperCase();
-
-
-    return (
-        "RX" +
-        prefix +
-        random
-    );
-
-}
-
-
-/* =========================================================
-   FIREBASE ERROR
-========================================================= */
-
-function firebaseErrorMessage(
-    error
-) {
-
-    const code =
-        String(
-            error?.code ||
-            ""
-        )
-            .toLowerCase();
-
-
-    const messages = {
-
-        "auth/email-already-in-use":
-            "An account with this email already exists. Please login instead.",
-
-        "auth/invalid-email":
-            "Please enter a valid email address.",
-
-        "auth/weak-password":
-            "Password is too weak. Use at least 6 characters.",
-
-        "auth/password-does-not-meet-requirements":
-            "Password does not meet the required security rules.",
-
-        "auth/operation-not-allowed":
-            "Email/password registration is not enabled in Firebase.",
-
-        "auth/network-request-failed":
-            "Network error. Check your internet connection.",
-
-        "auth/too-many-requests":
-            "Too many requests. Please wait and try again later.",
-
-        "auth/app-not-authorized":
-            "This RiderX domain is not authorized in Firebase.",
-
-        "auth/invalid-api-key":
-            "Firebase configuration is invalid.",
-
-        "auth/quota-exceeded":
-            "Firebase quota has been exceeded. Please try again later."
-
-    };
-
-
-    if (
-        messages[code]
-    ) {
-
-        return messages[code];
-
-    }
-
-
-    const raw =
-        String(
-            error?.message ||
-            ""
-        );
-
-
-    const lower =
-        raw.toLowerCase();
-
-
-    if (
-        lower.includes(
-            "permission"
-        ) ||
-        lower.includes(
-            "missing or insufficient permissions"
-        )
-    ) {
-
-        return (
-            "Firebase permission denied. Check Firestore security rules."
-        );
-
-    }
-
-
-    if (
-        lower.includes(
-            "network"
-        )
-    ) {
-
-        return (
-            "Network error. Check your internet connection and try again."
-        );
-
-    }
-
-
-    return (
-        raw ||
-        "Registration failed. Please try again."
-    );
-
-}
-
-
-/* =========================================================
    LOGIN
-   ---------------------------------------------------------
-   Central RiderX login page.
 ========================================================= */
 
 loginButton.addEventListener(
     "click",
     function () {
 
-        localStorage.setItem(
+        storageSet(
             "riderx_selected_role",
             selectedRole
         );
 
-        localStorage.setItem(
+        storageSet(
             "riderx_role",
             selectedRole
         );
 
-        localStorage.setItem(
+        storageSet(
             "userRole",
             selectedRole
         );
-
 
         window.location.href =
             "./login.html";
@@ -2301,9 +2017,7 @@ loginButton.addEventListener(
 
 termsLink.addEventListener(
     "click",
-    function (
-        event
-    ) {
+    function (event) {
 
         event.preventDefault();
 
@@ -2322,9 +2036,7 @@ termsLink.addEventListener(
 
 privacyLink.addEventListener(
     "click",
-    function (
-        event
-    ) {
+    function (event) {
 
         event.preventDefault();
 
@@ -2341,8 +2053,10 @@ privacyLink.addEventListener(
    INITIAL UI
 ========================================================= */
 
-setRole(
-    selectedRole
-);
+setRole(selectedRole);
 
-</script></body></html>
+</script>
+
+</body>
+
+</html>
