@@ -127,15 +127,6 @@ const STORAGE = Object.freeze({
 
 /* ============================================================
    ROUTES
-   ------------------------------------------------------------
-   Routes are stored relative to the RiderX project root.
-
-   They are resolved through import.meta.url so that they work
-   correctly whether the current page is inside:
-       /auth/
-       /customer/
-       /rider/
-       /admin/
 ============================================================ */
 
 const ROUTES = Object.freeze({
@@ -190,10 +181,6 @@ function resolveRoute(
     }
 
 
-    /*
-     * Keep external URLs and absolute URLs untouched.
-     */
-
     if (
         /^(https?:|mailto:|tel:|#|\/)/i.test(
             value
@@ -206,14 +193,6 @@ function resolveRoute(
 
 
     try {
-
-        /*
-         * auth.js is located at:
-         *
-         * /js/auth.js
-         *
-         * Therefore ../ resolves to the RiderX project root.
-         */
 
         return new URL(
             "../" + value,
@@ -685,10 +664,6 @@ AUTH.normalizePhone =
             );
 
 
-        /*
-         * RiderX India default.
-         */
-
         if (
             digits.length === 10
         ) {
@@ -847,8 +822,6 @@ AUTH.validateEmail =
 
 /* ============================================================
    FIREBASE USER
-   ------------------------------------------------------------
-   Firebase Auth is the ONLY source of authentication state.
 ============================================================ */
 
 AUTH.getUser =
@@ -913,10 +886,6 @@ AUTH.getUid =
         const user =
             AUTH.getUser();
 
-
-        /*
-         * NEVER use localStorage as an authenticated UID source.
-         */
 
         return user?.uid ||
             "";
@@ -1387,9 +1356,6 @@ AUTH.getErrorMessage =
             "auth/requires-recent-login":
                 "Please login again before performing this action.",
 
-            "auth/too-many-requests":
-                "Too many attempts. Please try again later.",
-
             "permission-denied":
                 "You do not have permission to access this account data."
 
@@ -1443,8 +1409,6 @@ async function safeFirebaseSignOut(
 
 /* ============================================================
    SESSION CACHE
-   ------------------------------------------------------------
-   Cache is UI convenience only.
 ============================================================ */
 
 function cacheAuthenticatedSession(
@@ -1934,6 +1898,8 @@ AUTH.registerWithEmail =
 
         if (
             !FB.auth
+            ||
+            !FB.createUserWithEmailAndPassword
         ) {
 
             throw new Error(
@@ -1967,10 +1933,6 @@ AUTH.registerWithEmail =
         const user =
             credential.user;
 
-
-        /*
-         * Update Firebase display name when available.
-         */
 
         if (
             name
@@ -2032,12 +1994,6 @@ AUTH.registerWithEmail =
         } catch (
             error
         ) {
-
-            /*
-             * Firebase Auth account was created, but its Firestore
-             * profile failed. Do not leave the browser session
-             * authenticated against an unconfigured account.
-             */
 
             await safeFirebaseSignOut(
                 FB
@@ -2134,6 +2090,19 @@ AUTH.loginWithEmail =
         }
 
 
+        if (
+            !FB.auth
+            ||
+            !FB.signInWithEmailAndPassword
+        ) {
+
+            throw new Error(
+                "Firebase Authentication is not available."
+            );
+
+        }
+
+
         const credential =
             await FB.signInWithEmailAndPassword(
                 FB.auth,
@@ -2199,6 +2168,62 @@ AUTH.loginWithEmail =
 
 
 /* ============================================================
+   LEGACY EMAIL LOGIN COMPATIBILITY
+   ------------------------------------------------------------
+   Older login pages may call:
+
+       auth.loginEmail(email, password)
+
+   while the canonical API uses:
+
+       auth.loginWithEmail({
+           email,
+           password,
+           role
+       })
+
+   Both now use the SAME Firebase implementation.
+============================================================ */
+
+AUTH.loginEmail =
+    function (
+        emailOrOptions,
+        password,
+        role
+    ) {
+
+        if (
+            emailOrOptions &&
+            typeof emailOrOptions === "object"
+        ) {
+
+            return AUTH.loginWithEmail(
+                emailOrOptions
+            );
+
+        }
+
+
+        return AUTH.loginWithEmail({
+
+            email:
+                emailOrOptions,
+
+            password:
+                password,
+
+            role:
+                role ||
+                safeStorageGet(
+                    STORAGE.selectedRole
+                )
+
+        });
+
+    };
+
+
+/* ============================================================
    PASSWORD RESET
 ============================================================ */
 
@@ -2230,6 +2255,19 @@ AUTH.sendPasswordReset =
         }
 
 
+        if (
+            !FB.auth
+            ||
+            !FB.sendPasswordResetEmail
+        ) {
+
+            throw new Error(
+                "Firebase Authentication is not available."
+            );
+
+        }
+
+
         await FB.sendPasswordResetEmail(
             FB.auth,
             normalizedEmail
@@ -2247,11 +2285,6 @@ AUTH.resetPassword =
 
 /* ============================================================
    PHONE OTP
-   ------------------------------------------------------------
-   Uses signInWithPhoneNumber(), which is already exported by
-   firebase-config.js.
-
-   This avoids requiring PhoneAuthProvider to be exported.
 ============================================================ */
 
 AUTH.sendPhoneOtp =
@@ -2313,6 +2346,8 @@ AUTH.sendPhoneOtp =
 
 
         if (
+            !FB.auth
+            ||
             !FB.signInWithPhoneNumber
         ) {
 
@@ -2458,10 +2493,6 @@ AUTH.verifyPhoneOtp =
             credential.user;
 
 
-        /*
-         * Determine whether this is a first-time phone user.
-         */
-
         let existingProfile =
             null;
 
@@ -2489,11 +2520,6 @@ AUTH.verifyPhoneOtp =
         const isNewPhoneUser =
             !existingProfile;
 
-
-        /*
-         * First-time phone user:
-         * create Firestore profile before finalization.
-         */
 
         if (
             isNewPhoneUser
@@ -2653,7 +2679,7 @@ AUTH.verifyPhoneOtp =
 
 
 /* ============================================================
-   RESEND / RESET OTP STATE
+   CLEAR OTP STATE
 ============================================================ */
 
 AUTH.clearOtpState =
@@ -2880,17 +2906,6 @@ AUTH.updateProfile =
         }
 
 
-        /*
-         * Never allow UI code to change:
-         *
-         * uid
-         * role
-         * userRole
-         * accountType
-         * status
-         * approval
-         */
-
         allowed.updatedAt =
             Date.now();
 
@@ -3053,11 +3068,6 @@ AUTH.init =
     function (
         options = {}
     ) {
-
-        /*
-         * If initialization is already running or complete,
-         * return the same promise.
-         */
 
         if (
             authInitPromise
@@ -3361,10 +3371,6 @@ AUTH.onAuthStateChanged =
         );
 
 
-        /*
-         * Immediately provide current known state.
-         */
-
         if (
             authInitialized
         ) {
@@ -3557,8 +3563,10 @@ AUTH.requireAuth =
                         );
 
                     } else if (
-                        state.role === ROLES.ADMIN ||
-                        state.role === ROLES.SUPERADMIN
+                        state.role ===
+                        ROLES.ADMIN ||
+                        state.role ===
+                        ROLES.SUPERADMIN
                     ) {
 
                         window.location.replace(
@@ -3823,7 +3831,7 @@ AUTH.requireAdmin =
 
 
 /* ============================================================
-   GET USER DISPLAY NAME
+   USER DISPLAY HELPERS
 ============================================================ */
 
 AUTH.getDisplayName =
@@ -3846,10 +3854,6 @@ AUTH.getDisplayName =
     };
 
 
-/* ============================================================
-   GET PHONE
-============================================================ */
-
 AUTH.getPhone =
     function () {
 
@@ -3863,10 +3867,6 @@ AUTH.getPhone =
     };
 
 
-/* ============================================================
-   GET EMAIL
-============================================================ */
-
 AUTH.getEmail =
     function () {
 
@@ -3878,10 +3878,6 @@ AUTH.getEmail =
 
     };
 
-
-/* ============================================================
-   GET USER ID
-============================================================ */
 
 AUTH.getUserId =
     function () {
@@ -4201,14 +4197,34 @@ AUTH.resetPasswordEmail =
 
 /* ============================================================
    GLOBAL COMPATIBILITY API
+   ------------------------------------------------------------
+   IMPORTANT:
+   Firebase config and older RiderX pages may already use
+   window.RiderX.
+
+   Do NOT create a second authentication engine.
+
+   All public APIs below point to the SAME AUTH object.
 ============================================================ */
 
+const existingRiderX =
+    globalThis.RiderX;
+
+const existingRiderXAuth =
+    globalThis.RiderXAuth;
+
+
 const RX =
-    globalThis.RiderXAuth ||
+    existingRiderXAuth ||
+    existingRiderX ||
     {};
 
 
 RX.auth =
+    AUTH;
+
+
+RX.AUTH =
     AUTH;
 
 
@@ -4231,6 +4247,22 @@ RX.login =
 
         return AUTH.loginWithEmail(
             options
+        );
+
+    };
+
+
+RX.loginEmail =
+    function (
+        email,
+        password,
+        role
+    ) {
+
+        return AUTH.loginEmail(
+            email,
+            password,
+            role
         );
 
     };
@@ -4442,28 +4474,78 @@ RX.refreshToken =
     };
 
 
+/*
+ * Compatibility aliases directly on the RiderX namespace.
+ */
+
+RX.loginWithEmail =
+    AUTH.loginWithEmail;
+
+
+RX.loginEmail =
+    AUTH.loginEmail;
+
+
+RX.registerWithEmail =
+    AUTH.registerWithEmail;
+
+
+RX.sendPasswordReset =
+    AUTH.sendPasswordReset;
+
+
+RX.resetPassword =
+    AUTH.resetPassword;
+
+
+RX.onAuthStateChanged =
+    AUTH.onAuthStateChanged;
+
+
+/* ============================================================
+   GLOBAL REFERENCES
+============================================================ */
+
+/*
+ * RiderXAuth
+ */
 globalThis.RiderXAuth =
     RX;
 
 
-/* ============================================================
-   GLOBAL AUTH REFERENCE
-============================================================ */
+/*
+ * RiderX
+ *
+ * This is intentionally the SAME object.
+ */
+globalThis.RiderX =
+    RX;
 
+
+/*
+ * Direct AUTH compatibility.
+ */
 globalThis.AUTH =
+    AUTH;
+
+
+/*
+ * Explicit auth reference.
+ */
+globalThis.RiderX.auth =
     AUTH;
 
 
 /* ============================================================
    AUTO INITIALIZATION
-   ------------------------------------------------------------
-   Only initialize when Firebase Auth is available.
 ============================================================ */
 
 try {
 
     if (
         FB.auth
+        &&
+        FB.onAuthStateChanged
     ) {
 
         AUTH.init()
