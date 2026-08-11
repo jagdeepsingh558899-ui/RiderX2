@@ -3,7 +3,7 @@
    FIREBASE CLOUD MESSAGING
    File: firebase/messaging.js
 
-   Firebase SDK: 10.8.0
+   Firebase SDK: 12.2.1
 
    Handles:
    - FCM web messaging
