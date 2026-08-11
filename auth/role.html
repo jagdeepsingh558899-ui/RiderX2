@@ -1,630 +1,862 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta
-name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    >
+
+    <meta
+        name="theme-color"
+        content="#FFD400"
+    >
+
+    <meta
+        name="description"
+        content="RiderX - Choose your account type"
+    >
+
+    <meta
+        name="color-scheme"
+        content="dark"
+    >
+
+    <title>RiderX - Choose Account</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/auth.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/responsive.css"
+    >
+
+    <style>
+
+        :root {
+            --rx-yellow: #FFD400;
+            --rx-black: #070707;
+            --rx-card: #111111;
+            --rx-card-2: #171717;
+            --rx-border: #292929;
+            --rx-text: #ffffff;
+            --rx-muted: #777777;
+            --rx-danger: #ff7777;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-«»
+        html {
+            background: var(--rx-black);
+        }
 
-<meta
-name="theme-color"
-content="#FFD400"
+        body {
+            min-height: 100vh;
+            min-height: 100dvh;
 
-«»
+            background: var(--rx-black);
+            color: var(--rx-text);
 
-<meta
-name="description"
-content="RiderX - Choose your account type"
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
 
-«»
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
 
-<title>RiderX - Choose Account</title><link
-    rel="stylesheet"
-    href="../css/style.css"
-><link
-    rel="stylesheet"
-    href="../css/auth.css"
-><link
-    rel="stylesheet"
-    href="../css/responsive.css"
-><style>
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
 
-*{
-    box-sizing:border-box;
-}
+        button {
+            font: inherit;
+        }
 
-html,
-body{
-    width:100%;
-    min-height:100%;
-    margin:0;
-}
+        button:disabled {
+            cursor: not-allowed;
+        }
 
-body{
-    min-height:100vh;
-    min-height:100dvh;
+        .page {
+            position: relative;
 
-    background:#070707;
-    color:#fff;
+            width: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-}
+            display: flex;
 
-button{
-    font:inherit;
-}
+            align-items: center;
+            justify-content: center;
 
-button,
-a{
-    -webkit-tap-highlight-color:transparent;
-}
+            overflow: hidden;
 
-.page{
-    position:relative;
+            padding:
+                max(18px, env(safe-area-inset-top))
+                max(18px, env(safe-area-inset-right))
+                max(18px, env(safe-area-inset-bottom))
+                max(18px, env(safe-area-inset-left));
+        }
 
-    min-height:100vh;
-    min-height:100dvh;
+        .glow {
+            position: absolute;
 
-    display:flex;
+            width: 430px;
+            height: 430px;
 
-    align-items:center;
-    justify-content:center;
+            border-radius: 50%;
 
-    overflow:hidden;
+            pointer-events: none;
 
-    padding:
-        max(18px,env(safe-area-inset-top))
-        max(18px,env(safe-area-inset-right))
-        max(18px,env(safe-area-inset-bottom))
-        max(18px,env(safe-area-inset-left));
-}
+            filter: blur(2px);
 
-.glow{
-    position:absolute;
+            z-index: 0;
+        }
 
-    width:430px;
-    height:430px;
+        .glow.one {
+            top: -300px;
+            right: -180px;
 
-    border-radius:50%;
+            background:
+                rgba(255, 212, 0, .09);
+        }
 
-    pointer-events:none;
+        .glow.two {
+            bottom: -300px;
+            left: -190px;
 
-    filter:blur(2px);
-}
+            background:
+                rgba(255, 212, 0, .06);
+        }
 
-.glow.one{
-    top:-300px;
-    right:-180px;
+        .card {
+            position: relative;
+            z-index: 2;
 
-    background:
-        rgba(255,212,0,.09);
-}
+            width: 100%;
+            max-width: 460px;
 
-.glow.two{
-    bottom:-300px;
-    left:-190px;
+            padding: 29px 22px 22px;
 
-    background:
-        rgba(255,212,0,.06);
-}
+            border: 1px solid var(--rx-border);
 
-.card{
-    position:relative;
-    z-index:2;
+            border-radius: 24px;
 
-    width:100%;
-    max-width:460px;
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(22, 22, 22, .98),
+                    rgba(12, 12, 12, .98)
+                );
 
-    padding:
-        29px 22px 22px;
+            box-shadow:
+                0 25px 80px rgba(0, 0, 0, .55),
+                0 0 40px rgba(255, 212, 0, .025);
+        }
 
-    border:
-        1px solid #292929;
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
 
-    border-radius:24px;
+        .logo {
+            width: 68px;
+            height: 68px;
 
-    background:#111111;
+            margin: 0 auto 13px;
 
-    box-shadow:
-        0 25px 80px
-        rgba(0,0,0,.55);
-}
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-.brand{
-    text-align:center;
-    margin-bottom:25px;
-}
+            border-radius: 19px;
 
-.logo{
-    width:68px;
-    height:68px;
+            background: var(--rx-yellow);
+            color: #090909;
 
-    margin:
-        0 auto 13px;
+            font-size: 23px;
+            font-weight: 900;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+            box-shadow:
+                0 10px 35px
+                rgba(255, 212, 0, .14);
 
-    border-radius:19px;
+            user-select: none;
+        }
 
-    background:#FFD400;
-    color:#090909;
+        .brand h1 {
+            margin: 0;
 
-    font-size:23px;
-    font-weight:1000;
+            font-size: 26px;
+            line-height: 1.1;
+            font-weight: 900;
 
-    box-shadow:
-        0 10px 35px
-        rgba(255,212,0,.14);
-}
+            letter-spacing: -.5px;
+        }
 
-.brand h1{
-    margin:0;
+        .brand h1 span {
+            color: var(--rx-yellow);
+        }
 
-    font-size:26px;
-    font-weight:1000;
+        .brand p {
+            margin: 7px 0 0;
 
-    letter-spacing:-.5px;
-}
+            color: var(--rx-muted);
 
-.brand h1 span{
-    color:#FFD400;
-}
+            font-size: 11px;
+            line-height: 1.4;
+        }
 
-.brand p{
-    margin:6px 0 0;
+        .heading {
+            text-align: center;
+        }
 
-    color:#777;
+        .heading h2 {
+            margin: 0;
 
-    font-size:9px;
-}
+            font-size: 19px;
+            line-height: 1.25;
+            font-weight: 900;
+        }
 
-.heading{
-    text-align:center;
-}
+        .heading p {
+            margin: 8px auto 0;
 
-.heading h2{
-    margin:0;
+            max-width: 330px;
 
-    font-size:19px;
-    font-weight:900;
-}
+            color: var(--rx-muted);
 
-.heading p{
-    margin:
-        7px auto 0;
+            font-size: 11px;
+            line-height: 1.55;
+        }
 
-    max-width:330px;
+        .roles {
+            display: grid;
 
-    color:#777;
+            gap: 11px;
 
-    font-size:9px;
-    line-height:1.6;
-}
+            margin-top: 23px;
+        }
 
-.roles{
-    display:grid;
-    gap:11px;
-    margin-top:23px;
-}
+        .role {
+            position: relative;
 
-.role{
-    position:relative;
+            width: 100%;
+            min-height: 88px;
 
-    width:100%;
-    min-height:88px;
+            display: grid;
 
-    display:grid;
+            grid-template-columns:
+                52px minmax(0, 1fr) 25px;
 
-    grid-template-columns:
-        52px 1fr 25px;
+            align-items: center;
 
-    align-items:center;
+            gap: 12px;
 
-    gap:12px;
+            padding: 14px;
 
-    padding:14px;
+            border:
+                1px solid #303030;
 
-    border:
-        1px solid #303030;
+            border-radius: 15px;
 
-    border-radius:15px;
+            background: var(--rx-card-2);
+            color: #fff;
 
-    background:#171717;
-    color:#fff;
+            cursor: pointer;
 
-    cursor:pointer;
+            text-align: left;
 
-    text-align:left;
+            appearance: none;
+            -webkit-appearance: none;
 
-    transition:
-        transform .15s ease,
-        border-color .15s ease,
-        background .15s ease,
-        box-shadow .15s ease;
-}
+            transition:
+                transform .15s ease,
+                border-color .15s ease,
+                background .15s ease,
+                box-shadow .15s ease;
+        }
 
-.role:hover{
-    transform:translateY(-1px);
+        .role:hover {
+            transform: translateY(-1px);
 
-    border-color:#FFD400;
+            border-color: var(--rx-yellow);
 
-    background:#1a1a1a;
+            background: #1a1a1a;
 
-    box-shadow:
-        0 8px 25px
-        rgba(255,212,0,.06);
-}
+            box-shadow:
+                0 8px 25px
+                rgba(255, 212, 0, .06);
+        }
 
-.role:focus-visible{
-    outline:2px solid #FFD400;
-    outline-offset:3px;
-}
+        .role:focus {
+            outline: none;
+        }
 
-.role:active{
-    transform:scale(.99);
-}
+        .role:focus-visible {
+            outline:
+                2px solid
+                var(--rx-yellow);
 
-.role-icon{
-    width:52px;
-    height:52px;
+            outline-offset: 3px;
+        }
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+        .role:active {
+            transform: scale(.99);
+        }
 
-    border-radius:13px;
+        .role-icon {
+            width: 52px;
+            height: 52px;
 
-    background:#222;
-    color:#FFD400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    font-size:16px;
-    font-weight:1000;
-}
+            border-radius: 13px;
 
-.role-content strong{
-    display:block;
+            background: #222;
+            color: var(--rx-yellow);
 
-    margin-bottom:5px;
+            font-size: 16px;
+            font-weight: 900;
 
-    font-size:12px;
-    font-weight:1000;
-}
+            user-select: none;
+        }
 
-.role-content span{
-    display:block;
+        .role-content {
+            min-width: 0;
+        }
 
-    color:#777;
+        .role-content strong {
+            display: block;
 
-    font-size:8px;
-    line-height:1.5;
-}
+            margin-bottom: 5px;
 
-.arrow{
-    color:#555;
+            color: #fff;
 
-    font-size:16px;
-    font-weight:900;
+            font-size: 13px;
+            line-height: 1.25;
+            font-weight: 900;
+        }
 
-    transition:
-        color .15s ease,
-        transform .15s ease;
-}
+        .role-content span {
+            display: block;
 
-.role:hover .arrow{
-    color:#FFD400;
-    transform:translateX(2px);
-}
+            color: var(--rx-muted);
 
-.quick-login{
-    margin-top:18px;
-    padding-top:17px;
+            font-size: 10px;
+            line-height: 1.5;
+        }
 
-    border-top:
-        1px solid #252525;
-}
+        .arrow {
+            color: #555;
 
-.quick-title{
-    margin-bottom:9px;
+            font-size: 18px;
+            line-height: 1;
 
-    color:#666;
+            font-weight: 900;
 
-    font-size:8px;
+            transition:
+                color .15s ease,
+                transform .15s ease;
 
-    text-align:center;
-}
+            user-select: none;
+        }
 
-.login-grid{
-    display:grid;
+        .role:hover .arrow {
+            color: var(--rx-yellow);
+            transform: translateX(2px);
+        }
 
-    grid-template-columns:
-        1fr 1fr;
+        .quick-login {
+            margin-top: 18px;
+            padding-top: 17px;
 
-    gap:8px;
-}
+            border-top:
+                1px solid #252525;
+        }
 
-.login-button{
-    min-height:42px;
+        .quick-title {
+            margin-bottom: 9px;
 
-    border:
-        1px solid #303030;
+            color: #666;
 
-    border-radius:9px;
+            font-size: 9px;
+            line-height: 1.3;
 
-    background:#181818;
-    color:#aaa;
+            text-align: center;
 
-    cursor:pointer;
+            letter-spacing: .4px;
+        }
 
-    font-size:9px;
-    font-weight:900;
+        .login-grid {
+            display: grid;
 
-    transition:
-        border-color .15s ease,
-        color .15s ease,
-        background .15s ease;
-}
+            grid-template-columns:
+                1fr 1fr;
 
-.login-button:hover{
-    border-color:#FFD400;
+            gap: 8px;
+        }
 
-    color:#FFD400;
+        .login-button {
+            min-height: 44px;
 
-    background:#1b1b1b;
-}
+            border:
+                1px solid #303030;
 
-.login-button:focus-visible{
-    outline:2px solid #FFD400;
-    outline-offset:2px;
-}
+            border-radius: 10px;
 
-.status{
-    display:none;
+            background: #181818;
+            color: #aaa;
 
-    margin-top:13px;
-    padding:9px;
+            cursor: pointer;
 
-    border:
-        1px solid #443b00;
+            font-size: 10px;
+            font-weight: 900;
 
-    border-radius:8px;
+            appearance: none;
+            -webkit-appearance: none;
 
-    background:
-        rgba(255,212,0,.07);
+            transition:
+                border-color .15s ease,
+                color .15s ease,
+                background .15s ease,
+                transform .15s ease;
+        }
 
-    color:#FFD400;
+        .login-button:hover {
+            border-color: var(--rx-yellow);
 
-    font-size:8px;
-    line-height:1.5;
+            color: var(--rx-yellow);
 
-    text-align:center;
-}
+            background: #1b1b1b;
+        }
 
-.status.show{
-    display:block;
-}
+        .login-button:active {
+            transform: scale(.98);
+        }
 
-.status.error{
-    border-color:#5a2222;
+        .login-button:focus {
+            outline: none;
+        }
 
-    background:
-        rgba(255,60,60,.07);
+        .login-button:focus-visible {
+            outline:
+                2px solid
+                var(--rx-yellow);
 
-    color:#ff7777;
-}
+            outline-offset: 2px;
+        }
 
-.footer{
-    margin-top:18px;
+        .status {
+            display: none;
 
-    color:#444;
+            margin-top: 13px;
+            padding: 10px 11px;
 
-    font-size:8px;
+            border:
+                1px solid
+                #443b00;
 
-    text-align:center;
-}
+            border-radius: 9px;
 
-@media(max-width:390px){
+            background:
+                rgba(255, 212, 0, .07);
 
-    .card{
-        padding:
-            24px 16px 19px;
+            color: var(--rx-yellow);
 
-        border-radius:20px;
-    }
+            font-size: 10px;
+            line-height: 1.5;
 
-    .role{
-        grid-template-columns:
-            46px 1fr 20px;
+            text-align: center;
+        }
 
-        min-height:82px;
+        .status.show {
+            display: block;
+        }
 
-        padding:11px;
-    }
+        .status.error {
+            border-color: #5a2222;
 
-    .role-icon{
-        width:46px;
-        height:46px;
-    }
+            background:
+                rgba(255, 60, 60, .07);
 
-}
+            color: var(--rx-danger);
+        }
 
-@media(prefers-reduced-motion:reduce){
+        .footer {
+            margin-top: 18px;
 
-    .role,
-    .arrow,
-    .login-button{
-        transition:none;
-    }
+            color: #444;
 
-}
+            font-size: 9px;
+            line-height: 1.4;
 
-</style></head><body><main class="page"><div
-    class="glow one"
-    aria-hidden="true"
-></div><div
-    class="glow two"
-    aria-hidden="true"
-></div><section
-    class="card"
-    aria-labelledby="pageTitle"
-><div class="brand">
+            text-align: center;
+        }
+
+        @media (max-width: 390px) {
+
+            .page {
+                align-items: flex-start;
+
+                padding-top:
+                    max(
+                        16px,
+                        env(safe-area-inset-top)
+                    );
+            }
+
+            .card {
+                padding:
+                    24px 16px 19px;
+
+                border-radius: 20px;
+            }
+
+            .brand {
+                margin-bottom: 22px;
+            }
+
+            .logo {
+                width: 62px;
+                height: 62px;
+
+                border-radius: 17px;
+
+                font-size: 21px;
+            }
+
+            .brand h1 {
+                font-size: 24px;
+            }
+
+            .heading h2 {
+                font-size: 18px;
+            }
+
+            .role {
+                grid-template-columns:
+                    46px minmax(0, 1fr) 20px;
+
+                min-height: 82px;
+
+                padding: 11px;
+
+                gap: 10px;
+            }
+
+            .role-icon {
+                width: 46px;
+                height: 46px;
+            }
+
+            .role-content strong {
+                font-size: 12px;
+            }
+
+            .role-content span {
+                font-size: 9px;
+            }
+
+            .arrow {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-height: 650px) {
+
+            .page {
+                align-items: flex-start;
+
+                padding-top:
+                    max(
+                        12px,
+                        env(safe-area-inset-top)
+                    );
+
+                padding-bottom:
+                    max(
+                        12px,
+                        env(safe-area-inset-bottom)
+                    );
+            }
+
+            .card {
+                margin-top: 0;
+            }
+
+            .brand {
+                margin-bottom: 16px;
+            }
+
+            .logo {
+                width: 56px;
+                height: 56px;
+
+                margin-bottom: 8px;
+            }
+
+            .roles {
+                margin-top: 16px;
+            }
+
+            .quick-login {
+                margin-top: 14px;
+                padding-top: 13px;
+            }
+
+            .footer {
+                margin-top: 12px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .role,
+            .arrow,
+            .login-button {
+                transition: none;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<main class="page">
 
     <div
-        class="logo"
+        class="glow one"
         aria-hidden="true"
-    >
-        RX
-    </div>
+    ></div>
 
-    <h1>
-        Rider<span>X</span>
-    </h1>
-
-    <p>
-        One platform. Every journey.
-    </p>
-
-</div>
+    <div
+        class="glow two"
+        aria-hidden="true"
+    ></div>
 
 
-<div class="heading">
-
-    <h2 id="pageTitle">
-        How will you use RiderX?
-    </h2>
-
-    <p>
-        Select your account type to continue
-        to the correct RiderX login.
-    </p>
-
-</div>
-
-
-<div class="roles">
-
-    <button
-        type="button"
-        class="role"
-        id="customerOption"
-        aria-label="Continue as Customer"
+    <section
+        class="card"
+        aria-labelledby="pageTitle"
     >
 
+        <div class="brand">
+
+            <div
+                class="logo"
+                aria-hidden="true"
+            >
+                RX
+            </div>
+
+            <h1>
+                Rider<span>X</span>
+            </h1>
+
+            <p>
+                One platform. Every journey.
+            </p>
+
+        </div>
+
+
+        <div class="heading">
+
+            <h2 id="pageTitle">
+                How will you use RiderX?
+            </h2>
+
+            <p>
+                Select your account type to continue
+                to the correct RiderX login.
+            </p>
+
+        </div>
+
+
+        <div class="roles">
+
+            <button
+                type="button"
+                class="role"
+                id="customerOption"
+                aria-label="Continue as Customer"
+            >
+
+                <div
+                    class="role-icon"
+                    aria-hidden="true"
+                >
+                    C
+                </div>
+
+                <div class="role-content">
+
+                    <strong>
+                        I'm a Customer
+                    </strong>
+
+                    <span>
+                        Book Bike Taxi, Cab, Parcel
+                        and other RiderX services.
+                    </span>
+
+                </div>
+
+                <div
+                    class="arrow"
+                    aria-hidden="true"
+                >
+                    →
+                </div>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="role"
+                id="riderOption"
+                aria-label="Continue as Rider or Driver"
+            >
+
+                <div
+                    class="role-icon"
+                    aria-hidden="true"
+                >
+                    R
+                </div>
+
+                <div class="role-content">
+
+                    <strong>
+                        I'm a Rider
+                    </strong>
+
+                    <span>
+                        Drive with RiderX, accept rides,
+                        navigate and manage earnings.
+                    </span>
+
+                </div>
+
+                <div
+                    class="arrow"
+                    aria-hidden="true"
+                >
+                    →
+                </div>
+
+            </button>
+
+        </div>
+
+
         <div
-            class="role-icon"
-            aria-hidden="true"
-        >
-            C
-        </div>
-
-        <div class="role-content">
-
-            <strong>
-                I'm a Customer
-            </strong>
-
-            <span>
-                Book Bike Taxi, Cab, Parcel
-                and other RiderX services.
-            </span>
-
-        </div>
-
-        <div
-            class="arrow"
-            aria-hidden="true"
-        >
-            →
-        </div>
-
-    </button>
+            class="status"
+            id="status"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+        ></div>
 
 
-    <button
-        type="button"
-        class="role"
-        id="riderOption"
-        aria-label="Continue as Rider or Driver"
-    >
+        <div class="quick-login">
 
-        <div
-            class="role-icon"
-            aria-hidden="true"
-        >
-            R
-        </div>
+            <div class="quick-title">
+                ALREADY HAVE AN ACCOUNT?
+            </div>
 
-        <div class="role-content">
+            <div class="login-grid">
 
-            <strong>
-                I'm a Rider
-            </strong>
+                <button
+                    type="button"
+                    class="login-button"
+                    id="customerLogin"
+                >
+                    Customer Login
+                </button>
 
-            <span>
-                Drive with RiderX, accept rides,
-                navigate and manage earnings.
-            </span>
+                <button
+                    type="button"
+                    class="login-button"
+                    id="riderLogin"
+                >
+                    Rider Login
+                </button>
+
+            </div>
 
         </div>
 
-        <div
-            class="arrow"
-            aria-hidden="true"
-        >
-            →
+
+        <div class="footer">
+            © 2026 RiderX • India
         </div>
 
-    </button>
+    </section>
 
-</div>
-
-
-<div
-    class="status"
-    id="status"
-    role="status"
-    aria-live="polite"
-></div>
+</main>
 
 
-<div class="quick-login">
-
-    <div class="quick-title">
-        ALREADY HAVE AN ACCOUNT?
-    </div>
-
-    <div class="login-grid">
-
-        <button
-            type="button"
-            class="login-button"
-            id="customerLogin"
-        >
-            Customer Login
-        </button>
-
-        <button
-            type="button"
-            class="login-button"
-            id="riderLogin"
-        >
-            Rider Login
-        </button>
-
-    </div>
-
-</div>
-
-
-<div class="footer">
-    © 2026 RiderX • India 
-</div>
-
-</section></main><script>
+<script>
 
 "use strict";
+
+
+/* =========================================================
+   RIDERX ROLE SELECTION ENGINE
+   =========================================================
+
+   FLOW:
+
+   index.html
+        ↓
+   auth/role.html
+        ↓
+   Customer / Rider selection
+        ↓
+   auth/login.html?role=customer
+   OR
+   auth/login.html?role=rider
+        ↓
+   Firebase authentication
+        ↓
+   auth.js resolves real Firebase/Firestore role
+        ↓
+   Customer / Rider dashboard
+
+   IMPORTANT:
+   This page NEVER authenticates a user.
+   This page NEVER sends a user directly to a dashboard.
+   ========================================================= */
 
 
 /* =========================================================
@@ -665,7 +897,7 @@ const riderLogin =
         "riderLogin"
     );
 
-const status =
+const statusBox =
     document.getElementById(
         "status"
     );
@@ -675,10 +907,10 @@ const status =
    ROLE NORMALIZATION
 ========================================================= */
 
-function normalizeRole(role){
+function normalizeRole(role) {
 
     const value =
-        String(role || "")
+        String(role ?? "")
             .trim()
             .toLowerCase()
             .replace(
@@ -687,28 +919,32 @@ function normalizeRole(role){
             );
 
 
-    if(
+    if (
         [
             "customer",
+            "customers",
             "user",
             "users"
         ].includes(value)
-    ){
+    ) {
 
         return "customer";
 
     }
 
 
-    if(
+    if (
         [
             "rider",
-            "driver",
-            "partner",
             "riders",
-            "drivers"
+            "driver",
+            "drivers",
+            "partner",
+            "driver_partner",
+            "driverpartner",
+            "captain"
         ].includes(value)
-    ){
+    ) {
 
         return "rider";
 
@@ -721,44 +957,115 @@ function normalizeRole(role){
 
 
 /* =========================================================
-   STORAGE
+   SAVE SELECTED ROLE
 ========================================================= */
 
-function setRole(role){
+function saveRole(role) {
 
     const normalized =
         normalizeRole(role);
 
 
-    if(!normalized){
+    if (!normalized) {
         return false;
     }
 
 
-    try{
+    try {
 
         localStorage.setItem(
             ROLE_KEY,
             normalized
         );
 
-
         localStorage.setItem(
             LEGACY_ROLE_KEY,
             normalized
         );
 
-
         return true;
 
-    }catch(error){
+    } catch (error) {
 
         console.warn(
-            "RiderX role storage failed:",
+            "RiderX role storage unavailable:",
             error
         );
 
+        /*
+         * The URL still carries ?role=customer/rider,
+         * so login can continue even if localStorage
+         * is blocked.
+         */
+
         return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   READ ROLE FROM URL
+========================================================= */
+
+function getUrlRole() {
+
+    try {
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        return normalizeRole(
+            params.get("role")
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX URL role parsing failed:",
+            error
+        );
+
+        return "";
+
+    }
+
+}
+
+
+/* =========================================================
+   READ STORED ROLE
+========================================================= */
+
+function getStoredRole() {
+
+    try {
+
+        return normalizeRole(
+
+            localStorage.getItem(
+                ROLE_KEY
+            )
+
+            ||
+
+            localStorage.getItem(
+                LEGACY_ROLE_KEY
+            )
+
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX role storage read failed:",
+            error
+        );
+
+        return "";
 
     }
 
@@ -771,26 +1078,41 @@ function setRole(role){
 
 function showStatus(
     text,
-    type = ""
-){
+    type
+) {
 
-    if(!status){
+    if (!statusBox) {
         return;
     }
 
 
-    status.textContent =
-        String(text || "");
+    const message =
+        String(text ?? "").trim();
 
 
-    status.className =
+    if (!message) {
+
+        clearStatus();
+
+        return;
+
+    }
+
+
+    statusBox.textContent =
+        message;
+
+
+    statusBox.className =
         "status show";
 
 
-    if(type){
+    if (
+        type === "error"
+    ) {
 
-        status.classList.add(
-            type
+        statusBox.classList.add(
+            "error"
         );
 
     }
@@ -798,33 +1120,36 @@ function showStatus(
 }
 
 
-function clearStatus(){
+function clearStatus() {
 
-    if(!status){
+    if (!statusBox) {
         return;
     }
 
 
-    status.textContent =
+    statusBox.textContent =
         "";
 
-    status.className =
+    statusBox.className =
         "status";
 
 }
 
 
 /* =========================================================
-   OPEN LOGIN
+   LOGIN NAVIGATION
 ========================================================= */
 
-function openLogin(role){
+function openLogin(role) {
 
     const normalized =
         normalizeRole(role);
 
 
-    if(!normalized){
+    if (
+        normalized !== "customer" &&
+        normalized !== "rider"
+    ) {
 
         showStatus(
             "Please select a valid RiderX account type.",
@@ -837,19 +1162,14 @@ function openLogin(role){
 
 
     /*
-     * This only remembers the user's selected login type.
-     * It does NOT authenticate the user.
+     * Save role for login.html.
+     *
+     * URL also contains the role, so the flow does not
+     * depend exclusively on localStorage.
      */
 
-    setRole(
+    saveRole(
         normalized
-    );
-
-
-    showStatus(
-        normalized === "customer"
-            ? "Opening Customer login..."
-            : "Opening Rider / Driver login..."
     );
 
 
@@ -861,30 +1181,46 @@ function openLogin(role){
         );
 
 
+    showStatus(
+        normalized === "customer"
+            ? "Opening Customer login..."
+            : "Opening Rider login..."
+    );
+
+
+    /*
+     * Small delay gives the user feedback and allows
+     * the browser to complete the click interaction.
+     */
+
     window.setTimeout(
-        function(){
+        function () {
 
             window.location.replace(
                 destination
             );
 
         },
-        180
+        120
     );
 
 }
 
 
 /* =========================================================
-   CUSTOMER
+   CUSTOMER BUTTON
 ========================================================= */
 
-if(customerOption){
+if (customerOption) {
 
     customerOption.addEventListener(
         "click",
-        function(){
-            openLogin("customer");
+        function () {
+
+            openLogin(
+                "customer"
+            );
+
         }
     );
 
@@ -892,15 +1228,19 @@ if(customerOption){
 
 
 /* =========================================================
-   RIDER
+   RIDER BUTTON
 ========================================================= */
 
-if(riderOption){
+if (riderOption) {
 
     riderOption.addEventListener(
         "click",
-        function(){
-            openLogin("rider");
+        function () {
+
+            openLogin(
+                "rider"
+            );
+
         }
     );
 
@@ -911,12 +1251,16 @@ if(riderOption){
    QUICK CUSTOMER LOGIN
 ========================================================= */
 
-if(customerLogin){
+if (customerLogin) {
 
     customerLogin.addEventListener(
         "click",
-        function(){
-            openLogin("customer");
+        function () {
+
+            openLogin(
+                "customer"
+            );
+
         }
     );
 
@@ -927,61 +1271,15 @@ if(customerLogin){
    QUICK RIDER LOGIN
 ========================================================= */
 
-if(riderLogin){
+if (riderLogin) {
 
     riderLogin.addEventListener(
         "click",
-        function(){
-            openLogin("rider");
-        }
-    );
+        function () {
 
-}
-
-
-/* =========================================================
-   KEYBOARD SUPPORT
-========================================================= */
-
-if(customerOption){
-
-    customerOption.addEventListener(
-        "keydown",
-        function(event){
-
-            if(
-                event.key === "Enter" ||
-                event.key === " "
-            ){
-
-                event.preventDefault();
-
-                openLogin("customer");
-
-            }
-
-        }
-    );
-
-}
-
-
-if(riderOption){
-
-    riderOption.addEventListener(
-        "keydown",
-        function(event){
-
-            if(
-                event.key === "Enter" ||
-                event.key === " "
-            ){
-
-                event.preventDefault();
-
-                openLogin("rider");
-
-            }
+            openLogin(
+                "rider"
+            );
 
         }
     );
@@ -990,41 +1288,35 @@ if(riderOption){
 
 
 /* =========================================================
-   URL ROLE
-   ---------------------------------------------------------
-   URL role is only remembered.
-   It NEVER auto-opens a dashboard.
+   URL ROLE PRESERVATION
+=========================================================
+
+   If role.html is opened as:
+
+   role.html?role=customer
+
+   or:
+
+   role.html?role=rider
+
+   remember that role.
+
+   This DOES NOT authenticate or redirect to a dashboard.
 ========================================================= */
 
-(function preserveUrlRole(){
+(function preserveUrlRole() {
 
-    try{
-
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
+    const urlRole =
+        getUrlRole();
 
 
-        const urlRole =
-            normalizeRole(
-                params.get("role")
-            );
+    if (
+        urlRole === "customer" ||
+        urlRole === "rider"
+    ) {
 
-
-        if(urlRole){
-
-            setRole(
-                urlRole
-            );
-
-        }
-
-    }catch(error){
-
-        console.warn(
-            "RiderX role URL parsing failed:",
-            error
+        saveRole(
+            urlRole
         );
 
     }
@@ -1033,15 +1325,28 @@ if(riderOption){
 
 
 /* =========================================================
-   IMPORTANT
-   ---------------------------------------------------------
-   There is intentionally NO automatic redirect here.
-
-   role.html is the authentication entry gate.
-   User must explicitly choose Customer/Rider and
-   then complete login.
+   CLEAR INITIAL STATUS
 ========================================================= */
 
 clearStatus();
 
-</script></body></html>
+
+/* =========================================================
+   DEBUG-SAFE STARTUP
+========================================================= */
+
+window.RiderXRole =
+    Object.freeze({
+
+        normalizeRole,
+        saveRole,
+        getUrlRole,
+        getStoredRole
+
+    });
+
+
+</script>
+
+</body>
+</html>
