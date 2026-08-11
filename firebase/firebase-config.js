@@ -3,22 +3,28 @@
    FIREBASE CONFIGURATION
    File: firebase/firebase-config.js
 
-   Firebase SDK: 10.8.0
+   FIREBASE SDK:
+   10.8.0
 
-   Services:
+   SERVICES:
    - Firebase Authentication
    - Cloud Firestore
    - Realtime Database
    - Firebase Storage
 
+   ARCHITECTURE:
+   - SINGLE Firebase initialization point
+   - SINGLE default Firebase app
+   - Shared service instances
+   - Modular Firebase SDK
+   - No Firebase initialization in feature modules
+   - Compatibility bridge for legacy RiderX code
+
    IMPORTANT:
-   This is the SINGLE Firebase initialization point
-   for the RiderX application.
+   Application modules MUST import Firebase services from
+   this file.
 
-   All RiderX modules should use the Firebase services
-   exported from this file.
-
-   Do NOT initialize Firebase again in application modules.
+   Do NOT call initializeApp() anywhere else in RiderX.
 ========================================================= */
 
 "use strict";
@@ -122,11 +128,15 @@ import {
    RIDERX FIREBASE CONFIGURATION
 
    NOTE:
-   Firebase Web configuration values are client-side
-   configuration values. Real security must be enforced
-   through Firebase Authentication, Firestore rules,
-   Realtime Database rules, Storage rules and API
-   restrictions.
+   Firebase Web configuration is client-side configuration.
+   The API key is NOT treated as a private server secret.
+
+   Real security MUST be enforced through:
+   - Firebase Authentication
+   - Firestore Security Rules
+   - Realtime Database Security Rules
+   - Storage Security Rules
+   - Google/Firebase API restrictions
 
    Project:
    riderx-1
@@ -162,16 +172,21 @@ const firebaseConfig = Object.freeze({
 
 
 /* =========================================================
+   INTERNAL CONSTANTS
+========================================================= */
+
+const FIREBASE_DEFAULT_APP_NAME = "[DEFAULT]";
+
+
+/* =========================================================
    FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   RiderX has ONE default Firebase application.
+   This is the ONLY initializeApp() call in RiderX.
 
-   If the default app already exists, reuse it.
+   If the default app already exists, it is reused.
 
-   Otherwise initialize it with the RiderX configuration.
-
-   IMPORTANT:
-   No other RiderX file should call initializeApp().
+   Named Firebase applications are ignored here because
+   RiderX intentionally operates on one default application.
 ========================================================= */
 
 let app;
@@ -180,24 +195,36 @@ try {
 
     const existingApps = getApps();
 
-    if (existingApps.length > 0) {
+    const defaultAppExists =
+        existingApps.some(
+            firebaseApp =>
+                firebaseApp.name ===
+                FIREBASE_DEFAULT_APP_NAME
+        );
+
+
+    if (defaultAppExists) {
 
         app = getApp();
 
     } else {
 
-        app = initializeApp(firebaseConfig);
+        app = initializeApp(
+            firebaseConfig
+        );
 
     }
 
 } catch (error) {
 
     console.error(
-        "RiderX Firebase app initialization failed:",
+        "RiderX Firebase app initialization failed.",
         error
     );
 
-    throw error;
+    throw new Error(
+        "RiderX Firebase could not be initialized."
+    );
 
 }
 
@@ -215,11 +242,13 @@ try {
 } catch (error) {
 
     console.error(
-        "RiderX Firebase Authentication initialization failed:",
+        "RiderX Firebase Authentication initialization failed.",
         error
     );
 
-    throw error;
+    throw new Error(
+        "RiderX Firebase Authentication could not be initialized."
+    );
 
 }
 
@@ -237,11 +266,13 @@ try {
 } catch (error) {
 
     console.error(
-        "RiderX Cloud Firestore initialization failed:",
+        "RiderX Cloud Firestore initialization failed.",
         error
     );
 
-    throw error;
+    throw new Error(
+        "RiderX Cloud Firestore could not be initialized."
+    );
 
 }
 
@@ -259,11 +290,13 @@ try {
 } catch (error) {
 
     console.error(
-        "RiderX Realtime Database initialization failed:",
+        "RiderX Firebase Realtime Database initialization failed.",
         error
     );
 
-    throw error;
+    throw new Error(
+        "RiderX Realtime Database could not be initialized."
+    );
 
 }
 
@@ -281,11 +314,13 @@ try {
 } catch (error) {
 
     console.error(
-        "RiderX Firebase Storage initialization failed:",
+        "RiderX Firebase Storage initialization failed.",
         error
     );
 
-    throw error;
+    throw new Error(
+        "RiderX Firebase Storage could not be initialized."
+    );
 
 }
 
@@ -308,15 +343,15 @@ googleProvider.setCustomParameters({
 /* =========================================================
    CENTRAL RIDERX FIREBASE SERVICES
    ---------------------------------------------------------
-   This object is the main shared Firebase reference.
+   This is the primary shared Firebase object.
 
-   Application modules should prefer:
+   Preferred usage:
 
        import {
            firebaseServices
        } from "../firebase/firebase-config.js";
 
-   or the individual exported services.
+   Or import individual services directly.
 ========================================================= */
 
 const firebaseServices =
@@ -353,7 +388,7 @@ const firebaseServices =
         storage,
 
 
-        /* Google Authentication */
+        /* Google authentication */
 
         googleProvider
 
@@ -366,17 +401,102 @@ const firebaseServices =
 
 let firebaseReady = false;
 
+let firebaseReadyResolve;
+
+let firebaseReadyReject;
+
+
+/* =========================================================
+   FIREBASE READY PROMISE
+   ---------------------------------------------------------
+   A Promise is provided so modules loaded after this file
+   can safely wait for Firebase without depending only on
+   a browser event that may already have fired.
+========================================================= */
+
+const firebaseReadyPromise =
+    new Promise(
+        (resolve, reject) => {
+
+            firebaseReadyResolve =
+                resolve;
+
+            firebaseReadyReject =
+                reject;
+
+        }
+    );
+
+
+/* =========================================================
+   FIREBASE ERROR NORMALIZER
+========================================================= */
+
+function normalizeFirebaseError(
+    error,
+    fallbackMessage
+) {
+
+    if (
+        error &&
+        typeof error === "object"
+    ) {
+
+        return {
+
+            code:
+                typeof error.code === "string"
+                    ? error.code
+                    : "firebase/unknown",
+
+            message:
+                typeof error.message === "string"
+                    ? error.message
+                    : fallbackMessage,
+
+            originalError:
+                error
+
+        };
+
+    }
+
+
+    return {
+
+        code:
+            "firebase/unknown",
+
+        message:
+            fallbackMessage,
+
+        originalError:
+            error
+
+    };
+
+}
+
 
 /* =========================================================
    FIREBASE READY EVENT
-   ---------------------------------------------------------
-   Dispatches a browser event after all core Firebase
-   services have been initialized successfully.
 ========================================================= */
 
 function markFirebaseReady() {
 
+    if (firebaseReady === true) {
+
+        return;
+
+    }
+
+
     firebaseReady = true;
+
+
+    firebaseReadyResolve(
+        firebaseServices
+    );
 
 
     if (
@@ -394,8 +514,10 @@ function markFirebaseReady() {
             new CustomEvent(
                 "riderx:firebase-ready",
                 {
+
                     detail:
                         firebaseServices
+
                 }
             )
         );
@@ -403,7 +525,7 @@ function markFirebaseReady() {
     } catch (error) {
 
         console.warn(
-            "RiderX Firebase ready event dispatch failed:",
+            "RiderX Firebase ready event dispatch failed.",
             error
         );
 
@@ -426,14 +548,57 @@ function isFirebaseReady() {
 
 
 /* =========================================================
+   WAIT FOR FIREBASE
+   ---------------------------------------------------------
+   Allows application modules to safely wait for the
+   centralized Firebase services.
+
+   Usage:
+
+       const firebase =
+           await waitForFirebase();
+
+========================================================= */
+
+function waitForFirebase() {
+
+    if (firebaseReady === true) {
+
+        return Promise.resolve(
+            firebaseServices
+        );
+
+    }
+
+
+    return firebaseReadyPromise;
+
+}
+
+
+/* =========================================================
+   GET FIREBASE SERVICES
+   ---------------------------------------------------------
+   Synchronous helper for modules that are already loaded
+   after this configuration module has initialized.
+========================================================= */
+
+function getFirebase() {
+
+    return firebaseServices;
+
+}
+
+
+/* =========================================================
    GLOBAL RIDERX FIREBASE REFERENCES
    ---------------------------------------------------------
    These references DO NOT initialize Firebase.
 
-   They expose the already initialized Firebase services
-   to legacy/non-module RiderX code.
+   They exist only as compatibility bridges for existing
+   non-module/legacy RiderX pages.
 
-   Existing compatibility names are intentionally preserved.
+   New code SHOULD use ES module imports instead.
 ========================================================= */
 
 if (
@@ -479,11 +644,7 @@ if (
     ----------------------------------------------------- */
 
     window.RiderX.getFirebase =
-        function () {
-
-            return firebaseServices;
-
-        };
+        getFirebase;
 
 
     /* -----------------------------------------------------
@@ -491,20 +652,50 @@ if (
     ----------------------------------------------------- */
 
     window.RiderX.isFirebaseReady =
-        function () {
+        isFirebaseReady;
 
-            return isFirebaseReady();
 
-        };
+    /* -----------------------------------------------------
+       Firebase wait helper
+    ----------------------------------------------------- */
+
+    window.RiderX.waitForFirebase =
+        waitForFirebase;
 
 }
 
 
 /* =========================================================
    MARK FIREBASE AS READY
+   ---------------------------------------------------------
+   At this point all core Firebase services have already
+   been initialized successfully.
 ========================================================= */
 
-markFirebaseReady();
+try {
+
+    markFirebaseReady();
+
+} catch (error) {
+
+    const normalizedError =
+        normalizeFirebaseError(
+            error,
+            "RiderX Firebase ready-state initialization failed."
+        );
+
+
+    firebaseReadyReject(
+        normalizedError
+    );
+
+
+    console.error(
+        "RiderX Firebase ready-state initialization failed.",
+        normalizedError
+    );
+
+}
 
 
 /* =========================================================
@@ -545,10 +736,14 @@ export {
 
 
     /* =====================================================
-       FIREBASE STATE
+       FIREBASE STATE / HELPERS
     ===================================================== */
 
     isFirebaseReady,
+
+    waitForFirebase,
+
+    getFirebase,
 
 
     /* =====================================================
@@ -670,7 +865,10 @@ export {
 /* =========================================================
    DEBUG INFORMATION
    ---------------------------------------------------------
-   Only non-sensitive project/service state is logged.
+   Only non-sensitive service initialization state is
+   logged.
+
+   The Firebase API key is intentionally NOT logged.
 ========================================================= */
 
 console.info(
@@ -693,7 +891,10 @@ console.info(
             Boolean(realtimeDb),
 
         storage:
-            Boolean(storage)
+            Boolean(storage),
+
+        ready:
+            firebaseReady
 
     }
 );
