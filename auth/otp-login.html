@@ -76,7 +76,7 @@ button {
         max(18px, env(safe-area-inset-left));
 
     position: relative;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .page::before {
@@ -126,8 +126,7 @@ button {
 
     padding: 29px 22px 21px;
 
-    border:
-        1px solid #292929;
+    border: 1px solid #292929;
 
     border-radius: 23px;
 
@@ -140,7 +139,6 @@ button {
 
 .brand {
     text-align: center;
-
     margin-bottom: 24px;
 }
 
@@ -195,8 +193,7 @@ button {
 }
 
 .heading p {
-    margin:
-        7px auto 0;
+    margin: 7px auto 0;
 
     max-width: 350px;
 
@@ -276,9 +273,13 @@ button {
         rgba(255, 212, 0, .07);
 }
 
+.input:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+}
+
 .phone-wrap {
     display: flex;
-
     gap: 8px;
 }
 
@@ -324,6 +325,10 @@ button {
 
     font-size: 10px;
     font-weight: 1000;
+
+    transition:
+        opacity .2s ease,
+        transform .15s ease;
 }
 
 .primary:hover {
@@ -337,11 +342,11 @@ button {
 .primary:disabled {
     opacity: .55;
     cursor: not-allowed;
+    transform: none;
 }
 
 .otp-section {
     display: none;
-
     margin-top: 20px;
 }
 
@@ -481,8 +486,12 @@ button {
 
 .secondary:hover {
     border-color: #ffd400;
-
     color: #ffd400;
+}
+
+.secondary:disabled {
+    opacity: .55;
+    cursor: not-allowed;
 }
 
 .footer {
@@ -520,8 +529,7 @@ button {
 @keyframes spin {
 
     to {
-        transform:
-            rotate(360deg);
+        transform: rotate(360deg);
     }
 
 }
@@ -585,7 +593,7 @@ button {
         class="role"
         id="roleBadge"
     >
-        CUSTOMER / RIDER
+        CUSTOMER
     </div>
 
 </div>
@@ -616,6 +624,7 @@ button {
         autocomplete="tel"
         maxlength="10"
         placeholder="Enter 10 digit mobile number"
+        aria-label="10 digit Indian mobile number"
     >
 
 </div>
@@ -647,6 +656,7 @@ button {
         autocomplete="one-time-code"
         maxlength="6"
         placeholder="OTP"
+        aria-label="6 digit OTP"
     >
 
 
@@ -803,10 +813,10 @@ let firebaseModule =
 
 
 /* =========================================================
-   ROLE
+   ROLE DETECTION
 ========================================================= */
 
-function getSelectedRole() {
+function readStoredRole() {
 
     const values = [
 
@@ -830,7 +840,7 @@ function getSelectedRole() {
     ) {
 
         const role =
-            normalizeRole(
+            parseStoredRole(
                 value
             );
 
@@ -851,7 +861,7 @@ function getSelectedRole() {
 }
 
 
-function normalizeRole(
+function parseStoredRole(
     value
 ) {
 
@@ -882,6 +892,26 @@ function normalizeRole(
 
     if (
         [
+            "customer",
+            "user",
+            "passenger"
+        ].includes(
+            role
+        )
+    ) {
+
+        return "customer";
+
+    }
+
+
+    /*
+     * Admin is intentionally not allowed
+     * to use the customer/rider OTP page.
+     */
+
+    if (
+        [
             "admin",
             "administrator"
         ].includes(
@@ -894,14 +924,38 @@ function normalizeRole(
     }
 
 
-    return "customer";
+    return null;
 
 }
 
 
 let selectedRole =
-    getSelectedRole();
+    readStoredRole();
 
+
+/* =========================================================
+   ADMIN PROTECTION
+========================================================= */
+
+if (
+    selectedRole ===
+    "admin"
+) {
+
+    selectedRole =
+        "customer";
+
+    localStorage.setItem(
+        "riderx_selected_role",
+        "customer"
+    );
+
+}
+
+
+/* =========================================================
+   ROLE BADGE
+========================================================= */
 
 if (
     selectedRole ===
@@ -946,7 +1000,7 @@ async function loadFirebase() {
 
 
 /* =========================================================
-   MESSAGE
+   MESSAGE HELPERS
 ========================================================= */
 
 function showMessage(
@@ -978,7 +1032,7 @@ function clearMessage() {
 
 
 /* =========================================================
-   PHONE FORMAT
+   PHONE NORMALIZATION
 ========================================================= */
 
 function getPhoneNumber() {
@@ -990,6 +1044,11 @@ function getPhoneNumber() {
                 ""
             );
 
+
+    /*
+     * If user somehow entered 91XXXXXXXXXX,
+     * normalize it to the actual 10 digit number.
+     */
 
     if (
         phone.startsWith("91") &&
@@ -1009,20 +1068,16 @@ function getPhoneNumber() {
 
 function getFirebasePhone() {
 
-    const phone =
-        getPhoneNumber();
-
-
     return (
         "+91" +
-        phone
+        getPhoneNumber()
     );
 
 }
 
 
 /* =========================================================
-   VALIDATE PHONE
+   PHONE VALIDATION
 ========================================================= */
 
 function validatePhone() {
@@ -1100,7 +1155,6 @@ async function sendOTP() {
     busy =
         true;
 
-
     setButtons(
         true
     );
@@ -1124,45 +1178,26 @@ async function sendOTP() {
 
 
         if (
-            !FB.RecaptchaVerifier
+            typeof FB.RecaptchaVerifier !==
+            "function"
         ) {
 
             throw new Error(
-                "Firebase reCAPTCHA is not configured."
+                "Firebase reCAPTCHA is not available. Please check firebase-config.js."
             );
 
         }
 
 
+        cleanupRecaptcha();
+
+
         /*
-         * Firebase requires a reCAPTCHA verifier
-         * before phone authentication.
+         * Firebase Phone Auth requires a
+         * RecaptchaVerifier before sending OTP.
+         *
+         * Invisible reCAPTCHA is attached to body.
          */
-
-        if (
-            window.riderxRecaptcha
-        ) {
-
-            try {
-
-                window.riderxRecaptcha.clear();
-
-            } catch (
-                error
-            ) {
-
-                console.warn(
-                    "reCAPTCHA cleanup warning:",
-                    error
-                );
-
-            }
-
-            window.riderxRecaptcha =
-                null;
-
-        }
-
 
         const verifier =
             new FB.RecaptchaVerifier(
@@ -1187,6 +1222,16 @@ async function sendOTP() {
 
                             showMessage(
                                 "Security verification expired. Please send OTP again.",
+                                "error"
+                            );
+
+                        },
+
+                    "error-callback":
+                        function () {
+
+                            showMessage(
+                                "Security verification failed. Please try again.",
                                 "error"
                             );
 
@@ -1221,6 +1266,9 @@ async function sendOTP() {
             "none";
 
 
+        otpInput.value =
+            "";
+
         otpInput.focus();
 
 
@@ -1247,15 +1295,15 @@ async function sendOTP() {
             null;
 
 
+        cleanupRecaptcha();
+
+
         showMessage(
             firebaseErrorMessage(
                 error
             ),
             "error"
         );
-
-
-        cleanupRecaptcha();
 
 
     } finally {
@@ -1290,14 +1338,6 @@ async function verifyOTP() {
     clearMessage();
 
 
-    const otp =
-        otpInput.value
-            .replace(
-                /\D/g,
-                ""
-            );
-
-
     if (
         !confirmationResult
     ) {
@@ -1310,6 +1350,14 @@ async function verifyOTP() {
         return;
 
     }
+
+
+    const otp =
+        otpInput.value
+            .replace(
+                /\D/g,
+                ""
+            );
 
 
     if (
@@ -1330,7 +1378,6 @@ async function verifyOTP() {
 
     busy =
         true;
-
 
     setButtons(
         true
@@ -1361,97 +1408,120 @@ async function verifyOTP() {
         }
 
 
+        stopTimer();
+
+
+        cleanupRecaptcha();
+
+
+        /*
+         * IMPORTANT:
+         * OTP authentication proves ownership
+         * of the phone number.
+         *
+         * RiderX profile/role must still exist
+         * before access is granted.
+         */
+
         const profile =
             await findProfile(
                 firebaseUser.uid
             );
 
 
-        /*
-         * Existing account:
-         * verify the stored RiderX role.
-         */
-
         if (
-            profile
+            !profile
         ) {
 
-            const role =
-                normalizeRole(
-                    profile.role ||
-                    profile.userRole ||
-                    profile.accountType
-                );
+            await safeSignOut();
 
+            clearLocalSession();
 
-            if (
-                role !==
-                selectedRole
-            ) {
-
-                await safeSignOut();
-
-
-                throw new Error(
-                    role === "rider"
-                        ? "This mobile number belongs to a Rider account. Please use Rider login."
-                        : "This mobile number belongs to a Customer account. Please use Customer login."
-                );
-
-            }
-
-
-            if (
-                isBlocked(
-                    profile
-                )
-            ) {
-
-                await safeSignOut();
-
-
-                throw new Error(
-                    "Your RiderX account is blocked or suspended. Please contact support."
-                );
-
-            }
-
-
-            saveSession(
-                firebaseUser,
-                profile
+            throw new Error(
+                "No RiderX account was found for this mobile number. Please register first."
             );
-
-
-            showMessage(
-                "OTP verified. Opening RiderX...",
-                "success"
-            );
-
-
-            redirectByRole(
-                selectedRole
-            );
-
-
-            return;
 
         }
 
 
-        /*
-         * No profile:
-         *
-         * Do NOT silently create a Customer/Rider role.
-         * This prevents OTP login from creating an
-         * incorrectly typed account.
-         */
-
-        await safeSignOut();
+        const profileRole =
+            resolveProfileRole(
+                profile
+            );
 
 
-        throw new Error(
-            "No RiderX account was found for this mobile number. Please register first."
+        if (
+            profileRole !==
+            selectedRole
+        ) {
+
+            await safeSignOut();
+
+            clearLocalSession();
+
+
+            if (
+                profileRole ===
+                "rider"
+            ) {
+
+                throw new Error(
+                    "This mobile number belongs to a Rider account. Please use Rider Login."
+                );
+
+            }
+
+
+            if (
+                profileRole ===
+                "customer"
+            ) {
+
+                throw new Error(
+                    "This mobile number belongs to a Customer account. Please use Customer Login."
+                );
+
+            }
+
+
+            throw new Error(
+                "This RiderX account has an invalid role. Please contact support."
+            );
+
+        }
+
+
+        if (
+            isBlocked(
+                profile
+            )
+        ) {
+
+            await safeSignOut();
+
+            clearLocalSession();
+
+            throw new Error(
+                "Your RiderX account is blocked or suspended. Please contact support."
+            );
+
+        }
+
+
+        saveSession(
+            firebaseUser,
+            profile
+        );
+
+
+        showMessage(
+            "OTP verified successfully. Opening RiderX...",
+            "success"
+        );
+
+
+        redirectByRole(
+            selectedRole
         );
 
 
@@ -1488,7 +1558,7 @@ async function verifyOTP() {
 
 
 /* =========================================================
-   FIND USER PROFILE
+   FIND PROFILE
 ========================================================= */
 
 async function findProfile(
@@ -1499,13 +1569,8 @@ async function findProfile(
         await loadFirebase();
 
 
-    let profile =
-        null;
-
-
     /*
-     * Primary:
-     * users/{uid}
+     * First check users/{uid}.
      */
 
     try {
@@ -1524,13 +1589,20 @@ async function findProfile(
             snapshot.exists()
         ) {
 
-            profile =
+            const data =
                 snapshot.data() ||
                 {};
 
-            profile.uid =
-                profile.uid ||
-                uid;
+
+            return {
+
+                ...data,
+
+                uid:
+                    data.uid ||
+                    uid
+
+            };
 
         }
 
@@ -1539,7 +1611,7 @@ async function findProfile(
     ) {
 
         console.warn(
-            "RiderX users profile lookup:",
+            "RiderX users profile lookup failed:",
             error
         );
 
@@ -1547,61 +1619,177 @@ async function findProfile(
 
 
     /*
-     * Role-specific collection fallback.
+     * Then check the selected role collection.
      */
 
-    if (
-        !profile
-    ) {
-
-        const collection =
-            selectedRole ===
-            "rider"
-                ? "riders"
-                : "customers";
+    const selectedCollection =
+        selectedRole ===
+        "rider"
+            ? "riders"
+            : "customers";
 
 
-        try {
+    try {
 
-            const snapshot =
-                await FB.getDoc(
-                    FB.doc(
-                        FB.db,
-                        collection,
-                        uid
-                    )
-                );
-
-
-            if (
-                snapshot.exists()
-            ) {
-
-                profile =
-                    snapshot.data() ||
-                    {};
-
-                profile.uid =
-                    profile.uid ||
-                    uid;
-
-            }
-
-        } catch (
-            error
-        ) {
-
-            console.warn(
-                "RiderX role profile lookup:",
-                error
+        const snapshot =
+            await FB.getDoc(
+                FB.doc(
+                    FB.db,
+                    selectedCollection,
+                    uid
+                )
             );
 
+
+        if (
+            snapshot.exists()
+        ) {
+
+            const data =
+                snapshot.data() ||
+                {};
+
+
+            return {
+
+                ...data,
+
+                uid:
+                    data.uid ||
+                    uid,
+
+                /*
+                 * If the role field is absent,
+                 * the collection itself establishes
+                 * the expected role.
+                 */
+
+                role:
+                    data.role ||
+                    selectedRole
+
+            };
+
         }
+
+    } catch (
+        error
+    ) {
+
+        console.warn(
+            "RiderX role profile lookup failed:",
+            error
+        );
 
     }
 
 
-    return profile;
+    /*
+     * Final fallback:
+     *
+     * This protects against projects where the
+     * profile was stored in the opposite role
+     * collection while still allowing us to
+     * detect the actual role correctly.
+     */
+
+    const alternateCollection =
+        selectedRole ===
+        "rider"
+            ? "customers"
+            : "riders";
+
+
+    try {
+
+        const snapshot =
+            await FB.getDoc(
+                FB.doc(
+                    FB.db,
+                    alternateCollection,
+                    uid
+                )
+            );
+
+
+        if (
+            snapshot.exists()
+        ) {
+
+            const data =
+                snapshot.data() ||
+                {};
+
+
+            return {
+
+                ...data,
+
+                uid:
+                    data.uid ||
+                    uid,
+
+                role:
+                    data.role ||
+                    (
+                        alternateCollection ===
+                        "riders"
+                            ? "rider"
+                            : "customer"
+                    )
+
+            };
+
+        }
+
+    } catch (
+        error
+    ) {
+
+        console.warn(
+            "RiderX alternate profile lookup failed:",
+            error
+        );
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   PROFILE ROLE
+========================================================= */
+
+function resolveProfileRole(
+    profile
+) {
+
+    const explicitRole =
+        parseStoredRole(
+            profile.role ||
+            profile.userRole ||
+            profile.accountType
+        );
+
+
+    if (
+        explicitRole
+    ) {
+
+        return explicitRole;
+
+    }
+
+
+    /*
+     * If the profile has no role at all,
+     * infer from the selected collection/context.
+     */
+
+    return selectedRole;
 
 }
 
@@ -1681,6 +1869,18 @@ function saveSession(
                     : "RiderX Customer"
             ),
 
+        fullName:
+            profile.fullName ||
+            profile.name ||
+            profile.displayName ||
+            firebaseUser.displayName ||
+            "",
+
+        displayName:
+            profile.displayName ||
+            firebaseUser.displayName ||
+            "",
+
         email:
             profile.email ||
             firebaseUser.email ||
@@ -1691,7 +1891,12 @@ function saveSession(
             profile.mobile ||
             profile.phoneNumber ||
             firebaseUser.phoneNumber ||
-            "",
+            getFirebasePhone(),
+
+        phoneNumber:
+            profile.phoneNumber ||
+            firebaseUser.phoneNumber ||
+            getFirebasePhone(),
 
         photoURL:
             profile.photoURL ||
@@ -1732,6 +1937,14 @@ function saveSession(
             firebaseUser.uid
         );
 
+        localStorage.removeItem(
+            "riderx_customer"
+        );
+
+        localStorage.removeItem(
+            "riderx_customer_id"
+        );
+
     } else {
 
         localStorage.setItem(
@@ -1744,6 +1957,14 @@ function saveSession(
         localStorage.setItem(
             "riderx_customer_id",
             firebaseUser.uid
+        );
+
+        localStorage.removeItem(
+            "riderx_rider"
+        );
+
+        localStorage.removeItem(
+            "riderx_rider_id"
         );
 
     }
@@ -1768,6 +1989,35 @@ function saveSession(
 
 
 /* =========================================================
+   CLEAR LOCAL SESSION
+========================================================= */
+
+function clearLocalSession() {
+
+    localStorage.removeItem(
+        "riderx_user"
+    );
+
+    localStorage.removeItem(
+        "riderx_rider"
+    );
+
+    localStorage.removeItem(
+        "riderx_customer"
+    );
+
+    localStorage.removeItem(
+        "riderx_rider_id"
+    );
+
+    localStorage.removeItem(
+        "riderx_customer_id"
+    );
+
+}
+
+
+/* =========================================================
    REDIRECT
 ========================================================= */
 
@@ -1775,29 +2025,22 @@ function redirectByRole(
     role
 ) {
 
-    if (
-        role ===
-        "rider"
-    ) {
+    window.setTimeout(
+        function () {
 
-        window.setTimeout(
-            function () {
+            if (
+                role ===
+                "rider"
+            ) {
 
                 window.location.replace(
                     "../rider/home.html"
                 );
 
-            },
-            450
-        );
+                return;
 
-        return;
+            }
 
-    }
-
-
-    window.setTimeout(
-        function () {
 
             window.location.replace(
                 "../customer/home.html"
@@ -1811,7 +2054,7 @@ function redirectByRole(
 
 
 /* =========================================================
-   SIGN OUT
+   SAFE SIGN OUT
 ========================================================= */
 
 async function safeSignOut() {
@@ -1824,7 +2067,8 @@ async function safeSignOut() {
 
         if (
             FB.auth &&
-            FB.signOut
+            typeof FB.signOut ===
+            "function"
         ) {
 
             await FB.signOut(
@@ -1844,19 +2088,6 @@ async function safeSignOut() {
 
     }
 
-
-    localStorage.removeItem(
-        "riderx_user"
-    );
-
-    localStorage.removeItem(
-        "riderx_rider"
-    );
-
-    localStorage.removeItem(
-        "riderx_customer"
-    );
-
 }
 
 
@@ -1866,29 +2097,37 @@ async function safeSignOut() {
 
 function cleanupRecaptcha() {
 
+    const verifier =
+        window.riderxRecaptcha;
+
+
     if (
-        window.riderxRecaptcha
+        !verifier
     ) {
 
-        try {
-
-            window.riderxRecaptcha.clear();
-
-        } catch (
-            error
-        ) {
-
-            console.warn(
-                "reCAPTCHA cleanup:",
-                error
-            );
-
-        }
-
-        window.riderxRecaptcha =
-            null;
+        return;
 
     }
+
+
+    try {
+
+        verifier.clear();
+
+    } catch (
+        error
+    ) {
+
+        console.warn(
+            "RiderX reCAPTCHA cleanup warning:",
+            error
+        );
+
+    }
+
+
+    window.riderxRecaptcha =
+        null;
 
 }
 
@@ -1975,15 +2214,31 @@ function stopTimer() {
 
 
 /* =========================================================
-   RESEND
+   RESEND OTP
 ========================================================= */
 
 resendButton.addEventListener(
     "click",
     async function () {
 
+        if (
+            busy
+        ) {
+
+            return;
+
+        }
+
+
         otpInput.value =
             "";
+
+        confirmationResult =
+            null;
+
+
+        cleanupRecaptcha();
+
 
         await sendOTP();
 
@@ -1999,11 +2254,22 @@ changeNumberButton.addEventListener(
     "click",
     function () {
 
+        if (
+            busy
+        ) {
+
+            return;
+
+        }
+
+
         confirmationResult =
             null;
 
 
         stopTimer();
+
+        cleanupRecaptcha();
 
 
         otpSection.classList.remove(
@@ -2028,6 +2294,10 @@ changeNumberButton.addEventListener(
             "";
 
 
+        timerBox.textContent =
+            "OTP expires in 60 seconds";
+
+
         clearMessage();
 
 
@@ -2038,12 +2308,21 @@ changeNumberButton.addEventListener(
 
 
 /* =========================================================
-   BACK
+   BACK TO LOGIN
 ========================================================= */
 
 backButton.addEventListener(
     "click",
     function () {
+
+        if (
+            busy
+        ) {
+
+            return;
+
+        }
+
 
         stopTimer();
 
@@ -2058,19 +2337,20 @@ backButton.addEventListener(
             window.location.href =
                 "./rider-login.html";
 
-        } else {
-
-            window.location.href =
-                "./customer-login.html";
+            return;
 
         }
+
+
+        window.location.href =
+            "./customer-login.html";
 
     }
 );
 
 
 /* =========================================================
-   SEND BUTTON
+   SEND OTP BUTTON
 ========================================================= */
 
 sendOtpButton.addEventListener(
@@ -2080,7 +2360,7 @@ sendOtpButton.addEventListener(
 
 
 /* =========================================================
-   VERIFY BUTTON
+   VERIFY OTP BUTTON
 ========================================================= */
 
 verifyOtpButton.addEventListener(
@@ -2090,7 +2370,7 @@ verifyOtpButton.addEventListener(
 
 
 /* =========================================================
-   INPUT FORMATTING
+   PHONE INPUT
 ========================================================= */
 
 phoneInput.addEventListener(
@@ -2111,6 +2391,10 @@ phoneInput.addEventListener(
     }
 );
 
+
+/* =========================================================
+   OTP INPUT
+========================================================= */
 
 otpInput.addEventListener(
     "input",
@@ -2200,11 +2484,47 @@ function setButtons(
     backButton.disabled =
         disabled;
 
+
+    if (
+        disabled &&
+        sendOtpButton.style.display !==
+        "none"
+    ) {
+
+        sendOtpButton.innerHTML =
+            '<span class="loader"></span>Sending OTP...';
+
+    } else if (
+        !disabled &&
+        sendOtpButton.style.display !==
+        "none"
+    ) {
+
+        sendOtpButton.textContent =
+            "SEND OTP";
+
+    }
+
+
+    if (
+        disabled
+    ) {
+
+        verifyOtpButton.innerHTML =
+            '<span class="loader"></span>Verifying...';
+
+    } else {
+
+        verifyOtpButton.textContent =
+            "VERIFY & LOGIN";
+
+    }
+
 }
 
 
 /* =========================================================
-   FIREBASE ERROR MESSAGE
+   FIREBASE ERROR TRANSLATOR
 ========================================================= */
 
 function firebaseErrorMessage(
@@ -2236,6 +2556,9 @@ function firebaseErrorMessage(
         "auth/invalid-verification-code":
             "The OTP is incorrect. Please check and try again.",
 
+        "auth/invalid-verification-id":
+            "This OTP session is invalid. Please request a new OTP.",
+
         "auth/code-expired":
             "The OTP has expired. Please request a new OTP.",
 
@@ -2252,7 +2575,13 @@ function firebaseErrorMessage(
             "This RiderX domain is not authorized for phone authentication.",
 
         "auth/operation-not-allowed":
-            "Phone authentication is not enabled in Firebase."
+            "Phone authentication is not enabled in Firebase.",
+
+        "auth/user-disabled":
+            "This Firebase account has been disabled.",
+
+        "auth/internal-error":
+            "Firebase encountered an internal error. Please try again."
 
     };
 
@@ -2270,7 +2599,7 @@ function firebaseErrorMessage(
         String(
             error?.message ||
             ""
-        );
+        ).trim();
 
 
     if (
@@ -2290,7 +2619,7 @@ function firebaseErrorMessage(
 
 
 /* =========================================================
-   CLEANUP
+   PAGE CLEANUP
 ========================================================= */
 
 window.addEventListener(
@@ -2299,6 +2628,8 @@ window.addEventListener(
 
         stopTimer();
 
+        cleanupRecaptcha();
+
     }
 );
 
@@ -2306,4 +2637,4 @@ window.addEventListener(
 
 </body>
 
-</html>
+    </html>
