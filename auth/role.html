@@ -1,636 +1,1039 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
 
-<head>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+>
 
-    <meta charset="UTF-8">
+<meta
+    name="theme-color"
+    content="#ffd400"
+>
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
+<meta
+    name="description"
+    content="RiderX - Choose your account type"
+>
 
-    <meta
-        name="theme-color"
-        content="#ffd400"
-    >
+<title>RiderX - Choose Account</title>
 
-    <meta
-        name="description"
-        content="RiderX - Choose your account"
-    >
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/auth.css">
+<link rel="stylesheet" href="../css/responsive.css">
 
-    <title>RiderX - Choose Account</title>
+<style>
 
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/auth.css">
-    <link rel="stylesheet" href="../css/responsive.css">
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
+    html,
+    body {
+        width: 100%;
+        min-height: 100%;
+        margin: 0;
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    body {
+        min-height: 100vh;
+        min-height: 100dvh;
+        background: #070707;
+        color: #ffffff;
+        font-family:
+            Arial,
+            Helvetica,
+            sans-serif;
+    }
 
-        html,
-        body {
-            width: 100%;
-            min-height: 100%;
-            margin: 0;
-        }
+    button {
+        font: inherit;
+    }
 
-        body {
-            min-height: 100vh;
-            min-height: 100dvh;
-            background: #070707;
-            color: #ffffff;
-            font-family: Arial, Helvetica, sans-serif;
-        }
+    button,
+    a {
+        -webkit-tap-highlight-color: transparent;
+    }
 
-        button {
-            font: inherit;
-        }
+    .page {
+        position: relative;
+        min-height: 100vh;
+        min-height: 100dvh;
 
-        .page {
-            position: relative;
-            min-height: 100vh;
-            min-height: 100dvh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding:
-                max(18px, env(safe-area-inset-top))
-                max(18px, env(safe-area-inset-right))
-                max(18px, env(safe-area-inset-bottom))
-                max(18px, env(safe-area-inset-left));
-        }
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-        .glow {
-            position: absolute;
-            width: 430px;
-            height: 430px;
-            border-radius: 50%;
-            pointer-events: none;
-        }
+        overflow: hidden;
 
-        .glow.one {
-            top: -300px;
-            right: -180px;
-            background: rgba(255, 212, 0, .08);
-        }
+        padding:
+            max(18px, env(safe-area-inset-top))
+            max(18px, env(safe-area-inset-right))
+            max(18px, env(safe-area-inset-bottom))
+            max(18px, env(safe-area-inset-left));
+    }
 
-        .glow.two {
-            bottom: -300px;
-            left: -190px;
-            background: rgba(255, 212, 0, .05);
-        }
+    .glow {
+        position: absolute;
+
+        width: 430px;
+        height: 430px;
+
+        border-radius: 50%;
+
+        pointer-events: none;
+
+        filter: blur(2px);
+    }
+
+    .glow.one {
+        top: -300px;
+        right: -180px;
+
+        background:
+            rgba(255, 212, 0, .09);
+    }
+
+    .glow.two {
+        bottom: -300px;
+        left: -190px;
+
+        background:
+            rgba(255, 212, 0, .06);
+    }
+
+    .card {
+        position: relative;
+        z-index: 2;
+
+        width: 100%;
+        max-width: 460px;
+
+        padding:
+            29px 22px 22px;
+
+        border:
+            1px solid #292929;
+
+        border-radius: 24px;
+
+        background: #111111;
+
+        box-shadow:
+            0 25px 80px
+            rgba(0, 0, 0, .55);
+    }
+
+    .brand {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .logo {
+        width: 68px;
+        height: 68px;
+
+        margin:
+            0 auto 13px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 19px;
+
+        background: #ffd400;
+        color: #090909;
+
+        font-size: 23px;
+        font-weight: 1000;
+
+        box-shadow:
+            0 10px 35px
+            rgba(255, 212, 0, .14);
+    }
+
+    .brand h1 {
+        margin: 0;
+
+        font-size: 26px;
+        font-weight: 1000;
+
+        letter-spacing: -.5px;
+    }
+
+    .brand h1 span {
+        color: #ffd400;
+    }
+
+    .brand p {
+        margin: 6px 0 0;
+
+        color: #777777;
+
+        font-size: 9px;
+    }
+
+    .heading {
+        text-align: center;
+    }
+
+    .heading h2 {
+        margin: 0;
+
+        font-size: 19px;
+        font-weight: 900;
+    }
+
+    .heading p {
+        margin:
+            7px auto 0;
+
+        max-width: 330px;
+
+        color: #777777;
+
+        font-size: 9px;
+        line-height: 1.6;
+    }
+
+    .roles {
+        display: grid;
+
+        gap: 11px;
+
+        margin-top: 23px;
+    }
+
+    .role {
+        position: relative;
+
+        width: 100%;
+        min-height: 88px;
+
+        display: grid;
+
+        grid-template-columns:
+            52px 1fr 25px;
+
+        align-items: center;
+
+        gap: 12px;
+
+        padding: 14px;
+
+        border:
+            1px solid #303030;
+
+        border-radius: 15px;
+
+        background: #171717;
+        color: #ffffff;
+
+        cursor: pointer;
+
+        text-align: left;
+
+        transition:
+            transform .15s ease,
+            border-color .15s ease,
+            background .15s ease,
+            box-shadow .15s ease;
+    }
+
+    .role:hover {
+        transform: translateY(-1px);
+
+        border-color: #ffd400;
+
+        background: #1a1a1a;
+
+        box-shadow:
+            0 8px 25px
+            rgba(255, 212, 0, .06);
+    }
+
+    .role:focus-visible {
+        outline: 2px solid #ffd400;
+        outline-offset: 3px;
+    }
+
+    .role:active {
+        transform: scale(.99);
+    }
+
+    .role-icon {
+        width: 52px;
+        height: 52px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 13px;
+
+        background: #222222;
+        color: #ffd400;
+
+        font-size: 16px;
+        font-weight: 1000;
+    }
+
+    .role-content strong {
+        display: block;
+
+        margin-bottom: 5px;
+
+        font-size: 12px;
+        font-weight: 1000;
+    }
+
+    .role-content span {
+        display: block;
+
+        color: #777777;
+
+        font-size: 8px;
+        line-height: 1.5;
+    }
+
+    .arrow {
+        color: #555555;
+
+        font-size: 16px;
+        font-weight: 900;
+
+        transition:
+            color .15s ease,
+            transform .15s ease;
+    }
+
+    .role:hover .arrow {
+        color: #ffd400;
+        transform: translateX(2px);
+    }
+
+    .quick-login {
+        margin-top: 18px;
+        padding-top: 17px;
+
+        border-top:
+            1px solid #252525;
+    }
+
+    .quick-title {
+        margin-bottom: 9px;
+
+        color: #666666;
+
+        font-size: 8px;
+
+        text-align: center;
+    }
+
+    .login-grid {
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 8px;
+    }
+
+    .login-button {
+        min-height: 42px;
+
+        border:
+            1px solid #303030;
+
+        border-radius: 9px;
+
+        background: #181818;
+        color: #aaaaaa;
+
+        cursor: pointer;
+
+        font-size: 9px;
+        font-weight: 900;
+
+        transition:
+            border-color .15s ease,
+            color .15s ease,
+            background .15s ease;
+    }
+
+    .login-button:hover {
+        border-color: #ffd400;
+
+        color: #ffd400;
+
+        background: #1b1b1b;
+    }
+
+    .login-button:focus-visible {
+        outline: 2px solid #ffd400;
+        outline-offset: 2px;
+    }
+
+    .status {
+        display: none;
+
+        margin-top: 13px;
+        padding: 9px;
+
+        border:
+            1px solid #443b00;
+
+        border-radius: 8px;
+
+        background:
+            rgba(255, 212, 0, .07);
+
+        color: #ffd400;
+
+        font-size: 8px;
+        line-height: 1.5;
+
+        text-align: center;
+    }
+
+    .status.show {
+        display: block;
+    }
+
+    .status.error {
+        border-color: #5a2222;
+
+        background:
+            rgba(255, 60, 60, .07);
+
+        color: #ff7777;
+    }
+
+    .footer {
+        margin-top: 18px;
+
+        color: #444444;
+
+        font-size: 8px;
+
+        text-align: center;
+    }
+
+    @media (max-width: 390px) {
 
         .card {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 460px;
-            padding: 29px 22px 22px;
-            border: 1px solid #292929;
-            border-radius: 24px;
-            background: #111111;
-            box-shadow: 0 25px 80px rgba(0, 0, 0, .55);
-        }
+            padding:
+                24px 16px 19px;
 
-        .brand {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .logo {
-            width: 68px;
-            height: 68px;
-            margin: 0 auto 13px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 19px;
-            background: #ffd400;
-            color: #090909;
-            font-size: 23px;
-            font-weight: 1000;
-            box-shadow: 0 10px 35px rgba(255, 212, 0, .10);
-        }
-
-        .brand h1 {
-            margin: 0;
-            font-size: 26px;
-            font-weight: 1000;
-            letter-spacing: -.5px;
-        }
-
-        .brand h1 span {
-            color: #ffd400;
-        }
-
-        .brand p {
-            margin: 6px 0 0;
-            color: #777777;
-            font-size: 9px;
-        }
-
-        .heading {
-            text-align: center;
-        }
-
-        .heading h2 {
-            margin: 0;
-            font-size: 19px;
-            font-weight: 900;
-        }
-
-        .heading p {
-            margin: 7px auto 0;
-            max-width: 330px;
-            color: #777777;
-            font-size: 9px;
-            line-height: 1.6;
-        }
-
-        .roles {
-            display: grid;
-            gap: 11px;
-            margin-top: 23px;
+            border-radius: 20px;
         }
 
         .role {
-            position: relative;
-            width: 100%;
-            min-height: 88px;
-            display: grid;
-            grid-template-columns: 52px 1fr 25px;
-            align-items: center;
-            gap: 12px;
-            padding: 14px;
-            border: 1px solid #303030;
-            border-radius: 15px;
-            background: #171717;
-            color: #ffffff;
-            cursor: pointer;
-            text-align: left;
-            transition:
-                transform .15s ease,
-                border-color .15s ease,
-                background .15s ease;
-        }
+            grid-template-columns:
+                46px 1fr 20px;
 
-        .role:hover {
-            transform: translateY(-1px);
-            border-color: #ffd400;
-            background: #1a1a1a;
-        }
+            min-height: 82px;
 
-        .role:active {
-            transform: scale(.99);
+            padding: 11px;
         }
 
         .role-icon {
-            width: 52px;
-            height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 13px;
-            background: #222222;
-            color: #ffd400;
-            font-size: 16px;
-            font-weight: 1000;
+            width: 46px;
+            height: 46px;
         }
 
-        .role-content strong {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 12px;
-            font-weight: 1000;
-        }
+    }
 
-        .role-content span {
-            display: block;
-            color: #777777;
-            font-size: 8px;
-            line-height: 1.5;
-        }
+    @media (prefers-reduced-motion: reduce) {
 
-        .arrow {
-            color: #555555;
-            font-size: 16px;
-            font-weight: 900;
-        }
-
-        .role:hover .arrow {
-            color: #ffd400;
-        }
-
-        .quick-login {
-            margin-top: 18px;
-            padding-top: 17px;
-            border-top: 1px solid #252525;
-        }
-
-        .quick-title {
-            margin-bottom: 9px;
-            color: #666666;
-            font-size: 8px;
-            text-align: center;
-        }
-
-        .login-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
+        .role,
+        .arrow,
         .login-button {
-            min-height: 42px;
-            border: 1px solid #303030;
-            border-radius: 9px;
-            background: #181818;
-            color: #aaaaaa;
-            cursor: pointer;
-            font-size: 9px;
-            font-weight: 900;
+            transition: none;
         }
 
-        .login-button:hover {
-            border-color: #ffd400;
-            color: #ffd400;
-        }
+    }
 
-        .footer {
-            margin-top: 18px;
-            color: #444444;
-            font-size: 8px;
-            text-align: center;
-        }
+</style>
 
-        .status {
-            display: none;
-            margin-top: 13px;
-            padding: 9px;
-            border: 1px solid #275335;
-            border-radius: 8px;
-            background: #132319;
-            color: #65e58b;
-            font-size: 8px;
-            line-height: 1.5;
-            text-align: center;
-        }
+</head><body><main class="page"><div
+    class="glow one"
+    aria-hidden="true"
+></div>
 
-        .status.show {
-            display: block;
-        }
-
-        @media (max-width: 390px) {
-
-            .card {
-                padding: 24px 16px 19px;
-                border-radius: 20px;
-            }
-
-            .role {
-                grid-template-columns: 46px 1fr 20px;
-                min-height: 82px;
-                padding: 11px;
-            }
-
-            .role-icon {
-                width: 46px;
-                height: 46px;
-            }
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<main class="page">
-
-    <div class="glow one"></div>
-    <div class="glow two"></div>
-
-    <section class="card">
-
-        <div class="brand">
-
-            <div class="logo">
-                RX
-            </div>
-
-            <h1>
-                Rider<span>X</span>
-            </h1>
-
-            <p>
-                One platform. Every journey.
-            </p>
-
-        </div>
+<div
+    class="glow two"
+    aria-hidden="true"
+></div>
 
 
-        <div class="heading">
+<section
+    class="card"
+    aria-labelledby="pageTitle"
+>
 
-            <h2>
-                How will you use RiderX?
-            </h2>
-
-            <p>
-                Select your account type to continue
-                to the correct RiderX experience.
-            </p>
-
-        </div>
-
-
-        <div class="roles">
-
-            <button
-                type="button"
-                class="role"
-                id="customerOption"
-            >
-
-                <div class="role-icon">
-                    C
-                </div>
-
-                <div class="role-content">
-
-                    <strong>
-                        I'm a Customer
-                    </strong>
-
-                    <span>
-                        Book Bike Taxi, Cab, Parcel and
-                        other RiderX services.
-                    </span>
-
-                </div>
-
-                <div class="arrow">
-                    →
-                </div>
-
-            </button>
-
-
-            <button
-                type="button"
-                class="role"
-                id="riderOption"
-            >
-
-                <div class="role-icon">
-                    R
-                </div>
-
-                <div class="role-content">
-
-                    <strong>
-                        I'm a Rider
-                    </strong>
-
-                    <span>
-                        Drive with RiderX, accept rides,
-                        navigate and manage earnings.
-                    </span>
-
-                </div>
-
-                <div class="arrow">
-                    →
-                </div>
-
-            </button>
-
-        </div>
-
+    <div class="brand">
 
         <div
-            class="status"
-            id="status"
-        ></div>
+            class="logo"
+            aria-hidden="true"
+        >
+            RX
+        </div>
+
+        <h1>
+            Rider<span>X</span>
+        </h1>
+
+        <p>
+            One platform. Every journey.
+        </p>
+
+    </div>
 
 
-        <div class="quick-login">
+    <div class="heading">
 
-            <div class="quick-title">
-                ALREADY HAVE AN ACCOUNT?
+        <h2 id="pageTitle">
+            How will you use RiderX?
+        </h2>
+
+        <p>
+            Select your account type to continue
+            to the correct RiderX experience.
+        </p>
+
+    </div>
+
+
+    <div class="roles">
+
+        <button
+            type="button"
+            class="role"
+            id="customerOption"
+            aria-label="Continue as Customer"
+        >
+
+            <div
+                class="role-icon"
+                aria-hidden="true"
+            >
+                C
             </div>
 
-            <div class="login-grid">
+            <div class="role-content">
 
-                <button
-                    type="button"
-                    class="login-button"
-                    id="customerLogin"
-                >
-                    Customer Login
-                </button>
+                <strong>
+                    I'm a Customer
+                </strong>
 
-                <button
-                    type="button"
-                    class="login-button"
-                    id="riderLogin"
-                >
-                    Rider Login
-                </button>
+                <span>
+                    Book Bike Taxi, Cab, Parcel
+                    and other RiderX services.
+                </span>
 
             </div>
+
+            <div
+                class="arrow"
+                aria-hidden="true"
+            >
+                →
+            </div>
+
+        </button>
+
+
+        <button
+            type="button"
+            class="role"
+            id="riderOption"
+            aria-label="Continue as Rider or Driver"
+        >
+
+            <div
+                class="role-icon"
+                aria-hidden="true"
+            >
+                R
+            </div>
+
+            <div class="role-content">
+
+                <strong>
+                    I'm a Rider
+                </strong>
+
+                <span>
+                    Drive with RiderX, accept rides,
+                    navigate and manage earnings.
+                </span>
+
+            </div>
+
+            <div
+                class="arrow"
+                aria-hidden="true"
+            >
+                →
+            </div>
+
+        </button>
+
+    </div>
+
+
+    <div
+        class="status"
+        id="status"
+        role="status"
+        aria-live="polite"
+    ></div>
+
+
+    <div class="quick-login">
+
+        <div class="quick-title">
+            ALREADY HAVE AN ACCOUNT?
+        </div>
+
+        <div class="login-grid">
+
+            <button
+                type="button"
+                class="login-button"
+                id="customerLogin"
+            >
+                Customer Login
+            </button>
+
+            <button
+                type="button"
+                class="login-button"
+                id="riderLogin"
+            >
+                Rider Login
+            </button>
 
         </div>
 
-
-        <div class="footer">
-            © 2026 RiderX • India 🇮🇳
-        </div>
-
-    </section>
-
-</main>
+    </div>
 
 
-<script>
+    <div class="footer">
+        © 2026 RiderX • India 🇮🇳
+    </div>
 
-    "use strict";
+</section>
 
+</main><script type="module">
 
-    const customerOption =
-        document.getElementById(
-            "customerOption"
-        );
-
-
-    const riderOption =
-        document.getElementById(
-            "riderOption"
-        );
+"use strict";
 
 
-    const customerLogin =
-        document.getElementById(
-            "customerLogin"
-        );
+/* =========================================================
+   RIDERX ROLE GATE
+   ---------------------------------------------------------
+   Responsibilities:
+   - Select Customer or Rider
+   - Persist selected role
+   - Open the canonical login page
+   - Preserve lowercase project structure
+   - Never create duplicate login pages
+========================================================= */
 
 
-    const riderLogin =
-        document.getElementById(
-            "riderLogin"
-        );
+/* =========================================================
+   CONSTANTS
+========================================================= */
+
+const ROLE_KEY =
+    "riderx_selected_role";
+
+const LEGACY_ROLE_KEY =
+    "riderx_role";
+
+const LOGIN_PAGE =
+    "./login.html";
 
 
-    const status =
-        document.getElementById(
-            "status"
-        );
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
+const customerOption =
+    document.getElementById(
+        "customerOption"
+    );
 
-    function setRole(
-        role
-    ) {
+const riderOption =
+    document.getElementById(
+        "riderOption"
+    );
 
-        localStorage.setItem(
-            "riderx_selected_role",
-            role
-        );
+const customerLogin =
+    document.getElementById(
+        "customerLogin"
+    );
 
-        localStorage.setItem(
-            "riderx_role",
-            role
-        );
+const riderLogin =
+    document.getElementById(
+        "riderLogin"
+    );
 
-    }
-
-
-    function showStatus(
-        text
-    ) {
-
-        status.textContent =
-            text;
-
-        status.classList.add(
-            "show"
-        );
-
-    }
-
-
-    customerOption.addEventListener(
-        "click",
-        function () {
-
-            setRole(
-                "customer"
-            );
-
-            showStatus(
-                "Opening Customer experience..."
-            );
-
-            setTimeout(
-                function () {
-
-                    window.location.href =
-                        "./customer-login.html";
-
-                },
-                180
-            );
-
-        }
+const status =
+    document.getElementById(
+        "status"
     );
 
 
-    riderOption.addEventListener(
-        "click",
-        function () {
+/* =========================================================
+   ROLE NORMALIZATION
+========================================================= */
 
-            setRole(
-                "rider"
+function normalizeRole(
+    role
+) {
+
+    const value =
+        String(
+            role || ""
+        )
+            .trim()
+            .toLowerCase()
+            .replace(
+                /[\s-]+/g,
+                "_"
             );
-
-            showStatus(
-                "Opening Rider / Driver Partner experience..."
-            );
-
-            setTimeout(
-                function () {
-
-                    window.location.href =
-                        "./rider-login.html";
-
-                },
-                180
-            );
-
-        }
-    );
-
-
-    customerLogin.addEventListener(
-        "click",
-        function () {
-
-            setRole(
-                "customer"
-            );
-
-            window.location.href =
-                "./customer-login.html";
-
-        }
-    );
-
-
-    riderLogin.addEventListener(
-        "click",
-        function () {
-
-            setRole(
-                "rider"
-            );
-
-            window.location.href =
-                "./rider-login.html";
-
-        }
-    );
-
-
-    /*
-     * If another RiderX page intentionally sends a user
-     * here with a selected role, keep that role available.
-     */
-
-    const existingRole =
-        localStorage.getItem(
-            "riderx_selected_role"
-        );
-
 
     if (
-        existingRole === "customer" ||
-        existingRole === "rider"
+        [
+            "customer",
+            "user",
+            "users"
+        ].includes(value)
     ) {
 
-        /*
-         * No automatic redirect here.
-         * This page remains the safe central role gate.
-         */
-
+        return "customer";
     }
 
-</script>
+    if (
+        [
+            "rider",
+            "driver",
+            "partner",
+            "riders",
+            "drivers"
+        ].includes(value)
+    ) {
 
-</body>
+        return "rider";
+    }
 
-</html>
+    return "";
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function setRole(
+    role
+) {
+
+    const normalized =
+        normalizeRole(
+            role
+        );
+
+    if (!normalized) {
+        return false;
+    }
+
+    try {
+
+        localStorage.setItem(
+            ROLE_KEY,
+            normalized
+        );
+
+        localStorage.setItem(
+            LEGACY_ROLE_KEY,
+            normalized
+        );
+
+        return true;
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX role storage failed:",
+            error
+        );
+
+        return false;
+    }
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function showStatus(
+    text,
+    type = ""
+) {
+
+    if (!status) {
+        return;
+    }
+
+    status.textContent =
+        String(
+            text || ""
+        );
+
+    status.className =
+        "status show";
+
+    if (type) {
+
+        status.classList.add(
+            type
+        );
+    }
+}
+
+
+function clearStatus() {
+
+    if (!status) {
+        return;
+    }
+
+    status.textContent =
+        "";
+
+    status.className =
+        "status";
+}
+
+
+/* =========================================================
+   OPEN CANONICAL LOGIN
+   ---------------------------------------------------------
+   login.html already contains:
+   - Customer login
+   - Rider login
+   - Email/password
+   - Mobile OTP
+   - Firebase auth integration
+========================================================= */
+
+function openLogin(
+    role
+) {
+
+    const normalized =
+        normalizeRole(
+            role
+        );
+
+    if (!normalized) {
+
+        showStatus(
+            "Please select a valid RiderX account type.",
+            "error"
+        );
+
+        return;
+    }
+
+    setRole(
+        normalized
+    );
+
+    showStatus(
+        normalized === "customer"
+            ? "Opening Customer login..."
+            : "Opening Rider / Driver login..."
+    );
+
+    const destination =
+        LOGIN_PAGE +
+        "?role=" +
+        encodeURIComponent(
+            normalized
+        );
+
+    window.setTimeout(
+        function () {
+
+            window.location.replace(
+                destination
+            );
+
+        },
+        180
+    );
+}
+
+
+/* =========================================================
+   CUSTOMER
+========================================================= */
+
+customerOption.addEventListener(
+    "click",
+    function () {
+
+        openLogin(
+            "customer"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   RIDER
+========================================================= */
+
+riderOption.addEventListener(
+    "click",
+    function () {
+
+        openLogin(
+            "rider"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   QUICK CUSTOMER LOGIN
+========================================================= */
+
+customerLogin.addEventListener(
+    "click",
+    function () {
+
+        openLogin(
+            "customer"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   QUICK RIDER LOGIN
+========================================================= */
+
+riderLogin.addEventListener(
+    "click",
+    function () {
+
+        openLogin(
+            "rider"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   KEYBOARD SUPPORT
+========================================================= */
+
+customerOption.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Enter" ||
+            event.key === " "
+        ) {
+
+            event.preventDefault();
+
+            openLogin(
+                "customer"
+            );
+        }
+    }
+);
+
+
+riderOption.addEventListener(
+    "keydown",
+    function (event) {
+
+        if (
+            event.key === "Enter" ||
+            event.key === " "
+        ) {
+
+            event.preventDefault();
+
+            openLogin(
+                "rider"
+            );
+        }
+    }
+);
+
+
+/* =========================================================
+   OPTIONAL URL ROLE
+   ---------------------------------------------------------
+   If role.html is opened with ?role=customer/rider,
+   persist it but do NOT automatically redirect.
+========================================================= */
+
+(function preserveUrlRole() {
+
+    try {
+
+        const params =
+            new URLSearchParams(
+                window.location.search
+            );
+
+        const urlRole =
+            normalizeRole(
+                params.get("role")
+            );
+
+        if (urlRole) {
+
+            setRole(
+                urlRole
+            );
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX role URL parsing failed:",
+            error
+        );
+    }
+
+})();
+
+
+/* =========================================================
+   INITIAL STATE
+   ---------------------------------------------------------
+   Do not auto-redirect based only on localStorage.
+   localStorage is a preference/cache, not authentication.
+========================================================= */
+
+clearStatus();
+
+</script></body></html>
