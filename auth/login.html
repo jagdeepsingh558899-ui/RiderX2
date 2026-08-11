@@ -4,8 +4,9 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
 <meta name="theme-color" content="#FFD400">
-<meta name="description" content="RiderX secure login">
+<meta name="description" content="RiderX secure account login">
 
 <title>RiderX - Login</title>
 
@@ -17,11 +18,16 @@
 
 :root {
     --rx-yellow: #ffd400;
+    --rx-yellow-hover: #ffe04a;
+
     --rx-black: #050505;
     --rx-card: #111111;
+
     --rx-border: rgba(255,255,255,.10);
+
     --rx-text: #ffffff;
     --rx-muted: #999999;
+
     --rx-danger: #ff4d4d;
     --rx-success: #31d158;
 }
@@ -33,9 +39,14 @@
 html,
 body {
     width: 100%;
+    min-width: 100%;
     min-height: 100%;
     margin: 0;
     padding: 0;
+}
+
+html {
+    background: var(--rx-black);
 }
 
 body {
@@ -48,7 +59,7 @@ body {
             rgba(255,212,0,.12),
             transparent 38%
         ),
-        #050505;
+        var(--rx-black);
 
     color: var(--rx-text);
 
@@ -62,7 +73,11 @@ body {
     justify-content: center;
     align-items: center;
 
-    padding: 20px;
+    padding:
+        max(20px, env(safe-area-inset-top))
+        max(20px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom))
+        max(20px, env(safe-area-inset-left));
 
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -75,6 +90,14 @@ input {
 
 button {
     -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible {
+    outline:
+        2px solid var(--rx-yellow);
+
+    outline-offset: 2px;
 }
 
 .auth-page {
@@ -186,6 +209,10 @@ button {
         1px solid rgba(255,212,0,.18);
 }
 
+.role-info > div {
+    min-width: 0;
+}
+
 .role-info span {
     display: block;
 
@@ -207,6 +234,8 @@ button {
 }
 
 .change-role {
+    flex: 0 0 auto;
+
     border: 0;
 
     background: transparent;
@@ -218,7 +247,19 @@ button {
 
     cursor: pointer;
 
-    padding: 5px;
+    padding: 6px;
+
+    border-radius: 7px;
+}
+
+.change-role:hover {
+    background:
+        rgba(255,212,0,.08);
+}
+
+.change-role:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
 
 .form-group {
@@ -244,7 +285,8 @@ button {
     width: 100%;
     height: 52px;
 
-    padding: 0 15px;
+    padding:
+        0 15px;
 
     border-radius: 14px;
 
@@ -264,12 +306,26 @@ button {
         box-shadow .2s ease;
 }
 
+.input-wrap .form-input {
+    padding-right: 72px;
+}
+
+.form-input:hover {
+    border-color:
+        rgba(255,255,255,.18);
+}
+
 .form-input:focus {
     border-color: var(--rx-yellow);
 
     box-shadow:
         0 0 0 3px
         rgba(255,212,0,.10);
+}
+
+.form-input:disabled {
+    opacity: .6;
+    cursor: not-allowed;
 }
 
 .form-input::placeholder {
@@ -284,6 +340,8 @@ button {
 
     transform: translateY(-50%);
 
+    min-width: 45px;
+
     border: 0;
 
     background: transparent;
@@ -293,11 +351,23 @@ button {
     cursor: pointer;
 
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
+
+    padding: 7px;
+
+    border-radius: 7px;
 }
 
 .password-toggle:hover {
     color: var(--rx-yellow);
+
+    background:
+        rgba(255,212,0,.06);
+}
+
+.password-toggle:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
 
 .form-actions {
@@ -319,10 +389,21 @@ button {
     font-size: 13px;
     font-weight: 700;
 
-    padding: 4px 0;
+    padding: 5px 0;
+}
+
+.forgot-btn:hover {
+    text-decoration: underline;
+}
+
+.forgot-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
 
 .login-btn {
+    position: relative;
+
     width: 100%;
     height: 54px;
 
@@ -349,7 +430,8 @@ button {
 }
 
 .login-btn:hover {
-    background: #ffe04a;
+    background:
+        var(--rx-yellow-hover);
 
     transform:
         translateY(-1px);
@@ -399,6 +481,8 @@ button {
     color: #888;
 
     font-size: 13px;
+
+    line-height: 1.5;
 }
 
 .register-btn {
@@ -412,6 +496,17 @@ button {
 
     font-size: 13px;
     font-weight: 800;
+
+    padding: 0 2px;
+}
+
+.register-btn:hover {
+    text-decoration: underline;
+}
+
+.register-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
 
 .message {
@@ -426,6 +521,8 @@ button {
     font-size: 13px;
 
     line-height: 1.45;
+
+    overflow-wrap: anywhere;
 }
 
 .message.show {
@@ -467,6 +564,9 @@ button {
     backdrop-filter:
         blur(8px);
 
+    -webkit-backdrop-filter:
+        blur(8px);
+
     display: none;
 
     align-items: center;
@@ -492,6 +592,9 @@ button {
         1px solid var(--rx-border);
 
     text-align: center;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.45);
 }
 
 .loader {
@@ -527,6 +630,8 @@ button {
     color: #888;
 
     font-size: 12px;
+
+    line-height: 1.4;
 }
 
 @keyframes rxSpin {
@@ -540,11 +645,16 @@ button {
 @media (max-width: 480px) {
 
     body {
-        padding: 14px;
+        padding:
+            max(14px, env(safe-area-inset-top))
+            max(14px, env(safe-area-inset-right))
+            max(14px, env(safe-area-inset-bottom))
+            max(14px, env(safe-area-inset-left));
 
         align-items: flex-start;
 
-        padding-top: 35px;
+        padding-top:
+            max(35px, env(safe-area-inset-top));
     }
 
     .auth-card {
@@ -557,9 +667,36 @@ button {
         font-size: 27px;
     }
 
+    .auth-logo {
+        width: 64px;
+        height: 64px;
+    }
+
+}
+
+@media (max-width: 360px) {
+
+    .auth-card {
+        padding: 18px;
+    }
+
+    .auth-card h2 {
+        font-size: 22px;
+    }
+
+    .role-info {
+        padding: 10px;
+    }
+
 }
 
 @media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+    }
 
     .login-btn,
     .form-input,
@@ -579,7 +716,10 @@ button {
 
     <section class="auth-brand">
 
-        <div class="auth-logo">
+        <div
+            class="auth-logo"
+            aria-hidden="true"
+        >
             RX
         </div>
 
@@ -594,9 +734,12 @@ button {
     </section>
 
 
-    <section class="auth-card">
+    <section
+        class="auth-card"
+        aria-labelledby="loginTitle"
+    >
 
-        <h2>
+        <h2 id="loginTitle">
             Welcome back
         </h2>
 
@@ -617,7 +760,7 @@ button {
                 </span>
 
                 <strong id="selectedRoleText">
-                    Customer
+                    RiderX account
                 </strong>
 
             </div>
@@ -661,6 +804,7 @@ button {
                     autocomplete="email"
                     inputmode="email"
                     placeholder="Enter your email"
+                    maxlength="254"
                     required
                 >
 
@@ -683,6 +827,7 @@ button {
                         autocomplete="current-password"
                         placeholder="Enter your password"
                         minlength="6"
+                        maxlength="128"
                         required
                     >
 
@@ -691,6 +836,7 @@ button {
                         class="password-toggle"
                         id="passwordToggle"
                         aria-label="Show password"
+                        aria-pressed="false"
                     >
                         SHOW
                     </button>
@@ -754,9 +900,16 @@ button {
     aria-hidden="true"
 >
 
-    <div class="loading-box">
+    <div
+        class="loading-box"
+        role="status"
+        aria-live="polite"
+    >
 
-        <div class="loader"></div>
+        <div
+            class="loader"
+            aria-hidden="true"
+        ></div>
 
         <strong id="loadingTitle">
             Signing in...
@@ -777,50 +930,19 @@ button {
 
 
 /* ============================================================
-   RIDERX LOGIN ENGINE
-   ============================================================
+   RIDERX LOGIN
+   ------------------------------------------------------------
+   Canonical file:
+       auth/login.html
 
-   IMPORTANT FIX:
-
-   auth.js is NOT imported during page startup.
-
-   Old flow:
-
-       login.html loads
-           ↓
-       auth.js imports
-           ↓
-       auth listener starts
-           ↓
-       signed-out state detected
-           ↓
-       global auth redirect
-           ↓
-       role.html
-
-   This caused the login page to disappear after a few seconds.
-
-   New flow:
-
-       role.html
-           ↓
-       login.html
-           ↓
-       login page remains here
-           ↓
-       user presses Login
-           ↓
-       auth.js loads
-           ↓
-       Firebase login
-           ↓
-       Firestore role
-           ↓
-       correct dashboard
-
-   Only the user's explicit "Change" action can return
-   to role.html from this page.
-============================================================ */
+   Rules:
+   - Do NOT automatically redirect signed-out users.
+   - Do NOT load auth.js during page startup.
+   - Load auth.js only after an authentication action.
+   - Firebase/Firestore verified role is authoritative.
+   - Successful login goes directly to the correct dashboard.
+   - "Change" and "Create account" explicitly return to role.html.
+   ============================================================ */
 
 
 const STORAGE = Object.freeze({
@@ -864,69 +986,43 @@ let loginBusy = false;
 ============================================================ */
 
 const loginForm =
-    document.getElementById(
-        "loginForm"
-    );
+    document.getElementById("loginForm");
 
 const emailInput =
-    document.getElementById(
-        "email"
-    );
+    document.getElementById("email");
 
 const passwordInput =
-    document.getElementById(
-        "password"
-    );
+    document.getElementById("password");
 
 const loginBtn =
-    document.getElementById(
-        "loginBtn"
-    );
+    document.getElementById("loginBtn");
 
 const message =
-    document.getElementById(
-        "message"
-    );
+    document.getElementById("message");
 
 const selectedRoleText =
-    document.getElementById(
-        "selectedRoleText"
-    );
+    document.getElementById("selectedRoleText");
 
 const changeRoleBtn =
-    document.getElementById(
-        "changeRoleBtn"
-    );
+    document.getElementById("changeRoleBtn");
 
 const registerBtn =
-    document.getElementById(
-        "registerBtn"
-    );
+    document.getElementById("registerBtn");
 
 const forgotPasswordBtn =
-    document.getElementById(
-        "forgotPasswordBtn"
-    );
+    document.getElementById("forgotPasswordBtn");
 
 const passwordToggle =
-    document.getElementById(
-        "passwordToggle"
-    );
+    document.getElementById("passwordToggle");
 
 const loadingOverlay =
-    document.getElementById(
-        "loadingOverlay"
-    );
+    document.getElementById("loadingOverlay");
 
 const loadingTitle =
-    document.getElementById(
-        "loadingTitle"
-    );
+    document.getElementById("loadingTitle");
 
 const loadingText =
-    document.getElementById(
-        "loadingText"
-    );
+    document.getElementById("loadingText");
 
 
 /* ============================================================
@@ -935,9 +1031,7 @@ const loadingText =
 
 function clean(value) {
 
-    return String(
-        value ?? ""
-    ).trim();
+    return String(value ?? "").trim();
 
 }
 
@@ -947,10 +1041,7 @@ function normalizeRole(role) {
     const value =
         clean(role)
             .toLowerCase()
-            .replace(
-                /[\s-]+/g,
-                "_"
-            );
+            .replace(/[\s-]+/g, "_");
 
 
     if (
@@ -1016,7 +1107,20 @@ function normalizeRole(role) {
 
 
 /* ============================================================
-   ROLE FROM URL
+   EMAIL VALIDATION
+============================================================ */
+
+function isValidEmail(email) {
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        email
+    );
+
+}
+
+
+/* ============================================================
+   URL ROLE
 ============================================================ */
 
 function getUrlRole() {
@@ -1068,19 +1172,20 @@ function getSelectedRole() {
 
     try {
 
-        const stored =
+        const storedRole =
             normalizeRole(
                 localStorage.getItem(
                     STORAGE.selectedRole
                 )
             );
 
+
         if (
-            stored === "customer" ||
-            stored === "rider"
+            storedRole === "customer" ||
+            storedRole === "rider"
         ) {
 
-            return stored;
+            return storedRole;
 
         }
 
@@ -1100,7 +1205,7 @@ function getSelectedRole() {
 
 
 /* ============================================================
-   SAVE ROLE
+   SAVE SELECTED ROLE
 ============================================================ */
 
 function saveSelectedRole(role) {
@@ -1134,7 +1239,31 @@ function saveSelectedRole(role) {
     } catch (error) {
 
         console.warn(
-            "RiderX role save failed:",
+            "RiderX selected role save failed:",
+            error
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   REMOVE SELECTED ROLE
+============================================================ */
+
+function clearSelectedRole() {
+
+    try {
+
+        localStorage.removeItem(
+            STORAGE.selectedRole
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX selected role cleanup failed:",
             error
         );
 
@@ -1191,6 +1320,96 @@ function hideMessage() {
 
 
 /* ============================================================
+   AUTH ERROR NORMALIZATION
+============================================================ */
+
+function friendlyAuthError(error) {
+
+    const code =
+        clean(
+            error?.code
+        ).toLowerCase();
+
+
+    const rawMessage =
+        clean(
+            error?.message
+        );
+
+
+    const known = {
+
+        "auth/invalid-email":
+            "Please enter a valid email address.",
+
+        "auth/user-not-found":
+            "No RiderX account was found with this email.",
+
+        "auth/wrong-password":
+            "Incorrect email or password.",
+
+        "auth/invalid-credential":
+            "Incorrect email or password.",
+
+        "auth/invalid-login-credentials":
+            "Incorrect email or password.",
+
+        "auth/user-disabled":
+            "This RiderX account has been disabled.",
+
+        "auth/too-many-requests":
+            "Too many login attempts. Please wait a while and try again.",
+
+        "auth/network-request-failed":
+            "Network error. Check your internet connection and try again.",
+
+        "auth/email-already-in-use":
+            "This email is already registered.",
+
+        "auth/weak-password":
+            "Password is too weak.",
+
+        "auth/operation-not-allowed":
+            "Email/password login is currently unavailable.",
+
+        "auth/configuration-not-found":
+            "RiderX authentication is not configured correctly.",
+
+        "auth/internal-error":
+            "RiderX authentication encountered an internal error."
+
+    };
+
+
+    if (
+        known[code]
+    ) {
+
+        return known[code];
+
+    }
+
+
+    /*
+     * Avoid displaying raw Firebase internals when possible.
+     */
+
+    if (
+        rawMessage &&
+        !rawMessage.includes("FirebaseError:")
+    ) {
+
+        return rawMessage;
+
+    }
+
+
+    return "Unable to complete the RiderX request. Please try again.";
+
+}
+
+
+/* ============================================================
    LOADING
 ============================================================ */
 
@@ -1220,6 +1439,9 @@ function setLoading(
         Boolean(loading);
 
     changeRoleBtn.disabled =
+        Boolean(loading);
+
+    passwordToggle.disabled =
         Boolean(loading);
 
 
@@ -1259,7 +1481,7 @@ function setLoading(
 
 
 /* ============================================================
-   DASHBOARD ROUTE
+   ROUTING
 ============================================================ */
 
 function routeForRole(role) {
@@ -1301,21 +1523,7 @@ function routeForRole(role) {
 }
 
 
-/* ============================================================
-   NAVIGATION
-============================================================ */
-
 function goToRolePage() {
-
-    /*
-     * This is the ONLY normal navigation from login.html
-     * back to role.html.
-     *
-     * It is called only by:
-     *
-     * 1. Change
-     * 2. Create account
-     */
 
     window.location.replace(
         ROUTES.role
@@ -1338,12 +1546,6 @@ function goToDashboard(role) {
 
     }
 
-
-    /*
-     * Direct dashboard navigation.
-     *
-     * NEVER send successful login to role.html.
-     */
 
     window.location.replace(
         target
@@ -1394,14 +1596,6 @@ function renderSelectedRole() {
     }
 
 
-    /*
-     * If somebody directly opens login.html without selecting
-     * a role, we still allow the page to remain visible.
-     *
-     * The actual Firestore role will be authoritative after
-     * successful authentication.
-     */
-
     selectedRoleText.textContent =
         "RiderX account";
 
@@ -1437,12 +1631,11 @@ async function loadAuthEngine() {
 
 
     /*
-     * IMPORTANT:
+     * auth.js is loaded only when the user actually performs
+     * an authentication-related operation.
      *
-     * This import happens ONLY after an actual authentication
-     * action.
-     *
-     * login.html startup no longer imports auth.js.
+     * This prevents the global auth listener from interfering
+     * with the login page during startup.
      */
 
     await import(
@@ -1451,22 +1644,147 @@ async function loadAuthEngine() {
 
 
     if (
-        !window.RiderX ||
-        !window.RiderX.auth
+        window.RiderX &&
+        window.RiderX.auth
     ) {
 
-        throw new Error(
-            "RiderX authentication engine is unavailable."
-        );
+        RX_AUTH =
+            window.RiderX.auth;
+
+        return RX_AUTH;
 
     }
 
 
-    RX_AUTH =
-        window.RiderX.auth;
+    throw new Error(
+        "RiderX authentication engine is unavailable."
+    );
+
+}
 
 
-    return RX_AUTH;
+/* ============================================================
+   EXTRACT VERIFIED ROLE
+============================================================ */
+
+async function getVerifiedRole(
+    auth,
+    result
+) {
+
+    let role =
+        normalizeRole(
+            result?.role ||
+            result?.user?.role ||
+            result?.profile?.role
+        );
+
+
+    if (
+        role
+    ) {
+
+        return role;
+
+    }
+
+
+    /*
+     * Compatibility with auth.js implementations that expose
+     * getRole().
+     */
+
+    if (
+        auth &&
+        typeof auth.getRole === "function"
+    ) {
+
+        try {
+
+            role =
+                normalizeRole(
+                    await auth.getRole(
+                        result?.user ||
+                        null
+                    )
+                );
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX getRole failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    return role;
+
+}
+
+
+/* ============================================================
+   SAVE VERIFIED USER
+============================================================ */
+
+function saveVerifiedSession(
+    result,
+    role
+) {
+
+    try {
+
+        localStorage.setItem(
+            STORAGE.legacyRole,
+            role
+        );
+
+
+        if (
+            result?.user
+        ) {
+
+            /*
+             * Only store a small safe session object.
+             * Never store passwords or credentials.
+             */
+
+            const safeUser = {
+
+                uid:
+                    result.user.uid ||
+                    "",
+
+                email:
+                    result.user.email ||
+                    "",
+
+                role:
+                    role
+
+            };
+
+
+            localStorage.setItem(
+                STORAGE.user,
+                JSON.stringify(
+                    safeUser
+                )
+            );
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX session storage failed:",
+            error
+        );
+
+    }
 
 }
 
@@ -1480,7 +1798,9 @@ async function handleLogin(event) {
     event.preventDefault();
 
 
-    if (loginBusy) {
+    if (
+        loginBusy
+    ) {
 
         return;
 
@@ -1493,14 +1813,17 @@ async function handleLogin(event) {
     const email =
         clean(
             emailInput.value
-        )
-        .toLowerCase();
+        ).toLowerCase();
 
 
     const password =
         String(
             passwordInput.value || ""
         );
+
+
+    const selectedRole =
+        getSelectedRole();
 
 
     if (!email) {
@@ -1516,10 +1839,7 @@ async function handleLogin(event) {
     }
 
 
-    if (
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
-            .test(email)
-    ) {
+    if (!isValidEmail(email)) {
 
         showMessage(
             "Please enter a valid email address."
@@ -1569,33 +1889,21 @@ async function handleLogin(event) {
         );
 
 
-        /*
-         * Auth engine is loaded ONLY now.
-         */
-
         const auth =
             await loadAuthEngine();
 
 
         if (
             !auth ||
-            typeof auth.loginEmail !==
-                "function"
+            typeof auth.loginEmail !== "function"
         ) {
 
             throw new Error(
-                "RiderX login service is unavailable."
+                "RiderX email login service is unavailable."
             );
 
         }
 
-
-        /*
-         * Firestore/Firebase role remains authoritative.
-         *
-         * Selected Customer/Rider role is NOT trusted
-         * for authorization.
-         */
 
         const result =
             await auth.loginEmail(
@@ -1613,20 +1921,14 @@ async function handleLogin(event) {
         }
 
 
-        const role =
-            normalizeRole(
-                result.role ||
-                result.user?.role ||
-                (
-                    typeof auth.getRole ===
-                    "function"
-                        ? auth.getRole()
-                        : ""
-                )
+        const verifiedRole =
+            await getVerifiedRole(
+                auth,
+                result
             );
 
 
-        if (!role) {
+        if (!verifiedRole) {
 
             throw new Error(
                 "Your RiderX account role could not be verified."
@@ -1636,46 +1938,82 @@ async function handleLogin(event) {
 
 
         /*
-         * Store verified role.
-         */
-
-        try {
-
-            localStorage.setItem(
-                STORAGE.legacyRole,
-                role
-            );
-
-        } catch (storageError) {
-
-            console.warn(
-                "RiderX verified role storage failed:",
-                storageError
-            );
-
-        }
-
-
-        /*
-         * Remove stale selection.
+         * Security rule:
          *
-         * This is done AFTER successful authentication.
+         * Customer/Rider selection is only a UI choice.
+         * The authenticated Firestore role remains authoritative.
+         *
+         * Therefore a rider cannot gain customer/rider access
+         * simply by changing localStorage.
+         *
+         * When a Customer/Rider role was explicitly selected,
+         * require the verified account role to match it.
          */
 
-        try {
+        if (
+            (
+                selectedRole === "customer" ||
+                selectedRole === "rider"
+            ) &&
+            (
+                verifiedRole === "customer" ||
+                verifiedRole === "rider"
+            ) &&
+            selectedRole !== verifiedRole
+        ) {
 
-            localStorage.removeItem(
-                STORAGE.selectedRole
-            );
+            /*
+             * Do not leave a mismatched authenticated session
+             * sitting on the login page.
+             *
+             * auth.js may expose logout/signOut depending on
+             * its finalized implementation.
+             */
 
-        } catch (storageError) {
+            try {
 
-            console.warn(
-                "RiderX selected-role cleanup failed:",
-                storageError
+                if (
+                    typeof auth.logout === "function"
+                ) {
+
+                    await auth.logout();
+
+                } else if (
+                    typeof auth.signOut === "function"
+                ) {
+
+                    await auth.signOut();
+
+                }
+
+            } catch (logoutError) {
+
+                console.warn(
+                    "RiderX mismatch session cleanup failed:",
+                    logoutError
+                );
+
+            }
+
+
+            throw new Error(
+                "This email belongs to a " +
+                verifiedRole +
+                " account. Please choose " +
+                verifiedRole +
+                " from the role selector."
             );
 
         }
+
+
+        saveVerifiedSession(
+            result,
+            verifiedRole
+        );
+
+
+        clearSelectedRole();
 
 
         setLoading(
@@ -1686,12 +2024,14 @@ async function handleLogin(event) {
 
 
         /*
-         * Small delay is NOT used here.
-         * Navigate immediately after verified login.
+         * No timeout.
+         * No role.html redirect.
+         *
+         * Go directly to the verified dashboard.
          */
 
         goToDashboard(
-            role
+            verifiedRole
         );
 
     } catch (error) {
@@ -1708,10 +2048,9 @@ async function handleLogin(event) {
 
 
         showMessage(
-            clean(
-                error?.message
-            ) ||
-            "Unable to login. Please try again."
+            friendlyAuthError(
+                error
+            )
         );
 
     }
@@ -1725,7 +2064,9 @@ async function handleLogin(event) {
 
 async function handleForgotPassword() {
 
-    if (loginBusy) {
+    if (
+        loginBusy
+    ) {
 
         return;
 
@@ -1738,8 +2079,7 @@ async function handleForgotPassword() {
     const email =
         clean(
             emailInput.value
-        )
-        .toLowerCase();
+        ).toLowerCase();
 
 
     if (!email) {
@@ -1755,10 +2095,7 @@ async function handleForgotPassword() {
     }
 
 
-    if (
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
-            .test(email)
-    ) {
+    if (!isValidEmail(email)) {
 
         showMessage(
             "Please enter a valid email address."
@@ -1786,8 +2123,7 @@ async function handleForgotPassword() {
 
         if (
             !auth ||
-            typeof auth.resetPassword !==
-                "function"
+            typeof auth.resetPassword !== "function"
         ) {
 
             throw new Error(
@@ -1826,10 +2162,9 @@ async function handleForgotPassword() {
 
 
         showMessage(
-            clean(
-                error?.message
-            ) ||
-            "Unable to send password reset email."
+            friendlyAuthError(
+                error
+            )
         );
 
     }
@@ -1838,14 +2173,22 @@ async function handleForgotPassword() {
 
 
 /* ============================================================
-   PASSWORD TOGGLE
+   PASSWORD VISIBILITY
 ============================================================ */
 
 function togglePassword() {
 
+    if (
+        loginBusy
+    ) {
+
+        return;
+
+    }
+
+
     const showing =
-        passwordInput.type ===
-        "text";
+        passwordInput.type === "text";
 
 
     passwordInput.type =
@@ -1866,6 +2209,61 @@ function togglePassword() {
             ? "Show password"
             : "Hide password"
     );
+
+
+    passwordToggle.setAttribute(
+        "aria-pressed",
+        showing
+            ? "false"
+            : "true"
+    );
+
+
+    passwordInput.focus();
+
+}
+
+
+/* ============================================================
+   EXPLICIT ROLE CHANGE
+============================================================ */
+
+function handleChangeRole() {
+
+    if (
+        loginBusy
+    ) {
+
+        return;
+
+    }
+
+
+    clearSelectedRole();
+
+    goToRolePage();
+
+}
+
+
+/* ============================================================
+   REGISTRATION
+============================================================ */
+
+function handleRegister() {
+
+    if (
+        loginBusy
+    ) {
+
+        return;
+
+    }
+
+
+    clearSelectedRole();
+
+    goToRolePage();
 
 }
 
@@ -1894,95 +2292,32 @@ passwordToggle.addEventListener(
 
 changeRoleBtn.addEventListener(
     "click",
-    function () {
-
-        if (loginBusy) {
-
-            return;
-
-        }
-
-
-        /*
-         * Explicit user action.
-         */
-
-        try {
-
-            localStorage.removeItem(
-                STORAGE.selectedRole
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX selected-role cleanup failed:",
-                error
-            );
-
-        }
-
-
-        goToRolePage();
-
-    }
+    handleChangeRole
 );
 
 
 registerBtn.addEventListener(
     "click",
-    function () {
-
-        if (loginBusy) {
-
-            return;
-
-        }
-
-
-        /*
-         * Registration starts from the role selector.
-         */
-
-        try {
-
-            localStorage.removeItem(
-                STORAGE.selectedRole
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "RiderX role cleanup failed:",
-                error
-            );
-
-        }
-
-
-        goToRolePage();
-
-    }
+    handleRegister
 );
 
 
 /* ============================================================
-   AUTH EVENTS
+   PASSIVE AUTH EVENTS
 ============================================================
 
-   These listeners are intentionally passive.
+   These events do not automatically redirect a signed-out user.
 
-   They do NOT redirect signed-out users to role.html.
-
-   This page must remain stable until the user explicitly
-   changes role or completes login.
+   A verified signed-in event may redirect to a dashboard.
 ============================================================ */
 
 window.addEventListener(
     "riderx-auth-signed-in",
     function (event) {
 
-        if (loginBusy) {
+        if (
+            loginBusy
+        ) {
 
             return;
 
@@ -2002,14 +2337,33 @@ window.addEventListener(
         }
 
 
-        /*
-         * Only a verified signed-in event can send the user
-         * to a dashboard.
-         */
+        try {
 
-        goToDashboard(
-            role
-        );
+            saveVerifiedSession(
+                event.detail,
+                role
+            );
+
+            clearSelectedRole();
+
+            goToDashboard(
+                role
+            );
+
+        } catch (error) {
+
+            console.error(
+                "RiderX auth-event navigation error:",
+                error
+            );
+
+            showMessage(
+                friendlyAuthError(
+                    error
+                )
+            );
+
+        }
 
     }
 );
@@ -2019,7 +2373,9 @@ window.addEventListener(
     "riderx-auth-auth-error",
     function (event) {
 
-        if (loginBusy) {
+        if (
+            loginBusy
+        ) {
 
             return;
 
@@ -2031,11 +2387,13 @@ window.addEventListener(
 
 
         if (
-            error?.message
+            error
         ) {
 
             showMessage(
-                error.message
+                friendlyAuthError(
+                    error
+                )
             );
 
         }
@@ -2053,12 +2411,12 @@ window.addEventListener(
     /*
      * IMPORTANT:
      *
+     * No Firebase initialization here.
      * No auth.js import here.
-     * No Firebase session check here.
-     * No automatic redirect here.
+     * No automatic session redirect here.
+     * No signed-out redirect here.
      *
-     * Therefore login.html cannot jump back to role.html
-     * merely because Firebase reports signed-out state.
+     * This keeps login.html stable.
      */
 
     renderSelectedRole();
@@ -2071,14 +2429,15 @@ window.addEventListener(
 
 
     /*
-     * Make the email field immediately usable.
+     * Focus email field after the browser paints the page.
      */
 
     window.setTimeout(
         function () {
 
             if (
-                !emailInput.disabled
+                !emailInput.disabled &&
+                document.visibilityState !== "hidden"
             ) {
 
                 emailInput.focus();
@@ -2086,12 +2445,12 @@ window.addEventListener(
             }
 
         },
-        50
+        80
     );
 
 
     /*
-     * Public diagnostic object.
+     * Public diagnostic API.
      */
 
     window.RiderXLogin =
@@ -2099,7 +2458,8 @@ window.addEventListener(
 
             getSelectedRole,
             normalizeRole,
-            loadAuthEngine
+            loadAuthEngine,
+            routeForRole
 
         });
 
