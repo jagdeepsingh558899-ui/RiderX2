@@ -29,13 +29,10 @@
 
 
 /* =========================================================
-   FIREBASE SDK
+   FIREBASE SDK VERSION
 ========================================================= */
 
 const FIREBASE_SDK_VERSION = "12.2.1";
-
-const FIREBASE_BASE_URL =
-    `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
 
 
 /* =========================================================
@@ -45,7 +42,7 @@ const FIREBASE_BASE_URL =
 import {
     initializeApp,
     getApps
-} from `${FIREBASE_BASE_URL}/firebase-app.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 
 
 /* =========================================================
@@ -66,7 +63,7 @@ import {
     updateProfile,
     deleteUser,
     sendEmailVerification
-} from `${FIREBASE_BASE_URL}/firebase-auth.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 
 
 /* =========================================================
@@ -95,7 +92,7 @@ import {
     arrayUnion,
     arrayRemove,
     increment
-} from `${FIREBASE_BASE_URL}/firebase-firestore.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
 
 /* =========================================================
@@ -114,7 +111,7 @@ import {
     off,
     onDisconnect,
     serverTimestamp as databaseServerTimestamp
-} from `${FIREBASE_BASE_URL}/firebase-database.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
 
 /* =========================================================
@@ -128,7 +125,7 @@ import {
     uploadBytesResumable,
     getDownloadURL,
     deleteObject
-} from `${FIREBASE_BASE_URL}/firebase-storage.js`;
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
 
 
 /* =========================================================
@@ -167,11 +164,8 @@ const firebaseConfig = Object.freeze({
 /* =========================================================
    FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   Reuse the existing default Firebase app if one already
-   exists. Otherwise initialize exactly one default app.
-
-   IMPORTANT:
-   No other RiderX file should call initializeApp().
+   Reuse an existing default Firebase app if available.
+   Otherwise initialize exactly one default app.
 ========================================================= */
 
 let app = null;
@@ -180,7 +174,6 @@ try {
 
     const existingApps =
         getApps();
-
 
     app =
         existingApps.find(
@@ -317,7 +310,6 @@ try {
 const googleProvider =
     new GoogleAuthProvider();
 
-
 googleProvider.setCustomParameters({
 
     prompt:
@@ -428,11 +420,6 @@ function getFirebase() {
    LEGACY COMPATIBILITY BRIDGE
    ---------------------------------------------------------
    This bridge DOES NOT initialize Firebase.
-
-   It only exposes already initialized RiderX Firebase
-   instances to older non-module scripts/pages.
-
-   New code should use ES module imports.
 ========================================================= */
 
 if (
@@ -475,9 +462,6 @@ if (
 
     /* =====================================================
        FIREBASE READY EVENT
-       -----------------------------------------------------
-       Dispatch asynchronously so page scripts have time
-       to register their listeners.
     ===================================================== */
 
     const dispatchReadyEvent =
