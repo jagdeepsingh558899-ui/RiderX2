@@ -3,8 +3,10 @@
    FIREBASE CONFIGURATION
    File: firebase/firebase-config.js
 
+   CANONICAL FIREBASE CONFIGURATION
+
    Firebase SDK:
-   10.8.0
+   12.2.1
 
    Services:
    - Firebase Authentication
@@ -12,16 +14,28 @@
    - Realtime Database
    - Firebase Storage
 
-   RULE:
-   This is the ONLY Firebase initialization file.
+   IMPORTANT:
+   This is the ONLY RiderX page-side Firebase
+   initialization file.
 
-   No other RiderX file should call:
+   No other RiderX page/module should call:
        initializeApp()
 
-   Feature modules should import Firebase services from here.
+   Feature modules must import Firebase services
+   from this file.
 ========================================================= */
 
 "use strict";
+
+
+/* =========================================================
+   FIREBASE SDK
+========================================================= */
+
+const FIREBASE_SDK_VERSION = "12.2.1";
+
+const FIREBASE_BASE_URL =
+    `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
 
 
 /* =========================================================
@@ -30,9 +44,8 @@
 
 import {
     initializeApp,
-    getApps,
-    getApp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    getApps
+} from `${FIREBASE_BASE_URL}/firebase-app.js`;
 
 
 /* =========================================================
@@ -53,7 +66,7 @@ import {
     updateProfile,
     deleteUser,
     sendEmailVerification
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+} from `${FIREBASE_BASE_URL}/firebase-auth.js`;
 
 
 /* =========================================================
@@ -82,7 +95,7 @@ import {
     arrayUnion,
     arrayRemove,
     increment
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+} from `${FIREBASE_BASE_URL}/firebase-firestore.js`;
 
 
 /* =========================================================
@@ -101,7 +114,7 @@ import {
     off,
     onDisconnect,
     serverTimestamp as databaseServerTimestamp
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+} from `${FIREBASE_BASE_URL}/firebase-database.js`;
 
 
 /* =========================================================
@@ -115,21 +128,11 @@ import {
     uploadBytesResumable,
     getDownloadURL,
     deleteObject
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+} from `${FIREBASE_BASE_URL}/firebase-storage.js`;
 
 
 /* =========================================================
    RIDERX FIREBASE CONFIGURATION
-   ---------------------------------------------------------
-   IMPORTANT:
-   This API key must exactly match the Firebase Console
-   configuration for project: riderx-1
-
-   The previous RiderX config contained a typo:
-       ATNcUBKI2
-
-   Correct value:
-       ATNcJyUBKI2
 ========================================================= */
 
 const firebaseConfig = Object.freeze({
@@ -162,44 +165,30 @@ const firebaseConfig = Object.freeze({
 
 
 /* =========================================================
-   INTERNAL CONSTANTS
-========================================================= */
-
-const FIREBASE_DEFAULT_APP_NAME =
-    "[DEFAULT]";
-
-
-/* =========================================================
    FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   Reuse an already initialized default app.
-   Otherwise create exactly one default app.
+   Reuse an existing default app when available.
+   Otherwise initialize exactly one default app.
 ========================================================= */
 
-let app;
+let app = null;
 
 try {
 
-    const apps =
-        getApps();
+    const apps = getApps();
 
-
-    const existingDefaultApp =
-        apps.find(
-            firebaseApp =>
-                firebaseApp.name ===
-                FIREBASE_DEFAULT_APP_NAME
-        );
-
-
-    if (
-        existingDefaultApp
-    ) {
+    if (apps.length > 0) {
 
         app =
-            existingDefaultApp;
+            apps.find(
+                firebaseApp =>
+                    firebaseApp.name === "[DEFAULT]"
+            ) ||
+            apps[0];
 
-    } else {
+    }
+
+    if (!app) {
 
         app =
             initializeApp(
@@ -208,12 +197,10 @@ try {
 
     }
 
-} catch (
-    error
-) {
+} catch (error) {
 
     console.error(
-        "RiderX Firebase initialization failed:",
+        "RiderX: Firebase app initialization failed.",
         error
     );
 
@@ -226,7 +213,7 @@ try {
    FIREBASE AUTH
 ========================================================= */
 
-let auth;
+let auth = null;
 
 try {
 
@@ -235,12 +222,10 @@ try {
             app
         );
 
-} catch (
-    error
-) {
+} catch (error) {
 
     console.error(
-        "RiderX Firebase Auth initialization failed:",
+        "RiderX: Firebase Auth initialization failed.",
         error
     );
 
@@ -253,7 +238,7 @@ try {
    CLOUD FIRESTORE
 ========================================================= */
 
-let db;
+let db = null;
 
 try {
 
@@ -262,12 +247,10 @@ try {
             app
         );
 
-} catch (
-    error
-) {
+} catch (error) {
 
     console.error(
-        "RiderX Firestore initialization failed:",
+        "RiderX: Firestore initialization failed.",
         error
     );
 
@@ -280,7 +263,7 @@ try {
    REALTIME DATABASE
 ========================================================= */
 
-let realtimeDb;
+let realtimeDb = null;
 
 try {
 
@@ -289,12 +272,10 @@ try {
             app
         );
 
-} catch (
-    error
-) {
+} catch (error) {
 
     console.error(
-        "RiderX Realtime Database initialization failed:",
+        "RiderX: Realtime Database initialization failed.",
         error
     );
 
@@ -307,7 +288,7 @@ try {
    FIREBASE STORAGE
 ========================================================= */
 
-let storage;
+let storage = null;
 
 try {
 
@@ -316,12 +297,10 @@ try {
             app
         );
 
-} catch (
-    error
-) {
+} catch (error) {
 
     console.error(
-        "RiderX Firebase Storage initialization failed:",
+        "RiderX: Firebase Storage initialization failed.",
         error
     );
 
@@ -383,10 +362,7 @@ const firebaseReady =
 
 
 /* =========================================================
-   READY PROMISE
-   ---------------------------------------------------------
-   Firebase initialization is synchronous after this module
-   successfully loads.
+   FIREBASE READY PROMISE
 ========================================================= */
 
 const firebaseReadyPromise =
@@ -402,7 +378,12 @@ const firebaseReadyPromise =
 function isFirebaseReady() {
 
     return (
-        firebaseReady === true
+        firebaseReady === true &&
+        Boolean(app) &&
+        Boolean(auth) &&
+        Boolean(db) &&
+        Boolean(realtimeDb) &&
+        Boolean(storage)
     );
 
 }
@@ -431,19 +412,19 @@ function getFirebase() {
 
 
 /* =========================================================
-   GLOBAL COMPATIBILITY BRIDGE
+   LEGACY COMPATIBILITY BRIDGE
    ---------------------------------------------------------
-   This does NOT initialize Firebase.
+   IMPORTANT:
+   This bridge DOES NOT initialize Firebase.
 
-   It only exposes the already initialized Firebase
-   instances for legacy RiderX pages/scripts.
+   It only exposes the already initialized instances
+   to older RiderX pages/scripts.
 
    New code should use ES module imports.
 ========================================================= */
 
 if (
-    typeof window !==
-    "undefined"
+    typeof window !== "undefined"
 ) {
 
     window.RiderXFirebase =
@@ -481,29 +462,50 @@ if (
 
 
     /*
-     * Dispatch the ready event after all Firebase services
-     * have successfully initialized.
+     * Dispatch the ready event asynchronously so pages
+     * have a chance to register their listeners.
      */
 
-    try {
+    const dispatchReadyEvent =
+        () => {
 
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx:firebase-ready",
-                {
-                    detail:
-                        firebaseServices
-                }
-            )
-        );
+            try {
 
-    } catch (
-        error
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "riderx:firebase-ready",
+                        {
+                            detail:
+                                firebaseServices
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX: Firebase ready event could not be dispatched.",
+                    error
+                );
+
+            }
+
+        };
+
+
+    if (
+        typeof queueMicrotask === "function"
     ) {
 
-        console.warn(
-            "RiderX Firebase ready event could not be dispatched:",
-            error
+        queueMicrotask(
+            dispatchReadyEvent
+        );
+
+    } else {
+
+        setTimeout(
+            dispatchReadyEvent,
+            0
         );
 
     }
@@ -517,7 +519,7 @@ if (
 
 export {
 
-    /* Firebase */
+    /* Firebase app/config */
 
     app,
 
@@ -526,7 +528,7 @@ export {
     firebaseServices,
 
 
-    /* Instances */
+    /* Firebase instances */
 
     auth,
 
@@ -539,7 +541,7 @@ export {
     googleProvider,
 
 
-    /* State */
+    /* Firebase state/helpers */
 
     isFirebaseReady,
 
@@ -665,14 +667,21 @@ export {
 
 
 /* =========================================================
-   DEBUG
+   DEBUG INFORMATION
    ---------------------------------------------------------
-   Never print the Firebase API key.
+   Never print:
+   - API key
+   - Auth credentials
+   - User tokens
+   - Firebase secrets
 ========================================================= */
 
 console.info(
-    "RiderX Firebase initialized successfully.",
+    "RiderX Firebase initialized.",
     {
+
+        sdk:
+            FIREBASE_SDK_VERSION,
 
         projectId:
             firebaseConfig.projectId,
@@ -693,7 +702,7 @@ console.info(
             Boolean(storage),
 
         ready:
-            firebaseReady
+            isFirebaseReady()
 
     }
 );
