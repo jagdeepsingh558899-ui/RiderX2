@@ -80,7 +80,7 @@ const NORMAL_USER_ROLES = Object.freeze([
 
 const STORAGE = Object.freeze({
 
-   .user:
+    user:
         "riderx_user",
 
     customer:
@@ -127,35 +127,113 @@ const STORAGE = Object.freeze({
 
 /* ============================================================
    ROUTES
+   ------------------------------------------------------------
+   Routes are stored relative to the RiderX project root.
+
+   They are resolved through import.meta.url so that they work
+   correctly whether the current page is inside:
+       /auth/
+       /customer/
+       /rider/
+       /admin/
 ============================================================ */
 
 const ROUTES = Object.freeze({
 
     role:
-        "../auth/role.html",
+        "auth/role.html",
 
     login:
-        "../auth/login.html",
+        "auth/login.html",
 
     register:
-        "../auth/register.html",
+        "auth/register.html",
 
     customerHome:
-        "../customer/home.html",
+        "customer/home.html",
 
     riderHome:
-        "../rider/home.html",
+        "rider/home.html",
 
     riderPending:
-        "../rider/pending.html",
+        "rider/pending.html",
 
     adminDashboard:
-        "../admin/dashboard.html",
+        "admin/dashboard.html",
 
     index:
-        "../index.html"
+        "index.html"
 
 });
+
+
+/* ============================================================
+   ROUTE RESOLVER
+============================================================ */
+
+function resolveRoute(
+    route
+) {
+
+    const value =
+        safeString(
+            route
+        );
+
+
+    if (
+        !value
+    ) {
+
+        return value;
+
+    }
+
+
+    /*
+     * Keep external URLs and absolute URLs untouched.
+     */
+
+    if (
+        /^(https?:|mailto:|tel:|#|\/)/i.test(
+            value
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    try {
+
+        /*
+         * auth.js is located at:
+         *
+         * /js/auth.js
+         *
+         * Therefore ../ resolves to the RiderX project root.
+         */
+
+        return new URL(
+            "../" + value,
+            import.meta.url
+        ).href;
+
+    } catch (
+        error
+    ) {
+
+        console.warn(
+            "RiderX: route resolution failed.",
+            error
+        );
+
+        return value;
+
+    }
+
+}
 
 
 /* ============================================================
@@ -176,6 +254,9 @@ let authInitialized =
 
 let authListenerStarted =
     false;
+
+let authInitPromise =
+    null;
 
 let authListeners =
     [];
@@ -766,6 +847,8 @@ AUTH.validateEmail =
 
 /* ============================================================
    FIREBASE USER
+   ------------------------------------------------------------
+   Firebase Auth is the ONLY source of authentication state.
 ============================================================ */
 
 AUTH.getUser =
@@ -831,10 +914,11 @@ AUTH.getUid =
             AUTH.getUser();
 
 
+        /*
+         * NEVER use localStorage as an authenticated UID source.
+         */
+
         return user?.uid ||
-            safeStorageGet(
-                STORAGE.uid
-            ) ||
             "";
 
     };
@@ -1123,6 +1207,7 @@ async function createUserProfile(
 
         phoneNumber:
             extra.phoneNumber ||
+            extra.phone ||
             user.phoneNumber ||
             "",
 
@@ -1296,8 +1381,17 @@ AUTH.getErrorMessage =
             "auth/popup-closed-by-user":
                 "Authentication window was closed.",
 
+            "auth/popup-blocked":
+                "The authentication popup was blocked. Please allow popups and try again.",
+
             "auth/requires-recent-login":
-                "Please login again before performing this action."
+                "Please login again before performing this action.",
+
+            "auth/too-many-requests":
+                "Too many attempts. Please try again later.",
+
+            "permission-denied":
+                "You do not have permission to access this account data."
 
         };
 
@@ -1323,6 +1417,8 @@ async function safeFirebaseSignOut(
 
         if (
             firebaseModule?.auth
+            &&
+            firebaseModule?.signOut
         ) {
 
             await firebaseModule.signOut(
@@ -1347,6 +1443,8 @@ async function safeFirebaseSignOut(
 
 /* ============================================================
    SESSION CACHE
+   ------------------------------------------------------------
+   Cache is UI convenience only.
 ============================================================ */
 
 function cacheAuthenticatedSession(
@@ -1510,7 +1608,8 @@ function clearSessionCache() {
 
 
     for (
-        const key of keys
+        const key
+        of keys
     ) {
 
         safeStorageRemove(
@@ -1644,13 +1743,17 @@ async function finalizeAuthenticatedUser(
 
 
     /*
-     * Only allow selected-role fallback when explicitly requested.
-     * Firebase user itself does not carry a trusted application role.
+     * Existing Firestore role always wins.
+     *
+     * Selected-role fallback is allowed only during explicit
+     * account setup and only for Customer/Rider.
      */
 
     if (
-        !role &&
-        options.allowSelectedRoleFallback === true &&
+        !role
+        &&
+        options.allowSelectedRoleFallback === true
+        &&
         NORMAL_USER_ROLES.includes(
             requestedRole
         )
@@ -1899,27 +2002,50 @@ AUTH.registerWithEmail =
         }
 
 
-        const profile =
-            await createUserProfile(
-                user,
-                role,
-                {
+        let profile;
 
-                    name,
 
-                    fullName:
+        try {
+
+            profile =
+                await createUserProfile(
+                    user,
+                    role,
+                    {
+
                         name,
 
-                    displayName:
-                        name,
+                        fullName:
+                            name,
 
-                    phone:
-                        options.phone ||
-                        user.phoneNumber ||
-                        ""
+                        displayName:
+                            name,
 
-                }
+                        phone:
+                            options.phone ||
+                            user.phoneNumber ||
+                            ""
+
+                    }
+                );
+
+        } catch (
+            error
+        ) {
+
+            /*
+             * Firebase Auth account was created, but its Firestore
+             * profile failed. Do not leave the browser session
+             * authenticated against an unconfigured account.
+             */
+
+            await safeFirebaseSignOut(
+                FB
             );
+
+            throw error;
+
+        }
 
 
         currentUser =
@@ -2121,6 +2247,11 @@ AUTH.resetPassword =
 
 /* ============================================================
    PHONE OTP
+   ------------------------------------------------------------
+   Uses signInWithPhoneNumber(), which is already exported by
+   firebase-config.js.
+
+   This avoids requiring PhoneAuthProvider to be exported.
 ============================================================ */
 
 AUTH.sendPhoneOtp =
@@ -2165,10 +2296,6 @@ AUTH.sendPhoneOtp =
         }
 
 
-        /*
-         * Firebase RecaptchaVerifier is created by the page.
-         */
-
         const verifier =
             options.recaptchaVerifier ||
             options.appVerifier;
@@ -2185,16 +2312,22 @@ AUTH.sendPhoneOtp =
         }
 
 
-        const provider =
-            new FB.PhoneAuthProvider(
-                FB.auth
+        if (
+            !FB.signInWithPhoneNumber
+        ) {
+
+            throw new Error(
+                "Phone OTP authentication is not available."
             );
+
+        }
 
 
         try {
 
             otpConfirmationResult =
-                await provider.verifyPhoneNumber(
+                await FB.signInWithPhoneNumber(
+                    FB.auth,
                     phone,
                     verifier
                 );
@@ -2344,11 +2477,6 @@ AUTH.verifyPhoneOtp =
             error
         ) {
 
-            /*
-             * If the profile read fails, do not create a duplicate
-             * account profile. Surface the real error.
-             */
-
             await safeFirebaseSignOut(
                 FB
             );
@@ -2363,33 +2491,13 @@ AUTH.verifyPhoneOtp =
 
 
         /*
-         * A first-time phone user does not automatically have a
-         * Firestore users/{uid} profile. Create it before the
-         * common finalization step, otherwise the auth-state
-         * listener can immediately see a missing role and sign
-         * the new user back out.
+         * First-time phone user:
+         * create Firestore profile before finalization.
          */
 
         if (
             isNewPhoneUser
         ) {
-
-            if (
-                !NORMAL_USER_ROLES.includes(
-                    requestedRole
-                )
-            ) {
-
-                await safeFirebaseSignOut(
-                    FB
-                );
-
-                throw new Error(
-                    "Please select Customer or Rider before verifying your phone number."
-                );
-
-            }
-
 
             const now =
                 Date.now();
@@ -2398,7 +2506,9 @@ AUTH.verifyPhoneOtp =
             const phone =
                 safeStorageGet(
                     STORAGE.otpPhone
-                ) || "";
+                ) ||
+                firebaseUser.phoneNumber ||
+                "";
 
 
             const phoneProfile = {
@@ -2468,18 +2578,32 @@ AUTH.verifyPhoneOtp =
             };
 
 
-            await FB.setDoc(
-                FB.doc(
-                    FB.db,
-                    "users",
-                    firebaseUser.uid
-                ),
-                phoneProfile,
-                {
-                    merge:
-                        true
-                }
-            );
+            try {
+
+                await FB.setDoc(
+                    FB.doc(
+                        FB.db,
+                        "users",
+                        firebaseUser.uid
+                    ),
+                    phoneProfile,
+                    {
+                        merge:
+                            true
+                    }
+                );
+
+            } catch (
+                error
+            ) {
+
+                await safeFirebaseSignOut(
+                    FB
+                );
+
+                throw error;
+
+            }
 
         }
 
@@ -2544,6 +2668,14 @@ AUTH.clearOtpState =
 
         safeStorageRemove(
             STORAGE.pendingRole
+        );
+
+        safeStorageRemove(
+            STORAGE.pendingEmail
+        );
+
+        safeStorageRemove(
+            STORAGE.pendingName
         );
 
     };
@@ -2704,7 +2836,8 @@ AUTH.updateProfile =
 
 
         if (
-            updates.photoURL
+            updates.photoURL !==
+            undefined
         ) {
 
             allowed.photoURL =
@@ -2728,22 +2861,34 @@ AUTH.updateProfile =
 
 
             if (
-                phone
+                !phone
             ) {
 
-                allowed.phone =
-                    phone;
-
-                allowed.phoneNumber =
-                    phone;
+                throw new Error(
+                    "Please enter a valid phone number."
+                );
 
             }
+
+
+            allowed.phone =
+                phone;
+
+            allowed.phoneNumber =
+                phone;
 
         }
 
 
         /*
-         * Never allow the UI to change uid/role/status/approval.
+         * Never allow UI code to change:
+         *
+         * uid
+         * role
+         * userRole
+         * accountType
+         * status
+         * approval
          */
 
         allowed.updatedAt =
@@ -2762,7 +2907,8 @@ AUTH.updateProfile =
 
 
         if (
-            name &&
+            name
+            &&
             FB.updateProfile
         ) {
 
@@ -2849,7 +2995,9 @@ AUTH.logout =
 
 
             window.location.replace(
-                path
+                resolveRoute(
+                    path
+                )
             );
 
         }
@@ -2870,7 +3018,9 @@ function notifyAuthListeners(
 
     for (
         const listener
-        of authListeners
+        of [
+            ...authListeners
+        ]
     ) {
 
         try {
@@ -2904,13 +3054,56 @@ AUTH.init =
         options = {}
     ) {
 
+        /*
+         * If initialization is already running or complete,
+         * return the same promise.
+         */
+
         if (
-            authListenerStarted
+            authInitPromise
         ) {
 
-            return Promise.resolve(
-                AUTH.getState()
-            );
+            return authInitPromise;
+
+        }
+
+
+        if (
+            !FB.auth ||
+            !FB.onAuthStateChanged
+        ) {
+
+            authInitialized =
+                true;
+
+
+            const state = {
+
+                authenticated:
+                    false,
+
+                configured:
+                    false,
+
+                user:
+                    null,
+
+                profile:
+                    null,
+
+                role:
+                    ""
+
+            };
+
+
+            authInitPromise =
+                Promise.resolve(
+                    state
+                );
+
+
+            return authInitPromise;
 
         }
 
@@ -2919,51 +3112,180 @@ AUTH.init =
             true;
 
 
-        return new Promise(
-            function (
-                resolve
-            ) {
+        authInitPromise =
+            new Promise(
+                function (
+                    resolve
+                ) {
 
-                let resolved =
-                    false;
-
-
-                const unsubscribe =
-                    FB.onAuthStateChanged(
-                        FB.auth,
-                        async function (
-                            user
-                        ) {
-
-                            try {
-
-                                currentUser =
-                                    user ||
-                                    null;
+                    let resolved =
+                        false;
 
 
-                                if (
-                                    !user
-                                ) {
+                    const unsubscribe =
+                        FB.onAuthStateChanged(
+                            FB.auth,
+                            async function (
+                                user
+                            ) {
 
-                                    currentProfile =
+                                try {
+
+                                    currentUser =
+                                        user ||
                                         null;
 
-                                    currentRole =
-                                        "";
 
-                                    clearSessionCache();
+                                    if (
+                                        !user
+                                    ) {
+
+                                        currentProfile =
+                                            null;
+
+                                        currentRole =
+                                            "";
+
+                                        clearSessionCache();
+
+
+                                        const state = {
+
+                                            authenticated:
+                                                false,
+
+                                            configured:
+                                                false,
+
+                                            user:
+                                                null,
+
+                                            profile:
+                                                null,
+
+                                            role:
+                                                ""
+
+                                        };
+
+
+                                        authInitialized =
+                                            true;
+
+
+                                        notifyAuthListeners(
+                                            state
+                                        );
+
+
+                                        if (
+                                            !resolved
+                                        ) {
+
+                                            resolved =
+                                                true;
+
+                                            resolve(
+                                                state
+                                            );
+
+                                        }
+
+
+                                        return;
+
+                                    }
+
+
+                                    let result;
+
+
+                                    try {
+
+                                        result =
+                                            await finalizeAuthenticatedUser(
+                                                user,
+                                                {
+                                                    allowSelectedRoleFallback:
+                                                        false
+                                                }
+                                            );
+
+                                    } catch (
+                                        error
+                                    ) {
+
+                                        console.error(
+                                            "RiderX: auth profile initialization failed.",
+                                            error
+                                        );
+
+
+                                        result = {
+
+                                            authenticated:
+                                                true,
+
+                                            configured:
+                                                false,
+
+                                            user,
+
+                                            profile:
+                                                null,
+
+                                            role:
+                                                ""
+
+                                        };
+
+                                    }
+
+
+                                    authInitialized =
+                                        true;
+
+
+                                    notifyAuthListeners(
+                                        result
+                                    );
+
+
+                                    if (
+                                        !resolved
+                                    ) {
+
+                                        resolved =
+                                            true;
+
+                                        resolve(
+                                            result
+                                        );
+
+                                    }
+
+                                } catch (
+                                    error
+                                ) {
+
+                                    console.error(
+                                        "RiderX: auth initialization failed.",
+                                        error
+                                    );
 
 
                                     const state = {
 
                                         authenticated:
-                                            false,
+                                            Boolean(
+                                                user
+                                            ),
 
                                         configured:
                                             false,
 
                                         user:
+                                            user ||
                                             null,
 
                                         profile:
@@ -2973,6 +3295,10 @@ AUTH.init =
                                             ""
 
                                     };
+
+
+                                    authInitialized =
+                                        true;
 
 
                                     notifyAuthListeners(
@@ -2993,145 +3319,20 @@ AUTH.init =
 
                                     }
 
-
-                                    return;
-
-                                }
-
-
-                                let result;
-
-
-                                try {
-
-                                    result =
-                                        await finalizeAuthenticatedUser(
-                                            user,
-                                            {
-                                                allowSelectedRoleFallback:
-                                                    false
-                                            }
-                                        );
-
-                                } catch (
-                                    error
-                                ) {
-
-                                    console.error(
-                                        "RiderX: auth profile initialization failed.",
-                                        error
-                                    );
-
-
-                                    result = {
-
-                                        authenticated:
-                                            true,
-
-                                        configured:
-                                            false,
-
-                                        user,
-
-                                        profile:
-                                            null,
-
-                                        role:
-                                            ""
-
-                                    };
-
-                                }
-
-
-                                authInitialized =
-                                    true;
-
-
-                                notifyAuthListeners(
-                                    result
-                                );
-
-
-                                if (
-                                    !resolved
-                                ) {
-
-                                    resolved =
-                                        true;
-
-                                    resolve(
-                                        result
-                                    );
-
-                                }
-
-                            } catch (
-                                error
-                            ) {
-
-                                console.error(
-                                    "RiderX: auth initialization failed.",
-                                    error
-                                );
-
-
-                                const state = {
-
-                                    authenticated:
-                                        Boolean(
-                                            user
-                                        ),
-
-                                    configured:
-                                        false,
-
-                                    user:
-                                        user ||
-                                        null,
-
-                                    profile:
-                                        null,
-
-                                    role:
-                                        ""
-
-                                };
-
-
-                                notifyAuthListeners(
-                                    state
-                                );
-
-
-                                if (
-                                    !resolved
-                                ) {
-
-                                    resolved =
-                                        true;
-
-                                    resolve(
-                                        state
-                                    );
-
                                 }
 
                             }
-
-                        }
-                    );
+                        );
 
 
-                /*
-                 * Keep unsubscribe available for explicit cleanup.
-                 */
+                    AUTH._unsubscribe =
+                        unsubscribe;
 
-                AUTH._unsubscribe =
-                    unsubscribe;
+                }
+            );
 
-            }
-        );
+
+        return authInitPromise;
 
     };
 
@@ -3179,6 +3380,7 @@ AUTH.onAuthStateChanged =
             ) {
 
                 console.error(
+                    "RiderX auth callback error.",
                     error
                 );
 
@@ -3297,8 +3499,10 @@ AUTH.requireAuth =
             ) {
 
                 window.location.replace(
-                    options.redirectTo ||
-                    ROUTES.login
+                    resolveRoute(
+                        options.redirectTo ||
+                        ROUTES.login
+                    )
                 );
 
             }
@@ -3320,6 +3524,8 @@ AUTH.requireAuth =
 
 
             if (
+                !requiredRole
+                ||
                 state.role !==
                 requiredRole
             ) {
@@ -3334,7 +3540,9 @@ AUTH.requireAuth =
                     ) {
 
                         window.location.replace(
-                            ROUTES.customerHome
+                            resolveRoute(
+                                ROUTES.customerHome
+                            )
                         );
 
                     } else if (
@@ -3343,13 +3551,28 @@ AUTH.requireAuth =
                     ) {
 
                         window.location.replace(
-                            ROUTES.riderHome
+                            resolveRoute(
+                                ROUTES.riderHome
+                            )
+                        );
+
+                    } else if (
+                        state.role === ROLES.ADMIN ||
+                        state.role === ROLES.SUPERADMIN
+                    ) {
+
+                        window.location.replace(
+                            resolveRoute(
+                                ROUTES.adminDashboard
+                            )
                         );
 
                     } else {
 
                         window.location.replace(
-                            ROUTES.role
+                            resolveRoute(
+                                ROUTES.role
+                            )
                         );
 
                     }
@@ -3401,7 +3624,9 @@ AUTH.requireAuth =
             ) {
 
                 window.location.replace(
-                    ROUTES.riderPending
+                    resolveRoute(
+                        ROUTES.riderPending
+                    )
                 );
 
             }
@@ -3501,8 +3726,10 @@ AUTH.requireAdmin =
             ) {
 
                 window.location.replace(
-                    options.redirectTo ||
-                    ROUTES.login
+                    resolveRoute(
+                        options.redirectTo ||
+                        ROUTES.login
+                    )
                 );
 
             }
@@ -3535,7 +3762,9 @@ AUTH.requireAdmin =
                 ) {
 
                     window.location.replace(
-                        ROUTES.riderHome
+                        resolveRoute(
+                            ROUTES.riderHome
+                        )
                     );
 
                 } else if (
@@ -3544,18 +3773,43 @@ AUTH.requireAdmin =
                 ) {
 
                     window.location.replace(
-                        ROUTES.customerHome
+                        resolveRoute(
+                            ROUTES.customerHome
+                        )
                     );
 
                 } else {
 
                     window.location.replace(
-                        ROUTES.role
+                        resolveRoute(
+                            ROUTES.role
+                        )
                     );
 
                 }
 
             }
+
+
+            return false;
+
+        }
+
+
+        if (
+            options.checkBlocked !== false
+            &&
+            AUTH.isAccountBlocked(
+                state.profile
+            )
+        ) {
+
+            await AUTH.logout({
+
+                redirectTo:
+                    ROUTES.login
+
+            });
 
 
             return false;
@@ -3652,6 +3906,15 @@ AUTH.refreshSession =
             !user
         ) {
 
+            currentUser =
+                null;
+
+            currentProfile =
+                null;
+
+            currentRole =
+                "";
+
             clearSessionCache();
 
             return AUTH.getState();
@@ -3666,28 +3929,50 @@ AUTH.refreshSession =
 
 
         if (
-            profile
+            !profile
         ) {
 
-            currentUser =
-                user;
-
             currentProfile =
-                profile;
+                null;
 
             currentRole =
-                AUTH.normalizeRole(
-                    profile.role
-                );
+                "";
 
+            clearSessionCache();
 
-            cacheAuthenticatedSession(
-                user,
-                profile,
-                currentRole
-            );
+            return AUTH.getState();
 
         }
+
+
+        currentUser =
+            user;
+
+        currentProfile =
+            profile;
+
+        currentRole =
+            AUTH.normalizeRole(
+                profile.role
+            );
+
+
+        if (
+            !currentRole
+        ) {
+
+            clearSessionCache();
+
+            return AUTH.getState();
+
+        }
+
+
+        cacheAuthenticatedSession(
+            user,
+            profile,
+            currentRole
+        );
 
 
         return AUTH.getState();
@@ -3822,6 +4107,15 @@ AUTH.clearLocalSession =
 
         clearSessionCache();
 
+        currentUser =
+            null;
+
+        currentProfile =
+            null;
+
+        currentRole =
+            "";
+
     };
 
 
@@ -3920,6 +4214,14 @@ RX.auth =
 
 RX.ROLES =
     ROLES;
+
+
+RX.ROUTES =
+    ROUTES;
+
+
+RX.resolveRoute =
+    resolveRoute;
 
 
 RX.login =
@@ -4033,7 +4335,20 @@ RX.isRiderApproved =
 
         return AUTH.isRiderApproved(
             user ||
-            AUTH.getUser()
+            AUTH.getProfile()
+        );
+
+    };
+
+
+RX.isAccountBlocked =
+    function (
+        user
+    ) {
+
+        return AUTH.isAccountBlocked(
+            user ||
+            AUTH.getProfile()
         );
 
     };
@@ -4111,6 +4426,22 @@ RX.updateProfile =
     };
 
 
+RX.refreshSession =
+    function () {
+
+        return AUTH.refreshSession();
+
+    };
+
+
+RX.refreshToken =
+    function () {
+
+        return AUTH.refreshToken();
+
+    };
+
+
 globalThis.RiderXAuth =
     RX;
 
@@ -4126,8 +4457,7 @@ globalThis.AUTH =
 /* ============================================================
    AUTO INITIALIZATION
    ------------------------------------------------------------
-   Only initialize when Firebase auth is available.
-   Pages can still explicitly call AUTH.init().
+   Only initialize when Firebase Auth is available.
 ============================================================ */
 
 try {
@@ -4174,7 +4504,9 @@ export {
 
     ROLES,
 
-    ROUTES
+    ROUTES,
+
+    resolveRoute
 
 };
 
