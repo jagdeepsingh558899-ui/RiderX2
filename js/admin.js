@@ -1,1009 +1,1288 @@
 /* ============================================================
-   RIDERX
+   RIDERX 2.0
    ADMIN MAIN CONTROLLER
    File: js/admin.js
 
+   FINAL VERSION
+
    Handles:
-   - Admin authentication guard
-   - Admin session
+   - Secure admin authentication guard
+   - Firebase modular SDK compatibility
+   - Firestore admin-role verification
+   - Admin session state
    - Admin dashboard initialization
    - Admin navigation
    - Admin notifications
    - Riders / Customers / Supports modules
    - Global admin refresh
    - Logout
-   ============================================================ */
+   - Firebase ready-state handling
 
-(function () {
+   IMPORTANT:
+   - Firebase initialization is handled ONLY by:
+       ../firebase/firebase-config.js
+   - This file NEVER calls initializeApp().
+   - This file NEVER trusts localStorage for admin authorization.
+   - Firebase Authentication + Firestore are the authority.
+============================================================ */
 
-    "use strict";
-
-    window.RiderX = window.RiderX || {};
-
-    const RX = window.RiderX;
-
-    const ADMIN =
-        RX.admin =
-        RX.admin || {};
+"use strict";
 
 
-    /* ========================================================
-       STATE
-       ======================================================== */
+/* ============================================================
+   RIDERX NAMESPACE
+============================================================ */
 
-    ADMIN.state = {
+window.RiderX =
+    window.RiderX || {};
 
-        initialized:
-            false,
+const RX =
+    window.RiderX;
 
-        authenticated:
-            false,
-
-        admin:
-            null,
-
-        page:
-            "",
-
-        notificationCount:
-            0,
-
-        notificationListener:
-            null,
-
-        authListener:
-            null
-    };
+const ADMIN =
+    RX.admin =
+    RX.admin || {};
 
 
-    /* ========================================================
-       HELPERS
-       ======================================================== */
+/* ============================================================
+   STATE
+============================================================ */
 
-    ADMIN.getPage = function () {
+ADMIN.state = {
 
-        const path =
-            window.location.pathname
-                .split("/")
-                .pop()
+    initialized: false,
+
+    initializing: false,
+
+    authenticated: false,
+
+    admin: null,
+
+    adminProfile: null,
+
+    page: "",
+
+    notificationCount: 0,
+
+    notificationListener: null,
+
+    notificationReference: null,
+
+    authListener: null,
+
+    firebaseLoaded: false,
+
+    firebase: null
+};
+
+
+/* ============================================================
+   FIREBASE REFERENCES
+============================================================ */
+
+let firebaseModule = null;
+
+let auth = null;
+
+let db = null;
+
+let realtimeDb = null;
+
+let firebaseReadyPromise = null;
+
+
+/* ============================================================
+   FIREBASE LOADER
+   ------------------------------------------------------------
+   Loads the SINGLE Firebase configuration module.
+
+   This prevents admin.js from using the old compat API.
+============================================================ */
+
+function loadFirebase() {
+
+    if (firebaseReadyPromise) {
+
+        return firebaseReadyPromise;
+    }
+
+
+    firebaseReadyPromise =
+        new Promise(
+            async function (resolve, reject) {
+
+                try {
+
+                    /*
+                     * If firebase-config.js has already loaded,
+                     * use the existing shared services.
+                     */
+
+                    if (
+                        RX.firebase &&
+                        RX.firebase.auth &&
+                        RX.firebase.db
+                    ) {
+
+                        firebaseModule =
+                            RX.firebase;
+
+                    } else {
+
+                        /*
+                         * Dynamically load the canonical
+                         * Firebase configuration.
+                         *
+                         * admin.js can therefore remain a
+                         * normal script and does not require
+                         * every admin HTML page to be converted
+                         * to type="module".
+                         */
+
+                        const module =
+                            await import(
+                                "../firebase/firebase-config.js"
+                            );
+
+
+                        firebaseModule =
+                            module.firebaseServices ||
+                            RX.firebase;
+                    }
+
+
+                    if (!firebaseModule) {
+
+                        throw new Error(
+                            "RiderX Firebase services are unavailable."
+                        );
+                    }
+
+
+                    auth =
+                        firebaseModule.auth ||
+                        null;
+
+
+                    db =
+                        firebaseModule.db ||
+                        firebaseModule.firestore ||
+                        null;
+
+
+                    realtimeDb =
+                        firebaseModule.realtimeDb ||
+                        firebaseModule.database ||
+                        null;
+
+
+                    if (
+                        !auth ||
+                        !db
+                    ) {
+
+                        throw new Error(
+                            "RiderX Firebase Auth/Firestore service missing."
+                        );
+                    }
+
+
+                    ADMIN.state.firebaseLoaded =
+                        true;
+
+
+                    ADMIN.state.firebase =
+                        firebaseModule;
+
+
+                    resolve(
+                        firebaseModule
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "RiderX admin Firebase loading failed:",
+                        error
+                    );
+
+
+                    reject(
+                        error
+                    );
+                }
+            }
+        );
+
+
+    return firebaseReadyPromise;
+}
+
+
+/* ============================================================
+   FIREBASE READY HELPER
+============================================================ */
+
+async function ensureFirebase() {
+
+    try {
+
+        return await loadFirebase();
+
+    } catch (error) {
+
+        console.error(
+            "RiderX admin Firebase unavailable:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+/* ============================================================
+   GET CURRENT PAGE
+============================================================ */
+
+ADMIN.getPage = function () {
+
+    const path =
+        window.location.pathname
+            .split("/")
+            .pop()
+            .toLowerCase();
+
+
+    return path ||
+        "dashboard.html";
+};
+
+
+/* ============================================================
+   GET CURRENT AUTH USER
+============================================================ */
+
+ADMIN.getUser = function () {
+
+    try {
+
+        if (
+            auth &&
+            auth.currentUser
+        ) {
+
+            return auth.currentUser;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX admin current-user error:",
+            error
+        );
+    }
+
+
+    return null;
+};
+
+
+/* ============================================================
+   GET LOCAL PROFILE
+   ------------------------------------------------------------
+   LocalStorage is used only for UI/session convenience.
+   It is NEVER treated as proof of admin access.
+============================================================ */
+
+ADMIN.getStoredUser = function () {
+
+    try {
+
+        const value =
+            localStorage.getItem(
+                "riderx_user"
+            );
+
+
+        if (!value) {
+
+            return null;
+        }
+
+
+        return JSON.parse(
+            value
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX admin local profile error:",
+            error
+        );
+
+        return null;
+    }
+};
+
+
+/* ============================================================
+   GET ROLE
+============================================================ */
+
+ADMIN.getRole = function (
+    user,
+    profile
+) {
+
+    user =
+        user ||
+        ADMIN.getUser();
+
+
+    profile =
+        profile ||
+        ADMIN.state.adminProfile ||
+        {};
+
+
+    const role =
+        profile.role ||
+        profile.userRole ||
+        profile.accountType ||
+        user?.role ||
+        user?.userRole ||
+        user?.accountType ||
+        "";
+
+
+    return String(
+        role
+    ).trim().toLowerCase();
+};
+
+
+/* ============================================================
+   ADMIN ROLE CHECK
+============================================================ */
+
+ADMIN.isAdmin = function (
+    user,
+    profile
+) {
+
+    const role =
+        ADMIN.getRole(
+            user,
+            profile
+        );
+
+
+    return (
+        role === "admin" ||
+        role === "superadmin" ||
+        role === "super_admin"
+    );
+};
+
+
+/* ============================================================
+   LOGIN PAGE CHECK
+============================================================ */
+
+ADMIN.isLoginPage = function () {
+
+    return (
+        ADMIN.getPage() ===
+        "login.html"
+    );
+};
+
+
+/* ============================================================
+   HTML ESCAPE
+============================================================ */
+
+ADMIN.escape = function (
+    value
+) {
+
+    const div =
+        document.createElement(
+            "div"
+        );
+
+
+    div.textContent =
+        String(
+            value ?? ""
+        );
+
+
+    return div.innerHTML;
+};
+
+
+/* ============================================================
+   FIRESTORE ADMIN PROFILE VERIFICATION
+   ------------------------------------------------------------
+   Security authority:
+       users/{uid}
+
+   Supported role fields:
+       role
+       userRole
+       accountType
+
+   Supported admin flags:
+       isAdmin
+============================================================ */
+
+ADMIN.verifyRole = async function (
+    user
+) {
+
+    if (!user || !user.uid) {
+
+        return false;
+    }
+
+
+    const services =
+        await ensureFirebase();
+
+
+    if (!services || !db) {
+
+        return false;
+    }
+
+
+    try {
+
+        const {
+            doc,
+            getDoc
+        } = await import(
+            "../firebase/firebase-config.js"
+        );
+
+
+        const userReference =
+            doc(
+                db,
+                "users",
+                user.uid
+            );
+
+
+        const snapshot =
+            await getDoc(
+                userReference
+            );
+
+
+        if (!snapshot.exists()) {
+
+            ADMIN.state.adminProfile =
+                null;
+
+            return false;
+        }
+
+
+        const data =
+            snapshot.data() ||
+            {};
+
+
+        ADMIN.state.adminProfile =
+            data;
+
+
+        /*
+         * Admin role is determined from
+         * the trusted Firestore profile.
+         */
+
+        const role =
+            String(
+                data.role ||
+                data.userRole ||
+                data.accountType ||
+                ""
+            )
+                .trim()
                 .toLowerCase();
 
 
-        return path ||
-            "dashboard.html";
-    };
-
-
-    ADMIN.getUser = function () {
-
-        /*
-         * Firebase Auth
-         */
-
-        try {
-
-            if (
-                window.firebase &&
-                firebase.auth
-            ) {
-
-                const user =
-                    firebase.auth()
-                        .currentUser;
-
-                if (user) {
-
-                    return {
-
-                        uid:
-                            user.uid,
-
-                        email:
-                            user.email ||
-                            "",
-
-                        displayName:
-                            user.displayName ||
-                            "",
-
-                        photoURL:
-                            user.photoURL ||
-                            ""
-                    };
-                }
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Firebase admin user error:",
-                error
-            );
-        }
+        const adminFlag =
+            data.isAdmin === true;
 
 
         /*
-         * Local session fallback
+         * Disabled/blocked accounts cannot
+         * access the admin panel.
          */
 
-        try {
-
-            const stored =
-                JSON.parse(
-                    localStorage.getItem(
-                        "riderx_user"
-                    ) || "null"
-                );
+        const blocked =
+            data.disabled === true ||
+            data.blocked === true ||
+            data.status === "disabled" ||
+            data.status === "blocked" ||
+            data.status === "suspended";
 
 
-            if (stored) {
-                return stored;
-            }
+        if (blocked) {
 
-        } catch (error) {
-
-            console.warn(
-                "Admin local session error:",
-                error
-            );
+            return false;
         }
-
-
-        return null;
-    };
-
-
-    ADMIN.getRole = function (
-        user
-    ) {
-
-        user =
-            user ||
-            ADMIN.getUser();
-
-
-        if (!user) {
-            return "";
-        }
-
-
-        return String(
-
-            user.role ||
-            user.userRole ||
-            user.accountType ||
-            localStorage.getItem(
-                "riderx_role"
-            ) ||
-            ""
-
-        ).toLowerCase();
-    };
-
-
-    ADMIN.isAdmin = function (
-        user
-    ) {
-
-        const role =
-            ADMIN.getRole(
-                user
-            );
 
 
         return (
             role === "admin" ||
             role === "superadmin" ||
-            role === "super_admin"
+            role === "super_admin" ||
+            adminFlag
         );
-    };
 
+    } catch (error) {
 
-    ADMIN.isLoginPage = function () {
-
-        const page =
-            ADMIN.getPage();
-
-
-        return (
-            page ===
-            "login.html"
+        console.error(
+            "RiderX admin Firestore role verification failed:",
+            error
         );
-    };
 
 
-    ADMIN.escape = function (
-        value
+        ADMIN.state.adminProfile =
+            null;
+
+
+        return false;
+    }
+};
+
+
+/* ============================================================
+   AUTH GUARD
+   ------------------------------------------------------------
+   IMPORTANT:
+   LocalStorage cannot bypass this guard.
+============================================================ */
+
+ADMIN.guard = async function () {
+
+    if (
+        ADMIN.isLoginPage()
     ) {
 
-        const div =
-            document.createElement(
-                "div"
-            );
+        return true;
+    }
 
 
-        div.textContent =
-            String(
-                value ?? ""
-            );
+    const services =
+        await ensureFirebase();
 
 
-        return div.innerHTML;
-    };
+    if (!services || !auth) {
+
+        ADMIN.showFirebaseError();
+
+        return false;
+    }
 
 
-    /* ========================================================
-       AUTH GUARD
-       ======================================================== */
+    /*
+     * Wait for Firebase Auth to resolve
+     * the current session.
+     */
 
-    ADMIN.guard = async function () {
-
-        /*
-         * Login page should remain accessible.
-         */
-
-        if (
-            ADMIN.isLoginPage()
-        ) {
-
-            return true;
-        }
+    const user =
+        await ADMIN.waitForAuthUser();
 
 
-        /*
-         * Firebase Auth
-         */
-
-        try {
-
-            if (
-                window.firebase &&
-                firebase.auth
-            ) {
-
-                const auth =
-                    firebase.auth();
-
-
-                const user =
-                    auth.currentUser;
-
-
-                if (user) {
-
-                    const allowed =
-                        await ADMIN.verifyRole(
-                            user
-                        );
-
-
-                    if (allowed) {
-
-                        ADMIN.state.authenticated =
-                            true;
-
-                        ADMIN.state.admin =
-                            user;
-
-                        return true;
-                    }
-
-
-                    ADMIN.denyAccess();
-
-                    return false;
-                }
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Firebase admin guard error:",
-                error
-            );
-        }
-
-
-        /*
-         * Local role fallback.
-         */
-
-        const user =
-            ADMIN.getUser();
-
-
-        if (
-            user &&
-            ADMIN.isAdmin(
-                user
-            )
-        ) {
-
-            ADMIN.state.authenticated =
-                true;
-
-            ADMIN.state.admin =
-                user;
-
-            return true;
-        }
-
+    if (!user) {
 
         ADMIN.redirectLogin();
 
         return false;
-    };
+    }
 
 
-    /* ========================================================
-       VERIFY ADMIN ROLE
-       ======================================================== */
-
-    ADMIN.verifyRole = async function (
-        user
-    ) {
-
-        if (!user) {
-            return false;
-        }
+    const allowed =
+        await ADMIN.verifyRole(
+            user
+        );
 
 
-        /*
-         * Local role first.
-         */
+    if (!allowed) {
 
-        if (
-            ADMIN.isAdmin(
-                user
-            )
-        ) {
-            return true;
-        }
-
-
-        /*
-         * Firestore role verification.
-         */
-
-        try {
-
-            if (
-                window.firebase &&
-                typeof firebase.firestore ===
-                "function"
-            ) {
-
-                const firestore =
-                    firebase.firestore();
-
-
-                const document =
-                    await firestore
-                        .collection(
-                            "users"
-                        )
-                        .doc(
-                            user.uid
-                        )
-                        .get();
-
-
-                if (
-                    document.exists
-                ) {
-
-                    const data =
-                        document.data() ||
-                        {};
-
-
-                    const role =
-                        String(
-                            data.role ||
-                            data.userRole ||
-                            ""
-                        ).toLowerCase();
-
-
-                    return (
-                        role === "admin" ||
-                        role === "superadmin" ||
-                        role === "super_admin"
-                    );
-                }
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Firestore role verification failed:",
-                error
-            );
-        }
-
-
-        /*
-         * Realtime Database role verification.
-         */
-
-        try {
-
-            if (
-                window.firebase &&
-                typeof firebase.database ===
-                "function"
-            ) {
-
-                const snapshot =
-                    await firebase.database()
-                        .ref(
-                            "users/" +
-                            user.uid
-                        )
-                        .once(
-                            "value"
-                        );
-
-
-                const data =
-                    snapshot.val() ||
-                    {};
-
-
-                const role =
-                    String(
-                        data.role ||
-                        data.userRole ||
-                        ""
-                    ).toLowerCase();
-
-
-                return (
-                    role === "admin" ||
-                    role === "superadmin" ||
-                    role === "super_admin"
-                );
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "RTDB role verification failed:",
-                error
-            );
-        }
-
+        ADMIN.denyAccess();
 
         return false;
-    };
+    }
 
 
-    /* ========================================================
-       REDIRECT
-       ======================================================== */
-
-    ADMIN.redirectLogin = function () {
-
-        const current =
-            window.location.pathname;
+    ADMIN.state.authenticated =
+        true;
 
 
-        if (
-            current.endsWith(
-                "login.html"
-            )
-        ) {
-            return;
-        }
+    ADMIN.state.admin =
+        user;
 
 
-        window.location.replace(
-            "login.html"
-        );
-    };
+    return true;
+};
 
 
-    ADMIN.denyAccess = function () {
+/* ============================================================
+   WAIT FOR AUTH USER
+============================================================ */
 
-        try {
+ADMIN.waitForAuthUser = function () {
 
-            localStorage.removeItem(
-                "riderx_admin_session"
-            );
+    return new Promise(
+        async function (resolve) {
 
-        } catch (error) {
-            /* ignore */
-        }
-
-
-        document.body.innerHTML =
-            `
-            <div class="riderx-access-denied">
-
-                <div class="access-denied-card">
-
-                    <div class="access-denied-icon">
-                        🔒
-                    </div>
-
-                    <h1>
-                        Access Denied
-                    </h1>
-
-                    <p>
-                        You do not have permission
-                        to access the RiderX admin panel.
-                    </p>
-
-                    <button
-                        type="button"
-                        id="riderx-admin-login"
-                    >
-                        Go to Login
-                    </button>
-
-                </div>
-
-            </div>
-            `;
+            const services =
+                await ensureFirebase();
 
 
-        const button =
-            document.getElementById(
-                "riderx-admin-login"
-            );
-
-
-        if (button) {
-
-            button.addEventListener(
-                "click",
-                function () {
-
-                    ADMIN.redirectLogin();
-                }
-            );
-        }
-    };
-
-
-    /* ========================================================
-       ADMIN PROFILE
-       ======================================================== */
-
-    ADMIN.renderProfile = function () {
-
-        const user =
-            ADMIN.state.admin ||
-            ADMIN.getUser();
-
-
-        if (!user) {
-            return;
-        }
-
-
-        const name =
-            user.displayName ||
-            user.name ||
-            "Admin";
-
-
-        const email =
-            user.email ||
-            "";
-
-
-        document
-            .querySelectorAll(
-                "[data-admin-name]"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
-
-                    element.textContent =
-                        name;
-                }
-            );
-
-
-        document
-            .querySelectorAll(
-                "[data-admin-email]"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
-
-                    element.textContent =
-                        email;
-                }
-            );
-
-
-        document
-            .querySelectorAll(
-                "[data-admin-avatar]"
-            )
-            .forEach(
-                function (
-                    element
-                ) {
-
-                    if (
-                        user.photoURL
-                    ) {
-
-                        element.src =
-                            user.photoURL;
-                    }
-
-                }
-            );
-    };
-
-
-    /* ========================================================
-       NAVIGATION
-       ======================================================== */
-
-    ADMIN.setupNavigation = function () {
-
-        document.addEventListener(
-            "click",
-            function (
-                event
+            if (
+                !services ||
+                !auth
             ) {
 
-                const link =
-                    event.target.closest(
-                        "[data-admin-link]"
-                    );
+                resolve(
+                    null
+                );
 
-
-                if (!link) {
-                    return;
-                }
-
-
-                const target =
-                    link.dataset
-                        .adminLink;
-
-
-                if (!target) {
-                    return;
-                }
-
-
-                event.preventDefault();
-
-
-                window.location.href =
-                    target;
-            }
-        );
-
-
-        /*
-         * Active navigation.
-         */
-
-        const current =
-            ADMIN.getPage();
-
-
-        document
-            .querySelectorAll(
-                "[data-admin-link]"
-            )
-            .forEach(
-                function (
-                    link
-                ) {
-
-                    const target =
-                        (
-                            link.dataset
-                                .adminLink ||
-                            ""
-                        )
-                            .split("/")
-                            .pop()
-                            .toLowerCase();
-
-
-                    if (
-                        target ===
-                        current
-                    ) {
-
-                        link.classList.add(
-                            "active"
-                        );
-
-                    } else {
-
-                        link.classList.remove(
-                            "active"
-                        );
-                    }
-                }
-            );
-    };
-
-
-    /* ========================================================
-       MOBILE MENU
-       ======================================================== */
-
-    ADMIN.setupMenu = function () {
-
-        document.addEventListener(
-            "click",
-            function (
-                event
-            ) {
-
-                const open =
-                    event.target.closest(
-                        "[data-admin-menu-open]"
-                    );
-
-
-                if (open) {
-
-                    event.preventDefault();
-
-                    document.body.classList.add(
-                        "admin-menu-open"
-                    );
-
-                    return;
-                }
-
-
-                const close =
-                    event.target.closest(
-                        "[data-admin-menu-close]"
-                    );
-
-
-                if (close) {
-
-                    event.preventDefault();
-
-                    document.body.classList.remove(
-                        "admin-menu-open"
-                    );
-
-                    return;
-                }
-
-
-                const overlay =
-                    event.target.closest(
-                        ".admin-sidebar-overlay"
-                    );
-
-
-                if (overlay) {
-
-                    document.body.classList.remove(
-                        "admin-menu-open"
-                    );
-                }
-            }
-        );
-    };
-
-
-    /* ========================================================
-       ADMIN NOTIFICATIONS
-       ======================================================== */
-
-    ADMIN.startNotifications =
-        function () {
-
-            const user =
-                ADMIN.state.admin ||
-                ADMIN.getUser();
-
-
-            if (!user) {
-                return;
-            }
-
-
-            const uid =
-                user.uid ||
-                user.id;
-
-
-            if (!uid) {
                 return;
             }
 
 
             /*
-             * Avoid duplicate listener.
+             * If Firebase already knows the user,
+             * use it immediately.
              */
 
             if (
-                ADMIN.state.notificationListener
+                auth.currentUser
             ) {
 
-                try {
+                resolve(
+                    auth.currentUser
+                );
 
-                    ADMIN.state
-                        .notificationListener
-                        .off();
-
-                } catch (error) {
-                    /* ignore */
-                }
-            }
-
-
-            const database =
-                (
-                    window.firebase &&
-                    typeof firebase.database ===
-                    "function"
-                )
-                    ? firebase.database()
-                    : null;
-
-
-            if (!database) {
                 return;
             }
 
 
-            const reference =
-                database.ref(
-                    "adminNotifications"
-                );
+            let finished =
+                false;
 
 
-            const callback =
+            let unsubscribe =
+                null;
+
+
+            const finish =
                 function (
-                    snapshot
+                    user
                 ) {
 
-                    let count =
-                        0;
+                    if (finished) {
+
+                        return;
+                    }
 
 
-                    snapshot.forEach(
-                        function (
-                            child
-                        ) {
-
-                            const data =
-                                child.val() ||
-                                {};
+                    finished =
+                        true;
 
 
-                            if (
-                                data.read !==
-                                true
-                            ) {
+                    if (
+                        typeof unsubscribe ===
+                        "function"
+                    ) {
 
-                                count++;
-                            }
-                        }
-                    );
+                        unsubscribe();
+                    }
 
 
-                    ADMIN.state.notificationCount =
-                        count;
-
-
-                    ADMIN.renderNotificationCount(
-                        count
+                    resolve(
+                        user ||
+                        null
                     );
                 };
 
 
-            reference.on(
-                "value",
-                callback
-            );
+            try {
+
+                const {
+                    onAuthStateChanged
+                } = await import(
+                    "../firebase/firebase-config.js"
+                );
 
 
-            ADMIN.state.notificationListener =
-                reference;
-        };
+                unsubscribe =
+                    onAuthStateChanged(
+                        auth,
+                        function (
+                            user
+                        ) {
+
+                            finish(
+                                user
+                            );
+                        }
+                    );
 
 
-    ADMIN.renderNotificationCount =
+                /*
+                 * Safety timeout.
+                 * This prevents a broken auth listener
+                 * from leaving the admin page frozen forever.
+                 */
+
+                setTimeout(
+                    function () {
+
+                        finish(
+                            auth.currentUser ||
+                            null
+                        );
+
+                    },
+                    10000
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "RiderX admin auth wait failed:",
+                    error
+                );
+
+
+                finish(
+                    null
+                );
+            }
+        }
+    );
+};
+
+
+/* ============================================================
+   REDIRECT TO LOGIN
+============================================================ */
+
+ADMIN.redirectLogin = function () {
+
+    if (
+        ADMIN.isLoginPage()
+    ) {
+
+        return;
+    }
+
+
+    window.location.replace(
+        "login.html"
+    );
+};
+
+
+/* ============================================================
+   FIREBASE ERROR SCREEN
+============================================================ */
+
+ADMIN.showFirebaseError = function () {
+
+    if (!document.body) {
+
+        return;
+    }
+
+
+    document.body.innerHTML =
+        `
+        <div class="riderx-access-denied">
+
+            <div class="access-denied-card">
+
+                <div class="access-denied-icon">
+                    ⚠️
+                </div>
+
+                <h1>
+                    RiderX System Error
+                </h1>
+
+                <p>
+                    Firebase services could not be loaded.
+                    Please refresh the page and try again.
+                </p>
+
+                <button
+                    type="button"
+                    id="riderx-admin-retry"
+                >
+                    Retry
+                </button>
+
+                <button
+                    type="button"
+                    id="riderx-admin-login"
+                >
+                    Go to Login
+                </button>
+
+            </div>
+
+        </div>
+        `;
+
+
+    const retry =
+        document.getElementById(
+            "riderx-admin-retry"
+        );
+
+
+    if (retry) {
+
+        retry.addEventListener(
+            "click",
+            function () {
+
+                window.location.reload();
+
+            }
+        );
+    }
+
+
+    const login =
+        document.getElementById(
+            "riderx-admin-login"
+        );
+
+
+    if (login) {
+
+        login.addEventListener(
+            "click",
+            function () {
+
+                ADMIN.redirectLogin();
+
+            }
+        );
+    }
+};
+
+
+/* ============================================================
+   ACCESS DENIED
+============================================================ */
+
+ADMIN.denyAccess = function () {
+
+    ADMIN.state.authenticated =
+        false;
+
+
+    ADMIN.state.admin =
+        null;
+
+
+    ADMIN.state.adminProfile =
+        null;
+
+
+    try {
+
+        localStorage.removeItem(
+            "riderx_admin_session"
+        );
+
+    } catch (error) {
+        /* Ignore local storage errors. */
+    }
+
+
+    if (!document.body) {
+
+        ADMIN.redirectLogin();
+
+        return;
+    }
+
+
+    document.body.innerHTML =
+        `
+        <div class="riderx-access-denied">
+
+            <div class="access-denied-card">
+
+                <div class="access-denied-icon">
+                    🔒
+                </div>
+
+                <h1>
+                    Access Denied
+                </h1>
+
+                <p>
+                    You do not have permission
+                    to access the RiderX admin panel.
+                </p>
+
+                <button
+                    type="button"
+                    id="riderx-admin-login"
+                >
+                    Go to Login
+                </button>
+
+            </div>
+
+        </div>
+        `;
+
+
+    const button =
+        document.getElementById(
+            "riderx-admin-login"
+        );
+
+
+    if (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                ADMIN.redirectLogin();
+
+            }
+        );
+    }
+};
+
+
+/* ============================================================
+   ADMIN PROFILE
+============================================================ */
+
+ADMIN.renderProfile = function () {
+
+    const user =
+        ADMIN.state.admin ||
+        ADMIN.getUser();
+
+
+    const profile =
+        ADMIN.state.adminProfile ||
+        {};
+
+
+    if (!user) {
+
+        return;
+    }
+
+
+    const name =
+        profile.displayName ||
+        profile.fullName ||
+        profile.name ||
+        user.displayName ||
+        "Admin";
+
+
+    const email =
+        profile.email ||
+        user.email ||
+        "";
+
+
+    const photo =
+        profile.photoURL ||
+        profile.profileImage ||
+        user.photoURL ||
+        "";
+
+
+    document
+        .querySelectorAll(
+            "[data-admin-name]"
+        )
+        .forEach(
+            function (
+                element
+            ) {
+
+                element.textContent =
+                    name;
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            "[data-admin-email]"
+        )
+        .forEach(
+            function (
+                element
+            ) {
+
+                element.textContent =
+                    email;
+            }
+        );
+
+
+    document
+        .querySelectorAll(
+            "[data-admin-avatar]"
+        )
+        .forEach(
+            function (
+                element
+            ) {
+
+                if (photo) {
+
+                    element.src =
+                        photo;
+                }
+            }
+        );
+};
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+ADMIN.setupNavigation = function () {
+
+    if (
+        ADMIN.state.navigationReady
+    ) {
+
+        return;
+    }
+
+
+    ADMIN.state.navigationReady =
+        true;
+
+
+    document.addEventListener(
+        "click",
         function (
-            count
+            event
         ) {
 
-            document
-                .querySelectorAll(
-                    "[data-admin-notification-count]"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
-
-                        element.textContent =
-                            count > 99
-                                ? "99+"
-                                : count;
-
-                        element.hidden =
-                            count === 0;
-                    }
+            const link =
+                event.target.closest(
+                    "[data-admin-link]"
                 );
 
 
-            document
-                .querySelectorAll(
-                    ".admin-notification-badge"
-                )
-                .forEach(
-                    function (
-                        element
-                    ) {
+            if (!link) {
 
-                        element.textContent =
-                            count > 99
-                                ? "99+"
-                                : count;
-
-                        element.classList.toggle(
-                            "hidden",
-                            count === 0
-                        );
-                    }
-                );
-        };
-
-
-    /* ========================================================
-       MARK ADMIN NOTIFICATIONS READ
-       ======================================================== */
-
-    ADMIN.markNotificationsRead =
-        async function () {
-
-            const database =
-                (
-                    window.firebase &&
-                    typeof firebase.database ===
-                    "function"
-                )
-                    ? firebase.database()
-                    : null;
-
-
-            if (!database) {
                 return;
             }
 
 
-            try {
-
-                const snapshot =
-                    await database
-                        .ref(
-                            "adminNotifications"
-                        )
-                        .once(
-                            "value"
-                        );
+            const target =
+                link.dataset.adminLink;
 
 
-                const updates =
-                    {};
+            if (!target) {
+
+                return;
+            }
+
+
+            event.preventDefault();
+
+
+            window.location.href =
+                target;
+        }
+    );
+
+
+    const current =
+        ADMIN.getPage();
+
+
+    document
+        .querySelectorAll(
+            "[data-admin-link]"
+        )
+        .forEach(
+            function (
+                link
+            ) {
+
+                const target =
+                    (
+                        link.dataset.adminLink ||
+                        ""
+                    )
+                        .split("/")
+                        .pop()
+                        .toLowerCase();
+
+
+                link.classList.toggle(
+                    "active",
+                    target === current
+                );
+            }
+        );
+};
+
+
+/* ============================================================
+   MOBILE MENU
+============================================================ */
+
+ADMIN.setupMenu = function () {
+
+    if (
+        ADMIN.state.menuReady
+    ) {
+
+        return;
+    }
+
+
+    ADMIN.state.menuReady =
+        true;
+
+
+    document.addEventListener(
+        "click",
+        function (
+            event
+        ) {
+
+            const open =
+                event.target.closest(
+                    "[data-admin-menu-open]"
+                );
+
+
+            if (open) {
+
+                event.preventDefault();
+
+                document.body.classList.add(
+                    "admin-menu-open"
+                );
+
+                return;
+            }
+
+
+            const close =
+                event.target.closest(
+                    "[data-admin-menu-close]"
+                );
+
+
+            if (close) {
+
+                event.preventDefault();
+
+                document.body.classList.remove(
+                    "admin-menu-open"
+                );
+
+                return;
+            }
+
+
+            const overlay =
+                event.target.closest(
+                    ".admin-sidebar-overlay"
+                );
+
+
+            if (overlay) {
+
+                document.body.classList.remove(
+                    "admin-menu-open"
+                );
+            }
+        }
+    );
+};
+
+
+/* ============================================================
+   ADMIN NOTIFICATIONS
+   ------------------------------------------------------------
+   Uses Realtime Database modular API.
+
+   Expected location:
+       adminNotifications/{notificationId}
+
+   Expected read field:
+       read: true/false
+============================================================ */
+
+ADMIN.startNotifications = async function () {
+
+    if (
+        ADMIN.state.notificationListener
+    ) {
+
+        return;
+    }
+
+
+    if (!realtimeDb) {
+
+        return;
+    }
+
+
+    try {
+
+        const {
+            ref,
+            onValue
+        } = await import(
+            "../firebase/firebase-config.js"
+        );
+
+
+        const reference =
+            ref(
+                realtimeDb,
+                "adminNotifications"
+            );
+
+
+        const callback =
+            function (
+                snapshot
+            ) {
+
+                let count =
+                    0;
 
 
                 snapshot.forEach(
@@ -1017,356 +1296,589 @@
 
 
                         if (
-                            data.read !==
-                            true
+                            data.read !== true &&
+                            data.isRead !== true
                         ) {
 
-                            updates[
-                                child.key +
-                                "/read"
-                            ] =
-                                true;
+                            count++;
                         }
                     }
                 );
-
-
-                if (
-                    Object.keys(
-                        updates
-                    ).length
-                ) {
-
-                    await database
-                        .ref(
-                            "adminNotifications"
-                        )
-                        .update(
-                            updates
-                        );
-                }
 
 
                 ADMIN.state.notificationCount =
-                    0;
+                    count;
 
 
                 ADMIN.renderNotificationCount(
-                    0
+                    count
+                );
+            };
+
+
+        onValue(
+            reference,
+            callback
+        );
+
+
+        ADMIN.state.notificationReference =
+            reference;
+
+
+        ADMIN.state.notificationListener =
+            callback;
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX admin notification listener failed:",
+            error
+        );
+    }
+};
+
+
+/* ============================================================
+   STOP ADMIN NOTIFICATIONS
+============================================================ */
+
+ADMIN.stopNotifications = async function () {
+
+    if (
+        !realtimeDb ||
+        !ADMIN.state.notificationReference ||
+        !ADMIN.state.notificationListener
+    ) {
+
+        return;
+    }
+
+
+    try {
+
+        const {
+            off
+        } = await import(
+            "../firebase/firebase-config.js"
+        );
+
+
+        off(
+            ADMIN.state.notificationReference,
+            "value",
+            ADMIN.state.notificationListener
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "RiderX admin notification listener cleanup failed:",
+            error
+        );
+    }
+
+
+    ADMIN.state.notificationReference =
+        null;
+
+
+    ADMIN.state.notificationListener =
+        null;
+};
+
+
+/* ============================================================
+   RENDER NOTIFICATION COUNT
+============================================================ */
+
+ADMIN.renderNotificationCount =
+    function (
+        count
+    ) {
+
+        const safeCount =
+            Math.max(
+                0,
+                Number(
+                    count
+                ) || 0
+            );
+
+
+        document
+            .querySelectorAll(
+                "[data-admin-notification-count]"
+            )
+            .forEach(
+                function (
+                    element
+                ) {
+
+                    element.textContent =
+                        safeCount > 99
+                            ? "99+"
+                            : String(
+                                safeCount
+                            );
+
+
+                    element.hidden =
+                        safeCount === 0;
+                }
+            );
+
+
+        document
+            .querySelectorAll(
+                ".admin-notification-badge"
+            )
+            .forEach(
+                function (
+                    element
+                ) {
+
+                    element.textContent =
+                        safeCount > 99
+                            ? "99+"
+                            : String(
+                                safeCount
+                            );
+
+
+                    element.classList.toggle(
+                        "hidden",
+                        safeCount === 0
+                    );
+                }
+            );
+    };
+
+
+/* ============================================================
+   MARK ADMIN NOTIFICATIONS READ
+============================================================ */
+
+ADMIN.markNotificationsRead =
+    async function () {
+
+        if (!realtimeDb) {
+
+            return false;
+        }
+
+
+        try {
+
+            const {
+                ref,
+                get,
+                update
+            } = await import(
+                "../firebase/firebase-config.js"
+            );
+
+
+            const reference =
+                ref(
+                    realtimeDb,
+                    "adminNotifications"
                 );
 
-            } catch (error) {
 
-                console.warn(
-                    "Admin notification read error:",
-                    error
+            const snapshot =
+                await get(
+                    reference
                 );
-            }
-        };
 
 
-    /* ========================================================
-       GLOBAL REFRESH
-       ======================================================== */
+            const updates =
+                {};
 
-    ADMIN.refresh =
-        async function () {
 
-            const jobs = [];
+            snapshot.forEach(
+                function (
+                    child
+                ) {
+
+                    const data =
+                        child.val() ||
+                        {};
+
+
+                    if (
+                        data.read !== true
+                    ) {
+
+                        updates[
+                            child.key +
+                            "/read"
+                        ] =
+                            true;
+                    }
+                }
+            );
 
 
             if (
-                RX.adminRiders &&
-                typeof RX.adminRiders.load ===
-                "function"
+                Object.keys(
+                    updates
+                ).length
             ) {
 
-                jobs.push(
+                await update(
+                    reference,
+                    updates
+                );
+            }
+
+
+            ADMIN.state.notificationCount =
+                0;
+
+
+            ADMIN.renderNotificationCount(
+                0
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX admin notification update failed:",
+                error
+            );
+
+
+            return false;
+        }
+    };
+
+
+/* ============================================================
+   GLOBAL REFRESH
+============================================================ */
+
+ADMIN.refresh =
+    async function () {
+
+        const jobs =
+            [];
+
+
+        if (
+            RX.adminRiders &&
+            typeof RX.adminRiders.load ===
+            "function"
+        ) {
+
+            jobs.push(
+                Promise.resolve(
                     RX.adminRiders.load()
-                );
-            }
-
-
-            if (
-                RX.adminSupports &&
-                typeof RX.adminSupports.load ===
-                "function"
-            ) {
-
-                jobs.push(
-                    RX.adminSupports.load()
-                );
-            }
-
-
-            if (
-                RX.adminCustomers &&
-                typeof RX.adminCustomers.load ===
-                "function"
-            ) {
-
-                jobs.push(
-                    RX.adminCustomers.load()
-                );
-            }
-
-
-            if (
-                RX.admin &&
-                typeof RX.admin.loadDashboard ===
-                "function"
-            ) {
-
-                jobs.push(
-                    RX.admin.loadDashboard()
-                );
-            }
-
-
-            if (jobs.length) {
-
-                await Promise.allSettled(
-                    jobs
-                );
-            }
-
-
-            window.dispatchEvent(
-                new CustomEvent(
-                    "riderx-admin-refresh"
                 )
             );
-        };
+        }
 
 
-    /* ========================================================
-       DASHBOARD HOOK
-       ======================================================== */
+        if (
+            RX.adminSupports &&
+            typeof RX.adminSupports.load ===
+            "function"
+        ) {
 
-    ADMIN.loadDashboard =
-        async function () {
-
-            /*
-             * Dashboard module can provide
-             * its own implementation.
-             */
-
-            if (
-                RX.dashboard &&
-                typeof RX.dashboard.load ===
-                "function"
-            ) {
-
-                return RX.dashboard.load();
-            }
-
-
-            /*
-             * Basic dashboard counters.
-             */
-
-            const database =
-                (
-                    window.firebase &&
-                    typeof firebase.database ===
-                    "function"
+            jobs.push(
+                Promise.resolve(
+                    RX.adminSupports.load()
                 )
-                    ? firebase.database()
-                    : null;
+            );
+        }
 
 
-            if (!database) {
-                return;
-            }
+        if (
+            RX.adminCustomers &&
+            typeof RX.adminCustomers.load ===
+            "function"
+        ) {
+
+            jobs.push(
+                Promise.resolve(
+                    RX.adminCustomers.load()
+                )
+            );
+        }
 
 
-            try {
+        /*
+         * Do not call RX.admin.loadDashboard()
+         * here because RX.admin is this controller
+         * itself and that would create a recursive
+         * refresh loop.
+         */
 
-                const [
-                    usersSnapshot,
-                    ridesSnapshot
-                ] =
-                    await Promise.all([
-                        database
-                            .ref(
-                                "users"
-                            )
-                            .once(
-                                "value"
-                            ),
+        if (
+            typeof ADMIN.loadDashboard ===
+            "function"
+        ) {
 
-                        database
-                            .ref(
-                                "rides"
-                            )
-                            .once(
-                                "value"
-                            )
-                    ]);
+            jobs.push(
+                Promise.resolve(
+                    ADMIN.loadDashboard()
+                )
+            );
+        }
 
 
-                const users =
-                    usersSnapshot.val() ||
-                    {};
+        if (jobs.length) {
+
+            await Promise.allSettled(
+                jobs
+            );
+        }
 
 
-                const rides =
-                    ridesSnapshot.val() ||
-                    {};
+        window.dispatchEvent(
+            new CustomEvent(
+                "riderx-admin-refresh"
+            )
+        );
+    };
 
 
-                let customers =
-                    0;
+/* ============================================================
+   DASHBOARD COUNTERS
+   ------------------------------------------------------------
+   Uses Firestore as the canonical source.
 
-                let riders =
-                    0;
+   Collections:
+       users
+       riders
+       rides
+============================================================ */
 
-                let onlineRiders =
-                    0;
+ADMIN.loadDashboard =
+    async function () {
 
+        if (!db) {
 
-                Object.keys(
-                    users
-                ).forEach(
-                    function (
-                        id
-                    ) {
-
-                        const user =
-                            users[id] ||
-                            {};
+            return null;
+        }
 
 
-                        const role =
-                            String(
-                                user.role ||
-                                user.userRole ||
-                                ""
-                            ).toLowerCase();
+        try {
+
+            const {
+                collection,
+                getDocs,
+                query,
+                where
+            } = await import(
+                "../firebase/firebase-config.js"
+            );
 
 
-                        if (
-                            role ===
-                            "customer"
-                        ) {
-
-                            customers++;
-                        }
-
-
-                        if (
-                            role ===
-                            "rider"
-                        ) {
-
-                            riders++;
-
-
-                            if (
-                                user.online ===
-                                true
-                            ) {
-
-                                onlineRiders++;
-                            }
-                        }
-                    }
+            const usersReference =
+                collection(
+                    db,
+                    "users"
                 );
 
 
-                let totalRides =
-                    0;
-
-                let activeRides =
-                    0;
-
-                let completedRides =
-                    0;
-
-
-                Object.keys(
-                    rides
-                ).forEach(
-                    function (
-                        id
-                    ) {
-
-                        const ride =
-                            rides[id] ||
-                            {};
-
-
-                        totalRides++;
-
-
-                        const status =
-                            String(
-                                ride.status ||
-                                ""
-                            ).toLowerCase();
-
-
-                        if (
-                            [
-                                "searching",
-                                "requested",
-                                "accepted",
-                                "arriving",
-                                "started",
-                                "ongoing",
-                                "in_progress"
-                            ].includes(
-                                status
-                            )
-                        ) {
-
-                            activeRides++;
-                        }
-
-
-                        if (
-                            [
-                                "completed",
-                                "complete",
-                                "finished"
-                            ].includes(
-                                status
-                            )
-                        ) {
-
-                            completedRides++;
-                        }
-                    }
+            const ridersReference =
+                collection(
+                    db,
+                    "riders"
                 );
 
 
-                const counters = {
-
-                    customers:
-                        customers,
-
-                    riders:
-                        riders,
-
-                    onlineRiders:
-                        onlineRiders,
-
-                    totalRides:
-                        totalRides,
-
-                    activeRides:
-                        activeRides,
-
-                    completedRides:
-                        completedRides
-                };
+            const ridesReference =
+                collection(
+                    db,
+                    "rides"
+                );
 
 
-                Object.keys(
-                    counters
-                ).forEach(
+            const [
+                usersSnapshot,
+                ridersSnapshot,
+                ridesSnapshot
+            ] =
+                await Promise.all([
+                    getDocs(
+                        usersReference
+                    ),
+
+                    getDocs(
+                        ridersReference
+                    ),
+
+                    getDocs(
+                        ridesReference
+                    )
+                ]);
+
+
+            let customers =
+                0;
+
+
+            let riders =
+                0;
+
+
+            let onlineRiders =
+                0;
+
+
+            usersSnapshot.forEach(
+                function (
+                    document
+                ) {
+
+                    const user =
+                        document.data() ||
+                        {};
+
+
+                    const role =
+                        String(
+                            user.role ||
+                            user.userRole ||
+                            user.accountType ||
+                            ""
+                        )
+                            .toLowerCase();
+
+
+                    if (
+                        role === "customer" ||
+                        role === "user"
+                    ) {
+
+                        customers++;
+                    }
+                }
+            );
+
+
+            riders =
+                ridersSnapshot.size;
+
+
+            ridersSnapshot.forEach(
+                function (
+                    document
+                ) {
+
+                    const rider =
+                        document.data() ||
+                        {};
+
+
+                    if (
+                        rider.online === true ||
+                        rider.isOnline === true
+                    ) {
+
+                        onlineRiders++;
+                    }
+                }
+            );
+
+
+            let totalRides =
+                ridesSnapshot.size;
+
+
+            let activeRides =
+                0;
+
+
+            let completedRides =
+                0;
+
+
+            ridesSnapshot.forEach(
+                function (
+                    document
+                ) {
+
+                    const ride =
+                        document.data() ||
+                        {};
+
+
+                    const status =
+                        String(
+                            ride.status ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
+
+
+                    if (
+                        [
+                            "requested",
+                            "searching",
+                            "pending",
+                            "accepted",
+                            "arriving",
+                            "started",
+                            "ongoing",
+                            "in_progress",
+                            "in-progress"
+                        ].includes(
+                            status
+                        )
+                    ) {
+
+                        activeRides++;
+                    }
+
+
+                    if (
+                        [
+                            "completed",
+                            "complete",
+                            "finished"
+                        ].includes(
+                            status
+                        )
+                    ) {
+
+                        completedRides++;
+                    }
+                }
+            );
+
+
+            const counters = {
+
+                customers,
+
+                riders,
+
+                onlineRiders,
+
+                totalRides,
+
+                activeRides,
+
+                completedRides
+            };
+
+
+            Object.entries(
+                counters
+            )
+                .forEach(
                     function (
-                        key
+                        [
+                            key,
+                            value
+                        ]
                     ) {
 
                         document
@@ -1381,64 +1893,60 @@
                                 ) {
 
                                     element.textContent =
-                                        counters[key];
+                                        String(
+                                            value
+                                        );
                                 }
                             );
                     }
                 );
 
 
-                return counters;
-
-            } catch (error) {
-
-                console.warn(
-                    "Admin dashboard load failed:",
-                    error
-                );
-            }
-        };
-
-
-    /* ========================================================
-       LOGOUT
-       ======================================================== */
-
-    ADMIN.logout = async function () {
-
-        try {
-
-            /*
-             * Remove local admin session.
-             */
-
-            localStorage.removeItem(
-                "riderx_admin_session"
-            );
-
-            localStorage.removeItem(
-                "riderx_role"
-            );
-
-
-            /*
-             * Firebase logout.
-             */
-
-            if (
-                window.firebase &&
-                firebase.auth
-            ) {
-
-                await firebase.auth()
-                    .signOut();
-            }
-
+            return counters;
 
         } catch (error) {
 
             console.warn(
-                "Admin logout error:",
+                "RiderX admin dashboard load failed:",
+                error
+            );
+
+
+            return null;
+        }
+    };
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+ADMIN.logout =
+    async function () {
+
+        try {
+
+            await ADMIN.stopNotifications();
+
+
+            if (auth) {
+
+                const {
+                    signOut
+                } = await import(
+                    "../firebase/firebase-config.js"
+                );
+
+
+                await signOut(
+                    auth
+                );
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "RiderX admin logout error:",
                 error
             );
 
@@ -1447,8 +1955,28 @@
             ADMIN.state.authenticated =
                 false;
 
+
             ADMIN.state.admin =
                 null;
+
+
+            ADMIN.state.adminProfile =
+                null;
+
+
+            try {
+
+                localStorage.removeItem(
+                    "riderx_admin_session"
+                );
+
+                localStorage.removeItem(
+                    "riderx_role"
+                );
+
+            } catch (error) {
+                /* Ignore local-storage errors. */
+            }
 
 
             window.location.replace(
@@ -1458,199 +1986,280 @@
     };
 
 
-    /* ========================================================
-       LOGOUT EVENTS
-       ======================================================== */
+/* ============================================================
+   LOGOUT EVENTS
+============================================================ */
 
-    ADMIN.setupLogout =
-        function () {
+ADMIN.setupLogout =
+    function () {
 
-            document.addEventListener(
-                "click",
-                function (
-                    event
-                ) {
+        if (
+            ADMIN.state.logoutReady
+        ) {
 
-                    const button =
-                        event.target.closest(
-                            "[data-admin-logout]"
-                        );
+            return;
+        }
 
 
-                    if (!button) {
-                        return;
-                    }
+        ADMIN.state.logoutReady =
+            true;
 
 
-                    event.preventDefault();
+        document.addEventListener(
+            "click",
+            function (
+                event
+            ) {
+
+                const button =
+                    event.target.closest(
+                        "[data-admin-logout]"
+                    );
 
 
-                    ADMIN.logout();
-                }
-            );
-        };
+                if (!button) {
 
-
-    /* ========================================================
-       AUTH STATE LISTENER
-       ======================================================== */
-
-    ADMIN.watchAuth =
-        function () {
-
-            try {
-
-                if (
-                    !window.firebase ||
-                    !firebase.auth
-                ) {
                     return;
                 }
 
 
-                ADMIN.state.authListener =
-                    firebase.auth()
-                        .onAuthStateChanged(
-                            async function (
+                event.preventDefault();
+
+
+                ADMIN.logout();
+            }
+        );
+    };
+
+
+/* ============================================================
+   AUTH STATE LISTENER
+============================================================ */
+
+ADMIN.watchAuth =
+    async function () {
+
+        if (
+            ADMIN.state.authListener
+        ) {
+
+            return;
+        }
+
+
+        if (!auth) {
+
+            return;
+        }
+
+
+        try {
+
+            const {
+                onAuthStateChanged
+            } = await import(
+                "../firebase/firebase-config.js"
+            );
+
+
+            ADMIN.state.authListener =
+                onAuthStateChanged(
+                    auth,
+                    async function (
+                        user
+                    ) {
+
+                        if (
+                            ADMIN.isLoginPage()
+                        ) {
+
+                            return;
+                        }
+
+
+                        if (!user) {
+
+                            ADMIN.state.authenticated =
+                                false;
+
+
+                            ADMIN.redirectLogin();
+
+                            return;
+                        }
+
+
+                        const allowed =
+                            await ADMIN.verifyRole(
                                 user
-                            ) {
-
-                                if (
-                                    ADMIN.isLoginPage()
-                                ) {
-
-                                    return;
-                                }
+                            );
 
 
-                                if (!user) {
+                        if (!allowed) {
 
-                                    ADMIN.redirectLogin();
+                            ADMIN.denyAccess();
 
-                                    return;
-                                }
-
-
-                                const allowed =
-                                    await ADMIN.verifyRole(
-                                        user
-                                    );
+                            return;
+                        }
 
 
-                                if (!allowed) {
-
-                                    ADMIN.denyAccess();
-
-                                    return;
-                                }
+                        ADMIN.state.authenticated =
+                            true;
 
 
-                                ADMIN.state.authenticated =
-                                    true;
-
-                                ADMIN.state.admin =
-                                    user;
+                        ADMIN.state.admin =
+                            user;
 
 
-                                ADMIN.renderProfile();
+                        ADMIN.renderProfile();
+                    }
+                );
 
-                            }
-                        );
+        } catch (error) {
+
+            console.warn(
+                "RiderX admin auth listener failed:",
+                error
+            );
+        }
+    };
+
+
+/* ============================================================
+   PAGE-SPECIFIC MODULES
+============================================================ */
+
+ADMIN.initModules =
+    function () {
+
+        if (
+            RX.adminRiders &&
+            typeof RX.adminRiders.init ===
+            "function"
+        ) {
+
+            try {
+
+                RX.adminRiders.init();
 
             } catch (error) {
 
                 console.warn(
-                    "Admin auth listener failed:",
+                    "RiderX admin riders module error:",
                     error
                 );
             }
-        };
+        }
 
 
-    /* ========================================================
-       PAGE SPECIFIC MODULES
-       ======================================================== */
-
-    ADMIN.initModules =
-        function () {
-
-            /*
-             * Riders
-             */
-
-            if (
-                RX.adminRiders &&
-                typeof RX.adminRiders.init ===
-                "function"
-            ) {
-
-                RX.adminRiders.init();
-            }
-
-
-            /*
-             * Supports
-             */
-
-            if (
-                RX.adminSupports &&
-                typeof RX.adminSupports.init ===
-                "function"
-            ) {
-
-                RX.adminSupports.init();
-            }
-
-
-            /*
-             * Customers
-             */
-
-            if (
-                RX.adminCustomers &&
-                typeof RX.adminCustomers.init ===
-                "function"
-            ) {
-
-                RX.adminCustomers.init();
-            }
-
-
-            /*
-             * Notifications
-             */
-
-            if (
-                RX.notifications &&
-                typeof RX.notifications.init ===
-                "function"
-            ) {
-
-                RX.notifications.init();
-            }
-        };
-
-
-    /* ========================================================
-       ADMIN LOGIN PAGE HELPERS
-       ======================================================== */
-
-    ADMIN.loginSuccess =
-        function (
-            user,
-            role
+        if (
+            RX.adminSupports &&
+            typeof RX.adminSupports.init ===
+            "function"
         ) {
 
-            user =
-                user || {};
+            try {
+
+                RX.adminSupports.init();
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX admin supports module error:",
+                    error
+                );
+            }
+        }
 
 
-            role =
-                String(
-                    role ||
-                    "admin"
-                ).toLowerCase();
+        if (
+            RX.adminCustomers &&
+            typeof RX.adminCustomers.init ===
+            "function"
+        ) {
 
+            try {
+
+                RX.adminCustomers.init();
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX admin customers module error:",
+                    error
+                );
+            }
+        }
+
+
+        if (
+            RX.notifications &&
+            typeof RX.notifications.init ===
+            "function"
+        ) {
+
+            try {
+
+                RX.notifications.init();
+
+            } catch (error) {
+
+                console.warn(
+                    "RiderX admin notifications module error:",
+                    error
+                );
+            }
+        }
+    };
+
+
+/* ============================================================
+   ADMIN LOGIN SUCCESS
+   ------------------------------------------------------------
+   This function only stores a convenience session.
+
+   IMPORTANT:
+   The real admin authority remains Firebase Auth +
+   Firestore users/{uid}.
+============================================================ */
+
+ADMIN.loginSuccess =
+    function (
+        user,
+        role
+    ) {
+
+        user =
+            user ||
+            {};
+
+
+        role =
+            String(
+                role ||
+                "admin"
+            )
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            !(
+                role === "admin" ||
+                role === "superadmin" ||
+                role === "super_admin"
+            )
+        ) {
+
+            console.warn(
+                "RiderX: loginSuccess rejected non-admin role."
+            );
+
+            return false;
+        }
+
+
+        try {
 
             localStorage.setItem(
                 "riderx_role",
@@ -1662,7 +2271,22 @@
                 "riderx_user",
                 JSON.stringify(
                     {
-                        ...user,
+                        uid:
+                            user.uid ||
+                            "",
+
+                        email:
+                            user.email ||
+                            "",
+
+                        displayName:
+                            user.displayName ||
+                            "",
+
+                        photoURL:
+                            user.photoURL ||
+                            "",
+
                         role:
                             role
                     }
@@ -1676,7 +2300,6 @@
                     {
                         uid:
                             user.uid ||
-                            user.id ||
                             "",
 
                         email:
@@ -1692,190 +2315,262 @@
                 )
             );
 
+        } catch (error) {
 
-            window.location.replace(
-                "dashboard.html"
+            console.warn(
+                "RiderX admin local session storage failed:",
+                error
             );
+        }
+
+
+        window.location.replace(
+            "dashboard.html"
+        );
+
+
+        return true;
     };
 
 
-    /* ========================================================
-       GLOBAL EVENTS
-       ======================================================== */
+/* ============================================================
+   GLOBAL EVENTS
+============================================================ */
 
-    ADMIN.setupGlobalEvents =
-        function () {
-
-            window.addEventListener(
-                "riderx-admin-notifications-open",
-                function () {
-
-                    ADMIN.markNotificationsRead();
-                }
-            );
-
-
-            window.addEventListener(
-                "riderx-admin-refresh-request",
-                function () {
-
-                    ADMIN.refresh();
-                }
-            );
-        };
-
-
-    /* ========================================================
-       INIT
-       ======================================================== */
-
-    ADMIN.init = async function () {
+ADMIN.setupGlobalEvents =
+    function () {
 
         if (
-            ADMIN.state.initialized
+            ADMIN.state.globalEventsReady
         ) {
+
             return;
         }
+
+
+        ADMIN.state.globalEventsReady =
+            true;
+
+
+        window.addEventListener(
+            "riderx-admin-notifications-open",
+            function () {
+
+                ADMIN.markNotificationsRead();
+
+            }
+        );
+
+
+        window.addEventListener(
+            "riderx-admin-refresh-request",
+            function () {
+
+                ADMIN.refresh();
+
+            }
+        );
+    };
+
+
+/* ============================================================
+   INITIALIZATION
+============================================================ */
+
+ADMIN.init =
+    async function () {
+
+        if (
+            ADMIN.state.initialized ||
+            ADMIN.state.initializing
+        ) {
+
+            return;
+        }
+
+
+        ADMIN.state.initializing =
+            true;
 
 
         ADMIN.state.page =
             ADMIN.getPage();
 
 
-        /*
-         * Login page does not need
-         * protected admin modules.
-         */
+        try {
 
-        if (
-            ADMIN.isLoginPage()
-        ) {
+            /*
+             * Login page:
+             * Firebase is not required for admin controller
+             * initialization itself.
+             */
+
+            if (
+                ADMIN.isLoginPage()
+            ) {
+
+                ADMIN.setupLogout();
+
+                ADMIN.setupGlobalEvents();
+
+
+                ADMIN.state.initialized =
+                    true;
+
+
+                return;
+            }
+
+
+            /*
+             * Load Firebase.
+             */
+
+            const services =
+                await ensureFirebase();
+
+
+            if (!services) {
+
+                ADMIN.showFirebaseError();
+
+                return;
+            }
+
+
+            /*
+             * Protect every admin page.
+             */
+
+            const allowed =
+                await ADMIN.guard();
+
+
+            if (!allowed) {
+
+                return;
+            }
+
+
+            ADMIN.setupNavigation();
+
+            ADMIN.setupMenu();
 
             ADMIN.setupLogout();
+
             ADMIN.setupGlobalEvents();
+
+            await ADMIN.watchAuth();
+
+            ADMIN.renderProfile();
+
+            await ADMIN.startNotifications();
+
+            ADMIN.initModules();
+
+
+            /*
+             * Dashboard page.
+             */
+
+            if (
+                ADMIN.state.page ===
+                "dashboard.html" ||
+                ADMIN.state.page ===
+                ""
+            ) {
+
+                await ADMIN.loadDashboard();
+            }
+
 
             ADMIN.state.initialized =
                 true;
 
-            return;
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "riderx-admin-ready"
+                )
+            );
+
+
+            console.info(
+                "RiderX admin controller initialized."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "RiderX admin initialization failed:",
+                error
+            );
+
+        } finally {
+
+            ADMIN.state.initializing =
+                false;
         }
+    };
 
 
-        /*
-         * Protect every other admin page.
-         */
+/* ============================================================
+   PUBLIC API
+============================================================ */
 
-        const allowed =
-            await ADMIN.guard();
+RX.adminGuard =
+    function () {
 
-
-        if (!allowed) {
-            return;
-        }
+        return ADMIN.guard();
+    };
 
 
-        ADMIN.setupNavigation();
+RX.adminLogout =
+    function () {
 
-        ADMIN.setupMenu();
-
-        ADMIN.setupLogout();
-
-        ADMIN.setupGlobalEvents();
-
-        ADMIN.watchAuth();
-
-        ADMIN.renderProfile();
-
-        ADMIN.startNotifications();
-
-        ADMIN.initModules();
+        return ADMIN.logout();
+    };
 
 
-        /*
-         * Dashboard only.
-         */
+RX.adminRefresh =
+    function () {
 
-        if (
-            ADMIN.state.page ===
-                "dashboard.html" ||
-            ADMIN.state.page ===
-                ""
-        ) {
-
-            await ADMIN.loadDashboard();
-        }
+        return ADMIN.refresh();
+    };
 
 
-        ADMIN.state.initialized =
-            true;
+RX.adminIsAdmin =
+    function () {
 
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "riderx-admin-ready"
-            )
-        );
-
-
-        console.log(
-            "RiderX admin.js loaded."
+        return ADMIN.isAdmin(
+            ADMIN.state.admin,
+            ADMIN.state.adminProfile
         );
     };
 
 
-    /* ========================================================
-       PUBLIC API
-       ======================================================== */
+/* ============================================================
+   AUTO START
+============================================================ */
 
-    RX.adminGuard =
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
         function () {
 
-            return ADMIN.guard();
-        };
+            ADMIN.init();
 
+        },
+        {
+            once: true
+        }
+    );
 
-    RX.adminLogout =
-        function () {
+} else {
 
-            return ADMIN.logout();
-        };
-
-
-    RX.adminRefresh =
-        function () {
-
-            return ADMIN.refresh();
-        };
-
-
-    RX.adminIsAdmin =
-        function () {
-
-            return ADMIN.isAdmin();
-        };
-
-
-    /* ========================================================
-       AUTO START
-       ======================================================== */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                ADMIN.init();
-
-            }
-        );
-
-    } else {
-
-        ADMIN.init();
-    }
-
-})();
+    ADMIN.init();
+           }
