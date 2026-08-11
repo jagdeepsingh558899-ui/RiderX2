@@ -35,7 +35,7 @@
 const FIREBASE_SDK_VERSION = "12.2.1";
 
 const FIREBASE_BASE_URL =
-    "https://www.gstatic.com/firebasejs/12.2.1";
+    `https://www.gstatic.com/firebasejs/${FIREBASE_SDK_VERSION}`;
 
 
 /* =========================================================
@@ -45,7 +45,7 @@ const FIREBASE_BASE_URL =
 import {
     initializeApp,
     getApps
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+} from `${FIREBASE_BASE_URL}/firebase-app.js`;
 
 
 /* =========================================================
@@ -66,7 +66,7 @@ import {
     updateProfile,
     deleteUser,
     sendEmailVerification
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+} from `${FIREBASE_BASE_URL}/firebase-auth.js`;
 
 
 /* =========================================================
@@ -95,7 +95,7 @@ import {
     arrayUnion,
     arrayRemove,
     increment
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+} from `${FIREBASE_BASE_URL}/firebase-firestore.js`;
 
 
 /* =========================================================
@@ -114,7 +114,7 @@ import {
     off,
     onDisconnect,
     serverTimestamp as databaseServerTimestamp
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+} from `${FIREBASE_BASE_URL}/firebase-database.js`;
 
 
 /* =========================================================
@@ -128,7 +128,7 @@ import {
     uploadBytesResumable,
     getDownloadURL,
     deleteObject
-} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-storage.js";
+} from `${FIREBASE_BASE_URL}/firebase-storage.js`;
 
 
 /* =========================================================
@@ -167,8 +167,8 @@ const firebaseConfig = Object.freeze({
 /* =========================================================
    FIREBASE APP INITIALIZATION
    ---------------------------------------------------------
-   Reuse an existing default app when available.
-   Otherwise initialize exactly one default app.
+   Reuse the existing default Firebase app if one already
+   exists. Otherwise initialize exactly one default app.
 
    IMPORTANT:
    No other RiderX file should call initializeApp().
@@ -178,7 +178,9 @@ let app = null;
 
 try {
 
-    const existingApps = getApps();
+    const existingApps =
+        getApps();
+
 
     app =
         existingApps.find(
@@ -356,7 +358,14 @@ const firebaseServices =
    FIREBASE READY STATE
 ========================================================= */
 
-const firebaseReady = true;
+const firebaseReady =
+    Boolean(
+        app &&
+        auth &&
+        db &&
+        realtimeDb &&
+        storage
+    );
 
 
 /* =========================================================
@@ -364,9 +373,15 @@ const firebaseReady = true;
 ========================================================= */
 
 const firebaseReadyPromise =
-    Promise.resolve(
-        firebaseServices
-    );
+    firebaseReady
+        ? Promise.resolve(
+            firebaseServices
+        )
+        : Promise.reject(
+            new Error(
+                "RiderX Firebase services are not ready."
+            )
+        );
 
 
 /* =========================================================
@@ -414,8 +429,8 @@ function getFirebase() {
    ---------------------------------------------------------
    This bridge DOES NOT initialize Firebase.
 
-   It only exposes already initialized RiderX
-   Firebase instances to older scripts/pages.
+   It only exposes already initialized RiderX Firebase
+   instances to older non-module scripts/pages.
 
    New code should use ES module imports.
 ========================================================= */
@@ -461,8 +476,8 @@ if (
     /* =====================================================
        FIREBASE READY EVENT
        -----------------------------------------------------
-       Dispatch asynchronously so pages/scripts have time
-       to register their event listeners.
+       Dispatch asynchronously so page scripts have time
+       to register their listeners.
     ===================================================== */
 
     const dispatchReadyEvent =
